@@ -47,7 +47,7 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
+class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 
 	private final HttpServletResponse response;
 
@@ -84,15 +84,17 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 	}
 
 
-	public HttpServletResponse getServletResponse() {
-		return this.response;
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getNativeResponse() {
+		return (T) this.response;
 	}
 
 	@Override
 	protected void applyStatusCode() {
 		HttpStatus statusCode = this.getStatusCode();
 		if (statusCode != null) {
-			getServletResponse().setStatus(statusCode.value());
+			this.response.setStatus(statusCode.value());
 		}
 	}
 

@@ -28,10 +28,10 @@ import org.apache.tomcat.websocket.server.WsServerContainer;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.http.server.reactive.AbstractServerHttpRequest;
+import org.springframework.http.server.reactive.AbstractServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.http.server.reactive.ServletServerHttpRequest;
-import org.springframework.http.server.reactive.ServletServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.HandshakeInfo;
@@ -83,13 +83,13 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 	}
 
 	private HttpServletRequest getHttpServletRequest(ServerHttpRequest request) {
-		Assert.isInstanceOf(ServletServerHttpRequest.class, request, "ServletServerHttpRequest required");
-		return ((ServletServerHttpRequest) request).getServletRequest();
+		Assert.isInstanceOf(AbstractServerHttpRequest.class, request, "ServletServerHttpRequest required");
+		return ((AbstractServerHttpRequest) request).getNativeRequest();
 	}
 
 	private HttpServletResponse getHttpServletResponse(ServerHttpResponse response) {
-		Assert.isInstanceOf(ServletServerHttpResponse.class, response, "ServletServerHttpResponse required");
-		return ((ServletServerHttpResponse) response).getServletResponse();
+		Assert.isInstanceOf(AbstractServerHttpResponse.class, response, "ServletServerHttpResponse required");
+		return ((AbstractServerHttpResponse) response).getNativeResponse();
 	}
 
 	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, @Nullable String protocol) {

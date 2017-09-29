@@ -40,7 +40,7 @@ import org.springframework.http.ZeroCopyHttpOutputMessage;
  * @since 5.0
  * @see reactor.ipc.netty.http.client.HttpClient
  */
-public class ReactorClientHttpRequest extends AbstractClientHttpRequest implements ZeroCopyHttpOutputMessage {
+class ReactorClientHttpRequest extends AbstractClientHttpRequest implements ZeroCopyHttpOutputMessage {
 
 	private final HttpMethod httpMethod;
 

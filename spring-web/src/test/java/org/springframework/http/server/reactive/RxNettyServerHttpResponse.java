@@ -45,7 +45,7 @@ import org.springframework.util.Assert;
  * @author Sebastien Deleuze
  * @since 5.0
  */
-public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
+class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 
 	private static final ByteBuf FLUSH_SIGNAL = Unpooled.buffer(0, 0);
 
@@ -63,8 +63,10 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 	}
 
 
-	public HttpServerResponse<?> getRxNettyResponse() {
-		return this.response;
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getNativeResponse() {
+		return (T) this.response;
 	}
 
 

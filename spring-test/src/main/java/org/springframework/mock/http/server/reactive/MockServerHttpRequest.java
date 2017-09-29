@@ -103,6 +103,10 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		return this.cookies;
 	}
 
+	@Override
+	public <T> T getNativeRequest() {
+		throw new IllegalStateException("This is a mock. No running server, no native request.");
+	}
 
 	/**
 	 * Shortcut to wrap the request with a {@code MockServerWebExchange}.

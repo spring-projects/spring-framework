@@ -53,7 +53,7 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ServletServerHttpRequest extends AbstractServerHttpRequest {
+class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -145,13 +145,9 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 
-	public HttpServletRequest getServletRequest() {
-		return this.request;
-	}
-
 	@Override
 	public String getMethodValue() {
-		return getServletRequest().getMethod();
+		return this.request.getMethod();
 	}
 
 	@Override
@@ -199,6 +195,12 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getNativeRequest() {
+		return (T) this.request;
 	}
 
 

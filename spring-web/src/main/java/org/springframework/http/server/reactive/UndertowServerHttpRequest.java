@@ -46,7 +46,7 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
+class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpServerExchange exchange;
 
@@ -76,14 +76,9 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		return headers;
 	}
 
-
-	public HttpServerExchange getUndertowExchange() {
-		return this.exchange;
-	}
-
 	@Override
 	public String getMethodValue() {
-		return this.getUndertowExchange().getRequestMethod().toString();
+		return this.exchange.getRequestMethod().toString();
 	}
 
 	@Override
@@ -105,6 +100,12 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	public Flux<DataBuffer> getBody() {
 		return Flux.from(this.body);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getNativeRequest() {
+		return (T) this.exchange;
 	}
 
 

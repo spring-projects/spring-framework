@@ -19,6 +19,8 @@ package org.springframework.http.server.reactive;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import javax.servlet.AsyncContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -69,7 +71,8 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			ByteBuffer byteBuffer = buffer.asByteBuffer();
 			byteBuffer.limit(byteBuffer.capacity());
 
-			int read = ((CoyoteInputStream) getServletRequest().getInputStream()).read(byteBuffer);
+			ServletRequest request = getNativeRequest();
+			int read = ((CoyoteInputStream) request.getInputStream()).read(byteBuffer);
 			if (logger.isTraceEnabled()) {
 				logger.trace("read:" + read);
 			}
@@ -95,7 +98,8 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 		protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
 			ByteBuffer input = dataBuffer.asByteBuffer();
 			int len = input.remaining();
-			((CoyoteOutputStream) getServletResponse().getOutputStream()).write(input);
+			ServletResponse response = getNativeResponse();
+			((CoyoteOutputStream) response.getOutputStream()).write(input);
 			return len;
 		}
 	}

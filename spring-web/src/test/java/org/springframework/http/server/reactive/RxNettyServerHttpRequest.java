@@ -43,7 +43,7 @@ import org.springframework.util.MultiValueMap;
  * @author Stephane Maldini
  * @since 5.0
  */
-public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
+class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpServerRequest<ByteBuf> request;
 
@@ -88,10 +88,6 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 
-	public HttpServerRequest<ByteBuf> getRxNettyRequest() {
-		return this.request;
-	}
-
 	@Override
 	public String getMethodValue() {
 		return this.request.getHttpMethod().name();
@@ -120,4 +116,9 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 		return Flux.from(RxReactiveStreams.toPublisher(content));
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getNativeRequest() {
+		return (T) this.request;
+	}
 }
