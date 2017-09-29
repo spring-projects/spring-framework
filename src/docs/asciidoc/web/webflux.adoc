@@ -4,247 +4,245 @@
 [[webflux-introduction]]
 == Introduction
 The original web framework included in the Spring Framework, Spring Web MVC, was purpose
-built for the Servlet API and Servlet containers. The reactive stack, web framework,
-Spring WebFlux, was added later in version 5.0. It is built on a
-http://www.reactive-streams.org/[Reactive Streams] API and runs on non-blocking
-servers such as Netty, Undertow, and Servlet 3.1+ containers.
+built for the Servlet API and Servlet containers. The reactive web framework, Spring
+WebFlux, was added later, in version 5.0. It is built on a
+http://www.reactive-streams.org/[Reactive Streams] API and runs on non-blocking servers
+such as Netty, Undertow, and Servlet 3.1+ containers.
 
-Both web frameworks mirror the names of their source modules
+Both web frameworks mirror the names of their source modules:
 https://github.com/spring-projects/spring-framework/tree/master/spring-webmvc[spring-webmvc] and
 https://github.com/spring-projects/spring-framework/tree/master/spring-webflux[spring-webflux]
-and co-exist side by side in the Spring Framework. Each module is optional.
-Applications may use one or the other module, or in some cases both --
-e.g. Spring MVC controllers with the reactive `WebClient`.
+and co-exist side by side in the Spring Framework. Each module is optional. Applications
+may use one or the other module or, in some cases, both. For example, an application
+might use Spring MVC controllers with the reactive `WebClient`.
 
 In addition to the WebFlux web framework, the `spring-webflux` module includes several
-other reactive components such as a <<webflux-client>> for performing HTTP requests,
+other reactive components, including a <<webflux-client>> for performing HTTP requests,
 a `WebTestClient` for testing web endpoints, and WebSocket support.
 
-
 [[webflux-new-framework]]
-=== Why a new web framework?
+=== Why a New Web framework?
 
 Part of the answer is the need for a non-blocking web stack to handle concurrency with a
-small number of threads and scale with less hardware resources. Servlet 3.1 did provide
-an API for non-blocking I/O. However the use of that leads away from using the rest of the
-Servlet API which remains synchronous -- `Filter`, `Servlet`, and blocking -- `getParameter`,
-`getPart`. On the positive side a new common API foundation makes it possible to support any
-server and that is important because of runtimes such as Netty that are well established in
-the async, non-blocking space.
+small number of threads and scale with fewer hardware resources. Servlet 3.1 did provide
+an API for non-blocking I/O. However, the use of that leads away from using the rest of
+the Servlet API, which remains synchronous (`Filter` and `Servlet`) and blocking
+(`getParameter` and `getPart`). On the positive side, a new common API foundation makes
+it possible to support any server. That is important because of runtimes such as Netty
+that are well established in the asynchronous, non-blocking space.
 
-The other part of the answer is functional programming. Much like the addition of annotations
-in Java 5 created opportunities -- e.g. annotated REST controllers or unit tests, the addition
-of lambda expressions in Java 8 created opportunities for functional APIs in Java.
-This is a boon for non-blocking applications and continuation style APIs -- as popularized
-by `CompletableFuture` and http://reactivex.io/[ReactiveX], that allow declarative
-composition of asynchronous logic. At the programming model level Java 8 enabled Spring
-WebFlux to offer functional web endpoints alongside with annotated controllers.
-
+The other part of the answer is functional programming. Much like the addition of
+annotations in Java 5 created opportunities (such as annotated REST controllers and unit
+tests), the addition of lambda expressions in Java 8 created opportunities for functional
+APIs in Java. This is a boon for non-blocking applications and continuation style APIs,
+as popularized by `CompletableFuture` and http://reactivex.io/[ReactiveX], which allow
+declarative composition of asynchronous logic. At the programming model level, Java 8
+enabled Spring WebFlux to offer both functional web endpoints and annotated controllers.
 
 [[webflux-why-reactive]]
-=== Reactive: what and why?
+=== Reactive: What and Why?
 
-We touched on non-blocking and functional but why reactive and what do we mean?
+We touched on non-blocking and functional but why reactive and what do we mean by
+"reactive"?
 
-The term "reactive" refers to programming models that are built around reacting to change --
-network component reacting to I/O events, UI controller reacting to mouse events, etc.
-In that sense non-blocking is reactive because instead of being blocked we are now in the mode
-of reacting to notifications as operations complete or data becomes available.
+The term, "reactive," refers to programming models that are built around reacting to
+change: network components reacting to I/O events, UI controllers reacting to mouse
+events, and so on. In that sense, non-blocking is reactive because, instead of being
+blocked, we are now in the mode of reacting to notifications as operations complete or
+data becomes available.
 
-There is also another important mechanism that we on the Spring team associate with "reactive"
-and that is non-blocking back pressure. In synchronous, imperative code, blocking calls
+There is also another important mechanism that we on the Spring team associate with
+"reactive": non-blocking back pressure. In synchronous, imperative code, blocking calls
 serve as a natural form of back pressure that forces the caller to wait. In non-blocking
-code it becomes important to control the rate of events so that a fast producer does not
+code, it becomes important to control the rate of events so that a fast producer does not
 overwhelm its destination.
 
 Reactive Streams is a
-https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.1/README.md#specification[small spec],
-also http://download.java.net/java/jdk9/docs/api/java/util/concurrent/Flow.html[adopted] in Java 9,
-that defines the interaction between asynchronous components with back pressure.
-For example a data repository -- acting as
-http://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/org/reactivestreams/Publisher.html[Publisher],
-can produce data that an HTTP server -- acting as
-http://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/org/reactivestreams/Subscriber.html[Subscriber],
-can then write to the response. The main purpose of Reactive Streams is to allow the
-subscriber to control how fast or how slow the publisher will produce data.
+https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.1/README.md#specification[small specification],
+also http://download.java.net/java/jdk9/docs/api/java/util/concurrent/Flow.html[adopted]
+in Java 9, that defines the interaction between asynchronous components with back
+pressure. For example a data repository (acting as
+http://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/org/reactivestreams/Publisher.html[Publisher]),
+can produce data that an HTTP server (acting as
+http://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/org/reactivestreams/Subscriber.html[Subscriber]),
+can then write to the response. The main purpose of Reactive Streams is to let the
+subscriber control how fast or how slow the publisher produces data.
 
 [NOTE]
 ====
-*Common question: what if a publisher can't slow down?* +
-The purpose of Reactive Streams is only to establish the mechanism and a boundary.
-If a publisher can't slow down then it has to decide whether to buffer, drop, or fail.
+*Common question: What if a publisher cannot slow down?* +
+The purpose of Reactive Streams is only to establish the mechanism and a boundary between
+a publisher and a subscriber. If a publisher cannot slow down then it has to decide
+whether to buffer, drop, or fail.
 ====
-
 
 [[webflux-reactive-api]]
 === Reactive API
 
-Reactive Streams plays an important role for interoperability. It is of interest to libraries
-and infrastructure components but less useful as an application API because it is too
-low level. What applications need is a higher level and richer, functional API to
-compose async logic -- similar to the Java 8 `Stream` API but not only for collections.
-This is the role that reactive libraries play.
+Reactive Streams plays an important role for interoperability. It is of interest to
+libraries and infrastructure components but less useful as an application API, because it
+is too low level. What applications need is a higher level and richer, functional API to
+compose asynchronous logic, similar to the Java 8 `Stream` API but not only for
+collections. This is the role that reactive libraries play.
 
 https://github.com/reactor/reactor[Reactor] is the reactive library of choice for
 Spring WebFlux. It provides the
 https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html[Mono] and
-https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html[Flux] API types
-to work on data sequences of 0..1 and 0..N through a rich set of operators aligned with the
+https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html[Flux]
+API types to work on data sequences of 0..1 and 0..N (respectively) through a rich set of
+operators aligned with the
 ReactiveX http://reactivex.io/documentation/operators.html[vocabulary of operators].
-Reactor is a Reactive Streams library and therefore all of its operators support non-blocking back pressure.
-Reactor has a strong focus on server-side Java.
-It is developed in close collaboration with and feedback from Spring projects.
+Reactor is a Reactive Streams library. Therefore, all of its operators support
+non-blocking back pressure. Reactor has a strong focus on server-side Java. It is
+developed in close collaboration with and feedback from Spring projects.
 
-WebFlux requires Reactor as a core dependency but it is interoperable with other reactive
-libraries via Reactive Streams. As a general rule WebFlux APIs accept a plain `Publisher`
-as input, adapt it to Reactor types internally, use those, and then return either
-`Flux` or `Mono` as output. So you can pass any `Publisher` as input and you can apply
-operations on the output, but you'll need to adapt the output for use with another reactive library.
-Whenever feasible -- e.g. annotated controllers, WebFlux adapts transparently to the use
-of RxJava or other reactive library. See <<webflux-reactive-libraries>> for more details.
-
+WebFlux requires Reactor as a core dependency, but it is interoperable with other
+reactive libraries made with Reactive Streams. As a general rule, WebFlux APIs accept a
+plain `Publisher` as input, adapt it to Reactor types internally, use those, and then
+return either a `Flux` or a `Mono` as output. So you can pass any `Publisher` as input
+and you can apply operations on the output, but you need to adapt the output for use with
+another reactive library. Whenever feasible (such as with annotated controllers), WebFlux
+adapts transparently to the use of RxJava or other reactive libraries. See
+<<webflux-reactive-libraries>> for more details.
 
 [[webflux-programming-models]]
-=== Programming models
+=== Programming Models
 
-The `spring-web` module contains the reactive foundation that underlies Spring WebFlux --
-HTTP abstractions, Reactive Streams server adapters, reactive codecs, and a
-core Web API whose role is comparable to the Servlet API but with non-blocking semantics.
+The `spring-web` module contains the reactive foundation that underlies Spring WebFlux:
+HTTP abstractions, Reactive Streams server adapters, reactive codecs, and a core Web API
+whose role is comparable to the Servlet API but with non-blocking semantics.
 
-On that foundation Spring WebFlux provides a choice of two programming models:
+On that foundation, Spring WebFlux provides a choice of two programming models:
 
-- <<webflux-controller>> -- consistent with Spring MVC, and based on the same annotations
+* <<webflux-controller>>: Consistent with Spring MVC and based on the same annotations
 from the `spring-web` module. Both Spring MVC and WebFlux controllers support reactive
-(Reactor, RxJava) return types and as a result it is not easy to tell them apart. One notable
-difference is that WebFlux also supports reactive `@RequestBody` arguments.
-- <<webflux-fn>> -- lambda-based, lightweight, functional programming model. Think of
-this as a small library or a set of utilities that an application can use to route and
-handle requests. The big difference with annotated controllers is that the application
-is in charge of request handling from start to finish vs declaring intent through
+(Reactor, RxJava) return types and, as a result, it is not easy to tell them apart. One
+notable difference is that WebFlux also supports reactive `@RequestBody` arguments.
+* <<webflux-fn>>: lambda-based, lightweight, functional programming model. Think of this
+as a small library or a set of utilities that an application can use to route and handle
+requests. The big difference with annotated controllers is that the application is in
+charge of request handling from start to finish versus declaring intent through
 annotations and being called back.
 
-
 [[webflux-framework-choice]]
-=== Choosing a web framework
+=== Choosing a Web Framework
 
-Should you use Spring MVC or WebFlux? Let's cover a few different perspectives.
+Should you use Spring MVC or WebFlux?
 
 If you have a Spring MVC application that works fine, there is no need to change.
-Imperative programming is the easiest way to write, understand, and debug code.
-You have maximum choice of libraries since historically most are blocking.
+Imperative programming is the easiest way to write, understand, and debug code. You have
+maximum choice of libraries, since, historically, most libraries are blocking.
 
 If you are already shopping for a non-blocking web stack, Spring WebFlux offers the same
-execution model benefits as others in this space and also provides a choice of servers --
-Netty, Tomcat, Jetty, Undertow, Servlet 3.1+ containers, a choice of programming models --
-annotated controllers and functional web endpoints, and a choice of reactive libraries --
-Reactor, RxJava, or other.
+execution model benefits as others in this space and also provides a choice of servers
+(Netty, Tomcat, Jetty, Undertow, Servlet 3.1+ containers), a choice of programming models
+(annotated controllers and functional web endpoints), and a choice of reactive libraries
+(Reactor, RxJava, and others).
 
-If you are interested in a lightweight, functional web framework for use with Java 8 lambdas
-or Kotlin then use the Spring WebFlux functional web endpoints. That can also be a good choice
-for smaller applications or microservices with less complex requirements that can benefit
-from greater transparency and control.
+If you are interested in a lightweight, functional web framework for use with Java 8
+lambdas or Kotlin, then use the Spring WebFlux functional web endpoints. That can also be
+a good choice for smaller applications or microservices with less complex requirements
+that can benefit from greater transparency and control.
 
-In a microservice architecture you can have a mix of applications with either Spring MVC
-or Spring WebFlux controllers, or with Spring WebFlux functional endpoints. Having support
+In a microservice architecture, you can have a mix of applications with either Spring MVC
+or Spring WebFlux controllers or with Spring WebFlux functional endpoints. Having support
 for the same annotation-based programming model in both frameworks makes it easier to
 re-use knowledge while also selecting the right tool for the right job.
 
-A simple way to evaluate an application is to check its dependencies. If you have blocking
-persistence APIs, or networking APIs to use, then Spring MVC is the best choice for common
-architectures at least. It is technically feasible with both Reactor and RxJava to perform
-blocking calls on a separate thread but you wouldn't be making the most of a non-blocking
-web stack.
+A simple way to evaluate an application is to check its dependencies. If you have
+blocking persistence APIs or networking APIs to use, then Spring MVC is the best choice,
+at least for common architectures. It is technically feasible with both Reactor and
+RxJava to perform blocking calls on a separate thread, but you would not be making the
+most of a non-blocking web stack.
 
-If you have a Spring MVC application with calls to remote services, try the reactive `WebClient`.
-You can return reactive types (Reactor, RxJava, <<webflux-reactive-libraries,or other>>)
-directly from Spring MVC controller methods. The greater the latency per call, or the
-interdependency among calls, the more dramatic the benefits. Spring MVC controllers
-can call other reactive components too.
+If you have a Spring MVC application with calls to remote services, try the reactive
+`WebClient`. You can return reactive types (Reactor, RxJava,
+<<webflux-reactive-libraries,or other>>) directly from Spring MVC controller methods. The
+greater the latency per call or the interdependency among calls, the more dramatic the
+benefits. Spring MVC controllers can call other reactive components too.
 
-If you have a large team, keep in mind the steep learning curve in the shift to non-blocking,
-functional, and declarative programming. A practical way to start without a full switch
-is to use the reactive `WebClient`. Beyond that start small and measure the benefits.
-We expect that for a wide range of applications the shift is unnecessary.
+If you have a large team, keep in mind the steep learning curve in the shift to
+non-blocking, functional, and declarative programming. A practical way to start without a
+full switch is to use the reactive `WebClient`. Beyond that, start small and measure the
+benefits. We expect that, for a wide range of applications, the shift is unnecessary.
 
 If you are unsure what benefits to look for, start by learning about how non-blocking I/O
-works (e.g. concurrency on single-threaded Node.js is not an oxymoron) and its effects.
-The tag line is "scale with less hardware" but that effect is not guaranteed, not without
-some network I/O that can be slow or unpredictable. This Netflix
+works (for example, concurrency on single-threaded Node.js is not an oxymoron) and its
+effects. The tag line is "scale with less hardware" but that effect is not guaranteed,
+not without some network I/O that can be slow or unpredictable. This Netflix
 https://medium.com/netflix-techblog/zuul-2-the-netflix-journey-to-asynchronous-non-blocking-systems-45947377fb5c[blog post]
 is a good resource.
 
-
 [[webflux-server-choice]]
-=== Choosing a server
+=== Choosing a Server
 
-Spring WebFlux is supported on Netty, Undertow, Tomcat, Jetty, and Servlet 3.1+ containers.
-Each server is adapted to a common Reactive Streams API. The Spring WebFlux programming
-models are built on that common API.
+Spring WebFlux is supported on Netty, Undertow, Tomcat, Jetty, and Servlet 3.1+
+containers. Each server is adapted to a common Reactive Streams API. The Spring WebFlux
+programming models are built on that common API.
 
 [NOTE]
 ====
-*Common question: how can Tomcat and Jetty be used in both stacks?* +
-Tomcat and Jetty are non-blocking at their core. It's the Servlet API that adds a
-blocking facade. Starting in version 3.1 the Servlet API adds a choice for non-blocking I/O.
-However its use requires care to avoid other synchronous and blocking parts. For this
-reason Spring's reactive web stack has a low-level Servlet adapter to bridge to Reactive
-Streams but the Servlet API is otherwise not exposed for direct use.
+*Common question: How can Tomcat and Jetty be used in both stacks?* +
+Tomcat and Jetty are non-blocking at their core. It is the Servlet API that adds a
+blocking facade. Starting in version 3.1, the Servlet API adds a choice for non-blocking
+I/O. However, its use requires care to avoid other synchronous and blocking parts. For
+this reason, Spring's reactive web stack has a low-level Servlet adapter to bridge to
+Reactive Streams, but the Servlet API is otherwise not exposed for direct use.
 ====
 
-Spring Boot 2 uses Netty by default with WebFlux because Netty is more widely used in the
-async, non-blocking space and also provides both client and server that can share resources.
-By comparison Servlet 3.1 non-blocking I/O hasn't seen much use because the bar to use it
-is so high. Spring WebFlux opens one practical path to adoption.
+By default, Spring Boot 2 uses Netty with WebFlux, because Netty is more widely used in
+the asynchronous, non-blocking space and also provides both a client and a server that
+can share resources. By comparison, Servlet 3.1 non-blocking I/O has not seen much use,
+because the bar to use it is so high. Spring WebFlux opens one practical path to
+adoption.
 
 The default server choice in Spring Boot is mainly about the out-of-the-box experience.
-Applications can still choose any of the other supported servers which are also highly
+Applications can still choose any of the other supported servers, which are also highly
 optimized for performance, fully non-blocking, and adapted to Reactive Streams back
-pressure. In Spring Boot it is trivial to make the switch.
-
+pressure. In Spring Boot, it is trivial to make the switch.
 
 [[webflux-performance]]
-=== Performance vs scale
+=== Performance vs Scale
 
-Performance has many characteristics and meanings. Reactive and non-blocking generally
-do not make applications run faster. They can, in some cases, for example if using the
-`WebClient` to execute remote calls in parallel. On the whole it requires more work to do
-things the non-blocking way and that can increase slightly the required processing time.
+Performance has many characteristics and meanings. Reactive and non-blocking generally do
+not make applications run faster. They can improve performance in some cases, such as
+when using the `WebClient` to execute remote calls in parallel. On the whole, it requires
+more work to do things the non-blocking way and that can slightly increase the required
+processing time.
 
-The key expected benefit of reactive and non-blocking is the ability to scale with a small,
-fixed number of threads and less memory. That makes applications more resilient under load
-because they scale in a more predictable way. In order to observe those benefits however you
-need to have some latency including a mix of slow and unpredictable network I/O.
-That's where the reactive stack begins to show its strengths and the differences can be
-dramatic.
-
-
+The key expected benefit of reactive and non-blocking applications is the ability to
+scale with a small, fixed number of threads and less memory. That makes applications more
+resilient under load, because they scale in a more predictable way. In order to observe
+those benefits, however, you need to have some latency including a mix of slow and
+unpredictable network I/O. That is where the reactive stack begins to show its strengths,
+and the differences can be dramatic.
 
 [[webflux-reactive-spring-web]]
 == Reactive Spring Web
 
-The `spring-web` module provides low level infrastructure and HTTP abstractions -- client
-and server, to build reactive web applications. All public APIs are build around Reactive
+The `spring-web` module provides low level infrastructure and HTTP abstractions (client
+and server) to build reactive web applications. All public APIs are built around Reactive
 Streams with Reactor as a backing implementation.
 
 Server support is organized in two layers:
 
-* <<webflux-httphandler,HttpHandler>> and server adapters -- the most basic, common API
+* <<webflux-httphandler,HttpHandler>> and server adapters: The most basic, common API
 for HTTP request handling with Reactive Streams back pressure.
-* <<webflux-web-handler-api,WebHandler API>> -- slightly higher level but still general
-purpose server web API with filter chain style processing.
-
+* <<webflux-web-handler-api,WebHandler API>>: Slightly higher level but still
+general-purpose server web API with filter chain style processing.
 
 [[webflux-httphandler]]
 === HttpHandler
 
 Every HTTP server has some API for HTTP request handling.
-{api-spring-framework}/http/server/reactive/HttpHandler.html[HttpHandler]
-is a simple contract with one method to handle a request and response.
-It is intentionally minimal. Its main purpose is to provide a common, Reactive Streams
-based API for HTTP request handling over different servers.
+{api-spring-framework}/http/server/reactive/HttpHandler.html[HttpHandler] is a simple
+contract with one method to handle a request and a response. It is intentionally minimal.
+Its main purpose is to provide a common, Reactive Streams-based API for HTTP request
+handling over different servers.
 
-The `spring-web` module contains adapters for every supported server. The table below shows
-the server APIs are used and where Reactive Streams support comes from:
+The `spring-web` module contains adapters for every supported server. The following table
+shows which server APIs are used and where Reactive Streams support comes from for each
+one:
 
 [cols="1,2,2", options="header"]
 |===
@@ -259,11 +257,11 @@ the server APIs are used and where Reactive Streams support comes from:
 |spring-web: Undertow to Reactive Streams bridge
 
 |Tomcat
-|Servlet 3.1 non-blocking I/O; Tomcat API to read and write ByteBuffers vs byte[]
+|Servlet 3.1 non-blocking I/O, Tomcat API to read and write ByteBuffers vs byte[]
 |spring-web: Servlet 3.1 non-blocking I/O to Reactive Streams bridge
 
 |Jetty
-|Servlet 3.1 non-blocking I/O; Jetty API to write ByteBuffers vs byte[]
+|Servlet 3.1 non-blocking I/O, Jetty API to write ByteBuffers vs byte[]
 |spring-web: Servlet 3.1 non-blocking I/O to Reactive Streams bridge
 
 |Servlet 3.1 container
@@ -271,9 +269,9 @@ the server APIs are used and where Reactive Streams support comes from:
 |spring-web: Servlet 3.1 non-blocking I/O to Reactive Streams bridge
 |===
 
-Here are required dependencies,
-https://github.com/spring-projects/spring-framework/wiki/What%27s-New-in-the-Spring-Framework[supported versions],
-and code snippets for each server:
+The following table shows the required dependencies,
+https://github.com/spring-projects/spring-framework/wiki/What%27s-New-in-the-Spring-Framework[supported
+versions], for each server:
 
 |===
 |Server name|Group id|Artifact name
@@ -294,6 +292,8 @@ and code snippets for each server:
 |org.eclipse.jetty
 |jetty-server, jetty-servlet
 |===
+
+The following code blocks show snippets for each server.
 
 Reactor Netty:
 [source,java,indent=0]
@@ -353,26 +353,23 @@ server.start();
 You can also deploy as a WAR to any Servlet 3.1 container by wrapping the handler with
 `ServletHttpHandlerAdapter` as a `Servlet`.
 
-
-
 [[webflux-web-handler-api]]
 === WebHandler API
 
-`HttpHandler` is the basis for running on different servers. On that base the WebHandler
-API provides a slightly higher level processing chain of
-exception handlers
+`HttpHandler` is the basis for running on different servers. On that basis, the
+WebHandler API provides a slightly higher level processing chain of exception handlers
 ({api-spring-framework}/web/server/WebExceptionHandler.html[WebExceptionHandler]), filters
 ({api-spring-framework}/web/server/WebFilter.html[WebFilter]), and a target handler
 ({api-spring-framework}/web/server/WebHandler.html[WebHandler]).
 
-All components work on `ServerWebExchange` -- a container for the HTTP request and
+All components work on `ServerWebExchange`, a container for the HTTP request and
 response that also adds request attributes, session attributes, access to form data,
 multipart data, and more.
 
-The processing chain can be put together with `WebHttpHandlerBuilder` which builds an
+The processing chain can be put together with `WebHttpHandlerBuilder`, which builds an
 `HttpHandler` that in turn can be run with a <<webflux-httphandler,server adapter>>.
-To use the builder either add components individually or point to an `ApplicationContext`
-to have the following detected:
+To use the builder, either add components individually or point to an
+`ApplicationContext` to have the items in the following table detected:
 
 [cols="2,2,1,3", options="header"]
 |===
@@ -409,7 +406,6 @@ to have the following detected:
 |Custom resolver for `LocaleContext`; `AcceptHeaderLocaleContextResolver` by default
 |===
 
-
 [[webflux-codecs]]
 === Codecs
 
@@ -419,50 +415,50 @@ The `spring-web` module provides
 for encoding and decoding the HTTP request and response body with Reactive Streams.
 It builds on lower level contracts from `spring-core`:
 
-* {api-spring-framework}/core/io/buffer/DataBuffer.html[DataBuffer] -- abstraction for
-byte buffers -- e.g. Netty `ByteBuf`, `java.nio.ByteBuffer`
-* {api-spring-framework}/core/codec/Encoder.html[Encoder] -- serialize a stream of Objects
-to a stream of data buffers
-* {api-spring-framework}/core/codec/Decoder.html[Decoder] -- deserialize a stream of data
-buffers into a stream of Objects
+* {api-spring-framework}/core/io/buffer/DataBuffer.html[DataBuffer]: abstraction for
+byte buffers, such as Netty `ByteBuf`, `java.nio.ByteBuffer`.
+* {api-spring-framework}/core/codec/Encoder.html[Encoder]: serialize a stream of `Object`
+instances to a stream of data buffers.
+* {api-spring-framework}/core/codec/Decoder.html[Decoder]: deserialize a stream of data
+buffers into a stream of `Object` instances.
 
-Basic `Encoder` and `Decoder` implementations exist in `spring-core` but `spring-web` adds
-more for JSON, XML, and other formats. You can wrap any `Encoder` and `Decoder` as a reader
-or writer with `EncoderHttpMessageWriter` and `DecoderHttpMessageReader`. There are some
-additional, web-only reader and writer implementations for server-sent events, form data,
-and more.
+Basic `Encoder` and `Decoder` implementations exist in `spring-core`, but `spring-web`
+adds more for JSON, XML, and other formats. You can wrap any `Encoder` and `Decoder` as a
+reader or writer with `EncoderHttpMessageWriter` and `DecoderHttpMessageReader`. There
+are someadditional, web-only, reader and writer implementations for server-sent events,
+form data, and more.
 
 Finally, `ClientCodecConfigurer` and `ServerCodecConfigurer` can be used to initialize
-a list of readers and writers. They include support for classpath detection and a
+a list of readers and writers. They include support for classpath detection and a set
 of defaults along with the ability to override or replace those defaults.
-
-
 
 [[webflux-dispatcher-handler]]
 == The DispatcherHandler
-[.small]#<<web.adoc#mvc-servlet,Same in Spring MVC>>#
+[.small]#<<web.adoc#mvc-servlet,Same as in Spring MVC>>#
 
 Spring WebFlux, like Spring MVC, is designed around the front controller pattern where a
 central `WebHandler`, the `DispatcherHandler`, provides a shared algorithm for request
-processing while actual work is performed by configurable, delegate components.
+processing, while actual work is performed by configurable, delegate components.
 This model is flexible and supports diverse workflows.
 
 `DispatcherHandler` discovers the delegate components it needs from Spring configuration.
 It is also designed to be a Spring bean itself and implements `ApplicationContextAware`
-for access to the context it runs in. If `DispatcherHandler` is declared with the bean
-name "webHandler" it is in turn discovered by
-{api-spring-framework}/web/server/adapter/WebHttpHandlerBuilder.html[WebHttpHandlerBuilder]
+for access to the context in which it runs. If `DispatcherHandler` is declared with a
+bean name of "webHandler", it is in turn discovered by
+{api-spring-framework}/web/server/adapter/WebHttpHandlerBuilder.html[WebHttpHandlerBuilder],
 which puts together a request processing chain as described in
 <<webflux-web-handler-api,WebHandler API>>.
 
 Spring configuration in a WebFlux application typically contains:
 
-* `DispatcherHandler` with the bean name "webHandler"
-* `WebFilter` and `WebExceptionHandler` beans
-* <<webflux-special-bean-types,DispatcherHandler special beans>>
-* Others
+* `DispatcherHandler` with a bean name of "webHandler".
+* `WebFilter` and `WebExceptionHandler` beans.
+* <<webflux-special-bean-types,DispatcherHandler special beans>>.
+* Others.
 
-The configuration is given to `WebHttpHandlerBuilder` to build the processing chain:
+The following example shows how configuration is given to `WebHttpHandlerBuilder` to
+build the processing chain:
+
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -473,62 +469,57 @@ HttpHandler handler = WebHttpHandlerBuilder.applicationContext(context);
 The resulting `HttpHandler` is ready for use with a
 <<webflux-httphandler,server adapter>>.
 
-
-
 [[webflux-special-bean-types]]
-=== Special bean types
-[.small]#<<web.adoc#mvc-servlet-special-bean-types,Same in Spring MVC>>#
+=== Special Bean Types
+[.small]#<<web.adoc#mvc-servlet-special-bean-types,Same as in Spring MVC>>#
 
 The `DispatcherHandler` delegates to special beans to process requests and render the
-appropriate responses. By "special beans" we mean Spring-managed Object instances that
-implement one of the framework contracts listed in the table below.
-Spring WebFlux provides built-in implementations of these contracts but you can also
-customize, extend, or replace them.
+appropriate responses. By "special beans," we mean Spring-managed `Object` instances that
+implement one of the framework contracts listed in the following table. Spring WebFlux
+provides built-in implementations of these contracts, but you can also customize, extend,
+or replace them.
 
 .Special bean types in the ApplicationContext
 |===
 | Bean type| Explanation
 
 | HandlerMapping
-| Map a request to a handler. The mapping is based on some criteria the details of
-  which vary by `HandlerMapping` implementation -- annotated controllers, simple
-  URL pattern mappings, etc.
+| Map a request to a handler. The mapping is based on some criteria, the details of which
+vary by `HandlerMapping` implementation: annotated controllers, simple URL pattern
+mappings, etc.
 
 | HandlerAdapter
-| Helps the `DispatcherHandler` to invoke a handler mapped to a request regardless of
-  how the handler is actually invoked. For example invoking an annotated controller
-  requires resolving various annotations. The main purpose of a `HandlerAdapter` is
-  to shield the `DispatcherHandler` from such details.
+| Helps the `DispatcherHandler` to invoke a handler mapped to a request regardless of how
+the handler is actually invoked. For example, invoking an annotated controller requires
+resolving various annotations. The main purpose of a `HandlerAdapter` is to shield the
+`DispatcherHandler` from such details.
 
 | HandlerResultHandler
 | Process the `HandlerResult` returned from a `HandlerAdapter`.
 |===
 
-
 [[webflux-dispatcher-handler-sequence]]
-=== Processing sequence
-[.small]#<<web.adoc#mvc-servlet-sequence,Same in Spring MVC>>#
+=== Processing Sequence
+[.small]#<<web.adoc#mvc-servlet-sequence,Same as in Spring MVC>>#
 
 The `DispatcherHandler` processes requests as follows:
 
-* Each `HandlerMapping` is asked to find a matching handler and the first match is used.
-* If a handler is found, it is executed through an appropriate `HandlerAdapter` which
+. Each `HandlerMapping` is asked to find a matching handler and the first match is used.
+. If a handler is found, it is executed through an appropriate `HandlerAdapter`, which
 exposes the return value from the execution as `HandlerResult`.
-* The `HandlerResult` is given to an appropriate `HandlerResultHandler` to complete
+. The `HandlerResult` is given to an appropriate `HandlerResultHandler` to complete
 processing by writing to the response directly or using a view to render.
-
-
 
 [[webflux-controller]]
 == Annotated Controllers
-[.small]#<<web.adoc#mvc-controller,Same in Spring MVC>>#
+[.small]#<<web.adoc#mvc-controller,Same as in Spring MVC>>#
 
 Spring WebFlux provides an annotation-based programming model where `@Controller` and
 `@RestController` components use annotations to express request mappings, request input,
 exception handling, and more. Annotated controllers have flexible method signatures and
 do not have to extend base classes nor implement specific interfaces.
 
-Here is a basic example:
+The following code shows a basic example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -543,22 +534,20 @@ Here is a basic example:
 	}
 ----
 
-In this example the methods returns a String to be written to the response body.
-
-
+In the preceding example the methods returns a String to be written to the response body.
 
 [[webflux-ann-controller]]
-=== @Controller declaration
-[.small]#<<web.adoc#mvc-ann-controller,Same in Spring MVC>>#
+=== `@Controller` Declaration
+[.small]#<<web.adoc#mvc-ann-controller,Same as in Spring MVC>>#
 
-You can define controller beans using a standard Spring bean definition.
-The `@Controller` stereotype allows for auto-detection, aligned with Spring general support
+You can define controller beans using a standard Spring bean definition. The
+`@Controller` stereotype allows for auto-detection, aligned with Spring general support
 for detecting `@Component` classes in the classpath and auto-registering bean definitions
-for them. It also acts as a stereotype for the annotated class, indicating its role as
-a web component.
+for them. It also acts as a stereotype for the annotated class, indicating its role as a
+web component.
 
 To enable auto-detection of such `@Controller` beans, you can add component scanning to
-your Java configuration:
+your Java configuration, as shown in the following example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -573,16 +562,15 @@ your Java configuration:
 
 [NOTE]
 ====
-`@RestController` is a composed annotation that is itself annotated with `@Controller` and
-`@ResponseBody` indicating a controller whose every method inherits the type-level
-`@ResponseBody` annotation and therefore writes to the response body (vs model-and-vew
-rendering).
+`@RestController` is a composed annotation that is itself annotated with `@Controller`
+and `@ResponseBody`, indicating a controller whose every method inherits the type-level
+`@ResponseBody` annotation and therefore writes to the response body (rather than
+model-and-vew rendering).
 ====
-
 
 [[webflux-ann-requestmapping]]
 === Mapping Requests
-[.small]#<<web.adoc#mvc-ann-requestmapping,Same in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping,Same as in Spring MVC>>#
 
 The `@RequestMapping` annotation is used to map requests to controllers methods. It has
 various attributes to match by URL, HTTP method, request parameters, headers, and media
@@ -591,16 +579,17 @@ to narrow down to a specific endpoint mapping.
 
 There are also HTTP method specific shortcut variants of `@RequestMapping`:
 
-- `@GetMapping`
-- `@PostMapping`
-- `@PutMapping`
-- `@DeleteMapping`
-- `@PatchMapping`
+* `@GetMapping`
+* `@PostMapping`
+* `@PutMapping`
+* `@DeleteMapping`
+* `@PatchMapping`
 
 The shortcut variants are
-https://github.com/spring-projects/spring-framework/wiki/Spring-Annotation-Programming-Model#composed-annotations[composed annotations]
--- themselves annotated with `@RequestMapping`. They are commonly used at the method level.
-At the class level an `@RequestMapping` is more useful for expressing shared mappings.
+https://github.com/spring-projects/spring-framework/wiki/Spring-Annotation-Programming-Model#composed-annotations[composed
+annotations], which are themselves annotated with `@RequestMapping`. They are commonly
+used at the method level. At the class level, an `@RequestMapping` is more useful for
+expressing shared mappings, as shown in the following example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -622,10 +611,9 @@ At the class level an `@RequestMapping` is more useful for expressing shared map
 	}
 ----
 
-
 [[webflux-ann-requestmapping-uri-templates]]
 ==== URI Patterns
-[.small]#<<web.adoc#mvc-ann-requestmapping-uri-templates,Same in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping-uri-templates,Same as in Spring MVC>>#
 
 You can map requests using glob patterns and wildcards:
 
@@ -633,7 +621,8 @@ You can map requests using glob patterns and wildcards:
 * `*` matches zero or more characters within a path segment
 * `**` match zero or more path segments
 
-You can also declare URI variables and access their values with `@PathVariable`:
+You can also declare URI variables and access their values with `@PathVariable`, as shown
+in the following example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -659,12 +648,12 @@ public class OwnerController {
 }
 ----
 
-URI variables are automatically converted to the appropriate type or`TypeMismatchException`
-is raised. Simple types -- `int`, `long`, `Date`, are supported by default and you can
-register support for any other data type.
+URI variables are automatically converted to the appropriate type, or
+`TypeMismatchException` is raised. By default, Simple types (`int`, `long`, and `Date`)
+are supported and you can register support for any other data type.
 // TODO: see <<webflux-ann-typeconversion>> and <<webflux-ann-webdatabinder>>.
 
-URI variables can be named explicitly -- e.g. `@PathVariable("customId")`, but you can
+URI variables can be named explicitly (for example, `@PathVariable("customId")`), but you can
 leave that detail out if the names are the same and your code is compiled with debugging
 information or with the `-parameters` compiler flag on Java 8.
 
@@ -672,9 +661,9 @@ The syntax `{*varName}` declares a URI variable that matches zero or more remain
 path segments. For example `/resources/{*path}` matches all files `/resources/` and the
 `"path"` variable captures the complete relative path.
 
-The syntax `{varName:regex}` declares a URI variable with a regular expressions with the
-syntax `{varName:regex}` -- e.g. given URL `"/spring-web-3.0.5 .jar"`, the below method
-extracts the name, version, and file extension:
+The `{varName:regex}` syntax declares a URI variable with a regular expression. For
+example, given a URL of `"/spring-web-3.0.5 .jar"`, the following method extracts the
+name, version, and file extension:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -686,43 +675,45 @@ extracts the name, version, and file extension:
 ----
 
 URI path patterns can also have embedded `${...}` placeholders that are resolved on startup
- via `PropertyPlaceHolderConfigurer` against local, system, environment, and other property
-sources. This can be used for example to parameterize a base URL based on some external
+via `PropertyPlaceHolderConfigurer` against local, system, environment, and other property
+sources. This can be used, for example, to parameterize a base URL based on some external
 configuration.
 
 [NOTE]
 ====
-Spring WebFlux uses `PathPattern` and the `PathPatternParser` for URI path matching support
-both of which are located in `spring-web` and expressly designed for use with HTTP URL
-paths in web applications where a large number of URI path patterns are matched at runtime.
+Spring WebFlux uses `PathPattern` and the `PathPatternParser` for URI path matching
+support. Both are located in `spring-web` and expressly designed for use with HTTP URL
+paths in web applications where a large number of URI path patterns are matched at
+runtime.
 ====
 
-Spring WebFlux does not support suffix pattern matching -- unlike Spring MVC, where a
+Spring WebFlux does not support suffix pattern matching, unlike Spring MVC, where a
 mapping such as `/person` also matches to `/person.{asterisk}`. For URL based content
-negotiation, if needed, we recommend using a query parameter, which is more simpler, more
+negotiation, if needed, we recommend using a query parameter, which is simpler, more
 explicit, and less vulnerable to URL path based exploits.
-
 
 [[webflux-ann-requestmapping-pattern-comparison]]
 ==== Pattern Comparison
-[.small]#<<web.adoc#mvc-ann-requestmapping-pattern-comparison,Same in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping-pattern-comparison,Same as in Spring MVC>>#
 
-When multiple patterns match a URL, they must be compared to find the best match. This is done
-with `PathPattern.SPECIFICITY_COMPARATOR` which looks for patterns that more specific.
+When multiple patterns match a URL, they must be compared to find the best match. This is
+done with `PathPattern.SPECIFICITY_COMPARATOR`, which looks for patterns that are more
+specific.
 
-For every pattern, a score is computed based the number of URI variables and wildcards
+For every pattern, a score is computed based on the number of URI variables and wildcards,
 where a URI variable scores lower than a wildcard. A pattern with a lower total score
-wins. If two patterns have the same score, then the longer is chosen.
+wins. If two patterns have the same score, then the longer pattern is chosen.
 
-Catch-all patterns, e.g. `**`, `{*varName}`, are excluded from the scoring and are always
-sorted last instead. If two patterns are both catch-all, the longer is chosen.
-
+Catch-all patterns, such as `**` and `{*varName}`, are excluded from the scoring and are
+always sorted last instead. If two patterns are both catch-all, the longer pattern is
+chosen.
 
 [[webflux-ann-requestmapping-consumes]]
 ==== Consumable Media Types
-[.small]#<<web.adoc#mvc-ann-requestmapping-consumes,Same in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping-consumes,Same as in Spring MVC>>#
 
-You can narrow the request mapping based on the `Content-Type` of the request:
+You can narrow the request mapping based on the `Content-Type` of the request, as shown
+in the following example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -733,26 +724,25 @@ You can narrow the request mapping based on the `Content-Type` of the request:
 	}
 ----
 
-The consumes attribute also supports negation expressions -- e.g. `!text/plain` means any
-content type other than "text/plain".
+The `consumes` attribute also supports negation expressions. For example, `!text/plain`
+means any content type other than "text/plain".
 
-You can declare a shared consumes attribute at the class level. Unlike most other request
-mapping attributes however when used at the class level, a method-level consumes attribute
-will overrides rather than extend the class level declaration.
+You can declare a shared `consumes` attribute at the class level. Unlike most other
+request mapping attributes, however, when used at the class level, a method-level
+`consumes` attribute overrides rather than extends the class level declaration.
 
 [TIP]
 ====
-`MediaType` provides constants for commonly used media types -- e.g.
-`APPLICATION_JSON_VALUE`, `APPLICATION_JSON_UTF8_VALUE`.
+`MediaType` provides constants for commonly used media types, such as.
+`APPLICATION_JSON_VALUE` and `APPLICATION_JSON_UTF8_VALUE`.
 ====
-
 
 [[webflux-ann-requestmapping-produces]]
 ==== Producible Media Types
-[.small]#<<web.adoc#mvc-ann-requestmapping-produces,Same in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping-produces,Same as in Spring MVC>>#
 
 You can narrow the request mapping based on the `Accept` request header and the list of
-content types that a controller method produces:
+content types that a controller method produces, as shown in the following example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -764,27 +754,26 @@ content types that a controller method produces:
 	}
 ----
 
-The media type can specify a character set. Negated expressions are supported -- e.g.
-`!text/plain` means any content type other than "text/plain".
+The media type can specify a character set. Negated expressions are supported. For
+example, `!text/plain` means any content type other than "text/plain".
 
-You can declare a shared produces attribute at the class level. Unlike most other request
-mapping attributes however when used at the class level, a method-level produces attribute
-will overrides rather than extend the class level declaration.
+You can declare a shared `produces` attribute at the class level. Unlike most other
+request mapping attributes, however, when used at the class level, a method-level
+`produces` attribute overrides rather than extends the class level declaration.
 
 [TIP]
 ====
-`MediaType` provides constants for commonly used media types -- e.g.
-`APPLICATION_JSON_VALUE`, `APPLICATION_JSON_UTF8_VALUE`.
+`MediaType` provides constants for commonly used media types, such as
+`APPLICATION_JSON_VALUE` and `APPLICATION_JSON_UTF8_VALUE`.
 ====
-
 
 [[webflux-ann-requestmapping-params-and-headers]]
 ==== Parameters and Headers
-[.small]#<<web.adoc#mvc-ann-requestmapping-params-and-headers,Same in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping-params-and-headers,Same as in Spring MVC>>#
 
 You can narrow request mappings based on query parameter conditions. You can test for the
 presence of a query parameter (`"myParam"`), for the absence (`"!myParam"`), or for a
-specific value (`"myParam=myValue"`):
+specific value (`"myParam=myValue"`), as shown in the following example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -795,7 +784,8 @@ specific value (`"myParam=myValue"`):
 	}
 ----
 
-You can also use the same with request header conditions:
+You can also do the same with request header conditions, as shown in the following
+example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -806,69 +796,66 @@ You can also use the same with request header conditions:
 	}
 ----
 
-
 [[webflux-ann-requestmapping-head-options]]
-==== HTTP HEAD, OPTIONS
-[.small]#<<web.adoc#mvc-ann-requestmapping-head-options,Same in Spring MVC>>#
+==== HTTP HEAD and HTTP OPTIONS
+[.small]#<<web.adoc#mvc-ann-requestmapping-head-options,Same as in Spring MVC>>#
 
-`@GetMapping` -- and also `@RequestMapping(method=HttpMethod.GET)`, are implicitly mapped to
-and also support HTTP HEAD. An HTTP HEAD request is processed as if it were HTTP GET except
-but instead of writing the body, the number of bytes are counted and the "Content-Length"
-header set.
+`@GetMapping` and `@RequestMapping(method=HttpMethod.GET)` are implicitly mapped to
+and support HTTP HEAD. An HTTP HEAD request is processed as if it were HTTP GET except
+that, instead of writing the body, the number of bytes are counted and the
+"Content-Length" header set.
 
-By default HTTP OPTIONS is handled by setting the "Allow" response header to the list of HTTP
-methods listed in all `@RequestMapping` methods with matching URL patterns.
+By default, HTTP OPTIONS is handled by setting the "Allow" response header to the list of
+HTTP methods listed in all `@RequestMapping` methods with matching URL patterns.
 
 For a `@RequestMapping` without HTTP method declarations, the "Allow" header is set to
 `"GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS"`. Controller methods should always declare the
-supported HTTP methods for example by using the HTTP method specific variants --
+supported HTTP methods -- for example, by using the HTTP method specific variants:
 `@GetMapping`, `@PostMapping`, etc.
 
 `@RequestMapping` method can be explicitly mapped to HTTP HEAD and HTTP OPTIONS, but that
 is not necessary in the common case.
 
-
-
 [[webflux-ann-methods]]
-=== Handler methods
-[.small]#<<web.adoc#mvc-ann-methods,Same in Spring MVC>>#
+=== Handler Methods
+[.small]#<<web.adoc#mvc-ann-methods,Same as in Spring MVC>>#
 
 `@RequestMapping` handler methods have a flexible signature and can choose from a range of
 supported controller method arguments and return values.
 
 [[webflux-ann-arguments]]
-==== Method arguments
-[.small]#<<web.adoc#mvc-ann-arguments,Same in Spring MVC>>#
+==== Method Arguments
+[.small]#<<web.adoc#mvc-ann-arguments,Same as in Spring MVC>>#
 
-The table below shows supported controller method arguments.
+The following table shows supported controller method arguments.
 
 Reactive types (Reactor, RxJava, <<webflux-reactive-libraries,or other>>) are
-supported on arguments that require blocking I/O, e.g. reading the request body, to
+supported on arguments that require blocking I/O (such as reading the request body) to
 be resolved. This is marked in the description column. Reactive types are not expected
-on arguments that don't require blocking.
+on arguments that do not require blocking.
 
 JDK 1.8's `java.util.Optional` is supported as a method argument in combination with
-annotations that have a `required` attribute -- e.g. `@RequestParam`, `@RequestHeader`,
-etc, and is equivalent to `required=false`.
+annotations that have a `required` attribute (`@RequestParam`, `@RequestHeader`,
+and others) and is equivalent to `required=false`.
 
 [cols="1,2", options="header"]
 |===
 |Controller method argument|Description
 
 |`ServerWebExchange`
-|Access to the full `ServerWebExchange` -- container for the HTTP request and response,
+|Access to the full `ServerWebExchange`: a container for the HTTP request and response,
 request and session attributes, `checkNotModified` methods, and others.
 
 |`ServerHttpRequest`, `ServerHttpResponse`
 |Access to the HTTP request or response.
 
 |`WebSession`
-|Access to the session; this does not forcing the start of a new session unless attributes
+|Access to the session. Does not force the start of a new session unless attributes
 are added. Supports reactive types.
 
 |`java.security.Principal`
-|Currently authenticated user; possibly a specific `Principal` implementation class if known.
-Supports reactive types.
+|Currently authenticated user. Possibly a specific `Principal` implementation class, if
+known. Supports reactive types.
 
 |`org.springframework.http.HttpMethod`
 |The HTTP method of the request.
@@ -899,12 +886,12 @@ type.
 
 |`@RequestBody`
 |For access to the HTTP request body. Body content is converted to the declared method
-argument type using ``HttpMessageReader``'s. Supports reactive types.
+argument type using ``HttpMessageReader`` instances. Supports reactive types.
 // TODO: See <<webflux-ann-requestbody>>.
 
 |`HttpEntity<B>`
-|For access to request headers and body. The body is converted with ``HttpMessageReader``'s.
-Supports reactive types.
+|For access to request headers and body. The body is converted with ``HttpMessageReader``
+instances. Supports reactive types.
 // TODO: See <<webflux-ann-httpentity>>.
 
 |`@RequestPart`
@@ -912,48 +899,48 @@ Supports reactive types.
 // TODO: See <<webflux-multipart-forms-non-browsers>> and <<webflux-multipart>>.
 
 |`java.util.Map`, `org.springframework.ui.Model`, `org.springframework.ui.ModelMap`
-|For access and updates of the implicit model that is exposed to the web view.
+|For access to and updates of the implicit model that is exposed to the web view.
 
 |Command or form object (with optional `@ModelAttribute`)
-|Command object whose properties to bind to request parameters -- via setters or directly to
-fields, with customizable type conversion, depending on `@InitBinder` methods and/or the
-HandlerAdapter configuration (see the `webBindingInitializer` property on
-`RequestMappingHandlerAdapter`).
+|Command object whose properties bind to request parameters (through setters or directly
+to fields, with customizable type conversion) depending on `@InitBinder` methods and/or
+the HandlerAdapter configuration. See the `webBindingInitializer` property on
+`RequestMappingHandlerAdapter`.
 
-Command objects along with their validation results are exposed as model attributes, by
-default using the command class name - e.g. model attribute "orderAddress" for a command
-object of type "some.package.OrderAddress". `@ModelAttribute` can be used to customize the
-model attribute name.
+By default, command objects along with their validation results are exposed as model
+attributes by using the command class name -- for example, model attribute "orderAddress"
+for a command object of type "some.package.OrderAddress". `@ModelAttribute` can be used
+to customize the model attribute name.
 
 Supports reactive types.
 
 |`Errors`, `BindingResult`
-|Validation results for the command/form object data binding; this argument must be
+|Validation results for the command/form object data binding. This argument must be
 declared immediately after the command/form object in the controller method signature.
 
 |`SessionStatus`
-|For marking form processing complete which triggers cleanup of session attributes
+|For marking form processing complete, which triggers cleanup of session attributes
 declared through a class-level `@SessionAttributes` annotation.
 
 |`UriComponentsBuilder`
-|For preparing a URL relative to the current request's host, port, scheme, context path, and
-the literal  part of the servlet mapping also taking into account `Forwarded` and
+|For preparing a URL relative to the current request's host, port, scheme, context path,
+and the literal  part of the servlet mapping and taking into account `Forwarded` and
 `X-Forwarded-*` headers.
 
 |`@SessionAttribute`
-|For access to any session attribute; in contrast to model attributes stored in the session
-as a result of a class-level `@SessionAttributes` declaration.
+|For access to any session attribute, in contrast to model attributes stored in the
+session as a result of a class-level `@SessionAttributes` declaration.
 
 |`@RequestAttribute`
 |For access to request attributes.
 |===
 
 [[webflux-ann-return-types]]
-==== Return values
-[.small]#<<web.adoc#mvc-ann-return-types,Same in Spring MVC>>#
+==== Return Values
+[.small]#<<web.adoc#mvc-ann-return-types,Same as in Spring MVC>>#
 
-The table below shows supported controller method return values. Reactive types --
-Reactor, RxJava, <<webflux-reactive-libraries,or other>> are supported for all return
+The table below shows supported controller method return values. Reactive types
+(Reactor, RxJava, <<webflux-reactive-libraries,or others>>) are supported for all return
 values.
 
 [cols="1,2", options="header"]
@@ -961,27 +948,33 @@ values.
 |Controller method return value|Description
 
 |`@ResponseBody`
-|The return value is encoded through ``HttpMessageWriter``s and written to the response.
+|The return value is encoded through ``HttpMessageWriter`` instances and written to the
+response.
 // TODO: See <<webflux-ann-responsebody>>.
 
 |`HttpEntity<B>`, `ResponseEntity<B>`
-|The return value specifies the full response including HTTP headers and body be encoded
-through ``HttpMessageWriter``s and written to the response.
+|The return value specifies that the full response, including the HTTP headers and the
+body, be encoded through ``HttpMessageWriter`` instances and written to the response.
 // TODO: See <<webflux-ann-httpentity>>.
 
 |`HttpHeaders`
 |For returning a response with headers and no body.
 
 |`String`
-|A view name to be resolved with ``ViewResolver``'s and used together with the implicit
-model -- determined through command objects and `@ModelAttribute` methods. The handler
-method may also programmatically enrich the model by declaring a `Model` argument (see
-above).
+|A view name to be resolved with ``ViewResolver`` instances and used together with the
+implicit model, as determined through command objects and `@ModelAttribute` methods. The
+handler method may also programmatically enrich the model by declaring a `Model` argument
+(as previously described in this document).
+// TODO "previously described" should be a link to the previous relevant location,
+// but I can't figure out where that is.
 
 |`View`
-|A `View` instance to use for rendering together with the implicit model -- determined
+|A `View` instance to use (together with the implicit model) for rendering, as determined
 through command objects and `@ModelAttribute` methods. The handler method may also
-programmatically enrich the model by declaring a `Model` argument (see above).
+programmatically enrich the model by declaring a `Model` argument (as previously
+described in this document).
+// TODO "previously described" should be a link to the previous relevant location,
+// but I can't figure out where that is.
 
 |`java.util.Map`, `org.springframework.ui.Model`
 |Attributes to be added to the implicit model with the view name implicitly determined
@@ -991,45 +984,41 @@ from the request path.
 |An API for model and view rendering scenarios.
 
 |`void`
-|For use in method that don't write the response body; or methods where the view name is
-supposed to be determined implicitly from the request path.
+|For use in methods that do not write the response body or in methods where the view name
+is supposed to be determined implicitly from the request path.
 
-|`Flux<ServerSentEvent>`, `Observable<ServerSentEvent>`, or other reactive type
-|Emit server-sent events; the `SeverSentEvent` wrapper can be omitted when only data needs
-to be written (however `text/event-stream` must be requested or declared in the mapping
-through the produces attribute).
+|`Flux<ServerSentEvent>`, `Observable<ServerSentEvent>`, or other reactive types
+|Emit server-sent events. The `SeverSentEvent` wrapper can be omitted when only data needs
+to be written (however, `text/event-stream` must be requested or declared in the mapping
+through the `produces` attribute).
 
 |Any other return type
 |A single model attribute to be added to the implicit model with the view name implicitly
-determined through a `RequestToViewNameTranslator`; the attribute name may be specified
-through a method-level `@ModelAttribute` or otherwise a name is selected based on the
+determined through a `RequestToViewNameTranslator`. The attribute name may be specified
+through a method-level `@ModelAttribute`. Otherwise, a name is selected based on the
 class name of the return type.
 |===
 
-
-
 include::webflux-functional.adoc[leveloffset=+1]
-
-
 
 [[webflux-config]]
 == WebFlux Java Config
-[.small]#<<web.adoc#mvc-config,Same in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config,Same as in Spring MVC>>#
 
-The WebFlux Java config provides default configuration suitable for most applications along
-with a configuration API to customize it. For more advanced customizations, not available in
+The WebFlux Java config provides default configuration suitable for most applications and
+a configuration API to customize it. For more advanced customizations, not available in
 the configuration API, see <<webflux-config-advanced-java>>.
 
-You do not need to understand the underlying beans created by the Java config, but it's
-easy to seem them in `WebFluxConfigurationSupport`, and if you want to learn more, see
-<<webflux-special-bean-types>>.
-
+You do not need to understand the underlying beans created by the Java config. However,
+if you do wish to find them, you  can see them in `WebFluxConfigurationSupport`. If you
+want to learn more, see <<webflux-special-bean-types>>.
 
 [[webflux-config-enable]]
-=== Enable the configuration
-[.small]#<<web.adoc#mvc-config-enable,Same in Spring MVC>>#
+=== Enabling the Configuration
+[.small]#<<web.adoc#mvc-config-enable,Same as in Spring MVC>>#
 
-Use the `@EnableWebFlux` annotation in your Java config:
+To enable WebFlux, use the `@EnableWebFlux` annotation in your Java config, as shown in
+the following example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1040,16 +1029,16 @@ Use the `@EnableWebFlux` annotation in your Java config:
 	}
 ----
 
-The above registers a number of Spring WebFlux
-<<mvc-webflux-special-bean-types,infrastructure beans>> also adapting to dependencies
-available on the classpath -- for JSON, XML, etc.
-
+The preceding code registers a number of Spring WebFlux
+<<mvc-webflux-special-bean-types,infrastructure beans>> and adapts to dependencies
+available on the classpath (for JSON, XML, and others).
 
 [[webflux-config-customize]]
 === Configuration API
-[.small]#<<web.adoc#mvc-config-customize,Same in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-customize,Same as in Spring MVC>>#
 
-In your Java config implement the `WebFluxConfigurer` interface:
+To use the configuration API in your Java configuration, implement the
+`WebFluxConfigurer` interface, as shown in the following example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1063,17 +1052,15 @@ In your Java config implement the `WebFluxConfigurer` interface:
 	}
 ----
 
-
-
 [[webflux-config-conversion]]
-=== Conversion, formatting
-[.small]#<<web.adoc#mvc-config-conversion,Same in Spring MVC>>#
+=== Conversion, Formatting
+[.small]#<<web.adoc#mvc-config-conversion,Same as in Spring MVC>>#
 
-By default formatters for `Number` and `Date` types are installed, including support for
-the `@NumberFormat` and `@DateTimeFormat` annotations. Full support for the Joda Time
-formatting library is also installed if Joda Time is present on the classpath.
+By default, formatters for `Number` and `Date` types are installed, providing support for
+the `@NumberFormat` and `@DateTimeFormat` annotations.  If Joda Time is present on the
+classpath, Full support for the Joda Time formatting library is also installed.
 
-To register custom formatters and converters:
+The following example shows how to register custom formatters and converters:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1092,21 +1079,22 @@ To register custom formatters and converters:
 
 [NOTE]
 ====
-See <<core.adoc#format-FormatterRegistrar-SPI,FormatterRegistrar SPI>>
-and the `FormattingConversionServiceFactoryBean` for more information on when to use FormatterRegistrars.
+See <<core.adoc#format-FormatterRegistrar-SPI,FormatterRegistrar SPI>> and the
+`FormattingConversionServiceFactoryBean` for more information on when to use
+FormatterRegistrars.
 ====
-
 
 [[webflux-config-validation]]
 === Validation
-[.small]#<<web.adoc#mvc-config-validation,Same in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-validation,Same as in Spring MVC>>#
 
-By default if <<core.adoc#validation-beanvalidation-overview,Bean Validation>> is present
-on the classpath -- e.g. Hibernate Validator, the `LocalValidatorFactoryBean` is registered
-as a global <<core.adoc#validator,Validator>> for use with `@Valid` and `Validated` on
-`@Controller` method arguments.
+By default, if <<core.adoc#validation-beanvalidation-overview,Bean Validation>> (such as
+the Hibernate Validator) is present on the classpath, the `LocalValidatorFactoryBean` is
+registered as a global <<core.adoc#validator,Validator>> for use with `@Valid` and
+`Validated` on `@Controller` method arguments.
 
-In your Java config, you can customize the global `Validator` instance:
+In your Java configuration, you can customize the global `Validator` instance, as shown
+in the following example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1123,7 +1111,8 @@ In your Java config, you can customize the global `Validator` instance:
 	}
 ----
 
-Note that you can also register ``Validator``'s locally:
+Note that you can also register ``Validator``'s locally, as shown in the following
+example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1142,19 +1131,20 @@ Note that you can also register ``Validator``'s locally:
 [TIP]
 ====
 If you need to have a `LocalValidatorFactoryBean` injected somewhere, create a bean and
-mark it with `@Primary` in order to avoid conflict with the one declared in the MVC config.
+mark it with `@Primary` in order to avoid conflict with the one declared in the MVC
+configuration.
 ====
 
 
 [[webflux-config-content-negotiation]]
-=== Content type resolvers
-[.small]#<<web.adoc#mvc-config-content-negotiation,Same in Spring MVC>>#
+=== Content Type Resolvers
+[.small]#<<web.adoc#mvc-config-content-negotiation,Same as in Spring MVC>>#
 
 You can configure how Spring WebFlux determines the requested media types for
-``@Controller``'s from the request. By default only the "Accept" header is checked but you
-can also enable a query parameter based strategy.
+``@Controller`` instances from the request. By default, only the "Accept" header is
+checked, but you can also enable a query-parameter-based strategy.
 
-To customize the requested content type resolution:
+The following example shows how to customize the requested content type resolution:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1171,10 +1161,11 @@ To customize the requested content type resolution:
 ----
 
 [[webflux-config-message-codecs]]
-=== HTTP message codecs
-[.small]#<<web.adoc#mvc-config-message-converters,Same in Spring MVC>>#
+=== HTTP Message Codecs
+[.small]#<<web.adoc#mvc-config-message-converters,Same as in Spring MVC>>#
 
-To customize how the request and response body are read and written:
+The following example shows how to customize how the request and response body are read
+and written:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1190,29 +1181,34 @@ To customize how the request and response body are read and written:
 	}
 ----
 
-`ServerCodecConfigurer` provides a set of default readers and writers. You can use it to add
-more readers and writers, customize the default ones, or replace the default ones completely.
+`ServerCodecConfigurer` provides a set of default readers and writers. You can use it to
+add more readers and writers, customize the default ones, or replace the default ones
+completely.
 
 For Jackson JSON and XML, consider using the
-{api-spring-framework}/http/converter/json/Jackson2ObjectMapperBuilder.html[Jackson2ObjectMapperBuilder]
+{api-spring-framework}/http/converter/json/Jackson2ObjectMapperBuilder.html[Jackson2ObjectMapperBuilder],
 which customizes Jackson's default properties with the following ones:
 
-. http://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/DeserializationFeature.html#FAIL_ON_UNKNOWN_PROPERTIES[`DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES`] is disabled.
-. http://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/MapperFeature.html#DEFAULT_VIEW_INCLUSION[`MapperFeature.DEFAULT_VIEW_INCLUSION`] is disabled.
+* http://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/DeserializationFeature.html#FAIL_ON_UNKNOWN_PROPERTIES[`DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES`] is disabled.
+* http://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/MapperFeature.html#DEFAULT_VIEW_INCLUSION[`MapperFeature.DEFAULT_VIEW_INCLUSION`] is disabled.
 
-It also automatically registers the following well-known modules if they are detected on the classpath:
+It also automatically registers the following well-known modules if they are detected on
+the classpath:
 
-. https://github.com/FasterXML/jackson-datatype-jdk7[jackson-datatype-jdk7]: support for Java 7 types like `java.nio.file.Path`.
-. https://github.com/FasterXML/jackson-datatype-joda[jackson-datatype-joda]: support for Joda-Time types.
-. https://github.com/FasterXML/jackson-datatype-jsr310[jackson-datatype-jsr310]: support for Java 8 Date & Time API types.
-. https://github.com/FasterXML/jackson-datatype-jdk8[jackson-datatype-jdk8]: support for other Java 8 types like `Optional`.
-
+* https://github.com/FasterXML/jackson-datatype-jdk7[jackson-datatype-jdk7]: Support
+for Java 7 types like `java.nio.file.Path`.
+* https://github.com/FasterXML/jackson-datatype-joda[jackson-datatype-joda]: Support
+for Joda-Time types.
+* https://github.com/FasterXML/jackson-datatype-jsr310[jackson-datatype-jsr310]: Support
+for Java 8 Date & Time API types.
+* https://github.com/FasterXML/jackson-datatype-jdk8[jackson-datatype-jdk8]: Support for
+other Java 8 types like `Optional`.
 
 [[webflux-config-view-resolvers]]
-=== View resolvers
-[.small]#<<web.adoc#mvc-config-view-resolvers,Same in Spring MVC>>#
+=== View Resolvers
+[.small]#<<web.adoc#mvc-config-view-resolvers,Same as in Spring MVC>>#
 
-To configure view resolution:
+The following example shows how to configure view resolution:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1228,7 +1224,8 @@ To configure view resolution:
 	}
 ----
 
-Note that FreeMarker also requires configuration of the underlying view technology:
+Note that FreeMarker also requires configuration of the underlying view technology, as
+shown in the following example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1249,19 +1246,19 @@ Note that FreeMarker also requires configuration of the underlying view technolo
 	}
 ----
 
-
 [[webflux-config-static-resources]]
-=== Static resources
-[.small]#<<web.adoc#mvc-config-static-resources,Same in Spring MVC>>#
+=== Static Resources
+[.small]#<<web.adoc#mvc-config-static-resources,Same as in Spring MVC>>#
 
 This option provides a convenient way to serve static resources from a list of
 {api-spring-framework}/core/io/Resource.html[Resource]-based locations.
 
-In the example below, given a request that starts with `"/resources"`, the relative path is
-used to find and serve static resources relative to `"/static"` on the classpath. Resources
-will be served with a 1-year future expiration to ensure maximum use of the browser cache
-and a reduction in HTTP requests made by the browser. The `Last-Modified` header is also
-evaluated and if present a `304` status code is returned.
+In the example below, given a request that starts with `"/resources"`, the relative path
+is used to find and serve static resources relative to `"/static"` on the classpath.
+Resources are served with a 1-year future expiration to ensure maximum use of the browser
+cache and a reduction in HTTP requests made by the browser. The `Last-Modified` header is
+also evaluated and, if present, a `304` status code is returned. The following code
+provides an example:
 
 [source,java,indent=0]
 [subs="verbatim"]
@@ -1284,16 +1281,16 @@ evaluated and if present a `304` status code is returned.
 // See also <<webflux-caching-static-resources, HTTP caching support for static resources>>.
 
 The resource handler also supports a chain of
-{api-spring-framework}/web/reactive/resource/ResourceResolver.html[ResourceResolver]'s and
-{api-spring-framework}/web/reactive/resource/ResourceTransformer.html[ResourceResolver]'s.
-which can be used to create a toolchain for working with optimized resources.
+{api-spring-framework}/web/reactive/resource/ResourceResolver.html[ResourceResolver] instances and
+{api-spring-framework}/web/reactive/resource/ResourceTransformer.html[ResourceResolver]
+instances., which can be used to create a toolchain for working with optimized resources.
 
 The `VersionResourceResolver` can be used for versioned resource URLs based on an MD5 hash
-computed from the content, a fixed application version, or other. A
-`ContentVersionStrategy` (MD5 hash) is a good choice with some notable exceptions such as
-JavaScript resources used with a module loader.
+computed from the content, a fixed application version, or other mechanisms. A
+`ContentVersionStrategy` (MD5 hash) is a good choice, with some notable exceptions (such as
+JavaScript resources used with a module loader).
 
-For example in your Java config;
+For example, in your Java configuration, you could do something similar to the following:
 
 [source,java,indent=0]
 [subs="verbatim"]
@@ -1313,37 +1310,36 @@ For example in your Java config;
 	}
 ----
 
-You can use `ResourceUrlProvider` to rewrite URLs and apply the full chain of resolvers and
-transformers -- e.g. to insert versions. The WebFlux config provides a `ResourceUrlProvider`
-so it can be injected into others.
+You can use `ResourceUrlProvider` to rewrite URLs and apply the full chain of resolvers
+and transformers (for example, to insert versions). The WebFlux configuration provides a
+`ResourceUrlProvider`, so it can be injected into others.
 
-Unlike Spring MVC at present in WebFlux there is no way to transparely rewrite static
-resource URLs since the are no view technologies that can make use of a non-blocking chain
-of resolvers and transformers (e.g. resources on Amazon S3). When serving only local
-resources the workaround is to use `ResourceUrlProvider` directly (e.g. through a custom
-tag) and block for 0 seconds.
+Unlike Spring MVC, at present, in WebFlux, there is no way to transparently rewrite
+static resource URLs, since the are no view technologies that can make use of a
+non-blocking chain of resolvers and transformers (such as resources on Amazon S3). When
+serving only local resources, the workaround is to use `ResourceUrlProvider` directly
+(for example, through a custom tag) and block for 0 seconds.
 
-http://www.webjars.org/documentation[WebJars] is also supported via `WebJarsResourceResolver`
-and automatically registered when `"org.webjars:webjars-locator"` is present on the
-classpath. The resolver can re-write URLs to include the version of the jar and can also
-match to incoming URLs without versions -- e.g. `"/jquery/jquery.min.js"` to
-`"/jquery/1.2.0/jquery.min.js"`.
-
+http://www.webjars.org/documentation[WebJars] is also supported via
+`WebJarsResourceResolver` and automatically registered when
+`"org.webjars:webjars-locator"` is present on the classpath. The resolver can re-write
+URLs to include the version of the jar and can also match to incoming URLs without
+versions, such as mapping `"/jquery/jquery.min.js"` to `"/jquery/1.2.0/jquery.min.js"`.
 
 [[webflux-config-path-matching]]
 === Path Matching
-[.small]#<<web.adoc#mvc-config-path-matching,Same in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-path-matching,Same as in Spring MVC>>#
 
-Spring WebFlux uses parsed representation of path patterns -- i.e. `PathPattern`, and also
-the incoming  request path -- i.e. `RequestPath`, which eliminates the need to indicate
-whether to decode the request path, or remove semicolon content, since `PathPattern`
-can now access decoded path segment values and match safely.
+Spring WebFlux uses parsed representation of path patterns (`PathPattern`) and of the
+incoming  request path (`RequestPath`), which eliminates the need to indicate whether to
+decode the request path or remove semicolon content, since `PathPattern` can now access
+decoded path segment values and match safely.
 
-Spring WebFlux also does not support suffix pattern matching so effectively there are only two
-minor options to customize related to path matching -- whether to match trailing slashes
-(`true` by default) and whether the match is case-sensitive (`false`).
+Spring WebFlux also does not support suffix pattern matching, so, effectively, there are
+only two minor options to customize related to path matching: whether to match trailing
+slashes (`true` by default) and whether the match is case-sensitive (`false` by default).
 
-To customize those options:
+The following example shows how to customize those options:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1359,18 +1355,19 @@ To customize those options:
 
 	}
 ----
-
+// TODO It seems like we should actually set the options.
 
 [[webflux-config-advanced-java]]
-=== Advanced config mode
-[.small]#<<web.adoc#mvc-config-advanced-java,Same in Spring MVC>>#
+=== Advanced Config Mode
+[.small]#<<web.adoc#mvc-config-advanced-java,Same as in Spring MVC>>#
 
-`@EnableWebFlux` imports `DelegatingWebFluxConfiguration` that (1) provides default
-Spring configuration for WebFlux applications and (2) detects and delegates to
-``WebFluxConfigurer``'s to customize that configuration.
+The `@EnableWebFlux` annotation imports `DelegatingWebFluxConfiguration`, which (1)
+provides default Spring configuration for WebFlux applications and (2) detects and
+delegates to ``WebFluxConfigurer`` instances to customize that configuration.
 
 For advanced mode, remove `@EnableWebFlux` and extend directly from
-`DelegatingWebFluxConfiguration` instead of implementing `WebFluxConfigurer`:
+`DelegatingWebFluxConfiguration` instead of implementing `WebFluxConfigurer`, as shown
+in the following example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1383,10 +1380,9 @@ For advanced mode, remove `@EnableWebFlux` and extend directly from
 	}
 ----
 
-You can keep existing methods in `WebConfig` but you can now also override bean declarations
-from the base class and you can still have any number of other ``WebMvcConfigurer``'s on
-the classpath.
-
+You can keep existing methods in `WebConfig`, and you can now also override bean
+declarations from the base class and still have any number of other ``WebMvcConfigurer``
+instances on the classpath.
 
 [[webflux-client]]
 == WebClient
@@ -1395,26 +1391,25 @@ The `spring-webflux` module includes a non-blocking, reactive client for HTTP re
 with Reactive Streams back pressure. It shares <<webflux-codecs,HTTP codecs>> and other
 infrastructure with the server <<webflux-fn,functional web framework>>.
 
-`WebClient` provides a higher level API over HTTP client libraries. By default
-it uses https://github.com/reactor/reactor-netty[Reactor Netty] but that is pluggable
+`WebClient` provides a higher-level API over HTTP client libraries. By default,
+it uses https://github.com/reactor/reactor-netty[Reactor Netty], but that is pluggable
 with a different `ClientHttpConnector`. The `WebClient` API returns Reactor `Flux` or
 `Mono` for output and accepts Reactive Streams `Publisher` as input (see
 <<webflux-reactive-libraries>>).
 
 [TIP]
 ====
-By comparison to the
-<<integration.adoc#rest-resttemplate,RestTemplate>>, the `WebClient` offers a more
-functional and fluent API that taking full advantage of Java 8 lambdas. It supports both
-sync and async scenarios, including streaming, and brings the efficiency of
-non-blocking I/O.
+By comparison to the <<integration.adoc#rest-resttemplate,RestTemplate>>, the `WebClient`
+offers a more functional and fluent API that takes full advantage of Java 8 lambdas. It
+supports both synchronous and asynchronous scenarios, including streaming, and brings the
+efficiency of non-blocking I/O.
 ====
-
 
 [[webflux-client-retrieve]]
 === Retrieve
 
-The `retrieve()` method is the easiest way to get a response body and decode it:
+The `retrieve()` method is the easiest way to get a response body and decode it, as shown
+in the following example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -1427,7 +1422,8 @@ The `retrieve()` method is the easiest way to get a response body and decode it:
             .bodyToMono(Person.class);
 ----
 
-You can also get a stream of objects decoded from the response:
+You can also get a stream of objects decoded from the response, as shown in the following
+example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -1439,7 +1435,8 @@ You can also get a stream of objects decoded from the response:
 ----
 
 By default, responses with 4xx or 5xx status codes result in an error of type
-`WebClientResponseException` but you can customize that:
+`WebClientResponseException`, but you can customize that, as shown in the following
+example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -1452,13 +1449,11 @@ By default, responses with 4xx or 5xx status codes result in an error of type
             .bodyToFlux(Person.class);
 ----
 
-
-
 [[webflux-client-exchange]]
 === Exchange
 
-The `exchange()` method provides more control. The below example is equivalent
-to `retrieve()` but also provides access to the `ClientResponse`:
+The `exchange()` method provides more control. The following example is equivalent to
+`retrieve()` but also provides access to the `ClientResponse`:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -1469,7 +1464,8 @@ to `retrieve()` but also provides access to the `ClientResponse`:
             .flatMap(response -> response.bodyToMono(Person.class));
 ----
 
-At this level you can also create a full `ResponseEntity`:
+At this level you can also create a full `ResponseEntity`, as shown in the following
+example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -1480,25 +1476,24 @@ At this level you can also create a full `ResponseEntity`:
             .flatMap(response -> response.bodyToEntity(Person.class));
 ----
 
-Note that unlike `retrieve()`, with `exchange()` there are no automatic error signals for
-4xx and 5xx responses. You have to check the status code and decide how to proceed.
+Note that, unlike `retrieve()`, with `exchange()`, there are no automatic error signals
+for 4xx and 5xx responses. You have to check the status code and decide how to proceed.
 
 [CAUTION]
 ====
 When you use `exchange()`, you must call `response.close()` if you do not intend to read
-the response body in order to close the underlying HTTP connection. Not doing so can
+the response body, in order to close the underlying HTTP connection. Not doing so can
 result in connection pool inconsistencies or memory leaks.
 
-You do not have to call `response.close()` if you consume the body because forcing a
+You do not have to call `response.close()` if you consume the body, because forcing a
 connection to be closed negates the benefits of persistent connections and connection
 pooling.
 ====
 
-
 [[webflux-client-body]]
-=== Request body
+=== Request Body
 
-The request body can be encoded from an Object:
+The request body can be encoded from an `Object`, as shown in the following example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -1513,7 +1508,7 @@ The request body can be encoded from an Object:
             .bodyToMono(Void.class);
 ----
 
-You can also have a stream of objects encoded:
+You can also have a stream of objects encoded, as shown in the following example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -1528,7 +1523,8 @@ You can also have a stream of objects encoded:
             .bodyToMono(Void.class);
 ----
 
-Or if you have the actual value, use the `syncBody` shortcut method:
+Alternatively, if you have the actual value, you can use the `syncBody` shortcut method,
+as shown in the following example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -1545,13 +1541,13 @@ Or if you have the actual value, use the `syncBody` shortcut method:
 
 
 [[webflux-client-builder]]
-=== Builder options
+=== Builder Options
 
-A simple way to create `WebClient` is through the static factory methods `create()` and
+A simple way to create a `WebClient` is through the static factory methods `create()` and
 `create(String)` with a base URL for all requests. You can also use `WebClient.builder()`
 for access to more options.
 
-To customize the underlying HTTP client:
+The following examlpe shows how to customize the underlying HTTP client:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -1566,7 +1562,8 @@ To customize the underlying HTTP client:
             .build();
 ----
 
-To customize the <<webflux-codecs,HTTP codecs>> used for encoding and decoding HTTP messages:
+The following example shows how to customize the <<webflux-codecs,HTTP codecs>> used for
+encoding and decoding HTTP messages:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -1589,7 +1586,8 @@ Explore the `WebClient.Builder` in your IDE for other options related to URI bui
 default headers (and cookies), and more.
 
 After the `WebClient` is built, you can always obtain a new builder from it, in order to
-build a new `WebClient`, based on, but without affecting the current instance:
+build a new `WebClient` that is based on but does not affect the current instance, as
+shown in the following example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -1599,14 +1597,11 @@ build a new `WebClient`, based on, but without affecting the current instance:
             .build();
 ----
 
-
-
-
-
 [[webflux-client-filter]]
 === Filters
 
-`WebClient` supports interception style request filtering:
+`WebClient` supports interception style request filtering, as shown in the following
+example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -1623,7 +1618,8 @@ build a new `WebClient`, based on, but without affecting the current instance:
         .build();
 ----
 
-`ExchangeFilterFunctions` provides a filter for basic authentication:
+`ExchangeFilterFunctions` provides a filter for basic authentication, as shown in the
+following example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -1636,7 +1632,8 @@ build a new `WebClient`, based on, but without affecting the current instance:
         .build();
 ----
 
-You can also mutate an existing `WebClient` instance without affecting the original:
+You can also mutate an existing `WebClient` instance without affecting the original, as
+shown in the following example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -1646,42 +1643,39 @@ You can also mutate an existing `WebClient` instance without affecting the origi
             .build();
 ----
 
-
-
-
 [[webflux-reactive-libraries]]
 == Reactive Libraries
 
 Reactor is a required dependency for the `spring-webflux` module and is used internally
 for composing logic and for Reactive Streams support. An easy rule to remember is that
-WebFlux APIs return `Flux` or `Mono` -- since that's what's used internally, and
+WebFlux APIs return `Flux` or `Mono` (since that's what's used internally) and
 leniently accept any Reactive Streams `Publisher` implementation.
 
-The use of `Flux` and `Mono` helps to express cardinality -- e.g.
-whether a single or multiple async values are expected. This is important for API design
-but also essential in some cases, e.g. when encoding an HTTP message.
+The use of `Flux` and `Mono` helps to express cardinality -- for example,
+whether a single asynchronous value or multiple asynchronous values are expected. This is
+important for API design but also essential in some cases, such as when encoding an HTTP
+message.
 
 For annotated controllers, WebFlux adapts transparently to the reactive library in use
 with proper translation of cardinality. This is done with the help of the
 {api-spring-framework}/core/ReactiveAdapterRegistry.html[ReactiveAdapterRegistry] from
-`spring-core` which provides pluggable support for reactive and async types. The registry
-has built-in support for RxJava and `CompletableFuture` but others can be registered.
+`spring-core`, which provides pluggable support for reactive and asynchronous types. The
+registry has built-in support for RxJava and `CompletableFuture`, and others can be registered.
 
-For functional endpoints, the `WebClient`, and other functional APIs, the general rule
-of thumb for WebFlux APIs applies:
+For functional endpoints, the `WebClient`, and other functional APIs, two general rules
+of thumb for WebFlux APIs apply:
 
-* `Flux` or `Mono` as return values -- use them to compose logic or pass to any Reactive
-Streams library (both are `Publisher` implementations).
-* Reactive Streams `Publisher` for input -- if a `Publisher` from another reactive library
-is provided it can only be treated as a stream with unknown semantics (0..N). If the
-semantics are known -- e.g. `io.reactivex.Single`, you can use `Mono.from(Publisher)` and
-pass that in instead of the raw `Publisher`.
+* `Flux` or `Mono` as return values: Use them to compose logic or pass them to any
+Reactive Streams library (both are `Publisher` implementations).
+* Reactive Streams `Publisher` for input: If a `Publisher` from another reactive library
+is provided, it can only be treated as a stream with unknown semantics (0..N). If the
+semantics are known (for example, `io.reactivex.Single`), you can use
+`Mono.from(Publisher)` and pass that in instead of the raw `Publisher`.
 
 [NOTE]
 ====
 For example, given a `Publisher` that is not a `Mono`, the Jackson JSON message writer
-expects multiple values. If the media type implies an infinite stream -- e.g.
-`"application/json+stream"`, values are written and flushed individually; otherwise
+expects multiple values. If the media type implies an infinite stream (for example,
+`"application/json+stream"`), values are written and flushed individually. Otherwise,
 values are buffered into a list and rendered as a JSON array.
 ====
-
