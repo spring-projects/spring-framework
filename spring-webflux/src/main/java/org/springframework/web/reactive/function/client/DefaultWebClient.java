@@ -418,7 +418,7 @@ class DefaultWebClient implements WebClient {
 		public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference) {
 			return this.responseMono.flatMap(
 					response -> bodyToPublisher(response, BodyExtractors.toMono(typeReference),
-							mono -> (Mono<T>)mono));
+							this::monoThrowableToMono));
 		}
 
 		private <T> Mono<T> monoThrowableToMono(Mono<? extends Throwable> mono) {
