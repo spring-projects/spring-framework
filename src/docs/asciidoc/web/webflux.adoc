@@ -4,10 +4,17 @@
 [[webflux-introduction]]
 == Introduction
 The original web framework included in the Spring Framework, Spring Web MVC, was purpose
+<<<<<<< HEAD
 built for the Servlet API and Servlet containers. The reactive web framework,
 Spring WebFlux, was added later, in version 5.0. It is fully non-blocking, supports
 http://www.reactive-streams.org/[Reactive Streams] back pressure, and runs on servers such as
 Netty, Undertow, and Servlet 3.1+ containers.
+=======
+built for the Servlet API and Servlet containers. The reactive web framework, Spring
+WebFlux, was added later, in version 5.0. It is built on a
+http://www.reactive-streams.org/[Reactive Streams] API and runs on non-blocking servers
+such as Netty, Undertow, and Servlet 3.1+ containers.
+>>>>>>> 2941d78ee5109cb47aca987e7b3f5e9641abf11f
 
 Both web frameworks mirror the names of their source modules:
 https://github.com/spring-projects/spring-framework/tree/master/spring-webmvc[spring-webmvc] and
@@ -15,16 +22,25 @@ https://github.com/spring-projects/spring-framework/tree/master/spring-webflux[s
 and co-exist side by side in the Spring Framework. Each module is optional. Applications
 may use one or the other module or, in some cases, both. For example, an application
 might use Spring MVC controllers with the reactive `WebClient`.
+<<<<<<< HEAD
 
 In addition to the web framework, Spring WebFlux also provides a <<webflux-client>> for
 performing HTTP requests, a `WebTestClient` for testing web endpoints, and
 also reactive WebSocket support for both client and server.
 
+=======
+
+In addition to the WebFlux web framework, the `spring-webflux` module includes several
+other reactive components, including a <<webflux-client>> for performing HTTP requests,
+a `WebTestClient` for testing web endpoints, and WebSocket support.
+
+>>>>>>> 2941d78ee5109cb47aca987e7b3f5e9641abf11f
 [[webflux-new-framework]]
 === Why a New Web framework?
 
 Part of the answer is the need for a non-blocking web stack to handle concurrency with a
 small number of threads and scale with fewer hardware resources. Servlet 3.1 did provide
+<<<<<<< HEAD
 an API for non-blocking I/O. However, using it leads away from the rest of the Servlet
 API where contracts are synchronous (`Filter`, `Servlet`) or blocking (`getParameter`,
 `getPart`). This was the motivation for a new common API to serve as a foundation across
@@ -39,6 +55,21 @@ APIs in Java. This is a boon for non-blocking applications and continuation styl
 declarative composition of asynchronous logic. At the programming model level, Java 8
 enabled Spring WebFlux to offer functional web endpoints alongside with annotated
 controllers.
+=======
+an API for non-blocking I/O. However, the use of that leads away from using the rest of
+the Servlet API, which remains synchronous (`Filter` and `Servlet`) and blocking
+(`getParameter` and `getPart`). On the positive side, a new common API foundation makes
+it possible to support any server. That is important because of runtimes such as Netty
+that are well established in the asynchronous, non-blocking space.
+
+The other part of the answer is functional programming. Much like the addition of
+annotations in Java 5 created opportunities (such as annotated REST controllers and unit
+tests), the addition of lambda expressions in Java 8 created opportunities for functional
+APIs in Java. This is a boon for non-blocking applications and continuation style APIs,
+as popularized by `CompletableFuture` and http://reactivex.io/[ReactiveX], which allow
+declarative composition of asynchronous logic. At the programming model level, Java 8
+enabled Spring WebFlux to offer both functional web endpoints and annotated controllers.
+>>>>>>> 2941d78ee5109cb47aca987e7b3f5e9641abf11f
 
 [[webflux-why-reactive]]
 === Reactive: What and Why?
@@ -95,6 +126,7 @@ operators aligned with the
 ReactiveX http://reactivex.io/documentation/operators.html[vocabulary of operators].
 Reactor is a Reactive Streams library. Therefore, all of its operators support
 non-blocking back pressure. Reactor has a strong focus on server-side Java. It is
+<<<<<<< HEAD
 developed in close collaboration with Spring.
 
 WebFlux requires Reactor as a core dependency, but it is interoperable with other reactive
@@ -104,6 +136,18 @@ a `Flux` or a `Mono` as output. So you can pass any `Publisher` as input and you
 operations on the output, but you need to adapt the output for use with another reactive library.
 Whenever feasible (such as with annotated controllers), WebFlux adapts transparently to the use
 of RxJava or other reactive libraries. See <<webflux-reactive-libraries>> for more details.
+=======
+developed in close collaboration with and feedback from Spring projects.
+
+WebFlux requires Reactor as a core dependency, but it is interoperable with other
+reactive libraries made with Reactive Streams. As a general rule, WebFlux APIs accept a
+plain `Publisher` as input, adapt it to Reactor types internally, use those, and then
+return either a `Flux` or a `Mono` as output. So you can pass any `Publisher` as input
+and you can apply operations on the output, but you need to adapt the output for use with
+another reactive library. Whenever feasible (such as with annotated controllers), WebFlux
+adapts transparently to the use of RxJava or other reactive libraries. See
+<<webflux-reactive-libraries>> for more details.
+>>>>>>> 2941d78ee5109cb47aca987e7b3f5e9641abf11f
 
 [[webflux-programming-models]]
 === Programming Models
@@ -150,10 +194,17 @@ for the same annotation-based programming model in both frameworks makes it easi
 re-use knowledge while also selecting the right tool for the right job.
 
 A simple way to evaluate an application is to check its dependencies. If you have
+<<<<<<< HEAD
 blocking persistence APIs (such as JPA or JDBC) or networking APIs to use, then Spring
 MVC is the best choice, at least for common architectures at least. It is technically
 feasible with both Reactor and RxJava to perform blocking calls on a separate thread but
 you would not be making the most of a non-blocking web stack.
+=======
+blocking persistence APIs or networking APIs to use, then Spring MVC is the best choice,
+at least for common architectures. It is technically feasible with both Reactor and
+RxJava to perform blocking calls on a separate thread, but you would not be making the
+most of a non-blocking web stack.
+>>>>>>> 2941d78ee5109cb47aca987e7b3f5e9641abf11f
 
 If you have a Spring MVC application with calls to remote services, try the reactive
 `WebClient`. You can return reactive types (Reactor, RxJava,
@@ -800,11 +851,18 @@ example:
 ==== HTTP HEAD and HTTP OPTIONS
 [.small]#<<web.adoc#mvc-ann-requestmapping-head-options,Same as in Spring MVC>>#
 
+<<<<<<< HEAD
 `@GetMapping` and `@RequestMapping(method=HttpMethod.GET)` support HTTP HEAD
 transparently for request mapping purposes. Controller methods do not need to change. A
 response wrapper, applied in the `HttpHandler` server adapter, ensures that a
 `"Content-Length"` header is set to the number of bytes written without actually writing
 to the response.
+=======
+`@GetMapping` and `@RequestMapping(method=HttpMethod.GET)` are implicitly mapped to
+and support HTTP HEAD. An HTTP HEAD request is processed as if it were HTTP GET except
+that, instead of writing the body, the number of bytes are counted and the
+"Content-Length" header set.
+>>>>>>> 2941d78ee5109cb47aca987e7b3f5e9641abf11f
 
 By default, HTTP OPTIONS is handled by setting the "Allow" response header to the list of
 HTTP methods listed in all `@RequestMapping` methods with matching URL patterns.
@@ -1281,8 +1339,13 @@ provides an example:
 
 The resource handler also supports a chain of
 {api-spring-framework}/web/reactive/resource/ResourceResolver.html[ResourceResolver] instances and
+<<<<<<< HEAD
 {api-spring-framework}/web/reactive/resource/ResourceTransformer.html[ResourceTransformer]
 instances, which can be used to create a toolchain for working with optimized resources.
+=======
+{api-spring-framework}/web/reactive/resource/ResourceTransformer.html[ResourceResolver]
+instances., which can be used to create a toolchain for working with optimized resources.
+>>>>>>> 2941d78ee5109cb47aca987e7b3f5e9641abf11f
 
 The `VersionResourceResolver` can be used for versioned resource URLs based on an MD5 hash
 computed from the content, a fixed application version, or other mechanisms. A
@@ -1383,7 +1446,268 @@ You can keep existing methods in `WebConfig`, and you can now also override bean
 declarations from the base class and still have any number of other ``WebMvcConfigurer``
 instances on the classpath.
 
+<<<<<<< HEAD
 include::webflux-webclient.adoc[leveloffset=+1]
+=======
+[[webflux-client]]
+== WebClient
+
+The `spring-webflux` module includes a non-blocking, reactive client for HTTP requests
+with Reactive Streams back pressure. It shares <<webflux-codecs,HTTP codecs>> and other
+infrastructure with the server <<webflux-fn,functional web framework>>.
+
+`WebClient` provides a higher-level API over HTTP client libraries. By default,
+it uses https://github.com/reactor/reactor-netty[Reactor Netty], but that is pluggable
+with a different `ClientHttpConnector`. The `WebClient` API returns Reactor `Flux` or
+`Mono` for output and accepts Reactive Streams `Publisher` as input (see
+<<webflux-reactive-libraries>>).
+
+[TIP]
+====
+By comparison to the <<integration.adoc#rest-resttemplate,RestTemplate>>, the `WebClient`
+offers a more functional and fluent API that takes full advantage of Java 8 lambdas. It
+supports both synchronous and asynchronous scenarios, including streaming, and brings the
+efficiency of non-blocking I/O.
+====
+
+[[webflux-client-retrieve]]
+=== Retrieve
+
+The `retrieve()` method is the easiest way to get a response body and decode it, as shown
+in the following example:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+    WebClient client = WebClient.create("http://example.org");
+
+    Mono<Person> result = client.get()
+            .uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+            .retrieve()
+            .bodyToMono(Person.class);
+----
+
+You can also get a stream of objects decoded from the response, as shown in the following
+example:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+    Flux<Quote> result = client.get()
+            .uri("/quotes").accept(TEXT_EVENT_STREAM)
+            .retrieve()
+            .bodyToFlux(Quote.class);
+----
+
+By default, responses with 4xx or 5xx status codes result in an error of type
+`WebClientResponseException`, but you can customize that, as shown in the following
+example:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+    Mono<Person> result = client.get()
+            .uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+            .retrieve()
+            .onStatus(HttpStatus::is4xxServerError, response -> ...)
+            .onStatus(HttpStatus::is5xxServerError, response -> ...)
+            .bodyToFlux(Person.class);
+----
+
+[[webflux-client-exchange]]
+=== Exchange
+
+The `exchange()` method provides more control. The following example is equivalent to
+`retrieve()` but also provides access to the `ClientResponse`:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+    Mono<Person> result = client.get()
+            .uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .flatMap(response -> response.bodyToMono(Person.class));
+----
+
+At this level you can also create a full `ResponseEntity`, as shown in the following
+example:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+    Mono<ResponseEntity<Person>> result = client.get()
+            .uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .flatMap(response -> response.bodyToEntity(Person.class));
+----
+
+Note that, unlike `retrieve()`, with `exchange()`, there are no automatic error signals
+for 4xx and 5xx responses. You have to check the status code and decide how to proceed.
+
+[CAUTION]
+====
+When you use `exchange()`, you must call `response.close()` if you do not intend to read
+the response body, in order to close the underlying HTTP connection. Not doing so can
+result in connection pool inconsistencies or memory leaks.
+
+You do not have to call `response.close()` if you consume the body, because forcing a
+connection to be closed negates the benefits of persistent connections and connection
+pooling.
+====
+
+[[webflux-client-body]]
+=== Request Body
+
+The request body can be encoded from an `Object`, as shown in the following example:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+    Mono<Person> personMono = ... ;
+
+    Mono<Void> result = client.post()
+            .uri("/persons/{id}", id)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(personMono, Person.class)
+            .retrieve()
+            .bodyToMono(Void.class);
+----
+
+You can also have a stream of objects encoded, as shown in the following example:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+    Flux<Person> personFlux = ... ;
+
+    Mono<Void> result = client.post()
+            .uri("/persons/{id}", id)
+            .contentType(MediaType.APPLICATION_STREAM_JSON)
+            .body(personFlux, Person.class)
+            .retrieve()
+            .bodyToMono(Void.class);
+----
+
+Alternatively, if you have the actual value, you can use the `syncBody` shortcut method,
+as shown in the following example:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+    Person person = ... ;
+
+    Mono<Void> result = client.post()
+            .uri("/persons/{id}", id)
+            .contentType(MediaType.APPLICATION_JSON)
+            .syncBody(person)
+            .retrieve()
+            .bodyToMono(Void.class);
+----
+
+
+[[webflux-client-builder]]
+=== Builder Options
+
+A simple way to create a `WebClient` is through the static factory methods `create()` and
+`create(String)` with a base URL for all requests. You can also use `WebClient.builder()`
+for access to more options.
+
+The following examlpe shows how to customize the underlying HTTP client:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+    SslContext sslContext = ...
+
+    ClientHttpConnector connector = new ReactorClientHttpConnector(
+            builder -> builder.sslContext(sslContext));
+
+    WebClient webClient = WebClient.builder()
+            .clientConnector(connector)
+            .build();
+----
+
+The following example shows how to customize the <<webflux-codecs,HTTP codecs>> used for
+encoding and decoding HTTP messages:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+    ExchangeStrategies strategies = ExchangeStrategies.builder()
+            .codecs(configurer -> {
+                // ...
+            })
+            .build();
+
+    WebClient webClient = WebClient.builder()
+            .exchangeStrategies(strategies)
+            .build();
+
+----
+
+The builder can be used to insert <<webflux-client-filter>>.
+
+Explore the `WebClient.Builder` in your IDE for other options related to URI building,
+default headers (and cookies), and more.
+
+After the `WebClient` is built, you can always obtain a new builder from it, in order to
+build a new `WebClient` that is based on but does not affect the current instance, as
+shown in the following example:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+    WebClient modifiedClient = client.mutate()
+            // user builder methods...
+            .build();
+----
+
+[[webflux-client-filter]]
+=== Filters
+
+`WebClient` supports interception style request filtering, as shown in the following
+example:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+    WebClient client = WebClient.builder()
+        .filter((request, next) -> {
+
+    	    ClientRequest filtered = ClientRequest.from(request)
+        	    .header("foo", "bar")
+        	    .build();
+
+        	return next.exchange(filtered);
+        })
+        .build();
+----
+
+`ExchangeFilterFunctions` provides a filter for basic authentication, as shown in the
+following example:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+
+// static import of ExchangeFilterFunctions.basicAuthentication
+
+    WebClient client = WebClient.builder()
+        .filter(basicAuthentication("user", "pwd"))
+        .build();
+----
+
+You can also mutate an existing `WebClient` instance without affecting the original, as
+shown in the following example:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+    WebClient filteredClient = client.mutate()
+            .filter(basicAuthentication("user", "pwd")
+            .build();
+----
+>>>>>>> 2941d78ee5109cb47aca987e7b3f5e9641abf11f
 
 [[webflux-reactive-libraries]]
 == Reactive Libraries
