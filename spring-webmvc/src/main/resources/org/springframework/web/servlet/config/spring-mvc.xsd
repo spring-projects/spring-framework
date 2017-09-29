@@ -959,7 +959,7 @@
 		<xsd:attribute name="cache-views" type="xsd:boolean">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	Enable or disable thew caching of resolved views.
+	Enable or disable the caching of resolved views.
 	Default is "true": caching is enabled.
 	Disable this only for debugging and development.
 				]]></xsd:documentation>
@@ -969,7 +969,7 @@
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
 	The view class that should be used to create views.
-	Configure this if you want to provide a custom View implementation, typically a ub-class of the expected View type.
+	Configure this if you want to provide a custom View implementation, typically a sub-class of the expected View type.
 				]]></xsd:documentation>
 				<xsd:appinfo>
 					<tool:annotation kind="ref">
