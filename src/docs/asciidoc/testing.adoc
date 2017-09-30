@@ -74,7 +74,7 @@ configuration in testing scenarios without modification.
 [[mock-objects-servlet]]
 ==== Servlet API
 The `org.springframework.mock.web` package contains a comprehensive set of Servlet API
-mock objects, which are useful for testing web contexts, controllers, and filters. These
+mock objects that are useful for testing web contexts, controllers, and filters. These
 mock objects are targeted at usage with Spring's Web MVC framework and are generally more
 convenient to use than dynamic mock objects such as http://www.easymock.org[EasyMock] or
 alternative Servlet API mock objects such as http://www.mockobjects.com[MockObjects].
@@ -86,19 +86,19 @@ on the Servlet 4.0 API.
 ====
 
 The Spring MVC Test framework builds on the mock Servlet API objects to provide an
-integration test framework for Spring MVC. See
+integration testing framework for Spring MVC. See
 <<spring-mvc-test-framework,_Spring MVC Test_>>.
 
 
 [[mock-objects-web-reactive]]
 ==== Spring Web Reactive
 The `org.springframework.mock.http.server.reactive` package contains mock request and
-response objects for testing Spring WebFlux applications. There is also a
-`MockWebServerExchange` in `org.springframework.mock.web.server` package that uses
-those mock request and response.
+response objects for testing _Spring WebFlux_ applications. There is also a
+`MockWebServerExchange` in the `org.springframework.mock.web.server` package that uses
+those mock request and response objects.
 
-`WebTestClient` builds on these mock objects and to provide integration testing
-of WebFlux server endpoints without running an HTTP server.
+`WebTestClient` builds on these mock objects to provide integration testing support for
+WebFlux server endpoints without running an HTTP server.
 
 
 [[unit-testing-support-classes]]
