@@ -450,7 +450,7 @@ public abstract class TransactionSynchronizationManager {
 	 * between active transaction synchronization (with or without backing
 	 * resource transaction; also on PROPAGATION_SUPPORTS) and an actual
 	 * transaction being active (with backing resource transaction;
-	 * on PROPAGATION_REQUIRES, PROPAGATION_REQUIRES_NEW, etc).
+	 * on PROPAGATION_REQUIRED, PROPAGATION_REQUIRES_NEW, etc).
 	 * @see #isSynchronizationActive()
 	 */
 	public static boolean isActualTransactionActive() {
