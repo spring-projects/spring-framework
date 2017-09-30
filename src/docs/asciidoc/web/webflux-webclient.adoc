@@ -6,26 +6,25 @@ with Reactive Streams back pressure. It shares
 <<web-reactive.adoc#webflux-codecs,HTTP codecs>> and other infrastructure with the
 server <<web-reactive.adoc#webflux-fn,functional web framework>>.
 
-`WebClient` provides a higher level API over HTTP client libraries. By default
-it uses https://github.com/reactor/reactor-netty[Reactor Netty] but that is pluggable
+`WebClient` provides a higher level API over HTTP client libraries. By default,
+it uses https://github.com/reactor/reactor-netty[Reactor Netty], but that is pluggable
 with a different `ClientHttpConnector`. The `WebClient` API returns Reactor `Flux` or
-`Mono` for output and accepts Reactive Streams `Publisher` as input (see
+`Mono` for output and accepts Reactive Streams `Publisher` instances as input (see
 <<web-reactive.adoc#webflux-reactive-libraries>>).
 
 [TIP]
 ====
-By comparison to the
-<<integration.adoc#rest-resttemplate,RestTemplate>>, the `WebClient` offers a more
-functional and fluent API that taking full advantage of Java 8 lambdas. It supports both
-sync and async scenarios, including streaming, and brings the efficiency of
-non-blocking I/O.
+By comparison to the <<integration.adoc#rest-resttemplate,RestTemplate>>, the `WebClient`
+offers a more functional and fluent API that takes full advantage of Java 8 lambdas. It
+supports both synchronous and asynchronous scenarios, including streaming, and brings the
+efficiency of non-blocking I/O.
 ====
-
 
 [[webflux-client-retrieve]]
 == Retrieve
 
-The `retrieve()` method is the easiest way to get a response body and decode it:
+The `retrieve()` method is the easiest way to get a response body and decode it, as shown
+in the following example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -38,7 +37,8 @@ The `retrieve()` method is the easiest way to get a response body and decode it:
             .bodyToMono(Person.class);
 ----
 
-You can also get a stream of objects decoded from the response:
+You can also get a stream of objects decoded from the response, as shown in the following
+example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -50,7 +50,8 @@ You can also get a stream of objects decoded from the response:
 ----
 
 By default, responses with 4xx or 5xx status codes result in an error of type
-`WebClientResponseException` but you can customize that:
+`WebClientResponseException` but you can customize that, as shown in the following
+example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -63,12 +64,10 @@ By default, responses with 4xx or 5xx status codes result in an error of type
             .bodyToFlux(Person.class);
 ----
 
-
-
 [[webflux-client-exchange]]
 == Exchange
 
-The `exchange()` method provides more control. The below example is equivalent
+The `exchange()` method provides more control. The following example is equivalent
 to `retrieve()` but also provides access to the `ClientResponse`:
 
 [source,java,intent=0]
@@ -80,7 +79,7 @@ to `retrieve()` but also provides access to the `ClientResponse`:
             .flatMap(response -> response.bodyToMono(Person.class));
 ----
 
-At this level you can also create a full `ResponseEntity`:
+At this level, you can also create a full `ResponseEntity`, as shown in the following example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -91,14 +90,14 @@ At this level you can also create a full `ResponseEntity`:
             .flatMap(response -> response.toEntity(Person.class));
 ----
 
-Note that unlike `retrieve()`, with `exchange()` there are no automatic error signals for
-4xx and 5xx responses. You have to check the status code and decide how to proceed.
+Note that, unlike `retrieve()`, with `exchange()`, there are no automatic error signals
+for 4xx and 5xx responses. You have to check the status code and decide how to proceed.
 
 [CAUTION]
 ====
-When using `exchange()` you must always use any of the body or entity methods of
+When using `exchange()`, you must always use any of the body or entity methods of
 `ClientResponse` to ensure resources are released and to avoid potential issues with HTTP
-connection pooling. If not interested in the response body use `bodyToMono(Void.class)`
+connection pooling. If not interested in the response body, use `bodyToMono(Void.class)`
 to complete.
 ====
 
@@ -106,7 +105,7 @@ to complete.
 [[webflux-client-body]]
 == Request body
 
-The request body can be encoded from an Object:
+The request body can be encoded from an Object, as shown in the following example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -121,7 +120,7 @@ The request body can be encoded from an Object:
             .bodyToMono(Void.class);
 ----
 
-You can also have a stream of objects encoded:
+You can also have a stream of objects encoded, as shown in the following example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -136,7 +135,8 @@ You can also have a stream of objects encoded:
             .bodyToMono(Void.class);
 ----
 
-Or if you have the actual value, use the `syncBody` shortcut method:
+Alternatively, if you have the actual value, use the `syncBody` shortcut method, as shown
+in the following example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -155,11 +155,11 @@ Or if you have the actual value, use the `syncBody` shortcut method:
 [[webflux-client-builder]]
 == Builder options
 
-A simple way to create `WebClient` is through the static factory methods `create()` and
+A simple way to create a `WebClient` is through the static factory methods `create()` and
 `create(String)` with a base URL for all requests. You can also use `WebClient.builder()`
 for access to more options.
 
-To customize the underlying HTTP client:
+The following example shows how to customize the underlying HTTP client:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -174,8 +174,9 @@ To customize the underlying HTTP client:
             .build();
 ----
 
-To customize the <<web-reactive.adoc#webflux-codecs,HTTP codecs>> used for encoding and
-decoding HTTP messages:
+The following example shows how to customize the
+<<web-reactive.adoc#webflux-codecs,HTTP codecs>> used for encoding and decoding HTTP
+messages:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -198,7 +199,7 @@ Explore the `WebClient.Builder` in your IDE for other options related to URI bui
 default headers (and cookies), and more.
 
 After the `WebClient` is built, you can always obtain a new builder from it, in order to
-build a new `WebClient`, based on, but without affecting the current instance:
+build a new `WebClient` that is based on but does not affect the current instance:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -208,14 +209,11 @@ build a new `WebClient`, based on, but without affecting the current instance:
             .build();
 ----
 
-
-
-
-
 [[webflux-client-filter]]
 == Filters
 
-`WebClient` supports interception style request filtering:
+`WebClient` supports interception style request filtering, as shown in the following
+example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -232,7 +230,8 @@ build a new `WebClient`, based on, but without affecting the current instance:
         .build();
 ----
 
-`ExchangeFilterFunctions` provides a filter for basic authentication:
+`ExchangeFilterFunctions` provides a filter for basic authentication, as shown in the
+following example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -245,7 +244,8 @@ build a new `WebClient`, based on, but without affecting the current instance:
         .build();
 ----
 
-You can also mutate an existing `WebClient` instance without affecting the original:
+You can also mutate an existing `WebClient` instance without affecting the original, as
+shown in the following example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -254,4 +254,3 @@ You can also mutate an existing `WebClient` instance without affecting the origi
             .filter(basicAuthentication("user", "pwd")
             .build();
 ----
-
