@@ -105,9 +105,10 @@ Libraries like Reactor or Spring Data provide null-safe APIs leveraging this fea
 The JSR 305 checks can be configured by adding the `-Xjsr305` compiler flag with the following
 options: `-Xjsr305={strict|warn|ignore}`.
 
-For kotlin versions 1.1.50+, the default behavior is the same to `-Xjsr305=warn`. The
-`strict` value should be considered experimental (Spring API nullability declaration could
-evolve even between minor releases and more checks may be added in the future).
+For kotlin versions 1.1.50+, the default behavior is the same to `-Xjsr305=warn`.
+The `strict` value is required to have Spring Framework API full null-safety taken in account
+but should be considered experimental since Spring API nullability declaration could evolve
+even between minor releases and more checks may be added in the future).
 
 [NOTE]
 ====
@@ -375,6 +376,27 @@ example:
 class Person(val name: String, val age: Int)
 ----
 
+You can optionally add https://kotlinlang.org/docs/reference/data-classes.html[the `data` keyword]
+to make the compiler automatically derives the following members from all properties
+declared in the primary constructor:
+
+* equals()/hashCode() pair
+* toString() of the form "User(name=John, age=42)"
+* componentN() functions corresponding to the properties in their order of declaration
+* copy() function
+
+This allows to change easily just one of the properties even if `User` properties are read-only:
+his allows us to write:
+
+
+[source,kotlin]
+----
+data class Person(val name: String, val age: Int)
+
+val jack = User(name = "Jack", age = 1)
+val olderJack = jack.copy(age = 2)
+----
+
 But some persistence technologies like JPA require a default constructor, preventing this
 kind of design. Fortunately, there is now a workaround for this
 https://stackoverflow.com/questions/32038177/kotlin-with-jpa-default-constructor-hell["default constructor hell"]
@@ -528,6 +550,8 @@ https://youtrack.jetbrains.com/issue/KT-11235[this Kotlin language design issue]
 
 === Testing
 
+==== Per class lifecycle
+
 Kotlin allows one to specify meaningful test function names between backticks,
 and as of JUnit 5 Kotlin test classes can use the `@TestInstance(TestInstance.Lifecycle.PER_CLASS)`
 annotation to enable a single instantiation of test classes which allows the use of `@BeforeAll` and `@AfterAll`
@@ -566,6 +590,35 @@ class IntegrationTests {
   }
 }
 ----
+
+==== Specification-like tests
+
+It is possible to create specification-like tests with JUnit 5 and Kotlin.
+
+[source]
+----
+class SpecificationLikeTests {
+
+  @Nested
+  @DisplayName("a calculator")
+  inner class Calculator {
+     val calculator = SampleCalculator()
+
+     @Test
+     fun `should return the result of adding the first number to the second number`() {
+        val sum = calculator.sum(2, 4)
+        assertEquals(6, sum)
+     }
+
+     @Test
+     fun `should return the result of subtracting the second number from the first number`() {
+        val subtract = calculator.subtract(4, 2)
+        assertEquals(2, subtract)
+     }
+  }
+}
+----
+
 
 [[getting-started]]
 == Getting started
