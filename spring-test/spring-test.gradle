@@ -35,6 +35,7 @@ dependencies {
 	optional("javax.websocket:javax.websocket-api:1.1")
 	optional("junit:junit:4.12")
 	optional("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
+	optional("org.apiguardian:apiguardian-api:1.0.0")  // for compiling against JUnit 5 without warnings
 	optional("org.testng:testng:6.12")
 	optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 	optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
