@@ -953,9 +953,9 @@ The Spring Framework offers two choices for client-side access to REST endpoints
 * <<rest-resttemplate>> -- the original Spring REST client with an API similar to other
 template classes in Spring, such as `JdbcTemplate`, `JmsTemplate` and others. The
 `RestTemplate` is built for synchronous use with the blocking I/O.
-* <<webflux-client,WebClient>> -- reactive client with a functional,
-fluent API. It is built on a non-blocking foundation for async and sync scenarios and
-supports Reactive Streams back pressure.
+* <<web-reactive.adoc#webflux-client,WebClient>> -- reactive client with a functional,
+fluent API from the `spring-webflux` module. It is built on a non-blocking foundation
+for async and sync scenarios and supports Reactive Streams back pressure.
 
 
 [[rest-resttemplate]]
@@ -1345,10 +1345,6 @@ and writes the media type supported by the Java I/O API.
 
 The `AsyncRestTemplate` is deprecated.
 Please use the <<web-reactive.adoc#webflux-client,WebClient>> instead.
-
-
-
-include::web/webflux-webclient.adoc[leveloffset=+3]
 
 
 
