@@ -16,9 +16,10 @@ and co-exist side by side in the Spring Framework. Each module is optional.
 Applications may use one or the other module, or in some cases both --
 e.g. Spring MVC controllers with the reactive `WebClient`.
 
-In addition to the web framework, Spring WebFlux also provides a <<webflux-client>> for
-performing HTTP requests, a `WebTestClient` for testing web endpoints, and
-also client and server reactive, WebSocket support.
+The `spring-webflux` module also provides a reactive <<webflux-client,WebClient>> for
+performing HTTP requests, along with client and server, reactive WebSocket support.
+The `spring-test` module provides test support for WebFlux applications, see
+<<webflux-test>> for more details.
 
 
 [[webflux-new-framework]]
@@ -1387,6 +1388,19 @@ the classpath.
 
 
 include::webflux-webclient.adoc[leveloffset=+1]
+
+
+[[webflux-test]]
+== Testing
+
+The `spring-test` module provides mock implementations of `ServerHttpRequest`,
+`ServerHttpResponse`, and `ServerWebExchange`.
+See <<testing.adoc#mock-objects-web-reactive,Spring Web Reactive>> mock objects.
+
+The <<testing.adoc#webtestclient,WebTestClient>> builds on these mock request and
+response objects to provide support for testing WebFlux applications without and HTTP
+server. The `WebTestClient` can be used for end-to-end integration tests too.
+
 
 
 [[webflux-reactive-libraries]]
