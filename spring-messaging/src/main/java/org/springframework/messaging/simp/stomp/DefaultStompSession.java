@@ -693,7 +693,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		@Override
 		public void run() {
 			closing = true;
-			String error = "Server has gone quite. Closing connection in session id=" + sessionId + ".";
+			String error = "Server has gone quiet. Closing connection in session id=" + sessionId + ".";
 			if (logger.isDebugEnabled()) {
 				logger.debug(error);
 			}
