@@ -113,7 +113,7 @@ even between minor releases and more checks may be added in the future).
 [NOTE]
 ====
 Generic type arguments, varargs and array elements nullability are not supported yet,
-but should be in an upcoming release, see https://jira.spring.io/browse/SPR-15942[SPR-15942]
+but should be in an upcoming release, see https://github.com/Kotlin/KEEP/issues/79[this dicussion]
 for up-to-date information.
 ====
 
@@ -688,7 +688,10 @@ Here is a list of pending issues related to Spring + Kotlin support.
 
 ==== Kotlin
 
+* https://github.com/Kotlin/KEEP/issues/79[Better generics null-safety support]
 * https://youtrack.jetbrains.com/issue/KT-6380[Parent issue for Spring Framework support]
+* https://youtrack.jetbrains.com/issue/KT-20283[Smart cast regression with open classes]
+* https://youtrack.jetbrains.com/issue/KT-18833[JSR-223 application classpath not available when using Java 9]
 * https://youtrack.jetbrains.com/issue/KT-15667[Support "::foo" as a short-hand syntax for bound callable reference to "this::foo"]
 * https://youtrack.jetbrains.com/issue/KT-11235[Allow specifying array annotation attribute single value without arrayOf()]
 * https://youtrack.jetbrains.com/issue/KT-5464[Kotlin requires type inference where Java doesn't]
@@ -696,3 +699,6 @@ Here is a list of pending issues related to Spring + Kotlin support.
 * https://youtrack.jetbrains.com/issue/KT-19592[Apply JSR 305 meta-annotations to generic type parameters]
 * https://youtrack.jetbrains.com/issue/KT-18398[Provide a way for libraries to avoid mixing Kotlin 1.0 and 1.1 dependencies]
 * https://youtrack.jetbrains.com/issue/KT-15125[Support JSR 223 bindings directly via script variables]
+* https://youtrack.jetbrains.com/issue/KT-16780[Kotlin Runtime library warning with kotlin-script-util dependency]
+* https://youtrack.jetbrains.com/issue/KT-18765[Move incremental compilation message from Gradle's warning to info logging level]
+* https://youtrack.jetbrains.com/issue/KT-15467[Support all-open and no-arg compiler plugins in Kotlin Eclipse plugin]
