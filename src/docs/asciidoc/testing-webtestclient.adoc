@@ -50,7 +50,7 @@ Use this option to set up a server from a
 
 Internally the provided configuration is passed to `RouterFunctions.toWebHandler`.
 The resulting WebFlux application will be tested without an HTTP server using mock
-request and response objects
+request and response objects.
 
 
 [[webtestclient-context-config]]
@@ -171,7 +171,7 @@ You can go beyond the built-in assertions and create your own:
             });
 ----
 
-You can also exit the workflow and get an `ExchangeResult` with the response data:
+You can also exit the workflow and get a result:
 
 ----
     EntityExchangeResult<Person> result = client.get().uri("/persons/1")
@@ -188,6 +188,35 @@ that accept
 {api-spring-framework}/core/ParameterizedTypeReference.html[ParameterizedTypeReference]
 instead of `Class<T>`.
 ====
+
+
+[[webtestclient-no-content]]
+=== No content
+
+If the response has no content, or you don't care if it does, use `Void.class` which ensures
+that resources are released:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+    client.get().uri("/persons/123")
+            .exchange()
+            .expectStatus().isNotFound()
+            .expectBody(Void.class);
+----
+
+Or if you want to assert there is no response content, use this:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+    client.post().uri("/persons")
+            .body(personMono, Person.class)
+            .exchange()
+            .expectStatus().isCreated()
+            .expectBody().isEmpty;
+----
+
 
 
 [[webtestclient-json]]
@@ -225,22 +254,23 @@ You can also use https://github.com/jayway/JsonPath[JSONPath] expressions:
 === Streaming responses
 
 To test infinite streams (e.g. `"text/event-stream"`, `"application/stream+json"`),
-exit the response workflow via `returnResult` immediately after response status and
-header assertions, as shown below:
+you'll need to exit the chained API, via `returnResult`, immediately after response status
+and header assertions, as shown below:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-    FluxExchangeResult<Event> result = client.get().uri("/events")
+    FluxExchangeResult<MyEvent> result = client.get().uri("/events")
             .accept(TEXT_EVENT_STREAM)
             .exchange()
             .expectStatus().isOk()
-            .returnResult(Event.class);
+            .returnResult(MyEvent.class);
 
 ----
 
-Now you can use the `StepVerifier`, from the `reactor-test` module, to apply
-assertions on the stream of decoded objects and cancel when test objectives are met:
+Now you can consume the `Flux<T>`, assert decoded objects as they come, and then
+cancel at some point when test objects are met. We recommend using the `StepVerifier`
+from the `reactor-test` module to do that, for example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
