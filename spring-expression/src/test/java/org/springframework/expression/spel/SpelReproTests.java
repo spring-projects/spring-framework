@@ -59,6 +59,7 @@ import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 import org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver;
+import org.springframework.util.ObjectUtils;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -2093,6 +2094,16 @@ public class SpelReproTests extends AbstractExpressionTests {
 		Expression ex = parser.parseExpression("T(java.nio.charset.Charset).forName(#encoding)");
 		Object result = ex.getValue(context);
 		assertEquals(StandardCharsets.UTF_8, result);
+	}
+
+	@Test
+	public void SPR16032() {
+		EvaluationContext context = new StandardEvaluationContext();
+		context.setVariable("str", "a\0b");
+
+		Expression ex = parser.parseExpression("#str?.split('\0')");
+		Object result = ex.getValue(context);
+		assertTrue(ObjectUtils.nullSafeEquals(result, new String[] {"a", "b"}));
 	}
 
 
