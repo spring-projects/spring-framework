@@ -25,9 +25,9 @@ import org.springframework.beans.PropertyAccessor;
 import org.springframework.lang.Nullable;
 
 /**
- * <p>Nested-path tag, to support and assist with nested beans or bean properties
- * in the model. Exports a "nestedPath" variable of type String in request scope,
- * visible to the current page and also included pages, if any.
+ * <p>The {@code <nestedPath>} tag supports and assists with nested beans or
+ * bean properties in the model. Exports a "nestedPath" variable of type String
+ * in request scope, visible to the current page and also included pages, if any.
  *
  * <p>The BindTag will auto-detect the current nested path and automatically
  * prepend it to its own path to form a complete path to the bean or bean property.
@@ -35,7 +35,26 @@ import org.springframework.lang.Nullable;
  * <p>This tag will also prepend any existing nested path that is currently set.
  * Thus, you can nest multiple nested-path tags.
  *
- * <p>Thanks to Seth Ladd for the suggestion and the original implementation!
+ * <table>
+ * <caption>Attribute Summary</caption>
+ * <thead>
+ * <tr>
+ * <th class="colFirst">Attribute</th>
+ * <th class="colOne">Required?</th>
+ * <th class="colOne">Runtime Expression?</th>
+ * <th class="colLast">Description</th>
+ * </tr>
+ * </thead>
+ * <tbody>
+ * <tr class="altColor">
+ * <td>path</p></td>
+ * <td>true</p></td>
+ * <td>true</p></td>
+ * <td>Set the path that this tag should apply. E.g. 'customer' to allow bind
+ * paths like 'address.street' rather than 'customer.address.street'.</p></td>
+ * </tr>
+ * </tbody>
+ * </table>
  *
  * @author Juergen Hoeller
  * @since 1.1

@@ -24,9 +24,39 @@ import org.springframework.lang.Nullable;
 import org.springframework.validation.Errors;
 
 /**
- * JSP tag that evaluates content if there are binding errors
- * for a certain bean. Exports an "errors" variable of type
- * {@link org.springframework.validation.Errors} for the given bean.
+ * This {@code <hasBindErrors>} tag provides an {@link Errors} instance in case of
+ * bind errors. The HTML escaping flag participates in a page-wide or
+ * application-wide setting (i.e. by HtmlEscapeTag or a "defaultHtmlEscape"
+ * context-param in web.xml).
+ *
+ * <table>
+ * <caption>Attribute Summary</caption>
+ * <thead>
+ * <tr>
+ * <th class="colFirst">Attribute</th>
+ * <th class="colOne">Required?</th>
+ * <th class="colOne">Runtime Expression?</th>
+ * <th class="colLast">Description</th>
+ * </tr>
+ * </thead>
+ * <tbody>
+ * <tr class="altColor">
+ * <td>htmlEscape</p></td>
+ * <td>false</p></td>
+ * <td>true</p></td>
+ * <td>Set HTML escaping for this tag, as boolean value.
+ * Overrides the default HTML escaping setting for the current page.</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td>name</p></td>
+ * <td>true</p></td>
+ * <td>true</p></td>
+ * <td>The name of the bean in the request that needs to be inspected for errors.
+ * If errors are available for this bean, they will be bound under the
+ * 'errors' key.</p></td>
+ * </tr>
+ * </tbody>
+ * </table>
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

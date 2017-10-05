@@ -25,13 +25,58 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.util.TagUtils;
 
 /**
- * Tag for transforming reference data values from form controllers and
- * other objects inside a {@code spring:bind} tag (or a data-bound
- * form element tag from Spring's form tag library).
+ * The {@code <transform>} tag provides transformation for reference data values
+ * from controllers and other objects inside a {@code spring:bind} tag (or a
+ * data-bound form element tag from Spring's form tag library).
  *
  * <p>The BindTag has a PropertyEditor that it uses to transform properties of
  * a bean to a String, usable in HTML forms. This tag uses that PropertyEditor
  * to transform objects passed into this tag.
+ *
+ * <table>
+ * <caption>Attribute Summary</caption>
+ * <thead>
+ * <tr>
+ * <th class="colFirst">Attribute</th>
+ * <th class="colOne">Required?</th>
+ * <th class="colOne">Runtime Expression?</th>
+ * <th class="colLast">Description</th>
+ * </tr>
+ * </thead>
+ * <tbody>
+ * <tr class="altColor">
+ * <td>htmlEscape</p></td>
+ * <td>false</p></td>
+ * <td>true</p></td>
+ * <td>Set HTML escaping for this tag, as boolean value. Overrides the default HTML
+ * escaping setting for the current page.</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td>scope</p></td>
+ * <td>false</p></td>
+ * <td>true</p></td>
+ * <td>The scope to use when exported the result to a variable. This attribute
+ * is only used when var is also set. Possible values are page, request, session
+ * and application.</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td>value</p></td>
+ * <td>true</p></td>
+ * <td>true</p></td>
+ * <td>The value to transform. This is the actual object you want to have
+ * transformed (for instance a Date). Using the PropertyEditor that is currently
+ * in use by the 'spring:bind' tag.</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td>var</p></td>
+ * <td>false</p></td>
+ * <td>true</p></td>
+ * <td>The string to use when binding the result to the page, request, session
+ * or application scope. If not specified, the result gets outputted to the
+ * writer (i.e. typically directly to the JSP).</p></td>
+ * </tr>
+ * </tbody>
+ * </table>
  *
  * @author Alef Arendsen
  * @author Juergen Hoeller

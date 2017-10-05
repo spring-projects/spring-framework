@@ -574,10 +574,10 @@ earlier chapters. To facilitate the development of JSP pages in combination with
 data binding features, Spring provides a few tags that make things even easier. All
 Spring tags have__HTML escaping__ features to enable or disable escaping of characters.
 
-The tag library descriptor (TLD) is included in the `spring-webmvc.jar`. For information
-on individual tags, see the API reference for the
-{api-spring-framework}/web/servlet/tags/package-summary.html[spring tags] and the .
-{api-spring-framework}/web/servlet/tags/form/package-summary.html[spring-form tags]
+The `spring.tld` tag library descriptor (TLD) is included in the `spring-webmvc.jar`.
+For a comprehensive reference on individual tags, browse the
+{api-spring-framework}/web/servlet/tags/package-summary.html#package.description[API reference]
+or see the tag library description.
 
 
 [[mvc-view-jsp-formtaglib]]
@@ -1258,6 +1258,11 @@ The HTML would look like:
         </table>
 	</form>
 ----
+
+The `spring-form.tld` tag library descriptor (TLD) is included in the `spring-webmvc.jar`.
+For a comprehensive reference on individual tags, browse the
+{api-spring-framework}/web/servlet/tags/form/package-summary.html#package.description[API reference]
+or see the tag library description.
 
 
 [[mvc-rest-method-conversion]]
