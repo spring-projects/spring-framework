@@ -1,16 +1,15 @@
-= Spring Framework Reference Documentation
-The Spring Framework team and contributors https://github.com/spring-projects/spring-framework/graphs/contributors
+= Spring Framework Documentation
 :doc-root: https://docs.spring.io
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 
-Welcome to the Spring Framework reference!
+Welcome to the Spring Framework reference documentation!
 
-Please read the <<overview.adoc,Overview>> for an introduction including brief history,
+Please read the <<overview.adoc,*Overview*>> for a quick introduction including brief history,
 design philosophy, where to ask questions, and tips to get started. For information on
-what's new, or migrating from a previous version, check the
-https://github.com/spring-projects/spring-framework/wiki[Github Wiki].
+"What's New", or "Migrating from previous versions", check the
+https://github.com/spring-projects/spring-framework/wiki[*Github Wiki*].
 
-The reference is divided into several sections:
+The reference documentation is divided into several sections:
 
 [horizontal]
 <<core.adoc#spring-core,Core>> :: IoC container, Events, Resources, i18n, Validation,
@@ -25,4 +24,4 @@ SockJS, STOMP messaging.
 WebClient, WebSocket support.
 <<integration.adoc#spring-integration,Integration>> :: Remoting, JMS, JCA, JMX, Email,
 Tasks, Scheduling, Cache, Dynamic languages.
-<<kotlin.adoc#kotlin,Kotlin>> :: Extensions, Bean Definition DSL, WebFlux DSL
+<<kotlin.adoc#kotlin,Kotlin>> :: Extensions, Bean Definition DSL, WebFlux DSL.
