@@ -1711,7 +1711,8 @@ The above configuration is equivalent to the following Java code:
 The p-namespace enables you to use the `bean` element's attributes, instead of nested
 `<property/>` elements, to describe your property values and/or collaborating beans.
 
-Spring supports extensible configuration formats <<appendix.adoc#xsd-configuration,with namespaces>>,
+Spring supports extensible configuration formats
+<<core.adoc#xsd-schemas,with namespaces>>,
 which are based on an XML Schema definition. The `beans` configuration format discussed in this
 chapter is defined in an XML Schema document. However, the p-namespace is not defined in
 an XSD file and exists only in the core of Spring.
@@ -2771,7 +2772,7 @@ understand the "why" as well as the "how" behind it.
 
 To create such a proxy, you insert a child `<aop:scoped-proxy/>` element into a scoped
 bean definition (see <<beans-factory-scopes-other-injection-proxies>> and
-<<appendix.adoc#xsd-configuration, XML Schema-based configuration>>).
+<<core.adoc#xsd-schemas, XML Schema-based configuration>>).
 Why do definitions of beans scoped at the `request`, `session` and custom-scope
 levels require the `<aop:scoped-proxy/>` element?
 Let's examine the following singleton bean definition and contrast it with
@@ -5293,7 +5294,9 @@ Or with an overridden value for the `proxyMode` as follows:
 	}
 ----
 
-For further details, consult the <<appendix.adoc#annotation-programming-model,Spring Annotation Programming Model>>.
+For further details, consult the
+https://github.com/spring-projects/spring-framework/wiki/Spring-Annotation-Programming-Model[Spring Annotation Programming Model]
+wiki page.
 
 
 [[beans-scanning-autodetection]]

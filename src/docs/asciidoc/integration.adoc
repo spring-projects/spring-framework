@@ -9033,3 +9033,6 @@ policies and different topologies which other solutions do not (take for example
 `ConcurrentHashMap`) - exposing that in the cache abstraction would be useless simply
 because there would no backing support. Such functionality should be controlled directly
 through the backing cache, when configuring it or through its native API.
+
+
+include::integration-appendix.adoc[leveloffset=+1]

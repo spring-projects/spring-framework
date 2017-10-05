@@ -26,4 +26,3 @@ WebClient, WebSocket support.
 <<integration.adoc#spring-integration,Integration>> :: Remoting, JMS, JCA, JMX, Email,
 Tasks, Scheduling, Cache, Dynamic languages.
 <<kotlin.adoc#kotlin,Kotlin>> :: Extensions, Bean Definition DSL, WebFlux DSL
-<<appendix.adoc#spring-appendices,Appendix>> :: XML Schemas, JSP Tag Libraries

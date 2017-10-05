@@ -302,11 +302,8 @@ infrastructure.
 [NOTE]
 ====
 The above definition of the `dataSource` bean uses the `<jndi-lookup/>` tag from the
-`jee` namespace. For more information on schema-based configuration, see
-<<appendix.adoc#xsd-configuration, XML Schema-based configuration>>,
-and for more information on the `<jee/>`
-tags see the section entitled <<appendix.adoc#xsd-config-body-schemas-jee,
-the JEE schema>>.
+`jee` namespace. For more information see
+<<integration.adoc#xsd-schemas-jee, The JEE schema>>.
 ====
 
 You can also use Hibernate local transactions easily, as shown in the following
@@ -4929,9 +4926,7 @@ You can configure all of the supported features for O/R (object relational) mapp
 tools through Dependency Injection. They can participate in Spring's resource and
 transaction management, and they comply with Spring's generic transaction and DAO
 exception hierarchies. The recommended integration style is to code DAOs against plain
-Hibernate or JPA APIs. The older style of using Spring's DAO templates is no longer
-recommended; however, coverage of this style can be found in the
-<<appendix.adoc#classic-spring-orm, Classic ORM usage>> in the appendices.
+Hibernate or JPA APIs.
 
 Spring adds significant enhancements to the ORM layer of your choice when you create
 data access applications. You can leverage as much of the integration support as you
@@ -6680,3 +6675,6 @@ vulnerabilities do not get invoked.
 NOTE: Note that XStream is an XML serialization library, not a data binding library.
 Therefore, it has limited namespace support. As such, it is rather unsuitable for usage
 within Web services.
+
+
+include::data-access-appendix.adoc[leveloffset=+1]
