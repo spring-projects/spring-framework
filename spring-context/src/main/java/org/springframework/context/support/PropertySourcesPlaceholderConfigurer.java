@@ -33,6 +33,7 @@ import org.springframework.core.env.PropertySources;
 import org.springframework.core.env.PropertySourcesPropertyResolver;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.DefaultIgnorableStringValueResolver;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -169,14 +170,39 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 		propertyResolver.setPlaceholderSuffix(this.placeholderSuffix);
 		propertyResolver.setValueSeparator(this.valueSeparator);
 
-		StringValueResolver valueResolver = strVal -> {
-			String resolved = (ignoreUnresolvablePlaceholders ?
-					propertyResolver.resolvePlaceholders(strVal) :
-					propertyResolver.resolveRequiredPlaceholders(strVal));
-			if (trimValues) {
-				resolved = resolved.trim();
+		DefaultIgnorableStringValueResolver valueResolver = new DefaultIgnorableStringValueResolver() {
+			@Nullable
+			@Override
+			public String resolveStringValue(String strVal) {
+				return doResolveStringValue(strVal, false);
 			}
-			return (resolved.equals(nullValue) ? null : resolved);
+
+			@Nullable
+			@Override
+			public String resolveStringValueIgnoringDefault(String strVal) {
+				return doResolveStringValue(strVal, true);
+			}
+
+			private String doResolveStringValue(String strVal, boolean ignoreDefault) {
+				String resolved;
+				if (ignoreUnresolvablePlaceholders) {
+					resolved = (ignoreDefault ?
+							propertyResolver.resolvePlaceholdersIgnoringDefault(strVal) :
+							propertyResolver.resolvePlaceholders(strVal)
+					);
+				}
+				else {
+					resolved = (ignoreDefault ?
+							propertyResolver.resolveRequiredPlaceholdersIgnoringDefault(strVal) :
+							propertyResolver.resolveRequiredPlaceholders(strVal)
+					);
+				}
+				if (trimValues) {
+					resolved = resolved.trim();
+				}
+				return (resolved.equals(nullValue) ? null : resolved);
+
+			}
 		};
 
 		doProcessProperties(beanFactoryToProcess, valueResolver);

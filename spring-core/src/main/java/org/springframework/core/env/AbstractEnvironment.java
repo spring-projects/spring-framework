@@ -563,10 +563,19 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	@Override
+	public String resolvePlaceholdersIgnoringDefault(String text) {
+		return this.propertyResolver.resolvePlaceholdersIgnoringDefault(text);
+	}
+
+	@Override
 	public String resolveRequiredPlaceholders(String text) throws IllegalArgumentException {
 		return this.propertyResolver.resolveRequiredPlaceholders(text);
 	}
 
+	@Override
+	public String resolveRequiredPlaceholdersIgnoringDefault(String text) throws IllegalArgumentException {
+		return this.propertyResolver.resolveRequiredPlaceholdersIgnoringDefault(text);
+	}
 
 	@Override
 	public String toString() {

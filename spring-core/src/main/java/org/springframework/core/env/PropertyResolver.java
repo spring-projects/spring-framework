@@ -102,6 +102,8 @@ public interface PropertyResolver {
 	 */
 	String resolvePlaceholders(String text);
 
+	String resolvePlaceholdersIgnoringDefault(String text);
+
 	/**
 	 * Resolve ${...} placeholders in the given text, replacing them with corresponding
 	 * property values as resolved by {@link #getProperty}. Unresolvable placeholders with
@@ -112,5 +114,7 @@ public interface PropertyResolver {
 	 * @see org.springframework.util.SystemPropertyUtils#resolvePlaceholders(String, boolean)
 	 */
 	String resolveRequiredPlaceholders(String text) throws IllegalArgumentException;
+
+	String resolveRequiredPlaceholdersIgnoringDefault(String text) throws IllegalArgumentException;
 
 }

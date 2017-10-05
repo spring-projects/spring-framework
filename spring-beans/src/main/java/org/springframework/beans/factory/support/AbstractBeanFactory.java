@@ -71,11 +71,7 @@ import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
-import org.springframework.util.StringValueResolver;
+import org.springframework.util.*;
 
 /**
  * Abstract base class for {@link org.springframework.beans.factory.BeanFactory}
@@ -146,7 +142,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private TypeConverter typeConverter;
 
 	/** String resolvers to apply e.g. to annotation attribute values */
-	private final List<StringValueResolver> embeddedValueResolvers = new LinkedList<>();
+	private final List<DefaultIgnorableStringValueResolver> embeddedValueResolvers = new LinkedList<>();
 
 	/** BeanPostProcessors to apply in createBean */
 	private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
@@ -813,8 +809,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	@Override
-	public void addEmbeddedValueResolver(StringValueResolver valueResolver) {
-		Assert.notNull(valueResolver, "StringValueResolver must not be null");
+	public void addEmbeddedValueResolver(DefaultIgnorableStringValueResolver valueResolver) {
+		Assert.notNull(valueResolver, "DefaultIgnorableStringValueResolver must not be null");
 		this.embeddedValueResolvers.add(valueResolver);
 	}
 
@@ -830,8 +826,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			return null;
 		}
 		String result = value;
-		for (StringValueResolver resolver : this.embeddedValueResolvers) {
-			result = resolver.resolveStringValue(result);
+		Iterator<DefaultIgnorableStringValueResolver> resolverIterator = this.embeddedValueResolvers.iterator();
+		while (resolverIterator.hasNext()) {
+			DefaultIgnorableStringValueResolver resolver = resolverIterator.next();
+			result = (resolverIterator.hasNext() ? resolver.resolveStringValueIgnoringDefault(result) : resolver.resolveStringValue(result));
 			if (result == null) {
 				return null;
 			}

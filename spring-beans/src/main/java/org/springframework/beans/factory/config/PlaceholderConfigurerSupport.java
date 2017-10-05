@@ -21,6 +21,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.lang.Nullable;
+import org.springframework.util.DefaultIgnorableStringValueResolver;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -211,7 +212,7 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 
 
 	protected void doProcessProperties(ConfigurableListableBeanFactory beanFactoryToProcess,
-			StringValueResolver valueResolver) {
+			DefaultIgnorableStringValueResolver valueResolver) {
 
 		BeanDefinitionVisitor visitor = new BeanDefinitionVisitor(valueResolver);
 

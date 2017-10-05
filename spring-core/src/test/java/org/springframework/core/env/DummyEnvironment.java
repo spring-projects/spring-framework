@@ -59,7 +59,17 @@ public class DummyEnvironment implements Environment {
 	}
 
 	@Override
+	public String resolvePlaceholdersIgnoringDefault(String text) {
+		return null;
+	}
+
+	@Override
 	public String resolveRequiredPlaceholders(String text) throws IllegalArgumentException {
+		return null;
+	}
+
+	@Override
+	public String resolveRequiredPlaceholdersIgnoringDefault(String text) throws IllegalArgumentException {
 		return null;
 	}
 

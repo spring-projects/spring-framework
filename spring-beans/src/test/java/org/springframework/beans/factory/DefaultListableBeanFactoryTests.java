@@ -94,6 +94,9 @@ import org.springframework.tests.sample.beans.NestedTestBean;
 import org.springframework.tests.sample.beans.SideEffectBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.tests.sample.beans.factory.DummyFactory;
+import org.springframework.util.DefaultIgnorableStringValueResolver;
+import org.springframework.util.PropertyPlaceholderHelper;
+import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringValueResolver;
 
@@ -111,6 +114,7 @@ import static org.mockito.BDDMockito.*;
  * @author Chris Beams
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Nathan Xu
  */
 public class DefaultListableBeanFactoryTests {
 
@@ -2700,21 +2704,57 @@ public class DefaultListableBeanFactoryTests {
 	@Test
 	public void resolveEmbeddedValue() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		StringValueResolver r1 = mock(StringValueResolver.class);
-		StringValueResolver r2 = mock(StringValueResolver.class);
-		StringValueResolver r3 = mock(StringValueResolver.class);
+		DefaultIgnorableStringValueResolver r1 = mock(DefaultIgnorableStringValueResolver.class);
+		DefaultIgnorableStringValueResolver r2 = mock(DefaultIgnorableStringValueResolver.class);
+		DefaultIgnorableStringValueResolver r3 = mock(DefaultIgnorableStringValueResolver.class);
 		bf.addEmbeddedValueResolver(r1);
 		bf.addEmbeddedValueResolver(r2);
 		bf.addEmbeddedValueResolver(r3);
-		given(r1.resolveStringValue("A")).willReturn("B");
-		given(r2.resolveStringValue("B")).willReturn(null);
+		given(r1.resolveStringValueIgnoringDefault("A")).willReturn("B");
+		given(r2.resolveStringValueIgnoringDefault("B")).willReturn(null);
 		given(r3.resolveStringValue(isNull())).willThrow(new IllegalArgumentException());
 
 		bf.resolveEmbeddedValue("A");
 
-		verify(r1).resolveStringValue("A");
-		verify(r2).resolveStringValue("B");
+		verify(r1).resolveStringValueIgnoringDefault("A");
+		verify(r2).resolveStringValueIgnoringDefault("B");
 		verify(r3, never()).resolveStringValue(isNull());
+	}
+
+	@Test
+	public void resolveEmbeddedDefaultValue() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		Properties props1 = new Properties();
+		Properties props2 = new Properties();
+		props2.put("A", "B");
+		bf.addEmbeddedValueResolver(buildDefaultIgnorableStringValueResolver(props1));
+		bf.addEmbeddedValueResolver(buildDefaultIgnorableStringValueResolver(props2));
+
+		String resolvedValue = bf.resolveEmbeddedValue("${A:defaultValue}");
+
+		assertEquals("B", resolvedValue);
+	}
+
+	private DefaultIgnorableStringValueResolver buildDefaultIgnorableStringValueResolver(Properties props) {
+		PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper(
+				"${", "}", ":", true);
+		PlaceholderResolver resolver = new PlaceholderResolver() {
+			@Override
+			public String resolvePlaceholder(String placeholderName) {
+				return (String) props.get(placeholderName);
+
+			}
+		};
+		return new DefaultIgnorableStringValueResolver() {
+			@Override
+			public String resolveStringValue(String strVal) {
+				return helper.replacePlaceholders(strVal, resolver);
+			}
+			@Override
+			public String resolveStringValueIgnoringDefault(String strVal) {
+				return helper.replacePlaceholdersIgnoringDefault(strVal, resolver);
+			}
+		};
 	}
 
 	@Test

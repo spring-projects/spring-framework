@@ -28,6 +28,7 @@ import org.springframework.beans.factory.HierarchicalBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.lang.Nullable;
+import org.springframework.util.DefaultIgnorableStringValueResolver;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -212,7 +213,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * @param valueResolver the String resolver to apply to embedded values
 	 * @since 3.0
 	 */
-	void addEmbeddedValueResolver(StringValueResolver valueResolver);
+	void addEmbeddedValueResolver(DefaultIgnorableStringValueResolver valueResolver);
 
 	/**
 	 * Determine whether an embedded value resolver has been registered with this

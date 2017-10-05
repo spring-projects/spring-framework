@@ -23,6 +23,7 @@ import org.springframework.core.Constants;
 import org.springframework.core.SpringProperties;
 import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.lang.Nullable;
+import org.springframework.util.DefaultIgnorableStringValueResolver;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 import org.springframework.util.StringValueResolver;
@@ -221,12 +222,12 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 	protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess, Properties props)
 			throws BeansException {
 
-		StringValueResolver valueResolver = new PlaceholderResolvingStringValueResolver(props);
+		DefaultIgnorableStringValueResolver valueResolver = new PlaceholderResolvingStringValueResolver(props);
 		doProcessProperties(beanFactoryToProcess, valueResolver);
 	}
 
 
-	private class PlaceholderResolvingStringValueResolver implements StringValueResolver {
+	private class PlaceholderResolvingStringValueResolver implements DefaultIgnorableStringValueResolver {
 
 		private final PropertyPlaceholderHelper helper;
 
@@ -241,7 +242,19 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 		@Override
 		@Nullable
 		public String resolveStringValue(String strVal) throws BeansException {
-			String resolved = this.helper.replacePlaceholders(strVal, this.resolver);
+			return doResolveStringValue(strVal, true);
+		}
+
+		@Override
+		@Nullable
+		public String resolveStringValueIgnoringDefault(String strVal) throws BeansException {
+			return doResolveStringValue(strVal, false);
+		}
+
+		private String doResolveStringValue(String strVal, boolean ignoreDefault) throws BeansException {
+			String resolved = (ignoreDefault ?
+					this.helper.replacePlaceholdersIgnoringDefault(strVal, this.resolver) :
+					this.helper.replacePlaceholders(strVal, this.resolver));
 			if (trimValues) {
 				resolved = resolved.trim();
 			}

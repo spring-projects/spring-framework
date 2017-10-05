@@ -204,11 +204,27 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	}
 
 	@Override
+	public String resolvePlaceholdersIgnoringDefault(String text) {
+		if (this.nonStrictHelper == null) {
+			this.nonStrictHelper = createPlaceholderHelper(true);
+		}
+		return doResolvePlaceholdersIgnoringDefault(text, this.nonStrictHelper);
+	}
+
+	@Override
 	public String resolveRequiredPlaceholders(String text) throws IllegalArgumentException {
 		if (this.strictHelper == null) {
 			this.strictHelper = createPlaceholderHelper(false);
 		}
 		return doResolvePlaceholders(text, this.strictHelper);
+	}
+
+	@Override
+	public String resolveRequiredPlaceholdersIgnoringDefault(String text) throws IllegalArgumentException {
+		if (this.strictHelper == null) {
+			this.strictHelper = createPlaceholderHelper(false);
+		}
+		return doResolvePlaceholdersIgnoringDefault(text, this.strictHelper);
 	}
 
 	/**
@@ -235,6 +251,10 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 	private String doResolvePlaceholders(String text, PropertyPlaceholderHelper helper) {
 		return helper.replacePlaceholders(text, this::getPropertyAsRawString);
+	}
+
+	private String doResolvePlaceholdersIgnoringDefault(String text, PropertyPlaceholderHelper helper) {
+		return helper.replacePlaceholdersIgnoringDefault(text, this::getPropertyAsRawString);
 	}
 
 	/**

@@ -76,9 +76,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
+import org.springframework.util.*;
 
 /**
  * Abstract implementation of the {@link org.springframework.context.ApplicationContext}
@@ -849,7 +847,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// (such as a PropertyPlaceholderConfigurer bean) registered any before:
 		// at this point, primarily for resolution in annotation attribute values.
 		if (!beanFactory.hasEmbeddedValueResolver()) {
-			beanFactory.addEmbeddedValueResolver(strVal -> getEnvironment().resolvePlaceholders(strVal));
+			beanFactory.addEmbeddedValueResolver(new DefaultIgnorableStringValueResolver() {
+				@Nullable
+				@Override
+				public String resolveStringValue(String strVal) {
+					return getEnvironment().resolvePlaceholders(strVal);
+				}
+				@Nullable
+				@Override
+				public String resolveStringValueIgnoringDefault(String strVal) {
+					return getEnvironment().resolvePlaceholdersIgnoringDefault(strVal);
+				}
+			});
 		}
 
 		// Initialize LoadTimeWeaverAware beans early to allow for registering their transformers early.
