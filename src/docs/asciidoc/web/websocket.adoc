@@ -1,11 +1,10 @@
 [[websocket]]
-= Servlet-based WebSocket Support
+= WebSockets
 :doc-spring-security: {doc-root}/spring-security/site/docs/current/reference
 
 
-This part of the reference documentation covers Spring Framework's support for
-WebSocket-style messaging in web applications including use of STOMP as an
-application level WebSocket sub-protocol.
+This part of the reference documentation covers the Spring Framework support for Servlet stack
+based WebSocket messaging including use of STOMP as a a WebSocket sub-protocol.
 
 <<websocket-intro>> establishes a frame of mind in which to think about
 WebSocket, covering adoption challenges, design considerations, and thoughts on
@@ -183,7 +182,7 @@ As explained in the <<websocket-intro-sub-protocol,introduction>>, direct use of
 WebSocket API is too low level for applications -- until assumptions are made about the
 format of a message there is little a framework can do to interpret messages or route
 them via annotations. This is why applications should consider using a sub-protocol
-and Spring's <<websocket-stomp,STOMP over WebSocket>> support.
+and Spring's <<websocket-stomp>> support.
 
 When using a higher level protocol, the details of the WebSocket API become less
 relevant, much like the details of TCP communication are not exposed to applications
@@ -194,7 +193,7 @@ directly.
 
 
 [[websocket-server-handler]]
-=== Create and Configure a WebSocketHandler
+=== WebSocketHandler
 Creating a WebSocket server is as simple as implementing `WebSocketHandler` or more
 likely extending either `TextWebSocketHandler` or `BinaryWebSocketHandler`:
 
@@ -274,7 +273,7 @@ into other HTTP serving environments with the help of
 
 
 [[websocket-server-handshake]]
-=== Customizing the WebSocket Handshake
+=== WebSocket Handshake
 The easiest way to customize the initial HTTP WebSocket handshake request is through
 a `HandshakeInterceptor`, which exposes "before" and "after" the handshake methods.
 Such an interceptor can be used to preclude the handshake or to make any attributes
@@ -333,20 +332,20 @@ Both the Java-config and XML namespace make it possible to configure a custom
 `HandshakeHandler`.
 
 
-
-[[websocket-server-decorators]]
-=== WebSocketHandler Decoration
+[TIP]
+====
 Spring provides a `WebSocketHandlerDecorator` base class that can be used to decorate
 a `WebSocketHandler` with additional behavior. Logging and exception handling
 implementations are provided and added by default when using the WebSocket Java-config
 or XML namespace. The `ExceptionWebSocketHandlerDecorator` catches all uncaught
 exceptions arising from any WebSocketHandler method and closes the WebSocket
 session with status `1011` that indicates a server error.
+====
 
 
 
 [[websocket-server-deployment]]
-=== Deployment Considerations
+=== Deployment
 The Spring WebSocket API is easy to integrate into a Spring MVC application where
 the `DispatcherServlet` serves both HTTP WebSocket handshake as well as other
 HTTP requests. It is also easy to integrate into other HTTP processing scenarios
@@ -419,7 +418,7 @@ Java initialization API, if required:
 ----
 
 [[websocket-server-runtime-configuration]]
-=== Configuring the WebSocket Engine
+=== Server config
 
 Each underlying WebSocket engine exposes configuration properties that control
 runtime characteristics such as the size of message buffer sizes, idle timeout,
@@ -545,7 +544,7 @@ or WebSocket XML namespace:
 ----
 
 [[websocket-server-allowed-origins]]
-=== Configuring allowed origins
+=== Allowed origins
 
 As of Spring Framework 4.1.5, the default behavior for WebSocket and SockJS is to accept
 only _same origin_ requests. It is also possible to allow _all_ or a specified list of origins.
@@ -617,7 +616,7 @@ XML configuration equivalent:
 
 
 [[websocket-fallback]]
-== SockJS Fallback Options
+== SockJS Fallback
 As explained in the <<websocket-into-fallback-options,introduction>>, WebSocket is not
 supported in all browsers yet and may be precluded by restrictive network proxies.
 This is why Spring provides fallback options that emulate the WebSocket API as close
@@ -625,7 +624,7 @@ as possible based on the https://github.com/sockjs/sockjs-protocol[SockJS protoc
 (version 0.3.3).
 
 [[websocket-fallback-sockjs-overview]]
-=== Overview of SockJS
+=== Overview
 
 The goal of SockJS is to let applications use a WebSocket API but fall back to
 non-WebSocket alternatives when necessary at runtime, i.e. without the need to
@@ -748,7 +747,7 @@ transport types supported by browser. The client also provides several
 configuration options, for example, to specify which transports to include.
 
 [[websocket-fallback-xhr-vs-iframe]]
-=== HTTP Streaming in IE 8, 9: Ajax/XHR vs IFrame
+=== IE 8, 9
 
 Internet Explorer 8 and 9 are and will remain common for some time. They are
 a key reason for having SockJS. This section covers important
@@ -829,7 +828,7 @@ https://github.com/sockjs/sockjs-client/[SockJS client] page.
 ====
 
 [[websocket-fallback-sockjs-heartbeat]]
-=== Heartbeat Messages
+=== Heartbeats
 
 The SockJS protocol requires servers to send heartbeat messages to preclude proxies
 from concluding a connection is hung. The Spring SockJS configuration has a property
@@ -850,7 +849,7 @@ with default settings based on the number of available processors. Applications
 should consider customizing the settings according to their specific needs.
 
 [[websocket-fallback-sockjs-servlet3-async]]
-=== Servlet 3 Async Requests
+=== Client disconnects
 
 HTTP streaming and HTTP long polling SockJS transports require a connection to remain
 open longer than usual. For an overview of these techniques see
@@ -878,7 +877,7 @@ log category to TRACE.
 ====
 
 [[websocket-fallback-cors]]
-=== CORS Headers for SockJS
+=== SockJS and CORS
 
 If you allow cross-origin requests (see <<websocket-server-allowed-origins>>), the SockJS protocol
 uses CORS for cross-domain support in the XHR streaming and polling transports. Therefore
@@ -905,7 +904,7 @@ SockJS endpoint prefix thus letting Spring's `SockJsService` handle it.
 
 
 [[websocket-fallback-sockjs-client]]
-=== SockJS Client
+=== SockJsClient
 
 A SockJS Java client is provided in order to connect to remote SockJS endpoints without
 using a browser. This can be especially useful when there is a need for bidirectional
@@ -986,7 +985,7 @@ public class WebSocketConfig extends WebSocketMessageBrokerConfigurationSupport 
 
 
 [[websocket-stomp]]
-== STOMP Over WebSocket Messaging Architecture
+== STOMP Sub-protocol
 The WebSocket protocol defines two types of messages, text and binary, but their
 content is undefined. It's expected that the client and server may agree on using
 a sub-protocol (i.e. a higher-level protocol) to define message semantics.
@@ -997,7 +996,7 @@ messages.
 
 
 [[websocket-stomp-overview]]
-=== Overview of STOMP
+=== Overview
 http://stomp.github.io/stomp-specification-1.2.html#Abstract[STOMP] is a simple
 text-oriented messaging protocol that was originally created for scripting languages
 such as Ruby, Python, and Perl to connect to enterprise message brokers. It is
@@ -1102,7 +1101,7 @@ Spring MVC provides a programming model based on HTTP.
 
 
 [[websocket-stomp-enable]]
-=== Enable STOMP over WebSocket
+=== Enable STOMP
 The Spring Framework provides support for using STOMP over WebSocket through
 the +spring-messaging+ and +spring-websocket+ modules.
 Here is an example of exposing a STOMP WebSocket/SockJS endpoint at the URL path
@@ -1317,7 +1316,7 @@ kinds of arguments and return values supported.
 
 
 [[websocket-stomp-handle-annotations]]
-=== Annotation Message Handling
+=== Handler methods
 
 The `@MessageMapping` annotation is supported on methods of `@Controller` classes.
 It can be used for mapping methods to message destinations and can also be combined
@@ -1397,7 +1396,7 @@ change to `<tx:annotation-driven proxy-target-class="true" />`.
 
 
 [[websocket-stomp-handle-send]]
-=== Sending Messages
+=== Send Messages
 
 What if you want to send messages to connected clients from any part of the
 application? Any application component can send messages to the `"brokerChannel"`.
@@ -1449,7 +1448,7 @@ See <<websocket-stomp-destination-separator>>.
 
 
 [[websocket-stomp-handle-broker-relay]]
-=== Full-Featured Broker
+=== External Broker
 
 The simple broker is great for getting started but supports only a subset of
 STOMP commands (e.g. no acks, receipts, etc.), relies on a simple message
@@ -1531,7 +1530,7 @@ subscribed WebSocket clients.
 In effect, the broker relay enables robust and scalable message broadcasting.
 
 [[websocket-stomp-handle-broker-relay-configure]]
-=== Connections To Full-Featured Broker
+=== Connect to Broker
 
 A STOMP broker relay maintains a single "system" TCP connection to the broker.
 This connection is used for messages originating from the server-side application
@@ -1576,7 +1575,7 @@ the TCP connection is established is different from the host providing the
 cloud-based STOMP service.
 
 [[websocket-stomp-destination-separator]]
-=== Using Dot as Separator in @MessageMapping Destinations
+=== Dot as Separator
 
 Although slash-separated path patterns are familiar to web developers, in messaging
 it is common to use a "." as the separator, for example in the names of topics, queues,
@@ -1697,7 +1696,7 @@ that ensures the user HTTP session does not expire when the WebSocket session is
 
 
 [[websocket-stomp-authentication-token-based]]
-=== Token-based Authentication
+=== Token Authentication
 
 https://github.com/spring-projects/spring-security-oauth[Spring Security OAuth]
 provides support for token based security including JSON Web Token (JWT).
@@ -1903,7 +1902,7 @@ of the `message-broker` element in XML.
 
 
 [[websocket-stomp-appplication-context-events]]
-=== Listening To ApplicationContext Events and Intercepting Messages
+=== Events and Interception
 
 Several `ApplicationContext` events (listed below) are published and can be
 received by implementing Spring's `ApplicationListener` interface.
@@ -2162,7 +2161,7 @@ shown in the examples above.
 
 
 [[websocket-stomp-configuration-performance]]
-=== Configuration and Performance
+=== Performance
 
 There is no silver bullet when it comes to performance. Many factors may
 affect it including the size of messages, the volume, whether application
@@ -2325,7 +2324,7 @@ through any other application instances.
 
 
 [[websocket-stomp-stats]]
-=== Runtime Monitoring
+=== Monitoring
 
 When using `@EnableWebSocketMessageBroker` or `<websocket:message-broker>` key
 infrastructure components automatically gather stats and counters that provide
@@ -2382,7 +2381,7 @@ SockJS Task Scheduler:: stats from thread pool of the SockJS task scheduler whic
     STOMP level the SockJS heartbeats are disabled.
 
 [[websocket-stomp-testing]]
-=== Testing Annotated Controller Methods
+=== Testing
 
 There are two main approaches to testing applications using Spring's STOMP over
 WebSocket support. The first is to write server-side tests verifying the functionality

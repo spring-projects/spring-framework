@@ -435,7 +435,7 @@ of defaults along with the ability to override or replace those defaults.
 
 
 [[webflux-dispatcher-handler]]
-== The DispatcherHandler
+== DispatcherHandler
 [.small]#<<web.adoc#mvc-servlet,Same in Spring MVC>>#
 
 Spring WebFlux, like Spring MVC, is designed around the front controller pattern where a
@@ -1020,7 +1020,7 @@ easy to seem them in `WebFluxConfigurationSupport`, and if you want to learn mor
 
 
 [[webflux-config-enable]]
-=== Enable the configuration
+=== Enable WebFlux config
 [.small]#<<web.adoc#mvc-config-enable,Same in Spring MVC>>#
 
 Use the `@EnableWebFlux` annotation in your Java config:
@@ -1040,7 +1040,7 @@ available on the classpath -- for JSON, XML, etc.
 
 
 [[webflux-config-customize]]
-=== Configuration API
+=== WebFlux config API
 [.small]#<<web.adoc#mvc-config-customize,Same in Spring MVC>>#
 
 In your Java config implement the `WebFluxConfigurer` interface:

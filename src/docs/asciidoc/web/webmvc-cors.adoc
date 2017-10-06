@@ -1,5 +1,5 @@
 [[mvc-cors]]
-= CORS Support
+= CORS
 
 == Introduction
 
@@ -31,7 +31,7 @@ Since CORS requests are automatically dispatched, you *do not need* to change th
 (`false`) is the recommended approach.
 ====
 
-== Controller method CORS configuration
+== @Controller CORS
 
 You can add an
 {api-spring-framework}/web/bind/annotation/CrossOrigin.html[`@CrossOrigin`]
@@ -109,14 +109,14 @@ public class AccountController {
 }
 ----
 
-== Global CORS configuration
+== Global CORS
 
 In addition to fine-grained, annotation-based configuration you'll probably want to
 define some global CORS configuration as well. This is similar to using filters but can
 be declared within Spring MVC and combined with fine-grained `@CrossOrigin` configuration.
 By default all origins and `GET`, `HEAD`, and `POST` methods are allowed.
 
-=== JavaConfig
+=== MVC Java Config
 
 Enabling CORS for the whole application is as simple as:
 
@@ -156,7 +156,7 @@ public class WebConfig implements WebMvcConfigurer {
 }
 ----
 
-=== XML namespace
+=== MVC XML Config
 
 The following minimal XML configuration enables CORS for the `/**` path pattern with
 the same default properties as with the aforementioned JavaConfig examples:
@@ -205,7 +205,7 @@ It can be provided in various ways:
    now does) in order to provide a {api-spring-framework}/web/cors/CorsConfiguration.html[CorsConfiguration]
    instance for each request.
 
-== Filter based CORS support
+== CORS Filter
 
 In order to support CORS with filter-based security frameworks like
 http://projects.spring.io/spring-security/[Spring Security], or

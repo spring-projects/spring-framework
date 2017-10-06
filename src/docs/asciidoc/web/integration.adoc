@@ -1,6 +1,6 @@
 
 [[web-integration]]
-= Other Web Frameworks
+= 3rd Party Web Frameworks
 
 
 [[intro]]
@@ -19,7 +19,7 @@ popular third party web frameworks.
 
 
 [[web-integration-common]]
-== Common configuration
+== Common config
 Before diving into the integration specifics of each supported web framework, let us
 first take a look at the Spring configuration that is __not__ specific to any one web
 framework. (This section is equally applicable to Spring's own web framework, Spring
@@ -103,7 +103,7 @@ has more detail on its specific integration strategies.
 
 
 [[jsf]]
-== JavaServer Faces 1.2
+== JSF 1.2
 JavaServer Faces (JSF) is the JCP's standard component-based, event-driven web user
 interface framework. As of Java EE 5, it is an official part of the Java EE umbrella.
 
@@ -123,10 +123,10 @@ http://projects.spring.io/spring-webflow[Spring Web Flow website] for details!
 The key element in Spring's JSF integration is the JSF `ELResolver` mechanism.
 
 [[jsf-springbeanfaceselresolver]]
-=== SpringBeanFacesELResolver (JSF 1.2+)
+=== Spring Bean Resolver
 `SpringBeanFacesELResolver` is a JSF 1.2 compliant `ELResolver` implementation,
 integrating with the standard Unified EL as used by JSF 1.2 and JSP 2.1. Like
-`SpringBeanVariableResolver`, it delegates to the Spring's 'business context'
+	`SpringBeanVariableResolver`, it delegates to the Spring's 'business context'
 `WebApplicationContext` __first__, then to the default resolver of the underlying JSF
 implementation.
 
