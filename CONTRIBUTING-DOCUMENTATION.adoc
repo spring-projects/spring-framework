@@ -55,6 +55,7 @@ Some notes on the documentation.
 * Follow the existing style when inserting `source` blocks.
 
 Here are some useful resources for working with Asciidoctor:
+
 * http://asciidoctor.org/docs/asciidoc-syntax-quick-reference/[Asciidoctor Quick Reference]
 * http://asciidoctor.org/docs/user-manual/[Asciidoctor Manual]
 * http://asciidoctor.org/docs/asciidoc-writers-guide/[Asciidoctor Writers Guide]
