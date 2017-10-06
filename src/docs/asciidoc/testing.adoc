@@ -4,7 +4,7 @@
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :doc-spring-boot: {doc-root}/spring-boot/docs/current/reference
 :toc: left
-:toclevels: 2
+:toclevels: 4
 :docinfo1:
 
 The adoption of the test-driven-development (TDD) approach to software

@@ -83,6 +83,11 @@ asciidoctor {
 	sources {
 		include '*.adoc'
 	}
+	resources {
+		from(sourceDir) {
+			include 'images/**', 'tocbot-3.0.2/**'
+		}
+	}
 	logDocuments = true
 	backends = ["html5"]
 	// only ouput PDF documentation for non-SNAPSHOT builds
