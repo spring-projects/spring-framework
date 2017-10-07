@@ -544,7 +544,7 @@ In this example the methods returns a String to be written to the response body.
 
 
 [[webflux-ann-controller]]
-=== @Controller declaration
+=== @Controller
 [.small]#<<web.adoc#mvc-ann-controller,Same in Spring MVC>>#
 
 You can define controller beans using a standard Spring bean definition.
@@ -567,13 +567,10 @@ your Java configuration:
 	}
 ----
 
-[NOTE]
-====
-`@RestController` is a composed annotation that is itself annotated with `@Controller` and
-`@ResponseBody` indicating a controller whose every method inherits the type-level
+`@RestController` is a composed annotation that is itself annotated with
+`@Controller` and `@ResponseBody` indicating a controller whose every method inherits the type-level
 `@ResponseBody` annotation and therefore writes to the response body (vs model-and-vew
 rendering).
-====
 
 
 [[webflux-ann-requestmapping]]

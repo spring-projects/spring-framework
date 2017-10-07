@@ -48,7 +48,7 @@ and also provides additional value-add as explained in the rest of the introduct
 
 
 [[websocket-into-fallback-options]]
-=== WebSocket Fallback Options
+=== Fallback Options
 An important challenge to adoption is the lack of support for WebSocket in some
 browsers. Notably the first Internet Explorer version to support WebSocket is
 version 10 (see http://caniuse.com/websockets for support by browser versions).
@@ -67,7 +67,7 @@ application otherwise.
 
 
 [[websocket-intro-architecture]]
-=== A Messaging Architecture
+=== Messaging
 Aside from short-to-midterm adoption challenges, using WebSocket
 brings up important design considerations that are important to recognize
 early on, especially in contrast to what we know about building web applications today.
@@ -94,7 +94,7 @@ annotation based programming model.
 
 
 [[websocket-intro-sub-protocol]]
-=== Sub-Protocol Support in WebSocket
+=== WebSocket Sub-Protocol
 WebSocket does imply a __messaging architecture__ but does not mandate the
 use of any specific __messaging protocol__. It is a very thin layer over TCP
 that transforms a stream of bytes into a stream of messages
@@ -127,7 +127,7 @@ WebSocket and over the web.
 
 
 [[websocket-intro-when-to-use]]
-=== Should I Use WebSocket?
+=== Do I Use WebSocket?
 With all the design considerations surrounding the use of WebSocket, it is
 reasonable to ask, "When is it appropriate to use?".
 
