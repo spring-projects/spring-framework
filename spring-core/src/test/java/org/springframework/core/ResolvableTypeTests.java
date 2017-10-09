@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -867,6 +867,22 @@ public class ResolvableTypeTests {
 		assertThat(parameterized.resolveGeneric(), equalTo((Class) Long.class));
 		verify(variableResolver, atLeastOnce()).resolveVariable(this.typeVariableCaptor.capture());
 		assertThat(this.typeVariableCaptor.getValue().getName(), equalTo("T"));
+	}
+
+	@Test
+	public void resolveTypeVariableFromReflectiveParameterizedTypeReference() throws Exception {
+		Type sourceType = Methods.class.getMethod("typedReturn").getGenericReturnType();
+		ResolvableType type = ResolvableType.forType(ParameterizedTypeReference.forType(sourceType));
+		assertThat(type.resolve(), nullValue());
+		assertThat(type.getType().toString(), equalTo("T"));
+	}
+
+	@Test
+	public void resolveTypeVariableFromDeclaredParameterizedTypeReference() throws Exception {
+		Type sourceType = Methods.class.getMethod("charSequenceReturn").getGenericReturnType();
+		ResolvableType reflectiveType = ResolvableType.forType(sourceType);
+		ResolvableType declaredType = ResolvableType.forType(new ParameterizedTypeReference<List<CharSequence>>() {});
+		assertEquals(reflectiveType, declaredType);
 	}
 
 	@Test
