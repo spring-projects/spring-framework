@@ -56,7 +56,7 @@ configure(allprojects) { project ->
 	ext.reactorVersion       = "Bismuth-RELEASE"
 	ext.rxjavaVersion        = "1.3.2"
 	ext.rxjavaAdapterVersion = "1.2.1"
-	ext.rxjava2Version       = "2.1.4"
+	ext.rxjava2Version       = "2.1.5"
 	ext.slf4jVersion         = "1.7.25"
 	ext.tiles3Version        = "3.0.7"
 	ext.tomcatVersion        = "8.5.23"
