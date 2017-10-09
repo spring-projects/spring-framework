@@ -1350,7 +1350,7 @@ public class ResolvableType implements Serializable {
 	 * @see #forType(Type)
 	 */
 	public static ResolvableType forType(ParameterizedTypeReference<?> typeReference) {
-		return forType(typeReference.getType(), null ,null);
+		return forType(typeReference.getType(), null, null);
 	}
 
 	/**
@@ -1594,7 +1594,7 @@ public class ResolvableType implements Serializable {
 			}
 			WildcardType wildcardType = (WildcardType) resolveToWildcard.type;
 			Kind boundsType = (wildcardType.getLowerBounds().length > 0 ? Kind.LOWER : Kind.UPPER);
-			Type[] bounds = boundsType == Kind.UPPER ? wildcardType.getUpperBounds() : wildcardType.getLowerBounds();
+			Type[] bounds = (boundsType == Kind.UPPER ? wildcardType.getUpperBounds() : wildcardType.getLowerBounds());
 			ResolvableType[] resolvableBounds = new ResolvableType[bounds.length];
 			for (int i = 0; i < bounds.length; i++) {
 				resolvableBounds[i] = ResolvableType.forType(bounds[i], type.variableResolver);

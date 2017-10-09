@@ -18,7 +18,7 @@ package org.springframework.asm;
 
 /**
  * Utility class exposing constants related to Spring's internal repackaging
- * of the ASM bytecode manipulation library (currently based on version 5.0).
+ * of the ASM bytecode manipulation library (currently based on version 6.0).
  *
  * <p>See <a href="package-summary.html">package-level javadocs</a> for more
  * information on {@code org.springframework.asm}.
