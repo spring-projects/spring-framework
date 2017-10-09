@@ -65,7 +65,7 @@ configure(allprojects) { project ->
 	ext.nettyVersion         = "4.1.16.Final"
 	ext.okhttpVersion        = "2.7.5"
 	ext.okhttp3Version       = "3.8.1"
-	ext.openjpaVersion       = "2.4.1"
+	ext.openjpaVersion       = "2.4.2"
 	ext.poiVersion           = "3.14"
 	ext.reactorVersion       = "2.0.8.RELEASE"
 	ext.romeVersion          = "1.7.4"
