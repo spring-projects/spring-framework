@@ -1,6 +1,6 @@
 
 [[web-integration]]
-= 3rd Party Web Frameworks
+= Other Web Frameworks
 
 
 [[intro]]

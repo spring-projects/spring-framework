@@ -18,10 +18,9 @@ Data Binding, Type Conversion, SpEL, AOP.
 Spring MVC Test, WebTestClient.
 <<data-access.adoc#spring-data-tier,Data Access>> :: Transactions, DAO support, JDBC,
 ORM, Marshalling XML.
-<<web.adoc#spring-web,Web Servlet>> :: Spring MVC web framework, WebSocket,
-SockJS, STOMP messaging.
+<<web.adoc#spring-web,Web Servlet>> :: Spring MVC, WebSocket, SockJS, STOMP messaging.
 <<web-reactive.adoc#spring-webflux,Web Reactive>> :: Spring WebFlux,
-WebClient, WebSocket support.
+WebClient, WebSocket.
 <<integration.adoc#spring-integration,Integration>> :: Remoting, JMS, JCA, JMX, Email,
 Tasks, Scheduling, Cache, Dynamic languages.
 <<kotlin.adoc#kotlin,Kotlin>> :: Extensions, Bean Definition DSL, WebFlux DSL.

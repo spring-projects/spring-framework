@@ -985,7 +985,7 @@ public class WebSocketConfig extends WebSocketMessageBrokerConfigurationSupport 
 
 
 [[websocket-stomp]]
-== STOMP Sub-protocol
+== STOMP
 The WebSocket protocol defines two types of messages, text and binary, but their
 content is undefined. It's expected that the client and server may agree on using
 a sub-protocol (i.e. a higher-level protocol) to define message semantics.
