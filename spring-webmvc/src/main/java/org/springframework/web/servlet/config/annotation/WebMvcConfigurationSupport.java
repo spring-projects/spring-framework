@@ -483,7 +483,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		if (handlerMapping != null) {
 			handlerMapping.setPathMatcher(mvcPathMatcher());
 			handlerMapping.setUrlPathHelper(mvcUrlPathHelper());
-			handlerMapping.setInterceptors(new ResourceUrlProviderExposingInterceptor(mvcResourceUrlProvider()));
+			handlerMapping.setInterceptors(getInterceptors());
 			handlerMapping.setCorsConfigurations(getCorsConfigurations());
 		}
 		else {
