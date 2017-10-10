@@ -568,10 +568,28 @@ strategy described above is used for the wildcard subpath.
 Please note that `classpath*:` when combined with Ant-style patterns will only work
 reliably with at least one root directory before the pattern starts, unless the actual
 target files reside in the file system. This means that a pattern like
-`classpath*:*.xml` will not retrieve files from the root of jar files but rather only
-from the root of expanded directories. This originates from a limitation in the JDK's
+`classpath*:*.xml` might not retrieve files from the root of jar files but rather only
+from the root of expanded directories.
+
+Spring's ability to retrieve classpath entries originates from the JDK's
 `ClassLoader.getResources()` method which only returns file system locations for a
-passed-in empty string (indicating potential roots to search).
+passed-in empty string (indicating potential roots to search). Spring evaluates
+`URLClassLoader` runtime configuration and the "java.class.path" manifest in jar files
+as well but this is not guaranteed to lead to portable behavior.
+
+[NOTE]
+====
+The scanning of classpath packages requires the presence of corresponding directory
+entries in the classpath. When you build JARs with Ant, make sure that you do __not__
+activate the files-only switch of the JAR task. Also, classpath directories may not
+get exposed based on security policies in some environments, e.g. standalone apps on
+JDK 1.7.0_45 and higher (which requires 'Trusted-Library' setup in your manifests; see
+http://stackoverflow.com/questions/19394570/java-jre-7u45-breaks-classloader-getresources).
+
+On JDK 9's module path (Jigsaw), Spring's classpath scanning generally works as expected.
+Putting resources into a dedicated directory is highly recommendable here as well,
+avoiding the aforementioned portability problems with searching the jar file root level.
+====
 
 Ant-style patterns with `classpath:` resources are not guaranteed to find matching
 resources if the root package to search is available in multiple class path locations.

@@ -5347,7 +5347,7 @@ comma/semicolon/space-separated list that includes the parent package of each cl
 
 [NOTE]
 ====
-for concision, the above may have used the `value` attribute of the
+For concision, the above may have used the `value` attribute of the
 annotation, i.e. `@ComponentScan("org.example")`
 ====
 
@@ -5385,6 +5385,12 @@ activate the files-only switch of the JAR task. Also, classpath directories may 
 get exposed based on security policies in some environments, e.g. standalone apps on
 JDK 1.7.0_45 and higher (which requires 'Trusted-Library' setup in your manifests; see
 http://stackoverflow.com/questions/19394570/java-jre-7u45-breaks-classloader-getresources).
+
+On JDK 9's module path (Jigsaw), Spring's classpath scanning generally works as expected.
+However, please make sure that your component classes are exported in your `module-info`
+descriptors; if you expect Spring to invoke non-public members of your classes, make
+sure that they are 'opened' (i.e. using an `opens` declaration instead of an `exports`
+declaration in your `module-info` descriptor).
 ====
 
 Furthermore, the `AutowiredAnnotationBeanPostProcessor` and
@@ -5396,7 +5402,7 @@ wired together - all without any bean configuration metadata provided in XML.
 ====
 You can disable the registration of `AutowiredAnnotationBeanPostProcessor` and
 `CommonAnnotationBeanPostProcessor` by including the __annotation-config__ attribute
-with a value of false.
+with a value of `false`.
 ====
 
 
