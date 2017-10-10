@@ -44,7 +44,7 @@ You can also get a stream of objects decoded from the response:
 [subs="verbatim,quotes"]
 ----
     Flux<Quote> result = client.get()
-            .uri("/quotes").accept(TEXT_EVENT_STREAM)
+            .uri("/quotes").accept(MediaType.TEXT_EVENT_STREAM)
             .retrieve()
             .bodyToFlux(Quote.class);
 ----
@@ -60,7 +60,7 @@ By default, responses with 4xx or 5xx status codes result in an error of type
             .retrieve()
             .onStatus(HttpStatus::is4xxServerError, response -> ...)
             .onStatus(HttpStatus::is5xxServerError, response -> ...)
-            .bodyToFlux(Person.class);
+            .bodyToMono(Person.class);
 ----
 
 
