@@ -51,11 +51,14 @@ import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.MethodNotAllowedException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -273,11 +276,14 @@ public class ResourceWebHandlerTests {
 		MockServerHttpRequest request = MockServerHttpRequest.method(httpMethod, "").build();
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 		setPathWithinHandlerMapping(exchange, requestPath);
-		this.handler.handle(exchange).block(TIMEOUT);
+		StepVerifier.create(this.handler.handle(exchange))
+				.expectErrorSatisfies(err -> {
+					assertThat(err, instanceOf(ResponseStatusException.class));
+					assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) err).getStatus());
+				}).verify(TIMEOUT);
 		if (!location.createRelative(requestPath).exists() && !requestPath.contains(":")) {
 			fail(requestPath + " doesn't actually exist as a relative path");
 		}
-		assertEquals(HttpStatus.NOT_FOUND, exchange.getResponse().getStatusCode());
 	}
 
 	@Test
@@ -363,8 +369,11 @@ public class ResourceWebHandlerTests {
 	public void directory() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("").build());
 		setPathWithinHandlerMapping(exchange, "js/");
-		this.handler.handle(exchange).block(TIMEOUT);
-		assertEquals(HttpStatus.NOT_FOUND, exchange.getResponse().getStatusCode());
+		StepVerifier.create(this.handler.handle(exchange))
+				.expectErrorSatisfies(err -> {
+					assertThat(err, instanceOf(ResponseStatusException.class));
+					assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) err).getStatus());
+				}).verify(TIMEOUT);
 	}
 
 	@Test
@@ -381,8 +390,11 @@ public class ResourceWebHandlerTests {
 	public void missingResourcePath() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("").build());
 		setPathWithinHandlerMapping(exchange, "");
-		this.handler.handle(exchange).block(TIMEOUT);
-		assertEquals(HttpStatus.NOT_FOUND, exchange.getResponse().getStatusCode());
+		StepVerifier.create(this.handler.handle(exchange))
+				.expectErrorSatisfies(err -> {
+					assertThat(err, instanceOf(ResponseStatusException.class));
+					assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) err).getStatus());
+				}).verify(TIMEOUT);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -409,8 +421,11 @@ public class ResourceWebHandlerTests {
 		MockServerHttpRequest request = MockServerHttpRequest.method(httpMethod, "").build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		setPathWithinHandlerMapping(exchange, "not-there.css");
-		this.handler.handle(exchange).block(TIMEOUT);
-		assertEquals(HttpStatus.NOT_FOUND, exchange.getResponse().getStatusCode());
+		StepVerifier.create(this.handler.handle(exchange))
+				.expectErrorSatisfies(err -> {
+					assertThat(err, instanceOf(ResponseStatusException.class));
+					assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) err).getStatus());
+				}).verify(TIMEOUT);
 	}
 
 	@Test

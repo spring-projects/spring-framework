@@ -50,6 +50,7 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.MethodNotAllowedException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 
@@ -86,8 +87,10 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	/** Set of supported HTTP methods */
 	private static final Set<HttpMethod> SUPPORTED_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
 
-	private static final Log logger = LogFactory.getLog(ResourceWebHandler.class);
+	private static final ResponseStatusException NOT_FOUND_EXCEPTION =
+			new ResponseStatusException(HttpStatus.NOT_FOUND);
 
+	private static final Log logger = LogFactory.getLog(ResourceWebHandler.class);
 
 	private final List<Resource> locations = new ArrayList<>(4);
 
@@ -245,8 +248,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 		return getResource(exchange)
 				.switchIfEmpty(Mono.defer(() -> {
 					logger.trace("No matching resource found - returning 404");
-					exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
-					return Mono.empty();
+					return Mono.error(NOT_FOUND_EXCEPTION);
 				}))
 				.flatMap(resource -> {
 					try {
