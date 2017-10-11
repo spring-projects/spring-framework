@@ -581,19 +581,44 @@ public abstract class AnnotationUtils {
 		A annotation = null;
 		for (Class<?> iface : ifcs) {
 			if (isInterfaceWithAnnotatedMethods(iface)) {
-				try {
-					Method equivalentMethod = iface.getMethod(method.getName(), method.getParameterTypes());
+				Method equivalentMethod = findMethodWithMatchingParameters(iface, method.getName(), method.getParameterTypes());
+				if (equivalentMethod != null) {
 					annotation = getAnnotation(equivalentMethod, annotationType);
-				}
-				catch (NoSuchMethodException ex) {
-					// Skip this interface - it doesn't have the method...
-				}
-				if (annotation != null) {
-					break;
+					if (annotation != null) {
+						break;
+					}
 				}
 			}
 		}
 		return annotation;
+	}
+
+	private static Method findMethodWithMatchingParameters(Class<?> cls, String methodName, Class<?>[] parameterTypes) {
+		try {
+			// first try exact match
+			return cls.getMethod(methodName, parameterTypes);
+		} catch (NoSuchMethodException e) {
+			// then look for method with assignable parameters
+			for (Method method : cls.getMethods()) {
+				if (method.getName().equals(methodName) &&
+					method.getParameterCount() == parameterTypes.length &&
+					parametersAreAssignable(parameterTypes, method)) {
+						return method;
+				}
+			}
+		}
+		// return null if there is no match
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static boolean parametersAreAssignable(Class<?>[] parameterTypes, Method method) {
+		for (int j = 0; j < parameterTypes.length; j++) {
+			if (!method.getParameterTypes()[j].isAssignableFrom(parameterTypes[j])) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	static boolean isInterfaceWithAnnotatedMethods(Class<?> iface) {

@@ -195,6 +195,13 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
+	public void findMethodAnnotationFromGenericInterfaceSuper() throws Exception {
+		Method method = ImplementsInterfaceWithGenericAnnotatedMethod.class.getMethod("foo", String.class);
+		Order order = findAnnotation(method, Order.class);
+		assertNotNull(order);
+	}
+
+	@Test
 	public void findMethodAnnotationFromInterfaceOnSuper() throws Exception {
 		Method method = SubOfImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
 		Order order = findAnnotation(method, Order.class);
@@ -1753,6 +1760,17 @@ public class AnnotationUtilsTests {
 	}
 
 	public static class SubTransactionalAndOrderedClass extends TransactionalAndOrderedClass {
+	}
+
+	public static interface InterfaceWithGenericAnnotatedMethod<T> {
+		@Order
+		void foo(T t);
+	}
+
+	public static class ImplementsInterfaceWithGenericAnnotatedMethod implements InterfaceWithGenericAnnotatedMethod<String> {
+		public void foo(String t) {
+			// no body in test method
+		}
 	}
 
 	public interface InterfaceWithAnnotatedMethod {
