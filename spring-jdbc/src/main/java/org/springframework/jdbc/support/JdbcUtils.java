@@ -34,6 +34,7 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.lang.Nullable;
@@ -56,6 +57,7 @@ public abstract class JdbcUtils {
 
 	private static final Log logger = LogFactory.getLog(JdbcUtils.class);
 
+	private static final String EXASOL_PRODUCT_NAME = "EXASolution";
 
 	/**
 	 * Close the given JDBC Connection and ignore any thrown exception.
@@ -78,8 +80,11 @@ public abstract class JdbcUtils {
 	}
 
 	/**
-	 * Close the given JDBC Statement and ignore any thrown exception.
+	 * Close the given JDBC Statement and may throw {@link DataIntegrityViolationException} if database vendor is Exasol
+	 * because when {@link Connection#setAutoCommit(boolean)} set to {@code false} this vendor
+	 * does integrity checks and throws {@link SQLException} at this point.
 	 * This is useful for typical finally blocks in manual JDBC code.
+	 *
 	 * @param stmt the JDBC Statement to close (may be {@code null})
 	 */
 	public static void closeStatement(@Nullable Statement stmt) {
@@ -88,6 +93,9 @@ public abstract class JdbcUtils {
 				stmt.close();
 			}
 			catch (SQLException ex) {
+				if (EXASOL_PRODUCT_NAME.equals(extractDatabaseProductNameFromStatementObject(stmt))) {
+					throw new DataIntegrityViolationException("[Exasol] Data integrity violation",ex);
+				}
 				logger.trace("Could not close JDBC Statement", ex);
 			}
 			catch (Throwable ex) {
@@ -494,4 +502,16 @@ public abstract class JdbcUtils {
 		return result.toString();
 	}
 
+	private static String extractDatabaseProductNameFromStatementObject(Statement statement) {
+		try {
+			Connection conn = statement.getConnection();
+			DatabaseMetaData meta = conn.getMetaData();
+			if (meta != null) {
+				return meta.getDatabaseProductName();
+			}
+		} catch (SQLException e) {
+			logger.trace("Could not extract database product name from statement", e);
+		}
+		return null;
+	}
 }
