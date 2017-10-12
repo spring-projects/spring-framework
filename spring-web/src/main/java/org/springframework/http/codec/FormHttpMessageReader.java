@@ -77,8 +77,9 @@ public class FormHttpMessageReader implements HttpMessageReader<MultiValueMap<St
 
 	@Override
 	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
-		return (MULTIVALUE_TYPE.isAssignableFrom(elementType) &&
-				(mediaType == null || MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType)));
+		return (MULTIVALUE_TYPE.isAssignableFrom(elementType)  ||
+				(elementType.hasUnresolvableGenerics() && MultiValueMap.class.isAssignableFrom(elementType.resolve()))) &&
+				(mediaType == null || MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType));
 	}
 
 	@Override

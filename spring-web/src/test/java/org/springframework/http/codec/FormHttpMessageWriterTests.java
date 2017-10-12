@@ -44,6 +44,10 @@ public class FormHttpMessageWriterTests {
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
 				MediaType.APPLICATION_FORM_URLENCODED));
 
+		assertTrue(this.writer.canWrite(
+				ResolvableType.forInstance(new LinkedMultiValueMap<String, String>()),
+				MediaType.APPLICATION_FORM_URLENCODED));
+
 		assertFalse(this.writer.canWrite(
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
 				MediaType.APPLICATION_FORM_URLENCODED));

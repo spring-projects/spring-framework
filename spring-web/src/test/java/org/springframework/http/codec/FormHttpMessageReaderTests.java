@@ -27,6 +27,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -40,6 +41,10 @@ public class FormHttpMessageReaderTests {
 	public void canRead() {
 		assertTrue(this.reader.canRead(
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
+				MediaType.APPLICATION_FORM_URLENCODED));
+
+		assertTrue(this.reader.canRead(
+				ResolvableType.forInstance(new LinkedMultiValueMap<String, String>()),
 				MediaType.APPLICATION_FORM_URLENCODED));
 
 		assertFalse(this.reader.canRead(
