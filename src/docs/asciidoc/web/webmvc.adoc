@@ -3603,7 +3603,7 @@ semantics of name generation for collections clearer:
 
 * An `x.y.User[]` array with zero or more `x.y.User` elements added will have the name
   `userList` generated.
-* An `x.y.Foo[]` array with zero or more `x.y.User` elements added will have the name
+* An `x.y.Foo[]` array with zero or more `x.y.Foo` elements added will have the name
   `fooList` generated.
 * A `java.util.ArrayList` with one or more `x.y.User` elements added will have the name
   `userList` generated.
