@@ -13,6 +13,8 @@ For reactive stack, web applications, go to <<web-reactive.adoc#spring-web-react
 
 include::web/webmvc.adoc[leveloffset=+1]
 
+include::web/webmvc-client.adoc[leveloffset=+1]
+
 include::web/webmvc-test.adoc[leveloffset=+1]
 
 include::web/websocket.adoc[leveloffset=+1]
