@@ -24,6 +24,7 @@ import java.lang.annotation.Target;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Component;
 
 /**
@@ -412,9 +413,10 @@ public @interface Configuration {
 	 * component scanning or supplied directly to a {@link AnnotationConfigApplicationContext}.
 	 * If the Configuration class is registered as a traditional XML bean definition,
 	 * the name/id of the bean element will take precedence.
-	 * @return the specified bean name, if any
+	 * @return the suggested component name, if any (or empty String otherwise)
 	 * @see org.springframework.beans.factory.support.DefaultBeanNameGenerator
 	 */
+	@AliasFor(annotation = Component.class)
 	String value() default "";
 
 }

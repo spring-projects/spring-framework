@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,17 +27,8 @@ import java.lang.annotation.Target;
  * Such classes are considered as candidates for auto-detection
  * when using annotation-based configuration and classpath scanning.
  *
- * <p>Other class-level annotations may be considered as identifying
- * a component as well, typically a special kind of component:
- * e.g. the {@link Repository @Repository} annotation or AspectJ's
- * {@link org.aspectj.lang.annotation.Aspect @Aspect} annotation.
- *
  * @author Mark Fisher
  * @since 2.5
- * @see Repository
- * @see Service
- * @see Controller
- * @see org.springframework.context.annotation.ClassPathBeanDefinitionScanner
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -48,8 +39,8 @@ public @interface Component {
 	/**
 	 * The value may indicate a suggestion for a logical component name,
 	 * to be turned into a Spring bean in case of an autodetected component.
-	 * @return the suggested component name, if any
+	 * @return the suggested component name, if any (or empty String otherwise)
 	 */
-	public abstract String value() default "";
+	String value() default "";
 
 }
