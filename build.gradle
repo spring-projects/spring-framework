@@ -650,6 +650,7 @@ project("spring-context-support") {
 			exclude group: "xml-apis", module: "xml-apis"
 			exclude group: "org.springframework", module: "spring-context"
 		}
+		compile("com.mashape.unirest:unirest-java:1.4.9")
 		testCompile(project(":spring-context"))
 		testCompile("org.apache.poi:poi:${poiVersion}")
 		testCompile("commons-beanutils:commons-beanutils:1.8.0")  // for Velocity/JasperReports
