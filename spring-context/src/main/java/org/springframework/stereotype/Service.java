@@ -22,6 +22,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
+
 /**
  * Indicates that an annotated class is a "Service", originally defined by Domain-Driven
  * Design (Evans, 2003) as "an operation offered as an interface that stands alone in the
@@ -50,6 +52,7 @@ public @interface Service {
 	 * to be turned into a Spring bean in case of an autodetected component.
 	 * @return the suggested component name, if any
 	 */
+	@AliasFor(annotation = Component.class)
 	String value() default "";
 
 }

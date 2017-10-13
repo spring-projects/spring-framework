@@ -22,6 +22,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
+
 /**
  * Indicates that an annotated class is a "Controller" (e.g. a web controller).
  *
@@ -48,6 +50,7 @@ public @interface Controller {
 	 * to be turned into a Spring bean in case of an autodetected component.
 	 * @return the suggested component name, if any
 	 */
+	@AliasFor(annotation = Component.class)
 	String value() default "";
 
 }
