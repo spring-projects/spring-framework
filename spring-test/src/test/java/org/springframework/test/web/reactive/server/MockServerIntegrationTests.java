@@ -24,6 +24,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.web.server.WebHandler;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.*;
 
 /**
  * Mock server integration test scenarios.
@@ -67,5 +68,40 @@ public class MockServerIntegrationTests {
 				.exchange()
 				.expectBody(String.class).isEqualTo("bar");
 	}
+
+	@Test
+	public void mutateDoesCopy() throws Exception {
+
+		WebTestClient.Builder builder = WebTestClient.bindToWebHandler(exchange -> exchange.getResponse().setComplete()).configureClient();
+		builder.filter((request, next) -> next.exchange(request));
+		builder.defaultHeader("foo", "bar");
+		builder.defaultCookie("foo", "bar");
+		WebTestClient client1 = builder.build();
+
+		builder.filter((request, next) -> next.exchange(request));
+		builder.defaultHeader("baz", "qux");
+		builder.defaultCookie("baz", "qux");
+		WebTestClient client2 = builder.build();
+
+		WebTestClient.Builder mutatedBuilder = client1.mutate();
+
+		mutatedBuilder.filter((request, next) -> next.exchange(request));
+		mutatedBuilder.defaultHeader("baz", "qux");
+		mutatedBuilder.defaultCookie("baz", "qux");
+		WebTestClient clientFromMutatedBuilder = mutatedBuilder.build();
+
+		client1.mutate().filters(filters -> assertEquals(1, filters.size()));
+		client1.mutate().defaultHeaders(headers -> assertEquals(1, headers.size()));
+		client1.mutate().defaultCookies(cookies -> assertEquals(1, cookies.size()));
+
+		client2.mutate().filters(filters -> assertEquals(2, filters.size()));
+		client2.mutate().defaultHeaders(headers -> assertEquals(2, headers.size()));
+		client2.mutate().defaultCookies(cookies -> assertEquals(2, cookies.size()));
+
+		clientFromMutatedBuilder.mutate().filters(filters -> assertEquals(2, filters.size()));
+		clientFromMutatedBuilder.mutate().defaultHeaders(headers -> assertEquals(2, headers.size()));
+		clientFromMutatedBuilder.mutate().defaultCookies(cookies -> assertEquals(2, cookies.size()));
+	}
+
 
 }

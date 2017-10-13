@@ -60,6 +60,11 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 		this(null, httpHandlerBuilder, null, null);
 	}
 
+	DefaultWebTestClientBuilder(DefaultWebTestClientBuilder other) {
+		this(other.webClientBuilder.clone(), other.httpHandlerBuilder, other.connector,
+				other.responseTimeout);
+	}
+
 	DefaultWebTestClientBuilder(@Nullable WebClient.Builder webClientBuilder,
 			@Nullable WebHttpHandlerBuilder httpHandlerBuilder, @Nullable ClientHttpConnector connector,
 			@Nullable Duration responseTimeout) {
@@ -150,12 +155,8 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 			connectorToUse = new HttpHandlerConnector(this.httpHandlerBuilder.build());
 		}
 
-		DefaultWebTestClientBuilder webTestClientBuilder = new DefaultWebTestClientBuilder(
-				this.webClientBuilder.clone(), this.httpHandlerBuilder,
-				this.connector, this.responseTimeout);
-
 		return new DefaultWebTestClient(this.webClientBuilder,
-				connectorToUse, this.responseTimeout, webTestClientBuilder);
+				connectorToUse, this.responseTimeout, new DefaultWebTestClientBuilder(this));
 	}
 
 }
