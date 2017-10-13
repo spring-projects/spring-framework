@@ -39,11 +39,10 @@ public interface ServerCodecConfigurer extends CodecConfigurer {
 
 
 	/**
-	 * Creates a new instance of the {@code ServerCodecConfigurer}.
-	 * @return the created instance
+	 * Create a new instance of the {@code ServerCodecConfigurer}.
 	 */
 	static ServerCodecConfigurer create() {
-		return new DefaultServerCodecConfigurer();
+		return CodecConfigurerFactory.create(ServerCodecConfigurer.class);
 	}
 
 

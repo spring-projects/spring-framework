@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.http.codec;
+
+package org.springframework.http.codec.support;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -38,6 +39,14 @@ import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.ClientCodecConfigurer;
+import org.springframework.http.codec.DecoderHttpMessageReader;
+import org.springframework.http.codec.EncoderHttpMessageWriter;
+import org.springframework.http.codec.FormHttpMessageWriter;
+import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.ResourceHttpMessageWriter;
+import org.springframework.http.codec.ServerSentEventHttpMessageReader;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.json.Jackson2SmileDecoder;
@@ -48,10 +57,11 @@ import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.forClass;
+import static org.springframework.core.ResolvableType.*;
 
 /**
  * Unit tests for {@link ClientCodecConfigurer}.
+ *
  * @author Rossen Stoyanchev
  */
 public class ClientCodecConfigurerTests {
@@ -62,7 +72,7 @@ public class ClientCodecConfigurerTests {
 
 
 	@Test
-	public void defaultReaders() throws Exception {
+	public void defaultReaders() {
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
 		assertEquals(10, readers.size());
 		assertEquals(ByteArrayDecoder.class, getNextDecoder(readers).getClass());
@@ -70,15 +80,15 @@ public class ClientCodecConfigurerTests {
 		assertEquals(DataBufferDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ResourceDecoder.class, getNextDecoder(readers).getClass());
 		assertStringDecoder(getNextDecoder(readers), true);
-		assertEquals(Jaxb2XmlDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(Jackson2JsonDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(Jackson2SmileDecoder.class, getNextDecoder(readers).getClass());
+		assertEquals(Jaxb2XmlDecoder.class, getNextDecoder(readers).getClass());
 		assertSseReader(readers);
 		assertStringDecoder(getNextDecoder(readers), false);
 	}
 
 	@Test
-	public void defaultWriters() throws Exception {
+	public void defaultWriters() {
 		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
 		assertEquals(11, writers.size());
 		assertEquals(ByteArrayEncoder.class, getNextEncoder(writers).getClass());
@@ -88,15 +98,14 @@ public class ClientCodecConfigurerTests {
 		assertStringEncoder(getNextEncoder(writers), true);
 		assertEquals(FormHttpMessageWriter.class, writers.get(this.index.getAndIncrement()).getClass());
 		assertEquals(MultipartHttpMessageWriter.class, writers.get(this.index.getAndIncrement()).getClass());
-		assertEquals(Jaxb2XmlEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(Jackson2JsonEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(Jackson2SmileEncoder.class, getNextEncoder(writers).getClass());
+		assertEquals(Jaxb2XmlEncoder.class, getNextEncoder(writers).getClass());
 		assertStringEncoder(getNextEncoder(writers), false);
 	}
 
 	@Test
-	public void jackson2EncoderOverride() throws Exception {
-
+	public void jackson2EncoderOverride() {
 		Jackson2JsonDecoder decoder = new Jackson2JsonDecoder();
 		this.configurer.defaultCodecs().jackson2JsonDecoder(decoder);
 

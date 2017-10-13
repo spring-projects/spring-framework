@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.codec.json;
 
 import java.io.IOException;
@@ -57,12 +58,14 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 
 	protected final List<MediaType> streamingMediaTypes = new ArrayList<>(1);
 
+
 	/**
 	 * Constructor with a Jackson {@link ObjectMapper} to use.
 	 */
 	protected AbstractJackson2Encoder(ObjectMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);
 	}
+
 
 	/**
 	 * Configure "streaming" media types for which flushing should be performed
@@ -75,6 +78,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 		this.streamingMediaTypes.clear();
 		this.streamingMediaTypes.addAll(mediaTypes);
 	}
+
 
 	@Override
 	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
@@ -143,6 +147,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	
 	protected ObjectWriter customizeWriter(ObjectWriter writer, @Nullable MimeType mimeType,
 			ResolvableType elementType, @Nullable Map<String, Object> hints) {
+
 		return writer;
 	}
 

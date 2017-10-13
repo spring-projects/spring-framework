@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.http.codec;
+
+package org.springframework.http.codec.support;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,6 +34,12 @@ import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.CodecConfigurer;
+import org.springframework.http.codec.DecoderHttpMessageReader;
+import org.springframework.http.codec.EncoderHttpMessageWriter;
+import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.json.Jackson2SmileDecoder;
@@ -41,12 +48,9 @@ import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.MimeTypeUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.core.ResolvableType.forClass;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.core.ResolvableType.*;
 
 /**
  * Unit tests for {@link AbstractCodecConfigurer.AbstractDefaultCodecs}.
@@ -60,7 +64,7 @@ public class CodecConfigurerTests {
 
 
 	@Test
-	public void defaultReaders() throws Exception {
+	public void defaultReaders() {
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
 		assertEquals(9, readers.size());
 		assertEquals(ByteArrayDecoder.class, getNextDecoder(readers).getClass());
@@ -68,14 +72,14 @@ public class CodecConfigurerTests {
 		assertEquals(DataBufferDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ResourceDecoder.class, getNextDecoder(readers).getClass());
 		assertStringDecoder(getNextDecoder(readers), true);
-		assertEquals(Jaxb2XmlDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(Jackson2JsonDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(Jackson2SmileDecoder.class, getNextDecoder(readers).getClass());
+		assertEquals(Jaxb2XmlDecoder.class, getNextDecoder(readers).getClass());
 		assertStringDecoder(getNextDecoder(readers), false);
 	}
 
 	@Test
-	public void defaultWriters() throws Exception {
+	public void defaultWriters() {
 		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
 		assertEquals(9, writers.size());
 		assertEquals(ByteArrayEncoder.class, getNextEncoder(writers).getClass());
@@ -83,15 +87,14 @@ public class CodecConfigurerTests {
 		assertEquals(DataBufferEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(ResourceHttpMessageWriter.class, writers.get(index.getAndIncrement()).getClass());
 		assertStringEncoder(getNextEncoder(writers), true);
-		assertEquals(Jaxb2XmlEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(Jackson2JsonEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(Jackson2SmileEncoder.class, getNextEncoder(writers).getClass());
+		assertEquals(Jaxb2XmlEncoder.class, getNextEncoder(writers).getClass());
 		assertStringEncoder(getNextEncoder(writers), false);
 	}
 
 	@Test
-	public void defaultAndCustomReaders() throws Exception {
-
+	public void defaultAndCustomReaders() {
 		Decoder<?> customDecoder1 = mock(Decoder.class);
 		Decoder<?> customDecoder2 = mock(Decoder.class);
 
@@ -120,17 +123,16 @@ public class CodecConfigurerTests {
 		assertEquals(StringDecoder.class, getNextDecoder(readers).getClass());
 		assertSame(customDecoder1, getNextDecoder(readers));
 		assertSame(customReader1, readers.get(this.index.getAndIncrement()));
-		assertEquals(Jaxb2XmlDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(Jackson2JsonDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(Jackson2SmileDecoder.class, getNextDecoder(readers).getClass());
+		assertEquals(Jaxb2XmlDecoder.class, getNextDecoder(readers).getClass());
 		assertSame(customDecoder2, getNextDecoder(readers));
 		assertSame(customReader2, readers.get(this.index.getAndIncrement()));
 		assertEquals(StringDecoder.class, getNextDecoder(readers).getClass());
 	}
 
 	@Test
-	public void defaultAndCustomWriters() throws Exception {
-
+	public void defaultAndCustomWriters() {
 		Encoder<?> customEncoder1 = mock(Encoder.class);
 		Encoder<?> customEncoder2 = mock(Encoder.class);
 
@@ -159,17 +161,16 @@ public class CodecConfigurerTests {
 		assertEquals(CharSequenceEncoder.class, getNextEncoder(writers).getClass());
 		assertSame(customEncoder1, getNextEncoder(writers));
 		assertSame(customWriter1, writers.get(this.index.getAndIncrement()));
-		assertEquals(Jaxb2XmlEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(Jackson2JsonEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(Jackson2SmileEncoder.class, getNextEncoder(writers).getClass());
+		assertEquals(Jaxb2XmlEncoder.class, getNextEncoder(writers).getClass());
 		assertSame(customEncoder2, getNextEncoder(writers));
 		assertSame(customWriter2, writers.get(this.index.getAndIncrement()));
 		assertEquals(CharSequenceEncoder.class, getNextEncoder(writers).getClass());
 	}
 
 	@Test
-	public void defaultsOffCustomReaders() throws Exception {
-
+	public void defaultsOffCustomReaders() {
 		Decoder<?> customDecoder1 = mock(Decoder.class);
 		Decoder<?> customDecoder2 = mock(Decoder.class);
 
@@ -200,8 +201,7 @@ public class CodecConfigurerTests {
 	}
 
 	@Test
-	public void defaultsOffWithCustomWriters() throws Exception {
-
+	public void defaultsOffWithCustomWriters() {
 		Encoder<?> customEncoder1 = mock(Encoder.class);
 		Encoder<?> customEncoder2 = mock(Encoder.class);
 
@@ -232,8 +232,7 @@ public class CodecConfigurerTests {
 	}
 
 	@Test
-	public void jackson2DecoderOverride() throws Exception {
-
+	public void jackson2DecoderOverride() {
 		Jackson2JsonDecoder decoder = new Jackson2JsonDecoder();
 		this.configurer.defaultCodecs().jackson2JsonDecoder(decoder);
 
@@ -246,8 +245,7 @@ public class CodecConfigurerTests {
 	}
 
 	@Test
-	public void jackson2EncoderOverride() throws Exception {
-
+	public void jackson2EncoderOverride() {
 		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
 		this.configurer.defaultCodecs().jackson2JsonEncoder(encoder);
 
@@ -295,7 +293,7 @@ public class CodecConfigurerTests {
 		private static class TestDefaultCodecs extends AbstractDefaultCodecs {
 
 			@Override
-			protected boolean splitTextOnNewLine() {
+			boolean splitTextOnNewLine() {
 				return true;
 			}
 		}
