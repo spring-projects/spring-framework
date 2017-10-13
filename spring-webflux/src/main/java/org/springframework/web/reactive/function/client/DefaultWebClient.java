@@ -142,7 +142,7 @@ class DefaultWebClient implements WebClient {
 
 	@Override
 	public Builder mutate() {
-		return this.builder;
+		return new DefaultWebClientBuilder(this.builder);
 	}
 
 
