@@ -664,6 +664,7 @@ MVC and its annotation-based programming model is a perfectly valid and fully su
 * https://github.com/sdeleuze/spring-boot-kotlin-demo[spring-boot-kotlin-demo]: regular Spring Boot + Spring Data JPA project
 * https://github.com/mixitconf/mixit[mixit]: Spring Boot 2 + WebFlux + Reactive Spring Data MongoDB
 * https://github.com/sdeleuze/spring-kotlin-functional[spring-kotlin-functional]: standalone WebFlux + functional bean definition DSL
+* https://github.com/sdeleuze/spring-kotlin-fullstack[spring-kotlin-fullstack]: WebFlux Kotlin fullstack example with Kotlin2js for frontend instead of JavaScript or TypeScript
 * https://github.com/spring-petclinic/spring-petclinic-kotlin[spring-petclinic-kotlin]: Kotlin version of the Spring PetClinic Sample Application
 
 === Tutorials
