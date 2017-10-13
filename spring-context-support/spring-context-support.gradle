@@ -14,6 +14,7 @@ dependencies {
 	optional("org.quartz-scheduler:quartz:2.3.0")
 	optional("org.codehaus.fabric3.api:commonj:1.1.0")
 	optional("org.freemarker:freemarker:${freemarkerVersion}")
+	compile("com.mashape.unirest:unirest-java:1.4.9")
 	testCompile(project(":spring-context"))
 	testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 	testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
