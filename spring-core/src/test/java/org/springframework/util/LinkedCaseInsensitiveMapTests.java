@@ -104,7 +104,6 @@ public class LinkedCaseInsensitiveMapTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void mapClone() {
 		map.put("key", "value1");
 		LinkedCaseInsensitiveMap<String> copy = map.clone();

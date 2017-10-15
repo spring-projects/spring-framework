@@ -182,7 +182,7 @@ public class MethodParameter {
 	 */
 	@Nullable
 	public Constructor<?> getConstructor() {
-		return (this.executable instanceof Constructor ? (Constructor) this.executable : null);
+		return (this.executable instanceof Constructor ? (Constructor<?>) this.executable : null);
 	}
 
 	/**
@@ -586,7 +586,7 @@ public class MethodParameter {
 				parameterNames = discoverer.getParameterNames((Method) this.executable);
 			}
 			else if (this.executable instanceof Constructor) {
-				parameterNames = discoverer.getParameterNames((Constructor) this.executable);
+				parameterNames = discoverer.getParameterNames((Constructor<?>) this.executable);
 			}
 			if (parameterNames != null) {
 				this.parameterName = parameterNames[this.parameterIndex];

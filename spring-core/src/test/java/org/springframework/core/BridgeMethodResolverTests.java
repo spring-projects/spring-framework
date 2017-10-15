@@ -18,7 +18,6 @@ package org.springframework.core;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.lang.reflect.TypeVariable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -42,16 +41,6 @@ import static org.junit.Assert.*;
  */
 @SuppressWarnings("rawtypes")
 public class BridgeMethodResolverTests {
-
-	private static TypeVariable<?> findTypeVariable(Class<?> clazz, String name) {
-		TypeVariable<?>[] variables = clazz.getTypeParameters();
-		for (TypeVariable<?> variable : variables) {
-			if (variable.getName().equals(name)) {
-				return variable;
-			}
-		}
-		return null;
-	}
 
 	private static Method findMethodWithReturnType(String name, Class<?> returnType, Class<SettingsDaoImpl> targetType) {
 		Method[] methods = targetType.getMethods();
