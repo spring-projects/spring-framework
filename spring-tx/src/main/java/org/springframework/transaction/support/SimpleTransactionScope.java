@@ -23,7 +23,6 @@ import java.util.Map;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * A simple transaction-backed {@link Scope} implementation, delegating to
