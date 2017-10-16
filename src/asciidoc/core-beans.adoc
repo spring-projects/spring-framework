@@ -4626,6 +4626,7 @@ The corresponding bean definitions appear as follows.
 ----
 
 
+
 [[beans-autowired-annotation-qualifiers]]
 === Fine-tuning annotation-based autowiring with qualifiers
 
@@ -5040,7 +5041,6 @@ Generic qualifiers also apply when autowiring Lists, Maps and Arrays:
 	@Autowired
 	private List<Store<Integer>> s;
 ----
-
 
 
 
@@ -6138,26 +6138,36 @@ The `AppConfig` class above would be equivalent to the following Spring `<beans/
 	</beans>
 ----
 
-.Full @Configuration vs 'lite' @Beans mode?
+.Full @Configuration vs 'lite' @Bean mode?
 ****
 When `@Bean` methods are declared within classes that are __not__ annotated with
-`@Configuration` they are referred to as being processed in a 'lite' mode. For example,
-bean methods declared in a `@Component` or even in a __plain old class__ will be
-considered 'lite'.
+`@Configuration` they are referred to as being processed in a 'lite' mode. Bean methods
+declared in a `@Component` or even in a __plain old class__ will be considered 'lite',
+with a different primary purpose of the containing class and an `@Bean` method just
+being a sort of bonus there. For example, service components may expose management views
+to the container through an additional `@Bean` method on each applicable component class.
+In such scenarios, `@Bean` methods are a simple general-purpose factory method mechanism.
 
-Unlike full `@Configuration`, lite `@Bean` methods cannot easily declare inter-bean
-dependencies. Usually one `@Bean` method should not invoke another `@Bean` method when
-operating in 'lite' mode.
+Unlike full `@Configuration`, lite `@Bean` methods cannot declare inter-bean dependencies.
+Instead, they operate on their containing component's internal state and optionally on
+arguments that they may declare. Such an `@Bean` method should therefore not invoke other
+`@Bean` methods; each such method is literally just a factory method for a particular
+bean reference, without any special runtime semantics. The positive side-effect here is
+that no CGLIB subclassing has to be applied at runtime, so there are no limitations in
+terms of class design (i.e. the containing class may nevertheless be `final` etc).
 
-Only using `@Bean` methods within `@Configuration` classes is a recommended approach of
-ensuring that 'full' mode is always used. This will prevent the same `@Bean` method from
-accidentally being invoked multiple times and helps to reduce subtle bugs that can be
-hard to track down when operating in 'lite' mode.
+In common scenarios, `@Bean` methods are to be declared within `@Configuration` classes,
+ensuring that 'full' mode is always used and that cross-method references will therefore
+get redirected to the container's lifecycle management. This will prevent the same
+`@Bean` method from accidentally being invoked through a regular Java call which helps
+to reduce subtle bugs that can be hard to track down when operating in 'lite' mode.
 ****
 
 The `@Bean` and `@Configuration` annotations will be discussed in depth in the sections
 below. First, however, we'll cover the various ways of creating a spring container using
 Java-based configuration.
+
+
 
 [[beans-java-instantiating-container]]
 === Instantiating the Spring container using AnnotationConfigApplicationContext
