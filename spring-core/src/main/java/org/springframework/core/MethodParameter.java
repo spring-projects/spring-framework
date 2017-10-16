@@ -358,17 +358,20 @@ public class MethodParameter {
 	 * @return the parameter type (never {@code null})
 	 */
 	public Class<?> getParameterType() {
-		if (this.parameterType == null) {
+		Class<?> paramType = this.parameterType;
+		if (paramType == null) {
 			if (this.parameterIndex < 0) {
-				this.parameterType = (this.method != null ? this.method.getReturnType() : null);
+				Method method = getMethod();
+				paramType = (method != null ? method.getReturnType() : void.class);
 			}
 			else {
-				this.parameterType = (this.method != null ?
-					this.method.getParameterTypes()[this.parameterIndex] :
-					this.constructor.getParameterTypes()[this.parameterIndex]);
+				paramType = (this.method != null ?
+						this.method.getParameterTypes()[this.parameterIndex] :
+						this.constructor.getParameterTypes()[this.parameterIndex]);
 			}
+			this.parameterType = paramType;
 		}
-		return this.parameterType;
+		return paramType;
 	}
 
 	/**
@@ -377,17 +380,20 @@ public class MethodParameter {
 	 * @since 3.0
 	 */
 	public Type getGenericParameterType() {
-		if (this.genericParameterType == null) {
+		Type paramType = this.genericParameterType;
+		if (paramType == null) {
 			if (this.parameterIndex < 0) {
-				this.genericParameterType = (this.method != null ? this.method.getGenericReturnType() : null);
+				Method method = getMethod();
+				paramType = (method != null ? method.getGenericReturnType() : void.class);
 			}
 			else {
-				this.genericParameterType = (this.method != null ?
-					this.method.getGenericParameterTypes()[this.parameterIndex] :
-					this.constructor.getGenericParameterTypes()[this.parameterIndex]);
+				paramType = (this.method != null ?
+						this.method.getGenericParameterTypes()[this.parameterIndex] :
+						this.constructor.getGenericParameterTypes()[this.parameterIndex]);
 			}
+			this.genericParameterType = paramType;
 		}
-		return this.genericParameterType;
+		return paramType;
 	}
 
 	/**
