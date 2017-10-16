@@ -92,9 +92,9 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 
 	@Override
 	protected void applyStatusCode() {
-		HttpStatus statusCode = this.getStatusCode();
+		Integer statusCode = getStatusCodeValue();
 		if (statusCode != null) {
-			this.response.setStatus(statusCode.value());
+			this.response.setStatus(statusCode);
 		}
 	}
 

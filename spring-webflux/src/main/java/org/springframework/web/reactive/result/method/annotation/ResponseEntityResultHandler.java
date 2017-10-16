@@ -32,6 +32,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.server.reactive.AbstractServerHttpResponse;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerResult;
@@ -48,8 +50,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ResponseEntityResultHandler extends AbstractMessageWriterResultHandler
-		implements HandlerResultHandler {
+public class ResponseEntityResultHandler extends AbstractMessageWriterResultHandler implements HandlerResultHandler {
 
 	private static final List<HttpMethod> SAFE_METHODS = Arrays.asList(HttpMethod.GET, HttpMethod.HEAD);
 
@@ -139,7 +140,13 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 
 			if (httpEntity instanceof ResponseEntity) {
 				ResponseEntity<?> responseEntity = (ResponseEntity<?>) httpEntity;
-				exchange.getResponse().setStatusCode(responseEntity.getStatusCode());
+				ServerHttpResponse response = exchange.getResponse();
+				if (response instanceof AbstractServerHttpResponse) {
+					((AbstractServerHttpResponse) response).setStatusCodeValue(responseEntity.getStatusCodeValue());
+				}
+				else {
+					response.setStatusCode(responseEntity.getStatusCode());
+				}
 			}
 
 			HttpHeaders entityHeaders = httpEntity.getHeaders();
