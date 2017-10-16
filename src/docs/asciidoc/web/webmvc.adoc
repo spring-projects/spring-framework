@@ -218,14 +218,14 @@ customize, extend, or replace them.
   The mapping is based on some criteria the details of which vary by `HandlerMapping`
   implementation.
 
-  The two main HandlerMapping implementations are `RequestMappingHandlerMapping` which
+  The two main `HandlerMapping` implementations are `RequestMappingHandlerMapping` which
   supports `@RequestMapping` annotated methods and `SimpleUrlHandlerMapping` which
   maintains explicit registrations of URI path patterns to handlers.
 
 | HandlerAdapter
-| Helps the `DispatcherServlet` to invoke a handler mapped to a request regardless of
+| Help the `DispatcherServlet` to invoke a handler mapped to a request regardless of
   how the handler is actually invoked. For example, invoking an annotated controller
-  requires resolving various annotations. The main purpose of a `HandlerAdapter` is
+  requires resolving annotations. The main purpose of a `HandlerAdapter` is
   to shield the `DispatcherServlet` from such details.
 
 | <<mvc-exceptionhandlers,HandlerExceptionResolver>>
@@ -233,15 +233,15 @@ customize, extend, or replace them.
   views, or other. See <<mvc-exceptionhandlers>>.
 
 | <<mvc-viewresolver,ViewResolver>>
-| Resolves logical String-based view names returned from a handler to an actual `View`
+| Resolve logical String-based view names returned from a handler to an actual `View`
   to render to the response with. See <<mvc-viewresolver>> and <<mvc-view>>.
 
 | <<mvc-localeresolver,LocaleResolver>>, <<mvc-timezone,LocaleContextResolver>>
-| Resolves the `Locale` a client is using and possibly their time zone, in order to be able
+| Resolve the `Locale` a client is using and possibly their time zone, in order to be able
   to offer internationalized views. See <<mvc-localeresolver>>.
 
 | <<mvc-themeresolver,ThemeResolver>>
-| Resolves themes your web application can use, for example, to offer personalized layouts.
+| Resolve themes your web application can use, for example, to offer personalized layouts.
   See <<mvc-themeresolver>>.
 
 | <<mvc-multipart,MultipartResolver>>
@@ -249,7 +249,7 @@ customize, extend, or replace them.
   the help of some multipart parsing library. See <<mvc-multipart>>.
 
 | <<mvc-flash-attributes,FlashMapManager>>
-| Stores and retrieves the "input" and the "output" `FlashMap` that can be used to pass
+| Store and retrieve the "input" and the "output" `FlashMap` that can be used to pass
   attributes from one request to another, usually across a redirect.
   See <<mvc-flash-attributes>>.
 |===
@@ -257,6 +257,8 @@ customize, extend, or replace them.
 
 [[mvc-servlet-config]]
 === Framework Config
+[.small]#<<web-reactive.adoc#webflux-framework-config,Same in Spring WebFlux>>#
+
 For each type of special bean, the `DispatcherServlet` checks for the `WebApplicationContext` first.
 If there are no matching bean types, it falls back on the default types listed in
 https://github.com/spring-projects/spring-framework/blob/master/spring-webmvc/src/main/resources/org/springframework/web/servlet/DispatcherServlet.properties[DispatcherServlet.properties].

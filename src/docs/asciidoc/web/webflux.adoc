@@ -481,7 +481,8 @@ implement one of the framework contracts listed in the table below.
 Spring WebFlux provides built-in implementations of these contracts but you can also
 customize, extend, or replace them.
 
-.Special bean types in the ApplicationContext
+[[webflux-special-beans-table]]
+[cols="1,2", options="header"]
 |===
 | Bean type| Explanation
 
@@ -490,19 +491,43 @@ customize, extend, or replace them.
   which vary by `HandlerMapping` implementation -- annotated controllers, simple
   URL pattern mappings, etc.
 
+  The main `HandlerMapping` implementations are `RequestMappingHandlerMapping` based on
+  `@RequestMapping` annotated methods, `RouterFunctionMapping` based on functional
+  endpoint routes, and `SimpleUrlHandlerMapping` based on explicit registrations of URI
+  path patterns to handlers.
+
 | HandlerAdapter
-| Helps the `DispatcherHandler` to invoke a handler mapped to a request regardless of
+| Help the `DispatcherHandler` to invoke a handler mapped to a request regardless of
   how the handler is actually invoked. For example invoking an annotated controller
-  requires resolving various annotations. The main purpose of a `HandlerAdapter` is
-  to shield the `DispatcherHandler` from such details.
+  requires resolving annotations. The main purpose of a `HandlerAdapter` is to shield the
+  `DispatcherHandler` from such details.
 
 | HandlerResultHandler
-| Process the `HandlerResult` returned from a `HandlerAdapter`.
+| Process the result from the handler invocation and finalize the response.
+
+  The built-in `HandlerResultHandler` implementations are `ResponseEntityResultHandler`
+  supporting `ResponseEntity` return values, `ResponseBodyResultHandler`
+  supporting `@ResponseBody` methods, `ServerResponseResultHandler`
+  supporting the `ServerResponse` returned from functional endpoints, and
+  `ViewResolutionResultHandler` supporting rendering with a view and a model.
 |===
 
 
+
+[[webflux-framework-config]]
+=== Framework Config
+[.small]#<<web.adoc#mvc-servlet-config,Same in Spring MVC>>#
+
+The `DispatcherHandler` detects the special beans it needs in the `ApplicationContext`.
+Applications can declare the special beans they wish to have. However most applications
+will find a better starting point in the WebFlux Java config which provide a higher level
+configuration API that in turn make the necessary bean declarations.
+See <<webflux-config>> for more details.
+
+
+
 [[webflux-dispatcher-handler-sequence]]
-=== Processing sequence
+=== Processing
 [.small]#<<web.adoc#mvc-servlet-sequence,Same in Spring MVC>>#
 
 The `DispatcherHandler` processes requests as follows:
@@ -574,7 +599,7 @@ rendering).
 
 
 [[webflux-ann-requestmapping]]
-=== Mapping Requests
+=== Request Mapping
 [.small]#<<web.adoc#mvc-ann-requestmapping,Same in Spring MVC>>#
 
 The `@RequestMapping` annotation is used to map requests to controllers methods. It has
