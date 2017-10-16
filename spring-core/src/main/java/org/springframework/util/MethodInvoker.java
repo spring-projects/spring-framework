@@ -51,7 +51,7 @@ public class MethodInvoker {
 	private String staticMethod;
 
 	@Nullable
-	private Object[] arguments = new Object[0];
+	private Object[] arguments;
 
 	/** The method we will call */
 	@Nullable
