@@ -98,8 +98,10 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 	private void setSessionCookie(ServerWebExchange exchange, String id, Duration maxAge) {
 		String name = getCookieName();
 		boolean secure = "https".equalsIgnoreCase(exchange.getRequest().getURI().getScheme());
-		MultiValueMap<String, ResponseCookie> cookieMap = exchange.getResponse().getCookies();
-		cookieMap.set(name, ResponseCookie.from(name, id).maxAge(maxAge).httpOnly(true).secure(secure).build());
+		String path = exchange.getRequest().getPath().contextPath().value() + "/";
+		exchange.getResponse().getCookies().set(name,
+				ResponseCookie.from(name, id).path(path)
+						.maxAge(maxAge).httpOnly(true).secure(secure).build());
 	}
 
 }
