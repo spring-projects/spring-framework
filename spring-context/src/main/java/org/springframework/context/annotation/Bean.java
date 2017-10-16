@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,8 +157,8 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <pre class="code">
  *     &#064;Bean
- *     public static PropertyPlaceholderConfigurer ppc() {
- *         // instantiate, configure and return ppc ...
+ *     public static PropertySourcesPlaceholderConfigurer pspc() {
+ *         // instantiate, configure and return pspc ...
  *     }
  * </pre>
  *
@@ -228,6 +228,8 @@ public @interface Bean {
 	 * Not commonly used, given that the method may be called programmatically directly
 	 * within the body of a Bean-annotated method.
 	 * <p>The default value is {@code ""}, indicating no init method to be called.
+	 * @see org.springframework.beans.factory.InitializingBean
+	 * @see org.springframework.context.ConfigurableApplicationContext#refresh()
 	 */
 	String initMethod() default "";
 
@@ -248,12 +250,14 @@ public @interface Bean {
 	 * creation time).
 	 * <p>To disable destroy method inference for a particular {@code @Bean}, specify an
 	 * empty string as the value, e.g. {@code @Bean(destroyMethod="")}. Note that the
-	 * {@link org.springframework.beans.factory.DisposableBean} and the
-	 * {@link java.io.Closeable}/{@link java.lang.AutoCloseable} interfaces will
-	 * nevertheless get detected and the corresponding destroy/close method invoked.
+	 * {@link org.springframework.beans.factory.DisposableBean} callback interface will
+	 * nevertheless get detected and the corresponding destroy method invoked: In other
+	 * words, {@code destroyMethod=""} only affects custom close/shutdown methods and
+	 * {@link java.io.Closeable}/{@link java.lang.AutoCloseable} declared close methods.
 	 * <p>Note: Only invoked on beans whose lifecycle is under the full control of the
 	 * factory, which is always the case for singletons but not guaranteed for any
 	 * other scope.
+	 * @see org.springframework.beans.factory.DisposableBean
 	 * @see org.springframework.context.ConfigurableApplicationContext#close()
 	 */
 	String destroyMethod() default AbstractBeanDefinition.INFER_METHOD;
