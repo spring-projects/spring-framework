@@ -24,6 +24,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import static java.util.Arrays.*;
 import static java.util.Collections.*;
 import static org.hamcrest.CoreMatchers.*;
 
@@ -448,6 +449,57 @@ public class AssertTests {
 		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage(equalTo(null));
 		Assert.notEmpty(emptyList(), (Supplier<String>) null);
+	}
+
+	@Test
+	public void noNullElementsWithCollection() {
+		Assert.noNullElements(asList("foo", "bar"), "enigma");
+	}
+
+	@Test
+	public void noNullElementsWithEmptyCollection() {
+		Assert.noNullElements(emptyList(), "enigma");
+	}
+
+	@Test
+	public void noNullElementsWithNullCollection() {
+		Assert.noNullElements((Collection<Object>) null, "enigma");
+	}
+
+	@Test
+	public void noNullElementsWithCollectionAndNullElement() {
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("enigma");
+		Assert.noNullElements(asList("foo", null, "bar"), "enigma");
+	}
+
+	@Test
+	public void noNullElementsWithCollectionAndMessageSupplier() {
+		Assert.noNullElements(asList("foo", "bar"), () -> "enigma");
+	}
+
+	@Test
+	public void noNullElementsWithEmptyCollectionAndMessageSupplier() {
+		Assert.noNullElements(emptyList(), "enigma");
+	}
+
+	@Test
+	public void noNullElementsWithNullCollectionAndMessageSupplier() {
+		Assert.noNullElements((Collection<Object>) null, () -> "enigma");
+	}
+
+	@Test
+	public void noNullElementsWithCollectionAndNullElementAndMessageSupplier() {
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("enigma");
+		Assert.noNullElements(asList("foo", null, "bar"), () -> "enigma");
+	}
+
+	@Test
+	public void noNullElementsWithCollectionAndNullElementAndNullMessageSupplier() {
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage(equalTo(null));
+		Assert.noNullElements(asList("foo", null, "bar"), (Supplier<String>) null);
 	}
 
 	@Test
