@@ -44,7 +44,7 @@ public class MethodInvoker {
 
 	private String staticMethod;
 
-	private Object[] arguments = new Object[0];
+	private Object[] arguments;
 
 	/** The method we will call */
 	private Method methodObject;
@@ -130,7 +130,7 @@ public class MethodInvoker {
 	 * Return the arguments for the method invocation.
 	 */
 	public Object[] getArguments() {
-		return this.arguments;
+		return (this.arguments != null ? this.arguments : new Object[0]);
 	}
 
 
