@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ public class HandlerMappingIntrospector
 	 * Return the configured HandlerMapping's.
 	 */
 	public List<HandlerMapping> getHandlerMappings() {
-		return this.handlerMappings;
+		return (this.handlerMappings != null ? this.handlerMappings : Collections.<HandlerMapping>emptyList());
 	}
 
 
@@ -102,44 +102,6 @@ public class HandlerMappingIntrospector
 			Assert.notNull(this.applicationContext, "No ApplicationContext");
 			this.handlerMappings = initHandlerMappings(this.applicationContext);
 		}
-	}
-
-	private static List<HandlerMapping> initHandlerMappings(ApplicationContext applicationContext) {
-		Map<String, HandlerMapping> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
-				applicationContext, HandlerMapping.class, true, false);
-		if (!beans.isEmpty()) {
-			List<HandlerMapping> mappings = new ArrayList<HandlerMapping>(beans.values());
-			AnnotationAwareOrderComparator.sort(mappings);
-			return Collections.unmodifiableList(mappings);
-		}
-		return Collections.unmodifiableList(initFallback(applicationContext));
-	}
-
-	private static List<HandlerMapping> initFallback(ApplicationContext applicationContext) {
-		Properties props;
-		String path = "DispatcherServlet.properties";
-		try {
-			Resource resource = new ClassPathResource(path, DispatcherServlet.class);
-			props = PropertiesLoaderUtils.loadProperties(resource);
-		}
-		catch (IOException ex) {
-			throw new IllegalStateException("Could not load '" + path + "': " + ex.getMessage());
-		}
-
-		String value = props.getProperty(HandlerMapping.class.getName());
-		String[] names = StringUtils.commaDelimitedListToStringArray(value);
-		List<HandlerMapping> result = new ArrayList<HandlerMapping>(names.length);
-		for (String name : names) {
-			try {
-				Class<?> clazz = ClassUtils.forName(name, DispatcherServlet.class.getClassLoader());
-				Object mapping = applicationContext.getAutowireCapableBeanFactory().createBean(clazz);
-				result.add((HandlerMapping) mapping);
-			}
-			catch (ClassNotFoundException ex) {
-				throw new IllegalStateException("Could not find default HandlerMapping [" + name + "]");
-			}
-		}
-		return result;
 	}
 
 
@@ -199,6 +161,45 @@ public class HandlerMappingIntrospector
 	}
 
 
+	private static List<HandlerMapping> initHandlerMappings(ApplicationContext applicationContext) {
+		Map<String, HandlerMapping> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+				applicationContext, HandlerMapping.class, true, false);
+		if (!beans.isEmpty()) {
+			List<HandlerMapping> mappings = new ArrayList<HandlerMapping>(beans.values());
+			AnnotationAwareOrderComparator.sort(mappings);
+			return Collections.unmodifiableList(mappings);
+		}
+		return Collections.unmodifiableList(initFallback(applicationContext));
+	}
+
+	private static List<HandlerMapping> initFallback(ApplicationContext applicationContext) {
+		Properties props;
+		String path = "DispatcherServlet.properties";
+		try {
+			Resource resource = new ClassPathResource(path, DispatcherServlet.class);
+			props = PropertiesLoaderUtils.loadProperties(resource);
+		}
+		catch (IOException ex) {
+			throw new IllegalStateException("Could not load '" + path + "': " + ex.getMessage());
+		}
+
+		String value = props.getProperty(HandlerMapping.class.getName());
+		String[] names = StringUtils.commaDelimitedListToStringArray(value);
+		List<HandlerMapping> result = new ArrayList<HandlerMapping>(names.length);
+		for (String name : names) {
+			try {
+				Class<?> clazz = ClassUtils.forName(name, DispatcherServlet.class.getClassLoader());
+				Object mapping = applicationContext.getAutowireCapableBeanFactory().createBean(clazz);
+				result.add((HandlerMapping) mapping);
+			}
+			catch (ClassNotFoundException ex) {
+				throw new IllegalStateException("Could not find default HandlerMapping [" + name + "]");
+			}
+		}
+		return result;
+	}
+
+
 	/**
 	 * Request wrapper that ignores request attribute changes.
 	 */
@@ -210,7 +211,7 @@ public class HandlerMappingIntrospector
 
 		@Override
 		public void setAttribute(String name, Object value) {
-			// Ignore attribute change
+			// Ignore attribute change...
 		}
 	}
 
