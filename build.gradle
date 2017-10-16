@@ -45,7 +45,7 @@ configure(allprojects) { project ->
 	ext.freemarkerVersion    = "2.3.26-incubating"
 	ext.groovyVersion        = "2.4.12"
 	ext.hsqldbVersion        = "2.4.0"
-	ext.jackson2Version      = "2.9.1"
+	ext.jackson2Version      = "2.9.2"
 	ext.jettyVersion         = "9.4.7.v20170914"
 	ext.junitJupiterVersion  = "5.0.1"
 	ext.junitPlatformVersion = "1.0.1"
