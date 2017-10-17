@@ -80,8 +80,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 	@Test
 	public void resolveMapArgumentWithQueryString() throws Exception {
 		MethodParameter param = this.testMethod.annot(requestParam().name("")).arg(Map.class);
-		MockServerHttpRequest request = MockServerHttpRequest.get("/path?foo=bar").build();
-		Object result= resolve(param, MockServerWebExchange.from(request));
+		Object result= resolve(param, MockServerWebExchange.from(MockServerHttpRequest.get("/path?foo=bar")));
 		assertTrue(result instanceof Map);
 		assertEquals(Collections.singletonMap("foo", "bar"), result);
 	}
@@ -89,8 +88,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 	@Test
 	public void resolveMultiValueMapArgument() throws Exception {
 		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(MultiValueMap.class);
-		MockServerHttpRequest request = MockServerHttpRequest.get("/path?foo=bar&foo=baz").build();
-		ServerWebExchange exchange = MockServerWebExchange.from(request);
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path?foo=bar&foo=baz"));
 		Object result= resolve(param, exchange);
 
 		assertTrue(result instanceof MultiValueMap);

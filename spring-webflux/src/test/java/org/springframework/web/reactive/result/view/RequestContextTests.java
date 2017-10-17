@@ -35,7 +35,7 @@ import static org.junit.Assert.assertEquals;
 public class RequestContextTests {
 
 	private final MockServerWebExchange exchange =
-			MockServerWebExchange.from(MockServerHttpRequest.get("/foo/path").contextPath("/foo").build());
+			MockServerWebExchange.from(MockServerHttpRequest.get("/foo/path").contextPath("/foo"));
 
 	private GenericApplicationContext applicationContext;
 

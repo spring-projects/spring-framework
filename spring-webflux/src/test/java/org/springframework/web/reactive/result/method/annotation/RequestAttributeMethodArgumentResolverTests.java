@@ -56,8 +56,7 @@ public class RequestAttributeMethodArgumentResolverTests {
 
 	private RequestAttributeMethodArgumentResolver resolver;
 
-	private final MockServerWebExchange exchange = MockServerWebExchange.from(
-			MockServerHttpRequest.get("/").build());
+	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 	private Method handleMethod;
 

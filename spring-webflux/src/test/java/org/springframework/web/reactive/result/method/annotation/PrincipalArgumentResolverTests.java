@@ -57,7 +57,7 @@ public class PrincipalArgumentResolverTests {
 
 		BindingContext context = new BindingContext();
 		Principal user = () -> "Joe";
-		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build())
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"))
 				.mutate().principal(Mono.just(user)).build();
 
 		MethodParameter param = this.testMethod.arg(Principal.class);

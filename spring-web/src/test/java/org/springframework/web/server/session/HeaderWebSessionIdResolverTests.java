@@ -41,7 +41,7 @@ public class HeaderWebSessionIdResolverTests {
 	@Before
 	public void setUp() {
 		this.idResolver = new HeaderWebSessionIdResolver();
-		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path").build());
+		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
 	}
 
 	@Test
@@ -123,8 +123,7 @@ public class HeaderWebSessionIdResolverTests {
 	public void resolveSessionIdsWhenIdThenIdFound() {
 		String id = "123";
 		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path")
-				.header(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME, id)
-				.build());
+				.header(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME, id));
 
 		List<String> ids = this.idResolver.resolveSessionIds(this.exchange);
 
@@ -137,8 +136,7 @@ public class HeaderWebSessionIdResolverTests {
 		String id2 = "abc";
 		this.exchange = MockServerWebExchange.from(
 				MockServerHttpRequest.get("/path")
-						.header(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME, id1, id2)
-						.build());
+						.header(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME, id1, id2));
 
 		List<String> ids = this.idResolver.resolveSessionIds(this.exchange);
 

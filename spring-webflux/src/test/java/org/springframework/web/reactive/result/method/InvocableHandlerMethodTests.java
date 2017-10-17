@@ -46,7 +46,7 @@ import static org.springframework.web.method.ResolvableMethod.*;
 public class InvocableHandlerMethodTests {
 
 	private final MockServerWebExchange exchange =
-			MockServerWebExchange.from(MockServerHttpRequest.get("http://localhost:8080/path").build());
+			MockServerWebExchange.from(MockServerHttpRequest.get("http://localhost:8080/path"));
 
 
 	@Test

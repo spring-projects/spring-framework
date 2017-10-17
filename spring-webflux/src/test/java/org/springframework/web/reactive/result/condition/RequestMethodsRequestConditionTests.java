@@ -139,7 +139,7 @@ public class RequestMethodsRequestConditionTests {
 	}
 
 	private ServerWebExchange getExchange(String method) throws URISyntaxException {
-		return MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.valueOf(method), "/").build());
+		return MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.valueOf(method), "/"));
 	}
 
 }

@@ -47,8 +47,7 @@ public class RedirectViewTests {
 
 	@Before
 	public void setup() {
-		this.exchange = MockServerWebExchange.from(
-				MockServerHttpRequest.get("/context/path").contextPath("/context").build());
+		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/context/path").contextPath("/context"));
 	}
 
 
@@ -130,8 +129,7 @@ public class RedirectViewTests {
 	public void propagateQueryParams() throws Exception {
 		RedirectView view = new RedirectView("http://url.somewhere.com?foo=bar#bazz");
 		view.setPropagateQuery(true);
-		MockServerHttpRequest request = MockServerHttpRequest.get("http://url.somewhere.com?a=b&c=d").build();
-		this.exchange = MockServerWebExchange.from(request);
+		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://url.somewhere.com?a=b&c=d"));
 		view.render(new HashMap<>(), MediaType.TEXT_HTML, this.exchange).block();
 		assertEquals(HttpStatus.SEE_OTHER, this.exchange.getResponse().getStatusCode());
 		assertEquals(URI.create("http://url.somewhere.com?foo=bar&a=b&c=d#bazz"),

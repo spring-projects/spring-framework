@@ -75,7 +75,7 @@ public class HandlerMethodMappingTests {
 	public void directMatch() throws Exception {
 		String key = "foo";
 		this.mapping.registerMapping(key, this.handler, this.method1);
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(key).build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(key));
 		Mono<Object> result = this.mapping.getHandler(exchange);
 
 		assertEquals(this.method1, ((HandlerMethod) result.block()).getMethod());
@@ -86,7 +86,7 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping("/fo*", this.handler, this.method1);
 		this.mapping.registerMapping("/f*", this.handler, this.method2);
 
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo"));
 		Mono<Object> result = this.mapping.getHandler(exchange);
 		assertEquals(this.method1, ((HandlerMethod) result.block()).getMethod());
 	}
@@ -95,7 +95,7 @@ public class HandlerMethodMappingTests {
 	public void ambiguousMatch() throws Exception {
 		this.mapping.registerMapping("/f?o", this.handler, this.method1);
 		this.mapping.registerMapping("/fo?", this.handler, this.method2);
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo"));
 		Mono<Object> result = this.mapping.getHandler(exchange);
 
 		StepVerifier.create(result).expectError(IllegalStateException.class).verify();
@@ -128,12 +128,12 @@ public class HandlerMethodMappingTests {
 	public void unregisterMapping() throws Exception {
 		String key = "foo";
 		this.mapping.registerMapping(key, this.handler, this.method1);
-		Mono<Object> result = this.mapping.getHandler(MockServerWebExchange.from(MockServerHttpRequest.get(key).build()));
+		Mono<Object> result = this.mapping.getHandler(MockServerWebExchange.from(MockServerHttpRequest.get(key)));
 
 		assertNotNull(result.block());
 
 		this.mapping.unregisterMapping(key);
-		result = this.mapping.getHandler(MockServerWebExchange.from(MockServerHttpRequest.get(key).build()));
+		result = this.mapping.getHandler(MockServerWebExchange.from(MockServerHttpRequest.get(key)));
 
 		assertNull(result.block());
 		assertThat(this.mapping.getMappingRegistry().getMappings().keySet(), Matchers.not(Matchers.contains(key)));

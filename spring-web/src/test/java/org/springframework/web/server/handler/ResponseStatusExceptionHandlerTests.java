@@ -39,8 +39,7 @@ public class ResponseStatusExceptionHandlerTests {
 
 	private final ResponseStatusExceptionHandler handler = new ResponseStatusExceptionHandler();
 
-	private final MockServerWebExchange exchange = MockServerWebExchange.from(
-			MockServerHttpRequest.get("/").build());
+	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 
 	@Test

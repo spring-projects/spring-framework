@@ -80,7 +80,7 @@ public class PatternsRequestConditionTests {
 	@Test
 	public void matchDirectPath() throws Exception {
 		PatternsRequestCondition condition = createPatternsCondition("/foo");
-		MockServerWebExchange exchange = MockServerWebExchange.from(get("/foo").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/foo"));
 		PatternsRequestCondition match = condition.getMatchingCondition(exchange);
 
 		assertNotNull(match);
@@ -89,7 +89,7 @@ public class PatternsRequestConditionTests {
 	@Test
 	public void matchPattern() throws Exception {
 		PatternsRequestCondition condition = createPatternsCondition("/foo/*");
-		MockServerWebExchange exchange = MockServerWebExchange.from(get("/foo/bar").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/foo/bar"));
 		PatternsRequestCondition match = condition.getMatchingCondition(exchange);
 
 		assertNotNull(match);
@@ -98,7 +98,7 @@ public class PatternsRequestConditionTests {
 	@Test
 	public void matchSortPatterns() throws Exception {
 		PatternsRequestCondition condition = createPatternsCondition("/*/*", "/foo/bar", "/foo/*");
-		MockServerWebExchange exchange = MockServerWebExchange.from(get("/foo/bar").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/foo/bar"));
 		PatternsRequestCondition match = condition.getMatchingCondition(exchange);
 		PatternsRequestCondition expected = createPatternsCondition("/foo/bar", "/foo/*", "/*/*");
 
@@ -107,7 +107,7 @@ public class PatternsRequestConditionTests {
 
 	@Test
 	public void matchTrailingSlash() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(get("/foo/").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/foo/"));
 
 		PatternsRequestCondition condition = createPatternsCondition("/foo");
 		PatternsRequestCondition match = condition.getMatchingCondition(exchange);
@@ -126,7 +126,7 @@ public class PatternsRequestConditionTests {
 		PathPatternParser parser = new PathPatternParser();
 		parser.setMatchOptionalTrailingSeparator(false);
 		condition = new PatternsRequestCondition(parser.parse("/foo"));
-		match = condition.getMatchingCondition(MockServerWebExchange.from(get("/foo/").build()));
+		match = condition.getMatchingCondition(MockServerWebExchange.from(get("/foo/")));
 
 		assertNull(match);
 	}
@@ -134,7 +134,7 @@ public class PatternsRequestConditionTests {
 	@Test
 	public void matchPatternContainsExtension() throws Exception {
 		PatternsRequestCondition condition = createPatternsCondition("/foo.jpg");
-		MockServerWebExchange exchange = MockServerWebExchange.from(get("/foo.html").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/foo.html"));
 		PatternsRequestCondition match = condition.getMatchingCondition(exchange);
 
 		assertNull(match);
@@ -145,7 +145,7 @@ public class PatternsRequestConditionTests {
 		PatternsRequestCondition c1 = createPatternsCondition("/foo*");
 		PatternsRequestCondition c2 = createPatternsCondition("/foo*");
 
-		assertEquals(0, c1.compareTo(c2, MockServerWebExchange.from(get("/foo").build())));
+		assertEquals(0, c1.compareTo(c2, MockServerWebExchange.from(get("/foo"))));
 	}
 
 	@Test
@@ -159,7 +159,7 @@ public class PatternsRequestConditionTests {
 
 	@Test
 	public void comparePatternSpecificity() throws Exception {
-		ServerWebExchange exchange = MockServerWebExchange.from(get("/foo").build());
+		ServerWebExchange exchange = MockServerWebExchange.from(get("/foo"));
 
 		PatternsRequestCondition c1 = createPatternsCondition("/fo*");
 		PatternsRequestCondition c2 = createPatternsCondition("/foo");
@@ -174,7 +174,7 @@ public class PatternsRequestConditionTests {
 
 	@Test
 	public void compareNumberOfMatchingPatterns() throws Exception {
-		ServerWebExchange exchange = MockServerWebExchange.from(get("/foo.html").build());
+		ServerWebExchange exchange = MockServerWebExchange.from(get("/foo.html"));
 
 		PatternsRequestCondition c1 = createPatternsCondition("/foo.*", "/foo.jpeg");
 		PatternsRequestCondition c2 = createPatternsCondition("/foo.*", "/foo.html");

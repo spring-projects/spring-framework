@@ -191,8 +191,7 @@ public class DefaultEntityResponseBuilderTests {
 
 		Mono<EntityResponse<Publisher<String>>> result = EntityResponse.fromPublisher(publisher, String.class).build();
 
-		MockServerHttpRequest request = MockServerHttpRequest.get("http://localhost").build();
-		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://localhost"));
 
 		ServerResponse.Context context = new ServerResponse.Context() {
 			@Override

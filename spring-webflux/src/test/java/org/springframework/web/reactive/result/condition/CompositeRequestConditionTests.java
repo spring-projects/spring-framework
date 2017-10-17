@@ -98,20 +98,20 @@ public class CompositeRequestConditionTests {
 	@Test
 	public void noMatch() {
 		CompositeRequestCondition cond = new CompositeRequestCondition(this.param1);
-		assertNull(cond.getMatchingCondition(MockServerWebExchange.from(MockServerHttpRequest.get("/").build())));
+		assertNull(cond.getMatchingCondition(MockServerWebExchange.from(MockServerHttpRequest.get("/"))));
 	}
 
 	@Test
 	public void matchEmpty() {
 		CompositeRequestCondition empty = new CompositeRequestCondition();
-		assertSame(empty, empty.getMatchingCondition(MockServerWebExchange.from(MockServerHttpRequest.get("/").build())));
+		assertSame(empty, empty.getMatchingCondition(MockServerWebExchange.from(MockServerHttpRequest.get("/"))));
 	}
 
 	@Test
 	public void compare() {
 		CompositeRequestCondition cond1 = new CompositeRequestCondition(this.param1);
 		CompositeRequestCondition cond3 = new CompositeRequestCondition(this.param3);
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 		assertEquals(1, cond1.compareTo(cond3, exchange));
 		assertEquals(-1, cond3.compareTo(cond1, exchange));
@@ -121,7 +121,7 @@ public class CompositeRequestConditionTests {
 	public void compareEmpty() {
 		CompositeRequestCondition empty = new CompositeRequestCondition();
 		CompositeRequestCondition notEmpty = new CompositeRequestCondition(this.param1);
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 		assertEquals(0, empty.compareTo(empty, exchange));
 		assertEquals(-1, notEmpty.compareTo(empty, exchange));
@@ -132,7 +132,7 @@ public class CompositeRequestConditionTests {
 	public void compareDifferentLength() {
 		CompositeRequestCondition cond1 = new CompositeRequestCondition(this.param1);
 		CompositeRequestCondition cond2 = new CompositeRequestCondition(this.param1, this.header1);
-		cond1.compareTo(cond2, MockServerWebExchange.from(MockServerHttpRequest.get("/").build()));
+		cond1.compareTo(cond2, MockServerWebExchange.from(MockServerHttpRequest.get("/")));
 	}
 
 

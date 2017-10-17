@@ -38,7 +38,7 @@ public class ParameterContentTypeResolverTests {
 	@Test
 	public void noKey() throws Exception {
 		ParameterContentTypeResolver resolver = new ParameterContentTypeResolver(Collections.emptyMap());
-		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
 
 		assertEquals(0, mediaTypes.size());
@@ -87,7 +87,7 @@ public class ParameterContentTypeResolverTests {
 	}
 
 	private MockServerWebExchange createExchange(String format) {
-		return MockServerWebExchange.from(MockServerHttpRequest.get("/path?format=" + format).build());
+		return MockServerWebExchange.from(MockServerHttpRequest.get("/path?format=" + format));
 	}
 
 }

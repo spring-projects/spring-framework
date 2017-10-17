@@ -50,7 +50,7 @@ public class JythonScriptTemplateTests {
 
 	private MockServerHttpResponse renderViewWithModel(String viewUrl, Map<String, Object> model) throws Exception {
 		ScriptTemplateView view = createViewWithUrl(viewUrl);
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		view.renderInternal(model, MediaType.TEXT_HTML, exchange).block();
 		return exchange.getResponse();
 	}

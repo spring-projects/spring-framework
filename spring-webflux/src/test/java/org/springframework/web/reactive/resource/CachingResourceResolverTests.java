@@ -71,7 +71,7 @@ public class CachingResourceResolverTests {
 	public void resolveResourceInternal() {
 		String file = "bar.css";
 		Resource expected = new ClassPathResource("test/" + file, getClass());
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		Resource actual = this.chain.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 
 		assertEquals(expected, actual);
@@ -84,7 +84,7 @@ public class CachingResourceResolverTests {
 		this.cache.put(CachingResourceResolver.RESOLVED_RESOURCE_CACHE_KEY_PREFIX + "bar.css", expected);
 
 		String file = "bar.css";
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		Resource actual = this.chain.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 
 		assertSame(expected, actual);
@@ -92,7 +92,7 @@ public class CachingResourceResolverTests {
 
 	@Test
 	public void resolveResourceInternalNoMatch() {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		assertNull(this.chain.resolveResource(exchange, "invalid.css", this.locations).block(TIMEOUT));
 	}
 
@@ -122,7 +122,7 @@ public class CachingResourceResolverTests {
 	public void resolveResourceAcceptEncodingInCacheKey() {
 		String file = "bar.css";
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(file)
-				.header("Accept-Encoding", "gzip").build());
+				.header("Accept-Encoding", "gzip"));
 
 		Resource expected = this.chain.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 		String cacheKey = CachingResourceResolver.RESOLVED_RESOURCE_CACHE_KEY_PREFIX + file + "+encoding=gzip";
@@ -133,7 +133,7 @@ public class CachingResourceResolverTests {
 	@Test
 	public void resolveResourceNoAcceptEncodingInCacheKey() {
 		String file = "bar.css";
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(file).build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(file));
 
 		Resource expected = this.chain.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 		String cacheKey = CachingResourceResolver.RESOLVED_RESOURCE_CACHE_KEY_PREFIX + file;
@@ -149,11 +149,10 @@ public class CachingResourceResolverTests {
 		this.cache.put(CachingResourceResolver.RESOLVED_RESOURCE_CACHE_KEY_PREFIX + "bar.css+encoding=gzip", gzResource);
 
 		String file = "bar.css";
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(file).build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(file));
 		assertSame(resource, this.chain.resolveResource(exchange, file, this.locations).block(TIMEOUT));
 
-		MockServerHttpRequest request = MockServerHttpRequest.get(file).header("Accept-Encoding", "gzip").build();
-		exchange = MockServerWebExchange.from(request);
+		exchange = MockServerWebExchange.from(MockServerHttpRequest.get(file).header("Accept-Encoding", "gzip"));
 		assertSame(gzResource, this.chain.resolveResource(exchange, file, this.locations).block(TIMEOUT));
 	}
 

@@ -91,7 +91,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	@Test // SPR-14559
 	public void checkNotModifiedInvalidIfNoneMatchHeader() {
 		String eTag = "\"etagvalue\"";
-		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch("missingquotes").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch("missingquotes"));
 		assertFalse(exchange.checkNotModified(eTag));
 		assertNull(exchange.getResponse().getStatusCode());
 		assertEquals(eTag, exchange.getResponse().getHeaders().getETag());
@@ -135,7 +135,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	@Test
 	public void checkNotModifiedETag() {
 		String eTag = "\"Foo\"";
-		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(eTag).build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(eTag));
 
 		assertTrue(exchange.checkNotModified(eTag));
 
@@ -146,7 +146,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	@Test
 	public void checkNotModifiedETagWithSeparatorChars() {
 		String eTag = "\"Foo, Bar\"";
-		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(eTag).build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(eTag));
 
 		assertTrue(exchange.checkNotModified(eTag));
 
@@ -159,7 +159,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	public void checkModifiedETag() {
 		String currentETag = "\"Foo\"";
 		String oldEtag = "Bar";
-		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(oldEtag).build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(oldEtag));
 
 		assertFalse(exchange.checkNotModified(currentETag));
 
@@ -171,7 +171,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	public void checkNotModifiedUnpaddedETag() {
 		String eTag = "Foo";
 		String paddedEtag = String.format("\"%s\"", eTag);
-		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(paddedEtag).build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(paddedEtag));
 
 		assertTrue(exchange.checkNotModified(eTag));
 
@@ -183,7 +183,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	public void checkModifiedUnpaddedETag() {
 		String currentETag = "Foo";
 		String oldEtag = "Bar";
-		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(oldEtag).build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(oldEtag));
 
 		assertFalse(exchange.checkNotModified(currentETag));
 
@@ -194,7 +194,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	@Test
 	public void checkNotModifiedWildcardIsIgnored() {
 		String eTag = "\"Foo\"";
-		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch("*").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch("*"));
 		assertFalse(exchange.checkNotModified(eTag));
 
 		assertNull(exchange.getResponse().getStatusCode());
@@ -223,7 +223,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/")
 				.ifNoneMatch(eTag)
 				.ifModifiedSince(oneMinuteAgo.toEpochMilli())
-				.build());
+				);
 
 		assertTrue(exchange.checkNotModified(eTag, currentDate));
 
@@ -251,7 +251,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	public void checkNotModifiedETagWeakStrong() {
 		String eTag = "\"Foo\"";
 		String weakEtag = String.format("W/%s", eTag);
-		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(eTag).build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(eTag));
 
 		assertTrue(exchange.checkNotModified(weakEtag));
 
@@ -275,7 +275,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	public void checkNotModifiedMultipleETags() {
 		String eTag = "\"Bar\"";
 		String multipleETags = String.format("\"Foo\", %s", eTag);
-		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(multipleETags).build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(multipleETags));
 
 		assertTrue(exchange.checkNotModified(eTag));
 

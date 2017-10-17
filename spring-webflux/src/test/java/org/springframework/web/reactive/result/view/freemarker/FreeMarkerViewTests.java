@@ -48,7 +48,7 @@ public class FreeMarkerViewTests {
 
 
 	private final MockServerWebExchange exchange =
-			MockServerWebExchange.from(MockServerHttpRequest.get("/path").build());
+			MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
 
 	private GenericApplicationContext context;
 

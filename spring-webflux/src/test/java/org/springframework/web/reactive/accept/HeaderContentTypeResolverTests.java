@@ -47,8 +47,8 @@ public class HeaderContentTypeResolverTests {
 	@Test
 	public void resolveMediaTypes() throws Exception {
 		String header = "text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c";
-		MockServerHttpRequest request = MockServerHttpRequest.get("/").header("accept", header).build();
-		List<MediaType> mediaTypes = this.resolver.resolveMediaTypes(MockServerWebExchange.from(request));
+		List<MediaType> mediaTypes = this.resolver.resolveMediaTypes(
+				MockServerWebExchange.from(MockServerHttpRequest.get("/").header("accept", header)));
 
 		assertEquals(4, mediaTypes.size());
 		assertEquals("text/html", mediaTypes.get(0).toString());
@@ -60,8 +60,8 @@ public class HeaderContentTypeResolverTests {
 	@Test(expected = NotAcceptableStatusException.class)
 	public void resolveMediaTypesParseError() throws Exception {
 		String header = "textplain; q=0.5";
-		MockServerHttpRequest request = MockServerHttpRequest.get("/").header("accept", header).build();
-		this.resolver.resolveMediaTypes(MockServerWebExchange.from(request));
+		this.resolver.resolveMediaTypes(
+				MockServerWebExchange.from(MockServerHttpRequest.get("/").header("accept", header)));
 	}
 
 }

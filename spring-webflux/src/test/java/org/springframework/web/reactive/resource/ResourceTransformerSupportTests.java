@@ -71,8 +71,7 @@ public class ResourceTransformerSupportTests {
 
 	@Test
 	public void resolveUrlPath() throws Exception {
-		MockServerHttpRequest request = MockServerHttpRequest.get("/resources/main.css").build();
-		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/resources/main.css"));
 		String resourcePath = "/resources/bar.css";
 		Resource css = new ClassPathResource("test/main.css", getClass());
 		String actual = this.transformer.resolveUrlPath(
@@ -85,7 +84,7 @@ public class ResourceTransformerSupportTests {
 	@Test
 	public void resolveUrlPathWithRelativePath() throws Exception {
 		Resource css = new ClassPathResource("test/main.css", getClass());
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		String actual = this.transformer.resolveUrlPath(
 				"bar.css", exchange, css, this.transformerChain).block(Duration.ofSeconds(5));
 
@@ -95,7 +94,7 @@ public class ResourceTransformerSupportTests {
 	@Test
 	public void resolveUrlPathWithRelativePathInParentDirectory() throws Exception {
 		Resource imagePng = new ClassPathResource("test/images/image.png", getClass());
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		String actual = this.transformer.resolveUrlPath(
 				"../bar.css", exchange, imagePng, this.transformerChain).block(Duration.ofSeconds(5));
 

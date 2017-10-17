@@ -36,8 +36,8 @@ public class RequestedContentTypeResolverBuilderTests {
 	public void defaultSettings() throws Exception {
 
 		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder().build();
-		MockServerHttpRequest request = MockServerHttpRequest.get("/flower").accept(MediaType.IMAGE_GIF).build();
-		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		MockServerWebExchange exchange = MockServerWebExchange.from(
+				MockServerHttpRequest.get("/flower").accept(MediaType.IMAGE_GIF));
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
 
 		assertEquals(Collections.singletonList(MediaType.IMAGE_GIF), mediaTypes);
@@ -50,8 +50,7 @@ public class RequestedContentTypeResolverBuilderTests {
 		builder.parameterResolver().mediaType("json", MediaType.APPLICATION_JSON);
 		RequestedContentTypeResolver resolver = builder.build();
 
-		MockServerHttpRequest request = MockServerHttpRequest.get("/flower?format=json").build();
-		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/flower?format=json"));
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
 
 		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON), mediaTypes);
@@ -64,8 +63,8 @@ public class RequestedContentTypeResolverBuilderTests {
 		builder.parameterResolver().mediaType("json", MediaType.APPLICATION_JSON).parameterName("s");
 		RequestedContentTypeResolver resolver = builder.build();
 
-		MockServerHttpRequest request = MockServerHttpRequest.get("/flower?s=json").build();
-		List<MediaType> mediaTypes = resolver.resolveMediaTypes(MockServerWebExchange.from(request));
+		List<MediaType> mediaTypes = resolver.resolveMediaTypes(
+				MockServerWebExchange.from(MockServerHttpRequest.get("/flower?s=json")));
 
 		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON), mediaTypes);
 	}
@@ -77,8 +76,8 @@ public class RequestedContentTypeResolverBuilderTests {
 		builder.fixedResolver(MediaType.APPLICATION_JSON);
 		RequestedContentTypeResolver resolver = builder.build();
 
-		MockServerHttpRequest request = MockServerHttpRequest.get("/").accept(MediaType.ALL).build();
-		List<MediaType> mediaTypes = resolver.resolveMediaTypes(MockServerWebExchange.from(request));
+		List<MediaType> mediaTypes = resolver.resolveMediaTypes(
+				MockServerWebExchange.from(MockServerHttpRequest.get("/").accept(MediaType.ALL)));
 
 		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON), mediaTypes);
 	}
@@ -90,11 +89,11 @@ public class RequestedContentTypeResolverBuilderTests {
 		builder.resolver(new FixedContentTypeResolver(MediaType.APPLICATION_JSON));
 		RequestedContentTypeResolver resolver = builder.build();
 
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
 		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON), mediaTypes);
 
-		exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").accept(MediaType.ALL).build());
+		exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").accept(MediaType.ALL));
 		mediaTypes = resolver.resolveMediaTypes(exchange);
 		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON), mediaTypes);
 	}

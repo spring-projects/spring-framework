@@ -49,7 +49,7 @@ public class AbstractViewTests {
 
     @Before
     public void setup() {
-        this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
+        this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
     }
 
     @SuppressWarnings("unchecked")

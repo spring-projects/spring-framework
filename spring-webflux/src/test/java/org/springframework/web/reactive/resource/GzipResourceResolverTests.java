@@ -105,7 +105,7 @@ public class GzipResourceResolverTests {
 	@Test
 	public void resolveGzippedFile() throws IOException {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("")
-				.header("Accept-Encoding", "gzip").build());
+				.header("Accept-Encoding", "gzip"));
 
 		String file = "js/foo.js";
 		Resource resolved = this.resolver.resolveResource(exchange, file, this.locations).block(TIMEOUT);
@@ -121,7 +121,7 @@ public class GzipResourceResolverTests {
 	@Test
 	public void resolveFingerprintedGzippedFile() throws IOException {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("")
-				.header("Accept-Encoding", "gzip").build());
+				.header("Accept-Encoding", "gzip"));
 
 		String file = "foo-e36d2e05253c6c7085a91522ce43a0b4.css";
 		Resource resolved = this.resolver.resolveResource(exchange, file, this.locations).block(TIMEOUT);
@@ -137,7 +137,7 @@ public class GzipResourceResolverTests {
 	@Test
 	public void resolveFromCacheWithEncodingVariants() throws IOException {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("")
-				.header("Accept-Encoding", "gzip").build());
+				.header("Accept-Encoding", "gzip"));
 
 		String file = "js/foo.js";
 		Resource resolved = this.resolver.resolveResource(exchange, file, this.locations).block(TIMEOUT);
@@ -151,7 +151,7 @@ public class GzipResourceResolverTests {
 
 		// resolved resource is now cached in CachingResourceResolver
 
-		exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/js/foo.js").build());
+		exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/js/foo.js"));
 		resolved = this.resolver.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 
 		Resource resource = new ClassPathResource("test/"+file, getClass());

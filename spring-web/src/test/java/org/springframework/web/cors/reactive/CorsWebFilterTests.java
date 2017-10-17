@@ -65,14 +65,6 @@ public class CorsWebFilterTests {
 
 	@Test
 	public void validActualRequest() {
-
-		MockServerHttpRequest request = MockServerHttpRequest
-				.get("http://domain1.com/test.html")
-				.header(HOST, "domain1.com")
-				.header(ORIGIN, "http://domain2.com")
-				.header("header2", "foo")
-				.build();
-
 		WebFilterChain filterChain = (filterExchange) -> {
 			try {
 				HttpHeaders headers = filterExchange.getResponse().getHeaders();
@@ -84,19 +76,23 @@ public class CorsWebFilterTests {
 			return Mono.empty();
 
 		};
-		filter.filter(MockServerWebExchange.from(request), filterChain);
+		MockServerWebExchange exchange = MockServerWebExchange.from(
+				MockServerHttpRequest
+						.get("http://domain1.com/test.html")
+						.header(HOST, "domain1.com")
+						.header(ORIGIN, "http://domain2.com")
+						.header("header2", "foo"));
+		this.filter.filter(exchange, filterChain);
 	}
 
 	@Test
 	public void invalidActualRequest() throws ServletException, IOException {
-
-		MockServerHttpRequest request = MockServerHttpRequest
-				.delete("http://domain1.com/test.html")
-				.header(HOST, "domain1.com")
-				.header(ORIGIN, "http://domain2.com")
-				.header("header2", "foo")
-				.build();
-		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		MockServerWebExchange exchange = MockServerWebExchange.from(
+				MockServerHttpRequest
+						.delete("http://domain1.com/test.html")
+						.header(HOST, "domain1.com")
+						.header(ORIGIN, "http://domain2.com")
+						.header("header2", "foo"));
 
 		WebFilterChain filterChain = (filterExchange) -> Mono.error(
 				new AssertionError("Invalid requests must not be forwarded to the filter chain"));
@@ -108,14 +104,14 @@ public class CorsWebFilterTests {
 	@Test
 	public void validPreFlightRequest() throws ServletException, IOException {
 
-		MockServerHttpRequest request = MockServerHttpRequest
-				.options("http://domain1.com/test.html")
-				.header(HOST, "domain1.com")
-				.header(ORIGIN, "http://domain2.com")
-				.header(ACCESS_CONTROL_REQUEST_METHOD, HttpMethod.GET.name())
-				.header(ACCESS_CONTROL_REQUEST_HEADERS, "header1, header2")
-				.build();
-		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		MockServerWebExchange exchange = MockServerWebExchange.from(
+				MockServerHttpRequest
+						.options("http://domain1.com/test.html")
+						.header(HOST, "domain1.com")
+						.header(ORIGIN, "http://domain2.com")
+						.header(ACCESS_CONTROL_REQUEST_METHOD, HttpMethod.GET.name())
+						.header(ACCESS_CONTROL_REQUEST_HEADERS, "header1, header2")
+		);
 
 		WebFilterChain filterChain = (filterExchange) -> Mono.error(
 				new AssertionError("Preflight requests must not be forwarded to the filter chain"));
@@ -131,14 +127,13 @@ public class CorsWebFilterTests {
 	@Test
 	public void invalidPreFlightRequest() throws ServletException, IOException {
 
-		MockServerHttpRequest request = MockServerHttpRequest
-				.options("http://domain1.com/test.html")
-				.header(HOST, "domain1.com")
-				.header(ORIGIN, "http://domain2.com")
-				.header(ACCESS_CONTROL_REQUEST_METHOD, HttpMethod.DELETE.name())
-				.header(ACCESS_CONTROL_REQUEST_HEADERS, "header1, header2")
-				.build();
-		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		MockServerWebExchange exchange = MockServerWebExchange.from(
+				MockServerHttpRequest
+						.options("http://domain1.com/test.html")
+						.header(HOST, "domain1.com")
+						.header(ORIGIN, "http://domain2.com")
+						.header(ACCESS_CONTROL_REQUEST_METHOD, HttpMethod.DELETE.name())
+						.header(ACCESS_CONTROL_REQUEST_HEADERS, "header1, header2"));
 
 		WebFilterChain filterChain = (filterExchange) -> Mono.error(
 				new AssertionError("Preflight requests must not be forwarded to the filter chain"));

@@ -81,7 +81,7 @@ public class ResourceHandlerRegistryTests {
 
 	@Test
 	public void mapPathToLocation() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		exchange.getAttributes().put(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE,
 				PathContainer.parsePath("/testStylesheet.css"));
 

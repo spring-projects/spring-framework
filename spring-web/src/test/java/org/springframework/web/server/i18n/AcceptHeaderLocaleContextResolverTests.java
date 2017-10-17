@@ -81,8 +81,7 @@ public class AcceptHeaderLocaleContextResolverTests {
 
 
 	private ServerWebExchange exchange(Locale... locales) {
-		MockServerHttpRequest request = MockServerHttpRequest.get("").acceptLanguageAsLocales(locales).build();
-		return MockServerWebExchange.from(request);
+		return MockServerWebExchange.from(MockServerHttpRequest.get("").acceptLanguageAsLocales(locales));
 	}
 
 }

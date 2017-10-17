@@ -136,8 +136,7 @@ public class CorsUrlHandlerMappingTests {
 		return MockServerWebExchange.from(MockServerHttpRequest
 				.method(method, "http://localhost" + path)
 				.header("Origin", origin)
-				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET")
-				.build());
+				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET"));
 	}
 
 

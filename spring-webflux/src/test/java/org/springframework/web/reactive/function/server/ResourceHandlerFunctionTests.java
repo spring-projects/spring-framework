@@ -73,7 +73,7 @@ public class ResourceHandlerFunctionTests {
 
 	@Test
 	public void get() throws IOException {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://localhost").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://localhost"));
 		MockServerHttpResponse mockResponse = exchange.getResponse();
 
 		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults().messageReaders());
@@ -109,7 +109,7 @@ public class ResourceHandlerFunctionTests {
 
 	@Test
 	public void head() throws IOException {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.head("http://localhost").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.head("http://localhost"));
 		MockServerHttpResponse mockResponse = exchange.getResponse();
 
 		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults().messageReaders());
@@ -134,7 +134,7 @@ public class ResourceHandlerFunctionTests {
 
 	@Test
 	public void options() {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.options("http://localhost").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.options("http://localhost"));
 		MockServerHttpResponse mockResponse = exchange.getResponse();
 
 		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults().messageReaders());

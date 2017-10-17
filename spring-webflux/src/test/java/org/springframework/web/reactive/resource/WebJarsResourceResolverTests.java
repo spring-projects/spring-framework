@@ -64,7 +64,7 @@ public class WebJarsResourceResolverTests {
 		this.locations = singletonList(new ClassPathResource("/META-INF/resources/webjars"));
 		this.resolver = new WebJarsResourceResolver();
 		this.chain = mock(ResourceResolverChain.class);
-		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("").build());
+		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 	}
 
 

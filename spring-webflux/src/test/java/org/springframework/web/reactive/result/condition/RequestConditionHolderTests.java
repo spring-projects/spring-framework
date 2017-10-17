@@ -34,7 +34,7 @@ import static org.junit.Assert.assertSame;
  */
 public class RequestConditionHolderTests {
 
-	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
+	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 
 	@Test

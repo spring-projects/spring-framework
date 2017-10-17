@@ -54,8 +54,7 @@ public class PathVariableMethodArgumentResolverTests {
 
 	private PathVariableMethodArgumentResolver resolver;
 
-	private final MockServerWebExchange exchange= MockServerWebExchange.from(
-			MockServerHttpRequest.get("/").build());
+	private final MockServerWebExchange exchange= MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 	private MethodParameter paramNamedString;
 	private MethodParameter paramString;

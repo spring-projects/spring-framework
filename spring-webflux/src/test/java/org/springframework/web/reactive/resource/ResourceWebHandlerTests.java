@@ -93,7 +93,7 @@ public class ResourceWebHandlerTests {
 
 	@Test
 	public void getResource() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "foo.css");
 		this.handler.handle(exchange).block(TIMEOUT);
 
@@ -110,7 +110,7 @@ public class ResourceWebHandlerTests {
 
 	@Test
 	public void getResourceHttpHeader() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.head("").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.head(""));
 		setPathWithinHandlerMapping(exchange, "foo.css");
 		this.handler.handle(exchange).block(TIMEOUT);
 
@@ -131,7 +131,7 @@ public class ResourceWebHandlerTests {
 
 	@Test
 	public void getResourceHttpOptions() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.options("").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.options(""));
 		setPathWithinHandlerMapping(exchange, "foo.css");
 		this.handler.handle(exchange).block(TIMEOUT);
 
@@ -141,7 +141,7 @@ public class ResourceWebHandlerTests {
 
 	@Test
 	public void getResourceNoCache() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "foo.css");
 		this.handler.setCacheControl(CacheControl.noStore());
 		this.handler.handle(exchange).block(TIMEOUT);
@@ -161,7 +161,7 @@ public class ResourceWebHandlerTests {
 		this.handler.setResourceResolvers(Arrays.asList(versionResolver, new PathResourceResolver()));
 		this.handler.afterPropertiesSet();
 
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "versionString/foo.css");
 		this.handler.handle(exchange).block(TIMEOUT);
 
@@ -172,7 +172,7 @@ public class ResourceWebHandlerTests {
 
 	@Test
 	public void getResourceWithHtmlMediaType() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "foo.html");
 		this.handler.handle(exchange).block(TIMEOUT);
 
@@ -187,7 +187,7 @@ public class ResourceWebHandlerTests {
 
 	@Test
 	public void getResourceFromAlternatePath() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "baz.css");
 		this.handler.handle(exchange).block(TIMEOUT);
 
@@ -204,7 +204,7 @@ public class ResourceWebHandlerTests {
 
 	@Test
 	public void getResourceFromSubDirectory() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "js/foo.js");
 		this.handler.handle(exchange).block(TIMEOUT);
 
@@ -215,7 +215,7 @@ public class ResourceWebHandlerTests {
 
 	@Test
 	public void getResourceFromSubDirectoryOfAlternatePath() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "js/baz.js");
 		this.handler.handle(exchange).block(TIMEOUT);
 
@@ -232,7 +232,7 @@ public class ResourceWebHandlerTests {
 		handler.afterPropertiesSet();
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("")
-				.header("Accept", "application/json,text/plain,*/*").build());
+				.header("Accept", "application/json,text/plain,*/*"));
 		setPathWithinHandlerMapping(exchange, "foo.html");
 		handler.handle(exchange).block(TIMEOUT);
 
@@ -273,8 +273,7 @@ public class ResourceWebHandlerTests {
 	}
 
 	private void testInvalidPath(HttpMethod httpMethod, String requestPath, Resource location) throws Exception {
-		MockServerHttpRequest request = MockServerHttpRequest.method(httpMethod, "").build();
-		ServerWebExchange exchange = MockServerWebExchange.from(request);
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.method(httpMethod, ""));
 		setPathWithinHandlerMapping(exchange, requestPath);
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
@@ -347,7 +346,7 @@ public class ResourceWebHandlerTests {
 	@Test
 	public void notModified() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("")
-				.ifModifiedSince(resourceLastModified("test/foo.css")).build());
+				.ifModifiedSince(resourceLastModified("test/foo.css")));
 		setPathWithinHandlerMapping(exchange, "foo.css");
 		this.handler.handle(exchange).block(TIMEOUT);
 		assertEquals(HttpStatus.NOT_MODIFIED, exchange.getResponse().getStatusCode());
@@ -367,7 +366,7 @@ public class ResourceWebHandlerTests {
 
 	@Test
 	public void directory() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "js/");
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
@@ -378,7 +377,7 @@ public class ResourceWebHandlerTests {
 
 	@Test
 	public void directoryInJarFile() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "underscorejs/");
 		this.handler.handle(exchange).block(TIMEOUT);
 
@@ -388,7 +387,7 @@ public class ResourceWebHandlerTests {
 
 	@Test
 	public void missingResourcePath() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "");
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
@@ -399,13 +398,13 @@ public class ResourceWebHandlerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void noPathWithinHandlerMappingAttribute() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		this.handler.handle(exchange).block(TIMEOUT);
 	}
 
 	@Test(expected = MethodNotAllowedException.class)
 	public void unsupportedHttpMethod() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post(""));
 		setPathWithinHandlerMapping(exchange, "foo.css");
 		this.handler.handle(exchange).block(TIMEOUT);
 	}
@@ -569,7 +568,7 @@ public class ResourceWebHandlerTests {
 
 	@Test  // SPR-14005
 	public void doOverwriteExistingCacheControlHeaders() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		exchange.getResponse().getHeaders().setCacheControl(CacheControl.noStore().getHeaderValue());
 		setPathWithinHandlerMapping(exchange, "foo.css");
 		this.handler.handle(exchange).block(TIMEOUT);

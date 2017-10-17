@@ -112,7 +112,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 	@Test
 	public void resolveStringArgument() throws Exception {
 		String expected = "foo";
-		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").header("name", expected).build());
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").header("name", expected));
 
 		Mono<Object> mono = this.resolver.resolveArgument(
 				this.paramNamedDefaultValueStringHeader, this.bindingContext, exchange);
@@ -137,7 +137,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 
 	@Test
 	public void resolveDefaultValue() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		Mono<Object> mono = this.resolver.resolveArgument(
 				this.paramNamedDefaultValueStringHeader, this.bindingContext, exchange);
 
@@ -152,7 +152,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 		try {
 			Mono<Object> mono = this.resolver.resolveArgument(
 					this.paramSystemProperty, this.bindingContext,
-					MockServerWebExchange.from(MockServerHttpRequest.get("/").build()));
+					MockServerWebExchange.from(MockServerHttpRequest.get("/")));
 
 			Object result = mono.block();
 			assertTrue(result instanceof String);
@@ -207,7 +207,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 	public void notFound() throws Exception {
 		Mono<Object> mono = resolver.resolveArgument(
 				this.paramNamedValueStringArray, this.bindingContext,
-				MockServerWebExchange.from(MockServerHttpRequest.get("/").build()));
+				MockServerWebExchange.from(MockServerHttpRequest.get("/")));
 
 		StepVerifier.create(mono)
 				.expectNextCount(0)

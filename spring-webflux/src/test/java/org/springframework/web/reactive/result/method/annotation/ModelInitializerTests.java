@@ -67,8 +67,7 @@ public class ModelInitializerTests {
 
 	private ModelInitializer modelInitializer;
 
-	private final ServerWebExchange exchange = MockServerWebExchange.from(
-			MockServerHttpRequest.get("/path").build());
+	private final ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
 
 
 	@Before

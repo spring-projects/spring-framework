@@ -53,7 +53,7 @@ public class ErrorsArgumentResolverTests {
 
 	private BindingResult bindingResult;
 
-	private MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("/path").build());
+	private MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("/path"));
 
 	private final ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 

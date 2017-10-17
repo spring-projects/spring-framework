@@ -54,7 +54,7 @@ public class RouterFunctionMappingTests {
 	@Before
 	public void setUp() {
 		this.messageReaders = Collections.singletonList(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
-		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://example.com/match").build());
+		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://example.com/match"));
 		codecConfigurer = ServerCodecConfigurer.create();
 
 	}

@@ -43,13 +43,13 @@ public class ForwardedHeaderFilterTests {
 
 	@Test
 	public void removeOnly() {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/")
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest
+				.get("/")
 				.header("Forwarded", "for=192.0.2.60;proto=http;by=203.0.113.43")
 				.header("X-Forwarded-Host", "example.com")
 				.header("X-Forwarded-Port", "8080")
 				.header("X-Forwarded-Proto", "http")
-				.header("X-Forwarded-Prefix", "prefix")
-				.build());
+				.header("X-Forwarded-Prefix", "prefix"));
 
 		this.filter.setRemoveOnly(true);
 		this.filter.filter(exchange, this.filterChain).block(Duration.ZERO);
@@ -65,11 +65,11 @@ public class ForwardedHeaderFilterTests {
 
 	@Test
 	public void xForwardedRequest() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://example.com/path")
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest
+				.get("http://example.com/path")
 				.header("X-Forwarded-Host", "84.198.58.199")
 				.header("X-Forwarded-Port", "443")
-				.header("X-Forwarded-Proto", "https")
-				.build());
+				.header("X-Forwarded-Proto", "https"));
 
 		this.filter.filter(exchange, this.filterChain).block(Duration.ZERO);
 
@@ -79,10 +79,9 @@ public class ForwardedHeaderFilterTests {
 
 	@Test
 	public void forwardedRequest() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://example.com/path")
-				.header("Forwarded", "host=84.198.58.199;proto=https")
-
-				.build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest
+				.get("http://example.com/path")
+				.header("Forwarded", "host=84.198.58.199;proto=https"));
 
 		this.filter.filter(exchange, this.filterChain).block(Duration.ZERO);
 
@@ -92,9 +91,9 @@ public class ForwardedHeaderFilterTests {
 
 	@Test
 	public void requestUriWithForwardedPrefix() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://example.com/path")
-				.header("X-Forwarded-Prefix", "/prefix")
-				.build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest
+				.get("http://example.com/path")
+				.header("X-Forwarded-Prefix", "/prefix"));
 
 		this.filter.filter(exchange, this.filterChain).block(Duration.ZERO);
 
@@ -104,9 +103,9 @@ public class ForwardedHeaderFilterTests {
 
 	@Test
 	public void requestUriWithForwardedPrefixTrailingSlash() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://example.com/path")
-				.header("X-Forwarded-Prefix", "/prefix/")
-				.build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest
+				.get("http://example.com/path")
+				.header("X-Forwarded-Prefix", "/prefix/"));
 
 		this.filter.filter(exchange, this.filterChain).block(Duration.ZERO);
 

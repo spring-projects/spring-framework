@@ -47,7 +47,7 @@ public class HeadersRequestConditionTests {
 
 	@Test
 	public void headerPresent() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").header("Accept", "").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").header("Accept", ""));
 		HeadersRequestCondition condition = new HeadersRequestCondition("accept");
 	
 		assertNotNull(condition.getMatchingCondition(exchange));
@@ -55,7 +55,7 @@ public class HeadersRequestConditionTests {
 
 	@Test
 	public void headerPresentNoMatch() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").header("bar", "").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").header("bar", ""));
 		HeadersRequestCondition condition = new HeadersRequestCondition("foo");
 
 		assertNull(condition.getMatchingCondition(exchange));
@@ -63,7 +63,7 @@ public class HeadersRequestConditionTests {
 
 	@Test
 	public void headerNotPresent() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		HeadersRequestCondition condition = new HeadersRequestCondition("!accept");
 
 		assertNotNull(condition.getMatchingCondition(exchange));
@@ -71,7 +71,7 @@ public class HeadersRequestConditionTests {
 
 	@Test
 	public void headerValueMatch() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").header("foo", "bar").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").header("foo", "bar"));
 		HeadersRequestCondition condition = new HeadersRequestCondition("foo=bar");
 
 		assertNotNull(condition.getMatchingCondition(exchange));
@@ -79,7 +79,7 @@ public class HeadersRequestConditionTests {
 
 	@Test
 	public void headerValueNoMatch() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").header("foo", "bazz").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").header("foo", "bazz"));
 		HeadersRequestCondition condition = new HeadersRequestCondition("foo=bar");
 
 		assertNull(condition.getMatchingCondition(exchange));
@@ -87,7 +87,7 @@ public class HeadersRequestConditionTests {
 
 	@Test
 	public void headerCaseSensitiveValueMatch() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").header("foo", "bar").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").header("foo", "bar"));
 		HeadersRequestCondition condition = new HeadersRequestCondition("foo=Bar");
 
 		assertNull(condition.getMatchingCondition(exchange));
@@ -95,7 +95,7 @@ public class HeadersRequestConditionTests {
 
 	@Test
 	public void headerValueMatchNegated() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").header("foo", "baz").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").header("foo", "baz"));
 		HeadersRequestCondition condition = new HeadersRequestCondition("foo!=bar");
 
 		assertNotNull(condition.getMatchingCondition(exchange));
@@ -103,7 +103,7 @@ public class HeadersRequestConditionTests {
 
 	@Test
 	public void headerValueNoMatchNegated() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").header("foo", "bar").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").header("foo", "bar"));
 		HeadersRequestCondition condition = new HeadersRequestCondition("foo!=bar");
 
 		assertNull(condition.getMatchingCondition(exchange));
@@ -111,7 +111,7 @@ public class HeadersRequestConditionTests {
 
 	@Test
 	public void compareTo() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 		HeadersRequestCondition condition1 = new HeadersRequestCondition("foo", "bar", "baz");
 		HeadersRequestCondition condition2 = new HeadersRequestCondition("foo", "bar");
@@ -136,7 +136,7 @@ public class HeadersRequestConditionTests {
 
 	@Test
 	public void getMatchingCondition() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").header("foo", "bar").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").header("foo", "bar"));
 		HeadersRequestCondition condition = new HeadersRequestCondition("foo");
 
 		HeadersRequestCondition result = condition.getMatchingCondition(exchange);

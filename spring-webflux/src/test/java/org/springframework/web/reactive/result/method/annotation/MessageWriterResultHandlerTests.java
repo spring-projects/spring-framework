@@ -69,8 +69,7 @@ public class MessageWriterResultHandlerTests {
 
 	private final AbstractMessageWriterResultHandler resultHandler = initResultHandler();
 
-	private final MockServerWebExchange exchange = MockServerWebExchange.from(
-			MockServerHttpRequest.get("/path").build());
+	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
 
 
 	private AbstractMessageWriterResultHandler initResultHandler(HttpMessageWriter<?>... writers) {

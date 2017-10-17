@@ -67,7 +67,7 @@ public class DispatcherHandlerTests {
 
 		DispatcherHandler dispatcherHandler = new DispatcherHandler(context);
 
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		dispatcherHandler.handle(exchange).block(Duration.ofSeconds(0));
 		assertEquals("1", exchange.getResponse().getBodyAsString().block(Duration.ofSeconds(5)));
 	}

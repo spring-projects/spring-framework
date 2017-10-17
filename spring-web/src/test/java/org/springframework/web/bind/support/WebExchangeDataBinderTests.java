@@ -181,8 +181,8 @@ public class WebExchangeDataBinderTests {
 	@Test
 	public void testBindingWithQueryParams() throws Exception {
 		String url = "/path?spouse=someValue&spouse.name=test";
-		MockServerHttpRequest request = MockServerHttpRequest.post(url).build();
-		this.binder.bind(MockServerWebExchange.from(request)).block(Duration.ofSeconds(5));
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post(url));
+		this.binder.bind(exchange).block(Duration.ofSeconds(5));
 
 		assertNotNull(this.testBean.getSpouse());
 		assertEquals("test", this.testBean.getSpouse().getName());

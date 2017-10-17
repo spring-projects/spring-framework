@@ -52,8 +52,7 @@ public class ServerWebExchangeArgumentResolverTests {
 	private final ServerWebExchangeArgumentResolver resolver =
 			new ServerWebExchangeArgumentResolver(new ReactiveAdapterRegistry());
 
-	private final MockServerWebExchange exchange = MockServerWebExchange.from(
-			MockServerHttpRequest.get("/path").build());
+	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
 
 	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 

@@ -53,8 +53,7 @@ public class HttpMessageWriterViewTests {
 
 	private final ModelMap model = new ExtendedModelMap();
 
-	private final MockServerWebExchange exchange = MockServerWebExchange.from(
-			MockServerHttpRequest.get("/").build());
+	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 
 	@Test

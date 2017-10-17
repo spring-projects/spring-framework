@@ -72,7 +72,7 @@ public class ResourceUrlProviderTests {
 
 	@Test
 	public void getStaticResourceUrl() {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		String uriString = "/resources/foo.css";
 		String actual = this.urlProvider.getForUriString(uriString, exchange).block(Duration.ofSeconds(5));
 		assertEquals(uriString, actual);
@@ -80,7 +80,7 @@ public class ResourceUrlProviderTests {
 
 	@Test  // SPR-13374
 	public void getStaticResourceUrlRequestWithQueryOrHash() {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 		String url = "/resources/foo.css?foo=bar&url=http://example.org";
 		String resolvedUrl = this.urlProvider.getForUriString(url, exchange).block(Duration.ofSeconds(5));
@@ -103,7 +103,7 @@ public class ResourceUrlProviderTests {
 		resolvers.add(new PathResourceResolver());
 		this.handler.setResourceResolvers(resolvers);
 
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		String path = "/resources/foo.css";
 		String url = this.urlProvider.getForUriString(path, exchange).block(Duration.ofSeconds(5));
 		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
@@ -126,7 +126,7 @@ public class ResourceUrlProviderTests {
 		this.handlerMap.put("/resources/*.css", otherHandler);
 		this.urlProvider.registerHandlers(this.handlerMap);
 
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		String path = "/resources/foo.css";
 		String url = this.urlProvider.getForUriString(path, exchange).block(Duration.ofSeconds(5));
 		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);

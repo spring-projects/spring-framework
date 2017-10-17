@@ -87,7 +87,7 @@ public class RequestMappingInfoTests {
 
 	@Test
 	public void matchPatternsCondition() {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo"));
 
 		RequestMappingInfo info = paths("/foo*", "/bar").build();
 		RequestMappingInfo expected = paths("/foo*").build();
@@ -102,8 +102,7 @@ public class RequestMappingInfoTests {
 
 	@Test
 	public void matchParamsCondition() {
-		MockServerHttpRequest request = MockServerHttpRequest.get("/foo?foo=bar").build();
-		ServerWebExchange exchange = MockServerWebExchange.from(request);
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo?foo=bar"));
 
 		RequestMappingInfo info = paths("/foo").params("foo=bar").build();
 		RequestMappingInfo match = info.getMatchingCondition(exchange);
@@ -166,8 +165,7 @@ public class RequestMappingInfoTests {
 
 	@Test
 	public void matchCustomCondition() {
-		MockServerHttpRequest request = MockServerHttpRequest.get("/foo?foo=bar").build();
-		ServerWebExchange exchange = MockServerWebExchange.from(request);
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo?foo=bar"));
 
 		RequestMappingInfo info = paths("/foo").params("foo=bar").build();
 		RequestMappingInfo match = info.getMatchingCondition(exchange);
@@ -188,7 +186,7 @@ public class RequestMappingInfoTests {
 		RequestMappingInfo oneMethod = paths().methods(RequestMethod.GET).build();
 		RequestMappingInfo oneMethodOneParam = paths().methods(RequestMethod.GET).params("foo").build();
 
-		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo").build());
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo"));
 		Comparator<RequestMappingInfo> comparator = (info, otherInfo) -> info.compareTo(otherInfo, exchange);
 
 		List<RequestMappingInfo> list = asList(none, oneMethod, oneMethodOneParam);
@@ -287,7 +285,7 @@ public class RequestMappingInfoTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.options("/foo")
 				.header("Origin", "http://domain.com")
 				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "POST")
-				.build());
+				);
 
 		RequestMappingInfo info = paths("/foo").methods(RequestMethod.POST).build();
 		RequestMappingInfo match = info.getMatchingCondition(exchange);

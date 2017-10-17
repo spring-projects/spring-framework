@@ -35,8 +35,7 @@ public class ServerWebExchangeTests {
 
 	@Before
 	public void createExchange() {
-		MockServerHttpRequest request = MockServerHttpRequest.get("http://example.com").build();
-		this.exchange = MockServerWebExchange.from(request);
+		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://example.com"));
 	}
 
 	@Test

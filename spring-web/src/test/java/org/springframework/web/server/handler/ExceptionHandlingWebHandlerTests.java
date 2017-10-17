@@ -41,8 +41,8 @@ public class ExceptionHandlingWebHandlerTests {
 
 	private final WebHandler targetHandler = new StubWebHandler(new IllegalStateException("boo"));
 
-	private final ServerWebExchange exchange = MockServerWebExchange.from(
-			MockServerHttpRequest.get("http://localhost:8080").build());
+	private final ServerWebExchange exchange =
+			MockServerWebExchange.from(MockServerHttpRequest.get("http://localhost:8080"));
 
 
 	@Test

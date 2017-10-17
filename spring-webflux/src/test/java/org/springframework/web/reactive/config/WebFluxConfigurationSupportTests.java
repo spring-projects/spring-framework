@@ -105,7 +105,7 @@ public class WebFluxConfigurationSupportTests {
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
 		assertSame(resolver, mapping.getContentTypeResolver());
 
-		ServerWebExchange exchange = MockServerWebExchange.from(get("/path").accept(MediaType.APPLICATION_JSON).build());
+		ServerWebExchange exchange = MockServerWebExchange.from(get("/path").accept(MediaType.APPLICATION_JSON));
 		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON), resolver.resolveMediaTypes(exchange));
 	}
 

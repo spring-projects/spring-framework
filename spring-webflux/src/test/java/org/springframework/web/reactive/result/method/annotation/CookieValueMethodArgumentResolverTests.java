@@ -97,7 +97,7 @@ public class CookieValueMethodArgumentResolverTests {
 	@Test
 	public void resolveCookieArgument() {
 		HttpCookie expected = new HttpCookie("name", "foo");
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").cookie(expected).build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").cookie(expected));
 
 		Mono<Object> mono = this.resolver.resolveArgument(
 				this.cookieParameter, this.bindingContext, exchange);
@@ -108,7 +108,7 @@ public class CookieValueMethodArgumentResolverTests {
 	@Test
 	public void resolveCookieStringArgument() {
 		HttpCookie cookie = new HttpCookie("name", "foo");
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").cookie(cookie).build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").cookie(cookie));
 
 		Mono<Object> mono = this.resolver.resolveArgument(
 				this.cookieStringParameter, this.bindingContext, exchange);
@@ -118,7 +118,7 @@ public class CookieValueMethodArgumentResolverTests {
 
 	@Test
 	public void resolveCookieDefaultValue() {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		Object result = this.resolver.resolveArgument(this.cookieStringParameter, this.bindingContext, exchange).block();
 
 		assertTrue(result instanceof String);
@@ -127,7 +127,7 @@ public class CookieValueMethodArgumentResolverTests {
 
 	@Test
 	public void notFound() {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		Mono<Object> mono = resolver.resolveArgument(this.cookieParameter, this.bindingContext, exchange);
 		StepVerifier.create(mono)
 				.expectNextCount(0)

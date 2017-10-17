@@ -108,8 +108,7 @@ public class DefaultRenderingResponseTests {
 		Map<String, Object> model = Collections.singletonMap("foo", "bar");
 		Mono<RenderingResponse> result = RenderingResponse.create("view").modelAttributes(model).build();
 
-		MockServerHttpRequest build = MockServerHttpRequest.get("http://localhost").build();
-		MockServerWebExchange exchange = MockServerWebExchange.from(build);
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://localhost"));
 		ViewResolver viewResolver = mock(ViewResolver.class);
 		View view = mock(View.class);
 		when(viewResolver.resolveViewName("view", Locale.ENGLISH)).thenReturn(Mono.just(view));

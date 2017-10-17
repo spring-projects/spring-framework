@@ -55,4 +55,14 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 		return new MockServerWebExchange(request);
 	}
 
+	/**
+	 * A variant of {@link #from(MockServerHttpRequest)} that accepts a request
+	 * builder. Internally invokes the {@code build()} to build the request.
+	 * @param requestBuilder the builder for the request.
+	 * @return the exchange
+	 */
+	public static MockServerWebExchange from(MockServerHttpRequest.BaseBuilder<?> requestBuilder) {
+		return new MockServerWebExchange(requestBuilder.build());
+	}
+
 }

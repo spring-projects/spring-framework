@@ -152,8 +152,8 @@ public class DefaultCorsProcessorTests {
 
 	@Test
 	public void preflightRequestAllOriginsAllowed() throws Exception {
-		MockServerHttpRequest request = preFlightRequest().header(ACCESS_CONTROL_REQUEST_METHOD, "GET").build();
-		ServerWebExchange exchange = MockServerWebExchange.from(request);
+		ServerWebExchange exchange = MockServerWebExchange.from(
+				preFlightRequest().header(ACCESS_CONTROL_REQUEST_METHOD, "GET"));
 		this.conf.addAllowedOrigin("*");
 		this.processor.process(this.conf, exchange);
 
@@ -163,8 +163,8 @@ public class DefaultCorsProcessorTests {
 
 	@Test
 	public void preflightRequestWrongAllowedMethod() throws Exception {
-		MockServerHttpRequest request = preFlightRequest().header(ACCESS_CONTROL_REQUEST_METHOD, "DELETE").build();
-		ServerWebExchange exchange = MockServerWebExchange.from(request);
+		ServerWebExchange exchange = MockServerWebExchange.from(
+				preFlightRequest().header(ACCESS_CONTROL_REQUEST_METHOD, "DELETE"));
 		this.conf.addAllowedOrigin("*");
 		this.processor.process(this.conf, exchange);
 
@@ -173,8 +173,8 @@ public class DefaultCorsProcessorTests {
 
 	@Test
 	public void preflightRequestMatchedAllowedMethod() throws Exception {
-		MockServerHttpRequest request = preFlightRequest().header(ACCESS_CONTROL_REQUEST_METHOD, "GET").build();
-		ServerWebExchange exchange = MockServerWebExchange.from(request);
+		ServerWebExchange exchange = MockServerWebExchange.from(
+				preFlightRequest().header(ACCESS_CONTROL_REQUEST_METHOD, "GET"));
 		this.conf.addAllowedOrigin("*");
 		this.processor.process(this.conf, exchange);
 
@@ -185,7 +185,7 @@ public class DefaultCorsProcessorTests {
 
 	@Test
 	public void preflightRequestTestWithOriginButWithoutOtherHeaders() throws Exception {
-		ServerWebExchange exchange = MockServerWebExchange.from(preFlightRequest().build());
+		ServerWebExchange exchange = MockServerWebExchange.from(preFlightRequest());
 		this.processor.process(this.conf, exchange);
 
 		ServerHttpResponse response = exchange.getResponse();
@@ -195,8 +195,8 @@ public class DefaultCorsProcessorTests {
 
 	@Test
 	public void preflightRequestWithoutRequestMethod() throws Exception {
-		MockServerHttpRequest request = preFlightRequest().header(ACCESS_CONTROL_REQUEST_HEADERS, "Header1").build();
-		ServerWebExchange exchange = MockServerWebExchange.from(request);
+		ServerWebExchange exchange = MockServerWebExchange.from(
+				preFlightRequest().header(ACCESS_CONTROL_REQUEST_HEADERS, "Header1"));
 		this.processor.process(this.conf, exchange);
 
 		ServerHttpResponse response = exchange.getResponse();
@@ -208,8 +208,7 @@ public class DefaultCorsProcessorTests {
 	public void preflightRequestWithRequestAndMethodHeaderButNoConfig() throws Exception {
 		ServerWebExchange exchange = MockServerWebExchange.from(preFlightRequest()
 				.header(ACCESS_CONTROL_REQUEST_METHOD, "GET")
-				.header(ACCESS_CONTROL_REQUEST_HEADERS, "Header1")
-				.build());
+				.header(ACCESS_CONTROL_REQUEST_HEADERS, "Header1"));
 
 		this.processor.process(this.conf, exchange);
 
@@ -222,8 +221,7 @@ public class DefaultCorsProcessorTests {
 	public void preflightRequestValidRequestAndConfig() throws Exception {
 		ServerWebExchange exchange = MockServerWebExchange.from(preFlightRequest()
 				.header(ACCESS_CONTROL_REQUEST_METHOD, "GET")
-				.header(ACCESS_CONTROL_REQUEST_HEADERS, "Header1")
-				.build());
+				.header(ACCESS_CONTROL_REQUEST_HEADERS, "Header1"));
 
 		this.conf.addAllowedOrigin("*");
 		this.conf.addAllowedMethod("GET");
@@ -246,8 +244,7 @@ public class DefaultCorsProcessorTests {
 	public void preflightRequestCredentials() throws Exception {
 		ServerWebExchange exchange = MockServerWebExchange.from(preFlightRequest()
 				.header(ACCESS_CONTROL_REQUEST_METHOD, "GET")
-				.header(ACCESS_CONTROL_REQUEST_HEADERS, "Header1")
-				.build());
+				.header(ACCESS_CONTROL_REQUEST_HEADERS, "Header1"));
 
 		this.conf.addAllowedOrigin("http://domain1.com");
 		this.conf.addAllowedOrigin("http://domain2.com");
@@ -269,8 +266,7 @@ public class DefaultCorsProcessorTests {
 	public void preflightRequestCredentialsWithOriginWildcard() throws Exception {
 		ServerWebExchange exchange = MockServerWebExchange.from(preFlightRequest()
 				.header(ACCESS_CONTROL_REQUEST_METHOD, "GET")
-				.header(ACCESS_CONTROL_REQUEST_HEADERS, "Header1")
-				.build());
+				.header(ACCESS_CONTROL_REQUEST_HEADERS, "Header1"));
 
 		this.conf.addAllowedOrigin("http://domain1.com");
 		this.conf.addAllowedOrigin("*");
@@ -290,8 +286,7 @@ public class DefaultCorsProcessorTests {
 	public void preflightRequestAllowedHeaders() throws Exception {
 		ServerWebExchange exchange = MockServerWebExchange.from(preFlightRequest()
 				.header(ACCESS_CONTROL_REQUEST_METHOD, "GET")
-				.header(ACCESS_CONTROL_REQUEST_HEADERS, "Header1, Header2")
-				.build());
+				.header(ACCESS_CONTROL_REQUEST_HEADERS, "Header1, Header2"));
 
 		this.conf.addAllowedHeader("Header1");
 		this.conf.addAllowedHeader("Header2");
@@ -313,8 +308,7 @@ public class DefaultCorsProcessorTests {
 	public void preflightRequestAllowsAllHeaders() throws Exception {
 		ServerWebExchange exchange = MockServerWebExchange.from(preFlightRequest()
 				.header(ACCESS_CONTROL_REQUEST_METHOD, "GET")
-				.header(ACCESS_CONTROL_REQUEST_HEADERS, "Header1, Header2")
-				.build());
+				.header(ACCESS_CONTROL_REQUEST_HEADERS, "Header1, Header2"));
 
 		this.conf.addAllowedHeader("*");
 		this.conf.addAllowedOrigin("http://domain2.com");
@@ -334,8 +328,7 @@ public class DefaultCorsProcessorTests {
 	public void preflightRequestWithEmptyHeaders() throws Exception {
 		ServerWebExchange exchange = MockServerWebExchange.from(preFlightRequest()
 				.header(ACCESS_CONTROL_REQUEST_METHOD, "GET")
-				.header(ACCESS_CONTROL_REQUEST_HEADERS, "")
-				.build());
+				.header(ACCESS_CONTROL_REQUEST_HEADERS, ""));
 
 		this.conf.addAllowedHeader("*");
 		this.conf.addAllowedOrigin("http://domain2.com");
@@ -350,8 +343,8 @@ public class DefaultCorsProcessorTests {
 
 	@Test
 	public void preflightRequestWithNullConfig() throws Exception {
-		MockServerHttpRequest request = preFlightRequest().header(ACCESS_CONTROL_REQUEST_METHOD, "GET").build();
-		ServerWebExchange exchange = MockServerWebExchange.from(request);
+		ServerWebExchange exchange = MockServerWebExchange.from(
+				preFlightRequest().header(ACCESS_CONTROL_REQUEST_METHOD, "GET"));
 		this.conf.addAllowedOrigin("*");
 		this.processor.process(null, exchange);
 
@@ -362,7 +355,7 @@ public class DefaultCorsProcessorTests {
 
 
 	private ServerWebExchange actualRequest() {
-		return MockServerWebExchange.from(corsRequest(HttpMethod.GET).build());
+		return MockServerWebExchange.from(corsRequest(HttpMethod.GET));
 	}
 
 	private MockServerHttpRequest.BaseBuilder<?> preFlightRequest() {

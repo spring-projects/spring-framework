@@ -48,42 +48,42 @@ public class ParamsRequestConditionTests {
 	@Test
 	public void paramPresent() throws Exception {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo");
-		assertNotNull(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?foo=").build())));
+		assertNotNull(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?foo="))));
 	}
 
 	@Test // SPR-15831
 	public void paramPresentNullValue() throws Exception {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo");
-		assertNotNull(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?foo").build())));
+		assertNotNull(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?foo"))));
 	}
 
 	@Test
 	public void paramPresentNoMatch() throws Exception {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo");
-		assertNull(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?bar=").build())));
+		assertNull(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?bar="))));
 	}
 
 	@Test
 	public void paramNotPresent() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/"));
 		assertNotNull(new ParamsRequestCondition("!foo").getMatchingCondition(exchange));
 	}
 
 	@Test
 	public void paramValueMatch() throws Exception {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo=bar");
-		assertNotNull(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?foo=bar").build())));
+		assertNotNull(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?foo=bar"))));
 	}
 
 	@Test
 	public void paramValueNoMatch() throws Exception {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo=bar");
-		assertNull(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?foo=bazz").build())));
+		assertNull(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?foo=bazz"))));
 	}
 
 	@Test
 	public void compareTo() throws Exception {
-		ServerWebExchange exchange = MockServerWebExchange.from(get("/").build());
+		ServerWebExchange exchange = MockServerWebExchange.from(get("/"));
 
 		ParamsRequestCondition condition1 = new ParamsRequestCondition("foo", "bar", "baz");
 		ParamsRequestCondition condition2 = new ParamsRequestCondition("foo", "bar");

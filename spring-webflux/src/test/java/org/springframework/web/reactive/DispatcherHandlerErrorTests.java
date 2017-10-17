@@ -82,8 +82,7 @@ public class DispatcherHandlerErrorTests {
 
 	@Test
 	public void noHandler() throws Exception {
-		MockServerHttpRequest request = MockServerHttpRequest.get("/does-not-exist").build();
-		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/does-not-exist"));
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
 		StepVerifier.create(publisher)
@@ -96,8 +95,7 @@ public class DispatcherHandlerErrorTests {
 
 	@Test
 	public void controllerReturnsMonoError() throws Exception {
-		MockServerHttpRequest request = MockServerHttpRequest.get("/error-signal").build();
-		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/error-signal"));
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
 		StepVerifier.create(publisher)
@@ -107,8 +105,7 @@ public class DispatcherHandlerErrorTests {
 
 	@Test
 	public void controllerThrowsException() throws Exception {
-		MockServerHttpRequest request = MockServerHttpRequest.get("/raise-exception").build();
-		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/raise-exception"));
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
 		StepVerifier.create(publisher)
@@ -118,8 +115,7 @@ public class DispatcherHandlerErrorTests {
 
 	@Test
 	public void unknownReturnType() throws Exception {
-		MockServerHttpRequest request = MockServerHttpRequest.get("/unknown-return-type").build();
-		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/unknown-return-type"));
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
 		StepVerifier.create(publisher)
@@ -156,8 +152,7 @@ public class DispatcherHandlerErrorTests {
 
 	@Test
 	public void webExceptionHandler() throws Exception {
-		ServerWebExchange exchange = MockServerWebExchange.from(
-				MockServerHttpRequest.get("/unknown-argument-type").build());
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/unknown-argument-type"));
 
 		List<WebExceptionHandler> handlers = Collections.singletonList(new ServerError500ExceptionHandler());
 		WebHandler webHandler = new ExceptionHandlingWebHandler(this.dispatcherHandler, handlers);

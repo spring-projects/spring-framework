@@ -101,7 +101,7 @@ public class ConsumesRequestConditionTests {
 
 	@Test
 	public void compareToSingle() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 		ConsumesRequestCondition condition1 = new ConsumesRequestCondition("text/plain");
 		ConsumesRequestCondition condition2 = new ConsumesRequestCondition("text/*");
@@ -115,7 +115,7 @@ public class ConsumesRequestConditionTests {
 
 	@Test
 	public void compareToMultiple() throws Exception {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 		ConsumesRequestCondition condition1 = new ConsumesRequestCondition("*/*", "text/plain");
 		ConsumesRequestCondition condition2 = new ConsumesRequestCondition("text/*", "text/plain;q=0.7");
@@ -189,7 +189,7 @@ public class ConsumesRequestConditionTests {
 
 	private MockServerWebExchange postExchange(String contentType) {
 		return MockServerWebExchange.from(
-				MockServerHttpRequest.post("/").header(HttpHeaders.CONTENT_TYPE, contentType).build());
+				MockServerHttpRequest.post("/").header(HttpHeaders.CONTENT_TYPE, contentType));
 	}
 
 }

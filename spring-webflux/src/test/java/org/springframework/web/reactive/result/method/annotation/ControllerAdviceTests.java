@@ -54,7 +54,7 @@ import static org.mockito.Mockito.mock;
 public class ControllerAdviceTests {
 
 	private final MockServerWebExchange exchange =
-			MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
+			MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 
 	@Test

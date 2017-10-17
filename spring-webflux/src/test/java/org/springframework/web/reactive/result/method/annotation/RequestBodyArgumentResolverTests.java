@@ -238,7 +238,7 @@ public class RequestBodyArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> T resolveValueWithEmptyBody(MethodParameter param) {
-		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("/path").build());
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("/path"));
 		Mono<Object> result = this.resolver.resolveArgument(param, new BindingContext(), exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
