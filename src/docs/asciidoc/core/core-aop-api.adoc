@@ -736,7 +736,7 @@ options that are preferable if you don't need such control.
 The `ProxyFactoryBean`, like other Spring `FactoryBean` implementations, introduces a
 level of indirection. If you define a `ProxyFactoryBean` with name `foo`, what objects
 referencing `foo` see is not the `ProxyFactoryBean` instance itself, but an object
-created by the `ProxyFactoryBean`'s implementation of the `getObject()` method. This
+created by the ``ProxyFactoryBean``'s implementation of the `getObject()` method. This
 method will create an AOP proxy wrapping a target object.
 
 One of the most important benefits of using a `ProxyFactoryBean` or another IoC-aware
