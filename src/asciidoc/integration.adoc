@@ -271,7 +271,7 @@ In the newly created application context called `remoting-servlet.xml`, we'll cr
 Now we're ready to link in the service at the client. No explicit handler mapping is
 specified, mapping request URLs onto services, so `BeanNameUrlHandlerMapping` will be
 used: Hence, the service will be exported at the URL indicated through its bean name
-within the containing `DispatcherServlet`'s mapping (as defined above):
+within the containing ``DispatcherServlet``'s mapping (as defined above):
 `'http://HOST:8080/remoting/AccountService'`.
 
 Alternatively, create a `HessianServiceExporter` in your root application context (e.g.
@@ -425,7 +425,7 @@ dispatcher's application context:
 	</bean>
 ----
 
-Such an exporter definition will be exposed through the `DispatcherServlet`'s standard
+Such an exporter definition will be exposed through the ``DispatcherServlet``'s standard
 mapping facilities, as explained in the section on Hessian.
 
 Alternatively, create an `HttpInvokerServiceExporter` in your root application context
@@ -1801,7 +1801,7 @@ synchronous receive calls is set using the property `setReceiveTimeout`.
 
 Some JMS providers allow the setting of default QOS values administratively through the
 configuration of the `ConnectionFactory`. This has the effect that a call to
-`MessageProducer`'s send method `send(Destination destination, Message message)` will
+``MessageProducer``'s send method `send(Destination destination, Message message)` will
 use different QOS default values than those specified in the JMS specification. In order
 to provide consistent management of QOS values, the `JmsTemplate` must therefore be
 specifically enabled to use its own QOS values by setting the boolean property
@@ -2583,7 +2583,7 @@ Spring also provides a generic JCA message endpoint manager which is not tied to
 for using any message listener type (e.g. a CCI MessageListener) and any
 provider-specific ActivationSpec object. Check out your JCA provider's documentation to
 find out about the actual capabilities of your connector, and consult
-`GenericMessageEndpointManager`'s javadoc for the Spring-specific configuration details.
+``GenericMessageEndpointManager``'s javadoc for the Spring-specific configuration details.
 
 [NOTE]
 ====
@@ -3296,7 +3296,7 @@ a container that does not provide an `MBeanServer`. To address this you can crea
 `MBeanServer` instance declaratively by adding an instance of the
 `org.springframework.jmx.support.MBeanServerFactoryBean` class to your configuration.
 You can also ensure that a specific `MBeanServer` is used by setting the value of the
-`MBeanExporter`'s `server` property to the `MBeanServer` value returned by an
+``MBeanExporter``'s `server` property to the `MBeanServer` value returned by an
 `MBeanServerFactoryBean`; for example:
 
 [source,xml,indent=0]

@@ -1672,7 +1672,7 @@ for more configuration examples.
 == XML Marshalling View
 The `MarshallingView` uses an XML `Marshaller` defined in the `org.springframework.oxm`
 package to render the response content as XML. The object to be marshalled can be set
-explicitly using `MarhsallingView`'s `modelKey` bean property. Alternatively, the view
+explicitly using ``MarhsallingView``'s `modelKey` bean property. Alternatively, the view
 will iterate over all model properties and marshal the first type that is supported
 by the `Marshaller`. For more information on the functionality in the
 `org.springframework.oxm` package refer to the chapter <<oxm,Marshalling XML using O/X
