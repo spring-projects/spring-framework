@@ -33,10 +33,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
-import static org.springframework.core.ReactiveTypeDescriptor.multiValue;
-import static org.springframework.core.ReactiveTypeDescriptor.noValue;
-import static org.springframework.core.ReactiveTypeDescriptor.singleOptionalValue;
-import static org.springframework.core.ReactiveTypeDescriptor.singleRequiredValue;
+import static org.springframework.core.ReactiveTypeDescriptor.*;
 
 /**
  * A registry of adapters to adapt a Reactive Streams {@link Publisher} to/from
@@ -94,11 +91,8 @@ public class ReactiveAdapterRegistry {
 		try {
 			new ReactorJdkFlowAdapterRegistrar().registerAdapter(this);
 		}
-		catch (NoSuchMethodException ex) {
-			throw new IllegalStateException("Failed to find JdkFlowAdapter methods", ex);
-		}
 		catch (Throwable ex) {
-			// Ignore
+			// Ignore for the time being...
 			// We can fall back on "reactive-streams-flow-bridge" (once released)
 		}
 	}
@@ -254,16 +248,10 @@ public class ReactiveAdapterRegistry {
 	private static class ReactorJdkFlowAdapterRegistrar {
 
 		// TODO: remove reflection when build requires JDK 9+
-
-		void registerAdapter(ReactiveAdapterRegistry registry)
-				throws NoSuchMethodException, ClassNotFoundException {
-
-			String name = "java.util.concurrent.Flow.Publisher";
-			Class<?> type = ClassUtils.forName(name, getClass().getClassLoader());
-
-			Method toFlowMethod = getMethod("publisherToFlowPublisher", Publisher.class);
+		void registerAdapter(ReactiveAdapterRegistry registry) throws Exception {
+			Class<?> type = ClassUtils.forName("java.util.concurrent.Flow.Publisher", getClass().getClassLoader());
 			Method toFluxMethod = getMethod("flowPublisherToFlux", type);
-
+			Method toFlowMethod = getMethod("publisherToFlowPublisher", Publisher.class);
 			Object emptyFlow = ReflectionUtils.invokeMethod(toFlowMethod, null, Flux.empty());
 
 			registry.registerReactiveType(
