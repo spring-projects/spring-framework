@@ -140,22 +140,22 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 
 		ServletRequest request = webRequest.getNativeRequest(ServletRequest.class);
 		Assert.state(request != null, "No ServletRequest");
-		ShallowEtagHeaderFilter.disableContentCaching(request);
 
 		ResponseBodyEmitter emitter;
-
 		if (returnValue instanceof ResponseBodyEmitter) {
 			emitter = (ResponseBodyEmitter) returnValue;
 		}
 		else {
 			emitter = this.reactiveHandler.handleValue(returnValue, returnType, mavContainer, webRequest);
+			if (emitter == null) {
+				// Not streaming..
+				return;
+			}
 		}
-
-		if (emitter == null) {
-			return;
-		}
-
 		emitter.extendResponse(outputMessage);
+
+		// At this point we know we're streaming..
+		ShallowEtagHeaderFilter.disableContentCaching(request);
 
 		// Commit the response and wrap to ignore further header changes
 		outputMessage.getBody();
