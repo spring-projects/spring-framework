@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,6 +159,7 @@ import static org.junit.Assert.*;
  * </ul>
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  */
 public class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandlerMethodTests {
 
@@ -578,6 +579,20 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertEquals("myPath-name1-typeMismatch-tb1-myValue-yourValue", response.getContentAsString());
+	}
+
+	@Test
+	public void lateBindingFormController() throws Exception {
+		initServlet(
+				wac -> wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class)),
+				LateBindingFormController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
+		request.addParameter("name", "name1");
+		request.addParameter("age", "value2");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals("myView-name1-typeMismatch-tb1-myValue", response.getContentAsString());
 	}
 
 	@Test
@@ -2154,6 +2169,29 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 				model.addAttribute("myKey", "myValue");
 			}
 			return "yourValue";
+		}
+	}
+
+	@Controller
+	public static class LateBindingFormController {
+
+		@ModelAttribute("testBeanList")
+		public List<TestBean> getTestBeans(@ModelAttribute(name="myCommand", binding=false) TestBean tb) {
+			List<TestBean> list = new LinkedList<>();
+			list.add(new TestBean("tb1"));
+			list.add(new TestBean("tb2"));
+			return list;
+		}
+
+		@RequestMapping("/myPath.do")
+		public String myHandle(@ModelAttribute(name="myCommand", binding=true) TestBean tb, BindingResult errors, ModelMap model) {
+			FieldError error = errors.getFieldError("age");
+			assertNotNull("Must have field error for age property", error);
+			assertEquals("value2", error.getRejectedValue());
+			if (!model.containsKey("myKey")) {
+				model.addAttribute("myKey", "myValue");
+			}
+			return "myView";
 		}
 	}
 

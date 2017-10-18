@@ -65,7 +65,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * Class constructor.
 	 * @param annotationNotRequired if "true", non-simple method arguments and
 	 * return values are considered model attributes with or without a
-	 * {@code @ModelAttribute} annotation.
+	 * {@code @ModelAttribute} annotation
 	 */
 	public ModelAttributeMethodProcessor(boolean annotationNotRequired) {
 		this.annotationNotRequired = annotationNotRequired;
@@ -89,23 +89,21 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * with request values via data binding and optionally validated
 	 * if {@code @java.validation.Valid} is present on the argument.
 	 * @throws BindException if data binding and validation result in an error
-	 * and the next method parameter is not of type {@link Errors}.
-	 * @throws Exception if WebDataBinder initialization fails.
+	 * and the next method parameter is not of type {@link Errors}
+	 * @throws Exception if WebDataBinder initialization fails
 	 */
 	@Override
 	public final Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
 		String name = ModelFactory.getNameForParameter(parameter);
+		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
+		if (ann != null) {
+			mavContainer.setBinding(name, ann.binding());
+		}
+
 		Object attribute = (mavContainer.containsAttribute(name) ? mavContainer.getModel().get(name) :
 				createAttribute(name, parameter, binderFactory, webRequest));
-
-		if (!mavContainer.isBindingDisabled(name)) {
-			ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
-			if (ann != null && !ann.binding()) {
-				mavContainer.setBindingDisabled(name);
-			}
-		}
 
 		WebDataBinder binder = binderFactory.createBinder(webRequest, attribute, name);
 		if (binder.getTarget() != null) {
@@ -130,15 +128,15 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * Extension point to create the model attribute if not found in the model.
 	 * The default implementation uses the default constructor.
 	 * @param attributeName the name of the attribute (never {@code null})
-	 * @param methodParam the method parameter
+	 * @param parameter the method parameter
 	 * @param binderFactory for creating WebDataBinder instance
-	 * @param request the current request
+	 * @param webRequest the current request
 	 * @return the created model attribute (never {@code null})
 	 */
-	protected Object createAttribute(String attributeName, MethodParameter methodParam,
-			WebDataBinderFactory binderFactory, NativeWebRequest request) throws Exception {
+	protected Object createAttribute(String attributeName, MethodParameter parameter,
+			WebDataBinderFactory binderFactory, NativeWebRequest webRequest) throws Exception {
 
-		return BeanUtils.instantiateClass(methodParam.getParameterType());
+		return BeanUtils.instantiateClass(parameter.getParameterType());
 	}
 
 	/**
@@ -156,10 +154,10 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * Spring's {@link org.springframework.validation.annotation.Validated},
 	 * and custom annotations whose name starts with "Valid".
 	 * @param binder the DataBinder to be used
-	 * @param methodParam the method parameter
+	 * @param parameter the method parameter declaration
 	 */
-	protected void validateIfApplicable(WebDataBinder binder, MethodParameter methodParam) {
-		Annotation[] annotations = methodParam.getParameterAnnotations();
+	protected void validateIfApplicable(WebDataBinder binder, MethodParameter parameter) {
+		Annotation[] annotations = parameter.getParameterAnnotations();
 		for (Annotation ann : annotations) {
 			Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);
 			if (validatedAnn != null || ann.annotationType().getSimpleName().startsWith("Valid")) {
@@ -174,12 +172,12 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	/**
 	 * Whether to raise a fatal bind exception on validation errors.
 	 * @param binder the data binder used to perform data binding
-	 * @param methodParam the method argument
-	 * @return {@code true} if the next method argument is not of type {@link Errors}
+	 * @param parameter the method parameter declaration
+	 * @return {@code true} if the next method parameter is not of type {@link Errors}
 	 */
-	protected boolean isBindExceptionRequired(WebDataBinder binder, MethodParameter methodParam) {
-		int i = methodParam.getParameterIndex();
-		Class<?>[] paramTypes = methodParam.getMethod().getParameterTypes();
+	protected boolean isBindExceptionRequired(WebDataBinder binder, MethodParameter parameter) {
+		int i = parameter.getParameterIndex();
+		Class<?>[] paramTypes = parameter.getMethod().getParameterTypes();
 		boolean hasBindingResult = (paramTypes.length > (i + 1) && Errors.class.isAssignableFrom(paramTypes[i + 1]));
 		return !hasBindingResult;
 	}

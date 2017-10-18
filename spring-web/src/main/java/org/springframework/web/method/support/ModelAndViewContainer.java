@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,10 +57,11 @@ public class ModelAndViewContainer {
 
 	private boolean redirectModelScenario = false;
 
-	/* Names of attributes with binding disabled */
-	private final Set<String> bindingDisabledAttributes = new HashSet<String>(4);
-
 	private HttpStatus status;
+
+	private final Set<String> noBinding = new HashSet<String>(4);
+
+	private final Set<String> bindingDisabled = new HashSet<String>(4);
 
 	private final SessionStatus sessionStatus = new SimpleSessionStatus();
 
@@ -142,24 +143,6 @@ public class ModelAndViewContainer {
 	}
 
 	/**
-	 * Register an attribute for which data binding should not occur, for example
-	 * corresponding to an {@code @ModelAttribute(binding=false)} declaration.
-	 * @param attributeName the name of the attribute
-	 * @since 4.3
-	 */
-	public void setBindingDisabled(String attributeName) {
-		this.bindingDisabledAttributes.add(attributeName);
-	}
-
-	/**
-	 * Whether binding is disabled for the given model attribute.
-	 * @since 4.3
-	 */
-	public boolean isBindingDisabled(String name) {
-		return this.bindingDisabledAttributes.contains(name);
-	}
-
-	/**
 	 * Whether to use the default model or the redirect model.
 	 */
 	private boolean useDefaultModel() {
@@ -199,15 +182,7 @@ public class ModelAndViewContainer {
 	}
 
 	/**
-	 * Return the {@link SessionStatus} instance to use that can be used to
-	 * signal that session processing is complete.
-	 */
-	public SessionStatus getSessionStatus() {
-		return this.sessionStatus;
-	}
-
-	/**
-	 * Provide a HTTP status that will be passed on to with the
+	 * Provide an HTTP status that will be passed on to with the
 	 * {@code ModelAndView} used for view rendering purposes.
 	 * @since 4.3
 	 */
@@ -221,6 +196,49 @@ public class ModelAndViewContainer {
 	 */
 	public HttpStatus getStatus() {
 		return this.status;
+	}
+
+	/**
+	 * Programmatically register an attribute for which data binding should not occur,
+	 * not even for a subsequent {@code @ModelAttribute} declaration.
+	 * @param attributeName the name of the attribute
+	 * @since 4.3
+	 */
+	public void setBindingDisabled(String attributeName) {
+		this.bindingDisabled.add(attributeName);
+	}
+
+	/**
+	 * Whether binding is disabled for the given model attribute.
+	 * @since 4.3
+	 */
+	public boolean isBindingDisabled(String name) {
+		return (this.bindingDisabled.contains(name) || this.noBinding.contains(name));
+	}
+
+	/**
+	 * Register whether data binding should occur for a corresponding model attribute,
+	 * corresponding to an {@code @ModelAttribute(binding=true/false)} declaration.
+	 * <p>Note: While this flag will be taken into account by {@link #isBindingDisabled},
+	 * a hard {@link #setBindingDisabled} declaration will always override it.
+	 * @param attributeName the name of the attribute
+	 * @since 4.3.13
+	 */
+	public void setBinding(String attributeName, boolean enabled) {
+		if (!enabled) {
+			this.noBinding.add(attributeName);
+		}
+		else {
+			this.noBinding.remove(attributeName);
+		}
+	}
+
+	/**
+	 * Return the {@link SessionStatus} instance to use that can be used to
+	 * signal that session processing is complete.
+	 */
+	public SessionStatus getSessionStatus() {
+		return this.sessionStatus;
 	}
 
 	/**
