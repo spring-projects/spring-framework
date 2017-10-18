@@ -115,11 +115,9 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		Assert.state(binderFactory != null, "ModelAttributeMethodProcessor requires WebDataBinderFactory");
 
 		String name = ModelFactory.getNameForParameter(parameter);
-		if (!mavContainer.isBindingDisabled(name)) {
-			ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
-			if (ann != null && !ann.binding()) {
-				mavContainer.setBindingDisabled(name);
-			}
+		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
+		if (ann != null) {
+			mavContainer.setBinding(name, ann.binding());
 		}
 
 		Object attribute = null;
