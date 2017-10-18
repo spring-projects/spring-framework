@@ -484,7 +484,6 @@ Portlet facilities.
 
 [TIP]
 ====
-
 Available in the https://github.com/spring-projects/[spring-projects Org on Github],
 a number of web applications leverage the annotation support described in this section
 including __MvcShowcase__, __MvcAjax__, __MvcBasic__, __PetClinic__, __PetCare__,
@@ -800,7 +799,6 @@ the value of `ownerId` is `fred`.
 
 [TIP]
 ====
-
 To process the @PathVariable annotation, Spring MVC needs to find the matching URI
 template variable by name. You can specify it in the annotation:
 
@@ -1098,7 +1096,6 @@ default it is set to `true`.
 
 [TIP]
 ====
-
 The MVC Java config and the MVC namespace both provide options for enabling the use of
 matrix variables.
 
@@ -1151,7 +1148,6 @@ using constants provided in `MediaType` such as `APPLICATION_JSON_VALUE` and
 
 [TIP]
 ====
-
 The __consumes__ condition is supported on the type and on the method level. Unlike most
 other conditions, when used at the type level, method-level consumable types override
 rather than extend type-level consumable types.
@@ -1239,7 +1235,6 @@ specific request header value:
 
 [TIP]
 ====
-
 Although you can match to __Content-Type__ and __Accept__ header values using media type
 wild cards (for example __"content-type=text/*"__ will match to __"text/plain"__ and
 __"text/html"__), it is recommended to use the __consumes__ and __produces__ conditions
@@ -1697,7 +1692,6 @@ for more details.
 
 [TIP]
 ====
-
 What happens when a model attribute name is not explicitly specified? In such cases a
 default name is assigned to the model attribute based on its type. For example if the
 method returns an object of type `Account`, the default name used is "account". You can
@@ -2468,7 +2462,7 @@ the response.
 [[mvc-ann-async-sse]]
 ==== HTTP Streaming With Server-Sent Events
 
-`SseEmitter` is a sub-class of `ResponseBodyEmitter` providing support for
+`SseEmitter` is a subclass of `ResponseBodyEmitter` providing support for
 http://www.w3.org/TR/eventsource/[Server-Sent Events].
 Server-sent events is a just another variation on the same "HTTP Streaming"
 technique except events pushed from the server are formatted according to
@@ -2752,7 +2746,6 @@ extend the `HandlerInterceptor` interface.
 
 [TIP]
 ====
-
 In the example above, the configured interceptor will apply to all requests handled with
 annotated controller methods. If you want to narrow down the URL paths to which an
 interceptor applies, you can use the MVC namespace or the MVC Java config, or declare
@@ -2765,6 +2758,7 @@ writes to and commits the response before `postHandle` is called which makes it 
 to change the response, for example to add a header. Instead an application can implement
 `ResponseBodyAdvice` and either declare it as an `@ControllerAdvice` bean or configure it
 directly on `RequestMappingHandlerAdapter`.
+
 
 
 
@@ -3271,7 +3265,7 @@ You can also expand and encode using individual URI components:
 			.encode();
 ----
 
-In a Servlet environment the `ServletUriComponentsBuilder` sub-class provides static
+In a Servlet environment the `ServletUriComponentsBuilder` subclass provides static
 factory methods to copy available URL information from a Servlet requests:
 
 [source,java,indent=0]
@@ -3971,7 +3965,7 @@ error content to the body of the response.
 
 You can do that with `@ExceptionHandler` methods. When declared within a controller such
 methods apply to exceptions raised by `@RequestMapping` methods of that controller (or
-any of its sub-classes). You can also declare an `@ExceptionHandler` method within an
+any of its subclasses). You can also declare an `@ExceptionHandler` method within an
 `@ControllerAdvice` class in which case it handles exceptions from `@RequestMapping`
 methods from many controllers. Below is an example of a controller-local
 `@ExceptionHandler` method:
@@ -3997,6 +3991,16 @@ The `@ExceptionHandler` value can be set to an array of Exception types. If an e
 is thrown that matches one of the types in the list, then the method annotated with the
 matching `@ExceptionHandler` will be invoked. If the annotation value is not set then
 the exception types listed as method arguments are used.
+
+[TIP]
+====
+For `@ExceptionHandler` methods, a root exception match will be preferred to just
+matching a cause of the current exception, among the handler methods of a particular
+controller or advice bean. However, a cause match on a higher-priority `@ControllerAdvice`
+will still be preferred to a any match (whether root or cause level) on a lower-priority
+advice bean. As a consequence, when using a multi-advice arrangement, please declare your
+primary root exception mappings on a prioritized advice bean with a corresponding order!
+====
 
 Much like standard controller methods annotated with a `@RequestMapping` annotation, the
 method arguments and return values of `@ExceptionHandler` methods can be flexible. For
@@ -4393,12 +4397,10 @@ then resolved into the `/WEB-INF/jsp/registration.jsp` view by the
 
 [TIP]
 ====
-
 You do not need to define a `DefaultRequestToViewNameTranslator` bean explicitly. If you
 like the default settings of the `DefaultRequestToViewNameTranslator`, you can rely on
 the Spring Web MVC `DispatcherServlet` to instantiate an instance of this class if one
 is not explicitly configured.
-
 ====
 
 Of course, if you need to change the default settings, then you do need to configure

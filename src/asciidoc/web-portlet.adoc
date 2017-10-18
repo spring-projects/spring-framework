@@ -1121,7 +1121,6 @@ parameters.
 
 [TIP]
 ====
-
 `@RequestMapping` at the type level may be used for plain implementations of the
 `Controller` interface as well. In this case, the request processing code would follow
 the traditional `handle(Action|Render)Request` signature, while the controller's mapping
