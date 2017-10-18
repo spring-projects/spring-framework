@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -205,6 +205,39 @@ public class ResourceBundleMessageSourceTests {
 	@Test
 	public void testDefaultApplicationContextMessageSource() {
 		GenericApplicationContext ac = new GenericApplicationContext();
+		ac.refresh();
+		assertEquals("default", ac.getMessage("code1", null, "default", Locale.ENGLISH));
+		assertEquals("default value", ac.getMessage("code1", new Object[] {"value"}, "default {0}", Locale.ENGLISH));
+	}
+
+	@Test
+	public void testDefaultApplicationContextMessageSourceWithParent() {
+		GenericApplicationContext ac = new GenericApplicationContext();
+		GenericApplicationContext parent = new GenericApplicationContext();
+		parent.refresh();
+		ac.setParent(parent);
+		ac.refresh();
+		assertEquals("default", ac.getMessage("code1", null, "default", Locale.ENGLISH));
+		assertEquals("default value", ac.getMessage("code1", new Object[] {"value"}, "default {0}", Locale.ENGLISH));
+	}
+
+	@Test
+	public void testStaticApplicationContextMessageSourceWithStaticParent() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		StaticApplicationContext parent = new StaticApplicationContext();
+		parent.refresh();
+		ac.setParent(parent);
+		ac.refresh();
+		assertEquals("default", ac.getMessage("code1", null, "default", Locale.ENGLISH));
+		assertEquals("default value", ac.getMessage("code1", new Object[] {"value"}, "default {0}", Locale.ENGLISH));
+	}
+
+	@Test
+	public void testStaticApplicationContextMessageSourceWithDefaultParent() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		GenericApplicationContext parent = new GenericApplicationContext();
+		parent.refresh();
+		ac.setParent(parent);
 		ac.refresh();
 		assertEquals("default", ac.getMessage("code1", null, "default", Locale.ENGLISH));
 		assertEquals("default value", ac.getMessage("code1", new Object[] {"value"}, "default {0}", Locale.ENGLISH));

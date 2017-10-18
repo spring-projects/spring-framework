@@ -263,7 +263,9 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 			}
 			else {
 				// Check parent MessageSource, returning null if not found there.
-				return parent.getMessage(code, args, null, locale);
+				// Covers custom MessageSource impls and DelegatingMessageSource.
+				String msg = parent.getMessage(code, args, null, locale);
+				return ("".equals(msg) ? null : msg);
 			}
 		}
 		// Not found in parent either.
