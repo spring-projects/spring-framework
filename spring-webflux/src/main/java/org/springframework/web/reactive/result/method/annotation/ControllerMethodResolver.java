@@ -82,6 +82,8 @@ class ControllerMethodResolver {
 
 	private final List<HandlerMethodArgumentResolver> exceptionHandlerResolvers;
 
+	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
+
 
 	private final Map<Class<?>, Set<Method>> initBinderMethodCache = new ConcurrentHashMap<>(64);
 
@@ -126,6 +128,8 @@ class ControllerMethodResolver {
 		registrar = ArgumentResolverRegistrar.configurer(argumentResolvers).basic();
 		addResolversTo(registrar, reactiveRegistry, context);
 		this.exceptionHandlerResolvers = registrar.getResolvers();
+
+		this.reactiveAdapterRegistry = reactiveRegistry;
 
 		initControllerAdviceCaches(context);
 	}
@@ -214,6 +218,7 @@ class ControllerMethodResolver {
 	public InvocableHandlerMethod getRequestMappingMethod(HandlerMethod handlerMethod) {
 		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
 		invocable.setArgumentResolvers(this.requestMappingResolvers);
+		invocable.setReactiveAdapterRegistry(this.reactiveAdapterRegistry);
 		return invocable;
 	}
 

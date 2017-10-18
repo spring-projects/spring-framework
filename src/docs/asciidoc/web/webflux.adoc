@@ -1029,8 +1029,14 @@ from the request path.
 |An API for model and view rendering scenarios.
 
 |`void`
-|For use in method that don't write the response body; or methods where the view name is
-supposed to be determined implicitly from the request path.
+|A method with a `void`, possibly async (e.g. `Mono<Void>`), return type (or a `null` return
+value) is considered to have fully handled the response if it also has a `ServerHttpResponse`,
+or a `ServerWebExchange` argument, or an `@ResponseStatus` annotation. The same is true also
+if the controller has made a positive ETag or lastModified timestamp check.
+// TODO (see <<webflux-caching-etag-lastmodified>> for details)
+
+If none of the above is true, a `void` return type may also indicate "no response body" for
+REST controllers, or default view name selection for HTML controllers.
 
 |`Flux<ServerSentEvent>`, `Observable<ServerSentEvent>`, or other reactive type
 |Emit server-sent events; the `SeverSentEvent` wrapper can be omitted when only data needs
