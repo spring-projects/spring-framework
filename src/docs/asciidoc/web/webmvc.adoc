@@ -161,6 +161,12 @@ Below is example configuration with a `WebApplicationContext` hierarchy:
   }
 ----
 
+[TIP]
+====
+If an application context hierarchy is not required, applications may return all
+configuration via `getRootConfigClasses()` and `null` from `getServletConfigClasses()`.
+====
+
 And the `web.xml` equivalent:
 
 [source,xml,indent=0]
@@ -194,6 +200,13 @@ And the `web.xml` equivalent:
 
 </web-app>
 ----
+
+[TIP]
+====
+If an application context hierarchy is not required, applications may configure a
+"root" context only and leave the `contextConfigLocation` Servlet parameter empty.
+====
+
 
 
 

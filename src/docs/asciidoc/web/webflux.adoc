@@ -346,8 +346,13 @@ server.addConnector(connector);
 server.start();
 ----
 
-You can also deploy as a WAR to any Servlet 3.1 container by wrapping the handler with
-`ServletHttpHandlerAdapter` as a `Servlet`.
+[NOTE]
+====
+To deploy as a WAR to a Servlet 3.1+ container, wrap `HttpHandler` with
+`ServletHttpHandlerAdapter` and register that as a `Servlet`. Use
+{api-spring-framework}/web/reactive/support/AbstractServletHttpHandlerAdapterInitializer.html[AbstractServletHttpHandlerAdapterInitializer]
+to automate the required Servlet container configuration.
+====
 
 
 
