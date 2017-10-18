@@ -209,7 +209,6 @@ If an application context hierarchy is not required, applications may configure 
 
 
 
-
 [[mvc-servlet-special-bean-types]]
 === Special Bean Types
 [.small]#<<web-reactive.adoc#webflux-special-bean-types,Same in Spring WebFlux>>#
@@ -575,7 +574,7 @@ view technologies.
 ==== Redirect
 
 The special `redirect:` prefix in a view name allows you to perform a redirect. The
-`UrlBasedViewResolver` (and sub-classes) will recognize this as a special indication that a
+`UrlBasedViewResolver` (and subclasses) will recognize this as a special indication that a
 redirect is needed. The rest of the view name will be treated as the redirect URL.
 
 The net effect is the same as if the controller had returned a `RedirectView`, but now
@@ -592,7 +591,7 @@ value takes precedence over the response status set by `RedirectView`.
 ==== Forward
 
 It is also possible to use a special `forward:` prefix for view names that are
-ultimately resolved by `UrlBasedViewResolver` and sub-classes. This creates an
+ultimately resolved by `UrlBasedViewResolver` and subclasses. This creates an
 `InternalResourceView` which does a `RequestDispatcher.forward()`.
 Therefore, this prefix is not useful with `InternalResourceViewResolver` and
 `InternalResourceView` (for JSPs) but it can be helpful if using another view
@@ -1351,7 +1350,6 @@ default it is set to `true`.
 
 [TIP]
 ====
-
 The MVC Java config and the MVC namespace both provide options for enabling the use of
 matrix variables.
 
@@ -2593,7 +2591,6 @@ for more details.
 
 [TIP]
 ====
-
 What happens when a model attribute name is not explicitly specified? In such cases a
 default name is assigned to the model attribute based on its type. For example if the
 method returns an object of type `Account`, the default name used is "account". You can
@@ -2739,7 +2736,7 @@ You can also expand and encode using individual URI components:
 			.encode();
 ----
 
-In a Servlet environment the `ServletUriComponentsBuilder` sub-class provides static
+In a Servlet environment the `ServletUriComponentsBuilder` subclass provides static
 factory methods to copy available URL information from a Servlet requests:
 
 [source,java,indent=0]
@@ -2962,7 +2959,7 @@ error content to the body of the response.
 
 You can do that with `@ExceptionHandler` methods. When declared within a controller such
 methods apply to exceptions raised by `@RequestMapping` methods of that controller (or
-any of its sub-classes). You can also declare an `@ExceptionHandler` method within an
+any of its subclasses). You can also declare an `@ExceptionHandler` method within an
 `@ControllerAdvice` class in which case it handles exceptions from `@RequestMapping`
 methods from many controllers. Below is an example of a controller-local
 `@ExceptionHandler` method:
@@ -2988,6 +2985,16 @@ The `@ExceptionHandler` value can be set to an array of Exception types. If an e
 is thrown that matches one of the types in the list, then the method annotated with the
 matching `@ExceptionHandler` will be invoked. If the annotation value is not set then
 the exception types listed as method arguments are used.
+
+[TIP]
+====
+For `@ExceptionHandler` methods, a root exception match will be preferred to just
+matching a cause of the current exception, among the handler methods of a particular
+controller or advice bean. However, a cause match on a higher-priority `@ControllerAdvice`
+will still be preferred to a any match (whether root or cause level) on a lower-priority
+advice bean. As a consequence, when using a multi-advice arrangement, please declare your
+primary root exception mappings on a prioritized advice bean with a corresponding order!
+====
 
 Much like standard controller methods annotated with a `@RequestMapping` annotation, the
 method arguments and return values of `@ExceptionHandler` methods can be flexible. For
@@ -3341,7 +3348,7 @@ the response.
 [[mvc-ann-async-sse]]
 === Server-Sent Events
 
-`SseEmitter` is a sub-class of `ResponseBodyEmitter` providing support for
+`SseEmitter` is a subclass of `ResponseBodyEmitter` providing support for
 http://www.w3.org/TR/eventsource/[Server-Sent Events].
 Server-sent events is a just another variation on the same "HTTP Streaming"
 technique except events pushed from the server are formatted according to
@@ -3696,12 +3703,10 @@ then resolved into the `/WEB-INF/jsp/registration.jsp` view by the
 
 [TIP]
 ====
-
 You do not need to define a `DefaultRequestToViewNameTranslator` bean explicitly. If you
 like the default settings of the `DefaultRequestToViewNameTranslator`, you can rely on
 the Spring Web MVC `DispatcherServlet` to instantiate an instance of this class if one
 is not explicitly configured.
-
 ====
 
 Of course, if you need to change the default settings, then you do need to configure
