@@ -2,6 +2,8 @@
 = The IoC container
 
 
+
+
 [[beans-introduction]]
 == Introduction to the Spring IoC container and beans
 
@@ -400,6 +402,7 @@ a dependency on a specific bean through metadata (e.g. an autowiring annotation)
 
 [[beans-definition]]
 == Bean overview
+
 A Spring IoC container manages one or more __beans__. These beans are created with the
 configuration metadata that you supply to the container, for example, in the form of XML
 `<bean/>` definitions.
@@ -778,6 +781,7 @@ Spring container that will create objects through an
 
 [[beans-dependencies]]
 == Dependencies
+
 A typical enterprise application does not consist of a single object (or bean in the
 Spring parlance). Even the simplest application has a few objects that work together to
 present what the end-user sees as a coherent application. This next section explains how
@@ -2380,6 +2384,7 @@ shortest string that will match an argument type.
 
 [[beans-factory-scopes]]
 == Bean scopes
+
 When you create a bean definition, you create a __recipe__ for creating actual instances
 of the class defined by that bean definition. The idea that a bean definition is a
 recipe is important, because it means that, as with a class, you can create many object
@@ -3602,6 +3607,7 @@ beans that require programmatic access to the container.
 
 [[beans-child-bean-definitions]]
 == Bean definition inheritance
+
 A bean definition can contain a lot of configuration information, including constructor
 arguments, property values, and container-specific information such as initialization
 method, static factory method name, and so on. A child bean definition inherits
@@ -3687,6 +3693,7 @@ context will actually (attempt to) pre-instantiate the `abstract` bean.
 
 [[beans-factory-extension]]
 == Container Extension Points
+
 Typically, an application developer does not need to subclass `ApplicationContext`
 implementation classes. Instead, the Spring IoC container can be extended by plugging in
 implementations of special integration interfaces. The next few sections describe these
@@ -5173,6 +5180,7 @@ For details about the effects of combining various lifecycle mechanisms, see
 
 [[beans-classpath-scanning]]
 == Classpath scanning and managed components
+
 Most examples in this chapter use XML to specify the configuration metadata that produces
 each `BeanDefinition` within the Spring container. The previous section
 (<<beans-annotation-config>>) demonstrates how to provide a lot of the configuration
@@ -5297,6 +5305,7 @@ Or with an overridden value for the `proxyMode` as follows:
 For further details, consult the
 https://github.com/spring-projects/spring-framework/wiki/Spring-Annotation-Programming-Model[Spring Annotation Programming Model]
 wiki page.
+
 
 
 [[beans-scanning-autodetection]]
@@ -5839,6 +5848,7 @@ metadata is provided per-instance rather than per-class.
 
 [[beans-scanning-index]]
 === Generating an index of candidate components
+
 While classpath scanning is very fast, it is possible to improve the startup performance
 of large applications by creating a static list of candidates at compilation time. In this
 mode, _all modules_ of the application must use this mechanism as, when the
@@ -5893,8 +5903,10 @@ classpath.
 
 
 
+
 [[beans-standard-annotations]]
 == Using JSR 330 Standard Annotations
+
 Starting with Spring 3.0, Spring offers support for JSR-330 standard annotations
 (Dependency Injection). Those annotations are scanned in the same way as the Spring
 annotations. You just need to have the relevant jars in your classpath.
@@ -6740,6 +6752,7 @@ annotation can be used:
 		}
 	}
 ----
+
 
 
 [[beans-java-configuration-annotation]]
@@ -7979,7 +7992,7 @@ AspectJ load-time weaving, see <<aop-aj-ltw>>.
 
 
 [[context-introduction]]
-== Additional Capabilities of the ApplicationContext
+== Additional capabilities of the ApplicationContext
 
 As was discussed in the chapter introduction, the `org.springframework.beans.factory`
 package provides basic functionality for managing and manipulating beans, including in a
@@ -8211,7 +8224,7 @@ out the `ReloadableResourceBundleMessageSource` javadocs for details.
 
 
 [[context-functionality-events]]
-=== Standard and Custom Events
+=== Standard and custom events
 
 Event handling in the `ApplicationContext` is provided through the `ApplicationEvent`
 class and `ApplicationListener` interface. If a bean that implements the
@@ -8400,8 +8413,9 @@ http://www.enterpriseintegrationpatterns.com[pattern-oriented], event-driven
 architectures that build upon the well-known Spring programming model.
 ====
 
+
 [[context-functionality-events-annotation]]
-==== Annotation-based Event Listeners
+==== Annotation-based event listeners
 
 As of Spring 4.2, an event listener can be registered on any public method of a managed
 bean via the `EventListener` annotation. The `BlackListNotifier` can be rewritten as
@@ -8508,6 +8522,7 @@ This new method will publish a new `ListUpdateEvent` for every `BlackListEvent` 
 by the method above. If you need to publish several events, just return a `Collection` of
 events instead.
 
+
 [[context-functionality-events-async]]
 ==== Asynchronous Listeners
 
@@ -8534,7 +8549,7 @@ Be aware of the following limitations when using asynchronous events:
 
 
 [[context-functionality-events-order]]
-==== Ordering Listeners
+==== Ordering listeners
 
 If you need the listener to be invoked before another one, just add the `@Order`
 annotation to the method declaration:
@@ -8549,8 +8564,9 @@ annotation to the method declaration:
 	}
 ----
 
+
 [[context-functionality-events-generics]]
-==== Generic Events
+==== Generic events
 
 You may also use generics to further define the structure of your event. Consider an
 `EntityCreatedEvent<T>` where `T` is the type of the actual entity that got created. You
@@ -8716,14 +8732,15 @@ be used by other application modules on the same machine.
 
 [[beans-beanfactory]]
 == The BeanFactory
+
 The `BeanFactory` provides the underlying basis for Spring's IoC functionality but it is
 only used directly in integration with other third-party frameworks and is now largely
 historical in nature for most users of Spring. The `BeanFactory` and related interfaces,
 such as `BeanFactoryAware`, `InitializingBean`, `DisposableBean`, are still present in
 Spring for the purposes of backward compatibility with the large number of third-party
 frameworks that integrate with Spring. Often third-party components that can not use
-more modern equivalents such as `@PostConstruct` or `@PreDestroy` in order to remain
-compatible with JDK 1.4 or to avoid a dependency on JSR-250.
+more modern equivalents such as `@PostConstruct` or `@PreDestroy` in order to avoid a
+dependency on JSR-250.
 
 This section provides additional background into the differences between the
 `BeanFactory` and `ApplicationContext` and how one might access the IoC container

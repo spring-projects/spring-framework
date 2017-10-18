@@ -2,6 +2,8 @@
 = Validation, Data Binding, and Type Conversion
 
 
+
+
 [[validation-introduction]]
 == Introduction
 
@@ -169,6 +171,7 @@ methods it offers can be found in the javadocs.
 
 [[validation-conversion]]
 == Resolving codes to error messages
+
 We've talked about databinding and validation. Outputting messages corresponding to
 validation errors is the last thing we need to discuss. In the example we've shown
 above, we rejected the `name` and the `age` field. If we're going to output the error
@@ -225,6 +228,7 @@ perform actions on that bean, like setting and retrieving properties.
 
 [[beans-beans-conventions]]
 === Setting and getting basic and nested properties
+
 Setting and getting properties is done using the `setPropertyValue(s)` and
 `getPropertyValue(s)` methods that both come with a couple of overloaded variants.
 They're all described in more detail in the javadocs Spring comes with. What's important
@@ -698,6 +702,7 @@ registration code to be encapsulated in a class and then shared amongst as many
 
 [[core-convert]]
 == Spring Type Conversion
+
 Spring 3 introduces a `core.convert` package that provides a general type conversion
 system. The system defines an SPI to implement type conversion logic, as well as an API
 to execute type conversions at runtime. Within a Spring container, this system can be
@@ -709,6 +714,7 @@ application where type conversion is needed.
 
 [[core-convert-Converter-API]]
 === Converter SPI
+
 The SPI to implement type conversion logic is simple and strongly typed:
 
 [source,java,indent=0]
@@ -756,6 +762,7 @@ Consider `StringToInteger` as an example for a typical `Converter` implementatio
 
 [[core-convert-ConverterFactory-SPI]]
 === ConverterFactory
+
 When you need to centralize the conversion logic for an entire class hierarchy, for
 example, when converting from String to java.lang.Enum objects, implement
 `ConverterFactory`:
@@ -808,6 +815,7 @@ Consider the `StringToEnum` ConverterFactory as an example:
 
 [[core-convert-GenericConverter-SPI]]
 === GenericConverter
+
 When you require a sophisticated Converter implementation, consider the GenericConverter
 interface. With a more flexible but less strongly typed signature, a GenericConverter
 supports converting between multiple source and target types. In addition, a
@@ -850,6 +858,7 @@ Favor Converter or ConverterFactory for basic type conversion needs.
 
 [[core-convert-ConditionalGenericConverter-SPI]]
 ==== ConditionalGenericConverter
+
 Sometimes you only want a `Converter` to execute if a specific condition holds true. For
 example, you might only want to execute a `Converter` if a specific annotation is present
 on the target field. Or you might only want to execute a `Converter` if a specific method,
@@ -882,6 +891,7 @@ might only match if the target entity type declares a static finder method e.g.
 
 [[core-convert-ConversionService-API]]
 === ConversionService API
+
 The ConversionService defines a unified API for executing type conversion logic at
 runtime. Converters are often executed behind this facade interface:
 
@@ -916,6 +926,7 @@ creating common ConversionService configurations.
 
 [[core-convert-Spring-config]]
 === Configuring a ConversionService
+
 A ConversionService is a stateless object designed to be instantiated at application
 startup, then shared between multiple threads. In a Spring application, you typically
 configure a ConversionService instance per Spring container (or ApplicationContext).
@@ -968,6 +979,7 @@ In certain situations you may wish to apply formatting during conversion. See
 
 [[core-convert-programmatic-usage]]
 === Using a ConversionService programmatically
+
 To work with a ConversionService instance programmatically, simply inject a reference to
 it like you would for any other bean:
 
@@ -1021,6 +1033,7 @@ no need to create a specific converter to convert from a `Collection` of `S` to 
 
 [[format]]
 == Spring Field Formatting
+
 As discussed in the previous section, <<core-convert, `core.convert`>> is a
 general-purpose type conversion system. It provides a unified ConversionService API as
 well as a strongly-typed Converter SPI for implementing conversion logic from one type
@@ -1048,6 +1061,7 @@ ConversionService provides a unified type conversion API for both SPIs.
 
 [[format-Formatter-SPI]]
 === Formatter SPI
+
 The Formatter SPI to implement field formatting logic is simple and strongly typed:
 
 [source,java,indent=0]
@@ -1139,6 +1153,7 @@ https://jira.spring.io/browse/SPR[jira.spring.io] to contribute.
 
 [[format-CustomFormatAnnotations]]
 === Annotation-driven Formatting
+
 As you will see, field formatting can be configured by field type or annotation. To bind
 an Annotation to a formatter, implement AnnotationFormatterFactory:
 
@@ -1222,6 +1237,7 @@ To trigger formatting, simply annotate fields with @NumberFormat:
 
 [[format-annotations-api]]
 ==== Format Annotation API
+
 A portable format annotation API exists in the `org.springframework.format.annotation`
 package. Use @NumberFormat to format java.lang.Number fields. Use @DateTimeFormat to
 format java.util.Date, java.util.Calendar, java.util.Long, or Joda Time fields.
@@ -1244,6 +1260,7 @@ The example below uses @DateTimeFormat to format a java.util.Date as a ISO Date
 
 [[format-FormatterRegistry-SPI]]
 === FormatterRegistry SPI
+
 The FormatterRegistry is an SPI for registering formatters and converters.
 `FormattingConversionService` is an implementation of FormatterRegistry suitable for
 most environments. This implementation may be configured programmatically or
@@ -1283,6 +1300,7 @@ these rules once and they are applied whenever formatting is needed.
 
 [[format-FormatterRegistrar-SPI]]
 === FormatterRegistrar SPI
+
 The FormatterRegistrar is an SPI for registering formatters and converters through the
 FormatterRegistry:
 
@@ -1317,6 +1335,7 @@ See <<web.adoc#mvc-config-conversion, Conversion and Formatting>> in the Spring 
 
 [[format-configuring-formatting-globaldatetimeformat]]
 == Configuring a global date & time format
+
 By default, date and time fields that are not annotated with `@DateTimeFormat` are
 converted from strings using the `DateFormat.SHORT` style. If you prefer, you can
 change this by defining your own global format.
@@ -1411,6 +1430,7 @@ See <<web.adoc#mvc-config-conversion, Conversion and Formatting>> for details.
 
 [[validation-beanvalidation]]
 == Spring Validation
+
 Spring 3 introduces several enhancements to its validation support. First, the JSR-303
 Bean Validation API is now fully supported. Second, when used programmatically, Spring's
 DataBinder can now validate objects as well as bind to them. Third, Spring MVC now has
@@ -1420,6 +1440,7 @@ support for declaratively validating `@Controller` inputs.
 
 [[validation-beanvalidation-overview]]
 === Overview of the JSR-303 Bean Validation API
+
 JSR-303 standardizes validation constraint declaration and metadata for the Java
 platform. Using this API, you annotate domain model properties with declarative
 validation constraints and the runtime enforces them. There are a number of built-in
@@ -1466,6 +1487,7 @@ bean, keep reading.
 
 [[validation-beanvalidation-spring]]
 === Configuring a Bean Validation Provider
+
 Spring provides full support for the Bean Validation API. This includes convenient
 support for bootstrapping a JSR-303/JSR-349 Bean Validation provider as a Spring bean.
 This allows for a `javax.validation.ValidatorFactory` or `javax.validation.Validator` to
@@ -1487,6 +1509,7 @@ is expected to be present in the classpath and will be detected automatically.
 
 [[validation-beanvalidation-spring-inject]]
 ==== Injecting a Validator
+
 `LocalValidatorFactoryBean` implements both `javax.validation.ValidatorFactory` and
 `javax.validation.Validator`, as well as Spring's
 `org.springframework.validation.Validator`. You may inject a reference to either of
@@ -1527,6 +1550,7 @@ the Spring Validation API:
 
 [[validation-beanvalidation-spring-constraints]]
 ==== Configuring Custom Constraints
+
 Each Bean Validation constraint consists of two parts. First, a `@Constraint` annotation
 that declares the constraint and its configurable properties. Second, an implementation
 of the `javax.validation.ConstraintValidator` interface that implements the constraint's
@@ -1572,6 +1596,7 @@ As you can see, a ConstraintValidator implementation may have its dependencies
 
 [[validation-beanvalidation-spring-method]]
 ==== Spring-driven Method Validation
+
 The method validation feature supported by Bean Validation 1.1, and as a custom
 extension also by Hibernate Validator 4.3, can be integrated into a Spring context
 through a `MethodValidationPostProcessor` bean definition:
@@ -1590,6 +1615,7 @@ for setup details with Hibernate Validator and Bean Validation 1.1 providers.
 
 [[validation-beanvalidation-spring-other]]
 ==== Additional Configuration Options
+
 The default `LocalValidatorFactoryBean` configuration should prove sufficient for most
 cases. There are a number of configuration options for various Bean Validation
 constructs, from message interpolation to traversal resolution. See the
@@ -1599,6 +1625,7 @@ constructs, from message interpolation to traversal resolution. See the
 
 [[validation-binder]]
 === Configuring a DataBinder
+
 Since Spring 3, a DataBinder instance can be configured with a Validator. Once
 configured, the Validator may be invoked by calling `binder.validate()`. Any validation
 Errors are automatically added to the binder's BindingResult.
@@ -1634,4 +1661,3 @@ locally on a DataBinder instance. See <<validation-mvc-configuring>>.
 === Spring MVC 3 Validation
 
 See <<web.adoc#mvc-config-validation, Validation>> in the Spring MVC chapter.
-

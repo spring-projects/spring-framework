@@ -2,8 +2,11 @@
 = View Technologies
 
 
+
+
 [[mvc-view-introduction]]
 == Introduction
+
 One of the areas in which Spring excels is in the separation of view technologies from
 the rest of the MVC framework. For example, deciding to use Groovy Markup Templates
 or Thymeleaf in place of an existing JSP is primarily a matter of configuration.
@@ -11,6 +14,8 @@ This chapter covers the major view technologies that work with Spring and touche
 briefly on how to add new ones. This chapter assumes you are already familiar with
 <<mvc-viewresolver>> which covers the basics of how views in general are coupled
 to the MVC framework.
+
+
 
 
 [[mvc-view-thymeleaf]]
@@ -26,6 +31,8 @@ Please refer to the http://www.thymeleaf.org/documentation.html[Thymeleaf+Spring
 documentation section for more details.
 
 
+
+
 [[mvc-view-groovymarkup]]
 == Groovy Markup
 
@@ -35,6 +42,7 @@ aimed at generating XML-like markup (XML, XHTML, HTML5, ...​), but that can be
 text based content.
 
 This requires Groovy 2.3.1+ on the classpath.
+
 
 
 [[mvc-view-groovymarkup-configuration]]
@@ -78,6 +86,7 @@ The XML counterpart using the MVC namespace is:
 ----
 
 
+
 [[mvc-view-groovymarkup-example]]
 === Example
 
@@ -100,15 +109,20 @@ Here is a sample template for an HTML page:
 ----
 
 
+
+
 [[mvc-view-freemarker]]
 == FreeMarker
+
 http://www.freemarker.org[FreeMarker] is a  templating language that can be used as a
 view technology within Spring MVC applications. For details on the template language,
 see the http://www.freemarker.org[FreeMarker] web site.
 
 
+
 [[mvc-view-freemarker-dependencies]]
 === Dependencies
+
 Your web application will need to include `freemarker-2.x.jar` in order to work with
 FreeMarker. Typically this is included in the `WEB-INF/lib` folder where the jars are
 guaranteed to be found by a Java EE server and added to the classpath for your
@@ -116,8 +130,10 @@ application. It is of course assumed that you already have the `spring-webmvc.ja
 your `'WEB-INF/lib'` directory too!
 
 
+
 [[mvc-view-freemarker-contextconfig]]
 === Context configuration
+
 A suitable configuration is initialized by adding the relevant configurer bean
 definition to your `'{asterisk}-servlet.xml'` as shown below:
 
@@ -147,8 +163,10 @@ definition file.
 ====
 
 
+
 [[mvc-view-freemarker-createtemplates]]
 === Creating templates
+
 Your templates need to be stored in the directory specified by the `FreeMarkerConfigurer`
 shown above. If you use the view resolvers highlighted, then the logical view names
 relate to the template file names in similar fashion to `InternalResourceViewResolver`
@@ -158,6 +176,7 @@ for JSP's. So if your controller returns a ModelAndView object containing a view
 
 [[mvc-views-freemarker]]
 === Advanced config
+
 FreeMarker 'Settings' and 'SharedVariables' can be passed directly to the FreeMarker
 `Configuration` object managed by Spring by setting the appropriate bean properties on
 the `FreeMarkerConfigurer` bean. The `freemarkerSettings` property requires a
@@ -186,6 +205,7 @@ the `Configuration` object.
 
 [[mvc-view-freemarker-forms]]
 === Form handling
+
 Spring provides a tag library for use in JSP's that contains (amongst other things) a
 `<spring:bind/>` tag. This tag primarily enables forms to display values from form
 backing objects and to show the results of failed validations from a `Validator` in the
@@ -195,6 +215,7 @@ with additional convenience macros for generating form input elements themselves
 
 [[mvc-view-bind-macros]]
 ==== The bind macros
+
 A standard set of macros are maintained within the `spring-webmvc.jar` file for both
 languages, so they are always available to a suitably configured application.
 
@@ -208,6 +229,7 @@ directly, the file is called `spring.ftl` in the package
 
 [[mvc-view-simple-binding]]
 ==== Simple binding
+
 In your HTML forms (vm / ftl templates) which act as a form view for a Spring MVC
 controller, you can use code similar to the following to bind to field values and
 display error messages for each input field in similar fashion to the JSP equivalent.
@@ -252,6 +274,7 @@ They are explained in the next section.
 
 [[mvc-views-form-macros]]
 ==== Input macros
+
 Additional convenience macros for both languages simplify both binding and form
 generation (including validation error display). It is never necessary to use these
 macros to generate form input fields, and they can be mixed and matched with simple HTML
@@ -342,6 +365,7 @@ differences exist between the two languages, they are explained in the notes.
 
 [[mvc-views-form-macros-input]]
 ===== Input Fields
+
 The formInput macro takes the path parameter (command.name) and an additional attributes
 parameter which is empty in the example above. The macro, along with all other form
 generation macros, performs an implicit spring bind on the path parameter. The binding
@@ -383,6 +407,7 @@ information or rows and cols attributes for the textarea.
 
 [[mvc-views-form-macros-select]]
 ===== Selection Fields
+
 Four selection field macros can be used to generate common UI value selection inputs in
 your HTML forms.
 
@@ -457,6 +482,7 @@ user still sees the more user friendly city names.
 
 [[mvc-views-form-macros-html-escaping]]
 ==== HTML escaping
+
 Default usage of the form macros above will result in HTML tags that are HTML 4.01
 compliant and that use the default value for HTML escaping defined in your web.xml as
 used by Spring's bind support. In order to make the tags XHTML compliant or to override
@@ -498,6 +524,7 @@ In similar fashion, HTML escaping can be specified per field:
 
 [[mvc-view-jsp]]
 == JSP & JSTL
+
 Spring provides a couple of out-of-the-box solutions for JSP and JSTL views. Using JSP
 or JSTL is done using a normal view resolver defined in the `WebApplicationContext`.
 Furthermore, of course you need to write some JSPs that will actually render the view.
@@ -518,6 +545,7 @@ somewhat.
 
 [[mvc-view-jsp-resolver]]
 === View resolvers
+
 Just as with any other view technology you're integrating with Spring, for JSPs you'll
 need a view resolver that will resolve your views. The most commonly used view resolvers
 when developing with JSPs are the `InternalResourceViewResolver` and the
@@ -561,6 +589,7 @@ under the `'WEB-INF'` directory, so there can be no direct access by clients.
 
 [[mvc-view-jsp-jstl]]
 === JSPs versus JSTL
+
 When using the Java Standard Tag Library you must use a special view class, the
 `JstlView`, as JSTL needs some preparation before things such as the I18N features will
 work.
@@ -569,6 +598,7 @@ work.
 
 [[mvc-view-jsp-tags]]
 === Spring tags
+
 Spring provides data binding of request parameters to command objects as described in
 earlier chapters. To facilitate the development of JSP pages in combination with those
 data binding features, Spring provides a few tags that make things even easier. All
@@ -582,6 +612,7 @@ or see the tag library description.
 
 [[mvc-view-jsp-formtaglib]]
 === Spring form tags
+
 As of version 2.0, Spring provides a comprehensive set of data binding-aware tags for
 handling form elements when using JSP and Spring Web MVC. Each tag provides support for
 the set of attributes of its corresponding HTML tag counterpart, making the tags
@@ -598,6 +629,7 @@ included generated HTML snippets where certain tags require further commentary.
 
 [[mvc-view-jsp-formtaglib-configuration]]
 ==== Configuration
+
 The form tag library comes bundled in `spring-webmvc.jar`. The library descriptor is
 called `spring-form.tld`.
 
@@ -1267,6 +1299,7 @@ or see the tag library description.
 
 [[mvc-rest-method-conversion]]
 ==== HTTP Method Conversion
+
 A key principle of REST is the use of the Uniform Interface. This means that all
 resources (URLs) can be manipulated using the same four HTTP methods: GET, PUT, POST,
 and DELETE. For each method, the HTTP specification defines the exact semantics. For
@@ -1327,6 +1360,7 @@ The corresponding `@Controller` method is shown below:
 
 [[mvc-view-jsp-formtaglib-html5]]
 ==== HTML5 Tags
+
 Starting with Spring 3, the Spring form tag library allows entering dynamic attributes,
 which means you can enter any HTML5 specific attributes.
 
@@ -1334,6 +1368,7 @@ In Spring 3.1, the form input tag supports entering a type attribute other than 
 This is intended to allow rendering new HTML5 specific input types such as 'email',
 'date', 'range', and others. Note that entering type='text' is not required since 'text'
 is the default type.
+
 
 
 
@@ -1354,6 +1389,8 @@ It has been tested with:
 * http://www.stuartellis.eu/articles/erb/[ERB] running on http://jruby.org[JRuby]
 * https://docs.python.org/2/library/string.html#template-strings[String templates] running on http://www.jython.org/[Jython]
 
+
+
 [[mvc-view-script-dependencies]]
 === Requirements
 
@@ -1372,6 +1409,7 @@ the script engine:
 You should also need to add dependencies for your script based template engine. For example,
 for Javascript you can use http://www.webjars.org/[WebJars] to add Maven/Gradle dependencies
 in order to make your javascript libraries available in the classpath.
+
 
 
 [[mvc-view-script-integrate]]
@@ -1536,6 +1574,7 @@ for more configuration examples.
 
 [[mvc-view-xml-marshalling]]
 == XML Marshalling
+
 The `MarshallingView` uses an XML `Marshaller` defined in the `org.springframework.oxm`
 package to render the response content as XML. The object to be marshalled can be set
 explicitly using ``MarhsallingView``'s `modelKey` bean property. Alternatively, the view
@@ -1547,12 +1586,11 @@ Mappers>>.
 
 
 
-
 [[mvc-view-tiles]]
 == Tiles
+
 It is possible to integrate Tiles - just as any other view technology - in web
 applications using Spring. The following describes in a broad way how to do this.
-
 
 [NOTE]
 ====
@@ -1561,15 +1599,19 @@ This section focuses on Spring's support for Tiles v3 in the
 ====
 
 
+
 [[mvc-view-tiles-dependencies]]
 === Dependencies
+
 To be able to use Tiles, you have to add a dependency on Tiles version 3.0.1 or higher
 and http://tiles.apache.org/framework/dependency-management.html[its transitive dependencies]
 to your project.
 
 
+
 [[mvc-view-tiles-integrate]]
 === Configuration
+
 To be able to use Tiles, you have to configure it using files containing definitions
 (for basic information on definitions and other Tiles concepts, please have a look at
 http://tiles.apache.org[]). In Spring this is done using the `TilesConfigurer`. Have a
@@ -1720,8 +1762,10 @@ per preparer name (as used in your Tiles definitions).
 
 
 
+
 [[mvc-view-xslt]]
 == XSLT
+
 XSLT is a transformation language for XML and is popular as a view technology within web
 applications. XSLT can be a good choice as a view technology if your application
 naturally deals with XML, or if your model can easily be converted to XML. The following
@@ -1735,8 +1779,10 @@ name of our XSLT view. See <<mvc-controller>> for details of Spring Web MVC's
 document ready for transformation.
 
 
+
 [[mvc-view-xslt-beandefs]]
 === Beans
+
 Configuration is standard for a simple Spring application.
 The MVC configuration has to define a `XsltViewResolver` bean and
 regular MVC annotation configuration.
@@ -1761,6 +1807,7 @@ public class WebConfig implements WebMvcConfigurer {
 ----
 
 And we need a Controller that encapsulates our word generation logic.
+
 
 
 [[mvc-view-xslt-controllercode]]
@@ -1809,6 +1856,7 @@ Next, `XsltViewResolver` will resolve the "home" XSLT template file and merge th
 DOM document into it to generate our view.
 
 
+
 [[mvc-view-xslt-transforming]]
 === Transformation
 
@@ -1816,7 +1864,6 @@ Finally, the `XsltViewResolver` will resolve the "home" XSLT template file and m
 DOM document into it to generate our view. As shown in the `XsltViewResolver`
 configuration, XSLT templates live in the war file in the `'WEB-INF/xsl'` directory
 and end with a `"xslt"` file extension.
-
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -1866,6 +1913,9 @@ This is rendered as:
 </html>
 ----
 
+
+
+
 [[mvc-view-document]]
 == PDF, Excel
 
@@ -1873,6 +1923,7 @@ This is rendered as:
 
 [[mvc-view-document-intro]]
 === Introduction
+
 Returning an HTML page isn't always the best way for the user to view the model output,
 and Spring makes it simple to generate a PDF document or an Excel spreadsheet
 dynamically from the model data. The document is the view and will be streamed from the
@@ -1886,6 +1937,7 @@ for PDF generation, the iText library.
 
 [[mvc-view-document-config]]
 === Configuration
+
 Document based views are handled in an almost identical fashion to XSLT views, and the
 following sections build upon the previous one by demonstrating how the same controller
 used in the XSLT example is invoked to render the same model as both a PDF document and
@@ -1894,6 +1946,7 @@ an Excel spreadsheet (which can also be viewed or manipulated in Open Office).
 
 [[mvc-view-document-configviews]]
 === View definition
+
 First, let's amend the views.properties file (or xml equivalent) and add a simple view
 definition for both document types. The entire file now looks like this with the XSLT
 view shown from earlier:
@@ -1914,16 +1967,20 @@ __If you want to start with a template spreadsheet or a fillable PDF form to add
 model data to, specify the location as the 'url' property in the view definition__
 
 
+
 [[mvc-view-document-configcontroller]]
 === Controller
+
 The controller code we'll use remains exactly the same from the XSLT example earlier
 other than to change the name of the view to use. Of course, you could be clever and
 have this selected based on a URL parameter or some other logic - proof that Spring
 really is very good at decoupling the views from the controllers!
 
 
+
 [[mvc-view-document-configsubclasses]]
 === Excel views
+
 Exactly as we did for the XSLT example, we'll subclass suitable abstract classes in
 order to implement custom behavior in generating our output documents. For Excel, this
 involves writing a subclass of
@@ -2006,8 +2063,10 @@ that the Excel spreadsheet is created and downloaded automatically when you requ
 same page as before.
 
 
+
 [[mvc-view-document-configsubclasspdf]]
 === PDF views
+
 The PDF version of the word list is even simpler. This time, the class extends
 `org.springframework.web.servlet.view.document.AbstractPdfView` and implements the
 `buildPdfDocument()` method as follows:
@@ -2041,6 +2100,7 @@ document should appear listing each of the words in the model map.
 
 [[mvc-view-feeds]]
 == RSS Feeds
+
 Both `AbstractAtomFeedView` and `AbstractRssFeedView` inherit from the base class
 `AbstractFeedView` and are used to provide Atom and RSS Feed views respectfully. They
 are based on java.net's https://rome.dev.java.net[ROME] project and are located in the
@@ -2101,11 +2161,16 @@ For an example of creating an Atom view please refer to Alef Arendsen's Spring T
 https://spring.io/blog/2009/03/16/adding-an-atom-view-to-an-application-using-spring-s-rest-support[entry].
 
 
+
+
 [[mvc-view-jackson]]
 == Jackson
 
+
+
 [[mvc-view-json-mapping]]
 === JSON
+
 The `MappingJackson2JsonView` uses the Jackson library's `ObjectMapper` to render the response
 content as JSON. By default, the entire contents of the model map (with the exception of
 framework-specific classes) will be encoded as JSON. For cases where the contents of the
@@ -2125,9 +2190,9 @@ name(s) could be customized through the `jsonpParameterNames` property.
 
 
 
-
 [[mvc-view-xml-mapping]]
 === XML
+
 The `MappingJackson2XmlView` uses the
 https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML extension]'s `XmlMapper`
 to render the response content as XML. If the model contains multiples entries, the
@@ -2138,4 +2203,3 @@ XML mapping can be customized as needed through the use of JAXB or Jackson's pro
 annotations. When further control is needed, a custom `XmlMapper` can be injected
 through the `ObjectMapper` property for cases where custom XML
 serializers/deserializers need to be provided for specific types.
-

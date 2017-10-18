@@ -4,6 +4,8 @@
 = Appendix
 
 
+
+
 [[xsd-schemas]]
 == XML Schemas
 
@@ -123,7 +125,7 @@ Injecting enum values into beans as either property or constructor arguments is 
 easy to do in Spring, in that you don't actually have to __do__ anything or know
 anything about the Spring internals (or even about classes such as the
 `FieldRetrievingFactoryBean`). Let's look at an example to see how easy injecting an
-enum value is; consider this JDK 5 enum:
+enum value is; consider this enum:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -134,7 +136,6 @@ enum value is; consider this JDK 5 enum:
 
 		TRANSACTION,
 		EXTENDED
-
 	}
 ----
 
@@ -152,7 +153,6 @@ Now consider a setter of type `PersistenceContextType`:
 		public void setPersistenceContextType(PersistenceContextType type) {
 			this.persistenceContextType = type;
 		}
-
 	}
 ----
 
@@ -162,13 +162,9 @@ Now consider a setter of type `PersistenceContextType`:
 [subs="verbatim,quotes"]
 ----
 	<bean class="example.Client">
-		<property name="persistenceContextType" value="TRANSACTION" />
+		<property name="persistenceContextType" value="TRANSACTION"/>
 	</bean>
 ----
-
-This works for classic type-safe emulated enums (on JDK 1.4 and JDK 1.3) as well; Spring
-will automatically attempt to match the string property value to a constant on the enum
-class.
 
 
 [[xsd-schemas-util-property-path]]
@@ -786,14 +782,14 @@ The `NamespaceHandler` interface is pretty simple in that it features just three
 * `init()` - allows for initialization of the `NamespaceHandler` and will be called by
   Spring before the handler is used
 * `BeanDefinition parse(Element, ParserContext)` - called when Spring encounters a
-  top-level element (not nested inside a bean definition or a different namespace). This
-  method can register bean definitions itself and/or return a bean definition.
+  top-level element (not nested inside a bean definition or a different namespace).
+  This method can register bean definitions itself and/or return a bean definition.
 * `BeanDefinitionHolder decorate(Node, BeanDefinitionHolder, ParserContext)` - called
-  when Spring encounters an attribute or nested element of a different namespace. The
-  decoration of one or more bean definitions is used for example with
-  the<<core.adoc#beans-factory-scopes,out-of-the-box scopes Spring 2.0 supports>>. We'll start by
-  highlighting a simple example, without using decoration, after which we will	show
-  decoration in a somewhat more advanced example.
+  when Spring encounters an attribute or nested element of a different namespace.
+  The decoration of one or more bean definitions is used for example with the
+  <<core.adoc#beans-factory-scopes,out-of-the-box scopes Spring supports>>.
+  We'll start by highlighting a simple example, without using decoration, after which
+  we will show decoration in a somewhat more advanced example.
 
 Although it is perfectly possible to code your own `NamespaceHandler` for the entire
 namespace (and hence provide code that parses each and every element in the namespace),
@@ -1373,4 +1369,3 @@ http\://www.foo.com/schema/jcache=com.foo.JCacheNamespaceHandler
 # in 'META-INF/spring.schemas'
 http\://www.foo.com/schema/jcache/jcache.xsd=com/foo/jcache.xsd
 ----
-

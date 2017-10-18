@@ -1,9 +1,13 @@
 = Appendix
 
+
+
+
 [[xsd-schemas]]
 == XML Schemas
 
 This part of the appendix lists XML schemas related to integration technologies.
+
 
 
 [[xsd-schemas-jee]]

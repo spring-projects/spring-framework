@@ -10,12 +10,14 @@ without the need for an HTTP server.
 
 
 
+
 [[webtestclient-setup]]
 == Setup
 
 To create a `WebTestClient` you must choose one of several server setup options.
 Effectively you either configure a WebFlux application to bind to, or use absolute URLs
 to connect to a running server.
+
 
 
 [[webtestclient-controller-config]]
@@ -35,6 +37,7 @@ without an HTTP server using mock request and response objects. There are more m
 on the builder to customize the default WebFlux Java config.
 
 
+
 [[webtestclient-fn-config]]
 === Bind to RouterFunction
 
@@ -51,6 +54,7 @@ Use this option to set up a server from a
 Internally the provided configuration is passed to `RouterFunctions.toWebHandler`.
 The resulting WebFlux application will be tested without an HTTP server using mock
 request and response objects.
+
 
 
 [[webtestclient-context-config]]
@@ -88,6 +92,7 @@ the request processing chain, see
 <<web-reactive.adoc#webflux-web-handler-api,WebHandler API>> for more details. The
 resulting WebFlux application will be tested without an HTTP server using mock request
 and response objects.
+
 
 
 [[webtestclient-server-config]]
@@ -284,6 +289,3 @@ from the `reactor-test` module to do that, for example:
             .thenCancel()
             .verify();
 ----
-
-
-

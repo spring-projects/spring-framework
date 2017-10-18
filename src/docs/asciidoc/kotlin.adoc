@@ -6,6 +6,9 @@
 :toclevels: 4
 :docinfo1:
 
+
+
+
 [[introduction]]
 == Introduction
 
@@ -17,8 +20,11 @@ existing libraries written in Java.
 Spring Framework 5 introduces first-class support for Kotlin and allows developers to write
 Spring + Kotlin applications almost as if the Spring Framework was a native Kotlin framework.
 
+
+
+
 [[requirements]]
-== Requirements ==
+== Requirements
 
 Spring Framework supports Kotlin 1.1+ and requires
 https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-stdlib[`kotlin-stdlib`]
@@ -27,6 +33,9 @@ https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-stdlib[`kotlin
 and https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-reflect[`kotlin-reflect`]
 to be present on the classpath. They are provided by default if one bootstraps a Kotlin project on
 https://start.spring.io/#!language=kotlin[start.spring.io].
+
+
+
 
 [[extensions]]
 == Extensions
@@ -77,6 +86,9 @@ val users : Flux<User> = client.get().retrieve().bodyToFlux()
 As in Java, `users` in Kotlin is strongly typed, but Kotlin's clever type inference allows
 for shorter syntax.
 
+
+
+
 [[null-safety]]
 == Null-safety
 
@@ -117,6 +129,9 @@ but should be in an upcoming release, see https://github.com/Kotlin/KEEP/issues/
 for up-to-date information.
 ====
 
+
+
+
 [[classes-interfaces]]
 == Classes & Interfaces
 
@@ -138,6 +153,9 @@ detected without the Jackson Kotlin module present.
 As of Spring Boot 2.0, Jackson Kotlin module is automatically provided via the JSON starter.
 ====
 
+
+
+
 [[annotations]]
 == Annotations
 
@@ -151,6 +169,9 @@ In a similar fashion, Spring bean injection with `@Autowired` or `@Inject` uses 
 to determine if a bean is required or not. `@Autowired lateinit var foo: Foo` implies that a bean
 of type `Foo` must be registered in the application context while `@Autowired lateinit var foo: Foo?`
 won’t raise an error if such bean does not exist.
+
+
+
 
 [[bean-definition-dsl]]
 == Bean definition DSL
@@ -251,8 +272,13 @@ see https://stackoverflow.com/questions/45935931/how-to-use-functional-bean-defi
 for more details and up-to-date information.
 ====
 
+
+
+
 [[web]]
 == Web
+
+
 
 === WebFlux Functional DSL
 
@@ -291,6 +317,8 @@ depending on dynamic data (for example, from a database).
 See https://github.com/mixitconf/mixit/tree/bad6b92bce6193f9b3f696af9d416c276501dbf1/src/main/kotlin/mixit/web/routes[MiXiT project routes]
 for a concrete example.
 
+
+
 === Kotlin Script templates
 
 As of version 4.3, Spring Framework provides a
@@ -326,11 +354,16 @@ ${include("footer")}
 See https://github.com/sdeleuze/kotlin-script-templating[kotlin-script-templating] example
 project for more details.
 
+
+
+
 [[spring-projects-in-kotlin]]
 == Spring projects in Kotlin
 
 This section provides focus on some specific hints and recommendations worth
 knowing when developing Spring projects in Kotlin.
+
+
 
 === Final by default
 
@@ -364,6 +397,8 @@ annotations are meta-annotated with `@Component`.
 
 http://start.spring.io/#!language=kotlin[start.spring.io] enables it by default, so in practice
 you will be able to write your Kotlin beans without any additional `open` keyword, like in Java.
+
+
 
 === Using immutable class instances for persistence
 
@@ -414,6 +449,8 @@ and should not require `kotlin-noarg` plugin if the module leverages Spring Data
 mapping (like with MongoDB, Redis, Cassandra, etc.).
 ====
 
+
+
 === Injecting dependencies
 
 Our recommendation is to try and favor constructor injection with `val` read-only (and non-nullable when possible)
@@ -450,6 +487,8 @@ class YourBean {
     lateinit var solrClient: SolrClient
 }
 ----
+
+
 
 === Injecting configuration properties
 
@@ -497,6 +536,8 @@ See these issues about https://github.com/spring-projects/spring-boot/issues/876
 and https://github.com/spring-projects/spring-boot/issues/1254[`@ConfigurationProperties` binding on interfaces]
 for more details.
 ====
+
+
 
 === Annotation array attributes
 
@@ -548,7 +589,10 @@ not only the `GET` methods.
 Improving the syntax and consistency of Kotlin annotation array attributes is discussed in
 https://youtrack.jetbrains.com/issue/KT-11235[this Kotlin language design issue].
 
+
+
 === Testing
+
 
 ==== Per class lifecycle
 
@@ -591,6 +635,7 @@ class IntegrationTests {
 }
 ----
 
+
 ==== Specification-like tests
 
 It is possible to create specification-like tests with JUnit 5 and Kotlin.
@@ -620,8 +665,12 @@ class SpecificationLikeTests {
 ----
 
 
+
+
 [[getting-started]]
 == Getting started
+
+
 
 === start.spring.io
 
@@ -630,6 +679,8 @@ Boot 2 project on https://start.spring.io/#!language=kotlin[start.spring.io].
 
 It is also possible to create a standalone WebFlux project as described in
 https://spring.io/blog/2017/08/01/spring-framework-5-kotlin-apis-the-functional-way[this blog post].
+
+
 
 === Choosing the web flavor
 
@@ -643,6 +694,9 @@ Kotlin DSL.
 For other use cases, especially if you are using blocking technologies like JPA, Spring
 MVC and its annotation-based programming model is a perfectly valid and fully supported choice.
 
+
+
+
 [[resources-started]]
 == Resources
 
@@ -652,12 +706,16 @@ MVC and its annotation-based programming model is a perfectly valid and fully su
 * https://blog.jetbrains.com/kotlin/[Kotlin blog]
 * https://kotlin.link/[Awesome Kotlin]
 
+
+
 === Blog posts
 
 * https://spring.io/blog/2016/02/15/developing-spring-boot-applications-with-kotlin[Developing Spring Boot applications with Kotlin]
 * https://spring.io/blog/2016/03/20/a-geospatial-messenger-with-kotlin-spring-boot-and-postgresql[A Geospatial Messenger with Kotlin, Spring Boot and PostgreSQL]
 * https://spring.io/blog/2017/01/04/introducing-kotlin-support-in-spring-framework-5-0[Introducing Kotlin support in Spring Framework 5.0]
 * https://spring.io/blog/2017/08/01/spring-framework-5-kotlin-apis-the-functional-way[Spring Framework 5 Kotlin APIs, the functional way]
+
+
 
 === Examples
 
@@ -667,17 +725,23 @@ MVC and its annotation-based programming model is a perfectly valid and fully su
 * https://github.com/sdeleuze/spring-kotlin-fullstack[spring-kotlin-fullstack]: WebFlux Kotlin fullstack example with Kotlin2js for frontend instead of JavaScript or TypeScript
 * https://github.com/spring-petclinic/spring-petclinic-kotlin[spring-petclinic-kotlin]: Kotlin version of the Spring PetClinic Sample Application
 
+
+
 === Tutorials
 
 * https://kotlinlang.org/docs/tutorials/spring-boot-restful.html[Creating a RESTful Web Service with Spring Boot]
+
+
 
 === Issues
 
 Here is a list of pending issues related to Spring + Kotlin support.
 
+
 ==== Spring Framework
 
 * https://jira.spring.io/browse/SPR-15413[Add support for Kotlin coroutines]
+
 
 ==== Spring Boot
 
@@ -686,6 +750,7 @@ Here is a list of pending issues related to Spring + Kotlin support.
 * https://github.com/spring-projects/spring-boot/issues/1254[Allow `@ConfigurationProperties` binding on interfaces]
 * https://github.com/spring-projects/spring-boot/issues/8511[Provide support for Kotlin KClass parameter in `SpringApplication.run()`]
 * https://github.com/spring-projects/spring-boot/issues/8115[Expose the functional bean registration API via `SpringApplication`]
+
 
 ==== Kotlin
 

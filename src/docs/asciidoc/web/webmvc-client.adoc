@@ -3,6 +3,9 @@
 
 This section describes options for client-side access to REST endpoints.
 
+
+
+
 [[webmvc-resttemplate]]
 == RestTemplate
 
@@ -17,6 +20,8 @@ execution model including seamless support for streaming.
 
 See <<integration.adoc#rest-client-access,RestTemplate>> for more details on using the
 `RestTemplate`.
+
+
 
 
 [[webmvc-webclient]]

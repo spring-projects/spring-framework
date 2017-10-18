@@ -1,6 +1,9 @@
 [[webflux]]
 = Spring WebFlux
 
+
+
+
 [[webflux-introduction]]
 == Introduction
 The original web framework included in the Spring Framework, Spring Web MVC, was purpose
@@ -15,6 +18,7 @@ https://github.com/spring-projects/spring-framework/tree/master/spring-webflux[s
 and co-exist side by side in the Spring Framework. Each module is optional.
 Applications may use one or the other module, or in some cases both --
 e.g. Spring MVC controllers with the reactive `WebClient`.
+
 
 
 [[webflux-new-framework]]
@@ -35,6 +39,7 @@ This is a boon for non-blocking applications and continuation style APIs -- as p
 by `CompletableFuture` and http://reactivex.io/[ReactiveX], that allow declarative
 composition of asynchronous logic. At the programming model level Java 8 enabled Spring
 WebFlux to offer functional web endpoints alongside with annotated controllers.
+
 
 
 [[webflux-why-reactive]]
@@ -72,6 +77,7 @@ If a publisher can't slow down then it has to decide whether to buffer, drop, or
 ====
 
 
+
 [[webflux-reactive-api]]
 === Reactive API
 
@@ -100,6 +106,7 @@ Whenever feasible -- e.g. annotated controllers, WebFlux adapts transparently to
 of RxJava or other reactive library. See <<webflux-reactive-libraries>> for more details.
 
 
+
 [[webflux-programming-models]]
 === Programming models
 
@@ -118,6 +125,7 @@ this as a small library or a set of utilities that an application can use to rou
 handle requests. The big difference with annotated controllers is that the application
 is in charge of request handling from start to finish vs declaring intent through
 annotations and being called back.
+
 
 
 [[webflux-framework-choice]]
@@ -170,6 +178,7 @@ https://medium.com/netflix-techblog/zuul-2-the-netflix-journey-to-asynchronous-n
 is a good resource.
 
 
+
 [[webflux-server-choice]]
 === Choosing a server
 
@@ -198,6 +207,7 @@ optimized for performance, fully non-blocking, and adapted to Reactive Streams b
 pressure. In Spring Boot it is trivial to make the switch.
 
 
+
 [[webflux-performance]]
 === Performance vs scale
 
@@ -215,6 +225,7 @@ dramatic.
 
 
 
+
 [[webflux-reactive-spring-web]]
 == Reactive Spring Web
 
@@ -228,6 +239,7 @@ Server support is organized in two layers:
 for HTTP request handling with Reactive Streams back pressure.
 * <<webflux-web-handler-api,WebHandler API>> -- slightly higher level but still general
 purpose server web API with filter chain style processing.
+
 
 
 [[webflux-httphandler]]
@@ -411,6 +423,7 @@ to have the following detected:
 |===
 
 
+
 [[webflux-codecs]]
 === Codecs
 
@@ -436,6 +449,7 @@ and more.
 Finally, `ClientCodecConfigurer` and `ServerCodecConfigurer` can be used to initialize
 a list of readers and writers. They include support for classpath detection and a
 of defaults along with the ability to override or replace those defaults.
+
 
 
 
@@ -601,6 +615,7 @@ your Java configuration:
 `@Controller` and `@ResponseBody` indicating a controller whose every method inherits the type-level
 `@ResponseBody` annotation and therefore writes to the response body (vs model-and-vew
 rendering).
+
 
 
 [[webflux-ann-requestmapping]]
@@ -859,6 +874,7 @@ is not necessary in the common case.
 `@RequestMapping` handler methods have a flexible signature and can choose from a range of
 supported controller method arguments and return values.
 
+
 [[webflux-ann-arguments]]
 ==== Method arguments
 [.small]#<<web.adoc#mvc-ann-arguments,Same in Spring MVC>>#
@@ -969,6 +985,7 @@ as a result of a class-level `@SessionAttributes` declaration.
 |For access to request attributes.
 |===
 
+
 [[webflux-ann-return-types]]
 ==== Return values
 [.small]#<<web.adoc#mvc-ann-return-types,Same in Spring MVC>>#
@@ -1029,7 +1046,9 @@ class name of the return type.
 
 
 
+
 include::webflux-functional.adoc[leveloffset=+1]
+
 
 
 
@@ -1044,6 +1063,7 @@ the configuration API, see <<webflux-config-advanced-java>>.
 You do not need to understand the underlying beans created by the Java config, but it's
 easy to seem them in `WebFluxConfigurationSupport`, and if you want to learn more, see
 <<webflux-special-bean-types>>.
+
 
 
 [[webflux-config-enable]]
@@ -1064,6 +1084,7 @@ Use the `@EnableWebFlux` annotation in your Java config:
 The above registers a number of Spring WebFlux
 <<mvc-webflux-special-bean-types,infrastructure beans>> also adapting to dependencies
 available on the classpath -- for JSON, XML, etc.
+
 
 
 [[webflux-config-customize]]
@@ -1118,6 +1139,7 @@ and the `FormattingConversionServiceFactoryBean` for more information on when to
 ====
 
 
+
 [[webflux-config-validation]]
 === Validation
 [.small]#<<web.adoc#mvc-config-validation,Same in Spring MVC>>#
@@ -1167,6 +1189,7 @@ mark it with `@Primary` in order to avoid conflict with the one declared in the 
 ====
 
 
+
 [[webflux-config-content-negotiation]]
 === Content type resolvers
 [.small]#<<web.adoc#mvc-config-content-negotiation,Same in Spring MVC>>#
@@ -1190,6 +1213,8 @@ To customize the requested content type resolution:
 		}
 	}
 ----
+
+
 
 [[webflux-config-message-codecs]]
 === HTTP message codecs
@@ -1227,6 +1252,7 @@ It also automatically registers the following well-known modules if they are det
 . https://github.com/FasterXML/jackson-datatype-joda[jackson-datatype-joda]: support for Joda-Time types.
 . https://github.com/FasterXML/jackson-datatype-jsr310[jackson-datatype-jsr310]: support for Java 8 Date & Time API types.
 . https://github.com/FasterXML/jackson-datatype-jdk8[jackson-datatype-jdk8]: support for other Java 8 types like `Optional`.
+
 
 
 [[webflux-config-view-resolvers]]
@@ -1269,6 +1295,7 @@ Note that FreeMarker also requires configuration of the underlying view technolo
 
 	}
 ----
+
 
 
 [[webflux-config-static-resources]]
@@ -1351,6 +1378,7 @@ match to incoming URLs without versions -- e.g. `"/jquery/jquery.min.js"` to
 `"/jquery/1.2.0/jquery.min.js"`.
 
 
+
 [[webflux-config-path-matching]]
 === Path Matching
 [.small]#<<web.adoc#mvc-config-path-matching,Same in Spring MVC>>#
@@ -1382,6 +1410,7 @@ To customize those options:
 ----
 
 
+
 [[webflux-config-advanced-java]]
 === Advanced config mode
 [.small]#<<web.adoc#mvc-config-advanced-java,Same in Spring MVC>>#
@@ -1407,5 +1436,3 @@ For advanced mode, remove `@EnableWebFlux` and extend directly from
 You can keep existing methods in `WebConfig` but you can now also override bean declarations
 from the base class and you can still have any number of other ``WebMvcConfigurer``'s on
 the classpath.
-
-

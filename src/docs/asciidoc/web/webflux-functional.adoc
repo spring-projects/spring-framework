@@ -7,6 +7,8 @@ It is an alternative to the annotated-based programming model but runs on the sa
 <<web-reactive.adoc#webflux-reactive-spring-web>> foundation
 
 
+
+
 [[webflux-fn-handler-functions]]
 == HandlerFunction
 
@@ -119,6 +121,9 @@ when the `Person` has been saved.
 variable `id`. We retrieve that `Person` via the repository, and create a JSON response if it is
 found. If it is not found, we use `switchIfEmpty(Mono<T>)` to return a 404 Not Found response.
 
+
+
+
 [[webflux-fn-router-functions]]
 == RouterFunction
 
@@ -182,6 +187,8 @@ For instance, `RequestPredicates.GET(String)` is a composition of
 `RequestPredicates.method(HttpMethod)` and `RequestPredicates.path(String)`.
 
 
+
+
 [[webflux-fn-running]]
 == Running a server
 
@@ -196,6 +203,7 @@ it is also possible to run with a
 with annotated controllers. The easiest way to do that is through the
 <<web-reactive.adoc#webflux-config>> which creates the necessary configuration to
 handle requests with router and handler functions.
+
 
 
 

@@ -2,8 +2,12 @@
 = Spring Web MVC
 :doc-spring-security: {doc-root}/spring-security/site/docs/current/reference
 
+
+
+
 [[mvc-introduction]]
 == Introduction
+
 Spring Web MVC is the original web framework built on the Servlet API and included
 in the Spring Framework from the very beginning. The formal name "Spring Web MVC"
 comes from the name of its source module
@@ -15,6 +19,7 @@ whose name Spring WebFlux is also based on its source module
 https://github.com/spring-projects/spring-framework/tree/master/spring-webflux[spring-webflux].
 This section covers Spring Web MVC. The <<web-reactive.adoc#spring-web-reactive,next section>>
 covers Spring WebFlux.
+
 
 
 
@@ -112,6 +117,7 @@ are detected in Spring configuration and registered with the Servlet container.
 For more details check the
 https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-embedded-container[Spring Boot docs].
 ====
+
 
 
 [[mvc-servlet-context-hierarchy]]
@@ -285,6 +291,7 @@ See <<mvc-config>> for more details.
 Spring Boot relies on the MVC Java config to configure Spring MVC and also
 provides many extra convenient options on top.
 ====
+
 
 
 [[mvc-container-config]]
@@ -467,6 +474,7 @@ initialization parameters ( `init-param` elements) to the Servlet declaration in
 |===
 
 
+
 [[mvc-handlermapping-interceptor]]
 === Interception
 
@@ -499,8 +507,10 @@ declare it as an <<mvc-ann-controller-advice>> bean or configure it directly on
 `RequestMappingHandlerAdapter`.
 
 
+
 [[mvc-viewresolver]]
 === View Resolution
+
 Spring MVC defines the `ViewResolver` and `View` interfaces that enable you to render
 models in a browser without tying you to a specific view technology. `ViewResolver`
 provides a mapping between view names and actual views. `View` addresses the preparation
@@ -553,7 +563,6 @@ This table below provides more details on the `ViewResolver` hierarchy:
   request file name or `Accept` header. See <<mvc-multiple-representations>>.
 |===
 
-
 You chain view resolvers by configuring more than one resolver and, if necessary, by
 setting the `order` property to specify ordering. Remember, the higher the order property,
 the later the view resolver is positioned in the chain.
@@ -567,7 +576,6 @@ must always be configured last in the order.
 See <<mvc-config-view-controller,View Controllers>> under <<mvc-config>> for details on
 how to configure view resolution. Also see<<mvc-view>> for more details on supported
 view technologies.
-
 
 
 [[mvc-redirecting-redirect-prefix]]
@@ -622,8 +630,10 @@ Content-Type was `text/xml` is a compatible match.
 See <<mvc-config-view-resolvers>> under <<mvc-config>> for configuration details.
 
 
+
 [[mvc-localeresolver]]
-=== Locales
+=== Locale
+
 Most parts of Spring's architecture support internationalization, just as the Spring web
 MVC framework does. `DispatcherServlet` enables you to automatically resolve messages
 using the client's locale. This is done with `LocaleResolver` objects.
@@ -643,9 +653,9 @@ context in the normal way. Here is a selection of the locale resolvers included 
 Spring.
 
 
-
 [[mvc-timezone]]
 ==== TimeZone
+
 In addition to obtaining the client's locale, it is often useful to know their time zone.
 The `LocaleContextResolver` interface offers an extension to `LocaleResolver` that allows
 resolvers to provide a richer `LocaleContext`, which may include time zone information.
@@ -656,14 +666,13 @@ by Date/Time `Converter` and `Formatter` objects registered with Spring's
 `ConversionService`.
 
 
-
 [[mvc-localeresolver-acceptheader]]
 ==== Header resolver
+
 This locale resolver inspects the `accept-language` header in the request that was sent
 by the client (e.g., a web browser). Usually this header field contains the locale of
 the client's operating system. __Note that this resolver does not support time zone
 information.__
-
 
 
 [[mvc-localeresolver-cookie]]
@@ -710,7 +719,6 @@ maximum age. Find below an example of defining a `CookieLocaleResolver`.
 |===
 
 
-
 [[mvc-localeresolver-session]]
 ==== Session resolver
 
@@ -723,7 +731,6 @@ for each session and therefore lost when each session terminates.
 Note that there is no direct relationship with external session management mechanisms
 such as the Spring Session project. This `SessionLocaleResolver` will simply evaluate and
 modify corresponding `HttpSession` attributes against the current `HttpServletRequest`.
-
 
 
 [[mvc-localeresolver-interceptor]]
@@ -763,7 +770,6 @@ change the site language to Dutch.
 
 
 
-
 [[mvc-themeresolver]]
 === Themes
 
@@ -775,6 +781,7 @@ application.
 
 [[mvc-themeresolver-defining]]
 ==== Define a theme
+
 To use themes in your web application, you must set up an implementation of the
 `org.springframework.ui.context.ThemeSource` interface. The `WebApplicationContext`
 interface extends `ThemeSource` but delegates its responsibilities to a dedicated
@@ -823,9 +830,9 @@ example, we could have a `/WEB-INF/classes/cool_nl.properties` that references a
 background image with Dutch text on it.
 
 
-
 [[mvc-themeresolver-resolving]]
 ==== Resolve themes
+
 After you define themes, as in the preceding section, you decide which theme to use. The
 `DispatcherServlet` will look for a bean named `themeResolver` to find out which
 `ThemeResolver` implementation to use. A theme resolver works in much the same way as a
@@ -853,6 +860,7 @@ Spring also provides a `ThemeChangeInterceptor` that allows theme changes on eve
 request with a simple request parameter.
 
 
+
 [[mvc-multipart]]
 === Multipart requests
 
@@ -869,7 +877,6 @@ contains a multipart. If no multipart is found, the request continues as expecte
 multipart is found in the request, the `MultipartResolver` that has been declared in
 your context is used. After that, the multipart attribute in your request is treated
 like any other attribute.
-
 
 
 [[mvc-multipart-resolver-commons]]
@@ -902,10 +909,15 @@ Once Servlet 3.0 multipart parsing has been enabled in one of the above mentione
 you can add a bean of type `StandardServletMultipartResolver` and with the name
 `multipartResolver` to your Spring configuration.
 
+
+
+
 [[filters]]
 == Filters
 
 The `spring-web` module provides some useful filters.
+
+
 
 [[filters-http-put]]
 === HTTP PUT Form
@@ -918,6 +930,7 @@ The `spring-web` module provides `HttpPutFormContentFilter` that intercepts HTTP
 PATCH requests with content type `application/x-www-form-urlencoded`, reads the form data from
 the body of the request, and wraps the `ServletRequest` in order to make the form data
 available through the `ServletRequest.getParameter{asterisk}()` family of methods.
+
 
 
 [[filters-forwarded-headers]]
@@ -947,6 +960,7 @@ Applications that don't have a proxy and don't need to use forwarded headers can
 configure the `ForwardedHeaderFilter` to remove and ignore such headers.
 
 
+
 [[filters-shallow-etag]]
 === Shallow ETag
 
@@ -957,6 +971,7 @@ response and computing the ETag value at the end.
 See <<mvc-httpcaching-shallowetag>> for more details.
 
 
+
 [[filters-cors]]
 === CORS
 
@@ -965,6 +980,7 @@ controllers. However when used with Spring Security it is advisable to rely on t
 `CorsFilter` that must be ordered ahead of Spring Security's chain of filters.
 
 See the section on <<mvc-cors>> and the <<mvc-cors-filter,CorsFilter>> for more details.
+
 
 
 
@@ -1206,7 +1222,6 @@ the `PathMatcher` implementation used can be customized. See <<mvc-config-path-m
 in the configuration section.
 
 
-
 [[mvc-ann-requestmapping-suffix-pattern-match]]
 ==== Suffix match
 
@@ -1259,6 +1274,7 @@ recommendations related to RFD.
 
 [[mvc-ann-matrix-variables]]
 ==== Matrix variables
+
 The URI specification http://tools.ietf.org/html/rfc3986#section-3.3[RFC 3986] defines
 the possibility of including name-value pairs within path segments. There is no specific
 term used in the spec. The general "URI path parameters" could be applied although the
@@ -1288,7 +1304,6 @@ Below is an example of extracting the matrix variable "q":
 
 		// petId == 42
 		// q == 11
-
 	}
 ----
 
@@ -1307,7 +1322,6 @@ specific to identify where the variable is expected to be:
 
 		// q1 == 11
 		// q2 == 22
-
 	}
 ----
 
@@ -1322,7 +1336,6 @@ A matrix variable may be defined as optional and a default value specified:
 	public void findPet(@MatrixVariable(required=false, defaultValue="1") int q) {
 
 		// q == 1
-
 	}
 ----
 
@@ -1340,7 +1353,6 @@ All matrix variables may be obtained in a Map:
 
 		// matrixVars: ["q" : [11,22], "r" : 12, "s" : 23]
 		// petMatrixVars: ["q" : 22, "s" : 23]
-
 	}
 ----
 
@@ -1511,6 +1523,7 @@ is not necessary in the common case.
 `@RequestMapping` handler methods have a flexible signature and can choose from a range of
 supported controller method arguments and return values.
 
+
 [[mvc-ann-arguments]]
 ==== Method Arguments
 [.small]#<<web-reactive.adoc#webflux-ann-arguments,Same in Spring WebFlux>>#
@@ -1518,7 +1531,7 @@ supported controller method arguments and return values.
 The table below shows supported controller method arguments. Reactive types are not supported
 for any arguments.
 
-JDK 1.8's `java.util.Optional` is supported as a method argument in combination with
+JDK 8's `java.util.Optional` is supported as a method argument in combination with
 annotations that have a `required` attribute -- e.g. `@RequestParam`, `@RequestHeader`,
 etc, and is equivalent to `required=false`.
 
@@ -1628,6 +1641,7 @@ as a result of a class-level `@SessionAttributes` declaration.
 |`@RequestAttribute`
 |For access to request attributes.
 |===
+
 
 [[mvc-ann-return-types]]
 ==== Return Values
@@ -1758,6 +1772,7 @@ parameters.
 
 [[mvc-ann-typeconversion]]
 ==== Type Conversion
+
 String-based values extracted from the request including request parameters, path
 variables, request headers, and cookie values may need to be converted to the target
 type of the method parameter or field (e.g., binding a request parameter to a field in
@@ -1770,6 +1785,7 @@ the `FormattingConversionService`, see <<core.adoc#format, Spring Field Formatti
 
 [[mvc-ann-requestheader]]
 ==== @RequestHeader
+
 The `@RequestHeader` annotation allows a method parameter to be bound to a request header.
 
 Here is a sample request header:
@@ -1805,7 +1821,6 @@ When an `@RequestHeader` annotation is used on a `Map<String, String>`,
 `MultiValueMap<String, String>`, or `HttpHeaders` argument, the map is populated
 with all header values.
 
-
 [TIP]
 ====
 Built-in support is available for converting a comma-separated string into an
@@ -1813,7 +1828,6 @@ array/collection of strings or other types known to the type conversion system. 
 example a method parameter annotated with `@RequestHeader("Accept")` may be of type
 `String` but also `String[]` or `List<String>`.
 ====
-
 
 
 [[mvc-ann-cookievalue]]
@@ -1995,6 +2009,7 @@ See <<core.adoc#validation-beanvalidation, Bean validation>> and
 
 [[mvc-multipart-forms]]
 ==== File upload
+
 After the `MultipartResolver` completes its job, the request is processed like any
 other. First, create a form with a file input that will allow the user to upload a form.
 The encoding attribute ( `enctype="multipart/form-data"`) lets the browser know how to
@@ -2178,9 +2193,9 @@ other redirect attributes, flash attributes are saved in the HTTP session (and h
 not appear in the URL). See <<mvc-flash-attributes>> for more information.
 
 
-
 [[mvc-flash-attributes]]
 ==== Flash attributes
+
 Flash attributes provide a way for one request to store attributes intended for use in
 another. This is most commonly needed when redirecting -- for example, the
 __Post/Redirect/Get__ pattern. Flash attributes are saved temporarily before the
@@ -2226,6 +2241,7 @@ Therefore the use of flash attributes is recommended mainly for redirect scenari
 
 [[mvc-multipart-forms-non-browsers]]
 ==== @RequestPart
+
 Multipart requests can also be submitted from non-browser clients in a RESTful service
 scenario. All of the above examples and configuration apply here as well. However,
 unlike browsers that typically submit files and simple form fields, a programmatic
@@ -2284,6 +2300,7 @@ converted with the help of the `MappingJackson2HttpMessageConverter`.
 
 [[mvc-ann-requestbody]]
 ==== @RequestBody
+
 The `@RequestBody` method parameter annotation indicates that a method parameter should
 be bound to the value of the HTTP request body. For example:
 
@@ -2431,7 +2448,6 @@ converters, see the previous section and <<integration.adoc#rest-message-convers
 Message Converters>>.
 
 
-
 [[mvc-ann-jackson]]
 ==== Jackson JSON
 
@@ -2538,6 +2554,7 @@ request has a query parameter named `jsonp` or `callback`. Those names can be
 customized through `jsonpParameterNames` property.
 
 
+
 [[mvc-ann-modelattrib-methods]]
 === Model Methods
 
@@ -2605,6 +2622,7 @@ attribute rather than as a view name. The view name is then derived based on vie
 conventions instead, much like for methods returning `void` -- see <<mvc-coc-r2vnt>>.
 
 
+
 [[mvc-ann-initbinder]]
 === Binder Methods
 
@@ -2666,6 +2684,7 @@ controller-specific tweaking of the binding rules.
 ----
 
 
+
 [[mvc-ann-controller-advice]]
 === Controller Advice
 
@@ -2701,7 +2720,8 @@ Both `@ControllerAdvice` and `@RestControllerAdvice` can target a subset of cont
 
 See the
 {api-spring-framework}/web/bind/annotation/ControllerAdvice.html[@ControllerAdvice]
-Javadoc for more details.
+javadoc for more details.
+
 
 
 
@@ -2790,6 +2810,7 @@ the original request. Note that you can also use the
 ====
 
 
+
 [[mvc-links-to-controllers]]
 === Links to Controllers
 
@@ -2864,6 +2885,7 @@ with a base URL and then use the instance-based "withXxx" methods. For example:
 ----
 
 
+
 [[mvc-links-to-controllers-from-views]]
 === Links in views
 
@@ -2918,8 +2940,11 @@ in order to use a specific instance of `MvcUriComponentsBuilder` with a custom b
 
 
 
+
 [[mvc-exceptionhandlers]]
 == Exception Handling
+
+
 
 [[mvc-exceptionhandlers-overview]]
 === Overview
@@ -3007,6 +3032,7 @@ value converted with message converters and written to the response stream.
 
 [[mvc-ann-rest-spring-mvc-exceptions]]
 === Framework exceptions
+
 Spring MVC may raise a number of exceptions while processing a request. The
 `SimpleMappingExceptionResolver` can easily map any exception to a default error view as
 needed. However, when working with clients that interpret responses in an automated way
@@ -3104,7 +3130,6 @@ See `ResponseEntityExceptionHandler`.
 
 
 
-
 [[mvc-ann-annotated-exceptions]]
 === Annotated Exception
 
@@ -3117,6 +3142,7 @@ response accordingly. By default the `DispatcherServlet` registers the
 
 [[mvc-ann-customer-servlet-container-error-page]]
 === Container error page
+
 When the status of the response is set to an error status code and the body of the
 response is empty, Servlet containers commonly render an HTML formatted error page. To
 customize the default error page of the container, you can declare an `<error-page>`
@@ -3172,8 +3198,12 @@ or in a JSP:
 ----
 
 
+
+
 [[mvc-ann-async]]
 == Async Requests
+
+
 
 [[mvc-ann-async-processing]]
 === Processing
@@ -3271,8 +3301,10 @@ https://spring.io/blog/2012/05/07/spring-mvc-3-2-preview-introducing-servlet-3-a
 blog post series].
 
 
+
 [[mvc-ann-async-exceptions]]
 === Exception handling
+
 What happens if a `Callable` returned from a controller method raises an
 Exception while being executed? The short answer is the same as what happens
 when a controller method raises an exception. It goes through the regular
@@ -3284,8 +3316,10 @@ When using a `DeferredResult` you have a choice whether to call
 `setResult` or `setErrorResult` with an `Exception` instance.
 
 
+
 [[mvc-ann-async-interception]]
 === Async interceptors
+
 A `HandlerInterceptor` can also implement `AsyncHandlerInterceptor` in order
 to implement the `afterConcurrentHandlingStarted` callback, which is called
 instead of `postHandle` and `afterCompletion` when asynchronous processing
@@ -3303,6 +3337,8 @@ details.
 
 When using a `Callable` you can wrap it with an instance of `WebAsyncTask`
 which also provides registration methods for timeout and completion.
+
+
 
 [[mvc-ann-async-http-streaming]]
 === Streaming response
@@ -3345,6 +3381,8 @@ Note that `ResponseBodyEmitter` can also be used as the body in a
 `ResponseEntity` in order to customize the status and headers of
 the response.
 
+
+
 [[mvc-ann-async-sse]]
 === Server-Sent Events
 
@@ -3367,6 +3405,8 @@ and also higher-level messaging patterns for interacting with clients through
 a publish-subscribe model within a more messaging-centric architecture.
 For further background on this see
 http://blog.pivotal.io/pivotal/products/websocket-architecture-in-spring-4-0[the following blog post].
+
+
 
 [[mvc-ann-async-output-stream]]
 === Streaming raw data
@@ -3397,6 +3437,7 @@ Here is an example of that:
 Note that `StreamingResponseBody` can also be used as the body in a
 `ResponseEntity` in order to customize the status and headers of
 the response.
+
 
 
 [[mvc-ann-async-reactive-types]]
@@ -3456,8 +3497,10 @@ processing and hence does not require a thread to absorb the effect of blocking.
 For asynchronous requests there are minor requirements at the Servlet container
 level and more controls in Spring MVC configuration.
 
+
 [[mvc-ann-async-configuration-servlet3]]
 ==== Servlet container config
+
 For applications configured with a `web.xml` be sure to update to version 3.0:
 
 [source,xml,indent=0]
@@ -3519,6 +3562,7 @@ just like with `web.xml`. To simplify all this configuration, consider extending
 `AbstractAnnotationConfigDispatcherServletInitializer` which automatically
 set those options and make it very easy to register `Filter` instances.
 
+
 [[mvc-ann-async-configuration-spring-mvc]]
 ==== Spring MVC config
 
@@ -3542,7 +3586,11 @@ the timeout value. The class constructor of `WebAsyncTask` also allows providing
 `AsyncTaskExecutor`.
 
 
+
+
 include::webmvc-cors.adoc[leveloffset=+1]
+
+
 
 
 [[mvc-web-security]]
@@ -3561,6 +3609,7 @@ for an example.
 
 Another option is to use a framework dedicated to Web Security.
 http://hdiv.org/[HDIV] is one such framework and integrates with Spring MVC.
+
 
 
 [[mvc-coc-modelmap]]
@@ -3716,6 +3765,7 @@ that can be configured.
 
 
 
+
 [[mvc-caching]]
 == HTTP Caching
 
@@ -3735,6 +3785,7 @@ content has not changed, the server returns `304: Not Modified`.
 
 This section describes the different choices available to configure HTTP caching in a
 Spring Web MVC application.
+
 
 
 [[mvc-caching-cachecontrol]]
@@ -3775,6 +3826,7 @@ accepted as an argument in several Spring Web MVC APIs.
     									.noTransform().cachePublic();
 ----
 
+
 [[mvc-caching-static-resources]]
 === Static resources
 
@@ -3814,6 +3866,7 @@ And in XML:
 		<mvc:cache-control max-age="3600" cache-public="true"/>
 	</mvc:resources>
 ----
+
 
 
 [[mvc-caching-etag-lastmodified]]
@@ -3893,6 +3946,7 @@ will check that the resource has not been modified and if it has been, it will r
 `HTTP 409 Precondition Failed` response to prevent concurrent modifications.
 
 
+
 [[mvc-httpcaching-shallowetag]]
 === ETag Filter
 
@@ -3911,6 +3965,7 @@ avoid computation.
 This filter has a `writeWeakETag` parameter that configures the filter to write Weak ETags,
 like this: `W/"02a2d595e6ed9a0b24f027f2b63b134d6"`, as defined in
 https://tools.ietf.org/html/rfc7232#section-2.3[RFC 7232 Section 2.3].
+
 
 
 
@@ -3994,6 +4049,7 @@ completion feature of your IDE to discover what attributes and sub-elements are
 available.
 
 
+
 [[mvc-config-conversion]]
 === Type conversion
 [.small]#<<web-reactive.adoc#webflux-config-conversion,Same in Spring WebFlux>>#
@@ -4064,6 +4120,7 @@ In XML, the same:
 See <<core.adoc#format-FormatterRegistrar-SPI,FormatterRegistrar SPI>>
 and the `FormattingConversionServiceFactoryBean` for more information on when to use FormatterRegistrars.
 ====
+
 
 
 [[mvc-config-validation]]
@@ -4229,6 +4286,7 @@ In XML, the same:
 ----
 
 
+
 [[mvc-config-message-converters]]
 === Message Converters
 [.small]#<<web-reactive.adoc#webflux-config-message-codecs,Same in Spring WebFlux>>#
@@ -4319,6 +4377,7 @@ It is also possible to do the same in XML:
 ----
 
 
+
 [[mvc-config-view-controller]]
 === View Controllers
 
@@ -4350,6 +4409,7 @@ And the same in XML use the `<mvc:view-controller>` element:
 ----
 	<mvc:view-controller path="/" view-name="home"/>
 ----
+
 
 
 [[mvc-config-view-resolvers]]
@@ -4550,6 +4610,7 @@ match to incoming URLs without versions -- e.g. `"/jquery/jquery.min.js"` to
 `"/jquery/1.2.0/jquery.min.js"`.
 
 
+
 [[mvc-default-servlet-handler]]
 === Default Servlet
 
@@ -4736,7 +4797,6 @@ Note that `MyPostProcessor` needs to be declared as a bean either explicitly in 
 detected through a `<component scan/>` declaration.
 
 
+
+
 include::webmvc-view.adoc[leveloffset=+1]
-
-
-

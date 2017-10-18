@@ -21,6 +21,9 @@ Spring is open source. It has a large and active community that provides continu
 based on a diverse range of real-world use cases. This has helped Spring to successfully
 evolve over a very long time.
 
+
+
+
 [[overview-spring]]
 == What We Mean by "Spring"
 
@@ -43,6 +46,9 @@ A note about modules: Spring's framework jars allow for deployment to JDK 9's mo
 ("spring.core", "spring.context" etc) independent from jar artifact names (the jars follow
 the same naming pattern with "-" instead of ".", e.g. "spring-core" and "spring-context").
 Of course, Spring's framework jars keep working fine on the classpath on both JDK 8 and 9.
+
+
+
 
 [[overview-history]]
 == History of Spring and the Spring Framework
@@ -85,6 +91,9 @@ among others. It’s important to remember that each project has its own source 
 issue tracker, and release cadence. See https://spring.io/projects[spring.io/projects] for
 the complete list of Spring projects.
 
+
+
+
 [[overview-philosophy]]
 == Design Philosophy
 
@@ -108,6 +117,9 @@ that are intuitive and that hold up across many versions and many years.
 meaningful, current, and accurate Javadoc. It is one of very few projects that can claim
 clean code structure with  no circular dependencies between packages.
 
+
+
+
 [[overview-feedback]]
 == Feedback and Contributions
 
@@ -127,6 +139,9 @@ reference is versioned and distributed with the Spring Framework, the wiki conta
 information that is not specific to any one version. For example, it has migration
 notes from earlier versions, comprehensive information on what's new across multiple
 versions, contributor guidelines, the Spring Framework code style, and other information.
+
+
+
 
 [[overview-getting-started]]
 == Getting Started

@@ -1,6 +1,7 @@
-
 [[web-integration]]
 = Other Web Frameworks
+
+
 
 
 [[intro]]
@@ -16,6 +17,8 @@ methodology that is most relevant to a developer and their development team is
 arguably most evident in the web area, where Spring provides its own web framework
 (<<mvc,Spring MVC>>), while at the same time providing integration with a number of
 popular third party web frameworks.
+
+
 
 
 [[web-integration-common]]
@@ -103,7 +106,7 @@ has more detail on its specific integration strategies.
 
 
 [[jsf]]
-== JSF 1.2
+== JSF
 JavaServer Faces (JSF) is the JCP's standard component-based, event-driven web user
 interface framework. As of Java EE 5, it is an official part of the Java EE umbrella.
 
@@ -122,15 +125,17 @@ http://projects.spring.io/spring-webflow[Spring Web Flow website] for details!
 
 The key element in Spring's JSF integration is the JSF `ELResolver` mechanism.
 
+
+
 [[jsf-springbeanfaceselresolver]]
 === Spring Bean Resolver
-`SpringBeanFacesELResolver` is a JSF 1.2 compliant `ELResolver` implementation,
+`SpringBeanFacesELResolver` is a JSF 1.2+ compliant `ELResolver` implementation,
 integrating with the standard Unified EL as used by JSF 1.2 and JSP 2.1. Like
-	`SpringBeanVariableResolver`, it delegates to the Spring's 'business context'
+`SpringBeanVariableResolver`, it delegates to the Spring's 'business context'
 `WebApplicationContext` __first__, then to the default resolver of the underlying JSF
 implementation.
 
-Configuration-wise, simply define `SpringBeanFacesELResolver` in your JSF 1.2
+Configuration-wise, simply define `SpringBeanFacesELResolver` in your JSF
 __faces-context.xml__ file:
 
 [source,xml,indent=0]
@@ -143,6 +148,7 @@ __faces-context.xml__ file:
 		</application>
 	</faces-config>
 ----
+
 
 
 [[jsf-facescontextutils]]
@@ -161,6 +167,7 @@ takes a `FacesContext` parameter rather than a `ServletContext` parameter.
 
 
 
+
 [[struts]]
 == Apache Struts 2.x
 Invented by Craig McClanahan, http://struts.apache.org[Struts] is an open source project
@@ -173,6 +180,7 @@ among Java web developers.
 Check out the Struts
 https://struts.apache.org/release/2.3.x/docs/spring-plugin.html[Spring Plugin] for the
 built-in Spring integration shipped with Struts.
+
 
 
 
@@ -193,6 +201,7 @@ Spring].
 
 
 
+
 [[web-integration-resources]]
 == Further Resources
 Find below links to further resources about the various web frameworks described in this
@@ -201,4 +210,3 @@ chapter.
 * The http://www.oracle.com/technetwork/java/javaee/javaserverfaces-139869.html[JSF] homepage
 * The http://struts.apache.org/[Struts] homepage
 * The http://tapestry.apache.org/[Tapestry] homepage
-

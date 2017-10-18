@@ -1,6 +1,9 @@
 [[mvc-cors]]
 = CORS
 
+
+
+
 == Introduction
 
 For security reasons, browsers prohibit AJAX calls to resources residing outside the
@@ -30,6 +33,9 @@ Since CORS requests are automatically dispatched, you *do not need* to change th
 `DispatcherServlet` `dispatchOptionsRequest` init parameter value; using its default value
 (`false`) is the recommended approach.
 ====
+
+
+
 
 [[mvc-cors-controller]]
 == @Controller CORS
@@ -110,6 +116,9 @@ public class AccountController {
 }
 ----
 
+
+
+
 [[mvc-cors-global]]
 == Global CORS
 
@@ -117,6 +126,7 @@ In addition to fine-grained, annotation-based configuration you'll probably want
 define some global CORS configuration as well. This is similar to using filters but can
 be declared within Spring MVC and combined with fine-grained `@CrossOrigin` configuration.
 By default all origins and `GET`, `HEAD`, and `POST` methods are allowed.
+
 
 
 [[mvc-cors-global-java]]
@@ -161,6 +171,7 @@ public class WebConfig implements WebMvcConfigurer {
 ----
 
 
+
 [[mvc-cors-global-xml]]
 === XML Config
 
@@ -195,6 +206,9 @@ It is also possible to declare several CORS mappings with customized properties:
 </mvc:cors>
 ----
 
+
+
+
 [[mvc-cors-customizations]]
 == Advanced Customization
 
@@ -211,6 +225,8 @@ It can be provided in various ways:
    interface (like https://github.com/spring-projects/spring-framework/blob/master/spring-webmvc/src/main/java/org/springframework/web/servlet/resource/ResourceHttpRequestHandler.java[`ResourceHttpRequestHandler`]
    now does) in order to provide a {api-spring-framework}/web/cors/CorsConfiguration.html[CorsConfiguration]
    instance for each request.
+
+
 
 
 [[mvc-cors-filter]]

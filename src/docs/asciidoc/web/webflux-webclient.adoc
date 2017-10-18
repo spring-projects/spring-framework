@@ -22,6 +22,8 @@ non-blocking I/O.
 ====
 
 
+
+
 [[webflux-client-retrieve]]
 == Retrieve
 
@@ -65,6 +67,7 @@ By default, responses with 4xx or 5xx status codes result in an error of type
 
 
 
+
 [[webflux-client-exchange]]
 == Exchange
 
@@ -101,6 +104,8 @@ When using `exchange()` you must always use any of the body or entity methods of
 connection pooling. If not interested in the response body use `bodyToMono(Void.class)`
 to complete.
 ====
+
+
 
 
 [[webflux-client-body]]
@@ -150,6 +155,8 @@ Or if you have the actual value, use the `syncBody` shortcut method:
             .retrieve()
             .bodyToMono(Void.class);
 ----
+
+
 
 
 [[webflux-client-builder]]
@@ -211,7 +218,6 @@ build a new `WebClient`, based on, but without affecting the current instance:
 
 
 
-
 [[webflux-client-filter]]
 == Filters
 
@@ -254,4 +260,3 @@ You can also mutate an existing `WebClient` instance without affecting the origi
             .filter(basicAuthentication("user", "pwd")
             .build();
 ----
-

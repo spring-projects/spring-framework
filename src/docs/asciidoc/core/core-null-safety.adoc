@@ -28,6 +28,9 @@ scope of this feature.
 Libraries like Reactor or Spring Data provide null-safe APIs leveraging this feature.
 ====
 
+
+
+
 == Use cases
 
 In addition to providing an explicit declaration for Spring Framework API nullability,
