@@ -30,6 +30,7 @@ import org.apache.catalina.connector.CoyoteOutputStream;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 
 /**
  * {@link ServletHttpHandlerAdapter} extension that uses Tomcat APIs for reading
@@ -67,21 +68,32 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		@Override
 		protected DataBuffer readFromInputStream() throws IOException {
-			DataBuffer buffer = getDataBufferFactory().allocateBuffer(getBufferSize());
-			ByteBuffer byteBuffer = buffer.asByteBuffer();
-			byteBuffer.limit(byteBuffer.capacity());
+			boolean release = true;
+			int capacity = getBufferSize();
+			DataBuffer dataBuffer = getDataBufferFactory().allocateBuffer(capacity);
+			try {
+				ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, capacity);
 
-			ServletRequest request = getNativeRequest();
-			int read = ((CoyoteInputStream) request.getInputStream()).read(byteBuffer);
-			if (logger.isTraceEnabled()) {
-				logger.trace("read:" + read);
+				ServletRequest request = getNativeRequest();
+				int read = ((CoyoteInputStream) request.getInputStream()).read(byteBuffer);
+				if (logger.isTraceEnabled()) {
+					logger.trace("read:" + read);
+				}
+
+				if (read > 0) {
+					dataBuffer.writePosition(read);
+					release = false;
+					return dataBuffer;
+				}
+				else {
+					return null;
+				}
 			}
-
-			if (read > 0) {
-				return getDataBufferFactory().wrap(byteBuffer);
+			finally {
+				if (release) {
+					DataBufferUtils.release(dataBuffer);
+				}
 			}
-
-			return null;
 		}
 	}
 
