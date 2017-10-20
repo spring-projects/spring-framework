@@ -48,6 +48,7 @@ import org.springframework.web.util.UrlPathHelper;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
@@ -98,11 +99,10 @@ public class DelegatingWebMvcConfigurationTests {
 	@Test
 	public void requestMappingHandlerAdapter() throws Exception {
 		delegatingConfig.setConfigurers(Collections.singletonList(webMvcConfigurer));
-		RequestMappingHandlerAdapter adapter = delegatingConfig.requestMappingHandlerAdapter();
+		RequestMappingHandlerAdapter adapter = this.delegatingConfig.requestMappingHandlerAdapter();
 
-		ConfigurableWebBindingInitializer initializer = (ConfigurableWebBindingInitializer) adapter.getWebBindingInitializer();
-		ConversionService initializerConversionService = initializer.getConversionService();
-		assertTrue(initializer.getValidator() instanceof LocalValidatorFactoryBean);
+		ConfigurableWebBindingInitializer initializer =
+				(ConfigurableWebBindingInitializer) adapter.getWebBindingInitializer();
 
 		verify(webMvcConfigurer).configureMessageConverters(converters.capture());
 		verify(webMvcConfigurer).configureContentNegotiation(contentNegotiationConfigurer.capture());
@@ -111,7 +111,9 @@ public class DelegatingWebMvcConfigurationTests {
 		verify(webMvcConfigurer).addReturnValueHandlers(handlers.capture());
 		verify(webMvcConfigurer).configureAsyncSupport(asyncConfigurer.capture());
 
-		assertSame(conversionService.getValue(), initializerConversionService);
+		assertNotNull(initializer);
+		assertSame(conversionService.getValue(), initializer.getConversionService());
+		assertTrue(initializer.getValidator() instanceof LocalValidatorFactoryBean);
 		assertEquals(0, resolvers.getValue().size());
 		assertEquals(0, handlers.getValue().size());
 		assertEquals(converters.getValue(), adapter.getMessageConverters());

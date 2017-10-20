@@ -96,7 +96,9 @@ public class AsyncSupportConfigurer {
 	 * execution that starts when a controller returns a {@link DeferredResult}.
 	 * @param interceptors the interceptors to register
 	 */
-	public AsyncSupportConfigurer registerDeferredResultInterceptors(DeferredResultProcessingInterceptor... interceptors) {
+	public AsyncSupportConfigurer registerDeferredResultInterceptors(
+			DeferredResultProcessingInterceptor... interceptors) {
+
 		this.deferredResultInterceptors.addAll(Arrays.asList(interceptors));
 		return this;
 	}

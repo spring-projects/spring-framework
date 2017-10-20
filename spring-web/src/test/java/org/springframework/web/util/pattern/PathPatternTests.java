@@ -329,13 +329,16 @@ public class PathPatternTests {
 		// With a /** on the end have to check if there is any more data post
 		// 'the match' it starts with a separator
 		assertNull(parse("/resource/**").matchStartOfPath(toPathContainer("/resourceX")));
-		assertEquals("",parse("/resource/**").matchStartOfPath(toPathContainer("/resource")).getPathRemaining().value());
+		assertEquals("",parse("/resource/**")
+				.matchStartOfPath(toPathContainer("/resource")).getPathRemaining().value());
 
 		// Similar to above for the capture-the-rest variant
 		assertNull(parse("/resource/{*foo}").matchStartOfPath(toPathContainer("/resourceX")));
-		assertEquals("",parse("/resource/{*foo}").matchStartOfPath(toPathContainer("/resource")).getPathRemaining().value());
+		assertEquals("", parse("/resource/{*foo}")
+				.matchStartOfPath(toPathContainer("/resource")).getPathRemaining().value());
 
-		PathPattern.PathRemainingMatchInfo pri = parse("/aaa/{bbb}/c?d/e*f/*/g").matchStartOfPath(toPathContainer("/aaa/b/ccd/ef/x/g/i"));
+		PathPattern.PathRemainingMatchInfo pri = parse("/aaa/{bbb}/c?d/e*f/*/g")
+				.matchStartOfPath(toPathContainer("/aaa/b/ccd/ef/x/g/i"));
 		assertNotNull(pri);
 		assertEquals("/i",pri.getPathRemaining().value());
 		assertEquals("b",pri.getUriVariables().get("bbb"));
@@ -397,7 +400,8 @@ public class PathPatternTests {
 	@Test
 	public void multipleSeparatorsInPattern() {
 		PathPattern pp = parse("a//b//c");
-		assertEquals("Literal(a) Separator(/) Separator(/) Literal(b) Separator(/) Separator(/) Literal(c)",pp.toChainString());
+		assertEquals("Literal(a) Separator(/) Separator(/) Literal(b) Separator(/) Separator(/) Literal(c)",
+				pp.toChainString());
 		assertMatches(pp,"a//b//c");
 		assertEquals("Literal(a) Separator(/) WildcardTheRest(/**)",parse("a//**").toChainString());
 		checkMatches("///abc", "///abc");
@@ -812,7 +816,8 @@ public class PathPatternTests {
 		assertEquals("com.example", result.getUriVariables().get("symbolicName"));
 		assertEquals("1.0.0", result.getUriVariables().get("version"));
 
-		p = pp.parse("{symbolicName:[\\w\\.]+}-sources-{version:[\\d\\.]+}-{year:\\d{4}}{month:\\d{2}}{day:\\d{2}}.jar");
+		p = pp.parse("{symbolicName:[\\w\\.]+}-sources-" +
+				"{version:[\\d\\.]+}-{year:\\d{4}}{month:\\d{2}}{day:\\d{2}}.jar");
 		result = matchAndExtract(p,"com.example-sources-1.0.0-20100220.jar");
 		assertEquals("com.example", result.getUriVariables().get("symbolicName"));
 		assertEquals("1.0.0", result.getUriVariables().get("version"));

@@ -72,7 +72,8 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 
 		ManagedList<Object> resolvers = new ManagedList<>(4);
 		resolvers.setSource(context.extractSource(element));
-		String[] names = new String[] {"jsp", "tiles", "bean-name", "freemarker", "groovy", "script-template", "bean", "ref"};
+		String[] names = new String[] {
+				"jsp", "tiles", "bean-name", "freemarker", "groovy", "script-template", "bean", "ref"};
 
 		for (Element resolverElement : DomUtils.getChildElementsByTagName(element, names)) {
 			String name = resolverElement.getLocalName();

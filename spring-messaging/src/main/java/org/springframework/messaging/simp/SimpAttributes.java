@@ -43,7 +43,8 @@ public class SimpAttributes {
 	public static final String SESSION_COMPLETED_NAME = SimpAttributes.class.getName() + ".COMPLETED";
 
 	/** Prefix for the name of session attributes used to store destruction callbacks. */
-	public static final String DESTRUCTION_CALLBACK_NAME_PREFIX = SimpAttributes.class.getName() + ".DESTRUCTION_CALLBACK.";
+	public static final String DESTRUCTION_CALLBACK_NAME_PREFIX =
+			SimpAttributes.class.getName() + ".DESTRUCTION_CALLBACK.";
 
 	private static final Log logger = LogFactory.getLog(SimpAttributes.class);
 

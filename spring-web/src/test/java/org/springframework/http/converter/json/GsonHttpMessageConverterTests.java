@@ -18,6 +18,7 @@ package org.springframework.http.converter.json;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -156,7 +157,8 @@ public class GsonHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 
-		List<MyBean> results = (List<MyBean>) converter.read(beansList.getGenericType(), MyBeanListHolder.class, inputMessage);
+		Type genericType = beansList.getGenericType();
+		List<MyBean> results = (List<MyBean>) converter.read(genericType, MyBeanListHolder.class, inputMessage);
 		assertEquals(1, results.size());
 		MyBean result = results.get(0);
 		assertEquals("Foo", result.getString());

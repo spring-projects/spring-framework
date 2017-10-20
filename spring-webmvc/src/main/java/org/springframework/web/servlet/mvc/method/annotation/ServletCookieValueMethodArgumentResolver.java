@@ -52,7 +52,9 @@ public class ServletCookieValueMethodArgumentResolver extends AbstractCookieValu
 
 	@Override
 	@Nullable
-	protected Object resolveName(String cookieName, MethodParameter parameter, NativeWebRequest webRequest) throws Exception {
+	protected Object resolveName(String cookieName, MethodParameter parameter,
+			NativeWebRequest webRequest) throws Exception {
+
 		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 		Assert.state(servletRequest != null, "No HttpServletRequest");
 

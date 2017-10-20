@@ -43,21 +43,24 @@ public class NashornScriptTemplateTests {
 		Map<String, Object> model = new HashMap<>();
 		model.put("title", "Layout example");
 		model.put("body", "This is the body");
-		MockServerHttpResponse response = renderViewWithModel("org/springframework/web/reactive/result/view/script/nashorn/template.html",
-				model, ScriptTemplatingConfiguration.class);
+		String url = "org/springframework/web/reactive/result/view/script/nashorn/template.html";
+		MockServerHttpResponse response = render(url, model, ScriptTemplatingConfiguration.class);
 		assertEquals("<html><head><title>Layout example</title></head><body><p>This is the body</p></body></html>",
 				response.getBodyAsString().block());
 	}
 
 	@Test  // SPR-13453
 	public void renderTemplateWithUrl() throws Exception {
-		MockServerHttpResponse response = renderViewWithModel("org/springframework/web/reactive/result/view/script/nashorn/template.html",
-				null, ScriptTemplatingWithUrlConfiguration.class);
-		assertEquals("<html><head><title>Check url parameter</title></head><body><p>org/springframework/web/reactive/result/view/script/nashorn/template.html</p></body></html>",
+		String url = "org/springframework/web/reactive/result/view/script/nashorn/template.html";
+		Class<?> configClass = ScriptTemplatingWithUrlConfiguration.class;
+		MockServerHttpResponse response = render(url, null, configClass);
+		assertEquals("<html><head><title>Check url parameter</title></head><body><p>" + url + "</p></body></html>",
 				response.getBodyAsString().block());
 	}
 
-	private MockServerHttpResponse renderViewWithModel(String viewUrl, Map<String, Object> model, Class<?> configuration) throws Exception {
+	private MockServerHttpResponse render(String viewUrl, Map<String, Object> model,
+			Class<?> configuration) throws Exception {
+		
 		ScriptTemplateView view = createViewWithUrl(viewUrl, configuration);
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		view.renderInternal(model, MediaType.TEXT_HTML, exchange).block();

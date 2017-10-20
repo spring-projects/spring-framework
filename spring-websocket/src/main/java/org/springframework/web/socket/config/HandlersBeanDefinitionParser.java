@@ -58,10 +58,10 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 
 	@Override
 	@Nullable
-	public BeanDefinition parse(Element element, ParserContext context) {
-		Object source = context.extractSource(element);
+	public BeanDefinition parse(Element element, ParserContext cxt) {
+		Object source = cxt.extractSource(element);
 		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(element.getTagName(), source);
-		context.pushContainingComponent(compDefinition);
+		cxt.pushContainingComponent(compDefinition);
 
 		String orderAttribute = element.getAttribute("order");
 		int order = orderAttribute.isEmpty() ? DEFAULT_MAPPING_ORDER : Integer.valueOf(orderAttribute);
@@ -70,34 +70,34 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 		handlerMappingDef.setSource(source);
 		handlerMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		handlerMappingDef.getPropertyValues().add("order", order);
-		String handlerMappingName = context.getReaderContext().registerWithGeneratedName(handlerMappingDef);
+		String handlerMappingName = cxt.getReaderContext().registerWithGeneratedName(handlerMappingDef);
 
 		RuntimeBeanReference sockJsService = WebSocketNamespaceUtils.registerSockJsService(
-				element, SOCK_JS_SCHEDULER_NAME, context, source);
+				element, SOCK_JS_SCHEDULER_NAME, cxt, source);
 
 		HandlerMappingStrategy strategy;
 		if (sockJsService != null) {
 			strategy = new SockJsHandlerMappingStrategy(sockJsService);
 		}
 		else {
-			RuntimeBeanReference handshakeHandler = WebSocketNamespaceUtils.registerHandshakeHandler(element, context, source);
-			Element interceptorsElement = DomUtils.getChildElementByTagName(element, "handshake-interceptors");
-			ManagedList<? super Object> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context);
-			String allowedOriginsAttribute = element.getAttribute("allowed-origins");
-			List<String> allowedOrigins = Arrays.asList(StringUtils.tokenizeToStringArray(allowedOriginsAttribute, ","));
-			interceptors.add(new OriginHandshakeInterceptor(allowedOrigins));
-			strategy = new WebSocketHandlerMappingStrategy(handshakeHandler, interceptors);
+			RuntimeBeanReference handler = WebSocketNamespaceUtils.registerHandshakeHandler(element, cxt, source);
+			Element interceptElem = DomUtils.getChildElementByTagName(element, "handshake-interceptors");
+			ManagedList<? super Object> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptElem, cxt);
+			String allowedOrigins = element.getAttribute("allowed-origins");
+			List<String> origins = Arrays.asList(StringUtils.tokenizeToStringArray(allowedOrigins, ","));
+			interceptors.add(new OriginHandshakeInterceptor(origins));
+			strategy = new WebSocketHandlerMappingStrategy(handler, interceptors);
 		}
 
 		ManagedMap<String, Object> urlMap = new ManagedMap<>();
 		urlMap.setSource(source);
 		for (Element mappingElement : DomUtils.getChildElementsByTagName(element, "mapping")) {
-			strategy.addMapping(mappingElement, urlMap, context);
+			strategy.addMapping(mappingElement, urlMap, cxt);
 		}
 		handlerMappingDef.getPropertyValues().add("urlMap", urlMap);
 
-		context.registerComponent(new BeanComponentDefinition(handlerMappingDef, handlerMappingName));
-		context.popAndRegisterContainingComponent();
+		cxt.registerComponent(new BeanComponentDefinition(handlerMappingDef, handlerMappingName));
+		cxt.popAndRegisterContainingComponent();
 		return null;
 	}
 

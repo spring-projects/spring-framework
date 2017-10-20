@@ -57,7 +57,8 @@ import org.springframework.util.Assert;
  * @author Brian Clozel
  * @author Mark Paluch
  * @since 4.1.2
- * @deprecated as of Spring 5.0, in favor of {@link org.springframework.http.client.reactive.ReactorClientHttpConnector}
+ * @deprecated as of Spring 5.0, in favor of
+ * {@link org.springframework.http.client.reactive.ReactorClientHttpConnector}
  */
 @Deprecated
 public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,

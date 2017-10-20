@@ -60,7 +60,9 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueSyncAr
 	 * or {@code null} if default values are not expected to contain expressions
 	 * @param registry for checking reactive type wrappers
 	 */
-	public PathVariableMethodArgumentResolver(@Nullable ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
+	public PathVariableMethodArgumentResolver(@Nullable ConfigurableBeanFactory factory,
+			ReactiveAdapterRegistry registry) {
+
 		super(factory, registry);
 	}
 

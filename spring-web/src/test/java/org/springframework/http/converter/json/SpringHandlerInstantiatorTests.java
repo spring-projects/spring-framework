@@ -136,7 +136,9 @@ public class SpringHandlerInstantiatorTests {
 		private Capitalizer capitalizer;
 
 		@Override
-		public void serialize(User user, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+		public void serialize(User user, JsonGenerator jsonGenerator,
+				SerializerProvider serializerProvider) throws IOException {
+
 			jsonGenerator.writeStartObject();
 			jsonGenerator.writeStringField("username", this.capitalizer.capitalize(user.getUsername()));
 			jsonGenerator.writeEndObject();
@@ -150,7 +152,7 @@ public class SpringHandlerInstantiatorTests {
 		private Capitalizer capitalizer;
 
 		@Override
-		public Object deserializeKey(String key, DeserializationContext context) throws IOException, JsonProcessingException {
+		public Object deserializeKey(String key, DeserializationContext context) throws IOException {
 			return this.capitalizer.capitalize(key);
 		}
 	}
@@ -164,13 +166,17 @@ public class SpringHandlerInstantiatorTests {
 		public static boolean isAutowiredFiledInitialized = false;
 
 		@Override
-		public TypeSerializer buildTypeSerializer(SerializationConfig config, JavaType baseType, Collection<NamedType> subtypes) {
+		public TypeSerializer buildTypeSerializer(SerializationConfig config, JavaType baseType,
+				Collection<NamedType> subtypes) {
+
 			isAutowiredFiledInitialized = (this.capitalizer != null);
 			return super.buildTypeSerializer(config, baseType, subtypes);
 		}
 
 		@Override
-		public TypeDeserializer buildTypeDeserializer(DeserializationConfig config, JavaType baseType, Collection<NamedType> subtypes) {
+		public TypeDeserializer buildTypeDeserializer(DeserializationConfig config,
+				JavaType baseType, Collection<NamedType> subtypes) {
+
 			return super.buildTypeDeserializer(config, baseType, subtypes);
 		}
 	}

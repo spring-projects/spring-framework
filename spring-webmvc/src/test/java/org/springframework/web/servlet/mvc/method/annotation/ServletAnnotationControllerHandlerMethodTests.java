@@ -626,7 +626,9 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 	@Test
 	public void binderInitializingCommandProvidingFormController() throws Exception {
-		initServlet(wac -> wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class)), MyBinderInitializingCommandProvidingFormController.class);
+		initServlet(wac -> wac.registerBeanDefinition("viewResolver",
+				new RootBeanDefinition(TestViewResolver.class)),
+				MyBinderInitializingCommandProvidingFormController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
 		request.addParameter("defaultName", "myDefaultName");
@@ -639,7 +641,9 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 	@Test
 	public void specificBinderInitializingCommandProvidingFormController() throws Exception {
-		initServlet(wac -> wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class)), MySpecificBinderInitializingCommandProvidingFormController.class);
+		initServlet(wac -> wac.registerBeanDefinition("viewResolver",
+				new RootBeanDefinition(TestViewResolver.class)),
+				MySpecificBinderInitializingCommandProvidingFormController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
 		request.addParameter("defaultName", "myDefaultName");
@@ -2000,12 +2004,16 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 
 		@InitBinder
-		public void initBinder(@RequestParam("param1") String p1, @RequestParam(value="paramX", required=false) String px, int param2) {
+		public void initBinder(@RequestParam("param1") String p1,
+				@RequestParam(value="paramX", required=false) String px, int param2) {
+
 			assertNull(px);
 		}
 
 		@ModelAttribute
-		public void modelAttribute(@RequestParam("param1") String p1, @RequestParam(value="paramX", required=false) String px, int param2) {
+		public void modelAttribute(@RequestParam("param1") String p1,
+				@RequestParam(value="paramX", required=false) String px, int param2) {
+
 			assertNull(px);
 		}
 	}
@@ -2036,13 +2044,17 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@Override
 		@InitBinder
-		public void initBinder(@RequestParam("param1") String p1, @RequestParam(value="paramX", required=false) String px, int param2) {
+		public void initBinder(@RequestParam("param1") String p1,
+				@RequestParam(value="paramX", required=false) String px, int param2) {
+
 			assertNull(px);
 		}
 
 		@Override
 		@ModelAttribute
-		public void modelAttribute(@RequestParam("param1") String p1, @RequestParam(value="paramX", required=false) String px, int param2) {
+		public void modelAttribute(@RequestParam("param1") String p1,
+				@RequestParam(value="paramX", required=false) String px, int param2) {
+
 			assertNull(px);
 		}
 	}
@@ -2154,7 +2166,8 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class MyParameterizedControllerImplWithOverriddenMappings implements MyEditableParameterizedControllerIfc<TestBean> {
+	public static class MyParameterizedControllerImplWithOverriddenMappings
+			implements MyEditableParameterizedControllerIfc<TestBean> {
 
 		@Override
 		@ModelAttribute("testBeanList")
@@ -2251,7 +2264,9 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 
 		@RequestMapping("/myPath.do")
-		public String myHandle(@ModelAttribute(name="myCommand", binding=true) TestBean tb, BindingResult errors, ModelMap model) {
+		public String myHandle(@ModelAttribute(name="myCommand", binding=true) TestBean tb,
+				BindingResult errors, ModelMap model) {
+
 			FieldError error = errors.getFieldError("age");
 			assertNotNull("Must have field error for age property", error);
 			assertEquals("value2", error.getRejectedValue());
@@ -2266,7 +2281,9 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	static class MyCommandProvidingFormController<T, TB, TB2> extends MyFormController {
 
 		@ModelAttribute("myCommand")
-		public ValidTestBean createTestBean(@RequestParam T defaultName, Map<String, Object> model, @RequestParam Date date) {
+		public ValidTestBean createTestBean(@RequestParam T defaultName, Map<String, Object> model,
+				@RequestParam Date date) {
+
 			model.put("myKey", "myOriginalValue");
 			ValidTestBean tb = new ValidTestBean();
 			tb.setName(defaultName.getClass().getSimpleName() + ":" + defaultName.toString());
@@ -3264,12 +3281,16 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 
 		@RequestMapping("/singleString")
-		public void processMultipart(@RequestParam("content") String content, HttpServletResponse response) throws IOException {
+		public void processMultipart(@RequestParam("content") String content,
+				HttpServletResponse response) throws IOException {
+
 			response.getWriter().write(content);
 		}
 
 		@RequestMapping("/stringArray")
-		public void processMultipart(@RequestParam("content") String[] content, HttpServletResponse response) throws IOException {
+		public void processMultipart(@RequestParam("content") String[] content,
+				HttpServletResponse response) throws IOException {
+
 			response.getWriter().write(StringUtils.arrayToDelimitedString(content, "-"));
 		}
 	}

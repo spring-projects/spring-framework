@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -174,8 +175,9 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertFalse(defaultSockJsService.shouldSuppressCors());
 
 		ThreadPoolTaskScheduler scheduler = (ThreadPoolTaskScheduler) defaultSockJsService.getTaskScheduler();
-		assertEquals(Runtime.getRuntime().availableProcessors(), scheduler.getScheduledThreadPoolExecutor().getCorePoolSize());
-		assertTrue(scheduler.getScheduledThreadPoolExecutor().getRemoveOnCancelPolicy());
+		ScheduledThreadPoolExecutor executor = scheduler.getScheduledThreadPoolExecutor();
+		assertEquals(Runtime.getRuntime().availableProcessors(), executor.getCorePoolSize());
+		assertTrue(executor.getRemoveOnCancelPolicy());
 
 		interceptors = defaultSockJsService.getHandshakeInterceptors();
 		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class),
@@ -226,8 +228,9 @@ public class MessageBrokerBeanDefinitionParserTests {
 
 		assertNotNull(this.appContext.getBean("webSocketScopeConfigurer", CustomScopeConfigurer.class));
 
-		DirectFieldAccessor subscriptionRegistryAccessor = new DirectFieldAccessor(brokerMessageHandler.getSubscriptionRegistry());
-		String pathSeparator = (String) new DirectFieldAccessor(subscriptionRegistryAccessor.getPropertyValue("pathMatcher")).getPropertyValue("pathSeparator");
+		DirectFieldAccessor accessor = new DirectFieldAccessor(brokerMessageHandler.getSubscriptionRegistry());
+		Object pathMatcher = accessor.getPropertyValue("pathMatcher");
+		String pathSeparator = (String) new DirectFieldAccessor(pathMatcher).getPropertyValue("pathSeparator");
 		assertEquals(".", pathSeparator);
 	}
 
@@ -314,10 +317,14 @@ public class MessageBrokerBeanDefinitionParserTests {
 		String expected = "WebSocketSession\\[0 current WS\\(0\\)-HttpStream\\(0\\)-HttpPoll\\(0\\), " +
 				"0 total, 0 closed abnormally \\(0 connect failure, 0 send limit, 0 transport error\\)\\], " +
 				"stompSubProtocol\\[processed CONNECT\\(0\\)-CONNECTED\\(0\\)-DISCONNECT\\(0\\)\\], " +
-				"stompBrokerRelay\\[0 sessions, relayhost:1234 \\(not available\\), processed CONNECT\\(0\\)-CONNECTED\\(0\\)-DISCONNECT\\(0\\)\\], " +
-				"inboundChannel\\[pool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d\\], " +
-				"outboundChannelpool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d\\], " +
-				"sockJsScheduler\\[pool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d\\]";
+				"stompBrokerRelay\\[0 sessions, relayhost:1234 \\(not available\\), " +
+				"processed CONNECT\\(0\\)-CONNECTED\\(0\\)-DISCONNECT\\(0\\)\\], " +
+				"inboundChannel\\[pool size = \\d, active threads = \\d, queued tasks = \\d, " +
+				"completed tasks = \\d\\], " +
+				"outboundChannelpool size = \\d, active threads = \\d, queued tasks = \\d, " +
+				"completed tasks = \\d\\], " +
+				"sockJsScheduler\\[pool size = \\d, active threads = \\d, queued tasks = \\d, " +
+				"completed tasks = \\d\\]";
 
 		assertTrue("\nExpected: " + expected.replace("\\", "") + "\n  Actual: " + actual, actual.matches(expected));
 	}
@@ -353,7 +360,8 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertEquals(MimeTypeUtils.APPLICATION_JSON, ((DefaultContentTypeResolver) resolver).getDefaultMimeType());
 
 		DirectFieldAccessor handlerAccessor = new DirectFieldAccessor(annotationMethodMessageHandler);
-		String pathSeparator = (String) new DirectFieldAccessor(handlerAccessor.getPropertyValue("pathMatcher")).getPropertyValue("pathSeparator");
+		Object pathMatcher = handlerAccessor.getPropertyValue("pathMatcher");
+		String pathSeparator = (String) new DirectFieldAccessor(pathMatcher).getPropertyValue("pathSeparator");
 		assertEquals(".", pathSeparator);
 	}
 

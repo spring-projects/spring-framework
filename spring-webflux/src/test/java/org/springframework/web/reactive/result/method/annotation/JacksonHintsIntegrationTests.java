@@ -85,9 +85,12 @@ public class JacksonHintsIntegrationTests extends AbstractRequestMappingIntegrat
 
 	@Test
 	public void jsonViewWithFluxRequest() throws Exception {
-		String expected = "[{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}," +
+		String expected = "[" +
+				"{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}," +
 				"{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}]";
-		List<JacksonViewBean> beans = Arrays.asList(new JacksonViewBean("with", "with", "without"), new JacksonViewBean("with", "with", "without"));
+		List<JacksonViewBean> beans = Arrays.asList(
+				new JacksonViewBean("with", "with", "without"),
+				new JacksonViewBean("with", "with", "without"));
 		assertEquals(expected, performPost("/request/flux", MediaType.APPLICATION_JSON, beans,
 				MediaType.APPLICATION_JSON_UTF8, String.class).getBody());
 	}

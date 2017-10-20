@@ -42,7 +42,9 @@ public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueSyn
 	 * or {@code null} if default values are not expected to contain expressions
 	 * @param registry for checking reactive type wrappers
 	 */
-	public ExpressionValueMethodArgumentResolver(@Nullable ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
+	public ExpressionValueMethodArgumentResolver(@Nullable ConfigurableBeanFactory factory,
+			ReactiveAdapterRegistry registry) {
+
 		super(factory, registry);
 	}
 

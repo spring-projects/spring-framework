@@ -181,17 +181,22 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			ClassUtils.isPresent("javax.xml.bind.Binder", WebMvcConfigurationSupport.class.getClassLoader());
 
 	private static final boolean jackson2Present =
-			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", WebMvcConfigurationSupport.class.getClassLoader()) &&
-					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", WebMvcConfigurationSupport.class.getClassLoader());
+			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
+					WebMvcConfigurationSupport.class.getClassLoader()) &&
+			ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
+					WebMvcConfigurationSupport.class.getClassLoader());
 
 	private static final boolean jackson2XmlPresent =
-			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", WebMvcConfigurationSupport.class.getClassLoader());
+			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper",
+					WebMvcConfigurationSupport.class.getClassLoader());
 
 	private static final boolean jackson2SmilePresent =
-			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", WebMvcConfigurationSupport.class.getClassLoader());
+			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory",
+					WebMvcConfigurationSupport.class.getClassLoader());
 
 	private static final boolean jackson2CborPresent =
-			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", WebMvcConfigurationSupport.class.getClassLoader());
+			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory",
+					WebMvcConfigurationSupport.class.getClassLoader());
 
 	private static final boolean gsonPresent =
 			ClassUtils.isPresent("com.google.gson.Gson", WebMvcConfigurationSupport.class.getClassLoader());

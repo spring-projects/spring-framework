@@ -18,9 +18,11 @@ package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -190,9 +192,12 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test
 	public void getHandlerHttpOptions() throws Exception {
+		List<HttpMethod> allMethodExceptTrace = new ArrayList<>(Arrays.asList(HttpMethod.values()));
+		allMethodExceptTrace.remove(HttpMethod.TRACE);
+
 		testHttpOptions("/foo", EnumSet.of(HttpMethod.GET, HttpMethod.HEAD));
 		testHttpOptions("/person/1", EnumSet.of(HttpMethod.PUT));
-		testHttpOptions("/persons", EnumSet.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH, HttpMethod.DELETE, HttpMethod.OPTIONS));
+		testHttpOptions("/persons", EnumSet.copyOf(allMethodExceptTrace));
 		testHttpOptions("/something", EnumSet.of(HttpMethod.PUT, HttpMethod.POST));
 	}
 

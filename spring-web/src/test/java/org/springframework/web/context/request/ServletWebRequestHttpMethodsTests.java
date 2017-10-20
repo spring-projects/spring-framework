@@ -126,7 +126,8 @@ public class ServletWebRequestHttpMethodsTests {
 		assertTrue(request.checkNotModified(epochTime));
 
 		assertEquals(304, servletResponse.getStatus());
-		assertEquals(RFC_1123_DATE_TIME.format(Instant.ofEpochMilli(epochTime).atZone(GMT)), servletResponse.getHeader("Last-Modified"));
+		assertEquals(RFC_1123_DATE_TIME.format(Instant.ofEpochMilli(epochTime).atZone(GMT)),
+				servletResponse.getHeader("Last-Modified"));
 	}
 
 	@Test
@@ -137,7 +138,8 @@ public class ServletWebRequestHttpMethodsTests {
 		assertFalse(request.checkNotModified(currentDate.getTime()));
 
 		assertEquals(200, servletResponse.getStatus());
-		assertEquals(RFC_1123_DATE_TIME.format(currentDate.toInstant().atZone(GMT)), servletResponse.getHeader("Last-Modified"));
+		assertEquals(RFC_1123_DATE_TIME.format(currentDate.toInstant().atZone(GMT)),
+				servletResponse.getHeader("Last-Modified"));
 	}
 
 	@Test
@@ -220,7 +222,8 @@ public class ServletWebRequestHttpMethodsTests {
 
 		assertEquals(304, servletResponse.getStatus());
 		assertEquals(eTag, servletResponse.getHeader("ETag"));
-		assertEquals(RFC_1123_DATE_TIME.format(currentDate.toInstant().atZone(GMT)), servletResponse.getHeader("Last-Modified"));
+		assertEquals(RFC_1123_DATE_TIME.format(currentDate.toInstant().atZone(GMT)),
+				servletResponse.getHeader("Last-Modified"));
 	}
 
 	@Test  // SPR-14224
@@ -235,7 +238,8 @@ public class ServletWebRequestHttpMethodsTests {
 
 		assertEquals(304, servletResponse.getStatus());
 		assertEquals(eTag, servletResponse.getHeader("ETag"));
-		assertEquals(RFC_1123_DATE_TIME.format(Instant.ofEpochMilli(currentEpoch).atZone(GMT)), servletResponse.getHeader("Last-Modified"));
+		assertEquals(RFC_1123_DATE_TIME.format(Instant.ofEpochMilli(currentEpoch).atZone(GMT)),
+				servletResponse.getHeader("Last-Modified"));
 	}
 
 	@Test
@@ -250,7 +254,8 @@ public class ServletWebRequestHttpMethodsTests {
 
 		assertEquals(200, servletResponse.getStatus());
 		assertEquals(currentETag, servletResponse.getHeader("ETag"));
-		assertEquals(RFC_1123_DATE_TIME.format(Instant.ofEpochMilli(epochTime).atZone(GMT)), servletResponse.getHeader("Last-Modified"));
+		assertEquals(RFC_1123_DATE_TIME.format(Instant.ofEpochMilli(epochTime).atZone(GMT)),
+				servletResponse.getHeader("Last-Modified"));
 	}
 
 	@Test
@@ -297,7 +302,8 @@ public class ServletWebRequestHttpMethodsTests {
 		assertTrue(request.checkNotModified(epochTime));
 
 		assertEquals(304, servletResponse.getStatus());
-		assertEquals(RFC_1123_DATE_TIME.format(Instant.ofEpochMilli(epochTime).atZone(GMT)), servletResponse.getHeader("Last-Modified"));
+		assertEquals(RFC_1123_DATE_TIME.format(Instant.ofEpochMilli(epochTime).atZone(GMT)),
+				servletResponse.getHeader("Last-Modified"));
 	}
 
 	@Test
@@ -309,7 +315,8 @@ public class ServletWebRequestHttpMethodsTests {
 		assertFalse(request.checkNotModified(epochTime));
 
 		assertEquals(200, servletResponse.getStatus());
-		assertEquals(RFC_1123_DATE_TIME.format(Instant.ofEpochMilli(epochTime).atZone(GMT)), servletResponse.getHeader("Last-Modified"));
+		assertEquals(RFC_1123_DATE_TIME.format(Instant.ofEpochMilli(epochTime).atZone(GMT)),
+				servletResponse.getHeader("Last-Modified"));
 	}
 
 	@Test

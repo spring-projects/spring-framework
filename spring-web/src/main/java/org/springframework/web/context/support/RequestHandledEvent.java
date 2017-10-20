@@ -61,7 +61,9 @@ public class RequestHandledEvent extends ApplicationEvent {
 	 * request, if any (usually the UserPrincipal)
 	 * @param processingTimeMillis the processing time of the request in milliseconds
 	 */
-	public RequestHandledEvent(Object source, @Nullable String sessionId, @Nullable String userName, long processingTimeMillis) {
+	public RequestHandledEvent(Object source, @Nullable String sessionId, @Nullable String userName,
+			long processingTimeMillis) {
+
 		super(source);
 		this.sessionId = sessionId;
 		this.userName = userName;
@@ -77,8 +79,8 @@ public class RequestHandledEvent extends ApplicationEvent {
 	 * @param processingTimeMillis the processing time of the request in milliseconds
 	 * @param failureCause the cause of failure, if any
 	 */
-	public RequestHandledEvent(
-			Object source, @Nullable String sessionId, @Nullable String userName, long processingTimeMillis, @Nullable Throwable failureCause) {
+	public RequestHandledEvent(Object source, @Nullable String sessionId, @Nullable String userName,
+			long processingTimeMillis, @Nullable Throwable failureCause) {
 
 		this(source, sessionId, userName, processingTimeMillis);
 		this.failureCause = failureCause;

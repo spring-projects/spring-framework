@@ -47,8 +47,10 @@ public class MappingJackson2MessageConverterTests {
 	@Test
 	public void defaultConstructor() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
-		assertThat(converter.getSupportedMimeTypes(), contains(new MimeType("application", "json", StandardCharsets.UTF_8)));
-		assertFalse(converter.getObjectMapper().getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
+		assertThat(converter.getSupportedMimeTypes(),
+				contains(new MimeType("application", "json", StandardCharsets.UTF_8)));
+		assertFalse(converter.getObjectMapper().getDeserializationConfig()
+				.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
 	}
 
 	@Test  // SPR-12724
@@ -56,7 +58,8 @@ public class MappingJackson2MessageConverterTests {
 		MimeType mimetype = new MimeType("application", "xml", StandardCharsets.UTF_8);
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter(mimetype);
 		assertThat(converter.getSupportedMimeTypes(), contains(mimetype));
-		assertFalse(converter.getObjectMapper().getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
+		assertFalse(converter.getObjectMapper().getDeserializationConfig()
+				.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
 	}
 
 	@Test  // SPR-12724
@@ -65,13 +68,20 @@ public class MappingJackson2MessageConverterTests {
 		MimeType xmlMimetype = new MimeType("application", "xml", StandardCharsets.UTF_8);
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter(jsonMimetype, xmlMimetype);
 		assertThat(converter.getSupportedMimeTypes(), contains(jsonMimetype, xmlMimetype));
-		assertFalse(converter.getObjectMapper().getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
+		assertFalse(converter.getObjectMapper().getDeserializationConfig()
+				.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
 	}
 
 	@Test
 	public void fromMessage() throws Exception {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
-		String payload = "{\"bytes\":\"AQI=\",\"array\":[\"Foo\",\"Bar\"],\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
+		String payload = "{" +
+				"\"bytes\":\"AQI=\"," +
+				"\"array\":[\"Foo\",\"Bar\"]," +
+				"\"number\":42," +
+				"\"string\":\"Foo\"," +
+				"\"bool\":true," +
+				"\"fraction\":42.0}";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
 		MyBean actual = (MyBean) converter.fromMessage(message, MyBean.class);
 

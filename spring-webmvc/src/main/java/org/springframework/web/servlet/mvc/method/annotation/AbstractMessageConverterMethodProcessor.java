@@ -356,9 +356,11 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		}
 	}
 
-	private List<MediaType> getAcceptableMediaTypes(HttpServletRequest request) throws HttpMediaTypeNotAcceptableException {
-		List<MediaType> mediaTypes = this.contentNegotiationManager.resolveMediaTypes(new ServletWebRequest(request));
-		return (mediaTypes.isEmpty() ? Collections.singletonList(MediaType.ALL) : mediaTypes);
+	private List<MediaType> getAcceptableMediaTypes(HttpServletRequest request)
+			throws HttpMediaTypeNotAcceptableException {
+
+		List<MediaType> types = this.contentNegotiationManager.resolveMediaTypes(new ServletWebRequest(request));
+		return (types.isEmpty() ? Collections.singletonList(MediaType.ALL) : types);
 	}
 
 	/**

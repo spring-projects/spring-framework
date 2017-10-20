@@ -76,10 +76,14 @@ import org.springframework.util.xml.StaxUtils;
  * <p>It also automatically registers the following well-known modules if they are
  * detected on the classpath:
  * <ul>
- * <li><a href="https://github.com/FasterXML/jackson-datatype-jdk8">jackson-datatype-jdk8</a>: support for other Java 8 types like {@link java.util.Optional}</li>
- * <li><a href="https://github.com/FasterXML/jackson-datatype-jsr310">jackson-datatype-jsr310</a>: support for Java 8 Date & Time API types</li>
- * <li><a href="https://github.com/FasterXML/jackson-datatype-joda">jackson-datatype-joda</a>: support for Joda-Time types</li>
- * <li><a href="https://github.com/FasterXML/jackson-module-kotlin">jackson-module-kotlin</a>: support for Kotlin classes and data classes</li>
+ * <li><a href="https://github.com/FasterXML/jackson-datatype-jdk8">jackson-datatype-jdk8</a>:
+ * support for other Java 8 types like {@link java.util.Optional}</li>
+ * <li><a href="https://github.com/FasterXML/jackson-datatype-jsr310">jackson-datatype-jsr310</a>:
+ * support for Java 8 Date & Time API types</li>
+ * <li><a href="https://github.com/FasterXML/jackson-datatype-joda">jackson-datatype-joda</a>:
+ * support for Joda-Time types</li>
+ * <li><a href="https://github.com/FasterXML/jackson-module-kotlin">jackson-module-kotlin</a>:
+ * support for Kotlin classes and data classes</li>
  * </ul>
  *
  * <p>Compatible with Jackson 2.6 and higher, as of Spring 4.3.
@@ -766,11 +770,13 @@ public class Jackson2ObjectMapperBuilder {
 		if (KotlinDetector.isKotlinPresent()) {
 			try {
 				Class<? extends Module> kotlinModule = (Class<? extends Module>)
-						ClassUtils.forName("com.fasterxml.jackson.module.kotlin.KotlinModule", this.moduleClassLoader);
+						ClassUtils.forName("com.fasterxml.jackson.module.kotlin.KotlinModule",
+								this.moduleClassLoader);
 				objectMapper.registerModule(BeanUtils.instantiateClass(kotlinModule));
 			}
 			catch (ClassNotFoundException ex) {
-				logger.warn("For Jackson Kotlin classes support please add \"com.fasterxml.jackson.module:jackson-module-kotlin\" to the classpath");
+				logger.warn("For Jackson Kotlin classes support please add " +
+						"\"com.fasterxml.jackson.module:jackson-module-kotlin\" to the classpath");
 			}
 		}
 	}

@@ -137,7 +137,9 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 		return executeRequest(url, HttpMethod.POST, headers, message.getPayload());
 	}
 
-	protected ResponseEntity<String> executeRequest(URI url, HttpMethod method, HttpHeaders headers, @Nullable String body) {
+	protected ResponseEntity<String> executeRequest(URI url, HttpMethod method,
+			HttpHeaders headers, @Nullable String body) {
+
 		Request httpRequest = this.httpClient.newRequest(url).method(method);
 		addHttpHeaders(httpRequest, headers);
 		if (body != null) {

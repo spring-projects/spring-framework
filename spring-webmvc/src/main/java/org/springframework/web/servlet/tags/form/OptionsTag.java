@@ -70,7 +70,8 @@ import org.springframework.web.util.TagUtils;
  * <td><p>disabled</p></td>
  * <td><p>false</p></td>
  * <td><p>true</p></td>
- * <td><p>HTML Optional Attribute. Setting the value of this attribute to 'true' will disable the HTML element.</p></td>
+ * <td><p>HTML Optional Attribute. Setting the value of this attribute
+ * to 'true' will disable the HTML element.</p></td>
  * </tr>
  * <tr class="rowColor">
  * <td><p>htmlEscape</p></td>

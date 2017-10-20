@@ -236,7 +236,9 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 
 	@Override
 	@Nullable
-	protected Object convertToInternal(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
+	protected Object convertToInternal(Object payload, @Nullable MessageHeaders headers,
+			@Nullable Object conversionHint) {
+
 		try {
 			Class<?> view = getSerializationView(conversionHint);
 			if (byte[].class == getSerializedPayloadClass()) {

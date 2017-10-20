@@ -54,7 +54,9 @@ public class AsyncHttpAccessor {
 	 * Set the request factory that this accessor uses for obtaining {@link
 	 * org.springframework.http.client.ClientHttpRequest HttpRequests}.
 	 */
-	public void setAsyncRequestFactory(org.springframework.http.client.AsyncClientHttpRequestFactory asyncRequestFactory) {
+	public void setAsyncRequestFactory(
+			org.springframework.http.client.AsyncClientHttpRequestFactory asyncRequestFactory) {
+
 		Assert.notNull(asyncRequestFactory, "AsyncClientHttpRequestFactory must not be null");
 		this.asyncRequestFactory = asyncRequestFactory;
 	}

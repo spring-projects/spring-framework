@@ -188,8 +188,8 @@ public class MvcNamespaceTests {
 		appContext.getServletContext().setAttribute(attributeName, appContext);
 
 		handler = new TestController();
-		Method method = TestController.class.getMethod("testBind", Date.class, Double.class, TestBean.class, BindingResult.class);
-		handlerMethod = new InvocableHandlerMethod(handler, method);
+		handlerMethod = new InvocableHandlerMethod(handler, TestController.class.getMethod("testBind",
+				Date.class, Double.class, TestBean.class, BindingResult.class));
 	}
 
 

@@ -57,7 +57,9 @@ public class MockExpressionEvaluator extends javax.servlet.jsp.el.ExpressionEval
 
 		return new javax.servlet.jsp.el.Expression() {
 			@Override
-			public Object evaluate(javax.servlet.jsp.el.VariableResolver variableResolver) throws javax.servlet.jsp.el.ELException {
+			public Object evaluate(javax.servlet.jsp.el.VariableResolver variableResolver)
+					throws javax.servlet.jsp.el.ELException {
+
 				return doEvaluate(expression, expectedType, functionMapper);
 			}
 		};
@@ -65,7 +67,8 @@ public class MockExpressionEvaluator extends javax.servlet.jsp.el.ExpressionEval
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public Object evaluate(String expression, Class expectedType, javax.servlet.jsp.el.VariableResolver variableResolver,
+	public Object evaluate(String expression, Class expectedType,
+			javax.servlet.jsp.el.VariableResolver variableResolver,
 			javax.servlet.jsp.el.FunctionMapper functionMapper) throws javax.servlet.jsp.el.ELException {
 
 		Assert.isNull(variableResolver, "Custom VariableResolver not supported");
@@ -73,15 +76,17 @@ public class MockExpressionEvaluator extends javax.servlet.jsp.el.ExpressionEval
 	}
 
 	@SuppressWarnings("rawtypes")
-	protected Object doEvaluate(String expression, Class expectedType, javax.servlet.jsp.el.FunctionMapper functionMapper)
-			throws javax.servlet.jsp.el.ELException {
+	protected Object doEvaluate(String expression, Class expectedType,
+			javax.servlet.jsp.el.FunctionMapper functionMapper) throws javax.servlet.jsp.el.ELException {
 
 		Assert.isNull(functionMapper, "Custom FunctionMapper not supported");
 		try {
-			return ExpressionEvaluatorManager.evaluate("JSP EL expression", expression, expectedType, this.pageContext);
+			return ExpressionEvaluatorManager.evaluate(
+					"JSP EL expression", expression, expectedType, this.pageContext);
 		}
 		catch (JspException ex) {
-			throw new javax.servlet.jsp.el.ELException("Parsing of JSP EL expression \"" + expression + "\" failed", ex);
+			throw new javax.servlet.jsp.el.ELException(
+					"Parsing of JSP EL expression \"" + expression + "\" failed", ex);
 		}
 	}
 

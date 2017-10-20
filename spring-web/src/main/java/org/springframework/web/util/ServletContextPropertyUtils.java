@@ -73,13 +73,16 @@ public abstract class ServletContextPropertyUtils {
      * @see SystemPropertyUtils#resolvePlaceholders(String, boolean)
 	 * @throws IllegalArgumentException if there is an unresolvable placeholder and the flag is false
 	 */
-	public static String resolvePlaceholders(String text, ServletContext servletContext, boolean ignoreUnresolvablePlaceholders) {
+	public static String resolvePlaceholders(String text, ServletContext servletContext,
+			boolean ignoreUnresolvablePlaceholders) {
+
 		PropertyPlaceholderHelper helper = (ignoreUnresolvablePlaceholders ? nonStrictHelper : strictHelper);
 		return helper.replacePlaceholders(text, new ServletContextPlaceholderResolver(text, servletContext));
 	}
 
 
-	private static class ServletContextPlaceholderResolver implements PropertyPlaceholderHelper.PlaceholderResolver {
+	private static class ServletContextPlaceholderResolver
+			implements PropertyPlaceholderHelper.PlaceholderResolver {
 
         private final String text;
 

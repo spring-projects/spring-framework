@@ -293,7 +293,9 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * @see #processTemplate
 	 * @see freemarker.ext.servlet.FreemarkerServlet
 	 */
-	protected void doRender(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+	protected void doRender(Map<String, Object> model, HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+
 		// Expose model to JSP tags (as request attributes).
 		exposeModelAsRequestAttributes(model, request);
 		// Expose all standard FreeMarker hash models.
@@ -315,7 +317,9 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * @param response current servlet response
 	 * @return the FreeMarker template model, as a {@link SimpleHash} or subclass thereof
 	 */
-	protected SimpleHash buildTemplateModel(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) {
+	protected SimpleHash buildTemplateModel(Map<String, Object> model, HttpServletRequest request,
+			HttpServletResponse response) {
+
 		AllHttpScopesHashModel fmModel = new AllHttpScopesHashModel(getObjectWrapper(), getServletContext(), request);
 		fmModel.put(FreemarkerServlet.KEY_JSP_TAGLIBS, this.taglibFactory);
 		fmModel.put(FreemarkerServlet.KEY_APPLICATION, this.servletContextHashModel);

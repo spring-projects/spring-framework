@@ -45,7 +45,8 @@ import org.springframework.util.StringUtils;
  * @author Sebastien Deleuze
  * @author Kazuki Shimizu
  * @since 3.0
- * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.1.1">HTTP 1.1: Semantics and Content, section 3.1.1.1</a>
+ * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.1.1">
+ *     HTTP 1.1: Semantics and Content, section 3.1.1.1</a>
  */
 public class MediaType extends MimeType implements Serializable {
 
@@ -699,7 +700,8 @@ public class MediaType extends MimeType implements Serializable {
 			else {
 				int paramsSize1 = mediaType1.getParameters().size();
 				int paramsSize2 = mediaType2.getParameters().size();
-				return (paramsSize2 < paramsSize1 ? -1 : (paramsSize2 == paramsSize1 ? 0 : 1)); // audio/basic;level=1 < audio/basic
+				// audio/basic;level=1 < audio/basic
+				return (paramsSize2 < paramsSize1 ? -1 : (paramsSize2 == paramsSize1 ? 0 : 1));
 			}
 		}
 	};

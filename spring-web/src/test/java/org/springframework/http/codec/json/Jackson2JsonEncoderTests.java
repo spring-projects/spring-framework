@@ -102,7 +102,10 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, null, emptyMap());
 
 		StepVerifier.create(output)
-				.consumeNextWith(stringConsumer("[{\"foo\":\"foo\",\"bar\":\"bar\"},{\"foo\":\"foofoo\",\"bar\":\"barbar\"},{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}]"))
+				.consumeNextWith(stringConsumer("[" +
+						"{\"foo\":\"foo\",\"bar\":\"bar\"}," +
+						"{\"foo\":\"foofoo\",\"bar\":\"barbar\"}," +
+						"{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}]"))
 				.verifyComplete();
 	}
 

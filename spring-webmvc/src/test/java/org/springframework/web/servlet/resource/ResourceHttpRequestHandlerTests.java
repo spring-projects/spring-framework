@@ -620,7 +620,8 @@ public class ResourceHttpRequestHandlerTests {
 
 
 	private long dateHeaderAsLong(String responseHeaderName) throws Exception {
-		return ZonedDateTime.parse(this.response.getHeader(responseHeaderName), RFC_1123_DATE_TIME).toInstant().toEpochMilli();
+		String header = this.response.getHeader(responseHeaderName);
+		return ZonedDateTime.parse(header, RFC_1123_DATE_TIME).toInstant().toEpochMilli();
 	}
 
 	private long resourceLastModified(String resourceName) throws IOException {

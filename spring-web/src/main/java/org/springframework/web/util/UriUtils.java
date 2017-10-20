@@ -229,8 +229,11 @@ public abstract class UriUtils {
 	 * @return the encoded query parameter
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
-	public static String encodeQueryParam(String queryParam, String encoding) throws UnsupportedEncodingException {
-		return HierarchicalUriComponents.encodeUriComponent(queryParam, encoding, HierarchicalUriComponents.Type.QUERY_PARAM);
+	public static String encodeQueryParam(String queryParam, String encoding)
+			throws UnsupportedEncodingException {
+
+		return HierarchicalUriComponents.encodeUriComponent(
+				queryParam, encoding, HierarchicalUriComponents.Type.QUERY_PARAM);
 	}
 
 	/**
@@ -241,7 +244,8 @@ public abstract class UriUtils {
 	 * @since 5.0
 	 */
 	public static String encodeQueryParam(String queryParam, Charset charset) {
-		return HierarchicalUriComponents.encodeUriComponent(queryParam, charset, HierarchicalUriComponents.Type.QUERY_PARAM);
+		return HierarchicalUriComponents.encodeUriComponent(
+				queryParam, charset, HierarchicalUriComponents.Type.QUERY_PARAM);
 	}
 
 	/**
@@ -251,8 +255,11 @@ public abstract class UriUtils {
 	 * @return the encoded fragment
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
-	public static String encodeFragment(String fragment, String encoding) throws UnsupportedEncodingException {
-		return HierarchicalUriComponents.encodeUriComponent(fragment, encoding, HierarchicalUriComponents.Type.FRAGMENT);
+	public static String encodeFragment(String fragment, String encoding)
+			throws UnsupportedEncodingException {
+
+		return HierarchicalUriComponents.encodeUriComponent(
+				fragment, encoding, HierarchicalUriComponents.Type.FRAGMENT);
 	}
 
 	/**

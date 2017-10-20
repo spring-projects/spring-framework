@@ -126,8 +126,8 @@ public class BodyExtractorsTests {
 
 	@Test
 	public void toMonoParameterizedTypeReference() throws Exception {
-		ParameterizedTypeReference<Map<String, String>> typeReference = new ParameterizedTypeReference<Map<String, String>>() {};
-		BodyExtractor<Mono<Map<String, String>>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(typeReference);
+		BodyExtractor<Mono<Map<String, String>>, ReactiveHttpInputMessage> extractor =
+				BodyExtractors.toMono(new ParameterizedTypeReference<Map<String, String>>() {});
 
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
 		DefaultDataBuffer dataBuffer =
@@ -206,8 +206,8 @@ public class BodyExtractorsTests {
 		this.hints.put(JSON_VIEW_HINT, SafeToDeserialize.class);
 
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("[{\"username\":\"foo\",\"password\":\"bar\"},{\"username\":\"bar\",\"password\":\"baz\"}]".getBytes(StandardCharsets.UTF_8)));
+		String text = "[{\"username\":\"foo\",\"password\":\"bar\"},{\"username\":\"bar\",\"password\":\"baz\"}]";
+		DefaultDataBuffer dataBuffer = factory.wrap(ByteBuffer.wrap(text.getBytes(StandardCharsets.UTF_8)));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")
@@ -270,8 +270,8 @@ public class BodyExtractorsTests {
 		BodyExtractor<Mono<MultiValueMap<String, String>>, ServerHttpRequest> extractor = BodyExtractors.toFormData();
 
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3".getBytes(StandardCharsets.UTF_8)));
+		String text = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
+		DefaultDataBuffer dataBuffer = factory.wrap(ByteBuffer.wrap(text.getBytes(StandardCharsets.UTF_8)));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")

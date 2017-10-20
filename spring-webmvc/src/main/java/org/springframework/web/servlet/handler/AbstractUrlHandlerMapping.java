@@ -278,7 +278,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * @param request the request to expose the path to
 	 * @see #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE
 	 */
-	protected void exposePathWithinMapping(String bestMatchingPattern, String pathWithinMapping, HttpServletRequest request) {
+	protected void exposePathWithinMapping(String bestMatchingPattern, String pathWithinMapping,
+			HttpServletRequest request) {
+
 		request.setAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE, bestMatchingPattern);
 		request.setAttribute(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathWithinMapping);
 	}

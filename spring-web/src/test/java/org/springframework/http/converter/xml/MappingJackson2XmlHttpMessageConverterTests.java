@@ -65,7 +65,14 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 
 	@Test
 	public void read() throws IOException {
-		String body = "<MyBean><string>Foo</string><number>42</number><fraction>42.0</fraction><array><array>Foo</array><array>Bar</array></array><bool>true</bool><bytes>AQI=</bytes></MyBean>";
+		String body = "<MyBean>" +
+				"<string>Foo</string>" +
+				"<number>42</number>" +
+				"<fraction>42.0</fraction>" +
+				"<array><array>Foo</array>" +
+				"<array>Bar</array></array>" +
+				"<bool>true</bool>" +
+				"<bytes>AQI=</bytes></MyBean>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
 		MyBean result = (MyBean) converter.read(MyBean.class, inputMessage);

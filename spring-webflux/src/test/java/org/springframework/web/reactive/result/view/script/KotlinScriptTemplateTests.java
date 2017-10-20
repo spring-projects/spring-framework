@@ -46,20 +46,18 @@ public class KotlinScriptTemplateTests {
 	public void renderTemplateWithFrenchLocale() throws Exception {
 		Map<String, Object> model = new HashMap<>();
 		model.put("foo", "Foo");
-		MockServerHttpResponse response = renderViewWithModel("org/springframework/web/reactive/result/view/script/kotlin/template.kts",
-				model, Locale.FRENCH, ScriptTemplatingConfiguration.class);
-		assertEquals("<html><body>\n<p>Bonjour Foo</p>\n</body></html>",
-				response.getBodyAsString().block());
+		String url = "org/springframework/web/reactive/result/view/script/kotlin/template.kts";
+		MockServerHttpResponse response = render(url, model, Locale.FRENCH, ScriptTemplatingConfiguration.class);
+		assertEquals("<html><body>\n<p>Bonjour Foo</p>\n</body></html>", response.getBodyAsString().block());
 	}
 
 	@Test
 	public void renderTemplateWithEnglishLocale() throws Exception {
 		Map<String, Object> model = new HashMap<>();
 		model.put("foo", "Foo");
-		MockServerHttpResponse response = renderViewWithModel("org/springframework/web/reactive/result/view/script/kotlin/template.kts",
-				model, Locale.ENGLISH, ScriptTemplatingConfiguration.class);
-		assertEquals("<html><body>\n<p>Hello Foo</p>\n</body></html>",
-				response.getBodyAsString().block());
+		String url = "org/springframework/web/reactive/result/view/script/kotlin/template.kts";
+		MockServerHttpResponse response = render(url, model, Locale.ENGLISH, ScriptTemplatingConfiguration.class);
+		assertEquals("<html><body>\n<p>Hello Foo</p>\n</body></html>", response.getBodyAsString().block());
 	}
 
 	@Test
@@ -69,14 +67,15 @@ public class KotlinScriptTemplateTests {
 		model.put("hello", "Hello");
 		model.put("foo", "Foo");
 		model.put("footer", "</body></html>");
-		MockServerHttpResponse response = renderViewWithModel("org/springframework/web/reactive/result/view/script/kotlin/eval.kts",
-				model, Locale.ENGLISH, ScriptTemplatingConfigurationWithoutRenderFunction.class);
+		String url = "org/springframework/web/reactive/result/view/script/kotlin/eval.kts";
+		Class<?> configClass = ScriptTemplatingConfigurationWithoutRenderFunction.class;
+		MockServerHttpResponse response = render(url, model, Locale.ENGLISH, configClass);
 		assertEquals("<html><body>\n<p>Hello Foo</p>\n</body></html>",
 				response.getBodyAsString().block());
 	}
 
 
-	private MockServerHttpResponse renderViewWithModel(String viewUrl, Map<String, Object> model,
+	private MockServerHttpResponse render(String viewUrl, Map<String, Object> model,
 			Locale locale, Class<?> configuration) throws Exception {
 
 		ScriptTemplateView view = createViewWithUrl(viewUrl, configuration);

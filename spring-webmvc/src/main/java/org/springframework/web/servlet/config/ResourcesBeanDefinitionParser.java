@@ -87,12 +87,12 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
 
 	@Override
-	public BeanDefinition parse(Element element, ParserContext parserContext) {
-		Object source = parserContext.extractSource(element);
+	public BeanDefinition parse(Element element, ParserContext context) {
+		Object source = context.extractSource(element);
 
-		registerUrlProvider(parserContext, source);
+		registerUrlProvider(context, source);
 
-		String resourceHandlerName = registerResourceHandler(parserContext, element, source);
+		String resourceHandlerName = registerResourceHandler(context, element, source);
 		if (resourceHandlerName == null) {
 			return null;
 		}
@@ -100,13 +100,13 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		Map<String, String> urlMap = new ManagedMap<>();
 		String resourceRequestPath = element.getAttribute("mapping");
 		if (!StringUtils.hasText(resourceRequestPath)) {
-			parserContext.getReaderContext().error("The 'mapping' attribute is required.", parserContext.extractSource(element));
+			context.getReaderContext().error("The 'mapping' attribute is required.", context.extractSource(element));
 			return null;
 		}
 		urlMap.put(resourceRequestPath, resourceHandlerName);
 
-		RuntimeBeanReference pathMatcherRef = MvcNamespaceUtils.registerPathMatcher(null, parserContext, source);
-		RuntimeBeanReference pathHelperRef = MvcNamespaceUtils.registerUrlPathHelper(null, parserContext, source);
+		RuntimeBeanReference pathMatcherRef = MvcNamespaceUtils.registerPathMatcher(null, context, source);
+		RuntimeBeanReference pathHelperRef = MvcNamespaceUtils.registerUrlPathHelper(null, context, source);
 
 		RootBeanDefinition handlerMappingDef = new RootBeanDefinition(SimpleUrlHandlerMapping.class);
 		handlerMappingDef.setSource(source);
@@ -114,20 +114,21 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		handlerMappingDef.getPropertyValues().add("urlMap", urlMap);
 		handlerMappingDef.getPropertyValues().add("pathMatcher", pathMatcherRef).add("urlPathHelper", pathHelperRef);
 
-		String order = element.getAttribute("order");
+		String orderValue = element.getAttribute("order");
 		// Use a default of near-lowest precedence, still allowing for even lower precedence in other mappings
-		handlerMappingDef.getPropertyValues().add("order", StringUtils.hasText(order) ? order : Ordered.LOWEST_PRECEDENCE - 1);
+		Object order = StringUtils.hasText(orderValue) ? orderValue : Ordered.LOWEST_PRECEDENCE - 1;
+		handlerMappingDef.getPropertyValues().add("order", order);
 
-		RuntimeBeanReference corsConfigurationsRef = MvcNamespaceUtils.registerCorsConfigurations(null, parserContext, source);
-		handlerMappingDef.getPropertyValues().add("corsConfigurations", corsConfigurationsRef);
+		RuntimeBeanReference corsRef = MvcNamespaceUtils.registerCorsConfigurations(null, context, source);
+		handlerMappingDef.getPropertyValues().add("corsConfigurations", corsRef);
 
-		String beanName = parserContext.getReaderContext().generateBeanName(handlerMappingDef);
-		parserContext.getRegistry().registerBeanDefinition(beanName, handlerMappingDef);
-		parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef, beanName));
+		String beanName = context.getReaderContext().generateBeanName(handlerMappingDef);
+		context.getRegistry().registerBeanDefinition(beanName, handlerMappingDef);
+		context.registerComponent(new BeanComponentDefinition(handlerMappingDef, beanName));
 
 		// Ensure BeanNameUrlHandlerMapping (SPR-8289) and default HandlerAdapters are not "turned off"
 		// Register HttpRequestHandlerAdapter
-		MvcNamespaceUtils.registerDefaultComponents(parserContext, source);
+		MvcNamespaceUtils.registerDefaultComponents(context, source);
 
 		return null;
 	}
@@ -155,10 +156,11 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	@Nullable
-	private String registerResourceHandler(ParserContext parserContext, Element element, @Nullable Object source) {
+	private String registerResourceHandler(ParserContext context, Element element, @Nullable Object source) {
 		String locationAttr = element.getAttribute("location");
 		if (!StringUtils.hasText(locationAttr)) {
-			parserContext.getReaderContext().error("The 'location' attribute is required.", parserContext.extractSource(element));
+			String message = "The 'location' attribute is required.";
+			context.getReaderContext().error(message, context.extractSource(element));
 			return null;
 		}
 
@@ -185,17 +187,17 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
 		Element resourceChainElement = DomUtils.getChildElementByTagName(element, "resource-chain");
 		if (resourceChainElement != null) {
-			parseResourceChain(resourceHandlerDef, parserContext, resourceChainElement, source);
+			parseResourceChain(resourceHandlerDef, context, resourceChainElement, source);
 		}
 
-		Object manager = MvcNamespaceUtils.getContentNegotiationManager(parserContext);
+		Object manager = MvcNamespaceUtils.getContentNegotiationManager(context);
 		if (manager != null) {
 			values.add("contentNegotiationManager", manager);
 		}
 
-		String beanName = parserContext.getReaderContext().generateBeanName(resourceHandlerDef);
-		parserContext.getRegistry().registerBeanDefinition(beanName, resourceHandlerDef);
-		parserContext.registerComponent(new BeanComponentDefinition(resourceHandlerDef, beanName));
+		String beanName = context.getReaderContext().generateBeanName(resourceHandlerDef);
+		context.getRegistry().registerBeanDefinition(beanName, resourceHandlerDef);
+		context.registerComponent(new BeanComponentDefinition(resourceHandlerDef, beanName));
 		return beanName;
 	}
 

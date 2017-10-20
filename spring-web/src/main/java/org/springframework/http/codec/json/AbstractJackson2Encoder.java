@@ -99,7 +99,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 			return Flux.from(inputStream).map(value ->
 					encodeValue(value, mimeType, bufferFactory, elementType, hints));
 		}
-		else if (this.streamingMediaTypes.stream().anyMatch(streamingMediaType -> streamingMediaType.isCompatibleWith(mimeType))) {
+		else if (this.streamingMediaTypes.stream().anyMatch(mediaType -> mediaType.isCompatibleWith(mimeType))) {
 			return Flux.from(inputStream).map(value -> {
 				DataBuffer buffer = encodeValue(value, mimeType, bufferFactory, elementType, hints);
 				buffer.write(new byte[]{'\n'});

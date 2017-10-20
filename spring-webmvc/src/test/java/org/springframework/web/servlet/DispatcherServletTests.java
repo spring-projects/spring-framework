@@ -880,7 +880,8 @@ public class DispatcherServletTests {
 	}
 
 
-	private static class TestWebContextInitializer implements ApplicationContextInitializer<ConfigurableWebApplicationContext> {
+	private static class TestWebContextInitializer
+			implements ApplicationContextInitializer<ConfigurableWebApplicationContext> {
 
 		@Override
 		public void initialize(ConfigurableWebApplicationContext applicationContext) {
@@ -889,7 +890,8 @@ public class DispatcherServletTests {
 	}
 
 
-	private static class OtherWebContextInitializer implements ApplicationContextInitializer<ConfigurableWebApplicationContext> {
+	private static class OtherWebContextInitializer
+			implements ApplicationContextInitializer<ConfigurableWebApplicationContext> {
 
 		@Override
 		public void initialize(ConfigurableWebApplicationContext applicationContext) {

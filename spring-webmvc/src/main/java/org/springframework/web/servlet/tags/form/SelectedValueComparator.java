@@ -100,7 +100,8 @@ abstract class SelectedValueComparator {
 		return selected;
 	}
 
-	private static boolean collectionCompare(Collection<?> boundCollection, Object candidateValue, BindStatus bindStatus) {
+	private static boolean collectionCompare(Collection<?> boundCollection, Object candidateValue,
+			BindStatus bindStatus) {
 		try {
 			if (boundCollection.contains(candidateValue)) {
 				return true;

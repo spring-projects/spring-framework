@@ -235,7 +235,8 @@ public class ResponseEntityResultHandlerTests {
 	public void handleReturnValueLastModified() throws Exception {
 		Instant currentTime = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 		Instant oneMinAgo = currentTime.minusSeconds(60);
-		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path").ifModifiedSince(currentTime.toEpochMilli()));
+		long timestamp = currentTime.toEpochMilli();
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path").ifModifiedSince(timestamp));
 
 		ResponseEntity<String> entity = ok().lastModified(oneMinAgo.toEpochMilli()).body("body");
 		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(String.class));

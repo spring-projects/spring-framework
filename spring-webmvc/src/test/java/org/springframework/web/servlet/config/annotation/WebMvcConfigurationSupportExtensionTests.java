@@ -224,7 +224,9 @@ public class WebMvcConfigurationSupportExtensionTests {
 	public void webBindingInitializer() throws Exception {
 		RequestMappingHandlerAdapter adapter = this.config.requestMappingHandlerAdapter();
 
-		ConfigurableWebBindingInitializer initializer = (ConfigurableWebBindingInitializer) adapter.getWebBindingInitializer();
+		ConfigurableWebBindingInitializer initializer =
+				(ConfigurableWebBindingInitializer) adapter.getWebBindingInitializer();
+
 		assertNotNull(initializer);
 
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(null, "");

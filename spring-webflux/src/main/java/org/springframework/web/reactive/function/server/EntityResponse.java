@@ -86,7 +86,9 @@ public interface EntityResponse<T> extends ServerResponse {
 	 * @param <P> the type of the {@code Publisher}
 	 * @return the created builder
 	 */
-	static <T, P extends Publisher<T>> Builder<P> fromPublisher(P publisher, ParameterizedTypeReference<T> typeReference) {
+	static <T, P extends Publisher<T>> Builder<P> fromPublisher(P publisher,
+			ParameterizedTypeReference<T> typeReference) {
+
 		return new DefaultEntityResponseBuilder<>(publisher,
 				BodyInserters.fromPublisher(publisher, typeReference));
 	}

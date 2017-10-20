@@ -42,7 +42,9 @@ public class RequestAttributeMethodArgumentResolver extends AbstractNamedValueSy
 	 * or {@code null} if default values are not expected to have expressions
 	 * @param registry for checking reactive type wrappers
 	 */
-	public RequestAttributeMethodArgumentResolver(@Nullable ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
+	public RequestAttributeMethodArgumentResolver(@Nullable ConfigurableBeanFactory factory,
+			ReactiveAdapterRegistry registry) {
+
 		super(factory, registry);
 	}
 
