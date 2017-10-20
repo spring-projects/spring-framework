@@ -144,6 +144,8 @@ class ControllerMethodResolver {
 		registrar.add(new RequestParamMapMethodArgumentResolver(reactiveRegistry));
 		registrar.add(new PathVariableMethodArgumentResolver(beanFactory, reactiveRegistry));
 		registrar.add(new PathVariableMapMethodArgumentResolver(reactiveRegistry));
+		registrar.add(new MatrixVariableMethodArgumentResolver(beanFactory, reactiveRegistry));
+		registrar.add(new MatrixVariableMapMethodArgumentResolver(reactiveRegistry));
 		registrar.addIfRequestBody(readers -> new RequestBodyArgumentResolver(readers, reactiveRegistry));
 		registrar.addIfRequestBody(readers -> new RequestPartMethodArgumentResolver(readers, reactiveRegistry));
 		registrar.addIfModelAttribute(() -> new ModelAttributeMethodArgumentResolver(reactiveRegistry, false));

@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.springframework.web.servlet.mvc.method.annotation;
+package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -30,12 +30,11 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.MatrixVariable;
 import org.springframework.web.bind.annotation.ValueConstants;
-import org.springframework.web.bind.support.WebDataBinderFactory;
-import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.reactive.BindingContext;
+import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
+import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Resolves arguments of type {@link Map} annotated with {@link MatrixVariable
@@ -48,40 +47,40 @@ import org.springframework.web.servlet.HandlerMapping;
  * {@link MatrixVariableMethodArgumentResolver} instead.
  *
  * @author Rossen Stoyanchev
- * @since 3.2
+ * @since 5.0.1
+ * @see MatrixVariableMethodArgumentResolver
  */
-public class MatrixVariableMapMethodArgumentResolver implements HandlerMethodArgumentResolver {
+public class MatrixVariableMapMethodArgumentResolver extends HandlerMethodArgumentResolverSupport
+		implements SyncHandlerMethodArgumentResolver {
+
+
+	public MatrixVariableMapMethodArgumentResolver(ReactiveAdapterRegistry registry) {
+		super(registry);
+	}
 
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		MatrixVariable matrixVariable = parameter.getParameterAnnotation(MatrixVariable.class);
-		if (matrixVariable != null) {
-			if (Map.class.isAssignableFrom(parameter.getParameterType())) {
-				return !StringUtils.hasText(matrixVariable.name());
-			}
-		}
-		return false;
+		return checkAnnotatedParamNoReactiveWrapper(parameter, MatrixVariable.class,
+				(annot, type) -> (Map.class.isAssignableFrom(type) && !StringUtils.hasText(annot.name())));
 	}
 
-	@Override
 	@Nullable
-	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
-			NativeWebRequest request, @Nullable WebDataBinderFactory binderFactory) throws Exception {
+	@Override
+	public Object resolveArgumentValue(MethodParameter parameter, BindingContext bindingContext,
+			ServerWebExchange exchange) {
 
-		@SuppressWarnings("unchecked")
 		Map<String, MultiValueMap<String, String>> matrixVariables =
-				(Map<String, MultiValueMap<String, String>>) request.getAttribute(
-						HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
+				exchange.getAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE);
 
 		if (CollectionUtils.isEmpty(matrixVariables)) {
 			return Collections.emptyMap();
 		}
 
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-		MatrixVariable ann = parameter.getParameterAnnotation(MatrixVariable.class);
-		Assert.state(ann != null, "No MatrixVariable annotation");
-		String pathVariable = ann.pathVar();
+		MatrixVariable annotation = parameter.getParameterAnnotation(MatrixVariable.class);
+		Assert.state(annotation != null, "No MatrixVariable annotation");
+		String pathVariable = annotation.pathVar();
 
 		if (!pathVariable.equals(ValueConstants.DEFAULT_NONE)) {
 			MultiValueMap<String, String> mapForPathVariable = matrixVariables.get(pathVariable);

@@ -13,26 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.springframework.web.servlet.mvc.method.annotation;
+package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.MatrixVariable;
 import org.springframework.web.bind.annotation.ValueConstants;
-import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver;
-import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.server.ServerErrorException;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.ServerWebInputException;
 
 /**
  * Resolves arguments annotated with {@link MatrixVariable @MatrixVariable}.
@@ -43,27 +43,25 @@ import org.springframework.web.servlet.HandlerMapping;
  * type map (vs multiple attributes collected in a map).
  *
  * @author Rossen Stoyanchev
- * @author Sam Brannen
- * @since 3.2
+ * @since 5.0.1
+ * @see MatrixVariableMapMethodArgumentResolver
  */
-public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
+public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueSyncArgumentResolver {
 
-	public MatrixVariableMethodArgumentResolver() {
-		super(null);
+
+	protected MatrixVariableMethodArgumentResolver(@Nullable ConfigurableBeanFactory factory,
+			ReactiveAdapterRegistry registry) {
+
+		super(factory, registry);
 	}
 
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		if (!parameter.hasParameterAnnotation(MatrixVariable.class)) {
-			return false;
-		}
-		if (Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType())) {
-			MatrixVariable matrixVariable = parameter.getParameterAnnotation(MatrixVariable.class);
-			return (matrixVariable != null && StringUtils.hasText(matrixVariable.name()));
-		}
-		return true;
+		return checkAnnotatedParamNoReactiveWrapper(parameter, MatrixVariable.class,
+				(annot, type) -> !Map.class.isAssignableFrom(type) || StringUtils.hasText(annot.name()));
 	}
+
 
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
@@ -72,17 +70,18 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 		return new MatrixVariableNamedValueInfo(ann);
 	}
 
-	@Override
-	@SuppressWarnings("unchecked")
 	@Nullable
-	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
-		Map<String, MultiValueMap<String, String>> pathParameters = (Map<String, MultiValueMap<String, String>>)
-				request.getAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
+	@Override
+	protected Object resolveNamedValue(String name, MethodParameter param, ServerWebExchange exchange) {
+
+		Map<String, MultiValueMap<String, String>> pathParameters =
+				exchange.getAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE);
+
 		if (CollectionUtils.isEmpty(pathParameters)) {
 			return null;
 		}
 
-		MatrixVariable ann = parameter.getParameterAnnotation(MatrixVariable.class);
+		MatrixVariable ann = param.getParameterAnnotation(MatrixVariable.class);
 		Assert.state(ann != null, "No MatrixVariable annotation");
 		String pathVar = ann.pathVar();
 		List<String> paramValues = null;
@@ -98,8 +97,8 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 			for (MultiValueMap<String, String> params : pathParameters.values()) {
 				if (params.containsKey(name)) {
 					if (found) {
-						String paramType = parameter.getNestedParameterType().getName();
-						throw new ServletRequestBindingException(
+						String paramType = param.getNestedParameterType().getName();
+						throw new ServerErrorException(
 								"Found more than one match for URI path parameter '" + name +
 								"' for parameter type [" + paramType + "]. Use 'pathVar' attribute to disambiguate.");
 					}
@@ -121,8 +120,8 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 	}
 
 	@Override
-	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
-		throw new ServletRequestBindingException("Missing matrix variable '" + name +
+	protected void handleMissingValue(String name, MethodParameter parameter) throws ServerWebInputException {
+		throw new ServerWebInputException("Missing matrix variable '" + name +
 				"' for method parameter of type " + parameter.getNestedParameterType().getSimpleName());
 	}
 

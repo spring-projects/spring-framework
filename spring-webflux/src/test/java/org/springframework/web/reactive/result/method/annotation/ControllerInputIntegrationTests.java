@@ -13,10 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.web.reactive.result.method.annotation;
-
-import java.time.Duration;
 
 import org.junit.Test;
 import org.reactivestreams.Publisher;
@@ -27,24 +24,24 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.MatrixVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
- * Integration tests with {@code @RequestMapping} handler methods.
- *
- * <p>Before adding tests here consider if they are a better fit for any of the
- * other {@code RequestMapping*IntegrationTests}.
- *
+ * {@code @RequestMapping} integration focusing on controller method parameters.
+ * Also see:
+ * <ul>
+ * <li>{@link RequestMappingDataBindingIntegrationTests}
+ * <li>{@link RequestMappingMessageConversionIntegrationTests}
+ * </ul>
  * @author Rossen Stoyanchev
- * @author Stephane Maldini
- * @since 5.0
  */
-public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegrationTests {
+public class ControllerInputIntegrationTests extends AbstractRequestMappingIntegrationTests {
+
 
 	@Override
 	protected ApplicationContext initApplicationContext() {
@@ -56,19 +53,22 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 
 
 	@Test
-	public void httpHead() throws Exception {
-		String url = "http://localhost:" + this.port + "/text";
-		HttpHeaders headers = getRestTemplate().headForHeaders(url);
-		String contentType = headers.getFirst("Content-Type");
-		assertNotNull(contentType);
-		assertEquals("text/html;charset=utf-8", contentType.toLowerCase());
-		assertEquals(3, headers.getContentLength());
+	public void handleWithParam() throws Exception {
+		String expected = "Hello George!";
+		assertEquals(expected, performGet("/param?name=George", new HttpHeaders(), String.class).getBody());
+	}
+
+	@Test // SPR-15140
+	public void handleWithEncodedParam() throws Exception {
+		String expected = "Hello  + \u00e0!";
+		assertEquals(expected, performGet("/param?name=%20%2B+%C3%A0", new HttpHeaders(), String.class).getBody());
 	}
 
 	@Test
-	public void stream() throws Exception {
-		String[] expected = {"0", "1", "2", "3", "4"};
-		assertArrayEquals(expected, performGet("/stream", new HttpHeaders(), String[].class).getBody());
+	public void matrixVariable() throws Exception {
+		String expected = "p=11, q2=22, q4=44";
+		String url = "/first;p=11/second;q=22/third-fourth;q=44";
+		assertEquals(expected, performGet(url, new HttpHeaders(), String.class).getBody());
 	}
 
 
@@ -77,19 +77,22 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 	static class WebConfig {
 	}
 
-
 	@RestController
 	@SuppressWarnings("unused")
 	private static class TestRestController {
 
-		@GetMapping("/text")
-		public String text() {
-			return "Foo";
+		@GetMapping("/param")
+		public Publisher<String> param(@RequestParam String name) {
+			return Flux.just("Hello ", name, "!");
 		}
 
-		@GetMapping("/stream")
-		public Publisher<Long> stream() {
-			return Flux.interval(Duration.ofMillis(50)).take(5);
+		@GetMapping("/{one}/{two}/{three}-{four}")
+		public String matrixVar(
+				@MatrixVariable int p,
+				@MatrixVariable(name = "q", pathVar = "two") int q2,
+				@MatrixVariable(name = "q", pathVar = "four") int q4) {
+
+			return "p=" + p + ", q2=" + q2 + ", q4=" + q4;
 		}
 	}
 

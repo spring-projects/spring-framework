@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.springframework.web.reactive.result.method.annotation;
 
-package org.springframework.web.servlet.mvc.method.annotation;
-
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,16 +25,17 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.MatrixVariable;
-import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.ResolvableMethod;
-import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.reactive.BindingContext;
+import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.server.ServerErrorException;
+import org.springframework.web.server.ServerWebInputException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -42,31 +43,22 @@ import static org.junit.Assert.assertTrue;
 import static org.springframework.web.method.MvcAnnotationPredicates.matrixAttribute;
 
 /**
- * Test fixture with {@link MatrixVariableMethodArgumentResolver}.
+ * Unit tests for {@link MatrixVariableMethodArgumentResolver}.
  * @author Rossen Stoyanchev
  */
 public class MatrixVariablesMethodArgumentResolverTests {
 
-	private MatrixVariableMethodArgumentResolver resolver;
+	private MatrixVariableMethodArgumentResolver resolver =
+			new MatrixVariableMethodArgumentResolver(null, new ReactiveAdapterRegistry());
 
-	private ModelAndViewContainer mavContainer;
-
-	private ServletWebRequest webRequest;
-
-	private MockHttpServletRequest request;
+	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 	private ResolvableMethod testMethod = ResolvableMethod.on(this.getClass()).named("handle").build();
 
 
 	@Before
-	public void setup() throws Exception {
-		this.resolver = new MatrixVariableMethodArgumentResolver();
-		this.mavContainer = new ModelAndViewContainer();
-		this.request = new MockHttpServletRequest();
-		this.webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
-
-		Map<String, MultiValueMap<String, String>> params = new LinkedHashMap<>();
-		this.request.setAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, params);
+	public void setUp() throws Exception {
+		this.exchange.getAttributes().put(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, new LinkedHashMap<>());
 	}
 
 
@@ -75,11 +67,11 @@ public class MatrixVariablesMethodArgumentResolverTests {
 
 		assertFalse(this.resolver.supportsParameter(this.testMethod.arg(String.class)));
 
-		assertTrue(this.resolver.supportsParameter(
-				this.testMethod.annot(matrixAttribute().noName()).arg(List.class, String.class)));
+		assertTrue(this.resolver.supportsParameter(this.testMethod
+				.annot(matrixAttribute().noName()).arg(List.class, String.class)));
 
-		assertTrue(this.resolver.supportsParameter(
-				this.testMethod.annot(matrixAttribute().name("year")).arg(int.class)));
+		assertTrue(this.resolver.supportsParameter(this.testMethod
+				.annot(matrixAttribute().name("year")).arg(int.class)));
 	}
 
 	@Test
@@ -91,7 +83,7 @@ public class MatrixVariablesMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annot(matrixAttribute().noName()).arg(List.class, String.class);
 
 		assertEquals(Arrays.asList("red", "green", "blue"),
-				this.resolver.resolveArgument(param, this.mavContainer, this.webRequest, null));
+				this.resolver.resolveArgument(param, new BindingContext(), this.exchange).block(Duration.ZERO));
 	}
 
 	@Test
@@ -100,28 +92,30 @@ public class MatrixVariablesMethodArgumentResolverTests {
 		getVariablesFor("bikes").add("year", "2005");
 		MethodParameter param = this.testMethod.annot(matrixAttribute().name("year")).arg(int.class);
 
-		assertEquals("2006", this.resolver.resolveArgument(param, this.mavContainer, this.webRequest, null));
+		Object actual = this.resolver.resolveArgument(param, new BindingContext(), this.exchange).block(Duration.ZERO);
+		assertEquals(2006, actual);
 	}
 
 	@Test
 	public void resolveArgumentDefaultValue() throws Exception {
 		MethodParameter param = this.testMethod.annot(matrixAttribute().name("year")).arg(int.class);
-		assertEquals("2013", resolver.resolveArgument(param, this.mavContainer, this.webRequest, null));
+		Object actual = this.resolver.resolveArgument(param, new BindingContext(), this.exchange).block(Duration.ZERO);
+		assertEquals(2013, actual);
 	}
 
-	@Test(expected = ServletRequestBindingException.class)
+	@Test(expected = ServerErrorException.class)
 	public void resolveArgumentMultipleMatches() throws Exception {
 		getVariablesFor("var1").add("colors", "red");
 		getVariablesFor("var2").add("colors", "green");
-		MethodParameter param = this.testMethod.annot(matrixAttribute().noName()).arg(List.class, String.class);
 
-		this.resolver.resolveArgument(param, this.mavContainer, this.webRequest, null);
+		MethodParameter param = this.testMethod.annot(matrixAttribute().noName()).arg(List.class, String.class);
+		this.resolver.resolveArgument(param, new BindingContext(), this.exchange).block(Duration.ZERO);
 	}
 
-	@Test(expected = ServletRequestBindingException.class)
+	@Test(expected = ServerWebInputException.class)
 	public void resolveArgumentRequired() throws Exception {
 		MethodParameter param = this.testMethod.annot(matrixAttribute().noName()).arg(List.class, String.class);
-		this.resolver.resolveArgument(param, this.mavContainer, this.webRequest, null);
+		this.resolver.resolveArgument(param, new BindingContext(), this.exchange).block(Duration.ZERO);
 	}
 
 	@Test
@@ -130,15 +124,14 @@ public class MatrixVariablesMethodArgumentResolverTests {
 		params.add("anotherYear", "2012");
 		MethodParameter param = this.testMethod.annot(matrixAttribute().name("year")).arg(int.class);
 
-		assertEquals("2013", this.resolver.resolveArgument(param, this.mavContainer, this.webRequest, null));
+		Object actual = this.resolver.resolveArgument(param, new BindingContext(), this.exchange).block(Duration.ZERO);
+		assertEquals(2013, actual);
 	}
-
 
 	@SuppressWarnings("unchecked")
 	private MultiValueMap<String, String> getVariablesFor(String pathVarName) {
 		Map<String, MultiValueMap<String, String>> matrixVariables =
-				(Map<String, MultiValueMap<String, String>>) this.request.getAttribute(
-						HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE);
+				this.exchange.getAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE);
 
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		matrixVariables.put(pathVarName, params);
@@ -146,7 +139,8 @@ public class MatrixVariablesMethodArgumentResolverTests {
 	}
 
 
-	public void handle(
+	@SuppressWarnings("unused")
+	void handle(
 			String stringArg,
 			@MatrixVariable List<String> colors,
 			@MatrixVariable(name = "year", pathVar = "cars", required = false, defaultValue = "2013") int preferredYear) {
