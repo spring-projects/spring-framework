@@ -126,7 +126,6 @@ configure(allprojects) { project ->
 	repositories {
 		maven { url "https://repo.spring.io/libs-release" }
 		maven { url "https://repo.spring.io/milestone" }  // for AspectJ 1.9 beta
-		maven { url "https://repo.spring.io/snapshot" }  // for Reactor Bismuth
 	}
 
 	dependencies {
