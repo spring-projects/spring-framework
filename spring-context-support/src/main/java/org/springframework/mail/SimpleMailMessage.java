@@ -47,7 +47,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	private String from;
 
 	@Nullable
-	private String replyTo;
+	private String[] replyTo;
 
 	@Nullable
 	private String[] to;
@@ -81,7 +81,9 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	public SimpleMailMessage(SimpleMailMessage original) {
 		Assert.notNull(original, "'original' message argument must not be null");
 		this.from = original.getFrom();
-		this.replyTo = original.getReplyTo();
+		if (original.getReplyTo() != null) {
+			this.replyTo = copy(original.getReplyTo());
+		}
 		if (original.getTo() != null) {
 			this.to = copy(original.getTo());
 		}
@@ -109,11 +111,16 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 
 	@Override
 	public void setReplyTo(@Nullable String replyTo) {
+		this.replyTo = new String[] {replyTo};
+	}
+
+	@Override
+	public void setReplyTo(@Nullable String[] replyTo) {
 		this.replyTo = replyTo;
 	}
 
 	@Nullable
-	public String getReplyTo() {
+	public String[] getReplyTo() {
 		return this.replyTo;
 	}
 
@@ -231,7 +238,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	public String toString() {
 		StringBuilder sb = new StringBuilder("SimpleMailMessage: ");
 		sb.append("from=").append(this.from).append("; ");
-		sb.append("replyTo=").append(this.replyTo).append("; ");
+		sb.append("replyTo=").append(StringUtils.arrayToCommaDelimitedString(this.replyTo)).append("; ");
 		sb.append("to=").append(StringUtils.arrayToCommaDelimitedString(this.to)).append("; ");
 		sb.append("cc=").append(StringUtils.arrayToCommaDelimitedString(this.cc)).append("; ");
 		sb.append("bcc=").append(StringUtils.arrayToCommaDelimitedString(this.bcc)).append("; ");
@@ -251,7 +258,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 		}
 		SimpleMailMessage otherMessage = (SimpleMailMessage) other;
 		return (ObjectUtils.nullSafeEquals(this.from, otherMessage.from) &&
-				ObjectUtils.nullSafeEquals(this.replyTo, otherMessage.replyTo) &&
+				java.util.Arrays.equals(this.replyTo, otherMessage.replyTo) &&
 				java.util.Arrays.equals(this.to, otherMessage.to) &&
 				java.util.Arrays.equals(this.cc, otherMessage.cc) &&
 				java.util.Arrays.equals(this.bcc, otherMessage.bcc) &&
@@ -263,15 +270,17 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	@Override
 	public int hashCode() {
 		int hashCode = (this.from == null ? 0 : this.from.hashCode());
-		hashCode = 29 * hashCode + (this.replyTo == null ? 0 : this.replyTo.hashCode());
+		for (int i = 0; this.replyTo != null && i < this.replyTo.length; i++) {
+			hashCode = 29 * hashCode + this.replyTo[i].hashCode();
+		}
 		for (int i = 0; this.to != null && i < this.to.length; i++) {
-			hashCode = 29 * hashCode + (this.to == null ? 0 : this.to[i].hashCode());
+			hashCode = 29 * hashCode + this.to[i].hashCode();
 		}
 		for (int i = 0; this.cc != null && i < this.cc.length; i++) {
-			hashCode = 29 * hashCode + (this.cc == null ? 0 : this.cc[i].hashCode());
+			hashCode = 29 * hashCode + this.cc[i].hashCode();
 		}
 		for (int i = 0; this.bcc != null && i < this.bcc.length; i++) {
-			hashCode = 29 * hashCode + (this.bcc == null ? 0 : this.bcc[i].hashCode());
+			hashCode = 29 * hashCode + this.bcc[i].hashCode();
 		}
 		hashCode = 29 * hashCode + (this.sentDate == null ? 0 : this.sentDate.hashCode());
 		hashCode = 29 * hashCode + (this.subject == null ? 0 : this.subject.hashCode());
