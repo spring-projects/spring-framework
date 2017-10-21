@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public class SimpleMailMessageTests {
 		message.setText("my text");
 
 		assertEquals("me@mail.org", message.getFrom());
-		assertEquals("reply@mail.org", message.getReplyTo());
+		assertEquals("reply@mail.org", message.getReplyTo()[0]);
 		assertEquals("you@mail.org", message.getTo()[0]);
 		List<String> ccs = Arrays.asList(message.getCc());
 		assertTrue(ccs.contains("he@mail.org"));
@@ -66,7 +66,7 @@ public class SimpleMailMessageTests {
 
 		messageCopy = new SimpleMailMessage(message);
 		assertEquals("me@mail.org", messageCopy.getFrom());
-		assertEquals("reply@mail.org", messageCopy.getReplyTo());
+		assertEquals("reply@mail.org", messageCopy.getReplyTo()[0]);
 		assertEquals("you@mail.org", messageCopy.getTo()[0]);
 		ccs = Arrays.asList(messageCopy.getCc());
 		assertTrue(ccs.contains("he@mail.org"));

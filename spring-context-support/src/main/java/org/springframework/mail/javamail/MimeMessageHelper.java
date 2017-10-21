@@ -559,9 +559,24 @@ public class MimeMessageHelper {
 		this.mimeMessage.setReplyTo(new InternetAddress[] {replyTo});
 	}
 
+	public void setReplyTo(InternetAddress[] replyTo) throws MessagingException {
+		Assert.notNull(replyTo, "Reply-to address array must not be null");
+		validateAddresses(replyTo);
+		this.mimeMessage.setReplyTo(replyTo);
+	}
+
 	public void setReplyTo(String replyTo) throws MessagingException {
 		Assert.notNull(replyTo, "Reply-to address must not be null");
 		setReplyTo(parseAddress(replyTo));
+	}
+
+	public void setReplyTo(String[] replyTo) throws MessagingException {
+		Assert.notNull(replyTo, "Reply-to address array must not be null");
+		InternetAddress[] addresses = new InternetAddress[replyTo.length];
+		for (int i = 0; i < replyTo.length; i++) {
+			addresses[i] = parseAddress(replyTo[i]);
+		}
+		setReplyTo(addresses);
 	}
 
 	public void setReplyTo(String replyTo, String personal) throws MessagingException, UnsupportedEncodingException {

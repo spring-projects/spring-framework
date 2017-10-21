@@ -24,20 +24,22 @@ import java.util.Date;
  * the underlying message is a simple text message or a more sophisticated
  * MIME message.
  *
- * <p>Implemented by both SimpleMailMessage and MimeMessageHelper,
+ * <p>Implemented by both SimpleMailMessage and MimeMailMessage,
  * to let message population code interact with a simple message or a
  * MIME message through a common interface.
  *
  * @author Juergen Hoeller
  * @since 1.1.5
  * @see SimpleMailMessage
- * @see org.springframework.mail.javamail.MimeMessageHelper
+ * @see org.springframework.mail.javamail.MimeMailMessage
  */
 public interface MailMessage {
 
 	void setFrom(String from) throws MailParseException;
 
 	void setReplyTo(String replyTo) throws MailParseException;
+
+	void setReplyTo(String[] replyTo) throws MailParseException;
 
 	void setTo(String to) throws MailParseException;
 
