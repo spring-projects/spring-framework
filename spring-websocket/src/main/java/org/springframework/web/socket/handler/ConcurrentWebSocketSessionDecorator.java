@@ -126,7 +126,7 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 				if (logger.isTraceEnabled()) {
 					String text = String.format("Another send already in progress: " +
 							"session id '%s':, \"in-progress\" send time %d (ms), buffer size %d bytes",
-							getId(), getTimeSinceSendStarted(), this.bufferSize.get());
+							getId(), getTimeSinceSendStarted(), getBufferSize());
 					logger.trace(text);
 				}
 				checkSessionLimits();
@@ -166,14 +166,14 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 	private void checkSessionLimits() {
 		if (!shouldNotSend() && this.closeLock.tryLock()) {
 			try {
-				if (getTimeSinceSendStarted() > this.sendTimeLimit) {
+				if (getTimeSinceSendStarted() > getSendTimeLimit()) {
 					String format = "Message send time %d (ms) for session '%s' exceeded the allowed limit %d";
-					String reason = String.format(format, getTimeSinceSendStarted(), getId(), this.sendTimeLimit);
+					String reason = String.format(format, getTimeSinceSendStarted(), getId(), getSendTimeLimit());
 					limitExceeded(reason);
 				}
-				else if (this.bufferSize.get() > this.bufferSizeLimit) {
+				else if (getBufferSize() > getBufferSizeLimit()) {
 					String format = "The send buffer size %d bytes for session '%s' exceeded the allowed limit %d";
-					String reason = String.format(format, this.bufferSize.get(), getId(), this.bufferSizeLimit);
+					String reason = String.format(format, getBufferSize(), getId(), getBufferSizeLimit());
 					limitExceeded(reason);
 				}
 			}
