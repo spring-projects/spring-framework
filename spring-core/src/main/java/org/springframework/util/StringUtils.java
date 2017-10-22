@@ -333,9 +333,8 @@ public abstract class StringUtils {
 			return false;
 		}
 
-		String lcStr = str.substring(0, prefix.length()).toLowerCase();
-		String lcPrefix = prefix.toLowerCase();
-		return lcStr.equals(lcPrefix);
+		String strPrefix = str.substring(0, prefix.length());
+		return strPrefix.equalsIgnoreCase(prefix);
 	}
 
 	/**
