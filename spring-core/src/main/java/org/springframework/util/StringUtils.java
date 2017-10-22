@@ -356,9 +356,8 @@ public abstract class StringUtils {
 			return false;
 		}
 
-		String lcStr = str.substring(str.length() - suffix.length()).toLowerCase();
-		String lcSuffix = suffix.toLowerCase();
-		return lcStr.equals(lcSuffix);
+		String strSuffix = str.substring(str.length() - suffix.length());
+		return strSuffix.equalsIgnoreCase(suffix);
 	}
 
 	/**
