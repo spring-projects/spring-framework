@@ -139,17 +139,7 @@ public abstract class StringUtils {
 	 * @see Character#isWhitespace
 	 */
 	public static boolean hasText(@Nullable CharSequence str) {
-		if (!hasLength(str)) {
-			return false;
-		}
-
-		int strLen = str.length();
-		for (int i = 0; i < strLen; i++) {
-			if (!Character.isWhitespace(str.charAt(i))) {
-				return true;
-			}
-		}
-		return false;
+		return (hasLength(str) && containsText(str));
 	}
 
 	/**
@@ -163,8 +153,18 @@ public abstract class StringUtils {
 	 * @see #hasText(CharSequence)
 	 */
 	public static boolean hasText(@Nullable String str) {
-		return (str != null && !str.isEmpty() && hasText((CharSequence) str));
+		return (hasLength(str) && containsText(str));
 	}
+
+	private static boolean containsText(CharSequence str) {
+		int strLen = str.length();
+		for (int i = 0; i < strLen; i++) {
+			if (!Character.isWhitespace(str.charAt(i))) {
+				return true;
+			}
+		}
+		return false;
+}
 
 	/**
 	 * Check whether the given {@code CharSequence} contains any whitespace characters.
