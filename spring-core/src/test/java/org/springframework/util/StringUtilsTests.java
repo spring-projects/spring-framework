@@ -139,6 +139,56 @@ public class StringUtilsTests {
 	}
 
 	@Test
+	public void testStartsWithIgnoreCase() {
+		String suffix = "fOo";
+		assertTrue(StringUtils.startsWithIgnoreCase("foo", suffix));
+		assertTrue(StringUtils.startsWithIgnoreCase("Foo", suffix));
+		assertTrue(StringUtils.startsWithIgnoreCase("foobar", suffix));
+		assertTrue(StringUtils.startsWithIgnoreCase("foobarbar", suffix));
+		assertTrue(StringUtils.startsWithIgnoreCase("Foobar", suffix));
+		assertTrue(StringUtils.startsWithIgnoreCase("FoobarBar", suffix));
+		assertTrue(StringUtils.startsWithIgnoreCase("foObar", suffix));
+		assertTrue(StringUtils.startsWithIgnoreCase("FOObar", suffix));
+		assertTrue(StringUtils.startsWithIgnoreCase("fOobar", suffix));
+		assertFalse(StringUtils.startsWithIgnoreCase(null, suffix));
+		assertFalse(StringUtils.startsWithIgnoreCase("fOobar", null));
+		assertFalse(StringUtils.startsWithIgnoreCase("b", suffix));
+	}
+
+	@Test
+	public void testEndsWithIgnoreCase() {
+		String suffix = "fOo";
+		assertTrue(StringUtils.endsWithIgnoreCase("foo", suffix));
+		assertTrue(StringUtils.endsWithIgnoreCase("Foo", suffix));
+		assertTrue(StringUtils.endsWithIgnoreCase("barfoo", suffix));
+		assertTrue(StringUtils.endsWithIgnoreCase("barbarfoo", suffix));
+		assertTrue(StringUtils.endsWithIgnoreCase("barFoo", suffix));
+		assertTrue(StringUtils.endsWithIgnoreCase("barBarFoo", suffix));
+		assertTrue(StringUtils.endsWithIgnoreCase("barfoO", suffix));
+		assertTrue(StringUtils.endsWithIgnoreCase("barFOO", suffix));
+		assertTrue(StringUtils.endsWithIgnoreCase("barfOo", suffix));
+		assertFalse(StringUtils.endsWithIgnoreCase(null, suffix));
+		assertFalse(StringUtils.endsWithIgnoreCase("barfOo", null));
+		assertFalse(StringUtils.endsWithIgnoreCase("b", suffix));
+	}
+
+	@Test
+	public void testSubstringMatch() {
+		assertTrue(StringUtils.substringMatch("foo", 0, "foo"));
+		assertTrue(StringUtils.substringMatch("foo", 1, "oo"));
+		assertTrue(StringUtils.substringMatch("foo", 2, "o"));
+		assertFalse(StringUtils.substringMatch("foo", 0, "fOo"));
+		assertFalse(StringUtils.substringMatch("foo", 1, "fOo"));
+		assertFalse(StringUtils.substringMatch("foo", 2, "fOo"));
+		assertFalse(StringUtils.substringMatch("foo", 3, "fOo"));
+		assertFalse(StringUtils.substringMatch("foo", 1, "Oo"));
+		assertFalse(StringUtils.substringMatch("foo", 2, "Oo"));
+		assertFalse(StringUtils.substringMatch("foo", 3, "Oo"));
+		assertFalse(StringUtils.substringMatch("foo", 2, "O"));
+		assertFalse(StringUtils.substringMatch("foo", 3, "O"));
+	}
+
+	@Test
 	public void testCountOccurrencesOf() {
 		assertTrue("nullx2 = 0",
 				StringUtils.countOccurrencesOf(null, null) == 0);
@@ -577,23 +627,6 @@ public class StringUtilsTests {
 		assertTrue("String array isn't null with legal match", sa != null);
 		assertEquals("String array length is correct with legal match", components.length, sa.length);
 		assertTrue("Output equals input", Arrays.equals(sa, components));
-	}
-
-	@Test
-	public void testEndsWithIgnoreCase() {
-		String suffix = "fOo";
-		assertTrue(StringUtils.endsWithIgnoreCase("foo", suffix));
-		assertTrue(StringUtils.endsWithIgnoreCase("Foo", suffix));
-		assertTrue(StringUtils.endsWithIgnoreCase("barfoo", suffix));
-		assertTrue(StringUtils.endsWithIgnoreCase("barbarfoo", suffix));
-		assertTrue(StringUtils.endsWithIgnoreCase("barFoo", suffix));
-		assertTrue(StringUtils.endsWithIgnoreCase("barBarFoo", suffix));
-		assertTrue(StringUtils.endsWithIgnoreCase("barfoO", suffix));
-		assertTrue(StringUtils.endsWithIgnoreCase("barFOO", suffix));
-		assertTrue(StringUtils.endsWithIgnoreCase("barfOo", suffix));
-		assertFalse(StringUtils.endsWithIgnoreCase(null, suffix));
-		assertFalse(StringUtils.endsWithIgnoreCase("barfOo", null));
-		assertFalse(StringUtils.endsWithIgnoreCase("b", suffix));
 	}
 
 
