@@ -140,19 +140,21 @@ public class StringUtilsTests {
 
 	@Test
 	public void testStartsWithIgnoreCase() {
-		String suffix = "fOo";
-		assertTrue(StringUtils.startsWithIgnoreCase("foo", suffix));
-		assertTrue(StringUtils.startsWithIgnoreCase("Foo", suffix));
-		assertTrue(StringUtils.startsWithIgnoreCase("foobar", suffix));
-		assertTrue(StringUtils.startsWithIgnoreCase("foobarbar", suffix));
-		assertTrue(StringUtils.startsWithIgnoreCase("Foobar", suffix));
-		assertTrue(StringUtils.startsWithIgnoreCase("FoobarBar", suffix));
-		assertTrue(StringUtils.startsWithIgnoreCase("foObar", suffix));
-		assertTrue(StringUtils.startsWithIgnoreCase("FOObar", suffix));
-		assertTrue(StringUtils.startsWithIgnoreCase("fOobar", suffix));
-		assertFalse(StringUtils.startsWithIgnoreCase(null, suffix));
+		String prefix = "fOo";
+		assertTrue(StringUtils.startsWithIgnoreCase("foo", prefix));
+		assertTrue(StringUtils.startsWithIgnoreCase("Foo", prefix));
+		assertTrue(StringUtils.startsWithIgnoreCase("foobar", prefix));
+		assertTrue(StringUtils.startsWithIgnoreCase("foobarbar", prefix));
+		assertTrue(StringUtils.startsWithIgnoreCase("Foobar", prefix));
+		assertTrue(StringUtils.startsWithIgnoreCase("FoobarBar", prefix));
+		assertTrue(StringUtils.startsWithIgnoreCase("foObar", prefix));
+		assertTrue(StringUtils.startsWithIgnoreCase("FOObar", prefix));
+		assertTrue(StringUtils.startsWithIgnoreCase("fOobar", prefix));
+		assertFalse(StringUtils.startsWithIgnoreCase(null, prefix));
 		assertFalse(StringUtils.startsWithIgnoreCase("fOobar", null));
-		assertFalse(StringUtils.startsWithIgnoreCase("b", suffix));
+		assertFalse(StringUtils.startsWithIgnoreCase("b", prefix));
+		assertFalse(StringUtils.startsWithIgnoreCase("barfoo", prefix));
+		assertFalse(StringUtils.startsWithIgnoreCase("barfoobar", prefix));
 	}
 
 	@Test
@@ -170,6 +172,8 @@ public class StringUtilsTests {
 		assertFalse(StringUtils.endsWithIgnoreCase(null, suffix));
 		assertFalse(StringUtils.endsWithIgnoreCase("barfOo", null));
 		assertFalse(StringUtils.endsWithIgnoreCase("b", suffix));
+		assertFalse(StringUtils.endsWithIgnoreCase("foobar", suffix));
+		assertFalse(StringUtils.endsWithIgnoreCase("barfoobar", suffix));
 	}
 
 	@Test
