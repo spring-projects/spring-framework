@@ -1227,6 +1227,14 @@ any kind of method.
 
 [NOTE]
 ====
+The default advice mode for processing `@Transactional` annotations is "proxy" which
+allows for interception of calls through the proxy only; local calls within the same
+class cannot get intercepted that way. For a more advanced mode of interception,
+consider switching to "aspectj" mode in combination with compile/load-time weaving.
+====
+
+[NOTE]
+====
 The `proxy-target-class` attribute controls what type of transactional proxies are
 created for classes annotated with the `@Transactional` annotation. If
 `proxy-target-class` is set to `true`, class-based proxies are created. If

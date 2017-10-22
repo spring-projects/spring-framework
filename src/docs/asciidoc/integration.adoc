@@ -6250,6 +6250,14 @@ Notice with the above XML that an executor reference is provided for handling th
 tasks that correspond to methods with the `@Async` annotation, and the scheduler
 reference is provided for managing those methods annotated with `@Scheduled`.
 
+[NOTE]
+====
+The default advice mode for processing `@Async` annotations is "proxy" which allows
+for interception of calls through the proxy only; local calls within the same class
+cannot get intercepted that way. For a more advanced mode of interception, consider
+switching to "aspectj" mode in combination with compile-time or load-time weaving.
+====
+
 
 [[scheduling-annotation-support-scheduled]]
 ==== The @Scheduled annotation
@@ -8313,8 +8321,16 @@ application through AOP. The configuration is intentionally similar with that of
 
 [NOTE]
 ====
-Advanced customizations using Java config require to implement `CachingConfigurer`, refer
-to {api-spring-framework}/cache/annotation/CachingConfigurer.html[the
+The default advice mode for processing caching annotations is "proxy" which allows
+for interception of calls through the proxy only; local calls within the same class
+cannot get intercepted that way. For a more advanced mode of interception, consider
+switching to "aspectj" mode in combination with compile-time or load-time weaving.
+====
+
+[NOTE]
+====
+Advanced customizations using Java config require to implement `CachingConfigurer`:
+Please refer to {api-spring-framework}/cache/annotation/CachingConfigurer.html[the
 javadoc for more details].
 ====
 
