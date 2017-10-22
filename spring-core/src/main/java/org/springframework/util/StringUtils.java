@@ -163,7 +163,7 @@ public abstract class StringUtils {
 	 * @see #hasText(CharSequence)
 	 */
 	public static boolean hasText(@Nullable String str) {
-		return (str != null && !str.isEmpty() && hasText((CharSequence) str));
+		return hasText((CharSequence) str);
 	}
 
 	/**
