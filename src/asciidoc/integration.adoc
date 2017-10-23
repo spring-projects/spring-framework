@@ -18,12 +18,16 @@ a number of Java EE (and related) technologies.
 --
 
 
+
+
 [[remoting]]
 == Remoting and web services using Spring
 
 
+
 [[remoting-introduction]]
 === Introduction
+
 Spring features integration classes for remoting support using various technologies. The
 remoting support eases the development of remote-enabled services, implemented by your
 usual (Spring) POJOs. Currently, Spring supports the following remoting technologies:
@@ -104,16 +108,15 @@ protocol.
 
 
 
-
 [[remoting-rmi]]
 === Exposing services using RMI
+
 Using Spring's support for RMI, you can transparently expose your services through the
 RMI infrastructure. After having this set up, you basically have a configuration similar
 to remote EJBs, except for the fact that there is no standard support for security
 context propagation or remote transaction propagation. Spring does provide hooks for
 such additional invocation context when using the RMI invoker, so you can for example
 plug in security frameworks or custom security credentials here.
-
 
 
 [[remoting-rmi-server]]
@@ -162,9 +165,9 @@ anonymous port will be used to communicate with the service.
 ====
 
 
-
 [[remoting-rmi-client]]
 ==== Linking in the service at the client
+
 Our client is a simple object using the `AccountService` to manage accounts:
 
 [source,java,indent=0]
@@ -205,12 +208,11 @@ will transparently create an invoker and remotely enable the account service thr
 
 
 
-
 [[remoting-caucho-protocols]]
 === Using Hessian or Burlap to remotely call services via HTTP
+
 Hessian offers a binary HTTP-based remoting protocol. It is developed by Caucho and more
 information about Hessian itself can be found at http://www.caucho.com[].
-
 
 
 [[remoting-caucho-protocols-hessian]]
@@ -246,7 +248,6 @@ allows you to embed the remote exporter definitions in your root application con
 default in `'WEB-INF/applicationContext.xml'`), with individual servlet definitions
 pointing to specific exporter beans. Each servlet name needs to match the bean name of
 its target exporter in this case.
-
 
 
 [[remoting-caucho-protocols-hessian-server]]
@@ -306,9 +307,9 @@ the target exporter.
 ----
 
 
-
 [[remoting-caucho-protocols-hessian-client]]
 ==== Linking in the service on the client
+
 Using the `HessianProxyFactoryBean` we can link in the service at the client. The same
 principles apply as with the RMI example. We'll create a separate bean factory or
 application context and mention the following beans where the `SimpleObject` is using
@@ -328,7 +329,6 @@ the `AccountService` to manage accounts:
 ----
 
 
-
 [[remoting-caucho-protocols-burlap]]
 ==== Using Burlap
 We won't discuss Burlap, the XML-based equivalent of Hessian, in detail here, since it
@@ -336,9 +336,9 @@ is configured and set up in exactly the same way as the Hessian variant explaine
 Just replace the word `Hessian` with `Burlap` and you're all set to go.
 
 
-
 [[remoting-caucho-protocols-security]]
 ==== Applying HTTP basic authentication to a service exposed through Hessian or Burlap
+
 One of the advantages of Hessian and Burlap is that we can easily apply HTTP basic
 authentication, because both protocols are HTTP-based. Your normal HTTP server security
 mechanism can easily be applied through using the `web.xml` security features, for
@@ -372,9 +372,9 @@ at http://projects.spring.io/spring-security/[].
 
 
 
-
 [[remoting-httpinvoker]]
 === Exposing services using HTTP invokers
+
 As opposed to Burlap and Hessian, which are both lightweight protocols using their own
 slim serialization mechanisms, Spring HTTP invokers use the standard Java serialization
 mechanism to expose services through HTTP. This has a huge advantage if your arguments
@@ -404,9 +404,9 @@ http://openjdk.java.net/jeps/290
 ====
 
 
-
 [[remoting-httpinvoker-server]]
 ==== Exposing the service object
+
 Setting up the HTTP invoker infrastructure for a service object resembles closely the
 way you would do the same using Hessian or Burlap. Just as Hessian support provides the
 `HessianServiceExporter`, Spring's HttpInvoker support provides the
@@ -483,9 +483,9 @@ shown in this example:
 ----
 
 
-
 [[remoting-httpinvoker-client]]
 ==== Linking in the service at the client
+
 Again, linking in the service from the client much resembles the way you would do it
 when using Hessian or Burlap. Using a proxy, Spring will be able to translate your calls
 to HTTP POST requests to the URL pointing to the exported service.
@@ -513,9 +513,9 @@ As mentioned before, you can choose what HTTP client you want to use. By default
 
 
 
-
 [[remoting-web-services]]
 === Web services
+
 Spring provides full support for standard Java web services APIs:
 
 * Exposing web services using JAX-WS
@@ -527,9 +527,9 @@ contract-first, document-driven web services - highly recommended for building m
 future-proof web services.
 
 
-
 [[remoting-web-services-jaxws-export-servlet]]
 ==== Exposing servlet-based web services using JAX-WS
+
 Spring provides a convenient base class for JAX-WS servlet endpoint implementations -
 `SpringBeanAutowiringSupport`. To expose our `AccountService` we extend Spring's
 `SpringBeanAutowiringSupport` class and implement our business logic here, usually
@@ -582,13 +582,13 @@ EE 5 environments, using the standard contract for JAX-WS servlet endpoint deplo
 See Java EE 5 web service tutorials for details.
 
 
-
 [[remoting-web-services-jaxws-export-standalone]]
 ==== Exporting standalone web services using JAX-WS
-The built-in JAX-WS provider that comes with Oracle's JDK 1.6 supports exposure of web
-services using the built-in HTTP server that's included in JDK 1.6 as well. Spring's
+
+The built-in JAX-WS provider that comes with Oracle's JDK supports exposure of web
+services using the built-in HTTP server that's included in the JDK as well. Spring's
 `SimpleJaxWsServiceExporter` detects all `@WebService` annotated beans in the Spring
-application context, exporting them through the default JAX-WS server (the JDK 1.6 HTTP
+application context, exporting them through the default JAX-WS server (the JDK HTTP
 server).
 
 In this scenario, the endpoint instances are defined and managed as Spring beans
@@ -639,9 +639,9 @@ and Spring's `@Autowired` configuration annotation still being honored:
 ----
 
 
-
 [[remoting-web-services-jaxws-export-ri]]
 ==== Exporting web services using the JAX-WS RI's Spring support
+
 Oracle's JAX-WS RI, developed as part of the GlassFish project, ships Spring support as
 part of its JAX-WS Commons project. This allows for defining JAX-WS endpoints as
 Spring-managed beans, similar to the standalone mode discussed in the previous section -
@@ -660,9 +660,9 @@ Check out https://jax-ws-commons.java.net/spring/[https://jax-ws-commons.java.ne
 for details on setup and usage style.
 
 
-
 [[remoting-web-services-jaxws-access]]
 ==== Accessing web services using JAX-WS
+
 Spring provides two factory beans to create JAX-WS web service proxies, namely
 `LocalJaxWsServiceFactoryBean` and `JaxWsPortProxyFactoryBean`. The former can only
 return a JAX-WS service class for us to work with. The latter is the full-fledged
@@ -729,9 +729,9 @@ accordingly first. Check the JAX-WS documentation for details on those requireme
 
 
 
-
 [[remoting-jms]]
 === JMS
+
 It is also possible to expose services transparently using JMS as the underlying
 communication protocol. The JMS remoting support in the Spring Framework is pretty basic
 - it sends and receives on the `same thread` and in the __same non-transactional__
@@ -794,9 +794,9 @@ the client and server.
 ----
 
 
-
 [[remoting-jms-server]]
 ==== Server-side configuration
+
 On the server, you just need to expose the service object using the
 `JmsInvokerServiceExporter`.
 
@@ -844,9 +844,9 @@ On the server, you just need to expose the service object using the
 ----
 
 
-
 [[remoting-jms-client]]
 ==== Client-side configuration
+
 The client merely needs to create a client-side proxy that will implement the agreed
 upon interface ( `CheckingAccountService`). The resulting object created off the back of
 the following bean definition can be injected into other client side objects, and the
@@ -893,7 +893,6 @@ proxy will take care of forwarding the call to the server-side object via JMS.
 
 
 
-
 [[remoting-amqp]]
 === AMQP
 Refer to the {doc-spring-amqp}/html/_reference.html#remoting[Spring AMQP Reference Document
@@ -901,9 +900,9 @@ Refer to the {doc-spring-amqp}/html/_reference.html#remoting[Spring AMQP Referen
 
 
 
-
 [[remoting-autodection-remote-interfaces]]
 === Auto-detection is not implemented for remote interfaces
+
 The main reason why auto-detection of implemented interfaces does not occur for remote
 interfaces is to avoid opening too many doors to remote callers. The target object might
 implement internal callback interfaces like `InitializingBean` or `DisposableBean` which
@@ -922,9 +921,9 @@ effort, and puts you on the safe side regarding controlled exposure of specific 
 
 
 
-
 [[remoting-considerations]]
 === Considerations when choosing a technology
+
 Each and every technology presented here has its drawbacks. You should carefully
 consider your needs, the services you are exposing and the objects you'll be sending
 over the wire when choosing a technology.
@@ -961,9 +960,9 @@ plugging in third-party or custom solutions here.
 
 
 
-
 [[rest-client-access]]
-=== Accessing RESTful services on the Client
+=== Accessing RESTful services on the client
+
 The `RestTemplate` is the core class for client-side access to RESTful services. It is
 conceptually similar to other template classes in Spring, such as `JdbcTemplate` and
 `JmsTemplate` and other template classes found in other Spring portfolio projects.
@@ -978,9 +977,9 @@ This section describes how to use the `RestTemplate` and its associated
 `HttpMessageConverters`.
 
 
-
 [[rest-resttemplate]]
 ==== RestTemplate
+
 Invoking RESTful services in Java is typically done using a helper class such as Apache
 HttpComponents `HttpClient`. For common REST operations this approach is too low level as
 shown below.
@@ -1182,9 +1181,9 @@ template will always close the request and handle any errors. Refer to the API
 documentation for more information on using the execute method and the meaning of its
 other method arguments.
 
-
 [[rest-resttemplate-uri]]
 ===== Working with the URI
+
 For each of the main HTTP methods, the `RestTemplate` provides variants that either take
 a String URI or `java.net.URI` as the first argument.
 
@@ -1232,9 +1231,9 @@ Or specify each URI component individually:
 	URI uri = uriComponents.toUri();
 ----
 
-
 [[rest-template-headers]]
 ===== Dealing with request and response headers
+
 Besides the methods described above, the `RestTemplate` also has the `exchange()`
 method, which can be used for arbitrary HTTP method execution based on the `HttpEntity`
 class.
@@ -1278,7 +1277,8 @@ to serialize only a subset of the object properties. For example:
 
 
 [[rest-message-conversion]]
-==== HTTP Message Conversion
+==== HTTP message conversion
+
 Objects passed to and returned from the methods `getForObject()`, `postForLocation()`,
 and `put()` are converted to HTTP requests and from HTTP responses by
 `HttpMessageConverters`. The `HttpMessageConverter` interface is shown below to give you
@@ -1309,47 +1309,47 @@ a better feel for its functionality
 
 Concrete implementations for the main media (mime) types are provided in the framework
 and are registered by default with the `RestTemplate` on the client-side and with
-`AnnotationMethodHandlerAdapter` on the server-side.
+`RequestMethodHandlerAdapter` on the server-side.
 
 The implementations of ``HttpMessageConverter``s are described in the following sections.
 For all converters a default media type is used but can be overridden by setting the
 `supportedMediaTypes` bean property
 
-
 [[rest-string-converter]]
 ===== StringHttpMessageConverter
+
 An `HttpMessageConverter` implementation that can read and write Strings from the HTTP
 request and response. By default, this converter supports all text media types (
 `text/{asterisk}`), and writes with a `Content-Type` of `text/plain`.
 
-
 [[rest-form-converter]]
 ===== FormHttpMessageConverter
+
 An `HttpMessageConverter` implementation that can read and write form data from the HTTP
 request and response. By default, this converter reads and writes the media type
 `application/x-www-form-urlencoded`. Form data is read from and written into a
 `MultiValueMap<String, String>`.
 
-
 [[rest-byte-converter]]
 ===== ByteArrayHttpMessageConverter
+
 An `HttpMessageConverter` implementation that can read and write byte arrays from the
 HTTP request and response. By default, this converter supports all media types ( `{asterisk}/{asterisk}`),
 and writes with a `Content-Type` of `application/octet-stream`. This can be overridden
 by setting the `supportedMediaTypes` property, and overriding `getContentType(byte[])`.
 
-
 [[rest-marhsalling-converter]]
 ===== MarshallingHttpMessageConverter
+
 An `HttpMessageConverter` implementation that can read and write XML using Spring's
 `Marshaller` and `Unmarshaller` abstractions from the `org.springframework.oxm` package.
 This converter requires a `Marshaller` and `Unmarshaller` before it can be used. These
 can be injected via constructor or bean properties. By default this converter supports (
 `text/xml`) and ( `application/xml`).
 
-
 [[rest-mapping-json-converter]]
 ===== MappingJackson2HttpMessageConverter
+
 An `HttpMessageConverter` implementation that can read and write JSON using Jackson's
 `ObjectMapper`. JSON mapping can be customized as needed through the use of Jackson's
 provided annotations. When further control is needed, a custom `ObjectMapper` can be
@@ -1357,9 +1357,9 @@ injected through the `ObjectMapper` property for cases where custom JSON
 serializers/deserializers need to be provided for specific types. By default this
 converter supports ( `application/json`).
 
-
 [[rest-mapping-xml-converter]]
 ===== MappingJackson2XmlHttpMessageConverter
+
 An `HttpMessageConverter` implementation that can read and write XML using
 https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML] extension's
 `XmlMapper`. XML mapping can be customized as needed through the use of JAXB
@@ -1368,20 +1368,21 @@ can be injected through the `ObjectMapper` property for cases where custom XML
 serializers/deserializers need to be provided for specific types. By default this
 converter supports ( `application/xml`).
 
-
 [[rest-source-converter]]
 ===== SourceHttpMessageConverter
+
 An `HttpMessageConverter` implementation that can read and write
 `javax.xml.transform.Source` from the HTTP request and response. Only `DOMSource`,
 `SAXSource`, and `StreamSource` are supported. By default, this converter supports (
 `text/xml`) and ( `application/xml`).
 
-
 [[rest-buffered-image-converter]]
 ===== BufferedImageHttpMessageConverter
+
 An `HttpMessageConverter` implementation that can read and write
 `java.awt.image.BufferedImage` from the HTTP request and response. This converter reads
 and writes the media type supported by the Java I/O API.
+
 
 [[rest-async-resttemplate]]
 ==== Async RestTemplate
@@ -1457,9 +1458,9 @@ for more details.
 
 
 
-
 [[ejb-introduction]]
 === Introduction
+
 As a lightweight container, Spring is often considered an EJB replacement. We do believe
 that for many if not most applications and use cases, Spring as a container, combined
 with its rich supporting functionality in the area of transactions, ORM and JDBC access,
@@ -1479,14 +1480,13 @@ by discussing this.
 
 
 
-
 [[ejb-access]]
 === Accessing EJBs
 
 
-
 [[ejb-access-concepts]]
 ==== Concepts
+
 To invoke a method on a local or remote stateless session bean, client code must
 normally perform a JNDI lookup to obtain the (local or remote) EJB Home object, then use
 a 'create' method call on that object to obtain the actual (local or remote) EJB object.
@@ -1512,9 +1512,9 @@ not need	to write another Service Locator, another JNDI lookup, or duplicate met
 a hand-coded Business Delegate unless you are actually adding real value in such code.
 
 
-
 [[ejb-access-local]]
 ==== Accessing local SLSBs
+
 Assume that we have a web controller that needs to use a local EJB. We'll follow best
 practice and use the EJB Business Methods Interface pattern, so that the EJB's local
 interface extends a non EJB-specific business methods interface. Let's call this
@@ -1620,9 +1620,9 @@ Although this will not be of interest to the majority of Spring users, those doi
 programmatic AOP work with EJBs may want to look at `LocalSlsbInvokerInterceptor`.
 
 
-
 [[ejb-access-remote]]
 ==== Accessing remote SLSBs
+
 Accessing remote EJBs is essentially identical to accessing local EJBs, except that the
 `SimpleRemoteStatelessSessionProxyFactoryBean` or `<jee:remote-slsb>` configuration
 element is used. Of course, with or without Spring, remote invocation semantics apply; a
@@ -1650,9 +1650,9 @@ the client code knowing or caring. Of course, this is optional; there is nothing
 stopping you from declaring `RemoteExceptions` in your business interface.
 
 
-
 [[ejb-access-ejb2-ejb3]]
 ==== Accessing EJB 2.x SLSBs versus EJB 3 SLSBs
+
 Accessing EJB 2.x Session Beans and EJB 3 Session Beans via Spring is largely
 transparent. Spring's EJB accessors, including the `<jee:local-slsb>` and
 `<jee:remote-slsb>` facilities, transparently adapt to the actual component at runtime.
@@ -1666,14 +1666,13 @@ lookups simply provides consistent and more explicit EJB access configuration.
 
 
 
-
 [[ejb-implementation]]
 === Using Spring's EJB implementation support classes
 
 
-
 [[ejb-implementation-ejb3]]
 ==== EJB 3 injection interceptor
+
 For EJB 3 Session Beans and Message-Driven Beans, Spring provides a convenient
 interceptor that resolves Spring's `@Autowired` annotation in the EJB component
 class: `org.springframework.ejb.interceptor.SpringBeanAutowiringInterceptor`. This
@@ -1721,9 +1720,9 @@ method, e.g. obtaining a shared `ApplicationContext` from a custom holder class.
 
 
 
-
 [[jms-introduction]]
 === Introduction
+
 Spring provides a JMS integration framework that simplifies the use of the JMS API much
 like Spring's integration does for the JDBC API.
 
@@ -1772,10 +1771,8 @@ resource into Spring's transaction management mechanisms.
 
 
 
-
 [[jms-using]]
 === Using Spring JMS
-
 
 
 [[jms-jmstemplate]]
@@ -1828,6 +1825,7 @@ send in generic manner.
 
 [[jms-connections]]
 ==== Connections
+
 The `JmsTemplate` requires a reference to a `ConnectionFactory`. The `ConnectionFactory`
 is part of the JMS specification and serves as the entry point for working with JMS. It
 is used by the client application as a factory to create connections with the JMS
@@ -1842,9 +1840,9 @@ the EJB or servlet deployment descriptors. To ensure the use of these features w
 `JmsTemplate` inside an EJB, the client application should ensure that it references the
 managed implementation of the `ConnectionFactory`.
 
-
 [[jms-caching-resources]]
 ===== Caching Messaging Resources
+
 The standard API involves creating many intermediate objects. To send a message the
 following 'API' walk is performed
 
@@ -1858,9 +1856,9 @@ Between the ConnectionFactory and the Send operation there are three intermediat
 objects that are created and destroyed. To optimise the resource usage and increase
 performance two implementations of `ConnectionFactory` are provided.
 
-
 [[jms-connection-factory]]
 ===== SingleConnectionFactory
+
 Spring provides an implementation of the `ConnectionFactory` interface,
 `SingleConnectionFactory`, that will return the same `Connection` on all
 `createConnection()` calls and ignore calls to `close()`. This is useful for testing and
@@ -1868,9 +1866,9 @@ standalone environments so that the same connection can be used for multiple
 `JmsTemplate` calls that may span any number of transactions. `SingleConnectionFactory`
 takes a reference to a standard `ConnectionFactory` that would typically come from JNDI.
 
-
 [[jdbc-connection-factory-caching]]
 ===== CachingConnectionFactory
+
 The `CachingConnectionFactory` extends the functionality of `SingleConnectionFactory`
 and adds the caching of Sessions, MessageProducers, and MessageConsumers. The initial
 cache size is set to 1, use the property `sessionCacheSize` to increase the number of
@@ -1884,9 +1882,9 @@ MessageConsumers are cached based on a key composed of the destination, selector
 noLocal delivery flag, and the durable subscription name (if creating durable consumers).
 
 
-
 [[jms-destinations]]
 ==== Destination Management
+
 Destinations, like ConnectionFactories, are JMS administered objects that can be stored
 and retrieved in JNDI. When configuring a Spring application context you can use the
 JNDI factory class `JndiObjectFactoryBean` / `<jee:jndi-lookup>` to perform dependency
@@ -1929,9 +1927,9 @@ You can also configure the `JmsTemplate` with a default destination via the prop
 operations that do not refer to a specific destination.
 
 
-
 [[jms-mdp]]
 ==== Message Listener Containers
+
 One of the most common uses of JMS messages in the EJB world is to drive message-driven
 beans (MDBs). Spring offers a solution to create message-driven POJOs (MDPs) in a way
 that does not tie a user to an EJB container. (See <<jms-asynchronousMessageReception>>
@@ -1952,9 +1950,9 @@ boilerplate JMS infrastructure concerns to the framework.
 There are two standard JMS message listener containers packaged with Spring, each with
 its specialised feature set.
 
-
 [[jms-mdp-simple]]
 ===== SimpleMessageListenerContainer
+
 This message listener container is the simpler of the two standard flavors. It creates a
 fixed number of JMS sessions and consumers at startup, registers the listener using the
 standard JMS `MessageConsumer.setMessageListener()` method, and leaves it up the JMS
@@ -1975,9 +1973,9 @@ Sessions and therefore does not include any other Session operations (such as se
 response messages) in the transaction protocol.
 ====
 
-
 [[jms-mdp-default]]
 ===== DefaultMessageListenerContainer
+
 This message listener container is the one used in most cases. In contrast to
 `SimpleMessageListenerContainer`, this container variant allows for dynamic adaptation
 to runtime demands and is able to participate in externally managed transactions. Each
@@ -2015,6 +2013,7 @@ message listener (including database operations etc).
 
 [[jms-tx]]
 ==== Transaction management
+
 Spring provides a `JmsTransactionManager` that manages transactions for a single JMS
 `ConnectionFactory`. This allows JMS applications to leverage the managed transaction
 features of Spring as described in <<transaction>>. The `JmsTransactionManager` performs
@@ -2044,7 +2043,6 @@ in an unmanaged environment you can specify these values through the use of the
 properties `sessionTransacted` and `sessionAcknowledgeMode`. When using a
 `PlatformTransactionManager` with `JmsTemplate`, the template will always be given a
 transactional JMS `Session`.
-
 
 
 
@@ -2108,9 +2106,9 @@ If you created the `JmsTemplate` and specified a default destination, the
 `send(MessageCreator c)` sends a message to that destination.
 
 
-
 [[jms-msg-conversion]]
 ==== Using Message Converters
+
 In order to facilitate the sending of domain model objects, the `JmsTemplate` has
 various send methods that take a Java object as an argument for a message's data
 content. The overloaded methods `convertAndSend()` and `receiveAndConvert()` in
@@ -2171,7 +2169,6 @@ MapMessage={
 ----
 
 
-
 [[jms-callbacks]]
 ==== SessionCallback and ProducerCallback
 
@@ -2183,14 +2180,13 @@ these callback methods.
 
 
 
-
 [[jms-receiving]]
 === Receiving a message
 
 
-
 [[jms-receiving-sync]]
-==== Synchronous Reception
+==== Synchronous reception
+
 While JMS is typically associated with asynchronous processing, it is possible to
 consume messages synchronously. The overloaded `receive(..)` methods provide this
 functionality. During a synchronous receive, the calling thread blocks until a message
@@ -2199,9 +2195,8 @@ potentially be blocked indefinitely. The property `receiveTimeout` specifies how
 the receiver should wait before giving up waiting for a message.
 
 
-
 [[jms-asynchronousMessageReception]]
-==== Asynchronous Reception - Message-Driven POJOs
+==== Asynchronous reception: Message-Driven POJOs
 
 [NOTE]
 ====
@@ -2271,9 +2266,8 @@ Please refer to the Spring javadocs of the various message listener containers f
 description of the features supported by each implementation.
 
 
-
 [[jms-receiving-async-session-aware-message-listener]]
-==== the SessionAwareMessageListener interface
+==== SessionAwareMessageListener interface
 
 The `SessionAwareMessageListener` interface is a Spring-specific interface that provides
 a similar contract to the JMS `MessageListener` interface, but also provides the message
@@ -2307,9 +2301,8 @@ interface, when using the `SessionAwareMessageListener` interface, it is the
 responsibility of the client code to handle any exceptions thrown.
 
 
-
 [[jms-receiving-async-message-listener-adapter]]
-==== the MessageListenerAdapter
+==== MessageListenerAdapter
 
 The `MessageListenerAdapter` class is the final component in Spring's asynchronous
 messaging support: in a nutshell, it allows you to expose almost __any__ class as a MDP
@@ -2445,9 +2438,9 @@ please note that this exception __will not__ be swallowed and __will__ propagate
 call stack).
 
 
-
 [[jms-tx-participation]]
 ==== Processing messages within transactions
+
 Invoking a message listener within a transaction only requires reconfiguration of the
 listener container.
 
@@ -2505,9 +2498,9 @@ take care of the rest.
 
 
 
-
 [[jms-jca-message-endpoint-manager]]
 === Support for JCA Message Endpoints
+
 Beginning with version 2.5, Spring also provides support for a JCA-based
 `MessageListener` container. The `JmsMessageEndpointManager` will attempt to
 automatically determine the `ActivationSpec` class name from the provider's
@@ -2599,6 +2592,7 @@ contract.
 
 [[jms-annotated]]
 === Annotation-driven listener endpoints
+
 The easiest way to receive a message asynchronously is to use the annotated listener
 endpoint infrastructure. In a nutshell, it allows you to expose a method of a managed
 bean as a JMS listener endpoint.
@@ -2631,6 +2625,7 @@ located for management purposes using the `JmsListenerEndpointRegistry` bean.
 several JMS destinations to the same method by adding additional `@JmsListener`
 declarations to it. On Java 6 and 7, you can use the `@JmsListeners` annotation.
 ====
+
 
 [[jms-annotated-support]]
 ==== Enable listener endpoint annotations
@@ -2683,6 +2678,7 @@ element.
     </bean>
 ----
 
+
 [[jms-annotated-programmatic-registration]]
 ==== Programmatic endpoints registration
 
@@ -2716,6 +2712,7 @@ describing a custom invocation mechanism.
 
 It should be noted that you could just as well skip the use of `@JmsListener` altogether
 and only register your endpoints programmatically through `JmsListenerConfigurer`.
+
 
 [[jms-annotated-method-signature]]
 ==== Annotated endpoint method signature
@@ -2794,6 +2791,7 @@ annotate the payload with `@Valid` and configure the necessary validator as foll
 	}
 ----
 
+
 [[jms-annotated-response]]
 ==== Response management
 
@@ -2863,6 +2861,7 @@ example can be rewritten as follows:
 
 [[jms-namespace]]
 === JMS namespace support
+
 Spring provides an XML namespace for simplifying JMS configuration. To use the JMS
 namespace elements you will need to reference the JMS schema:
 
@@ -3163,14 +3162,15 @@ table:
 
 
 
+
 [[jmx]]
 == JMX
 
 
 
-
 [[jmx-introduction]]
 === Introduction
+
 The JMX support in Spring provides you with the features to easily and transparently
 integrate your Spring application into a JMX infrastructure.
 
@@ -3195,9 +3195,9 @@ Spring JMX features.
 
 
 
-
 [[jmx-exporting]]
 === Exporting your beans to JMX
+
 The core class in Spring's JMX framework is the `MBeanExporter`. This class is
 responsible for taking your Spring beans and registering them with a JMX `MBeanServer`.
 For example, consider the following class:
@@ -3334,7 +3334,6 @@ supplied to the `MBeanExporter` via the server property. When you supply your ow
 correctly, you must (of course) have a JMX implementation on your classpath.
 
 
-
 [[jmx-mbean-server]]
 ==== Reusing an existing MBeanServer
 
@@ -3382,9 +3381,9 @@ For platforms/cases where the existing `MBeanServer` has a dynamic (or unknown)
 ----
 
 
-
 [[jmx-exporting-lazy]]
 ==== Lazy-initialized MBeans
+
 If you configure a bean with the `MBeanExporter` that is also configured for lazy
 initialization, then the `MBeanExporter` will __not__ break this contract and will avoid
 instantiating the bean. Instead, it will register a proxy with the `MBeanServer` and
@@ -3392,9 +3391,9 @@ will defer obtaining the bean from the container until the first invocation on t
 occurs.
 
 
-
 [[jmx-exporting-auto]]
 ==== Automatic registration of MBeans
+
 Any beans that are exported through the `MBeanExporter` and are already valid MBeans are
 registered as-is with the `MBeanServer` without further intervention from Spring. MBeans
 can be automatically detected by the `MBeanExporter` by setting the `autodetect`
@@ -3416,9 +3415,9 @@ registration have their bean name used as the `ObjectName`. This behavior can be
 overridden as detailed in <<jmx-naming>>.
 
 
-
 [[jmx-exporting-registration-behavior]]
 ==== Controlling the registration behavior
+
 Consider the scenario where a Spring `MBeanExporter` attempts to register an `MBean`
 with an `MBeanServer` using the `ObjectName` `'bean:name=testBean1'`. If an `MBean`
 instance has already been registered under that same `ObjectName`, the default behavior
@@ -3488,9 +3487,9 @@ behavior to the `REGISTRATION_REPLACE_EXISTING` behavior:
 
 
 
-
 [[jmx-interface]]
 === Controlling the management interface of your beans
+
 In the previous example, you had little control over the management interface of your
 bean; __all__ of the __public__ properties and methods of each exported bean was exposed
 as JMX attributes and operations respectively. To exercise finer-grained control over
@@ -3499,9 +3498,8 @@ attributes and operations, Spring JMX provides a comprehensive and extensible me
 for controlling the management interfaces of your beans.
 
 
-
 [[jmx-interface-assembler]]
-==== the MBeanInfoAssembler Interface
+==== MBeanInfoAssembler interface
 
 Behind the scenes, the `MBeanExporter` delegates to an implementation of the
 `org.springframework.jmx.export.assembler.MBeanInfoAssembler` interface which is
@@ -3514,9 +3512,9 @@ saw in the previous examples). Spring provides two additional implementations of
 interface using either source-level metadata or any arbitrary interface.
 
 
-
 [[jmx-interface-metadata]]
-==== Using Source-Level Metadata (Java annotations)
+==== Using source-level metadata: Java annotations
+
 Using the `MetadataMBeanInfoAssembler` you can define the management interfaces for your
 beans using source level metadata. The reading of metadata is encapsulated by the
 `org.springframework.jmx.export.metadata.JmxAttributeSource` interface. Spring JMX
@@ -3657,9 +3655,9 @@ through the assembler property. This is all that is required to take advantage o
 metadata-driven management interfaces for your Spring-exposed MBeans.
 
 
-
 [[jmx-interface-metadata-types]]
-==== Source-Level Metadata Types
+==== Source-Level metadata types
+
 The following source level metadata types are available for use in Spring JMX:
 
 [[jmx-metadata-types]]
@@ -3688,7 +3686,7 @@ The following configuration parameters are available for use on these source-lev
 metadata types:
 
 [[jmx-metadata-parameters]]
-.Source-Level Metadata Parameters
+.Source-Level metadata parameters
 [cols="1,3,1"]
 |===
 | Parameter| Description| Applies to
@@ -3743,9 +3741,8 @@ metadata types:
 |===
 
 
-
 [[jmx-interface-autodetect]]
-==== the AutodetectCapableMBeanInfoAssembler interface
+==== AutodetectCapableMBeanInfoAssembler interface
 
 To simplify configuration even further, Spring introduces the
 `AutodetectCapableMBeanInfoAssembler` interface which extends the `MBeanInfoAssembler`
@@ -3791,9 +3788,9 @@ meaning. You can address this issue by changing the default behavior for `Object
 creation as defined in <<jmx-naming>>.
 
 
-
 [[jmx-interface-java]]
 ==== Defining management interfaces using Java interfaces
+
 In addition to the `MetadataMBeanInfoAssembler`, Spring also includes the
 `InterfaceBasedMBeanInfoAssembler` which allows you to constrain the methods and
 properties that are exposed based on the set of methods defined in a collection of
@@ -3878,7 +3875,6 @@ on the bean and use all of the interfaces implemented by that bean to create the
 management interface.
 
 
-
 [[jmx-interface-methodnames]]
 ==== Using MethodNameBasedMBeanInfoAssembler
 
@@ -3914,7 +3910,6 @@ lists of method names.
 
 
 
-
 [[jmx-naming]]
 === Controlling the ObjectNames for your beans
 
@@ -3927,7 +3922,6 @@ of the `beans` `Map` to an entry in a `Properties` file (or files) to resolve th
 `ObjectNamingStrategy` implementations: the `IdentityNamingStrategy` that builds an
 `ObjectName` based on the JVM identity of the bean and the `MetadataNamingStrategy` that
 uses source level metadata to obtain the `ObjectName`.
-
 
 
 [[jmx-naming-properties]]
@@ -3985,7 +3979,6 @@ If no entry in the `Properties` instance can be found then the bean key name is 
 the `ObjectName`.
 
 
-
 [[jmx-naming-metadata]]
 ==== Using the MetadataNamingStrategy
 
@@ -4035,9 +4028,9 @@ __com.foo:type=MyClass,name=myBean__.
 ----
 
 
-
 [[jmx-context-mbeanexport]]
 ==== Configuring annotation based MBean export
+
 If you prefer using <<jmx-interface-metadata,the annotation based approach>> to define
 your management interfaces, then a convenience subclass of `MBeanExporter` is available:
 `AnnotationMBeanExporter`. When defining an instance of this subclass, the
@@ -4099,17 +4092,17 @@ startup...
 
 
 
-
 [[jmx-jsr160]]
 === JSR-160 Connectors
+
 For remote access, Spring JMX module offers two `FactoryBean` implementations inside the
 `org.springframework.jmx.support` package for creating both server- and client-side
 connectors.
 
 
-
 [[jmx-jsr160-server]]
-==== Server-side Connectors
+==== Server-side connectors
+
 To have Spring JMX create, start and expose a JSR-160 `JMXConnectorServer` use the
 following configuration:
 
@@ -4178,9 +4171,9 @@ snippet of configuration:
 ----
 
 
-
 [[jmx-jsr160-client]]
-==== Client-side Connectors
+==== Client-side connectors
+
 To create an `MBeanServerConnection` to a remote JSR-160 enabled `MBeanServer` use the
 `MBeanServerConnectionFactoryBean` as shown below:
 
@@ -4193,9 +4186,9 @@ To create an `MBeanServerConnection` to a remote JSR-160 enabled `MBeanServer` u
 ----
 
 
-
 [[jmx-jsr160-protocols]]
 ==== JMX over Burlap/Hessian/SOAP
+
 JSR-160 permits extensions to the way in which communication is done between the client
 and the server. The examples above are using the mandatory RMI-based implementation
 required by the JSR-160 specification (IIOP and JRMP) and the (optional) JMXMP. By using
@@ -4217,9 +4210,9 @@ documentation for more information.
 
 
 
-
 [[jmx-proxy]]
-=== Accessing MBeans via Proxies
+=== Accessing MBeans via proxies
+
 Spring JMX allows you to create proxies that re-route calls to MBeans registered in a
 local or remote `MBeanServer`. These proxies provide you with a standard Java interface
 through which you can interact with your MBeans. The code below shows how to configure a
@@ -4268,15 +4261,15 @@ created will forward all invocations to the `MBeanServer` via this
 
 
 
-
 [[jmx-notifications]]
 === Notifications
+
 Spring's JMX offering includes comprehensive support for JMX notifications.
 
 
-
 [[jmx-notifications-listeners]]
-==== Registering Listeners for Notifications
+==== Registering listeners for notifications
+
 Spring's JMX support makes it very easy to register any number of
 `NotificationListeners` with any number of MBeans (this includes MBeans exported by
 Spring's `MBeanExporter` and MBeans registered via some other mechanism). By way of an
@@ -4495,9 +4488,9 @@ specification (1.2) entitled 'The JMX Notification Model'.)
 ----
 
 
-
 [[jmx-notifications-publishing]]
 ==== Publishing Notifications
+
 Spring provides support not just for registering to receive `Notifications`, but also
 for publishing `Notifications`.
 
@@ -4579,9 +4572,9 @@ you can accept the coupling to both Spring and JMX, then do so.
 
 
 
-
 [[jmx-resources]]
-=== Further Resources
+=== Further resources
+
 This section contains links to further resources about JMX.
 
 * The http://www.oracle.com/technetwork/java/javase/tech/javamanagement-140525.html[JMX
@@ -4595,14 +4588,15 @@ homepage] at Oracle
 
 
 
+
 [[cci]]
 == JCA CCI
 
 
 
-
 [[cci-introduction]]
 === Introduction
+
 Java EE provides a specification to standardize access to enterprise information systems
 (EIS): the JCA (Java EE Connector Architecture). This specification is divided into
 several different parts:
@@ -4632,14 +4626,13 @@ special support for such connector-specific APIs.
 
 
 
-
 [[cci-config]]
 === Configuring CCI
 
 
-
 [[cci-config-connector]]
 ==== Connector configuration
+
 The base resource to use JCA CCI is the `ConnectionFactory` interface. The connector
 used must provide an implementation of this interface.
 
@@ -4668,7 +4661,6 @@ the resource is never enlisted / delisted in the current global transaction of t
 current thread. The resource is simply not aware of any global Java EE transactions that
 might be running.
 ====
-
 
 
 [[cci-config-connectionfactory]]
@@ -4714,9 +4706,9 @@ connector. This interface is part of the JCA SPI specification.
 ====
 
 
-
 [[cci-config-cci-connections]]
 ==== Configuring CCI connections
+
 JCA CCI allow the developer to configure the connections to the EIS using the
 `ConnectionSpec` implementation of your connector. In order to configure its properties,
 you need to wrap the target connection factory with a dedicated adapter,
@@ -4771,9 +4763,9 @@ with the `ConnectionSpec` argument, otherwise the variant without argument.
 ----
 
 
-
 [[cci-config-single-connection]]
 ==== Using a single CCI connection
+
 If you want to use a single CCI connection, Spring provides a further
 `ConnectionFactory` adapter to manage this. The `SingleConnectionFactory` adapter class
 will open a single connection lazily and close it when this bean is destroyed at
@@ -4811,14 +4803,13 @@ Use an intermediary `ConnectionSpecConnectionFactoryAdapter` that the
 
 
 
-
 [[cci-using]]
 === Using Spring's CCI access support
 
 
-
 [[cci-record-creator]]
 ==== Record conversion
+
 One of the aims of the JCA CCI support is to provide convenient facilities for
 manipulating CCI records. The developer can specify the strategy to create records and
 extract datas from records, for use with Spring's `CciTemplate`. The following
@@ -4891,9 +4882,8 @@ The following sample shows how to use the `RecordExtractor` interface.
 ----
 
 
-
 [[cci-using-template]]
-==== the CciTemplate
+==== CciTemplate
 
 The `CciTemplate` is the central class of the core CCI support package (
 `org.springframework.jca.cci.core`). It simplifies the use of CCI since it handles the
@@ -4999,9 +4989,9 @@ output `Record` as return value.
 ----
 
 
-
 [[cci-using-dao]]
 ==== DAO support
+
 Spring's CCI support provides a abstract class for DAOs, supporting injection of a
 `ConnectionFactory` or a `CciTemplate` instances. The name of the class is
 `CciDaoSupport`: It provides simple `setConnectionFactory` and `setCciTemplate` methods.
@@ -5033,9 +5023,9 @@ Internally, this class will create a `CciTemplate` instance for a passed-in
 ----
 
 
-
 [[automatic-output-generation]]
 ==== Automatic output record generation
+
 If the connector used only supports the `Interaction.execute(..)` method with input and
 output records as parameters (that is, it requires the desired output record to be
 passed in instead of returning an appropriate output record), you can set the
@@ -5075,9 +5065,9 @@ instance.
 ====
 
 
-
 [[template-summary]]
 ==== Summary
+
 The following table summarizes the mechanisms of the `CciTemplate` class and the
 corresponding methods called on the CCI `Interaction` interface:
 
@@ -5129,7 +5119,6 @@ corresponding methods called on the CCI `Interaction` interface:
 |===
 
 
-
 [[cci-straight]]
 ==== Using a CCI Connection and Interaction directly
 
@@ -5173,7 +5162,6 @@ custom operations on it, plus the corresponding CCI `ConnectionFactory`.
 `InteractionSpec` objects can either be shared across multiple template calls or newly
 created inside every callback method. This is completely up to the DAO implementation.
 ====
-
 
 
 [[cci-template-example]]
@@ -5320,9 +5308,9 @@ follows:
 
 
 
-
 [[cci-object]]
 === Modeling CCI access as operation objects
+
 The `org.springframework.jca.cci.object` package contains support classes that allow you
 to access the EIS in a different style: through reusable operation objects, analogous to
 Spring's JDBC operation objects (see JDBC chapter). This will usually encapsulate the
@@ -5336,7 +5324,6 @@ This approach is internally based on the `CciTemplate` class and the
 `RecordCreator` / `RecordExtractor` interfaces, reusing the machinery of Spring's core
 CCI support.
 ====
-
 
 
 [[cci-object-mapping-record]]
@@ -5407,7 +5394,6 @@ with a specific `InteractionSpec`:
 ----
 
 
-
 [[cci-object-mapping-comm-area]]
 ==== MappingCommAreaOperation
 
@@ -5438,18 +5424,18 @@ input COMMAREA and the output COMMAREA into an output object.
 ----
 
 
-
 [[cci-automatic-record-gen]]
 ==== Automatic output record generation
+
 As every `MappingRecordOperation` subclass is based on CciTemplate internally, the same
 way to automatically generate output records as with `CciTemplate` is available. Every
 operation object provides a corresponding `setOutputRecordCreator(..)` method. For
 further information, see <<automatic-output-generation>>.
 
 
-
 [[cci-object-summary]]
 ==== Summary
+
 The operation object approach uses records in the same manner as the `CciTemplate` class.
 
 [[cci-interaction-methods]]
@@ -5466,7 +5452,6 @@ The operation object approach uses records in the same manner as the `CciTemplat
 | set
 | boolean execute(InteractionSpec, Record, Record)
 |===
-
 
 
 [[cci-objects-mappring-record-example]]
@@ -5595,7 +5580,6 @@ follows:
 ----
 
 
-
 [[cci-objects-mapping-comm-area-example]]
 ==== Example for MappingCommAreaOperation usage
 
@@ -5696,9 +5680,9 @@ follows:
 
 
 
-
 [[cci-tx]]
 === Transactions
+
 JCA specifies several levels of transaction support for resource adapters. The kind of
 transactions that your resource adapter supports is specified in its `ra.xml` file.
 There are essentially three options: none (for example with CICS EPI connector), local
@@ -5754,6 +5738,7 @@ For more information on Spring's transaction facilities, see the chapter entitle
 == Email
 
 
+
 [[mail-introduction]]
 === Introduction
 
@@ -5789,9 +5774,9 @@ of JavaMail MIME messages, called
 
 
 
-
 [[mail-usage]]
 === Usage
+
 Let's assume there is a business interface called `OrderManager`:
 
 [source,java,indent=0]
@@ -5806,7 +5791,6 @@ Let's assume there is a business interface called `OrderManager`:
 
 Let us also assume that there is a requirement stating that an email message with an
 order number needs to be generated and sent to a customer placing the relevant order.
-
 
 
 [[mail-usage-simple]]
@@ -5878,7 +5862,6 @@ Find below the bean definitions for the above code:
 		<property name="templateMessage" ref="templateMessage"/>
 	</bean>
 ----
-
 
 
 [[mail-usage-mime]]
@@ -5954,7 +5937,6 @@ Please refer to the relevant javadocs for more information.
 
 
 
-
 [[mail-javamail-mime]]
 === Using the JavaMail MimeMessageHelper
 
@@ -5979,16 +5961,16 @@ to create a `MimeMessage`:
 ----
 
 
-
 [[mail-javamail-mime-attachments]]
 ==== Sending attachments and inline resources
+
 Multipart email messages allow for both attachments and inline resources. Examples of
 inline resources would be images or a stylesheet you want to use in your message, but
 that you don't want displayed as an attachment.
 
-
 [[mail-javamail-mime-attachments-attachment]]
 ===== Attachments
+
 The following example shows you how to use the `MimeMessageHelper` to send an email
 along with a single JPEG image attachment.
 
@@ -6013,9 +5995,9 @@ along with a single JPEG image attachment.
 	sender.send(message);
 ----
 
-
 [[mail-javamail-mime-attachments-inline]]
 ===== Inline resources
+
 The following example shows you how to use the `MimeMessageHelper` to send an email
 along with an inline image.
 
@@ -6050,9 +6032,9 @@ the resources. If you are doing it the other way around, it won't work!
 ====
 
 
-
 [[mail-templates]]
 ==== Creating email content using a templating library
+
 The code in the previous examples explicitly created the content of the email message,
 using methods calls such as `message.setText(..)`. This is fine for simple cases, and it
 is okay in the context of the aforementioned examples, where the intent was to show you
@@ -6188,14 +6170,15 @@ Velocity template to create email content and send email(s).
 
 
 
+
 [[scheduling]]
 == Task Execution and Scheduling
 
 
 
-
 [[scheduling-introduction]]
 === Introduction
+
 The Spring Framework provides abstractions for asynchronous execution and scheduling of
 tasks with the `TaskExecutor` and `TaskScheduler` interfaces, respectively. Spring also
 features implementations of those interfaces that support thread pools or delegation to
@@ -6213,28 +6196,25 @@ operation).
 
 
 
-
 [[scheduling-task-executor]]
 === The Spring TaskExecutor abstraction
 
-Spring 2.0 introduces a new abstraction for dealing with executors. Executors are the
-Java 5 name for the concept of thread pools. The "executor" naming is due to the fact
-that there is no guarantee that the underlying implementation is actually a pool; an
-executor may be single-threaded or even synchronous. Spring's abstraction hides
-implementation details between Java SE 1.4, Java SE 5 and Java EE environments.
+Executors are the JDK name for the concept of thread pools. The "executor" naming is
+due to the fact that there is no guarantee that the underlying implementation is
+actually a pool; an executor may be single-threaded or even synchronous. Spring's
+abstraction hides implementation details between Java SE and Java EE environments.
 
 Spring's `TaskExecutor` interface is identical to the `java.util.concurrent.Executor`
-interface. In fact, its primary reason for existence was to abstract away the need for
-Java 5 when using thread pools. The interface has a single method `execute(Runnable
-task)` that accepts a task for execution based on the semantics and configuration of the
-thread pool.
+interface. In fact, originally, its primary reason for existence was to abstract away
+the need for Java 5 when using thread pools. The interface has a single method
+`execute(Runnable task)` that accepts a task for execution based on the semantics
+and configuration of the thread pool.
 
 The `TaskExecutor` was originally created to give other Spring components an abstraction
 for thread pooling where needed. Components such as the `ApplicationEventMulticaster`,
 JMS's `AbstractMessageListenerContainer`, and Quartz integration all use the
 `TaskExecutor` abstraction to pool threads. However, if your beans need thread pooling
 behavior, it is possible to use this abstraction for your own needs.
-
 
 
 [[scheduling-task-executor-types]]
@@ -6284,7 +6264,6 @@ This implementation uses the CommonJ `WorkManager` as its backing implementation
 the central convenience class for setting up a CommonJ `WorkManager` reference in a Spring
 context. Similar to the `SimpleThreadPoolTaskExecutor`, this class implements the
 `WorkManager` interface and therefore can be used directly as a `WorkManager` as well.
-
 
 
 [[scheduling-task-executor-usage]]
@@ -6353,7 +6332,6 @@ been exposed.
 
 
 
-
 [[scheduling-task-scheduler]]
 === The Spring TaskScheduler abstraction
 
@@ -6387,9 +6365,8 @@ methods are for simple, periodic execution, but the method that accepts a Trigge
 much more flexible.
 
 
-
 [[scheduling-trigger-interface]]
-==== the Trigger interface
+==== Trigger interface
 
 The `Trigger` interface is essentially inspired by JSR-236, which, as of Spring 3.0, has
 not yet been officially implemented. The basic idea of the `Trigger` is that execution
@@ -6428,7 +6405,6 @@ default). Here you can see what methods are available for `Trigger` implementati
 ----
 
 
-
 [[scheduling-trigger-implementations]]
 ==== Trigger implementations
 
@@ -6455,7 +6431,6 @@ Such a component could take advantage of dependency injection so that such `Trig
 could be configured externally and therefore easily modified or extended.
 
 
-
 [[scheduling-task-scheduler-implementations]]
 ==== TaskScheduler implementations
 
@@ -6476,16 +6451,16 @@ recurring, executions.
 
 
 
-
 [[scheduling-annotation-support]]
 === Annotation Support for Scheduling and Asynchronous Execution
+
 Spring provides annotation support for both task scheduling and asynchronous method
 execution.
 
 
-
 [[scheduling-enable-annotation-support]]
 ==== Enable scheduling annotations
+
 To enable support for `@Scheduled` and `@Async` annotations add `@EnableScheduling` and
 `@EnableAsync` to one of your `@Configuration` classes:
 
@@ -6518,10 +6493,18 @@ Notice with the above XML that an executor reference is provided for handling th
 tasks that correspond to methods with the `@Async` annotation, and the scheduler
 reference is provided for managing those methods annotated with `@Scheduled`.
 
+[NOTE]
+====
+The default advice mode for processing `@Async` annotations is "proxy" which allows
+for interception of calls through the proxy only; local calls within the same class
+cannot get intercepted that way. For a more advanced mode of interception, consider
+switching to "aspectj" mode in combination with compile-time or load-time weaving.
+====
 
 
 [[scheduling-annotation-support-scheduled]]
 ==== The @Scheduled annotation
+
 The `@Scheduled` annotation can be added to a method along with trigger metadata. For
 example, the following method would be invoked every 5 seconds with a fixed delay,
 meaning that the period will be measured from the completion time of each preceding
@@ -6597,9 +6580,9 @@ container and once through the `@Configurable` aspect, with the consequence of e
 ====
 
 
-
 [[scheduling-annotation-support-async]]
 ==== The @Async annotation
+
 The `@Async` annotation can be provided on a method so that invocation of that method
 will occur asynchronously. In other words, the caller will return immediately upon
 invocation and the actual execution of the method will occur in a task that has been
@@ -6693,9 +6676,9 @@ in combination with a custom pointcut.
 ====
 
 
-
 [[scheduling-annotation-support-qualification]]
 ==== Executor qualification with @Async
+
 By default when specifying `@Async` on a method, the executor that will be used is the
 one supplied to the 'annotation-driven' element as described above. However, the `value`
 attribute of the `@Async` annotation can be used when needing to indicate that an
@@ -6715,9 +6698,9 @@ container, or may be the name of a __qualifier__ associated with any `Executor`,
 specified with the `<qualifier>` element or Spring's `@Qualifier` annotation.
 
 
-
 [[scheduling-annotation-support-exception]]
 ==== Exception management with @Async
+
 When an `@Async` method has a `Future` typed return value, it is easy to manage
 an exception that was thrown during the method execution as this exception will
 be thrown when calling `get` on the `Future` result. With a void return type
@@ -6741,17 +6724,17 @@ be defined _via_ `AsyncConfigurer` or the `task:annotation-driven` XML element.
 
 
 
-
 [[scheduling-task-namespace]]
 === The task namespace
+
 Beginning with Spring 3.0, there is an XML namespace for configuring `TaskExecutor` and
 `TaskScheduler` instances. It also provides a convenient way to configure tasks to be
 scheduled with a trigger.
 
 
-
 [[scheduling-task-namespace-scheduler]]
 ==== The 'scheduler' element
+
 The following element will create a `ThreadPoolTaskScheduler` instance with the
 specified thread pool size.
 
@@ -6767,9 +6750,9 @@ provide a 'pool-size' attribute, the default thread pool will only have a single
 There are no other configuration options for the scheduler.
 
 
-
 [[scheduling-task-namespace-executor]]
 ==== The 'executor' element
+
 The following will create a `ThreadPoolTaskExecutor` instance:
 
 [source,xml,indent=0]
@@ -6861,9 +6844,9 @@ immediately after executing a task without remaining follow-up work in the task 
 ----
 
 
-
 [[scheduling-task-namespace-scheduled-tasks]]
 ==== The 'scheduled-tasks' element
+
 The most powerful feature of Spring's task namespace is the support for configuring
 tasks to be scheduled within a Spring Application Context. This follows an approach
 similar to other "method-invokers" in Spring, such as that provided by the JMS namespace
@@ -6905,18 +6888,18 @@ provided instead. Here is an example demonstrating these other options.
 
 
 
-
 [[scheduling-quartz]]
 === Using the Quartz Scheduler
+
 Quartz uses `Trigger`, `Job` and `JobDetail` objects to realize scheduling of all kinds
 of jobs. For the basic concepts behind Quartz, have a look at
 http://quartz-scheduler.org[]. For convenience purposes, Spring offers a couple of
 classes that simplify the usage of Quartz within Spring-based applications.
 
 
-
 [[scheduling-quartz-jobdetail]]
 ==== Using the JobDetailFactoryBean
+
 Quartz `JobDetail` objects contain all information needed to run a job. Spring provides a
 `JobDetailFactoryBean` which provides bean-style properties for XML configuration purposes.
 Let's have a look at an example:
@@ -6973,7 +6956,6 @@ Using the `name` and `group` properties, you can modify the name and the group
 of the job, respectively. By default, the name of the job matches the bean name
 of the `JobDetailFactoryBean` (in the example above, this is `exampleJob`).
 ====
-
 
 
 [[scheduling-quartz-method-invoking-job]]
@@ -7041,7 +7023,6 @@ By default, jobs will run in a concurrent fashion.
 ====
 
 
-
 [[scheduling-quartz-cron]]
 ==== Wiring up jobs using triggers and the SchedulerFactoryBean
 
@@ -7102,14 +7083,15 @@ javadocs] for more information.
 
 
 
+
 [[dynamic-language]]
 == Dynamic language support
 
 
 
-
 [[dynamic-language-introduction]]
 === Introduction
+
 Spring 2.0 introduces comprehensive support for using classes and objects that have been
 defined using a dynamic language (such as JRuby) with Spring. This support allows you to
 write any number of classes in a supported dynamic language, and have the Spring
@@ -7135,9 +7117,9 @@ are described in <<dynamic-language-scenarios>>.
 
 
 
-
 [[dynamic-language-a-first-example]]
 === A first example
+
 This bulk of this chapter is concerned with describing the dynamic language support in
 detail. Before diving into all of the ins and outs of the dynamic language support,
 let's look at a quick example of a bean defined in a dynamic language. The dynamic
@@ -7253,9 +7235,9 @@ configuration.
 
 
 
-
 [[dynamic-language-beans]]
 === Defining beans that are backed by dynamic languages
+
 This section describes exactly how you define Spring managed beans in any of the
 supported dynamic languages.
 
@@ -7266,9 +7248,9 @@ you need further details about the dynamic languages themselves, please
 consult <<dynamic-language-resources>> at the end of this chapter.
 
 
-
 [[dynamic-language-beans-concepts]]
 ==== Common concepts
+
 The steps involved in using dynamic-language-backed beans are as follows:
 
 * Write the test for the dynamic language source code (naturally)
@@ -7288,9 +7270,9 @@ source files. You __will__ first want to read the rest of this chapter though, a
 Spring's dynamic language support does make some (small) assumptions about the contents
 of your dynamic language source files.
 
-
 [[dynamic-language-beans-concepts-xml-language-element]]
 ===== The <lang:language/> element
+
 The final step involves defining dynamic-language-backed bean definitions, one for each
 bean that you want to configure (this is no different from normal JavaBean
 configuration). However, instead of specifying the fully qualified classname of the
@@ -7307,9 +7289,9 @@ The exact attributes and child elements that are available for configuration dep
 exactly which language the bean has been defined in (the language-specific sections
 below provide the full lowdown on this).
 
-
 [[dynamic-language-refreshable-beans]]
 ===== Refreshable beans
+
 One of the (if not __the__) most compelling value adds of the dynamic language support
 in Spring is the__'refreshable bean'__ feature.
 
@@ -7441,9 +7423,9 @@ changes to the underlying source file can actually be detected; for example, by 
 that checks the last modified date of a dynamic language source file that exists on the
 filesystem.
 
-
 [[dynamic-language-beans-inline]]
 ===== Inline dynamic language source files
+
 The dynamic language support can also cater for dynamic language source files that are
 embedded directly in Spring bean definitions. More specifically, the
 `<lang:inline-script/>` element allows you to define dynamic language source immediately
@@ -7508,9 +7490,9 @@ a `<![CDATA[]]>` region might be better.)
 	</lang:jruby>
 ----
 
-
 [[dynamic-language-beans-ctor-injection]]
 ===== Understanding Constructor Injection in the context of dynamic-language-backed beans
+
 There is one __very__ important thing to be aware of with regard to Spring's dynamic
 language support. Namely, it is not (currently) possible to supply constructor arguments
 to dynamic-language-backed beans (and hence constructor-injection is not available for
@@ -7560,7 +7542,6 @@ will __not__ work.
 In practice this limitation is not as significant as it first appears since setter
 injection is the injection style favored by the overwhelming majority of developers
 anyway (let's leave the discussion as to whether that is a good thing to another day).
-
 
 
 [[dynamic-language-beans-jruby]]
@@ -7691,7 +7672,6 @@ See <<dynamic-language-scenarios>> for some scenarios where you might want to us
 JRuby-based beans.
 
 
-
 [[dynamic-language-beans-groovy]]
 ==== Groovy beans
 
@@ -7784,9 +7764,9 @@ While this is perfectly legal in Groovy, it is (arguably) a bad practice: in the
 interests of a consistent approach, you should (in the opinion of this author) respect
 the standard Java conventions of one (public) class per source file.
 
-
 [[dynamic-language-beans-groovy-customizer]]
 ===== Customizing Groovy objects via a callback
+
 The `GroovyObjectCustomizer` interface is a callback that allows you to hook additional
 creation logic into the process of creating a Groovy-backed bean. For example,
 implementations of this interface could invoke any required initialization method(s), or
@@ -7869,7 +7849,6 @@ in the same place as Spring's `GroovyObjectCustomizer`.
 ====
 
 
-
 [[dynamic-language-beans-bsh]]
 ==== BeanShell beans
 
@@ -7949,17 +7928,17 @@ BeanShell-based beans.
 
 
 
-
 [[dynamic-language-scenarios]]
 === Scenarios
+
 The possible scenarios where defining Spring managed beans in a scripting language would
 be beneficial are, of course, many and varied. This section describes two possible use
 cases for the dynamic language support in Spring.
 
 
-
 [[dynamic-language-scenarios-controllers]]
 ==== Scripted Spring MVC Controllers
+
 One group of classes that may benefit from using dynamic-language-backed beans is that
 of Spring MVC controllers. In pure Spring MVC applications, the navigational flow
 through a web application is to a large extent determined by code encapsulated within
@@ -8024,9 +8003,9 @@ using the Groovy dynamic language.
 ----
 
 
-
 [[dynamic-language-scenarios-validators]]
 ==== Scripted Validators
+
 Another area of application development with Spring that may benefit from the
 flexibility afforded by dynamic-language-backed beans is that of validation. It __may__
 be easier to express complex validation logic using a loosely typed dynamic language
@@ -8074,15 +8053,15 @@ using the Groovy dynamic language. (See <<validator>> for a discussion of the
 
 
 
-
 [[dynamic-language-final-notes]]
 === Bits and bobs
-This last section contains some bits and bobs related to the dynamic language support.
 
+This last section contains some bits and bobs related to the dynamic language support.
 
 
 [[dynamic-language-final-notes-aop]]
 ==== AOP - advising scripted beans
+
 It is possible to use the Spring AOP framework to advise scripted beans. The Spring AOP
 framework actually is unaware that a bean that is being advised might be a scripted
 bean, so all of the AOP use cases and functionality that you may be using or aim to use
@@ -8096,9 +8075,9 @@ Spring beans. This really would be an advanced use of the dynamic language suppo
 though.
 
 
-
 [[dynamic-language-final-notes-scopes]]
 ==== Scoping
+
 In case it is not immediately obvious, scripted beans can of course be scoped just like
 any other bean. The `scope` attribute on the various `<lang:language/>` elements allows
 you to control the scope of the underlying scripted bean, just as it does with a regular
@@ -8134,15 +8113,17 @@ in the Spring Framework.
 
 
 
-
 [[dynamic-language-resources]]
-=== Further Resources
+=== Further resources
+
 Find below links to further resources about the various dynamic languages described in
 this chapter.
 
 * The http://jruby.org/[JRuby] homepage
 * The http://www.groovy-lang.org/[Groovy] homepage
 * The http://www.beanshell.org/[BeanShell] homepage
+
+
 
 
 [[cache]]
@@ -8152,6 +8133,7 @@ this chapter.
 
 [[cache-introduction]]
 === Introduction
+
 Since version 3.1, Spring Framework provides support for transparently adding caching
 into an existing Spring application. Similar to the <<transaction,transaction>> support,
 the caching abstraction allows consistent use of various caching solutions with minimal
@@ -8164,6 +8146,7 @@ support of <<cache-jsr-107,JSR-107 annotations>> and more customization options.
 
 [[cache-strategies]]
 === Understanding the cache abstraction
+
 .Cache vs Buffer
 ****
 
@@ -8245,8 +8228,10 @@ To use the cache abstraction, the developer needs to take care of two aspects:
 * cache configuration - the backing cache where the data is stored and read from
 
 
+
 [[cache-annotations]]
 === Declarative annotation-based caching
+
 For caching declaration, the abstraction provides a set of Java annotations:
 
 * `@Cacheable` triggers cache population
@@ -8256,6 +8241,7 @@ For caching declaration, the abstraction provides a set of Java annotations:
 * `@CacheConfig` shares some common cache-related settings at class-level
 
 Let us take a closer look at each annotation:
+
 
 [[cache-annotations-cacheable]]
 ==== @Cacheable annotation
@@ -8294,9 +8280,9 @@ the cached method was not actually executed.
 	public Book findBook(ISBN isbn) {...}
 ----
 
-
 [[cache-annotations-cacheable-default-key]]
 ===== Default Key Generation
+
 Since caches are essentially key-value stores, each invocation of a cached method needs
 to be translated into a suitable key for cache access. Out of the box, the caching
 abstraction uses a simple `KeyGenerator` based on the following algorithm:
@@ -8326,9 +8312,9 @@ If you want to keep using the previous key strategy, you can configure the depre
 hash-based 'KeyGenerator' implementation.
 ====
 
-
 [[cache-annotations-cacheable-key]]
 ===== Custom Key Generation Declaration
+
 Since caching is generic, it is quite likely the target methods have various signatures
 that cannot be simply mapped on top of the cache structure. This tends to become obvious
 when the target method has multiple arguments out of which only some are suitable for
@@ -8384,7 +8370,6 @@ this, specify the name of the `KeyGenerator` bean implementation to use:
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 ----
 
-
 [NOTE]
 ====
 The `key` and `keyGenerator` parameters are mutually exclusive and an operation
@@ -8400,7 +8385,6 @@ retrieves the cache(s) defined at the operation level using the configured
 
 To provide a different __default__ cache resolver, one needs to implement the
 `org.springframework.cache.interceptor.CacheResolver` interface.
-
 
 [[cache-annotations-cacheable-cache-resolver]]
 ===== Custom cache resolution
@@ -8445,6 +8429,7 @@ result in an exception as a custom `CacheManager` will be ignored by the
 
 [[cache-annotations-cacheable-synchronized]]
 ===== Synchronized caching
+
 In a multi-threaded environment, certain operations might be concurrently invoked for
 the same argument (typically on startup). By default, the cache abstraction does not
 lock anything and the same value may be computed several times, defeating the purpose
@@ -8458,7 +8443,7 @@ entry is updated in the cache.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(cacheNames="foos", **sync="true"**)
+	@Cacheable(cacheNames="foos", **sync=true**)
 	public Foo executeExpensiveOperation(String id) {...}
 ----
 
@@ -8469,9 +8454,9 @@ This is an optional feature and your favorite cache library may not support it. 
 documentation of your cache provider for more details.
 ====
 
-
 [[cache-annotations-cacheable-condition]]
 ===== Conditional caching
+
 Sometimes, a method might not be suitable for caching all the time (for example, it
 might depend on the given arguments). The cache annotations support such functionality
 through the `condition` parameter which takes a `SpEL` expression that is evaluated to
@@ -8590,7 +8575,6 @@ than method flow optimization:
 	public Book updateBook(ISBN isbn, BookDescriptor descriptor)
 ----
 
-
 [IMPORTANT]
 ====
 Note that using `@CachePut` and `@Cacheable` annotations on the same method is generally
@@ -8645,7 +8629,6 @@ cache) - this is not the case with `@Cacheable` which adds/updates data into the
 and thus requires a result.
 
 
-
 [[cache-annotations-caching]]
 ==== @Caching annotation
 
@@ -8694,8 +8677,10 @@ gives therefore three levels of customizations per cache operation:
 * At class level, using `@CacheConfig`
 * At the operation level
 
+
 [[cache-annotation-enable]]
 ==== Enable caching annotations
+
 It is important to note that even though declaring the cache annotations does not
 automatically trigger their actions - like many things in Spring, the feature has to be
 declaratively enabled (which means if you ever suspect caching is to blame, you can
@@ -8738,8 +8723,16 @@ application through AOP. The configuration is intentionally similar with that of
 
 [NOTE]
 ====
-Advanced customizations using Java config require to implement `CachingConfigurer`, refer
-to {api-spring-framework}/cache/annotation/CachingConfigurer.html[the
+The default advice mode for processing caching annotations is "proxy" which allows
+for interception of calls through the proxy only; local calls within the same class
+cannot get intercepted that way. For a more advanced mode of interception, consider
+switching to "aspectj" mode in combination with compile-time or load-time weaving.
+====
+
+[NOTE]
+====
+Advanced customizations using Java config require to implement `CachingConfigurer`:
+Please refer to {api-spring-framework}/cache/annotation/CachingConfigurer.html[the
 javadoc for more details].
 ====
 
@@ -8848,7 +8841,6 @@ code, i.e. `@PostConstruct`.
 ====
 
 
-
 [[cache-annotation-stereotype]]
 ==== Using custom annotations
 
@@ -8906,6 +8898,7 @@ up its declaration at runtime and understands its meaning. Note that as mentione
 <<cache-annotation-enable,above>>, the annotation-driven behavior needs to be enabled.
 
 
+
 [[cache-jsr-107]]
 === JCache (JSR-107) annotations
 
@@ -8919,8 +8912,9 @@ compliant with the specification. In other words, if you are already using Sprin
 caching abstraction, you can switch to these standard annotations without changing
 your cache storage (or configuration, for that matter).
 
+
 [[cache-jsr-107-summary]]
-==== Features summary
+==== Feature summary
 
 For those who are familiar with Spring's caching annotations, the following table
 describes the main differences between the Spring annotations and the JSR-107
@@ -9035,8 +9029,10 @@ caches, a consistent and identical key generation implementation should be used.
 ====
 
 
+
 [[cache-declarative-xml]]
 === Declarative XML-based caching
+
 If annotations are not an option (no access to the sources or no external code), one can
 use XML for declarative caching. So instead of annotating the methods for caching, one
 specifies the target method and the caching directives externally (similar to the
@@ -9089,9 +9085,9 @@ we did in the example above by defining the target cache through the `cache:defi
 
 
 
-
 [[cache-store-configuration]]
 === Configuring the cache storage
+
 Out of the box, the cache abstraction provides several storage integration. To use
 them, one needs to simply declare an appropriate `CacheManager` - an entity that
 controls and manages ``Cache``s and can be used to retrieve these for storage.
@@ -9128,7 +9124,6 @@ very fast but it does not provide any management or persistence capabilities nor
 eviction contracts.
 
 
-
 [[cache-store-configuration-ehcache]]
 ==== Ehcache-based Cache
 
@@ -9151,6 +9146,7 @@ Again, to use it, one simply needs to declare the appropriate `CacheManager`:
 This setup bootstraps the ehcache library inside Spring IoC (through the `ehcache` bean) which
 is then wired into the dedicated `CacheManager` implementation. Note the entire
 ehcache-specific configuration is read from `ehcache.xml`.
+
 
 [[cache-store-configuration-caffeine]]
 ==== Caffeine Cache
@@ -9188,6 +9184,7 @@ The Caffeine `CacheManager` also supports customs `Caffeine` and `CacheLoader`. 
 the https://github.com/ben-manes/caffeine/wiki[Caffeine documentation] for more
 information about those.
 
+
 [[cache-store-configuration-guava]]
 ==== Guava Cache
 
@@ -9223,6 +9220,7 @@ The Guava `CacheManager` also supports customs `CacheBuilder` and `CacheLoader`.
 the https://code.google.com/p/guava-libraries/wiki/CachesExplained[Guava documentation]
 for more information about those.
 
+
 [[cache-store-configuration-gemfire]]
 ==== GemFire-based Cache
 
@@ -9231,6 +9229,7 @@ active (with built-in pattern-based subscription notifications), globally replic
 database and provides fully-featured edge caching. For further information on how to use
 GemFire as a CacheManager (and more), please refer to the
 {doc-spring-gemfire}/html/[Spring Data GemFire reference documentation].
+
 
 [[cache-store-configuration-jsr107]]
 ==== JSR-107 Cache
@@ -9254,6 +9253,7 @@ Again, to use it, one simply needs to declare the appropriate `CacheManager`:
 
 [[cache-store-configuration-noop]]
 ==== Dealing with caches without a backing store
+
 Sometimes when switching environments or doing testing, one might have cache
 declarations without an actual backing cache configured. As this is an invalid
 configuration, at runtime an exception will be thrown since the caching infrastructure
@@ -9284,9 +9284,9 @@ method to be executed every time.
 
 
 
-
 [[cache-plug]]
 === Plugging-in different back-end caches
+
 Clearly there are plenty of caching products out there that can be used as a backing
 store. To plug them in, one needs to provide a `CacheManager` and `Cache` implementation
 since unfortunately there is no available standard that we can use instead. This may
@@ -9300,13 +9300,12 @@ that provide integration with Spring can fill in this small configuration gap.
 
 
 
-
 [[cache-specific-config]]
 === How can I set the TTL/TTI/Eviction policy/XXX feature?
+
 Directly through your cache provider. The cache abstraction is... well, an abstraction
 not a cache implementation. The solution you are using might support various data
 policies and different topologies which other solutions do not (take for example the JDK
 `ConcurrentHashMap`) - exposing that in the cache abstraction would be useless simply
 because there would no backing support. Such functionality should be controlled directly
 through the backing cache, when configuring it or through its native API.
-
