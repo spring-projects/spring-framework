@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,7 +150,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationName) {
 		try {
 			Method[] methods = getIntrospectedClass().getDeclaredMethods();
-			Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();
+			Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>(4);
 			for (Method method : methods) {
 				if (!method.isBridge() && method.getAnnotations().length > 0 &&
 						AnnotatedElementUtils.isAnnotated(method, annotationName)) {

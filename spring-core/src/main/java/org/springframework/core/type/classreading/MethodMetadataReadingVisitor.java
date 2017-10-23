@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,11 +77,12 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 
 	@Override
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
-		String className = Type.getType(desc).getClassName();
 		this.methodMetadataSet.add(this);
+		String className = Type.getType(desc).getClassName();
 		return new AnnotationAttributesReadingVisitor(
 				className, this.attributesMap, this.metaAnnotationMap, this.classLoader);
 	}
+
 
 	@Override
 	public String getMethodName() {
