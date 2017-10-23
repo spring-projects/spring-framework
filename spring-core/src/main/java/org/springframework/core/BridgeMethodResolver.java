@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ public abstract class BridgeMethodResolver {
 		if (bridgeMethod == null || !bridgeMethod.isBridge()) {
 			return bridgeMethod;
 		}
+
 		// Gather all methods with matching name and parameter size.
 		List<Method> candidateMethods = new ArrayList<Method>();
 		Method[] methods = ReflectionUtils.getAllDeclaredMethods(bridgeMethod.getDeclaringClass());
@@ -67,10 +68,12 @@ public abstract class BridgeMethodResolver {
 				candidateMethods.add(candidateMethod);
 			}
 		}
+
 		// Now perform simple quick check.
 		if (candidateMethods.size() == 1) {
 			return candidateMethods.get(0);
 		}
+
 		// Search for candidate match.
 		Method bridgedMethod = searchCandidates(candidateMethods, bridgeMethod);
 		if (bridgedMethod != null) {
@@ -134,41 +137,12 @@ public abstract class BridgeMethodResolver {
 	}
 
 	/**
-	 * Searches for the generic {@link Method} declaration whose erased signature
-	 * matches that of the supplied bridge method.
-	 * @throws IllegalStateException if the generic declaration cannot be found
-	 */
-	private static Method findGenericDeclaration(Method bridgeMethod) {
-		// Search parent types for method that has same signature as bridge.
-		Class<?> superclass = bridgeMethod.getDeclaringClass().getSuperclass();
-		while (superclass != null && Object.class != superclass) {
-			Method method = searchForMatch(superclass, bridgeMethod);
-			if (method != null && !method.isBridge()) {
-				return method;
-			}
-			superclass = superclass.getSuperclass();
-		}
-
-		// Search interfaces.
-		Class<?>[] interfaces = ClassUtils.getAllInterfacesForClass(bridgeMethod.getDeclaringClass());
-		for (Class<?> ifc : interfaces) {
-			Method method = searchForMatch(ifc, bridgeMethod);
-			if (method != null && !method.isBridge()) {
-				return method;
-			}
-		}
-
-		return null;
-	}
-
-	/**
 	 * Returns {@code true} if the {@link Type} signature of both the supplied
 	 * {@link Method#getGenericParameterTypes() generic Method} and concrete {@link Method}
 	 * are equal after resolving all types against the declaringType, otherwise
 	 * returns {@code false}.
 	 */
-	private static boolean isResolvedTypeMatch(
-			Method genericMethod, Method candidateMethod, Class<?> declaringClass) {
+	private static boolean isResolvedTypeMatch(Method genericMethod, Method candidateMethod, Class<?> declaringClass) {
 		Type[] genericParameters = genericMethod.getGenericParameterTypes();
 		Class<?>[] candidateParameters = candidateMethod.getParameterTypes();
 		if (genericParameters.length != candidateParameters.length) {
@@ -192,12 +166,50 @@ public abstract class BridgeMethodResolver {
 	}
 
 	/**
+	 * Searches for the generic {@link Method} declaration whose erased signature
+	 * matches that of the supplied bridge method.
+	 * @throws IllegalStateException if the generic declaration cannot be found
+	 */
+	private static Method findGenericDeclaration(Method bridgeMethod) {
+		// Search parent types for method that has same signature as bridge.
+		Class<?> superclass = bridgeMethod.getDeclaringClass().getSuperclass();
+		while (superclass != null && Object.class != superclass) {
+			Method method = searchForMatch(superclass, bridgeMethod);
+			if (method != null && !method.isBridge()) {
+				return method;
+			}
+			superclass = superclass.getSuperclass();
+		}
+
+		Class<?>[] interfaces = ClassUtils.getAllInterfacesForClass(bridgeMethod.getDeclaringClass());
+		return searchInterfaces(interfaces, bridgeMethod);
+	}
+
+	private static Method searchInterfaces(Class<?>[] interfaces, Method bridgeMethod) {
+		for (Class<?> ifc : interfaces) {
+			Method method = searchForMatch(ifc, bridgeMethod);
+			if (method != null && !method.isBridge()) {
+				return method;
+			}
+			else {
+				return searchInterfaces(ifc.getInterfaces(), bridgeMethod);
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * If the supplied {@link Class} has a declared {@link Method} whose signature matches
 	 * that of the supplied {@link Method}, then this matching {@link Method} is returned,
 	 * otherwise {@code null} is returned.
 	 */
 	private static Method searchForMatch(Class<?> type, Method bridgeMethod) {
-		return ReflectionUtils.findMethod(type, bridgeMethod.getName(), bridgeMethod.getParameterTypes());
+		try {
+			return type.getDeclaredMethod(bridgeMethod.getName(), bridgeMethod.getParameterTypes());
+		}
+		catch (NoSuchMethodException ex) {
+			return null;
+		}
 	}
 
 	/**
