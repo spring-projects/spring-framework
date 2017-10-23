@@ -49,11 +49,11 @@ dependencies {
 	optional("org.seleniumhq.selenium:htmlunit-driver:2.27") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-	optional("org.seleniumhq.selenium:selenium-java:3.5.3") {
+	optional("org.seleniumhq.selenium:selenium-java:3.6.0") {
 		exclude group: "commons-logging", module: "commons-logging"
 		exclude group: "io.netty", module: "netty"
 	}
-	optional("org.xmlunit:xmlunit-matchers:2.3.0")
+	optional("org.xmlunit:xmlunit-matchers:2.5.0")
 	optional("org.skyscreamer:jsonassert:1.5.0")
 	optional("com.jayway.jsonpath:json-path:2.4.0")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
