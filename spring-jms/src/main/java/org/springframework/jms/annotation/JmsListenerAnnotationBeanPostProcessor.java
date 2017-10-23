@@ -17,7 +17,9 @@
 package org.springframework.jms.annotation;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,6 +43,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.jms.config.JmsListenerConfigUtils;
 import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerEndpointRegistrar;
@@ -166,9 +169,11 @@ public class JmsListenerAnnotationBeanPostProcessor
 
 		if (this.beanFactory instanceof ListableBeanFactory) {
 			// Apply JmsListenerConfigurer beans from the BeanFactory, if any
-			Map<String, JmsListenerConfigurer> instances =
+			Map<String, JmsListenerConfigurer> beans =
 					((ListableBeanFactory) this.beanFactory).getBeansOfType(JmsListenerConfigurer.class);
-			for (JmsListenerConfigurer configurer : instances.values()) {
+			List<JmsListenerConfigurer> configurers = new ArrayList<JmsListenerConfigurer>(beans.values());
+			AnnotationAwareOrderComparator.sort(configurers);
+			for (JmsListenerConfigurer configurer : configurers) {
 				configurer.configureJmsListeners(this.registrar);
 			}
 		}

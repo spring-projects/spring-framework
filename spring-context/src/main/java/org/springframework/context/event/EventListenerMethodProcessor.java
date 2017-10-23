@@ -31,7 +31,6 @@ import org.springframework.aop.framework.autoproxy.AutoProxyUtils;
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.ApplicationContext;
@@ -65,7 +64,7 @@ public class EventListenerMethodProcessor implements SmartInitializingSingleton,
 
 
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+	public void setApplicationContext(ApplicationContext applicationContext) {
 		Assert.isTrue(applicationContext instanceof ConfigurableApplicationContext,
 				"ApplicationContext does not implement ConfigurableApplicationContext");
 		this.applicationContext = (ConfigurableApplicationContext) applicationContext;
@@ -119,9 +118,9 @@ public class EventListenerMethodProcessor implements SmartInitializingSingleton,
 	 */
 	protected List<EventListenerFactory> getEventListenerFactories() {
 		Map<String, EventListenerFactory> beans = this.applicationContext.getBeansOfType(EventListenerFactory.class);
-		List<EventListenerFactory> allFactories = new ArrayList<EventListenerFactory>(beans.values());
-		AnnotationAwareOrderComparator.sort(allFactories);
-		return allFactories;
+		List<EventListenerFactory> factories = new ArrayList<EventListenerFactory>(beans.values());
+		AnnotationAwareOrderComparator.sort(factories);
+		return factories;
 	}
 
 	protected void processBean(final List<EventListenerFactory> factories, final String beanName, final Class<?> targetType) {

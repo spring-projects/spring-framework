@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,13 +148,13 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	protected void detectResourceHandlers(ApplicationContext appContext) {
 		logger.debug("Looking for resource handler mappings");
 
-		Map<String, SimpleUrlHandlerMapping> map = appContext.getBeansOfType(SimpleUrlHandlerMapping.class);
-		List<SimpleUrlHandlerMapping> handlerMappings = new ArrayList<SimpleUrlHandlerMapping>(map.values());
-		AnnotationAwareOrderComparator.sort(handlerMappings);
+		Map<String, SimpleUrlHandlerMapping> beans = appContext.getBeansOfType(SimpleUrlHandlerMapping.class);
+		List<SimpleUrlHandlerMapping> mappings = new ArrayList<SimpleUrlHandlerMapping>(beans.values());
+		AnnotationAwareOrderComparator.sort(mappings);
 
-		for (SimpleUrlHandlerMapping hm : handlerMappings) {
-			for (String pattern : hm.getHandlerMap().keySet()) {
-				Object handler = hm.getHandlerMap().get(pattern);
+		for (SimpleUrlHandlerMapping mapping : mappings) {
+			for (String pattern : mapping.getHandlerMap().keySet()) {
+				Object handler = mapping.getHandlerMap().get(pattern);
 				if (handler instanceof ResourceHttpRequestHandler) {
 					ResourceHttpRequestHandler resourceHandler = (ResourceHttpRequestHandler) handler;
 					if (logger.isDebugEnabled()) {
