@@ -47,18 +47,18 @@ import java.lang.annotation.Target;
  * }
  *
  * &#064;Component
- * public class JdbcFooRepository {
+ * public class JdbcFooRepository extends FooRepository {
  *
- *     public JdbcFooService(DataSource dataSource) {
+ *     public JdbcFooRepository(DataSource dataSource) {
  *         // ...
  *     }
  * }
  *
  * &#064;Primary
  * &#064;Component
- * public class HibernateFooRepository {
+ * public class HibernateFooRepository extends FooRepository {
  *
- *     public HibernateFooService(SessionFactory sessionFactory) {
+ *     public HibernateFooRepository(SessionFactory sessionFactory) {
  *         // ...
  *     }
  * }
