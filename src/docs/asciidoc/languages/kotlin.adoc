@@ -1,29 +1,18 @@
 [[kotlin]]
-= Kotlin support
-:doc-root: https://docs.spring.io
-:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
-:toc: left
-:toclevels: 4
-:docinfo1:
-
-
-
-
-[[introduction]]
-== Introduction
+= Kotlin
 
 https://kotlinlang.org[Kotlin] is a statically-typed language targeting the JVM (and other platforms)
 which allows writing concise and elegant code while providing very good
 https://kotlinlang.org/docs/reference/java-interop.html[interoperability] with
 existing libraries written in Java.
 
-Spring Framework 5 introduces first-class support for Kotlin and allows developers to write
-Spring + Kotlin applications almost as if the Spring Framework was a native Kotlin framework.
+The Spring Framework provides first-class support for Kotlin that allows developers to write
+Kotlin applications almost as if the Spring Framework was a native Kotlin framework.
 
 
 
 
-[[requirements]]
+[[kotlin-requirements]]
 == Requirements
 
 Spring Framework supports Kotlin 1.1+ and requires
@@ -37,7 +26,7 @@ https://start.spring.io/#!language=kotlin[start.spring.io].
 
 
 
-[[extensions]]
+[[kotlin-extensions]]
 == Extensions
 
 Kotlin https://kotlinlang.org/docs/reference/extensions.html[extensions] provide the ability
@@ -89,7 +78,7 @@ for shorter syntax.
 
 
 
-[[null-safety]]
+[[kotlin-null-safety]]
 == Null-safety
 
 One of Kotlin's key features is https://kotlinlang.org/docs/reference/null-safety.html[null-safety]
@@ -132,7 +121,7 @@ for up-to-date information.
 
 
 
-[[classes-interfaces]]
+[[kotlin-classes-interfaces]]
 == Classes & Interfaces
 
 Spring Framework supports various Kotlin constructs like instantiating Kotlin classes
@@ -156,7 +145,7 @@ As of Spring Boot 2.0, Jackson Kotlin module is automatically provided via the J
 
 
 
-[[annotations]]
+[[kotlin-annotations]]
 == Annotations
 
 Spring Framework also takes advantage of https://kotlinlang.org/docs/reference/null-safety.html[Kotlin null-safety]
@@ -173,7 +162,7 @@ won’t raise an error if such bean does not exist.
 
 
 
-[[bean-definition-dsl]]
+[[kotlin-bean-definition-dsl]]
 == Bean definition DSL
 
 Spring Framework 5 introduces a new way to register beans in a functional way using lambdas
@@ -275,7 +264,7 @@ for more details and up-to-date information.
 
 
 
-[[web]]
+[[kotlin-web]]
 == Web
 
 
@@ -357,7 +346,7 @@ project for more details.
 
 
 
-[[spring-projects-in-kotlin]]
+[[kotlin-spring-projects-in-kotlin]]
 == Spring projects in Kotlin
 
 This section provides focus on some specific hints and recommendations worth
@@ -667,7 +656,7 @@ class SpecificationLikeTests {
 
 
 
-[[getting-started]]
+[[kotlin-getting-started]]
 == Getting started
 
 
@@ -697,7 +686,7 @@ MVC and its annotation-based programming model is a perfectly valid and fully su
 
 
 
-[[resources-started]]
+[[kotlin-resources-started]]
 == Resources
 
 * http://kotlinlang.org/docs/reference/[Kotlin language reference]

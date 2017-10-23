@@ -258,35 +258,6 @@ After...
 
 
 
-[[xsd-schemas-lang]]
-=== The lang schema
-
-The `lang` tags deal with exposing objects that have been written in a dynamic language
-such as JRuby or Groovy as beans in the Spring container.
-
-These tags (and the dynamic language support) are comprehensively covered in the chapter
-entitled <<integration.adoc#dynamic-language,Dynamic language support>>.
-Please do consult that chapter for full details on this support and the `lang` tags themselves.
-
-In the interest of completeness, to use the tags in the `lang` schema, you need to have
-the following preamble at the top of your Spring XML configuration file; the text in the
-following snippet references the correct schema so that the tags in the `lang` namespace
-are available to you.
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<?xml version="1.0" encoding="UTF-8"?>
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		__xmlns:lang="http://www.springframework.org/schema/lang"__ xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd"__> <!-- bean definitions here -->
-
-	</beans>
-----
-
-
 
 [[xsd-schemas-jms]]
 === The jms schema

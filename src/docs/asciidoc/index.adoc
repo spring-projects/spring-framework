@@ -22,5 +22,5 @@ ORM, Marshalling XML.
 <<web-reactive.adoc#spring-webflux,Web Reactive>> :: Spring WebFlux,
 WebClient, WebSocket.
 <<integration.adoc#spring-integration,Integration>> :: Remoting, JMS, JCA, JMX, Email,
-Tasks, Scheduling, Cache, Dynamic languages.
-<<kotlin.adoc#kotlin,Kotlin>> :: Extensions, Bean Definition DSL, WebFlux DSL.
+Tasks, Scheduling, Cache.
+<<languages.adoc#languages,Languages>> :: Kotlin, Groovy, Dynamic languages.
