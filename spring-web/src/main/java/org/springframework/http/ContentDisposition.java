@@ -21,11 +21,12 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 import static java.nio.charset.StandardCharsets.*;
 import static java.time.format.DateTimeFormatter.*;
@@ -253,9 +254,8 @@ public class ContentDisposition {
 	 * @see #toString()
 	 */
 	public static ContentDisposition parse(String contentDisposition) {
-		String[] parts = StringUtils.tokenizeToStringArray(contentDisposition, ";");
-		Assert.isTrue(parts.length >= 1, "Content-Disposition header must not be empty");
-		String type = parts[0];
+		List<String> parts = tokenize(contentDisposition);
+		String type = parts.get(0);
 		String name = null;
 		String filename = null;
 		Charset charset = null;
@@ -263,8 +263,8 @@ public class ContentDisposition {
 		ZonedDateTime creationDate = null;
 		ZonedDateTime modificationDate = null;
 		ZonedDateTime readDate = null;
-		for (int i = 1; i < parts.length; i++) {
-			String part = parts[i];
+		for (int i = 1; i < parts.size(); i++) {
+			String part = parts.get(i);
 			int eqIndex = part.indexOf('=');
 			if (eqIndex != -1) {
 				String attribute = part.substring(0, eqIndex);
@@ -316,6 +316,41 @@ public class ContentDisposition {
 			}
 		}
 		return new ContentDisposition(type, name, filename, charset, size, creationDate, modificationDate, readDate);
+	}
+
+	private static List<String> tokenize(String headerValue) {
+		int index = headerValue.indexOf(';');
+		String type = (index >= 0 ? headerValue.substring(0, index) : headerValue).trim();
+		if (type.isEmpty()) {
+			throw new IllegalArgumentException("Content-Disposition header must not be empty");
+		}
+		List<String> parts = new ArrayList<>();
+		parts.add(type);
+		if (index >= 0) {
+			do {
+				int nextIndex = index + 1;
+				boolean quoted = false;
+				while (nextIndex < headerValue.length()) {
+					char ch = headerValue.charAt(nextIndex);
+					if (ch == ';') {
+						if (!quoted) {
+							break;
+						}
+					}
+					else if (ch == '"') {
+						quoted = !quoted;
+					}
+					nextIndex++;
+				}
+				String part = headerValue.substring(index + 1, nextIndex).trim();
+				if (!part.isEmpty()) {
+					parts.add(part);
+				}
+				index = nextIndex;
+			}
+			while (index < headerValue.length());
+		}
+		return parts;
 	}
 
 	/**

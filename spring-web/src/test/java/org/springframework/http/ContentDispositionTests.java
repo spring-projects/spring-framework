@@ -55,6 +55,22 @@ public class ContentDispositionTests {
 		assertEquals(ContentDisposition.builder("form-data").filename("unquoted").build(), disposition);
 	}
 
+	@Test  // SPR-16091
+	public void parseFilenameWithSemicolon() {
+		ContentDisposition disposition = ContentDisposition
+				.parse("attachment; filename=\"filename with ; semicolon.txt\"");
+		assertEquals(ContentDisposition.builder("attachment")
+				.filename("filename with ; semicolon.txt").build(), disposition);
+	}
+
+	@Test
+	public void parseAndIgnoreEmptyParts() {
+		ContentDisposition disposition = ContentDisposition
+				.parse("form-data; name=\"foo\";; ; filename=\"foo.txt\"; size=123");
+		assertEquals(ContentDisposition.builder("form-data")
+				.name("foo").filename("foo.txt").size(123L).build(), disposition);
+	}
+
 	@Test
 	public void parseEncodedFilename() {
 		ContentDisposition disposition = ContentDisposition
