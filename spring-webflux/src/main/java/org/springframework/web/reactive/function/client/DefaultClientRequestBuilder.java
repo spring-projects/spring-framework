@@ -49,15 +49,15 @@ import org.springframework.web.reactive.function.BodyInserters;
  */
 class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
-	private final HttpMethod method;
-
-	private final URI url;
-
 	private final HttpHeaders headers = new HttpHeaders();
 
 	private final MultiValueMap<String, String> cookies = new LinkedMultiValueMap<>();
 
 	private final Map<String, Object> attributes = new LinkedHashMap<>();
+
+	private HttpMethod method;
+
+	private URI url;
 
 	private BodyInserter<?, ? super ClientHttpRequest> inserter = BodyInserters.empty();
 
@@ -67,6 +67,19 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 		this.url = url;
 	}
 
+	@Override
+	public ClientRequest.Builder method(HttpMethod method) {
+		Assert.notNull(method, "'method' must not be null");
+		this.method = method;
+		return this;
+	}
+
+	@Override
+	public ClientRequest.Builder url(URI url) {
+		Assert.notNull(url, "'url' must not be null");
+		this.url = url;
+		return this;
+	}
 
 	@Override
 	public ClientRequest.Builder header(String headerName, String... headerValues) {
