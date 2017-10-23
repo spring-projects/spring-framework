@@ -1231,7 +1231,7 @@ to serialize only a subset of the object properties. For example:
 
 
 [[rest-message-conversion]]
-==== HTTP Message Conversion
+==== HTTP message conversion
 
 Objects passed to and returned from the methods `getForObject()`, `postForLocation()`,
 and `put()` are converted to HTTP requests and from HTTP responses by
@@ -1354,6 +1354,7 @@ Please use the <<web-reactive.adoc#webflux-client,WebClient>> instead.
 
 [[ejb-introduction]]
 === Introduction
+
 As a lightweight container, Spring is often considered an EJB replacement. We do believe
 that for many if not most applications and use cases, Spring as a container, combined
 with its rich supporting functionality in the area of transactions, ORM and JDBC access,
@@ -2031,7 +2032,7 @@ these callback methods.
 
 
 [[jms-receiving-sync]]
-==== Synchronous Reception
+==== Synchronous reception
 
 While JMS is typically associated with asynchronous processing, it is possible to
 consume messages synchronously. The overloaded `receive(..)` methods provide this
@@ -2042,7 +2043,7 @@ the receiver should wait before giving up waiting for a message.
 
 
 [[jms-asynchronousMessageReception]]
-==== Asynchronous Reception - Message-Driven POJOs
+==== Asynchronous reception: Message-Driven POJOs
 
 [NOTE]
 ====
@@ -2113,7 +2114,7 @@ description of the features supported by each implementation.
 
 
 [[jms-receiving-async-session-aware-message-listener]]
-==== the SessionAwareMessageListener interface
+==== SessionAwareMessageListener interface
 
 The `SessionAwareMessageListener` interface is a Spring-specific interface that provides
 a similar contract to the JMS `MessageListener` interface, but also provides the message
@@ -2148,7 +2149,7 @@ responsibility of the client code to handle any exceptions thrown.
 
 
 [[jms-receiving-async-message-listener-adapter]]
-==== the MessageListenerAdapter
+==== MessageListenerAdapter
 
 The `MessageListenerAdapter` class is the final component in Spring's asynchronous
 messaging support: in a nutshell, it allows you to expose almost __any__ class as a MDP
@@ -3369,7 +3370,7 @@ for controlling the management interfaces of your beans.
 
 
 [[jmx-interface-assembler]]
-==== the MBeanInfoAssembler Interface
+==== MBeanInfoAssembler interface
 
 Behind the scenes, the `MBeanExporter` delegates to an implementation of the
 `org.springframework.jmx.export.assembler.MBeanInfoAssembler` interface which is
@@ -3383,7 +3384,7 @@ interface using either source-level metadata or any arbitrary interface.
 
 
 [[jmx-interface-metadata]]
-==== Using Source-Level Metadata (Java annotations)
+==== Using source-level metadata: Java annotations
 
 Using the `MetadataMBeanInfoAssembler` you can define the management interfaces for your
 beans using source level metadata. The reading of metadata is encapsulated by the
@@ -3526,12 +3527,12 @@ metadata-driven management interfaces for your Spring-exposed MBeans.
 
 
 [[jmx-interface-metadata-types]]
-==== Source-Level Metadata Types
+==== Source-level metadata types
 
 The following source level metadata types are available for use in Spring JMX:
 
 [[jmx-metadata-types]]
-.Source-Level Metadata Types
+.Source-level metadata types
 |===
 | Purpose| Annotation| Annotation Type
 
@@ -3556,7 +3557,7 @@ The following configuration parameters are available for use on these source-lev
 metadata types:
 
 [[jmx-metadata-parameters]]
-.Source-Level Metadata Parameters
+.Source-level metadata parameters
 [cols="1,3,1"]
 |===
 | Parameter| Description| Applies to
@@ -3612,7 +3613,7 @@ metadata types:
 
 
 [[jmx-interface-autodetect]]
-==== the AutodetectCapableMBeanInfoAssembler interface
+==== AutodetectCapableMBeanInfoAssembler interface
 
 To simplify configuration even further, Spring introduces the
 `AutodetectCapableMBeanInfoAssembler` interface which extends the `MBeanInfoAssembler`
@@ -3971,7 +3972,7 @@ connectors.
 
 
 [[jmx-jsr160-server]]
-==== Server-side Connectors
+==== Server-side connectors
 
 To have Spring JMX create, start and expose a JSR-160 `JMXConnectorServer` use the
 following configuration:
@@ -4042,7 +4043,7 @@ snippet of configuration:
 
 
 [[jmx-jsr160-client]]
-==== Client-side Connectors
+==== Client-side connectors
 
 To create an `MBeanServerConnection` to a remote JSR-160 enabled `MBeanServer` use the
 `MBeanServerConnectionFactoryBean` as shown below:
@@ -4080,7 +4081,7 @@ documentation for more information.
 
 
 [[jmx-proxy]]
-=== Accessing MBeans via Proxies
+=== Accessing MBeans via proxies
 
 Spring JMX allows you to create proxies that re-route calls to MBeans registered in a
 local or remote `MBeanServer`. These proxies provide you with a standard Java interface
@@ -4137,7 +4138,7 @@ Spring's JMX offering includes comprehensive support for JMX notifications.
 
 
 [[jmx-notifications-listeners]]
-==== Registering Listeners for Notifications
+==== Registering listeners for notifications
 
 Spring's JMX support makes it very easy to register any number of
 `NotificationListeners` with any number of MBeans (this includes MBeans exported by
@@ -4442,7 +4443,7 @@ you can accept the coupling to both Spring and JMX, then do so.
 
 
 [[jmx-resources]]
-=== Further Resources
+=== Further resources
 
 This section contains links to further resources about JMX.
 
@@ -6123,7 +6124,7 @@ much more flexible.
 
 
 [[scheduling-trigger-interface]]
-==== the Trigger interface
+==== Trigger interface
 
 The `Trigger` interface is essentially inspired by JSR-236, which, as of Spring 3.0, has
 not yet been officially implemented. The basic idea of the `Trigger` is that execution
@@ -6850,7 +6851,7 @@ javadocs] for more information.
 === Introduction
 
 Since version 3.1, Spring Framework provides support for transparently adding caching
-into an existing Spring application. Similar to the <<data-acess.adoc#transaction,transaction>>
+into an existing Spring application. Similar to the <<data-access.adoc#transaction,transaction>>
 support, the caching abstraction allows consistent use of various caching solutions with minimal
 impact on the code.
 

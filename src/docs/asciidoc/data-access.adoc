@@ -2034,7 +2034,7 @@ treats them as errors.
 
 
 [[transaction-resources]]
-=== Further Resources
+=== Further resources
 
 For more information about the Spring Framework's transaction support:
 
@@ -2457,7 +2457,7 @@ last code snippet as follows:
 ----
 
 [[jdbc-JdbcTemplate-examples-update]]
-====== Updating (INSERT/UPDATE/DELETE) with jdbcTemplate
+====== Updating (INSERT/UPDATE/DELETE) with JdbcTemplate
 
 You use the `update(..)` method to perform insert, update and delete operations.
 Parameter values are usually provided as var args or alternatively as an object array.
@@ -2487,7 +2487,7 @@ Parameter values are usually provided as var args or alternatively as an object 
 ----
 
 [[jdbc-JdbcTemplate-examples-other]]
-====== Other jdbcTemplate operations
+====== Other JdbcTemplate operations
 
 You can use the `execute(..)` method to execute any arbitrary SQL, and as such the
 method is often used for DDL statements. It is heavily overloaded with variants taking
@@ -3348,7 +3348,6 @@ The same example using classic JDBC "?" placeholders:
 		}
 
 		// ... additional methods
-
 	}
 ----
 
@@ -3398,7 +3397,6 @@ This example shows a batch update using a batch size of 100:
 		}
 
 		// ... additional methods
-
 	}
 ----
 
@@ -3540,7 +3538,6 @@ You can limit the columns for an insert by specifying a list of column names wit
 		}
 
 		// ... additional methods
-
 	}
 ----
 
@@ -3580,7 +3577,6 @@ values. Here is an example:
 		}
 
 		// ... additional methods
-
 	}
 ----
 
@@ -3611,7 +3607,6 @@ convenient `addValue` method that can be chained.
 		}
 
 		// ... additional methods
-
 	}
 ----
 
@@ -3683,7 +3678,6 @@ of the stored procedure.
 		}
 
 		// ... additional methods
-
 	}
 ----
 
@@ -3724,7 +3718,6 @@ the constructor of your `SimpleJdbcCall`. Here is an example of this configurati
 		}
 
 		// ... additional methods
-
 	}
 ----
 
@@ -3883,7 +3876,6 @@ To call this function we again create a `SimpleJdbcCall` in the initialization m
 		}
 
 		// ... additional methods
-
 	}
 ----
 
@@ -3943,7 +3935,6 @@ created by passing in the required class to map to in the `newInstance` method.
 		}
 
 		// ... additional methods
-
 	}
 ----
 
@@ -5759,6 +5750,7 @@ thus are isolated from each other.
 
 [[orm-jpa-multiple]]
 ===== Dealing with multiple persistence units
+
 For applications that rely on multiple persistence units locations, stored in various
 JARS in the classpath, for example, Spring offers the `PersistenceUnitManager` to act as
 a central repository and to avoid the persistence units discovery process, which can be
@@ -6038,6 +6030,7 @@ less portable, but will be set up for the server's JTA environment out of the bo
 
 [[oxm-introduction]]
 === Introduction
+
 In this chapter, we will describe Spring's Object/XML Mapping support. Object/XML
 Mapping, or O/X mapping for short, is the act of converting an XML document to and from
 an object. This conversion process is also known as XML Marshalling, or XML
@@ -6055,12 +6048,12 @@ Some of the benefits of using Spring for your O/X mapping needs are:
 
 Spring's bean factory makes it easy to configure marshallers, without needing to
 construct JAXB context, JiBX binding factories, etc. The marshallers can be configured
-as any other bean in your application context. Additionally, XML Schema-based
+as any other bean in your application context. Additionally, XML namespace-based
 configuration is available for a number of marshallers, making the configuration even
 simpler.
 
 
-==== Consistent Interfaces
+==== Consistent interfaces
 
 Spring's O/X mapping operates through two global interfaces: the `Marshaller` and
 `Unmarshaller` interface. These abstractions allow you to switch O/X mapping frameworks
@@ -6071,7 +6064,7 @@ other using Castor) in a non-intrusive fashion, leveraging the strength of each
 technology.
 
 
-==== Consistent Exception Hierarchy
+==== Consistent exception hierarchy
 
 Spring provides a conversion from exceptions from the underlying O/X mapping tool to its
 own exception hierarchy with the `XmlMappingException` as the root exception. As can be
@@ -6322,7 +6315,7 @@ This sample application produces the following `settings.xml` file:
 
 
 [[oxm-schema-based-config]]
-=== XML Schema-based Configuration
+=== XML configuration namespace
 
 Marshallers could be configured more concisely using tags from the OXM namespace. To
 make these tags available, the appropriate schema has to be referenced first in the
@@ -6397,7 +6390,7 @@ validation is performed by specifying one or more schema resource to the bean, l
 ----
 
 [[oxm-jaxb2-xsd]]
-===== XML Schema-based Configuration
+===== XML configuration namespace
 
 The `jaxb2-marshaller` tag configures a `org.springframework.oxm.jaxb.Jaxb2Marshaller`.
 Here is an example:
@@ -6488,7 +6481,7 @@ with a classpath resource.
 ----
 
 [[oxm-castor-xsd]]
-===== XML Schema-based Configuration
+===== XML configuration namespace
 
 The `castor-marshaller` tag configures a
 `org.springframework.oxm.castor.CastorMarshaller`. Here is an example:
@@ -6574,7 +6567,7 @@ classes, you have to configure multiple ``JibxMarshaller``s with different `targ
 property values.
 
 [[oxm-jibx-xsd]]
-===== XML Schema-based Configuration
+===== XML configuration namespace
 
 The `jibx-marshaller` tag configures a `org.springframework.oxm.jibx.JibxMarshaller`.
 Here is an example:
