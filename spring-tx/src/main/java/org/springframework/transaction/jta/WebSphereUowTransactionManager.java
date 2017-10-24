@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -246,7 +246,8 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 						"Transaction propagation 'nested' not supported for WebSphere UOW transactions");
 			}
 			if (pb == TransactionDefinition.PROPAGATION_SUPPORTS ||
-					pb == TransactionDefinition.PROPAGATION_REQUIRED || pb == TransactionDefinition.PROPAGATION_MANDATORY) {
+					pb == TransactionDefinition.PROPAGATION_REQUIRED ||
+					pb == TransactionDefinition.PROPAGATION_MANDATORY) {
 				joinTx = true;
 				newSynch = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
 			}
@@ -264,7 +265,8 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 						"Transaction propagation 'mandatory' but no existing transaction found");
 			}
 			if (pb == TransactionDefinition.PROPAGATION_SUPPORTS ||
-					pb == TransactionDefinition.PROPAGATION_NOT_SUPPORTED || pb == TransactionDefinition.PROPAGATION_NEVER) {
+					pb == TransactionDefinition.PROPAGATION_NOT_SUPPORTED ||
+					pb == TransactionDefinition.PROPAGATION_NEVER) {
 				uowType = UOWSynchronizationRegistry.UOW_TYPE_LOCAL_TRANSACTION;
 				newSynch = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
 			}
@@ -278,6 +280,7 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 			logger.debug("Creating new transaction with name [" + definition.getName() + "]: " + definition);
 		}
 		SuspendedResourcesHolder suspendedResources = (!joinTx ? suspend(null) : null);
+		UOWActionAdapter<T> action = null;
 		try {
 			if (definition.getTimeout() > TransactionDefinition.TIMEOUT_DEFAULT) {
 				this.uowManager.setUOWTimeout(uowType, definition.getTimeout());
@@ -285,7 +288,7 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 			if (debug) {
 				logger.debug("Invoking WebSphere UOW action: type=" + uowType + ", join=" + joinTx);
 			}
-			UOWActionAdapter<T> action = new UOWActionAdapter<T>(
+			action = new UOWActionAdapter<T>(
 					definition, callback, (uowType == UOWManager.UOW_TYPE_GLOBAL_TRANSACTION), !joinTx, newSynch, debug);
 			this.uowManager.runUnderUOW(uowType, joinTx, action);
 			if (debug) {
@@ -294,10 +297,24 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 			return action.getResult();
 		}
 		catch (UOWException ex) {
-			throw new TransactionSystemException("UOWManager transaction processing failed", ex);
+			TransactionSystemException tse =
+					new TransactionSystemException("UOWManager transaction processing failed", ex);
+			Throwable appEx = action.getException();
+			if (appEx != null) {
+				logger.error("Application exception overridden by rollback exception", appEx);
+				tse.initApplicationException(appEx);
+			}
+			throw tse;
 		}
 		catch (UOWActionException ex) {
-			throw new TransactionSystemException("UOWManager threw unexpected UOWActionException", ex);
+			TransactionSystemException tse =
+					new TransactionSystemException("UOWManager threw unexpected UOWActionException", ex);
+			Throwable appEx = action.getException();
+			if (appEx != null) {
+				logger.error("Application exception overridden by rollback exception", appEx);
+				tse.initApplicationException(appEx);
+			}
+			throw tse;
 		}
 		finally {
 			if (suspendedResources != null) {
@@ -330,6 +347,7 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 
 		public UOWActionAdapter(TransactionDefinition definition, TransactionCallback<T> callback,
 				boolean actualTransaction, boolean newTransaction, boolean newSynchronization, boolean debug) {
+
 			this.definition = definition;
 			this.callback = callback;
 			this.actualTransaction = actualTransaction;
@@ -349,12 +367,15 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 			}
 			catch (Throwable ex) {
 				this.exception = ex;
+				if (status.isDebug()) {
+					logger.debug("Rolling back on application exception from transaction callback", ex);
+				}
 				uowManager.setRollbackOnly();
 			}
 			finally {
 				if (status.isLocalRollbackOnly()) {
 					if (status.isDebug()) {
-						logger.debug("Transactional code has requested rollback");
+						logger.debug("Transaction callback has explicitly requested rollback");
 					}
 					uowManager.setRollbackOnly();
 				}
@@ -374,6 +395,10 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 				ReflectionUtils.rethrowRuntimeException(this.exception);
 			}
 			return this.result;
+		}
+
+		public Throwable getException() {
+			return this.exception;
 		}
 
 		@Override
