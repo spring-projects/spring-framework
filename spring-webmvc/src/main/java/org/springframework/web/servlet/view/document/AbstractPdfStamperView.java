@@ -33,6 +33,11 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * document with an AcroForm. Application-specific view classes
  * will extend this class to merge the PDF form with model data.
  *
+ * <p>This view implementation uses Bruno Lowagie's
+ * <a href="http://www.lowagie.com/iText">iText</a> package.
+ * Known to work with iText 2.1.7 as well as its fork
+ * <a href="https://github.com/LibrePDF/OpenPDF">OpenPDF</a>.
+ *
  * <p>Thanks to Bryant Larsen for the suggestion and the original prototype!
  *
  * @author Juergen Hoeller

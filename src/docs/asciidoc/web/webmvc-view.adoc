@@ -1930,8 +1930,8 @@ dynamically from the model data. The document is the view and will be streamed f
 server with the correct content type to (hopefully) enable the client PC to run their
 spreadsheet or PDF viewer application in response.
 
-In order to use Excel views, you need to add the 'poi' library to your classpath, and
-for PDF generation, the iText library.
+In order to use Excel views, you need to add the Apache POI library to your classpath,
+and for PDF generation, the common iText 2.1.7 or its fork OpenPDF (e.g. OpenPDF 1.0.4).
 
 
 
