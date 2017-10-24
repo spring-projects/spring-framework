@@ -67,8 +67,8 @@ public class DefaultResponseErrorHandlerTests {
 			handler.handleError(response);
 			fail("expected HttpClientErrorException");
 		}
-		catch (HttpClientErrorException e) {
-			assertSame(headers, e.getResponseHeaders());
+		catch (HttpClientErrorException ex) {
+			assertSame(headers, ex.getResponseHeaders());
 		}
 	}
 
@@ -107,6 +107,18 @@ public class DefaultResponseErrorHandlerTests {
 		given(response.getHeaders()).willReturn(headers);
 
 		handler.handleError(response);
+	}
+
+	@Test  // SPR-16108
+	public void hasErrorForUnknownStatusCode() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.TEXT_PLAIN);
+
+		given(response.getRawStatusCode()).willReturn(999);
+		given(response.getStatusText()).willReturn("Custom status code");
+		given(response.getHeaders()).willReturn(headers);
+
+		assertFalse(handler.hasError(response));
 	}
 
 }
