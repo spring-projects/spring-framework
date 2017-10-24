@@ -597,7 +597,7 @@ work.
 
 
 [[mvc-view-jsp-tags]]
-=== Spring tags
+=== Spring's JSP tag library
 
 Spring provides data binding of request parameters to command objects as described in
 earlier chapters. To facilitate the development of JSP pages in combination with those
@@ -611,7 +611,7 @@ or see the tag library description.
 
 
 [[mvc-view-jsp-formtaglib]]
-=== Spring form tags
+=== Spring's form tag library
 
 As of version 2.0, Spring provides a comprehensive set of data binding-aware tags for
 handling form elements when using JSP and Spring Web MVC. Each tag provides support for
@@ -1298,7 +1298,7 @@ or see the tag library description.
 
 
 [[mvc-rest-method-conversion]]
-==== HTTP Method Conversion
+==== HTTP method conversion
 
 A key principle of REST is the use of the Uniform Interface. This means that all
 resources (URLs) can be manipulated using the same four HTTP methods: GET, PUT, POST,
@@ -1359,7 +1359,7 @@ The corresponding `@Controller` method is shown below:
 
 
 [[mvc-view-jsp-formtaglib-html5]]
-==== HTML5 Tags
+==== HTML5 tags
 
 Starting with Spring 3, the Spring form tag library allows entering dynamic attributes,
 which means you can enter any HTML5 specific attributes.
@@ -1668,7 +1668,7 @@ them otherwise in the file names for Tiles definitions.
 
 
 [[mvc-view-tiles-url]]
-==== View Resolver
+==== UrlBasedViewResolver
 
 The `UrlBasedViewResolver` instantiates the given `viewClass` for each view it has to
 resolve.
@@ -1683,10 +1683,10 @@ resolve.
 
 
 [[mvc-view-tiles-resource]]
-==== Resource Bundle
+==== ResourceBundleViewResolver
 
 The `ResourceBundleViewResolver` has to be provided with a property file containing
-viewnames and viewclasses the resolver can use:
+view names and view classes the resolver can use:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -1719,7 +1719,7 @@ box.
 
 
 [[mvc-view-tiles-preparer]]
-==== Preparer Factories
+==== SimpleSpringPreparerFactory and SpringBeanPreparerFactory
 
 As an advanced feature, Spring also supports two special Tiles `PreparerFactory`
 implementations. Check out the Tiles documentation for details on how to use
@@ -1917,7 +1917,7 @@ This is rendered as:
 
 
 [[mvc-view-document]]
-== PDF, Excel
+== Document views: PDF, Excel
 
 
 
@@ -1942,6 +1942,7 @@ Document based views are handled in an almost identical fashion to XSLT views, a
 following sections build upon the previous one by demonstrating how the same controller
 used in the XSLT example is invoked to render the same model as both a PDF document and
 an Excel spreadsheet (which can also be viewed or manipulated in Open Office).
+
 
 
 [[mvc-view-document-configviews]]
@@ -2099,7 +2100,7 @@ document should appear listing each of the words in the model map.
 
 
 [[mvc-view-feeds]]
-== RSS Feeds
+== Feed views: RSS, Atom
 
 Both `AbstractAtomFeedView` and `AbstractRssFeedView` inherit from the base class
 `AbstractFeedView` and are used to provide Atom and RSS Feed views respectfully. They
