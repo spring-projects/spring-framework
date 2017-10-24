@@ -1,9 +1,12 @@
 [[view]]
-= View technologies
+= View Technologies
+
+
 
 
 [[view-introduction]]
 == Introduction
+
 One of the areas in which Spring excels is in the separation of view technologies from
 the rest of the MVC framework. For example, deciding to use Groovy Markup Templates
 or Thymeleaf in place of an existing JSP is primarily a matter of configuration.
@@ -11,6 +14,8 @@ This chapter covers the major view technologies that work with Spring and touche
 briefly on how to add new ones. This chapter assumes you are already familiar with
 <<mvc-viewresolver>> which covers the basics of how views in general are coupled
 to the MVC framework.
+
+
 
 
 [[view-thymeleaf]]
@@ -26,6 +31,8 @@ Please refer to the http://www.thymeleaf.org/documentation.html[Thymeleaf+Spring
 documentation section for more details.
 
 
+
+
 [[view-groovymarkup]]
 == Groovy Markup Templates
 
@@ -35,6 +42,8 @@ aimed at generating XML-like markup (XML, XHTML, HTML5, ...​), but that can be
 text based content.
 
 This requires Groovy 2.3.1+ on the classpath.
+
+
 
 [[view-groovymarkup-configuration]]
 === Configuration
@@ -76,6 +85,8 @@ The XML counterpart using the MVC namespace is:
 	<mvc:groovy-configurer resource-loader-path="/WEB-INF/"/>
 ----
 
+
+
 [[view-groovymarkup-example]]
 === Example
 
@@ -98,8 +109,11 @@ Here is a sample template for an HTML page:
 ----
 
 
+
+
 [[view-velocity]]
 == Velocity & FreeMarker
+
 http://velocity.apache.org[Velocity] and http://www.freemarker.org[FreeMarker] are two
 templating languages that can be used as view technologies within Spring MVC
 applications. The languages are quite similar and serve similar needs and so are
@@ -117,6 +131,7 @@ FreeMarker support instead, or Thymeleaf which comes with Spring support itself.
 
 [[view-velocity-dependencies]]
 === Dependencies
+
 Your web application will need to include `velocity-1.x.x.jar` or `freemarker-2.x.jar`
 in order to work with Velocity or FreeMarker respectively and `commons-collections.jar`
 is required for Velocity. Typically they are included in the `WEB-INF/lib` folder where
@@ -130,6 +145,7 @@ your `'WEB-INF/lib'` directory too! If you make use of Spring's 'dateToolAttribu
 
 [[view-velocity-contextconfig]]
 === Context configuration
+
 A suitable configuration is initialized by adding the relevant configurer bean
 definition to your `'{asterisk}-servlet.xml'` as shown below:
 
@@ -185,6 +201,7 @@ For non web-apps add a `VelocityConfigurationFactoryBean` or a
 
 [[view-velocity-createtemplates]]
 === Creating templates
+
 Your templates need to be stored in the directory specified by the `{asterisk}Configurer` bean
 shown above. This document does not cover details of creating templates for the two
 languages - please see their relevant websites for information. If you use the view
@@ -198,6 +215,7 @@ template as appropriate.
 
 [[view-velocity-advancedconfig]]
 === Advanced configuration
+
 The basic configurations highlighted above will be suitable for most application
 requirements, however additional configuration options are available for when unusual or
 advanced requirements dictate.
@@ -205,6 +223,7 @@ advanced requirements dictate.
 
 [[view-velocity-example-velocityproperties]]
 ==== velocity.properties
+
 This file is completely optional, but if specified, contains the values that are passed
 to the Velocity runtime in order to configure velocity itself. Only required for
 advanced configurations, if you need this file, specify its location on the
@@ -247,6 +266,7 @@ examples and definitions of the `'velocity.properties'` file itself.
 
 [[views-freemarker]]
 ==== FreeMarker
+
 FreeMarker 'Settings' and 'SharedVariables' can be passed directly to the FreeMarker
 `Configuration` object managed by Spring by setting the appropriate bean properties on
 the `FreeMarkerConfigurer` bean. The `freemarkerSettings` property requires a
@@ -275,6 +295,7 @@ the `Configuration` object.
 
 [[view-velocity-forms]]
 === Bind support and form handling
+
 Spring provides a tag library for use in JSP's that contains (amongst other things) a
 `<spring:bind/>` tag. This tag primarily enables forms to display values from form
 backing objects and to show the results of failed validations from a `Validator` in the
@@ -285,6 +306,7 @@ generating form input elements themselves.
 
 [[view-bind-macros]]
 ==== The bind macros
+
 A standard set of macros are maintained within the `spring-webmvc.jar` file for both
 languages, so they are always available to a suitably configured application.
 
@@ -299,6 +321,7 @@ directly, the files are called spring.vm / spring.ftl and are in the packages
 
 [[view-simple-binding]]
 ==== Simple binding
+
 In your HTML forms (vm / ftl templates) which act as a form view for a Spring MVC
 controller, you can use code similar to the following to bind to field values and
 display error messages for each input field in similar fashion to the JSP equivalent.
@@ -364,6 +387,7 @@ wherever possible. They are explained in the next section.
 
 [[views-form-macros]]
 ==== Form input generation macros
+
 Additional convenience macros for both languages simplify both binding and form
 generation (including validation error display). It is never necessary to use these
 macros to generate form input fields, and they can be mixed and matched with simple HTML
@@ -467,6 +491,7 @@ differences exist between the two languages, they are explained in the notes.
 
 [[views-form-macros-input]]
 ===== Input Fields
+
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -519,6 +544,7 @@ information or rows and cols attributes for the textarea.
 
 [[views-form-macros-select]]
 ===== Selection Fields
+
 Four selection field macros can be used to generate common UI value selection inputs in
 your HTML forms.
 
@@ -566,15 +592,15 @@ codes would be created with suitable keys like the example below.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	protected Map referenceData(HttpServletRequest request) throws Exception {
-		Map cityMap = new LinkedHashMap();
+	protected Map<String, String> referenceData(HttpServletRequest request) throws Exception {
+		Map<String, String> cityMap = new LinkedHashMap<>();
 		cityMap.put("LDN", "London");
 		cityMap.put("PRS", "Paris");
 		cityMap.put("NYC", "New York");
 
-		Map m = new HashMap();
-		m.put("cityMap", cityMap);
-		return m;
+		Map<String, String> model = new HashMap<>();
+		model.put("cityMap", cityMap);
+		return model;
 	}
 ----
 
@@ -593,6 +619,7 @@ user still sees the more user friendly city names.
 
 [[views-form-macros-html-escaping]]
 ==== HTML escaping and XHTML compliance
+
 Default usage of the form macros above will result in HTML tags that are HTML 4.01
 compliant and that use the default value for HTML escaping defined in your web.xml as
 used by Spring's bind support. In order to make the tags XHTML compliant or to override
@@ -637,6 +664,7 @@ In similar fashion, HTML escaping can be specified per field:
 
 [[view-jsp]]
 == JSP & JSTL
+
 Spring provides a couple of out-of-the-box solutions for JSP and JSTL views. Using JSP
 or JSTL is done using a normal view resolver defined in the `WebApplicationContext`.
 Furthermore, of course you need to write some JSPs that will actually render the view.
@@ -657,6 +685,7 @@ somewhat.
 
 [[view-jsp-resolver]]
 === View resolvers
+
 Just as with any other view technology you're integrating with Spring, for JSPs you'll
 need a view resolver that will resolve your views. The most commonly used view resolvers
 when developing with JSPs are the `InternalResourceViewResolver` and the
@@ -700,6 +729,7 @@ under the `'WEB-INF'` directory, so there can be no direct access by clients.
 
 [[view-jsp-jstl]]
 === 'Plain-old' JSPs versus JSTL
+
 When using the Java Standard Tag Library you must use a special view class, the
 `JstlView`, as JSTL needs some preparation before things such as the I18N features will
 work.
@@ -707,7 +737,8 @@ work.
 
 
 [[view-jsp-tags]]
-=== Additional tags facilitating development
+=== Spring's JSP tag library
+
 Spring provides data binding of request parameters to command objects as described in
 earlier chapters. To facilitate the development of JSP pages in combination with those
 data binding features, Spring provides a few tags that make things even easier. All
@@ -720,7 +751,8 @@ information about the individual tags can be found in the appendix entitled
 
 
 [[view-jsp-formtaglib]]
-=== Using Spring's form tag library
+=== Spring's form tag library
+
 As of version 2.0, Spring provides a comprehensive set of data binding-aware tags for
 handling form elements when using JSP and Spring Web MVC. Each tag provides support for
 the set of attributes of its corresponding HTML tag counterpart, making the tags
@@ -737,6 +769,7 @@ included generated HTML snippets where certain tags require further commentary.
 
 [[view-jsp-formtaglib-configuration]]
 ==== Configuration
+
 The form tag library comes bundled in `spring-webmvc.jar`. The library descriptor is
 called `spring-form.tld`.
 
@@ -1400,7 +1433,8 @@ The HTML would look like:
 
 
 [[rest-method-conversion]]
-==== HTTP Method Conversion
+==== HTTP method conversion
+
 A key principle of REST is the use of the Uniform Interface. This means that all
 resources (URLs) can be manipulated using the same four HTTP methods: GET, PUT, POST,
 and DELETE. For each method, the HTTP specification defines the exact semantics. For
@@ -1460,7 +1494,8 @@ The corresponding `@Controller` method is shown below:
 
 
 [[view-jsp-formtaglib-html5]]
-==== HTML5 Tags
+==== HTML5 tags
+
 Starting with Spring 3, the Spring form tag library allows entering dynamic attributes,
 which means you can enter any HTML5 specific attributes.
 
@@ -1471,8 +1506,9 @@ is the default type.
 
 
 
+
 [[view-script]]
-== Script templates
+== Script views
 
 It is possible to integrate any templating library running on top of a JSR-223
 script engine in web applications using Spring. The following describes in a
@@ -1488,8 +1524,10 @@ It has been tested with:
 * http://www.stuartellis.eu/articles/erb/[ERB] running on http://jruby.org[JRuby]
 * https://docs.python.org/2/library/string.html#template-strings[String templates] running on http://www.jython.org/[Jython]
 
+
+
 [[view-script-dependencies]]
-=== Dependencies
+=== Requirements
 
 To be able to use script templates integration, you need to have available in your classpath
 the script engine:
@@ -1508,8 +1546,9 @@ for Javascript you can use http://www.webjars.org/[WebJars] to add Maven/Gradle 
 in order to make your javascript libraries available in the classpath.
 
 
+
 [[view-script-integrate]]
-=== How to integrate script based templating
+=== Script templates
 
 To be able to use script templates, you have to configure it in order to specify various parameters
 like the script engine to use, the script files to load and what function should be called to
@@ -1669,7 +1708,8 @@ for more configuration examples.
 
 
 [[view-xml-marshalling]]
-== XML Marshalling View
+== XML Marshalling
+
 The `MarshallingView` uses an XML `Marshaller` defined in the `org.springframework.oxm`
 package to render the response content as XML. The object to be marshalled can be set
 explicitly using ``MarhsallingView``'s `modelKey` bean property. Alternatively, the view
@@ -1681,12 +1721,11 @@ Mappers>>.
 
 
 
-
 [[view-tiles]]
 == Tiles
+
 It is possible to integrate Tiles - just as any other view technology - in web
 applications using Spring. The following describes in a broad way how to do this.
-
 
 [NOTE]
 ====
@@ -1695,15 +1734,19 @@ This section focuses on Spring's support for Tiles v3 in the
 ====
 
 
+
 [[view-tiles-dependencies]]
 === Dependencies
+
 To be able to use Tiles, you have to add a dependency on Tiles version 3.0.1 or higher
 and http://tiles.apache.org/framework/dependency-management.html[its transitive dependencies]
 to your project.
 
 
+
 [[view-tiles-integrate]]
-=== How to integrate Tiles
+=== Configuration
+
 To be able to use Tiles, you have to configure it using files containing definitions
 (for basic information on definitions and other Tiles concepts, please have a look at
 http://tiles.apache.org[]). In Spring this is done using the `TilesConfigurer`. Have a
@@ -1778,7 +1821,7 @@ resolve.
 ==== ResourceBundleViewResolver
 
 The `ResourceBundleViewResolver` has to be provided with a property file containing
-viewnames and viewclasses the resolver can use:
+view names and view classes the resolver can use:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -1854,18 +1897,16 @@ per preparer name (as used in your Tiles definitions).
 
 
 
+
 [[view-xslt]]
 == XSLT
+
 XSLT is a transformation language for XML and is popular as a view technology within web
 applications. XSLT can be a good choice as a view technology if your application
 naturally deals with XML, or if your model can easily be converted to XML. The following
 section shows how to produce an XML document as model data and have it transformed with
 XSLT in a Spring Web MVC application.
 
-
-
-[[view-xslt-firstwords]]
-=== My First Words
 This example is a trivial Spring application that creates a list of words in the
 `Controller` and adds them to the model map. The map is returned along with the view
 name of our XSLT view. See <<mvc-controller>> for details of Spring Web MVC's
@@ -1873,8 +1914,10 @@ name of our XSLT view. See <<mvc-controller>> for details of Spring Web MVC's
 document ready for transformation.
 
 
+
 [[view-xslt-beandefs]]
-==== Bean definitions
+=== Beans
+
 Configuration is standard for a simple Spring application.
 The MVC configuration has to define a `XsltViewResolver` bean and
 regular MVC annotation configuration.
@@ -1901,8 +1944,9 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 And we need a Controller that encapsulates our word generation logic.
 
 
+
 [[view-xslt-controllercode]]
-==== Standard MVC controller code
+=== Controller
 
 The controller logic is encapsulated in a `@Controller` class, with the
 handler method being defined like so...
@@ -1947,14 +1991,14 @@ Next, `XsltViewResolver` will resolve the "home" XSLT template file and merge th
 DOM document into it to generate our view.
 
 
+
 [[view-xslt-transforming]]
-==== Document transformation
+=== Transformation
 
 Finally, the `XsltViewResolver` will resolve the "home" XSLT template file and merge the
 DOM document into it to generate our view. As shown in the `XsltViewResolver`
 configuration, XSLT templates live in the war file in the `'WEB-INF/xsl'` directory
 and end with a `"xslt"` file extension.
-
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -2004,34 +2048,41 @@ This is rendered as:
 </html>
 ----
 
+
+
+
 [[view-document]]
-== Document views (PDF/Excel)
+== Document views: PDF, Excel
 
 
 
 [[view-document-intro]]
 === Introduction
+
 Returning an HTML page isn't always the best way for the user to view the model output,
 and Spring makes it simple to generate a PDF document or an Excel spreadsheet
 dynamically from the model data. The document is the view and will be streamed from the
 server with the correct content type to (hopefully) enable the client PC to run their
 spreadsheet or PDF viewer application in response.
 
-In order to use Excel views, you need to add the 'poi' library to your classpath, and
-for PDF generation, the iText library.
+In order to use Excel views, you need to add the Apache POI library to your classpath,
+and for PDF generation, the common iText 2.1.7 or its fork OpenPDF (e.g. OpenPDF 1.0.4).
 
 
 
 [[view-document-config]]
-=== Configuration and setup
+=== Configuration
+
 Document based views are handled in an almost identical fashion to XSLT views, and the
 following sections build upon the previous one by demonstrating how the same controller
 used in the XSLT example is invoked to render the same model as both a PDF document and
 an Excel spreadsheet (which can also be viewed or manipulated in Open Office).
 
 
+
 [[view-document-configviews]]
-==== Document view definitions
+=== View definition
+
 First, let's amend the views.properties file (or xml equivalent) and add a simple view
 definition for both document types. The entire file now looks like this with the XSLT
 view shown from earlier:
@@ -2052,16 +2103,20 @@ __If you want to start with a template spreadsheet or a fillable PDF form to add
 model data to, specify the location as the 'url' property in the view definition__
 
 
+
 [[view-document-configcontroller]]
-==== Controller code
+=== Controller
+
 The controller code we'll use remains exactly the same from the XSLT example earlier
 other than to change the name of the view to use. Of course, you could be clever and
 have this selected based on a URL parameter or some other logic - proof that Spring
 really is very good at decoupling the views from the controllers!
 
 
+
 [[view-document-configsubclasses]]
-==== Subclassing for Excel views
+=== Excel views
+
 Exactly as we did for the XSLT example, we'll subclass suitable abstract classes in
 order to implement custom behavior in generating our output documents. For Excel, this
 involves writing a subclass of
@@ -2144,8 +2199,10 @@ that the Excel spreadsheet is created and downloaded automatically when you requ
 same page as before.
 
 
+
 [[view-document-configsubclasspdf]]
-==== Subclassing for PDF views
+=== PDF views
+
 The PDF version of the word list is even simpler. This time, the class extends
 `org.springframework.web.servlet.view.document.AbstractPdfView` and implements the
 `buildPdfDocument()` method as follows:
@@ -2179,6 +2236,7 @@ document should appear listing each of the words in the model map.
 
 [[view-jasper-reports]]
 == JasperReports
+
 JasperReports ( http://jasperreports.sourceforge.net[]) is a powerful open-source
 reporting engine that supports the creation of report designs using an easily understood
 XML file format. JasperReports is capable of rendering reports in four different
@@ -2188,8 +2246,9 @@ formats: CSV, Excel, HTML and PDF.
 
 [[view-jasper-reports-dependencies]]
 === Dependencies
-Your application will need to include the latest release of JasperReports, which at the
-time of writing was 0.6.1. JasperReports itself depends on the following projects:
+
+Your application will need to include a recent release of JasperReports, e.g. 6.2.
+JasperReports itself depends on the following projects:
 
 * BeanShell
 * Commons BeanUtils
@@ -2199,12 +2258,13 @@ time of writing was 0.6.1. JasperReports itself depends on the following project
 * iText
 * POI
 
-JasperReports also requires a JAXP compliant XML parser.
+JasperReports also requires a JAXP-compliant XML parser.
 
 
 
 [[view-jasper-reports-configuration]]
 === Configuration
+
 To configure JasperReports views in your Spring container configuration you need to
 define a `ViewResolver` to map view names to the appropriate view class depending on
 which format you want your report rendered in.
@@ -2277,6 +2337,7 @@ file.
 
 [[view-jasper-reports-configuration-report-files]]
 ==== About Report Files
+
 JasperReports has two distinct types of report file: the design file, which has a
 `.jrxml` extension, and the compiled report file, which has a `.jasper` extension.
 Typically, you use the JasperReports Ant task to compile your `.jrxml` design file into
@@ -2413,7 +2474,8 @@ approach.
 
 
 [[view-jasper-reports-subreports]]
-=== Working with Sub-Reports
+=== Working with sub-reports
+
 JasperReports provides support for embedded sub-reports within your master report files.
 There are a wide variety of mechanisms for including sub-reports in your report files.
 The easiest way is to hard code the report path and the SQL query for the sub report
@@ -2424,7 +2486,8 @@ and you can include additional data for these sub-reports directly from your con
 
 
 [[view-jasper-reports-subreports-config-reports]]
-==== Configuring Sub-Report Files
+==== Configuring sub-report files
+
 To control which sub-report files are included in a master report using Spring, your
 report file must be configured to accept sub-reports from an external source. To do this
 you declare a parameter in your report file like so:
@@ -2475,7 +2538,8 @@ the given key.
 
 
 [[view-jasper-reports-subreports-config-datasources]]
-==== Configuring Sub-Report Data Sources
+==== Configuring sub-report data sources
+
 This step is entirely optional when using Spring to configure your sub-reports. If you
 wish, you can still configure the data source for your sub-reports using static queries.
 However, if you want Spring to convert data returned in your `ModelAndView` into
@@ -2495,7 +2559,8 @@ and the key used in your report design file.
 
 
 [[view-jasper-reports-exporter-parameters]]
-=== Configuring Exporter Parameters
+=== Configuring exporter parameters
+
 If you have special requirements for exporter configuration -- perhaps you want a
 specific page size for your PDF report -- you can configure these exporter parameters
 declaratively in your Spring configuration file using the `exporterParameters` property
@@ -2530,7 +2595,8 @@ which will output a footer in the resulting HTML.
 
 
 [[view-feeds]]
-== Feed Views
+== Feed views: RSS, Atom
+
 Both `AbstractAtomFeedView` and `AbstractRssFeedView` inherit from the base class
 `AbstractFeedView` and are used to provide Atom and RSS Feed views respectfully. They
 are based on java.net's https://rome.dev.java.net[ROME] project and are located in the
@@ -2595,6 +2661,7 @@ https://spring.io/blog/2009/03/16/adding-an-atom-view-to-an-application-using-sp
 
 [[view-json-mapping]]
 == JSON Mapping View
+
 The `MappingJackson2JsonView` uses the Jackson library's `ObjectMapper` to render the response
 content as JSON. By default, the entire contents of the model map (with the exception of
 framework-specific classes) will be encoded as JSON. For cases where the contents of the
@@ -2617,6 +2684,7 @@ name(s) could be customized through the `jsonpParameterNames` property.
 
 [[view-xml-mapping]]
 == XML Mapping View
+
 The `MappingJackson2XmlView` uses the
 https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML extension]'s `XmlMapper`
 to render the response content as XML. If the model contains multiples entries, the
@@ -2627,4 +2695,3 @@ XML mapping can be customized as needed through the use of JAXB or Jackson's pro
 annotations. When further control is needed, a custom `XmlMapper` can be injected
 through the `ObjectMapper` property for cases where custom XML
 serializers/deserializers need to be provided for specific types.
-
