@@ -29,12 +29,14 @@ import org.springframework.util.FileCopyUtils;
  * Spring's default implementation of the {@link ResponseErrorHandler} interface.
  *
  * <p>This error handler checks for the status code on the {@link ClientHttpResponse}:
- * Any code with series {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR} or
- * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR} is considered to be an
- * error. This behavior can be changed by overriding the {@link #hasError(HttpStatus)} method.
+ * Any code with series {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR}
+ * or {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR} is considered to be
+ * an error; this behavior can be changed by overriding the {@link #hasError(HttpStatus)}
+ * method. Unknown status codes will be ignored by {@link #hasError(ClientHttpResponse)}.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.0
  * @see RestTemplate#setErrorHandler
  */
@@ -45,7 +47,12 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 */
 	@Override
 	public boolean hasError(ClientHttpResponse response) throws IOException {
-		return hasError(getHttpStatusCode(response));
+		try {
+			return hasError(getHttpStatusCode(response));
+		}
+		catch (UnknownHttpStatusCodeException ex) {
+			return false;
+		}
 	}
 
 	/**
