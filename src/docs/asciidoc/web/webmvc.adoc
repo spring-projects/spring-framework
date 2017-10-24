@@ -4804,3 +4804,27 @@ detected through a `<component scan/>` declaration.
 
 
 include::webmvc-view.adoc[leveloffset=+1]
+
+
+
+[[mvc-http2]]
+== HTTP/2 support
+
+
+[[mvc-http2-servlet4]]
+=== Servlet 4 support
+
+Spring MVC supports the Servlet 4 API; of course, the chosen Servlet container must support
+that API in the first place.
+
+It is now possible to inject a `javax.servlet.http.PushBuilder`
+as a Controller method argument for pushing HTTP/2 resources programmatically.
+Note that per Servlet spec, the injected `PushBuilder` instance can be null if the client
+does not support that HTTP/2 feature. See <<mvc-ann-arguments>>.
+
+[[mvc-http2-container]]
+=== Container configuration
+
+For more information on how to configure your Servlet container for HTTP/2, please check
+out the https://github.com/spring-projects/spring-framework/wiki/HTTP-2-support[dedicated
+wiki page on HTTP/2 support].
