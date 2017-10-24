@@ -139,7 +139,7 @@ public abstract class StringUtils {
 	 * @see Character#isWhitespace
 	 */
 	public static boolean hasText(@Nullable CharSequence str) {
-		return (hasLength(str) && containsText(str));
+		return (str != null && str.length() > 0 && containsText(str));
 	}
 
 	/**
@@ -153,7 +153,7 @@ public abstract class StringUtils {
 	 * @see #hasText(CharSequence)
 	 */
 	public static boolean hasText(@Nullable String str) {
-		return (hasLength(str) && containsText(str));
+		return (str != null && !str.isEmpty() && containsText(str));
 	}
 
 	private static boolean containsText(CharSequence str) {
