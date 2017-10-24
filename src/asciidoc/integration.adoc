@@ -3656,12 +3656,12 @@ metadata-driven management interfaces for your Spring-exposed MBeans.
 
 
 [[jmx-interface-metadata-types]]
-==== Source-Level metadata types
+==== Source-level metadata types
 
 The following source level metadata types are available for use in Spring JMX:
 
 [[jmx-metadata-types]]
-.Source-Level Metadata Types
+.Source-level metadata types
 |===
 | Purpose| Annotation| Annotation Type
 
@@ -3686,7 +3686,7 @@ The following configuration parameters are available for use on these source-lev
 metadata types:
 
 [[jmx-metadata-parameters]]
-.Source-Level metadata parameters
+.Source-level metadata parameters
 [cols="1,3,1"]
 |===
 | Parameter| Description| Applies to
