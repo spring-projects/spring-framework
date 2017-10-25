@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.asm.Opcodes;
 import org.springframework.asm.SpringAsmInfo;
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * ASM class visitor which looks only for the class name and implemented types,
@@ -61,7 +62,7 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 
 	private String[] interfaces;
 
-	private Set<String> memberClassNames = new LinkedHashSet<String>();
+	private Set<String> memberClassNames = new LinkedHashSet<String>(4);
 
 
 	public ClassMetadataReadingVisitor() {
@@ -201,7 +202,7 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 
 	@Override
 	public String[] getMemberClassNames() {
-		return this.memberClassNames.toArray(new String[this.memberClassNames.size()]);
+		return StringUtils.toStringArray(this.memberClassNames);
 	}
 
 
