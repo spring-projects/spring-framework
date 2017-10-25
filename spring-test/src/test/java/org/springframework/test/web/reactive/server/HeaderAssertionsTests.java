@@ -20,6 +20,7 @@ import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
+import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
@@ -148,15 +149,14 @@ public class HeaderAssertionsTests {
 	}
 
 	private HeaderAssertions headerAssertions(HttpHeaders responseHeaders) {
-
 		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("/"));
 		MockClientHttpResponse response = new MockClientHttpResponse(HttpStatus.OK);
 		response.getHeaders().putAll(responseHeaders);
 
-		WiretapClientHttpRequest wiretapRequest = new WiretapClientHttpRequest(request);
-		WiretapClientHttpResponse wiretapResponse = new WiretapClientHttpResponse(response);
+		MonoProcessor<byte[]> emptyContent = MonoProcessor.create();
+		emptyContent.onComplete();
 
-		ExchangeResult result = new ExchangeResult(wiretapRequest, wiretapResponse);
+		ExchangeResult result = new ExchangeResult(request, response, emptyContent, emptyContent, null);
 		return new HeaderAssertions(result, mock(WebTestClient.ResponseSpec.class));
 	}
 

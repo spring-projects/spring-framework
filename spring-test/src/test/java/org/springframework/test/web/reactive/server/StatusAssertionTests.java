@@ -19,6 +19,7 @@ package org.springframework.test.web.reactive.server;
 import java.net.URI;
 
 import org.junit.Test;
+import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -161,15 +162,14 @@ public class StatusAssertionTests {
 
 
 	private StatusAssertions statusAssertions(HttpStatus status) {
-
 		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("/"));
 		MockClientHttpResponse response = new MockClientHttpResponse(status);
 
-		WiretapClientHttpRequest wiretapRequest = new WiretapClientHttpRequest(request);
-		WiretapClientHttpResponse wiretapResponse = new WiretapClientHttpResponse(response);
+		MonoProcessor<byte[]> emptyContent = MonoProcessor.create();
+		emptyContent.onComplete();
 
-		ExchangeResult exchangeResult = new ExchangeResult(wiretapRequest, wiretapResponse);
-		return new StatusAssertions(exchangeResult, mock(WebTestClient.ResponseSpec.class));
+		ExchangeResult result = new ExchangeResult(request, response, emptyContent, emptyContent, null);
+		return new StatusAssertions(result, mock(WebTestClient.ResponseSpec.class));
 	}
 
 }
