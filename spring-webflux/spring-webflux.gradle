@@ -45,7 +45,7 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	testCompile("javax.xml.bind:jaxb-api:2.3.0")
-	testCompile("org.hibernate:hibernate-validator:6.0.3.Final")
+	testCompile("org.hibernate:hibernate-validator:6.0.4.Final")
 	testCompile "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 	testCompile("io.projectreactor:reactor-test")
 	testCompile("io.reactivex:rxnetty-http:0.5.2") {
@@ -68,5 +68,5 @@ dependencies {
 	testRuntime("org.glassfish:javax.el:3.0.1-b08")
 	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0")
 	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0")
-	testRuntime("javax.activation:activation:1.1.1")
+	testRuntime("com.sun.activation:javax.activation:1.2.0")
 }

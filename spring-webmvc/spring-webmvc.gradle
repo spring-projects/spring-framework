@@ -63,7 +63,7 @@ dependencies {
 	testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}") {
 		exclude group: "javax.servlet", module: "javax.servlet"
 	}
-	testCompile("org.hibernate:hibernate-validator:6.0.3.Final")
+	testCompile("org.hibernate:hibernate-validator:6.0.4.Final")
 	testCompile("org.apache.httpcomponents:httpclient:4.5.3") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
@@ -92,5 +92,5 @@ dependencies {
 	testRuntime("org.glassfish:javax.el:3.0.1-b08")
 	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0")
 	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0")
-	testRuntime("javax.activation:activation:1.1.1")
+	testRuntime("com.sun.activation:javax.activation:1.2.0")
 }
