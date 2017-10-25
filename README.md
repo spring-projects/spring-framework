@@ -31,40 +31,8 @@ You can find guides and tutorials on [https://spring.io](https://spring.io/guide
 
 ## Build from Source
 
-The Spring Framework uses a [Gradle](http://gradle.org) build. In the instructions below,
-the [Gradle Wrapper](http://vimeo.com/34436402) is invoked from the root of the source
-tree and serves as a cross-platform, self-contained bootstrap mechanism for the build.
-
-To build you will need [Git](http://help.github.com/set-up-git-redirect) and
-[JDK 8 update 20 or later](http://www.oracle.com/technetwork/java/javase/downloads).
-Be sure that your `JAVA_HOME` environment variable points to the `jdk1.8.0` folder
-extracted from the JDK download.
-
-Start by checking out the sources:
-```
-git clone git@github.com:spring-projects/spring-framework.git
-```
-
-To import into an IDE, ensure JDK 8 is configured. Then run `./import-into-eclipse.sh`
-or read [import-into-idea.md](import-into-idea.md). For IntelliJ please do read the
-instructions as a straight-up import will not work.
-
-To compile, test, build all jars, distribution zips, and docs use:
-```
-./gradlew build
-```
-
-To install all spring-\* jars into your local Maven cache:
-```
-./gradlew install
-```
-
-Discover more commands:
-```
-./gradlew tasks
-```
-
-See also [CONTRIBUTING](CONTRIBUTING.md) and the
+See the [Build from Source](https://github.com/spring-projects/spring-framework/wiki/Build-from-Source)
+wiki page, also [CONTRIBUTING](CONTRIBUTING.md), and the
 [Gradle build and release FAQ](https://github.com/spring-projects/spring-framework/wiki/Gradle-build-and-release-FAQ).
 
 ## Stay in Touch

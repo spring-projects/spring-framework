@@ -9,6 +9,7 @@ First off, thank you for taking the time to contribute! :+1: :tada:
   * [Discuss](#Discuss)
   * [Create a Ticket](#Create-a-Ticket)
   * [Submit a Pull Request](#Submit-a-Pull-Request)
+* [Build from Source](#Build-from-Source))
 * [Source Code Style](#Source-Code-Style)
 * [Reference Docs](#Reference-Docs)
 
@@ -89,6 +90,12 @@ your changes remain intact. You may also be asked to rework the submission.
 If asked to make corrections, simply push the changes against the same branch, and your
 pull request will be updated. In other words, you do not need to create a new pull request
 when asked to make changes.
+
+### Build from Source
+
+See the [Build from Source](https://github.com/spring-projects/spring-framework/wiki/Build-from-Source)
+wiki page for instructions on how to check out, build, and import the Spring Framework
+source code into your IDE.
 
 ### Source Code Style
 
