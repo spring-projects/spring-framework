@@ -1,16 +1,16 @@
 Please read the
-https://docs.spring.io/spring/docs/current/spring-framework-reference/overview.html#spring-introduction[Overview]
+[Overview](https://docs.spring.io/spring/docs/current/spring-framework-reference/overview.html#spring-introduction)
 in the reference documentation for a quick introduction.
 
 This project is governed by the [Spring Code of Conduct](CODE_OF_CONDUCT.adoc).
 By participating you are expected to uphold this code.
 Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
 
-For Maven repository information see [downloading Spring artifacts][]. Unable to
-use Maven or other transitive dependency management tools?
-See [building a distribution with dependencies][].
+For Maven repository information see [downloading Spring artifacts][], or if unable to
+use Maven or other transitive dependency management tools, see
+[building a distribution with dependencies][].
 
-For documentation see the current [reference docs][], [Javadoc][], Github Wiki pages.
+Documentation is available in the form of [reference docs][], [Javadoc][], and Github Wiki pages.
 
 For contributing see the [contributor guidelines][] for details.
 
