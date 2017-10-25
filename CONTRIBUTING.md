@@ -1,53 +1,41 @@
-[[contributing]]
-# Contributing  to the Spring Framework
+## Contributing  to the Spring Framework
 
 First off, thank you for taking the time to contribute!
 
-**Table of Contents**
+*Table of Contents*
 
-* <<conduct>>
-* <<how>>
-** <<how-question>>
-** <<how-ticket>>
-** <<how-pull-request>>
-* <<code-style>>
-* <<documentation>>
+* [Code of Conduct](#Code-of-Conduct)
+* [How to Contribute](#How-to-Contribute)
+  * [Discuss](#Discuss)
+  * [Create a Ticket](#Create-a-Ticket)
+  * [Submit a Pull Request](#Submit-a-Pull-Request)
+* [Source Code Style](#Source-Code-Style)
+* [Reference Docs](#Reference-Docs)
 
+### Code of Conduct
 
-
-[[conduct]]
-## Code of Conduct
-
-This project is governed by the link:CODE_OF_CONDUCT.adoc[Spring Code of Conduct].
+This project is governed by the [Spring Code of Conduct](CODE_OF_CONDUCT.adoc).
 By participating you are expected to uphold this code.
 Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
 
+### How to Contribute
 
-
-[[how]]
-## How to Contribute
-
-
-[[how-question]]
-### Discuss
+#### Discuss
 
 If you have a question, check StackOverflow using
-https://spring.io/questions[this list of tags], organized by Spring project.
+[this list of tags](https://spring.io/questions), organized by Spring project.
 Find an existing discussion or start a new one if necessary.
 
 If you suspect an issue, perform a search in the
-https://jira.spring.io/browse/SPR[JIRA issue tracker], using a few different keywords.
+[JIRA issue tracker](https://jira.spring.io/browse/SPR), using a few different keywords.
 When you find related issues and discussions, prior or current, it helps you to learn and
 it helps us to make a decision.
 
-
-
-[[how-ticket]]
-### Create a Ticket
+#### Create a Ticket
 
 Reporting an issue or making a feature request is a great way to contribute. Your feedback
 and the conversations that result from it provide a continuous flow of ideas. However,
-before you do that, please take the time to <<how-question,research first>>.
+before you do that, please take the time to [research first](#Discuss).
 
 When an issue is first created, it may not be assigned and will not have a fix version.
 Within a day or two, the issue is assigned to a specific committer and the target
@@ -59,24 +47,22 @@ When a fix is ready, the issue is marked "Resolved" and may still be re-opened. 
 is released, the issue is permanently "Closed". If necessary, you will need to create a new,
 related ticket with a fresh description.
 
-
-
-[[how-pull-request]]
-### Submit a Pull Request
+#### Submit a Pull Request
 
 You can contribute a source code change by submitting a pull request.
 
 1. If you have not previously done so, please sign the
-https://cla.pivotal.io/sign/spring[Contributor License Agreement]. You will also be reminded
+[Contributor License Agreement](https://cla.pivotal.io/sign/spring). You will also be reminded
 automatically when you submit a pull request.
 
-1. For all but the most trivial of contributions, please <<how-ticket>>. The purpose of the
-ticket is to understand and discuss the underlying issue or feature. We use the JIRA issue tracker
-as the preferred place of record for conversations and conclusions. In that sense discussions
-directly under a PR are more implementation detail oriented and transient in nature.
+1. For all but the most trivial of contributions, please [create a ticket](#Create-a-Ticket).
+The purpose of the ticket is to understand and discuss the underlying issue or feature.
+We use the JIRA issue tracker as the preferred place of record for conversations and
+conclusions. In that sense discussions directly under a PR are more implementation detail
+oriented and transient in nature.
 
 1. Always check out the `master` branch and submit pull requests against it
-(for target version see link:settings.gradle[settings.gradle]).
+(for target version see [settings.gradle](settings.gradle)).
 Backports to prior versions will be considered on a case-by-case basis and reflected as
 the fix version in the issue tracker.
 
@@ -85,13 +71,13 @@ otherwise using succinct, lower-case, dash (-) delimited names, such as `fix-war
 
 1. Choose the granularity of your commits consciously and squash commits that represent
 multiple edits or corrections of the same logical change. See
-http://git-scm.com/book/en/Git-Tools-Rewriting-History[Rewriting History section of Pro Git]
+[Rewriting History section of Pro Git](http://git-scm.com/book/en/Git-Tools-Rewriting-History)
 for an overview of streamlining commit history.
 
 1. Format commit messages using 55 characters for the subject line, 72 lines for the
 description, followed by related issues, e.g. `Issues: SPR-1234, SPR-1235`.
 See the
-http://git-scm.com/book/en/Distributed-Git-Contributing-to-a-Project#Commit-Guidelines[Commit Guidelines section of Pro Git]
+[Commit Guidelines section of Pro Git](http://git-scm.com/book/en/Distributed-Git-Contributing-to-a-Project#Commit-Guidelines)
 for best practices around commit messages and use `git log` to see some examples.
 
 1. List the JIRA issue number in the PR description.
@@ -104,30 +90,24 @@ If asked to make corrections, simply push the changes against the same branch, a
 pull request will be updated. In other words, you do not need to create a new pull request
 when asked to make changes.
 
+### Source Code Style
 
+The wiki page
+[Spring Framework Code Style](https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Code-Style)
+defines the source file coding standards we use while the [IDEA formatting](https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-IDEA-Code-Formatting)
+page describes the changes we make to the default code formatting settings in IntelliJ IDEA.
 
-[[code-style]]
-## Source Code Style
+### Reference Docs
 
-* The https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Code-Style[Spring Framework Code Style]
-wiki page defines the the coding standards used for Spring Framework source files.
-* The https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-IDEA-Code-Formatting[IDEA Code Formatting]
-wiki page describes changes we make to the default code formatting settings in Intellij IDEA.
-
-
-
-[[documentation]]
-## Reference Docs
-
-The reference documentation is in the `src/docs/asciidoc` directory and, in
-http://asciidoctor.org/[Asciidoctor] format. For trivial changes, you may be able to browse,
+The reference documentation is in the [src/docs/asciidoc](src/docs/asciidoc) directory and, in
+[Asciidoctor](http://asciidoctor.org/) format. For trivial changes, you may be able to browse,
 edit source files, and submit directly from Github.
 
 When making changes locally, use `./gradlew asciidoctor` and then browse the result under
 `build/asciidoc/html5/index.html`.
 
 Asciidoctor also supports live editing. For more details read
-http://asciidoctor.org/docs/editing-asciidoc-with-live-preview/[Editing AsciiDoc with Live Preview].
+[Editing AsciiDoc with Live Preview](http://asciidoctor.org/docs/editing-asciidoc-with-live-preview/).
 Note that if you choose the
-http://asciidoctor.org/docs/editing-asciidoc-with-live-preview/#using-a-system-monitor[System Monitor]
+[System Monitor](http://asciidoctor.org/docs/editing-asciidoc-with-live-preview/#using-a-system-monitor)
 option, you can find a Guardfile under `src/docs/asciidoc`.
