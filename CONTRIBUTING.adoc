@@ -2,7 +2,6 @@
 # Contributing  to the Spring Framework
 :toc: preamble
 :toclevels: 4
-:docinfo1:
 
 First off, thank you for taking the time to contribute!
 
