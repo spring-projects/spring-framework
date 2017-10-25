@@ -4,14 +4,14 @@ First off, thank you for taking the time to contribute! :+1: :tada:
 
 **Table of Contents**
 
-* [Code of Conduct](#Code-of-Conduct)
-* [How to Contribute](#How-to-Contribute)
-  * [Discuss](#Discuss)
-  * [Create a Ticket](#Create-a-Ticket)
-  * [Submit a Pull Request](#Submit-a-Pull-Request)
-* [Build from Source](#Build-from-Source)
-* [Source Code Style](#Source-Code-Style)
-* [Reference Docs](#Reference-Docs)
+* [Code of Conduct](#code-of-conduct)
+* [How to Contribute](#how-to-contribute)
+  * [Discuss](#discuss)
+  * [Create a Ticket](#create-a-ticket)
+  * [Submit a Pull Request](#submit-a-pull-request)
+* [Build from Source](#build-from-source)
+* [Source Code Style](#source-code-style)
+* [Reference Docs](#reference-docs)
 
 ### Code of Conduct
 
