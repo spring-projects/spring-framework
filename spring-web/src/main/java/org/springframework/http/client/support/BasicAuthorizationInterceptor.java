@@ -46,9 +46,9 @@ public class BasicAuthorizationInterceptor implements ClientHttpRequestIntercept
 	 * @param username the username to use
 	 * @param password the password to use
 	 */
-	public BasicAuthorizationInterceptor(String username, @Nullable String password) {
-		Assert.hasLength(username, "Username must not be empty");
-		this.username = username;
+	public BasicAuthorizationInterceptor(@Nullable String username, @Nullable String password) {
+		Assert.doesNotContain(username, ":", "Username must not contain a colon");
+		this.username = (username != null ? username : "");
 		this.password = (password != null ? password : "");
 	}
 
