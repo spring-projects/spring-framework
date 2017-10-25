@@ -1,9 +1,17 @@
 [[contributing]]
 # Contributing  to the Spring Framework
-:toc: preamble
-:toclevels: 4
 
 First off, thank you for taking the time to contribute!
+
+**Table of Contents**
+
+* <<conduct>>
+* <<how>>
+** <<how-question>>
+** <<how-ticket>>
+** <<how-pull-request>>
+* <<code-style>>
+* <<documentation>>
 
 
 
