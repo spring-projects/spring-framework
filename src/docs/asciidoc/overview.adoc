@@ -133,12 +133,9 @@ https://github.com/spring-projects/spring-framework[Github]. However, please kee
 that, for all but the most trivial issues, we expect a ticket to be filed in the issue
 tracker, where discussions take place and leave a record for future reference.
 
-When contributing, please check out our
-https://github.com/spring-projects/spring-framework/wiki[Wiki on Github]. While this
-reference is versioned and distributed with the Spring Framework, the wiki contains
-information that is not specific to any one version. For example, it has migration
-notes from earlier versions, comprehensive information on what's new across multiple
-versions, contributor guidelines, the Spring Framework code style, and other information.
+For more details see the guidelines at the
+https://github.com/spring-projects/spring-framework/blob/master/CONTRIBUTING.adoc[CONTRIBUTING],
+top-level project page.
 
 
 
