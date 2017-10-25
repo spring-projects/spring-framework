@@ -9,7 +9,7 @@ First off, thank you for taking the time to contribute! :+1: :tada:
   * [Discuss](#Discuss)
   * [Create a Ticket](#Create-a-Ticket)
   * [Submit a Pull Request](#Submit-a-Pull-Request)
-* [Build from Source](#Build-from-Source))
+* [Build from Source](#Build-from-Source)
 * [Source Code Style](#Source-Code-Style)
 * [Reference Docs](#Reference-Docs)
 
