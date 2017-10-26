@@ -421,6 +421,11 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 					javaClassPathProperty, System.getProperty("path.separator"))) {
 				try {
 					String filePath = new File(path).getAbsolutePath();
+					int prefixIndex = filePath.indexOf(':');
+					if (prefixIndex == 1) {
+						// Possibly "c:" drive prefix on Windows, to be upper-cased for proper duplicate detection
+						filePath = filePath.substring(0, 1).toUpperCase() + filePath.substring(1);
+					}
 					UrlResource jarResource = new UrlResource(ResourceUtils.JAR_URL_PREFIX +
 							ResourceUtils.FILE_URL_PREFIX + filePath + ResourceUtils.JAR_URL_SEPARATOR);
 					// Potentially overlapping with URLClassLoader.getURLs() result above!
