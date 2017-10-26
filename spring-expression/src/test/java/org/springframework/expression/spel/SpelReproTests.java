@@ -100,7 +100,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR5899() throws Exception {
+	public void SPR5899() {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new Spr5899Class());
 		Expression expr = new SpelExpressionParser().parseRaw("tryToInvokeWithNull(12)");
 		assertEquals(12, expr.getValue(eContext));
@@ -196,7 +196,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 
 	@Test
-	public void SPR5905_InnerTypeReferences() throws Exception {
+	public void SPR5905_InnerTypeReferences() {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new Spr5899Class());
 		Expression expr = new SpelExpressionParser().parseRaw("T(java.util.Map$Entry)");
 		assertEquals(Map.Entry.class, expr.getValue(eContext));
@@ -228,7 +228,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 
 	@Test
-	public void SPR5804() throws Exception {
+	public void SPR5804() {
 		Map<String, String> m = new HashMap<>();
 		m.put("foo", "bar");
 		StandardEvaluationContext eContext = new StandardEvaluationContext(m); // root is a map instance
@@ -238,7 +238,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR5847() throws Exception {
+	public void SPR5847() {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new TestProperties());
 		String name = null;
 		Expression expr = null;
@@ -319,7 +319,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 
 	@Test
-	public void NPE_SPR5673() throws Exception {
+	public void NPE_SPR5673() {
 		ParserContext hashes = TemplateExpressionParsingTests.HASH_DELIMITED_PARSER_CONTEXT;
 		ParserContext dollars = TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT;
 
@@ -558,6 +558,41 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 
+	static class C {
+
+		public List<String> ls;
+
+		public String[] as;
+
+		public Map<String, String> ms;
+
+		C() {
+			ls = new ArrayList<>();
+			ls.add("abc");
+			ls.add("def");
+			as = new String[] { "abc", "def" };
+			ms = new HashMap<>();
+			ms.put("abc", "xyz");
+			ms.put("def", "pqr");
+		}
+	}
+
+
+	static class D {
+
+		public String a;
+
+		private D(String s) {
+			a = s;
+		}
+
+		@Override
+		public String toString() {
+			return "D(" + a + ")";
+		}
+	}
+
+
 	static class Goo {
 
 		public static Goo instance = new Goo();
@@ -586,21 +621,21 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	// ---
 
-	private void checkTemplateParsing(String expression, String expectedValue) throws Exception {
+	private void checkTemplateParsing(String expression, String expectedValue) {
 		checkTemplateParsing(expression, TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT, expectedValue);
 	}
 
-	private void checkTemplateParsing(String expression, ParserContext context, String expectedValue) throws Exception {
+	private void checkTemplateParsing(String expression, ParserContext context, String expectedValue) {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expr = parser.parseExpression(expression, context);
 		assertEquals(expectedValue, expr.getValue(TestScenarioCreator.getTestEvaluationContext()));
 	}
 
-	private void checkTemplateParsingError(String expression, String expectedMessage) throws Exception {
+	private void checkTemplateParsingError(String expression, String expectedMessage) {
 		checkTemplateParsingError(expression, TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT, expectedMessage);
 	}
 
-	private void checkTemplateParsingError(String expression, ParserContext context, String expectedMessage) throws Exception {
+	private void checkTemplateParsingError(String expression, ParserContext context, String expectedMessage) {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		try {
 			parser.parseExpression(expression, context);
@@ -783,7 +818,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void mapOfMap_SPR7244() throws Exception {
+	public void mapOfMap_SPR7244() {
 		Map<String, Object> map = new LinkedHashMap<>();
 		map.put("uri", "http:");
 		Map<String, String> nameMap = new LinkedHashMap<>();
@@ -804,7 +839,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void projectionTypeDescriptors_1() throws Exception {
+	public void projectionTypeDescriptors_1() {
 		StandardEvaluationContext ctx = new StandardEvaluationContext(new C());
 		SpelExpressionParser parser = new SpelExpressionParser();
 		String el1 = "ls.![#this.equals('abc')]";
@@ -817,7 +852,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void projectionTypeDescriptors_2() throws Exception {
+	public void projectionTypeDescriptors_2() {
 		StandardEvaluationContext ctx = new StandardEvaluationContext(new C());
 		SpelExpressionParser parser = new SpelExpressionParser();
 		String el1 = "as.![#this.equals('abc')]";
@@ -830,7 +865,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void projectionTypeDescriptors_3() throws Exception {
+	public void projectionTypeDescriptors_3() {
 		StandardEvaluationContext ctx = new StandardEvaluationContext(new C());
 		SpelExpressionParser parser = new SpelExpressionParser();
 		String el1 = "ms.![key.equals('abc')]";
@@ -842,42 +877,8 @@ public class SpelReproTests extends AbstractExpressionTests {
 		assertEquals(null, evaluated.getElementTypeDescriptor());
 	}
 
-
-	static class C {
-
-		public List<String> ls;
-		public String[] as;
-		public Map<String, String> ms;
-
-		C() {
-			ls = new ArrayList<>();
-			ls.add("abc");
-			ls.add("def");
-			as = new String[] { "abc", "def" };
-			ms = new HashMap<>();
-			ms.put("abc", "xyz");
-			ms.put("def", "pqr");
-		}
-	}
-
-
-	static class D {
-
-		public String a;
-
-		private D(String s) {
-			a = s;
-		}
-
-		@Override
-		public String toString() {
-			return "D(" + a + ")";
-		}
-	}
-
-
 	@Test
-	public void greaterThanWithNulls_SPR7840() throws Exception {
+	public void greaterThanWithNulls_SPR7840() {
 		List<D> list = new ArrayList<>();
 		list.add(new D("aaa"));
 		list.add(new D("bbb"));
@@ -1101,7 +1102,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 
 	@Test
-	public void reservedWords_8228() throws Exception {
+	public void reservedWords_8228() {
 		// "DIV","EQ","GE","GT","LE","LT","MOD","NE","NOT"
 		@SuppressWarnings("unused")
 		class Reserver {
@@ -1151,7 +1152,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void reservedWordProperties_9862() throws Exception {
+	public void reservedWordProperties_9862() {
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 		SpelExpressionParser parser = new SpelExpressionParser();
 		SpelExpression expression = parser.parseRaw("T(org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver).CONST");
@@ -1328,7 +1329,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR9486_floatFunctionResolver() throws Exception {
+	public void SPR9486_floatFunctionResolver() {
 		Number expectedResult = Math.abs(-10.2f);
 		ExpressionParser parser = new SpelExpressionParser();
 		SPR9486_FunctionsClass testObject = new SPR9486_FunctionsClass();
@@ -1663,7 +1664,21 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR10146_malformedExpressions() throws Exception {
+	public void SPR16123() {
+		ExpressionParser parser = new SpelExpressionParser();
+		parser.parseExpression("simpleProperty").setValue(new BooleanHolder(), null);
+
+		try {
+			parser.parseExpression("primitiveProperty").setValue(new BooleanHolder(), null);
+			fail("Should have thrown EvaluationException");
+		}
+		catch (EvaluationException ex) {
+			// expected
+		}
+	}
+
+	@Test
+	public void SPR10146_malformedExpressions() {
 		doTestSpr10146("/foo", "EL1070E: Problem parsing left operand");
 		doTestSpr10146("*foo", "EL1070E: Problem parsing left operand");
 		doTestSpr10146("%foo", "EL1070E: Problem parsing left operand");
@@ -1682,7 +1697,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR10125() throws Exception {
+	public void SPR10125() {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		String fromInterface = parser.parseExpression("T(" + StaticFinalImpl1.class.getName() + ").VALUE").getValue(
 				context, String.class);
@@ -1693,7 +1708,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR10210() throws Exception {
+	public void SPR10210() {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		context.setVariable("bridgeExample", new org.springframework.expression.spel.spr10210.D());
 		Expression parseExpression = parser.parseExpression("#bridgeExample.bridgeMethod()");
@@ -1701,7 +1716,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR10328() throws Exception {
+	public void SPR10328() {
 		thrown.expect(SpelParseException.class);
 		thrown.expectMessage("EL1071E: A required selection expression has not been specified");
 		Expression exp = parser.parseExpression("$[]");
@@ -1709,7 +1724,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR10452() throws Exception {
+	public void SPR10452() {
 		SpelParserConfiguration configuration = new SpelParserConfiguration(false, false);
 		ExpressionParser parser = new SpelExpressionParser(configuration);
 
@@ -1734,7 +1749,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR9495() throws Exception {
+	public void SPR9495() {
 		SpelParserConfiguration configuration = new SpelParserConfiguration(false, false);
 		ExpressionParser parser = new SpelExpressionParser(configuration);
 
@@ -1779,7 +1794,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR10486() throws Exception {
+	public void SPR10486() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		Spr10486 rootObject = new Spr10486();
@@ -1790,7 +1805,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR11142() throws Exception {
+	public void SPR11142() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		Spr11142 rootObject = new Spr11142();
@@ -1928,7 +1943,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	@Test
 	@SuppressWarnings("rawtypes")
-	public void SPR13055() throws Exception {
+	public void SPR13055() {
 		List<Map<String, Object>> myPayload = new ArrayList<>();
 
 		Map<String, Object> v1 = new HashMap<>();
