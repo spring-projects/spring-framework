@@ -13,21 +13,19 @@ This project is governed by the [Spring Code of Conduct](CODE_OF_CONDUCT.adoc).
 By participating you are expected to uphold this code.
 Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
 
-## Artifacts
+## Access to Binaries
 
-For Maven repository information see
-[downloading Spring artifacts](https://github.com/spring-projects/spring-framework/wiki/Downloading-Spring-artifacts),
-or if unable to use Maven or other transitive dependency management tools, see
-[building a distribution with dependencies](https://github.com/spring-projects/spring-framework/wiki/Building-a-distribution-with-dependencies).
+For access to artifacts or a distribution zip, see the
+[Spring artifacts](https://github.com/spring-projects/spring-framework/wiki/Downloading-Spring-artifacts)
+wiki page.
 
-## Learn
+## Docs
 
 The Spring Frameworks maintains
 [reference documentation](http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/),
 Github [wiki pages](https://github.com/spring-projects/spring-framework/wiki), and an
 [API reference](http://docs.spring.io/spring-framework/docs/current/javadoc-api/).
-
-You can find guides and tutorials on [https://spring.io](https://spring.io/guides).
+There are also [guides and tutorials](https://spring.io/guides) across Spring projects.
 
 ## Build from Source
 
