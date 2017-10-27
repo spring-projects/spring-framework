@@ -17,7 +17,7 @@ Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
 ## Access to Binaries
 
 For access to artifacts or a distribution zip, see the
-[Spring artifacts](https://github.com/spring-projects/spring-framework/wiki/Downloading-Spring-artifacts)
+[Spring Framework Artifacts](https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Artifacts)
 wiki page.
 
 ## Documentation
