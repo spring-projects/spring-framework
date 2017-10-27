@@ -748,7 +748,7 @@ on literals. Varargs are also supported.
 [subs="verbatim,quotes"]
 ----
 	// string literal, evaluates to "bc"
-	String c = parser.parseExpression("'abc'.substring(2, 3)").getValue(String.class);
+	String bc = parser.parseExpression("'abc'.substring(1, 3)").getValue(String.class);
 
 	// evaluates to true
 	boolean isMember = parser.parseExpression("isMember('Mihajlo Pupin')").getValue(
