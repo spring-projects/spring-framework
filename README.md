@@ -31,8 +31,7 @@ There are also [guides and tutorials](https://spring.io/guides) across Spring pr
 ## Build from Source
 
 See the [Build from Source](https://github.com/spring-projects/spring-framework/wiki/Build-from-Source)
-wiki page, also [CONTRIBUTING](CONTRIBUTING.md), and the
-[Gradle build and release FAQ](https://github.com/spring-projects/spring-framework/wiki/Gradle-build-and-release-FAQ).
+wiki page and also [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Stay in Touch
 
