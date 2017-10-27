@@ -1,8 +1,8 @@
-## Contributing  to the Spring Framework
+# Contributing  to the Spring Framework
 
 First off, thank you for taking the time to contribute! :+1: :tada: 
 
-**Table of Contents**
+### Table of Contents
 
 * [Code of Conduct](#code-of-conduct)
 * [How to Contribute](#how-to-contribute)
