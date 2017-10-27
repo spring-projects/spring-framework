@@ -1,6 +1,7 @@
-This is the home of the Spring Framework that underlies all
-[Spring projects](https://spring.io/projects). Collectively the Spring Framework and the
-family of related Spring projects make up what we call "Spring".
+# <img src="src/docs/asciidoc/images/spring-framework.png" width="80" height="80"> Spring Framework
+
+This is the home of the Spring Framework, the foundation for all
+[Spring projects](https://spring.io/projects). Together the Spring Framework and the family of Spring projects make up what we call "Spring". 
 
 Spring provides everything you need beyond the Java language to create enterprise
 applications in a wide range of scenarios and architectures. Please read the
@@ -19,7 +20,7 @@ For access to artifacts or a distribution zip, see the
 [Spring artifacts](https://github.com/spring-projects/spring-framework/wiki/Downloading-Spring-artifacts)
 wiki page.
 
-## Docs
+## Documentation
 
 The Spring Frameworks maintains
 [reference documentation](http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/),
