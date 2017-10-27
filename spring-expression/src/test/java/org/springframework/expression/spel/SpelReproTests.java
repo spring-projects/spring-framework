@@ -241,19 +241,21 @@ public class SpelReproTests extends AbstractExpressionTests {
 		EvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
 		assertFalse(propertyAccessor.canRead(context, null, "abc"));
 		assertFalse(propertyAccessor.canWrite(context, null, "abc"));
+
 		try {
 			propertyAccessor.read(context, null, "abc");
 			fail("Should have failed with an IllegalStateException");
 		}
-		catch (IllegalStateException ae) {
-			// success
+		catch (IllegalStateException ex) {
+			// expected
 		}
+
 		try {
 			propertyAccessor.write(context, null, "abc", "foo");
-			fail("Should have failed with an AccessEIllegalStateExceptionxception");
+			fail("Should have failed with an IllegalStateException");
 		}
-		catch (IllegalStateException ae) {
-			// success
+		catch (IllegalStateException ex) {
+			// expected
 		}
 	}
 
