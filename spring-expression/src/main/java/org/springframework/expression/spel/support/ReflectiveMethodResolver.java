@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.expression.spel.support;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -230,6 +231,14 @@ public class ReflectiveMethodResolver implements MethodResolver {
 			}
 			// Also expose methods from java.lang.Class itself
 			result.addAll(Arrays.asList(getMethods(Class.class)));
+			return result;
+		}
+		else if (Proxy.isProxyClass(type)) {
+			Set<Method> result = new LinkedHashSet<Method>();
+			// Expose interface methods (not proxy-declared overrides) for proper vararg introspection
+			for (Class<?> ifc : type.getInterfaces()) {
+				result.addAll(Arrays.asList(getMethods(ifc)));
+			}
 			return result;
 		}
 		else {
