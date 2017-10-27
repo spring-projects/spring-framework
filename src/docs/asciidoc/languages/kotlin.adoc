@@ -741,6 +741,7 @@ Here is a list of pending issues related to Spring + Kotlin support.
 ==== Spring Framework
 
 * https://jira.spring.io/browse/SPR-16057[Unable to use WebTestClient with mock server in Kotlin]
+* https://jira.spring.io/browse/SPR-15942[Support null-safety at generics, varargs and array elements level]
 * https://jira.spring.io/browse/SPR-15413[Add support for Kotlin coroutines]
 
 
