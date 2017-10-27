@@ -1199,7 +1199,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public StringBuffer getRequestURL() {
-		StringBuffer url = new StringBuffer(this.scheme).append("://").append(this.serverName);
+		StringBuffer url = new StringBuffer(this.scheme).append("://").append(getServerName());
 		if (this.serverPort > 0 && ((HTTP.equalsIgnoreCase(this.scheme) && this.serverPort != 80) ||
 				(HTTPS.equalsIgnoreCase(this.scheme) && this.serverPort != 443))) {
 			url.append(':').append(this.serverPort);
