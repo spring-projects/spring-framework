@@ -66,6 +66,13 @@ import org.springframework.web.util.UriBuilderFactory;
  *
  * <p>See the static {@code bindToXxx} entry points for creating an instance.
  *
+ * <p><strong>Warning</strong>: {@code WebTestClient} is not usable yet in Kotlin due to a
+ * <a href="https://youtrack.jetbrains.com/issue/KT-5464">type inference issue</a> which is
+ * expected to be fixed as of Kotlin 1.3. You can watch
+ * <a href="https://jira.spring.io/browse/SPR-16057">SPR-16057</a> for up-to-date information.
+ * Meanwhile, the proposed alternative is to use directly {@link WebClient} with its Reactor
+ * and Spring Kotlin extensions to perform integration tests on an embedded WebFlux server.
+ *
  * @author Rossen Stoyanchev
  * @since 5.0
  */

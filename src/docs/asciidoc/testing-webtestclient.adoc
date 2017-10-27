@@ -8,6 +8,10 @@ to any server over an HTTP connection. It can also bind directly to WebFlux appl
 with <<testing.adoc#mock-objects-web-reactive,mock request and response>> objects,
 without the need for an HTTP server.
 
+[NOTE]
+====
+`WebTestClient` is not usable yet in Kotlin, see <<languages.adoc#kotlin-webtestclient-issue, this section>> for more details.
+====
 
 
 

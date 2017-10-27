@@ -654,6 +654,17 @@ class SpecificationLikeTests {
 ----
 
 
+[[kotlin-webtestclient-issue]]
+==== `WebTestClient` type inference issue in Kotlin
+
+`WebTestClient` is not usable yet in Kotlin due to a
+https://youtrack.jetbrains.com/issue/KT-5464[type inference issue] which is
+expected to be fixed as of Kotlin 1.3. You can watch
+https://jira.spring.io/browse/SPR-16057[SPR-16057] for up-to-date information. Meanwhile,
+the proposed alternative is to use directly `WebClient` with its Reactor and Spring Kotlin
+extensions to perform integration tests on an embedded WebFlux server.
+
+
 
 
 [[kotlin-getting-started]]
@@ -729,6 +740,7 @@ Here is a list of pending issues related to Spring + Kotlin support.
 
 ==== Spring Framework
 
+* https://jira.spring.io/browse/SPR-16057[Unable to use WebTestClient with mock server in Kotlin]
 * https://jira.spring.io/browse/SPR-15413[Add support for Kotlin coroutines]
 
 
