@@ -99,10 +99,10 @@ source code into your IDE.
 
 ### Source Code Style
 
-The wiki page
-[Spring Framework Code Style](https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Code-Style)
-defines the source file coding standards we use while the [IDEA formatting](https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-IDEA-Code-Formatting)
-page describes the changes we make to the default code formatting settings in IntelliJ IDEA.
+The wiki pages
+[Code Style](https://github.com/spring-projects/spring-framework/wiki/Code-Style) and
+[IntelliJ IDEA Editor Settings](https://github.com/spring-projects/spring-framework/wiki/IntelliJ-IDEA-Editor-Settings)
+defines the source file coding standards we use along with some IDEA editor settings we customize.
 
 ### Reference Docs
 
