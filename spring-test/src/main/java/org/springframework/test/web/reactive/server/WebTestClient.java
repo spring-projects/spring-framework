@@ -75,6 +75,9 @@ import org.springframework.web.util.UriBuilderFactory;
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @see StatusAssertions
+ * @see HeaderAssertions
+ * @see JsonPathAssertions
  */
 public interface WebTestClient {
 
@@ -154,7 +157,7 @@ public interface WebTestClient {
 	WebTestClient mutateWith(WebTestClientConfigurer configurer);
 
 
-	// Static, factory methods
+	// Static factory methods
 
 	/**
 	 * Use this server setup to test one `@Controller` at a time.
@@ -261,8 +264,8 @@ public interface WebTestClient {
 		 * Shortcut to build the test client.
 		 */
 		WebTestClient build();
-
 	}
+
 
 	/**
 	 * Specification for customizing controller configuration equivalent to, and
@@ -324,8 +327,8 @@ public interface WebTestClient {
 		 * @see WebFluxConfigurer#configureViewResolvers
 		 */
 		ControllerSpec viewResolvers(Consumer<ViewResolverRegistry> consumer);
-
 	}
+
 
 	/**
 	 * Specification for customizing router function configuration.
@@ -336,8 +339,8 @@ public interface WebTestClient {
 		 * Configure handler strategies.
 		 */
 		RouterFunctionSpec handlerStrategies(HandlerStrategies handlerStrategies);
-
 	}
+
 
 	/**
 	 * Steps for customizing the {@link WebClient} used to test with
@@ -433,7 +436,6 @@ public interface WebTestClient {
 		 * Build the {@link WebTestClient} instance.
 		 */
 		WebTestClient build();
-
 	}
 
 
@@ -470,8 +472,8 @@ public interface WebTestClient {
 		 * @return spec to add headers or perform the exchange
 		 */
 		S uri(Function<UriBuilder, URI> uriFunction);
-
 	}
+
 
 	/**
 	 * Specification for adding request headers and performing an exchange.
@@ -570,8 +572,8 @@ public interface WebTestClient {
 		 * @return spec for decoding the response
 		 */
 		ResponseSpec exchange();
-
 	}
+
 
 	interface RequestBodySpec extends RequestHeadersSpec<RequestBodySpec> {
 		/**
@@ -617,12 +619,12 @@ public interface WebTestClient {
 		 * @return a {@code Mono} with the response
 		 */
 		RequestHeadersSpec<?> syncBody(Object body);
-
 	}
 
-	interface RequestHeadersUriSpec<S extends RequestHeadersSpec<S>>
-			extends UriSpec<S>, RequestHeadersSpec<S> {
+
+	interface RequestHeadersUriSpec<S extends RequestHeadersSpec<S>> extends UriSpec<S>, RequestHeadersSpec<S> {
 	}
+
 
 	interface RequestBodyUriSpec extends RequestBodySpec, RequestHeadersUriSpec<RequestBodySpec> {
 	}
@@ -698,6 +700,7 @@ public interface WebTestClient {
 		<T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementType);
 	}
 
+
 	/**
 	 * Spec for expectations on the response body decoded to a single Object.
 	 */
@@ -718,8 +721,8 @@ public interface WebTestClient {
 		 * decoded response content.
 		 */
 		EntityExchangeResult<B> returnResult();
-
 	}
+
 
 	/**
 	 * Spec for expectations on the response body decoded to a List.
@@ -745,8 +748,8 @@ public interface WebTestClient {
 		 */
 		@SuppressWarnings("unchecked")
 		ListBodySpec<E> doesNotContain(E... elements);
-
 	}
+
 
 	/**
 	 * Spec for expectations on the response body content.
@@ -791,7 +794,6 @@ public interface WebTestClient {
 		 * raw response content.
 		 */
 		EntityExchangeResult<byte[]> returnResult();
-
 	}
 
 }

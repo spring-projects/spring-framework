@@ -30,10 +30,8 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.http.client.reactive.MockClientHttpRequest;
 import org.springframework.mock.http.client.reactive.MockClientHttpResponse;
 
-import static junit.framework.TestCase.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link HeaderAssertions}.
@@ -41,11 +39,10 @@ import static org.mockito.Mockito.mock;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class HeaderAssertionsTests {
-
+public class HeaderAssertionTests {
 
 	@Test
-	public void valueEquals() throws Exception {
+	public void valueEquals() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("foo", "bar");
 		HeaderAssertions assertions = headerAssertions(headers);
@@ -79,7 +76,7 @@ public class HeaderAssertionsTests {
 	}
 
 	@Test
-	public void valueEqualsWithMultipeValues() throws Exception {
+	public void valueEqualsWithMultipeValues() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("foo", "bar");
 		headers.add("foo", "baz");
@@ -107,7 +104,7 @@ public class HeaderAssertionsTests {
 	}
 
 	@Test
-	public void valueMatches() throws Exception {
+	public void valueMatches() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
 		HeaderAssertions assertions = headerAssertions(headers);
@@ -122,14 +119,13 @@ public class HeaderAssertionsTests {
 		catch (AssertionError error) {
 			Throwable cause = error.getCause();
 			assertNotNull(cause);
-			assertEquals("Response header [Content-Type]='application/json;charset=UTF-8' " +
-					"does not match '.*ISO-8859-1.*'", cause.getMessage());
+			assertEquals("Response header 'Content-Type'=[application/json;charset=UTF-8] " +
+					"does not match [.*ISO-8859-1.*]", cause.getMessage());
 		}
 	}
 
 	@Test
-	public void cacheControl() throws Exception {
-
+	public void cacheControl() {
 		CacheControl control = CacheControl.maxAge(1, TimeUnit.HOURS).noTransform();
 
 		HttpHeaders headers = new HttpHeaders();
@@ -147,6 +143,7 @@ public class HeaderAssertionsTests {
 			// Expected
 		}
 	}
+
 
 	private HeaderAssertions headerAssertions(HttpHeaders responseHeaders) {
 		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("/"));
