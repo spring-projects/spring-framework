@@ -28,21 +28,15 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 
-import static org.junit.Assert.assertEquals;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.test.util.AssertionErrors.fail;
-import static org.springframework.test.web.client.ExpectedCount.max;
-import static org.springframework.test.web.client.ExpectedCount.min;
-import static org.springframework.test.web.client.ExpectedCount.once;
-import static org.springframework.test.web.client.ExpectedCount.times;
-import static org.springframework.test.web.client.ExpectedCount.twice;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static org.junit.Assert.*;
+import static org.springframework.http.HttpMethod.*;
+import static org.springframework.test.web.client.ExpectedCount.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
 
 /**
  * Unit tests for {@link SimpleRequestExpectationManager}.
+ *
  * @author Rossen Stoyanchev
  */
 public class SimpleRequestExpectationManagerTests {
@@ -188,16 +182,17 @@ public class SimpleRequestExpectationManagerTests {
 
 	@Test  // SPR-16132
 	public void sequentialRequestsWithFirstFailing() throws Exception {
-		this.manager.expectRequest(once(), requestTo("/foo")).andExpect(method(GET))
-				.andRespond(request -> { throw new SocketException("pseudo network error"); });
-		this.manager.expectRequest(once(), requestTo("/handle-error")).andExpect(method(POST)).andRespond(withSuccess());
+		this.manager.expectRequest(once(), requestTo("/foo")).
+				andExpect(method(GET)).andRespond(request -> { throw new SocketException("pseudo network error"); });
+		this.manager.expectRequest(once(), requestTo("/handle-error")).
+				andExpect(method(POST)).andRespond(withSuccess());
 
 		try {
 			this.manager.validateRequest(createRequest(GET, "/foo"));
-			fail("expected exception");
+			fail("Expected SocketException");
 		}
-		catch (SocketException e) {
-			//expected
+		catch (SocketException ex) {
+			// expected
 		}
 		this.manager.validateRequest(createRequest(POST, "/handle-error"));
 		this.manager.verify();
