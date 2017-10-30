@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.client;
 
+import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -30,6 +31,7 @@ import org.springframework.mock.http.client.MockClientHttpRequest;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.test.util.AssertionErrors.fail;
 import static org.springframework.test.web.client.ExpectedCount.max;
 import static org.springframework.test.web.client.ExpectedCount.min;
 import static org.springframework.test.web.client.ExpectedCount.once;
@@ -182,6 +184,23 @@ public class SimpleRequestExpectationManagerTests {
 		this.manager.validateRequest(createRequest(GET, "/foo"));
 		this.manager.validateRequest(createRequest(GET, "/bar"));
 		this.manager.validateRequest(createRequest(GET, "/bar"));
+	}
+
+	@Test  // SPR-16132
+	public void sequentialRequestsWithFirstFailing() throws Exception {
+		this.manager.expectRequest(once(), requestTo("/foo")).andExpect(method(GET))
+				.andRespond(request -> { throw new SocketException("pseudo network error"); });
+		this.manager.expectRequest(once(), requestTo("/handle-error")).andExpect(method(POST)).andRespond(withSuccess());
+
+		try {
+			this.manager.validateRequest(createRequest(GET, "/foo"));
+			fail("expected exception");
+		}
+		catch (SocketException e) {
+			//expected
+		}
+		this.manager.validateRequest(createRequest(POST, "/handle-error"));
+		this.manager.verify();
 	}
 
 

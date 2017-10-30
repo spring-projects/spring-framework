@@ -80,9 +80,12 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 			if (requests.isEmpty()) {
 				afterExpectationsDeclared();
 			}
-			ClientHttpResponse response = validateRequestInternal(request);
-			requests.add(request);
-			return response;
+			try {
+				return validateRequestInternal(request);
+			}
+			finally {
+				requests.add(request);
+			}
 		}
 	}
 
