@@ -50,7 +50,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.config.EnableWebFlux;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
@@ -83,8 +82,7 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 		Mono<ClientResponse> result = webClient
 				.post()
 				.uri("/requestPart")
-				.contentType(MediaType.MULTIPART_FORM_DATA)
-				.body(BodyInserters.fromMultipartData(generateBody()))
+				.syncBody(generateBody())
 				.exchange();
 
 		StepVerifier
@@ -98,8 +96,7 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 		Mono<String> result = webClient
 				.post()
 				.uri("/requestBodyMap")
-				.contentType(MediaType.MULTIPART_FORM_DATA)
-				.body(BodyInserters.fromMultipartData(generateBody()))
+				.syncBody(generateBody())
 				.retrieve()
 				.bodyToMono(String.class);
 
@@ -114,8 +111,7 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 		Mono<String> result = webClient
 				.post()
 				.uri("/requestBodyFlux")
-				.contentType(MediaType.MULTIPART_FORM_DATA)
-				.body(BodyInserters.fromMultipartData(generateBody()))
+				.syncBody(generateBody())
 				.retrieve()
 				.bodyToMono(String.class);
 
@@ -130,8 +126,7 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 		Mono<String> result = webClient
 				.post()
 				.uri("/modelAttribute")
-				.contentType(MediaType.MULTIPART_FORM_DATA)
-				.body(BodyInserters.fromMultipartData(generateBody()))
+				.syncBody(generateBody())
 				.retrieve()
 				.bodyToMono(String.class);
 

@@ -99,12 +99,11 @@ public class DefaultClientCodecConfigurer extends AbstractCodecConfigurer implem
 				return Collections.emptyList();
 			}
 			List<HttpMessageWriter<?>> result = super.getTypedWriters();
-			result.add(new FormHttpMessageWriter());
-			result.add(getMultipartHttpMessageWriter());
+			result.add(new MultipartHttpMessageWriter(getPartWriters(), new FormHttpMessageWriter()));
 			return result;
 		}
 
-		private MultipartHttpMessageWriter getMultipartHttpMessageWriter() {
+		private List<HttpMessageWriter<?>> getPartWriters() {
 			List<HttpMessageWriter<?>> partWriters;
 			if (this.multipartCodecs != null) {
 				partWriters = this.multipartCodecs.getWriters();
@@ -122,7 +121,7 @@ public class DefaultClientCodecConfigurer extends AbstractCodecConfigurer implem
 				}
 				partWriters.addAll(super.getCatchAllWriters());
 			}
-			return new MultipartHttpMessageWriter(partWriters);
+			return partWriters;
 		}
 	}
 

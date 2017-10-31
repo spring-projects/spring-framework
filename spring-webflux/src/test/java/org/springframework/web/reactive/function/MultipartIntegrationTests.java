@@ -52,8 +52,7 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 		Mono<ClientResponse> result = webClient
 				.post()
 				.uri("http://localhost:" + this.port + "/multipartData")
-				.contentType(MediaType.MULTIPART_FORM_DATA)
-				.body(BodyInserters.fromMultipartData(generateBody()))
+				.syncBody(generateBody())
 				.exchange();
 
 		StepVerifier
@@ -67,8 +66,7 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 		Mono<ClientResponse> result = webClient
 				.post()
 				.uri("http://localhost:" + this.port + "/parts")
-				.contentType(MediaType.MULTIPART_FORM_DATA)
-				.body(BodyInserters.fromMultipartData(generateBody()))
+				.syncBody(generateBody())
 				.exchange();
 
 		StepVerifier

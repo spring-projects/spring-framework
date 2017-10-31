@@ -27,7 +27,9 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Sebastien Deleuze
@@ -43,17 +45,18 @@ public class FormHttpMessageWriterTests {
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
 				MediaType.APPLICATION_FORM_URLENCODED));
 
+		// No generic information
 		assertTrue(this.writer.canWrite(
 				ResolvableType.forInstance(new LinkedMultiValueMap<String, String>()),
 				MediaType.APPLICATION_FORM_URLENCODED));
 
 		assertFalse(this.writer.canWrite(
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
-				MediaType.APPLICATION_FORM_URLENCODED));
+				null));
 
 		assertFalse(this.writer.canWrite(
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, Object.class, String.class),
-				MediaType.APPLICATION_FORM_URLENCODED));
+				null));
 
 		assertFalse(this.writer.canWrite(
 				ResolvableType.forClassWithGenerics(Map.class, String.class, String.class),

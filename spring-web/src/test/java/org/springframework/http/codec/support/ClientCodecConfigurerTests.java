@@ -42,7 +42,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
-import org.springframework.http.codec.FormHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
@@ -56,8 +55,11 @@ import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.MimeTypeUtils;
 
-import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.core.ResolvableType.forClass;
 
 /**
  * Unit tests for {@link ClientCodecConfigurer}.
@@ -90,13 +92,12 @@ public class ClientCodecConfigurerTests {
 	@Test
 	public void defaultWriters() {
 		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
-		assertEquals(11, writers.size());
+		assertEquals(10, writers.size());
 		assertEquals(ByteArrayEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(ByteBufferEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(DataBufferEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(ResourceHttpMessageWriter.class, writers.get(index.getAndIncrement()).getClass());
 		assertStringEncoder(getNextEncoder(writers), true);
-		assertEquals(FormHttpMessageWriter.class, writers.get(this.index.getAndIncrement()).getClass());
 		assertEquals(MultipartHttpMessageWriter.class, writers.get(this.index.getAndIncrement()).getClass());
 		assertEquals(Jackson2JsonEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(Jackson2SmileEncoder.class, getNextEncoder(writers).getClass());
