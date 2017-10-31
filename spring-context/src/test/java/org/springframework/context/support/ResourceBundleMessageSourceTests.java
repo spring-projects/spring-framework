@@ -162,6 +162,7 @@ public class ResourceBundleMessageSourceTests {
 		assertEquals("Hello, message1", ac.getMessage("hello", args, Locale.ENGLISH));
 
 		// test default message without and with args
+		assertNull(ac.getMessage(null, null, null, Locale.ENGLISH));
 		assertEquals("default", ac.getMessage(null, null, "default", Locale.ENGLISH));
 		assertEquals("default", ac.getMessage(null, args, "default", Locale.ENGLISH));
 		assertEquals("{0}, default", ac.getMessage(null, null, "{0}, default", Locale.ENGLISH));

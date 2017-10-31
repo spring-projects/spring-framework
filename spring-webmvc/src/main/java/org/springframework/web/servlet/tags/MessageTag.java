@@ -300,6 +300,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 		this.arguments = null;
 	}
 
+
 	/**
 	 * Resolve the specified message into a concrete message String.
 	 * The returned message String should be unescaped.
@@ -322,8 +323,9 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 
 			if (this.text != null) {
 				// We have a fallback text to consider.
-				return messageSource.getMessage(
+				String msg = messageSource.getMessage(
 						this.code, argumentsArray, this.text, getRequestContext().getLocale());
+				return (msg != null ? msg : "");
 			}
 			else {
 				// We have no fallback text to consider.
