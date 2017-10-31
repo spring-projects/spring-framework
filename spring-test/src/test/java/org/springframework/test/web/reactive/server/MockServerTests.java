@@ -15,45 +15,49 @@
  */
 package org.springframework.test.web.reactive.server;
 
+import java.util.Arrays;
+
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
-import org.springframework.web.server.WebHandler;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
- * Mock server integration test scenarios.
+ * Test scenarios involving a mock server.
  * @author Rossen Stoyanchev
  */
-public class MockServerIntegrationTests {
+public class MockServerTests {
 
 
-	@Test
-	public void sameSessionInstanceAfterMutate() throws Exception {
+	@Test // SPR-15674 (in comments)
+	public void mutateDoesNotCreateNewSession() throws Exception {
 
-		WebHandler webHandler = exchange -> {
-			if (exchange.getRequest().getURI().getPath().equals("/set")) {
-				return exchange.getSession()
-						.doOnNext(session -> session.getAttributes().put("foo", "bar"))
-						.then();
-			}
-			else {
-				return exchange.getSession()
-						.map(session -> session.getAttributeOrDefault("foo", "none"))
-						.flatMap(value -> {
-							byte[] bytes = value.getBytes(UTF_8);
-							DataBuffer buffer = new DefaultDataBufferFactory().wrap(bytes);
-							return exchange.getResponse().writeWith(Mono.just(buffer));
-						});
-			}
-		};
-
-		WebTestClient client = new DefaultMockServerSpec(webHandler).configureClient().build();
+		WebTestClient client = WebTestClient
+				.bindToWebHandler(exchange -> {
+					if (exchange.getRequest().getURI().getPath().equals("/set")) {
+						return exchange.getSession()
+								.doOnNext(session -> session.getAttributes().put("foo", "bar"))
+								.then();
+					}
+					else {
+						return exchange.getSession()
+								.map(session -> session.getAttributeOrDefault("foo", "none"))
+								.flatMap(value -> {
+									byte[] bytes = value.getBytes(UTF_8);
+									DataBuffer buffer = new DefaultDataBufferFactory().wrap(bytes);
+									return exchange.getResponse().writeWith(Mono.just(buffer));
+								});
+					}
+				})
+				.build();
 
 		// Set the session attribute
 		EntityExchangeResult<Void> result = client.get().uri("/set").exchange()
@@ -69,10 +73,13 @@ public class MockServerIntegrationTests {
 				.expectBody(String.class).isEqualTo("bar");
 	}
 
-	@Test
+	@Test // SPR-16059
 	public void mutateDoesCopy() throws Exception {
 
-		WebTestClient.Builder builder = WebTestClient.bindToWebHandler(exchange -> exchange.getResponse().setComplete()).configureClient();
+		WebTestClient.Builder builder = WebTestClient
+				.bindToWebHandler(exchange -> exchange.getResponse().setComplete())
+				.configureClient();
+
 		builder.filter((request, next) -> next.exchange(request));
 		builder.defaultHeader("foo", "bar");
 		builder.defaultCookie("foo", "bar");
@@ -103,5 +110,30 @@ public class MockServerIntegrationTests {
 		clientFromMutatedBuilder.mutate().defaultCookies(cookies -> assertEquals(2, cookies.size()));
 	}
 
+	@Test // SPR-16124
+	public void exchangeResultHasCookieHeaders() throws Exception {
+
+		ExchangeResult result = WebTestClient
+				.bindToWebHandler(exchange -> {
+					ServerHttpResponse response = exchange.getResponse();
+					if (exchange.getRequest().getURI().getPath().equals("/cookie")) {
+						response.addCookie(ResponseCookie.from("a", "alpha").path("/pathA").build());
+						response.addCookie(ResponseCookie.from("b", "beta").path("/pathB").build());
+					}
+					else {
+						response.setStatusCode(HttpStatus.NOT_FOUND);
+					}
+					return response.setComplete();
+				})
+				.build()
+				.get().uri("/cookie").cookie("a", "alpha").cookie("b", "beta")
+				.exchange()
+				.expectStatus().isOk()
+				.expectHeader().valueEquals(HttpHeaders.SET_COOKIE, "a=alpha; Path=/pathA", "b=beta; Path=/pathB")
+				.expectBody().isEmpty();
+
+		assertEquals(Arrays.asList("a=alpha", "b=beta"),
+				result.getRequestHeaders().get(HttpHeaders.COOKIE));
+	}
 
 }

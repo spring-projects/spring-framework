@@ -480,14 +480,16 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 		@Override
 		public MockServerHttpRequest body(Publisher<? extends DataBuffer> body) {
-			applyCookies();
+			applyCookiesIfNecessary();
 			return new MockServerHttpRequest(this.method, this.url, this.contextPath,
 					this.headers, this.cookies, this.remoteAddress, body);
 		}
 
-		private void applyCookies() {
-			this.cookies.values().stream().flatMap(Collection::stream)
-					.forEach(cookie -> this.headers.add(HttpHeaders.COOKIE, cookie.toString()));
+		private void applyCookiesIfNecessary() {
+			if (this.headers.get(HttpHeaders.COOKIE) == null) {
+				this.cookies.values().stream().flatMap(Collection::stream)
+						.forEach(cookie -> this.headers.add(HttpHeaders.COOKIE, cookie.toString()));
+			}
 		}
 	}
 
