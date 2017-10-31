@@ -32,7 +32,6 @@ import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerSentEvent;
-import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
@@ -57,7 +56,7 @@ public abstract class BodyInserters {
 			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
 
 	private static final ResolvableType MULTIPART_VALUE_TYPE = ResolvableType.forClassWithGenerics(
-			MultiValueMap.class, String.class, Part.class);
+			MultiValueMap.class, String.class, Object.class);
 
 	private static final BodyInserter<Void, ReactiveHttpOutputMessage> EMPTY =
 					(response, context) -> response.setComplete();
@@ -177,8 +176,14 @@ public abstract class BodyInserters {
 	}
 
 	/**
-	 * Return a {@code BodyInserter} that writes the given {@code MultiValueMap} as URL-encoded
-	 * form data.
+	 * Return a {@code BodyInserter} that writes the given {@code MultiValueMap}
+	 * as URL-encoded form data.
+	 *
+	 * <p><strong>Note:</strong> you can also use the {@code syncBody(Object)}
+	 * method in the request builders of both the {@code WebClient} and
+	 * {@code WebTestClient}. In that case setting the content type is not
+	 * required. Just make sure the map contains String values only.
+	 *
 	 * @param formData the form data to write to the output message
 	 * @return a {@code BodyInserter} that writes form data
 	 */
@@ -198,8 +203,15 @@ public abstract class BodyInserters {
 	}
 
 	/**
-	 * Return a {@code BodyInserter} that writes the given {@code MultiValueMap} as Multipart
-	 * data.
+	 * Return a {@code BodyInserter} that writes the given {@code MultiValueMap}
+	 * as multipart data.
+	 *
+	 * <p><strong>Note:</strong> you can also use the {@code syncBody(Object)}
+	 * method in the request builders of both the {@code WebClient} and
+	 * {@code WebTestClient}. In that case setting the content type is optional.
+	 * Just make sure the {@code MultiValueMap} contains at least one non-String
+	 * value or otherwise it would be interpreted as plan form data.
+	 *
 	 * @param multipartData the form data to write to the output message
 	 * @return a {@code BodyInserter} that writes form data
 	 */
