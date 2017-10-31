@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +34,12 @@ import org.springframework.util.Assert;
  * such as the {@link ClientHttpRequestFactory} to operate on.
  *
  * <p>Not intended to be used directly.
- * See {@link org.springframework.web.client.RestTemplate}.
+ * See {@link org.springframework.web.client.RestTemplate} for an entry point.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0
+ * @see ClientHttpRequestFactory
  * @see org.springframework.web.client.RestTemplate
  */
 public abstract class HttpAccessor {
@@ -56,6 +57,7 @@ public abstract class HttpAccessor {
 	 * <p><b>Note that the standard JDK HTTP library does not support the HTTP PATCH method.
 	 * Configure the Apache HttpComponents or OkHttp request factory to enable PATCH.</b>
 	 * @see #createRequest(URI, HttpMethod)
+	 * @see SimpleClientHttpRequestFactory
 	 * @see org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory
 	 * @see org.springframework.http.client.OkHttp3ClientHttpRequestFactory
 	 */
