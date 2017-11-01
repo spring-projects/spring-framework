@@ -20,7 +20,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
@@ -418,9 +417,13 @@ public class MvcNamespaceTests {
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping);
 		assertNotNull(mapping.getUrlMap().get("/resources/**"));
-		ResourceHttpRequestHandler handler = appContext.getBean((String) mapping.getUrlMap().get("/resources/**"),
-				ResourceHttpRequestHandler.class);
+		String beanName = (String) mapping.getUrlMap().get("/resources/**");
+		ResourceHttpRequestHandler handler = appContext.getBean(beanName, ResourceHttpRequestHandler.class);
 		assertNotNull(handler);
+
+		assertNotNull(handler.getUrlPathHelper());
+		assertEquals(1, handler.getLocationCharsets().size());
+		assertEquals(StandardCharsets.ISO_8859_1, handler.getLocationCharsets().values().iterator().next());
 
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
 		assertThat(resolvers, Matchers.hasSize(4));
@@ -438,6 +441,10 @@ public class MvcNamespaceTests {
 				Matchers.instanceOf(FixedVersionStrategy.class));
 		assertThat(versionResolver.getStrategyMap().get("/**"),
 				Matchers.instanceOf(ContentVersionStrategy.class));
+
+		PathResourceResolver pathResolver = (PathResourceResolver) resolvers.get(3);
+		assertEquals(1, pathResolver.getLocationCharsets().size());
+		assertEquals(StandardCharsets.ISO_8859_1, handler.getLocationCharsets().values().iterator().next());
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
 		assertThat(transformers, Matchers.hasSize(3));

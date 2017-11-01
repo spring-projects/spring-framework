@@ -481,7 +481,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		Assert.state(this.servletContext != null, "No ServletContext set");
 
 		ResourceHandlerRegistry registry = new ResourceHandlerRegistry(this.applicationContext,
-				this.servletContext, mvcContentNegotiationManager());
+				this.servletContext, mvcContentNegotiationManager(), mvcUrlPathHelper());
 		addResourceHandlers(registry);
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();

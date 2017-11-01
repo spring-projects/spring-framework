@@ -18,7 +18,9 @@ package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +33,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
@@ -55,6 +56,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.support.WebContentGenerator;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * {@code HttpRequestHandler} that serves static resources in an optimized way
@@ -96,6 +98,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	private final List<Resource> locations = new ArrayList<>(4);
 
+	private final Map<Resource, Charset> locationCharsets = new HashMap<>(4);
+
 	private final List<ResourceResolver> resourceResolvers = new ArrayList<>(4);
 
 	private final List<ResourceTransformer> resourceTransformers = new ArrayList<>(4);
@@ -115,6 +119,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	@Nullable
 	private CorsConfiguration corsConfiguration;
 
+	@Nullable
+	private UrlPathHelper urlPathHelper;
+
 
 	public ResourceHttpRequestHandler() {
 		super(HttpMethod.GET.name(), HttpMethod.HEAD.name());
@@ -124,6 +131,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	/**
 	 * Set the {@code List} of {@code Resource} paths to use as sources
 	 * for serving static resources.
+	 * @see #setLocationCharsets(Map)
 	 */
 	public void setLocations(List<Resource> locations) {
 		Assert.notNull(locations, "Locations list must not be null");
@@ -137,6 +145,31 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 */
 	public List<Resource> getLocations() {
 		return this.locations;
+	}
+
+	/**
+	 * Specify charsets associated with the configured {@link #setLocations(List)
+	 * locations}. This is supported for
+	 * {@link org.springframework.core.io.UrlResource URL resources} such as a
+	 * file or an HTTP URL location and is used in {@link PathResourceResolver}
+	 * to correctly encode paths relative to the location.
+	 * <p><strong>Note:</strong> the charset is used only if the
+	 * {@link #setUrlPathHelper urlPathHelper} property is also configured and
+	 * its {@code urlDecode} property is set to true.
+	 * @param locationCharsets charsets by location
+	 * @since 4.3.13
+	 */
+	public void setLocationCharsets(Map<Resource,Charset> locationCharsets) {
+		this.locationCharsets.clear();
+		this.locationCharsets.putAll(locationCharsets);
+	}
+
+	/**
+	 * Return charsets associated with static resource locations.
+	 * @since 4.3.13
+	 */
+	public Map<Resource, Charset> getLocationCharsets() {
+		return Collections.unmodifiableMap(locationCharsets);
 	}
 
 	/**
@@ -249,6 +282,26 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		return this.corsConfiguration;
 	}
 
+	/**
+	 * Provide a reference to the {@link UrlPathHelper} used to map requests to
+	 * static resources. This helps to derive information about the lookup path
+	 * such as whether it is decoded or not.
+	 * @param urlPathHelper a reference to the path helper
+	 * @since 4.3.13
+	 */
+	public void setUrlPathHelper(@Nullable UrlPathHelper urlPathHelper) {
+		this.urlPathHelper = urlPathHelper;
+	}
+
+	/**
+	 * The configured {@link UrlPathHelper}.
+	 * @since 4.3.13
+	 */
+	@Nullable
+	public UrlPathHelper getUrlPathHelper() {
+		return this.urlPathHelper;
+	}
+
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -286,6 +339,10 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 				PathResourceResolver pathResolver = (PathResourceResolver) getResourceResolvers().get(i);
 				if (ObjectUtils.isEmpty(pathResolver.getAllowedLocations())) {
 					pathResolver.setAllowedLocations(getLocations().toArray(new Resource[getLocations().size()]));
+				}
+				if (this.urlPathHelper != null) {
+					pathResolver.setLocationCharsets(this.locationCharsets);
+					pathResolver.setUrlPathHelper(this.urlPathHelper);
 				}
 				break;
 			}

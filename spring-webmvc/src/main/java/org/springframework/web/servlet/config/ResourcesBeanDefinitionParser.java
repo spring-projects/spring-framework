@@ -16,7 +16,11 @@
 
 package org.springframework.web.servlet.config;
 
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -34,6 +38,8 @@ import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.Ordered;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.CacheControl;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
@@ -92,7 +98,10 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
 		registerUrlProvider(context, source);
 
-		String resourceHandlerName = registerResourceHandler(context, element, source);
+		RuntimeBeanReference pathMatcherRef = MvcNamespaceUtils.registerPathMatcher(null, context, source);
+		RuntimeBeanReference pathHelperRef = MvcNamespaceUtils.registerUrlPathHelper(null, context, source);
+
+		String resourceHandlerName = registerResourceHandler(context, element, pathHelperRef, source);
 		if (resourceHandlerName == null) {
 			return null;
 		}
@@ -104,9 +113,6 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 			return null;
 		}
 		urlMap.put(resourceRequestPath, resourceHandlerName);
-
-		RuntimeBeanReference pathMatcherRef = MvcNamespaceUtils.registerPathMatcher(null, context, source);
-		RuntimeBeanReference pathHelperRef = MvcNamespaceUtils.registerUrlPathHelper(null, context, source);
 
 		RootBeanDefinition handlerMappingDef = new RootBeanDefinition(SimpleUrlHandlerMapping.class);
 		handlerMappingDef.setSource(source);
@@ -156,7 +162,9 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	@Nullable
-	private String registerResourceHandler(ParserContext context, Element element, @Nullable Object source) {
+	private String registerResourceHandler(ParserContext context, Element element,
+			RuntimeBeanReference pathHelperRef, @Nullable Object source) {
+
 		String locationAttr = element.getAttribute("location");
 		if (!StringUtils.hasText(locationAttr)) {
 			String message = "The 'location' attribute is required.";
@@ -164,15 +172,28 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 			return null;
 		}
 
-		ManagedList<String> locations = new ManagedList<>();
-		locations.addAll(Arrays.asList(StringUtils.commaDelimitedListToStringArray(locationAttr)));
+		String[] locationValues = StringUtils.commaDelimitedListToStringArray(locationAttr);
+		ManagedList<Object> locations = new ManagedList<>();
+		Map<Resource, Charset> locationCharsets = new HashMap<>();
+		ResourceLoader resourceLoader = context.getReaderContext().getResourceLoader();
+
+		if (resourceLoader != null) {
+			List<Resource> resources = new ArrayList<>();
+			MvcNamespaceUtils.loadResourceLocations(locationValues, resourceLoader, resources, locationCharsets);
+			locations.addAll(resources);
+		}
+		else {
+			locations.addAll(Arrays.asList(locationValues));
+		}
 
 		RootBeanDefinition resourceHandlerDef = new RootBeanDefinition(ResourceHttpRequestHandler.class);
 		resourceHandlerDef.setSource(source);
 		resourceHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 
 		MutablePropertyValues values = resourceHandlerDef.getPropertyValues();
+		values.add("urlPathHelper", pathHelperRef);
 		values.add("locations", locations);
+		values.add("locationCharsets", locationCharsets);
 
 		String cacheSeconds = element.getAttribute("cache-period");
 		if (StringUtils.hasText(cacheSeconds)) {
