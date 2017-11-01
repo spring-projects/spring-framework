@@ -116,7 +116,7 @@ class DefaultComparatorUnitTests {
 
 		assertThat(comparator.canCompare(2,1)).isTrue();
 		assertThat(comparator.canCompare("abc","def")).isTrue();
-		assertThat(comparator.canCompare("abc",3)).isTrue();
+		assertThat(comparator.canCompare("abc",3)).isFalse();
 		assertThat(comparator.canCompare(String.class,3)).isFalse();
 	}
 
