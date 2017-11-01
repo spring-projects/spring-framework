@@ -221,11 +221,8 @@ public abstract class Operator extends SpelNodeImpl {
 			return true;
 		}
 
-		if (left instanceof Comparable && right instanceof Comparable) {
-			Class<?> ancestor = ClassUtils.determineCommonAncestor(left.getClass(), right.getClass());
-			if (ancestor != null && Comparable.class.isAssignableFrom(ancestor)) {
-				return (context.getTypeComparator().compare(left, right) == 0);
-			}
+		if (context.getTypeComparator().canCompare(left, right)) {
+			return context.getTypeComparator().compare(left, right) == 0;
 		}
 
 		return false;
