@@ -51,6 +51,7 @@ import org.springframework.messaging.simp.SimpAttributes;
 import org.springframework.messaging.simp.SimpAttributesContextHolder;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.support.MessageBuilder;
@@ -159,7 +160,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 	@Test
 	public void subscribeEventDestinationVariableResolution() {
-		Message<?> message = createMessage("/pre/sub/bar/value");
+		Message<?> message = createMessage(SimpMessageType.SUBSCRIBE, "/pre/sub/bar/value", null);
 		this.messageHandler.registerHandler(this.testController);
 		this.messageHandler.handleMessage(message);
 
@@ -328,7 +329,11 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	private Message<?> createMessage(String destination, Map<String, Object> headers) {
-		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create();
+		return createMessage(SimpMessageType.MESSAGE, destination, headers);
+	}
+
+	private Message<?> createMessage(SimpMessageType messageType, String destination, Map<String, Object> headers) {
+		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(messageType);
 		accessor.setSessionId("session1");
 		accessor.setSessionAttributes(new HashMap<>());
 		accessor.setDestination(destination);

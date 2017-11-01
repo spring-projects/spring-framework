@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,11 +74,8 @@ public class SimpMessageTypeMessageCondition extends AbstractMessageCondition<Si
 	@Override
 	@Nullable
 	public SimpMessageTypeMessageCondition getMatchingCondition(Message<?> message) {
-		Object actualMessageType = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
-		if (actualMessageType == null) {
-			return null;
-		}
-		return this;
+		SimpMessageType actual = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
+		return (actual != null && actual.equals(this.messageType) ? this : null);
 	}
 
 	@Override
