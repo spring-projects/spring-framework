@@ -361,9 +361,9 @@ server.start();
 [NOTE]
 ====
 To deploy as a WAR to a Servlet 3.1+ container, wrap `HttpHandler` with
-`ServletHttpHandlerAdapter` and register that as a `Servlet`. Use
-{api-spring-framework}/web/reactive/support/AbstractServletHttpHandlerAdapterInitializer.html[AbstractServletHttpHandlerAdapterInitializer]
-to automate the required Servlet container configuration.
+`ServletHttpHandlerAdapter` and register that as a `Servlet`.
+This can be automated through the use of
+{api-spring-framework}/web/server/adapter/AbstractReactiveWebInitializer.html[AbstractReactiveWebInitializer].
 ====
 
 

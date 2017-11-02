@@ -30,13 +30,13 @@ import org.springframework.web.WebApplicationInitializer;
  * implementations that register a {@link ServletHttpHandlerAdapter} in the
  * servlet context.
  *
- * <p>See {@link AbstractDispatcherHandlerInitializer} if registering a
- * {@link org.springframework.web.reactive.DispatcherHandler DispatcherHandler}.
- *
  * @author Arjen Poutsma
  * @since 5.0
- * @see AbstractDispatcherHandlerInitializer
+ * @deprecated in favor of
+ * {@link org.springframework.web.server.adapter.AbstractReactiveWebInitializer
+ * AbstractReactiveWebInitializer}
  */
+@Deprecated
 public abstract class AbstractServletHttpHandlerAdapterInitializer implements WebApplicationInitializer {
 
 	/**

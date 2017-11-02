@@ -37,13 +37,13 @@ import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
  * implementations that register a {@link DispatcherHandler} in the servlet
  * context, wrapping it in a {@link ServletHttpHandlerAdapter}.
  *
- * <p>Most applications should consider extending the Spring Java config, sub-class
- * {@link AbstractAnnotationConfigDispatcherHandlerInitializer}.
- *
  * @author Arjen Poutsma
  * @since 5.0
- * @see AbstractServletHttpHandlerAdapterInitializer
+ * @deprecated in favor of
+ * {@link org.springframework.web.server.adapter.AbstractReactiveWebInitializer
+ * AbstractReactiveWebInitializer}
  */
+@Deprecated
 public abstract class AbstractDispatcherHandlerInitializer implements WebApplicationInitializer {
 
 	/**

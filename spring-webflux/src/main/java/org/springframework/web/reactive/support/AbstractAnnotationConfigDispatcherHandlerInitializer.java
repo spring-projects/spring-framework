@@ -26,13 +26,12 @@ import org.springframework.util.ObjectUtils;
  * to register a {@code DispatcherHandler}, wrapping it in a
  * {@link ServletHttpHandlerAdapter}, and use Java-based Spring configuration.
  *
- * <p>Concrete implementations are required to implement {@link #getConfigClasses()}.
- * Further template and customization methods are provided by
- * {@link AbstractDispatcherHandlerInitializer}.
- *
  * @author Arjen Poutsma
- * @since 5.0
+ * @deprecated in favor of
+ * {@link org.springframework.web.server.adapter.AbstractReactiveWebInitializer
+ * AbstractReactiveWebInitializer}
  */
+@Deprecated
 public abstract class AbstractAnnotationConfigDispatcherHandlerInitializer
 		extends AbstractDispatcherHandlerInitializer {
 
