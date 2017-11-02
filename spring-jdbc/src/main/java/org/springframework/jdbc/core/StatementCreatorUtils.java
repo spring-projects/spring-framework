@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *	  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -339,9 +339,11 @@ public abstract class StatementCreatorUtils {
 		else if (inValue instanceof SqlValue) {
 			((SqlValue) inValue).setValue(ps, paramIndex);
 		}
-		else if (sqlType == Types.VARCHAR || sqlType == Types.NVARCHAR ||
-				sqlType == Types.LONGVARCHAR || sqlType == Types.LONGNVARCHAR) {
+		else if (sqlType == Types.VARCHAR || sqlType == Types.LONGVARCHAR ) {
 			ps.setString(paramIndex, inValue.toString());
+		}
+		else if (sqlType == Types.NVARCHAR || sqlType == Types.LONGNVARCHAR) {
+			ps.setNString(paramIndex, inValue.toString());
 		}
 		else if ((sqlType == Types.CLOB || sqlType == Types.NCLOB) && isStringValue(inValue.getClass())) {
 			String strVal = inValue.toString();
@@ -364,8 +366,15 @@ public abstract class StatementCreatorUtils {
 					logger.debug("JDBC driver does not support JDBC 4.0 'setClob(int, Reader, long)' method", ex);
 				}
 			}
-			// Fallback: regular setString binding
-			ps.setString(paramIndex, strVal);
+			else {
+				// Fallback: setString or setNString binding
+				if (sqlType == Types.NCLOB) {
+					ps.setNString(paramIndex, strVal);
+				}
+				else {
+					ps.setString(paramIndex, strVal);
+				}
+			}
 		}
 		else if (sqlType == Types.DECIMAL || sqlType == Types.NUMERIC) {
 			if (inValue instanceof BigDecimal) {
