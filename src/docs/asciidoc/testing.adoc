@@ -3116,7 +3116,7 @@ bean by name there (as shown above, assuming that "myDataSource" is the bean id)
 [[testcontext-web-scoped-beans]]
 ==== Testing request and session scoped beans
 
-<<beans-factory-scopes-other,Request and session scoped beans>> have been supported by
+<<core#beans-factory-scopes-other,Request and session scoped beans>> have been supported by
 Spring since the early years, and since Spring 3.2 it's a breeze to test your
 request-scoped and session-scoped beans by following these steps.
 
@@ -3368,7 +3368,7 @@ javadocs for `TestTransaction` for further details.
 	@ContextConfiguration(classes = TestConfig.class)
 	public class ProgrammaticTransactionManagementTests extends
 			AbstractTransactionalJUnit4SpringContextTests {
-	
+
 		@Test
 		public void transactionalTest() {
 			// assert initial state in test database:
@@ -3601,7 +3601,7 @@ scripts against a `DataSource`.
 	public void databaseTest {
 		ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
 		populator.addScripts(
-			new ClassPathResource("test-schema.sql"), 
+			new ClassPathResource("test-schema.sql"),
 			new ClassPathResource("test-data.sql"));
 		populator.setSeparator("@@");
 		populator.execute(this.dataSource);
@@ -4317,10 +4317,10 @@ request that will be discussed below.
 ===== Static Imports
 
 The fluent API in the example above requires a few static imports such as
-`MockMvcRequestBuilders.{asterisk}`, `MockMvcResultMatchers.{asterisk}`, 
+`MockMvcRequestBuilders.{asterisk}`, `MockMvcResultMatchers.{asterisk}`,
 and `MockMvcBuilders.{asterisk}`. An easy way to find these classes is to search for
-types matching __"MockMvc*"__. If using Eclipse, be sure to add them as 
-"favorite static members" in the Eclipse preferences under 
+types matching __"MockMvc*"__. If using Eclipse, be sure to add them as
+"favorite static members" in the Eclipse preferences under
 __Java -> Editor -> Content Assist -> Favorites__. That will allow use of content
 assist after typing the first character of the static method name. Other IDEs (e.g.
 IntelliJ) may not require any additional configuration. Just check the support for code
