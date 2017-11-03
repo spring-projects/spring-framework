@@ -62,7 +62,7 @@ public abstract class AbstractReactiveWebInitializer implements WebApplicationIn
 		Assert.notNull(registration, "Failed to register servlet '" + servletName + "'.");
 
 		registration.setLoadOnStartup(1);
-		registration.addMapping("/");
+		registration.addMapping(getServletMapping());
 		registration.setAsyncSupported(true);
 	}
 
@@ -92,5 +92,14 @@ public abstract class AbstractReactiveWebInitializer implements WebApplicationIn
 	 * {@linkplain #createApplicationContext()}.
 	 */
 	protected abstract Class<?>[] getConfigClasses();
+
+	/**
+	 * Return the Servlet mapping to use. Only the default Servlet mapping '/'
+	 * and path-based Servlet mappings such as '/api/*' are supported.
+	 * <p>By default this is set to '/'.
+	 */
+	protected String getServletMapping() {
+		return "/";
+	}
 
 }
