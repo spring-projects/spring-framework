@@ -707,6 +707,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		Assert.notNull(url, "'url' must not be null");
 		Assert.notNull(method, "'method' must not be null");
 		ClientHttpResponse response = null;
+		boolean isClose = true;
 		try {
 			ClientHttpRequest request = createRequest(url, method);
 			if (requestCallback != null) {
@@ -715,8 +716,16 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			response = request.execute();
 			handleResponse(url, method, response);
 			if (responseExtractor != null) {
-				return responseExtractor.extractData(response);
-			}
+                T entityData = responseExtractor.extractData(response);
+                if(entityData instanceof ResponseEntity){
+                    ResponseEntity responseEntity = (ResponseEntity)entityData;
+                    Object o = responseEntity.getBody();
+                    if(o instanceof InputStreamResource){
+                        isClose = false;
+                    }
+                }
+                return entityData;
+            }
 			else {
 				return null;
 			}
@@ -729,7 +738,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 					" request for \"" + resource + "\": " + ex.getMessage(), ex);
 		}
 		finally {
-			if (response != null) {
+			if (isClose && response != null) {
 				response.close();
 			}
 		}
