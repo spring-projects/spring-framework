@@ -34,4 +34,6 @@ include::core/core-aop-api.adoc[leveloffset=+1]
 
 include::core/core-null-safety.adoc[leveloffset=+1]
 
+include::core/core-databuffer-codec.adoc[leveloffset=+1]
+
 include::core/core-appendix.adoc[leveloffset=+1]

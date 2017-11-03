@@ -434,7 +434,8 @@ for encoding and decoding the HTTP request and response body with Reactive Strea
 It builds on lower level contracts from `spring-core`:
 
 * {api-spring-framework}/core/io/buffer/DataBuffer.html[DataBuffer] -- abstraction for
-byte buffers -- e.g. Netty `ByteBuf`, `java.nio.ByteBuffer`
+byte buffers -- e.g. Netty `ByteBuf`, `java.nio.ByteBuffer`, see
+<<core#databuffers, Data Buffers and Codecs>>.
 * {api-spring-framework}/core/codec/Encoder.html[Encoder] -- serialize a stream of Objects
 to a stream of data buffers
 * {api-spring-framework}/core/codec/Decoder.html[Decoder] -- deserialize a stream of data
