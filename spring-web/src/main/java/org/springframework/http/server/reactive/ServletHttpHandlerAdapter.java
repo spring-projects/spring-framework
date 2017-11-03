@@ -17,11 +17,13 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
+import java.util.Collection;
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletRegistration;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebServlet;
@@ -62,9 +64,9 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 	private int bufferSize = DEFAULT_BUFFER_SIZE;
 
+	@Nullable
+	private String servletPath;
 
-	// Servlet is based on blocking I/O, hence the usage of non-direct, heap-based buffers
-	// (i.e. 'false' as constructor argument)
 	private DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory(false);
 
 
@@ -90,6 +92,18 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		return this.bufferSize;
 	}
 
+	/**
+	 * Return the Servlet path under which the Servlet is deployed by checking
+	 * the Servlet registration from {@link #init(ServletConfig)}.
+	 * @return the path, or an empty string if the Servlet is deployed without
+	 * a prefix (i.e. "/" or "/*"), or {@code null} if this method is invoked
+	 * before the {@link #init(ServletConfig)} Servlet container callback.
+	 */
+	@Nullable
+	public String getServletPath() {
+		return this.servletPath;
+	}
+
 	public void setDataBufferFactory(DataBufferFactory dataBufferFactory) {
 		Assert.notNull(dataBufferFactory, "DataBufferFactory must not be null");
 		this.dataBufferFactory = dataBufferFactory;
@@ -100,7 +114,40 @@ public class ServletHttpHandlerAdapter implements Servlet {
 	}
 
 
-	// The Servlet.service method
+	// Servlet methods...
+
+	@Override
+	public void init(ServletConfig config) {
+		this.servletPath = getServletPath(config);
+	}
+
+	@Nullable
+	private String getServletPath(ServletConfig config) {
+		String name = config.getServletName();
+		ServletRegistration registration = config.getServletContext().getServletRegistration(name);
+		Assert.notNull(registration, "ServletRegistration not found for Servlet '" + name + "'.");
+
+		Collection<String> mappings = registration.getMappings();
+		if (mappings.size() == 1) {
+			String mapping = mappings.iterator().next();
+			if (mapping.equals("/")) {
+				return "";
+			}
+			if (mapping.endsWith("/*")) {
+				String path = mapping.substring(0, mapping.length() - 2);
+				if (!path.isEmpty()) {
+					logger.info("Found Servlet mapping '" + path + "' for Servlet '" + name + "'.");
+				}
+				return path;
+			}
+		}
+
+		throw new IllegalArgumentException("Expected a single Servlet mapping -- " +
+				"either the default Servlet mapping (i.e. '/'), " +
+				"or a path based mapping (e.g. '/*', '/foo/*'). " +
+				"Actual mappings: " + mappings + " for Servlet '" + name + "'.");
+	}
+
 
 	@Override
 	public void service(ServletRequest request, ServletResponse response) throws IOException {
@@ -121,32 +168,30 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		this.httpHandler.handle(httpRequest, httpResponse).subscribe(subscriber);
 	}
 
-	protected ServerHttpRequest createRequest(HttpServletRequest request, AsyncContext context) throws IOException {
+	protected ServerHttpRequest createRequest(HttpServletRequest request, AsyncContext context)
+			throws IOException {
+
+		Assert.notNull(this.servletPath, "servletPath is not initialized.");
+
 		return new ServletServerHttpRequest(
-				request, context, getDataBufferFactory(), getBufferSize());
+				request, context, this.servletPath, getDataBufferFactory(), getBufferSize());
 	}
 
-	protected ServerHttpResponse createResponse(HttpServletResponse response, AsyncContext context) throws IOException {
-		return new ServletServerHttpResponse(
-				response, context, getDataBufferFactory(), getBufferSize());
+	protected ServerHttpResponse createResponse(HttpServletResponse response, AsyncContext context)
+			throws IOException {
+
+		return new ServletServerHttpResponse(response, context, getDataBufferFactory(), getBufferSize());
 	}
-
-
-	// Other Servlet methods...
 
 	@Override
-	public void init(ServletConfig config) {
+	public String getServletInfo() {
+		return "";
 	}
 
 	@Override
 	@Nullable
 	public ServletConfig getServletConfig() {
 		return null;
-	}
-
-	@Override
-	public String getServletInfo() {
-		return "";
 	}
 
 	@Override

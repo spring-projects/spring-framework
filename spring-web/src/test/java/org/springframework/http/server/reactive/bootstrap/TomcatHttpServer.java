@@ -35,6 +35,10 @@ public class TomcatHttpServer extends AbstractHttpServer {
 
 	private final Class<?> wsListener;
 
+	private String contextPath = "";
+
+	private String servletMapping = "/";
+
 	private Tomcat tomcatServer;
 
 
@@ -49,6 +53,15 @@ public class TomcatHttpServer extends AbstractHttpServer {
 	}
 
 
+	public void setContextPath(String contextPath) {
+		this.contextPath = contextPath;
+	}
+
+	public void setServletMapping(String servletMapping) {
+		this.servletMapping = servletMapping;
+	}
+
+
 	@Override
 	protected void initServer() throws Exception {
 		this.tomcatServer = new Tomcat();
@@ -59,9 +72,9 @@ public class TomcatHttpServer extends AbstractHttpServer {
 		ServletHttpHandlerAdapter servlet = initServletAdapter();
 
 		File base = new File(System.getProperty("java.io.tmpdir"));
-		Context rootContext = tomcatServer.addContext("", base.getAbsolutePath());
+		Context rootContext = tomcatServer.addContext(this.contextPath, base.getAbsolutePath());
 		Tomcat.addServlet(rootContext, "httpHandlerServlet", servlet);
-		rootContext.addServletMappingDecoded("/", "httpHandlerServlet");
+		rootContext.addServletMappingDecoded(this.servletMapping, "httpHandlerServlet");
 		if (wsListener != null) {
 			rootContext.addApplicationListener(wsListener.getName());
 		}

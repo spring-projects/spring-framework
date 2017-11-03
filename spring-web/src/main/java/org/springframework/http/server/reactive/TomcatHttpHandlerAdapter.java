@@ -31,6 +31,7 @@ import org.apache.catalina.connector.CoyoteOutputStream;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.util.Assert;
 
 /**
  * {@link ServletHttpHandlerAdapter} extension that uses Tomcat APIs for reading
@@ -42,18 +43,25 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 @WebServlet(asyncSupported = true)
 public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
+
 	public TomcatHttpHandlerAdapter(HttpHandler httpHandler) {
 		super(httpHandler);
 	}
 
 
 	@Override
-	protected ServerHttpRequest createRequest(HttpServletRequest request, AsyncContext cxt) throws IOException {
-		return new TomcatServerHttpRequest(request, cxt, getDataBufferFactory(), getBufferSize());
+	protected ServerHttpRequest createRequest(HttpServletRequest request, AsyncContext asyncContext)
+			throws IOException {
+
+		Assert.notNull(getServletPath(), "servletPath is not initialized.");
+		return new TomcatServerHttpRequest(request, asyncContext, getServletPath(),
+				getDataBufferFactory(), getBufferSize());
 	}
 
 	@Override
-	protected ServerHttpResponse createResponse(HttpServletResponse response, AsyncContext cxt) throws IOException {
+	protected ServerHttpResponse createResponse(HttpServletResponse response, AsyncContext cxt)
+			throws IOException {
+
 		return new TomcatServerHttpResponse(response, cxt, getDataBufferFactory(), getBufferSize());
 	}
 
@@ -61,9 +69,9 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 	private final class TomcatServerHttpRequest extends ServletServerHttpRequest {
 
 		public TomcatServerHttpRequest(HttpServletRequest request, AsyncContext context,
-				DataBufferFactory factory, int bufferSize) throws IOException {
+				String servletPath, DataBufferFactory factory, int bufferSize) throws IOException {
 
-			super(request, context, factory, bufferSize);
+			super(request, context, servletPath, factory, bufferSize);
 		}
 
 		@Override

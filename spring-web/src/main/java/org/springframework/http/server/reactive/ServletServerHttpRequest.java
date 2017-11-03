@@ -70,9 +70,9 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 
 	public ServletServerHttpRequest(HttpServletRequest request, AsyncContext asyncContext,
-			DataBufferFactory bufferFactory, int bufferSize) throws IOException {
+			String servletPath, DataBufferFactory bufferFactory, int bufferSize) throws IOException {
 
-		super(initUri(request), request.getContextPath(), initHeaders(request));
+		super(initUri(request), request.getContextPath() + servletPath, initHeaders(request));
 
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
 		Assert.isTrue(bufferSize > 0, "'bufferSize' must be higher than 0");
