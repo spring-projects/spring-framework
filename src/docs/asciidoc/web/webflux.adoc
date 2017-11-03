@@ -1446,3 +1446,19 @@ For advanced mode, remove `@EnableWebFlux` and extend directly from
 You can keep existing methods in `WebConfig` but you can now also override bean declarations
 from the base class and you can still have any number of other ``WebMvcConfigurer``'s on
 the classpath.
+
+
+
+
+[[webflux-http2]]
+== HTTP/2
+[.small]#<<web.adoc#mvc-http2,Same in Spring MVC>>#
+
+Servlet 4 containers are required to support HTTP/2 and Spring Framework 5 is compatible
+with Servlet API 4. From a programming model perspective there is nothing specific that
+applications need to do. However there are considerations related to server configuration.
+For more details please check out the
+https://github.com/spring-projects/spring-framework/wiki/HTTP-2-support[HTTP/2 wiki page].
+
+Currently Spring WebFlux does not support HTTP/2 with Netty. There is also no support for
+pushing resources programmatically to the client.
