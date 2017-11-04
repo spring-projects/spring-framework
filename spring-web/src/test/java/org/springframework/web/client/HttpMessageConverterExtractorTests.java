@@ -167,7 +167,6 @@ public class HttpMessageConverterExtractorTests {
 		given(converter.read(eq(type), eq(null), any(HttpInputMessage.class))).willReturn(expected);
 
 		Object result = extractor.extractData(response);
-
 		assertEquals(expected, result);
 	}
 
@@ -182,7 +181,8 @@ public class HttpMessageConverterExtractorTests {
 		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
 		given(response.getHeaders()).willReturn(responseHeaders);
 		given(response.getBody()).willReturn(new ByteArrayInputStream("Foobar".getBytes()));
-		given(converter.canRead(String.class, contentType)).willThrow(IOException.class);
+		given(converter.canRead(String.class, contentType)).willReturn(true);
+		given(converter.read(eq(String.class), any(HttpInputMessage.class))).willThrow(IOException.class);
 		exception.expect(RestClientException.class);
 		exception.expectMessage("Error while extracting response for type " +
 				"[class java.lang.String] and content type [text/plain]");
