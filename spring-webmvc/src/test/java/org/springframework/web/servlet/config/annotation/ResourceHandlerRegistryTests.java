@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.hamcrest.Matchers;
@@ -24,10 +25,12 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.core.io.UrlResource;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.http.CacheControl;
+import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -41,6 +44,7 @@ import org.springframework.web.servlet.resource.ResourceResolver;
 import org.springframework.web.servlet.resource.ResourceTransformer;
 import org.springframework.web.servlet.resource.VersionResourceResolver;
 import org.springframework.web.servlet.resource.WebJarsResourceResolver;
+import org.springframework.web.util.UrlPathHelper;
 
 import static org.junit.Assert.*;
 
@@ -60,8 +64,10 @@ public class ResourceHandlerRegistryTests {
 
 	@Before
 	public void setUp() {
-		this.registry = new ResourceHandlerRegistry(new GenericWebApplicationContext(), new MockServletContext());
-		this.registration = registry.addResourceHandler("/resources/**");
+		this.registry = new ResourceHandlerRegistry(new GenericWebApplicationContext(),
+				new MockServletContext(), new ContentNegotiationManager(), new UrlPathHelper());
+
+		this.registration = this.registry.addResourceHandler("/resources/**");
 		this.registration.addResourceLocations("classpath:org/springframework/web/servlet/config/annotation/");
 		this.response = new MockHttpServletResponse();
 	}
@@ -211,9 +217,27 @@ public class ResourceHandlerRegistryTests {
 		assertThat(transformers.get(2), Matchers.sameInstance(cssLinkTransformer));
 	}
 
+	@Test
+	public void urlResourceWithCharset() throws Exception {
+		this.registration.addResourceLocations("[charset=ISO-8859-1]file:///tmp");
+		this.registration.resourceChain(true);
+
+		ResourceHttpRequestHandler handler = getHandler("/resources/**");
+		UrlResource resource = (UrlResource) handler.getLocations().get(1);
+		assertEquals("file:/tmp", resource.getURL().toString());
+		assertNotNull(handler.getUrlPathHelper());
+		assertEquals(1, handler.getLocationCharsets().size());
+		assertEquals(StandardCharsets.ISO_8859_1, handler.getLocationCharsets().get(resource));
+
+		List<ResourceResolver> resolvers = handler.getResourceResolvers();
+		PathResourceResolver resolver = (PathResourceResolver) resolvers.get(resolvers.size()-1);
+		assertEquals(1, resolver.getLocationCharsets().size());
+		assertEquals(StandardCharsets.ISO_8859_1, handler.getLocationCharsets().values().iterator().next());
+	}
+
 	private ResourceHttpRequestHandler getHandler(String pathPattern) {
-		SimpleUrlHandlerMapping handlerMapping = (SimpleUrlHandlerMapping) this.registry.getHandlerMapping();
-		return (ResourceHttpRequestHandler) handlerMapping.getUrlMap().get(pathPattern);
+		SimpleUrlHandlerMapping hm = (SimpleUrlHandlerMapping) this.registry.getHandlerMapping();
+		return (ResourceHttpRequestHandler) hm.getUrlMap().get(pathPattern);
 	}
 
 }

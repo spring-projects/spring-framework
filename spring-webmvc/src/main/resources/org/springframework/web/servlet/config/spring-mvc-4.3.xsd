@@ -634,6 +634,9 @@
 	"/, classpath:/META-INF/public-web-resources/" will allow resources to be served both from the web app
 	root and from any JAR on the classpath  that contains a /META-INF/public-web-resources/ directory,
 	with resources in the web app root taking precedence.
+	For URL-based resources (e.g. files, HTTP URLs, etc) this property supports a special prefix to
+	indicate the charset associated with the URL so that relative paths appended to it can be encoded
+	correctly, e.g. "[charset=Windows-31J]http://example.org/path".
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>

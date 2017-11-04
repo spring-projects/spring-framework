@@ -97,6 +97,14 @@ public class UrlPathHelper {
 	}
 
 	/**
+	 * Whether to decode the request URI when determining the lookup path.
+	 * @since 4.3.13
+	 */
+	public boolean isUrlDecode() {
+		return this.urlDecode;
+	}
+
+	/**
 	 * Set if ";" (semicolon) content should be stripped from the request URI.
 	 * <p>Default is "true".
 	 */

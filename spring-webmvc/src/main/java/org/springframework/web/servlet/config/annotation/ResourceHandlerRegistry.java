@@ -32,6 +32,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Stores registrations of resource handlers for serving static resources such as images, css files and others
@@ -57,6 +58,8 @@ public class ResourceHandlerRegistry {
 
 	private final ContentNegotiationManager contentNegotiationManager;
 
+	private final UrlPathHelper pathHelper;
+
 	private final List<ResourceHandlerRegistration> registrations = new ArrayList<ResourceHandlerRegistration>();
 
 	private int order = Integer.MAX_VALUE -1;
@@ -81,10 +84,24 @@ public class ResourceHandlerRegistry {
 	public ResourceHandlerRegistry(ApplicationContext applicationContext, ServletContext servletContext,
 			ContentNegotiationManager contentNegotiationManager) {
 
+		this(applicationContext, servletContext, contentNegotiationManager, null);
+	}
+
+	/**
+	 * A variant of
+	 * {@link #ResourceHandlerRegistry(ApplicationContext, ServletContext, ContentNegotiationManager)}
+	 * that also accepts the {@link UrlPathHelper} used for mapping requests
+	 * to static resources.
+	 * @since 4.3.13
+	 */
+	public ResourceHandlerRegistry(ApplicationContext applicationContext, ServletContext servletContext,
+			ContentNegotiationManager contentNegotiationManager, UrlPathHelper pathHelper) {
+
 		Assert.notNull(applicationContext, "ApplicationContext is required");
 		this.applicationContext = applicationContext;
 		this.servletContext = servletContext;
 		this.contentNegotiationManager = contentNegotiationManager;
+		this.pathHelper = pathHelper;
 	}
 
 
@@ -140,9 +157,14 @@ public class ResourceHandlerRegistry {
 		for (ResourceHandlerRegistration registration : this.registrations) {
 			for (String pathPattern : registration.getPathPatterns()) {
 				ResourceHttpRequestHandler handler = registration.getRequestHandler();
+				if (this.pathHelper != null) {
+					handler.setUrlPathHelper(this.pathHelper);
+				}
+				if (this.contentNegotiationManager != null) {
+					handler.setContentNegotiationManager(this.contentNegotiationManager);
+				}
 				handler.setServletContext(this.servletContext);
 				handler.setApplicationContext(this.applicationContext);
-				handler.setContentNegotiationManager(this.contentNegotiationManager);
 				try {
 					handler.afterPropertiesSet();
 				}

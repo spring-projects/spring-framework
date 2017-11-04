@@ -16,14 +16,18 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.cache.Cache;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.util.Assert;
 import org.springframework.http.CacheControl;
+import org.springframework.util.Assert;
+import org.springframework.web.servlet.config.MvcNamespaceUtils;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
@@ -43,6 +47,8 @@ public class ResourceHandlerRegistration {
 
 	private final List<Resource> locations = new ArrayList<Resource>();
 
+	private final Map<Resource, Charset> locationCharsets = new HashMap<Resource, Charset>();
+
 	private Integer cachePeriod;
 
 	private CacheControl cacheControl;
@@ -61,20 +67,27 @@ public class ResourceHandlerRegistration {
 		this.pathPatterns = pathPatterns;
 	}
 
-
 	/**
-	 * Add one or more resource locations from which to serve static content. Each location must point to a valid
-	 * directory. Multiple locations may be specified as a comma-separated list, and the locations will be checked
+	 * Add one or more resource locations from which to serve static content.
+	 * Each location must point to a valid directory. Multiple locations may
+	 * be specified as a comma-separated list, and the locations will be checked
 	 * for a given resource in the order specified.
-	 * <p>For example, {{@code "/"}, {@code "classpath:/META-INF/public-web-resources/"}} allows resources to
-	 * be served both from the web application root and from any JAR on the classpath that contains a
-	 * {@code /META-INF/public-web-resources/} directory, with resources in the web application root taking precedence.
-	 * @return the same {@link ResourceHandlerRegistration} instance, for chained method invocation
+	 * <p>For example, {{@code "/"}, {@code "classpath:/META-INF/public-web-resources/"}}
+	 * allows resources to be served both from the web application root and
+	 * from any JAR on the classpath that contains a
+	 * {@code /META-INF/public-web-resources/} directory, with resources in the
+	 * web application root taking precedence.
+	 * <p>For {@link org.springframework.core.io.UrlResource URL-based resources}
+	 * (e.g. files, HTTP URLs, etc) this method supports a special prefix to
+	 * indicate the charset associated with the URL so that relative paths
+	 * appended to it can be encoded correctly, e.g.
+	 * {@code [charset=Windows-31J]http://example.org/path}.
+	 * @return the same {@link ResourceHandlerRegistration} instance, for
+	 * chained method invocation
 	 */
 	public ResourceHandlerRegistration addResourceLocations(String... resourceLocations) {
-		for (String location : resourceLocations) {
-			this.locations.add(resourceLoader.getResource(location));
-		}
+		MvcNamespaceUtils.loadResourceLocations(
+				resourceLocations, this.resourceLoader, this.locations, this.locationCharsets);
 		return this;
 	}
 
@@ -165,6 +178,7 @@ public class ResourceHandlerRegistration {
 			handler.setResourceTransformers(this.resourceChainRegistration.getResourceTransformers());
 		}
 		handler.setLocations(this.locations);
+		handler.setLocationCharsets(this.locationCharsets);
 		if (this.cacheControl != null) {
 			handler.setCacheControl(this.cacheControl);
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,15 @@
 package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.ClassPathResource;
@@ -27,6 +33,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResource;
+import org.springframework.web.util.UriUtils;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * A simple {@code ResourceResolver} that tries to find a resource under the given
@@ -42,7 +50,14 @@ import org.springframework.web.context.support.ServletContextResource;
  */
 public class PathResourceResolver extends AbstractResourceResolver {
 
+	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+
+
 	private Resource[] allowedLocations;
+
+	private final Map<Resource, Charset> locationCharsets = new HashMap<Resource, Charset>(4);
+
+	private UrlPathHelper urlPathHelper;
 
 
 	/**
@@ -70,28 +85,73 @@ public class PathResourceResolver extends AbstractResourceResolver {
 		return this.allowedLocations;
 	}
 
+	/**
+	 * Configure charsets associated with locations. If a static resource is found
+	 * under a {@link org.springframework.core.io.UrlResource URL resource}
+	 * location the charset is used to encode the relative path
+	 * <p><strong>Note:</strong> the charset is used only if the
+	 * {@link #setUrlPathHelper urlPathHelper} property is also configured and
+	 * its {@code urlDecode} property is set to true.
+	 * @param locationCharsets charsets by location
+	 * @since 4.3.13
+	 */
+	public void setLocationCharsets(Map<Resource, Charset> locationCharsets) {
+		this.locationCharsets.clear();
+		this.locationCharsets.putAll(locationCharsets);
+	}
+
+	/**
+	 * Return charsets associated with static resource locations.
+	 * @since 4.3.13
+	 */
+	public Map<Resource, Charset> getLocationCharsets() {
+		return Collections.unmodifiableMap(locationCharsets);
+	}
+
+	/**
+	 * Provide a reference to the {@link UrlPathHelper} used to map requests to
+	 * static resources. This helps to derive information about the lookup path
+	 * such as whether it is decoded or not.
+	 * @param urlPathHelper a reference to the path helper
+	 * @since 4.3.13
+	 */
+	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+		this.urlPathHelper = urlPathHelper;
+	}
+
+	/**
+	 * The configured {@link UrlPathHelper}.
+	 * @since 4.3.13
+	 */
+	public UrlPathHelper getUrlPathHelper() {
+		return this.urlPathHelper;
+	}
 
 	@Override
 	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
-		return getResource(requestPath, locations);
+		return getResource(requestPath, request, locations);
 	}
 
 	@Override
 	protected String resolveUrlPathInternal(String resourcePath, List<? extends Resource> locations,
 			ResourceResolverChain chain) {
 
-		return (StringUtils.hasText(resourcePath) && getResource(resourcePath, locations) != null ? resourcePath : null);
+		return (StringUtils.hasText(resourcePath) &&
+				getResource(resourcePath, null, locations) != null ? resourcePath : null);
 	}
 
-	private Resource getResource(String resourcePath, List<? extends Resource> locations) {
+	private Resource getResource(String resourcePath, HttpServletRequest request,
+			List<? extends Resource> locations) {
+
 		for (Resource location : locations) {
 			try {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Checking location: " + location);
 				}
-				Resource resource = getResource(resourcePath, location);
+				String pathToUse = encodeIfNecessary(resourcePath, request, location);
+				Resource resource = getResource(pathToUse, location);
 				if (resource != null) {
 					if (logger.isTraceEnabled()) {
 						logger.trace("Found match: " + resource);
@@ -201,6 +261,39 @@ public class PathResourceResolver extends AbstractResourceResolver {
 		}
 
 		return true;
+	}
+
+	private String encodeIfNecessary(String path, HttpServletRequest request, Resource location) {
+		if (shouldEncodeRelativePath(location) && request != null) {
+			Charset charset = this.locationCharsets.get(location);
+			charset = charset != null ? charset : DEFAULT_CHARSET;
+			StringBuilder sb = new StringBuilder();
+			StringTokenizer tokenizer = new StringTokenizer(path, "/");
+			while (tokenizer.hasMoreTokens()) {
+				String value = null;
+				try {
+					value = UriUtils.encode(tokenizer.nextToken(), charset.name());
+				}
+				catch (UnsupportedEncodingException ex) {
+					// Should never happen
+					throw new IllegalStateException("Unexpected error", ex);
+				}
+				sb.append(value);
+				sb.append("/");
+			}
+			if (!path.endsWith("/")) {
+				sb.setLength(sb.length() - 1);
+			}
+			return sb.toString();
+		}
+		else {
+			return path;
+		}
+	}
+
+	private boolean shouldEncodeRelativePath(Resource location) {
+		return location instanceof UrlResource &&
+				this.urlPathHelper != null && this.urlPathHelper.isUrlDecode();
 	}
 
 }
