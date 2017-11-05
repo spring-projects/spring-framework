@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -493,27 +494,33 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		setHeaderValue(name, formatDate(value));
 	}
 
-	public long getDateHeader(String name) {
-		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.US);
-		dateFormat.setTimeZone(GMT);
-		try {
-			return dateFormat.parse(getHeader(name)).getTime();
-		}
-		catch (ParseException ex) {
-			throw new IllegalArgumentException(
-					"Value for header '" + name + "' is not a valid Date: " + getHeader(name));
-		}
-	}
-
 	@Override
 	public void addDateHeader(String name, long value) {
 		addHeaderValue(name, formatDate(value));
 	}
 
+	public long getDateHeader(String name) {
+		String headerValue = getHeader(name);
+		if (headerValue == null) {
+			return -1;
+		}
+		try {
+			return newDateFormat().parse(getHeader(name)).getTime();
+		}
+		catch (ParseException ex) {
+			throw new IllegalArgumentException(
+					"Value for header '" + name + "' is not a valid Date: " + headerValue);
+		}
+	}
+
 	private String formatDate(long date) {
+		return newDateFormat().format(new Date(date));
+	}
+
+	private DateFormat newDateFormat() {
 		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.US);
 		dateFormat.setTimeZone(GMT);
-		return dateFormat.format(new Date(date));
+		return dateFormat;
 	}
 
 	@Override
