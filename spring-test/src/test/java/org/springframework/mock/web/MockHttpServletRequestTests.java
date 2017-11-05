@@ -146,7 +146,7 @@ public class MockHttpServletRequestTests {
 	}
 
 	@Test
-	public void httpHeaderNameCasingIsPreserved() throws Exception {
+	public void httpHeaderNameCasingIsPreserved() {
 		String headerName = "Header1";
 		request.addHeader(headerName, "value1");
 		Enumeration<String> requestHeaders = request.getHeaderNames();
@@ -360,6 +360,22 @@ public class MockHttpServletRequestTests {
 		assertEquals("http://localhost", requestURL.toString());
 	}
 
+	@Test  // SPR-16138
+	public void getRequestURLWithHostHeader() {
+		String testServer = "test.server";
+		request.addHeader(HOST, testServer);
+		StringBuffer requestURL = request.getRequestURL();
+		assertEquals("http://" + testServer, requestURL.toString());
+	}
+
+	@Test  // SPR-16138
+	public void getRequestURLWithHostHeaderAndPort() {
+		String testServer = "test.server:9999";
+		request.addHeader(HOST, testServer);
+		StringBuffer requestURL = request.getRequestURL();
+		assertEquals("http://" + testServer, requestURL.toString());
+	}
+
 	@Test
 	public void getRequestURLWithNullRequestUri() {
 		request.setRequestURI(null);
@@ -415,42 +431,43 @@ public class MockHttpServletRequestTests {
 	}
 
 	@Test
-	public void httpHeaderDate() throws Exception {
+	public void httpHeaderDate() {
 		Date date = new Date();
 		request.addHeader(IF_MODIFIED_SINCE, date);
 		assertEquals(date.getTime(), request.getDateHeader(IF_MODIFIED_SINCE));
 	}
 
 	@Test
-	public void httpHeaderTimestamp() throws Exception {
+	public void httpHeaderTimestamp() {
 		long timestamp = new Date().getTime();
 		request.addHeader(IF_MODIFIED_SINCE, timestamp);
 		assertEquals(timestamp, request.getDateHeader(IF_MODIFIED_SINCE));
 	}
 
 	@Test
-	public void httpHeaderRfcFormatedDate() throws Exception {
+	public void httpHeaderRfcFormatedDate() {
 		request.addHeader(IF_MODIFIED_SINCE, "Tue, 21 Jul 2015 10:00:00 GMT");
 		assertEquals(1437472800000L, request.getDateHeader(IF_MODIFIED_SINCE));
 	}
 
 	@Test
-	public void httpHeaderFirstVariantFormatedDate() throws Exception {
+	public void httpHeaderFirstVariantFormatedDate() {
 		request.addHeader(IF_MODIFIED_SINCE, "Tue, 21-Jul-15 10:00:00 GMT");
 		assertEquals(1437472800000L, request.getDateHeader(IF_MODIFIED_SINCE));
 	}
 
 	@Test
-	public void httpHeaderSecondVariantFormatedDate() throws Exception {
+	public void httpHeaderSecondVariantFormatedDate() {
 		request.addHeader(IF_MODIFIED_SINCE, "Tue Jul 21 10:00:00 2015");
 		assertEquals(1437472800000L, request.getDateHeader(IF_MODIFIED_SINCE));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void httpHeaderFormatedDateError() throws Exception {
+	public void httpHeaderFormatedDateError() {
 		request.addHeader(IF_MODIFIED_SINCE, "This is not a date");
 		request.getDateHeader(IF_MODIFIED_SINCE);
 	}
+
 
 	private void assertEqualEnumerations(Enumeration<?> enum1, Enumeration<?> enum2) {
 		assertNotNull(enum1);
