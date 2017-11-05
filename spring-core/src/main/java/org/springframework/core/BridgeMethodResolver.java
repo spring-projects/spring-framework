@@ -139,42 +139,12 @@ public abstract class BridgeMethodResolver {
 	}
 
 	/**
-	 * Searches for the generic {@link Method} declaration whose erased signature
-	 * matches that of the supplied bridge method.
-	 * @throws IllegalStateException if the generic declaration cannot be found
-	 */
-	@Nullable
-	private static Method findGenericDeclaration(Method bridgeMethod) {
-		// Search parent types for method that has same signature as bridge.
-		Class<?> superclass = bridgeMethod.getDeclaringClass().getSuperclass();
-		while (superclass != null && Object.class != superclass) {
-			Method method = searchForMatch(superclass, bridgeMethod);
-			if (method != null && !method.isBridge()) {
-				return method;
-			}
-			superclass = superclass.getSuperclass();
-		}
-
-		// Search interfaces.
-		Class<?>[] interfaces = ClassUtils.getAllInterfacesForClass(bridgeMethod.getDeclaringClass());
-		for (Class<?> ifc : interfaces) {
-			Method method = searchForMatch(ifc, bridgeMethod);
-			if (method != null && !method.isBridge()) {
-				return method;
-			}
-		}
-
-		return null;
-	}
-
-	/**
 	 * Returns {@code true} if the {@link Type} signature of both the supplied
 	 * {@link Method#getGenericParameterTypes() generic Method} and concrete {@link Method}
 	 * are equal after resolving all types against the declaringType, otherwise
 	 * returns {@code false}.
 	 */
-	private static boolean isResolvedTypeMatch(
-			Method genericMethod, Method candidateMethod, Class<?> declaringClass) {
+	private static boolean isResolvedTypeMatch(Method genericMethod, Method candidateMethod, Class<?> declaringClass) {
 		Type[] genericParameters = genericMethod.getGenericParameterTypes();
 		Class<?>[] candidateParameters = candidateMethod.getParameterTypes();
 		if (genericParameters.length != candidateParameters.length) {
@@ -198,13 +168,53 @@ public abstract class BridgeMethodResolver {
 	}
 
 	/**
+	 * Searches for the generic {@link Method} declaration whose erased signature
+	 * matches that of the supplied bridge method.
+	 * @throws IllegalStateException if the generic declaration cannot be found
+	 */
+	@Nullable
+	private static Method findGenericDeclaration(Method bridgeMethod) {
+		// Search parent types for method that has same signature as bridge.
+		Class<?> superclass = bridgeMethod.getDeclaringClass().getSuperclass();
+		while (superclass != null && Object.class != superclass) {
+			Method method = searchForMatch(superclass, bridgeMethod);
+			if (method != null && !method.isBridge()) {
+				return method;
+			}
+			superclass = superclass.getSuperclass();
+		}
+
+		Class<?>[] interfaces = ClassUtils.getAllInterfacesForClass(bridgeMethod.getDeclaringClass());
+		return searchInterfaces(interfaces, bridgeMethod);
+	}
+
+	@Nullable
+	private static Method searchInterfaces(Class<?>[] interfaces, Method bridgeMethod) {
+		for (Class<?> ifc : interfaces) {
+			Method method = searchForMatch(ifc, bridgeMethod);
+			if (method != null && !method.isBridge()) {
+				return method;
+			}
+			else {
+				return searchInterfaces(ifc.getInterfaces(), bridgeMethod);
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * If the supplied {@link Class} has a declared {@link Method} whose signature matches
 	 * that of the supplied {@link Method}, then this matching {@link Method} is returned,
 	 * otherwise {@code null} is returned.
 	 */
 	@Nullable
 	private static Method searchForMatch(Class<?> type, Method bridgeMethod) {
-		return ReflectionUtils.findMethod(type, bridgeMethod.getName(), bridgeMethod.getParameterTypes());
+		try {
+			return type.getDeclaredMethod(bridgeMethod.getName(), bridgeMethod.getParameterTypes());
+		}
+		catch (NoSuchMethodException ex) {
+			return null;
+		}
 	}
 
 	/**

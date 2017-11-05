@@ -35,6 +35,7 @@ dependencies {
 	optional("javax.websocket:javax.websocket-api:1.1")
 	optional("junit:junit:4.12")
 	optional("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
+	optional("org.apiguardian:apiguardian-api:1.0.0")  // for compiling against JUnit 5 without warnings
 	optional("org.testng:testng:6.12")
 	optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 	optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
@@ -48,11 +49,11 @@ dependencies {
 	optional("org.seleniumhq.selenium:htmlunit-driver:2.27") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-	optional("org.seleniumhq.selenium:selenium-java:3.5.3") {
+	optional("org.seleniumhq.selenium:selenium-java:3.6.0") {
 		exclude group: "commons-logging", module: "commons-logging"
 		exclude group: "io.netty", module: "netty"
 	}
-	optional("org.xmlunit:xmlunit-matchers:2.3.0")
+	optional("org.xmlunit:xmlunit-matchers:2.5.0")
 	optional("org.skyscreamer:jsonassert:1.5.0")
 	optional("com.jayway.jsonpath:json-path:2.4.0")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
@@ -64,8 +65,8 @@ dependencies {
 	testCompile("javax.ejb:javax.ejb-api:3.2")
 	testCompile("javax.interceptor:javax.interceptor-api:1.2.1")
 	testCompile("javax.mail:javax.mail-api:1.6.0")
-	testCompile("org.hibernate:hibernate-core:5.2.11.Final")
-	testCompile("org.hibernate:hibernate-validator:6.0.2.Final")
+	testCompile("org.hibernate:hibernate-core:5.2.12.Final")
+	testCompile("org.hibernate:hibernate-validator:6.0.4.Final")
 	// Enable use of the JUnitPlatform Runner
 	testCompile("org.junit.platform:junit-platform-runner:${junitPlatformVersion}")
 	testCompile("org.junit.jupiter:junit-jupiter-params:${junitJupiterVersion}")

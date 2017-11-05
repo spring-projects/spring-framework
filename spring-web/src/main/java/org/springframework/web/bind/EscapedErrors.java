@@ -110,7 +110,9 @@ public class EscapedErrors implements Errors {
 	}
 
 	@Override
-	public void rejectValue(@Nullable String field, String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage) {
+	public void rejectValue(@Nullable String field, String errorCode, @Nullable Object[] errorArgs,
+			@Nullable String defaultMessage) {
+
 		this.source.rejectValue(field, errorCode, errorArgs, defaultMessage);
 	}
 

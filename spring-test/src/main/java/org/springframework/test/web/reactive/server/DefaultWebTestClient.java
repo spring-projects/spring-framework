@@ -30,24 +30,19 @@ import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
-import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.BodyExtractor;
-import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -56,8 +51,6 @@ import org.springframework.web.util.UriBuilder;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
-import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
-import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 
 /**
  * Default implementation of {@link WebTestClient}.
@@ -73,13 +66,13 @@ class DefaultWebTestClient implements WebTestClient {
 
 	private final Duration timeout;
 
-	private final WebTestClient.Builder builder;
+	private final DefaultWebTestClientBuilder builder;
 
 	private final AtomicLong requestIndex = new AtomicLong();
 
 
 	DefaultWebTestClient(WebClient.Builder clientBuilder, ClientHttpConnector connector,
-			@Nullable Duration timeout, WebTestClient.Builder webTestClientBuilder) {
+			@Nullable Duration timeout, DefaultWebTestClientBuilder webTestClientBuilder) {
 
 		Assert.notNull(clientBuilder, "WebClient.Builder is required");
 		this.wiretapConnector = new WiretapConnector(connector);
@@ -140,7 +133,7 @@ class DefaultWebTestClient implements WebTestClient {
 
 	@Override
 	public Builder mutate() {
-		return this.builder;
+		return new DefaultWebTestClientBuilder(this.builder);
 	}
 
 	@Override
@@ -267,11 +260,6 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public ResponseSpec exchange() {
-			return toResponseSpec(this.bodySpec.exchange());
-		}
-
-		@Override
 		public RequestHeadersSpec<?> body(BodyInserter<?, ? super ClientHttpRequest> inserter) {
 			this.bodySpec.body(inserter);
 			return this;
@@ -289,111 +277,92 @@ class DefaultWebTestClient implements WebTestClient {
 			return this;
 		}
 
-		private DefaultResponseSpec toResponseSpec(Mono<ClientResponse> mono) {
-			ClientResponse clientResponse = mono.block(getTimeout());
+		@Override
+		public ResponseSpec exchange() {
+			ClientResponse clientResponse = this.bodySpec.exchange().block(getTimeout());
 			Assert.state(clientResponse != null, "No ClientResponse");
-			ExchangeResult exchangeResult = wiretapConnector.claimRequest(this.requestId);
-			return new DefaultResponseSpec(exchangeResult, clientResponse, this.uriTemplate, getTimeout());
-		}
-	}
-
-
-	private static class UndecodedExchangeResult extends ExchangeResult {
-
-		private final ClientResponse response;
-
-		private final Duration timeout;
-
-		UndecodedExchangeResult(ExchangeResult result, ClientResponse response,
-				@Nullable String uriTemplate, Duration timeout) {
-
-			super(result, uriTemplate);
-			this.response = response;
-			this.timeout = timeout;
-		}
-
-		public <T> EntityExchangeResult<T> decode(BodyExtractor<Mono<T>, ? super ClientHttpResponse> extractor) {
-			T body = this.response.body(extractor).block(this.timeout);
-			return new EntityExchangeResult<>(this, body);
-		}
-
-		public <T> EntityExchangeResult<List<T>> decodeToList(BodyExtractor<Flux<T>, ? super ClientHttpResponse> extractor) {
-			Flux<T> flux = this.response.body(extractor);
-			List<T> body = flux.collectList().block(this.timeout);
-			return new EntityExchangeResult<>(this, body);
-		}
-
-		public <T> FluxExchangeResult<T> decodeToFlux(BodyExtractor<Flux<T>, ? super ClientHttpResponse> extractor) {
-			Flux<T> body = this.response.body(extractor);
-			return new FluxExchangeResult<>(this, body, this.timeout);
-		}
-
-		public EntityExchangeResult<byte[]> decodeToByteArray() {
-			ByteArrayResource resource = this.response.body(toMono(ByteArrayResource.class)).block(this.timeout);
-			byte[] body = (resource != null ? resource.getByteArray() : null);
-			return new EntityExchangeResult<>(this, body);
+			WiretapConnector.Info info = wiretapConnector.claimRequest(this.requestId);
+			return new DefaultResponseSpec(info, clientResponse, this.uriTemplate, getTimeout());
 		}
 	}
 
 
 	private static class DefaultResponseSpec implements ResponseSpec {
 
-		private final UndecodedExchangeResult result;
+		private final ExchangeResult exchangeResult;
 
-		DefaultResponseSpec(
-				ExchangeResult result, ClientResponse response, @Nullable String uriTemplate, Duration timeout) {
+		private final ClientResponse response;
 
-			this.result = new UndecodedExchangeResult(result, response, uriTemplate, timeout);
+		private final Duration timeout;
+
+
+		DefaultResponseSpec(WiretapConnector.Info wiretapInfo, ClientResponse response,
+				@Nullable String uriTemplate, Duration timeout) {
+
+			this.exchangeResult = wiretapInfo.createExchangeResult(uriTemplate);
+			this.response = response;
+			this.timeout = timeout;
 		}
 
 		@Override
 		public StatusAssertions expectStatus() {
-			return new StatusAssertions(this.result, this);
+			return new StatusAssertions(this.exchangeResult, this);
 		}
 
 		@Override
 		public HeaderAssertions expectHeader() {
-			return new HeaderAssertions(this.result, this);
+			return new HeaderAssertions(this.exchangeResult, this);
 		}
 
 		@Override
 		public <B> BodySpec<B, ?> expectBody(Class<B> bodyType) {
-			return new DefaultBodySpec<>(this.result.decode(toMono(bodyType)));
+			B body = this.response.bodyToMono(bodyType).block(this.timeout);
+			EntityExchangeResult<B> entityResult = new EntityExchangeResult<>(this.exchangeResult, body);
+			return new DefaultBodySpec<>(entityResult);
 		}
 
 		@Override
 		public <B> BodySpec<B, ?> expectBody(ParameterizedTypeReference<B> bodyType) {
-			return new DefaultBodySpec<>(this.result.decode(toMono(bodyType)));
+			B body = this.response.bodyToMono(bodyType).block(this.timeout);
+			EntityExchangeResult<B> entityResult = new EntityExchangeResult<>(this.exchangeResult, body);
+			return new DefaultBodySpec<>(entityResult);
 		}
 
 		@Override
 		public <E> ListBodySpec<E> expectBodyList(Class<E> elementType) {
-			return new DefaultListBodySpec<>(this.result.decodeToList(toFlux(elementType)));
+			return getListBodySpec(this.response.bodyToFlux(elementType));
 		}
 
 		@Override
 		public <E> ListBodySpec<E> expectBodyList(ParameterizedTypeReference<E> elementType) {
-			return new DefaultListBodySpec<>(this.result.decodeToList(toFlux(elementType)));
+			Flux<E> flux = this.response.bodyToFlux(elementType);
+			return getListBodySpec(flux);
+		}
+
+		private <E> ListBodySpec<E> getListBodySpec(Flux<E> flux) {
+			List<E> body = flux.collectList().block(this.timeout);
+			EntityExchangeResult<List<E>> entityResult = new EntityExchangeResult<>(this.exchangeResult, body);
+			return new DefaultListBodySpec<>(entityResult);
 		}
 
 		@Override
 		public BodyContentSpec expectBody() {
-			return new DefaultBodyContentSpec(this.result.decodeToByteArray());
-		}
-
-		@Override
-		public FluxExchangeResult<DataBuffer> returnResult() {
-			return this.result.decodeToFlux(BodyExtractors.toDataBuffers());
+			ByteArrayResource resource = this.response.bodyToMono(ByteArrayResource.class).block(this.timeout);
+			byte[] body = (resource != null ? resource.getByteArray() : null);
+			EntityExchangeResult<byte[]> entityResult = new EntityExchangeResult<>(this.exchangeResult, body);
+			return new DefaultBodyContentSpec(entityResult);
 		}
 
 		@Override
 		public <T> FluxExchangeResult<T> returnResult(Class<T> elementType) {
-			return this.result.decodeToFlux(toFlux(elementType));
+			Flux<T> body = this.response.bodyToFlux(elementType);
+			return new FluxExchangeResult<>(this.exchangeResult, body, this.timeout);
 		}
 
 		@Override
 		public <T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementType) {
-			return this.result.decodeToFlux(toFlux(elementType));
+			Flux<T> body = this.response.bodyToFlux(elementType);
+			return new FluxExchangeResult<>(this.exchangeResult, body, this.timeout);
 		}
 	}
 

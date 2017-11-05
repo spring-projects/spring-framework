@@ -19,6 +19,8 @@ package org.springframework.http.server.reactive;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import javax.servlet.AsyncContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,6 +30,8 @@ import org.apache.catalina.connector.CoyoteOutputStream;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.util.Assert;
 
 /**
  * {@link ServletHttpHandlerAdapter} extension that uses Tomcat APIs for reading
@@ -39,18 +43,25 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 @WebServlet(asyncSupported = true)
 public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
+
 	public TomcatHttpHandlerAdapter(HttpHandler httpHandler) {
 		super(httpHandler);
 	}
 
 
 	@Override
-	protected ServerHttpRequest createRequest(HttpServletRequest request, AsyncContext cxt) throws IOException {
-		return new TomcatServerHttpRequest(request, cxt, getDataBufferFactory(), getBufferSize());
+	protected ServerHttpRequest createRequest(HttpServletRequest request, AsyncContext asyncContext)
+			throws IOException {
+
+		Assert.notNull(getServletPath(), "servletPath is not initialized.");
+		return new TomcatServerHttpRequest(request, asyncContext, getServletPath(),
+				getDataBufferFactory(), getBufferSize());
 	}
 
 	@Override
-	protected ServerHttpResponse createResponse(HttpServletResponse response, AsyncContext cxt) throws IOException {
+	protected ServerHttpResponse createResponse(HttpServletResponse response, AsyncContext cxt)
+			throws IOException {
+
 		return new TomcatServerHttpResponse(response, cxt, getDataBufferFactory(), getBufferSize());
 	}
 
@@ -58,27 +69,39 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 	private final class TomcatServerHttpRequest extends ServletServerHttpRequest {
 
 		public TomcatServerHttpRequest(HttpServletRequest request, AsyncContext context,
-				DataBufferFactory factory, int bufferSize) throws IOException {
+				String servletPath, DataBufferFactory factory, int bufferSize) throws IOException {
 
-			super(request, context, factory, bufferSize);
+			super(request, context, servletPath, factory, bufferSize);
 		}
 
 		@Override
 		protected DataBuffer readFromInputStream() throws IOException {
-			DataBuffer buffer = getDataBufferFactory().allocateBuffer(getBufferSize());
-			ByteBuffer byteBuffer = buffer.asByteBuffer();
-			byteBuffer.limit(byteBuffer.capacity());
+			boolean release = true;
+			int capacity = getBufferSize();
+			DataBuffer dataBuffer = getDataBufferFactory().allocateBuffer(capacity);
+			try {
+				ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, capacity);
 
-			int read = ((CoyoteInputStream) getServletRequest().getInputStream()).read(byteBuffer);
-			if (logger.isTraceEnabled()) {
-				logger.trace("read:" + read);
+				ServletRequest request = getNativeRequest();
+				int read = ((CoyoteInputStream) request.getInputStream()).read(byteBuffer);
+				if (logger.isTraceEnabled()) {
+					logger.trace("read:" + read);
+				}
+
+				if (read > 0) {
+					dataBuffer.writePosition(read);
+					release = false;
+					return dataBuffer;
+				}
+				else {
+					return null;
+				}
 			}
-
-			if (read > 0) {
-				return getDataBufferFactory().wrap(byteBuffer);
+			finally {
+				if (release) {
+					DataBufferUtils.release(dataBuffer);
+				}
 			}
-
-			return null;
 		}
 	}
 
@@ -95,7 +118,8 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 		protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
 			ByteBuffer input = dataBuffer.asByteBuffer();
 			int len = input.remaining();
-			((CoyoteOutputStream) getServletResponse().getOutputStream()).write(input);
+			ServletResponse response = getNativeResponse();
+			((CoyoteOutputStream) response.getOutputStream()).write(input);
 			return len;
 		}
 	}

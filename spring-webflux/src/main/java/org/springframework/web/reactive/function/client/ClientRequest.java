@@ -135,6 +135,22 @@ public interface ClientRequest {
 	interface Builder {
 
 		/**
+		 * Set the method of the request.
+		 * @param method the new method
+		 * @return this builder
+		 * @since 5.0.1
+		 */
+		Builder method(HttpMethod method);
+
+		/**
+		 * Set the url of the request.
+		 * @param url the new url
+		 * @return this builder
+		 * @since 5.0.1
+		 */
+		Builder url(URI url);
+
+		/**
 		 * Add the given header value(s) under the given name.
 		 * @param headerName  the header name
 		 * @param headerValues the header value(s)

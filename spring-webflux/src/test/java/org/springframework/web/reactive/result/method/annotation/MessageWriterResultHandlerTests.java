@@ -47,7 +47,7 @@ import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
@@ -69,7 +69,7 @@ public class MessageWriterResultHandlerTests {
 
 	private final AbstractMessageWriterResultHandler resultHandler = initResultHandler();
 
-	private final MockServerWebExchange exchange = MockServerHttpRequest.get("/path").toExchange();
+	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
 
 
 	private AbstractMessageWriterResultHandler initResultHandler(HttpMessageWriter<?>... writers) {

@@ -398,6 +398,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL statement [" + sql + "]");
 		}
+
 		class ExecuteStatementCallback implements StatementCallback<Object>, SqlProvider {
 			@Override
 			@Nullable
@@ -410,6 +411,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				return sql;
 			}
 		}
+
 		execute(new ExecuteStatementCallback());
 	}
 
@@ -421,6 +423,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL query [" + sql + "]");
 		}
+
 		class QueryStatementCallback implements StatementCallback<T>, SqlProvider {
 			@Override
 			@Nullable
@@ -439,6 +442,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				return sql;
 			}
 		}
+
 		return execute(new QueryStatementCallback());
 	}
 
@@ -493,7 +497,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		}
 
 		class UpdateStatementCallback implements StatementCallback<Integer>, SqlProvider {
-
 			@Override
 			public Integer doInStatement(Statement stmt) throws SQLException {
 				int rows = stmt.executeUpdate(sql);
@@ -502,7 +505,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				}
 				return rows;
 			}
-
 			@Override
 			public String getSql() {
 				return sql;

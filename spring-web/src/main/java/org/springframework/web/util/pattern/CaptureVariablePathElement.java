@@ -82,7 +82,8 @@ class CaptureVariablePathElement extends PathElement {
 		}
 
 		if (this.constraintPattern != null) {
-			// TODO possible optimization - only regex match if rest of pattern matches? Benefit likely to vary pattern to pattern
+			// TODO possible optimization - only regex match if rest of pattern matches?
+			// Benefit likely to vary pattern to pattern
 			Matcher matcher = constraintPattern.matcher(candidateCapture);
 			if (matcher.groupCount() != 0) {
 				throw new IllegalArgumentException(
@@ -117,7 +118,8 @@ class CaptureVariablePathElement extends PathElement {
 		}
 
 		if (match && matchingContext.extractingVariables) {
-			matchingContext.set(this.variableName, candidateCapture, ((PathSegment)matchingContext.pathElements.get(pathIndex-1)).parameters());
+			matchingContext.set(this.variableName, candidateCapture,
+					((PathSegment)matchingContext.pathElements.get(pathIndex-1)).parameters());
 		}
 		return match;
 	}

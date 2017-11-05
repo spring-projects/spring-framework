@@ -40,6 +40,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.OPTIONS;
 import static org.springframework.http.HttpMethod.POST;
 
 /**
@@ -67,9 +68,22 @@ public class DefaultClientRequestBuilderTests {
 	@Test
 	public void method() throws Exception {
 		URI url = new URI("http://example.com");
-		ClientRequest result = ClientRequest.method(DELETE, url).build();
-		assertEquals(url, result.url());
-		assertEquals(DELETE, result.method());
+		ClientRequest.Builder builder = ClientRequest.method(DELETE, url);
+		assertEquals(DELETE, builder.build().method());
+
+		builder.method(OPTIONS);
+		assertEquals(OPTIONS, builder.build().method());
+	}
+
+	@Test
+	public void url() throws Exception {
+		URI url1 = new URI("http://example.com/foo");
+		URI url2 = new URI("http://example.com/bar");
+		ClientRequest.Builder builder = ClientRequest.method(DELETE, url1);
+		assertEquals(url1, builder.build().url());
+
+		builder.url(url2);
+		assertEquals(url2, builder.build().url());
 	}
 
 	@Test

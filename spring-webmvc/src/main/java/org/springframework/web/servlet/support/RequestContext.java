@@ -653,6 +653,9 @@ public class RequestContext {
 	 */
 	public String getMessage(String code, @Nullable Object[] args, String defaultMessage, boolean htmlEscape) {
 		String msg = this.webApplicationContext.getMessage(code, args, defaultMessage, getLocale());
+		if (msg == null) {
+			return "";
+		}
 		return (htmlEscape ? HtmlUtils.htmlEscape(msg) : msg);
 	}
 
@@ -732,7 +735,8 @@ public class RequestContext {
 	 * @return the message
 	 */
 	public String getThemeMessage(String code, String defaultMessage) {
-		return getTheme().getMessageSource().getMessage(code, null, defaultMessage, getLocale());
+		String msg = getTheme().getMessageSource().getMessage(code, null, defaultMessage, getLocale());
+		return (msg != null ? msg : "");
 	}
 
 	/**
@@ -745,7 +749,8 @@ public class RequestContext {
 	 * @return the message
 	 */
 	public String getThemeMessage(String code, @Nullable Object[] args, String defaultMessage) {
-		return getTheme().getMessageSource().getMessage(code, args, defaultMessage, getLocale());
+		String msg = getTheme().getMessageSource().getMessage(code, args, defaultMessage, getLocale());
+		return (msg != null ? msg : "");
 	}
 
 	/**
@@ -758,8 +763,9 @@ public class RequestContext {
 	 * @return the message
 	 */
 	public String getThemeMessage(String code, @Nullable List<?> args, String defaultMessage) {
-		return getTheme().getMessageSource().getMessage(code, (args != null ? args.toArray() : null),
+		String msg = getTheme().getMessageSource().getMessage(code, (args != null ? args.toArray() : null),
 				defaultMessage, getLocale());
+		return (msg != null ? msg : "");
 	}
 
 	/**

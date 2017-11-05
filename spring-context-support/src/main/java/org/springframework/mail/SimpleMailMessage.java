@@ -25,7 +25,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Models a simple mail message, including data such as the from, to, cc, subject, and text fields.
+ * Models a simple mail message, including data such as the from, to, cc, subject,
+ * and text fields.
  *
  * <p>Consider {@code JavaMailSender} and JavaMail {@code MimeMessages} for creating
  * more sophisticated messages, for example messages with attachments, special
@@ -98,7 +99,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 
 
 	@Override
-	public void setFrom(@Nullable String from) {
+	public void setFrom(String from) {
 		this.from = from;
 	}
 
@@ -108,7 +109,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 	@Override
-	public void setReplyTo(@Nullable String replyTo) {
+	public void setReplyTo(String replyTo) {
 		this.replyTo = replyTo;
 	}
 
@@ -118,12 +119,12 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 	@Override
-	public void setTo(@Nullable String to) {
+	public void setTo(String to) {
 		this.to = new String[] {to};
 	}
 
 	@Override
-	public void setTo(@Nullable String[] to) {
+	public void setTo(String... to) {
 		this.to = to;
 	}
 
@@ -133,12 +134,12 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 	@Override
-	public void setCc(@Nullable String cc) {
+	public void setCc(String cc) {
 		this.cc = new String[] {cc};
 	}
 
 	@Override
-	public void setCc(@Nullable String[] cc) {
+	public void setCc(String... cc) {
 		this.cc = cc;
 	}
 
@@ -148,12 +149,12 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 	@Override
-	public void setBcc(@Nullable String bcc) {
+	public void setBcc(String bcc) {
 		this.bcc = new String[] {bcc};
 	}
 
 	@Override
-	public void setBcc(@Nullable String[] bcc) {
+	public void setBcc(String... bcc) {
 		this.bcc = bcc;
 	}
 
@@ -163,7 +164,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 	@Override
-	public void setSentDate(@Nullable Date sentDate) {
+	public void setSentDate(Date sentDate) {
 		this.sentDate = sentDate;
 	}
 
@@ -173,7 +174,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 	@Override
-	public void setSubject(@Nullable String subject) {
+	public void setSubject(String subject) {
 		this.subject = subject;
 	}
 
@@ -183,7 +184,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 	@Override
-	public void setText(@Nullable String text) {
+	public void setText(String text) {
 		this.text = text;
 	}
 
@@ -196,10 +197,9 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	/**
 	 * Copy the contents of this message to the given target message.
 	 * @param target the {@code MailMessage} to copy to
-	 * @throws IllegalArgumentException if the supplied {@code target} is {@code null}
 	 */
 	public void copyTo(MailMessage target) {
-		Assert.notNull(target, "The 'target' message argument cannot be null");
+		Assert.notNull(target, "'target' message argument must not be null");
 		if (getFrom() != null) {
 			target.setFrom(getFrom());
 		}

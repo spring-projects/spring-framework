@@ -291,6 +291,12 @@ public class MockHttpServletResponseTests {
 		response.getDateHeader("Last-Modified");
 	}
 
+	@Test  // SPR-16160
+	public void getNonExistentDateHeader() {
+		assertNull(response.getHeader("Last-Modified"));
+		assertEquals(-1, response.getDateHeader("Last-Modified"));
+	}
+
 	@Test  // SPR-10414
 	public void modifyStatusAfterSendError() throws IOException {
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);

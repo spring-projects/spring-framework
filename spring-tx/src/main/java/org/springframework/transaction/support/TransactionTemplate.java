@@ -172,13 +172,9 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 			ex2.initApplicationException(ex);
 			throw ex2;
 		}
-		catch (RuntimeException ex2) {
+		catch (RuntimeException | Error ex2) {
 			logger.error("Application exception overridden by rollback exception", ex);
 			throw ex2;
-		}
-		catch (Error err) {
-			logger.error("Application exception overridden by rollback error", ex);
-			throw err;
 		}
 	}
 

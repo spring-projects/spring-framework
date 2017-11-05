@@ -76,7 +76,9 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 	 * first access of multipart files or parameters
 	 * @throws MultipartException if an immediate parsing attempt failed
 	 */
-	public StandardMultipartHttpServletRequest(HttpServletRequest request, boolean lazyParsing) throws MultipartException {
+	public StandardMultipartHttpServletRequest(HttpServletRequest request,
+			boolean lazyParsing) throws MultipartException {
+
 		super(request);
 		if (!lazyParsing) {
 			parseRequest(request);

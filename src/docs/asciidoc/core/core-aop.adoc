@@ -2,8 +2,11 @@
 = Aspect Oriented Programming with Spring
 
 
+
+
 [[aop-introduction]]
 == Introduction
+
 __Aspect-Oriented Programming__ (AOP) complements Object-Oriented Programming (OOP) by
 providing another way of thinking about program structure. The key unit of modularity in
 OOP is the class, whereas in AOP the unit of modularity is the __aspect__. Aspects
@@ -15,17 +18,16 @@ One of the key components of Spring is the __AOP framework__. While the Spring I
 container does not depend on AOP, meaning you do not need to use AOP if you don't want
 to, AOP complements Spring IoC to provide a very capable middleware solution.
 
-.Spring 2.0 AOP
+.Spring 2.0+ AOP
 ****
-Spring 2.0 introduces a simpler and more powerful way of writing custom aspects using
+Spring 2.0 introduced a simpler and more powerful way of writing custom aspects using
 either a <<aop-schema,schema-based approach>> or the <<aop-ataspectj,@AspectJ annotation
 style>>. Both of these styles offer fully typed advice and use of the AspectJ pointcut
 language, while still using Spring AOP for weaving.
 
-The Spring 2.0 schema- and @AspectJ-based AOP support is discussed in this chapter.
-Spring 2.0 AOP remains fully backwards compatible with Spring 1.2 AOP, and the
-lower-level AOP support offered by the Spring 1.2 APIs is discussed in <<aop-api,the
-following chapter>>.
+The Spring 2.0+ schema- and @AspectJ-based AOP support is discussed in this chapter.
+The lower-level AOP support, as commonly exposed in Spring 1.2 applications, is
+discussed in <<aop-api,the following chapter>>.
 ****
 
 AOP is used in the Spring Framework to...
@@ -46,6 +48,7 @@ Spring AOP, and can skip most of this chapter.
 
 [[aop-introduction-defn]]
 === AOP concepts
+
 Let us begin by defining some central AOP concepts and terminology. These terms are not
 Spring-specific... unfortunately, AOP terminology is not particularly intuitive;
 however, it would be even more confusing if Spring used its own terminology.
@@ -123,6 +126,7 @@ multiple objects (such as all business operations in the service layer).
 
 [[aop-introduction-spring-defn]]
 === Spring AOP capabilities and goals
+
 Spring AOP is implemented in pure Java. There is no need for a special compilation
 process. Spring AOP does not need to control the class loader hierarchy, and is thus
 suitable for use in a Servlet container or application server.
@@ -182,6 +186,7 @@ style.
 
 [[aop-introduction-proxies]]
 === AOP Proxies
+
 Spring AOP defaults to using standard JDK __dynamic proxies__ for AOP proxies. This
 enables any interface (or set of interfaces) to be proxied.
 
@@ -202,6 +207,7 @@ implementation detail actually means.
 
 [[aop-ataspectj]]
 == @AspectJ support
+
 @AspectJ refers to a style of declaring aspects as regular Java classes annotated with
 annotations. The @AspectJ style was introduced by the
 http://www.eclipse.org/aspectj[AspectJ project] as part of the AspectJ 5 release. Spring
@@ -219,6 +225,7 @@ discussed in <<aop-using-aspectj>>.
 
 [[aop-aspectj-support]]
 === Enabling @AspectJ Support
+
 To use @AspectJ aspects in a Spring configuration you need to enable Spring support for
 configuring Spring AOP based on @AspectJ aspects, and __autoproxying__ beans based on
 whether or not they are advised by those aspects. By autoproxying we mean that if Spring
@@ -234,6 +241,7 @@ classpath of your application (version 1.6.8 or later). This library is availabl
 
 [[aop-enable-aspectj-java]]
 ==== Enabling @AspectJ Support with Java configuration
+
 To enable @AspectJ support with Java `@Configuration` add the `@EnableAspectJAutoProxy`
 annotation:
 
@@ -250,6 +258,7 @@ annotation:
 
 [[aop-enable-aspectj-xml]]
 ==== Enabling @AspectJ Support with XML configuration
+
 To enable @AspectJ support with XML based configuration use the `aop:aspectj-autoproxy`
 element:
 
@@ -259,9 +268,10 @@ element:
 	<aop:aspectj-autoproxy/>
 ----
 
-This assumes that you are using schema support as described in <<appendix.adoc#xsd-configuration,
-XML Schema-based configuration>>. See <<appendix.adoc#xsd-config-body-schemas-aop, the AOP schema>>
-for how to import the tags in the `aop` namespace.
+This assumes that you are using schema support as described in
+<<core.adoc#xsd-schemas, XML Schema-based configuration>>. See
+<<core.adoc#xsd-schemas-aop, the AOP schema>> for how to import the tags in the `aop`
+namespace.
 
 
 
@@ -326,6 +336,7 @@ hence excludes it from auto-proxying.
 
 [[aop-pointcuts]]
 === Declaring a pointcut
+
 Recall that pointcuts determine join points of interest, and thus enable us to control
 when advice executes. __Spring AOP only supports method execution join points for Spring
 beans__, so you can think of a pointcut as matching the execution of methods on Spring
@@ -358,6 +369,7 @@ et. al. or "AspectJ in Action" by Ramnivas Laddad.
 
 [[aop-pointcuts-designators]]
 ==== Supported Pointcut Designators
+
 Spring AOP supports the following AspectJ pointcut designators (PCD) for use in pointcut
 expressions:
 
@@ -455,6 +467,7 @@ it is natural and straightforward to identify specific beans by name.
 
 [[aop-pointcuts-combining]]
 ==== Combining pointcut expressions
+
 Pointcut expressions can be combined using '&&', '||' and '!'. It is also possible to
 refer to pointcut expressions by name. The following example shows three pointcut
 expressions: `anyPublicOperation` (which matches if a method execution join point
@@ -484,6 +497,7 @@ __matching__.
 
 [[aop-common-pointcuts]]
 ==== Sharing common pointcut definitions
+
 When working with enterprise applications, you often want to refer to modules of the
 application and particular sets of operations from within several aspects. We recommend
 defining a "SystemArchitecture" aspect that captures common pointcut expressions for
@@ -578,6 +592,7 @@ transaction elements are discussed in <<data-access.adoc#transaction, Transactio
 
 [[aop-pointcuts-examples]]
 ==== Examples
+
 Spring AOP users are likely to use the `execution` pointcut designator the most often.
 The format of an execution expression is:
 
@@ -794,6 +809,7 @@ how to make the annotation object(s) available in the advice body.
 
 [[writing-good-pointcuts]]
 ==== Writing good pointcuts
+
 During compilation, AspectJ processes pointcuts in order to try and optimize matching
 performance. Examining code and determining if each join point matches (statically or
 dynamically) a given pointcut is a costly process. (A dynamic match means the match
@@ -831,6 +847,7 @@ pointcut should always include one if possible.
 
 [[aop-advice]]
 === Declaring advice
+
 Advice is associated with a pointcut expression, and runs before, after, or around
 method executions matched by the pointcut. The pointcut expression may be either a
 simple reference to a named pointcut, or a pointcut expression declared in place.
@@ -838,6 +855,7 @@ simple reference to a named pointcut, or a pointcut expression declared in place
 
 [[aop-advice-before]]
 ==== Before advice
+
 Before advice is declared in an aspect using the `@Before` annotation:
 
 [source,java,indent=0]
@@ -879,6 +897,7 @@ If using an in-place pointcut expression we could rewrite the above example as:
 
 [[aop-advice-after-returning]]
 ==== After returning advice
+
 After returning advice runs when a matched method execution returns normally. It is
 declared using the `@AfterReturning` annotation:
 
@@ -940,6 +959,7 @@ using after-returning advice.
 
 [[aop-advice-after-throwing]]
 ==== After throwing advice
+
 After throwing advice runs when a matched method execution exits by throwing an
 exception. It is declared using the `@AfterThrowing` annotation:
 
@@ -993,6 +1013,7 @@ of the specified type ( `DataAccessException` in this case).
 
 [[aop-advice-after-finally]]
 ==== After (finally) advice
+
 After (finally) advice runs however a matched method execution exits. It is declared
 using the `@After` annotation. After advice must be prepared to handle both normal and
 exception return conditions. It is typically used for releasing resources, etc.
@@ -1017,6 +1038,7 @@ exception return conditions. It is typically used for releasing resources, etc.
 
 [[aop-ataspectj-around-advice]]
 ==== Around advice
+
 The final kind of advice is around advice. Around advice runs "around" a matched method
 execution. It has the opportunity to do work both before and after the method executes,
 and to determine when, how, and even if, the method actually gets to execute at all.
@@ -1078,6 +1100,7 @@ legal.
 
 [[aop-ataspectj-advice-params]]
 ==== Advice parameters
+
 Spring offers fully typed advice - meaning that you declare the parameters you need
 in the advice signature (as we saw for the returning and throwing examples above) rather
 than work with `Object[]` arrays all the time. We'll see how to make argument and other
@@ -1099,6 +1122,7 @@ Please do consult the javadocs for full details.
 
 [[aop-ataspectj-advice-params-passing]]
 ===== Passing parameters to advice
+
 We've already seen how to bind the returned value or exception value (using after
 returning and after throwing advice). To make argument values available to the advice
 body, you can use the binding form of `args`. If a parameter name is used in place of a
@@ -1173,6 +1197,7 @@ And then the advice that matches the execution of `@Auditable` methods:
 
 [[aop-ataspectj-advice-params-generics]]
 ===== Advice parameters and generics
+
 Spring AOP can handle generics used in class declarations and method parameters. Suppose
 you have a generic type like this:
 
@@ -1217,6 +1242,7 @@ check the type of the elements.
 
 [[aop-ataspectj-advice-params-names]]
 ===== Determining argument names
+
 The parameter binding in advice invocations relies on matching names used in pointcut
 expressions to declared parameter names in (advice and pointcut) method signatures.
 Parameter names are __not__ available through Java reflection, so Spring AOP uses the
@@ -1296,6 +1322,7 @@ will retain the needed information.
 
 [[aop-ataspectj-advice-proceeding-with-the-call]]
 ===== Proceeding with arguments
+
 We remarked earlier that we would describe how to write a proceed call __with
 arguments__ that works consistently across Spring AOP and AspectJ. The solution is
 simply to ensure that the advice signature binds each of the method parameters in order.
@@ -1319,6 +1346,7 @@ In many cases you will be doing this binding anyway (as in the example above).
 
 [[aop-ataspectj-advice-ordering]]
 ==== Advice ordering
+
 What happens when multiple pieces of advice all want to run at the same join point?
 Spring AOP follows the same precedence rules as AspectJ to determine the order of advice
 execution. The highest precedence advice runs first "on the way in" (so given two pieces
@@ -1344,6 +1372,7 @@ pieces of advice into separate aspect classes - which can be ordered at the aspe
 
 [[aop-introductions]]
 === Introductions
+
 Introductions (known as inter-type declarations in AspectJ) enable an aspect to declare
 that advised objects implement a given interface, and to provide an implementation of
 that interface on behalf of those objects.
@@ -1388,6 +1417,7 @@ you would write the following:
 
 [[aop-instantiation-models]]
 === Aspect instantiation models
+
 [NOTE]
 ====
 (This is an advanced topic, so if you are just starting out with AOP you can safely skip
@@ -1436,6 +1466,7 @@ creates one aspect instance for each unique target object at matched join points
 
 [[aop-ataspectj-example]]
 === Example
+
 Now that you have seen how all the constituent parts work, let's put them together to do
 something useful!
 
@@ -1545,6 +1576,7 @@ expression so that only `@Idempotent` operations match:
 
 [[aop-schema]]
 == Schema-based AOP support
+
 If you prefer an XML-based format, then Spring also offers support for defining aspects
 using the new "aop" namespace tags. The exact same pointcut expressions and advice kinds
 are supported as when using the @AspectJ style, hence in this section we will focus on
@@ -1553,9 +1585,9 @@ the new __syntax__ and refer the reader to the discussion in the previous sectio
 of advice parameters.
 
 To use the aop namespace tags described in this section, you need to import the
-`spring-aop` schema as described in <<appendix.adoc#xsd-configuration,
+`spring-aop` schema as described in <<core.adoc#xsd-schemas,
 XML Schema-based configuration>>.
-See <<appendix.adoc#xsd-config-body-schemas-aop, the AOP schema>>
+See <<core.adoc#xsd-schemas-aop, the AOP schema>>
 for how to import the tags in the `aop` namespace.
 
 Within your Spring configurations, all aspect and advisor elements must be placed within
@@ -1576,6 +1608,7 @@ just the `<aop:config>` style, or just the `AutoProxyCreator` style.
 
 [[aop-schema-declaring-an-aspect]]
 === Declaring an aspect
+
 Using the schema support, an aspect is simply a regular Java object defined as a bean in
 your Spring application context. The state and behavior is captured in the fields and
 methods of the object, and the pointcut and advice information is captured in the XML.
@@ -1604,6 +1637,7 @@ dependency injected just like any other Spring bean.
 
 [[aop-schema-pointcuts]]
 === Declaring a pointcut
+
 A named pointcut can be declared inside an <aop:config> element, enabling the pointcut
 definition to be shared across several aspects and advisors.
 
@@ -1723,12 +1757,14 @@ style.
 
 [[aop-schema-advice]]
 === Declaring advice
+
 The same five advice kinds are supported as for the @AspectJ style, and they have
 exactly the same semantics.
 
 
 [[aop-schema-advice-before]]
 ==== Before advice
+
 Before advice runs before a matched method execution. It is declared inside an
 `<aop:aspect>` using the <aop:before> element.
 
@@ -1776,6 +1812,7 @@ bean will be invoked.
 
 [[aop-schema-advice-after-returning]]
 ==== After returning advice
+
 After returning advice runs when a matched method execution completes normally. It is
 declared inside an `<aop:aspect>` in the same way as before advice. For example:
 
@@ -1825,6 +1862,7 @@ example, the method signature may be declared as:
 
 [[aop-schema-advice-after-throwing]]
 ==== After throwing advice
+
 After throwing advice executes when a matched method execution exits by throwing an
 exception. It is declared inside an `<aop:aspect>` using the after-throwing element:
 
@@ -1874,6 +1912,7 @@ example, the method signature may be declared as:
 
 [[aop-schema-advice-after-finally]]
 ==== After (finally) advice
+
 After (finally) advice runs however a matched method execution exits. It is declared
 using the `after` element:
 
@@ -1894,6 +1933,7 @@ using the `after` element:
 
 [[aop-schema-advice-around]]
 ==== Around advice
+
 The final kind of advice is around advice. Around advice runs "around" a matched method
 execution. It has the opportunity to do work both before and after the method executes,
 and to determine when, how, and even if, the method actually gets to execute at all.
@@ -1940,6 +1980,7 @@ The implementation of the `doBasicProfiling` advice would be exactly the same as
 
 [[aop-schema-params]]
 ==== Advice parameters
+
 The schema based declaration style supports fully typed advice in the same way as
 described for the @AspectJ support - by matching pointcut parameters by name against
 advice method parameters. See <<aop-ataspectj-advice-params>> for details. If you wish
@@ -2077,6 +2118,7 @@ ms     %     Task name
 
 [[aop-ordering]]
 ==== Advice ordering
+
 When multiple advice needs to execute at the same join point (executing method) the
 ordering rules are as described in <<aop-ataspectj-advice-ordering>>. The precedence
 between aspects is determined by either adding the `Order` annotation to the bean
@@ -2086,6 +2128,7 @@ backing the aspect or by having the bean implement the `Ordered` interface.
 
 [[aop-schema-introductions]]
 === Introductions
+
 Introductions (known as inter-type declarations in AspectJ) enable an aspect to declare
 that advised objects implement a given interface, and to provide an implementation of
 that interface on behalf of those objects.
@@ -2142,6 +2185,7 @@ following:
 
 [[aop-schema-instatiation-models]]
 === Aspect instantiation models
+
 The only supported instantiation model for schema-defined aspects is the singleton
 model. Other instantiation models may be supported in future releases.
 
@@ -2149,7 +2193,8 @@ model. Other instantiation models may be supported in future releases.
 
 [[aop-schema-advisors]]
 === Advisors
-The concept of "advisors" is brought forward from the AOP support defined in Spring 1.2
+
+The concept of "advisors" is brought forward from the AOP support defined in Spring
 and does not have a direct equivalent in AspectJ. An advisor is like a small
 self-contained aspect that has a single piece of advice. The advice itself is
 represented by a bean, and must implement one of the advice interfaces described in
@@ -2191,6 +2236,7 @@ use the `order` attribute to define the `Ordered` value of the advisor.
 
 [[aop-schema-example]]
 === Example
+
 Let's see how the concurrent locking failure retry example from
 <<aop-ataspectj-example>> looks when rewritten using the schema support.
 
@@ -2317,6 +2363,7 @@ pointcut expression so that only `@Idempotent` operations match:
 
 [[aop-choosing]]
 == Choosing which AOP declaration style to use
+
 Once you have decided that an aspect is the best approach for implementing a given
 requirement, how do you decide between using Spring AOP or AspectJ, and between the
 Aspect language (code) style, @AspectJ annotation style, or the Spring XML style? These
@@ -2327,6 +2374,7 @@ development tools, and team familiarity with AOP.
 
 [[aop-spring-or-aspectj]]
 === Spring AOP or full AspectJ?
+
 Use the simplest thing that can work. Spring AOP is simpler than using full AspectJ as
 there is no requirement to introduce the AspectJ compiler / weaver into your development
 and build processes. If you only need to advise the execution of operations on Spring
@@ -2350,6 +2398,7 @@ an aspect weaving phase to your build script.
 
 [[aop-ataspectj-or-xml]]
 === @AspectJ or XML for Spring AOP?
+
 If you have chosen to use Spring AOP, then you have a choice of @AspectJ or XML style.
 There are various tradeoffs to consider.
 
@@ -2412,6 +2461,7 @@ that do more than simple "configuration" of enterprise services.
 
 [[aop-mixing-styles]]
 == Mixing aspect types
+
 It is perfectly possible to mix @AspectJ style aspects using the autoproxying support,
 schema-defined `<aop:aspect>` aspects, `<aop:advisor>` declared advisors and even
 proxies and interceptors defined using the Spring 1.2 style in the same configuration.
@@ -2423,6 +2473,7 @@ co-exist without any difficulty.
 
 [[aop-proxying]]
 == Proxying mechanisms
+
 Spring AOP uses either JDK dynamic proxies or CGLIB to create the proxy for a given
 target object. (JDK dynamic proxies are preferred whenever you have a choice).
 
@@ -2482,6 +2533,7 @@ proxies __for all three of them__.
 
 [[aop-understanding-aop-proxies]]
 === Understanding AOP proxies
+
 Spring AOP is __proxy-based__. It is vitally important that you grasp the semantics of
 what that last statement actually means before you write your own aspects or use any of
 the Spring AOP-based aspects supplied with the Spring Framework.
@@ -2616,6 +2668,7 @@ it is not a proxy-based AOP framework.
 
 [[aop-aspectj-programmatic]]
 == Programmatic creation of @AspectJ Proxies
+
 In addition to declaring aspects in your configuration using either `<aop:config>` or
 `<aop:aspectj-autoproxy>`, it is also possible programmatically to create proxies that
 advise target objects. For the full details of Spring's AOP API, see the next chapter.
@@ -2649,6 +2702,7 @@ full information.
 
 [[aop-using-aspectj]]
 == Using AspectJ with Spring applications
+
 Everything we've covered so far in this chapter is pure Spring AOP. In this section,
 we're going to look at how you can use the AspectJ compiler/weaver instead of, or in
 addition to, Spring AOP if your needs go beyond the facilities offered by Spring AOP
@@ -2666,6 +2720,7 @@ using AspectJ.
 
 [[aop-atconfigurable]]
 === Using AspectJ to dependency inject domain objects with Spring
+
 The Spring container instantiates and configures beans defined in your application
 context. It is also possible to ask a bean factory to configure a __pre-existing__
 object given the name of a bean definition containing the configuration to be applied.
@@ -2793,8 +2848,9 @@ using Java based configuration simply add `@EnableSpringConfigured` to any
 	}
 ----
 
-If you prefer XML based configuration, the Spring <<appendix.adoc#xsd-config-body-schemas-context,
-`context` namespace>> defines a convenient `context:spring-configured` element:
+If you prefer XML based configuration, the Spring
+<<core.adoc#xsd-schemas-context, `context` namespace>>
+defines a convenient `context:spring-configured` element:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -2846,6 +2902,7 @@ that it has not been configured by Spring.
 
 [[aop-configurable-container]]
 ==== Working with multiple application contexts
+
 The `AnnotationBeanConfigurerAspect` used to implement the `@Configurable` support is an
 AspectJ singleton aspect. The scope of a singleton aspect is the same as the scope of
 `static` members, that is to say there is one aspect instance per classloader that
@@ -2875,6 +2932,7 @@ not what you want.
 
 [[aop-ajlib-other]]
 === Other Spring aspects for AspectJ
+
 In addition to the `@Configurable` aspect, `spring-aspects.jar` contains an AspectJ
 aspect that can be used to drive Spring's transaction management for types and methods
 annotated with the `@Transactional` annotation. This is primarily intended for users who
@@ -2932,6 +2990,7 @@ fully-qualified class names:
 
 [[aop-aj-configure]]
 === Configuring AspectJ aspects using Spring IoC
+
 When using AspectJ aspects with Spring applications, it is natural to both want and
 expect to be able to configure such aspects using Spring. The AspectJ runtime itself is
 responsible for aspect creation, and the means of configuring the AspectJ created
@@ -2989,6 +3048,7 @@ declaration is just being used here, but the AspectJ runtime is __not__ involved
 
 [[aop-aj-ltw]]
 === Load-time weaving with AspectJ in the Spring Framework
+
 Load-time weaving (LTW) refers to the process of weaving AspectJ aspects into an
 application's class files as they are being loaded into the Java virtual machine (JVM).
 The focus of this section is on configuring and using LTW in the specific context of the
@@ -3024,6 +3084,7 @@ https://github.com/spring-projects/spring-petclinic[Petclinic sample application
 
 [[aop-aj-ltw-first-example]]
 ==== A first example
+
 Let us assume that you are an application developer who has been tasked with diagnosing
 the cause of some performance problems in a system. Rather than break out a profiling
 tool, what we are going to do is switch on a simple profiling aspect that will enable us
@@ -3232,6 +3293,7 @@ into UAT or production.
 
 [[aop-aj-ltw-the-aspects]]
 ==== Aspects
+
 The aspects that you use in LTW have to be AspectJ aspects. They can be written in
 either the AspectJ language itself or you can write your aspects in the @AspectJ-style.
 It means that your aspects are then both valid AspectJ __and__ Spring AOP aspects.
@@ -3256,6 +3318,7 @@ directing you there.)
 
 [[aop-aj-ltw-libraries]]
 ==== Required libraries (JARS)
+
 At a minimum you will need the following libraries to use the Spring Framework's support
 for AspectJ LTW:
 
@@ -3270,6 +3333,7 @@ instrumentation>>, you will also need:
 
 [[aop-aj-ltw-spring]]
 ==== Spring configuration
+
 The key component in Spring's LTW support is the `LoadTimeWeaver` interface (in the
 `org.springframework.instrument.classloading` package), and the numerous implementations
 of it that ship with the Spring distribution. A `LoadTimeWeaver` is responsible for
@@ -3279,7 +3343,6 @@ happens to be the LTW of aspects.
 
 [TIP]
 ====
-
 If you are unfamiliar with the idea of runtime class file transformation, you are
 encouraged to read the javadoc API documentation for the `java.lang.instrument` package
 before continuing. This is not a huge chore because there is - rather annoyingly -
@@ -3445,12 +3508,14 @@ It accepts one of three possible values, summarized below, with the default valu
 
 [[aop-aj-ltw-environments]]
 ==== Environment-specific configuration
+
 This last section contains any additional settings and configuration that you will need
 when using Spring's LTW support in environments such as application servers and web
 containers.
 
 [[aop-aj-ltw-environment-tomcat]]
 ===== Tomcat
+
 Historically, http://tomcat.apache.org/[Apache Tomcat]'s default class loader did not
 support class transformation which is why Spring provides an enhanced implementation
 that addresses this need. Named `TomcatInstrumentableClassLoader`, the loader works on
@@ -3501,6 +3566,7 @@ deployed web applications, no matter what ClassLoader they happen to run on.
 
 [[aop-aj-ltw-environments-weblogic-oc4j-resin-glassfish-jboss]]
 ===== WebLogic, WebSphere, Resin, GlassFish, JBoss
+
 Recent versions of WebLogic Server (version 10 and above), IBM WebSphere Application
 Server (version 7 and above), Resin (3.1 and above) and JBoss (6.x or above) provide a
 ClassLoader that is capable of local instrumentation. Spring's native LTW leverages such
@@ -3524,6 +3590,7 @@ to your artifact a file named `WEB-INF/jboss-scanning.xml` with the following co
 
 [[aop-aj-ltw-environment-generic]]
 ===== Generic Java applications
+
 When class instrumentation is required in environments that do not support or are not
 supported by the existing `LoadTimeWeaver` implementations, a JDK agent can be the only
 solution. For such cases, Spring provides `InstrumentationLoadTimeWeaver`, which
@@ -3552,6 +3619,7 @@ support) a dedicated LTW.
 
 [[aop-resources]]
 == Further Resources
+
 More information on AspectJ can be found on the http://www.eclipse.org/aspectj[AspectJ
 website].
 
@@ -3561,4 +3629,3 @@ comprehensive introduction and reference for the AspectJ language.
 The book __AspectJ in Action, Second Edition__ by Ramnivas Laddad (Manning, 2009) comes highly
 recommended; the focus of the book is on AspectJ, but a lot of general AOP themes are
 explored (in some depth).
-

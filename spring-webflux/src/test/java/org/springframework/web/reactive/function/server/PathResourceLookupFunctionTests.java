@@ -66,7 +66,8 @@ public class PathResourceLookupFunctionTests {
 				.uri(new URI("http://localhost/resources/child/response.txt"))
 				.build();
 		Mono<Resource> result = function.apply(request);
-		File expected = new ClassPathResource("org/springframework/web/reactive/function/server/child/response.txt").getFile();
+		String path = "org/springframework/web/reactive/function/server/child/response.txt";
+		File expected = new ClassPathResource(path).getFile();
 		StepVerifier.create(result)
 				.expectNextMatches(resource -> {
 					try {

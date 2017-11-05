@@ -83,7 +83,7 @@ public abstract class Jackson2CodecSupport {
 	}
 
 	/**
-	 * Sub-classes should expose this as "decodable" or "encodable" mime types.
+	 * Subclasses should expose this as "decodable" or "encodable" mime types.
 	 */
 	protected List<MimeType> getMimeTypes() {
 		return this.mimeTypes;

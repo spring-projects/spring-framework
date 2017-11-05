@@ -126,7 +126,6 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * @param request the current request
 	 * @return the created model attribute, or {@code null} if no suitable
 	 * conversion found
-	 * @throws Exception
 	 */
 	@Nullable
 	protected Object createAttributeFromRequestValue(String sourceValue, String attributeName,

@@ -19,14 +19,15 @@ package org.springframework.test.web.reactive.server;
 import java.net.URI;
 
 import org.junit.Test;
+import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.client.reactive.MockClientHttpRequest;
 import org.springframework.mock.http.client.reactive.MockClientHttpResponse;
 
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link StatusAssertions}.
@@ -37,8 +38,7 @@ import static org.mockito.Mockito.mock;
 public class StatusAssertionTests {
 
 	@Test
-	public void isEqualTo() throws Exception {
-
+	public void isEqualTo() {
 		StatusAssertions assertions = statusAssertions(HttpStatus.CONFLICT);
 
 		// Success
@@ -63,8 +63,7 @@ public class StatusAssertionTests {
 	}
 
 	@Test
-	public void reasonEquals() throws Exception {
-
+	public void reasonEquals() {
 		StatusAssertions assertions = statusAssertions(HttpStatus.CONFLICT);
 
 		// Success
@@ -80,7 +79,7 @@ public class StatusAssertionTests {
 	}
 
 	@Test
-	public void statusSerius1xx() throws Exception {
+	public void statusSerius1xx() {
 		StatusAssertions assertions = statusAssertions(HttpStatus.CONTINUE);
 
 		// Success
@@ -96,7 +95,7 @@ public class StatusAssertionTests {
 	}
 
 	@Test
-	public void statusSerius2xx() throws Exception {
+	public void statusSerius2xx() {
 		StatusAssertions assertions = statusAssertions(HttpStatus.OK);
 
 		// Success
@@ -112,7 +111,7 @@ public class StatusAssertionTests {
 	}
 
 	@Test
-	public void statusSerius3xx() throws Exception {
+	public void statusSerius3xx() {
 		StatusAssertions assertions = statusAssertions(HttpStatus.PERMANENT_REDIRECT);
 
 		// Success
@@ -128,7 +127,7 @@ public class StatusAssertionTests {
 	}
 
 	@Test
-	public void statusSerius4xx() throws Exception {
+	public void statusSerius4xx() {
 		StatusAssertions assertions = statusAssertions(HttpStatus.BAD_REQUEST);
 
 		// Success
@@ -144,7 +143,7 @@ public class StatusAssertionTests {
 	}
 
 	@Test
-	public void statusSerius5xx() throws Exception {
+	public void statusSerius5xx() {
 		StatusAssertions assertions = statusAssertions(HttpStatus.INTERNAL_SERVER_ERROR);
 
 		// Success
@@ -161,15 +160,14 @@ public class StatusAssertionTests {
 
 
 	private StatusAssertions statusAssertions(HttpStatus status) {
-
 		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("/"));
 		MockClientHttpResponse response = new MockClientHttpResponse(status);
 
-		WiretapClientHttpRequest wiretapRequest = new WiretapClientHttpRequest(request);
-		WiretapClientHttpResponse wiretapResponse = new WiretapClientHttpResponse(response);
+		MonoProcessor<byte[]> emptyContent = MonoProcessor.create();
+		emptyContent.onComplete();
 
-		ExchangeResult exchangeResult = new ExchangeResult(wiretapRequest, wiretapResponse);
-		return new StatusAssertions(exchangeResult, mock(WebTestClient.ResponseSpec.class));
+		ExchangeResult result = new ExchangeResult(request, response, emptyContent, emptyContent, null);
+		return new StatusAssertions(result, mock(WebTestClient.ResponseSpec.class));
 	}
 
 }

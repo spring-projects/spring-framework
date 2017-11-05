@@ -47,6 +47,7 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
+import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.MediaType.*;
 
 /**
@@ -326,7 +327,7 @@ public class RestTemplateTests {
 
 	@Test
 	public void postForLocation() throws Exception {
-		given(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).willReturn(request);
+		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(request);
 		String helloWorld = "Hello World";
 		given(converter.canWrite(String.class, null)).willReturn(true);
 		converter.write(helloWorld, null, request);
@@ -348,7 +349,7 @@ public class RestTemplateTests {
 
 	@Test
 	public void postForLocationEntityContentType() throws Exception {
-		given(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).willReturn(request);
+		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(request);
 		String helloWorld = "Hello World";
 		MediaType contentType = MediaType.TEXT_PLAIN;
 		given(converter.canWrite(String.class, contentType)).willReturn(true);
@@ -377,7 +378,7 @@ public class RestTemplateTests {
 
 	@Test
 	public void postForLocationEntityCustomHeader() throws Exception {
-		given(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).willReturn(request);
+		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(request);
 		String helloWorld = "Hello World";
 		given(converter.canWrite(String.class, null)).willReturn(true);
 		HttpHeaders requestHeaders = new HttpHeaders();
@@ -406,7 +407,7 @@ public class RestTemplateTests {
 
 	@Test
 	public void postForLocationNoLocation() throws Exception {
-		given(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).willReturn(request);
+		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(request);
 		String helloWorld = "Hello World";
 		given(converter.canWrite(String.class, null)).willReturn(true);
 		converter.write(helloWorld, null, request);
@@ -426,7 +427,7 @@ public class RestTemplateTests {
 
 	@Test
 	public void postForLocationNull() throws Exception {
-		given(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).willReturn(request);
+		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(request);
 		HttpHeaders requestHeaders = new HttpHeaders();
 		given(request.getHeaders()).willReturn(requestHeaders);
 		given(request.execute()).willReturn(response);
@@ -448,7 +449,7 @@ public class RestTemplateTests {
 		MediaType textPlain = new MediaType("text", "plain");
 		given(converter.canRead(Integer.class, null)).willReturn(true);
 		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(textPlain));
-		given(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).willReturn(this.request);
+		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(this.request);
 		HttpHeaders requestHeaders = new HttpHeaders();
 		given(this.request.getHeaders()).willReturn(requestHeaders);
 		String request = "Hello World";
@@ -481,7 +482,7 @@ public class RestTemplateTests {
 		MediaType textPlain = new MediaType("text", "plain");
 		given(converter.canRead(Integer.class, null)).willReturn(true);
 		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(textPlain));
-		given(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).willReturn(this.request);
+		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(this.request);
 		HttpHeaders requestHeaders = new HttpHeaders();
 		given(this.request.getHeaders()).willReturn(requestHeaders);
 		String request = "Hello World";
@@ -514,7 +515,7 @@ public class RestTemplateTests {
 		MediaType textPlain = new MediaType("text", "plain");
 		given(converter.canRead(Integer.class, null)).willReturn(true);
 		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(textPlain));
-		given(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).willReturn(request);
+		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(request);
 		HttpHeaders requestHeaders = new HttpHeaders();
 		given(request.getHeaders()).willReturn(requestHeaders);
 		given(request.execute()).willReturn(response);
@@ -543,7 +544,7 @@ public class RestTemplateTests {
 		MediaType textPlain = new MediaType("text", "plain");
 		given(converter.canRead(Integer.class, null)).willReturn(true);
 		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(textPlain));
-		given(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).willReturn(request);
+		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(request);
 		HttpHeaders requestHeaders = new HttpHeaders();
 		given(request.getHeaders()).willReturn(requestHeaders);
 		given(request.execute()).willReturn(response);
@@ -685,7 +686,7 @@ public class RestTemplateTests {
 		given(request.execute()).willReturn(response);
 		given(errorHandler.hasError(response)).willReturn(false);
 		HttpHeaders responseHeaders = new HttpHeaders();
-		EnumSet<HttpMethod> expected = EnumSet.of(HttpMethod.GET, HttpMethod.POST);
+		EnumSet<HttpMethod> expected = EnumSet.of(HttpMethod.GET, POST);
 		responseHeaders.setAllow(expected);
 		given(response.getHeaders()).willReturn(responseHeaders);
 		HttpStatus status = HttpStatus.OK;
@@ -747,7 +748,7 @@ public class RestTemplateTests {
 	public void exchange() throws Exception {
 		given(converter.canRead(Integer.class, null)).willReturn(true);
 		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-		given(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).willReturn(this.request);
+		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(this.request);
 		HttpHeaders requestHeaders = new HttpHeaders();
 		given(this.request.getHeaders()).willReturn(requestHeaders);
 		given(converter.canWrite(String.class, null)).willReturn(true);
@@ -769,8 +770,8 @@ public class RestTemplateTests {
 
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.set("MyHeader", "MyValue");
-		HttpEntity<String> requestEntity = new HttpEntity<>(body, entityHeaders);
-		ResponseEntity<Integer> result = template.exchange("http://example.com", HttpMethod.POST, requestEntity, Integer.class);
+		HttpEntity<String> entity = new HttpEntity<>(body, entityHeaders);
+		ResponseEntity<Integer> result = template.exchange("http://example.com", POST, entity, Integer.class);
 		assertEquals("Invalid POST result", expected, result.getBody());
 		assertEquals("Invalid Content-Type", MediaType.TEXT_PLAIN, result.getHeaders().getContentType());
 		assertEquals("Invalid Accept header", MediaType.TEXT_PLAIN_VALUE, requestHeaders.getFirst("Accept"));
@@ -789,7 +790,7 @@ public class RestTemplateTests {
 		ParameterizedTypeReference<List<Integer>> intList = new ParameterizedTypeReference<List<Integer>>() {};
 		given(converter.canRead(intList.getType(), null, null)).willReturn(true);
 		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-		given(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).willReturn(this.request);
+		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(this.request);
 		HttpHeaders requestHeaders = new HttpHeaders();
 		given(this.request.getHeaders()).willReturn(requestHeaders);
 		given(converter.canWrite(String.class, String.class, null)).willReturn(true);
@@ -811,7 +812,7 @@ public class RestTemplateTests {
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.set("MyHeader", "MyValue");
 		HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, entityHeaders);
-		ResponseEntity<List<Integer>> result = template.exchange("http://example.com", HttpMethod.POST, requestEntity, intList);
+		ResponseEntity<List<Integer>> result = template.exchange("http://example.com", POST, requestEntity, intList);
 		assertEquals("Invalid POST result", expected, result.getBody());
 		assertEquals("Invalid Content-Type", MediaType.TEXT_PLAIN, result.getHeaders().getContentType());
 		assertEquals("Invalid Accept header", MediaType.TEXT_PLAIN_VALUE, requestHeaders.getFirst("Accept"));

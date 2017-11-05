@@ -83,6 +83,11 @@ asciidoctor {
 	sources {
 		include '*.adoc'
 	}
+	resources {
+		from(sourceDir) {
+			include 'images/*', 'stylesheets/*', 'tocbot-3.0.2/*'
+		}
+	}
 	logDocuments = true
 	backends = ["html5"]
 	// only ouput PDF documentation for non-SNAPSHOT builds
@@ -99,7 +104,7 @@ asciidoctor {
 			sectnums: '',
 			'source-highlighter': 'coderay@', // TODO switch to 'rouge' once supported by the html5 backend
 			stylesdir: 'stylesheets/',
-			stylesheet: 'spring.css',
+			stylesheet: 'main.css',
 			'spring-version': project.version
 
 }

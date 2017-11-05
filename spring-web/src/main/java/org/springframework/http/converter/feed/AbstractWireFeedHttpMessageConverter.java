@@ -49,7 +49,8 @@ import org.springframework.util.StringUtils;
  * @see AtomFeedHttpMessageConverter
  * @see RssChannelHttpMessageConverter
  */
-public abstract class AbstractWireFeedHttpMessageConverter<T extends WireFeed> extends AbstractHttpMessageConverter<T> {
+public abstract class AbstractWireFeedHttpMessageConverter<T extends WireFeed>
+		extends AbstractHttpMessageConverter<T> {
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 

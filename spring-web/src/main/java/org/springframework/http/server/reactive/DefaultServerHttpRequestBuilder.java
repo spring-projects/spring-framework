@@ -63,6 +63,9 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 	private Flux<DataBuffer> body;
 
+	private final ServerHttpRequest originalRequest;
+
+
 	public DefaultServerHttpRequestBuilder(ServerHttpRequest original) {
 		Assert.notNull(original, "ServerHttpRequest is required");
 
@@ -76,6 +79,8 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 		this.cookies = new LinkedMultiValueMap<>(original.getCookies().size());
 		copyMultiValueMap(original.getCookies(), this.cookies);
+
+		this.originalRequest = original;
 	}
 
 	private static <K, V> void copyMultiValueMap(MultiValueMap<K,V> source,
@@ -130,7 +135,8 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 	public ServerHttpRequest build() {
 		URI uriToUse = getUriToUse();
 		return new DefaultServerHttpRequest(uriToUse, this.contextPath, this.httpHeaders,
-				this.httpMethodValue, this.cookies, this.remoteAddress, this.body);
+				this.httpMethodValue, this.cookies, this.remoteAddress, this.body,
+				this.originalRequest);
 
 	}
 
@@ -158,16 +164,22 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 		private final Flux<DataBuffer> body;
 
+		private final ServerHttpRequest originalRequest;
+
+
 		public DefaultServerHttpRequest(URI uri, @Nullable String contextPath,
-				HttpHeaders headers, String methodValue,
-				MultiValueMap<String, HttpCookie> cookies, @Nullable InetSocketAddress remoteAddress,
-				Flux<DataBuffer> body) {
+				HttpHeaders headers, String methodValue, MultiValueMap<String, HttpCookie> cookies,
+				@Nullable InetSocketAddress remoteAddress,
+				Flux<DataBuffer> body, ServerHttpRequest originalRequest) {
+
 			super(uri, contextPath, headers);
 			this.methodValue = methodValue;
 			this.cookies = cookies;
 			this.remoteAddress = remoteAddress;
 			this.body = body;
+			this.originalRequest = originalRequest;
 		}
+
 
 		@Override
 		public String getMethodValue() {
@@ -188,6 +200,12 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		@Override
 		public Flux<DataBuffer> getBody() {
 			return this.body;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> T getNativeRequest() {
+			return (T) this.originalRequest;
 		}
 	}
 

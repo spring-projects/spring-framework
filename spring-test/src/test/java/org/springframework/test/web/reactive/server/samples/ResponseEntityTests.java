@@ -40,7 +40,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static java.time.Duration.ofMillis;
 import static org.hamcrest.CoreMatchers.endsWith;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 
 /**

@@ -31,7 +31,8 @@ import org.springframework.util.concurrent.ListenableFuture;
  * @author Rossen Stoyanchev
  * @since 4.3
  * @see AsyncClientHttpRequestInterceptor
- * @deprecated as of Spring 5.0, in favor of {@link org.springframework.web.reactive.function.client.ExchangeFilterFunction}
+ * @deprecated as of Spring 5.0, in favor of
+ * {@link org.springframework.web.reactive.function.client.ExchangeFilterFunction}
  */
 @Deprecated
 public interface AsyncClientHttpRequestExecution {

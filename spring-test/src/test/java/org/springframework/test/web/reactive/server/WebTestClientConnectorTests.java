@@ -32,8 +32,8 @@ import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunctions;
 
-import static java.time.Duration.*;
-import static org.junit.Assert.*;
+import static java.time.Duration.ofMillis;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link WiretapConnector}.
@@ -56,10 +56,10 @@ public class WebTestClientConnectorTests {
 		ExchangeFunction function = ExchangeFunctions.create(wiretapConnector);
 		function.exchange(clientRequest).block(ofMillis(0));
 
-		ExchangeResult actual = wiretapConnector.claimRequest("1");
-		assertNotNull(actual);
-		assertEquals(HttpMethod.GET, actual.getMethod());
-		assertEquals("/test", actual.getUrl().toString());
+		WiretapConnector.Info actual = wiretapConnector.claimRequest("1");
+		ExchangeResult result = actual.createExchangeResult(null);
+		assertEquals(HttpMethod.GET, result.getMethod());
+		assertEquals("/test", result.getUrl().toString());
 	}
 
 }

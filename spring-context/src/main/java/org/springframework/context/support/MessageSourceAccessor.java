@@ -84,7 +84,8 @@ public class MessageSourceAccessor {
 	 * @return the message
 	 */
 	public String getMessage(String code, String defaultMessage) {
-		return this.messageSource.getMessage(code, null, defaultMessage, getDefaultLocale());
+		String msg = this.messageSource.getMessage(code, null, defaultMessage, getDefaultLocale());
+		return (msg != null ? msg : "");
 	}
 
 	/**
@@ -95,7 +96,8 @@ public class MessageSourceAccessor {
 	 * @return the message
 	 */
 	public String getMessage(String code, String defaultMessage, Locale locale) {
-		return this.messageSource.getMessage(code, null, defaultMessage, locale);
+		String msg = this.messageSource.getMessage(code, null, defaultMessage, locale);
+		return (msg != null ? msg : "");
 	}
 
 	/**
@@ -106,7 +108,8 @@ public class MessageSourceAccessor {
 	 * @return the message
 	 */
 	public String getMessage(String code, @Nullable Object[] args, String defaultMessage) {
-		return this.messageSource.getMessage(code, args, defaultMessage, getDefaultLocale());
+		String msg = this.messageSource.getMessage(code, args, defaultMessage, getDefaultLocale());
+		return (msg != null ? msg : "");
 	}
 
 	/**
@@ -118,7 +121,8 @@ public class MessageSourceAccessor {
 	 * @return the message
 	 */
 	public String getMessage(String code, @Nullable Object[] args, String defaultMessage, Locale locale) {
-		return this.messageSource.getMessage(code, args, defaultMessage, locale);
+		String msg = this.messageSource.getMessage(code, args, defaultMessage, locale);
+		return (msg != null ? msg : "");
 	}
 
 	/**

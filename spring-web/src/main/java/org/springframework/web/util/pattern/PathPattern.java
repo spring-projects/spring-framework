@@ -381,7 +381,9 @@ public class PathPattern implements Comparable<PathPattern> {
 		// /hotels/* + /booking => /hotels/booking
 		// /hotels/* + booking => /hotels/booking
 		if (this.endsWithSeparatorWildcard) {
-			return parser.parse(concat(this.patternString.substring(0, this.patternString.length() - 2), pattern2string.patternString));
+			return parser.parse(concat(
+					this.patternString.substring(0, this.patternString.length() - 2),
+					pattern2string.patternString));
 		}
 
 		// /hotels + /booking => /hotels/booking

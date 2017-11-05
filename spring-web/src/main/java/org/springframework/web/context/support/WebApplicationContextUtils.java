@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletConfig;
@@ -180,7 +179,9 @@ public abstract class WebApplicationContextUtils {
 	 * @param beanFactory the BeanFactory to configure
 	 * @param sc the ServletContext that we're running within
 	 */
-	public static void registerWebApplicationScopes(ConfigurableListableBeanFactory beanFactory, @Nullable ServletContext sc) {
+	public static void registerWebApplicationScopes(ConfigurableListableBeanFactory beanFactory,
+			@Nullable ServletContext sc) {
+
 		beanFactory.registerScope(WebApplicationContext.SCOPE_REQUEST, new RequestScope());
 		beanFactory.registerScope(WebApplicationContext.SCOPE_SESSION, new SessionScope());
 		if (sc != null) {
@@ -278,7 +279,7 @@ public abstract class WebApplicationContextUtils {
 	 * <p>This method is idempotent with respect to the fact it may be called any number
 	 * of times but will perform replacement of stub property sources with their
 	 * corresponding actual property sources once and only once.
-	 * @param propertySources the {@link MutablePropertySources} to initialize (must not
+	 * @param sources the {@link MutablePropertySources} to initialize (must not
 	 * be {@code null})
 	 * @param servletContext the current {@link ServletContext} (ignored if {@code null}
 	 * or if the {@link StandardServletEnvironment#SERVLET_CONTEXT_PROPERTY_SOURCE_NAME
@@ -289,19 +290,17 @@ public abstract class WebApplicationContextUtils {
 	 * @see org.springframework.core.env.PropertySource.StubPropertySource
 	 * @see org.springframework.core.env.ConfigurableEnvironment#getPropertySources()
 	 */
-	public static void initServletPropertySources(
-			MutablePropertySources propertySources, @Nullable ServletContext servletContext, @Nullable ServletConfig servletConfig) {
+	public static void initServletPropertySources(MutablePropertySources sources,
+			@Nullable ServletContext servletContext, @Nullable ServletConfig servletConfig) {
 
-		Assert.notNull(propertySources, "'propertySources' must not be null");
-		if (servletContext != null && propertySources.contains(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME) &&
-				propertySources.get(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME) instanceof StubPropertySource) {
-			propertySources.replace(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME,
-					new ServletContextPropertySource(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME, servletContext));
+		Assert.notNull(sources, "'propertySources' must not be null");
+		String name = StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME;
+		if (servletContext != null && sources.contains(name) && sources.get(name) instanceof StubPropertySource) {
+			sources.replace(name, new ServletContextPropertySource(name, servletContext));
 		}
-		if (servletConfig != null && propertySources.contains(StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME) &&
-				propertySources.get(StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME) instanceof StubPropertySource) {
-			propertySources.replace(StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME,
-					new ServletConfigPropertySource(StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME, servletConfig));
+		name = StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME;
+		if (servletConfig != null && sources.contains(name) && sources.get(name) instanceof StubPropertySource) {
+			sources.replace(name, new ServletConfigPropertySource(name, servletConfig));
 		}
 	}
 

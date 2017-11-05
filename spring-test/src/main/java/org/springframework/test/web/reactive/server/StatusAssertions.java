@@ -18,7 +18,7 @@ package org.springframework.test.web.reactive.server;
 
 import org.springframework.http.HttpStatus;
 
-import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.*;
 
 /**
  * Assertions on the response status.
@@ -135,6 +135,14 @@ public class StatusAssertions {
 	}
 
 	/**
+	 * Assert the response status code is {@code HttpStatus.FORBIDDEN} (403).
+	 * @since 5.0.2
+	 */
+	public WebTestClient.ResponseSpec isForbidden() {
+		return assertStatusAndReturn(HttpStatus.FORBIDDEN);
+	}
+
+	/**
 	 * Assert the response status code is {@code HttpStatus.NOT_FOUND} (404).
 	 */
 	public WebTestClient.ResponseSpec isNotFound() {
@@ -187,7 +195,6 @@ public class StatusAssertions {
 		return assertSeriesAndReturn(expected);
 	}
 
-	// Private methods
 
 	private WebTestClient.ResponseSpec assertStatusAndReturn(HttpStatus expected) {
 		HttpStatus actual = this.exchangeResult.getStatus();
@@ -197,8 +204,8 @@ public class StatusAssertions {
 
 	private WebTestClient.ResponseSpec assertSeriesAndReturn(HttpStatus.Series expected) {
 		HttpStatus status = this.exchangeResult.getStatus();
-		String message = "Range for response status value " + status;
-		this.exchangeResult.assertWithDiagnostics(() -> assertEquals(message, expected, status.series()));
+		this.exchangeResult.assertWithDiagnostics(() ->
+				assertEquals("Range for response status value " + status, expected, status.series()));
 		return this.responseSpec;
 	}
 

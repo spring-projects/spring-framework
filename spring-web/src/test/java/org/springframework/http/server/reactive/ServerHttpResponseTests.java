@@ -32,7 +32,9 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.ResponseCookie;
 
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 
 /**
  * @author Rossen Stoyanchev
@@ -150,6 +152,11 @@ public class ServerHttpResponseTests {
 
 		public TestServerHttpResponse() {
 			super(new DefaultDataBufferFactory());
+		}
+
+		@Override
+		public <T> T getNativeResponse() {
+			throw new IllegalStateException("This is a mock. No running server, no native response.");
 		}
 
 		@Override

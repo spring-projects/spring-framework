@@ -93,7 +93,7 @@ public class ServerHttpRequestTests {
 			}
 		};
 		AsyncContext asyncContext = new MockAsyncContext(request, new MockHttpServletResponse());
-		return new ServletServerHttpRequest(request, asyncContext, new DefaultDataBufferFactory(), 1024);
+		return new ServletServerHttpRequest(request, asyncContext, "", new DefaultDataBufferFactory(), 1024);
 	}
 
 	private static class TestServletInputStream extends DelegatingServletInputStream {

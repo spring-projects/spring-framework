@@ -1,13 +1,13 @@
-
 [[web-integration]]
-= Integrating with other web frameworks
+= Other Web Frameworks
+
+
 
 
 [[intro]]
 == Introduction
 
-This chapter details Spring's integration with third party web frameworks, such as
-http://www.oracle.com/technetwork/java/javaee/javaserverfaces-139869.html[JSF].
+This chapter details Spring's integration with third party web frameworks.
 
 One of the core value propositions of the Spring Framework is that of enabling
 __choice__. In a general sense, Spring does not force one to use or buy into any
@@ -16,37 +16,13 @@ some over others). This freedom to pick and choose the architecture, technology,
 methodology that is most relevant to a developer and their development team is
 arguably most evident in the web area, where Spring provides its own web framework
 (<<mvc,Spring MVC>>), while at the same time providing integration with a number of
-popular third party web frameworks. This allows one to continue to leverage any and all
-of the skills one may have acquired in a particular web framework such as JSF, while
-at the same time being able to enjoy the benefits afforded by Spring in other areas such
-as data access, declarative transaction management, and flexible configuration and
-application assembly.
-
-Having dispensed with the woolly sales patter (c.f. the previous paragraph), the
-remainder of this chapter will concentrate upon the meaty details of integrating your
-favorite web framework with Spring. One thing that is often commented upon by developers
-coming to Java from other languages is the seeming super-abundance of web frameworks
-available in Java. There are indeed a great number of web frameworks in the Java space;
-in fact there are far too many to cover with any semblance of detail in a single
-chapter. This chapter thus picks four of the more popular web frameworks in Java,
-starting with the Spring configuration that is common to all of the supported web
-frameworks, and then detailing the specific integration options for each supported web
-framework.
-
-[NOTE]
-====
-Please note that this chapter does not attempt to explain how to use any of the
-supported web frameworks. For example, if you want to use JSF for the presentation
-layer of your web application, the assumption is that you are already familiar with
-JSF itself. If you need further details about any of the supported web frameworks
-themselves, please do consult <<web-integration-resources>> at the end of this chapter.
-====
+popular third party web frameworks.
 
 
 
 
 [[web-integration-common]]
-== Common configuration
+== Common config
 Before diving into the integration specifics of each supported web framework, let us
 first take a look at the Spring configuration that is __not__ specific to any one web
 framework. (This section is equally applicable to Spring's own web framework, Spring
@@ -130,7 +106,7 @@ has more detail on its specific integration strategies.
 
 
 [[jsf]]
-== JavaServer Faces 1.2
+== JSF
 JavaServer Faces (JSF) is the JCP's standard component-based, event-driven web user
 interface framework. As of Java EE 5, it is an official part of the Java EE umbrella.
 
@@ -149,15 +125,17 @@ http://projects.spring.io/spring-webflow[Spring Web Flow website] for details!
 
 The key element in Spring's JSF integration is the JSF `ELResolver` mechanism.
 
+
+
 [[jsf-springbeanfaceselresolver]]
-=== SpringBeanFacesELResolver (JSF 1.2+)
-`SpringBeanFacesELResolver` is a JSF 1.2 compliant `ELResolver` implementation,
+=== Spring Bean Resolver
+`SpringBeanFacesELResolver` is a JSF 1.2+ compliant `ELResolver` implementation,
 integrating with the standard Unified EL as used by JSF 1.2 and JSP 2.1. Like
 `SpringBeanVariableResolver`, it delegates to the Spring's 'business context'
 `WebApplicationContext` __first__, then to the default resolver of the underlying JSF
 implementation.
 
-Configuration-wise, simply define `SpringBeanFacesELResolver` in your JSF 1.2
+Configuration-wise, simply define `SpringBeanFacesELResolver` in your JSF
 __faces-context.xml__ file:
 
 [source,xml,indent=0]
@@ -170,6 +148,7 @@ __faces-context.xml__ file:
 		</application>
 	</faces-config>
 ----
+
 
 
 [[jsf-facescontextutils]]
@@ -188,6 +167,7 @@ takes a `FacesContext` parameter rather than a `ServletContext` parameter.
 
 
 
+
 [[struts]]
 == Apache Struts 2.x
 Invented by Craig McClanahan, http://struts.apache.org[Struts] is an open source project
@@ -200,6 +180,7 @@ among Java web developers.
 Check out the Struts
 https://struts.apache.org/release/2.3.x/docs/spring-plugin.html[Spring Plugin] for the
 built-in Spring integration shipped with Struts.
+
 
 
 
@@ -220,6 +201,7 @@ Spring].
 
 
 
+
 [[web-integration-resources]]
 == Further Resources
 Find below links to further resources about the various web frameworks described in this
@@ -228,4 +210,3 @@ chapter.
 * The http://www.oracle.com/technetwork/java/javaee/javaserverfaces-139869.html[JSF] homepage
 * The http://struts.apache.org/[Struts] homepage
 * The http://tapestry.apache.org/[Tapestry] homepage
-

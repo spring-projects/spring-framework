@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package org.springframework.http.codec;
+package org.springframework.http.codec.support;
 
 import java.util.Collections;
 import java.util.List;
 
 import org.springframework.core.codec.Encoder;
+import org.springframework.http.codec.FormHttpMessageReader;
+import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
 import org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader;
 import org.springframework.lang.Nullable;
@@ -31,11 +36,11 @@ import org.springframework.util.ClassUtils;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-class DefaultServerCodecConfigurer extends AbstractCodecConfigurer implements ServerCodecConfigurer {
+public class DefaultServerCodecConfigurer extends AbstractCodecConfigurer implements ServerCodecConfigurer {
 
-	static final boolean synchronossMultipartPresent = ClassUtils.isPresent(
-			"org.synchronoss.cloud.nio.multipart.NioMultipartParser",
-			DefaultServerCodecConfigurer.class.getClassLoader());
+	static final boolean synchronossMultipartPresent =
+			ClassUtils.isPresent("org.synchronoss.cloud.nio.multipart.NioMultipartParser",
+					DefaultServerCodecConfigurer.class.getClassLoader());
 
 
 	public DefaultServerCodecConfigurer() {
@@ -62,12 +67,12 @@ class DefaultServerCodecConfigurer extends AbstractCodecConfigurer implements Se
 		}
 
 		@Override
-		protected boolean splitTextOnNewLine() {
+		boolean splitTextOnNewLine() {
 			return true;
 		}
 
 		@Override
-		public List<HttpMessageReader<?>> getTypedReaders() {
+		List<HttpMessageReader<?>> getTypedReaders() {
 			if (!shouldRegisterDefaults()) {
 				return Collections.emptyList();
 			}
@@ -82,7 +87,7 @@ class DefaultServerCodecConfigurer extends AbstractCodecConfigurer implements Se
 		}
 
 		@Override
-		public List<HttpMessageWriter<?>> getObjectWriters() {
+		List<HttpMessageWriter<?>> getObjectWriters() {
 			if (!shouldRegisterDefaults()) {
 				return Collections.emptyList();
 			}
@@ -96,7 +101,7 @@ class DefaultServerCodecConfigurer extends AbstractCodecConfigurer implements Se
 			if (this.sseEncoder != null) {
 				return this.sseEncoder;
 			}
-			return jackson2Present ? jackson2JsonEncoder() : null;
+			return jackson2Present ? getJackson2JsonEncoder() : null;
 		}
 	}
 

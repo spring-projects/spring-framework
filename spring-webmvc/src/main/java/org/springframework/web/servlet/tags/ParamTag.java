@@ -22,11 +22,37 @@ import javax.servlet.jsp.tagext.BodyTagSupport;
 import org.springframework.lang.Nullable;
 
 /**
- * JSP tag for collecting name-value parameters and passing them to a
+ * The {@code <param>} tag collects name-value parameters and passes them to a
  * {@link ParamAware} ancestor in the tag hierarchy.
  *
  * <p>This tag must be nested under a param aware tag.
  *
+ * <table>
+ * <caption>Attribute Summary</caption>
+ * <thead>
+ * <tr>
+ * <th class="colFirst">Attribute</th>
+ * <th class="colOne">Required?</th>
+ * <th class="colOne">Runtime Expression?</th>
+ * <th class="colLast">Description</th>
+ * </tr>
+ * </thead>
+ * <tbody>
+ * <tr class="altColor">
+ * <td>name</p></td>
+ * <td>true</p></td>
+ * <td>true</p></td>
+ * <td>The name of the parameter.</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td>value</p></td>
+ * <td>false</p></td>
+ * <td>true</p></td>
+ * <td>The value of the parameter.</p></td>
+ * </tr>
+ * </tbody>
+ * </table>
+ * 
  * @author Scott Andrews
  * @author Nicholas Williams
  * @since 3.0

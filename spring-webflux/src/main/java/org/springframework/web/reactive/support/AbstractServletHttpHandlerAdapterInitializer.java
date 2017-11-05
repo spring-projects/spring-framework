@@ -27,17 +27,16 @@ import org.springframework.web.WebApplicationInitializer;
 
 /**
  * Base class for {@link org.springframework.web.WebApplicationInitializer}
- * implementations that register a {@link ServletHttpHandlerAdapter} in the servlet context.
- *
- * <p>Concrete implementations are required to implement
- * {@link #createHttpHandler()}, as well as {@link #getServletMappings()},
- * both of which get invoked from {@link #registerHandlerAdapter(ServletContext)}.
- * Further customization can be achieved by overriding
- * {@link #customizeRegistration(ServletRegistration.Dynamic)}.
+ * implementations that register a {@link ServletHttpHandlerAdapter} in the
+ * servlet context.
  *
  * @author Arjen Poutsma
  * @since 5.0
+ * @deprecated in favor of
+ * {@link org.springframework.web.server.adapter.AbstractReactiveWebInitializer
+ * AbstractReactiveWebInitializer}
  */
+@Deprecated
 public abstract class AbstractServletHttpHandlerAdapterInitializer implements WebApplicationInitializer {
 
 	/**
@@ -67,12 +66,12 @@ public abstract class AbstractServletHttpHandlerAdapterInitializer implements We
 		Assert.hasLength(servletName, "getServletName() must not return empty or null");
 
 		HttpHandler httpHandler = createHttpHandler();
-		Assert.notNull(httpHandler,
-				"createHttpHandler() did not return a HttpHandler for servlet [" + servletName + "]");
+		Assert.notNull(httpHandler, "createHttpHandler() did not return a HttpHandler" +
+				"for servlet [" + servletName + "]");
 
 		ServletHttpHandlerAdapter servlet = createServlet(httpHandler);
-		Assert.notNull(servlet,
-				"createHttpHandler() did not return a ServletHttpHandlerAdapter for servlet [" + servletName + "]");
+		Assert.notNull(servlet, "createHttpHandler() did not return a ServletHttpHandlerAdapter " +
+				"for servlet [" + servletName + "]");
 
 		ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, servlet);
 		Assert.notNull(registration,
@@ -102,8 +101,8 @@ public abstract class AbstractServletHttpHandlerAdapterInitializer implements We
 
 	/**
 	 * Create a {@link ServletHttpHandlerAdapter}  with the specified .
-	 * <p>Default implementation returns a {@code ServletHttpHandlerAdapter} with the provided
-	 * {@code httpHandler}.
+	 * <p>Default implementation returns a {@code ServletHttpHandlerAdapter}
+	 * with the provided {@code httpHandler}.
 	 */
 	protected ServletHttpHandlerAdapter createServlet(HttpHandler httpHandler) {
 		return new ServletHttpHandlerAdapter(httpHandler);

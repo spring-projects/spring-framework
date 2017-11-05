@@ -243,13 +243,13 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		return entityHeadersVary;
 	}
 
-	private boolean isResourceNotModified(ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage) {
+	private boolean isResourceNotModified(ServletServerHttpRequest request, ServletServerHttpResponse response) {
 		ServletWebRequest servletWebRequest =
-				new ServletWebRequest(inputMessage.getServletRequest(), outputMessage.getServletResponse());
-		HttpHeaders responseHeaders = outputMessage.getHeaders();
+				new ServletWebRequest(request.getServletRequest(), response.getServletResponse());
+		HttpHeaders responseHeaders = response.getHeaders();
 		String etag = responseHeaders.getETag();
 		long lastModifiedTimestamp = responseHeaders.getLastModified();
-		if (inputMessage.getMethod() == HttpMethod.GET || inputMessage.getMethod() == HttpMethod.HEAD) {
+		if (request.getMethod() == HttpMethod.GET || request.getMethod() == HttpMethod.HEAD) {
 			responseHeaders.remove(HttpHeaders.ETAG);
 			responseHeaders.remove(HttpHeaders.LAST_MODIFIED);
 		}

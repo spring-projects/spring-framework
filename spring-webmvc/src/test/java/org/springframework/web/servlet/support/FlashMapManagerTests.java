@@ -282,7 +282,8 @@ public class FlashMapManagerTests {
 		this.flashMapManager.saveOutputFlashMap(flashMap, this.request, this.response);
 
 		MockHttpServletRequest requestAfterRedirect = new MockHttpServletRequest("GET", "/path");
-		requestAfterRedirect.setQueryString("param=%D0%90%D0%90&param=%D0%91%D0%91&param=%D0%92%D0%92&%3A%2F%3F%23%5B%5D%40=value");
+		requestAfterRedirect.setQueryString(
+				"param=%D0%90%D0%90&param=%D0%91%D0%91&param=%D0%92%D0%92&%3A%2F%3F%23%5B%5D%40=value");
 		requestAfterRedirect.addParameter("param", "\u0410\u0410");
 		requestAfterRedirect.addParameter("param", "\u0411\u0411");
 		requestAfterRedirect.addParameter("param", "\u0412\u0412");

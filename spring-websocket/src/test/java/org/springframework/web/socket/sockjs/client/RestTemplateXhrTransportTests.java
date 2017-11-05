@@ -207,7 +207,9 @@ public class RestTemplateXhrTransportTests {
 		}
 
 		@Override
-		public <T> T execute(URI url, HttpMethod method, @Nullable RequestCallback callback, @Nullable ResponseExtractor<T> extractor) throws RestClientException {
+		public <T> T execute(URI url, HttpMethod method, @Nullable RequestCallback callback,
+				@Nullable ResponseExtractor<T> extractor) throws RestClientException {
+
 			try {
 				extractor.extractData(this.responses.remove());
 			}

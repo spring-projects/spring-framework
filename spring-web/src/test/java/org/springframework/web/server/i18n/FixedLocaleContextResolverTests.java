@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 
 import static java.util.Locale.CANADA;
@@ -55,10 +55,7 @@ public class FixedLocaleContextResolverTests {
 	}
 
 	private ServerWebExchange exchange(Locale... locales) {
-		return new MockServerWebExchange(MockServerHttpRequest
-				.get("")
-				.acceptLanguageAsLocales(locales)
-				.build());
+		return MockServerWebExchange.from(MockServerHttpRequest.get("").acceptLanguageAsLocales(locales));
 	}
 
 }

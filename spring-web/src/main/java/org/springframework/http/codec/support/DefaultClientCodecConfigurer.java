@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.codec;
+package org.springframework.http.codec.support;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +22,12 @@ import java.util.List;
 
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
+import org.springframework.http.codec.ClientCodecConfigurer;
+import org.springframework.http.codec.EncoderHttpMessageWriter;
+import org.springframework.http.codec.FormHttpMessageWriter;
+import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.ServerSentEventHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
 import org.springframework.lang.Nullable;
 
@@ -31,7 +37,7 @@ import org.springframework.lang.Nullable;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-class DefaultClientCodecConfigurer extends AbstractCodecConfigurer implements ClientCodecConfigurer {
+public class DefaultClientCodecConfigurer extends AbstractCodecConfigurer implements ClientCodecConfigurer {
 
 	public DefaultClientCodecConfigurer() {
 		super(new ClientDefaultCodecsImpl());
@@ -65,12 +71,12 @@ class DefaultClientCodecConfigurer extends AbstractCodecConfigurer implements Cl
 		}
 
 		@Override
-		protected boolean splitTextOnNewLine() {
+		boolean splitTextOnNewLine() {
 			return false;
 		}
 
 		@Override
-		public List<HttpMessageReader<?>> getObjectReaders() {
+		List<HttpMessageReader<?>> getObjectReaders() {
 			if (!shouldRegisterDefaults()) {
 				return Collections.emptyList();
 			}
@@ -84,21 +90,20 @@ class DefaultClientCodecConfigurer extends AbstractCodecConfigurer implements Cl
 			if (this.sseDecoder != null) {
 				return this.sseDecoder;
 			}
-			return (jackson2Present ? jackson2JsonDecoder() : null);
+			return (jackson2Present ? getJackson2JsonDecoder() : null);
 		}
 
 		@Override
-		public List<HttpMessageWriter<?>> getTypedWriters() {
-			if (!this.shouldRegisterDefaults()) {
+		List<HttpMessageWriter<?>> getTypedWriters() {
+			if (!shouldRegisterDefaults()) {
 				return Collections.emptyList();
 			}
 			List<HttpMessageWriter<?>> result = super.getTypedWriters();
-			result.add(new FormHttpMessageWriter());
-			result.add(getMultipartHttpMessageWriter());
+			result.add(new MultipartHttpMessageWriter(getPartWriters(), new FormHttpMessageWriter()));
 			return result;
 		}
 
-		private MultipartHttpMessageWriter getMultipartHttpMessageWriter() {
+		private List<HttpMessageWriter<?>> getPartWriters() {
 			List<HttpMessageWriter<?>> partWriters;
 			if (this.multipartCodecs != null) {
 				partWriters = this.multipartCodecs.getWriters();
@@ -116,7 +121,7 @@ class DefaultClientCodecConfigurer extends AbstractCodecConfigurer implements Cl
 				}
 				partWriters.addAll(super.getCatchAllWriters());
 			}
-			return new MultipartHttpMessageWriter(partWriters);
+			return partWriters;
 		}
 	}
 
@@ -137,7 +142,7 @@ class DefaultClientCodecConfigurer extends AbstractCodecConfigurer implements Cl
 			return this;
 		}
 
-		public List<HttpMessageWriter<?>> getWriters() {
+		List<HttpMessageWriter<?>> getWriters() {
 			return this.writers;
 		}
 	}

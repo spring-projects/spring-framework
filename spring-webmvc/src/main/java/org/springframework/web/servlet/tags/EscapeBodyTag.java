@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.util.JavaScriptUtils;
 
 /**
- * Custom JSP tag to escape its enclosed body content,
+ * The {@code <escapeBody>} tag is used to escape its enclosed body content,
  * applying HTML escaping and/or JavaScript escaping.
  *
  * <p>Provides a "htmlEscape" property for explicitly specifying whether to
@@ -36,6 +36,33 @@ import org.springframework.web.util.JavaScriptUtils;
  *
  * <p>Provides a "javaScriptEscape" property for specifying whether to apply
  * JavaScript escaping. Can be combined with HTML escaping or used standalone.
+ *
+ * <table>
+ * <caption>Attribute Summary</caption>
+ * <thead>
+ * <tr>
+ * <th class="colFirst">Attribute</th>
+ * <th class="colOne">Required?</th>
+ * <th class="colOne">Runtime Expression?</th>
+ * <th class="colLast">Description</th>
+ * </tr>
+ * <tbody>
+ * <tr class="altColor">
+ * <td>htmlEscape</p></td>
+ * <td>false</p></td>
+ * <td>true</p></td>
+ * <td>Set HTML escaping for this tag, as boolean value.
+ * Overrides the default HTML escaping setting for the current page.</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td>javaScriptEscape</p></td>
+ * <td>false</p></td>
+ * <td>true</p></td>
+ * <td>Set JavaScript escaping for this tag, as boolean value.
+ * Default is false.</p></td>
+ * </tr>
+ * </tbody>
+ * </table>
  *
  * @author Juergen Hoeller
  * @since 1.1.1

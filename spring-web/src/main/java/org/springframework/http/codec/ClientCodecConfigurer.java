@@ -35,17 +35,15 @@ import org.springframework.core.codec.Encoder;
  */
 public interface ClientCodecConfigurer extends CodecConfigurer {
 
-
 	@Override
 	ClientDefaultCodecs defaultCodecs();
 
 
 	/**
-	 * Creates a new instance of the {@code ClientCodecConfigurer}.
-	 * @return the created instance
+	 * Create a new instance of the {@code ClientCodecConfigurer}.
 	 */
 	static ClientCodecConfigurer create() {
-		return new DefaultClientCodecConfigurer();
+		return CodecConfigurerFactory.create(ClientCodecConfigurer.class);
 	}
 
 
@@ -70,6 +68,7 @@ public interface ClientCodecConfigurer extends CodecConfigurer {
 		 */
 		void serverSentEventDecoder(Decoder<?> decoder);
 	}
+
 
 	/**
 	 * Registry and container for multipart HTTP message writers.

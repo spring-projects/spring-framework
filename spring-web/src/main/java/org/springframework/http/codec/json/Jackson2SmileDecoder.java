@@ -16,7 +16,7 @@
 
 package org.springframework.http.codec.json;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,6 +51,7 @@ public class Jackson2SmileDecoder extends AbstractJackson2Decoder {
 
 	@Override
 	public List<MimeType> getDecodableMimeTypes() {
-		return Arrays.asList(SMILE_MIME_TYPE);
+		return Collections.singletonList(SMILE_MIME_TYPE);
 	}
+
 }

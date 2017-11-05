@@ -16,6 +16,7 @@
 
 package org.springframework.core;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +30,8 @@ import reactor.core.publisher.Mono;
 import rx.RxReactiveStreams;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 import static org.springframework.core.ReactiveTypeDescriptor.*;
 
@@ -38,7 +41,8 @@ import static org.springframework.core.ReactiveTypeDescriptor.*;
  * {@code Observable}, and others.
  *
  * <p>By default, depending on classpath availability, adapters are registered
- * for Reactor, RxJava 1, RxJava 2 types, and {@link CompletableFuture}.
+ * for Reactor, RxJava 1, RxJava 2 types, {@link CompletableFuture}, and Java 9+
+ * Flow.Publisher.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
@@ -81,6 +85,15 @@ public class ReactiveAdapterRegistry {
 		}
 		catch (Throwable ex) {
 			// Ignore
+		}
+
+		// Java 9+ Flow.Publisher
+		try {
+			new ReactorJdkFlowAdapterRegistrar().registerAdapter(this);
+		}
+		catch (Throwable ex) {
+			// Ignore for the time being...
+			// We can fall back on "reactive-streams-flow-bridge" (once released)
 		}
 	}
 
@@ -228,6 +241,28 @@ public class ReactiveAdapterRegistry {
 					source -> ((io.reactivex.Completable) source).toFlowable(),
 					source -> io.reactivex.Flowable.fromPublisher(source).toObservable().ignoreElements()
 			);
+		}
+	}
+
+
+	private static class ReactorJdkFlowAdapterRegistrar {
+
+		// TODO: remove reflection when build requires JDK 9+
+		void registerAdapter(ReactiveAdapterRegistry registry) throws Exception {
+			Class<?> type = ClassUtils.forName("java.util.concurrent.Flow.Publisher", getClass().getClassLoader());
+			Method toFluxMethod = getMethod("flowPublisherToFlux", type);
+			Method toFlowMethod = getMethod("publisherToFlowPublisher", Publisher.class);
+			Object emptyFlow = ReflectionUtils.invokeMethod(toFlowMethod, null, Flux.empty());
+
+			registry.registerReactiveType(
+					multiValue(type, () -> emptyFlow),
+					source -> (Publisher<?>) ReflectionUtils.invokeMethod(toFluxMethod, null, source),
+					publisher -> ReflectionUtils.invokeMethod(toFlowMethod, null, publisher)
+			);
+		}
+
+		private static Method getMethod(String name, Class<?> argumentType) throws NoSuchMethodException {
+			return reactor.adapter.JdkFlowAdapter.class.getMethod(name, argumentType);
 		}
 	}
 

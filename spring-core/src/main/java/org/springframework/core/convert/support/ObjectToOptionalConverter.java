@@ -76,7 +76,7 @@ final class ObjectToOptionalConverter implements ConditionalGenericConverter {
 		else if (targetType.getResolvableType().hasGenerics()) {
 			Object target = this.conversionService.convert(source, sourceType, new GenericTypeDescriptor(targetType));
 			if (target == null || (target.getClass().isArray() && Array.getLength(target) == 0) ||
-						(target instanceof Collection && ((Collection) target).isEmpty())) {
+						(target instanceof Collection && ((Collection<?>) target).isEmpty())) {
 				return Optional.empty();
 			}
 			return Optional.of(target);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.codec;
+package org.springframework.http.codec.support;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,6 +32,12 @@ import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
+import org.springframework.http.codec.CodecConfigurer;
+import org.springframework.http.codec.DecoderHttpMessageReader;
+import org.springframework.http.codec.EncoderHttpMessageWriter;
+import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.json.Jackson2SmileDecoder;
@@ -50,7 +56,7 @@ import org.springframework.util.ClassUtils;
  */
 abstract class AbstractCodecConfigurer implements CodecConfigurer {
 
-	protected static final boolean jackson2Present =
+	static final boolean jackson2Present =
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
 					AbstractCodecConfigurer.class.getClassLoader()) &&
 					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
@@ -60,8 +66,8 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory",
 					AbstractCodecConfigurer.class.getClassLoader());
 
-	protected static final boolean jaxb2Present = ClassUtils.isPresent("javax.xml.bind.Binder",
-			AbstractCodecConfigurer.class.getClassLoader());
+	private static final boolean jaxb2Present =
+			ClassUtils.isPresent("javax.xml.bind.Binder", AbstractCodecConfigurer.class.getClassLoader());
 
 
 	private final AbstractDefaultCodecs defaultCodecs;
@@ -69,7 +75,7 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 	private final DefaultCustomCodecs customCodecs = new DefaultCustomCodecs();
 
 
-	protected AbstractCodecConfigurer(AbstractDefaultCodecs defaultCodecs) {
+	AbstractCodecConfigurer(AbstractDefaultCodecs defaultCodecs) {
 		Assert.notNull(defaultCodecs, "'defaultCodecs' is required");
 		this.defaultCodecs = defaultCodecs;
 		this.defaultCodecs.setCustomCodecs(this.customCodecs);
@@ -83,7 +89,7 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 
 	@Override
 	public void registerDefaults(boolean shouldRegister) {
-		this.defaultCodecs.setRegisterDefaults(shouldRegister);
+		this.defaultCodecs.registerDefaults(shouldRegister);
 	}
 
 	@Override
@@ -120,60 +126,60 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 	}
 
 
-	abstract protected static class AbstractDefaultCodecs implements DefaultCodecs {
+	abstract static class AbstractDefaultCodecs implements DefaultCodecs {
 
 		private boolean registerDefaults = true;
 
 		@Nullable
-		private Jackson2JsonDecoder jackson2JsonDecoder;
+		private Decoder<?> jackson2JsonDecoder;
 
 		@Nullable
-		private Jackson2JsonEncoder jackson2JsonEncoder;
+		private Encoder<?> jackson2JsonEncoder;
 
 		@Nullable
 		private DefaultCustomCodecs customCodecs;
 
-		public void setRegisterDefaults(boolean registerDefaults) {
+		void registerDefaults(boolean registerDefaults) {
 			this.registerDefaults = registerDefaults;
 		}
 
-		public boolean shouldRegisterDefaults() {
+		boolean shouldRegisterDefaults() {
 			return this.registerDefaults;
 		}
 
 		/**
-		 * Access to custom codecs for sub-classes, e.g. for multipart writers.
+		 * Access to custom codecs for subclasses, e.g. for multipart writers.
 		 */
-		public void setCustomCodecs(@Nullable DefaultCustomCodecs customCodecs) {
+		void setCustomCodecs(@Nullable DefaultCustomCodecs customCodecs) {
 			this.customCodecs = customCodecs;
 		}
 
 		@Nullable
-		public DefaultCustomCodecs getCustomCodecs() {
+		DefaultCustomCodecs getCustomCodecs() {
 			return this.customCodecs;
 		}
 
 		@Override
-		public void jackson2JsonDecoder(Jackson2JsonDecoder decoder) {
+		public void jackson2JsonDecoder(Decoder<?> decoder) {
 			this.jackson2JsonDecoder = decoder;
 		}
 
-		protected Jackson2JsonDecoder jackson2JsonDecoder() {
+		Decoder<?> getJackson2JsonDecoder() {
 			return (this.jackson2JsonDecoder != null ? this.jackson2JsonDecoder : new Jackson2JsonDecoder());
 		}
 
 		@Override
-		public void jackson2JsonEncoder(Jackson2JsonEncoder encoder) {
+		public void jackson2JsonEncoder(Encoder<?> encoder) {
 			this.jackson2JsonEncoder = encoder;
 		}
 
-		protected Jackson2JsonEncoder jackson2JsonEncoder() {
+		Encoder<?> getJackson2JsonEncoder() {
 			return (this.jackson2JsonEncoder != null ? this.jackson2JsonEncoder : new Jackson2JsonEncoder());
 		}
 
 		// Readers...
 
-		public List<HttpMessageReader<?>> getTypedReaders() {
+		List<HttpMessageReader<?>> getTypedReaders() {
 			if (!this.registerDefaults) {
 				return Collections.emptyList();
 			}
@@ -186,26 +192,26 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 			return result;
 		}
 
-		protected abstract boolean splitTextOnNewLine();
+		abstract boolean splitTextOnNewLine();
 
-		public List<HttpMessageReader<?>> getObjectReaders() {
+		List<HttpMessageReader<?>> getObjectReaders() {
 			if (!this.registerDefaults) {
 				return Collections.emptyList();
 			}
 			List<HttpMessageReader<?>> result = new ArrayList<>();
-			if (jaxb2Present) {
-				result.add(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
-			}
 			if (jackson2Present) {
-				result.add(new DecoderHttpMessageReader<>(jackson2JsonDecoder()));
+				result.add(new DecoderHttpMessageReader<>(getJackson2JsonDecoder()));
 			}
 			if (jackson2SmilePresent) {
 				result.add(new DecoderHttpMessageReader<>(new Jackson2SmileDecoder()));
 			}
+			if (jaxb2Present) {
+				result.add(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
+			}
 			return result;
 		}
 
-		public List<HttpMessageReader<?>> getCatchAllReaders() {
+		List<HttpMessageReader<?>> getCatchAllReaders() {
 			if (!this.registerDefaults) {
 				return Collections.emptyList();
 			}
@@ -216,7 +222,7 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 
 		// Writers...
 
-		public List<HttpMessageWriter<?>> getTypedWriters() {
+		List<HttpMessageWriter<?>> getTypedWriters() {
 			if (!this.registerDefaults) {
 				return Collections.emptyList();
 			}
@@ -229,24 +235,24 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 			return result;
 		}
 
-		public List<HttpMessageWriter<?>> getObjectWriters() {
+		List<HttpMessageWriter<?>> getObjectWriters() {
 			if (!this.registerDefaults) {
 				return Collections.emptyList();
 			}
 			List<HttpMessageWriter<?>> result = new ArrayList<>();
-			if (jaxb2Present) {
-				result.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
-			}
 			if (jackson2Present) {
-				result.add(new EncoderHttpMessageWriter<>(jackson2JsonEncoder()));
+				result.add(new EncoderHttpMessageWriter<>(getJackson2JsonEncoder()));
 			}
 			if (jackson2SmilePresent) {
 				result.add(new EncoderHttpMessageWriter<>(new Jackson2SmileEncoder()));
 			}
+			if (jaxb2Present) {
+				result.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
+			}
 			return result;
 		}
 
-		public List<HttpMessageWriter<?>> getCatchAllWriters() {
+		List<HttpMessageWriter<?>> getCatchAllWriters() {
 			if (!this.registerDefaults) {
 				return Collections.emptyList();
 			}
@@ -257,7 +263,7 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 	}
 
 
-	protected static class DefaultCustomCodecs implements CustomCodecs {
+	static class DefaultCustomCodecs implements CustomCodecs {
 
 		private final List<HttpMessageReader<?>> typedReaders = new ArrayList<>();
 
@@ -289,19 +295,19 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 			(canWriteObject ? this.objectWriters : this.typedWriters).add(writer);
 		}
 
-		public List<HttpMessageReader<?>> getTypedReaders() {
+		List<HttpMessageReader<?>> getTypedReaders() {
 			return this.typedReaders;
 		}
 
-		public List<HttpMessageWriter<?>> getTypedWriters() {
+		List<HttpMessageWriter<?>> getTypedWriters() {
 			return this.typedWriters;
 		}
 
-		public List<HttpMessageReader<?>> getObjectReaders() {
+		List<HttpMessageReader<?>> getObjectReaders() {
 			return this.objectReaders;
 		}
 
-		public List<HttpMessageWriter<?>> getObjectWriters() {
+		List<HttpMessageWriter<?>> getObjectWriters() {
 			return this.objectWriters;
 		}
 	}

@@ -38,13 +38,16 @@ import org.springframework.web.server.ServerWebExchange;
 public abstract class AbstractNamedValueSyncArgumentResolver extends AbstractNamedValueArgumentResolver
 		implements SyncHandlerMethodArgumentResolver {
 
+
 	/**
 	 * @param factory a bean factory to use for resolving  ${...}
 	 * placeholder and #{...} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to have expressions
 	 * @param registry for checking reactive type wrappers
 	 */
-	protected AbstractNamedValueSyncArgumentResolver(@Nullable ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
+	protected AbstractNamedValueSyncArgumentResolver(@Nullable ConfigurableBeanFactory factory,
+			ReactiveAdapterRegistry registry) {
+
 		super(factory, registry);
 	}
 

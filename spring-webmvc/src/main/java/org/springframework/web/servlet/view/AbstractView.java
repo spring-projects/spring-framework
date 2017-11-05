@@ -301,7 +301,9 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * @see #renderMergedOutputModel
 	 */
 	@Override
-	public void render(@Nullable Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public void render(@Nullable Map<String, ?> model, HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+
 		if (logger.isTraceEnabled()) {
 			logger.trace("Rendering view with name '" + this.beanName + "' with model " + model +
 				" and static attributes " + this.staticAttributes);
@@ -432,7 +434,9 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * @param model Map of model objects to expose
 	 * @param request current HTTP request
 	 */
-	protected void exposeModelAsRequestAttributes(Map<String, Object> model, HttpServletRequest request) throws Exception {
+	protected void exposeModelAsRequestAttributes(Map<String, Object> model,
+			HttpServletRequest request) throws Exception {
+
 		model.forEach((modelName, modelValue) -> {
 			if (modelValue != null) {
 				request.setAttribute(modelName, modelValue);

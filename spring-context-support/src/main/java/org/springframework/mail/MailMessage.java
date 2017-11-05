@@ -41,15 +41,15 @@ public interface MailMessage {
 
 	void setTo(String to) throws MailParseException;
 
-	void setTo(String[] to) throws MailParseException;
+	void setTo(String... to) throws MailParseException;
 
 	void setCc(String cc) throws MailParseException;
 
-	void setCc(String[] cc) throws MailParseException;
+	void setCc(String... cc) throws MailParseException;
 
 	void setBcc(String bcc) throws MailParseException;
 
-	void setBcc(String[] bcc) throws MailParseException;
+	void setBcc(String... bcc) throws MailParseException;
 
 	void setSentDate(Date sentDate) throws MailParseException;
 

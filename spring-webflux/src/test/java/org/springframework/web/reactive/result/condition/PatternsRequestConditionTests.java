@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
@@ -80,7 +80,8 @@ public class PatternsRequestConditionTests {
 	@Test
 	public void matchDirectPath() throws Exception {
 		PatternsRequestCondition condition = createPatternsCondition("/foo");
-		PatternsRequestCondition match = condition.getMatchingCondition(get("/foo").toExchange());
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/foo"));
+		PatternsRequestCondition match = condition.getMatchingCondition(exchange);
 
 		assertNotNull(match);
 	}
@@ -88,7 +89,8 @@ public class PatternsRequestConditionTests {
 	@Test
 	public void matchPattern() throws Exception {
 		PatternsRequestCondition condition = createPatternsCondition("/foo/*");
-		PatternsRequestCondition match = condition.getMatchingCondition(get("/foo/bar").toExchange());
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/foo/bar"));
+		PatternsRequestCondition match = condition.getMatchingCondition(exchange);
 
 		assertNotNull(match);
 	}
@@ -96,7 +98,8 @@ public class PatternsRequestConditionTests {
 	@Test
 	public void matchSortPatterns() throws Exception {
 		PatternsRequestCondition condition = createPatternsCondition("/*/*", "/foo/bar", "/foo/*");
-		PatternsRequestCondition match = condition.getMatchingCondition(get("/foo/bar").toExchange());
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/foo/bar"));
+		PatternsRequestCondition match = condition.getMatchingCondition(exchange);
 		PatternsRequestCondition expected = createPatternsCondition("/foo/bar", "/foo/*", "/*/*");
 
 		assertEquals(expected, match);
@@ -104,7 +107,7 @@ public class PatternsRequestConditionTests {
 
 	@Test
 	public void matchTrailingSlash() throws Exception {
-		MockServerWebExchange exchange = get("/foo/").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/foo/"));
 
 		PatternsRequestCondition condition = createPatternsCondition("/foo");
 		PatternsRequestCondition match = condition.getMatchingCondition(exchange);
@@ -123,7 +126,7 @@ public class PatternsRequestConditionTests {
 		PathPatternParser parser = new PathPatternParser();
 		parser.setMatchOptionalTrailingSeparator(false);
 		condition = new PatternsRequestCondition(parser.parse("/foo"));
-		match = condition.getMatchingCondition(get("/foo/").toExchange());
+		match = condition.getMatchingCondition(MockServerWebExchange.from(get("/foo/")));
 
 		assertNull(match);
 	}
@@ -131,7 +134,8 @@ public class PatternsRequestConditionTests {
 	@Test
 	public void matchPatternContainsExtension() throws Exception {
 		PatternsRequestCondition condition = createPatternsCondition("/foo.jpg");
-		PatternsRequestCondition match = condition.getMatchingCondition(get("/foo.html").toExchange());
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/foo.html"));
+		PatternsRequestCondition match = condition.getMatchingCondition(exchange);
 
 		assertNull(match);
 	}
@@ -141,7 +145,7 @@ public class PatternsRequestConditionTests {
 		PatternsRequestCondition c1 = createPatternsCondition("/foo*");
 		PatternsRequestCondition c2 = createPatternsCondition("/foo*");
 
-		assertEquals(0, c1.compareTo(c2, get("/foo").toExchange()));
+		assertEquals(0, c1.compareTo(c2, MockServerWebExchange.from(get("/foo"))));
 	}
 
 	@Test
@@ -155,7 +159,7 @@ public class PatternsRequestConditionTests {
 
 	@Test
 	public void comparePatternSpecificity() throws Exception {
-		ServerWebExchange exchange = get("/foo").toExchange();
+		ServerWebExchange exchange = MockServerWebExchange.from(get("/foo"));
 
 		PatternsRequestCondition c1 = createPatternsCondition("/fo*");
 		PatternsRequestCondition c2 = createPatternsCondition("/foo");
@@ -170,7 +174,7 @@ public class PatternsRequestConditionTests {
 
 	@Test
 	public void compareNumberOfMatchingPatterns() throws Exception {
-		ServerWebExchange exchange = get("/foo.html").toExchange();
+		ServerWebExchange exchange = MockServerWebExchange.from(get("/foo.html"));
 
 		PatternsRequestCondition c1 = createPatternsCondition("/foo.*", "/foo.jpeg");
 		PatternsRequestCondition c2 = createPatternsCondition("/foo.*", "/foo.html");

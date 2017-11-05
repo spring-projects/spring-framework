@@ -202,7 +202,9 @@ public class XsltView extends AbstractUrlBasedView {
 	 * @see #setTransformerFactoryClass
 	 * @see #getTransformerFactory()
 	 */
-	protected TransformerFactory newTransformerFactory(@Nullable Class<? extends TransformerFactory> transformerFactoryClass) {
+	protected TransformerFactory newTransformerFactory(
+			@Nullable Class<? extends TransformerFactory> transformerFactoryClass) {
+
 		if (transformerFactoryClass != null) {
 			try {
 				return ReflectionUtils.accessibleConstructor(transformerFactoryClass).newInstance();
@@ -342,7 +344,9 @@ public class XsltView extends AbstractUrlBasedView {
 	 * @see #copyOutputProperties(Transformer)
 	 * @see #configureIndentation(Transformer)
 	 */
-	protected void configureTransformer(Map<String, Object> model, HttpServletResponse response, Transformer transformer) {
+	protected void configureTransformer(Map<String, Object> model, HttpServletResponse response,
+			Transformer transformer) {
+
 		copyModelParameters(model, transformer);
 		copyOutputProperties(transformer);
 		configureIndentation(transformer);

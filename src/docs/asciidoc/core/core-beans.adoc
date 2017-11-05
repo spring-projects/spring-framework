@@ -2,6 +2,8 @@
 = The IoC container
 
 
+
+
 [[beans-introduction]]
 == Introduction to the Spring IoC container and beans
 
@@ -400,6 +402,7 @@ a dependency on a specific bean through metadata (e.g. an autowiring annotation)
 
 [[beans-definition]]
 == Bean overview
+
 A Spring IoC container manages one or more __beans__. These beans are created with the
 configuration metadata that you supply to the container, for example, in the form of XML
 `<bean/>` definitions.
@@ -778,6 +781,7 @@ Spring container that will create objects through an
 
 [[beans-dependencies]]
 == Dependencies
+
 A typical enterprise application does not consist of a single object (or bean in the
 Spring parlance). Even the simplest application has a few objects that work together to
 present what the end-user sees as a coherent application. This next section explains how
@@ -1711,7 +1715,8 @@ The above configuration is equivalent to the following Java code:
 The p-namespace enables you to use the `bean` element's attributes, instead of nested
 `<property/>` elements, to describe your property values and/or collaborating beans.
 
-Spring supports extensible configuration formats <<appendix.adoc#xsd-configuration,with namespaces>>,
+Spring supports extensible configuration formats
+<<core.adoc#xsd-schemas,with namespaces>>,
 which are based on an XML Schema definition. The `beans` configuration format discussed in this
 chapter is defined in an XML Schema document. However, the p-namespace is not defined in
 an XSD file and exists only in the core of Spring.
@@ -2379,6 +2384,7 @@ shortest string that will match an argument type.
 
 [[beans-factory-scopes]]
 == Bean scopes
+
 When you create a bean definition, you create a __recipe__ for creating actual instances
 of the class defined by that bean definition. The idea that a bean definition is a
 recipe is important, because it means that, as with a class, you can create many object
@@ -2771,7 +2777,7 @@ understand the "why" as well as the "how" behind it.
 
 To create such a proxy, you insert a child `<aop:scoped-proxy/>` element into a scoped
 bean definition (see <<beans-factory-scopes-other-injection-proxies>> and
-<<appendix.adoc#xsd-configuration, XML Schema-based configuration>>).
+<<core.adoc#xsd-schemas, XML Schema-based configuration>>).
 Why do definitions of beans scoped at the `request`, `session` and custom-scope
 levels require the `<aop:scoped-proxy/>` element?
 Let's examine the following singleton bean definition and contrast it with
@@ -3601,6 +3607,7 @@ beans that require programmatic access to the container.
 
 [[beans-child-bean-definitions]]
 == Bean definition inheritance
+
 A bean definition can contain a lot of configuration information, including constructor
 arguments, property values, and container-specific information such as initialization
 method, static factory method name, and so on. A child bean definition inherits
@@ -3686,6 +3693,7 @@ context will actually (attempt to) pre-instantiate the `abstract` bean.
 
 [[beans-factory-extension]]
 == Container Extension Points
+
 Typically, an application developer does not need to subclass `ApplicationContext`
 implementation classes. Instead, the Spring IoC container can be extended by plugging in
 implementations of special integration interfaces. The next few sections describe these
@@ -3860,7 +3868,7 @@ Notice how the `InstantiationTracingBeanPostProcessor` is simply defined. It doe
 even have a name, and because it is a bean it can be dependency-injected just like any
 other bean. (The preceding configuration also defines a bean that is backed by a Groovy
 script. The Spring dynamic language support is detailed in the chapter entitled
-<<integration.adoc#dynamic-language, Dynamic language support>>.)
+<<languages.adoc#dynamic-language, Dynamic language support>>.)
 
 The following simple Java application executes the preceding code and configuration:
 
@@ -4479,7 +4487,7 @@ non-required constructors can be annotated. In that case, each is considered amo
 candidates and Spring uses the __greediest__ constructor whose dependencies can be
 satisfied, that is the constructor that has the largest number of arguments.
 
-`@Autowired`'s __required__ attribute is recommended over the `@Required` annotation.
+The __required__ attribute of `@Autowired` is recommended over the `@Required` annotation.
 The __required__ attribute indicates that the property is not required for autowiring
 purposes, the property is ignored if it cannot be autowired. `@Required`, on the other
 hand, is stronger in that it enforces the property that was set by any means supported
@@ -4514,6 +4522,7 @@ automatically resolved, with no special setup necessary.
 annotations within your own `BeanPostProcessor` or `BeanFactoryPostProcessor` types (if
 any). These types must be 'wired up' explicitly via XML or using a Spring `@Bean` method.
 ====
+
 
 
 [[beans-autowired-annotation-primary]]
@@ -5009,7 +5018,6 @@ Generic qualifiers also apply when autowiring Lists, Maps and Arrays:
 
 
 
-
 [[beans-custom-autowire-configurer]]
 === CustomAutowireConfigurer
 
@@ -5172,6 +5180,7 @@ For details about the effects of combining various lifecycle mechanisms, see
 
 [[beans-classpath-scanning]]
 == Classpath scanning and managed components
+
 Most examples in this chapter use XML to specify the configuration metadata that produces
 each `BeanDefinition` within the Spring container. The previous section
 (<<beans-annotation-config>>) demonstrates how to provide a lot of the configuration
@@ -5293,7 +5302,10 @@ Or with an overridden value for the `proxyMode` as follows:
 	}
 ----
 
-For further details, consult the <<appendix.adoc#annotation-programming-model,Spring Annotation Programming Model>>.
+For further details, consult the
+https://github.com/spring-projects/spring-framework/wiki/Spring-Annotation-Programming-Model[Spring Annotation Programming Model]
+wiki page.
+
 
 
 [[beans-scanning-autodetection]]
@@ -5344,7 +5356,7 @@ comma/semicolon/space-separated list that includes the parent package of each cl
 
 [NOTE]
 ====
-for concision, the above may have used the `value` attribute of the
+For concision, the above may have used the `value` attribute of the
 annotation, i.e. `@ComponentScan("org.example")`
 ====
 
@@ -5382,6 +5394,12 @@ activate the files-only switch of the JAR task. Also, classpath directories may 
 get exposed based on security policies in some environments, e.g. standalone apps on
 JDK 1.7.0_45 and higher (which requires 'Trusted-Library' setup in your manifests; see
 http://stackoverflow.com/questions/19394570/java-jre-7u45-breaks-classloader-getresources).
+
+On JDK 9's module path (Jigsaw), Spring's classpath scanning generally works as expected.
+However, please make sure that your component classes are exported in your `module-info`
+descriptors; if you expect Spring to invoke non-public members of your classes, make
+sure that they are 'opened' (i.e. using an `opens` declaration instead of an `exports`
+declaration in your `module-info` descriptor).
 ====
 
 Furthermore, the `AutowiredAnnotationBeanPostProcessor` and
@@ -5393,7 +5411,7 @@ wired together - all without any bean configuration metadata provided in XML.
 ====
 You can disable the registration of `AutowiredAnnotationBeanPostProcessor` and
 `CommonAnnotationBeanPostProcessor` by including the __annotation-config__ attribute
-with a value of false.
+with a value of `false`.
 ====
 
 
@@ -5830,6 +5848,7 @@ metadata is provided per-instance rather than per-class.
 
 [[beans-scanning-index]]
 === Generating an index of candidate components
+
 While classpath scanning is very fast, it is possible to improve the startup performance
 of large applications by creating a static list of candidates at compilation time. In this
 mode, _all modules_ of the application must use this mechanism as, when the
@@ -5884,8 +5903,10 @@ classpath.
 
 
 
+
 [[beans-standard-annotations]]
 == Using JSR 330 Standard Annotations
+
 Starting with Spring 3.0, Spring offers support for JSR-330 standard annotations
 (Dependency Injection). Those annotations are scanned in the same way as the Spring
 annotations. You just need to have the relevant jars in your classpath.
@@ -6159,26 +6180,36 @@ The `AppConfig` class above would be equivalent to the following Spring `<beans/
 	</beans>
 ----
 
-.Full @Configuration vs 'lite' @Beans mode?
+.Full @Configuration vs 'lite' @Bean mode?
 ****
 When `@Bean` methods are declared within classes that are __not__ annotated with
-`@Configuration` they are referred to as being processed in a 'lite' mode. For example,
-bean methods declared in a `@Component` or even in a __plain old class__ will be
-considered 'lite'.
+`@Configuration` they are referred to as being processed in a 'lite' mode. Bean methods
+declared in a `@Component` or even in a __plain old class__ will be considered 'lite',
+with a different primary purpose of the containing class and an `@Bean` method just
+being a sort of bonus there. For example, service components may expose management views
+to the container through an additional `@Bean` method on each applicable component class.
+In such scenarios, `@Bean` methods are a simple general-purpose factory method mechanism.
 
-Unlike full `@Configuration`, lite `@Bean` methods cannot easily declare inter-bean
-dependencies. Usually one `@Bean` method should not invoke another `@Bean` method when
-operating in 'lite' mode.
+Unlike full `@Configuration`, lite `@Bean` methods cannot declare inter-bean dependencies.
+Instead, they operate on their containing component's internal state and optionally on
+arguments that they may declare. Such an `@Bean` method should therefore not invoke other
+`@Bean` methods; each such method is literally just a factory method for a particular
+bean reference, without any special runtime semantics. The positive side-effect here is
+that no CGLIB subclassing has to be applied at runtime, so there are no limitations in
+terms of class design (i.e. the containing class may nevertheless be `final` etc).
 
-Only using `@Bean` methods within `@Configuration` classes is a recommended approach of
-ensuring that 'full' mode is always used. This will prevent the same `@Bean` method from
-accidentally being invoked multiple times and helps to reduce subtle bugs that can be
-hard to track down when operating in 'lite' mode.
+In common scenarios, `@Bean` methods are to be declared within `@Configuration` classes,
+ensuring that 'full' mode is always used and that cross-method references will therefore
+get redirected to the container's lifecycle management. This will prevent the same
+`@Bean` method from accidentally being invoked through a regular Java call which helps
+to reduce subtle bugs that can be hard to track down when operating in 'lite' mode.
 ****
 
 The `@Bean` and `@Configuration` annotations will be discussed in depth in the sections
 below. First, however, we'll cover the various ways of creating a spring container using
 Java-based configuration.
+
+
 
 [[beans-java-instantiating-container]]
 === Instantiating the Spring container using AnnotationConfigApplicationContext
@@ -6721,6 +6752,7 @@ annotation can be used:
 		}
 	}
 ----
+
 
 
 [[beans-java-configuration-annotation]]
@@ -7960,7 +7992,7 @@ AspectJ load-time weaving, see <<aop-aj-ltw>>.
 
 
 [[context-introduction]]
-== Additional Capabilities of the ApplicationContext
+== Additional capabilities of the ApplicationContext
 
 As was discussed in the chapter introduction, the `org.springframework.beans.factory`
 package provides basic functionality for managing and manipulating beans, including in a
@@ -8192,7 +8224,7 @@ out the `ReloadableResourceBundleMessageSource` javadocs for details.
 
 
 [[context-functionality-events]]
-=== Standard and Custom Events
+=== Standard and custom events
 
 Event handling in the `ApplicationContext` is provided through the `ApplicationEvent`
 class and `ApplicationListener` interface. If a bean that implements the
@@ -8381,8 +8413,9 @@ http://www.enterpriseintegrationpatterns.com[pattern-oriented], event-driven
 architectures that build upon the well-known Spring programming model.
 ====
 
+
 [[context-functionality-events-annotation]]
-==== Annotation-based Event Listeners
+==== Annotation-based event listeners
 
 As of Spring 4.2, an event listener can be registered on any public method of a managed
 bean via the `EventListener` annotation. The `BlackListNotifier` can be rewritten as
@@ -8489,6 +8522,7 @@ This new method will publish a new `ListUpdateEvent` for every `BlackListEvent` 
 by the method above. If you need to publish several events, just return a `Collection` of
 events instead.
 
+
 [[context-functionality-events-async]]
 ==== Asynchronous Listeners
 
@@ -8515,7 +8549,7 @@ Be aware of the following limitations when using asynchronous events:
 
 
 [[context-functionality-events-order]]
-==== Ordering Listeners
+==== Ordering listeners
 
 If you need the listener to be invoked before another one, just add the `@Order`
 annotation to the method declaration:
@@ -8530,8 +8564,9 @@ annotation to the method declaration:
 	}
 ----
 
+
 [[context-functionality-events-generics]]
-==== Generic Events
+==== Generic events
 
 You may also use generics to further define the structure of your event. Consider an
 `EntityCreatedEvent<T>` where `T` is the type of the actual entity that got created. You
@@ -8697,14 +8732,15 @@ be used by other application modules on the same machine.
 
 [[beans-beanfactory]]
 == The BeanFactory
+
 The `BeanFactory` provides the underlying basis for Spring's IoC functionality but it is
 only used directly in integration with other third-party frameworks and is now largely
 historical in nature for most users of Spring. The `BeanFactory` and related interfaces,
 such as `BeanFactoryAware`, `InitializingBean`, `DisposableBean`, are still present in
 Spring for the purposes of backward compatibility with the large number of third-party
 frameworks that integrate with Spring. Often third-party components that can not use
-more modern equivalents such as `@PostConstruct` or `@PreDestroy` in order to remain
-compatible with JDK 1.4 or to avoid a dependency on JSR-250.
+more modern equivalents such as `@PostConstruct` or `@PreDestroy` in order to avoid a
+dependency on JSR-250.
 
 This section provides additional background into the differences between the
 `BeanFactory` and `ApplicationContext` and how one might access the IoC container

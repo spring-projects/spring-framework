@@ -3,7 +3,7 @@
 :doc-root: https://docs.spring.io
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :toc: left
-:toclevels: 2
+:toclevels: 4
 :docinfo1:
 
 This part of the reference documentation covers all of those technologies that are
@@ -34,3 +34,4 @@ include::core/core-aop-api.adoc[leveloffset=+1]
 
 include::core/core-null-safety.adoc[leveloffset=+1]
 
+include::core/core-appendix.adoc[leveloffset=+1]

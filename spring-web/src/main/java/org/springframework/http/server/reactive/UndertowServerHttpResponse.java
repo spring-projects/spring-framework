@@ -37,7 +37,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
 import org.springframework.lang.Nullable;
@@ -51,8 +50,7 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 5.0
  */
-public class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse
-		implements ZeroCopyHttpOutputMessage {
+class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse implements ZeroCopyHttpOutputMessage {
 
 	private final HttpServerExchange exchange;
 
@@ -67,16 +65,18 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 	}
 
 
-	public HttpServerExchange getUndertowExchange() {
-		return this.exchange;
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getNativeResponse() {
+		return (T) this.exchange;
 	}
 
 
 	@Override
 	protected void applyStatusCode() {
-		HttpStatus statusCode = this.getStatusCode();
+		Integer statusCode = getStatusCodeValue();
 		if (statusCode != null) {
-			getUndertowExchange().setStatusCode(statusCode.value());
+			this.exchange.setStatusCode(statusCode);
 		}
 	}
 
@@ -115,7 +115,7 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 			FileChannel source = null;
 			try {
 				source = FileChannel.open(file.toPath(), StandardOpenOption.READ);
-				StreamSinkChannel destination = getUndertowExchange().getResponseChannel();
+				StreamSinkChannel destination = this.exchange.getResponseChannel();
 				Channels.transferBlocking(destination, source, position, count);
 				return Mono.empty();
 			}

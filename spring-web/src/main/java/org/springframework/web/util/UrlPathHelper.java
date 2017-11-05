@@ -554,7 +554,9 @@ public class UrlPathHelper {
 	 * @param vars URI variables extracted from the URL path
 	 * @return the same Map or a new Map instance
 	 */
-	public MultiValueMap<String, String> decodeMatrixVariables(HttpServletRequest request, MultiValueMap<String, String> vars) {
+	public MultiValueMap<String, String> decodeMatrixVariables(HttpServletRequest request,
+			MultiValueMap<String, String> vars) {
+
 		if (this.urlDecode) {
 			return vars;
 		}

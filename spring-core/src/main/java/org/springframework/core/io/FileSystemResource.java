@@ -183,7 +183,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 */
 	@Override
 	public ReadableByteChannel readableChannel() throws IOException {
-		return FileChannel.open(getFile().toPath(), StandardOpenOption.READ);
+		return FileChannel.open(this.file.toPath(), StandardOpenOption.READ);
 	}
 
 	/**
@@ -192,7 +192,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 */
 	@Override
 	public WritableByteChannel writableChannel() throws IOException {
-		return FileChannel.open(getFile().toPath(), StandardOpenOption.WRITE);
+		return FileChannel.open(this.file.toPath(), StandardOpenOption.WRITE);
 	}
 
 	/**

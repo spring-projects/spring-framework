@@ -23,7 +23,7 @@ import org.junit.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -38,7 +38,8 @@ public class ParameterContentTypeResolverTests {
 	@Test
 	public void noKey() throws Exception {
 		ParameterContentTypeResolver resolver = new ParameterContentTypeResolver(Collections.emptyMap());
-		List<MediaType> mediaTypes = resolver.resolveMediaTypes(MockServerHttpRequest.get("/").toExchange());
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
+		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
 
 		assertEquals(0, mediaTypes.size());
 	}
@@ -86,7 +87,7 @@ public class ParameterContentTypeResolverTests {
 	}
 
 	private MockServerWebExchange createExchange(String format) {
-		return MockServerHttpRequest.get("/path?format=" + format).toExchange();
+		return MockServerWebExchange.from(MockServerHttpRequest.get("/path?format=" + format));
 	}
 
 }

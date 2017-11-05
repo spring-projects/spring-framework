@@ -53,7 +53,7 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ServletServerHttpRequest extends AbstractServerHttpRequest {
+class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -70,9 +70,9 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 
 	public ServletServerHttpRequest(HttpServletRequest request, AsyncContext asyncContext,
-			DataBufferFactory bufferFactory, int bufferSize) throws IOException {
+			String servletPath, DataBufferFactory bufferFactory, int bufferSize) throws IOException {
 
-		super(initUri(request), request.getContextPath(), initHeaders(request));
+		super(initUri(request), request.getContextPath() + servletPath, initHeaders(request));
 
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
 		Assert.isTrue(bufferSize > 0, "'bufferSize' must be higher than 0");
@@ -145,13 +145,9 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 
-	public HttpServletRequest getServletRequest() {
-		return this.request;
-	}
-
 	@Override
 	public String getMethodValue() {
-		return getServletRequest().getMethod();
+		return this.request.getMethod();
 	}
 
 	@Override
@@ -199,6 +195,12 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getNativeRequest() {
+		return (T) this.request;
 	}
 
 

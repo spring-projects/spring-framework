@@ -153,8 +153,7 @@ public class Projection extends SpelNodeImpl {
 			}
 			nextType = nextType.getSuperclass();
 		}
-		Class<?>[] interfaces = ClassUtils.getAllInterfacesForClass(newType);
-		for (Class<?> nextInterface : interfaces) {
+		for (Class<?> nextInterface : ClassUtils.getAllInterfacesForClassAsSet(newType)) {
 			if (nextInterface.isAssignableFrom(oldType)) {
 				return nextInterface;
 			}

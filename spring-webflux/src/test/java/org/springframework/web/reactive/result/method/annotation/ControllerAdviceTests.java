@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ClassUtils;
@@ -53,7 +53,8 @@ import static org.mockito.Mockito.mock;
  */
 public class ControllerAdviceTests {
 
-	private final MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+	private final MockServerWebExchange exchange =
+			MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 
 	@Test

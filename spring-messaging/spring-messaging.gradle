@@ -43,5 +43,5 @@ dependencies {
 	testCompile("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0")
 	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0")
-	testRuntime("javax.activation:activation:1.1.1")
+	testRuntime("com.sun.activation:javax.activation:1.2.0")
 }

@@ -35,14 +35,13 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 
 	private static final Log logger = LogFactory.getLog(ResponseStatusExceptionHandler.class);
 
+
 	@Override
 	public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
 		if (ex instanceof ResponseStatusException) {
 			exchange.getResponse().setStatusCode(((ResponseStatusException) ex).getStatus());
-			if (ex.getMessage() != null) {
-				logger.error(ex.getMessage());
-			}
-			return Mono.empty();
+			logger.debug(ex.getMessage());
+			return exchange.getResponse().setComplete();
 		}
 		return Mono.error(ex);
 	}

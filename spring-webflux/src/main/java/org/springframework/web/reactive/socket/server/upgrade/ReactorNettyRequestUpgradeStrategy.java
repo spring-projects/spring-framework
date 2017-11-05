@@ -19,10 +19,12 @@ package org.springframework.web.reactive.socket.server.upgrade;
 import java.security.Principal;
 
 import reactor.core.publisher.Mono;
+import reactor.ipc.netty.http.server.HttpServerResponse;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
-import org.springframework.http.server.reactive.ReactorServerHttpResponse;
+import org.springframework.http.server.reactive.AbstractServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -40,11 +42,12 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 
 	@Override
 	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, @Nullable String subProtocol) {
-		ReactorServerHttpResponse response = (ReactorServerHttpResponse) exchange.getResponse();
+		ServerHttpResponse response = exchange.getResponse();
+		HttpServerResponse nativeResponse = ((AbstractServerHttpResponse) response).getNativeResponse();
 		HandshakeInfo info = getHandshakeInfo(exchange, subProtocol);
 		NettyDataBufferFactory bufferFactory = (NettyDataBufferFactory) response.bufferFactory();
 
-		return response.getReactorResponse().sendWebsocket(subProtocol,
+		return nativeResponse.sendWebsocket(subProtocol,
 				(in, out) -> handler.handle(new ReactorNettyWebSocketSession(in, out, info, bufferFactory)));
 	}
 

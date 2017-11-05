@@ -71,7 +71,6 @@ public abstract class DataBufferUtils {
 			DataBufferFactory dataBufferFactory, int bufferSize) {
 
 		Assert.notNull(inputStream, "InputStream must not be null");
-		Assert.notNull(dataBufferFactory, "DataBufferFactory must not be null");
 
 		ReadableByteChannel channel = Channels.newChannel(inputStream);
 		return read(channel, dataBufferFactory, bufferSize);
@@ -90,6 +89,7 @@ public abstract class DataBufferUtils {
 
 		Assert.notNull(channel, "ReadableByteChannel must not be null");
 		Assert.notNull(dataBufferFactory, "DataBufferFactory must not be null");
+		Assert.isTrue(bufferSize > 0, "'bufferSize' must be > 0");
 
 		return Flux.generate(() -> channel,
 				new ReadableByteChannelGenerator(dataBufferFactory, bufferSize),
@@ -125,15 +125,17 @@ public abstract class DataBufferUtils {
 		Assert.notNull(channel, "'channel' must not be null");
 		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
 		Assert.isTrue(position >= 0, "'position' must be >= 0");
+		Assert.isTrue(bufferSize > 0, "'bufferSize' must be > 0");
 
-		ByteBuffer byteBuffer = ByteBuffer.allocate(bufferSize);
+		DataBuffer dataBuffer = dataBufferFactory.allocateBuffer(bufferSize);
+		ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, bufferSize);
 
 		return Flux.create(sink -> {
 			sink.onDispose(() -> closeChannel(channel));
-			AsynchronousFileChannelReadCompletionHandler completionHandler =
-					new AsynchronousFileChannelReadCompletionHandler(sink, position,
-							dataBufferFactory, byteBuffer);
-			channel.read(byteBuffer, position, channel, completionHandler);
+			CompletionHandler<Integer, DataBuffer> completionHandler =
+					new AsynchronousFileChannelReadCompletionHandler(channel, sink, position,
+							dataBufferFactory, bufferSize);
+			channel.read(byteBuffer, position, dataBuffer, completionHandler);
 		});
 	}
 
@@ -414,32 +416,25 @@ public abstract class DataBufferUtils {
 
 		private final DataBufferFactory dataBufferFactory;
 
-		private final ByteBuffer byteBuffer;
+		private final int bufferSize;
 
-		public ReadableByteChannelGenerator(DataBufferFactory dataBufferFactory, int chunkSize) {
+		public ReadableByteChannelGenerator(DataBufferFactory dataBufferFactory, int bufferSize) {
 			this.dataBufferFactory = dataBufferFactory;
-			this.byteBuffer = ByteBuffer.allocate(chunkSize);
+			this.bufferSize = bufferSize;
 		}
 
 		@Override
-		public ReadableByteChannel apply(ReadableByteChannel channel, SynchronousSink<DataBuffer> sub) {
+		public ReadableByteChannel apply(ReadableByteChannel channel,
+				SynchronousSink<DataBuffer> sub) {
+			boolean release = true;
+			DataBuffer dataBuffer = this.dataBufferFactory.allocateBuffer(this.bufferSize);
 			try {
 				int read;
-				if ((read = channel.read(this.byteBuffer)) >= 0) {
-					this.byteBuffer.flip();
-					boolean release = true;
-					DataBuffer dataBuffer = this.dataBufferFactory.allocateBuffer(read);
-					try {
-						dataBuffer.write(this.byteBuffer);
-						release = false;
-						sub.next(dataBuffer);
-					}
-					finally {
-						if (release) {
-							release(dataBuffer);
-						}
-					}
-					this.byteBuffer.clear();
+				ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, dataBuffer.capacity());
+				if ((read = channel.read(byteBuffer)) >= 0) {
+					dataBuffer.writePosition(read);
+					release = false;
+					sub.next(dataBuffer);
 				}
 				else {
 					sub.complete();
@@ -448,62 +443,64 @@ public abstract class DataBufferUtils {
 			catch (IOException ex) {
 				sub.error(ex);
 			}
+			finally {
+				if (release) {
+					release(dataBuffer);
+				}
+			}
 			return channel;
 		}
 	}
 
 	private static class AsynchronousFileChannelReadCompletionHandler
-			implements CompletionHandler<Integer, AsynchronousFileChannel> {
+			implements CompletionHandler<Integer, DataBuffer> {
+
+		private final AsynchronousFileChannel channel;
 
 		private final FluxSink<DataBuffer> sink;
 
-		private final ByteBuffer byteBuffer;
-
 		private final DataBufferFactory dataBufferFactory;
 
-		private long position;
+		private final int bufferSize;
 
-		private AsynchronousFileChannelReadCompletionHandler(FluxSink<DataBuffer> sink,
-				long position, DataBufferFactory dataBufferFactory, ByteBuffer byteBuffer) {
+		private AtomicLong position;
+
+		private AsynchronousFileChannelReadCompletionHandler(
+				AsynchronousFileChannel channel, FluxSink<DataBuffer> sink,
+				long position, DataBufferFactory dataBufferFactory, int bufferSize) {
+			this.channel = channel;
 			this.sink = sink;
-			this.position = position;
+			this.position = new AtomicLong(position);
 			this.dataBufferFactory = dataBufferFactory;
-			this.byteBuffer = byteBuffer;
+			this.bufferSize = bufferSize;
 		}
 
 		@Override
-		public void completed(Integer read, AsynchronousFileChannel channel) {
+		public void completed(Integer read, DataBuffer dataBuffer) {
 			if (read != -1) {
-				this.position += read;
-				this.byteBuffer.flip();
-				boolean release = true;
-				DataBuffer dataBuffer = this.dataBufferFactory.allocateBuffer(read);
-				try {
-					dataBuffer.write(this.byteBuffer);
-					release = false;
-					this.sink.next(dataBuffer);
-				}
-				finally {
-					if (release) {
-						release(dataBuffer);
-					}
-				}
-				this.byteBuffer.clear();
+				long pos = this.position.addAndGet(read);
+				dataBuffer.writePosition(read);
+				this.sink.next(dataBuffer);
 
 				if (!this.sink.isCancelled()) {
-					channel.read(this.byteBuffer, this.position, channel, this);
+					DataBuffer newDataBuffer =
+							this.dataBufferFactory.allocateBuffer(this.bufferSize);
+					ByteBuffer newByteBuffer = newDataBuffer.asByteBuffer(0, this.bufferSize);
+					this.channel.read(newByteBuffer, pos, newDataBuffer, this);
 				}
 			}
 			else {
+				release(dataBuffer);
+				closeChannel(this.channel);
 				this.sink.complete();
-				closeChannel(channel);
 			}
 		}
 
 		@Override
-		public void failed(Throwable exc, AsynchronousFileChannel channel) {
+		public void failed(Throwable exc, DataBuffer dataBuffer) {
+			release(dataBuffer);
+			closeChannel(this.channel);
 			this.sink.error(exc);
-			closeChannel(channel);
 		}
 	}
 
@@ -558,9 +555,9 @@ public abstract class DataBufferUtils {
 
 		@Override
 		public void completed(Integer written, ByteBuffer byteBuffer) {
-			this.position.addAndGet(written);
+			long pos = this.position.addAndGet(written);
 			if (byteBuffer.hasRemaining()) {
-				this.channel.write(byteBuffer, this.position.get(), byteBuffer, this);
+				this.channel.write(byteBuffer, pos, byteBuffer, this);
 				return;
 			}
 

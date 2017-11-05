@@ -88,7 +88,8 @@ public class FixedLocaleContextResolver implements LocaleContextResolver {
 
 	@Override
 	public void setLocaleContext(ServerWebExchange exchange, @Nullable LocaleContext localeContext) {
-		throw new UnsupportedOperationException("Cannot change fixed locale - use a different locale context resolution strategy");
+		throw new UnsupportedOperationException(
+				"Cannot change fixed locale - use a different locale context resolution strategy");
 	}
 
 }

@@ -54,6 +54,7 @@ public class DelegatingMessageSource extends MessageSourceSupport implements Hie
 
 
 	@Override
+	@Nullable
 	public String getMessage(String code, @Nullable Object[] args, @Nullable String defaultMessage, Locale locale) {
 		if (this.parentMessageSource != null) {
 			return this.parentMessageSource.getMessage(code, args, defaultMessage, locale);
@@ -62,7 +63,7 @@ public class DelegatingMessageSource extends MessageSourceSupport implements Hie
 			return renderDefaultMessage(defaultMessage, args, locale);
 		}
 		else {
-			return "";
+			return null;
 		}
 	}
 

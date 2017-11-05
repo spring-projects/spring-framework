@@ -19,7 +19,7 @@ package org.springframework.web.reactive.result.condition;
 import org.junit.Test;
 
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import static org.junit.Assert.assertEquals;
@@ -34,7 +34,7 @@ import static org.junit.Assert.assertSame;
  */
 public class RequestConditionHolderTests {
 
-	private final MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 
 	@Test

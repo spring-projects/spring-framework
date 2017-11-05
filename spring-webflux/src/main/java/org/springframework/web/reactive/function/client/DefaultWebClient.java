@@ -142,7 +142,7 @@ class DefaultWebClient implements WebClient {
 
 	@Override
 	public Builder mutate() {
-		return this.builder;
+		return new DefaultWebClientBuilder(this.builder);
 	}
 
 
@@ -298,7 +298,9 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public <T, P extends Publisher<T>> RequestHeadersSpec<?> body(P publisher, ParameterizedTypeReference<T> typeReference) {
+		public <T, P extends Publisher<T>> RequestHeadersSpec<?> body(P publisher,
+				ParameterizedTypeReference<T> typeReference) {
+
 			this.inserter = BodyInserters.fromPublisher(publisher, typeReference);
 			return this;
 		}
@@ -418,7 +420,7 @@ class DefaultWebClient implements WebClient {
 		public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference) {
 			return this.responseMono.flatMap(
 					response -> bodyToPublisher(response, BodyExtractors.toMono(typeReference),
-							mono -> (Mono<T>)mono));
+							this::monoThrowableToMono));
 		}
 
 		private <T> Mono<T> monoThrowableToMono(Mono<? extends Throwable> mono) {

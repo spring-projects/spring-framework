@@ -42,7 +42,7 @@ import org.springframework.util.MultiValueMap;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
+class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpServerRequest request;
 
@@ -108,11 +108,6 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 		return headers;
 	}
 
-
-	public HttpServerRequest getReactorRequest() {
-		return this.request;
-	}
-
 	@Override
 	public String getMethodValue() {
 		return this.request.method().name();
@@ -138,6 +133,12 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	public Flux<DataBuffer> getBody() {
 		return this.request.receive().retain().map(this.bufferFactory::wrap);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getNativeRequest() {
+		return (T) this.request;
 	}
 
 }

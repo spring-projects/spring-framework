@@ -19,11 +19,33 @@ package org.springframework.web.servlet.tags;
 import javax.servlet.jsp.JspException;
 
 /**
- * Sets default HTML escape value for the current page. The actual value
- * can be overridden by escaping-aware tags. The default is "false".
+ * The {@code <htmlEscape>} tag sets default HTML escape value for the current
+ * page. The actual value  can be overridden by escaping-aware tags.
+ * The default is "false".
  *
  * <p>Note: You can also set a "defaultHtmlEscape" web.xml context-param.
  * A page-level setting overrides a context-param.
+ *
+ * <table>
+ * <caption>Attribute Summary</caption>
+ * <thead>
+ * <tr>
+ * <th class="colFirst">Attribute</th>
+ * <th class="colOne">Required?</th>
+ * <th class="colOne">Runtime Expression?</th>
+ * <th class="colLast">Description</th>
+ * </tr>
+ * </thead>
+ * <tbody>
+ * <tr class="altColor">
+ * <td>defaultHtmlEscape</p></td>
+ * <td>true</p></td>
+ * <td>true</p></td>
+ * <td>Set the default value for HTML escaping, to be put into the current
+ * PageContext.</p></td>
+ * </tr>
+ * </tbody>
+ * </table>
  *
  * @author Juergen Hoeller
  * @since 04.03.2003

@@ -75,14 +75,16 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 
 	@Override
 	public ClientHttpResponse validateRequest(ClientHttpRequest request) throws IOException {
-		List<ClientHttpRequest> requests = this.requests;
-		synchronized (requests) {
-			if (requests.isEmpty()) {
+		synchronized (this.requests) {
+			if (this.requests.isEmpty()) {
 				afterExpectationsDeclared();
 			}
-			ClientHttpResponse response = validateRequestInternal(request);
-			requests.add(request);
-			return response;
+			try {
+				return validateRequestInternal(request);
+			}
+			finally {
+				this.requests.add(request);
+			}
 		}
 	}
 
@@ -94,7 +96,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 	}
 
 	/**
-	 * Sub-classes must implement the actual validation of the request
+	 * Subclasses must implement the actual validation of the request
 	 * matching to declared expectations.
 	 */
 	protected abstract ClientHttpResponse validateRequestInternal(ClientHttpRequest request)
