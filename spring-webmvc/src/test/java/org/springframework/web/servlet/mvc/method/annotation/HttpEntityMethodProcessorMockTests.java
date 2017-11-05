@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -56,8 +57,7 @@ import static java.time.Instant.*;
 import static java.time.format.DateTimeFormatter.*;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
-import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
-import static org.springframework.http.MediaType.TEXT_PLAIN;
+import static org.springframework.http.MediaType.*;
 import static org.springframework.web.servlet.HandlerMapping.*;
 
 /**
@@ -618,13 +618,13 @@ public class HttpEntityMethodProcessorMockTests {
 		given(stringHttpMessageConverter.canWrite(String.class, accepted)).willReturn(true);
 	}
 
-	private void assertResponseBody(String body) throws Exception {
+	private void assertResponseBody(String body) throws IOException {
 		ArgumentCaptor<HttpOutputMessage> outputMessage = ArgumentCaptor.forClass(HttpOutputMessage.class);
 		verify(stringHttpMessageConverter).write(eq(body), eq(TEXT_PLAIN), outputMessage.capture());
 	}
 
-	private void assertConditionalResponse(HttpStatus status, String body, String etag,
-			long lastModified) throws Exception {
+	private void assertConditionalResponse(HttpStatus status, String body, String etag, long lastModified)
+			throws IOException {
 
 		assertEquals(status.value(), servletResponse.getStatus());
 		assertTrue(mavContainer.isRequestHandled());
@@ -640,8 +640,7 @@ public class HttpEntityMethodProcessorMockTests {
 		}
 		if (lastModified != -1) {
 			assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.LAST_MODIFIED).size());
-			assertEquals(RFC_1123_DATE_TIME.format(ofEpochMilli(lastModified).atZone(GMT)),
-					servletResponse.getHeader(HttpHeaders.LAST_MODIFIED));
+			assertEquals(lastModified / 1000, servletResponse.getDateHeader(HttpHeaders.LAST_MODIFIED) / 1000);
 		}
 	}
 
