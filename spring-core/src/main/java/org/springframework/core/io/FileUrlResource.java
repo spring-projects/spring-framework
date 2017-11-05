@@ -71,6 +71,14 @@ public class FileUrlResource extends UrlResource implements WritableResource {
 
 
 	@Override
+	public Resource createRelative(String relativePath) throws MalformedURLException {
+		if (relativePath.startsWith("/")) {
+			relativePath = relativePath.substring(1);
+		}
+		return new FileUrlResource(new URL(getURL(), relativePath));
+	}
+
+	@Override
 	public boolean isWritable() {
 		try {
 			URL url = getURL();
