@@ -101,6 +101,7 @@ public class MockMultipartFile implements MultipartFile {
 		this(name, originalFilename, contentType, FileCopyUtils.copyToByteArray(contentStream));
 	}
 
+
 	@Override
 	public String getName() {
 		return this.name;

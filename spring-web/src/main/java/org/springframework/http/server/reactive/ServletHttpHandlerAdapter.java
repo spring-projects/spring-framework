@@ -121,11 +121,12 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		this.servletPath = getServletPath(config);
 	}
 
-	@Nullable
 	private String getServletPath(ServletConfig config) {
 		String name = config.getServletName();
 		ServletRegistration registration = config.getServletContext().getServletRegistration(name);
-		Assert.notNull(registration, "ServletRegistration not found for Servlet '" + name + "'.");
+		if (registration == null) {
+			throw new IllegalStateException("ServletRegistration not found for Servlet '" + name + "'");
+		}
 
 		Collection<String> mappings = registration.getMappings();
 		if (mappings.size() == 1) {
@@ -136,16 +137,16 @@ public class ServletHttpHandlerAdapter implements Servlet {
 			if (mapping.endsWith("/*")) {
 				String path = mapping.substring(0, mapping.length() - 2);
 				if (!path.isEmpty()) {
-					logger.info("Found Servlet mapping '" + path + "' for Servlet '" + name + "'.");
+					logger.info("Found Servlet mapping '" + path + "' for Servlet '" + name + "'");
 				}
 				return path;
 			}
 		}
 
-		throw new IllegalArgumentException("Expected a single Servlet mapping -- " +
+		throw new IllegalArgumentException("Expected a single Servlet mapping: " +
 				"either the default Servlet mapping (i.e. '/'), " +
 				"or a path based mapping (e.g. '/*', '/foo/*'). " +
-				"Actual mappings: " + mappings + " for Servlet '" + name + "'.");
+				"Actual mappings: " + mappings + " for Servlet '" + name + "'");
 	}
 
 
@@ -168,18 +169,13 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		this.httpHandler.handle(httpRequest, httpResponse).subscribe(subscriber);
 	}
 
-	protected ServerHttpRequest createRequest(HttpServletRequest request, AsyncContext context)
-			throws IOException {
-
-		Assert.notNull(this.servletPath, "servletPath is not initialized.");
-
+	protected ServerHttpRequest createRequest(HttpServletRequest request, AsyncContext context) throws IOException {
+		Assert.notNull(this.servletPath, "Servlet path is not initialized");
 		return new ServletServerHttpRequest(
 				request, context, this.servletPath, getDataBufferFactory(), getBufferSize());
 	}
 
-	protected ServerHttpResponse createResponse(HttpServletResponse response, AsyncContext context)
-			throws IOException {
-
+	protected ServerHttpResponse createResponse(HttpServletResponse response, AsyncContext context) throws IOException {
 		return new ServletServerHttpResponse(response, context, getDataBufferFactory(), getBufferSize());
 	}
 
@@ -219,25 +215,25 @@ public class ServletHttpHandlerAdapter implements Servlet {
 	private final static AsyncListener ERROR_LISTENER = new AsyncListener() {
 
 		@Override
-		public void onTimeout(AsyncEvent event) throws IOException {
+		public void onTimeout(AsyncEvent event) {
 			AsyncContext context = event.getAsyncContext();
 			runIfAsyncNotComplete(context, context::complete);
 		}
 
 		@Override
-		public void onError(AsyncEvent event) throws IOException {
+		public void onError(AsyncEvent event) {
 			AsyncContext context = event.getAsyncContext();
 			runIfAsyncNotComplete(context, context::complete);
 		}
 
 		@Override
-		public void onStartAsync(AsyncEvent event) throws IOException {
-			// No-op
+		public void onStartAsync(AsyncEvent event) {
+			// no-op
 		}
 
 		@Override
-		public void onComplete(AsyncEvent event) throws IOException {
-			// No-op
+		public void onComplete(AsyncEvent event) {
+			// no-op
 		}
 	};
 
@@ -246,7 +242,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		private final AsyncContext asyncContext;
 
-		HandlerResultSubscriber(AsyncContext asyncContext) {
+		public HandlerResultSubscriber(AsyncContext asyncContext) {
 			this.asyncContext = asyncContext;
 		}
 
@@ -257,7 +253,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		@Override
 		public void onNext(Void aVoid) {
-			// no op
+			// no-op
 		}
 
 		@Override
