@@ -391,9 +391,8 @@ you will be able to write your Kotlin beans without any additional `open` keywor
 
 === Using immutable class instances for persistence
 
-In Kotlin, it is very convenient and considered best practice to declare
-read-only properties within the primary constructor, as in the following
-example:
+In Kotlin, it is very convenient and considered best practice to declare read-only properties
+within the primary constructor, as in the following example:
 
 [source,kotlin]
 ----
@@ -401,41 +400,39 @@ class Person(val name: String, val age: Int)
 ----
 
 You can optionally add https://kotlinlang.org/docs/reference/data-classes.html[the `data` keyword]
-to make the compiler automatically derives the following members from all properties
-declared in the primary constructor:
+to make the compiler automatically derive the following members from all properties declared
+in the primary constructor:
 
 * equals()/hashCode() pair
 * toString() of the form "User(name=John, age=42)"
 * componentN() functions corresponding to the properties in their order of declaration
 * copy() function
 
-This allows to change easily just one of the properties even if `User` properties are read-only:
-his allows us to write:
-
+This allows for easy changes to individual properties even if `Person` properties are read-only:
 
 [source,kotlin]
 ----
 data class Person(val name: String, val age: Int)
 
-val jack = User(name = "Jack", age = 1)
+val jack = Person(name = "Jack", age = 1)
 val olderJack = jack.copy(age = 2)
 ----
 
-But some persistence technologies like JPA require a default constructor, preventing this
+Common persistence technologies such as JPA require a default constructor, preventing this
 kind of design. Fortunately, there is now a workaround for this
 https://stackoverflow.com/questions/32038177/kotlin-with-jpa-default-constructor-hell["default constructor hell"]
 since Kotlin provides a https://kotlinlang.org/docs/reference/compiler-plugins.html#kotlin-jpa-compiler-plugin[kotlin-jpa]
 plugin which generates synthetic no-arg constructor for classes annotated with JPA annotations.
 
-If you need to leverage this kind of mechanism for other persistence technologies, you can
-configure https://kotlinlang.org/docs/reference/compiler-plugins.html#how-to-use-no-arg-plugin[kotlin-noarg]
+If you need to leverage this kind of mechanism for other persistence technologies, you can configure
+the https://kotlinlang.org/docs/reference/compiler-plugins.html#how-to-use-no-arg-plugin[kotlin-noarg]
 plugin.
 
 [NOTE]
 ====
-As of Kay release train, Spring Data supports Kotlin immutable class instances
-and should not require `kotlin-noarg` plugin if the module leverages Spring Data object
-mapping (like with MongoDB, Redis, Cassandra, etc.).
+As of the Kay release train, Spring Data supports Kotlin immutable class instances and
+does not require the `kotlin-noarg` plugin if the module leverages Spring Data object
+mappings (like with MongoDB, Redis, Cassandra, etc).
 ====
 
 
