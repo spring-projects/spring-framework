@@ -701,6 +701,11 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertEquals(2, bean.getNestedTestBeans().size());
 		assertNull(bean.getNestedTestBeans().get(0));
 		assertSame(ntb2, bean.getNestedTestBeans().get(1));
+
+		Map<String, NestedTestBean> map = bf.getBeansOfType(NestedTestBean.class);
+		assertNull(map.get("nestedTestBean1"));
+		assertSame(ntb2, map.get("nestedTestBean2"));
+
 		bf.destroySingletons();
 	}
 
