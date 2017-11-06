@@ -293,3 +293,13 @@ from the `reactor-test` module to do that, for example:
             .thenCancel()
             .verify();
 ----
+
+
+[[webtestclient-request-body]]
+=== Request body
+
+When it comes to building requests, the `WebTestClient` offers an identical API as the
+`WebClient` and the implementation is mostly a simple pass-through. Please refer
+to the <<web-reactive.adoc#webflux-client-body,WebClient documentation>> for examples on
+how to prepare a request with a body including submitting form data, multipart requests,
+and more.

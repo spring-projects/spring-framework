@@ -158,6 +158,84 @@ Or if you have the actual value, use the `syncBody` shortcut method:
 
 
 
+[[webflux-client-body-form]]
+=== Form data
+
+To send form data, provide a `MultiValueMap<String, String>` as the body. Note that the
+content is automatically set to `"application/x-www-form-urlencoded"` by the
+`FormHttpMessageWriter`:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+    MultiValueMap<String, String> formData = ... ;
+
+    Mono<Void> result = client.post()
+            .uri("/path", id)
+            .syncBody(formData)
+            .retrieve()
+            .bodyToMono(Void.class);
+----
+
+You can also supply form data in-line via `BodyInserters`:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+    import static org.springframework.web.reactive.function.BodyInserters.*;
+
+    Mono<Void> result = client.post()
+            .uri("/path", id)
+            .body(fromFormData("k1", "v1").with("k2", "v2"))
+            .retrieve()
+            .bodyToMono(Void.class);
+----
+
+
+
+[[webflux-client-body-multipart]]
+=== Multipart data
+
+To send multipart data, provide a `MultiValueMap<String, ?>` where values are either an
+Object representing the part body, or an `HttpEntity` representing the part body and
+headers. `MultipartBodyBuilder` can be used to build the parts:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+MultipartBodyBuilder builder = new MultipartBodyBuilder();
+builder.part("fieldPart", "fieldValue");
+builder.part("filePart", new FileSystemResource("...logo.png"));
+builder.part("jsonPart", new Person("Jason"));
+
+MultiValueMap<String, HttpEntity<?>> parts = builder.build();
+
+Mono<Void> result = client.post()
+		.uri("/path", id)
+		.syncBody(parts)
+		.retrieve()
+		.bodyToMono(Void.class);
+----
+
+Note that the content type for each part is automatically set based on the extension of the
+file being written or the type of Object. If you prefer you can also be more explicit and
+specify the content type for each part.
+
+You can also supply multipart data in-line via `BodyInserters`:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+    import static org.springframework.web.reactive.function.BodyInserters.*;
+
+    Mono<Void> result = client.post()
+            .uri("/path", id)
+            .body(fromMultipartData("fieldPart", "value").with("filePart", resource))
+            .retrieve()
+            .bodyToMono(Void.class);
+----
+
+
 
 [[webflux-client-builder]]
 == Builder options

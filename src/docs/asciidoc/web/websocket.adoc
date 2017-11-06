@@ -2,24 +2,9 @@
 = WebSockets
 :doc-spring-security: {doc-root}/spring-security/site/docs/current/reference
 
-This part of the reference documentation covers the Spring Framework support for Servlet stack
-based WebSocket messaging including use of STOMP as a a WebSocket sub-protocol.
-
-<<websocket-intro>> establishes a frame of mind in which to think about
-WebSocket, covering adoption challenges, design considerations, and thoughts on
-when it is a good fit.
-
-<<websocket-server>> reviews the Spring WebSocket API on the server-side, while
-<<websocket-fallback>> explains the SockJS protocol and shows how to configure
-and use it.
-
-<<websocket-stomp-overview>> introduces the STOMP messaging protocol.
-<<websocket-stomp-enable>> demonstrates how to configure STOMP support in Spring.
-<<websocket-stomp-handle-annotations>> and the following sections explain how to
-write annotated message handling methods, send messages, choose message broker
-options, as well as work with the special "user" destinations. Finally,
-<<websocket-stomp-testing>> lists three approaches to testing STOMP/WebSocket
-applications.
+This part of the reference documentation covers support for Servlet stack WebSocket
+messaging, SockJS-based fallback options, and the use of STOMP as a WebSocket messaging
+sub-protocol.
 
 
 
@@ -27,52 +12,54 @@ applications.
 [[websocket-intro]]
 == Introduction
 
-The WebSocket protocol http://tools.ietf.org/html/rfc6455[RFC 6455] defines an important
-new capability for web applications: full-duplex, two-way communication between client
-and server. It is an exciting new capability on the heels of a long history of
-techniques to make the web more interactive including Java Applets, XMLHttpRequest,
-Adobe Flash, ActiveXObject, various Comet techniques, server-sent events, and others.
+The WebSocket protocol http://tools.ietf.org/html/rfc6455[RFC 6455] provides a standardized
+way to establish a full-duplex, two-way communication channel between client and server
+over a single TCP connection. It is a different TCP protocol from HTTP but is designed to
+work over HTTP ports 80 and 443 thus allowing use of existing firewall rules.
 
-A proper introduction to the WebSocket protocol is beyond the scope of this
-document. At a minimum however it's important to understand that HTTP is used only for
-the initial handshake, which relies on a mechanism built into HTTP to request
-a protocol upgrade (or in this case a protocol switch) to which the server can respond with
-HTTP status 101 (switching protocols) if it agrees. Assuming the handshake succeeds
-the TCP socket underlying the HTTP upgrade request remains open and both client and
-server can use it to send messages to each other.
+A WebSocket interaction begins with an HTTP compatible handshake request that uses the
+HTTP `"Upgrade"` header to request switching to the WebSocket protocol:
 
-Spring Framework 4 includes a new `spring-websocket` module with comprehensive
-WebSocket support. It is compatible with the Java WebSocket API standard
-(http://jcp.org/en/jsr/detail?id=356[JSR-356])
-and also provides additional value-add as explained in the rest of the introduction.
+[subs="quotes"]
+----
+GET /spring-websocket-portfolio/portfolio HTTP/1.1
+Host: localhost:8080
+**Upgrade: websocket**
+**Connection: Upgrade**
+Sec-WebSocket-Key: Uc9l9TMkWGbHFD2qnFHltg==
+Sec-WebSocket-Protocol: v10.stomp, v11.stomp
+Sec-WebSocket-Version: 13
+Origin: http://localhost:8080
+----
+
+The response from a server with WebSocket support:
+
+[subs="quotes"]
+----
+**HTTP/1.1 101 Switching Protocols**
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Accept: 1qVdfYHU9hPOl4JYYNXF623Gzn0=
+Sec-WebSocket-Protocol: v10.stomp
+----
+
+After a successful handshake the TCP socket underlying the HTTP upgrade request remains
+open and both client and server can use send and receive messages.
+
+If you Servlet container is running behind a web server (e.g. nginx) you will likely need
+to configure it to send WebSocket upgrades to the backend server. Likewise if running in a
+cloud environment check the instructions for WebSocket support of your cloud provider.
+
+Beyond that, what do you do about restrictive proxies, outside your control, that preclude
+WebSocket interactions either because they are not configured to pass on the `Upgrade`
+header or because they close long lived connections that appear idle? The answer to this
+is WebSocket emulation that tries to use WebSocket first and then falls back HTTP-based
+techniques that WebSocket-like communication. See <<websocket-fallback>>.
 
 
 
-[[websocket-into-fallback-options]]
-=== Fallback Options
 
-An important challenge to adoption is the lack of support for WebSocket in some
-browsers. Notably the first Internet Explorer version to support WebSocket is
-version 10 (see http://caniuse.com/websockets for support by browser versions).
-Furthermore, some restrictive proxies may be configured in ways that either
-preclude the attempt to do an HTTP upgrade or otherwise break connection after
-some time because it has remained opened for too long. A good overview on this
-topic from Peter Lubbers is available in the InfoQ article
-http://www.infoq.com/articles/Web-Sockets-Proxy-Servers["How HTML5 Web Sockets Interact With Proxy Servers"].
-
-Therefore to build a WebSocket application today, fallback options are required in
-order to simulate the WebSocket API where necessary. The Spring Framework provides
-such transparent fallback options based on the https://github.com/sockjs/sockjs-protocol[SockJS protocol].
-These options can be enabled through configuration and do not require modifying the
-application otherwise.
-
-
-
-[[websocket-intro-architecture]]
-=== Messaging
-
-Aside from short-to-midterm adoption challenges, using WebSocket
-brings up important design considerations that are important to recognize
+WebSocket brings up important design considerations that are important to recognize
 early on, especially in contrast to what we know about building web applications today.
 
 Today REST is a widely accepted, understood, and supported

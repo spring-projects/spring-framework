@@ -544,9 +544,17 @@ public interface WebClient {
 
 		/**
 		 * Set the body of the request to the given synchronous {@code Object}.
-		 * <p>This method is a convenient shortcut for {@link #body(BodyInserter)} with a
-		 * {@linkplain org.springframework.web.reactive.function.BodyInserters#fromObject
-		 * Object body inserter}.
+		 * <p>This method is a convenient shortcut for:
+		 * <pre class="code">
+		 * .body(BodyInserters.fromObject(object))
+		 * </pre>
+		 * <p>The body can be a
+		 * {@link org.springframework.util.MultiValueMap MultiValueMap} to create
+		 * a multipart request. The values in the {@code MultiValueMap} can be
+		 * any Object representing the body of the part, or an
+		 * {@link org.springframework.http.HttpEntity HttpEntity} representing a
+		 * part with body and headers. The {@code MultiValueMap} can be built
+		 * conveniently using
 		 * @param body the {@code Object} to write to the request
 		 * @return this builder
 		 */

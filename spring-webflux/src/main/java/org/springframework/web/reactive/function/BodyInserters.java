@@ -220,10 +220,13 @@ public abstract class BodyInserters {
 
 	/**
 	 * Return a {@code FormInserter} that writes the given {@code MultiValueMap}
-	 * as multipart data. The {@code multipartData} parameter can conveniently be built using the
-	 * {@link org.springframework.http.client.MultipartBodyBuilder MultipartBodyBuilder}.
-	 * Note that the returned inserter allows for additional entries to be added
-	 * via {@link FormInserter#with(String, Object)}.
+	 * as multipart data. The values in the {@code MultiValueMap} can be any
+	 * Object representing the body of the part, or an
+	 * {@link org.springframework.http.HttpEntity HttpEntity} representing a part
+	 * with body and headers. The {@code MultiValueMap} can be built conveniently
+	 * using {@link org.springframework.http.client.MultipartBodyBuilder
+	 * MultipartBodyBuilder}. Also the returned inserter allows for additional
+	 * entries to be added via {@link FormInserter#with(String, Object)}.
 	 *
 	 * <p><strong>Note:</strong> you can also use the {@code syncBody(Object)}
 	 * method in the request builders of both the {@code WebClient} and
@@ -245,15 +248,13 @@ public abstract class BodyInserters {
 	}
 
 	/**
-	 * Return a {@code FormInserter} that writes the key-value pair  as multipart data. The
-	 * {@code multipartData} parameter can conveniently be built using the
-	 * {@link org.springframework.http.client.MultipartBodyBuilder MultipartBodyBuilder}.
-	 * Note that the returned inserter allows for additional entries to be added
-	 * via {@link FormInserter#with(String, Object)}.
-	 * {@link FormInserter#with(String, Object)}.
-	 * @param key the key to add to the form
-	 * @param value the value to add to the form
-	 * @return a {@code FormInserter} that writes multipart data
+	 * A variant of {@link #fromMultipartData(MultiValueMap)} for adding
+	 * parts as name-value pairs in-line vs building a {@code MultiValueMap}
+	 * and passing it in.
+	 * @param key the part name
+	 * @param value the part value, an Object or {@code HttpEntity}
+	 * @return a {@code FormInserter} that can writes the provided multipart
+	 * data and also allows adding more parts
 	 */
 	// Note that the returned BodyInserter is parameterized to ClientHttpRequest, not
 	// ReactiveHttpOutputMessage like other methods, since sending form data only typically happens
