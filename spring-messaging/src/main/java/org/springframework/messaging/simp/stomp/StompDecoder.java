@@ -150,7 +150,7 @@ public class StompDecoder {
 				if (payload.length > 0) {
 					StompCommand stompCommand = headerAccessor.getCommand();
 					if (stompCommand != null && !stompCommand.isBodyAllowed()) {
-						throw new StompConversionException(headerAccessor.getCommand() +
+						throw new StompConversionException(stompCommand +
 								" shouldn't have a payload: length=" + payload.length + ", headers=" + headers);
 					}
 				}
