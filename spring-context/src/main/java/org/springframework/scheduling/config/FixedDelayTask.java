@@ -16,42 +16,24 @@
 
 package org.springframework.scheduling.config;
 
-import org.springframework.util.Assert;
-
 /**
- * Holder class defining a {@code Runnable} to be executed as a task, typically at a
- * scheduled time or interval. See subclass hierarchy for various scheduling approaches.
+ * Specialization of {@link IntervalTask} for fixed-delay semantics.
  *
- * @author Chris Beams
  * @author Juergen Hoeller
- * @since 3.2
+ * @since 5.0.2
+ * @see org.springframework.scheduling.annotation.Scheduled#fixedDelay()
+ * @see ScheduledTaskRegistrar#addFixedDelayTask(IntervalTask)
  */
-public class Task {
-
-	private final Runnable runnable;
-
+public class FixedDelayTask extends IntervalTask {
 
 	/**
-	 * Create a new {@code Task}.
+	 * Create a new {@code FixedDelayTask}.
 	 * @param runnable the underlying task to execute
+	 * @param interval how often in milliseconds the task should be executed
+	 * @param initialDelay the initial delay before first execution of the task
 	 */
-	public Task(Runnable runnable) {
-		Assert.notNull(runnable, "Runnable must not be null");
-		this.runnable = runnable;
-	}
-
-
-	/**
-	 * Return the underlying task.
-	 */
-	public Runnable getRunnable() {
-		return this.runnable;
-	}
-
-
-	@Override
-	public String toString() {
-		return this.runnable.toString();
+	public FixedDelayTask(Runnable runnable, long interval, long initialDelay) {
+		super(runnable, interval, initialDelay);
 	}
 
 }

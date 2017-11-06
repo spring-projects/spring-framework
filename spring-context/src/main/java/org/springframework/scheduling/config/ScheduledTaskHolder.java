@@ -16,42 +16,21 @@
 
 package org.springframework.scheduling.config;
 
-import org.springframework.util.Assert;
+import java.util.Set;
 
 /**
- * Holder class defining a {@code Runnable} to be executed as a task, typically at a
- * scheduled time or interval. See subclass hierarchy for various scheduling approaches.
+ * Common interface for exposing locally scheduled tasks.
  *
- * @author Chris Beams
  * @author Juergen Hoeller
- * @since 3.2
+ * @since 5.0.2
+ * @see ScheduledTaskRegistrar
+ * @see org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor
  */
-public class Task {
-
-	private final Runnable runnable;
-
+public interface ScheduledTaskHolder {
 
 	/**
-	 * Create a new {@code Task}.
-	 * @param runnable the underlying task to execute
+	 * Return an overview of the tasks that have been scheduled by this instance.
 	 */
-	public Task(Runnable runnable) {
-		Assert.notNull(runnable, "Runnable must not be null");
-		this.runnable = runnable;
-	}
-
-
-	/**
-	 * Return the underlying task.
-	 */
-	public Runnable getRunnable() {
-		return this.runnable;
-	}
-
-
-	@Override
-	public String toString() {
-		return this.runnable.toString();
-	}
+	Set<ScheduledTask> getScheduledTasks();
 
 }
