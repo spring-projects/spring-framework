@@ -220,7 +220,9 @@ public abstract class BodyInserters {
 
 	/**
 	 * Return a {@code FormInserter} that writes the given {@code MultiValueMap}
-	 * as multipart data. Note that the returned inserter allows for additional entries to be added
+	 * as multipart data. The {@code multipartData} parameter can conveniently be built using the
+	 * {@link org.springframework.http.client.MultipartBodyBuilder MultipartBodyBuilder}.
+	 * Note that the returned inserter allows for additional entries to be added
 	 * via {@link FormInserter#with(String, Object)}.
 	 *
 	 * <p><strong>Note:</strong> you can also use the {@code syncBody(Object)}
@@ -243,8 +245,11 @@ public abstract class BodyInserters {
 	}
 
 	/**
-	 * Return a {@code FormInserter} that writes the key-value pair  as multipart data. Note that
-	 * the returned inserter allows for additional entries to be added via
+	 * Return a {@code FormInserter} that writes the key-value pair  as multipart data. The
+	 * {@code multipartData} parameter can conveniently be built using the
+	 * {@link org.springframework.http.client.MultipartBodyBuilder MultipartBodyBuilder}.
+	 * Note that the returned inserter allows for additional entries to be added
+	 * via {@link FormInserter#with(String, Object)}.
 	 * {@link FormInserter#with(String, Object)}.
 	 * @param key the key to add to the form
 	 * @param value the value to add to the form

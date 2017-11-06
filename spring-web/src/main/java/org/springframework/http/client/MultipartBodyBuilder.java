@@ -33,9 +33,7 @@ import org.springframework.util.MultiValueMap;
  * <pre class="code">
  *
  * MultipartBodyBuilder builder = new MultipartBodyBuilder();
- * MultiValueMap&lt;String, String&gt; form = new LinkedMultiValueMap&lt;&gt;();
- * form.add("form field", "form value");
- * builder.part("form", form).header("Foo", "Bar");
+ * builder.part("form field", "form value");
  *
  * Resource image = new ClassPathResource("image.jpg");
  * builder.part("image", image).header("Baz", "Qux");
