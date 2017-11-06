@@ -268,11 +268,12 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 					logger.trace("From client: " + headerAccessor.getShortLogMessage(message.getPayload()));
 				}
 
-				boolean isConnect = StompCommand.CONNECT.equals(headerAccessor.getCommand());
+				StompCommand command = headerAccessor.getCommand();
+				boolean isConnect = StompCommand.CONNECT.equals(command);
 				if (isConnect) {
 					this.stats.incrementConnectCount();
 				}
-				else if (StompCommand.DISCONNECT.equals(headerAccessor.getCommand())) {
+				else if (StompCommand.DISCONNECT.equals(command)) {
 					this.stats.incrementDisconnectCount();
 				}
 
@@ -292,10 +293,10 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 							if (isConnect) {
 								publishEvent(this.eventPublisher, new SessionConnectEvent(this, message, user));
 							}
-							else if (StompCommand.SUBSCRIBE.equals(headerAccessor.getCommand())) {
+							else if (StompCommand.SUBSCRIBE.equals(command)) {
 								publishEvent(this.eventPublisher, new SessionSubscribeEvent(this, message, user));
 							}
-							else if (StompCommand.UNSUBSCRIBE.equals(headerAccessor.getCommand())) {
+							else if (StompCommand.UNSUBSCRIBE.equals(command)) {
 								publishEvent(this.eventPublisher, new SessionUnsubscribeEvent(this, message, user));
 							}
 						}
