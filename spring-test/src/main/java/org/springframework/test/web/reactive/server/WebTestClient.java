@@ -33,6 +33,7 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.util.MultiValueMap;
@@ -216,7 +217,8 @@ public interface WebTestClient {
 	}
 
 	/**
-	 * This server setup option allows you to connect to a running server.
+	 * This server setup option allows you to connect to a running server via
+	 * Reactor Netty.
 	 * <p><pre class="code">
 	 * WebTestClient client = WebTestClient.bindToServer()
 	 *         .baseUrl("http://localhost:8080")
@@ -226,6 +228,20 @@ public interface WebTestClient {
 	 */
 	static Builder bindToServer() {
 		return new DefaultWebTestClientBuilder();
+	}
+
+	/**
+	 * A variant of {@link #bindToServer()} with a pre-configured connector.
+	 * <p><pre class="code">
+	 * WebTestClient client = WebTestClient.bindToServer()
+	 *         .baseUrl("http://localhost:8080")
+	 *         .build();
+	 * </pre>
+	 * @return chained API to customize client config
+	 * @since 5.0.2
+	 */
+	static Builder bindToServer(ClientHttpConnector connector) {
+		return new DefaultWebTestClientBuilder(connector);
 	}
 
 

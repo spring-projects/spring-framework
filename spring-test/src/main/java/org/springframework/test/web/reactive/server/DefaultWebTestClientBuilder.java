@@ -52,20 +52,28 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	private Duration responseTimeout;
 
 
+	/** Connect to server via Reactor Netty */
 	DefaultWebTestClientBuilder() {
-		this(null, null, new ReactorClientHttpConnector(), null);
+		this(new ReactorClientHttpConnector());
 	}
 
+	/** Connect to server through the given connector */
+	DefaultWebTestClientBuilder(ClientHttpConnector connector) {
+		this(null, null, connector, null);
+	}
+
+	/** Connect to given mock server with mock request and response */
 	DefaultWebTestClientBuilder(WebHttpHandlerBuilder httpHandlerBuilder) {
 		this(null, httpHandlerBuilder, null, null);
 	}
 
+	/** Copy constructor */
 	DefaultWebTestClientBuilder(DefaultWebTestClientBuilder other) {
 		this(other.webClientBuilder.clone(), other.httpHandlerBuilder, other.connector,
 				other.responseTimeout);
 	}
 
-	DefaultWebTestClientBuilder(@Nullable WebClient.Builder webClientBuilder,
+	private DefaultWebTestClientBuilder(@Nullable WebClient.Builder webClientBuilder,
 			@Nullable WebHttpHandlerBuilder httpHandlerBuilder, @Nullable ClientHttpConnector connector,
 			@Nullable Duration responseTimeout) {
 
