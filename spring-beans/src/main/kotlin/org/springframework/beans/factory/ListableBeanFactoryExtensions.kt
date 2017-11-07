@@ -31,7 +31,7 @@ inline fun <reified T : Any> ListableBeanFactory.getBeanNamesForType(includeNonS
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Any> ListableBeanFactory.getBeansOfType(includeNonSingletons: Boolean = true, allowEagerInit: Boolean = true): Map<String, Any> =
+inline fun <reified T : Any> ListableBeanFactory.getBeansOfType(includeNonSingletons: Boolean = true, allowEagerInit: Boolean = true): Map<String, T> =
 				getBeansOfType(T::class.java, includeNonSingletons, allowEagerInit)
 
 /**
@@ -49,7 +49,7 @@ inline fun <reified T : Annotation> ListableBeanFactory.getBeanNamesForAnnotatio
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Annotation> ListableBeanFactory.getBeansWithAnnotation(): MutableMap<String, Any> =
+inline fun <reified T : Annotation> ListableBeanFactory.getBeansWithAnnotation(): Map<String, Any> =
 		getBeansWithAnnotation(T::class.java)
 
 /**
