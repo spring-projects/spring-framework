@@ -159,11 +159,12 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * @see javax.persistence.spi.PersistenceProvider
 	 * @see javax.persistence.Persistence
 	 */
-	public void setPersistenceProvider(PersistenceProvider persistenceProvider) {
+	public void setPersistenceProvider(@Nullable PersistenceProvider persistenceProvider) {
 		this.persistenceProvider = persistenceProvider;
 	}
 
 	@Override
+	@Nullable
 	public PersistenceProvider getPersistenceProvider() {
 		return this.persistenceProvider;
 	}
@@ -175,11 +176,12 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * ambiguous EntityManager configurations are found.
 	 * @see javax.persistence.Persistence#createEntityManagerFactory(String)
 	 */
-	public void setPersistenceUnitName(String persistenceUnitName) {
+	public void setPersistenceUnitName(@Nullable String persistenceUnitName) {
 		this.persistenceUnitName = persistenceUnitName;
 	}
 
 	@Override
+	@Nullable
 	public String getPersistenceUnitName() {
 		return this.persistenceUnitName;
 	}
@@ -240,11 +242,12 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * @see JpaVendorAdapter#getEntityManagerInterface()
 	 * @see EntityManagerFactoryInfo#getEntityManagerInterface()
 	 */
-	public void setEntityManagerInterface(Class<? extends EntityManager> emInterface) {
+	public void setEntityManagerInterface(@Nullable Class<? extends EntityManager> emInterface) {
 		this.entityManagerInterface = emInterface;
 	}
 
 	@Override
+	@Nullable
 	public Class<? extends EntityManager> getEntityManagerInterface() {
 		return this.entityManagerInterface;
 	}
@@ -256,11 +259,12 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * accessors that intend to use JpaDialect functionality.
 	 * @see EntityManagerFactoryInfo#getJpaDialect()
 	 */
-	public void setJpaDialect(JpaDialect jpaDialect) {
+	public void setJpaDialect(@Nullable JpaDialect jpaDialect) {
 		this.jpaDialect = jpaDialect;
 	}
 
 	@Override
+	@Nullable
 	public JpaDialect getJpaDialect() {
 		return this.jpaDialect;
 	}
@@ -271,7 +275,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * such as persistence provider class and JpaDialect, unless locally
 	 * overridden in this FactoryBean.
 	 */
-	public void setJpaVendorAdapter(JpaVendorAdapter jpaVendorAdapter) {
+	public void setJpaVendorAdapter(@Nullable JpaVendorAdapter jpaVendorAdapter) {
 		this.jpaVendorAdapter = jpaVendorAdapter;
 	}
 
@@ -296,7 +300,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * in init methods of related beans, even for metadata introspection purposes.
 	 * @since 4.3
 	 */
-	public void setBootstrapExecutor(AsyncTaskExecutor bootstrapExecutor) {
+	public void setBootstrapExecutor(@Nullable AsyncTaskExecutor bootstrapExecutor) {
 		this.bootstrapExecutor = bootstrapExecutor;
 	}
 
@@ -491,6 +495,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * @see EntityManagerFactoryUtils#convertJpaAccessExceptionIfPossible
 	 */
 	@Override
+	@Nullable
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		return (this.jpaDialect != null ? this.jpaDialect.translateExceptionIfPossible(ex) :
 				EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex));
@@ -518,11 +523,13 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	}
 
 	@Override
+	@Nullable
 	public PersistenceUnitInfo getPersistenceUnitInfo() {
 		return null;
 	}
 
 	@Override
+	@Nullable
 	public DataSource getDataSource() {
 		return null;
 	}
@@ -532,6 +539,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * Return the singleton EntityManagerFactory.
 	 */
 	@Override
+	@Nullable
 	public EntityManagerFactory getObject() {
 		return this.entityManagerFactory;
 	}

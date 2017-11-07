@@ -39,6 +39,7 @@ import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
@@ -118,8 +119,7 @@ public class BodyInsertersTests {
 		Mono<Void> result = inserter.insert(response, this.context);
 		StepVerifier.create(result).expectComplete().verify();
 
-		ByteBuffer byteBuffer = ByteBuffer.wrap(body.getBytes(UTF_8));
-		DataBuffer buffer = new DefaultDataBufferFactory().wrap(byteBuffer);
+		DataBuffer buffer = new DefaultDataBufferFactory().wrap(body.getBytes(UTF_8));
 		StepVerifier.create(response.getBody())
 				.expectNext(buffer)
 				.expectComplete()
@@ -187,6 +187,7 @@ public class BodyInsertersTests {
 				.consumeNextWith(dataBuffer -> {
 					byte[] resultBytes = new byte[dataBuffer.readableByteCount()];
 					dataBuffer.read(resultBytes);
+					DataBufferUtils.release(dataBuffer);
 					assertArrayEquals(expectedBytes, resultBytes);
 				})
 				.expectComplete()
@@ -229,6 +230,7 @@ public class BodyInsertersTests {
 				.consumeNextWith(dataBuffer -> {
 					byte[] resultBytes = new byte[dataBuffer.readableByteCount()];
 					dataBuffer.read(resultBytes);
+					DataBufferUtils.release(dataBuffer);
 					assertArrayEquals(expectedBytes, resultBytes);
 				})
 				.expectComplete()
@@ -248,18 +250,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void ofServerSentEventClass() throws Exception {
-		Flux<String> body = Flux.just("foo");
-		BodyInserter<Flux<String>, ServerHttpResponse> inserter =
-				BodyInserters.fromServerSentEvents(body, String.class);
-
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = inserter.insert(response, this.context);
-		StepVerifier.create(result).expectNextCount(0).expectComplete().verify();
-	}
-
-	@Test
-	public void ofFormData() throws Exception {
+	public void fromFormDataMap() throws Exception {
 		MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
 		body.set("name 1", "value 1");
 		body.add("name 2", "value 2+1");
@@ -277,6 +268,32 @@ public class BodyInsertersTests {
 				.consumeNextWith(dataBuffer -> {
 					byte[] resultBytes = new byte[dataBuffer.readableByteCount()];
 					dataBuffer.read(resultBytes);
+					DataBufferUtils.release(dataBuffer);
+					assertArrayEquals("name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3".getBytes(StandardCharsets.UTF_8),
+							resultBytes);
+				})
+				.expectComplete()
+				.verify();
+
+	}
+
+	@Test
+	public void fromFormDataWith() throws Exception {
+		BodyInserter<MultiValueMap<String, String>, ClientHttpRequest>
+				inserter = BodyInserters.fromFormData("name 1", "value 1")
+				.with("name 2", "value 2+1")
+				.with("name 2", "value 2+2")
+				.with("name 3", null);
+
+		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("http://example.com"));
+		Mono<Void> result = inserter.insert(request, this.context);
+		StepVerifier.create(result).expectComplete().verify();
+
+		StepVerifier.create(request.getBody())
+				.consumeNextWith(dataBuffer -> {
+					byte[] resultBytes = new byte[dataBuffer.readableByteCount()];
+					dataBuffer.read(resultBytes);
+					DataBufferUtils.release(dataBuffer);
 					assertArrayEquals("name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3".getBytes(StandardCharsets.UTF_8),
 							resultBytes);
 				})

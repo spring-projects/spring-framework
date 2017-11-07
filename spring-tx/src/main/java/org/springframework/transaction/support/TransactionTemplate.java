@@ -105,7 +105,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 	/**
 	 * Set the transaction management strategy to be used.
 	 */
-	public void setTransactionManager(PlatformTransactionManager transactionManager) {
+	public void setTransactionManager(@Nullable PlatformTransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
 	}
 
@@ -126,6 +126,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 
 
 	@Override
+	@Nullable
 	public <T> T execute(TransactionCallback<T> action) throws TransactionException {
 		Assert.state(this.transactionManager != null, "No PlatformTransactionManager set");
 
@@ -171,13 +172,9 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 			ex2.initApplicationException(ex);
 			throw ex2;
 		}
-		catch (RuntimeException ex2) {
+		catch (RuntimeException | Error ex2) {
 			logger.error("Application exception overridden by rollback exception", ex);
 			throw ex2;
-		}
-		catch (Error err) {
-			logger.error("Application exception overridden by rollback error", ex);
-			throw err;
 		}
 	}
 

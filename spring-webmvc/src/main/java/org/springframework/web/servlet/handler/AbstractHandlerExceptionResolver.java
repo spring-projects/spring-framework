@@ -128,6 +128,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * to the {@link #doResolveException} template method.
 	 */
 	@Override
+	@Nullable
 	public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response,
 			@Nullable Object handler, Exception ex) {
 

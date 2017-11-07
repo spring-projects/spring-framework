@@ -31,13 +31,14 @@ import org.springframework.web.servlet.LocaleResolver;
  */
 public abstract class AbstractLocaleResolver implements LocaleResolver {
 
+	@Nullable
 	private Locale defaultLocale;
 
 
 	/**
 	 * Set a default Locale that this resolver will return if no other locale found.
 	 */
-	public void setDefaultLocale(Locale defaultLocale) {
+	public void setDefaultLocale(@Nullable Locale defaultLocale) {
 		this.defaultLocale = defaultLocale;
 	}
 

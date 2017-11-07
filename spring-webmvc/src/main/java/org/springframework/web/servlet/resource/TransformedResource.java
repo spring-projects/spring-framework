@@ -53,6 +53,7 @@ public class TransformedResource extends ByteArrayResource {
 
 
 	@Override
+	@Nullable
 	public String getFilename() {
 		return this.filename;
 	}

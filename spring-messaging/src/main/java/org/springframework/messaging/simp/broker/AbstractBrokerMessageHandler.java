@@ -129,7 +129,7 @@ public abstract class AbstractBrokerMessageHandler
 	}
 
 	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
+	public void setApplicationEventPublisher(@Nullable ApplicationEventPublisher publisher) {
 		this.eventPublisher = publisher;
 	}
 
@@ -283,7 +283,9 @@ public abstract class AbstractBrokerMessageHandler
 	private class UnsentDisconnectChannelInterceptor extends ChannelInterceptorAdapter {
 
 		@Override
-		public void afterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, Exception ex) {
+		public void afterSendCompletion(
+				Message<?> message, MessageChannel channel, boolean sent, @Nullable Exception ex) {
+
 			if (!sent) {
 				SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
 				if (SimpMessageType.DISCONNECT.equals(messageType)) {

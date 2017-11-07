@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.util.CookieGenerator;
@@ -87,11 +88,14 @@ public class CookieThemeResolver extends CookieGenerator implements ThemeResolve
 		}
 
 		// Retrieve cookie value from request.
-		Cookie cookie = WebUtils.getCookie(request, getCookieName());
-		if (cookie != null) {
-			String value = cookie.getValue();
-			if (StringUtils.hasText(value)) {
-				themeName = value;
+		String cookieName = getCookieName();
+		if (cookieName != null) {
+			Cookie cookie = WebUtils.getCookie(request, cookieName);
+			if (cookie != null) {
+				String value = cookie.getValue();
+				if (StringUtils.hasText(value)) {
+					themeName = value;
+				}
 			}
 		}
 
@@ -104,7 +108,11 @@ public class CookieThemeResolver extends CookieGenerator implements ThemeResolve
 	}
 
 	@Override
-	public void setThemeName(HttpServletRequest request, HttpServletResponse response, @Nullable String themeName) {
+	public void setThemeName(
+			HttpServletRequest request, @Nullable HttpServletResponse response, @Nullable String themeName) {
+
+		Assert.notNull(response, "HttpServletResponse is required for CookieThemeResolver");
+
 		if (StringUtils.hasText(themeName)) {
 			// Set request attribute and add cookie.
 			request.setAttribute(THEME_REQUEST_ATTRIBUTE_NAME, themeName);

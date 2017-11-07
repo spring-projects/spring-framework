@@ -120,6 +120,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 
 
 	@Override
+	@Nullable
 	public UserDestinationResult resolveDestination(Message<?> message) {
 		ParseResult parseResult = parse(message);
 		if (parseResult == null) {
@@ -160,6 +161,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		return null;
 	}
 
+	@Nullable
 	private ParseResult parseSubscriptionMessage(Message<?> message, String sourceDestination) {
 		MessageHeaders headers = message.getHeaders();
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);

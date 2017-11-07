@@ -110,6 +110,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @author Stephane Nicoll
+ * @author Sebastien Deleuze
  * @since 2.5
  * @see #setAutowiredAnnotationType
  * @see Autowired
@@ -234,6 +235,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	@Override
+	@Nullable
 	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, final String beanName)
 			throws BeanCreationException {
 
@@ -281,7 +283,11 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					List<Constructor<?>> candidates = new ArrayList<Constructor<?>>(rawCandidates.length);
 					Constructor<?> requiredConstructor = null;
 					Constructor<?> defaultConstructor = null;
+					Constructor<?> primaryConstructor = BeanUtils.findPrimaryConstructor(beanClass);
 					for (Constructor<?> candidate : rawCandidates) {
+						if (primaryConstructor != null && candidate.isSynthetic()) {
+							continue;
+						}
 						AnnotationAttributes ann = findAutowiredAnnotation(candidate);
 						if (ann == null) {
 							Class<?> userClass = ClassUtils.getUserClass(beanClass);
@@ -336,6 +342,11 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					}
 					else if (rawCandidates.length == 1 && rawCandidates[0].getParameterCount() > 0) {
 						candidateConstructors = new Constructor<?>[] {rawCandidates[0]};
+					}
+					else if (primaryConstructor != null) {
+						candidateConstructors = (defaultConstructor != null ?
+								new Constructor<?>[] {primaryConstructor, defaultConstructor} :
+								new Constructor<?>[] {primaryConstructor});
 					}
 					else {
 						candidateConstructors = new Constructor<?>[0];
@@ -724,7 +735,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		@Override
 		public Object resolveShortcut(BeanFactory beanFactory) {
-			return resolveCandidate(this.shortcut, this.requiredType, beanFactory);
+			return beanFactory.getBean(this.shortcut, this.requiredType);
 		}
 	}
 

@@ -66,6 +66,7 @@ public class EmbeddedDatabaseFactoryBean extends EmbeddedDatabaseFactory
 
 
 	@Override
+	@Nullable
 	public DataSource getObject() {
 		return getDataSource();
 	}

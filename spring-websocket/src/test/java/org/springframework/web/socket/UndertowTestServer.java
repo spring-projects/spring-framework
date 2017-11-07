@@ -31,6 +31,7 @@ import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.InstanceFactory;
 import io.undertow.servlet.api.InstanceHandle;
+import io.undertow.servlet.api.ServletInfo;
 import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
 import org.xnio.OptionMap;
 import org.xnio.Xnio;
@@ -76,11 +77,13 @@ public class UndertowTestServer implements WebSocketTestServer {
 			throw new IllegalStateException(ex);
 		}
 
+		ServletInfo servletInfo = servlet("DispatcherServlet", DispatcherServlet.class, servletFactory)
+				.addMapping("/").setAsyncSupported(true);
 		DeploymentInfo servletBuilder = deployment()
 				.setClassLoader(UndertowTestServer.class.getClassLoader())
 				.setDeploymentName("undertow-websocket-test")
 				.setContextPath("/")
-				.addServlet(servlet("DispatcherServlet", DispatcherServlet.class, servletFactory).addMapping("/").setAsyncSupported(true))
+				.addServlet(servletInfo)
 				.addServletContextAttribute(WebSocketDeploymentInfo.ATTRIBUTE_NAME, info);
 		for (final Filter filter : filters) {
 			String filterName = filter.getClass().getName();

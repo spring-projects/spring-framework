@@ -16,8 +16,8 @@
 
 package org.springframework.web.util.pattern;
 
-import org.springframework.http.server.reactive.PathContainer.Element;
-import org.springframework.http.server.reactive.PathContainer.Segment;
+import org.springframework.http.server.PathContainer.Element;
+import org.springframework.http.server.PathContainer.PathSegment;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
@@ -65,16 +65,16 @@ class SingleCharWildcardedPathElement extends PathElement {
 		}
 
 		Element element = matchingContext.pathElements.get(pathIndex);
-		if (!(element instanceof Segment)) {
+		if (!(element instanceof PathSegment)) {
 			return false;
 		}
-		String value = ((Segment)element).valueDecoded();
+		String value = ((PathSegment)element).valueToMatch();
 		if (value.length() != len) {
 			// Not enough data to match this path element
 			return false;
 		}
 		
-		char[] data = ((Segment)element).valueDecodedChars();
+		char[] data = ((PathSegment)element).valueToMatchAsChars();
 		if (this.caseSensitive) {
 			for (int i = 0; i < len; i++) {
 				char ch = this.text[i];
@@ -104,17 +104,14 @@ class SingleCharWildcardedPathElement extends PathElement {
 					return true;
 				}
 				else {
-					return (matchingContext.isAllowOptionalTrailingSlash() &&
+					return (matchingContext.isMatchOptionalTrailingSeparator() &&
 							(pathIndex + 1) == matchingContext.pathLength &&
 							matchingContext.isSeparator(pathIndex));
 				}
 			}
 		}
 		else {
-			if (matchingContext.isMatchStartMatching && pathIndex == matchingContext.pathLength) {
-				return true;  // no more data but everything matched so far
-			}
-			return this.next.matches(pathIndex, matchingContext);
+			return (this.next != null && this.next.matches(pathIndex, matchingContext));
 		}
 	}
 

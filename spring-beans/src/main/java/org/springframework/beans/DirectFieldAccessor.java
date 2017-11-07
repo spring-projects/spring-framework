@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -116,11 +117,13 @@ public class DirectFieldAccessor extends AbstractNestablePropertyAccessor {
 		}
 
 		@Override
+		@Nullable
 		public TypeDescriptor nested(int level) {
 			return TypeDescriptor.nested(this.field, level);
 		}
 
 		@Override
+		@Nullable
 		public Object getValue() throws Exception {
 			try {
 				ReflectionUtils.makeAccessible(this.field);
@@ -134,7 +137,7 @@ public class DirectFieldAccessor extends AbstractNestablePropertyAccessor {
 		}
 
 		@Override
-		public void setValue(Object value) throws Exception {
+		public void setValue(@Nullable Object value) throws Exception {
 			try {
 				ReflectionUtils.makeAccessible(this.field);
 				this.field.set(getWrappedInstance(), value);

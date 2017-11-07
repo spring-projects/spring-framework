@@ -123,7 +123,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 * @see org.springframework.jms.connection.JmsTransactionManager
 	 */
-	public void setTransactionManager(PlatformTransactionManager transactionManager) {
+	public void setTransactionManager(@Nullable PlatformTransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
 	}
 
@@ -469,11 +469,13 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	private class MessageListenerContainerResourceFactory implements ConnectionFactoryUtils.ResourceFactory {
 
 		@Override
+		@Nullable
 		public Connection getConnection(JmsResourceHolder holder) {
 			return AbstractPollingMessageListenerContainer.this.getConnection(holder);
 		}
 
 		@Override
+		@Nullable
 		public Session getSession(JmsResourceHolder holder) {
 			return AbstractPollingMessageListenerContainer.this.getSession(holder);
 		}

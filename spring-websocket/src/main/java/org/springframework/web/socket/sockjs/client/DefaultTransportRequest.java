@@ -117,6 +117,7 @@ class DefaultTransportRequest implements TransportRequest {
 	}
 
 	@Override
+	@Nullable
 	public Principal getUser() {
 		return this.user;
 	}
@@ -225,9 +226,7 @@ class DefaultTransportRequest implements TransportRequest {
 					fallbackRequest.connect(this.handler, this.future);
 				}
 				else {
-					if (logger.isErrorEnabled()) {
-						logger.error("No more fallback transports after " + DefaultTransportRequest.this, ex);
-					}
+					logger.error("No more fallback transports after " + DefaultTransportRequest.this, ex);
 					if (ex != null) {
 						this.future.setException(ex);
 					}

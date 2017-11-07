@@ -187,6 +187,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	 * {@link #invokeInContext}.
 	 */
 	@Override
+	@Nullable
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		Context ctx = (this.exposeAccessContext ? getJndiTemplate().getContext() : null);
 		try {

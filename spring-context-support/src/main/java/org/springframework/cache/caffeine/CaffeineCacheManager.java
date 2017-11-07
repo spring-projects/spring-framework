@@ -176,6 +176,7 @@ public class CaffeineCacheManager implements CacheManager {
 	}
 
 	@Override
+	@Nullable
 	public Cache getCache(String name) {
 		Cache cache = this.cacheMap.get(name);
 		if (cache == null && this.dynamic) {

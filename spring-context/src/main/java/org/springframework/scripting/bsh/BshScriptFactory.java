@@ -122,6 +122,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	 * @see BshScriptUtils#createBshObject(String, Class[], ClassLoader)
 	 */
 	@Override
+	@Nullable
 	public Object getScriptedObject(ScriptSource scriptSource, @Nullable Class<?>... actualInterfaces)
 			throws IOException, ScriptCompilationException {
 
@@ -180,6 +181,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getScriptedObjectType(ScriptSource scriptSource)
 			throws IOException, ScriptCompilationException {
 

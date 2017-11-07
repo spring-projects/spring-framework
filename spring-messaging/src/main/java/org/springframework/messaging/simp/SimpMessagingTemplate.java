@@ -54,6 +54,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 	private volatile long sendTimeout = -1;
 
+	@Nullable
 	private MessageHeaderInitializer headerInitializer;
 
 
@@ -111,7 +112,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	 * messages created through the {@code SimpMessagingTemplate}.
 	 * <p>By default, this property is not set.
 	 */
-	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+	public void setHeaderInitializer(@Nullable MessageHeaderInitializer headerInitializer) {
 		this.headerInitializer = headerInitializer;
 	}
 
@@ -230,7 +231,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 	/**
 	 * Creates a new map and puts the given headers under the key
-	 * {@link org.springframework.messaging.support.NativeMessageHeaderAccessor#NATIVE_HEADERS NATIVE_HEADERS NATIVE_HEADERS NATIVE_HEADERS}.
+	 * {@link NativeMessageHeaderAccessor#NATIVE_HEADERS NATIVE_HEADERS NATIVE_HEADERS NATIVE_HEADERS}.
 	 * effectively treats the input header map as headers to be sent out to the
 	 * destination.
 	 * <p>However if the given headers already contain the key

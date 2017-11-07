@@ -48,6 +48,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 
 
 	@Override
+	@Nullable
 	public Resource resolveResource(
 			@Nullable HttpServletRequest request, String requestPath, List<? extends Resource> locations) {
 
@@ -65,6 +66,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 	}
 
 	@Override
+	@Nullable
 	public String resolveUrlPath(String resourcePath, List<? extends Resource> locations) {
 		ResourceResolver resolver = getNext();
 		if (resolver == null) {
@@ -79,6 +81,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 		}
 	}
 
+	@Nullable
 	private ResourceResolver getNext() {
 		Assert.state(this.index <= this.resolvers.size(),
 				"Current index exceeds the number of configured ResourceResolvers");

@@ -405,6 +405,7 @@ public abstract class CollectionUtils {
 		}
 
 		@Override
+		@Nullable
 		public V getFirst(K key) {
 			List<V> values = this.map.get(key);
 			return (values != null ? values.get(0) : null);
@@ -430,7 +431,7 @@ public abstract class CollectionUtils {
 		}
 
 		@Override
-		public void set(K key, V value) {
+		public void set(K key, @Nullable V value) {
 			List<V> values = new LinkedList<>();
 			values.add(value);
 			this.map.put(key, values);

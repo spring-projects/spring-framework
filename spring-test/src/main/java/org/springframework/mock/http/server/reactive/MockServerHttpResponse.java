@@ -76,6 +76,11 @@ public class MockServerHttpResponse extends AbstractServerHttpResponse {
 		this.writeHandler = writeHandler;
 	}
 
+	@Override
+	public <T> T getNativeResponse() {
+		throw new IllegalStateException("This is a mock. No running server, no native response.");
+	}
+
 
 	@Override
 	protected void applyStatusCode() {

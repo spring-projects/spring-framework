@@ -70,7 +70,7 @@ public class AcceptHeaderLocaleContextResolver implements LocaleContextResolver 
 	 * have an "Accept-Language" header (not set by default).
 	 * @param defaultLocale the default locale to use
 	 */
-	public void setDefaultLocale(Locale defaultLocale) {
+	public void setDefaultLocale(@Nullable Locale defaultLocale) {
 		this.defaultLocale = defaultLocale;
 	}
 
@@ -97,7 +97,8 @@ public class AcceptHeaderLocaleContextResolver implements LocaleContextResolver 
 		if (supportedLocale != null) {
 			return new SimpleLocaleContext(supportedLocale);
 		}
-		return (defaultLocale != null ? new SimpleLocaleContext(defaultLocale) : new SimpleLocaleContext(requestLocale));
+		return (this.defaultLocale != null ? new SimpleLocaleContext(this.defaultLocale) :
+				new SimpleLocaleContext(requestLocale));
 	}
 
 	private boolean isSupportedLocale(@Nullable Locale locale) {

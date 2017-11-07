@@ -23,15 +23,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.util.MultiValueMap;
@@ -63,49 +65,49 @@ public interface WebClient {
 	 * Prepare an HTTP GET request.
 	 * @return a spec for specifying the target URL
 	 */
-	UriSpec<RequestHeadersSpec<?>> get();
+	RequestHeadersUriSpec<?> get();
 
 	/**
 	 * Prepare an HTTP HEAD request.
 	 * @return a spec for specifying the target URL
 	 */
-	UriSpec<RequestHeadersSpec<?>> head();
+	RequestHeadersUriSpec<?> head();
 
 	/**
 	 * Prepare an HTTP POST request.
 	 * @return a spec for specifying the target URL
 	 */
-	UriSpec<RequestBodySpec> post();
+	RequestBodyUriSpec post();
 
 	/**
 	 * Prepare an HTTP PUT request.
 	 * @return a spec for specifying the target URL
 	 */
-	UriSpec<RequestBodySpec> put();
+	RequestBodyUriSpec put();
 
 	/**
 	 * Prepare an HTTP PATCH request.
 	 * @return a spec for specifying the target URL
 	 */
-	UriSpec<RequestBodySpec> patch();
+	RequestBodyUriSpec patch();
 
 	/**
 	 * Prepare an HTTP DELETE request.
 	 * @return a spec for specifying the target URL
 	 */
-	UriSpec<RequestHeadersSpec<?>> delete();
+	RequestHeadersUriSpec<?> delete();
 
 	/**
 	 * Prepare an HTTP OPTIONS request.
 	 * @return a spec for specifying the target URL
 	 */
-	UriSpec<RequestHeadersSpec<?>> options();
+	RequestHeadersUriSpec<?> options();
 
 	/**
 	 * Prepare a request for the specified {@code HttpMethod}.
 	 * @return a spec for specifying the target URL
 	 */
-	UriSpec<RequestBodySpec> method(HttpMethod method);
+	RequestBodyUriSpec method(HttpMethod method);
 
 
 	/**
@@ -301,14 +303,20 @@ public interface WebClient {
 		Builder exchangeFunction(ExchangeFunction exchangeFunction);
 
 		/**
-		 * Builder the {@link WebClient} instance.
-		 */
-		WebClient build();
-
-		/**
 		 * Clone this {@code WebClient.Builder}
 		 */
 		Builder clone();
+
+		/**
+		 * Shortcut for pre-packaged customizations to WebTest builder.
+		 * @param builderConsumer the consumer to apply
+		 */
+		Builder apply(Consumer<Builder> builderConsumer);
+
+		/**
+		 * Builder the {@link WebClient} instance.
+		 */
+		WebClient build();
 
 	}
 
@@ -438,48 +446,46 @@ public interface WebClient {
 		S attributes(Consumer<Map<String, Object>> attributesConsumer);
 
 		/**
-		 * Exchange the request for a {@code ClientResponse} with full access
-		 * to the response status and headers before extracting the body.
-		 * <p>Use {@link Mono#flatMap(Function)} or
-		 * {@link Mono#flatMapMany(Function)} to compose further on the response:
-		 * <pre>
-		 * Mono&lt;Pojo&gt; mono = client.get().uri("/")
+		 * Perform the HTTP request and retrieve the response body:
+		 * <p><pre>
+		 * Mono&lt;Person&gt; bodyMono = client.get()
+		 *     .uri("/persons/1")
+		 *     .accept(MediaType.APPLICATION_JSON)
+		 *     .retrieve()
+		 *     .bodyToMono(Person.class);
+		 * </pre>
+		 * <p>This method is a shortcut to using {@link #exchange()} and
+		 * decoding the response body through {@link ClientResponse}.
+		 * @return {@code ResponseSpec} to specify how to decode the body
+		 * @see #exchange()
+		 */
+		ResponseSpec retrieve();
+
+		/**
+		 * Perform the HTTP request and return a {@link ClientResponse} with the
+		 * response status and headers. You can then use methods of the response
+		 * to consume the body:
+		 * <p><pre>
+		 * Mono&lt;Person&gt; mono = client.get()
+		 *     .uri("/persons/1")
 		 *     .accept(MediaType.APPLICATION_JSON)
 		 *     .exchange()
-		 *     .flatMap(response -> response.bodyToMono(Pojo.class));
+		 *     .flatMap(response -> response.bodyToMono(Person.class));
 		 *
-		 * Flux&lt;Pojo&gt; flux = client.get().uri("/")
+		 * Flux&lt;Person&gt; flux = client.get()
+		 *     .uri("/persons")
 		 *     .accept(MediaType.APPLICATION_STREAM_JSON)
 		 *     .exchange()
-		 *     .flatMapMany(response -> response.bodyToFlux(Pojo.class));
+		 *     .flatMapMany(response -> response.bodyToFlux(Person.class));
 		 * </pre>
-		 * @return a {@code Mono} with the response
+		 * <p><strong>NOTE:</strong> You must always use of the body or entity
+		 * methods on {@link ClientResponse} to ensure resources are released and
+		 * avoid potential issues with HTTP connection pooling. If not interested
+		 * in the response body, use {@code "bodyToMono(Void.class)"} to complete.
+		 * @return a {@code Mono} for the response
 		 * @see #retrieve()
 		 */
 		Mono<ClientResponse> exchange();
-
-		/**
-		 * A variant of {@link #exchange()} that provides the shortest path to
-		 * retrieving the full response (i.e. status, headers, and body) where
-		 * instead of returning {@code Mono<ClientResponse>} it exposes shortcut
-		 * methods to extract the response body.
-		 * <p>Use of this method is simpler when you don't need to deal directly
-		 * with {@link ClientResponse}, e.g. to use a custom {@code BodyExtractor}
-		 * or to check the status and headers before extracting the response.
-		 * <pre>
-		 * Mono&lt;Pojo&gt; bodyMono = client.get().uri("/")
-		 *     .accept(MediaType.APPLICATION_JSON)
-		 *     .retrieve()
-		 *     .bodyToMono(Pojo.class);
-		 *
-		 * Mono&lt;ResponseEntity&lt;Pojo&gt;&gt; entityMono = client.get().uri("/")
-		 *     .accept(MediaType.APPLICATION_JSON)
-		 *     .retrieve()
-		 *     .bodyToEntity(Pojo.class);
-		 * </pre>
-		 * @return spec with options for extracting the response body
-		 */
-		ResponseSpec retrieve();
 	}
 
 
@@ -516,6 +522,19 @@ public interface WebClient {
 		 * {@linkplain org.springframework.web.reactive.function.BodyInserters#fromPublisher}
 		 * Publisher body inserter}.
 		 * @param publisher the {@code Publisher} to write to the request
+		 * @param typeReference the type reference of elements contained in the publisher
+		 * @param <T> the type of the elements contained in the publisher
+		 * @param <P> the type of the {@code Publisher}
+		 * @return this builder
+		 */
+		<T, P extends Publisher<T>> RequestHeadersSpec<?> body(P publisher, ParameterizedTypeReference<T> typeReference);
+
+		/**
+		 * Set the body of the request to the given asynchronous {@code Publisher}.
+		 * <p>This method is a convenient shortcut for {@link #body(BodyInserter)} with a
+		 * {@linkplain org.springframework.web.reactive.function.BodyInserters#fromPublisher}
+		 * Publisher body inserter}.
+		 * @param publisher the {@code Publisher} to write to the request
 		 * @param elementClass the class of elements contained in the publisher
 		 * @param <T> the type of the elements contained in the publisher
 		 * @param <P> the type of the {@code Publisher}
@@ -525,9 +544,17 @@ public interface WebClient {
 
 		/**
 		 * Set the body of the request to the given synchronous {@code Object}.
-		 * <p>This method is a convenient shortcut for {@link #body(BodyInserter)} with a
-		 * {@linkplain org.springframework.web.reactive.function.BodyInserters#fromObject
-		 * Object body inserter}.
+		 * <p>This method is a convenient shortcut for:
+		 * <pre class="code">
+		 * .body(BodyInserters.fromObject(object))
+		 * </pre>
+		 * <p>The body can be a
+		 * {@link org.springframework.util.MultiValueMap MultiValueMap} to create
+		 * a multipart request. The values in the {@code MultiValueMap} can be
+		 * any Object representing the body of the part, or an
+		 * {@link org.springframework.http.HttpEntity HttpEntity} representing a
+		 * part with body and headers. The {@code MultiValueMap} can be built
+		 * conveniently using
 		 * @param body the {@code Object} to write to the request
 		 * @return this builder
 		 */
@@ -538,45 +565,73 @@ public interface WebClient {
 	interface ResponseSpec {
 
 		/**
-		 * Extract the body to a {@code Mono}. If the response has status code 4xx or 5xx, the
-		 * {@code Mono} will contain a {@link WebClientException}.
+		 * Register a custom error function that gets invoked when the given {@link HttpStatus}
+		 * predicate applies. The exception returned from the function will be returned from
+		 * {@link #bodyToMono(Class)} and {@link #bodyToFlux(Class)}.
+		 * <p>By default, an error handler is register that throws a
+		 * {@link WebClientResponseException} when the response status code is 4xx or 5xx.
+		 * @param statusPredicate a predicate that indicates whether {@code exceptionFunction}
+		 * applies
+		 * @param exceptionFunction the function that returns the exception
+		 * @return this builder
+		 */
+		ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,
+				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction);
+
+		/**
+		 * Extract the body to a {@code Mono}. By default, if the response has status code 4xx or
+		 * 5xx, the {@code Mono} will contain a {@link WebClientException}. This can be overridden
+		 * with {@link #onStatus(Predicate, Function)}.
 		 * @param bodyType the expected response body type
 		 * @param <T> response body type
-		 * @return a mono containing the body, or a {@link WebClientException} if the status code is
-		 * 4xx or 5xx
+		 * @return a mono containing the body, or a {@link WebClientResponseException} if the
+		 * status code is 4xx or 5xx
 		 */
 		<T> Mono<T> bodyToMono(Class<T> bodyType);
 
 		/**
-		 * Extract the body to a {@code Flux}. If the response has status code 4xx or 5xx, the
-		 * {@code Flux} will contain a {@link WebClientException}.
+		 * Extract the body to a {@code Mono}. By default, if the response has status code 4xx or
+		 * 5xx, the {@code Mono} will contain a {@link WebClientException}. This can be overridden
+		 * with {@link #onStatus(Predicate, Function)}.
+		 * @param typeReference a type reference describing the expected response body type
+		 * @param <T> response body type
+		 * @return a mono containing the body, or a {@link WebClientResponseException} if the
+		 * status code is 4xx or 5xx
+		 */
+		<T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference);
+
+		/**
+		 * Extract the body to a {@code Flux}. By default, if the response has status code 4xx or
+		 * 5xx, the {@code Flux} will contain a {@link WebClientException}. This can be overridden
+         * with {@link #onStatus(Predicate, Function)}.
 		 * @param elementType the type of element in the response
 		 * @param <T> the type of elements in the response
-		 * @return a flux containing the body, or a {@link WebClientException} if the status code is
-		 * 4xx or 5xx
+		 * @return a flux containing the body, or a {@link WebClientResponseException} if the
+		 * status code is 4xx or 5xx
 		 */
 		<T> Flux<T> bodyToFlux(Class<T> elementType);
 
 		/**
-		 * Returns the response as a delayed {@code ResponseEntity}. Unlike
-		 * {@link #bodyToMono(Class)} and {@link #bodyToFlux(Class)}, this method does not check
-		 * for a 4xx or 5xx status code before extracting the body.
-		 * @param bodyType the expected response body type
-		 * @param <T> response body type
-		 * @return {@code Mono} with the {@code ResponseEntity}
+		 * Extract the body to a {@code Flux}. By default, if the response has status code 4xx or
+		 * 5xx, the {@code Flux} will contain a {@link WebClientException}. This can be overridden
+         * with {@link #onStatus(Predicate, Function)}.
+		 * @param typeReference a type reference describing the expected response body type
+		 * @param <T> the type of elements in the response
+		 * @return a flux containing the body, or a {@link WebClientResponseException} if the
+		 * status code is 4xx or 5xx
 		 */
-		<T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyType);
-
-		/**
-		 * Returns the response as a delayed list of {@code ResponseEntity}s. Unlike
-		 * {@link #bodyToMono(Class)} and {@link #bodyToFlux(Class)}, this method does not check
-		 * for a 4xx or 5xx status code before extracting the body.
-		 * @param elementType the expected response body list element type
-		 * @param <T> the type of elements in the list
-		 * @return {@code Mono} with the list of {@code ResponseEntity}s
-		 */
-		<T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementType);
+		<T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference);
 
 	}
+
+
+	interface RequestHeadersUriSpec<S extends RequestHeadersSpec<S>>
+			extends UriSpec<S>, RequestHeadersSpec<S> {
+	}
+
+
+	interface RequestBodyUriSpec extends RequestBodySpec, RequestHeadersUriSpec<RequestBodySpec> {
+	}
+
 
 }

@@ -72,7 +72,7 @@ public class FailingBeforeAndAfterMethodsSpringRuleTests extends FailingBeforeAn
 	public static abstract class BaseSpringRuleTestCase {
 
 		@ClassRule
-		public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+		public static final SpringClassRule springClassRule = new SpringClassRule();
 
 		@Rule
 		public final SpringMethodRule springMethodRule = new SpringMethodRule();
@@ -115,7 +115,7 @@ public class FailingBeforeAndAfterMethodsSpringRuleTests extends FailingBeforeAn
 	public static class FailingBeforeTransactionSpringRuleTestCase {
 
 		@ClassRule
-		public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+		public static final SpringClassRule springClassRule = new SpringClassRule();
 
 		@Rule
 		public final SpringMethodRule springMethodRule = new SpringMethodRule();
@@ -138,7 +138,7 @@ public class FailingBeforeAndAfterMethodsSpringRuleTests extends FailingBeforeAn
 	public static class FailingAfterTransactionSpringRuleTestCase {
 
 		@ClassRule
-		public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+		public static final SpringClassRule springClassRule = new SpringClassRule();
 
 		@Rule
 		public final SpringMethodRule springMethodRule = new SpringMethodRule();

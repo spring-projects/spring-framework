@@ -41,7 +41,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
-import org.springframework.http.server.reactive.PathContainer;
+import org.springframework.http.server.PathContainer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -50,6 +50,7 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.MethodNotAllowedException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 
@@ -86,8 +87,10 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	/** Set of supported HTTP methods */
 	private static final Set<HttpMethod> SUPPORTED_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
 
-	private static final Log logger = LogFactory.getLog(ResourceWebHandler.class);
+	private static final ResponseStatusException NOT_FOUND_EXCEPTION =
+			new ResponseStatusException(HttpStatus.NOT_FOUND);
 
+	private static final Log logger = LogFactory.getLog(ResourceWebHandler.class);
 
 	private final List<Resource> locations = new ArrayList<>(4);
 
@@ -95,8 +98,10 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 
 	private final List<ResourceTransformer> resourceTransformers = new ArrayList<>(4);
 
+	@Nullable
 	private CacheControl cacheControl;
 
+	@Nullable
 	private ResourceHttpMessageWriter resourceHttpMessageWriter;
 
 
@@ -160,7 +165,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	 * Set the {@link org.springframework.http.CacheControl} instance to build
 	 * the Cache-Control HTTP response header.
 	 */
-	public void setCacheControl(CacheControl cacheControl) {
+	public void setCacheControl(@Nullable CacheControl cacheControl) {
 		this.cacheControl = cacheControl;
 	}
 
@@ -177,7 +182,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	 * Configure the {@link ResourceHttpMessageWriter} to use.
 	 * <p>By default a {@link ResourceHttpMessageWriter} will be configured.
 	 */
-	public void setResourceHttpMessageWriter(ResourceHttpMessageWriter httpMessageWriter) {
+	public void setResourceHttpMessageWriter(@Nullable ResourceHttpMessageWriter httpMessageWriter) {
 		this.resourceHttpMessageWriter = httpMessageWriter;
 	}
 
@@ -243,8 +248,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 		return getResource(exchange)
 				.switchIfEmpty(Mono.defer(() -> {
 					logger.trace("No matching resource found - returning 404");
-					exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
-					return Mono.empty();
+					return Mono.error(NOT_FOUND_EXCEPTION);
 				}))
 				.flatMap(resource -> {
 					try {

@@ -70,7 +70,6 @@ public class ClientHttpResponseDecorator implements ClientHttpResponse {
 		return this.delegate.getBody();
 	}
 
-
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + " [delegate=" + getDelegate() + "]";

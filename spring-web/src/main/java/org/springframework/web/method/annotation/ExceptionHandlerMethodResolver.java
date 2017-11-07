@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +51,7 @@ public class ExceptionHandlerMethodResolver {
 			(AnnotationUtils.findAnnotation(method, ExceptionHandler.class) != null);
 
 
-	private final Map<Class<? extends Throwable>, Method> mappedMethods = new ConcurrentReferenceHashMap<>(16);
+	private final Map<Class<? extends Throwable>, Method> mappedMethods = new HashMap<>(16);
 
 	private final Map<Class<? extends Throwable>, Method> exceptionLookupCache = new ConcurrentReferenceHashMap<>(16);
 
@@ -83,7 +84,9 @@ public class ExceptionHandlerMethodResolver {
 				}
 			}
 		}
-		Assert.notEmpty(result, "No exception types mapped to {" + method + "}");
+		if (result.isEmpty()) {
+			throw new IllegalStateException("No exception types mapped to " + method);
+		}
 		return result;
 	}
 

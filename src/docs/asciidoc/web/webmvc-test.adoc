@@ -1,0 +1,43 @@
+[[testing]]
+= Testing
+
+
+
+
+[[testing-servlet-mocks]]
+== Servlet API Mocks
+
+`spring-test` provides mock implementations of Servlet API contracts for unit testing
+controllers, filters, and other web components.
+See <<testing.adoc#mock-objects-servlet,Servlet API>> mock objects for more details.
+
+
+
+
+[[testing-testcontext]]
+== TestContext Framework
+
+`spring-test` provides support for loading Spring configuration in JUnit and TestNG tests
+including efficient caching of the loaded configuration across test methods and support for
+loading a `WebApplicationContext` with a `MockServletContext`.
+See <<testing.adoc#testcontext-framework,TestContext Framework>> for more details.
+
+
+
+
+[[testing-mockmvc]]
+== Spring MVC Tests
+
+`spring-test` provides an integration test framework for testing annotated controllers
+through the `DispatcherServlet`, complete with Spring MVC infrastructure, but without an
+HTTP server. See <<testing.adoc#spring-mvc-test-framework,Spring MVC Test>> for more details.
+
+
+
+
+[[testing-resttemplate]]
+== Client-side REST
+
+`spring-test` provides a `MockRestServiceServer` that can be used as a mock server for
+testing client-side code that internally uses the `RestTemplate`.
+See <<testing.adoc#spring-mvc-test-client,Client REST Tests>> for more details.

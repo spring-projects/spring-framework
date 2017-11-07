@@ -1,0 +1,107 @@
+description = "Spring Core"
+
+apply plugin: "io.spring.dependency-management"
+
+dependencyManagement {
+	imports {
+		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
+		mavenBom "io.netty:netty-bom:${nettyVersion}"
+	}
+	resolutionStrategy {
+		cacheChangingModulesFor 0, 'seconds'
+	}
+	applyMavenExclusions = false
+}
+
+// As of Spring 4.0.3, spring-core includes asm 5.x and repackages cglib 3.2, inlining
+// both into the spring-core jar. cglib 3.2 itself depends on asm 5.x and is therefore
+// further transformed by the JarJar task to depend on org.springframework.asm; this
+// avoids including two different copies of asm unnecessarily.
+def cglibVersion = "3.2.5"
+def objenesisVersion = "2.6"
+
+configurations {
+	jarjar
+	cglib
+	objenesis
+}
+
+task cglibRepackJar(type: Jar) { repackJar ->
+	repackJar.baseName = "spring-cglib-repack"
+	repackJar.version = cglibVersion
+
+	doLast() {
+		project.ant {
+			taskdef name: "jarjar", classname: "com.tonicsystems.jarjar.JarJarTask",
+					classpath: configurations.jarjar.asPath
+			jarjar(destfile: repackJar.archivePath) {
+				configurations.cglib.each { originalJar ->
+					zipfileset(src: originalJar)
+				}
+				// Repackage net.sf.cglib => org.springframework.cglib
+				rule(pattern: "net.sf.cglib.**", result: "org.springframework.cglib.@1")
+				// As mentioned above, transform cglib"s internal asm dependencies from
+				// org.objectweb.asm => org.springframework.asm. Doing this counts on the
+				// the fact that Spring and cglib depend on the same version of asm!
+				rule(pattern: "org.objectweb.asm.**", result: "org.springframework.asm.@1")
+			}
+		}
+	}
+}
+
+task objenesisRepackJar(type: Jar) { repackJar ->
+	repackJar.baseName = "spring-objenesis-repack"
+	repackJar.version = objenesisVersion
+
+	doLast() {
+		project.ant {
+			taskdef name: "jarjar", classname: "com.tonicsystems.jarjar.JarJarTask",
+					classpath: configurations.jarjar.asPath
+			jarjar(destfile: repackJar.archivePath) {
+				configurations.objenesis.each { originalJar ->
+					zipfileset(src: originalJar)
+				}
+				// Repackage org.objenesis => org.springframework.objenesis
+				rule(pattern: "org.objenesis.**", result: "org.springframework.objenesis.@1")
+			}
+		}
+	}
+}
+
+dependencies {
+	cglib("cglib:cglib:${cglibVersion}@jar")
+	objenesis("org.objenesis:objenesis:${objenesisVersion}@jar")
+	jarjar("com.googlecode.jarjar:jarjar:1.3")
+
+	compile(files(cglibRepackJar))
+	compile(files(objenesisRepackJar))
+	compile(project(":spring-jcl"))
+	optional("net.sf.jopt-simple:jopt-simple:5.0.4")
+	optional("org.aspectj:aspectjweaver:${aspectjVersion}")
+	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+	optional("io.projectreactor:reactor-core")
+	optional("io.reactivex:rxjava:${rxjavaVersion}")
+	optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
+	optional("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
+	optional("io.netty:netty-buffer")
+	testCompile("io.projectreactor:reactor-test")
+	testCompile("javax.xml.bind:jaxb-api:2.3.0")
+	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
+	testCompile("com.fasterxml.woodstox:woodstox-core:5.0.3") {
+		exclude group: "stax", module: "stax-api"
+	}
+}
+
+jar {
+	// Inline repackaged cglib classes directly into spring-core jar
+	dependsOn cglibRepackJar
+	from(zipTree(cglibRepackJar.archivePath)) {
+		include "org/springframework/cglib/**"
+	}
+
+	dependsOn objenesisRepackJar
+	from(zipTree(objenesisRepackJar.archivePath)) {
+		include "org/springframework/objenesis/**"
+	}
+}

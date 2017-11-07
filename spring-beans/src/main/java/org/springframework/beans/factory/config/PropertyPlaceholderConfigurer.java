@@ -239,6 +239,7 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 		}
 
 		@Override
+		@Nullable
 		public String resolveStringValue(String strVal) throws BeansException {
 			String resolved = this.helper.replacePlaceholders(strVal, this.resolver);
 			if (trimValues) {
@@ -258,6 +259,7 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 		}
 
 		@Override
+		@Nullable
 		public String resolvePlaceholder(String placeholderName) {
 			return PropertyPlaceholderConfigurer.this.resolvePlaceholder(placeholderName, props, systemPropertiesMode);
 		}

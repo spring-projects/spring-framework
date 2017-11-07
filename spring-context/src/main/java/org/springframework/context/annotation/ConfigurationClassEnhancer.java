@@ -309,6 +309,7 @@ class ConfigurationClassEnhancer {
 		 * super implementation of the proxied method i.e., the actual {@code @Bean} method
 		 */
 		@Override
+		@Nullable
 		public Object intercept(Object enhancedConfigInstance, Method beanMethod, Object[] beanMethodArgs,
 					MethodProxy cglibMethodProxy) throws Throwable {
 
@@ -360,10 +361,10 @@ class ConfigurationClassEnhancer {
 				return cglibMethodProxy.invokeSuper(enhancedConfigInstance, beanMethodArgs);
 			}
 
-			return obtainBeanInstanceFromFactory(beanMethod, beanMethodArgs, beanFactory, beanName);
+			return resolveBeanReference(beanMethod, beanMethodArgs, beanFactory, beanName);
 		}
 
-		private Object obtainBeanInstanceFromFactory(Method beanMethod, Object[] beanMethodArgs,
+		private Object resolveBeanReference(Method beanMethod, Object[] beanMethodArgs,
 				ConfigurableBeanFactory beanFactory, String beanName) {
 
 			// The user (i.e. not the factory) is requesting this bean through a call to
@@ -390,18 +391,29 @@ class ConfigurationClassEnhancer {
 				Object beanInstance = (useArgs ? beanFactory.getBean(beanName, beanMethodArgs) :
 						beanFactory.getBean(beanName));
 				if (!ClassUtils.isAssignableValue(beanMethod.getReturnType(), beanInstance)) {
-					String msg = String.format("@Bean method %s.%s called as a bean reference " +
+					if (beanInstance.equals(null)) {
+						if (logger.isDebugEnabled()) {
+							logger.debug(String.format("@Bean method %s.%s called as bean reference " +
+									"for type [%s] returned null bean; resolving to null value.",
+									beanMethod.getDeclaringClass().getSimpleName(), beanMethod.getName(),
+									beanMethod.getReturnType().getName()));
+						}
+						beanInstance = null;
+					}
+					else {
+						String msg = String.format("@Bean method %s.%s called as bean reference " +
 								"for type [%s] but overridden by non-compatible bean instance of type [%s].",
 								beanMethod.getDeclaringClass().getSimpleName(), beanMethod.getName(),
 								beanMethod.getReturnType().getName(), beanInstance.getClass().getName());
-					try {
-						BeanDefinition beanDefinition = beanFactory.getMergedBeanDefinition(beanName);
-						msg += " Overriding bean of same name declared in: " + beanDefinition.getResourceDescription();
+						try {
+							BeanDefinition beanDefinition = beanFactory.getMergedBeanDefinition(beanName);
+							msg += " Overriding bean of same name declared in: " + beanDefinition.getResourceDescription();
+						}
+						catch (NoSuchBeanDefinitionException ex) {
+							// Ignore - simply no detailed message then.
+						}
+						throw new IllegalStateException(msg);
 					}
-					catch (NoSuchBeanDefinitionException ex) {
-						// Ignore - simply no detailed message then.
-					}
-					throw new IllegalStateException(msg);
 				}
 				Method currentlyInvoked = SimpleInstantiationStrategy.getCurrentlyInvokedFactoryMethod();
 				if (currentlyInvoked != null) {

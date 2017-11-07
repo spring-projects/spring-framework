@@ -128,6 +128,7 @@ public class ResourceScriptSource implements ScriptSource {
 	}
 
 	@Override
+	@Nullable
 	public String suggestedClassName() {
 		String filename = getResource().getFilename();
 		return (filename != null ? StringUtils.stripFilenameExtension(filename) : null);

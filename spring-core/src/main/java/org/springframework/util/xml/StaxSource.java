@@ -47,22 +47,12 @@ import org.springframework.lang.Nullable;
  */
 class StaxSource extends SAXSource {
 
+	@Nullable
 	private XMLEventReader eventReader;
 
+	@Nullable
 	private XMLStreamReader streamReader;
 
-
-	/**
-	 * Construct a new instance of the {@code StaxSource} with the specified {@code XMLStreamReader}.
-	 * The supplied stream reader must be in {@code XMLStreamConstants.START_DOCUMENT} or
-	 * {@code XMLStreamConstants.START_ELEMENT} state.
-	 * @param streamReader the {@code XMLStreamReader} to read from
-	 * @throws IllegalStateException if the reader is not at the start of a document or element
-	 */
-	StaxSource(XMLStreamReader streamReader) {
-		super(new StaxStreamXMLReader(streamReader), new InputSource());
-		this.streamReader = streamReader;
-	}
 
 	/**
 	 * Construct a new instance of the {@code StaxSource} with the specified {@code XMLEventReader}.
@@ -74,6 +64,18 @@ class StaxSource extends SAXSource {
 	StaxSource(XMLEventReader eventReader) {
 		super(new StaxEventXMLReader(eventReader), new InputSource());
 		this.eventReader = eventReader;
+	}
+
+	/**
+	 * Construct a new instance of the {@code StaxSource} with the specified {@code XMLStreamReader}.
+	 * The supplied stream reader must be in {@code XMLStreamConstants.START_DOCUMENT} or
+	 * {@code XMLStreamConstants.START_ELEMENT} state.
+	 * @param streamReader the {@code XMLStreamReader} to read from
+	 * @throws IllegalStateException if the reader is not at the start of a document or element
+	 */
+	StaxSource(XMLStreamReader streamReader) {
+		super(new StaxStreamXMLReader(streamReader), new InputSource());
+		this.streamReader = streamReader;
 	}
 
 

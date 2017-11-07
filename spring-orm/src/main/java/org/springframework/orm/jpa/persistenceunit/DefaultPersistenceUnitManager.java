@@ -339,7 +339,7 @@ public class DefaultPersistenceUnitManager
 	 * none has been registered before.
 	 * @see javax.persistence.spi.PersistenceUnitInfo#getNonJtaDataSource()
 	 */
-	public void setDefaultDataSource(DataSource defaultDataSource) {
+	public void setDefaultDataSource(@Nullable DataSource defaultDataSource) {
 		this.defaultDataSource = defaultDataSource;
 	}
 
@@ -361,7 +361,7 @@ public class DefaultPersistenceUnitManager
 	 * none has been registered before.
 	 * @see javax.persistence.spi.PersistenceUnitInfo#getJtaDataSource()
 	 */
-	public void setDefaultJtaDataSource(DataSource defaultJtaDataSource) {
+	public void setDefaultJtaDataSource(@Nullable DataSource defaultJtaDataSource) {
 		this.defaultJtaDataSource = defaultJtaDataSource;
 	}
 
@@ -380,7 +380,7 @@ public class DefaultPersistenceUnitManager
 	 * <p>Such post-processors can, for example, register further entity classes and
 	 * jar files, in addition to the metadata read from {@code persistence.xml}.
 	 */
-	public void setPersistenceUnitPostProcessors(PersistenceUnitPostProcessor... postProcessors) {
+	public void setPersistenceUnitPostProcessors(@Nullable PersistenceUnitPostProcessor... postProcessors) {
 		this.persistenceUnitPostProcessors = postProcessors;
 	}
 
@@ -412,7 +412,7 @@ public class DefaultPersistenceUnitManager
 	 * @see org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver
 	 */
 	@Override
-	public void setLoadTimeWeaver(LoadTimeWeaver loadTimeWeaver) {
+	public void setLoadTimeWeaver(@Nullable LoadTimeWeaver loadTimeWeaver) {
 		this.loadTimeWeaver = loadTimeWeaver;
 	}
 

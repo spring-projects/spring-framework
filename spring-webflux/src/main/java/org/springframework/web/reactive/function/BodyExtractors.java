@@ -84,7 +84,9 @@ public abstract class BodyExtractors {
 	 * @param <T> the element type
 	 * @return a {@code BodyExtractor} that reads a mono
 	 */
-	public static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(ParameterizedTypeReference<T> typeReference) {
+	public static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(
+			ParameterizedTypeReference<T> typeReference) {
+
 		Assert.notNull(typeReference, "'typeReference' must not be null");
 		return toMono(ResolvableType.forType(typeReference.getType()));
 	}
@@ -103,7 +105,8 @@ public abstract class BodyExtractors {
 						return reader.readMono(elementType, inputMessage, context.hints());
 					}
 				},
-				Mono::error,
+				ex -> (inputMessage.getHeaders().getContentType() == null) ?
+						Mono.from(permitEmptyOrFail(inputMessage, ex)) : Mono.error(ex),
 				Mono::empty);
 	}
 
@@ -133,11 +136,14 @@ public abstract class BodyExtractors {
 	 * @param <T> the element type
 	 * @return a {@code BodyExtractor} that reads a flux
 	 */
-	public static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(ParameterizedTypeReference<T> typeReference) {
+	public static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(
+			ParameterizedTypeReference<T> typeReference) {
+
 		Assert.notNull(typeReference, "'typeReference' must not be null");
 		return toFlux(ResolvableType.forType(typeReference.getType()));
 	}
 
+	@SuppressWarnings("unchecked")
 	static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(ResolvableType elementType) {
 		Assert.notNull(elementType, "'elementType' must not be null");
 		return (inputMessage, context) -> readWithMessageReaders(inputMessage, context,
@@ -152,8 +158,16 @@ public abstract class BodyExtractors {
 						return reader.read(elementType, inputMessage, context.hints());
 					}
 				},
-				Flux::error,
+				ex -> (inputMessage.getHeaders().getContentType() == null) ?
+						permitEmptyOrFail(inputMessage, ex) : Flux.error(ex),
 				Flux::empty);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> Flux<T> permitEmptyOrFail(ReactiveHttpInputMessage message, UnsupportedMediaTypeException ex) {
+		return message.getBody().doOnNext(buffer -> {
+			throw ex;
+		}).map(o -> (T) o);
 	}
 
 	/**
@@ -164,12 +178,13 @@ public abstract class BodyExtractors {
 	// ReactiveHttpInputMessage like other methods, since reading form data only typically happens on
 	// the server-side
 	public static BodyExtractor<Mono<MultiValueMap<String, String>>, ServerHttpRequest> toFormData() {
-		return (serverRequest, context) -> {
-			HttpMessageReader<MultiValueMap<String, String>> messageReader =
-					messageReader(FORM_MAP_TYPE, MediaType.APPLICATION_FORM_URLENCODED, context);
+		return (request, context) -> {
+			ResolvableType type = FORM_MAP_TYPE;
+			HttpMessageReader<MultiValueMap<String, String>> reader =
+					messageReader(type, MediaType.APPLICATION_FORM_URLENCODED, context);
 			return context.serverResponse()
-					.map(serverResponse -> messageReader.readMono(FORM_MAP_TYPE, FORM_MAP_TYPE, serverRequest, serverResponse, context.hints()))
-					.orElseGet(() -> messageReader.readMono(FORM_MAP_TYPE, serverRequest, context.hints()));
+					.map(response -> reader.readMono(type, type, request, response, context.hints()))
+					.orElseGet(() -> reader.readMono(type, request, context.hints()));
 		};
 	}
 
@@ -183,12 +198,12 @@ public abstract class BodyExtractors {
 	// the server-side
 	public static BodyExtractor<Mono<MultiValueMap<String, Part>>, ServerHttpRequest> toMultipartData() {
 		return (serverRequest, context) -> {
-			HttpMessageReader<MultiValueMap<String, Part>> messageReader =
-					messageReader(MULTIPART_MAP_TYPE, MediaType.MULTIPART_FORM_DATA, context);
+			ResolvableType type = MULTIPART_MAP_TYPE;
+			HttpMessageReader<MultiValueMap<String, Part>> reader =
+					messageReader(type, MediaType.MULTIPART_FORM_DATA, context);
 			return context.serverResponse()
-					.map(serverResponse -> messageReader.readMono(MULTIPART_MAP_TYPE,
-							MULTIPART_MAP_TYPE, serverRequest, serverResponse, context.hints()))
-					.orElseGet(() -> messageReader.readMono(MULTIPART_MAP_TYPE, serverRequest, context.hints()));
+					.map(response -> reader.readMono(type, type, serverRequest, response, context.hints()))
+					.orElseGet(() -> reader.readMono(type, serverRequest, context.hints()));
 		};
 	}
 
@@ -202,11 +217,11 @@ public abstract class BodyExtractors {
 	// the server-side
 	public static BodyExtractor<Flux<Part>, ServerHttpRequest> toParts() {
 		return (serverRequest, context) -> {
-			HttpMessageReader<Part> messageReader =
-					messageReader(PART_TYPE, MediaType.MULTIPART_FORM_DATA, context);
+			ResolvableType type = PART_TYPE;
+			HttpMessageReader<Part> reader = messageReader(type, MediaType.MULTIPART_FORM_DATA, context);
 			return context.serverResponse()
-					.map(serverResponse -> messageReader.read(PART_TYPE, PART_TYPE, serverRequest, serverResponse, context.hints()))
-					.orElseGet(() -> messageReader.read(PART_TYPE, serverRequest, context.hints()));
+					.map(response -> reader.read(type, type, serverRequest, response, context.hints()))
+					.orElseGet(() -> reader.read(type, serverRequest, context.hints()));
 		};
 	}
 
@@ -225,7 +240,8 @@ public abstract class BodyExtractors {
 
 	private static <T, S extends Publisher<T>> S readWithMessageReaders(
 			ReactiveHttpInputMessage inputMessage, BodyExtractor.Context context, ResolvableType elementType,
-			Function<HttpMessageReader<T>, S> readerFunction, Function<Throwable, S> unsupportedError,
+			Function<HttpMessageReader<T>, S> readerFunction,
+			Function<UnsupportedMediaTypeException, S> unsupportedError,
 			Supplier<S> empty) {
 
 		if (VOID_TYPE.equals(elementType)) {

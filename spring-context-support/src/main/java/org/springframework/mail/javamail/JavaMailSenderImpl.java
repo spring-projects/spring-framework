@@ -99,6 +99,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	@Nullable
 	private String defaultEncoding;
 
+	@Nullable
 	private FileTypeMap defaultFileTypeMap;
 
 
@@ -165,7 +166,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	/**
 	 * Set the mail protocol. Default is "smtp".
 	 */
-	public void setProtocol(String protocol) {
+	public void setProtocol(@Nullable String protocol) {
 		this.protocol = protocol;
 	}
 
@@ -181,7 +182,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * Set the mail server host, typically an SMTP host.
 	 * <p>Default is the default host of the underlying JavaMail Session.
 	 */
-	public void setHost(String host) {
+	public void setHost(@Nullable String host) {
 		this.host = host;
 	}
 
@@ -220,7 +221,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * @see #setSession
 	 * @see #setPassword
 	 */
-	public void setUsername(String username) {
+	public void setUsername(@Nullable String username) {
 		this.username = username;
 	}
 
@@ -243,7 +244,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * @see #setSession
 	 * @see #setUsername
 	 */
-	public void setPassword(String password) {
+	public void setPassword(@Nullable String password) {
 		this.password = password;
 	}
 
@@ -260,7 +261,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * created by this instance.
 	 * <p>Such an encoding will be auto-detected by {@link MimeMessageHelper}.
 	 */
-	public void setDefaultEncoding(String defaultEncoding) {
+	public void setDefaultEncoding(@Nullable String defaultEncoding) {
 		this.defaultEncoding = defaultEncoding;
 	}
 
@@ -286,7 +287,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * {@code mime.types} file contained in the Spring jar).
 	 * @see MimeMessageHelper#setFileTypeMap
 	 */
-	public void setDefaultFileTypeMap(FileTypeMap defaultFileTypeMap) {
+	public void setDefaultFileTypeMap(@Nullable FileTypeMap defaultFileTypeMap) {
 		this.defaultFileTypeMap = defaultFileTypeMap;
 	}
 

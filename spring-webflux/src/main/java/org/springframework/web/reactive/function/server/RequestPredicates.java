@@ -35,16 +35,18 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.server.reactive.PathContainer;
+import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.WebSession;
+import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
@@ -341,10 +343,11 @@ public abstract class RequestPredicates {
 
 		@Override
 		public boolean test(ServerRequest request) {
-			boolean match = this.pattern.matches(request.pathContainer());
-			traceMatch("Pattern", this.pattern.getPatternString(), request.path(), match);
-			if (match) {
-				mergeTemplateVariables(request, this.pattern.matchAndExtract(request.path()).getUriVariables());
+			PathContainer pathContainer = request.pathContainer();
+			PathPattern.PathMatchInfo info = this.pattern.matchAndExtract(pathContainer);
+			traceMatch("Pattern", this.pattern.getPatternString(), request.path(), info != null);
+			if (info != null) {
+				mergeTemplateVariables(request, info.getUriVariables());
 				return true;
 			}
 			else {
@@ -354,7 +357,7 @@ public abstract class RequestPredicates {
 
 		@Override
 		public Optional<ServerRequest> nest(ServerRequest request) {
-			return Optional.ofNullable(this.pattern.getPathRemaining(request.pathContainer()))
+			return Optional.ofNullable(this.pattern.matchStartOfPath(request.pathContainer()))
 					.map(info -> {
 						mergeTemplateVariables(request, info.getUriVariables());
 						return new SubPathServerRequestWrapper(request, info);
@@ -475,8 +478,18 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public String methodName() {
+			return this.request.methodName();
+		}
+
+		@Override
 		public URI uri() {
 			return this.request.uri();
+		}
+
+		@Override
+		public UriBuilder uriBuilder() {
+			return this.request.uriBuilder();
 		}
 
 		@Override
@@ -515,12 +528,22 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference) {
+			return this.request.bodyToMono(typeReference);
+		}
+
+		@Override
 		public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
 			return this.request.bodyToFlux(elementClass);
 		}
 
 		@Override
-		public <T> Optional<T> attribute(String name) {
+		public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference) {
+			return this.request.bodyToFlux(typeReference);
+		}
+
+		@Override
+		public Optional<Object> attribute(String name) {
 			return this.request.attribute(name);
 		}
 
@@ -587,7 +610,7 @@ public abstract class RequestPredicates {
 
 			private static List<Element> prependWithSeparator(List<Element> elements) {
 				List<Element> result = new ArrayList<>(elements);
-				if (!(result.get(0) instanceof Separator)) {
+				if (result.isEmpty() || !(result.get(0) instanceof Separator)) {
 					result.add(0, SEPARATOR);
 				}
 				return Collections.unmodifiableList(result);

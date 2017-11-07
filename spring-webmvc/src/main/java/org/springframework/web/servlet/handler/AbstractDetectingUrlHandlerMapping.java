@@ -20,7 +20,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -96,10 +95,8 @@ public abstract class AbstractDetectingUrlHandlerMapping extends AbstractUrlHand
 	/**
 	 * Determine the URLs for the given handler bean.
 	 * @param beanName the name of the candidate bean
-	 * @return the URLs determined for the bean,
-	 * or {@code null} or an empty array if none
+	 * @return the URLs determined for the bean, or an empty array if none
 	 */
-	@Nullable
 	protected abstract String[] determineUrlsForHandler(String beanName);
 
 }

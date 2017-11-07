@@ -72,7 +72,9 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	/**
 	 * Add the given {@link HandlerMethodArgumentResolver}s.
 	 */
-	public HandlerMethodArgumentResolverComposite addResolvers(@Nullable List<? extends HandlerMethodArgumentResolver> resolvers) {
+	public HandlerMethodArgumentResolverComposite addResolvers(
+			@Nullable List<? extends HandlerMethodArgumentResolver> resolvers) {
+
 		if (resolvers != null) {
 			for (HandlerMethodArgumentResolver resolver : resolvers) {
 				this.argumentResolvers.add(resolver);
@@ -111,6 +113,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	 * @throws IllegalStateException if no suitable {@link HandlerMethodArgumentResolver} is found.
 	 */
 	@Override
+	@Nullable
 	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 

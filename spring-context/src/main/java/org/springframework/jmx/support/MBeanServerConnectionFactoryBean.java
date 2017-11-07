@@ -157,6 +157,7 @@ public class MBeanServerConnectionFactoryBean
 
 
 	@Override
+	@Nullable
 	public MBeanServerConnection getObject() {
 		return this.connection;
 	}

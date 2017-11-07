@@ -196,7 +196,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * after built-in ones. To override the built-in support for argument
 	 * resolution use {@link #setArgumentResolvers} instead.
 	 */
-	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	public void setCustomArgumentResolvers(@Nullable List<HandlerMethodArgumentResolver> argumentResolvers) {
 		this.customArgumentResolvers = argumentResolvers;
 	}
 
@@ -250,7 +250,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 */
 	@Nullable
 	public List<HandlerMethodArgumentResolver> getInitBinderArgumentResolvers() {
-		return (this.initBinderArgumentResolvers != null) ? this.initBinderArgumentResolvers.getResolvers() : null;
+		return (this.initBinderArgumentResolvers != null ? this.initBinderArgumentResolvers.getResolvers() : null);
 	}
 
 	/**
@@ -258,7 +258,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * ordered after built-in ones. To override the built-in support for
 	 * return value handling use {@link #setReturnValueHandlers}.
 	 */
-	public void setCustomReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+	public void setCustomReturnValueHandlers(@Nullable List<HandlerMethodReturnValueHandler> returnValueHandlers) {
 		this.customReturnValueHandlers = returnValueHandlers;
 	}
 
@@ -307,7 +307,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * the return type and controller method information and can be ordered
 	 * freely relative to other return value handlers.
 	 */
-	public void setModelAndViewResolvers(List<ModelAndViewResolver> modelAndViewResolvers) {
+	public void setModelAndViewResolvers(@Nullable List<ModelAndViewResolver> modelAndViewResolvers) {
 		this.modelAndViewResolvers = modelAndViewResolvers;
 	}
 
@@ -369,7 +369,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * Provide a WebBindingInitializer with "global" initialization to apply
 	 * to every DataBinder instance.
 	 */
-	public void setWebBindingInitializer(WebBindingInitializer webBindingInitializer) {
+	public void setWebBindingInitializer(@Nullable WebBindingInitializer webBindingInitializer) {
 		this.webBindingInitializer = webBindingInitializer;
 	}
 
@@ -427,14 +427,16 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	/**
 	 * Configure the registry for reactive library types to be supported as
 	 * return values from controller methods.
+	 * @since 5.0
 	 */
 	public void setReactiveRegistry(ReactiveAdapterRegistry reactiveRegistry) {
 		Assert.notNull(reactiveRegistry, "ReactiveAdapterRegistry is required");
-		this.reactiveRegistry = this.reactiveRegistry;
+		this.reactiveRegistry = reactiveRegistry;
 	}
 
 	/**
 	 * Return the configured reactive type registry of adapters.
+	 * @since 5.0
 	 */
 	public ReactiveAdapterRegistry getReactiveAdapterRegistry() {
 		return this.reactiveRegistry;

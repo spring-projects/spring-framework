@@ -147,6 +147,7 @@ public class DefaultTestContext implements TestContext {
 		return testMethod;
 	}
 
+	@Override
 	@Nullable
 	public final Throwable getTestException() {
 		return this.testException;
@@ -172,12 +173,14 @@ public class DefaultTestContext implements TestContext {
 	}
 
 	@Override
+	@Nullable
 	public Object getAttribute(String name) {
 		Assert.notNull(name, "Name must not be null");
 		return this.attributes.get(name);
 	}
 
 	@Override
+	@Nullable
 	public Object removeAttribute(String name) {
 		Assert.notNull(name, "Name must not be null");
 		return this.attributes.remove(name);

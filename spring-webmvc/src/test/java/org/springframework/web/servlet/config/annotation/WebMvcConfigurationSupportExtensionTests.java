@@ -160,9 +160,11 @@ public class WebMvcConfigurationSupportExtensionTests {
 		chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/resources/foo.gif"));
 		assertNotNull(chain);
 		assertNotNull(chain.getHandler());
-		assertEquals(Arrays.toString(chain.getInterceptors()), 2, chain.getInterceptors().length);
+		assertEquals(Arrays.toString(chain.getInterceptors()), 4, chain.getInterceptors().length);
 		// PathExposingHandlerInterceptor at chain.getInterceptors()[0]
-		assertEquals(ResourceUrlProviderExposingInterceptor.class, chain.getInterceptors()[1].getClass());
+		assertEquals(LocaleChangeInterceptor.class, chain.getInterceptors()[1].getClass());
+		assertEquals(ConversionServiceExposingInterceptor.class, chain.getInterceptors()[2].getClass());
+		assertEquals(ResourceUrlProviderExposingInterceptor.class, chain.getInterceptors()[3].getClass());
 
 		handlerMapping = (AbstractHandlerMapping) this.config.defaultServletHandlerMapping();
 		handlerMapping.setApplicationContext(this.context);
@@ -222,7 +224,9 @@ public class WebMvcConfigurationSupportExtensionTests {
 	public void webBindingInitializer() throws Exception {
 		RequestMappingHandlerAdapter adapter = this.config.requestMappingHandlerAdapter();
 
-		ConfigurableWebBindingInitializer initializer = (ConfigurableWebBindingInitializer) adapter.getWebBindingInitializer();
+		ConfigurableWebBindingInitializer initializer =
+				(ConfigurableWebBindingInitializer) adapter.getWebBindingInitializer();
+
 		assertNotNull(initializer);
 
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(null, "");

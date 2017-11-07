@@ -92,7 +92,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	 * <p>The default value is {@code true}.
 	 */
 	public void setUseTrailingSlashMatch(boolean trailingSlashMatch) {
-		this.patternParser.setMatchOptionalTrailingSlash(trailingSlashMatch);
+		this.patternParser.setMatchOptionalTrailingSeparator(trailingSlashMatch);
 	}
 
 	/**

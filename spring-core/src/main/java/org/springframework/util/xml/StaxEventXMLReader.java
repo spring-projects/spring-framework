@@ -66,6 +66,7 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 
 	private String xmlVersion = DEFAULT_XML_VERSION;
 
+	@Nullable
 	private String encoding;
 
 
@@ -77,7 +78,7 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 	 * @throws IllegalStateException if the reader is not at the start of a document or element
 	 */
 	StaxEventXMLReader(XMLEventReader reader) {
-		Assert.notNull(reader, "'reader' must not be null");
+		Assert.notNull(reader, "XMLEventReader must not be null");
 		try {
 			XMLEvent event = reader.peek();
 			if (event != null && !(event.isStartDocument() || event.isStartElement())) {
@@ -189,6 +190,7 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 					return xmlVersion;
 				}
 				@Override
+				@Nullable
 				public String getEncoding() {
 					return encoding;
 				}

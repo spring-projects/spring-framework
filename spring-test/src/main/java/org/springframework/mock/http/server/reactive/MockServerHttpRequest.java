@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import org.reactivestreams.Publisher;
@@ -37,6 +38,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.AbstractServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
@@ -44,10 +46,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Mock extension of {@link AbstractServerHttpRequest} for use in tests without
- * an actual server.
- *
- * <p>Use the static builder methods in this class to create an instance possibly
- * further creating a {@link MockServerWebExchange} via {@link #toExchange()}.
+ * an actual server. Use the static methods to obtain a builder.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -58,15 +57,15 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final MultiValueMap<String, HttpCookie> cookies;
 
+	@Nullable
 	private final InetSocketAddress remoteAddress;
 
 	private final Flux<DataBuffer> body;
 
 
-	private MockServerHttpRequest(HttpMethod httpMethod, URI uri, String contextPath,
+	private MockServerHttpRequest(HttpMethod httpMethod, URI uri, @Nullable String contextPath,
 			HttpHeaders headers, MultiValueMap<String, HttpCookie> cookies,
-			InetSocketAddress remoteAddress,
-			Publisher<? extends DataBuffer> body) {
+			@Nullable InetSocketAddress remoteAddress, Publisher<? extends DataBuffer> body) {
 
 		super(uri, contextPath, headers);
 		this.httpMethod = httpMethod;
@@ -87,6 +86,7 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
+	@Nullable
 	public InetSocketAddress getRemoteAddress() {
 		return this.remoteAddress;
 	}
@@ -101,12 +101,9 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		return this.cookies;
 	}
 
-
-	/**
-	 * Shortcut to wrap the request with a {@code MockServerWebExchange}.
-	 */
-	public MockServerWebExchange toExchange() {
-		return new MockServerWebExchange(this);
+	@Override
+	public <T> T getNativeRequest() {
+		throw new IllegalStateException("This is a mock. No running server, no native request.");
 	}
 
 
@@ -261,6 +258,13 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		B acceptCharset(Charset... acceptableCharsets);
 
 		/**
+		 * Set the list of acceptable {@linkplain Locale locales}, as specified
+		 * by the {@code Accept-Languages} header.
+		 * @param acceptableLocales the acceptable locales
+		 */
+		B acceptLanguageAsLocales(Locale... acceptableLocales);
+
+		/**
 		 * Set the value of the {@code If-Modified-Since} header.
 		 * <p>The date should be specified as the number of milliseconds since
 		 * January 1, 1970 GMT.
@@ -298,11 +302,6 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		 */
 		MockServerHttpRequest build();
 
-		/**
-		 * Shortcut for:<br>
-		 * {@code build().toExchange()}
-		 */
-		MockServerWebExchange toExchange();
 	}
 
 	/**
@@ -356,12 +355,14 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 		private final URI url;
 
+		@Nullable
 		private String contextPath;
 
 		private final HttpHeaders headers = new HttpHeaders();
 
 		private final MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
 
+		@Nullable
 		private InetSocketAddress remoteAddress;
 
 
@@ -421,6 +422,12 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
+		public BodyBuilder acceptLanguageAsLocales(Locale... acceptableLocales) {
+			this.headers.setAcceptLanguageAsLocales(Arrays.asList(acceptableLocales));
+			return this;
+		}
+
+		@Override
 		public BodyBuilder contentLength(long contentLength) {
 			this.headers.setContentLength(contentLength);
 			return this;
@@ -462,11 +469,6 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
-		public MockServerWebExchange toExchange() {
-			return build().toExchange();
-		}
-
-		@Override
 		public MockServerHttpRequest body(String body) {
 			return body(Flux.just(BUFFER_FACTORY.wrap(body.getBytes(getCharset()))));
 		}
@@ -478,14 +480,16 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 		@Override
 		public MockServerHttpRequest body(Publisher<? extends DataBuffer> body) {
-			applyCookies();
+			applyCookiesIfNecessary();
 			return new MockServerHttpRequest(this.method, this.url, this.contextPath,
 					this.headers, this.cookies, this.remoteAddress, body);
 		}
 
-		private void applyCookies() {
-			this.cookies.values().stream().flatMap(Collection::stream)
-					.forEach(cookie -> this.headers.add(HttpHeaders.COOKIE, cookie.toString()));
+		private void applyCookiesIfNecessary() {
+			if (this.headers.get(HttpHeaders.COOKIE) == null) {
+				this.cookies.values().stream().flatMap(Collection::stream)
+						.forEach(cookie -> this.headers.add(HttpHeaders.COOKIE, cookie.toString()));
+			}
 		}
 	}
 

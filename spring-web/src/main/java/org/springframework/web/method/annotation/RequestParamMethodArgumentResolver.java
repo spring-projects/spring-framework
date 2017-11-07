@@ -100,7 +100,9 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	 * is treated as a request parameter even if it isn't annotated, the
 	 * request parameter name is derived from the method parameter name.
 	 */
-	public RequestParamMethodArgumentResolver(@Nullable ConfigurableBeanFactory beanFactory, boolean useDefaultResolution) {
+	public RequestParamMethodArgumentResolver(@Nullable ConfigurableBeanFactory beanFactory,
+			boolean useDefaultResolution) {
+
 		super(beanFactory);
 		this.useDefaultResolution = useDefaultResolution;
 	}
@@ -156,6 +158,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	}
 
 	@Override
+	@Nullable
 	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
 		HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
 

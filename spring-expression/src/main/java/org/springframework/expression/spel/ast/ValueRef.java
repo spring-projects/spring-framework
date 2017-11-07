@@ -68,7 +68,7 @@ public interface ValueRef {
 		}
 
 		@Override
-		public void setValue(Object newValue) {
+		public void setValue(@Nullable Object newValue) {
 			// The exception position '0' isn't right but the overhead of creating
 			// instances of this per node (where the node is solely for error reporting)
 			// would be unfortunate.
@@ -102,7 +102,7 @@ public interface ValueRef {
 		}
 
 		@Override
-		public void setValue(Object newValue) {
+		public void setValue(@Nullable Object newValue) {
 			throw new SpelEvaluationException(this.node.pos, SpelMessage.NOT_ASSIGNABLE, this.node.toStringAST());
 		}
 

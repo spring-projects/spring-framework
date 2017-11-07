@@ -57,7 +57,7 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 	}
 
 	@Test
-	public void noTokenizeArrayElements() {
+	public void doNotTokenizeArrayElements() {
 		this.tokenizer = new Jackson2Tokenizer(this.jsonParser, false);
 
 		testTokenize(
@@ -115,6 +115,24 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 				singletonList("[{\"foo\": \"bar\"},{\"foo\": \"baz\"}]"),
 				asList("{\"foo\": \"bar\"}",
 						"{\"foo\": \"baz\"}"));
+
+		// SPR-15803: nested array
+		testTokenize(
+				singletonList("[" +
+						"{\"id\":\"0\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}," +
+						"{\"id\":\"1\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}," +
+						"{\"id\":\"2\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}" +
+						"]"),
+				asList(
+						"{\"id\":\"0\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}",
+						"{\"id\":\"1\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}",
+						"{\"id\":\"2\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}")
+		);
+
+		// SPR-15803: nested array, no top-level array
+		testTokenize(
+				singletonList("{\"speakerIds\":[\"tastapod\"],\"language\":\"ENGLISH\"}"),
+				singletonList("{\"speakerIds\":[\"tastapod\"],\"language\":\"ENGLISH\"}"));
 
 		testTokenize(
 				asList("[{\"foo\": \"foofoo\", \"bar\"",

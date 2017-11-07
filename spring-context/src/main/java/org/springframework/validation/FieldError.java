@@ -102,7 +102,8 @@ public class FieldError extends ObjectError {
 	@Override
 	public String toString() {
 		return "Field error in object '" + getObjectName() + "' on field '" + this.field +
-				"': rejected value [" + this.rejectedValue + "]; " + resolvableToString();
+				"': rejected value [" + ObjectUtils.nullSafeToString(this.rejectedValue) + "]; " +
+				resolvableToString();
 	}
 
 	@Override

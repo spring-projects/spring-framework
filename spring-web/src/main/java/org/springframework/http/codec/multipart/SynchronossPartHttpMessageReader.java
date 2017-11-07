@@ -17,7 +17,6 @@
 package org.springframework.http.codec.multipart;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.Channels;
@@ -25,6 +24,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -139,6 +139,9 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 				catch (IOException ex) {
 					listener.onError("Exception thrown providing input to the parser", ex);
 				}
+				finally {
+					DataBufferUtils.release(buffer);
+				}
 			}, (ex) -> {
 				try {
 					listener.onError("Request body input error", ex);
@@ -187,9 +190,9 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 		}
 
 		private Part createPart(StreamStorage storage, HttpHeaders httpHeaders) {
-			String fileName = MultipartUtils.getFileName(httpHeaders);
-			if (fileName != null) {
-				return new SynchronossFilePart(httpHeaders, storage, fileName, this.bufferFactory);
+			String filename = MultipartUtils.getFileName(httpHeaders);
+			if (filename != null) {
+				return new SynchronossFilePart(httpHeaders, storage, this.bufferFactory, filename);
 			}
 			else if (MultipartUtils.isFormField(httpHeaders, this.context)) {
 				String value = MultipartUtils.readFormParameterValue(storage, httpHeaders);
@@ -198,13 +201,6 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 			else {
 				return new DefaultSynchronossPart(httpHeaders, storage, this.bufferFactory);
 			}
-		}
-
-		private Part createPart(HttpHeaders httpHeaders, StreamStorage storage) {
-			String fileName = MultipartUtils.getFileName(httpHeaders);
-			return fileName != null ?
-					new SynchronossFilePart(httpHeaders, storage, fileName, this.bufferFactory) :
-					new DefaultSynchronossPart(httpHeaders, storage, this.bufferFactory);
 		}
 
 		@Override
@@ -284,15 +280,18 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 
 	private static class SynchronossFilePart extends DefaultSynchronossPart implements FilePart {
 
-		public SynchronossFilePart(HttpHeaders headers, StreamStorage storage,
-				String fileName, DataBufferFactory factory) {
+		private final String filename;
+
+		public SynchronossFilePart(
+				HttpHeaders headers, StreamStorage storage, DataBufferFactory factory, String filename) {
 
 			super(headers, storage, factory);
+			this.filename = filename;
 		}
 
 		@Override
 		public String filename() {
-			return MultipartUtils.getFileName(headers());
+			return this.filename;
 		}
 
 		@Override
@@ -301,8 +300,7 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 			FileChannel output = null;
 			try {
 				input = Channels.newChannel(getStorage().getInputStream());
-				output = new FileOutputStream(destination).getChannel();
-
+				output = FileChannel.open(destination.toPath(), StandardOpenOption.WRITE);
 				long size = (input instanceof FileChannel ? ((FileChannel) input).size() : Long.MAX_VALUE);
 				long totalWritten = 0;
 				while (totalWritten < size) {

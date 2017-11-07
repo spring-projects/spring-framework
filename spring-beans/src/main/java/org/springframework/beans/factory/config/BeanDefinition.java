@@ -126,7 +126,8 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	void setScope(@Nullable String scope);
 
 	/**
-	 * Return the name of the current target scope for this bean.
+	 * Return the name of the current target scope for this bean,
+	 * or {@code null} if not known yet.
 	 */
 	@Nullable
 	String getScope();
@@ -148,7 +149,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * Set the names of the beans that this bean depends on being initialized.
 	 * The bean factory will guarantee that these beans get initialized first.
 	 */
-	void setDependsOn(String... dependsOn);
+	void setDependsOn(@Nullable String... dependsOn);
 
 	/**
 	 * Return the bean names that this bean depends on.
@@ -238,6 +239,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	/**
 	 * Return whether this a <b>Prototype</b>, with an independent instance
 	 * returned for each call.
+	 * @since 3.0
 	 * @see #SCOPE_PROTOTYPE
 	 */
 	boolean isPrototype();

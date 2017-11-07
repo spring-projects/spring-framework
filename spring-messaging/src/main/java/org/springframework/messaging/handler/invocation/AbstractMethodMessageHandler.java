@@ -96,6 +96,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	private final HandlerMethodReturnValueHandlerComposite returnValueHandlers =
 			new HandlerMethodReturnValueHandlerComposite();
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
 	private final Map<T, HandlerMethod> handlerMethods = new LinkedHashMap<>(64);
@@ -211,7 +212,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
+	public void setApplicationContext(@Nullable ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 
@@ -231,11 +232,15 @@ public abstract class AbstractMethodMessageHandler<T>
 			this.returnValueHandlers.addHandlers(initReturnValueHandlers());
 		}
 
-		for (String beanName : this.applicationContext.getBeanNamesForType(Object.class)) {
+		ApplicationContext context = getApplicationContext();
+		if (context == null) {
+			return;
+		}
+		for (String beanName : context.getBeanNamesForType(Object.class)) {
 			if (!beanName.startsWith(SCOPED_TARGET_NAME_PREFIX)) {
 				Class<?> beanType = null;
 				try {
-					beanType = this.applicationContext.getType(beanName);
+					beanType = context.getType(beanName);
 				}
 				catch (Throwable ex) {
 					// An unresolvable bean type, probably from a lazy bean - let's ignore it.
@@ -278,8 +283,15 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * @param handler the handler to check, either an instance of a Spring bean name
 	 */
 	protected final void detectHandlerMethods(final Object handler) {
-		Class<?> handlerType = (handler instanceof String ?
-				this.applicationContext.getType((String) handler) : handler.getClass());
+		Class<?> handlerType;
+		if (handler instanceof String) {
+			ApplicationContext context = getApplicationContext();
+			Assert.state(context != null, "ApplicationContext is required for resolving handler bean names");
+			handlerType = context.getType((String) handler);
+		}
+		else {
+			handlerType = handler.getClass();
+		}
 
 		if (handlerType != null) {
 			final Class<?> userType = ClassUtils.getUserClass(handlerType);
@@ -337,9 +349,10 @@ public abstract class AbstractMethodMessageHandler<T>
 	protected HandlerMethod createHandlerMethod(Object handler, Method method) {
 		HandlerMethod handlerMethod;
 		if (handler instanceof String) {
+			ApplicationContext context = getApplicationContext();
+			Assert.state(context != null, "ApplicationContext is required for resolving handler bean names");
 			String beanName = (String) handler;
-			handlerMethod = new HandlerMethod(beanName,
-					this.applicationContext.getAutowireCapableBeanFactory(), method);
+			handlerMethod = new HandlerMethod(beanName, context.getAutowireCapableBeanFactory(), method);
 		}
 		else {
 			handlerMethod = new HandlerMethod(handler, method);
@@ -644,7 +657,7 @@ public abstract class AbstractMethodMessageHandler<T>
 		}
 
 		@Override
-		public void onSuccess(Object result) {
+		public void onSuccess(@Nullable Object result) {
 			try {
 				MethodParameter returnType = this.handlerMethod.getAsyncReturnValueType(result);
 				returnValueHandlers.handleReturnValue(result, returnType, this.message);

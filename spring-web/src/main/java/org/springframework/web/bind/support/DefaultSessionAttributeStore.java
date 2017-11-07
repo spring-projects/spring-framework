@@ -57,6 +57,7 @@ public class DefaultSessionAttributeStore implements SessionAttributeStore {
 	}
 
 	@Override
+	@Nullable
 	public Object retrieveAttribute(WebRequest request, String attributeName) {
 		Assert.notNull(request, "WebRequest must not be null");
 		Assert.notNull(attributeName, "Attribute name must not be null");

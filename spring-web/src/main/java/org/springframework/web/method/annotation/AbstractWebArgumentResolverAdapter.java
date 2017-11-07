@@ -92,6 +92,7 @@ public abstract class AbstractWebArgumentResolverAdapter implements HandlerMetho
 	 * to the method parameter.
 	 */
 	@Override
+	@Nullable
 	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 

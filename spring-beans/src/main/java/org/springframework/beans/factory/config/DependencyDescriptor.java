@@ -26,7 +26,6 @@ import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Optional;
 
-import kotlin.Metadata;
 import kotlin.reflect.KProperty;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 
@@ -35,11 +34,11 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.core.GenericTypeResolver;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
 
 /**
  * Descriptor for a specific dependency that is about to be injected.
@@ -51,10 +50,6 @@ import org.springframework.util.ClassUtils;
  */
 @SuppressWarnings("serial")
 public class DependencyDescriptor extends InjectionPoint implements Serializable {
-
-	private static final boolean kotlinPresent =
-			ClassUtils.isPresent("kotlin.Unit", DependencyDescriptor.class.getClassLoader());
-
 
 	private final Class<?> declaringClass;
 
@@ -172,7 +167,8 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 		if (this.field != null) {
 			return !(this.field.getType() == Optional.class || hasNullableAnnotation() ||
-					(kotlinPresent && KotlinDelegate.isNullable(this.field)));
+					(KotlinDetector.isKotlinType(this.field.getDeclaringClass()) &&
+							KotlinDelegate.isNullable(this.field)));
 		}
 		else {
 			return !obtainMethodParameter().isOptional();
@@ -252,7 +248,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	public Object resolveCandidate(String beanName, Class<?> requiredType, BeanFactory beanFactory)
 			throws BeansException {
 
-		return beanFactory.getBean(beanName, requiredType);
+		return beanFactory.getBean(beanName);
 	}
 
 
@@ -435,11 +431,8 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 		 * Check whether the specified {@link Field} represents a nullable Kotlin type or not.
 		 */
 		public static boolean isNullable(Field field) {
-			if (field.getDeclaringClass().isAnnotationPresent(Metadata.class)) {
-				KProperty<?> property = ReflectJvmMapping.getKotlinProperty(field);
-				return (property != null && property.getReturnType().isMarkedNullable());
-			}
-			return false;
+			KProperty<?> property = ReflectJvmMapping.getKotlinProperty(field);
+			return (property != null && property.getReturnType().isMarkedNullable());
 		}
 	}
 

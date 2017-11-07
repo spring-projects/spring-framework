@@ -22,10 +22,30 @@ import javax.servlet.jsp.tagext.BodyTagSupport;
 import org.springframework.lang.Nullable;
 
 /**
- * JSP tag for collecting arguments and passing them to an {@link ArgumentAware}
- * ancestor in the tag hierarchy.
+ * The {@code <argument>} tag is based on the JSTL {@code fmt:param} tag.
+ * The purpose is to support arguments inside the message and theme tags.
  *
  * <p>This tag must be nested under an argument aware tag.
+ *
+ * <table>
+ * <caption>Attribute Summary</caption>
+ * <thead>
+ * <tr>
+ * <th class="colFirst">Attribute</th>
+ * <th class="colOne">Required?</th>
+ * <th class="colOne">Runtime Expression?</th>
+ * <th class="colLast">Description</th>
+ * </tr>
+ * </thead>
+ * <tbody>
+ * <tr class="altColor">
+ * <td>value</p></td>
+ * <td>false</p></td>
+ * <td>true</p></td>
+ * <td>The value of the argument.</p></td>
+ * </tr>
+ * </tbody>
+ * </table>
  *
  * @author Nicholas Williams
  * @since 4.0

@@ -93,6 +93,7 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 	 * for example to hold a single shared EJB component instance.
 	 */
 	@Override
+	@Nullable
 	protected Object doInvoke(MethodInvocation invocation) throws Throwable {
 		Object ejb = null;
 		try {

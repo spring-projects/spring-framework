@@ -94,11 +94,13 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 	}
 
 	@Override
+	@Nullable
 	protected Boolean matchSuperClass(String superClassName) {
 		return hasAnnotation(superClassName);
 	}
 
 	@Override
+	@Nullable
 	protected Boolean matchInterface(String interfaceName) {
 		return hasAnnotation(interfaceName);
 	}

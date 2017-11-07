@@ -129,6 +129,7 @@ public class ResourceAdapterFactoryBean implements FactoryBean<ResourceAdapter>,
 
 
 	@Override
+	@Nullable
 	public ResourceAdapter getObject() {
 		return this.resourceAdapter;
 	}

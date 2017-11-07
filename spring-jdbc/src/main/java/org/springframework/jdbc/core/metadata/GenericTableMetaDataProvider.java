@@ -124,6 +124,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	}
 
 	@Override
+	@Nullable
 	public String getSimpleQueryForGetGeneratedKey(String tableName, String keyColumnName) {
 		return null;
 	}
@@ -222,6 +223,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	}
 
 	@Override
+	@Nullable
 	public String tableNameToUse(@Nullable String tableName) {
 		if (tableName == null) {
 			return null;
@@ -238,6 +240,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	}
 
 	@Override
+	@Nullable
 	public String catalogNameToUse(@Nullable String catalogName) {
 		if (catalogName == null) {
 			return null;
@@ -254,6 +257,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	}
 
 	@Override
+	@Nullable
 	public String schemaNameToUse(@Nullable String schemaName) {
 		if (schemaName == null) {
 			return null;
@@ -270,11 +274,13 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	}
 
 	@Override
+	@Nullable
 	public String metaDataCatalogNameToUse(@Nullable String catalogName) {
 		return catalogNameToUse(catalogName);
 	}
 
 	@Override
+	@Nullable
 	public String metaDataSchemaNameToUse(@Nullable String schemaName) {
 		if (schemaName == null) {
 			return schemaNameToUse(getDefaultSchema());

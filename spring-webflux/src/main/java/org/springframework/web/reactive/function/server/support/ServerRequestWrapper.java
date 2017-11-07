@@ -29,12 +29,13 @@ import java.util.OptionalLong;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
-import org.springframework.http.server.reactive.PathContainer;
+import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
@@ -42,6 +43,7 @@ import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.server.HandlerFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.server.WebSession;
+import org.springframework.web.util.UriBuilder;
 
 /**
  * Implementation of the {@link ServerRequest} interface that can be subclassed
@@ -79,8 +81,18 @@ public class ServerRequestWrapper implements ServerRequest {
 	}
 
 	@Override
+	public String methodName() {
+		return this.delegate.methodName();
+	}
+
+	@Override
 	public URI uri() {
 		return this.delegate.uri();
+	}
+
+	@Override
+	public UriBuilder uriBuilder() {
+		return this.delegate.uriBuilder();
 	}
 
 	@Override
@@ -119,12 +131,22 @@ public class ServerRequestWrapper implements ServerRequest {
 	}
 
 	@Override
+	public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference) {
+		return this.delegate.bodyToMono(typeReference);
+	}
+
+	@Override
 	public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
 		return this.delegate.bodyToFlux(elementClass);
 	}
 
 	@Override
-	public <T> Optional<T> attribute(String name) {
+	public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference) {
+		return this.delegate.bodyToFlux(typeReference);
+	}
+
+	@Override
+	public Optional<Object> attribute(String name) {
 		return this.delegate.attribute(name);
 	}
 

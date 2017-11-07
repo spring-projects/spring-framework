@@ -59,7 +59,6 @@ public class PrintingResultHandler implements ResultHandler {
 
 	private static final String MISSING_CHARACTER_ENCODING = "<no character encoding set>";
 
-
 	private final ResultValuePrinter printer;
 
 
@@ -148,9 +147,14 @@ public class PrintingResultHandler implements ResultHandler {
 
 	protected final Map<String, Object> getSessionAttributes(MockHttpServletRequest request) {
 		HttpSession session = request.getSession(false);
-		return session == null ? Collections.emptyMap() :
-				Collections.list(session.getAttributeNames()).stream()
-						.collect(Collectors.toMap(n -> n, session::getAttribute));
+		if (session != null) {
+			Enumeration<String> attrNames = session.getAttributeNames();
+			if (attrNames != null) {
+				return Collections.list(attrNames).stream().
+						collect(Collectors.toMap(n -> n, session::getAttribute));
+			}
+		}
+		return Collections.emptyMap();
 	}
 
 	protected void printAsyncResult(MvcResult result) throws Exception {
@@ -169,7 +173,9 @@ public class PrintingResultHandler implements ResultHandler {
 	/**
 	 * Print the handler.
 	 */
-	protected void printHandler(@Nullable Object handler, @Nullable HandlerInterceptor[] interceptors) throws Exception {
+	protected void printHandler(@Nullable Object handler, @Nullable HandlerInterceptor[] interceptors)
+			throws Exception {
+
 		if (handler == null) {
 			this.printer.printValue("Type", null);
 		}

@@ -17,14 +17,17 @@
 package org.springframework.web.reactive.handler;
 
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeansException;
-import org.springframework.http.server.reactive.PathContainer;
+import org.springframework.http.server.PathContainer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
 
@@ -51,8 +54,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	private boolean lazyInitHandlers = false;
 
-	@Nullable
-	private PathPatternRegistry<Object> patternRegistry;
+	private final Map<PathPattern, Object> handlerMap = new LinkedHashMap<>();
 
 
 	/**
@@ -70,12 +72,12 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	}
 
 	/**
-	 * Return the registered handlers as an unmodifiable Map, with the registered path
-	 * pattern as key and the handler object (or handler bean name in case of a lazy-init handler)
-	 * as value.
+	 * Return a read-only view of registered path patterns and handlers which may
+	 * may be an actual handler instance or the bean name of lazily initialized
+	 * handler.
 	 */
 	public final Map<PathPattern, Object> getHandlerMap() {
-		return (this.patternRegistry != null ? this.patternRegistry.getPatternsMap() : Collections.emptyMap());
+		return Collections.unmodifiableMap(this.handlerMap);
 	}
 
 
@@ -111,25 +113,27 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @see org.springframework.web.util.pattern.PathPattern
 	 */
 	@Nullable
-	protected Object lookupHandler(PathContainer lookupPath, ServerWebExchange exchange) throws Exception {
-		if (this.patternRegistry != null) {
-			PathMatchResult<Object> bestMatch = this.patternRegistry.findFirstMatch(lookupPath);
-			if (bestMatch != null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Matching patterns for request [" + lookupPath + "] are " + bestMatch);
-				}
-				PathContainer pathWithinMapping = bestMatch.getPattern().extractPathWithinPattern(lookupPath);
-				Object handler = bestMatch.getHandler();
-				return handleMatch(handler, bestMatch.getPattern(), pathWithinMapping, exchange);
-			}
-		}
+	protected Object lookupHandler(PathContainer lookupPath, ServerWebExchange exchange)
+			throws Exception {
 
-		// No handler found...
-		return null;
+		return this.handlerMap.entrySet().stream()
+				.filter(entry -> entry.getKey().matches(lookupPath))
+				.sorted((entry1, entry2) ->
+						PathPattern.SPECIFICITY_COMPARATOR.compare(entry1.getKey(), entry2.getKey()))
+				.findFirst()
+				.map(entry -> {
+					PathPattern pattern = entry.getKey();
+					if (logger.isDebugEnabled()) {
+						logger.debug("Matching pattern for request [" + lookupPath + "] is " + pattern);
+					}
+					PathContainer pathWithinMapping = pattern.extractPathWithinPattern(lookupPath);
+					return handleMatch(entry.getValue(), pattern, pathWithinMapping, exchange);
+				})
+				.orElse(null);
 	}
 
 	private Object handleMatch(Object handler, PathPattern bestMatch, PathContainer pathWithinMapping,
-			ServerWebExchange exchange) throws Exception {
+			ServerWebExchange exchange) {
 
 		// Bean name or resolved handler?
 		if (handler instanceof String) {
@@ -152,10 +156,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * for example to enforce specific preconditions expressed in URL mappings.
 	 * @param handler the handler object to validate
 	 * @param exchange current exchange
-	 * @throws Exception if validation failed
 	 */
 	@SuppressWarnings("UnusedParameters")
-	protected void validateHandler(Object handler, ServerWebExchange exchange) throws Exception {
+	protected void validateHandler(Object handler, ServerWebExchange exchange) {
 	}
 
 	/**
@@ -165,7 +168,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @throws BeansException if the handler couldn't be registered
 	 * @throws IllegalStateException if there is a conflicting handler registered
 	 */
-	protected void registerHandler(String[] urlPaths, String beanName) throws BeansException, IllegalStateException {
+	protected void registerHandler(String[] urlPaths, String beanName)
+			throws BeansException, IllegalStateException {
+
 		Assert.notNull(urlPaths, "URL path array must not be null");
 		for (String urlPath : urlPaths) {
 			registerHandler(urlPath, beanName);
@@ -180,11 +185,26 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @throws BeansException if the handler couldn't be registered
 	 * @throws IllegalStateException if there is a conflicting handler registered
 	 */
-	protected void registerHandler(String urlPath, Object handler) throws BeansException, IllegalStateException {
+	protected void registerHandler(String urlPath, Object handler)
+			throws BeansException, IllegalStateException {
+
 		Assert.notNull(urlPath, "URL path must not be null");
 		Assert.notNull(handler, "Handler object must not be null");
 		Object resolvedHandler = handler;
 
+		// Parse path pattern
+		urlPath = prependLeadingSlash(urlPath);
+		PathPattern pattern = getPathPatternParser().parse(urlPath);
+		if (this.handlerMap.containsKey(pattern)) {
+			Object existingHandler = this.handlerMap.get(pattern);
+			if (existingHandler != null) {
+				if (existingHandler != resolvedHandler) {
+					throw new IllegalStateException(
+							"Cannot map " + getHandlerDescription(handler) + " to [" + urlPath + "]: " +
+							"there is already " + getHandlerDescription(existingHandler) + " mapped.");
+				}
+			}
+		}
 
 		// Eagerly resolve handler if referencing singleton via name.
 		if (!this.lazyInitHandlers && handler instanceof String) {
@@ -193,32 +213,26 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 				resolvedHandler = obtainApplicationContext().getBean(handlerName);
 			}
 		}
-		if (this.patternRegistry == null) {
-			this.patternRegistry = new PathPatternRegistry<>(getPathPatternParser());
-		}
 
-		Map<PathPattern, Object> patternsMap = this.patternRegistry.getPatternsMap();
-		if (patternsMap.containsKey(urlPath)) {
-			Object mappedHandler = patternsMap.get(urlPath);
-			if (mappedHandler != null) {
-				if (mappedHandler != resolvedHandler) {
-					throw new IllegalStateException(
-							"Cannot map " + getHandlerDescription(handler) + " to URL path [" + urlPath +
-									"]: There is already " + getHandlerDescription(mappedHandler) + " mapped.");
-				}
-			}
-		}
-		else {
-			this.patternRegistry.register(urlPath, resolvedHandler);
-		}
-
+		// Register resolved handler
+		this.handlerMap.put(pattern, resolvedHandler);
 		if (logger.isInfoEnabled()) {
 			logger.info("Mapped URL path [" + urlPath + "] onto " + getHandlerDescription(handler));
 		}
 	}
 
+	private static String prependLeadingSlash(String pattern) {
+		if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
+			return "/" + pattern;
+		}
+		else {
+			return pattern;
+		}
+	}
+
 	private String getHandlerDescription(Object handler) {
-		return "handler " + (handler instanceof String ? "'" + handler + "'" : "of type [" + handler.getClass() + "]");
+		return "handler " + (handler instanceof String ?
+				"'" + handler + "'" : "of type [" + handler.getClass() + "]");
 	}
 
 }

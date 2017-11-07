@@ -38,8 +38,8 @@ import org.springframework.web.util.TagUtils;
 import org.springframework.web.util.UriUtils;
 
 /**
- * JSP tag for creating URLs. Modeled after the JSTL c:url tag with backwards
- * compatibility in mind.
+ * The {@code <url>} tag creates URLs. Modeled after the JSTL c:url tag with
+ * backwards compatibility in mind.
  *
  * <p>Enhancements to the JSTL functionality include:
  * <ul>
@@ -68,8 +68,67 @@ import org.springframework.web.util.UriUtils;
  * <pre class="code">&lt;spring:url value="/url/path/{variableName}"&gt;
  *   &lt;spring:param name="variableName" value="more than JSTL c:url" /&gt;
  * &lt;/spring:url&gt;</pre>
- * Results in:
+ *
+ * <p>The above results in:
  * {@code /currentApplicationContext/url/path/more%20than%20JSTL%20c%3Aurl}
+ *
+ * <table>
+ * <caption>Attribute Summary</caption>
+ * <thead>
+ * <tr>
+ * <th class="colFirst">Attribute</th>
+ * <th class="colOne">Required?</th>
+ * <th class="colOne">Runtime Expression?</th>
+ * <th class="colLast">Description</th>
+ * </tr>
+ * </thead>
+ * <tbody>
+ * <tr class="altColor">
+ * <td>value</p></td>
+ * <td>true</p></td>
+ * <td>true</p></td>
+ * <td>The URL to build. This value can include template {placeholders} that are
+ * replaced with the URL encoded value of the named parameter. Parameters
+ * must be defined using the param tag inside the body of this tag.</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td>context</p></td>
+ * <td>false</p></td>
+ * <td>true</p></td>
+ * <td>Specifies a remote application context path.
+ * The default is the current application context path.</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td>var</p></td>
+ * <td>false</p></td>
+ * <td>true</p></td>
+ * <td>The name of the variable to export the URL value to.
+ * If not specified the URL is written as output.</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td>scope</p></td>
+ * <td>false</p></td>
+ * <td>true</p></td>
+ * <td>The scope for the var. 'application', 'session', 'request' and 'page'
+ * scopes are supported. Defaults to page scope. This attribute has no
+ * effect unless the var attribute is also defined.</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td>htmlEscape</p></td>
+ * <td>false</p></td>
+ * <td>true</p></td>
+ * <td>Set HTML escaping for this tag, as a boolean value. Overrides the
+ * default HTML escaping setting for the current page.</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td>javaScriptEscape</p></td>
+ * <td>false</p></td>
+ * <td>true</p></td>
+ * <td>Set JavaScript escaping for this tag, as a boolean value.
+ * Default is false.</p></td>
+ * </tr>
+ * </tbody>
+ * </table>
  *
  * @author Scott Andrews
  * @since 3.0
@@ -203,7 +262,6 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	/**
 	 * Build the URL for the tag from the tag attributes and parameters.
 	 * @return the URL value as a String
-	 * @throws JspException
 	 */
 	String createUrl() throws JspException {
 		Assert.state(this.value != null, "No value set");

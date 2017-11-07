@@ -30,6 +30,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.function.BodyInserters;
 
 /**
@@ -129,6 +130,7 @@ class ResourceHandlerFunction implements HandlerFunction<ServerResponse> {
 		}
 
 		@Override
+		@Nullable
 		public String getFilename() {
 			return this.delegate.getFilename();
 		}

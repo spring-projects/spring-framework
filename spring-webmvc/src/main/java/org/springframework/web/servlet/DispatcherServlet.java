@@ -779,12 +779,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	@Nullable
 	public final ThemeSource getThemeSource() {
-		if (getWebApplicationContext() instanceof ThemeSource) {
-			return (ThemeSource) getWebApplicationContext();
-		}
-		else {
-			return null;
-		}
+		return (getWebApplicationContext() instanceof ThemeSource ? (ThemeSource) getWebApplicationContext() : null);
 	}
 
 	/**
@@ -795,6 +790,21 @@ public class DispatcherServlet extends FrameworkServlet {
 	@Nullable
 	public final MultipartResolver getMultipartResolver() {
 		return this.multipartResolver;
+	}
+
+	/**
+	 * Return the configured {@link HandlerMapping} beans that were detected by
+	 * type in the {@link WebApplicationContext} or initialized based on the
+	 * default set of strategies from {@literal DispatcherServlet.properties}.
+	 * <p><strong>Note:</strong> This method may return {@code null} if invoked
+	 * prior to {@link #onRefresh(ApplicationContext)}.
+	 * @return an immutable list with the configured mappings, or {@code null}
+	 * if not initialized yet
+	 * @since 5.0
+	 */
+	@Nullable
+	public final List<HandlerMapping> getHandlerMappings() {
+		return (this.handlerMappings != null ? Collections.unmodifiableList(this.handlerMappings) : null);
 	}
 
 	/**

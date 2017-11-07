@@ -18,6 +18,7 @@ package org.springframework.expression.spel.support;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -103,6 +104,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	 * </ol>
 	 */
 	@Override
+	@Nullable
 	public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
 			List<TypeDescriptor> argumentTypes) throws AccessException {
 
@@ -227,6 +229,14 @@ public class ReflectiveMethodResolver implements MethodResolver {
 			}
 			// Also expose methods from java.lang.Class itself
 			result.addAll(Arrays.asList(getMethods(Class.class)));
+			return result;
+		}
+		else if (Proxy.isProxyClass(type)) {
+			Set<Method> result = new LinkedHashSet<>();
+			// Expose interface methods (not proxy-declared overrides) for proper vararg introspection
+			for (Class<?> ifc : type.getInterfaces()) {
+				result.addAll(Arrays.asList(getMethods(ifc)));
+			}
 			return result;
 		}
 		else {

@@ -153,7 +153,6 @@ public class AnnotatedElementUtils {
 	 * @see #getMetaAnnotationTypes(AnnotatedElement, String)
 	 * @see #hasMetaAnnotationTypes
 	 */
-	@Nullable
 	public static Set<String> getMetaAnnotationTypes(AnnotatedElement element, Class<? extends Annotation> annotationType) {
 		Assert.notNull(element, "AnnotatedElement must not be null");
 		Assert.notNull(annotationType, "'annotationType' must not be null");
@@ -1114,7 +1113,7 @@ public class AnnotatedElementUtils {
 								processor.alwaysProcesses()) {
 							T result = processor.process(element, annotation, metaDepth);
 							if (result != null) {
-								if (processor.aggregates() && metaDepth == 0) {
+								if (aggregatedResults != null && metaDepth == 0) {
 									aggregatedResults.add(result);
 								}
 								else {
@@ -1126,7 +1125,7 @@ public class AnnotatedElementUtils {
 						else if (currentAnnotationType == containerType) {
 							for (Annotation contained : getRawAnnotationsFromContainer(element, annotation)) {
 								T result = processor.process(element, contained, metaDepth);
-								if (result != null) {
+								if (aggregatedResults != null && result != null) {
 									// No need to post-process since repeatable annotations within a
 									// container cannot be composed annotations.
 									aggregatedResults.add(result);
@@ -1144,7 +1143,7 @@ public class AnnotatedElementUtils {
 								containerType, processor, visited, metaDepth + 1);
 						if (result != null) {
 							processor.postProcess(currentAnnotationType, annotation, result);
-							if (processor.aggregates() && metaDepth == 0) {
+							if (aggregatedResults != null && metaDepth == 0) {
 								aggregatedResults.add(result);
 							}
 							else {
@@ -1154,7 +1153,7 @@ public class AnnotatedElementUtils {
 					}
 				}
 
-				if (processor.aggregates()) {
+				if (aggregatedResults != null) {
 					// Prepend to support top-down ordering within class hierarchies
 					processor.getAggregatedResults().addAll(0, aggregatedResults);
 				}
@@ -1237,9 +1236,10 @@ public class AnnotatedElementUtils {
 		return null;
 	}
 
-	private static <T> T searchOnInterfaces(Method method, Class<? extends Annotation> annotationType,
-			String annotationName, Class<? extends Annotation> containerType, Processor<T> processor,
-			Set<AnnotatedElement> visited, int metaDepth, Class<?>[] ifcs) {
+	@Nullable
+	private static <T> T searchOnInterfaces(Method method, @Nullable Class<? extends Annotation> annotationType,
+			@Nullable String annotationName, @Nullable Class<? extends Annotation> containerType,
+			Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth, Class<?>[] ifcs) {
 
 		for (Class<?> iface : ifcs) {
 			if (AnnotationUtils.isInterfaceWithAnnotatedMethods(iface)) {
@@ -1495,7 +1495,6 @@ public class AnnotatedElementUtils {
 	static class AlwaysTrueBooleanAnnotationProcessor extends SimpleAnnotationProcessor<Boolean> {
 
 		@Override
-		@Nullable
 		public final Boolean process(@Nullable AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
 			return Boolean.TRUE;
 		}

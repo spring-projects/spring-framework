@@ -40,11 +40,12 @@ import org.springframework.web.context.request.NativeWebRequest;
  * {@code MediaTypeFileExtensionResolver} instances.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.2
  */
 public class ContentNegotiationManager implements ContentNegotiationStrategy, MediaTypeFileExtensionResolver {
 
-	private static final List<MediaType> MEDIA_TYPE_ALL = Collections.<MediaType>singletonList(MediaType.ALL);
+	private static final List<MediaType> MEDIA_TYPE_ALL = Collections.singletonList(MediaType.ALL);
 
 
 	private final List<ContentNegotiationStrategy> strategies = new ArrayList<>();
@@ -66,6 +67,7 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	 * A collection-based alternative to
 	 * {@link #ContentNegotiationManager(ContentNegotiationStrategy...)}.
 	 * @param strategies the strategies to use
+	 * @since 3.2.2
 	 */
 	public ContentNegotiationManager(Collection<ContentNegotiationStrategy> strategies) {
 		Assert.notEmpty(strategies, "At least one ContentNegotiationStrategy is expected");
@@ -96,7 +98,7 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	/**
 	 * Find a {@code ContentNegotiationStrategy} of the given type.
 	 * @param strategyType the strategy type
-	 * @return the first matching strategy or {@code null}.
+	 * @return the first matching strategy, or {@code null} if none
 	 * @since 4.3
 	 */
 	@SuppressWarnings("unchecked")

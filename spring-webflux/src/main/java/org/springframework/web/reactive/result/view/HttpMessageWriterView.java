@@ -113,7 +113,9 @@ public class HttpMessageWriterView implements View {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Mono<Void> render(@Nullable Map<String, ?> model, @Nullable MediaType contentType, ServerWebExchange exchange) {
+	public Mono<Void> render(@Nullable Map<String, ?> model, @Nullable MediaType contentType,
+			ServerWebExchange exchange) {
+
 		Object value = getObjectToRender(model);
 		return (value != null) ?
 				write(value, contentType, exchange) :

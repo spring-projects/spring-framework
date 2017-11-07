@@ -127,6 +127,7 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 
 	// Redefined with public visibility.
 	@Override
+	@Nullable
 	public Class<?> getPropertyType(String propertyPath) {
 		return null;
 	}
@@ -141,6 +142,7 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 	 * accessor method failed
 	 */
 	@Override
+	@Nullable
 	public abstract Object getPropertyValue(String propertyName) throws BeansException;
 
 	/**

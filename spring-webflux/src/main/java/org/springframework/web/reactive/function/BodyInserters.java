@@ -32,10 +32,11 @@ import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerSentEvent;
-import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -57,7 +58,7 @@ public abstract class BodyInserters {
 			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
 
 	private static final ResolvableType MULTIPART_VALUE_TYPE = ResolvableType.forClassWithGenerics(
-			MultiValueMap.class, String.class, Part.class);
+			MultiValueMap.class, String.class, Object.class);
 
 	private static final BodyInserter<Void, ReactiveHttpOutputMessage> EMPTY =
 					(response, context) -> response.setComplete();
@@ -149,6 +150,9 @@ public abstract class BodyInserters {
 
 	/**
 	 * Return a {@code BodyInserter} that writes the given {@code ServerSentEvent} publisher.
+	 * <p>Note that a SSE {@code BodyInserter} can also be obtained by passing a stream of strings
+	 * or POJOs (to be encoded as JSON) to {@link #fromPublisher(Publisher, Class)}, and specifying a
+	 * {@link MediaType#TEXT_EVENT_STREAM text/event-stream} Content-Type.
 	 * @param eventsPublisher the {@code ServerSentEvent} publisher to write to the response body
 	 * @param <T> the type of the elements contained in the {@link ServerSentEvent}
 	 * @return a {@code BodyInserter} that writes a {@code ServerSentEvent} publisher
@@ -174,105 +178,92 @@ public abstract class BodyInserters {
 	}
 
 	/**
-	 * Return a {@code BodyInserter} that writes the given {@code Publisher} publisher as
-	 * Server-Sent Events.
-	 * @param eventsPublisher the publisher to write to the response body as Server-Sent Events
-	 * @param eventClass the class of event contained in the publisher
-	 * @param <T> the type of the elements contained in the publisher
-	 * @return a {@code BodyInserter} that writes the given {@code Publisher} publisher as
-	 * Server-Sent Events
-	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
-	 */
-	// Note that the returned BodyInserter is parameterized to ServerHttpResponse, not
-	// ReactiveHttpOutputMessage like other methods, since sending SSEs only typically happens on
-	// the server-side
-	public static <T, S extends Publisher<T>> BodyInserter<S, ServerHttpResponse> fromServerSentEvents(S eventsPublisher,
-			Class<T> eventClass) {
-
-		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
-		Assert.notNull(eventClass, "'eventClass' must not be null");
-		return fromServerSentEvents(eventsPublisher, ResolvableType.forClass(eventClass));
-	}
-
-	/**
-	 * Return a {@code BodyInserter} that writes the given {@code Publisher} publisher as
-	 * Server-Sent Events.
-	 * @param eventsPublisher the publisher to write to the response body as Server-Sent Events
-	 * @param typeReference the type of event contained in the publisher
-	 * @param <T> the type of the elements contained in the publisher
-	 * @return a {@code BodyInserter} that writes the given {@code Publisher} publisher as
-	 * Server-Sent Events
-	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
-	 */
-	// Note that the returned BodyInserter is parameterized to ServerHttpResponse, not
-	// ReactiveHttpOutputMessage like other methods, since sending SSEs only typically happens on
-	// the server-side
-	public static <T, S extends Publisher<T>> BodyInserter<S, ServerHttpResponse> fromServerSentEvents(S eventsPublisher,
-			ParameterizedTypeReference<T> typeReference) {
-
-		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
-		Assert.notNull(typeReference, "'typeReference' must not be null");
-		return fromServerSentEvents(eventsPublisher,
-				ResolvableType.forType(typeReference.getType()));
-	}
-
-	static <T, S extends Publisher<T>> BodyInserter<S, ServerHttpResponse> fromServerSentEvents(S eventsPublisher,
-			ResolvableType eventType) {
-
-		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
-		Assert.notNull(eventType, "'eventType' must not be null");
-		return (serverResponse, context) -> {
-			HttpMessageWriter<T> messageWriter =
-					findMessageWriter(context, SERVER_SIDE_EVENT_TYPE, MediaType.TEXT_EVENT_STREAM);
-			return context.serverRequest()
-					.map(serverRequest -> messageWriter.write(eventsPublisher, eventType,
-							eventType, MediaType.TEXT_EVENT_STREAM, serverRequest,
-							serverResponse, context.hints()))
-					.orElseGet(() -> messageWriter.write(eventsPublisher, eventType,
-							MediaType.TEXT_EVENT_STREAM, serverResponse, context.hints()));
-		};
-	}
-
-	/**
-	 * Return a {@code BodyInserter} that writes the given {@code MultiValueMap} as URL-encoded
-	 * form data.
+	 * Return a {@link FormInserter} that writes the given {@code MultiValueMap} as URL-encoded
+     * form data. Note that the returned inserter allows for additional entries to be added via
+     * {@link FormInserter#with(String, Object)}.
+	 *
+	 * <p><strong>Note:</strong> you can also use the {@code syncBody(Object)}
+	 * method in the request builders of both the {@code WebClient} and
+	 * {@code WebTestClient}. In that case setting the content type is not
+	 * required. Just make sure the map contains String values only.
+	 *
 	 * @param formData the form data to write to the output message
-	 * @return a {@code BodyInserter} that writes form data
+	 * @return a {@code FormInserter} that writes form data
 	 */
-	// Note that the returned BodyInserter is parameterized to ClientHttpRequest, not
+	// Note that the returned FormInserter is parameterized to ClientHttpRequest, not
 	// ReactiveHttpOutputMessage like other methods, since sending form data only typically happens
-	// on the server-side
-	public static BodyInserter<MultiValueMap<String, String>, ClientHttpRequest> fromFormData(
-			MultiValueMap<String, String> formData) {
+	// on the client-side
+	public static FormInserter<String> fromFormData(MultiValueMap<String, String> formData) {
 
 		Assert.notNull(formData, "'formData' must not be null");
-		return (outputMessage, context) -> {
-			HttpMessageWriter<MultiValueMap<String, String>> messageWriter =
-					findMessageWriter(context, FORM_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
-			return messageWriter.write(Mono.just(formData), FORM_TYPE,
-					MediaType.APPLICATION_FORM_URLENCODED, outputMessage, context.hints());
-		};
+
+		return DefaultFormInserter.forFormData().with(formData);
 	}
 
 	/**
-	 * Return a {@code BodyInserter} that writes the given {@code MultiValueMap} as Multipart
-	 * data.
+	 * Return a {@link FormInserter} that writes the given key-value pair as URL-encoded
+	 * form data. Note that the returned inserter allows for additional entries to be added via
+	 * {@link FormInserter#with(String, Object)}.
+	 * @param key the key to add to the form
+	 * @param value the value to add to the form
+	 * @return a {@code FormInserter} that writes form data
+	 */
+	// Note that the returned FormInserter is parameterized to ClientHttpRequest, not
+	// ReactiveHttpOutputMessage like other methods, since sending form data only typically happens
+	// on the client-side
+	public static FormInserter<String> fromFormData(String key, String value) {
+		Assert.notNull(key, "'key' must not be null");
+		Assert.notNull(value, "'value' must not be null");
+
+		return DefaultFormInserter.forFormData().with(key, value);
+	}
+
+	/**
+	 * Return a {@code FormInserter} that writes the given {@code MultiValueMap}
+	 * as multipart data. The values in the {@code MultiValueMap} can be any
+	 * Object representing the body of the part, or an
+	 * {@link org.springframework.http.HttpEntity HttpEntity} representing a part
+	 * with body and headers. The {@code MultiValueMap} can be built conveniently
+	 * using {@link org.springframework.http.client.MultipartBodyBuilder
+	 * MultipartBodyBuilder}. Also the returned inserter allows for additional
+	 * entries to be added via {@link FormInserter#with(String, Object)}.
+	 *
+	 * <p><strong>Note:</strong> you can also use the {@code syncBody(Object)}
+	 * method in the request builders of both the {@code WebClient} and
+	 * {@code WebTestClient}. In that case setting the content type is optional.
+	 * Just make sure the {@code MultiValueMap} contains at least one non-String
+	 * value or otherwise it would be interpreted as plan form data.
+	 *
 	 * @param multipartData the form data to write to the output message
-	 * @return a {@code BodyInserter} that writes form data
+	 * @return a {@code BodyInserter} that writes multipart data
 	 */
 	// Note that the returned BodyInserter is parameterized to ClientHttpRequest, not
 	// ReactiveHttpOutputMessage like other methods, since sending form data only typically happens
-	// on the server-side
-	public static BodyInserter<MultiValueMap<String, ?>, ClientHttpRequest> fromMultipartData(
-			MultiValueMap<String, ?> multipartData) {
+	// on the client-side
+	public static <T> FormInserter<T> fromMultipartData(MultiValueMap<String, T> multipartData) {
 
 		Assert.notNull(multipartData, "'multipartData' must not be null");
-		return (outputMessage, context) -> {
-			HttpMessageWriter<MultiValueMap<String, ?>> messageWriter =
-					findMessageWriter(context, MULTIPART_VALUE_TYPE, MediaType.MULTIPART_FORM_DATA);
-			return messageWriter.write(Mono.just(multipartData), FORM_TYPE,
-					MediaType.MULTIPART_FORM_DATA, outputMessage, context.hints());
-		};
+
+		return DefaultFormInserter.<T>forMultipartData().with(multipartData);
+	}
+
+	/**
+	 * A variant of {@link #fromMultipartData(MultiValueMap)} for adding
+	 * parts as name-value pairs in-line vs building a {@code MultiValueMap}
+	 * and passing it in.
+	 * @param key the part name
+	 * @param value the part value, an Object or {@code HttpEntity}
+	 * @return a {@code FormInserter} that can writes the provided multipart
+	 * data and also allows adding more parts
+	 */
+	// Note that the returned BodyInserter is parameterized to ClientHttpRequest, not
+	// ReactiveHttpOutputMessage like other methods, since sending form data only typically happens
+	// on the client-side
+	public static <T> FormInserter<T> fromMultipartData(String key, T value) {
+		Assert.notNull(key, "'key' must not be null");
+		Assert.notNull(value, "'value' must not be null");
+
+		return DefaultFormInserter.<T>forMultipartData().with(key, value);
 	}
 
 	/**
@@ -338,4 +329,71 @@ public abstract class BodyInserters {
 		return (HttpMessageWriter<T>) messageWriter;
 	}
 
+
+	/**
+	 * Sub-interface of {@link BodyInserter} that allows for additional (multipart) form data to be
+	 * added.
+	 */
+	public interface FormInserter<T> extends
+			BodyInserter<MultiValueMap<String, T>, ClientHttpRequest> {
+
+		/**
+		 * Adds the specified key-value pair to the form.
+		 * @param key the key to be added
+		 * @param value the value to be added
+		 * @return this inserter
+		 */
+		FormInserter<T> with(String key, @Nullable T value);
+
+		/**
+		 * Adds the specified values to the form.
+		 * @param values the values to be added
+		 * @return this inserter
+		 */
+		FormInserter<T> with(MultiValueMap<String, T> values);
+
+	}
+
+	private static class DefaultFormInserter<T> implements FormInserter<T> {
+
+		private final MultiValueMap<String, T> data = new LinkedMultiValueMap<>();
+
+		private final ResolvableType type;
+
+		private final MediaType mediaType;
+
+
+		private DefaultFormInserter(ResolvableType type, MediaType mediaType) {
+			this.type = type;
+			this.mediaType = mediaType;
+		}
+
+		public static FormInserter<String> forFormData() {
+			return new DefaultFormInserter<>(FORM_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
+		}
+
+		public static <T> FormInserter<T> forMultipartData() {
+			return new DefaultFormInserter<>(MULTIPART_VALUE_TYPE, MediaType.MULTIPART_FORM_DATA);
+		}
+
+		@Override
+		public FormInserter<T> with(String key, @Nullable T value) {
+			this.data.add(key, value);
+			return this;
+		}
+
+		@Override
+		public FormInserter<T> with(MultiValueMap<String, T> values) {
+			this.data.addAll(values);
+			return this;
+		}
+
+		@Override
+		public Mono<Void> insert(ClientHttpRequest outputMessage, Context context) {
+			HttpMessageWriter<MultiValueMap<String, T>> messageWriter =
+					findMessageWriter(context, this.type, this.mediaType);
+			return messageWriter.write(Mono.just(this.data), this.type, this.mediaType,
+					outputMessage, context.hints());
+		}
+	}
 }

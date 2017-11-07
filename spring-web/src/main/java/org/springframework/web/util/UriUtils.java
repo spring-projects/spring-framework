@@ -229,8 +229,11 @@ public abstract class UriUtils {
 	 * @return the encoded query parameter
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
-	public static String encodeQueryParam(String queryParam, String encoding) throws UnsupportedEncodingException {
-		return HierarchicalUriComponents.encodeUriComponent(queryParam, encoding, HierarchicalUriComponents.Type.QUERY_PARAM);
+	public static String encodeQueryParam(String queryParam, String encoding)
+			throws UnsupportedEncodingException {
+
+		return HierarchicalUriComponents.encodeUriComponent(
+				queryParam, encoding, HierarchicalUriComponents.Type.QUERY_PARAM);
 	}
 
 	/**
@@ -241,7 +244,8 @@ public abstract class UriUtils {
 	 * @since 5.0
 	 */
 	public static String encodeQueryParam(String queryParam, Charset charset) {
-		return HierarchicalUriComponents.encodeUriComponent(queryParam, charset, HierarchicalUriComponents.Type.QUERY_PARAM);
+		return HierarchicalUriComponents.encodeUriComponent(
+				queryParam, charset, HierarchicalUriComponents.Type.QUERY_PARAM);
 	}
 
 	/**
@@ -251,8 +255,11 @@ public abstract class UriUtils {
 	 * @return the encoded fragment
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
-	public static String encodeFragment(String fragment, String encoding) throws UnsupportedEncodingException {
-		return HierarchicalUriComponents.encodeUriComponent(fragment, encoding, HierarchicalUriComponents.Type.FRAGMENT);
+	public static String encodeFragment(String fragment, String encoding)
+			throws UnsupportedEncodingException {
+
+		return HierarchicalUriComponents.encodeUriComponent(
+				fragment, encoding, HierarchicalUriComponents.Type.FRAGMENT);
 	}
 
 	/**
@@ -336,11 +343,12 @@ public abstract class UriUtils {
 	@Nullable
 	public static String extractFileExtension(String path) {
 		int end = path.indexOf('?');
+		int fragmentIndex = path.indexOf('#');
+		if (fragmentIndex != -1 && (end == -1 || fragmentIndex < end)) {
+			end = fragmentIndex;
+		}
 		if (end == -1) {
-			end = path.indexOf('#');
-			if (end == -1) {
-				end = path.length();
-			}
+			end = path.length();
 		}
 		int begin = path.lastIndexOf('/', end) + 1;
 		int paramIndex = path.indexOf(';', begin);
@@ -360,7 +368,7 @@ public abstract class UriUtils {
 	 * @return the encoded String
 	 * @since 5.0
 	 */
-	static Map<String, String> encodeUriVariables(Map<String, ?> uriVariables) {
+	public static Map<String, String> encodeUriVariables(Map<String, ?> uriVariables) {
 		Map<String, String> result = new LinkedHashMap<>(uriVariables.size());
 		uriVariables.forEach((key, value) -> {
 			String stringValue = (value != null ? value.toString() : "");
@@ -376,7 +384,7 @@ public abstract class UriUtils {
 	 * @return the encoded String
 	 * @since 5.0
 	 */
-	static Object[] encodeUriVariables(Object... uriVariables) {
+	public static Object[] encodeUriVariables(Object... uriVariables) {
 		return Arrays.stream(uriVariables)
 				.map(value -> {
 					String stringValue = (value != null ? value.toString() : "");

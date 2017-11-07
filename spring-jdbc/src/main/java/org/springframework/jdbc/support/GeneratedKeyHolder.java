@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.lang.Nullable;
 
 /**
  * Default implementation of the {@link KeyHolder} interface, to be used for
@@ -58,6 +59,7 @@ public class GeneratedKeyHolder implements KeyHolder {
 
 
 	@Override
+	@Nullable
 	public Number getKey() throws InvalidDataAccessApiUsageException, DataRetrievalFailureException {
 		if (this.keyList.size() == 0) {
 			return null;
@@ -85,6 +87,7 @@ public class GeneratedKeyHolder implements KeyHolder {
 	}
 
 	@Override
+	@Nullable
 	public Map<String, Object> getKeys() throws InvalidDataAccessApiUsageException {
 		if (this.keyList.size() == 0) {
 			return null;

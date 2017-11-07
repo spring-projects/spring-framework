@@ -32,7 +32,7 @@ package org.springframework.asm;
 /**
  * A visitor to visit a Java class. The methods of this class must be called in
  * the following order: <tt>visit</tt> [ <tt>visitSource</tt> ] [
- * <tt>visitOuterClass</tt> ] ( <tt>visitAnnotation</tt> |
+ * <tt>visitModule</tt> ][ <tt>visitOuterClass</tt> ] ( <tt>visitAnnotation</tt> |
  * <tt>visitTypeAnnotation</tt> | <tt>visitAttribute</tt> )* (
  * <tt>visitInnerClass</tt> | <tt>visitField</tt> | <tt>visitMethod</tt> )*
  * <tt>visitEnd</tt>.
@@ -43,7 +43,7 @@ public abstract class ClassVisitor {
 
     /**
      * The ASM API version implemented by this visitor. The value of this field
-     * must be one of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
+     * must be one of {@link Opcodes#ASM4}, {@link Opcodes#ASM5} or {@link Opcodes#ASM6}.
      */
     protected final int api;
 
@@ -58,7 +58,7 @@ public abstract class ClassVisitor {
      * 
      * @param api
      *            the ASM API version implemented by this visitor. Must be one
-     *            of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
+     *            of {@link Opcodes#ASM4}, {@link Opcodes#ASM5} or {@link Opcodes#ASM6}.
      */
     public ClassVisitor(final int api) {
         this(api, null);
@@ -69,13 +69,13 @@ public abstract class ClassVisitor {
      * 
      * @param api
      *            the ASM API version implemented by this visitor. Must be one
-     *            of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
+     *            of {@link Opcodes#ASM4}, {@link Opcodes#ASM5} or {@link Opcodes#ASM6}.
      * @param cv
      *            the class visitor to which this visitor must delegate method
      *            calls. May be null.
      */
     public ClassVisitor(final int api, final ClassVisitor cv) {
-        if (api != Opcodes.ASM4 && api != Opcodes.ASM5) {
+        if (api < Opcodes.ASM4 || api > Opcodes.ASM6) {
             throw new IllegalArgumentException();
         }
         this.api = api;
@@ -129,6 +129,28 @@ public abstract class ClassVisitor {
         if (cv != null) {
             cv.visitSource(source, debug);
         }
+    }
+
+    /**
+     * Visit the module corresponding to the class.
+     * @param name
+     *            module name
+     * @param access
+     *            module flags, among {@code ACC_OPEN}, {@code ACC_SYNTHETIC}
+     *            and {@code ACC_MANDATED}.
+     * @param version
+     *            module version or null.
+     * @return a visitor to visit the module values, or <tt>null</tt> if
+     *         this visitor is not interested in visiting this module.
+     */
+    public ModuleVisitor visitModule(String name, int access, String version) {
+        if (api < Opcodes.ASM6) {
+            throw new RuntimeException();
+        }
+        if (cv != null) {
+            return cv.visitModule(name, access, version);
+        }
+        return null;
     }
 
     /**

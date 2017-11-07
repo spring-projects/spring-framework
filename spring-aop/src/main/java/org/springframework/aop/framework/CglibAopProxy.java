@@ -257,7 +257,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			Method[] methods = proxySuperClass.getDeclaredMethods();
 			for (Method method : methods) {
 				int mod = method.getModifiers();
-				if (!Modifier.isStatic(mod)) {
+				if (!Modifier.isStatic(mod) && !Modifier.isPrivate(mod)) {
 					if (Modifier.isFinal(mod)) {
 						if (implementsInterface(method, ifcs)) {
 							logger.warn("Unable to proxy interface-implementing method [" + method + "] because " +
@@ -267,7 +267,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 								"Calls to this method will NOT be routed to the target instance and " +
 								"might lead to NPEs against uninitialized fields in the proxy instance.");
 					}
-					else if (!Modifier.isPublic(mod) && !Modifier.isProtected(mod) && !Modifier.isPrivate(mod) &&
+					else if (!Modifier.isPublic(mod) && !Modifier.isProtected(mod) &&
 							proxyClassLoader != null && proxySuperClass.getClassLoader() != proxyClassLoader) {
 						logger.info("Method [" + method + "] is package-visible across different ClassLoaders " +
 								"and cannot get proxied via CGLIB: Declare this method as public or protected " +

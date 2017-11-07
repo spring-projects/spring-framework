@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,13 @@ import org.springframework.web.socket.WebSocketSession;
  * Wrap a {@link org.springframework.web.socket.WebSocketSession WebSocketSession}
  * to guarantee only one thread can send messages at a time.
  *
- * <p>If a send is slow, subsequent attempts to send more messages from other
- * threads will not be able to acquire the flush lock and messages will be
- * buffered instead -- at that time, the specified buffer-size limit and
- * send-time limit will be checked and the session closed if the limits are
- * exceeded.
+ * <p>If a send is slow, subsequent attempts to send more messages from other threads
+ * will not be able to acquire the flush lock and messages will be buffered instead.
+ * At that time, the specified buffer-size limit and send-time limit will be checked
+ * and the session will be closed if the limits are exceeded.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0.3
  */
 public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorator {
@@ -52,7 +52,6 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 
 	private final int bufferSizeLimit;
 
-
 	private final Queue<WebSocketMessage<?>> buffer = new LinkedBlockingQueue<>();
 
 	private final AtomicInteger bufferSize = new AtomicInteger();
@@ -62,7 +61,6 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 	private volatile boolean limitExceeded;
 
 	private volatile boolean closeInProgress;
-
 
 	private final Lock flushLock = new ReentrantLock();
 
@@ -82,10 +80,33 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 	}
 
 
+	/**
+	 * Return the configured send-time limit (milliseconds).
+	 * @since 4.3.13
+	 */
+	public int getSendTimeLimit() {
+		return this.sendTimeLimit;
+	}
+
+	/**
+	 * Return the configured buffer-size limit (number of bytes).
+	 * @since 4.3.13
+	 */
+	public int getBufferSizeLimit() {
+		return this.bufferSizeLimit;
+	}
+
+	/**
+	 * Return the current buffer size (number of bytes).
+	 */
 	public int getBufferSize() {
 		return this.bufferSize.get();
 	}
 
+	/**
+	 * Return the time (milliseconds) since the current send started,
+	 * or 0 if no send is currently in progress.
+	 */
 	public long getTimeSinceSendStarted() {
 		long start = this.sendStartTime;
 		return (start > 0 ? (System.currentTimeMillis() - start) : 0);
@@ -105,7 +126,7 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 				if (logger.isTraceEnabled()) {
 					String text = String.format("Another send already in progress: " +
 							"session id '%s':, \"in-progress\" send time %d (ms), buffer size %d bytes",
-							getId(), getTimeSinceSendStarted(), this.bufferSize.get());
+							getId(), getTimeSinceSendStarted(), getBufferSize());
 					logger.trace(text);
 				}
 				checkSessionLimits();
@@ -142,18 +163,18 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 		return false;
 	}
 
-	private void checkSessionLimits() throws IOException {
+	private void checkSessionLimits() {
 		if (!shouldNotSend() && this.closeLock.tryLock()) {
 			try {
-				if (getTimeSinceSendStarted() > this.sendTimeLimit) {
+				if (getTimeSinceSendStarted() > getSendTimeLimit()) {
 					String format = "Message send time %d (ms) for session '%s' exceeded the allowed limit %d";
-					String reason = String.format(format, getTimeSinceSendStarted(), getId(), this.sendTimeLimit);
-					setLimitExceeded(reason);
+					String reason = String.format(format, getTimeSinceSendStarted(), getId(), getSendTimeLimit());
+					limitExceeded(reason);
 				}
-				else if (this.bufferSize.get() > this.bufferSizeLimit) {
+				else if (getBufferSize() > getBufferSizeLimit()) {
 					String format = "The send buffer size %d bytes for session '%s' exceeded the allowed limit %d";
-					String reason = String.format(format, this.bufferSize.get(), getId(), this.bufferSizeLimit);
-					setLimitExceeded(reason);
+					String reason = String.format(format, getBufferSize(), getId(), getBufferSizeLimit());
+					limitExceeded(reason);
 				}
 			}
 			finally {
@@ -162,7 +183,7 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 		}
 	}
 
-	private void setLimitExceeded(String reason) {
+	private void limitExceeded(String reason) {
 		this.limitExceeded = true;
 		throw new SessionLimitExceededException(reason, CloseStatus.SESSION_NOT_RELIABLE);
 	}

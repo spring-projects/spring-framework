@@ -107,7 +107,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 
 	@Override
 	public void initializeWithProcedureColumnMetaData(DatabaseMetaData databaseMetaData, @Nullable String catalogName,
-			@Nullable String schemaName, String procedureName) throws SQLException {
+			@Nullable String schemaName, @Nullable String procedureName) throws SQLException {
 
 		this.procedureColumnMetaDataUsed = true;
 		processProcedureColumns(databaseMetaData, catalogName, schemaName,  procedureName);
@@ -119,6 +119,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	@Override
+	@Nullable
 	public String procedureNameToUse(@Nullable String procedureName) {
 		if (procedureName == null) {
 			return null;
@@ -135,6 +136,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	@Override
+	@Nullable
 	public String catalogNameToUse(@Nullable String catalogName) {
 		if (catalogName == null) {
 			return null;
@@ -151,6 +153,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	@Override
+	@Nullable
 	public String schemaNameToUse(@Nullable String schemaName) {
 		if (schemaName == null) {
 			return null;
@@ -167,6 +170,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	@Override
+	@Nullable
 	public String metaDataCatalogNameToUse(@Nullable String catalogName) {
 		if (isSupportsCatalogsInProcedureCalls()) {
 			return catalogNameToUse(catalogName);
@@ -177,6 +181,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	@Override
+	@Nullable
 	public String metaDataSchemaNameToUse(@Nullable String schemaName) {
 		if (isSupportsSchemasInProcedureCalls()) {
 			return schemaNameToUse(schemaName);
@@ -187,6 +192,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	@Override
+	@Nullable
 	public String parameterNameToUse(@Nullable String parameterName) {
 		if (parameterName == null) {
 			return null;

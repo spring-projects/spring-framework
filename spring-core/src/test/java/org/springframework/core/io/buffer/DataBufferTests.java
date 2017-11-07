@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import org.junit.Test;
@@ -33,8 +32,107 @@ import static org.junit.Assert.*;
 public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
-	public void writeAndRead() {
+	public void byteCountsAndPositions() {
+		DataBuffer buffer = createDataBuffer(2);
 
+		assertEquals(0, buffer.readPosition());
+		assertEquals(0, buffer.writePosition());
+		assertEquals(0, buffer.readableByteCount());
+		assertEquals(2, buffer.writableByteCount());
+		assertEquals(2, buffer.capacity());
+
+		buffer.write((byte) 'a');
+		assertEquals(0, buffer.readPosition());
+		assertEquals(1, buffer.writePosition());
+		assertEquals(1, buffer.readableByteCount());
+		assertEquals(1, buffer.writableByteCount());
+		assertEquals(2, buffer.capacity());
+
+		buffer.write((byte) 'b');
+		assertEquals(0, buffer.readPosition());
+		assertEquals(2, buffer.writePosition());
+		assertEquals(2, buffer.readableByteCount());
+		assertEquals(0, buffer.writableByteCount());
+		assertEquals(2, buffer.capacity());
+
+		buffer.read();
+		assertEquals(1, buffer.readPosition());
+		assertEquals(2, buffer.writePosition());
+		assertEquals(1, buffer.readableByteCount());
+		assertEquals(0, buffer.writableByteCount());
+		assertEquals(2, buffer.capacity());
+
+		buffer.read();
+		assertEquals(2, buffer.readPosition());
+		assertEquals(2, buffer.writePosition());
+		assertEquals(0, buffer.readableByteCount());
+		assertEquals(0, buffer.writableByteCount());
+		assertEquals(2, buffer.capacity());
+
+		release(buffer);
+	}
+
+	@Test
+	public void readPositionSmallerThanZero() {
+		DataBuffer buffer = createDataBuffer(1);
+		try {
+			buffer.readPosition(-1);
+			fail("IndexOutOfBoundsException expected");
+		}
+		catch (IndexOutOfBoundsException ignored) {
+		}
+		finally {
+			release(buffer);
+		}
+	}
+
+	@Test
+	public void readPositionGreaterThanWritePosition() {
+		DataBuffer buffer = createDataBuffer(1);
+		try {
+			buffer.readPosition(1);
+			fail("IndexOutOfBoundsException expected");
+		}
+		catch (IndexOutOfBoundsException ignored) {
+		}
+		finally {
+			release(buffer);
+		}
+	}
+
+	@Test
+	public void writePositionSmallerThanReadPosition() {
+		DataBuffer buffer = createDataBuffer(2);
+		try {
+			buffer.write((byte) 'a');
+			buffer.read();
+
+			buffer.writePosition(0);
+			fail("IndexOutOfBoundsException expected");
+		}
+		catch (IndexOutOfBoundsException ignored) {
+		}
+		finally {
+			release(buffer);
+		}
+	}
+
+	@Test
+	public void writePositionGreaterThanCapacity() {
+		DataBuffer buffer = createDataBuffer(1);
+		try {
+			buffer.writePosition(2);
+			fail("IndexOutOfBoundsException expected");
+		}
+		catch (IndexOutOfBoundsException ignored) {
+		}
+		finally {
+			release(buffer);
+		}
+	}
+
+	@Test
+	public void writeAndRead() {
 		DataBuffer buffer = createDataBuffer(5);
 		buffer.write(new byte[]{'a', 'b', 'c'});
 
@@ -54,33 +152,32 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void inputStream() throws IOException {
-		byte[] data = new byte[]{'a', 'b', 'c', 'd', 'e'};
-
 		DataBuffer buffer = createDataBuffer(4);
-		buffer.write(data);
-
-		buffer.read(); // readIndex++
+		buffer.write(new byte[]{'a', 'b', 'c', 'd', 'e'});
+		buffer.readPosition(1);
 
 		InputStream inputStream = buffer.asInputStream();
 
-		int available = inputStream.available();
-		assertEquals(4, available);
+		assertEquals(4, inputStream.available());
 
 		int result = inputStream.read();
 		assertEquals('b', result);
-
-		available = inputStream.available();
-		assertEquals(3, available);
+		assertEquals(3, inputStream.available());
 
 		byte[] bytes = new byte[2];
 		int len = inputStream.read(bytes);
 		assertEquals(2, len);
 		assertArrayEquals(new byte[]{'c', 'd'}, bytes);
+		assertEquals(1, inputStream.available());
 
 		Arrays.fill(bytes, (byte) 0);
 		len = inputStream.read(bytes);
 		assertEquals(1, len);
 		assertArrayEquals(new byte[]{'e', (byte) 0}, bytes);
+		assertEquals(0, inputStream.available());
+
+		assertEquals(-1, inputStream.read());
+		assertEquals(-1, inputStream.read(bytes));
 
 		release(buffer);
 	}
@@ -91,7 +188,8 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 		buffer.write((byte) 'a');
 
 		OutputStream outputStream = buffer.asOutputStream();
-		outputStream.write(new byte[]{'b', 'c', 'd'});
+		outputStream.write('b');
+		outputStream.write(new byte[]{'c', 'd'});
 
 		buffer.write((byte) 'e');
 
@@ -106,19 +204,58 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 	public void expand() {
 		DataBuffer buffer = createDataBuffer(1);
 		buffer.write((byte) 'a');
+		assertEquals(1, buffer.capacity());
 		buffer.write((byte) 'b');
 
-		byte[] result = new byte[2];
-		buffer.read(result);
-		assertArrayEquals(new byte[]{'a', 'b'}, result);
-
-		buffer.write(new byte[]{'c', 'd'});
-
-		result = new byte[2];
-		buffer.read(result);
-		assertArrayEquals(new byte[]{'c', 'd'}, result);
+		assertTrue(buffer.capacity() > 1);
 
 		release(buffer);
+	}
+
+	@Test
+	public void increaseCapacity() {
+		DataBuffer buffer = createDataBuffer(1);
+		assertEquals(1, buffer.capacity());
+
+		buffer.capacity(2);
+		assertEquals(2, buffer.capacity());
+
+		release(buffer);
+	}
+
+	@Test
+	public void decreaseCapacityLowReadPosition() {
+		DataBuffer buffer = createDataBuffer(2);
+		buffer.writePosition(2);
+		buffer.capacity(1);
+		assertEquals(1, buffer.capacity());
+
+		release(buffer);
+	}
+
+	@Test
+	public void decreaseCapacityHighReadPosition() {
+		DataBuffer buffer = createDataBuffer(2);
+		buffer.writePosition(2);
+		buffer.readPosition(2);
+		buffer.capacity(1);
+		assertEquals(1, buffer.capacity());
+
+		release(buffer);
+	}
+
+	@Test
+	public void capacityLessThanZero() {
+		DataBuffer buffer = createDataBuffer(1);
+		try {
+			buffer.capacity(-1);
+			fail("IllegalArgumentException expected");
+		}
+		catch (IllegalArgumentException ignored) {
+		}
+		finally {
+			release(buffer);
+		}
 	}
 
 	@Test
@@ -176,12 +313,70 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 		buffer.read(); // skip a
 
 		ByteBuffer result = buffer.asByteBuffer();
+		assertEquals(2, result.capacity());
 
 		buffer.write((byte) 'd');
 		assertEquals(2, result.remaining());
+
 		byte[] resultBytes = new byte[2];
-		buffer.read(resultBytes);
+		result.get(resultBytes);
 		assertArrayEquals(new byte[]{'b', 'c'}, resultBytes);
+
+		release(buffer);
+	}
+
+	@Test
+	public void asByteBufferIndexLength() {
+		DataBuffer buffer = createDataBuffer(3);
+		buffer.write(new byte[]{'a', 'b'});
+
+		ByteBuffer result = buffer.asByteBuffer(1, 2);
+		assertEquals(2, result.capacity());
+
+		buffer.write((byte) 'c');
+		assertEquals(2, result.remaining());
+
+		byte[] resultBytes = new byte[2];
+		result.get(resultBytes);
+		assertArrayEquals(new byte[]{'b', 'c'}, resultBytes);
+
+		release(buffer);
+	}
+
+	@Test
+	public void byteBufferContainsDataBufferChanges() {
+		DataBuffer dataBuffer = createDataBuffer(1);
+		ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, 1);
+
+		dataBuffer.write((byte) 'a');
+
+		assertEquals(1, byteBuffer.limit());
+		byte b = byteBuffer.get();
+		assertEquals('a', b);
+
+		release(dataBuffer);
+	}
+
+	@Test
+	public void dataBufferContainsByteBufferChanges() {
+		DataBuffer dataBuffer = createDataBuffer(1);
+		ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, 1);
+
+		byteBuffer.put((byte) 'a');
+		dataBuffer.writePosition(1);
+
+		byte b = dataBuffer.read();
+		assertEquals('a', b);
+
+		release(dataBuffer);
+	}
+
+	@Test
+	public void emptyAsByteBuffer() {
+		DataBuffer buffer = createDataBuffer(1);
+
+		ByteBuffer result = buffer.asByteBuffer();
+		assertEquals(0, result.capacity());
 
 		release(buffer);
 	}
@@ -244,7 +439,7 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 		assertEquals(2, slice.readableByteCount());
 		try {
 			slice.write((byte) 0);
-			fail("IndexOutOfBoundsException expected");
+			fail("Exception expected");
 		}
 		catch (Exception ignored) {
 		}
@@ -262,24 +457,6 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 
 		assertArrayEquals(new byte[]{'b', 'c'}, result);
 
-
-		release(buffer);
-	}
-
-
-	@Test
-	public void growDataBuffer() {
-		DataBuffer buffer = stringBuffer("Hello World!");
-
-		byte[] bytes = new byte[5];
-		buffer.read(bytes);
-		assertArrayEquals("Hello".getBytes(StandardCharsets.UTF_8), bytes);
-
-		buffer.write("!!".getBytes(StandardCharsets.UTF_8));
-
-		bytes = new byte[9];
-		buffer.read(bytes);
-		assertArrayEquals(" World!!!".getBytes(StandardCharsets.UTF_8), bytes);
 
 		release(buffer);
 	}

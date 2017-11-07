@@ -65,6 +65,7 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @author Mark Fisher
  * @author Costin Leau
+ * @author Sebastien Deleuze
  * @since 2.0
  * @see #autowireConstructor
  * @see #instantiateUsingFactoryMethod
@@ -348,7 +349,6 @@ class ConstructorResolver {
 	 * method, or {@code null} if none (-> use constructor argument values from bean definition)
 	 * @return a BeanWrapper for the new instance
 	 */
-	@Nullable
 	public BeanWrapper instantiateUsingFactoryMethod(
 			final String beanName, final RootBeanDefinition mbd, @Nullable final Object[] explicitArgs) {
 
@@ -576,9 +576,6 @@ class ConstructorResolver {
 						mbd, beanName, this.beanFactory, factoryBean, factoryMethodToUse, argsToUse);
 			}
 
-			if (beanInstance == null) {
-				return null;
-			}
 			bw.setBeanInstance(beanInstance);
 			return bw;
 		}
@@ -799,8 +796,8 @@ class ConstructorResolver {
 	 * Template method for resolving the specified argument which is supposed to be autowired.
 	 */
 	@Nullable
-	protected Object resolveAutowiredArgument(
-			MethodParameter param, String beanName, @Nullable Set<String> autowiredBeanNames, TypeConverter typeConverter) {
+	protected Object resolveAutowiredArgument(MethodParameter param, String beanName,
+			@Nullable Set<String> autowiredBeanNames, TypeConverter typeConverter) {
 
 		if (InjectionPoint.class.isAssignableFrom(param.getParameterType())) {
 			InjectionPoint injectionPoint = currentInjectionPoint.get();
@@ -812,7 +809,6 @@ class ConstructorResolver {
 		return this.beanFactory.resolveDependency(
 				new DependencyDescriptor(param, true), beanName, autowiredBeanNames, typeConverter);
 	}
-
 
 	static InjectionPoint setCurrentInjectionPoint(@Nullable InjectionPoint injectionPoint) {
 		InjectionPoint old = currentInjectionPoint.get();

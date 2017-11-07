@@ -16,14 +16,13 @@
 
 package org.springframework.web.util.pattern;
 
+import java.util.List;
+
+import org.springframework.http.server.PathContainer.Element;
+import org.springframework.http.server.PathContainer.PathSegment;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
-
-import java.util.List;
-
-import org.springframework.http.server.reactive.PathContainer.Element;
-import org.springframework.http.server.reactive.PathContainer.Segment;
 
 /**
  * A path element representing capturing the rest of a path. In the pattern
@@ -66,9 +65,9 @@ class CaptureTheRestPathElement extends PathElement {
 			MultiValueMap<String,String> parametersCollector = null;
 			for (int i = pathIndex; i < matchingContext.pathLength; i++) {
 				Element element = matchingContext.pathElements.get(i);
-				if (element instanceof Segment) {
-					MultiValueMap<String, String> parameters = ((Segment)element).parameters();
-					if (parameters != null && parameters.size()!=0) {
+				if (element instanceof PathSegment) {
+					MultiValueMap<String, String> parameters = ((PathSegment) element).parameters();
+					if (!parameters.isEmpty()) {
 						if (parametersCollector == null) {
 							parametersCollector = new LinkedMultiValueMap<>();
 						}
@@ -86,8 +85,8 @@ class CaptureTheRestPathElement extends PathElement {
 		StringBuilder buf = new StringBuilder();
 		for (int i = fromSegment, max = pathElements.size(); i < max; i++) {
 			Element element = pathElements.get(i);
-			if (element instanceof Segment) {
-				buf.append(((Segment)element).valueDecoded());
+			if (element instanceof PathSegment) {
+				buf.append(((PathSegment)element).valueToMatch());
 			}
 			else {
 				buf.append(element.value());

@@ -48,12 +48,14 @@ class DefaultAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAt
 
 
 	@Override
+	@Nullable
 	protected Object getRawAttributeValue(Method attributeMethod) {
 		ReflectionUtils.makeAccessible(attributeMethod);
 		return ReflectionUtils.invokeMethod(attributeMethod, getSource());
 	}
 
 	@Override
+	@Nullable
 	protected Object getRawAttributeValue(String attributeName) {
 		Method attributeMethod = ReflectionUtils.findMethod(getAnnotationType(), attributeName);
 		return (attributeMethod != null ? getRawAttributeValue(attributeMethod) : null);

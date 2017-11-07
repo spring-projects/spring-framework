@@ -30,7 +30,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link FactoryBean} implementation that takes a list of location Strings

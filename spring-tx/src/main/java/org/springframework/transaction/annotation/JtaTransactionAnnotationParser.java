@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
@@ -38,6 +39,7 @@ import org.springframework.transaction.interceptor.TransactionAttribute;
 public class JtaTransactionAnnotationParser implements TransactionAnnotationParser, Serializable {
 
 	@Override
+	@Nullable
 	public TransactionAttribute parseTransactionAnnotation(AnnotatedElement ae) {
 		AnnotationAttributes attributes =
 				AnnotatedElementUtils.getMergedAnnotationAttributes(ae, javax.transaction.Transactional.class);

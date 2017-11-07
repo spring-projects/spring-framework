@@ -19,7 +19,6 @@ package org.springframework.http.server.reactive;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -63,14 +62,11 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	private final DataBufferFactory dataBufferFactory;
 
 	@Nullable
-	private HttpStatus statusCode;
+	private Integer statusCode;
 
 	private final HttpHeaders headers;
 
 	private final MultiValueMap<String, ResponseCookie> cookies;
-
-	@Nullable
-	private Function<String, String> urlEncoder = url -> url;
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
 
@@ -91,17 +87,16 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public boolean setStatusCode(HttpStatus statusCode) {
-		Assert.notNull(statusCode, "Status code must not be null");
+	public boolean setStatusCode(@Nullable HttpStatus statusCode) {
 		if (this.state.get() == State.COMMITTED) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Can't set the status " + statusCode.toString() +
+				logger.debug("Can't set the status " + (statusCode != null ? statusCode.toString() : "null") +
 						" because the HTTP response has already been committed");
 			}
 			return false;
 		}
 		else {
-			this.statusCode = statusCode;
+			this.statusCode = (statusCode != null ? statusCode.value() : null);
 			return true;
 		}
 	}
@@ -109,6 +104,25 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	@Override
 	@Nullable
 	public HttpStatus getStatusCode() {
+		return (this.statusCode != null ? HttpStatus.resolve(this.statusCode) : null);
+	}
+
+	/**
+	 * Set the HTTP status code of the response.
+	 * @param statusCode the HTTP status as an integer value
+	 * @since 5.0.1
+	 */
+	public void setStatusCodeValue(Integer statusCode) {
+		this.statusCode = statusCode;
+	}
+
+	/**
+	 * Return the HTTP status code of the response.
+	 * @return the HTTP status as an integer value
+	 * @since 5.0.1
+	 */
+	@Nullable
+	public Integer getStatusCodeValue() {
 		return this.statusCode;
 	}
 
@@ -126,7 +140,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public void addCookie(ResponseCookie cookie) {
-		Assert.notNull(cookie, "'cookie' must not be null");
+		Assert.notNull(cookie, "ResponseCookie must not be null");
 
 		if (this.state.get() == State.COMMITTED) {
 			throw new IllegalStateException("Can't add the cookie " + cookie +
@@ -137,15 +151,13 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 		}
 	}
 
-	@Override
-	public String encodeUrl(String url) {
-		return (this.urlEncoder != null ? this.urlEncoder.apply(url) : url);
-	}
+	/**
+	 * Return the underlying server response.
+	 * <p><strong>Note:</strong> This is exposed mainly for internal framework
+	 * use such as WebSocket upgrades in the spring-webflux module.
+	 */
+	public abstract <T> T getNativeResponse();
 
-	@Override
-	public void registerUrlEncoder(Function<String, String> encoder) {
-		this.urlEncoder = (this.urlEncoder != null ? this.urlEncoder.andThen(encoder) : encoder);
-	}
 
 	@Override
 	public void beforeCommit(Supplier<? extends Mono<Void>> action) {

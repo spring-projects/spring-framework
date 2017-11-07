@@ -6,16 +6,16 @@
 				http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
 
 	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean" scope="request">
-    <aop:scoped-proxy proxy-target-class="false"/>
-    <property name="age" value="99"/>
-  </bean>
+		<aop:scoped-proxy proxy-target-class="false"/>
+		<property name="age" value="99"/>
+	</bean>
 
-  <bean class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
-    <property name="properties">
-      <map>
-        <entry key="testBean.sex" value="male"/>
-      </map>
-    </property>
-  </bean>
+	<bean class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
+		<property name="properties">
+			<map>
+				<entry key="testBean.sex" value="male"/>
+			</map>
+		</property>
+	</bean>
 
 </beans>

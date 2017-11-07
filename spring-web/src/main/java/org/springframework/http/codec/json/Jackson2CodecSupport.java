@@ -56,9 +56,10 @@ public abstract class Jackson2CodecSupport {
 	private static final String JSON_VIEW_HINT_ERROR =
 			"@JsonView only supported for write hints with exactly 1 class argument: ";
 
-	protected static final List<MimeType> JSON_MIME_TYPES = Arrays.asList(
-				new MimeType("application", "json", StandardCharsets.UTF_8),
-				new MimeType("application", "*+json", StandardCharsets.UTF_8));
+	private static final List<MimeType> DEFAULT_MIME_TYPES = Collections.unmodifiableList(
+			Arrays.asList(
+					new MimeType("application", "json", StandardCharsets.UTF_8),
+					new MimeType("application", "*+json", StandardCharsets.UTF_8)));
 
 
 	private final ObjectMapper objectMapper;
@@ -72,13 +73,22 @@ public abstract class Jackson2CodecSupport {
 	protected Jackson2CodecSupport(ObjectMapper objectMapper, MimeType... mimeTypes) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 		this.objectMapper = objectMapper;
-		this.mimeTypes = !ObjectUtils.isEmpty(mimeTypes) ? Arrays.asList(mimeTypes) : JSON_MIME_TYPES;
+		this.mimeTypes = !ObjectUtils.isEmpty(mimeTypes) ?
+				Collections.unmodifiableList(Arrays.asList(mimeTypes)) : DEFAULT_MIME_TYPES;
 	}
 
 
-	protected ObjectMapper objectMapper() {
+	public ObjectMapper getObjectMapper() {
 		return this.objectMapper;
 	}
+
+	/**
+	 * Subclasses should expose this as "decodable" or "encodable" mime types.
+	 */
+	protected List<MimeType> getMimeTypes() {
+		return this.mimeTypes;
+	}
+
 
 	protected boolean supportsMimeType(@Nullable MimeType mimeType) {
 		return (mimeType == null || this.mimeTypes.stream().anyMatch(m -> m.isCompatibleWith(mimeType)));

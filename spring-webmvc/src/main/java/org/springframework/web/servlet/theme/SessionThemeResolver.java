@@ -58,7 +58,9 @@ public class SessionThemeResolver extends AbstractThemeResolver {
 	}
 
 	@Override
-	public void setThemeName(HttpServletRequest request, HttpServletResponse response, @Nullable String themeName) {
+	public void setThemeName(
+			HttpServletRequest request, @Nullable HttpServletResponse response, @Nullable String themeName) {
+
 		WebUtils.setSessionAttribute(request, THEME_SESSION_ATTRIBUTE_NAME,
 				(StringUtils.hasText(themeName) ? themeName : null));
 	}

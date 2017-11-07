@@ -24,7 +24,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.Assert.assertEquals;
@@ -39,7 +39,7 @@ public class ResponseStatusExceptionHandlerTests {
 
 	private final ResponseStatusExceptionHandler handler = new ResponseStatusExceptionHandler();
 
-	private  final MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 
 	@Test

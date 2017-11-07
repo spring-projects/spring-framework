@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLResolver;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -59,11 +57,12 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.KotlinDetector;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.xml.StaxUtils;
 
 /**
  * A builder used to create {@link ObjectMapper} instances with a fluent API.
@@ -77,11 +76,14 @@ import org.springframework.util.StringUtils;
  * <p>It also automatically registers the following well-known modules if they are
  * detected on the classpath:
  * <ul>
- * <li><a href="https://github.com/FasterXML/jackson-datatype-jdk7">jackson-datatype-jdk7</a>: support for Java 7 types like {@link java.nio.file.Path}</li>
- * <li><a href="https://github.com/FasterXML/jackson-datatype-jdk8">jackson-datatype-jdk8</a>: support for other Java 8 types like {@link java.util.Optional}</li>
- * <li><a href="https://github.com/FasterXML/jackson-datatype-jsr310">jackson-datatype-jsr310</a>: support for Java 8 Date & Time API types</li>
- * <li><a href="https://github.com/FasterXML/jackson-datatype-joda">jackson-datatype-joda</a>: support for Joda-Time types</li>
- * <li><a href="https://github.com/FasterXML/jackson-module-kotlin">jackson-module-kotlin</a>: support for Kotlin classes and data classes</li>
+ * <li><a href="https://github.com/FasterXML/jackson-datatype-jdk8">jackson-datatype-jdk8</a>:
+ * support for other Java 8 types like {@link java.util.Optional}</li>
+ * <li><a href="https://github.com/FasterXML/jackson-datatype-jsr310">jackson-datatype-jsr310</a>:
+ * support for Java 8 Date & Time API types</li>
+ * <li><a href="https://github.com/FasterXML/jackson-datatype-joda">jackson-datatype-joda</a>:
+ * support for Joda-Time types</li>
+ * <li><a href="https://github.com/FasterXML/jackson-module-kotlin">jackson-module-kotlin</a>:
+ * support for Kotlin classes and data classes</li>
  * </ul>
  *
  * <p>Compatible with Jackson 2.6 and higher, as of Spring 4.3.
@@ -735,15 +737,6 @@ public class Jackson2ObjectMapperBuilder {
 	@SuppressWarnings("unchecked")
 	private void registerWellKnownModulesIfAvailable(ObjectMapper objectMapper) {
 		try {
-			Class<? extends Module> jdk7Module = (Class<? extends Module>)
-					ClassUtils.forName("com.fasterxml.jackson.datatype.jdk7.Jdk7Module", this.moduleClassLoader);
-			objectMapper.registerModule(BeanUtils.instantiateClass(jdk7Module));
-		}
-		catch (ClassNotFoundException ex) {
-			// jackson-datatype-jdk7 not available
-		}
-
-		try {
 			Class<? extends Module> jdk8Module = (Class<? extends Module>)
 					ClassUtils.forName("com.fasterxml.jackson.datatype.jdk8.Jdk8Module", this.moduleClassLoader);
 			objectMapper.registerModule(BeanUtils.instantiateClass(jdk8Module));
@@ -774,14 +767,16 @@ public class Jackson2ObjectMapperBuilder {
 		}
 
 		// Kotlin present?
-		if (ClassUtils.isPresent("kotlin.Unit", this.moduleClassLoader)) {
+		if (KotlinDetector.isKotlinPresent()) {
 			try {
 				Class<? extends Module> kotlinModule = (Class<? extends Module>)
-						ClassUtils.forName("com.fasterxml.jackson.module.kotlin.KotlinModule", this.moduleClassLoader);
+						ClassUtils.forName("com.fasterxml.jackson.module.kotlin.KotlinModule",
+								this.moduleClassLoader);
 				objectMapper.registerModule(BeanUtils.instantiateClass(kotlinModule));
 			}
 			catch (ClassNotFoundException ex) {
-				logger.warn("For Jackson Kotlin classes support please add \"com.fasterxml.jackson.module:jackson-module-kotlin\" to the classpath");
+				logger.warn("For Jackson Kotlin classes support please add " +
+						"\"com.fasterxml.jackson.module:jackson-module-kotlin\" to the classpath");
 			}
 		}
 	}
@@ -827,38 +822,27 @@ public class Jackson2ObjectMapperBuilder {
 	private static class XmlObjectMapperInitializer {
 
 		public ObjectMapper create() {
-			return new XmlMapper(xmlInputFactory());
+			return new XmlMapper(StaxUtils.createDefensiveInputFactory());
 		}
 
 		public ObjectMapper create(boolean defaultUseWrapper) {
 			JacksonXmlModule module = new JacksonXmlModule();
 			module.setDefaultUseWrapper(defaultUseWrapper);
-			return new XmlMapper(new XmlFactory(xmlInputFactory()), module);
+			return new XmlMapper(new XmlFactory(StaxUtils.createDefensiveInputFactory()), module);
 		}
-
-		private static XMLInputFactory xmlInputFactory() {
-			XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-			inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
-			inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
-			inputFactory.setXMLResolver(NO_OP_XML_RESOLVER);
-			return inputFactory;
-		}
-
-		private static final XMLResolver NO_OP_XML_RESOLVER = new XMLResolver() {
-			@Override
-			public Object resolveEntity(String publicID, String systemID, String base, String ns) {
-				return StreamUtils.emptyInput();
-			}
-		};
 	}
 
+
 	private static class SmileFactoryInitializer {
+
 		public JsonFactory create() {
 			return new SmileFactory();
 		}
 	}
 
+
 	private static class CborFactoryInitializer {
+
 		public JsonFactory create() {
 			return new CBORFactory();
 		}

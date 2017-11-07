@@ -32,16 +32,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.FormFieldPart;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,7 +48,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.config.EnableWebFlux;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
@@ -83,8 +80,7 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 		Mono<ClientResponse> result = webClient
 				.post()
 				.uri("/requestPart")
-				.contentType(MediaType.MULTIPART_FORM_DATA)
-				.body(BodyInserters.fromMultipartData(generateBody()))
+				.syncBody(generateBody())
 				.exchange();
 
 		StepVerifier
@@ -98,8 +94,7 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 		Mono<String> result = webClient
 				.post()
 				.uri("/requestBodyMap")
-				.contentType(MediaType.MULTIPART_FORM_DATA)
-				.body(BodyInserters.fromMultipartData(generateBody()))
+				.syncBody(generateBody())
 				.retrieve()
 				.bodyToMono(String.class);
 
@@ -114,8 +109,7 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 		Mono<String> result = webClient
 				.post()
 				.uri("/requestBodyFlux")
-				.contentType(MediaType.MULTIPART_FORM_DATA)
-				.body(BodyInserters.fromMultipartData(generateBody()))
+				.syncBody(generateBody())
 				.retrieve()
 				.bodyToMono(String.class);
 
@@ -130,8 +124,7 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 		Mono<String> result = webClient
 				.post()
 				.uri("/modelAttribute")
-				.contentType(MediaType.MULTIPART_FORM_DATA)
-				.body(BodyInserters.fromMultipartData(generateBody()))
+				.syncBody(generateBody())
 				.retrieve()
 				.bodyToMono(String.class);
 
@@ -141,27 +134,13 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 				.verifyComplete();
 	}
 
-
-	private MultiValueMap<String, Object> generateBody() {
-
-		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
-		parts.add("fieldPart", "fieldValue");
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.TEXT_PLAIN);
-		ClassPathResource resource = new ClassPathResource("foo.txt", MultipartHttpMessageReader.class);
-		parts.add("fileParts", new HttpEntity<>(resource, headers));
-
-		headers = new HttpHeaders();
-		headers.setContentType(MediaType.IMAGE_PNG);
-		resource = new ClassPathResource("logo.png", getClass());
-		parts.add("fileParts", new HttpEntity<>(resource, headers));
-
-		headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		parts.add("jsonPart", new HttpEntity<>(new Person("Jason"), headers));
-
-		return parts;
+	private MultiValueMap<String, HttpEntity<?>> generateBody() {
+		MultipartBodyBuilder builder = new MultipartBodyBuilder();
+		builder.part("fieldPart", "fieldValue");
+		builder.part("fileParts", new ClassPathResource("foo.txt", MultipartHttpMessageReader.class));
+		builder.part("fileParts", new ClassPathResource("logo.png", getClass()));
+		builder.part("jsonPart", new Person("Jason"));
+		return builder.build();
 	}
 
 

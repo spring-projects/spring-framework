@@ -43,6 +43,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class PathResourceResolver extends AbstractResourceResolver {
 
+	@Nullable
 	private Resource[] allowedLocations;
 
 
@@ -61,7 +62,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	 * to match its list of locations.
 	 * @param locations the list of allowed locations
 	 */
-	public void setAllowedLocations(Resource... locations) {
+	public void setAllowedLocations(@Nullable Resource... locations) {
 		this.allowedLocations = locations;
 	}
 
@@ -72,8 +73,8 @@ public class PathResourceResolver extends AbstractResourceResolver {
 
 
 	@Override
-	protected Mono<Resource> resolveResourceInternal(ServerWebExchange exchange, String requestPath,
-			List<? extends Resource> locations, ResourceResolverChain chain) {
+	protected Mono<Resource> resolveResourceInternal(@Nullable ServerWebExchange exchange,
+			String requestPath, List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		return getResource(requestPath, locations);
 	}

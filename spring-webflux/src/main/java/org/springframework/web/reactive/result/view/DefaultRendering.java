@@ -54,6 +54,7 @@ class DefaultRendering implements Rendering {
 
 
 	@Override
+	@Nullable
 	public Object view() {
 		return this.view;
 	}

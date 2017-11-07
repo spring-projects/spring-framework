@@ -65,6 +65,7 @@ public class Db2CallMetaDataProvider extends GenericCallMetaDataProvider {
 	}
 
 	@Override
+	@Nullable
 	public String metaDataSchemaNameToUse(@Nullable String schemaName) {
 		if (schemaName != null) {
 			return super.metaDataSchemaNameToUse(schemaName);

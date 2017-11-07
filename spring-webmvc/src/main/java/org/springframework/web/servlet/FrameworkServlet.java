@@ -285,7 +285,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * Set the name of the ServletContext attribute which should be used to retrieve the
 	 * {@link WebApplicationContext} that this servlet is supposed to use.
 	 */
-	public void setContextAttribute(String contextAttribute) {
+	public void setContextAttribute(@Nullable String contextAttribute) {
 		this.contextAttribute = contextAttribute;
 	}
 
@@ -322,7 +322,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * Specify a custom WebApplicationContext id,
 	 * to be used as serialization id for the underlying BeanFactory.
 	 */
-	public void setContextId(String contextId) {
+	public void setContextId(@Nullable String contextId) {
 		this.contextId = contextId;
 	}
 
@@ -355,7 +355,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * location built from the namespace. This location string can consist of
 	 * multiple locations separated by any number of commas and spaces.
 	 */
-	public void setContextConfigLocation(String contextConfigLocation) {
+	public void setContextConfigLocation(@Nullable String contextConfigLocation) {
 		this.contextConfigLocation = contextConfigLocation;
 	}
 
@@ -1139,7 +1139,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		public <T> void preProcess(NativeWebRequest webRequest, Callable<T> task) {
 			HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 			if (request != null) {
-				HttpServletResponse response = webRequest.getNativeRequest(HttpServletResponse.class);
+				HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
 				initContextHolders(request, buildLocaleContext(request),
 						buildRequestAttributes(request, response, null));
 			}

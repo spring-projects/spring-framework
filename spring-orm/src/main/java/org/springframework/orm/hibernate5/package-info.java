@@ -11,6 +11,8 @@
  * <p><b>This package supports Hibernate 5.x only.</b>
  */
 @NonNullApi
+@NonNullFields
 package org.springframework.orm.hibernate5;
 
 import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

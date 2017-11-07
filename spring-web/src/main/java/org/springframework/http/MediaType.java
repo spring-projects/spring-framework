@@ -45,7 +45,8 @@ import org.springframework.util.StringUtils;
  * @author Sebastien Deleuze
  * @author Kazuki Shimizu
  * @since 3.0
- * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.1.1">HTTP 1.1: Semantics and Content, section 3.1.1.1</a>
+ * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.1.1">
+ *     HTTP 1.1: Semantics and Content, section 3.1.1.1</a>
  */
 public class MediaType extends MimeType implements Serializable {
 
@@ -101,7 +102,7 @@ public class MediaType extends MimeType implements Serializable {
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_JSON_UTF8}.
 	 */
-	public final static String APPLICATION_JSON_UTF8_VALUE = APPLICATION_JSON_VALUE + ";charset=UTF-8";
+	public final static String APPLICATION_JSON_UTF8_VALUE = "application/json;charset=UTF-8";
 
 	/**
 	 * Public constant media type for {@code application/octet-stream}.
@@ -124,6 +125,48 @@ public class MediaType extends MimeType implements Serializable {
 	 * @since 4.3
 	 */
 	public final static String APPLICATION_PDF_VALUE = "application/pdf";
+
+	/**
+	 * Public constant media type for {@code application/problem+json}.
+	 * @since 5.0
+	 * @see <a href="https://tools.ietf.org/html/rfc7807#section-6.1">
+	 *     Problem Details for HTTP APIs, 6.1. application/problem+json</a>
+	 */
+	public final static MediaType APPLICATION_PROBLEM_JSON;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_PROBLEM_JSON}.
+	 * @since 5.0
+	 */
+	public final static String APPLICATION_PROBLEM_JSON_VALUE = "application/problem+json";
+
+	/**
+	 * Public constant media type for {@code application/problem+json}.
+	 * @since 5.0
+	 * @see <a href="https://tools.ietf.org/html/rfc7807#section-6.1">
+	 *     Problem Details for HTTP APIs, 6.1. application/problem+json</a>
+	 */
+	public final static MediaType APPLICATION_PROBLEM_JSON_UTF8;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_PROBLEM_JSON_UTF8}.
+	 * @since 5.0
+	 */
+	public final static String APPLICATION_PROBLEM_JSON_UTF8_VALUE = "application/problem+json;charset=UTF-8";
+
+	/**
+	 * Public constant media type for {@code application/problem+xml}.
+	 * @since 5.0
+	 * @see <a href="https://tools.ietf.org/html/rfc7807#section-6.2">
+	 *     Problem Details for HTTP APIs, 6.2. application/problem+xml</a>
+	 */
+	public final static MediaType APPLICATION_PROBLEM_XML;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_PROBLEM_XML}.
+	 * @since 5.0
+	 */
+	public final static String APPLICATION_PROBLEM_XML_VALUE = "application/problem+xml";
 
 	/**
 	 * Public constant media type for {@code application/rss+xml}.
@@ -552,7 +595,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * @return the list of media types
 	 * @throws InvalidMediaTypeException if the media type value cannot be parsed
 	 */
-	public static List<MediaType> parseMediaTypes(String mediaTypes) {
+	public static List<MediaType> parseMediaTypes(@Nullable String mediaTypes) {
 		if (!StringUtils.hasLength(mediaTypes)) {
 			return Collections.emptyList();
 		}
@@ -726,7 +769,8 @@ public class MediaType extends MimeType implements Serializable {
 			else {
 				int paramsSize1 = mediaType1.getParameters().size();
 				int paramsSize2 = mediaType2.getParameters().size();
-				return (paramsSize2 < paramsSize1 ? -1 : (paramsSize2 == paramsSize1 ? 0 : 1)); // audio/basic;level=1 < audio/basic
+				// audio/basic;level=1 < audio/basic
+				return (paramsSize2 < paramsSize1 ? -1 : (paramsSize2 == paramsSize1 ? 0 : 1));
 			}
 		}
 	};

@@ -187,6 +187,7 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
 		try {
 			return doGetType(name);

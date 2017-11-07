@@ -165,6 +165,7 @@ public class XmlValidationModeDetector {
 	 * Consume the next comment token, update the "inComment" flag
 	 * and return the remaining content.
 	 */
+	@Nullable
 	private String consume(String line) {
 		int index = (this.inComment ? endComment(line) : startComment(line));
 		return (index == -1 ? null : line.substring(index));

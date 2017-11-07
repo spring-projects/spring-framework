@@ -145,6 +145,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * using a cached MessageFormat instance per message code.
 	 */
 	@Override
+	@Nullable
 	protected MessageFormat resolveCode(String code, Locale locale) {
 		Set<String> basenames = getBasenameSet();
 		for (String basename : basenames) {

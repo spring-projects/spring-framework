@@ -38,6 +38,7 @@ import org.springframework.context.index.sample.SampleComponent;
 import org.springframework.context.index.sample.SampleController;
 import org.springframework.context.index.sample.SampleMetaController;
 import org.springframework.context.index.sample.SampleMetaIndexedController;
+import org.springframework.context.index.sample.SampleNonStaticEmbedded;
 import org.springframework.context.index.sample.SampleNone;
 import org.springframework.context.index.sample.SampleRepository;
 import org.springframework.context.index.sample.SampleService;
@@ -45,6 +46,7 @@ import org.springframework.context.index.sample.cdi.SampleManagedBean;
 import org.springframework.context.index.sample.cdi.SampleNamed;
 import org.springframework.context.index.sample.jpa.SampleConverter;
 import org.springframework.context.index.sample.jpa.SampleEmbeddable;
+import org.springframework.context.index.sample.SampleEmbedded;
 import org.springframework.context.index.sample.jpa.SampleEntity;
 import org.springframework.context.index.sample.jpa.SampleMappedSuperClass;
 import org.springframework.context.index.sample.type.Repo;
@@ -55,6 +57,7 @@ import org.springframework.context.index.sample.type.SmartRepo;
 import org.springframework.context.index.sample.type.SpecializedRepo;
 import org.springframework.context.index.test.TestCompiler;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ClassUtils;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -198,6 +201,26 @@ public class CandidateComponentsIndexerTests {
 		testSingleComponent(Repo.class, Repo.class);
 	}
 
+	@Test
+	public void embeddedCandidatesAreDetected()
+			throws IOException, ClassNotFoundException {
+		// Validate nested type structure
+		String nestedType = "org.springframework.context.index.sample.SampleEmbedded.Another$AnotherPublicCandidate";
+		Class<?> type = ClassUtils.forName(nestedType, getClass().getClassLoader());
+		assertThat(type, sameInstance(SampleEmbedded.Another.AnotherPublicCandidate.class));
+
+		CandidateComponentsMetadata metadata = compile(SampleEmbedded.class);
+		assertThat(metadata, hasComponent(
+				SampleEmbedded.PublicCandidate.class, Component.class));
+		assertThat(metadata, hasComponent(nestedType, Component.class.getName()));
+		assertThat(metadata.getItems(), hasSize(2));
+	}
+
+	@Test
+	public void embeddedNonStaticCandidateAreIgnored() throws IOException {
+		CandidateComponentsMetadata metadata = compile(SampleNonStaticEmbedded.class);
+		assertThat(metadata.getItems(), hasSize(0));
+	}
 
 	private void testComponent(Class<?>... classes) throws IOException {
 		CandidateComponentsMetadata metadata = compile(classes);

@@ -132,6 +132,7 @@ public abstract class JdbcUtils {
 	 * @throws SQLException if thrown by the JDBC API
 	 * @see #getResultSetValue(ResultSet, int)
 	 */
+	@Nullable
 	public static Object getResultSetValue(ResultSet rs, int index, @Nullable Class<?> requiredType) throws SQLException {
 		if (requiredType == null) {
 			return getResultSetValue(rs, index);
@@ -310,7 +311,6 @@ public abstract class JdbcUtils {
 	 * the DatabaseMetaDataCallback's {@code processMetaData} method
 	 * @throws MetaDataAccessException if meta data access failed
 	 */
-	@Nullable
 	public static Object extractDatabaseMetaData(DataSource dataSource, DatabaseMetaDataCallback action)
 			throws MetaDataAccessException {
 
@@ -350,7 +350,6 @@ public abstract class JdbcUtils {
 	 * @see java.sql.DatabaseMetaData
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
 	public static <T> T extractDatabaseMetaData(DataSource dataSource, final String metaDataMethodName)
 			throws MetaDataAccessException {
 

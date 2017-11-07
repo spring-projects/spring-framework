@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,6 +82,7 @@ public class FixedLocaleResolver extends AbstractLocaleContextResolver {
 	public LocaleContext resolveLocaleContext(HttpServletRequest request) {
 		return new TimeZoneAwareLocaleContext() {
 			@Override
+			@Nullable
 			public Locale getLocale() {
 				return getDefaultLocale();
 			}
@@ -93,7 +94,9 @@ public class FixedLocaleResolver extends AbstractLocaleContextResolver {
 	}
 
 	@Override
-	public void setLocaleContext(HttpServletRequest request, HttpServletResponse response, @Nullable LocaleContext localeContext) {
+	public void setLocaleContext( HttpServletRequest request, @Nullable HttpServletResponse response,
+			@Nullable LocaleContext localeContext) {
+
 		throw new UnsupportedOperationException("Cannot change fixed locale - use a different locale resolution strategy");
 	}
 

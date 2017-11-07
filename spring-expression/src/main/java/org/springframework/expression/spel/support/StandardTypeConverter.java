@@ -63,6 +63,7 @@ public class StandardTypeConverter implements TypeConverter {
 	}
 
 	@Override
+	@Nullable
 	public Object convertValue(@Nullable Object value, @Nullable TypeDescriptor sourceType, TypeDescriptor targetType) {
 		try {
 			return this.conversionService.convert(value, sourceType, targetType);

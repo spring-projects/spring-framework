@@ -84,7 +84,7 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 	}
 
 	@Override
-	public WebSocketHandlerRegistration setHandshakeHandler(HandshakeHandler handshakeHandler) {
+	public WebSocketHandlerRegistration setHandshakeHandler(@Nullable HandshakeHandler handshakeHandler) {
 		this.handshakeHandler = handshakeHandler;
 		return this;
 	}

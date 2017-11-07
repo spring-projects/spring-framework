@@ -48,17 +48,18 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
 	private final List<WebExceptionHandler> exceptionHandlers = new ArrayList<>();
 
-	private LocaleContextResolver localeContextResolver;
+	private LocaleContextResolver localeContextResolver = new AcceptHeaderLocaleContextResolver();
 
 
 	public DefaultHandlerStrategiesBuilder() {
 		this.codecConfigurer.registerDefaults(false);
 	}
 
+
 	public void defaultConfiguration() {
 		this.codecConfigurer.registerDefaults(true);
-		exceptionHandler(new ResponseStatusExceptionHandler());
-		localeContextResolver(new AcceptHeaderLocaleContextResolver());
+		this.exceptionHandlers.add(new ResponseStatusExceptionHandler());
+		this.localeContextResolver = new AcceptHeaderLocaleContextResolver();
 	}
 
 	@Override
@@ -117,7 +118,6 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 		private final List<WebExceptionHandler> exceptionHandlers;
 
 		private final LocaleContextResolver localeContextResolver;
-
 
 		public DefaultHandlerStrategies(
 				List<HttpMessageReader<?>> messageReaders,

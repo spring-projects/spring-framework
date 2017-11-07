@@ -483,6 +483,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getPropertyType(String propertyName) throws BeansException {
 		try {
 			PropertyHandler ph = getPropertyHandler(propertyName);
@@ -510,6 +511,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	}
 
 	@Override
+	@Nullable
 	public TypeDescriptor getPropertyTypeDescriptor(String propertyName) throws BeansException {
 		try {
 			AbstractNestablePropertyAccessor nestedPa = getPropertyAccessorForPropertyPath(propertyName);
@@ -578,6 +580,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			@Nullable Object newValue, @Nullable Class<?> requiredType, @Nullable TypeDescriptor td)
 			throws TypeMismatchException {
 
+		Assert.state(this.typeConverterDelegate != null, "No TypeConverterDelegate");
 		try {
 			return this.typeConverterDelegate.convertIfNecessary(propertyName, oldValue, newValue, requiredType, td);
 		}
@@ -602,6 +605,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	}
 
 	@Override
+	@Nullable
 	public Object getPropertyValue(String propertyName) throws BeansException {
 		AbstractNestablePropertyAccessor nestedPa = getPropertyAccessorForPropertyPath(propertyName);
 		PropertyTokenHolder tokens = getPropertyNameTokens(getFinalPath(nestedPa, propertyName));

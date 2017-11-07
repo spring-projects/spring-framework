@@ -444,9 +444,12 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	}
 
 	/**
-	 * Initialize components of this {@code UriComponentsBuilder} from the
-	 * components of the given {@link UriComponents}.
-	 * @param uriComponents the UriComponents instance
+	 * Set or append individual URI components of this builder from the values
+	 * of the given {@link UriComponents} instance.
+	 * <p>For the semantics of each component (i.e. set vs append) check the
+	 * builder methods on this class. For example {@link #host(String)} sets
+	 * while {@link #path(String)} appends.
+	 * @param uriComponents the UriComponents to copy from
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder uriComponents(UriComponents uriComponents) {

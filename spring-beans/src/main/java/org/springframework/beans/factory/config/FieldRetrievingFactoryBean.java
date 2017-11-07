@@ -87,7 +87,7 @@ public class FieldRetrievingFactoryBean
 	 * @see #setTargetObject
 	 * @see #setTargetField
 	 */
-	public void setTargetClass(Class<?> targetClass) {
+	public void setTargetClass(@Nullable Class<?> targetClass) {
 		this.targetClass = targetClass;
 	}
 
@@ -106,7 +106,7 @@ public class FieldRetrievingFactoryBean
 	 * @see #setTargetClass
 	 * @see #setTargetField
 	 */
-	public void setTargetObject(Object targetObject) {
+	public void setTargetObject(@Nullable Object targetObject) {
 		this.targetObject = targetObject;
 	}
 
@@ -125,8 +125,8 @@ public class FieldRetrievingFactoryBean
 	 * @see #setTargetClass
 	 * @see #setTargetObject
 	 */
-	public void setTargetField(String targetField) {
-		this.targetField = StringUtils.trimAllWhitespace(targetField);
+	public void setTargetField(@Nullable String targetField) {
+		this.targetField = (targetField != null ? StringUtils.trimAllWhitespace(targetField) : null);
 	}
 
 	/**
@@ -208,6 +208,7 @@ public class FieldRetrievingFactoryBean
 
 
 	@Override
+	@Nullable
 	public Object getObject() throws IllegalAccessException {
 		if (this.fieldObject == null) {
 			throw new FactoryBeanNotInitializedException();

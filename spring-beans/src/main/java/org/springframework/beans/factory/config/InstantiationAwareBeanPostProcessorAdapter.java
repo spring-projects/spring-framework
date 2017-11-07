@@ -21,6 +21,7 @@ import java.lang.reflect.Constructor;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
+import org.springframework.lang.Nullable;
 
 /**
  * Adapter that implements all methods on {@link SmartInstantiationAwareBeanPostProcessor}
@@ -40,11 +41,13 @@ import org.springframework.beans.PropertyValues;
 public abstract class InstantiationAwareBeanPostProcessorAdapter implements SmartInstantiationAwareBeanPostProcessor {
 
 	@Override
+	@Nullable
 	public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
 		return null;
 	}
 
 	@Override
+	@Nullable
 	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName) throws BeansException {
 		return null;
 	}
@@ -55,6 +58,7 @@ public abstract class InstantiationAwareBeanPostProcessorAdapter implements Smar
 	}
 
 	@Override
+	@Nullable
 	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
 		return null;
 	}

@@ -3,6 +3,8 @@
  * Contains a DAO base class for JdbcTemplate usage.
  */
 @NonNullApi
+@NonNullFields
 package org.springframework.jdbc.core.support;
 
 import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

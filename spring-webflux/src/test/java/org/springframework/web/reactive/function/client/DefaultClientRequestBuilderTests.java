@@ -17,14 +17,15 @@
 package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -39,6 +40,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.OPTIONS;
 import static org.springframework.http.HttpMethod.POST;
 
 /**
@@ -66,9 +68,22 @@ public class DefaultClientRequestBuilderTests {
 	@Test
 	public void method() throws Exception {
 		URI url = new URI("http://example.com");
-		ClientRequest result = ClientRequest.method(DELETE, url).build();
-		assertEquals(url, result.url());
-		assertEquals(DELETE, result.method());
+		ClientRequest.Builder builder = ClientRequest.method(DELETE, url);
+		assertEquals(DELETE, builder.build().method());
+
+		builder.method(OPTIONS);
+		assertEquals(OPTIONS, builder.build().method());
+	}
+
+	@Test
+	public void url() throws Exception {
+		URI url1 = new URI("http://example.com/foo");
+		URI url2 = new URI("http://example.com/bar");
+		ClientRequest.Builder builder = ClientRequest.method(DELETE, url1);
+		assertEquals(url1, builder.build().url());
+
+		builder.url(url2);
+		assertEquals(url2, builder.build().url());
 	}
 
 	@Test
@@ -101,8 +116,7 @@ public class DefaultClientRequestBuilderTests {
 		BodyInserter<String, ClientHttpRequest> inserter =
 				(response, strategies) -> {
 					byte[] bodyBytes = body.getBytes(UTF_8);
-					ByteBuffer byteBuffer = ByteBuffer.wrap(bodyBytes);
-					DataBuffer buffer = new DefaultDataBufferFactory().wrap(byteBuffer);
+					DataBuffer buffer = new DefaultDataBufferFactory().wrap(bodyBytes);
 
 					return response.writeWith(Mono.just(buffer));
 				};
@@ -119,6 +133,55 @@ public class DefaultClientRequestBuilderTests {
 		MockClientHttpRequest request = new MockClientHttpRequest(GET, "/");
 		result.writeTo(request, strategies).block();
 		assertNotNull(request.getBody());
+
+		StepVerifier.create(request.getBody())
+				.expectNextCount(1)
+				.verifyComplete();
+	}
+
+	@Test
+	public void bodyClass() throws Exception {
+		String body = "foo";
+		Publisher<String> publisher = Mono.just(body);
+		ClientRequest result = ClientRequest.method(POST, URI.create("http://example.com"))
+				.body(publisher, String.class).build();
+
+		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
+		messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
+
+		ExchangeStrategies strategies = mock(ExchangeStrategies.class);
+		when(strategies.messageWriters()).thenReturn(messageWriters);
+
+		MockClientHttpRequest request = new MockClientHttpRequest(GET, "/");
+		result.writeTo(request, strategies).block();
+		assertNotNull(request.getBody());
+
+		StepVerifier.create(request.getBody())
+				.expectNextCount(1)
+				.verifyComplete();
+	}
+
+	@Test
+	public void bodyParameterizedTypeReference() throws Exception {
+		String body = "foo";
+		Publisher<String> publisher = Mono.just(body);
+		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<String>() {};
+		ClientRequest result = ClientRequest.method(POST, URI.create("http://example.com"))
+				.body(publisher, typeReference).build();
+
+		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
+		messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
+
+		ExchangeStrategies strategies = mock(ExchangeStrategies.class);
+		when(strategies.messageWriters()).thenReturn(messageWriters);
+
+		MockClientHttpRequest request = new MockClientHttpRequest(GET, "/");
+		result.writeTo(request, strategies).block();
+		assertNotNull(request.getBody());
+
+		StepVerifier.create(request.getBody())
+				.expectNextCount(1)
+				.verifyComplete();
 	}
 
 }

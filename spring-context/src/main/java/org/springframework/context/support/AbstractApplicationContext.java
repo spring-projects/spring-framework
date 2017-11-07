@@ -34,7 +34,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.CachedIntrospectionResults;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -124,7 +123,7 @@ import org.springframework.util.ReflectionUtils;
  * @see org.springframework.context.MessageSource
  */
 public abstract class AbstractApplicationContext extends DefaultResourceLoader
-		implements ConfigurableApplicationContext, DisposableBean {
+		implements ConfigurableApplicationContext {
 
 	/**
 	 * Name of the MessageSource bean in the factory.
@@ -388,7 +387,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		else {
 			applicationEvent = new PayloadApplicationEvent<>(this, event);
 			if (eventType == null) {
-				eventType = ((PayloadApplicationEvent)applicationEvent).getResolvableType();
+				eventType = ((PayloadApplicationEvent) applicationEvent).getResolvableType();
 			}
 		}
 
@@ -940,12 +939,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * DisposableBean callback for destruction of this instance.
+	 * Callback for destruction of this instance, originally attached
+	 * to a {@code DisposableBean} implementation (not anymore in 5.0).
 	 * <p>The {@link #close()} method is the native way to shut down
 	 * an ApplicationContext, which this method simply delegates to.
-	 * @see #close()
+	 * @deprecated as of Spring Framework 5.0, in favor of {@link #close()}
 	 */
-	@Override
+	@Deprecated
 	public void destroy() {
 		close();
 	}
@@ -1000,11 +1000,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 
 			// Stop all Lifecycle beans, to avoid delays during individual destruction.
-			try {
-				getLifecycleProcessor().onClose();
-			}
-			catch (Throwable ex) {
-				logger.warn("Exception thrown from LifecycleProcessor on context close", ex);
+			if (this.lifecycleProcessor != null) {
+				try {
+					this.lifecycleProcessor.onClose();
+				}
+				catch (Throwable ex) {
+					logger.warn("Exception thrown from LifecycleProcessor on context close", ex);
+				}
 			}
 
 			// Destroy all cached singletons in the context's BeanFactory.
@@ -1137,6 +1139,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
 		assertBeanFactoryActive();
 		return getBeanFactory().getType(name);
@@ -1214,6 +1217,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	@Override
+	@Nullable
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
 			throws NoSuchBeanDefinitionException{
 
@@ -1227,6 +1231,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	//---------------------------------------------------------------------
 
 	@Override
+	@Nullable
 	public BeanFactory getParentBeanFactory() {
 		return getParent();
 	}

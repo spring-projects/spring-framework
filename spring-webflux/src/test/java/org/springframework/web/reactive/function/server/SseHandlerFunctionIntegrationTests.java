@@ -25,6 +25,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -120,13 +121,17 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 
 		public Mono<ServerResponse> string(ServerRequest request) {
 			Flux<String> flux = Flux.interval(Duration.ofMillis(100)).map(l -> "foo " + l).take(2);
-			return ServerResponse.ok().body(fromServerSentEvents(flux, String.class));
+			return ServerResponse.ok()
+					.contentType(MediaType.TEXT_EVENT_STREAM)
+					.body(flux, String.class);
 		}
 
 		public Mono<ServerResponse> person(ServerRequest request) {
 			Flux<Person> flux = Flux.interval(Duration.ofMillis(100))
 					.map(l -> new Person("foo " + l)).take(2);
-			return ServerResponse.ok().body(fromServerSentEvents(flux, Person.class));
+			return ServerResponse.ok()
+					.contentType(MediaType.TEXT_EVENT_STREAM)
+					.body(flux, Person.class);
 		}
 
 		public Mono<ServerResponse> sse(ServerRequest request) {

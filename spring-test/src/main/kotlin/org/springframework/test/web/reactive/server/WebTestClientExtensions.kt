@@ -34,6 +34,7 @@ inline fun <reified T : Any, S : Publisher<T>> WebTestClient.RequestBodySpec.bod
  * @author Sebastien Deleuze
  * @since 5.0
  */
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified B : Any> WebTestClient.ResponseSpec.expectBody(): WebTestClient.BodySpec<B, *> =
 		expectBody(B::class.java)
 
@@ -52,5 +53,6 @@ inline fun <reified E : Any> WebTestClient.ResponseSpec.expectBodyList(): WebTes
  * @author Sebastien Deleuze
  * @since 5.0
  */
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified T : Any> WebTestClient.ResponseSpec.returnResult(): FluxExchangeResult<T> =
 		returnResult(T::class.java)

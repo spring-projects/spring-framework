@@ -99,6 +99,7 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 
 
 	@Override
+	@Nullable
 	public TransactionAttribute getTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
 		if (!ClassUtils.isUserLevelMethod(method)) {
 			return null;

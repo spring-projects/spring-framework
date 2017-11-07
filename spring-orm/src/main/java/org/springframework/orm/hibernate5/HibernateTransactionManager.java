@@ -156,7 +156,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	/**
 	 * Set the SessionFactory that this instance should manage transactions for.
 	 */
-	public void setSessionFactory(SessionFactory sessionFactory) {
+	public void setSessionFactory(@Nullable SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
 	}
 
@@ -202,8 +202,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * @see DataSourceUtils
 	 * @see org.springframework.jdbc.core.JdbcTemplate
 	 */
-	public void setDataSource(DataSource dataSource) {
-		if (dataSource instanceof TransactionAwareDataSourceProxy) {
+	public void setDataSource(@Nullable DataSource dataSource) {
+		if (dataSource != null && dataSource instanceof TransactionAwareDataSourceProxy) {
 			// If we got a TransactionAwareDataSourceProxy, we need to perform transactions
 			// for its underlying target DataSource, else data access code won't see
 			// properly exposed transactions (i.e. transactions for the target DataSource).
@@ -319,7 +319,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * HibernateTransactionManager.
 	 * @see LocalSessionFactoryBean#setEntityInterceptor
 	 */
-	public void setEntityInterceptor(Interceptor entityInterceptor) {
+	public void setEntityInterceptor(@Nullable Interceptor entityInterceptor) {
 		this.entityInterceptor = entityInterceptor;
 	}
 
@@ -837,7 +837,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			return this.newSession;
 		}
 
-		public void setPreviousHoldability(Integer previousHoldability) {
+		public void setPreviousHoldability(@Nullable Integer previousHoldability) {
 			this.previousHoldability = previousHoldability;
 		}
 

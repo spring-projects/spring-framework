@@ -60,6 +60,12 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 	 */
 	private boolean hideProxyClassNames = false;
 
+	/**
+	 * Indicates whether to pass an exception to the logger.
+	 * @see #writeToLog(Log, String, Throwable)
+	 */
+	private boolean logExceptionStackTrace = true;
+
 
 	/**
 	 * Set whether to use a dynamic logger or a static logger.
@@ -97,6 +103,17 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 	 */
 	public void setHideProxyClassNames(boolean hideProxyClassNames) {
 		this.hideProxyClassNames = hideProxyClassNames;
+	}
+
+	/**
+	 * Set whether to pass an exception to the logger, suggesting inclusion
+	 * of its stack trace into the log. Default is "true"; set this to "false"
+	 * in order to reduce the log output to just the trace message (which may
+	 * include the exception class name and exception message, if applicable).
+	 * @since 4.3.10
+	 */
+	public void setLogExceptionStackTrace(boolean logExceptionStackTrace) {
+		this.logExceptionStackTrace = logExceptionStackTrace;
 	}
 
 
@@ -172,6 +189,40 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 		return logger.isTraceEnabled();
 	}
 
+	/**
+	 * Write the supplied trace message to the supplied {@code Log} instance.
+	 * <p>To be called by {@link #invokeUnderTrace} for enter/exit messages.
+	 * <p>Delegates to {@link #writeToLog(Log, String, Throwable)} as the
+	 * ultimate delegate that controls the underlying logger invocation.
+	 * @since 4.3.10
+	 * @see #writeToLog(Log, String, Throwable)
+	 */
+	protected void writeToLog(Log logger, String message) {
+		writeToLog(logger, message, null);
+	}
+
+	/**
+	 * Write the supplied trace message and {@link Throwable} to the
+	 * supplied {@code Log} instance.
+	 * <p>To be called by {@link #invokeUnderTrace} for enter/exit outcomes,
+	 * potentially including an exception. Note that an exception's stack trace
+	 * won't get logged when {@link #setLogExceptionStackTrace} is "false".
+	 * <p>By default messages are written at {@code TRACE} level. Subclasses
+	 * can override this method to control which level the message is written
+	 * at, typically also overriding {@link #isLogEnabled} accordingly.
+	 * @since 4.3.10
+	 * @see #setLogExceptionStackTrace
+	 * @see #isLogEnabled
+	 */
+	protected void writeToLog(Log logger, String message, @Nullable Throwable ex) {
+		if (ex != null && this.logExceptionStackTrace) {
+			logger.trace(message, ex);
+		}
+		else {
+			logger.trace(message);
+		}
+	}
+
 
 	/**
 	 * Subclasses must override this method to perform any tracing around the
@@ -181,13 +232,15 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 	 * <p>By default, the passed-in {@code Log} instance will have log level
 	 * "trace" enabled. Subclasses do not have to check for this again, unless
 	 * they overwrite the {@code isInterceptorEnabled} method to modify
-	 * the default behavior.
+	 * the default behavior, and may delegate to {@code writeToLog} for actual
+	 * messages to be written.
 	 * @param logger the {@code Log} to write trace messages to
 	 * @return the result of the call to {@code MethodInvocation.proceed()}
 	 * @throws Throwable if the call to {@code MethodInvocation.proceed()}
 	 * encountered any errors
-	 * @see #isInterceptorEnabled
 	 * @see #isLogEnabled
+	 * @see #writeToLog(Log, String)
+	 * @see #writeToLog(Log, String, Throwable)
 	 */
 	protected abstract Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable;
 

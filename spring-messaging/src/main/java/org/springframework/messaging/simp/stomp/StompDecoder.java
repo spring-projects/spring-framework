@@ -61,7 +61,7 @@ public class StompDecoder {
 	 * Configure a {@link MessageHeaderInitializer} to apply to the headers of
 	 * {@link Message}s from decoded STOMP frames.
 	 */
-	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+	public void setHeaderInitializer(@Nullable MessageHeaderInitializer headerInitializer) {
 		this.headerInitializer = headerInitializer;
 	}
 
@@ -106,7 +106,9 @@ public class StompDecoder {
 	 * @return the decoded messages, or an empty list if none
 	 * @throws StompConversionException raised in case of decoding issues
 	 */
-	public List<Message<byte[]>> decode(ByteBuffer byteBuffer, @Nullable MultiValueMap<String, String> partialMessageHeaders) {
+	public List<Message<byte[]>> decode(ByteBuffer byteBuffer,
+			@Nullable MultiValueMap<String, String> partialMessageHeaders) {
+
 		List<Message<byte[]>> messages = new ArrayList<>();
 		while (byteBuffer.hasRemaining()) {
 			Message<byte[]> message = decodeMessage(byteBuffer, partialMessageHeaders);
@@ -148,7 +150,7 @@ public class StompDecoder {
 				if (payload.length > 0) {
 					StompCommand stompCommand = headerAccessor.getCommand();
 					if (stompCommand != null && !stompCommand.isBodyAllowed()) {
-						throw new StompConversionException(headerAccessor.getCommand() +
+						throw new StompConversionException(stompCommand +
 								" shouldn't have a payload: length=" + payload.length + ", headers=" + headers);
 					}
 				}
@@ -160,9 +162,7 @@ public class StompDecoder {
 				}
 			}
 			else {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Incomplete frame, resetting input buffer...");
-				}
+				logger.trace("Incomplete frame, resetting input buffer...");
 				if (headers != null && headerAccessor != null) {
 					String name = NativeMessageHeaderAccessor.NATIVE_HEADERS;
 					@SuppressWarnings("unchecked")
@@ -299,7 +299,9 @@ public class StompDecoder {
 			contentLength = headerAccessor.getContentLength();
 		}
 		catch (NumberFormatException ex) {
-			logger.warn("Ignoring invalid content-length: '" + headerAccessor);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Ignoring invalid content-length: '" + headerAccessor);
+			}
 			contentLength = null;
 		}
 

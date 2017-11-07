@@ -292,7 +292,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		public void setReadMethod(Method readMethod) {
+		public void setReadMethod(@Nullable Method readMethod) {
 			this.readMethod = readMethod;
 		}
 
@@ -303,7 +303,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		public void setWriteMethod(Method writeMethod) {
+		public void setWriteMethod(@Nullable Method writeMethod) {
 			this.writeMethod = writeMethod;
 		}
 
@@ -327,7 +327,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		public void setPropertyEditorClass(Class<?> propertyEditorClass) {
+		public void setPropertyEditorClass(@Nullable Class<?> propertyEditorClass) {
 			this.propertyEditorClass = propertyEditorClass;
 		}
 
@@ -399,7 +399,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		public void setReadMethod(Method readMethod) {
+		public void setReadMethod(@Nullable Method readMethod) {
 			this.readMethod = readMethod;
 		}
 
@@ -410,7 +410,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		public void setWriteMethod(Method writeMethod) {
+		public void setWriteMethod(@Nullable Method writeMethod) {
 			this.writeMethod = writeMethod;
 		}
 
@@ -434,7 +434,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		public void setIndexedReadMethod(Method indexedReadMethod) throws IntrospectionException {
+		public void setIndexedReadMethod(@Nullable Method indexedReadMethod) throws IntrospectionException {
 			this.indexedReadMethod = indexedReadMethod;
 		}
 
@@ -445,7 +445,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		public void setIndexedWriteMethod(Method indexedWriteMethod) throws IntrospectionException {
+		public void setIndexedWriteMethod(@Nullable Method indexedWriteMethod) throws IntrospectionException {
 			this.indexedWriteMethod = indexedWriteMethod;
 		}
 
@@ -470,7 +470,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		public void setPropertyEditorClass(Class<?> propertyEditorClass) {
+		public void setPropertyEditorClass(@Nullable Class<?> propertyEditorClass) {
 			this.propertyEditorClass = propertyEditorClass;
 		}
 

@@ -360,7 +360,8 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	@Test
 	public void personCreateWithRxJava2ObservableXml() throws Exception {
 		People people = new People(new Person("Robert"), new Person("Marie"));
-		ResponseEntity<Void> response = performPost("/person-create/rxjava2-observable", APPLICATION_XML, people, null, Void.class);
+		String url = "/person-create/rxjava2-observable";
+		ResponseEntity<Void> response = performPost(url, APPLICATION_XML, people, null, Void.class);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals(2, getApplicationContext().getBean(PersonCreateController.class).persons.size());
@@ -600,7 +601,9 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		}
 
 		@PostMapping("/rxjava2-observable")
-		public io.reactivex.Completable createWithRxJava2Observable(@RequestBody io.reactivex.Observable<Person> observable) {
+		public io.reactivex.Completable createWithRxJava2Observable(
+				@RequestBody io.reactivex.Observable<Person> observable) {
+
 			return observable.toList().doOnSuccess(persons::addAll).toCompletable();
 		}
 

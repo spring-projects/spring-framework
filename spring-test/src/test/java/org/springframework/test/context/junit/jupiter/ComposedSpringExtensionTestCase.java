@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * with JUnit Jupiter's {@link ExtendWith @ExtendWith} <b>and</b> Spring's
  * {@link ContextConfiguration @ContextConfiguration}.
  *
- * <p>To run these tests in an IDE, simply run {@link SpringJUnitJupiterTestSuite}
- * as a JUnit 4 test.
+ * <p>To run these tests in an IDE that does not have built-in support for the JUnit
+ * Platform, simply run {@link SpringJUnitJupiterTestSuite} as a JUnit 4 test.
  *
  * @author Sam Brannen
  * @since 5.0

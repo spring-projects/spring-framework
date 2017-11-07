@@ -42,7 +42,7 @@ import static org.mockito.Mockito.*;
  *
  * @author Sebastien Deleuze
  */
-@Ignore  // for JDK 9 compatibility
+@Ignore  // for JDK 9 compatibility, see KT-18833
 public class KotlinScriptTemplateTests {
 
 	private WebApplicationContext webAppContext;
@@ -62,20 +62,18 @@ public class KotlinScriptTemplateTests {
 	public void renderTemplateWithFrenchLocale() throws Exception {
 		Map<String, Object> model = new HashMap<>();
 		model.put("foo", "Foo");
-		MockHttpServletResponse response = renderViewWithModel("org/springframework/web/servlet/view/script/kotlin/template.kts",
-				model, Locale.FRENCH, ScriptTemplatingConfiguration.class);
-		assertEquals("<html><body>\n<p>Bonjour Foo</p>\n</body></html>",
-				response.getContentAsString());
+		String url = "org/springframework/web/servlet/view/script/kotlin/template.kts";
+		MockHttpServletResponse response = render(url, model, Locale.FRENCH, ScriptTemplatingConfiguration.class);
+		assertEquals("<html><body>\n<p>Bonjour Foo</p>\n</body></html>", response.getContentAsString());
 	}
 
 	@Test
 	public void renderTemplateWithEnglishLocale() throws Exception {
 		Map<String, Object> model = new HashMap<>();
 		model.put("foo", "Foo");
-		MockHttpServletResponse response = renderViewWithModel("org/springframework/web/servlet/view/script/kotlin/template.kts",
-				model, Locale.ENGLISH, ScriptTemplatingConfiguration.class);
-		assertEquals("<html><body>\n<p>Hello Foo</p>\n</body></html>",
-				response.getContentAsString());
+		String url = "org/springframework/web/servlet/view/script/kotlin/template.kts";
+		MockHttpServletResponse response = render(url, model, Locale.ENGLISH, ScriptTemplatingConfiguration.class);
+		assertEquals("<html><body>\n<p>Hello Foo</p>\n</body></html>", response.getContentAsString());
 	}
 
 	@Test
@@ -85,14 +83,16 @@ public class KotlinScriptTemplateTests {
 		model.put("hello", "Hello");
 		model.put("foo", "Foo");
 		model.put("footer", "</body></html>");
-		MockHttpServletResponse response = renderViewWithModel("org/springframework/web/servlet/view/script/kotlin/eval.kts",
+		MockHttpServletResponse response = render("org/springframework/web/servlet/view/script/kotlin/eval.kts",
 				model, Locale.ENGLISH, ScriptTemplatingConfigurationWithoutRenderFunction.class);
 		assertEquals("<html><body>\n<p>Hello Foo</p>\n</body></html>",
 				response.getContentAsString());
 	}
 
 
-	private MockHttpServletResponse renderViewWithModel(String viewUrl, Map<String, Object> model, Locale locale, Class<?> configuration) throws Exception {
+	private MockHttpServletResponse render(String viewUrl, Map<String, Object> model,
+			Locale locale, Class<?> configuration) throws Exception {
+
 		ScriptTemplateView view = createViewWithUrl(viewUrl, configuration);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		MockHttpServletRequest request = new MockHttpServletRequest();

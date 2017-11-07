@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.apache.tomcat.websocket.WsWebSocketContainer;
 import org.apache.tomcat.websocket.server.WsContextListener;
 import org.junit.After;
 import org.junit.Before;
@@ -60,6 +61,7 @@ import org.springframework.web.reactive.socket.server.upgrade.ReactorNettyReques
 import org.springframework.web.reactive.socket.server.upgrade.RxNettyRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.TomcatRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.UndertowRequestUpgradeStrategy;
+import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.junit.Assume.*;
 
@@ -93,7 +95,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	public static Object[][] arguments() throws IOException {
 
 		Flux<? extends WebSocketClient> clients = Flux.concat(
-				Flux.just(new TomcatWebSocketClient()).repeat(5),
+				Flux.just(new TomcatWebSocketClient(new WsWebSocketContainer())).repeat(5),
 				Flux.just(new JettyWebSocketClient()).repeat(5),
 				Flux.just(new ReactorNettyWebSocketClient()).repeat(5),
 				Flux.just(new RxNettyWebSocketClient()).repeat(5),
@@ -159,7 +161,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 		context.register(DispatcherConfig.class, this.serverConfigClass);
 		context.register(getWebConfigClass());
 		context.refresh();
-		return DispatcherHandler.toHttpHandler(context);
+		return WebHttpHandlerBuilder.applicationContext(context).build();
 	}
 
 	protected URI getUrl(String path) throws URISyntaxException {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,21 +83,23 @@ public class DefaultDataBufferFactory implements DataBufferFactory {
 
 	@Override
 	public DefaultDataBuffer allocateBuffer(int initialCapacity) {
-		return (this.preferDirect ?
-				new DefaultDataBuffer(ByteBuffer.allocateDirect(initialCapacity), this) :
-				new DefaultDataBuffer(ByteBuffer.allocate(initialCapacity), this));
+		ByteBuffer byteBuffer = (this.preferDirect ?
+				ByteBuffer.allocateDirect(initialCapacity) :
+				ByteBuffer.allocate(initialCapacity));
+
+		return DefaultDataBuffer.fromEmptyByteBuffer(this, byteBuffer);
 	}
 
 	@Override
 	public DefaultDataBuffer wrap(ByteBuffer byteBuffer) {
 		ByteBuffer sliced = byteBuffer.slice();
-		return new DefaultDataBuffer(sliced, 0, byteBuffer.remaining(), this);
+		return DefaultDataBuffer.fromFilledByteBuffer(this, sliced);
 	}
 
 	@Override
 	public DataBuffer wrap(byte[] bytes) {
 		ByteBuffer wrapper = ByteBuffer.wrap(bytes);
-		return new DefaultDataBuffer(wrapper, 0, bytes.length, this);
+		return DefaultDataBuffer.fromFilledByteBuffer(this, wrapper);
 	}
 
 	@Override

@@ -145,7 +145,6 @@ abstract class AutowireUtils {
 	 * @param requiredType the type to assign the result to
 	 * @return the resolved value
 	 */
-	@Nullable
 	public static Object resolveAutowiringValue(Object autowiringValue, Class<?> requiredType) {
 		if (autowiringValue instanceof ObjectFactory && !requiredType.isInstance(autowiringValue)) {
 			ObjectFactory<?> factory = (ObjectFactory<?>) autowiringValue;

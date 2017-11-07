@@ -79,9 +79,10 @@ import org.springframework.util.Assert;
 public class TransactionAwareConnectionFactoryProxy
 		implements ConnectionFactory, QueueConnectionFactory, TopicConnectionFactory {
 
-	private boolean synchedLocalTransactionAllowed = false;
-
+	@Nullable
 	private ConnectionFactory targetConnectionFactory;
+
+	private boolean synchedLocalTransactionAllowed = false;
 
 
 	/**
@@ -110,9 +111,10 @@ public class TransactionAwareConnectionFactoryProxy
 	/**
 	 * Return the target ConnectionFactory that this ConnectionFactory should delegate to.
 	 */
-	@Nullable
 	protected ConnectionFactory getTargetConnectionFactory() {
-		return this.targetConnectionFactory;
+		ConnectionFactory target = this.targetConnectionFactory;
+		Assert.state(target != null, "'targetConnectionFactory' is required");
+		return target;
 	}
 
 	/**
@@ -141,19 +143,19 @@ public class TransactionAwareConnectionFactoryProxy
 
 	@Override
 	public Connection createConnection() throws JMSException {
-		Connection targetConnection = this.targetConnectionFactory.createConnection();
+		Connection targetConnection = getTargetConnectionFactory().createConnection();
 		return getTransactionAwareConnectionProxy(targetConnection);
 	}
 
 	@Override
 	public Connection createConnection(String username, String password) throws JMSException {
-		Connection targetConnection = obtainTargetConnectionFactory().createConnection(username, password);
+		Connection targetConnection = getTargetConnectionFactory().createConnection(username, password);
 		return getTransactionAwareConnectionProxy(targetConnection);
 	}
 
 	@Override
 	public QueueConnection createQueueConnection() throws JMSException {
-		ConnectionFactory target = obtainTargetConnectionFactory();
+		ConnectionFactory target = getTargetConnectionFactory();
 		if (!(target instanceof QueueConnectionFactory)) {
 			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is no QueueConnectionFactory");
 		}
@@ -163,7 +165,7 @@ public class TransactionAwareConnectionFactoryProxy
 
 	@Override
 	public QueueConnection createQueueConnection(String username, String password) throws JMSException {
-		ConnectionFactory target = obtainTargetConnectionFactory();
+		ConnectionFactory target = getTargetConnectionFactory();
 		if (!(target instanceof QueueConnectionFactory)) {
 			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is no QueueConnectionFactory");
 		}
@@ -173,7 +175,7 @@ public class TransactionAwareConnectionFactoryProxy
 
 	@Override
 	public TopicConnection createTopicConnection() throws JMSException {
-		ConnectionFactory target = obtainTargetConnectionFactory();
+		ConnectionFactory target = getTargetConnectionFactory();
 		if (!(target instanceof TopicConnectionFactory)) {
 			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is no TopicConnectionFactory");
 		}
@@ -183,7 +185,7 @@ public class TransactionAwareConnectionFactoryProxy
 
 	@Override
 	public TopicConnection createTopicConnection(String username, String password) throws JMSException {
-		ConnectionFactory target = obtainTargetConnectionFactory();
+		ConnectionFactory target = getTargetConnectionFactory();
 		if (!(target instanceof TopicConnectionFactory)) {
 			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is no TopicConnectionFactory");
 		}
@@ -193,28 +195,22 @@ public class TransactionAwareConnectionFactoryProxy
 
 	@Override
 	public JMSContext createContext() {
-		return obtainTargetConnectionFactory().createContext();
+		return getTargetConnectionFactory().createContext();
 	}
 
 	@Override
 	public JMSContext createContext(String userName, String password) {
-		return obtainTargetConnectionFactory().createContext(userName, password);
+		return getTargetConnectionFactory().createContext(userName, password);
 	}
 
 	@Override
 	public JMSContext createContext(String userName, String password, int sessionMode) {
-		return obtainTargetConnectionFactory().createContext(userName, password, sessionMode);
+		return getTargetConnectionFactory().createContext(userName, password, sessionMode);
 	}
 
 	@Override
 	public JMSContext createContext(int sessionMode) {
-		return obtainTargetConnectionFactory().createContext(sessionMode);
-	}
-
-	private ConnectionFactory obtainTargetConnectionFactory() {
-		ConnectionFactory target = getTargetConnectionFactory();
-		Assert.state(target != null, "'targetConnectionFactory' is required");
-		return target;
+		return getTargetConnectionFactory().createContext(sessionMode);
 	}
 
 
@@ -265,14 +261,14 @@ public class TransactionAwareConnectionFactoryProxy
 			}
 			else if (Session.class == method.getReturnType()) {
 				Session session = ConnectionFactoryUtils.getTransactionalSession(
-						obtainTargetConnectionFactory(), this.target, isSynchedLocalTransactionAllowed());
+						getTargetConnectionFactory(), this.target, isSynchedLocalTransactionAllowed());
 				if (session != null) {
 					return getCloseSuppressingSessionProxy(session);
 				}
 			}
 			else if (QueueSession.class == method.getReturnType()) {
 				QueueSession session = ConnectionFactoryUtils.getTransactionalQueueSession(
-						(QueueConnectionFactory) obtainTargetConnectionFactory(), (QueueConnection) this.target,
+						(QueueConnectionFactory) getTargetConnectionFactory(), (QueueConnection) this.target,
 						isSynchedLocalTransactionAllowed());
 				if (session != null) {
 					return getCloseSuppressingSessionProxy(session);
@@ -280,7 +276,7 @@ public class TransactionAwareConnectionFactoryProxy
 			}
 			else if (TopicSession.class == method.getReturnType()) {
 				TopicSession session = ConnectionFactoryUtils.getTransactionalTopicSession(
-						(TopicConnectionFactory) obtainTargetConnectionFactory(), (TopicConnection) this.target,
+						(TopicConnectionFactory) getTargetConnectionFactory(), (TopicConnection) this.target,
 						isSynchedLocalTransactionAllowed());
 				if (session != null) {
 					return getCloseSuppressingSessionProxy(session);

@@ -175,7 +175,9 @@ public class InterceptorRegistryTests {
 		return result;
 	}
 
-	private void verifyWebInterceptor(HandlerInterceptor interceptor, TestWebRequestInterceptor webInterceptor) throws Exception {
+	private void verifyWebInterceptor(HandlerInterceptor interceptor,
+			TestWebRequestInterceptor webInterceptor) throws Exception {
+
 		assertTrue(interceptor instanceof WebRequestHandlerInterceptorAdapter);
 		interceptor.preHandle(this.request, this.response, null);
 		assertTrue(webInterceptor.preHandleInvoked);

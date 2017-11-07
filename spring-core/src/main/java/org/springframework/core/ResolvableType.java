@@ -766,6 +766,7 @@ public class ResolvableType implements Serializable {
 		return (this.resolved != null ? this.resolved : fallback);
 	}
 
+	@Nullable
 	private Class<?> resolveClass() {
 		if (this.type == EmptyType.INSTANCE) {
 			return null;
@@ -1339,6 +1340,19 @@ public class ResolvableType implements Serializable {
 		return forType(type, variableResolver);
 	}
 
+
+	/**
+	 * Return a {@link ResolvableType} for the specified {@link ParameterizedTypeReference}.
+	 * Note: The resulting {@link ResolvableType} may not be {@link Serializable}.
+	 * @param typeReference the reference to obtain the source type from
+	 * @return a {@link ResolvableType} for the specified {@link ParameterizedTypeReference}
+	 * @since 4.3.12
+	 * @see #forType(Type)
+	 */
+	public static ResolvableType forType(ParameterizedTypeReference<?> typeReference) {
+		return forType(typeReference.getType(), null, null);
+	}
+
 	/**
 	 * Return a {@link ResolvableType} for the specified {@link Type} backed by a given
 	 * {@link VariableResolver}.
@@ -1419,6 +1433,7 @@ public class ResolvableType implements Serializable {
 	private class DefaultVariableResolver implements VariableResolver {
 
 		@Override
+		@Nullable
 		public ResolvableType resolveVariable(TypeVariable<?> variable) {
 			return ResolvableType.this.resolveVariable(variable);
 		}
@@ -1443,6 +1458,7 @@ public class ResolvableType implements Serializable {
 		}
 
 		@Override
+		@Nullable
 		public ResolvableType resolveVariable(TypeVariable<?> variable) {
 			for (int i = 0; i < this.variables.length; i++) {
 				if (ObjectUtils.nullSafeEquals(SerializableTypeWrapper.unwrap(this.variables[i]),
@@ -1472,6 +1488,7 @@ public class ResolvableType implements Serializable {
 		}
 
 		@Override
+		@Nullable
 		public Type getOwnerType() {
 			return null;
 		}
@@ -1577,7 +1594,7 @@ public class ResolvableType implements Serializable {
 			}
 			WildcardType wildcardType = (WildcardType) resolveToWildcard.type;
 			Kind boundsType = (wildcardType.getLowerBounds().length > 0 ? Kind.LOWER : Kind.UPPER);
-			Type[] bounds = boundsType == Kind.UPPER ? wildcardType.getUpperBounds() : wildcardType.getLowerBounds();
+			Type[] bounds = (boundsType == Kind.UPPER ? wildcardType.getUpperBounds() : wildcardType.getLowerBounds());
 			ResolvableType[] resolvableBounds = new ResolvableType[bounds.length];
 			for (int i = 0; i < bounds.length; i++) {
 				resolvableBounds[i] = ResolvableType.forType(bounds[i], type.variableResolver);

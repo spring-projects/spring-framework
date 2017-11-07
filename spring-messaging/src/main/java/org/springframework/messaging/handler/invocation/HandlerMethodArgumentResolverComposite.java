@@ -68,7 +68,9 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	/**
 	 * Add the given {@link HandlerMethodArgumentResolver}s.
 	 */
-	public HandlerMethodArgumentResolverComposite addResolvers(@Nullable List<? extends HandlerMethodArgumentResolver> argumentResolvers) {
+	public HandlerMethodArgumentResolverComposite addResolvers(
+			@Nullable List<? extends HandlerMethodArgumentResolver> argumentResolvers) {
+
 		if (argumentResolvers != null) {
 			for (HandlerMethodArgumentResolver resolver : argumentResolvers) {
 				this.argumentResolvers.add(resolver);
@@ -106,6 +108,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	 * @exception IllegalStateException if no suitable {@link HandlerMethodArgumentResolver} is found.
 	 */
 	@Override
+	@Nullable
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
 
 		HandlerMethodArgumentResolver resolver = getArgumentResolver(parameter);

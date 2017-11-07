@@ -554,8 +554,8 @@ public class ConstructorArgumentValues {
 		 * Set the converted value of the constructor argument,
 		 * after processed type conversion.
 		 */
-		public synchronized void setConvertedValue(Object value) {
-			this.converted = true;
+		public synchronized void setConvertedValue(@Nullable Object value) {
+			this.converted = (value != null);
 			this.convertedValue = value;
 		}
 

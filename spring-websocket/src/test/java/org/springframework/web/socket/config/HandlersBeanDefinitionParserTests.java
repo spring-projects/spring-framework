@@ -173,8 +173,8 @@ public class HandlersBeanDefinitionParserTests {
 		assertThat(defaultSockJsService.getTaskScheduler(), instanceOf(ThreadPoolTaskScheduler.class));
 		assertFalse(defaultSockJsService.shouldSuppressCors());
 
-		Map<TransportType, TransportHandler> transportHandlers = defaultSockJsService.getTransportHandlers();
-		assertThat(transportHandlers.values(),
+		Map<TransportType, TransportHandler> handlerMap = defaultSockJsService.getTransportHandlers();
+		assertThat(handlerMap.values(),
 				containsInAnyOrder(
 						instanceOf(XhrPollingTransportHandler.class),
 						instanceOf(XhrReceivingTransportHandler.class),
@@ -185,11 +185,12 @@ public class HandlersBeanDefinitionParserTests {
 						instanceOf(HtmlFileTransportHandler.class),
 						instanceOf(WebSocketTransportHandler.class)));
 
-		WebSocketTransportHandler handler = (WebSocketTransportHandler) transportHandlers.get(TransportType.WEBSOCKET);
+		WebSocketTransportHandler handler = (WebSocketTransportHandler) handlerMap.get(TransportType.WEBSOCKET);
 		assertEquals(TestHandshakeHandler.class, handler.getHandshakeHandler().getClass());
 
 		List<HandshakeInterceptor> interceptors = defaultSockJsService.getHandshakeInterceptors();
-		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class), instanceOf(BarTestInterceptor.class), instanceOf(OriginHandshakeInterceptor.class)));
+		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class),
+				instanceOf(BarTestInterceptor.class), instanceOf(OriginHandshakeInterceptor.class)));
 	}
 
 	@Test

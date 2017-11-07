@@ -162,7 +162,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	 * @see #setEnvironment(org.springframework.core.env.Environment)
 	 */
 	public DelegatingFilterProxy(String targetBeanName, @Nullable WebApplicationContext wac) {
-		Assert.hasText(targetBeanName, "target Filter bean name must not be null or empty");
+		Assert.hasText(targetBeanName, "Target Filter bean name must not be null or empty");
 		this.setTargetBeanName(targetBeanName);
 		this.webApplicationContext = wac;
 		if (wac != null) {
@@ -174,7 +174,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	 * Set the name of the ServletContext attribute which should be used to retrieve the
 	 * {@link WebApplicationContext} from which to load the delegate {@link Filter} bean.
 	 */
-	public void setContextAttribute(String contextAttribute) {
+	public void setContextAttribute(@Nullable String contextAttribute) {
 		this.contextAttribute = contextAttribute;
 	}
 
@@ -193,7 +193,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	 * <p>By default, the {@code filter-name} as specified for the
 	 * DelegatingFilterProxy in {@code web.xml} will be used.
 	 */
-	public void setTargetBeanName(String targetBeanName) {
+	public void setTargetBeanName(@Nullable String targetBeanName) {
 		this.targetBeanName = targetBeanName;
 	}
 

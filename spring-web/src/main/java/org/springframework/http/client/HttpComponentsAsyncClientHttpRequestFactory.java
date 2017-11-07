@@ -33,7 +33,6 @@ import org.apache.http.protocol.HttpContext;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -51,7 +50,6 @@ import org.springframework.util.Assert;
 public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsClientHttpRequestFactory
 		implements AsyncClientHttpRequestFactory, InitializingBean {
 
-	@Nullable
 	private HttpAsyncClient asyncClient;
 
 
@@ -72,7 +70,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 	 */
 	public HttpComponentsAsyncClientHttpRequestFactory(HttpAsyncClient asyncClient) {
 		super();
-		setAsyncClient(asyncClient);
+		this.asyncClient = asyncClient;
 	}
 
 	/**
@@ -82,7 +80,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 	 */
 	public HttpComponentsAsyncClientHttpRequestFactory(CloseableHttpAsyncClient asyncClient) {
 		super();
-		setAsyncClient(asyncClient);
+		this.asyncClient = asyncClient;
 	}
 
 	/**
@@ -94,7 +92,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 	 */
 	public HttpComponentsAsyncClientHttpRequestFactory(HttpClient httpClient, HttpAsyncClient asyncClient) {
 		super(httpClient);
-		setAsyncClient(asyncClient);
+		this.asyncClient = asyncClient;
 	}
 
 	/**
@@ -107,7 +105,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 			CloseableHttpClient httpClient, CloseableHttpAsyncClient asyncClient) {
 
 		super(httpClient);
-		setAsyncClient(asyncClient);
+		this.asyncClient = asyncClient;
 	}
 
 
@@ -128,7 +126,6 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 	 * @since 4.3.10
 	 * @see #getHttpClient()
 	 */
-	@Nullable
 	public HttpAsyncClient getAsyncClient() {
 		return this.asyncClient;
 	}
@@ -150,7 +147,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 	 */
 	@Deprecated
 	public CloseableHttpAsyncClient getHttpAsyncClient() {
-		Assert.state(this.asyncClient == null || this.asyncClient instanceof CloseableHttpAsyncClient,
+		Assert.state(this.asyncClient instanceof CloseableHttpAsyncClient,
 				"No CloseableHttpAsyncClient - use getAsyncClient() instead");
 		return (CloseableHttpAsyncClient) this.asyncClient;
 	}
@@ -163,7 +160,6 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 
 	private HttpAsyncClient startAsyncClient() {
         HttpAsyncClient client = getAsyncClient();
-		Assert.state(client != null, "No HttpAsyncClient set");
 		if (client instanceof CloseableHttpAsyncClient) {
 			CloseableHttpAsyncClient closeableAsyncClient = (CloseableHttpAsyncClient) client;
 			if (!closeableAsyncClient.isRunning()) {

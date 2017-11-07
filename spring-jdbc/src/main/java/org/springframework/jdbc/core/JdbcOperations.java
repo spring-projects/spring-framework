@@ -147,6 +147,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if there is any problem executing the query
 	 * @see #queryForObject(String, Object[], RowMapper)
 	 */
+	@Nullable
 	<T> T queryForObject(String sql, RowMapper<T> rowMapper) throws DataAccessException;
 
 	/**
@@ -531,6 +532,7 @@ public interface JdbcOperations {
 	 * return exactly one row
 	 * @throws DataAccessException if the query fails
 	 */
+	@Nullable
 	<T> T queryForObject(String sql, Object[] args, int[] argTypes, RowMapper<T> rowMapper)
 			throws DataAccessException;
 
@@ -549,6 +551,7 @@ public interface JdbcOperations {
 	 * return exactly one row
 	 * @throws DataAccessException if the query fails
 	 */
+	@Nullable
 	<T> T queryForObject(String sql, Object[] args, RowMapper<T> rowMapper) throws DataAccessException;
 
 	/**
@@ -566,6 +569,7 @@ public interface JdbcOperations {
 	 * return exactly one row
 	 * @throws DataAccessException if the query fails
 	 */
+	@Nullable
 	<T> T queryForObject(String sql, RowMapper<T> rowMapper, @Nullable Object... args) throws DataAccessException;
 
 	/**
@@ -897,7 +901,7 @@ public interface JdbcOperations {
 	 * @param batchArgs the List of Object arrays containing the batch of arguments for the query
 	 * @return an array containing the numbers of rows affected by each update in the batch
 	 */
-	public int[] batchUpdate(String sql, List<Object[]> batchArgs) throws DataAccessException;
+	int[] batchUpdate(String sql, List<Object[]> batchArgs) throws DataAccessException;
 
 	/**
 	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments.
@@ -907,7 +911,7 @@ public interface JdbcOperations {
 	 * (constants from {@code java.sql.Types})
 	 * @return an array containing the numbers of rows affected by each update in the batch
 	 */
-	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) throws DataAccessException;
+	int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) throws DataAccessException;
 
 	/**
 	 * Execute multiple batches using the supplied SQL statement with the collect of supplied arguments.
@@ -920,7 +924,7 @@ public interface JdbcOperations {
 	 * @return an array containing for each batch another array containing the numbers of rows affected
 	 * by each update in the batch
 	 */
-	public <T> int[][] batchUpdate(String sql, Collection<T> batchArgs, int batchSize,
+	<T> int[][] batchUpdate(String sql, Collection<T> batchArgs, int batchSize,
 			ParameterizedPreparedStatementSetter<T> pss) throws DataAccessException;
 
 

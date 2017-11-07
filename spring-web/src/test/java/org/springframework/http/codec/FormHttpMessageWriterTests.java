@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,6 @@ package org.springframework.http.codec;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
@@ -29,6 +26,10 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Sebastien Deleuze
@@ -44,13 +45,18 @@ public class FormHttpMessageWriterTests {
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
 				MediaType.APPLICATION_FORM_URLENCODED));
 
-		assertFalse(this.writer.canWrite(
-				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
+		// No generic information
+		assertTrue(this.writer.canWrite(
+				ResolvableType.forInstance(new LinkedMultiValueMap<String, String>()),
 				MediaType.APPLICATION_FORM_URLENCODED));
 
 		assertFalse(this.writer.canWrite(
+				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
+				null));
+
+		assertFalse(this.writer.canWrite(
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, Object.class, String.class),
-				MediaType.APPLICATION_FORM_URLENCODED));
+				null));
 
 		assertFalse(this.writer.canWrite(
 				ResolvableType.forClassWithGenerics(Map.class, String.class, String.class),

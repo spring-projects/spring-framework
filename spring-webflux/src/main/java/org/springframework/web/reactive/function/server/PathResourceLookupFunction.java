@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.server.PathContainer;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.pattern.PathPattern;
@@ -54,18 +55,17 @@ class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resourc
 
 	@Override
 	public Mono<Resource> apply(ServerRequest request) {
-		String path = processPath(request.path());
+		PathContainer pathContainer = request.pathContainer();
+		if (!this.pattern.matches(pathContainer)) {
+			return Mono.empty();
+		}
+		pathContainer = this.pattern.extractPathWithinPattern(pathContainer);
+		String path = processPath(pathContainer.value());
 		if (path.contains("%")) {
 			path = StringUtils.uriDecode(path, StandardCharsets.UTF_8);
 		}
 		if (!StringUtils.hasLength(path) || isInvalidPath(path)) {
 			return Mono.empty();
-		}
-		if (!this.pattern.matches(path)) {
-			return Mono.empty();
-		}
-		else {
-			path = this.pattern.extractPathWithinPattern(path);
 		}
 		try {
 			Resource resource = this.location.createRelative(path);
@@ -155,4 +155,8 @@ class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resourc
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return String.format("%s -> %s", this.pattern, this.location);
+	}
 }

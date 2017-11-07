@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,27 +46,24 @@ public abstract class HandlerInterceptorAdapter implements AsyncHandlerIntercept
 	 * This implementation is empty.
 	 */
 	@Override
-	public void postHandle(
-			HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView)
-			throws Exception {
+	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+			@Nullable ModelAndView modelAndView) throws Exception {
 	}
 
 	/**
 	 * This implementation is empty.
 	 */
 	@Override
-	public void afterCompletion(
-			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
-			throws Exception {
+	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
+			@Nullable Exception ex) throws Exception {
 	}
 
 	/**
 	 * This implementation is empty.
 	 */
 	@Override
-	public void afterConcurrentHandlingStarted(
-			HttpServletRequest request, HttpServletResponse response, Object handler)
-			throws Exception {
+	public void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response,
+			Object handler) throws Exception {
 	}
 
 }

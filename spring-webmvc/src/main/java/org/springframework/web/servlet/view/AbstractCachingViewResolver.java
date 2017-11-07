@@ -50,6 +50,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	/** Dummy marker object for unresolved views in the cache Maps */
 	private static final View UNRESOLVED_VIEW = new View() {
 		@Override
+		@Nullable
 		public String getContentType() {
 			return null;
 		}
@@ -143,6 +144,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 
 
 	@Override
+	@Nullable
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
 		if (!isCache()) {
 			return createView(viewName, locale);

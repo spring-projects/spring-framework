@@ -61,7 +61,6 @@ public class Selection extends SpelNodeImpl {
 
 	public Selection(boolean nullSafe, int variant, int pos, SpelNodeImpl expression) {
 		super(pos, expression);
-		Assert.notNull(expression, "Expression must not be null");
 		this.nullSafe = nullSafe;
 		this.variant = variant;
 	}

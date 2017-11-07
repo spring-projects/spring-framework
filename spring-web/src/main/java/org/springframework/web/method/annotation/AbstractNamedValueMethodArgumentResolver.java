@@ -90,6 +90,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 
 	@Override
+	@Nullable
 	public final Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 

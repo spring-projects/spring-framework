@@ -132,11 +132,13 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	@Override
+	@Nullable
 	public String getHeader(String headerName) {
 		return getRequest().getHeader(headerName);
 	}
 
 	@Override
+	@Nullable
 	public String[] getHeaderValues(String headerName) {
 		String[] headerValues = StringUtils.toStringArray(getRequest().getHeaders(headerName));
 		return (!ObjectUtils.isEmpty(headerValues) ? headerValues : null);
@@ -148,11 +150,13 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	@Override
+	@Nullable
 	public String getParameter(String paramName) {
 		return getRequest().getParameter(paramName);
 	}
 
 	@Override
+	@Nullable
 	public String[] getParameterValues(String paramName) {
 		return getRequest().getParameterValues(paramName);
 	}
@@ -178,11 +182,13 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	@Override
+	@Nullable
 	public String getRemoteUser() {
 		return getRequest().getRemoteUser();
 	}
 
 	@Override
+	@Nullable
 	public Principal getUserPrincipal() {
 		return getRequest().getUserPrincipal();
 	}
@@ -283,11 +289,11 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		etag = padEtagIfNecessary(etag);
 		while (ifNoneMatch.hasMoreElements()) {
 			String clientETags = ifNoneMatch.nextElement();
-			Matcher eTagMatcher = ETAG_HEADER_VALUE_PATTERN.matcher(clientETags);
+			Matcher etagMatcher = ETAG_HEADER_VALUE_PATTERN.matcher(clientETags);
 			// Compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
-			while (eTagMatcher.find()) {
-				if (StringUtils.hasLength(eTagMatcher.group()) &&
-						etag.replaceFirst("^W/", "").equals(eTagMatcher.group(3))) {
+			while (etagMatcher.find()) {
+				if (StringUtils.hasLength(etagMatcher.group()) &&
+						etag.replaceFirst("^W/", "").equals(etagMatcher.group(3))) {
 					this.notModified = true;
 					break;
 				}

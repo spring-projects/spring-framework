@@ -48,7 +48,6 @@ import static org.junit.Assert.*;
 /**
  * @author Kazuki Shimizu
  * @author Juergen Hoeller
- * @since 4.3
  */
 public class SpringValidatorAdapterTests {
 
@@ -84,6 +83,7 @@ public class SpringValidatorAdapterTests {
 		validatorAdapter.validate(testBean, errors);
 
 		assertThat(errors.getFieldErrorCount("password"), is(1));
+		assertThat(errors.getFieldValue("password"), is("pass"));
 		assertThat(messageSource.getMessage(errors.getFieldError("password"), Locale.ENGLISH),
 				is("Size of Password is must be between 8 and 128"));
 	}
@@ -98,6 +98,7 @@ public class SpringValidatorAdapterTests {
 		validatorAdapter.validate(testBean, errors);
 
 		assertThat(errors.getFieldErrorCount("password"), is(1));
+		assertThat(errors.getFieldValue("password"), is("password"));
 		assertThat(messageSource.getMessage(errors.getFieldError("password"), Locale.ENGLISH),
 				is("Password must be same value with Password(Confirm)"));
 	}
@@ -112,6 +113,7 @@ public class SpringValidatorAdapterTests {
 		validatorAdapter.validate(testBean, errors);
 
 		assertThat(errors.getFieldErrorCount("email"), is(1));
+		assertThat(errors.getFieldValue("email"), is("test@example.com"));
 		assertThat(errors.getFieldErrorCount("confirmEmail"), is(1));
 		assertThat(messageSource.getMessage(errors.getFieldError("email"), Locale.ENGLISH),
 				is("email must be same value with confirmEmail"));
@@ -131,12 +133,14 @@ public class SpringValidatorAdapterTests {
 		validatorAdapter.validate(testBean, errors);
 
 		assertThat(errors.getFieldErrorCount("email"), is(1));
+		assertThat(errors.getFieldValue("email"), is("test@example.com"));
 		assertThat(errors.getFieldErrorCount("confirmEmail"), is(1));
 		assertThat(messageSource.getMessage(errors.getFieldError("email"), Locale.ENGLISH),
 				is("email must be same value with confirmEmail"));
 		assertThat(messageSource.getMessage(errors.getFieldError("confirmEmail"), Locale.ENGLISH),
 				is("Email required"));
 	}
+
 
 
 	@Same(field = "password", comparingField = "confirmPassword")

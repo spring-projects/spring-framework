@@ -127,6 +127,7 @@ public class SqlFunction<T> extends MappingSqlQuery<T> {
 	 * of rows returned, this is treated as an error.
 	 */
 	@Override
+	@Nullable
 	protected T mapRow(ResultSet rs, int rowNum) throws SQLException {
 		return this.rowMapper.mapRow(rs, rowNum);
 	}

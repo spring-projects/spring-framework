@@ -16,6 +16,7 @@
 
 package org.springframework.jms.listener;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -28,10 +29,10 @@ public abstract class AbstractMessageListenerContainerTests {
 
 	protected abstract AbstractMessageListenerContainer getContainer();
 
-
-	@Test(expected = IllegalArgumentException.class)
-	public void testSettingMessageListenerToANullType() throws Exception {
+	
+	public void testSettingMessageListenerToANullType() {
 		getContainer().setMessageListener(null);
+		Assert.assertNull(getContainer().getMessageListener());
 	}
 
 	@Test(expected = IllegalArgumentException.class)

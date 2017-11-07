@@ -74,6 +74,7 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 
 	@SuppressWarnings("unchecked")
 	@Override
+	@Nullable
 	public <R> R getNativeSession(@Nullable Class<R> requiredType) {
 		return (requiredType == null || requiredType.isInstance(this.nativeSession) ? (R) this.nativeSession : null);
 	}

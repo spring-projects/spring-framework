@@ -178,7 +178,7 @@ public class DispatcherServletTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		simpleDispatcherServlet.service(request, response);
 		assertTrue("Not forwarded", response.getForwardedUrl() == null);
-		assertEquals("Wed, 1 Apr 2015 00:00:00 GMT", response.getHeader("Last-Modified"));
+		assertEquals("Wed, 01 Apr 2015 00:00:00 GMT", response.getHeader("Last-Modified"));
 	}
 
 	@Test
@@ -208,7 +208,7 @@ public class DispatcherServletTests {
 		assertTrue(request.getAttribute("test3") != null);
 		assertTrue(request.getAttribute("test3x") != null);
 		assertTrue(request.getAttribute("test3y") != null);
-		assertEquals("Wed, 1 Apr 2015 00:00:01 GMT", response.getHeader("Last-Modified"));
+		assertEquals("Wed, 01 Apr 2015 00:00:01 GMT", response.getHeader("Last-Modified"));
 	}
 
 	@Test
@@ -880,7 +880,8 @@ public class DispatcherServletTests {
 	}
 
 
-	private static class TestWebContextInitializer implements ApplicationContextInitializer<ConfigurableWebApplicationContext> {
+	private static class TestWebContextInitializer
+			implements ApplicationContextInitializer<ConfigurableWebApplicationContext> {
 
 		@Override
 		public void initialize(ConfigurableWebApplicationContext applicationContext) {
@@ -889,7 +890,8 @@ public class DispatcherServletTests {
 	}
 
 
-	private static class OtherWebContextInitializer implements ApplicationContextInitializer<ConfigurableWebApplicationContext> {
+	private static class OtherWebContextInitializer
+			implements ApplicationContextInitializer<ConfigurableWebApplicationContext> {
 
 		@Override
 		public void initialize(ConfigurableWebApplicationContext applicationContext) {

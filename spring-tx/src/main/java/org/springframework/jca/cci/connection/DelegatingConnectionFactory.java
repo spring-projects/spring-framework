@@ -44,13 +44,14 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class DelegatingConnectionFactory implements ConnectionFactory, InitializingBean {
 
+	@Nullable
 	private ConnectionFactory targetConnectionFactory;
 
 
 	/**
 	 * Set the target ConnectionFactory that this ConnectionFactory should delegate to.
 	 */
-	public void setTargetConnectionFactory(ConnectionFactory targetConnectionFactory) {
+	public void setTargetConnectionFactory(@Nullable ConnectionFactory targetConnectionFactory) {
 		this.targetConnectionFactory = targetConnectionFactory;
 	}
 

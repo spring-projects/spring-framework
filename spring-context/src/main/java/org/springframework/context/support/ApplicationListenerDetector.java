@@ -27,7 +27,6 @@ import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcess
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ApplicationEventMulticaster;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -47,7 +46,6 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 
 	private static final Log logger = LogFactory.getLog(ApplicationListenerDetector.class);
 
-	@Nullable
 	private transient final AbstractApplicationContext applicationContext;
 
 	private transient final Map<String, Boolean> singletonNames = new ConcurrentHashMap<>(256);
@@ -60,9 +58,7 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
-		if (this.applicationContext != null) {
-			this.singletonNames.put(beanName, beanDefinition.isSingleton());
-		}
+		this.singletonNames.put(beanName, beanDefinition.isSingleton());
 	}
 
 	@Override
@@ -72,7 +68,7 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
-		if (this.applicationContext != null && bean instanceof ApplicationListener) {
+		if (bean instanceof ApplicationListener) {
 			// potentially not detected as a listener by getBeanNamesForType retrieval
 			Boolean flag = this.singletonNames.get(beanName);
 			if (Boolean.TRUE.equals(flag)) {
@@ -95,10 +91,15 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 
 	@Override
 	public void postProcessBeforeDestruction(Object bean, String beanName) {
-		if (this.applicationContext != null && bean instanceof ApplicationListener) {
-			ApplicationEventMulticaster multicaster = this.applicationContext.getApplicationEventMulticaster();
-			multicaster.removeApplicationListener((ApplicationListener<?>) bean);
-			multicaster.removeApplicationListenerBean(beanName);
+		if (bean instanceof ApplicationListener) {
+			try {
+				ApplicationEventMulticaster multicaster = this.applicationContext.getApplicationEventMulticaster();
+				multicaster.removeApplicationListener((ApplicationListener<?>) bean);
+				multicaster.removeApplicationListenerBean(beanName);
+			}
+			catch (IllegalStateException ex) {
+				// ApplicationEventMulticaster not initialized yet - no need to remove a listener
+			}
 		}
 	}
 

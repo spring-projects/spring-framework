@@ -19,6 +19,7 @@ package org.springframework.web.cors.reactive;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.http.server.PathContainer;
 import org.springframework.lang.Nullable;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.ServerWebExchange;
@@ -65,11 +66,12 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	}
 
 	@Override
+	@Nullable
 	public CorsConfiguration getCorsConfiguration(ServerWebExchange exchange) {
-		String lookupPath = exchange.getRequest().getPath().pathWithinApplication().value();
+		PathContainer lookupPath = exchange.getRequest().getPath().pathWithinApplication();
 		return this.corsConfigurations.entrySet().stream()
 				.filter(entry -> entry.getKey().matches(lookupPath))
-				.map(entry -> entry.getValue())
+				.map(Map.Entry::getValue)
 				.findFirst()
 				.orElse(null);
 	}

@@ -244,6 +244,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 
 	@Override
+	@Nullable
 	public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
 		// We only apply special treatment to ScriptFactory implementations here.
 		if (!ScriptFactory.class.isAssignableFrom(beanClass)) {

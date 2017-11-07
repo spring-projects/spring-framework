@@ -44,6 +44,7 @@ import org.springframework.web.context.request.WebRequest;
  * {@link SessionStatus#setComplete()}.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class SessionAttributesHandler {
@@ -74,10 +75,7 @@ public class SessionAttributesHandler {
 			this.attributeNames.addAll(Arrays.asList(annotation.names()));
 			this.attributeTypes.addAll(Arrays.asList(annotation.types()));
 		}
-
-		for (String attributeName : this.attributeNames) {
-			this.knownAttributeNames.add(attributeName);
-		}
+		this.knownAttributeNames.addAll(this.attributeNames);
 	}
 
 	/**
@@ -85,21 +83,19 @@ public class SessionAttributesHandler {
 	 * session attributes through an {@link SessionAttributes} annotation.
 	 */
 	public boolean hasSessionAttributes() {
-		return (this.attributeNames.size() > 0 || this.attributeTypes.size() > 0);
+		return (!this.attributeNames.isEmpty() || !this.attributeTypes.isEmpty());
 	}
 
 	/**
 	 * Whether the attribute name or type match the names and types specified
-	 * via {@code @SessionAttributes} in underlying controller.
-	 *
+	 * via {@code @SessionAttributes} on the underlying controller.
 	 * <p>Attributes successfully resolved through this method are "remembered"
 	 * and subsequently used in {@link #retrieveAttributes(WebRequest)} and
 	 * {@link #cleanupAttributes(WebRequest)}.
-	 *
-	 * @param attributeName the attribute name to check, never {@code null}
-	 * @param attributeType the type for the attribute, possibly {@code null}
+	 * @param attributeName the attribute name to check
+	 * @param attributeType the type for the attribute
 	 */
-	public boolean isHandlerSessionAttribute(String attributeName, @Nullable Class<?> attributeType) {
+	public boolean isHandlerSessionAttribute(String attributeName, Class<?> attributeType) {
 		Assert.notNull(attributeName, "Attribute name must not be null");
 		if (this.attributeNames.contains(attributeName) || this.attributeTypes.contains(attributeType)) {
 			this.knownAttributeNames.add(attributeName);
@@ -119,8 +115,7 @@ public class SessionAttributesHandler {
 	public void storeAttributes(WebRequest request, Map<String, ?> attributes) {
 		for (String name : attributes.keySet()) {
 			Object value = attributes.get(name);
-			Class<?> attrType = (value != null ? value.getClass() : null);
-			if (isHandlerSessionAttribute(name, attrType)) {
+			if (value != null && isHandlerSessionAttribute(name, value.getClass())) {
 				this.sessionAttributeStore.storeAttribute(request, name, value);
 			}
 		}
@@ -160,7 +155,7 @@ public class SessionAttributesHandler {
 	 * A pass-through call to the underlying {@link SessionAttributeStore}.
 	 * @param request the current request
 	 * @param attributeName the name of the attribute of interest
-	 * @return the attribute value or {@code null}
+	 * @return the attribute value, or {@code null} if none
 	 */
 	@Nullable
 	Object retrieveAttribute(WebRequest request, String attributeName) {

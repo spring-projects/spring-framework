@@ -55,9 +55,9 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 	 * @see org.springframework.beans.SimpleTypeConverter
 	 * @see org.springframework.beans.BeanWrapperImpl
 	 */
-	public void setTypeConverter(TypeConverter typeConverter) {
+	public void setTypeConverter(@Nullable TypeConverter typeConverter) {
 		this.typeConverter = typeConverter;
-		this.useDefaultConverter = false;
+		this.useDefaultConverter = (typeConverter == null);
 	}
 
 	/**

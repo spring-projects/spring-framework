@@ -284,6 +284,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	// TaskScheduler implementation
 
 	@Override
+	@Nullable
 	public ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		try {

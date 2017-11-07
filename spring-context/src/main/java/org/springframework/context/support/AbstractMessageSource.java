@@ -90,7 +90,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 * <p>May also link to an externally defined Properties object, e.g. defined
 	 * through a {@link org.springframework.beans.factory.config.PropertiesFactoryBean}.
 	 */
-	public void setCommonMessages(Properties commonMessages) {
+	public void setCommonMessages(@Nullable Properties commonMessages) {
 		this.commonMessages = commonMessages;
 	}
 
@@ -143,8 +143,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 			return msg;
 		}
 		if (defaultMessage == null) {
-			String fallback = getDefaultMessage(code);
-			return (fallback != null ? fallback : "");
+			return getDefaultMessage(code);
 		}
 		return renderDefaultMessage(defaultMessage, args, locale);
 	}
@@ -263,6 +262,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 			}
 			else {
 				// Check parent MessageSource, returning null if not found there.
+				// Covers custom MessageSource impls and DelegatingMessageSource.
 				return parent.getMessage(code, args, null, locale);
 			}
 		}

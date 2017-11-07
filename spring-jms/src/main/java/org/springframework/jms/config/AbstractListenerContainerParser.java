@@ -103,6 +103,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 
 
 	@Override
+	@Nullable
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		CompositeComponentDefinition compositeDef =
 				new CompositeComponentDefinition(element.getTagName(), parserContext.extractSource(element));

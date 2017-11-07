@@ -76,6 +76,7 @@ public class TransactionAwareCacheManagerProxy implements CacheManager, Initiali
 
 
 	@Override
+	@Nullable
 	public Cache getCache(String name) {
 		Assert.state(this.targetCacheManager != null, "No target CacheManager set");
 		Cache targetCache = this.targetCacheManager.getCache(name);

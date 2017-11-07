@@ -58,6 +58,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.*;
+import static org.springframework.http.HttpMethod.POST;
 
 /**
  * @author Arjen Poutsma
@@ -248,8 +249,8 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.set("MyHeader", "MyValue");
 		requestHeaders.setContentType(MediaType.TEXT_PLAIN);
-		HttpEntity<String> requestEntity = new HttpEntity<>(helloWorld, requestHeaders);
-		HttpEntity<Void> result = template.exchange(baseUrl + "/{method}", HttpMethod.POST, requestEntity, Void.class, "post");
+		HttpEntity<String> entity = new HttpEntity<>(helloWorld, requestHeaders);
+		HttpEntity<Void> result = template.exchange(baseUrl + "/{method}", POST, entity, Void.class, "post");
 		assertEquals("Invalid location", new URI(baseUrl + "/post/1"), result.getHeaders().getLocation());
 		assertFalse(result.hasBody());
 	}

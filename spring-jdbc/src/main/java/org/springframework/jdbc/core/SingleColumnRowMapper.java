@@ -86,6 +86,7 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public T mapRow(ResultSet rs, int rowNum) throws SQLException {
 		// Validate column count.
 		ResultSetMetaData rsmd = rs.getMetaData();

@@ -22,6 +22,7 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -45,6 +46,7 @@ public class JdbcBeanDefinitionReader {
 
 	private final PropertiesBeanDefinitionReader propReader;
 
+	@Nullable
 	private JdbcTemplate jdbcTemplate;
 
 

@@ -266,6 +266,7 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 	 * #getOptionValues(String)} method.
 	 */
 	@Override
+	@Nullable
 	public final String getProperty(String name) {
 		if (this.nonOptionArgsPropertyName.equals(name)) {
 			Collection<String> nonOptionArguments = this.getNonOptionArgs();

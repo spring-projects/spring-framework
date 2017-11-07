@@ -55,8 +55,6 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Tests against Hibernate Validator 5.x.
- *
  * @author Juergen Hoeller
  */
 public class ValidatorFactoryTests {

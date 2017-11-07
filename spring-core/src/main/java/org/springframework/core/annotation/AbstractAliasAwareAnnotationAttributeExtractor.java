@@ -85,6 +85,7 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements Anno
 	}
 
 	@Override
+	@Nullable
 	public final Object getAttributeValue(Method attributeMethod) {
 		String attributeName = attributeMethod.getName();
 		Object attributeValue = getRawAttributeValue(attributeMethod);

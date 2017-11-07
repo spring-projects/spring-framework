@@ -75,6 +75,7 @@ public class NameMatchCacheOperationSource implements CacheOperationSource, Seri
 	}
 
 	@Override
+	@Nullable
 	public Collection<CacheOperation> getCacheOperations(Method method, @Nullable Class<?> targetClass) {
 		// look for direct name match
 		String methodName = method.getName();

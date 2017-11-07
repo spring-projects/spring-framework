@@ -105,8 +105,10 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private SessionFactory sessionFactory;
 
+	@Nullable
 	private String[] filterNames;
 
 	private boolean exposeNativeSession = false;
@@ -115,6 +117,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 	private boolean cacheQueries = false;
 
+	@Nullable
 	private String queryCacheRegion;
 
 	private int fetchSize = 0;
@@ -142,7 +145,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	 * Set the Hibernate SessionFactory that should be used to create
 	 * Hibernate Sessions.
 	 */
-	public void setSessionFactory(SessionFactory sessionFactory) {
+	public void setSessionFactory(@Nullable  SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
 	}
 
@@ -177,7 +180,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	 * @see #enableFilters(Session)
 	 * @see Session#enableFilter(String)
 	 */
-	public void setFilterNames(String... filterNames) {
+	public void setFilterNames(@Nullable  String... filterNames) {
 		this.filterNames = filterNames;
 	}
 
@@ -267,7 +270,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	 * @see org.hibernate.Query#setCacheRegion
 	 * @see Criteria#setCacheRegion
 	 */
-	public void setQueryCacheRegion(String queryCacheRegion) {
+	public void setQueryCacheRegion(@Nullable String queryCacheRegion) {
 		this.queryCacheRegion = queryCacheRegion;
 	}
 
@@ -325,6 +328,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 
 	@Override
+	@Nullable
 	public <T> T execute(HibernateCallback<T> action) throws DataAccessException {
 		return doExecute(action, false);
 	}
@@ -450,11 +454,13 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	//-------------------------------------------------------------------------
 
 	@Override
+	@Nullable
 	public <T> T get(Class<T> entityClass, Serializable id) throws DataAccessException {
 		return get(entityClass, id, null);
 	}
 
 	@Override
+	@Nullable
 	public <T> T get(final Class<T> entityClass, final Serializable id, @Nullable final LockMode lockMode)
 			throws DataAccessException {
 
@@ -469,11 +475,13 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	}
 
 	@Override
+	@Nullable
 	public Object get(String entityName, Serializable id) throws DataAccessException {
 		return get(entityName, id, null);
 	}
 
 	@Override
+	@Nullable
 	public Object get(final String entityName, final Serializable id, @Nullable final LockMode lockMode)
 			throws DataAccessException {
 

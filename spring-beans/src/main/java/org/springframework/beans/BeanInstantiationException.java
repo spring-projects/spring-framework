@@ -33,8 +33,10 @@ public class BeanInstantiationException extends FatalBeanException {
 
 	private Class<?> beanClass;
 
+	@Nullable
 	private Constructor<?> constructor;
 
+	@Nullable
 	private Method constructingMethod;
 
 

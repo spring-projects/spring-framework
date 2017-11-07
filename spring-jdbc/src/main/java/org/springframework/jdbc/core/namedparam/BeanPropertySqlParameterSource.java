@@ -63,6 +63,7 @@ public class BeanPropertySqlParameterSource extends AbstractSqlParameterSource {
 	}
 
 	@Override
+	@Nullable
 	public Object getValue(String paramName) throws IllegalArgumentException {
 		try {
 			return this.beanWrapper.getPropertyValue(paramName);

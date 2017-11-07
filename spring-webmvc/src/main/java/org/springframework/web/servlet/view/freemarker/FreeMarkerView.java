@@ -106,7 +106,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * <p>Specify the encoding in the FreeMarker Configuration rather than per
 	 * template if all your templates share a common encoding.
 	 */
-	public void setEncoding(String encoding) {
+	public void setEncoding(@Nullable String encoding) {
 		this.encoding = encoding;
 	}
 
@@ -127,7 +127,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * in terms of memory and initial CPU usage. In production it is recommended that you use
 	 * a {@link FreeMarkerConfig} which exposes a single shared {@link TaglibFactory}.
 	 */
-	public void setConfiguration(Configuration configuration) {
+	public void setConfiguration(@Nullable Configuration configuration) {
 		this.configuration = configuration;
 	}
 
@@ -293,7 +293,9 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * @see #processTemplate
 	 * @see freemarker.ext.servlet.FreemarkerServlet
 	 */
-	protected void doRender(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+	protected void doRender(Map<String, Object> model, HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+
 		// Expose model to JSP tags (as request attributes).
 		exposeModelAsRequestAttributes(model, request);
 		// Expose all standard FreeMarker hash models.
@@ -315,7 +317,9 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * @param response current servlet response
 	 * @return the FreeMarker template model, as a {@link SimpleHash} or subclass thereof
 	 */
-	protected SimpleHash buildTemplateModel(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) {
+	protected SimpleHash buildTemplateModel(Map<String, Object> model, HttpServletRequest request,
+			HttpServletResponse response) {
+
 		AllHttpScopesHashModel fmModel = new AllHttpScopesHashModel(getObjectWrapper(), getServletContext(), request);
 		fmModel.put(FreemarkerServlet.KEY_JSP_TAGLIBS, this.taglibFactory);
 		fmModel.put(FreemarkerServlet.KEY_APPLICATION, this.servletContextHashModel);

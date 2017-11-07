@@ -58,8 +58,8 @@ public class DefaultCorsProcessor implements CorsProcessor {
 
 	@Override
 	@SuppressWarnings("resource")
-	public boolean processRequest(@Nullable CorsConfiguration config, HttpServletRequest request, HttpServletResponse response)
-			throws IOException {
+	public boolean processRequest(@Nullable CorsConfiguration config, HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
 
 		if (!CorsUtils.isCorsRequest(request)) {
 			return true;

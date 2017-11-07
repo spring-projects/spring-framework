@@ -49,7 +49,7 @@ public class JodaTimeContext {
 	/**
 	 * Set the user's chronology (calendar system).
 	 */
-	public void setChronology(Chronology chronology) {
+	public void setChronology(@Nullable Chronology chronology) {
 		this.chronology = chronology;
 	}
 
@@ -69,7 +69,7 @@ public class JodaTimeContext {
 	 * @see org.springframework.context.i18n.LocaleContextHolder#getTimeZone()
 	 * @see org.springframework.context.i18n.LocaleContextHolder#setLocaleContext
 	 */
-	public void setTimeZone(DateTimeZone timeZone) {
+	public void setTimeZone(@Nullable DateTimeZone timeZone) {
 		this.timeZone = timeZone;
 	}
 

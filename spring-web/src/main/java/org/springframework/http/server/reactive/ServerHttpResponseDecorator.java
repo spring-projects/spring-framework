@@ -15,7 +15,6 @@
  */
 package org.springframework.http.server.reactive;
 
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
@@ -26,6 +25,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
@@ -55,7 +55,7 @@ public class ServerHttpResponseDecorator implements ServerHttpResponse {
 	// ServerHttpResponse delegation methods...
 
 	@Override
-	public boolean setStatusCode(HttpStatus status) {
+	public boolean setStatusCode(@Nullable HttpStatus status) {
 		return getDelegate().setStatusCode(status);
 	}
 
@@ -77,16 +77,6 @@ public class ServerHttpResponseDecorator implements ServerHttpResponse {
 	@Override
 	public void addCookie(ResponseCookie cookie) {
 		getDelegate().addCookie(cookie);
-	}
-
-	@Override
-	public String encodeUrl(String url) {
-		return getDelegate().encodeUrl(url);
-	}
-
-	@Override
-	public void registerUrlEncoder(Function<String, String> encoder) {
-		getDelegate().registerUrlEncoder(encoder);
 	}
 
 	@Override

@@ -70,7 +70,7 @@ public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCrea
 	 * references. Default value is the bean name of this object + a dot.
 	 * @param advisorBeanNamePrefix the exclusion prefix
 	 */
-	public void setAdvisorBeanNamePrefix(String advisorBeanNamePrefix) {
+	public void setAdvisorBeanNamePrefix(@Nullable String advisorBeanNamePrefix) {
 		this.advisorBeanNamePrefix = advisorBeanNamePrefix;
 	}
 

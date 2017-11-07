@@ -81,17 +81,19 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final Map<CacheOperationCacheKey, CacheOperationMetadata> metadataCache =
-			new ConcurrentHashMap<>(1024);
+	private final Map<CacheOperationCacheKey, CacheOperationMetadata> metadataCache = new ConcurrentHashMap<>(1024);
 
 	private final CacheOperationExpressionEvaluator evaluator = new CacheOperationExpressionEvaluator();
 
+	@Nullable
 	private CacheOperationSource cacheOperationSource;
 
 	private KeyGenerator keyGenerator = new SimpleKeyGenerator();
 
+	@Nullable
 	private CacheResolver cacheResolver;
 
+	@Nullable
 	private BeanFactory beanFactory;
 
 	private boolean initialized = false;
@@ -150,8 +152,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	 * @see #setCacheManager(org.springframework.cache.CacheManager)
 	 * @see SimpleCacheResolver
 	 */
-	public void setCacheResolver(CacheResolver cacheResolver) {
-		Assert.notNull(cacheResolver, "CacheResolver must not be null");
+	public void setCacheResolver(@Nullable CacheResolver cacheResolver) {
 		this.cacheResolver = cacheResolver;
 	}
 
@@ -184,6 +185,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	public void afterSingletonsInstantiated() {
 		if (getCacheResolver() == null) {
 			// Lazily initialize cache resolver via default cache manager...
+			Assert.state(this.beanFactory != null, "CacheResolver or BeanFactory must be set on cache aspect");
 			try {
 				setCacheManager(this.beanFactory.getBean(CacheManager.class));
 			}
@@ -287,6 +289,10 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	 * @see CacheOperation#cacheResolver
 	 */
 	protected <T> T getBean(String beanName, Class<T> expectedType) {
+		if (this.beanFactory == null) {
+			throw new IllegalStateException(
+					"BeanFactory must be set on cache aspect for " + expectedType.getSimpleName() + " retrieval");
+		}
 		return BeanFactoryAnnotationUtils.qualifiedBeanOfType(this.beanFactory, expectedType, beanName);
 	}
 

@@ -16,12 +16,9 @@
 
 package org.springframework.web.util.pattern;
 
-import java.nio.charset.StandardCharsets;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**

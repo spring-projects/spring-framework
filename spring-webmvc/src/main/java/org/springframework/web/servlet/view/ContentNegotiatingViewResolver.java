@@ -110,7 +110,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	 * applying a {@link org.springframework.web.accept.HeaderContentNegotiationStrategy}.
 	 * @see ContentNegotiationManager#ContentNegotiationManager()
 	 */
-	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
+	public void setContentNegotiationManager(@Nullable ContentNegotiationManager contentNegotiationManager) {
 		this.contentNegotiationManager = contentNegotiationManager;
 	}
 
@@ -219,6 +219,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 
 
 	@Override
+	@Nullable
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
 		RequestAttributes attrs = RequestContextHolder.getRequestAttributes();
 		Assert.state(attrs instanceof ServletRequestAttributes, "No current ServletRequestAttributes");
@@ -364,6 +365,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	private static final View NOT_ACCEPTABLE_VIEW = new View() {
 
 		@Override
+		@Nullable
 		public String getContentType() {
 			return null;
 		}

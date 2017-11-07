@@ -58,7 +58,7 @@ public class JsonbHttpMessageConverter extends AbstractJsonHttpMessageConverter 
 	 * @param config the {@code JsonbConfig} for the underlying delegate
 	 */
 	public JsonbHttpMessageConverter(JsonbConfig config) {
-		this(JsonbBuilder.create(config));
+		this.jsonb = JsonbBuilder.create(config);
 	}
 
 	/**
@@ -66,7 +66,8 @@ public class JsonbHttpMessageConverter extends AbstractJsonHttpMessageConverter 
 	 * @param jsonb the Jsonb instance to use
 	 */
 	public JsonbHttpMessageConverter(Jsonb jsonb) {
-		setJsonb(jsonb);
+		Assert.notNull(jsonb, "A Jsonb instance is required");
+		this.jsonb = jsonb;
 	}
 
 

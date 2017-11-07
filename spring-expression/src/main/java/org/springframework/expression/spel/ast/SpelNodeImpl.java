@@ -72,8 +72,9 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 		Assert.isTrue(pos != 0, "Pos must not be 0");
 		if (!ObjectUtils.isEmpty(operands)) {
 			this.children = operands;
-			for (SpelNodeImpl childNode : operands) {
-				childNode.parent = this;
+			for (SpelNodeImpl operand : operands) {
+				Assert.notNull(operand, "Operand must not be null");
+				operand.parent = this;
 			}
 		}
 	}
@@ -104,6 +105,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	}
 
 	@Override
+	@Nullable
 	public final Object getValue(ExpressionState expressionState) throws EvaluationException {
 		return getValueInternal(expressionState).getValue();
 	}
@@ -136,6 +138,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getObjectClass(@Nullable Object obj) {
 		if (obj == null) {
 			return null;
@@ -193,9 +196,9 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
 	
 	/**
-	 * Generate code that handles building the argument values for the specified method. This method will take account
-	 * of whether the invoked method is a varargs method and if it is then the argument values will be appropriately
-	 * packaged into an array.
+	 * Generate code that handles building the argument values for the specified method.
+	 * This method will take account of whether the invoked method is a varargs method
+	 * and if it is then the argument values will be appropriately packaged into an array.
 	 * @param mv the method visitor where code should be generated
 	 * @param cf the current codeflow
 	 * @param member the method or constructor for which arguments are being setup
@@ -205,7 +208,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 		String[] paramDescriptors = null;
 		boolean isVarargs = false;
 		if (member instanceof Constructor) {
-			Constructor<?> ctor = (Constructor<?>)member;
+			Constructor<?> ctor = (Constructor<?>) member;
 			paramDescriptors = CodeFlow.toDescriptors(ctor.getParameterTypes());
 			isVarargs = ctor.isVarArgs();
 		}

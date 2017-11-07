@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.http.HttpRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
@@ -79,6 +80,8 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 	private boolean removeOnly;
 
+	private boolean relativeRedirects;
+
 
 	public ForwardedHeaderFilter() {
 		this.pathHelper = new UrlPathHelper();
@@ -90,11 +93,26 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	/**
 	 * Enables mode in which any "Forwarded" or "X-Forwarded-*" headers are
 	 * removed only and the information in them ignored.
-	 * @param removeOnly whether to discard and ingore forwarded headers
+	 * @param removeOnly whether to discard and ignore forwarded headers
 	 * @since 4.3.9
 	 */
 	public void setRemoveOnly(boolean removeOnly) {
 		this.removeOnly = removeOnly;
+	}
+
+	/**
+	 * Use this property to enable relative redirects as explained in and also
+	 * using the same response wrapper as {@link RelativeRedirectFilter} does.
+	 * Or if both filters are used, only one will wrap the response.
+	 * <p>By default, if this property is set to false, in which case calls to
+	 * {@link HttpServletResponse#sendRedirect(String)} are overridden in order
+	 * to turn relative into absolute URLs since (which Servlet containers are
+	 * also required to do) also taking forwarded headers into consideration.
+	 * @param relativeRedirects whether to use relative redirects
+	 * @since 4.3.10
+	 */
+	public void setRelativeRedirects(boolean relativeRedirects) {
+		this.relativeRedirects = relativeRedirects;
 	}
 
 
@@ -130,7 +148,9 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		}
 		else {
 			HttpServletRequest theRequest = new ForwardedHeaderExtractingRequest(request, this.pathHelper);
-			HttpServletResponse theResponse = new ForwardedHeaderExtractingResponse(response, theRequest);
+			HttpServletResponse theResponse = (this.relativeRedirects ?
+					RelativeRedirectResponseWrapper.wrapIfNecessary(response, HttpStatus.SEE_OTHER) :
+					new ForwardedHeaderExtractingResponse(response, theRequest));
 			filterChain.doFilter(theRequest, theResponse);
 		}
 	}

@@ -17,9 +17,12 @@
 package org.springframework.test.web.reactive.server;
 
 import java.time.Duration;
+import java.util.function.Consumer;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import org.springframework.lang.Nullable;
 
 /**
  * {@code ExchangeResult} variant with the response body decoded as
@@ -87,11 +90,31 @@ public class FluxExchangeResult<T> extends ExchangeResult {
 	 * via {@code getResponseBody.ignoreElements()}.
 	 */
 	@Override
+	@Nullable
 	public byte[] getResponseBodyContent() {
 		return this.body.ignoreElements()
 				.timeout(this.timeout, Mono.error(TIMEOUT_ERROR))
 				.then(Mono.defer(() -> Mono.justOrEmpty(super.getResponseBodyContent())))
 				.block();
+	}
+
+	/**
+	 * Invoke the given consumer within {@link #assertWithDiagnostics(Runnable)}
+	 * passing {@code "this"} instance to it. This method allows the following,
+	 * without leaving the {@code WebTestClient} chain of calls:
+	 * <pre class="code">
+	 *	client.get()
+	 * 		.uri("/persons")
+	 * 		.accept(TEXT_EVENT_STREAM)
+	 * 		.exchange()
+	 * 		.expectStatus().isOk()
+	 *	 	.returnResult()
+	 *	 	.consumeWith(result -> assertThat(...);
+	 * </pre>
+	 * @param consumer consumer for {@code "this"} instance
+	 */
+	public void consumeWith(Consumer<FluxExchangeResult<T>> consumer) {
+		assertWithDiagnostics(() -> consumer.accept(this));
 	}
 
 }

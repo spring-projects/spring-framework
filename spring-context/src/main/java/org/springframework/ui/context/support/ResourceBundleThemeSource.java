@@ -136,6 +136,7 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource, BeanC
 	 * @see #createMessageSource
 	 */
 	@Override
+	@Nullable
 	public Theme getTheme(String themeName) {
 		Theme theme = this.themeCache.get(themeName);
 		if (theme == null) {

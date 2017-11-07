@@ -29,6 +29,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.json.MappingJacksonValue;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -64,7 +65,14 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 
 	@Test
 	public void read() throws IOException {
-		String body = "<MyBean><string>Foo</string><number>42</number><fraction>42.0</fraction><array><array>Foo</array><array>Bar</array></array><bool>true</bool><bytes>AQI=</bytes></MyBean>";
+		String body = "<MyBean>" +
+				"<string>Foo</string>" +
+				"<number>42</number>" +
+				"<fraction>42.0</fraction>" +
+				"<array><array>Foo</array>" +
+				"<array>Bar</array></array>" +
+				"<bool>true</bool>" +
+				"<bytes>AQI=</bytes></MyBean>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
 		MyBean result = (MyBean) converter.read(MyBean.class, inputMessage);
@@ -98,11 +106,12 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 				outputMessage.getHeaders().getContentType());
 	}
 
-	@Test(expected = IOException.class)
+	@Test
 	public void readInvalidXml() throws IOException {
 		String body = "FooBar";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
+		this.thrown.expect(HttpMessageNotReadableException.class);
 		converter.read(MyBean.class, inputMessage);
 	}
 
@@ -150,7 +159,7 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
 
-		this.thrown.expect(IOException.class);
+		this.thrown.expect(HttpMessageNotReadableException.class);
 		this.converter.read(MyBean.class, inputMessage);
 	}
 
@@ -177,7 +186,7 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
 
-		this.thrown.expect(IOException.class);
+		this.thrown.expect(HttpMessageNotReadableException.class);
 		this.converter.read(MyBean.class, inputMessage);
 	}
 

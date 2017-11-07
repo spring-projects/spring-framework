@@ -205,7 +205,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	 * @throws TypeMismatchException if type conversion failed
 	 */
 	@Nullable
-	public Object convertForProperty(Object value, String propertyName) throws TypeMismatchException {
+	public Object convertForProperty(@Nullable Object value, String propertyName) throws TypeMismatchException {
 		CachedIntrospectionResults cachedIntrospectionResults = getCachedIntrospectionResults();
 		PropertyDescriptor pd = cachedIntrospectionResults.getPropertyDescriptor(propertyName);
 		if (pd == null) {
@@ -225,6 +225,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	}
 
 	@Override
+	@Nullable
 	protected BeanPropertyHandler getLocalPropertyHandler(String propertyName) {
 		PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(propertyName);
 		if (pd != null) {
@@ -284,11 +285,13 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 		}
 
 		@Override
+		@Nullable
 		public TypeDescriptor nested(int level) {
 			return TypeDescriptor.nested(property(pd), level);
 		}
 
 		@Override
+		@Nullable
 		public Object getValue() throws Exception {
 			final Method readMethod = this.pd.getReadMethod();
 			if (System.getSecurityManager() != null) {

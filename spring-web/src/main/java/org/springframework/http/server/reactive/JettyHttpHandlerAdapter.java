@@ -19,6 +19,7 @@ package org.springframework.http.server.reactive;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import javax.servlet.AsyncContext;
+import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
 
@@ -62,7 +63,8 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 		protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
 			ByteBuffer input = dataBuffer.asByteBuffer();
 			int len = input.remaining();
-			((HttpOutput) getServletResponse().getOutputStream()).write(input);
+			ServletResponse response = getNativeResponse();
+			((HttpOutput) response.getOutputStream()).write(input);
 			return len;
 		}
 	}

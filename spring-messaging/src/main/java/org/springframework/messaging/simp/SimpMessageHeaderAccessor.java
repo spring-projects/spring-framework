@@ -88,7 +88,9 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	 * A constructor for creating new message headers.
 	 * This constructor is protected. See factory methods in this and sub-classes.
 	 */
-	protected SimpMessageHeaderAccessor(SimpMessageType messageType, @Nullable Map<String, List<String>> externalSourceHeaders) {
+	protected SimpMessageHeaderAccessor(SimpMessageType messageType,
+			@Nullable Map<String, List<String>> externalSourceHeaders) {
+
 		super(externalSourceHeaders);
 		Assert.notNull(messageType, "MessageType must not be null");
 		setHeader(MESSAGE_TYPE_HEADER, messageType);
@@ -121,8 +123,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		return (SimpMessageType) getHeader(MESSAGE_TYPE_HEADER);
 	}
 
-	public void setDestination(String destination) {
-		Assert.notNull(destination, "Destination must not be null");
+	public void setDestination(@Nullable String destination) {
 		setHeader(DESTINATION_HEADER, destination);
 	}
 
@@ -131,7 +132,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		return (String) getHeader(DESTINATION_HEADER);
 	}
 
-	public void setSubscriptionId(String subscriptionId) {
+	public void setSubscriptionId(@Nullable String subscriptionId) {
 		setHeader(SUBSCRIPTION_ID_HEADER, subscriptionId);
 	}
 
@@ -140,7 +141,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		return (String) getHeader(SUBSCRIPTION_ID_HEADER);
 	}
 
-	public void setSessionId(String sessionId) {
+	public void setSessionId(@Nullable String sessionId) {
 		setHeader(SESSION_ID_HEADER, sessionId);
 	}
 
@@ -155,7 +156,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	/**
 	 * A static alternative for access to the session attributes header.
 	 */
-	public void setSessionAttributes(Map<String, Object> attributes) {
+	public void setSessionAttributes(@Nullable Map<String, Object> attributes) {
 		setHeader(SESSION_ATTRIBUTES, attributes);
 	}
 
@@ -168,7 +169,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		return (Map<String, Object>) getHeader(SESSION_ATTRIBUTES);
 	}
 
-	public void setUser(Principal principal) {
+	public void setUser(@Nullable Principal principal) {
 		setHeader(USER_HEADER, principal);
 	}
 
@@ -214,15 +215,18 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		StringBuilder sb = new StringBuilder();
 		SimpMessageType messageType = getMessageType();
 		sb.append(messageType != null ? messageType.name() : SimpMessageType.OTHER);
-		if (getDestination() != null) {
-			sb.append(" destination=").append(getDestination());
+		String destination = getDestination();
+		if (destination != null) {
+			sb.append(" destination=").append(destination);
 		}
-		if (getSubscriptionId() != null) {
-			sb.append(" subscriptionId=").append(getSubscriptionId());
+		String subscriptionId = getSubscriptionId();
+		if (subscriptionId != null) {
+			sb.append(" subscriptionId=").append(subscriptionId);
 		}
 		sb.append(" session=").append(getSessionId());
-		if (getUser() != null) {
-			sb.append(" user=").append(getUser().getName());
+		Principal user = getUser();
+		if (user != null) {
+			sb.append(" user=").append(user.getName());
 		}
 		return sb;
 	}

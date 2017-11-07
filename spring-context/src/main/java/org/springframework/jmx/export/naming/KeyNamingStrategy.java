@@ -110,7 +110,6 @@ public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean
 	 * Merges the {@code Properties} configured in the {@code mappings} and
 	 * {@code mappingLocations} into the final {@code Properties} instance
 	 * used for {@code ObjectName} resolution.
-	 * @throws IOException
 	 */
 	@Override
 	public void afterPropertiesSet() throws IOException {

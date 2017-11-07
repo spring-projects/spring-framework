@@ -95,6 +95,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	 * @see #refreshAndRetry
 	 */
 	@Override
+	@Nullable
 	public Object invokeInContext(MethodInvocation invocation) throws Throwable {
 		try {
 			return doInvoke(invocation);

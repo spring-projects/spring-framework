@@ -21,8 +21,6 @@ import javax.servlet.jsp.PageContext;
 
 import org.apache.taglibs.standard.lang.support.ExpressionEvaluatorManager;
 
-import org.springframework.util.Assert;
-
 /**
  * Mock implementation of the JSP 2.0 {@link javax.servlet.jsp.el.ExpressionEvaluator}
  * interface, delegating to the Apache JSTL ExpressionEvaluatorManager.
@@ -68,7 +66,6 @@ public class MockExpressionEvaluator extends javax.servlet.jsp.el.ExpressionEval
 	public Object evaluate(String expression, Class expectedType, javax.servlet.jsp.el.VariableResolver variableResolver,
 			javax.servlet.jsp.el.FunctionMapper functionMapper) throws javax.servlet.jsp.el.ELException {
 
-		Assert.isNull(variableResolver, "Custom VariableResolver not supported");
 		return doEvaluate(expression, expectedType, functionMapper);
 	}
 
@@ -76,7 +73,6 @@ public class MockExpressionEvaluator extends javax.servlet.jsp.el.ExpressionEval
 	protected Object doEvaluate(String expression, Class expectedType, javax.servlet.jsp.el.FunctionMapper functionMapper)
 			throws javax.servlet.jsp.el.ELException {
 
-		Assert.isNull(functionMapper, "Custom FunctionMapper not supported");
 		try {
 			return ExpressionEvaluatorManager.evaluate("JSP EL expression", expression, expectedType, this.pageContext);
 		}

@@ -48,15 +48,18 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * @see org.springframework.scheduling.commonj.WorkManagerTaskExecutor
  */
 @SuppressWarnings("serial")
-public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implements AsyncListenableTaskExecutor, Serializable {
+public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
+		implements AsyncListenableTaskExecutor, Serializable {
 
 	/**
 	 * Permit any number of concurrent invocations: that is, don't throttle concurrency.
+	 * @see ConcurrencyThrottleSupport#UNBOUNDED_CONCURRENCY
 	 */
 	public static final int UNBOUNDED_CONCURRENCY = ConcurrencyThrottleSupport.UNBOUNDED_CONCURRENCY;
 
 	/**
 	 * Switch concurrency 'off': that is, don't allow any concurrent invocations.
+	 * @see ConcurrencyThrottleSupport#NO_CONCURRENCY
 	 */
 	public static final int NO_CONCURRENCY = ConcurrencyThrottleSupport.NO_CONCURRENCY;
 
@@ -103,7 +106,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 	 * @see #setThreadNamePrefix
 	 * @see #setThreadPriority
 	 */
-	public void setThreadFactory(ThreadFactory threadFactory) {
+	public void setThreadFactory(@Nullable ThreadFactory threadFactory) {
 		this.threadFactory = threadFactory;
 	}
 

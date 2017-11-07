@@ -84,8 +84,13 @@ public class MappingJackson2HttpMessageConverterTests {
 
 	@Test
 	public void readTyped() throws IOException {
-		String body =
-				"{\"bytes\":\"AQI=\",\"array\":[\"Foo\",\"Bar\"],\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
+		String body = "{" +
+				"\"bytes\":\"AQI=\"," +
+				"\"array\":[\"Foo\",\"Bar\"]," +
+				"\"number\":42," +
+				"\"string\":\"Foo\"," +
+				"\"bool\":true," +
+				"\"fraction\":42.0}";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 		MyBean result = (MyBean) converter.read(MyBean.class, inputMessage);
@@ -100,8 +105,13 @@ public class MappingJackson2HttpMessageConverterTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void readUntyped() throws IOException {
-		String body =
-				"{\"bytes\":\"AQI=\",\"array\":[\"Foo\",\"Bar\"],\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
+		String body = "{" +
+				"\"bytes\":\"AQI=\"," +
+				"\"array\":[\"Foo\",\"Bar\"]," +
+				"\"number\":42," +
+				"\"string\":\"Foo\"," +
+				"\"bool\":true," +
+				"\"fraction\":42.0}";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 		HashMap<String, Object> result = (HashMap<String, Object>) converter.read(HashMap.class, inputMessage);
@@ -179,8 +189,13 @@ public class MappingJackson2HttpMessageConverterTests {
 				}
 			}
 		};
-		String body =
-				"[{\"bytes\":\"AQI=\",\"array\":[\"Foo\",\"Bar\"],\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}]";
+		String body = "[{" +
+				"\"bytes\":\"AQI=\"," +
+				"\"array\":[\"Foo\",\"Bar\"]," +
+				"\"number\":42," +
+				"\"string\":\"Foo\"," +
+				"\"bool\":true," +
+				"\"fraction\":42.0}]";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 
@@ -200,8 +215,13 @@ public class MappingJackson2HttpMessageConverterTests {
 	public void readParameterizedType() throws IOException {
 		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<List<MyBean>>() {};
 
-		String body =
-				"[{\"bytes\":\"AQI=\",\"array\":[\"Foo\",\"Bar\"],\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}]";
+		String body = "[{" +
+				"\"bytes\":\"AQI=\"," +
+				"\"array\":[\"Foo\",\"Bar\"]," +
+				"\"number\":42," +
+				"\"string\":\"Foo\"," +
+				"\"bool\":true," +
+				"\"fraction\":42.0}]";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 
@@ -228,7 +248,8 @@ public class MappingJackson2HttpMessageConverterTests {
 		this.converter.writeInternal(bean, null, outputMessage);
 		String result = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
 
-		assertEquals("{" + NEWLINE_SYSTEM_PROPERTY + "  \"name\" : \"Jason\"" + NEWLINE_SYSTEM_PROPERTY + "}", result);
+		assertEquals("{" + NEWLINE_SYSTEM_PROPERTY +
+				"  \"name\" : \"Jason\"" + NEWLINE_SYSTEM_PROPERTY + "}", result);
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,17 +34,16 @@ import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
 
 /**
  * Base class for {@link org.springframework.web.WebApplicationInitializer}
- * implementations that register a {@link DispatcherHandler} in the servlet context, wrapping it in
- * a {@link ServletHttpHandlerAdapter}.
- *
- * <p>Concrete implementations are required to implement
- * {@link #createApplicationContext()}, which gets invoked from
- * {@link #registerDispatcherHandler(ServletContext)}. Further customization can be achieved by
- * overriding {@link #customizeRegistration(ServletRegistration.Dynamic)}.
+ * implementations that register a {@link DispatcherHandler} in the servlet
+ * context, wrapping it in a {@link ServletHttpHandlerAdapter}.
  *
  * @author Arjen Poutsma
  * @since 5.0
+ * @deprecated in favor of
+ * {@link org.springframework.web.server.adapter.AbstractReactiveWebInitializer
+ * AbstractReactiveWebInitializer}
  */
+@Deprecated
 public abstract class AbstractDispatcherHandlerInitializer implements WebApplicationInitializer {
 
 	/**

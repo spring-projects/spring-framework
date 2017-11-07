@@ -67,6 +67,7 @@ public class ServletPathExtensionContentNegotiationStrategy extends PathExtensio
 	 * {@link org.springframework.http.MediaTypeFactory} lookup.
 	 */
 	@Override
+	@Nullable
 	protected MediaType handleNoMatch(NativeWebRequest webRequest, String extension)
 			throws HttpMediaTypeNotAcceptableException {
 
@@ -89,7 +90,7 @@ public class ServletPathExtensionContentNegotiationStrategy extends PathExtensio
 	 * {@link PathExtensionContentNegotiationStrategy#getMediaTypeForResource}
 	 * with the ability to also look up through the ServletContext.
 	 * @param resource the resource to look up
-	 * @return the MediaType for the extension or {@code null}.
+	 * @return the MediaType for the extension, or {@code null} if none found
 	 * @since 4.3
 	 */
 	@Override

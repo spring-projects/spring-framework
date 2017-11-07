@@ -917,7 +917,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return this.asyncSupported;
 	}
 
-	public void setAsyncContext(MockAsyncContext asyncContext) {
+	public void setAsyncContext(@Nullable MockAsyncContext asyncContext) {
 		this.asyncContext = asyncContext;
 	}
 
@@ -941,7 +941,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	// HttpServletRequest interface
 	// ---------------------------------------------------------------------
 
-	public void setAuthType(String authType) {
+	public void setAuthType(@Nullable String authType) {
 		this.authType = authType;
 	}
 
@@ -1102,7 +1102,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		}
 	}
 
-	public void setMethod(String method) {
+	public void setMethod(@Nullable String method) {
 		this.method = method;
 	}
 
@@ -1167,7 +1167,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 				((MockServletContext) this.servletContext).getDeclaredRoles().contains(role)));
 	}
 
-	public void setUserPrincipal(Principal userPrincipal) {
+	public void setUserPrincipal(@Nullable Principal userPrincipal) {
 		this.userPrincipal = userPrincipal;
 	}
 
@@ -1177,7 +1177,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return this.userPrincipal;
 	}
 
-	public void setRequestedSessionId(String requestedSessionId) {
+	public void setRequestedSessionId(@Nullable String requestedSessionId) {
 		this.requestedSessionId = requestedSessionId;
 	}
 
@@ -1187,7 +1187,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return this.requestedSessionId;
 	}
 
-	public void setRequestURI(String requestURI) {
+	public void setRequestURI(@Nullable String requestURI) {
 		this.requestURI = requestURI;
 	}
 
@@ -1199,13 +1199,18 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public StringBuffer getRequestURL() {
-		StringBuffer url = new StringBuffer(this.scheme).append("://").append(this.serverName);
-		if (this.serverPort > 0 && ((HTTP.equalsIgnoreCase(this.scheme) && this.serverPort != 80) ||
-				(HTTPS.equalsIgnoreCase(this.scheme) && this.serverPort != 443))) {
-			url.append(':').append(this.serverPort);
+		String scheme = getScheme();
+		String server = getServerName();
+		int port = getServerPort();
+		String uri = getRequestURI();
+
+		StringBuffer url = new StringBuffer(scheme).append("://").append(server);
+		if (port > 0 && ((HTTP.equalsIgnoreCase(scheme) && port != 80) ||
+				(HTTPS.equalsIgnoreCase(scheme) && port != 443))) {
+			url.append(':').append(port);
 		}
-		if (StringUtils.hasText(getRequestURI())) {
-			url.append(getRequestURI());
+		if (StringUtils.hasText(uri)) {
+			url.append(uri);
 		}
 		return url;
 	}
@@ -1318,12 +1323,12 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	@Nullable
-	public Part getPart(String name) throws IOException, IllegalStateException, ServletException {
+	public Part getPart(String name) throws IOException, ServletException {
 		return this.parts.getFirst(name);
 	}
 
 	@Override
-	public Collection<Part> getParts() throws IOException, IllegalStateException, ServletException {
+	public Collection<Part> getParts() throws IOException, ServletException {
 		List<Part> result = new LinkedList<>();
 		for (List<Part> list : this.parts.values()) {
 			result.addAll(list);

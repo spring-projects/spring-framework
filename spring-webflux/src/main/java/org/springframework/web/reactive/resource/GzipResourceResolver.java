@@ -88,18 +88,22 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 			this.gzipped = original.createRelative(original.getFilename() + ".gz");
 		}
 
+		@Override
 		public InputStream getInputStream() throws IOException {
 			return this.gzipped.getInputStream();
 		}
 
+		@Override
 		public boolean exists() {
 			return this.gzipped.exists();
 		}
 
+		@Override
 		public boolean isReadable() {
 			return this.gzipped.isReadable();
 		}
 
+		@Override
 		public boolean isOpen() {
 			return this.gzipped.isOpen();
 		}
@@ -109,34 +113,43 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 			return this.gzipped.isFile();
 		}
 
+		@Override
 		public URL getURL() throws IOException {
 			return this.gzipped.getURL();
 		}
 
+		@Override
 		public URI getURI() throws IOException {
 			return this.gzipped.getURI();
 		}
 
+		@Override
 		public File getFile() throws IOException {
 			return this.gzipped.getFile();
 		}
 
+		@Override
 		public long contentLength() throws IOException {
 			return this.gzipped.contentLength();
 		}
 
+		@Override
 		public long lastModified() throws IOException {
 			return this.gzipped.lastModified();
 		}
 
+		@Override
 		public Resource createRelative(String relativePath) throws IOException {
 			return this.gzipped.createRelative(relativePath);
 		}
 
+		@Override
+		@Nullable
 		public String getFilename() {
 			return this.original.getFilename();
 		}
 
+		@Override
 		public String getDescription() {
 			return this.gzipped.getDescription();
 		}

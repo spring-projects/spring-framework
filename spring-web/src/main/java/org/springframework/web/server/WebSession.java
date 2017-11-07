@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,6 +100,20 @@ public interface WebSession {
 	 * {@link #save()} method is essentially a no-op.
 	 */
 	boolean isStarted();
+
+	/**
+	 * Generate a new id for the session and update the underlying session
+	 * storage to reflect the new id. After a successful call {@link #getId()}
+	 * reflects the new session id.
+	 * @return completion notification (success or error)
+	 */
+	Mono<Void> changeSessionId();
+
+	/**
+	 * Invalidate the current session and clear session storage.
+	 * @return completion notification (success or error)
+	 */
+	Mono<Void> invalidate();
 
 	/**
 	 * Save the session persisting attributes (e.g. if stored remotely) and also

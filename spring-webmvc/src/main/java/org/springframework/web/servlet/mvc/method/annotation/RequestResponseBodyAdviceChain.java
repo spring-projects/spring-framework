@@ -104,6 +104,7 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 	}
 
 	@Override
+	@Nullable
 	public Object beforeBodyWrite(@Nullable Object body, MethodParameter returnType, MediaType contentType,
 			Class<? extends HttpMessageConverter<?>> converterType,
 			ServerHttpRequest request, ServerHttpResponse response) {
@@ -112,6 +113,7 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 	}
 
 	@Override
+	@Nullable
 	public Object handleEmptyBody(@Nullable Object body, HttpInputMessage inputMessage, MethodParameter parameter,
 			Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
 

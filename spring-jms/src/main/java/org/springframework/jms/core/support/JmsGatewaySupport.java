@@ -76,6 +76,7 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 	/**
 	 * Return the JMS ConnectionFactory used by the gateway.
 	 */
+	@Nullable
 	public final ConnectionFactory getConnectionFactory() {
 		return (this.jmsTemplate != null ? this.jmsTemplate.getConnectionFactory() : null);
 	}
@@ -84,7 +85,7 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 	 * Set the JmsTemplate for the gateway.
 	 * @see #setConnectionFactory(javax.jms.ConnectionFactory)
 	 */
-	public final void setJmsTemplate(JmsTemplate jmsTemplate) {
+	public final void setJmsTemplate(@Nullable JmsTemplate jmsTemplate) {
 		this.jmsTemplate = jmsTemplate;
 	}
 

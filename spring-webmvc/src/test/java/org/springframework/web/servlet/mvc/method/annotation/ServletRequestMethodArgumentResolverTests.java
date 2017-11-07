@@ -25,9 +25,11 @@ import java.util.Locale;
 import java.util.TimeZone;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.PushBuilder;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
@@ -46,6 +48,7 @@ import static org.junit.Assert.*;
 /**
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @author Nicholas Williams
  */
 public class ServletRequestMethodArgumentResolverTests {
@@ -70,7 +73,7 @@ public class ServletRequestMethodArgumentResolverTests {
 
 		method = getClass().getMethod("supportedParams", ServletRequest.class, MultipartRequest.class,
 				HttpSession.class, Principal.class, Locale.class, InputStream.class, Reader.class,
-				WebRequest.class, TimeZone.class, ZoneId.class, HttpMethod.class);
+				WebRequest.class, TimeZone.class, ZoneId.class, HttpMethod.class, PushBuilder.class);
 	}
 
 
@@ -99,12 +102,7 @@ public class ServletRequestMethodArgumentResolverTests {
 
 	@Test
 	public void principal() throws Exception {
-		Principal principal = new Principal() {
-			@Override
-			public String getName() {
-				return "Foo";
-			}
-		};
+		Principal principal = () -> "Foo";
 		servletRequest.setUserPrincipal(principal);
 
 		MethodParameter principalParameter = new MethodParameter(method, 3);
@@ -228,6 +226,24 @@ public class ServletRequestMethodArgumentResolverTests {
 		assertSame("Invalid result", HttpMethod.valueOf(webRequest.getRequest().getMethod()), result);
 	}
 
+	@Test
+	public void pushBuilder() throws Exception {
+		final PushBuilder pushBuilder = Mockito.mock(PushBuilder.class);
+		servletRequest = new MockHttpServletRequest("GET", "") {
+			@Override
+			public PushBuilder newPushBuilder() {
+				return pushBuilder;
+			}
+		};
+		ServletWebRequest webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
+
+		MethodParameter pushBuilderParameter = new MethodParameter(method, 11);
+		assertTrue("PushBuilder not supported", resolver.supportsParameter(pushBuilderParameter));
+
+		Object result = resolver.resolveArgument(pushBuilderParameter, null, webRequest, null);
+		assertSame("Invalid result", pushBuilder, result);
+	}
+
 
 	@SuppressWarnings("unused")
 	public void supportedParams(ServletRequest p0,
@@ -240,7 +256,8 @@ public class ServletRequestMethodArgumentResolverTests {
 								WebRequest p7,
 								TimeZone p8,
 								ZoneId p9,
-								HttpMethod p10) {
+								HttpMethod p10,
+								PushBuilder p11) {
 	}
 
 }

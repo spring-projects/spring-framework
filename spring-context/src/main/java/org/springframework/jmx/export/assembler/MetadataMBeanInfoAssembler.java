@@ -432,7 +432,8 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * @param setter the Object value associated with the set method
 	 * @return the appropriate Object to use as the value for the descriptor
 	 */
-	private Object resolveObjectDescriptor(@Nullable Object getter, Object setter) {
+	@Nullable
+	private Object resolveObjectDescriptor(@Nullable Object getter, @Nullable Object setter) {
 		return (getter != null ? getter : setter);
 	}
 
@@ -446,7 +447,8 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * @param setter the String value associated with the set method
 	 * @return the appropriate String to use as the value for the descriptor
 	 */
-	private String resolveStringDescriptor(String getter, String setter) {
+	@Nullable
+	private String resolveStringDescriptor(@Nullable String getter, @Nullable String setter) {
 		return (StringUtils.hasLength(getter) ? getter : setter);
 	}
 

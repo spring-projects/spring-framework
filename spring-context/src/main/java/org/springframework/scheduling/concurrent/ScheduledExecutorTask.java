@@ -19,6 +19,7 @@ package org.springframework.scheduling.concurrent;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * JavaBean that describes a scheduled executor task, consisting of the
@@ -40,6 +41,7 @@ import org.springframework.lang.Nullable;
  */
 public class ScheduledExecutorTask {
 
+	@Nullable
 	private Runnable runnable;
 
 	private long delay = 0;
@@ -107,6 +109,7 @@ public class ScheduledExecutorTask {
 	 * Return the Runnable to schedule as executor task.
 	 */
 	public Runnable getRunnable() {
+		Assert.state(this.runnable != null, "No Runnable set");
 		return this.runnable;
 	}
 

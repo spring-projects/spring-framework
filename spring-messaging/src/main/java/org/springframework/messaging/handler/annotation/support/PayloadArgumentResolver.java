@@ -105,6 +105,7 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 	}
 
 	@Override
+	@Nullable
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
 		Payload ann = parameter.getParameterAnnotation(Payload.class);
 		if (ann != null && StringUtils.hasText(ann.expression())) {

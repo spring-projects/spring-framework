@@ -196,6 +196,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * or {@code null} if no patterns match.
 	 */
 	@Override
+	@Nullable
 	public PatternsRequestCondition getMatchingCondition(HttpServletRequest request) {
 
 		if (this.patterns.isEmpty()) {
@@ -231,6 +232,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		return matches;
 	}
 
+	@Nullable
 	private String getMatchingPattern(String pattern, String lookupPath) {
 		if (pattern.equals(lookupPath)) {
 			return pattern;

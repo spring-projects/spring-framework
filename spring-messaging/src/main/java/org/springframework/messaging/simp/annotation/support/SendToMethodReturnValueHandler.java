@@ -121,7 +121,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	 * messages sent to the client outbound channel.
 	 * <p>By default this property is not set.
 	 */
-	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+	public void setHeaderInitializer(@Nullable MessageHeaderInitializer headerInitializer) {
 		this.headerInitializer = headerInitializer;
 	}
 
@@ -285,6 +285,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		}
 
 		@Override
+		@Nullable
 		public String resolvePlaceholder(String placeholderName) {
 			return (this.vars != null ? this.vars.get(placeholderName) : null);
 		}

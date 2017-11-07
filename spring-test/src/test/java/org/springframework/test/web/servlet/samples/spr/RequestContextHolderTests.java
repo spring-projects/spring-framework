@@ -42,6 +42,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -161,6 +162,7 @@ public class RequestContextHolderTests {
 		}
 
 		@Bean
+		@RequestScope
 		@Scope(scopeName = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
 		public RequestScopedService requestScopedService() {
 			return new RequestScopedService();

@@ -84,11 +84,9 @@ public class DelegatingWebFluxConfigurationTests {
 	@Test
 	public void requestMappingHandlerAdapter() throws Exception {
 		delegatingConfig.setConfigurers(Collections.singletonList(webFluxConfigurer));
-		RequestMappingHandlerAdapter adapter = delegatingConfig.requestMappingHandlerAdapter();
 
-		ConfigurableWebBindingInitializer initializer = (ConfigurableWebBindingInitializer) adapter.getWebBindingInitializer();
-		ConversionService initializerConversionService = initializer.getConversionService();
-		assertTrue(initializer.getValidator() instanceof LocalValidatorFactoryBean);
+		ConfigurableWebBindingInitializer initializer = (ConfigurableWebBindingInitializer)
+				this.delegatingConfig.requestMappingHandlerAdapter().getWebBindingInitializer();
 
 		verify(webFluxConfigurer).configureHttpMessageCodecs(codecsConfigurer.capture());
 		verify(webFluxConfigurer).getValidator();
@@ -96,8 +94,10 @@ public class DelegatingWebFluxConfigurationTests {
 		verify(webFluxConfigurer).addFormatters(formatterRegistry.capture());
 		verify(webFluxConfigurer).configureArgumentResolvers(any());
 
-		assertSame(formatterRegistry.getValue(), initializerConversionService);
-		assertEquals(11, codecsConfigurer.getValue().getReaders().size());
+		assertNotNull(initializer);
+		assertTrue(initializer.getValidator() instanceof LocalValidatorFactoryBean);
+		assertSame(formatterRegistry.getValue(), initializer.getConversionService());
+		assertEquals(12, codecsConfigurer.getValue().getReaders().size());
 	}
 
 	@Test

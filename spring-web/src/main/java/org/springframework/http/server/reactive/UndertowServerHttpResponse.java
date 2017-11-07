@@ -17,10 +17,10 @@
 package org.springframework.http.server.reactive;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +37,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
 import org.springframework.lang.Nullable;
@@ -51,8 +50,7 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 5.0
  */
-public class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse
-		implements ZeroCopyHttpOutputMessage {
+class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse implements ZeroCopyHttpOutputMessage {
 
 	private final HttpServerExchange exchange;
 
@@ -67,43 +65,19 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 	}
 
 
-	public HttpServerExchange getUndertowExchange() {
-		return this.exchange;
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getNativeResponse() {
+		return (T) this.exchange;
 	}
 
 
 	@Override
 	protected void applyStatusCode() {
-		HttpStatus statusCode = this.getStatusCode();
+		Integer statusCode = getStatusCodeValue();
 		if (statusCode != null) {
-			getUndertowExchange().setStatusCode(statusCode.value());
+			this.exchange.setStatusCode(statusCode);
 		}
-	}
-
-	@Override
-	public Mono<Void> writeWith(File file, long position, long count) {
-		return doCommit(() -> {
-			FileChannel source = null;
-			try {
-				source = new FileInputStream(file).getChannel();
-				StreamSinkChannel destination = getUndertowExchange().getResponseChannel();
-				Channels.transferBlocking(destination, source, position, count);
-				return Mono.empty();
-			}
-			catch (IOException ex) {
-				return Mono.error(ex);
-			}
-			finally {
-				if (source != null) {
-					try {
-						source.close();
-					}
-					catch (IOException ex) {
-						// ignore
-					}
-				}
-			}
-		});
 	}
 
 	@Override
@@ -136,6 +110,33 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 	}
 
 	@Override
+	public Mono<Void> writeWith(File file, long position, long count) {
+		return doCommit(() -> {
+			FileChannel source = null;
+			try {
+				source = FileChannel.open(file.toPath(), StandardOpenOption.READ);
+				StreamSinkChannel destination = this.exchange.getResponseChannel();
+				Channels.transferBlocking(destination, source, position, count);
+				return Mono.empty();
+			}
+			catch (IOException ex) {
+				return Mono.error(ex);
+			}
+			finally {
+				if (source != null) {
+					try {
+						source.close();
+					}
+					catch (IOException ex) {
+						// ignore
+					}
+				}
+			}
+		});
+	}
+
+
+	@Override
 	protected Processor<? super Publisher<? extends DataBuffer>, Void> createBodyFlushProcessor() {
 		return new ResponseBodyFlushProcessor();
 	}
@@ -147,8 +148,20 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 		return new ResponseBodyProcessor(this.responseChannel);
 	}
 
+	private boolean isWritePossible() {
+		if (this.responseChannel == null) {
+			this.responseChannel = this.exchange.getResponseChannel();
+		}
+		if (this.responseChannel.isWriteResumed()) {
+			return true;
+		} else {
+			this.responseChannel.resumeWrites();
+			return false;
+		}
+	}
 
-	private static class ResponseBodyProcessor extends AbstractListenerWriteProcessor<DataBuffer> {
+
+	private class ResponseBodyProcessor extends AbstractListenerWriteProcessor<DataBuffer> {
 
 		private final StreamSinkChannel channel;
 
@@ -164,12 +177,7 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 
 		@Override
 		protected boolean isWritePossible() {
-			if (this.channel.isWriteResumed()) {
-				return true;
-			} else {
-				this.channel.resumeWrites();
-				return false;
-			}
+			return UndertowServerHttpResponse.this.isWritePossible();
 		}
 
 		@Override
@@ -263,6 +271,16 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 		protected void flushingFailed(Throwable t) {
 			cancel();
 			onError(t);
+		}
+
+		@Override
+		protected boolean isWritePossible() {
+			return UndertowServerHttpResponse.this.isWritePossible();
+		}
+
+		@Override
+		protected boolean isFlushPending() {
+			return false;
 		}
 	}
 

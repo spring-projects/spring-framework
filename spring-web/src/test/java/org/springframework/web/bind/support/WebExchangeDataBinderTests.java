@@ -34,6 +34,7 @@ import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
 import org.springframework.mock.http.client.reactive.test.MockClientHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.LinkedMultiValueMap;
@@ -180,8 +181,8 @@ public class WebExchangeDataBinderTests {
 	@Test
 	public void testBindingWithQueryParams() throws Exception {
 		String url = "/path?spouse=someValue&spouse.name=test";
-		MockServerHttpRequest request = MockServerHttpRequest.post(url).build();
-		this.binder.bind(request.toExchange()).block(Duration.ofSeconds(5));
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post(url));
+		this.binder.bind(exchange).block(Duration.ofSeconds(5));
 
 		assertNotNull(this.testBean.getSpouse());
 		assertEquals("test", this.testBean.getSpouse().getName());
@@ -223,11 +224,11 @@ public class WebExchangeDataBinderTests {
 				forClassWithGenerics(MultiValueMap.class, String.class, String.class),
 				MediaType.APPLICATION_FORM_URLENCODED, request, Collections.emptyMap()).block();
 
-		return MockServerHttpRequest
-				.post("/")
-				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-				.body(request.getBody())
-				.toExchange();
+		return MockServerWebExchange.from(
+				MockServerHttpRequest
+						.post("/")
+						.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+						.body(request.getBody()));
 	}
 
 	private ServerWebExchange exchangeMultipart(MultiValueMap<String, ?> multipartData) {
@@ -237,11 +238,10 @@ public class WebExchangeDataBinderTests {
 		new MultipartHttpMessageWriter().write(Mono.just(multipartData), forClass(MultiValueMap.class),
 				MediaType.MULTIPART_FORM_DATA, request, Collections.emptyMap()).block();
 
-		return MockServerHttpRequest
+		return MockServerWebExchange.from(MockServerHttpRequest
 				.post("/")
 				.contentType(request.getHeaders().getContentType())
-				.body(request.getBody())
-				.toExchange();
+				.body(request.getBody()));
 	}
 
 

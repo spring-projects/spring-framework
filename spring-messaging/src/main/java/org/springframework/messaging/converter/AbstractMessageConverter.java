@@ -167,11 +167,13 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	}
 
 	@Override
+	@Nullable
 	public final Object fromMessage(Message<?> message, Class<?> targetClass) {
 		return fromMessage(message, targetClass, null);
 	}
 
 	@Override
+	@Nullable
 	public final Object fromMessage(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
 		if (!canConvertFrom(message, targetClass)) {
 			return null;
@@ -184,11 +186,13 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	}
 
 	@Override
+	@Nullable
 	public final Message<?> toMessage(Object payload, @Nullable MessageHeaders headers) {
 		return toMessage(payload, headers, null);
 	}
 
 	@Override
+	@Nullable
 	public final Message<?> toMessage(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
 		if (!canConvertTo(payload, headers)) {
 			return null;

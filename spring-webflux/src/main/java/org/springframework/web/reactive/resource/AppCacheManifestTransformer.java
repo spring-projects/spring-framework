@@ -18,12 +18,11 @@ package org.springframework.web.reactive.resource;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.StringWriter;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
@@ -35,15 +34,17 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.SynchronousSink;
 
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.DigestUtils;
-import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * A {@link ResourceTransformer} implementation that helps handling resources
- * within HTML5 AppCache manifests for HTML5 offline applications.
+ * A {@link ResourceTransformer} HTML5 AppCache manifests.
  *
  * <p>This transformer:
  * <ul>
@@ -54,15 +55,11 @@ import org.springframework.web.server.ServerWebExchange;
  * of the manifest in order to trigger an appcache reload in the browser.
  * </ul>
  *
- * <p>All files that have the ".appcache" file extension, or the extension given in the constructor,
- * will be transformed by this class. This hash is computed using the content of the appcache manifest
- * and the content of the linked resources; so changing a resource linked in the manifest
- * or the manifest itself should invalidate the browser cache.
- *
- * <p>In order to serve manifest files with the proper {@code "text/manifest"} content type,
- * it is required to configure it with
- * {@code requestedContentTypeResolverBuilder.mediaType("appcache", MediaType.valueOf("text/manifest")}
- * in {@code WebFluxConfigurer.configureContentTypeResolver()}.
+ * <p>All files with an ".appcache" file extension (or the extension given
+ * to the constructor) will be transformed by this class. The hash is computed
+ * using the content of the appcache manifest so that changes in the manifest
+ * should invalidate the browser cache. This should also work with changes in
+ * referenced resources whose links are also versioned.
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
@@ -107,69 +104,90 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 			ResourceTransformerChain chain) {
 
 		return chain.transform(exchange, inputResource)
-				.flatMap(resource -> {
-					String name = resource.getFilename();
+				.flatMap(outputResource -> {
+					String name = outputResource.getFilename();
 					if (!this.fileExtension.equals(StringUtils.getFilenameExtension(name))) {
-						return Mono.just(resource);
+						return Mono.just(outputResource);
 					}
-					String content = new String(getResourceBytes(resource), DEFAULT_CHARSET);
-					if (!content.startsWith(MANIFEST_HEADER)) {
-						if (logger.isTraceEnabled()) {
-							logger.trace("Manifest should start with 'CACHE MANIFEST', skip: " + resource);
-						}
-						return Mono.just(resource);
-					}
-					if (logger.isTraceEnabled()) {
-						logger.trace("Transforming resource: " + resource);
-					}
-					return Flux.generate(new LineGenerator(content))
-							.concatMap(info -> processLine(info, exchange, resource, chain))
-							.collect(() -> new LineAggregator(resource, content), LineAggregator::add)
-							.flatMap(aggregator -> Mono.just(aggregator.createResource()));
+					DataBufferFactory bufferFactory = exchange.getResponse().bufferFactory();
+					return DataBufferUtils.read(outputResource, bufferFactory, StreamUtils.BUFFER_SIZE)
+							.reduce(DataBuffer::write)
+							.flatMap(dataBuffer -> {
+								CharBuffer charBuffer = DEFAULT_CHARSET.decode(dataBuffer.asByteBuffer());
+								DataBufferUtils.release(dataBuffer);
+								String content = charBuffer.toString();
+								return transform(content, outputResource, chain, exchange);
+							});
 				});
 	}
 
-	private static byte[] getResourceBytes(Resource resource) {
+	private Mono<? extends Resource> transform(String content, Resource resource,
+			ResourceTransformerChain chain, ServerWebExchange exchange) {
+
+		if (!content.startsWith(MANIFEST_HEADER)) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Manifest should start with 'CACHE MANIFEST', skip: " + resource);
+			}
+			return Mono.just(resource);
+		}
+		if (logger.isTraceEnabled()) {
+			logger.trace("Transforming resource: " + resource);
+		}
+		return Flux.generate(new LineInfoGenerator(content))
+				.concatMap(info -> processLine(info, exchange, resource, chain))
+				.reduce(new ByteArrayOutputStream(), (out, line) -> {
+					writeToByteArrayOutputStream(out, line + "\n");
+					return out;
+				})
+				.map(out -> {
+					String hash = DigestUtils.md5DigestAsHex(out.toByteArray());
+					writeToByteArrayOutputStream(out, "\n" + "# Hash: " + hash);
+					if (logger.isTraceEnabled()) {
+						logger.trace("AppCache file: [" + resource.getFilename()+ "] hash: [" + hash + "]");
+					}
+					return new TransformedResource(resource, out.toByteArray());
+				});
+	}
+
+	private static void writeToByteArrayOutputStream(ByteArrayOutputStream out, String toWrite) {
 		try {
-			return FileCopyUtils.copyToByteArray(resource.getInputStream());
+			byte[] bytes = toWrite.getBytes(DEFAULT_CHARSET);
+			out.write(bytes);
 		}
 		catch (IOException ex) {
 			throw Exceptions.propagate(ex);
 		}
 	}
 
-	private Mono<LineOutput> processLine(LineInfo info, ServerWebExchange exchange,
+	private Mono<String> processLine(LineInfo info, ServerWebExchange exchange,
 			Resource resource, ResourceTransformerChain chain) {
 
 		if (!info.isLink()) {
-			return Mono.just(new LineOutput(info.getLine(), null));
+			return Mono.just(info.getLine());
 		}
 
 		String link = toAbsolutePath(info.getLine(), exchange);
-		Mono<String> pathMono = resolveUrlPath(link, exchange, resource, chain)
+		return resolveUrlPath(link, exchange, resource, chain)
 				.doOnNext(path -> {
 					if (logger.isTraceEnabled()) {
 						logger.trace("Link modified: " + path + " (original: " + info.getLine() + ")");
 					}
 				});
-
-		Mono<Resource> resourceMono = chain.getResolverChain()
-				.resolveResource(null, info.getLine(), Collections.singletonList(resource));
-
-		return Flux.zip(pathMono, resourceMono, LineOutput::new).next();
 	}
 
 
-	private static class LineGenerator implements Consumer<SynchronousSink<LineInfo>> {
+	private static class LineInfoGenerator implements Consumer<SynchronousSink<LineInfo>> {
 
 		private final Scanner scanner;
 
 		@Nullable
 		private LineInfo previous;
 
-		public LineGenerator(String content) {
+
+		LineInfoGenerator(String content) {
 			this.scanner = new Scanner(content);
 		}
+
 
 		@Override
 		public void accept(SynchronousSink<LineInfo> sink) {
@@ -194,11 +212,13 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
 		private final boolean link;
 
-		public LineInfo(String line, @Nullable LineInfo previousLine) {
+
+		LineInfo(String line, @Nullable LineInfo previousLine) {
 			this.line = line;
 			this.cacheSection = initCacheSectionFlag(line, previousLine);
 			this.link = iniLinkFlag(line, this.cacheSection);
 		}
+
 
 		private static boolean initCacheSectionFlag(String line, @Nullable LineInfo previousLine) {
 			if (MANIFEST_SECTION_HEADERS.contains(line.trim())) {
@@ -221,6 +241,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 			return (line.startsWith("//") || (index > 0 && !line.substring(0, index).contains("/")));
 		}
 
+
 		public String getLine() {
 			return this.line;
 		}
@@ -231,67 +252,6 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
 		public boolean isLink() {
 			return this.link;
-		}
-	}
-
-
-	private static class LineOutput {
-
-		private final String line;
-
-		@Nullable
-		private final Resource resource;
-
-		public LineOutput(String line, @Nullable Resource resource) {
-			this.line = line;
-			this.resource = resource;
-		}
-
-		public String getLine() {
-			return this.line;
-		}
-
-		@Nullable
-		public Resource getResource() {
-			return this.resource;
-		}
-	}
-
-
-	private static class LineAggregator {
-
-		private final StringWriter writer = new StringWriter();
-
-		private final ByteArrayOutputStream baos;
-
-		private final Resource resource;
-
-		public LineAggregator(Resource resource, String content) {
-			this.resource = resource;
-			this.baos = new ByteArrayOutputStream(content.length());
-		}
-
-		public void add(LineOutput lineOutput) {
-			this.writer.write(lineOutput.getLine() + "\n");
-			try {
-				byte[] bytes = (lineOutput.getResource() != null ?
-						DigestUtils.md5Digest(getResourceBytes(lineOutput.getResource())) :
-						lineOutput.getLine().getBytes(DEFAULT_CHARSET));
-				this.baos.write(bytes);
-			}
-			catch (IOException ex) {
-				throw Exceptions.propagate(ex);
-			}
-		}
-
-		public TransformedResource createResource() {
-			String hash = DigestUtils.md5DigestAsHex(this.baos.toByteArray());
-			this.writer.write("\n" + "# Hash: " + hash);
-			if (logger.isTraceEnabled()) {
-				logger.trace("AppCache file: [" + resource.getFilename()+ "] hash: [" + hash + "]");
-			}
-			byte[] bytes = this.writer.toString().getBytes(DEFAULT_CHARSET);
-			return new TransformedResource(this.resource, bytes);
 		}
 	}
 

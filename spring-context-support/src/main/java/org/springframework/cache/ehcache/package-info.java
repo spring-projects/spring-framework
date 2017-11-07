@@ -10,6 +10,8 @@
  * Spring's support in {@code org.springframework.cache.jcache}.
  */
 @NonNullApi
+@NonNullFields
 package org.springframework.cache.ehcache;
 
 import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

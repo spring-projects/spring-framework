@@ -198,6 +198,7 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 
 		private final QName desiredName;
 
+		@Nullable
 		private List<XMLEvent> events;
 
 		private int elementDepth = 0;

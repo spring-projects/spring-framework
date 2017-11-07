@@ -71,12 +71,14 @@ public abstract class AbstractJdbcCall {
 	private volatile boolean compiled = false;
 
 	/** The generated string used for call statement */
+	@Nullable
 	private String callString;
 
 	/**
 	 * A delegate enabling us to create CallableStatementCreators
 	 * efficiently, based on this class's declared parameters.
 	 */
+	@Nullable
 	private CallableStatementCreatorFactory callableStatementFactory;
 
 
@@ -108,7 +110,7 @@ public abstract class AbstractJdbcCall {
 	/**
 	 * Set the name of the stored procedure.
 	 */
-	public void setProcedureName(String procedureName) {
+	public void setProcedureName(@Nullable String procedureName) {
 		this.callMetaDataContext.setProcedureName(procedureName);
 	}
 
@@ -137,7 +139,7 @@ public abstract class AbstractJdbcCall {
 	/**
 	 * Set the catalog name to use.
 	 */
-	public void setCatalogName(String catalogName) {
+	public void setCatalogName(@Nullable String catalogName) {
 		this.callMetaDataContext.setCatalogName(catalogName);
 	}
 
@@ -152,7 +154,7 @@ public abstract class AbstractJdbcCall {
 	/**
 	 * Set the schema name to use.
 	 */
-	public void setSchemaName(String schemaName) {
+	public void setSchemaName(@Nullable String schemaName) {
 		this.callMetaDataContext.setSchemaName(schemaName);
 	}
 
@@ -222,6 +224,7 @@ public abstract class AbstractJdbcCall {
 	/**
 	 * Get the call string that should be used based on parameters and meta data.
 	 */
+	@Nullable
 	public String getCallString() {
 		return this.callString;
 	}
@@ -230,6 +233,7 @@ public abstract class AbstractJdbcCall {
 	 * Get the {@link CallableStatementCreatorFactory} being used
 	 */
 	protected CallableStatementCreatorFactory getCallableStatementFactory() {
+		Assert.state(this.callableStatementFactory != null, "No CallableStatementCreatorFactory available");
 		return this.callableStatementFactory;
 	}
 
@@ -322,7 +326,7 @@ public abstract class AbstractJdbcCall {
 		}
 
 		this.callableStatementFactory =
-				new CallableStatementCreatorFactory(getCallString(), this.callMetaDataContext.getCallParameters());
+				new CallableStatementCreatorFactory(this.callString, this.callMetaDataContext.getCallParameters());
 
 		onCompileInternal();
 	}

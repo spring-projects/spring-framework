@@ -19,6 +19,7 @@ package org.springframework.messaging.handler.invocation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +39,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  */
 public abstract class AbstractExceptionHandlerMethodResolver {
 
-	private final Map<Class<? extends Throwable>, Method> mappedMethods = new ConcurrentReferenceHashMap<>(16);
+	private final Map<Class<? extends Throwable>, Method> mappedMethods = new HashMap<>(16);
 
 	private final Map<Class<? extends Throwable>, Method> exceptionLookupCache = new ConcurrentReferenceHashMap<>(16);
 
@@ -64,7 +65,9 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 				result.add((Class<? extends Throwable>) paramType);
 			}
 		}
-		Assert.notEmpty(result, "No exception types mapped to {" + method + "}");
+		if (result.isEmpty()) {
+			throw new IllegalStateException("No exception types mapped to " + method);
+		}
 		return result;
 	}
 
@@ -73,7 +76,7 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 	 * Whether the contained type has any exception mappings.
 	 */
 	public boolean hasExceptionMappings() {
-		return (this.mappedMethods.size() > 0);
+		return !this.mappedMethods.isEmpty();
 	}
 
 	/**

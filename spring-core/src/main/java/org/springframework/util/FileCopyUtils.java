@@ -16,19 +16,16 @@
 
 package org.springframework.util;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.file.Files;
 
 import org.springframework.lang.Nullable;
 
@@ -42,6 +39,7 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @since 06.10.2003
  * @see StreamUtils
+ * @see FileSystemUtils
  */
 public abstract class FileCopyUtils {
 
@@ -62,9 +60,7 @@ public abstract class FileCopyUtils {
 	public static int copy(File in, File out) throws IOException {
 		Assert.notNull(in, "No input File specified");
 		Assert.notNull(out, "No output File specified");
-
-		return copy(new BufferedInputStream(new FileInputStream(in)),
-				new BufferedOutputStream(new FileOutputStream(out)));
+		return copy(Files.newInputStream(in.toPath()), Files.newOutputStream(out.toPath()));
 	}
 
 	/**
@@ -76,10 +72,7 @@ public abstract class FileCopyUtils {
 	public static void copy(byte[] in, File out) throws IOException {
 		Assert.notNull(in, "No input byte array specified");
 		Assert.notNull(out, "No output File specified");
-
-		ByteArrayInputStream inStream = new ByteArrayInputStream(in);
-		OutputStream outStream = new BufferedOutputStream(new FileOutputStream(out));
-		copy(inStream, outStream);
+		copy(new ByteArrayInputStream(in), Files.newOutputStream(out.toPath()));
 	}
 
 	/**
@@ -90,8 +83,7 @@ public abstract class FileCopyUtils {
 	 */
 	public static byte[] copyToByteArray(File in) throws IOException {
 		Assert.notNull(in, "No input File specified");
-
-		return copyToByteArray(new BufferedInputStream(new FileInputStream(in)));
+		return copyToByteArray(Files.newInputStream(in.toPath()));
 	}
 
 

@@ -68,6 +68,7 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class ConnectionSpecConnectionFactoryAdapter extends DelegatingConnectionFactory {
 
+	@Nullable
 	private ConnectionSpec connectionSpec;
 
 	private final ThreadLocal<ConnectionSpec> threadBoundSpec =

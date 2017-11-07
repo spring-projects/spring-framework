@@ -14,29 +14,6 @@
  *  limitations under the License.
  */
 
-apply plugin: "org.asciidoctor.convert"
-
-asciidoctor {
-	sources {
-		include '*.adoc'
-	}
-	logDocuments = true
-	backends = ["html5", "pdf"]
-	options doctype: 'book', eruby: 'erubis'
-	attributes  'icons': 'font',
-				'idprefix': '',
-				'idseparator': '-',
-				docinfo: '',
-				revnumber: project.version,
-				sectanchors: '',
-				sectnums: '',
-				'source-highlighter': 'coderay@', // TODO switch to 'rouge' once supported by the html5 backend
-				stylesdir: 'stylesheets/',
-				stylesheet: 'spring.css',
-				'spring-version': project.version
-
-}
-
 task api(type: Javadoc) {
 	group = "Documentation"
 	description = "Generates aggregated Javadoc API documentation."
@@ -72,7 +49,67 @@ task api(type: Javadoc) {
 	}
 }
 
-task docsZip(type: Zip, dependsOn: 'asciidoctor') {
+// Need https://github.com/Kotlin/dokka/issues/184 to be fixed to avoid "Can't find node by signature" log spam
+dokka {
+	dependsOn {
+		subprojects.collect {
+			it.tasks.getByName("jar")
+		}
+	}
+	doFirst {
+		classpath = subprojects.collect { project -> project.jar.outputs.files.getFiles() }.flatten()
+		classpath += files(subprojects.collect { it.sourceSets.main.compileClasspath })
+
+	}
+	moduleName = "spring-framework"
+	outputFormat = "html"
+	outputDirectory = "$buildDir/docs/kdoc"
+
+	sourceDirs = files(subprojects.collect { project ->
+		project.sourceSets.main.kotlin.srcDirs
+	})
+	externalDocumentationLink {
+		url = new URL("http://docs.spring.io/spring-framework/docs/${version}/javadoc-api/")
+	}
+	externalDocumentationLink {
+		url = new URL("http://projectreactor.io/docs/core/release/api/")
+	}
+	externalDocumentationLink {
+		url = new URL("http://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/")
+	}
+}
+
+asciidoctor {
+	sources {
+		include '*.adoc'
+	}
+	resources {
+		from(sourceDir) {
+			include 'images/*', 'stylesheets/*', 'tocbot-3.0.2/*'
+		}
+	}
+	logDocuments = true
+	backends = ["html5"]
+	// only ouput PDF documentation for non-SNAPSHOT builds
+	if(!project.getVersion().toString().contains("BUILD-SNAPSHOT")) {
+		backends += "pdf"
+	}
+	options doctype: 'book', eruby: 'erubis'
+	attributes  'icons': 'font',
+			'idprefix': '',
+			'idseparator': '-',
+			docinfo: '',
+			revnumber: project.version,
+			sectanchors: '',
+			sectnums: '',
+			'source-highlighter': 'coderay@', // TODO switch to 'rouge' once supported by the html5 backend
+			stylesdir: 'stylesheets/',
+			stylesheet: 'main.css',
+			'spring-version': project.version
+
+}
+
+task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'dokka']) {
 	group = "Distribution"
 	baseName = "spring-framework"
 	classifier = "docs"
@@ -89,6 +126,10 @@ task docsZip(type: Zip, dependsOn: 'asciidoctor') {
 
 	from (asciidoctor) {
 		into "spring-framework-reference"
+	}
+
+	from (dokka) {
+		into "kdoc-api"
 	}
 }
 
@@ -121,6 +162,7 @@ task schemaZip(type: Zip) {
 }
 
 task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
+
 	group = "Distribution"
 	baseName = "spring-framework"
 	classifier = "dist"
@@ -157,6 +199,8 @@ task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
 		}
 	}
 }
+
+distZip.mustRunAfter subprojects.test
 
 // Create a distribution that contains all dependencies (required and optional).
 // Not published by default; only for use when building from source.

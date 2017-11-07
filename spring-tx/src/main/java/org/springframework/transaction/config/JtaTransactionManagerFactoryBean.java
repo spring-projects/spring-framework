@@ -70,6 +70,7 @@ public class JtaTransactionManagerFactoryBean implements FactoryBean<JtaTransact
 
 
 	@Override
+	@Nullable
 	public JtaTransactionManager getObject() {
 		return this.transactionManager;
 	}

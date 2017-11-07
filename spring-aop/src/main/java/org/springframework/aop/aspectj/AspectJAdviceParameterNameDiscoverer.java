@@ -222,6 +222,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 * @return the parameter names
 	 */
 	@Override
+	@Nullable
 	public String[] getParameterNames(Method method) {
 		this.argumentTypes = method.getParameterTypes();
 		this.numberOfRemainingUnboundArguments = this.argumentTypes.length;
@@ -310,6 +311,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 * {@link #setRaiseExceptions(boolean) raiseExceptions} has been set to {@code true}
 	 */
 	@Override
+	@Nullable
 	public String[] getParameterNames(Constructor<?> ctor) {
 		if (this.raiseExceptions) {
 			throw new UnsupportedOperationException("An advice method can never be a constructor");

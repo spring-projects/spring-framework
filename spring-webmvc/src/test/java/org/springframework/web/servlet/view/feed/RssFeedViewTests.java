@@ -56,9 +56,12 @@ public class RssFeedViewTests {
 		view.render(model, request, response);
 		assertEquals("Invalid content-type", "application/rss+xml", response.getContentType());
 		String expected = "<rss version=\"2.0\">" +
-				"<channel><title>Test Feed</title><link>http://example.com</link><description>Test feed description</description>" +
+				"<channel><title>Test Feed</title>" +
+				"<link>http://example.com</link>" +
+				"<description>Test feed description</description>" +
 				"<item><title>2</title><description>This is entry 2</description></item>" +
-				"<item><title>1</title><description>This is entry 1</description></item>" + "</channel></rss>";
+				"<item><title>1</title><description>This is entry 1</description></item>" +
+				"</channel></rss>";
 		assertThat(response.getContentAsString(), isSimilarTo(expected).ignoreWhitespace());
 	}
 
@@ -73,7 +76,9 @@ public class RssFeedViewTests {
 		}
 
 		@Override
-		protected List<Item> buildFeedItems(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		protected List<Item> buildFeedItems(Map<String, Object> model,
+				HttpServletRequest request, HttpServletResponse response) throws Exception {
+
 			List<Item> items = new ArrayList<>();
 			for (String name : model.keySet()) {
 				Item item = new Item();

@@ -39,11 +39,10 @@ public interface ServerCodecConfigurer extends CodecConfigurer {
 
 
 	/**
-	 * Creates a new instance of the {@code ServerCodecConfigurer}.
-	 * @return the created instance
+	 * Create a new instance of the {@code ServerCodecConfigurer}.
 	 */
 	static ServerCodecConfigurer create() {
-		return new DefaultServerCodecConfigurer();
+		return CodecConfigurerFactory.create(ServerCodecConfigurer.class);
 	}
 
 
@@ -55,7 +54,7 @@ public interface ServerCodecConfigurer extends CodecConfigurer {
 		/**
 		 * Configure the {@code Encoder} to use for Server-Sent Events.
 		 * <p>By default if this is not set, and Jackson is available, the
-		 * {@link #jackson2Encoder} override is used instead. Use this property
+		 * {@link #jackson2JsonEncoder} override is used instead. Use this property
 		 * if you want to further customize the SSE encoder.
 		 */
 		void serverSentEventEncoder(Encoder<?> encoder);

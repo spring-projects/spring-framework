@@ -75,8 +75,10 @@ public class WebDataBinder extends DataBinder {
 	 */
 	public static final String DEFAULT_FIELD_DEFAULT_PREFIX = "!";
 
+	@Nullable
 	private String fieldMarkerPrefix = DEFAULT_FIELD_MARKER_PREFIX;
 
+	@Nullable
 	private String fieldDefaultPrefix = DEFAULT_FIELD_DEFAULT_PREFIX;
 
 	private boolean bindEmptyMultipartFiles = true;
@@ -124,7 +126,7 @@ public class WebDataBinder extends DataBinder {
 	 * detect an empty field and automatically reset its value.
 	 * @see #DEFAULT_FIELD_MARKER_PREFIX
 	 */
-	public void setFieldMarkerPrefix(String fieldMarkerPrefix) {
+	public void setFieldMarkerPrefix(@Nullable String fieldMarkerPrefix) {
 		this.fieldMarkerPrefix = fieldMarkerPrefix;
 	}
 
@@ -150,7 +152,7 @@ public class WebDataBinder extends DataBinder {
 	 * marker for the given field.
 	 * @see #DEFAULT_FIELD_DEFAULT_PREFIX
 	 */
-	public void setFieldDefaultPrefix(String fieldDefaultPrefix) {
+	public void setFieldDefaultPrefix(@Nullable String fieldDefaultPrefix) {
 		this.fieldDefaultPrefix = fieldDefaultPrefix;
 	}
 
@@ -204,8 +206,8 @@ public class WebDataBinder extends DataBinder {
 	 * @see #getFieldDefaultPrefix
 	 */
 	protected void checkFieldDefaults(MutablePropertyValues mpvs) {
-		if (getFieldDefaultPrefix() != null) {
-			String fieldDefaultPrefix = getFieldDefaultPrefix();
+		String fieldDefaultPrefix = getFieldDefaultPrefix();
+		if (fieldDefaultPrefix != null) {
 			PropertyValue[] pvArray = mpvs.getPropertyValues();
 			for (PropertyValue pv : pvArray) {
 				if (pv.getName().startsWith(fieldDefaultPrefix)) {
@@ -231,8 +233,8 @@ public class WebDataBinder extends DataBinder {
 	 * @see #getEmptyValue(String, Class)
 	 */
 	protected void checkFieldMarkers(MutablePropertyValues mpvs) {
-		if (getFieldMarkerPrefix() != null) {
-			String fieldMarkerPrefix = getFieldMarkerPrefix();
+		String fieldMarkerPrefix = getFieldMarkerPrefix();
+		if (fieldMarkerPrefix != null) {
 			PropertyValue[] pvArray = mpvs.getPropertyValues();
 			for (PropertyValue pv : pvArray) {
 				if (pv.getName().startsWith(fieldMarkerPrefix)) {
@@ -249,7 +251,20 @@ public class WebDataBinder extends DataBinder {
 
 	/**
 	 * Determine an empty value for the specified field.
-	 * <p>Default implementation returns:
+	 * <p>The default implementation delegates to {@link #getEmptyValue(Class)}
+	 * if the field type is known, otherwise falls back to {@code null}.
+	 * @param field the name of the field
+	 * @param fieldType the type of the field
+	 * @return the empty value (for most fields: {@code null})
+	 */
+	@Nullable
+	protected Object getEmptyValue(String field, @Nullable Class<?> fieldType) {
+		return (fieldType != null ? getEmptyValue(fieldType) : null);
+	}
+
+	/**
+	 * Determine an empty value for the specified field.
+	 * <p>The default implementation returns:
 	 * <ul>
 	 * <li>{@code Boolean.FALSE} for boolean fields
 	 * <li>an empty array for array types
@@ -257,39 +272,41 @@ public class WebDataBinder extends DataBinder {
 	 * <li>Map implementations for Map types
 	 * <li>else, {@code null} is used as default
 	 * </ul>
-	 * @param field the name of the field
 	 * @param fieldType the type of the field
-	 * @return the empty value (for most fields: null)
+	 * @return the empty value (for most fields: {@code null})
+	 * @since 5.0
 	 */
 	@Nullable
-	protected Object getEmptyValue(String field, @Nullable Class<?> fieldType) {
-		if (fieldType != null) {
-			try {
-				if (boolean.class == fieldType || Boolean.class == fieldType) {
-					// Special handling of boolean property.
-					return Boolean.FALSE;
-				}
-				else if (fieldType.isArray()) {
-					// Special handling of array property.
-					return Array.newInstance(fieldType.getComponentType(), 0);
-				}
-				else if (Collection.class.isAssignableFrom(fieldType)) {
-					return CollectionFactory.createCollection(fieldType, 0);
-				}
-				else if (Map.class.isAssignableFrom(fieldType)) {
-					return CollectionFactory.createMap(fieldType, 0);
-				}
-			} catch (IllegalArgumentException exc) {
-				return null;
+	public Object getEmptyValue(Class<?> fieldType) {
+		try {
+			if (boolean.class == fieldType || Boolean.class == fieldType) {
+				// Special handling of boolean property.
+				return Boolean.FALSE;
+			}
+			else if (fieldType.isArray()) {
+				// Special handling of array property.
+				return Array.newInstance(fieldType.getComponentType(), 0);
+			}
+			else if (Collection.class.isAssignableFrom(fieldType)) {
+				return CollectionFactory.createCollection(fieldType, 0);
+			}
+			else if (Map.class.isAssignableFrom(fieldType)) {
+				return CollectionFactory.createMap(fieldType, 0);
 			}
 		}
-		// Default value: try null.
+		catch (IllegalArgumentException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Failed to create default value - falling back to null: " + ex.getMessage());
+			}
+		}
+		// Default value: null.
 		return null;
 	}
 
+
 	/**
 	 * Bind all multipart files contained in the given request, if any
-	 * (in case of a multipart request).
+	 * (in case of a multipart request). To be called by subclasses.
 	 * <p>Multipart files will only be added to the property values if they
 	 * are not empty or if we're configured to bind empty multipart files too.
 	 * @param multipartFiles Map of field name String to MultipartFile object

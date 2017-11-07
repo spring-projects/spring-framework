@@ -43,6 +43,7 @@ import org.springframework.web.context.support.ServletContextResource;
  */
 public class PathResourceResolver extends AbstractResourceResolver {
 
+	@Nullable
 	private Resource[] allowedLocations;
 
 
@@ -63,7 +64,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	 * @since 4.1.2
 	 * @see ResourceHttpRequestHandler#initAllowedLocations()
 	 */
-	public void setAllowedLocations(Resource... locations) {
+	public void setAllowedLocations(@Nullable Resource... locations) {
 		this.allowedLocations = locations;
 	}
 

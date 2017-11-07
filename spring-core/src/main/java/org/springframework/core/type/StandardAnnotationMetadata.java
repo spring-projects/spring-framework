@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -115,17 +116,20 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	}
 
 	@Override
+	@Nullable
 	public Map<String, Object> getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		return (this.annotations.length > 0 ? AnnotatedElementUtils.getMergedAnnotationAttributes(
 				getIntrospectedClass(), annotationName, classValuesAsString, this.nestedAnnotationsAsMap) : null);
 	}
 
 	@Override
+	@Nullable
 	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName) {
 		return getAllAnnotationAttributes(annotationName, false);
 	}
 
 	@Override
+	@Nullable
 	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		return (this.annotations.length > 0 ? AnnotatedElementUtils.getAllAnnotationAttributes(
 				getIntrospectedClass(), annotationName, classValuesAsString, this.nestedAnnotationsAsMap) : null);
@@ -152,7 +156,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationName) {
 		try {
 			Method[] methods = getIntrospectedClass().getDeclaredMethods();
-			Set<MethodMetadata> annotatedMethods = new LinkedHashSet<>();
+			Set<MethodMetadata> annotatedMethods = new LinkedHashSet<>(4);
 			for (Method method : methods) {
 				if (!method.isBridge() && method.getAnnotations().length > 0 &&
 						AnnotatedElementUtils.isAnnotated(method, annotationName)) {

@@ -83,6 +83,7 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
+	@Nullable
 	public ValueWrapper get(Object key) {
 		if (this.cache instanceof LoadingCache) {
 			Object value = ((LoadingCache<Object, Object>) this.cache).get(key);

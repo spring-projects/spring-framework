@@ -25,6 +25,7 @@ import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
 /**
@@ -66,6 +67,10 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 		ServerHttpRequest request = new UndertowServerHttpRequest(exchange, getDataBufferFactory());
 		ServerHttpResponse response = new UndertowServerHttpResponse(exchange, getDataBufferFactory());
+
+		if (HttpMethod.HEAD.equals(request.getMethod())) {
+			response = new HttpHeadResponseDecorator(response);
+		}
 
 		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber(exchange);
 		this.httpHandler.handle(request, response).subscribe(resultSubscriber);

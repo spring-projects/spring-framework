@@ -205,6 +205,7 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 
 
 	@Override
+	@Nullable
 	public JMXConnectorServer getObject() {
 		return this.connectorServer;
 	}

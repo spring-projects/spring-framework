@@ -118,6 +118,7 @@ public class DefaultContextCache implements ContextCache {
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Nullable
 	public ApplicationContext get(MergedContextConfiguration key) {
 		Assert.notNull(key, "Key must not be null");
 		ApplicationContext context = this.contextMap.get(key);

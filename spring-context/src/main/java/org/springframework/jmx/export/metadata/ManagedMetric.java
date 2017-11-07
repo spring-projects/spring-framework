@@ -17,6 +17,7 @@
 package org.springframework.jmx.export.metadata;
 
 import org.springframework.jmx.support.MetricType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -30,29 +31,34 @@ import org.springframework.util.Assert;
  */
 public class ManagedMetric extends AbstractJmxAttribute {
 
+	@Nullable
 	private String category;
 
+	@Nullable
 	private String displayName;
 
 	private MetricType metricType = MetricType.GAUGE;
 
 	private int persistPeriod = -1;
 
+	@Nullable
 	private String persistPolicy;
 
+	@Nullable
 	private String unit;
 
 
 	/**
 	 * The category of this metric (ex. throughput, performance, utilization).
 	 */
-	public void setCategory(String category) {
+	public void setCategory(@Nullable String category) {
 		this.category = category;
 	}
 
 	/**
 	 * The category of this metric (ex. throughput, performance, utilization).
 	 */
+	@Nullable
 	public String getCategory() {
 		return this.category;
 	}
@@ -60,13 +66,14 @@ public class ManagedMetric extends AbstractJmxAttribute {
 	/**
 	 * A display name for this metric.
 	 */
-	public void setDisplayName(String displayName) {
+	public void setDisplayName(@Nullable String displayName) {
 		this.displayName = displayName;
 	}
 
 	/**
 	 * A display name for this metric.
 	 */
+	@Nullable
 	public String getDisplayName() {
 		return this.displayName;
 	}
@@ -103,13 +110,14 @@ public class ManagedMetric extends AbstractJmxAttribute {
 	/**
 	 * The persist policy for this metric.
 	 */
-	public void setPersistPolicy(String persistPolicy) {
+	public void setPersistPolicy(@Nullable String persistPolicy) {
 		this.persistPolicy = persistPolicy;
 	}
 
 	/**
 	 * The persist policy for this metric.
 	 */
+	@Nullable
 	public String getPersistPolicy() {
 		return this.persistPolicy;
 	}
@@ -117,13 +125,14 @@ public class ManagedMetric extends AbstractJmxAttribute {
 	/**
 	 * The expected unit of measurement values.
 	 */
-	public void setUnit(String unit) {
+	public void setUnit(@Nullable String unit) {
 		this.unit = unit;
 	}
 
 	/**
 	 * The expected unit of measurement values.
 	 */
+	@Nullable
 	public String getUnit() {
 		return this.unit;
 	}

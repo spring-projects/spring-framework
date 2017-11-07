@@ -306,7 +306,6 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	public boolean remove(Object key, final Object value) {
 		Boolean result = doTask(key, new Task<Boolean>(TaskOption.RESTRUCTURE_AFTER, TaskOption.SKIP_IF_EMPTY) {
 			@Override
-			@Nullable
 			protected Boolean execute(@Nullable Reference<K, V> reference, @Nullable Entry<K, V> entry) {
 				if (entry != null && ObjectUtils.nullSafeEquals(entry.getValue(), value)) {
 					if (reference != null) {
@@ -324,7 +323,6 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	public boolean replace(K key, final V oldValue, final V newValue) {
 		Boolean result = doTask(key, new Task<Boolean>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.SKIP_IF_EMPTY) {
 			@Override
-			@Nullable
 			protected Boolean execute(@Nullable Reference<K, V> reference, @Nullable Entry<K, V> entry) {
 				if (entry != null && ObjectUtils.nullSafeEquals(entry.getValue(), oldValue)) {
 					entry.setValue(newValue);
@@ -1005,6 +1003,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		}
 
 		@Override
+		@Nullable
 		public Reference<K, V> getNext() {
 			return this.nextReference;
 		}
@@ -1041,6 +1040,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		}
 
 		@Override
+		@Nullable
 		public Reference<K, V> getNext() {
 			return this.nextReference;
 		}

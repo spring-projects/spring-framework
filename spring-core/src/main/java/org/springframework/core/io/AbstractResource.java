@@ -27,6 +27,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
 import org.springframework.core.NestedIOException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -202,6 +203,7 @@ public abstract class AbstractResource implements Resource {
 	 * assuming that this resource type does not have a filename.
 	 */
 	@Override
+	@Nullable
 	public String getFilename() {
 		return null;
 	}

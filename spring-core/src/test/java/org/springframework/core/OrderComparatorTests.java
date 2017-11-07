@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,34 +20,48 @@ import java.util.Comparator;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the {@link OrderComparator} class.
  *
  * @author Rick Evans
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  */
 public class OrderComparatorTests {
 
 	private final OrderComparator comparator = new OrderComparator();
 
+
 	@Test
 	public void compareOrderedInstancesBefore() {
-		assertEquals(-1, this.comparator.compare(
-				new StubOrdered(100), new StubOrdered(2000)));
+		assertEquals(-1, this.comparator.compare(new StubOrdered(100), new StubOrdered(2000)));
 	}
 
 	@Test
 	public void compareOrderedInstancesSame() {
-		assertEquals(0, this.comparator.compare(
-				new StubOrdered(100), new StubOrdered(100)));
+		assertEquals(0, this.comparator.compare(new StubOrdered(100), new StubOrdered(100)));
 	}
 
 	@Test
 	public void compareOrderedInstancesAfter() {
-		assertEquals(1, this.comparator.compare(
-				new StubOrdered(982300), new StubOrdered(100)));
+		assertEquals(1, this.comparator.compare(new StubOrdered(982300), new StubOrdered(100)));
+	}
+
+	@Test
+	public void compareOrderedInstancesNullFirst() {
+		assertEquals(1, this.comparator.compare(null, new StubOrdered(100)));
+	}
+
+	@Test
+	public void compareOrderedInstancesNullLast() {
+		assertEquals(-1, this.comparator.compare(new StubOrdered(100), null));
+	}
+
+	@Test
+	public void compareOrderedInstancesDoubleNull() {
+		assertEquals(0, this.comparator.compare(null, null));
 	}
 
 	@Test
@@ -87,6 +101,7 @@ public class OrderComparatorTests {
 	private static final class TestSourceProvider implements OrderComparator.OrderSourceProvider {
 
 		private final Object target;
+
 		private final Object orderSource;
 
 		public TestSourceProvider(Object target, Object orderSource) {
@@ -102,6 +117,7 @@ public class OrderComparatorTests {
 			return null;
 		}
 	}
+
 
 	private static final class StubOrdered implements Ordered {
 

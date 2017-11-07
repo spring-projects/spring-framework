@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,18 +26,15 @@ import org.junit.rules.ExpectedException;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 
-import static org.junit.Assert.assertEquals;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.test.web.client.ExpectedCount.max;
-import static org.springframework.test.web.client.ExpectedCount.min;
-import static org.springframework.test.web.client.ExpectedCount.once;
-import static org.springframework.test.web.client.ExpectedCount.twice;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static org.junit.Assert.*;
+import static org.springframework.http.HttpMethod.*;
+import static org.springframework.test.web.client.ExpectedCount.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
 
 /**
  * Unit tests for {@link UnorderedRequestExpectationManager}.
+ *
  * @author Rossen Stoyanchev
  */
 public class UnorderedRequestExpectationManagerTests {
@@ -131,4 +128,5 @@ public class UnorderedRequestExpectationManagerTests {
 			throw new IllegalStateException(ex);
 		}
 	}
+
 }

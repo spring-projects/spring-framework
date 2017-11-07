@@ -67,7 +67,8 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 	@Test
 	public void controllerThrowingExceptionWithCauseToHandle() throws Exception {
 		String expected = "Recovered from error: IO";
-		assertEquals(expected, performGet("/thrown-exception-with-cause-to-handle", new HttpHeaders(), String.class).getBody());
+		String url = "/thrown-exception-with-cause-to-handle";
+		assertEquals(expected, performGet(url, new HttpHeaders(), String.class).getBody());
 	}
 
 	@Test

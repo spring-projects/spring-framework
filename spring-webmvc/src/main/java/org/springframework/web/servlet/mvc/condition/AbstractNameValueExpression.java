@@ -60,6 +60,7 @@ abstract class AbstractNameValueExpression<T> implements NameValueExpression<T> 
 	}
 
 	@Override
+	@Nullable
 	public T getValue() {
 		return this.value;
 	}
@@ -133,4 +134,5 @@ abstract class AbstractNameValueExpression<T> implements NameValueExpression<T> 
 		}
 		return builder.toString();
 	}
+
 }

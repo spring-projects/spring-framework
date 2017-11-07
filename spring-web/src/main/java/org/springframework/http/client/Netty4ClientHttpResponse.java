@@ -33,7 +33,8 @@ import org.springframework.util.Assert;
  *
  * @author Arjen Poutsma
  * @since 4.1.2
- * @deprecated as of Spring 5.0, in favor of {@link org.springframework.http.client.reactive.ReactorClientHttpConnector}
+ * @deprecated as of Spring 5.0, in favor of
+ * {@link org.springframework.http.client.reactive.ReactorClientHttpConnector}
  */
 @Deprecated
 class Netty4ClientHttpResponse extends AbstractClientHttpResponse {

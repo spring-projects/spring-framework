@@ -110,12 +110,6 @@ public class BeanDefinitionParserDelegate {
 
 	public static final String AUTOWIRE_AUTODETECT_VALUE = "autodetect";
 
-	public static final String DEPENDENCY_CHECK_ALL_ATTRIBUTE_VALUE = "all";
-
-	public static final String DEPENDENCY_CHECK_SIMPLE_ATTRIBUTE_VALUE = "simple";
-
-	public static final String DEPENDENCY_CHECK_OBJECTS_ATTRIBUTE_VALUE = "objects";
-
 	public static final String NAME_ATTRIBUTE = "name";
 
 	public static final String BEAN_ELEMENT = "bean";
@@ -609,9 +603,7 @@ public class BeanDefinitionParserDelegate {
 
 		if (ele.hasAttribute(INIT_METHOD_ATTRIBUTE)) {
 			String initMethodName = ele.getAttribute(INIT_METHOD_ATTRIBUTE);
-			if (!"".equals(initMethodName)) {
-				bd.setInitMethodName(initMethodName);
-			}
+			bd.setInitMethodName(initMethodName);
 		}
 		else if (this.defaults.getInitMethod() != null) {
 			bd.setInitMethodName(this.defaults.getInitMethod());

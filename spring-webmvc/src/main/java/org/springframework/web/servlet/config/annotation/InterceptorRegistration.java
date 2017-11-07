@@ -42,10 +42,10 @@ public class InterceptorRegistration {
 
 	private final List<String> excludePatterns = new ArrayList<>();
 
-	private int order = 0;
-
 	@Nullable
 	private PathMatcher pathMatcher;
+
+	private int order = 0;
 
 
 	/**
@@ -73,18 +73,6 @@ public class InterceptorRegistration {
 	}
 
 	/**
-	 * An order position to be used, default is 0.
-	 */
-	public InterceptorRegistration order(int order){
-		this.order = order;
-		return this;
-	}
-
-	protected int getOrder() {
-		return this.order;
-	}
-
-	/**
 	 * A PathMatcher implementation to use with this interceptor. This is an optional,
 	 * advanced property required only if using custom PathMatcher implementations
 	 * that support mapping metadata other than the Ant path patterns supported
@@ -93,6 +81,23 @@ public class InterceptorRegistration {
 	public InterceptorRegistration pathMatcher(PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
 		return this;
+	}
+
+	/**
+	 * Specify an order position to be used. Default is 0.
+	 * @since 5.0
+	 */
+	public InterceptorRegistration order(int order){
+		this.order = order;
+		return this;
+	}
+
+	/**
+	 * Return the order position to be used.
+	 * @since 5.0
+	 */
+	protected int getOrder() {
+		return this.order;
 	}
 
 	/**

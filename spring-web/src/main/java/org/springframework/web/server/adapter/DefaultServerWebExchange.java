@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 
@@ -91,9 +92,12 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 	private volatile boolean notModified;
 
+	private Function<String, String> urlTransformer = url -> url;
+
 
 	public DefaultServerWebExchange(ServerHttpRequest request, ServerHttpResponse response,
-			WebSessionManager sessionManager, ServerCodecConfigurer codecConfigurer, LocaleContextResolver localeContextResolver) {
+			WebSessionManager sessionManager, ServerCodecConfigurer codecConfigurer,
+			LocaleContextResolver localeContextResolver) {
 
 		Assert.notNull(request, "'request' is required");
 		Assert.notNull(response, "'response' is required");
@@ -321,5 +325,17 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		this.notModified = ChronoUnit.SECONDS.between(lastModified, Instant.ofEpochMilli(ifModifiedSince)) >= 0;
 		return true;
 	}
+
+	@Override
+	public String transformUrl(String url) {
+		return this.urlTransformer.apply(url);
+	}
+
+	@Override
+	public void addUrlTransformer(Function<String, String> transformer) {
+		Assert.notNull(transformer, "'encoder' must not be null");
+		this.urlTransformer = this.urlTransformer.andThen(transformer);
+	}
+
 
 }

@@ -16,14 +16,24 @@
 
 package org.springframework.http.server.reactive;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
+import reactor.core.publisher.Flux;
+
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Package-private default implementation of {@link ServerHttpRequest.Builder}.
@@ -34,36 +44,71 @@ import org.springframework.util.Assert;
  */
 class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
-	private final ServerHttpRequest delegate;
+	private URI uri;
+
+	private HttpHeaders httpHeaders;
+
+	private String httpMethodValue;
+
+	private final MultiValueMap<String, HttpCookie> cookies;
 
 	@Nullable
-	private HttpMethod httpMethod;
+	private final InetSocketAddress remoteAddress;
 
 	@Nullable
-	private String path;
+	private String uriPath;
 
 	@Nullable
 	private String contextPath;
 
-	@Nullable
-	private HttpHeaders httpHeaders;
+	private Flux<DataBuffer> body;
+
+	private final ServerHttpRequest originalRequest;
 
 
-	public DefaultServerHttpRequestBuilder(ServerHttpRequest delegate) {
-		Assert.notNull(delegate, "ServerHttpRequest delegate is required");
-		this.delegate = delegate;
+	public DefaultServerHttpRequestBuilder(ServerHttpRequest original) {
+		Assert.notNull(original, "ServerHttpRequest is required");
+
+		this.uri = original.getURI();
+		this.httpMethodValue = original.getMethodValue();
+		this.remoteAddress = original.getRemoteAddress();
+		this.body = original.getBody();
+
+		this.httpHeaders = new HttpHeaders();
+		copyMultiValueMap(original.getHeaders(), this.httpHeaders);
+
+		this.cookies = new LinkedMultiValueMap<>(original.getCookies().size());
+		copyMultiValueMap(original.getCookies(), this.cookies);
+
+		this.originalRequest = original;
+	}
+
+	private static <K, V> void copyMultiValueMap(MultiValueMap<K,V> source,
+			MultiValueMap<K,V> destination) {
+
+		for (Map.Entry<K, List<V>> entry : source.entrySet()) {
+			K key = entry.getKey();
+			List<V> values = new LinkedList<>(entry.getValue());
+			destination.put(key, values);
+		}
 	}
 
 
 	@Override
 	public ServerHttpRequest.Builder method(HttpMethod httpMethod) {
-		this.httpMethod = httpMethod;
+		this.httpMethodValue = httpMethod.name();
+		return this;
+	}
+
+	@Override
+	public ServerHttpRequest.Builder uri(URI uri) {
+		this.uri = uri;
 		return this;
 	}
 
 	@Override
 	public ServerHttpRequest.Builder path(String path) {
-		this.path = path;
+		this.uriPath = path;
 		return this;
 	}
 
@@ -75,110 +120,92 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 	@Override
 	public ServerHttpRequest.Builder header(String key, String value) {
-		if (this.httpHeaders == null) {
-			this.httpHeaders = new HttpHeaders();
-		}
 		this.httpHeaders.add(key, value);
+		return this;
+	}
+
+	@Override
+	public ServerHttpRequest.Builder headers(Consumer<HttpHeaders> headersConsumer) {
+		Assert.notNull(headersConsumer, "'headersConsumer' must not be null");
+		headersConsumer.accept(this.httpHeaders);
 		return this;
 	}
 
 	@Override
 	public ServerHttpRequest build() {
 		URI uriToUse = getUriToUse();
-		RequestPath path = getRequestPathToUse(uriToUse);
-		HttpHeaders headers = getHeadersToUse();
-		return new MutativeDecorator(this.delegate, this.httpMethod, uriToUse, path, headers);
+		return new DefaultServerHttpRequest(uriToUse, this.contextPath, this.httpHeaders,
+				this.httpMethodValue, this.cookies, this.remoteAddress, this.body,
+				this.originalRequest);
+
 	}
 
-	@Nullable
 	private URI getUriToUse() {
-		if (this.path == null) {
-			return null;
+		if (this.uriPath == null) {
+			return this.uri;
 		}
-		URI uri = this.delegate.getURI();
 		try {
-			return new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(),
-					this.path, uri.getQuery(), uri.getFragment());
+			return new URI(this.uri.getScheme(), this.uri.getUserInfo(), uri.getHost(), uri.getPort(),
+					uriPath, uri.getQuery(), uri.getFragment());
 		}
 		catch (URISyntaxException ex) {
-			throw new IllegalStateException("Invalid URI path: \"" + this.path + "\"");
+			throw new IllegalStateException("Invalid URI path: \"" + this.uriPath + "\"");
 		}
 	}
 
-	@Nullable
-	private RequestPath getRequestPathToUse(@Nullable URI uriToUse) {
-		if (uriToUse == null) {
-			if (this.contextPath == null) {
-				return null;
-			}
-			return new DefaultRequestPath(this.delegate.getPath(), this.contextPath);
-		}
-		else {
-			return new DefaultRequestPath(uriToUse, this.contextPath, StandardCharsets.UTF_8);
-		}
-	}
+	private static class DefaultServerHttpRequest extends AbstractServerHttpRequest {
 
-	@Nullable
-	private HttpHeaders getHeadersToUse() {
-		if (this.httpHeaders != null) {
-			HttpHeaders headers = new HttpHeaders();
-			headers.putAll(this.delegate.getHeaders());
-			headers.putAll(this.httpHeaders);
-			return headers;
-		}
-		else {
-			return null;
-		}
-	}
+		private final String methodValue;
 
-
-	/**
-	 * An immutable wrapper of a request returning property overrides -- given
-	 * to the constructor -- or original values otherwise.
-	 */
-	private static class MutativeDecorator extends ServerHttpRequestDecorator {
+		private final MultiValueMap<String, HttpCookie> cookies;
 
 		@Nullable
-		private final HttpMethod httpMethod;
+		private final InetSocketAddress remoteAddress;
 
-		@Nullable
-		private final URI uri;
+		private final Flux<DataBuffer> body;
 
-		@Nullable
-		private final RequestPath requestPath;
-
-		@Nullable
-		private final HttpHeaders httpHeaders;
+		private final ServerHttpRequest originalRequest;
 
 
-		public MutativeDecorator(ServerHttpRequest delegate, @Nullable HttpMethod method,
-				@Nullable URI uri, @Nullable RequestPath requestPath, @Nullable HttpHeaders httpHeaders) {
+		public DefaultServerHttpRequest(URI uri, @Nullable String contextPath,
+				HttpHeaders headers, String methodValue, MultiValueMap<String, HttpCookie> cookies,
+				@Nullable InetSocketAddress remoteAddress,
+				Flux<DataBuffer> body, ServerHttpRequest originalRequest) {
 
-			super(delegate);
-			this.httpMethod = method;
-			this.uri = uri;
-			this.requestPath = requestPath;
-			this.httpHeaders = httpHeaders;
+			super(uri, contextPath, headers);
+			this.methodValue = methodValue;
+			this.cookies = cookies;
+			this.remoteAddress = remoteAddress;
+			this.body = body;
+			this.originalRequest = originalRequest;
+		}
+
+
+		@Override
+		public String getMethodValue() {
+			return this.methodValue;
 		}
 
 		@Override
-		public HttpMethod getMethod() {
-			return (this.httpMethod != null ? this.httpMethod : super.getMethod());
+		protected MultiValueMap<String, HttpCookie> initCookies() {
+			return this.cookies;
+		}
+
+		@Nullable
+		@Override
+		public InetSocketAddress getRemoteAddress() {
+			return this.remoteAddress;
 		}
 
 		@Override
-		public URI getURI() {
-			return (this.uri != null ? this.uri : super.getURI());
+		public Flux<DataBuffer> getBody() {
+			return this.body;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
-		public RequestPath getPath() {
-			return (this.requestPath != null ? this.requestPath : super.getPath());
-		}
-
-		@Override
-		public HttpHeaders getHeaders() {
-			return (this.httpHeaders != null ? this.httpHeaders : super.getHeaders());
+		public <T> T getNativeRequest() {
+			return (T) this.originalRequest;
 		}
 	}
 

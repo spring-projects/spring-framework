@@ -321,12 +321,12 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	private RuntimeBeanReference registerRequestHandler(Element element, RuntimeBeanReference subProtoHandler,
-			ParserContext context, @Nullable Object source) {
+			ParserContext cxt, @Nullable Object source) {
 
 		RootBeanDefinition beanDef;
 
 		RuntimeBeanReference sockJsService = WebSocketNamespaceUtils.registerSockJsService(
-				element, SCHEDULER_BEAN_NAME, context, source);
+				element, SCHEDULER_BEAN_NAME, cxt, source);
 
 		if (sockJsService != null) {
 			ConstructorArgumentValues cavs = new ConstructorArgumentValues();
@@ -335,22 +335,22 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			beanDef = new RootBeanDefinition(SockJsHttpRequestHandler.class, cavs, null);
 
 			// Register alias for backwards compatibility with 4.1
-			context.getRegistry().registerAlias(SCHEDULER_BEAN_NAME, SOCKJS_SCHEDULER_BEAN_NAME);
+			cxt.getRegistry().registerAlias(SCHEDULER_BEAN_NAME, SOCKJS_SCHEDULER_BEAN_NAME);
 		}
 		else {
-			RuntimeBeanReference handshakeHandler = WebSocketNamespaceUtils.registerHandshakeHandler(element, context, source);
-			Element interceptorsElement = DomUtils.getChildElementByTagName(element, "handshake-interceptors");
-			ManagedList<? super Object> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context);
-			String allowedOriginsAttribute = element.getAttribute("allowed-origins");
-			List<String> allowedOrigins = Arrays.asList(StringUtils.tokenizeToStringArray(allowedOriginsAttribute, ","));
-			interceptors.add(new OriginHandshakeInterceptor(allowedOrigins));
+			RuntimeBeanReference handler = WebSocketNamespaceUtils.registerHandshakeHandler(element, cxt, source);
+			Element interceptElem = DomUtils.getChildElementByTagName(element, "handshake-interceptors");
+			ManagedList<? super Object> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptElem, cxt);
+			String allowedOrigins = element.getAttribute("allowed-origins");
+			List<String> origins = Arrays.asList(StringUtils.tokenizeToStringArray(allowedOrigins, ","));
+			interceptors.add(new OriginHandshakeInterceptor(origins));
 			ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 			cavs.addIndexedArgumentValue(0, subProtoHandler);
-			cavs.addIndexedArgumentValue(1, handshakeHandler);
+			cavs.addIndexedArgumentValue(1, handler);
 			beanDef = new RootBeanDefinition(WebSocketHttpRequestHandler.class, cavs, null);
 			beanDef.getPropertyValues().add("handshakeInterceptors", interceptors);
 		}
-		return new RuntimeBeanReference(registerBeanDef(beanDef, context, source));
+		return new RuntimeBeanReference(registerBeanDef(beanDef, cxt, source));
 	}
 
 	private RootBeanDefinition registerMessageBroker(Element brokerElement,

@@ -16,6 +16,8 @@
 
 package org.springframework.http;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Enumeration of HTTP status codes.
  *
@@ -214,36 +216,42 @@ public enum HttpStatus {
 	CONFLICT(409, "Conflict"),
 	/**
 	 * {@code 410 Gone}.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.9">HTTP/1.1: Semantics and Content, section 6.5.9</a>
+	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.9">
+	 *     HTTP/1.1: Semantics and Content, section 6.5.9</a>
 	 */
 	GONE(410, "Gone"),
 	/**
 	 * {@code 411 Length Required}.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.10">HTTP/1.1: Semantics and Content, section 6.5.10</a>
+	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.10">
+	 *     HTTP/1.1: Semantics and Content, section 6.5.10</a>
 	 */
 	LENGTH_REQUIRED(411, "Length Required"),
 	/**
 	 * {@code 412 Precondition failed}.
-	 * @see <a href="http://tools.ietf.org/html/rfc7232#section-4.2">HTTP/1.1: Conditional Requests, section 4.2</a>
+	 * @see <a href="http://tools.ietf.org/html/rfc7232#section-4.2">
+	 *     HTTP/1.1: Conditional Requests, section 4.2</a>
 	 */
 	PRECONDITION_FAILED(412, "Precondition Failed"),
 	/**
 	 * {@code 413 Payload Too Large}.
 	 * @since 4.1
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.11">HTTP/1.1: Semantics and Content, section 6.5.11</a>
+	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.11">
+	 *     HTTP/1.1: Semantics and Content, section 6.5.11</a>
 	 */
 	PAYLOAD_TOO_LARGE(413, "Payload Too Large"),
 	/**
 	 * {@code 413 Request Entity Too Large}.
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-10.4.14">HTTP/1.1, section 10.4.14</a>
-	 * @deprecated in favor of {@link #PAYLOAD_TOO_LARGE} which will be returned from {@code HttpStatus.valueOf(413)}
+	 * @deprecated in favor of {@link #PAYLOAD_TOO_LARGE} which will be
+	 * returned from {@code HttpStatus.valueOf(413)}
 	 */
 	@Deprecated
 	REQUEST_ENTITY_TOO_LARGE(413, "Request Entity Too Large"),
 	/**
 	 * {@code 414 URI Too Long}.
 	 * @since 4.1
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.12">HTTP/1.1: Semantics and Content, section 6.5.12</a>
+	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.12">
+	 *     HTTP/1.1: Semantics and Content, section 6.5.12</a>
 	 */
 	URI_TOO_LONG(414, "URI Too Long"),
 	/**
@@ -255,7 +263,8 @@ public enum HttpStatus {
 	REQUEST_URI_TOO_LONG(414, "Request-URI Too Long"),
 	/**
 	 * {@code 415 Unsupported Media Type}.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.13">HTTP/1.1: Semantics and Content, section 6.5.13</a>
+	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.13">
+	 *     HTTP/1.1: Semantics and Content, section 6.5.13</a>
 	 */
 	UNSUPPORTED_MEDIA_TYPE(415, "Unsupported Media Type"),
 	/**
@@ -265,7 +274,8 @@ public enum HttpStatus {
 	REQUESTED_RANGE_NOT_SATISFIABLE(416, "Requested range not satisfiable"),
 	/**
 	 * {@code 417 Expectation Failed}.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.14">HTTP/1.1: Semantics and Content, section 6.5.14</a>
+	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.14">
+	 *     HTTP/1.1: Semantics and Content, section 6.5.14</a>
 	 */
 	EXPECTATION_FAILED(417, "Expectation Failed"),
 	/**
@@ -274,17 +284,23 @@ public enum HttpStatus {
 	 */
 	I_AM_A_TEAPOT(418, "I'm a teapot"),
 	/**
-	 * @deprecated See <a href="http://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">WebDAV Draft Changes</a>
+	 * @deprecated See
+	 * <a href="http://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">
+	 *     WebDAV Draft Changes</a>
 	 */
 	@Deprecated
 	INSUFFICIENT_SPACE_ON_RESOURCE(419, "Insufficient Space On Resource"),
 	/**
-	 * @deprecated See <a href="http://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">WebDAV Draft Changes</a>
+	 * @deprecated See
+	 * <a href="http://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">
+	 *     WebDAV Draft Changes</a>
 	 */
 	@Deprecated
 	METHOD_FAILURE(420, "Method Failure"),
 	/**
-	 * @deprecated See <a href="http://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">WebDAV Draft Changes</a>
+	 * @deprecated
+	 * See <a href="http://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">
+	 *     WebDAV Draft Changes</a>
 	 */
 	@Deprecated
 	DESTINATION_LOCKED(421, "Destination Locked"),
@@ -466,6 +482,16 @@ public enum HttpStatus {
 	}
 
 	/**
+	 * Whether this status code is in the HTTP series
+	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR} or
+	 * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR}.
+	 * This is a shortcut for checking the value of {@link #series()}.
+	 */
+	public boolean isError() {
+		return is4xxClientError() || is5xxServerError();
+	}
+
+	/**
 	 * Returns the HTTP status series of this status code.
 	 * @see HttpStatus.Series
 	 */
@@ -489,12 +515,28 @@ public enum HttpStatus {
 	 * @throws IllegalArgumentException if this enum has no constant for the specified numeric value
 	 */
 	public static HttpStatus valueOf(int statusCode) {
+		HttpStatus status = resolve(statusCode);
+		if (status == null) {
+			throw new IllegalArgumentException("No matching constant for [" + statusCode + "]");
+		}
+		return status;
+	}
+
+
+	/**
+	 * Resolve the given status code to an {@code HttpStatus}, if possible.
+	 * @param statusCode the HTTP status code (potentially non-standard)
+	 * @return the corresponding {@code HttpStatus}, or {@code null} if not found
+	 * @since 5.0
+	 */
+	@Nullable
+	public static HttpStatus resolve(int statusCode) {
 		for (HttpStatus status : values()) {
 			if (status.value == statusCode) {
 				return status;
 			}
 		}
-		throw new IllegalArgumentException("No matching constant for [" + statusCode + "]");
+		return null;
 	}
 
 

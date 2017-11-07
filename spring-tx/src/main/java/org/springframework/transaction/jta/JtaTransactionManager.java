@@ -249,7 +249,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * Creates a JndiTemplate with the given environment settings.
 	 * @see #setJndiTemplate
 	 */
-	public void setJndiEnvironment(Properties jndiEnvironment) {
+	public void setJndiEnvironment(@Nullable Properties jndiEnvironment) {
 		this.jndiTemplate = new JndiTemplate(jndiEnvironment);
 	}
 
@@ -269,7 +269,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see #setUserTransactionName
 	 * @see #setAutodetectUserTransaction
 	 */
-	public void setUserTransaction(UserTransaction userTransaction) {
+	public void setUserTransaction(@Nullable UserTransaction userTransaction) {
 		this.userTransaction = userTransaction;
 	}
 
@@ -333,7 +333,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see #setTransactionManagerName
 	 * @see #setAutodetectTransactionManager
 	 */
-	public void setTransactionManager(TransactionManager transactionManager) {
+	public void setTransactionManager(@Nullable TransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
 	}
 
@@ -386,7 +386,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see #setTransactionSynchronizationRegistryName
 	 * @see #setAutodetectTransactionSynchronizationRegistry
 	 */
-	public void setTransactionSynchronizationRegistry(TransactionSynchronizationRegistry transactionSynchronizationRegistry) {
+	public void setTransactionSynchronizationRegistry(@Nullable TransactionSynchronizationRegistry transactionSynchronizationRegistry) {
 		this.transactionSynchronizationRegistry = transactionSynchronizationRegistry;
 	}
 

@@ -143,6 +143,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 	// SimpUserRegistry methods
 
 	@Override
+	@Nullable
 	public SimpUser getUser(String userName) {
 		return this.users.get(userName);
 	}
@@ -198,6 +199,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 
 		@Override
+		@Nullable
 		public SimpSession getSession(@Nullable String sessionId) {
 			return (sessionId != null ? this.userSessions.get(sessionId) : null);
 		}
@@ -218,17 +220,17 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 		@Override
 		public boolean equals(Object other) {
 			return (this == other ||
-					(other instanceof SimpUser && this.name.equals(((SimpUser) other).getName())));
+					(other instanceof SimpUser && getName().equals(((SimpUser) other).getName())));
 		}
 
 		@Override
 		public int hashCode() {
-			return this.name.hashCode();
+			return getName().hashCode();
 		}
 
 		@Override
 		public String toString() {
-			return "name=" + this.name + ", sessions=" + this.userSessions;
+			return "name=" + getName() + ", sessions=" + this.userSessions;
 		}
 	}
 
@@ -274,17 +276,17 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 		@Override
 		public boolean equals(Object other) {
 			return (this == other ||
-					(other instanceof SimpSubscription && this.id.equals(((SimpSubscription) other).getId())));
+					(other instanceof SimpSubscription && getId().equals(((SimpSubscription) other).getId())));
 		}
 
 		@Override
 		public int hashCode() {
-			return this.id.hashCode();
+			return getId().hashCode();
 		}
 
 		@Override
 		public String toString() {
-			return "id=" + this.id + ", subscriptions=" + this.subscriptions;
+			return "id=" + getId() + ", subscriptions=" + this.subscriptions;
 		}
 	}
 
@@ -330,13 +332,13 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 				return false;
 			}
 			SimpSubscription otherSubscription = (SimpSubscription) other;
-			return (this.id.equals(otherSubscription.getId()) &&
+			return (getId().equals(otherSubscription.getId()) &&
 					getSession().getId().equals(otherSubscription.getSession().getId()));
 		}
 
 		@Override
 		public int hashCode() {
-			return this.id.hashCode() * 31 + getSession().getId().hashCode();
+			return getId().hashCode() * 31 + getSession().getId().hashCode();
 		}
 
 		@Override

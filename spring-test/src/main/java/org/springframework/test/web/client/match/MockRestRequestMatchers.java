@@ -31,9 +31,10 @@ import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
-import static org.springframework.test.util.AssertionErrors.*;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 /**
  * Static factory methods for {@link RequestMatcher} classes. Typically used to
@@ -77,13 +78,27 @@ public abstract class MockRestRequestMatchers {
 	}
 
 	/**
-	 * Assert the request URI string.
+	 * Assert the request URI matches the given string.
 	 * @param expectedUri the expected URI
 	 * @return the request matcher
 	 */
 	public static RequestMatcher requestTo(final String expectedUri) {
 		Assert.notNull(expectedUri, "'uri' must not be null");
 		return request -> assertEquals("Request URI", expectedUri, request.getURI().toString());
+	}
+
+	/**
+	 * Variant of {@link #requestTo(URI)} that prepares the URI from a URI
+	 * template plus optional variables via {@link UriComponentsBuilder}
+	 * including encoding.
+	 * @param expectedUri the expected URI template
+	 * @param uriVars zero or more URI variables to populate the expected URI
+	 * @return the request matcher
+	 */
+	public static RequestMatcher requestToUriTemplate(final String expectedUri, final Object... uriVars) {
+		Assert.notNull(expectedUri, "'uri' must not be null");
+		URI uri = UriComponentsBuilder.fromUriString(expectedUri).buildAndExpand(uriVars).encode().toUri();
+		return requestTo(uri);
 	}
 
 	/**

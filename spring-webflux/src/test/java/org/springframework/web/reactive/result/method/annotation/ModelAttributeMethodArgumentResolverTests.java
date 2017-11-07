@@ -32,6 +32,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -301,16 +302,17 @@ public class ModelAttributeMethodArgumentResolverTests {
 		assertTrue(map.get(bindingResultKey) instanceof BindingResult);
 	}
 
+	// TODO: SPR-15871, SPR-15542
+
 
 	private ModelAttributeMethodArgumentResolver createResolver() {
 		return new ModelAttributeMethodArgumentResolver(new ReactiveAdapterRegistry(), false);
 	}
 
 	private ServerWebExchange postForm(String formData) throws URISyntaxException {
-		return MockServerHttpRequest.post("/")
+		return MockServerWebExchange.from(MockServerHttpRequest.post("/")
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-				.body(formData)
-				.toExchange();
+				.body(formData));
 	}
 
 

@@ -714,6 +714,7 @@ class ConfigurationClassParser {
 		}
 
 		@Override
+		@Nullable
 		public AnnotationMetadata getImportingClassFor(String importedClass) {
 			List<AnnotationMetadata> list = this.imports.get(importedClass);
 			return (!CollectionUtils.isEmpty(list) ? list.get(list.size() - 1) : null);

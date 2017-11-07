@@ -26,13 +26,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Integration tests with {@code @RequestMapping} handler methods.
@@ -56,27 +56,19 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 
 
 	@Test
-	public void handleWithParam() throws Exception {
-		String expected = "Hello George!";
-		assertEquals(expected, performGet("/param?name=George", new HttpHeaders(), String.class).getBody());
-	}
-
-	@Test // SPR-15140
-	public void handleWithEncodedParam() throws Exception {
-		String expected = "Hello  ++\u00e0!";
-		assertEquals(expected, performGet("/param?name=%20%2B+%C3%A0", new HttpHeaders(), String.class).getBody());
+	public void httpHead() throws Exception {
+		String url = "http://localhost:" + this.port + "/text";
+		HttpHeaders headers = getRestTemplate().headForHeaders(url);
+		String contentType = headers.getFirst("Content-Type");
+		assertNotNull(contentType);
+		assertEquals("text/html;charset=utf-8", contentType.toLowerCase());
+		assertEquals(3, headers.getContentLength());
 	}
 
 	@Test
-	public void longStreamResult() throws Exception {
+	public void stream() throws Exception {
 		String[] expected = {"0", "1", "2", "3", "4"};
-		assertArrayEquals(expected, performGet("/long-stream-result", new HttpHeaders(), String[].class).getBody());
-	}
-
-	@Test
-	public void objectStreamResultWithAllMediaType() throws Exception {
-		String expected = "[{\"name\":\"bar\"}]";
-		assertEquals(expected, performGet("/object-stream-result", MediaType.ALL, String.class).getBody());
+		assertArrayEquals(expected, performGet("/stream", new HttpHeaders(), String[].class).getBody());
 	}
 
 
@@ -87,41 +79,17 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 
 
 	@RestController
+	@SuppressWarnings("unused")
 	private static class TestRestController {
 
-		@GetMapping("/param")
-		public Publisher<String> handleWithParam(@RequestParam String name) {
-			return Flux.just("Hello ", name, "!");
+		@GetMapping("/text")
+		public String text() {
+			return "Foo";
 		}
 
-		@GetMapping("/long-stream-result")
-		public Publisher<Long> longStreamResponseBody() {
-			return Flux.interval(Duration.ofMillis(100)).take(5);
-		}
-
-		@GetMapping("/object-stream-result")
-		public Publisher<Foo> objectStreamResponseBody() {
-			return Flux.just(new Foo("bar"));
-		}
-	}
-
-
-	private static class Foo {
-
-		private String name;
-
-		public Foo(String name) {
-			this.name = name;
-		}
-
-		@SuppressWarnings("unused")
-		public String getName() {
-			return name;
-		}
-
-		@SuppressWarnings("unused")
-		public void setName(String name) {
-			this.name = name;
+		@GetMapping("/stream")
+		public Publisher<Long> stream() {
+			return Flux.interval(Duration.ofMillis(50)).take(5);
 		}
 	}
 

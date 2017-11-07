@@ -23,7 +23,7 @@ import java.util.Locale;
 import org.junit.Test;
 
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 
 import static java.util.Locale.*;
@@ -62,34 +62,26 @@ public class AcceptHeaderLocaleContextResolverTests {
 		this.resolver.setSupportedLocales(Arrays.asList(US, JAPAN));
 		this.resolver.setDefaultLocale(JAPAN);
 
-		MockServerWebExchange exchange = new MockServerWebExchange(MockServerHttpRequest
-				.get("/")
-				.acceptLanguageAsLocales(KOREA)
-				.build());
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").acceptLanguageAsLocales(KOREA).build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		assertEquals(JAPAN, this.resolver.resolveLocaleContext(exchange).getLocale());
 	}
 
 	@Test
 	public void defaultLocale() throws Exception {
 		this.resolver.setDefaultLocale(JAPANESE);
-		MockServerWebExchange exchange = new MockServerWebExchange(MockServerHttpRequest
-				.get("/")
-				.build());
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		assertEquals(JAPANESE, this.resolver.resolveLocaleContext(exchange).getLocale());
 
-		exchange = new MockServerWebExchange(MockServerHttpRequest
-				.get("/")
-				.acceptLanguageAsLocales(US)
-				.build());
+		request = MockServerHttpRequest.get("/").acceptLanguageAsLocales(US).build();
+		exchange = MockServerWebExchange.from(request);
 		assertEquals(US, this.resolver.resolveLocaleContext(exchange).getLocale());
 	}
 
 
 	private ServerWebExchange exchange(Locale... locales) {
-		return new MockServerWebExchange(MockServerHttpRequest
-				.get("")
-				.acceptLanguageAsLocales(locales)
-				.build());
+		return MockServerWebExchange.from(MockServerHttpRequest.get("").acceptLanguageAsLocales(locales));
 	}
 
 }

@@ -92,6 +92,7 @@ public class EmptyTargetSource implements TargetSource, Serializable {
 	 * Always returns the specified target Class, or {@code null} if none.
 	 */
 	@Override
+	@Nullable
 	public Class<?> getTargetClass() {
 		return this.targetClass;
 	}
@@ -108,6 +109,7 @@ public class EmptyTargetSource implements TargetSource, Serializable {
 	 * Always returns {@code null}.
 	 */
 	@Override
+	@Nullable
 	public Object getTarget() {
 		return null;
 	}

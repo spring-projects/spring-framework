@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.springframework.core.DecoratingProxy;
 import org.springframework.core.OrderComparator;
+import org.springframework.lang.Nullable;
 
 /**
  * {@code AnnotationAwareOrderComparator} is an extension of
@@ -58,6 +59,8 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 	 * elements, in addition to the {@link org.springframework.core.Ordered}
 	 * check in the superclass.
 	 */
+	@Override
+	@Nullable
 	protected Integer findOrder(Object obj) {
 		// Check for regular Ordered interface
 		Integer order = super.findOrder(obj);
@@ -97,6 +100,8 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 	 * annotation: typically, selecting one object over another in case of
 	 * multiple matches but only one object to be returned.
 	 */
+	@Override
+	@Nullable
 	public Integer getPriority(Object obj) {
 		if (obj instanceof Class) {
 			return OrderUtils.getPriority((Class<?>) obj);

@@ -49,6 +49,7 @@ public class ErrorsMethodArgumentResolver implements HandlerMethodArgumentResolv
 	}
 
 	@Override
+	@Nullable
 	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 

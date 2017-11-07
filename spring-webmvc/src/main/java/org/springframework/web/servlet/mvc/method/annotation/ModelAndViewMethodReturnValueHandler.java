@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,24 +44,24 @@ import org.springframework.web.servlet.View;
  */
 public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
+	@Nullable
 	private String[] redirectPatterns;
 
 
 	/**
-	 * Configure one more simple patterns (as described in
-	 * {@link org.springframework.util.PatternMatchUtils#simpleMatch}) to use in order to recognize
-	 * custom redirect prefixes in addition to "redirect:".
-	 * <p>Note that simply configuring this property will not make a custom
-	 * redirect prefix work. There must be a custom View that recognizes the
-	 * prefix as well.
+	 * Configure one more simple patterns (as described in {@link PatternMatchUtils#simpleMatch})
+	 * to use in order to recognize custom redirect prefixes in addition to "redirect:".
+	 * <p>Note that simply configuring this property will not make a custom redirect prefix work.
+	 * There must be a custom {@link View} that recognizes the prefix as well.
 	 * @since 4.1
 	 */
-	public void setRedirectPatterns(String... redirectPatterns) {
+	public void setRedirectPatterns(@Nullable String... redirectPatterns) {
 		this.redirectPatterns = redirectPatterns;
 	}
 
 	/**
-	 * The configured redirect patterns, if any.
+	 * Return the configured redirect patterns, if any.
+	 * @since 4.1
 	 */
 	@Nullable
 	public String[] getRedirectPatterns() {

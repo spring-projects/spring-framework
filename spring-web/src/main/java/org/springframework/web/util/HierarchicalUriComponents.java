@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -105,6 +106,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	// Component getters
 
 	@Override
+	@Nullable
 	public String getSchemeSpecificPart() {
 		return null;
 	}
@@ -134,6 +136,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 	@Override
+	@NonNull
 	public String getPath() {
 		return this.path.getPath();
 	}
@@ -144,6 +147,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 	@Override
+	@Nullable
 	public String getQuery() {
 		if (!this.queryParams.isEmpty()) {
 			StringBuilder queryBuilder = new StringBuilder();

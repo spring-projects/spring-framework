@@ -91,6 +91,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	}
 
 	@Override
+	@Nullable
 	public ClassLoader getAspectClassLoader() {
 		return (this.beanFactory instanceof ConfigurableBeanFactory ?
 				((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader() :
@@ -103,6 +104,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	}
 
 	@Override
+	@Nullable
 	public Object getAspectCreationMutex() {
 		if (this.beanFactory.isSingleton(this.name)) {
 			// Rely on singleton semantics provided by the factory -> no local lock.

@@ -433,7 +433,9 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		@Nullable
 		public Subscription getSubscription(String subscriptionId) {
-			for (Map.Entry<String, Set<DefaultSubscriptionRegistry.Subscription>> destinationEntry : this.destinationLookup.entrySet()) {
+			for (Map.Entry<String, Set<DefaultSubscriptionRegistry.Subscription>> destinationEntry :
+					this.destinationLookup.entrySet()) {
+
 				Set<Subscription> subs = destinationEntry.getValue();
 				if (subs != null) {
 					for (Subscription sub : subs) {

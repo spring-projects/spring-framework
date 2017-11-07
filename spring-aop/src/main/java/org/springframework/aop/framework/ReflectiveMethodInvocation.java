@@ -262,6 +262,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	}
 
 	@Override
+	@Nullable
 	public Object getUserAttribute(String key) {
 		return (this.userAttributes != null ? this.userAttributes.get(key) : null);
 	}

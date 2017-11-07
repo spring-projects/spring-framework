@@ -67,7 +67,8 @@ import org.springframework.web.util.UriTemplateHandler;
  * @deprecated as of Spring 5.0, in favor of {@link org.springframework.web.reactive.function.client.WebClient}
  */
 @Deprecated
-public class AsyncRestTemplate extends org.springframework.http.client.support.InterceptingAsyncHttpAccessor implements AsyncRestOperations {
+public class AsyncRestTemplate extends org.springframework.http.client.support.InterceptingAsyncHttpAccessor
+		implements AsyncRestOperations {
 
 	private final RestTemplate syncTemplate;
 
@@ -114,8 +115,8 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 	 * @param asyncRequestFactory the asynchronous request factory
 	 * @param syncRequestFactory the synchronous request factory
 	 */
-	public AsyncRestTemplate(
-			org.springframework.http.client.AsyncClientHttpRequestFactory asyncRequestFactory, ClientHttpRequestFactory syncRequestFactory) {
+	public AsyncRestTemplate(org.springframework.http.client.AsyncClientHttpRequestFactory asyncRequestFactory,
+			ClientHttpRequestFactory syncRequestFactory) {
 
 		this(asyncRequestFactory, new RestTemplate(syncRequestFactory));
 	}
@@ -126,7 +127,9 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 	 * @param requestFactory the asynchronous request factory to use
 	 * @param restTemplate the synchronous template to use
 	 */
-	public AsyncRestTemplate(org.springframework.http.client.AsyncClientHttpRequestFactory requestFactory, RestTemplate restTemplate) {
+	public AsyncRestTemplate(org.springframework.http.client.AsyncClientHttpRequestFactory requestFactory,
+			RestTemplate restTemplate) {
+
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
 		this.syncTemplate = restTemplate;
 		setAsyncRequestFactory(requestFactory);
@@ -236,7 +239,9 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 	}
 
 	@Override
-	public <T> ListenableFuture<ResponseEntity<T>> getForEntity(URI url, Class<T> responseType) throws RestClientException {
+	public <T> ListenableFuture<ResponseEntity<T>> getForEntity(URI url, Class<T> responseType)
+			throws RestClientException {
+
 		AsyncRequestCallback requestCallback = acceptHeaderRequestCallback(responseType);
 		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
 		return execute(url, HttpMethod.GET, requestCallback, responseExtractor);
@@ -246,13 +251,17 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 	// HEAD
 
 	@Override
-	public ListenableFuture<HttpHeaders> headForHeaders(String url, Object... uriVariables) throws RestClientException {
+	public ListenableFuture<HttpHeaders> headForHeaders(String url, Object... uriVariables)
+			throws RestClientException {
+
 		ResponseExtractor<HttpHeaders> headersExtractor = headersExtractor();
 		return execute(url, HttpMethod.HEAD, null, headersExtractor, uriVariables);
 	}
 
 	@Override
-	public ListenableFuture<HttpHeaders> headForHeaders(String url, Map<String, ?> uriVariables) throws RestClientException {
+	public ListenableFuture<HttpHeaders> headForHeaders(String url, Map<String, ?> uriVariables)
+			throws RestClientException {
+
 		ResponseExtractor<HttpHeaders> headersExtractor = headersExtractor();
 		return execute(url, HttpMethod.HEAD, null, headersExtractor, uriVariables);
 	}
@@ -287,7 +296,9 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 	}
 
 	@Override
-	public ListenableFuture<URI> postForLocation(URI url, @Nullable HttpEntity<?> request) throws RestClientException {
+	public ListenableFuture<URI> postForLocation(URI url, @Nullable HttpEntity<?> request)
+			throws RestClientException {
+
 		AsyncRequestCallback callback = httpEntityCallback(request);
 		ResponseExtractor<HttpHeaders> extractor = headersExtractor();
 		ListenableFuture<HttpHeaders> future = execute(url, HttpMethod.POST, callback, extractor);
@@ -297,6 +308,7 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 	private static ListenableFuture<URI> adaptToLocationHeader(ListenableFuture<HttpHeaders> future) {
 		return new ListenableFutureAdapter<URI, HttpHeaders>(future) {
 			@Override
+			@Nullable
 			protected URI adapt(HttpHeaders headers) throws ExecutionException {
 				return headers.getLocation();
 			}
@@ -322,8 +334,8 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 	}
 
 	@Override
-	public <T> ListenableFuture<ResponseEntity<T>> postForEntity(URI url, @Nullable HttpEntity<?> request, Class<T> responseType)
-			throws RestClientException {
+	public <T> ListenableFuture<ResponseEntity<T>> postForEntity(URI url,
+			@Nullable HttpEntity<?> request, Class<T> responseType) throws RestClientException {
 
 		AsyncRequestCallback requestCallback = httpEntityCallback(request, responseType);
 		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
@@ -334,15 +346,19 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 	// PUT
 
 	@Override
-	public ListenableFuture<?> put(String url, @Nullable HttpEntity<?> request, Object... uriVariables) throws RestClientException {
+	public ListenableFuture<?> put(String url, @Nullable HttpEntity<?> request, Object... uriVars)
+			throws RestClientException {
+
 		AsyncRequestCallback requestCallback = httpEntityCallback(request);
-		return execute(url, HttpMethod.PUT, requestCallback, null, uriVariables);
+		return execute(url, HttpMethod.PUT, requestCallback, null, uriVars);
 	}
 
 	@Override
-	public ListenableFuture<?> put(String url, @Nullable HttpEntity<?> request, Map<String, ?> uriVariables) throws RestClientException {
+	public ListenableFuture<?> put(String url, @Nullable HttpEntity<?> request, Map<String, ?> uriVars)
+			throws RestClientException {
+
 		AsyncRequestCallback requestCallback = httpEntityCallback(request);
-		return execute(url, HttpMethod.PUT, requestCallback, null, uriVariables);
+		return execute(url, HttpMethod.PUT, requestCallback, null, uriVars);
 	}
 
 	@Override
@@ -373,14 +389,18 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 	// OPTIONS
 
 	@Override
-	public ListenableFuture<Set<HttpMethod>> optionsForAllow(String url, Object... uriVars) throws RestClientException {
+	public ListenableFuture<Set<HttpMethod>> optionsForAllow(String url, Object... uriVars)
+			throws RestClientException {
+
 		ResponseExtractor<HttpHeaders> extractor = headersExtractor();
 		ListenableFuture<HttpHeaders> future = execute(url, HttpMethod.OPTIONS, null, extractor, uriVars);
 		return adaptToAllowHeader(future);
 	}
 
 	@Override
-	public ListenableFuture<Set<HttpMethod>> optionsForAllow(String url, Map<String, ?> uriVars) throws RestClientException {
+	public ListenableFuture<Set<HttpMethod>> optionsForAllow(String url, Map<String, ?> uriVars)
+			throws RestClientException {
+
 		ResponseExtractor<HttpHeaders> extractor = headersExtractor();
 		ListenableFuture<HttpHeaders> future = execute(url, HttpMethod.OPTIONS, null, extractor, uriVars);
 		return adaptToAllowHeader(future);
@@ -405,8 +425,9 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 	// exchange
 
 	@Override
-	public <T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method, @Nullable HttpEntity<?> requestEntity,
-			Class<T> responseType, Object... uriVariables) throws RestClientException {
+	public <T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method,
+			@Nullable HttpEntity<?> requestEntity, Class<T> responseType, Object... uriVariables)
+			throws RestClientException {
 
 		AsyncRequestCallback requestCallback = httpEntityCallback(requestEntity, responseType);
 		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
@@ -414,8 +435,9 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 	}
 
 	@Override
-	public <T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method, @Nullable HttpEntity<?> requestEntity,
-			Class<T> responseType, Map<String, ?> uriVariables) throws RestClientException {
+	public <T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method,
+			@Nullable HttpEntity<?> requestEntity, Class<T> responseType, Map<String, ?> uriVariables)
+			throws RestClientException {
 
 		AsyncRequestCallback requestCallback = httpEntityCallback(requestEntity, responseType);
 		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
@@ -423,8 +445,8 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 	}
 
 	@Override
-	public <T> ListenableFuture<ResponseEntity<T>> exchange(URI url, HttpMethod method, @Nullable HttpEntity<?> requestEntity,
-			Class<T> responseType) throws RestClientException {
+	public <T> ListenableFuture<ResponseEntity<T>> exchange(URI url, HttpMethod method,
+			@Nullable HttpEntity<?> requestEntity, Class<T> responseType) throws RestClientException {
 
 		AsyncRequestCallback requestCallback = httpEntityCallback(requestEntity, responseType);
 		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
@@ -432,8 +454,9 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 	}
 
 	@Override
-	public <T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method, @Nullable HttpEntity<?> requestEntity,
-			ParameterizedTypeReference<T> responseType, Object... uriVariables) throws RestClientException {
+	public <T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method,
+			@Nullable HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType,
+			Object... uriVariables) throws RestClientException {
 
 		Type type = responseType.getType();
 		AsyncRequestCallback requestCallback = httpEntityCallback(requestEntity, type);
@@ -442,8 +465,9 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 	}
 
 	@Override
-	public <T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method, @Nullable HttpEntity<?> requestEntity,
-			ParameterizedTypeReference<T> responseType, Map<String, ?> uriVariables) throws RestClientException {
+	public <T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method,
+			@Nullable HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType,
+			Map<String, ?> uriVariables) throws RestClientException {
 
 		Type type = responseType.getType();
 		AsyncRequestCallback requestCallback = httpEntityCallback(requestEntity, type);
@@ -452,8 +476,9 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 	}
 
 	@Override
-	public <T> ListenableFuture<ResponseEntity<T>> exchange(URI url, HttpMethod method, @Nullable HttpEntity<?> requestEntity,
-			ParameterizedTypeReference<T> responseType) throws RestClientException {
+	public <T> ListenableFuture<ResponseEntity<T>> exchange(URI url, HttpMethod method,
+			@Nullable HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType)
+			throws RestClientException {
 
 		Type type = responseType.getType();
 		AsyncRequestCallback requestCallback = httpEntityCallback(requestEntity, type);
@@ -473,15 +498,17 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 	}
 
 	@Override
-	public <T> ListenableFuture<T> execute(String url, HttpMethod method, @Nullable AsyncRequestCallback requestCallback,
-			@Nullable ResponseExtractor<T> responseExtractor, Map<String, ?> uriVariables) throws RestClientException {
+	public <T> ListenableFuture<T> execute(String url, HttpMethod method,
+			@Nullable AsyncRequestCallback requestCallback, @Nullable ResponseExtractor<T> responseExtractor,
+			Map<String, ?> uriVariables) throws RestClientException {
 
 		URI expanded = getUriTemplateHandler().expand(url, uriVariables);
 		return doExecute(expanded, method, requestCallback, responseExtractor);
 	}
 
 	@Override
-	public <T> ListenableFuture<T> execute(URI url, HttpMethod method, @Nullable AsyncRequestCallback requestCallback,
+	public <T> ListenableFuture<T> execute(URI url, HttpMethod method,
+			@Nullable AsyncRequestCallback requestCallback,
 			@Nullable ResponseExtractor<T> responseExtractor) throws RestClientException {
 
 		return doExecute(url, method, requestCallback, responseExtractor);
@@ -499,7 +526,8 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 	 * be {@code null})
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
-	protected <T> ListenableFuture<T> doExecute(URI url, HttpMethod method, @Nullable AsyncRequestCallback requestCallback,
+	protected <T> ListenableFuture<T> doExecute(URI url, HttpMethod method,
+			@Nullable AsyncRequestCallback requestCallback,
 			@Nullable ResponseExtractor<T> responseExtractor) throws RestClientException {
 
 		Assert.notNull(url, "'url' must not be null");
@@ -522,7 +550,7 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 		if (logger.isDebugEnabled()) {
 			try {
 				logger.debug("Async " + method.name() + " request for \"" + url + "\" resulted in " +
-						response.getStatusCode() + " (" + response.getStatusText() + ")");
+						response.getRawStatusCode() + " (" + response.getStatusText() + ")");
 			}
 			catch (IOException ex) {
 				// ignore
@@ -534,7 +562,7 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 		if (logger.isWarnEnabled()) {
 			try {
 				logger.warn("Async " + method.name() + " request for \"" + url + "\" resulted in " +
-						response.getStatusCode() + " (" + response.getStatusText() + "); invoking error handler");
+						response.getRawStatusCode() + " (" + response.getStatusText() + "); invoking error handler");
 			}
 			catch (IOException ex) {
 				// ignore
@@ -607,6 +635,7 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 		}
 
 		@Override
+		@Nullable
 		protected final T adapt(ClientHttpResponse response) throws ExecutionException {
 			try {
 				if (!getErrorHandler().hasError(response)) {
@@ -649,7 +678,9 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 		}
 
 		@Override
-		public void doWithRequest(final org.springframework.http.client.AsyncClientHttpRequest request) throws IOException {
+		public void doWithRequest(final org.springframework.http.client.AsyncClientHttpRequest request)
+				throws IOException {
+
 			this.adaptee.doWithRequest(new ClientHttpRequest() {
 				@Override
 				public ClientHttpResponse execute() throws IOException {
@@ -660,6 +691,7 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 					return request.getBody();
 				}
 				@Override
+				@Nullable
 				public HttpMethod getMethod() {
 					return request.getMethod();
 				}

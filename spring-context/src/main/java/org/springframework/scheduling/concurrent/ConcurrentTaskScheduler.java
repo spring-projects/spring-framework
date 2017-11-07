@@ -169,6 +169,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 
 
 	@Override
+	@Nullable
 	public ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
 		try {
 			if (this.enterpriseConcurrentScheduler) {

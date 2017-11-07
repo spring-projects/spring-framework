@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 package org.springframework.expression.spel;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -34,12 +36,11 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import static org.junit.Assert.*;
 
-///CLOVER:OFF
-
 /**
  * Tests accessing of properties.
  *
  * @author Andy Clement
+ * @author Juergen Hoeller
  */
 public class PropertyAccessTests extends AbstractExpressionTests {
 
@@ -167,6 +168,20 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		assertEquals(value, "java.lang.String");
 	}
 
+	@Test
+	public void shouldAlwaysUsePropertyAccessorFromEvaluationContext() {
+		SpelExpressionParser parser = new SpelExpressionParser();
+		Expression expression = parser.parseExpression("name");
+
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		context.addPropertyAccessor(new ConfigurablePropertyAccessor(Collections.singletonMap("name", "Ollie")));
+		assertEquals("Ollie", expression.getValue(context));
+
+		context = new StandardEvaluationContext();
+		context.addPropertyAccessor(new ConfigurablePropertyAccessor(Collections.singletonMap("name", "Jens")));
+		assertEquals("Jens", expression.getValue(context));
+	}
+
 
 	// This can resolve the property 'flibbles' on any String (very useful...)
 	private static class StringyPropertyAccessor implements PropertyAccessor {
@@ -213,6 +228,40 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 			catch (EvaluationException ex) {
 				throw new AccessException("Cannot set flibbles to an object of type '" + newValue.getClass() + "'");
 			}
+		}
+	}
+
+
+	private static class ConfigurablePropertyAccessor implements PropertyAccessor {
+
+		private final Map<String, Object> values;
+
+		public ConfigurablePropertyAccessor(Map<String, Object> values) {
+			this.values = values;
+		}
+
+		@Override
+		public Class<?>[] getSpecificTargetClasses() {
+			return null;
+		}
+
+		@Override
+		public boolean canRead(EvaluationContext context, Object target, String name) {
+			return true;
+		}
+
+		@Override
+		public TypedValue read(EvaluationContext context, Object target, String name) {
+			return new TypedValue(this.values.get(name));
+		}
+
+		@Override
+		public boolean canWrite(EvaluationContext context, Object target, String name) {
+			return false;
+		}
+
+		@Override
+		public void write(EvaluationContext context, Object target, String name, Object newValue) {
 		}
 	}
 

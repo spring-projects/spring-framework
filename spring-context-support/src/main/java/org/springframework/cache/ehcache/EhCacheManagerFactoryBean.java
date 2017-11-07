@@ -169,6 +169,7 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 
 
 	@Override
+	@Nullable
 	public CacheManager getObject() {
 		return this.cacheManager;
 	}

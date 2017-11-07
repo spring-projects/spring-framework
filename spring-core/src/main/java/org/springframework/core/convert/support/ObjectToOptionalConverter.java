@@ -16,7 +16,9 @@
 
 package org.springframework.core.convert.support;
 
-import java.util.Collections;
+import java.lang.reflect.Array;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -46,7 +48,11 @@ final class ObjectToOptionalConverter implements ConditionalGenericConverter {
 
 	@Override
 	public Set<ConvertiblePair> getConvertibleTypes() {
-		return Collections.singleton(new ConvertiblePair(Object.class, Optional.class));
+		Set<ConvertiblePair> convertibleTypes = new LinkedHashSet<>(4);
+		convertibleTypes.add(new ConvertiblePair(Collection.class, Optional.class));
+		convertibleTypes.add(new ConvertiblePair(Object[].class, Optional.class));
+		convertibleTypes.add(new ConvertiblePair(Object.class, Optional.class));
+		return convertibleTypes;
 	}
 
 	@Override
@@ -60,7 +66,6 @@ final class ObjectToOptionalConverter implements ConditionalGenericConverter {
 	}
 
 	@Override
-	@Nullable
 	public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return Optional.empty();
@@ -70,7 +75,11 @@ final class ObjectToOptionalConverter implements ConditionalGenericConverter {
 		}
 		else if (targetType.getResolvableType().hasGenerics()) {
 			Object target = this.conversionService.convert(source, sourceType, new GenericTypeDescriptor(targetType));
-			return Optional.ofNullable(target);
+			if (target == null || (target.getClass().isArray() && Array.getLength(target) == 0) ||
+						(target instanceof Collection && ((Collection<?>) target).isEmpty())) {
+				return Optional.empty();
+			}
+			return Optional.of(target);
 		}
 		else {
 			return Optional.of(source);

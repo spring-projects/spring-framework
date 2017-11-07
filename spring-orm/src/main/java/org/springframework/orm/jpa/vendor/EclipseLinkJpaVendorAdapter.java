@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public class EclipseLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		if (getDatabasePlatform() != null) {
 			jpaProperties.put(PersistenceUnitProperties.TARGET_DATABASE, getDatabasePlatform());
 		}
-		else if (getDatabase() != null) {
+		else {
 			String targetDatabase = determineTargetDatabaseName(getDatabase());
 			if (targetDatabase != null) {
 				jpaProperties.put(PersistenceUnitProperties.TARGET_DATABASE, targetDatabase);

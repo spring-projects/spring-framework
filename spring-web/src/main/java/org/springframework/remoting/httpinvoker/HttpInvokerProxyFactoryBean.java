@@ -18,6 +18,7 @@ package org.springframework.remoting.httpinvoker;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -55,6 +56,7 @@ import org.springframework.util.Assert;
  */
 public class HttpInvokerProxyFactoryBean extends HttpInvokerClientInterceptor implements FactoryBean<Object> {
 
+	@Nullable
 	private Object serviceProxy;
 
 
@@ -68,6 +70,7 @@ public class HttpInvokerProxyFactoryBean extends HttpInvokerClientInterceptor im
 
 
 	@Override
+	@Nullable
 	public Object getObject() {
 		return this.serviceProxy;
 	}

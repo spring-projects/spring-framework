@@ -110,8 +110,7 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 			this.registration.setTransportHandlerOverrides(handler);
 		}
 		if (!this.allowedOrigins.isEmpty()) {
-			this.registration.setAllowedOrigins(
-					this.allowedOrigins.toArray(new String[this.allowedOrigins.size()]));
+			this.registration.setAllowedOrigins(this.allowedOrigins.toArray(new String[this.allowedOrigins.size()]));
 		}
 		return this.registration;
 	}

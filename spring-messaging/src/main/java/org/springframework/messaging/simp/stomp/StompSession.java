@@ -148,6 +148,7 @@ public interface StompSession {
 
 		/**
 		 * Return the headers used on the SUBSCRIBE frame.
+		 * @since 5.0
 		 */
 		StompHeaders getSubscriptionHeaders();
 
@@ -160,6 +161,7 @@ public interface StompSession {
 		 * Alternative to {@link #unsubscribe()} with additional custom headers
 		 * to send to the server.
 		 * <p><strong>Note:</strong> There is no need to set the subscription id.
+		 * @since 5.0
 		 */
 		void unsubscribe(@Nullable StompHeaders stompHeaders);
 	}

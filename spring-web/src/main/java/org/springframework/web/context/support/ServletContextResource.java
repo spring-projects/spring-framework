@@ -28,6 +28,7 @@ import javax.servlet.ServletContext;
 import org.springframework.core.io.AbstractFileResolvingResource;
 import org.springframework.core.io.ContextResource;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
@@ -212,6 +213,7 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 	 * @see org.springframework.util.StringUtils#getFilename(String)
 	 */
 	@Override
+	@Nullable
 	public String getFilename() {
 		return StringUtils.getFilename(this.path);
 	}

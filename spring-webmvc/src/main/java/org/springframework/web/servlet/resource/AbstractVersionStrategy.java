@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -60,6 +61,7 @@ public abstract class AbstractVersionStrategy implements VersionStrategy {
 
 
 	@Override
+	@Nullable
 	public String extractVersion(String requestPath) {
 		return this.pathStrategy.extractVersion(requestPath);
 	}
@@ -89,6 +91,7 @@ public abstract class AbstractVersionStrategy implements VersionStrategy {
 		}
 
 		@Override
+		@Nullable
 		public String extractVersion(String requestPath) {
 			return (requestPath.startsWith(this.prefix) ? this.prefix : null);
 		}
@@ -120,6 +123,7 @@ public abstract class AbstractVersionStrategy implements VersionStrategy {
 		private static final Pattern pattern = Pattern.compile("-(\\S*)\\.");
 
 		@Override
+		@Nullable
 		public String extractVersion(String requestPath) {
 			Matcher matcher = pattern.matcher(requestPath);
 			if (matcher.find()) {

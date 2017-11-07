@@ -27,9 +27,13 @@ import org.springframework.lang.Nullable;
  */
 public class PathMatchConfigurer {
 
+	@Nullable
 	private Boolean trailingSlashMatch;
 
+
+	@Nullable
 	private Boolean caseSensitiveMatch;
+
 
 	/**
 	 * Whether to match to URLs irrespective of their case.

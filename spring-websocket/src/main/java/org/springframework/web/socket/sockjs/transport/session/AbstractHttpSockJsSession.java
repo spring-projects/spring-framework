@@ -107,16 +107,19 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	}
 
 	@Override
+	@Nullable
 	public Principal getPrincipal() {
 		return this.principal;
 	}
 
 	@Override
+	@Nullable
 	public InetSocketAddress getLocalAddress() {
 		return this.localAddress;
 	}
 
 	@Override
+	@Nullable
 	public InetSocketAddress getRemoteAddress() {
 		return this.remoteAddress;
 	}
@@ -127,13 +130,14 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	 * the selected protocol set through this setter.
 	 * @param protocol the sub-protocol to set
 	 */
-	public void setAcceptedProtocol(String protocol) {
+	public void setAcceptedProtocol(@Nullable String protocol) {
 		this.acceptedProtocol = protocol;
 	}
 
 	/**
 	 * Return the selected sub-protocol to use.
 	 */
+	@Nullable
 	public String getAcceptedProtocol() {
 		return this.acceptedProtocol;
 	}
@@ -291,7 +295,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		synchronized (this.responseLock) {
 			this.messageCache.add(message);
 			if (logger.isTraceEnabled()) {
-				logger.trace(this.messageCache.size() + " message(s) to flush in session " + this.getId());
+				logger.trace(this.messageCache.size() + " message(s) to flush in session " + getId());
 			}
 			if (isActive() && this.readyToSend) {
 				if (logger.isTraceEnabled()) {

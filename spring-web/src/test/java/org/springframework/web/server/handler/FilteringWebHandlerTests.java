@@ -28,6 +28,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
@@ -57,7 +58,7 @@ public class FilteringWebHandlerTests {
 		StubWebHandler targetHandler = new StubWebHandler();
 
 		new FilteringWebHandler(targetHandler, Arrays.asList(filter1, filter2, filter3))
-				.handle(MockServerHttpRequest.get("/").toExchange())
+				.handle(MockServerWebExchange.from(MockServerHttpRequest.get("/")))
 				.block(Duration.ZERO);
 
 		assertTrue(filter1.invoked());
@@ -72,7 +73,7 @@ public class FilteringWebHandlerTests {
 		StubWebHandler targetHandler = new StubWebHandler();
 
 		new FilteringWebHandler(targetHandler, Collections.emptyList())
-				.handle(MockServerHttpRequest.get("/").toExchange())
+				.handle(MockServerWebExchange.from(MockServerHttpRequest.get("/")))
 				.block(Duration.ZERO);
 
 		assertTrue(targetHandler.invoked());
@@ -87,7 +88,7 @@ public class FilteringWebHandlerTests {
 		StubWebHandler targetHandler = new StubWebHandler();
 
 		new FilteringWebHandler(targetHandler, Arrays.asList(filter1, filter2, filter3))
-				.handle(MockServerHttpRequest.get("/").toExchange())
+				.handle(MockServerWebExchange.from(MockServerHttpRequest.get("/")))
 				.block(Duration.ZERO);
 
 		assertTrue(filter1.invoked());
@@ -103,7 +104,7 @@ public class FilteringWebHandlerTests {
 		StubWebHandler targetHandler = new StubWebHandler();
 
 		new FilteringWebHandler(targetHandler, Collections.singletonList(filter))
-				.handle(MockServerHttpRequest.get("/").toExchange())
+				.handle(MockServerWebExchange.from(MockServerHttpRequest.get("/")))
 				.block(Duration.ofSeconds(5));
 
 		assertTrue(filter.invoked());

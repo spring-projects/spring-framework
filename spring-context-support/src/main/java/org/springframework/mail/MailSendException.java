@@ -123,6 +123,7 @@ public class MailSendException extends MailException {
 
 
 	@Override
+	@Nullable
 	public String getMessage() {
 		if (ObjectUtils.isEmpty(this.messageExceptions)) {
 			return super.getMessage();

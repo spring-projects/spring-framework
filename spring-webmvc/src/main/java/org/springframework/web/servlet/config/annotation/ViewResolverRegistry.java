@@ -55,6 +55,12 @@ import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
 public class ViewResolverRegistry {
 
 	@Nullable
+	private ContentNegotiationManager contentNegotiationManager;
+
+	@Nullable
+	private ApplicationContext applicationContext;
+
+	@Nullable
 	private ContentNegotiatingViewResolver contentNegotiatingResolver;
 
 	private final List<ViewResolver> viewResolvers = new ArrayList<>(4);
@@ -62,20 +68,18 @@ public class ViewResolverRegistry {
 	@Nullable
 	private Integer order;
 
-	@Nullable
-	private ContentNegotiationManager contentNegotiationManager;
 
-	@Nullable
-	private ApplicationContext applicationContext;
+	/**
+	 * Class constructor with {@link ContentNegotiationManager} and {@link ApplicationContext}.
+	 * @since 4.3.12
+	 */
+	public ViewResolverRegistry(
+			ContentNegotiationManager contentNegotiationManager, @Nullable ApplicationContext context) {
 
-
-	protected void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
 		this.contentNegotiationManager = contentNegotiationManager;
+		this.applicationContext = context;
 	}
 
-	protected void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
 
 	/**
 	 * Whether any view resolvers have been registered.
@@ -83,7 +87,6 @@ public class ViewResolverRegistry {
 	public boolean hasRegistrations() {
 		return (this.contentNegotiatingResolver != null || !this.viewResolvers.isEmpty());
 	}
-
 
 	/**
 	 * Enable use of a {@link ContentNegotiatingViewResolver} to front all other
@@ -305,6 +308,7 @@ public class ViewResolverRegistry {
 		}
 	}
 
+
 	private static class GroovyMarkupRegistration extends UrlBasedViewResolverRegistration {
 
 		public GroovyMarkupRegistration() {
@@ -312,6 +316,7 @@ public class ViewResolverRegistry {
 			getViewResolver().setSuffix(".tpl");
 		}
 	}
+
 
 	private static class ScriptRegistration extends UrlBasedViewResolverRegistration {
 

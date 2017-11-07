@@ -51,16 +51,19 @@ final class OpaqueUriComponents extends UriComponents {
 
 
 	@Override
+	@Nullable
 	public String getSchemeSpecificPart() {
 		return this.ssp;
 	}
 
 	@Override
+	@Nullable
 	public String getUserInfo() {
 		return null;
 	}
 
 	@Override
+	@Nullable
 	public String getHost() {
 		return null;
 	}
@@ -71,6 +74,7 @@ final class OpaqueUriComponents extends UriComponents {
 	}
 
 	@Override
+	@Nullable
 	public String getPath() {
 		return null;
 	}
@@ -81,6 +85,7 @@ final class OpaqueUriComponents extends UriComponents {
 	}
 
 	@Override
+	@Nullable
 	public String getQuery() {
 		return null;
 	}

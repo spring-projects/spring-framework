@@ -31,14 +31,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import kotlin.Metadata;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
 /**
  * Helper class that encapsulates the specification of a method parameter, i.e. a {@link Method}
@@ -58,10 +56,6 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.core.annotation.SynthesizingMethodParameter
  */
 public class MethodParameter {
-
-	private static final boolean kotlinPresent =
-			ClassUtils.isPresent("kotlin.Unit", MethodParameter.class.getClassLoader());
-
 
 	private final Executable executable;
 
@@ -188,7 +182,7 @@ public class MethodParameter {
 	 */
 	@Nullable
 	public Constructor<?> getConstructor() {
-		return (this.executable instanceof Constructor ? (Constructor) this.executable : null);
+		return (this.executable instanceof Constructor ? (Constructor<?>) this.executable : null);
 	}
 
 	/**
@@ -342,7 +336,7 @@ public class MethodParameter {
 	 */
 	public boolean isOptional() {
 		return (getParameterType() == Optional.class || hasNullableAnnotation() ||
-				(kotlinPresent && KotlinDelegate.isNullable(this)));
+				(KotlinDetector.isKotlinType(getContainingClass()) && KotlinDelegate.isOptional(this)));
 	}
 
 	/**
@@ -592,7 +586,7 @@ public class MethodParameter {
 				parameterNames = discoverer.getParameterNames((Method) this.executable);
 			}
 			else if (this.executable instanceof Constructor) {
-				parameterNames = discoverer.getParameterNames((Constructor) this.executable);
+				parameterNames = discoverer.getParameterNames((Constructor<?>) this.executable);
 			}
 			if (parameterNames != null) {
 				this.parameterName = parameterNames[this.parameterIndex];
@@ -734,39 +728,38 @@ public class MethodParameter {
 	private static class KotlinDelegate {
 
 		/**
-		 * Check whether the specified {@link MethodParameter} represents a nullable Kotlin type or not.
+		 * Check whether the specified {@link MethodParameter} represents a nullable Kotlin type
+		 * or an optional parameter (with a default value in the Kotlin declaration).
 		 */
-		public static boolean isNullable(MethodParameter param) {
-			if (param.getContainingClass().isAnnotationPresent(Metadata.class)) {
-				Method method = param.getMethod();
-				Constructor<?> ctor = param.getConstructor();
-				int index = param.getParameterIndex();
-				if (method != null && index == -1) {
-					KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-					return (function != null && function.getReturnType().isMarkedNullable());
+		public static boolean isOptional(MethodParameter param) {
+			Method method = param.getMethod();
+			Constructor<?> ctor = param.getConstructor();
+			int index = param.getParameterIndex();
+			if (method != null && index == -1) {
+				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
+				return (function != null && function.getReturnType().isMarkedNullable());
+			}
+			else {
+				KFunction<?> function = null;
+				if (method != null) {
+					function = ReflectJvmMapping.getKotlinFunction(method);
 				}
-				else {
-					KFunction<?> function = null;
-					if (method != null) {
-						function = ReflectJvmMapping.getKotlinFunction(method);
-					}
-					else if (ctor != null) {
-						function = ReflectJvmMapping.getKotlinFunction(ctor);
-					}
-					if (function != null) {
-						List<KParameter> parameters = function.getParameters();
-						return parameters
-								.stream()
-								.filter(p -> KParameter.Kind.VALUE.equals(p.getKind()))
-								.collect(Collectors.toList())
-								.get(index)
-								.getType()
-								.isMarkedNullable();
-					}
+				else if (ctor != null) {
+					function = ReflectJvmMapping.getKotlinFunction(ctor);
+				}
+				if (function != null) {
+					List<KParameter> parameters = function.getParameters();
+					KParameter parameter = parameters
+							.stream()
+							.filter(p -> KParameter.Kind.VALUE.equals(p.getKind()))
+							.collect(Collectors.toList())
+							.get(index);
+					return (parameter.getType().isMarkedNullable() || parameter.isOptional());
 				}
 			}
 			return false;
 		}
+		
 	}
 
 }

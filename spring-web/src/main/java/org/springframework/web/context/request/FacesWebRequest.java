@@ -82,11 +82,13 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 
 
 	@Override
+	@Nullable
 	public String getHeader(String headerName) {
 		return getExternalContext().getRequestHeaderMap().get(headerName);
 	}
 
 	@Override
+	@Nullable
 	public String[] getHeaderValues(String headerName) {
 		return getExternalContext().getRequestHeaderValuesMap().get(headerName);
 	}
@@ -97,6 +99,7 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 	}
 
 	@Override
+	@Nullable
 	public String getParameter(String paramName) {
 		return getExternalContext().getRequestParameterMap().get(paramName);
 	}
@@ -107,6 +110,7 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 	}
 
 	@Override
+	@Nullable
 	public String[] getParameterValues(String paramName) {
 		return getExternalContext().getRequestParameterValuesMap().get(paramName);
 	}
@@ -127,11 +131,13 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 	}
 
 	@Override
+	@Nullable
 	public String getRemoteUser() {
 		return getFacesContext().getExternalContext().getRemoteUser();
 	}
 
 	@Override
+	@Nullable
 	public Principal getUserPrincipal() {
 		return getFacesContext().getExternalContext().getUserPrincipal();
 	}

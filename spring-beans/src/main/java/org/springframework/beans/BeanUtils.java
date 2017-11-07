@@ -27,13 +27,21 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
+import kotlin.jvm.JvmClassMappingKt;
+import kotlin.reflect.KFunction;
+import kotlin.reflect.KParameter;
+import kotlin.reflect.full.KClasses;
+import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -53,6 +61,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  */
 public abstract class BeanUtils {
 
@@ -103,7 +112,12 @@ public abstract class BeanUtils {
 			throw new BeanInstantiationException(clazz, "Specified class is an interface");
 		}
 		try {
-			return instantiateClass(clazz.getDeclaredConstructor());
+			Constructor<T> ctor = (KotlinDetector.isKotlinType(clazz) ?
+					KotlinDelegate.findPrimaryConstructor(clazz) : clazz.getDeclaredConstructor());
+			if (ctor == null) {
+				throw new BeanInstantiationException(clazz, "No default constructor found");
+			}
+			return instantiateClass(ctor);
 		}
 		catch (NoSuchMethodException ex) {
 			throw new BeanInstantiationException(clazz, "No default constructor found", ex);
@@ -132,9 +146,11 @@ public abstract class BeanUtils {
 	/**
 	 * Convenience method to instantiate a class using the given constructor.
 	 * <p>Note that this method tries to set the constructor accessible if given a
-	 * non-accessible (that is, non-public) constructor.
+	 * non-accessible (that is, non-public) constructor, and supports Kotlin classes
+	 * with optional parameters and default values.
 	 * @param ctor the constructor to instantiate
-	 * @param args the constructor arguments to apply
+	 * @param args the constructor arguments to apply (use {@code null} for an unspecified
+	 * parameter if needed for Kotlin classes with optional parameters and default values)
 	 * @return the new instance
 	 * @throws BeanInstantiationException if the bean cannot be instantiated
 	 * @see Constructor#newInstance
@@ -143,7 +159,8 @@ public abstract class BeanUtils {
 		Assert.notNull(ctor, "Constructor must not be null");
 		try {
 			ReflectionUtils.makeAccessible(ctor);
-			return ctor.newInstance(args);
+			return (KotlinDetector.isKotlinType(ctor.getDeclaringClass()) ?
+					KotlinDelegate.instantiateClass(ctor, args) : ctor.newInstance(args));
 		}
 		catch (InstantiationException ex) {
 			throw new BeanInstantiationException(ctor, "Is it an abstract class?", ex);
@@ -157,6 +174,28 @@ public abstract class BeanUtils {
 		catch (InvocationTargetException ex) {
 			throw new BeanInstantiationException(ctor, "Constructor threw exception", ex.getTargetException());
 		}
+	}
+
+	/**
+	 * Return the primary constructor of the provided class. For Kotlin classes, this
+	 * returns the Java constructor corresponding to the Kotlin primary constructor
+	 * (as defined in the Kotlin specification). Otherwise, in particular for non-Kotlin
+	 * classes, this simply returns {@code null}.
+	 * @param clazz the class to check
+	 * @since 5.0
+	 * @see <a href="http://kotlinlang.org/docs/reference/classes.html#constructors">Kotlin docs</a>
+	 */
+	@SuppressWarnings("unchecked")
+	@Nullable
+	public static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {
+		Assert.notNull(clazz, "Class must not be null");
+		if (KotlinDetector.isKotlinType(clazz)) {
+			Constructor<T> kotlinPrimaryConstructor = KotlinDelegate.findPrimaryConstructor(clazz);
+			if (kotlinPrimaryConstructor != null) {
+				return kotlinPrimaryConstructor;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -644,6 +683,61 @@ public abstract class BeanUtils {
 				}
 			}
 		}
+	}
+
+
+	/**
+	 * Inner class to avoid a hard dependency on Kotlin at runtime.
+	 */
+	private static class KotlinDelegate {
+
+		/**
+		 * Return the Java constructor corresponding to the Kotlin primary constructor if any.
+		 * @param clazz the {@link Class} of the Kotlin class
+		 * @see <a href="http://kotlinlang.org/docs/reference/classes.html#constructors">
+		 *     http://kotlinlang.org/docs/reference/classes.html#constructors</a>
+		 */
+		@Nullable
+		public static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {
+			try {
+				KFunction<T> primaryCtor = KClasses.getPrimaryConstructor(JvmClassMappingKt.getKotlinClass(clazz));
+				if (primaryCtor == null) {
+					return null;
+				}
+				Constructor<T> constructor = ReflectJvmMapping.getJavaConstructor(primaryCtor);
+				Assert.notNull(constructor,
+						() -> "Failed to find Java constructor for Kotlin primary constructor: " + clazz.getName());
+				return constructor;
+			}
+			catch (UnsupportedOperationException ex) {
+				return null;
+			}
+		}
+
+		/**
+		 * Instantiate a Kotlin class using the provided constructor.
+		 * @param ctor the constructor of the Kotlin class to instantiate
+		 * @param args the constructor arguments to apply (use null for unspecified parameter if needed)
+		 */
+		public static <T> T instantiateClass(Constructor<T> ctor, Object... args)
+				throws IllegalAccessException, InvocationTargetException, InstantiationException {
+
+			KFunction<T> kotlinConstructor = ReflectJvmMapping.getKotlinFunction(ctor);
+			if (kotlinConstructor == null) {
+				return ctor.newInstance(args);
+			}
+			List<KParameter> parameters = kotlinConstructor.getParameters();
+			Map<KParameter, Object> argParameters = new HashMap<>(parameters.size());
+			Assert.isTrue(args.length <= parameters.size(),
+					"Number of provided arguments should be less of equals than number of constructor parameters");
+			for (int i = 0 ; i < args.length ; i++) {
+				if (!(parameters.get(i).isOptional() && args[i] == null)) {
+					argParameters.put(parameters.get(i), args[i]);
+				}
+			}
+			return kotlinConstructor.callBy(argParameters);
+		}
+
 	}
 
 }

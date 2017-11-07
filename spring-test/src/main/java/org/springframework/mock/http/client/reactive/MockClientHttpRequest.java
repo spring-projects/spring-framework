@@ -17,6 +17,7 @@
 package org.springframework.mock.http.client.reactive;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
@@ -26,6 +27,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.AbstractClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpRequest;
@@ -114,6 +116,8 @@ public class MockClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	protected void applyCookies() {
+		getCookies().values().stream().flatMap(Collection::stream)
+				.forEach(cookie -> getHeaders().add(HttpHeaders.COOKIE, cookie.toString()));
 	}
 
 	@Override

@@ -17,12 +17,11 @@
 package org.springframework.web.multipart.support;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,9 +30,11 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import javax.mail.internet.MimeUtility;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.FileCopyUtils;
@@ -53,13 +54,6 @@ import org.springframework.web.multipart.MultipartFile;
  * @since 3.1
  */
 public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpServletRequest {
-
-	private static final String CONTENT_DISPOSITION = "content-disposition";
-
-	private static final String FILENAME_KEY = "filename=";
-
-	private static final String FILENAME_WITH_CHARSET_KEY = "filename*=";
-
 
 	@Nullable
 	private Set<String> multipartParameterNames;
@@ -82,7 +76,9 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 	 * first access of multipart files or parameters
 	 * @throws MultipartException if an immediate parsing attempt failed
 	 */
-	public StandardMultipartHttpServletRequest(HttpServletRequest request, boolean lazyParsing) throws MultipartException {
+	public StandardMultipartHttpServletRequest(HttpServletRequest request,
+			boolean lazyParsing) throws MultipartException {
+
 		super(request);
 		if (!lazyParsing) {
 			parseRequest(request);
@@ -96,12 +92,13 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 			this.multipartParameterNames = new LinkedHashSet<>(parts.size());
 			MultiValueMap<String, MultipartFile> files = new LinkedMultiValueMap<>(parts.size());
 			for (Part part : parts) {
-				String disposition = part.getHeader(CONTENT_DISPOSITION);
-				String filename = extractFilename(disposition);
-				if (filename == null) {
-					filename = extractFilenameWithCharset(disposition);
-				}
+				String headerValue = part.getHeader(HttpHeaders.CONTENT_DISPOSITION);
+				ContentDisposition disposition = ContentDisposition.parse(headerValue);
+				String filename = disposition.getFilename();
 				if (filename != null) {
+					if (filename.startsWith("=?") && filename.endsWith("?=")) {
+						filename = MimeDelegate.decode(filename);
+					}
 					files.add(part.getName(), new StandardMultipartFile(part, filename));
 				}
 				else {
@@ -122,62 +119,6 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 		}
 		throw new MultipartException("Failed to parse multipart servlet request", ex);
 	}
-
-	@Nullable
-	private String extractFilename(String contentDisposition, String key) {
-		int startIndex = contentDisposition.indexOf(key);
-		if (startIndex == -1) {
-			return null;
-		}
-		String filename = contentDisposition.substring(startIndex + key.length());
-		if (filename.startsWith("\"")) {
-			int endIndex = filename.indexOf("\"", 1);
-			if (endIndex != -1) {
-				return filename.substring(1, endIndex);
-			}
-		}
-		else {
-			int endIndex = filename.indexOf(";");
-			if (endIndex != -1) {
-				return filename.substring(0, endIndex);
-			}
-		}
-		return filename;
-	}
-
-	@Nullable
-	private String extractFilename(String contentDisposition) {
-		return extractFilename(contentDisposition, FILENAME_KEY);
-	}
-
-	@Nullable
-	private String extractFilenameWithCharset(String contentDisposition) {
-		String filename = extractFilename(contentDisposition, FILENAME_WITH_CHARSET_KEY);
-		if (filename == null) {
-			return null;
-		}
-		int index = filename.indexOf("'");
-		if (index != -1) {
-			Charset charset = null;
-			try {
-				charset = Charset.forName(filename.substring(0, index));
-			}
-			catch (IllegalArgumentException ex) {
-				// ignore
-			}
-			filename = filename.substring(index + 1);
-			// Skip language information..
-			index = filename.indexOf("'");
-			if (index != -1) {
-				filename = filename.substring(index + 1);
-			}
-			if (charset != null) {
-				filename = new String(filename.getBytes(StandardCharsets.US_ASCII), charset);
-			}
-		}
-		return filename;
-	}
-
 
 	@Override
 	protected void initializeMultipart() {
@@ -317,7 +258,23 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 				// At least we offloaded the file from memory storage; it'll get deleted
 				// from the temp dir eventually in any case. And for our user's purposes,
 				// we can manually copy it to the requested location as a fallback.
-				FileCopyUtils.copy(this.part.getInputStream(), new FileOutputStream(dest));
+				FileCopyUtils.copy(this.part.getInputStream(), Files.newOutputStream(dest.toPath()));
+			}
+		}
+	}
+
+
+	/**
+	 * Inner class to avoid a hard dependency on the JavaMail API.
+	 */
+	private static class MimeDelegate {
+
+		public static String decode(String value) {
+			try {
+				return MimeUtility.decodeText(value);
+			}
+			catch (UnsupportedEncodingException ex) {
+				throw new IllegalStateException(ex);
 			}
 		}
 	}

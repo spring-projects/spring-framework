@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -107,6 +108,7 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 	 * or {@code null} otherwise.
 	 */
 	@Override
+	@Nullable
 	public HeadersRequestCondition getMatchingCondition(ServerWebExchange exchange) {
 		if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
 			return PRE_FLIGHT_MATCH;
@@ -157,12 +159,12 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 
 		@Override
 		protected boolean matchName(ServerWebExchange exchange) {
-			return exchange.getRequest().getHeaders().get(name) != null;
+			return (exchange.getRequest().getHeaders().get(this.name) != null);
 		}
 
 		@Override
 		protected boolean matchValue(ServerWebExchange exchange) {
-			return value.equals(exchange.getRequest().getHeaders().getFirst(name));
+			return (this.value != null && this.value.equals(exchange.getRequest().getHeaders().getFirst(this.name)));
 		}
 	}
 

@@ -20,8 +20,6 @@ import java.util.List;
 
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
 
 /**
  * Defines a common interface for configuring either client or server HTTP
@@ -73,15 +71,16 @@ public interface CodecConfigurer {
 		/**
 		 * Override the default Jackson JSON {@code Decoder}.
 		 * @param decoder the decoder instance to use
+		 * @see org.springframework.http.codec.json.Jackson2JsonDecoder
 		 */
-		void jackson2Decoder(Jackson2JsonDecoder decoder);
+		void jackson2JsonDecoder(Decoder<?> decoder);
 
 		/**
 		 * Override the default Jackson JSON {@code Encoder}.
 		 * @param encoder the encoder instance to use
+		 * @see org.springframework.http.codec.json.Jackson2JsonEncoder
 		 */
-		void jackson2Encoder(Jackson2JsonEncoder encoder);
-
+		void jackson2JsonEncoder(Encoder<?> encoder);
 	}
 
 
@@ -119,6 +118,6 @@ public interface CodecConfigurer {
 		 * @param writer the writer to add
 		 */
 		void writer(HttpMessageWriter<?> writer);
-
 	}
+
 }

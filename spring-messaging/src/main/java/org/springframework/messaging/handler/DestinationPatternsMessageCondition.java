@@ -39,7 +39,8 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class DestinationPatternsMessageCondition extends AbstractMessageCondition<DestinationPatternsMessageCondition> {
+public class DestinationPatternsMessageCondition
+		extends AbstractMessageCondition<DestinationPatternsMessageCondition> {
 
 	public static final String LOOKUP_DESTINATION_HEADER = "lookupDestination";
 
@@ -145,6 +146,7 @@ public class DestinationPatternsMessageCondition extends AbstractMessageConditio
 	 * or {@code null} either if a destination can not be extracted or there is no match
 	 */
 	@Override
+	@Nullable
 	public DestinationPatternsMessageCondition getMatchingCondition(Message<?> message) {
 		String destination = (String) message.getHeaders().get(LOOKUP_DESTINATION_HEADER);
 		if (destination == null) {

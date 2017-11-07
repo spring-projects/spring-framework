@@ -25,8 +25,9 @@ import reactor.core.publisher.Mono;
 import rx.RxReactiveStreams;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
-import org.springframework.http.server.reactive.RxNettyServerHttpResponse;
+import org.springframework.http.server.reactive.AbstractServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -45,8 +46,8 @@ public class RxNettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	@Override
 	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, @Nullable String subProtocol) {
-		RxNettyServerHttpResponse response = (RxNettyServerHttpResponse) exchange.getResponse();
-		HttpServerResponse<?> rxNettyResponse = response.getRxNettyResponse();
+		ServerHttpResponse response = exchange.getResponse();
+		HttpServerResponse<?> rxNettyResponse = ((AbstractServerHttpResponse) response).getNativeResponse();
 
 		HandshakeInfo info = getHandshakeInfo(exchange, subProtocol);
 		NettyDataBufferFactory factory = (NettyDataBufferFactory) response.bufferFactory();

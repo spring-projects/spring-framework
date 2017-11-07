@@ -31,7 +31,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.util.MultiValueMap;
@@ -55,23 +57,28 @@ import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
 
 /**
- * Main entry point for testing WebFlux server endpoints with an API similar to
- * that of {@link WebClient}, and actually delegating to a {@code WebClient}
- * instance, but with a focus on testing.
+ * Non-blocking, reactive client for testing web servers. It uses the reactive
+ * {@link WebClient} internally to perform requests and provides a fluent API
+ * to verify responses.
  *
- * <p>The {@code WebTestClient} has 3 setup options without a running server:
- * <ul>
- * <li>{@link #bindToController}
- * <li>{@link #bindToApplicationContext}
- * <li>{@link #bindToRouterFunction}
- * </ul>
- * <p>and 1 option for actual requests on a socket:
- * <ul>
- * <li>{@link #bindToServer()}
- * </ul>
+ * <p>{@code WebTestClient} can connect to any server over an HTTP connection.
+ * It can also bind directly to WebFlux applications using mock request and
+ * response objects, without the need for an HTTP server.
+ *
+ * <p>See the static {@code bindToXxx} entry points for creating an instance.
+ *
+ * <p><strong>Warning</strong>: {@code WebTestClient} is not usable yet in Kotlin due to a
+ * <a href="https://youtrack.jetbrains.com/issue/KT-5464">type inference issue</a> which is
+ * expected to be fixed as of Kotlin 1.3. You can watch
+ * <a href="https://jira.spring.io/browse/SPR-16057">SPR-16057</a> for up-to-date information.
+ * Meanwhile, the proposed alternative is to use directly {@link WebClient} with its Reactor
+ * and Spring Kotlin extensions to perform integration tests on an embedded WebFlux server.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @see StatusAssertions
+ * @see HeaderAssertions
+ * @see JsonPathAssertions
  */
 public interface WebTestClient {
 
@@ -89,43 +96,49 @@ public interface WebTestClient {
 	 * Prepare an HTTP GET request.
 	 * @return a spec for specifying the target URL
 	 */
-	UriSpec<RequestHeadersSpec<?>> get();
+	RequestHeadersUriSpec<?> get();
 
 	/**
 	 * Prepare an HTTP HEAD request.
 	 * @return a spec for specifying the target URL
 	 */
-	UriSpec<RequestHeadersSpec<?>> head();
+	RequestHeadersUriSpec<?> head();
 
 	/**
 	 * Prepare an HTTP POST request.
 	 * @return a spec for specifying the target URL
 	 */
-	UriSpec<RequestBodySpec> post();
+	RequestBodyUriSpec post();
 
 	/**
 	 * Prepare an HTTP PUT request.
 	 * @return a spec for specifying the target URL
 	 */
-	UriSpec<RequestBodySpec> put();
+	RequestBodyUriSpec put();
 
 	/**
 	 * Prepare an HTTP PATCH request.
 	 * @return a spec for specifying the target URL
 	 */
-	UriSpec<RequestBodySpec> patch();
+	RequestBodyUriSpec patch();
 
 	/**
 	 * Prepare an HTTP DELETE request.
 	 * @return a spec for specifying the target URL
 	 */
-	UriSpec<RequestHeadersSpec<?>> delete();
+	RequestHeadersUriSpec<?> delete();
 
 	/**
 	 * Prepare an HTTP OPTIONS request.
 	 * @return a spec for specifying the target URL
 	 */
-	UriSpec<RequestHeadersSpec<?>> options();
+	RequestHeadersUriSpec<?> options();
+
+	/**
+	 * Prepare a request for the specified {@code HttpMethod}.
+	 * @return a spec for specifying the target URL
+	 */
+	RequestBodyUriSpec method(HttpMethod method);
 
 
 	/**
@@ -133,56 +146,102 @@ public interface WebTestClient {
 	 */
 	Builder mutate();
 
-	// Static, factory methods
+	/**
+	 * Mutate the {@link WebTestClient}, apply the given configurer, and build
+	 * a new instance. Essentially a shortcut for:
+	 * <pre>
+	 * mutate().apply(configurer).build();
+	 * </pre>
+	 * @param configurer the configurer to apply
+	 * @return the mutated test client
+	 */
+	WebTestClient mutateWith(WebTestClientConfigurer configurer);
+
+
+	// Static factory methods
 
 	/**
-	 * Integration testing with a "mock" server targeting specific annotated,
-	 * WebFlux controllers. The default configuration is the same as for
-	 * {@link org.springframework.web.reactive.config.EnableWebFlux @EnableWebFlux}
-	 * but can also be further customized through the returned spec.
-	 * @param controllers the controllers to test
-	 * @return spec for setting up controller configuration
+	 * Use this server setup to test one `@Controller` at a time.
+	 * This option loads the default configuration of
+	 * {@link org.springframework.web.reactive.config.EnableWebFlux @EnableWebFlux}.
+	 * There are builder methods to customize the Java config. The resulting
+	 * WebFlux application will be tested without an HTTP server using a mock
+	 * request and response.
+	 * @param controllers one or more controller instances to tests
+	 * @return chained API to customize server and client config; use
+	 * {@link MockServerSpec#configureClient()} to transition to client config
 	 */
 	static ControllerSpec bindToController(Object... controllers) {
 		return new DefaultControllerSpec(controllers);
 	}
 
 	/**
-	 * Integration testing with a "mock" server with WebFlux infrastructure
-	 * detected from an {@link ApplicationContext} such as
-	 * {@code @EnableWebFlux} Java config and annotated controller Spring beans.
-	 * @param applicationContext the context
-	 * @return the {@link WebTestClient} builder
-	 * @see org.springframework.web.reactive.config.EnableWebFlux
-	 */
-	static MockServerSpec<?> bindToApplicationContext(ApplicationContext applicationContext) {
-		return new ApplicationContextSpec(applicationContext);
-	}
-
-	/**
-	 * Integration testing without a server targeting WebFlux functional endpoints.
+	 * Use this option to set up a server from a {@link RouterFunction}.
+	 * Internally the provided configuration is passed to
+	 * {@code RouterFunctions#toWebHandler}. The resulting WebFlux application
+	 * will be tested without an HTTP server using a mock request and response.
 	 * @param routerFunction the RouterFunction to test
-	 * @return the {@link WebTestClient} builder
+	 * @return chained API to customize server and client config; use
+	 * {@link MockServerSpec#configureClient()} to transition to client config
 	 */
 	static RouterFunctionSpec bindToRouterFunction(RouterFunction<?> routerFunction) {
 		return new DefaultRouterFunctionSpec(routerFunction);
 	}
 
 	/**
+	 * Use this option to setup a server from the Spring configuration of your
+	 * application, or some subset of it. Internally the provided configuration
+	 * is passed to {@code WebHttpHandlerBuilder} to set up the request
+	 * processing chain. The resulting WebFlux application will be tested
+	 * without an HTTP server using a mock request and response.
+	 * <p>Consider using the TestContext framework and
+	 * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration}
+	 * in order to efficently load and inject the Spring configuration into the
+	 * test class.
+	 * @param applicationContext the Spring context
+	 * @return chained API to customize server and client config; use
+	 * {@link MockServerSpec#configureClient()} to transition to client config
+	 */
+	static MockServerSpec<?> bindToApplicationContext(ApplicationContext applicationContext) {
+		return new ApplicationContextSpec(applicationContext);
+	}
+
+	/**
 	 * Integration testing with a "mock" server targeting the given WebHandler.
 	 * @param webHandler the handler to test
-	 * @return the {@link WebTestClient} builder
+	 * @return chained API to customize server and client config; use
+	 * {@link MockServerSpec#configureClient()} to transition to client config
 	 */
 	static MockServerSpec<?> bindToWebHandler(WebHandler webHandler) {
 		return new DefaultMockServerSpec(webHandler);
 	}
 
 	/**
-	 * Complete end-to-end integration tests with actual requests to a running server.
-	 * @return the {@link WebTestClient} builder
+	 * This server setup option allows you to connect to a running server via
+	 * Reactor Netty.
+	 * <p><pre class="code">
+	 * WebTestClient client = WebTestClient.bindToServer()
+	 *         .baseUrl("http://localhost:8080")
+	 *         .build();
+	 * </pre>
+	 * @return chained API to customize client config
 	 */
 	static Builder bindToServer() {
 		return new DefaultWebTestClientBuilder();
+	}
+
+	/**
+	 * A variant of {@link #bindToServer()} with a pre-configured connector.
+	 * <p><pre class="code">
+	 * WebTestClient client = WebTestClient.bindToServer()
+	 *         .baseUrl("http://localhost:8080")
+	 *         .build();
+	 * </pre>
+	 * @return chained API to customize client config
+	 * @since 5.0.2
+	 */
+	static Builder bindToServer(ClientHttpConnector connector) {
+		return new DefaultWebTestClientBuilder(connector);
 	}
 
 
@@ -221,8 +280,8 @@ public interface WebTestClient {
 		 * Shortcut to build the test client.
 		 */
 		WebTestClient build();
-
 	}
+
 
 	/**
 	 * Specification for customizing controller configuration equivalent to, and
@@ -284,8 +343,8 @@ public interface WebTestClient {
 		 * @see WebFluxConfigurer#configureViewResolvers
 		 */
 		ControllerSpec viewResolvers(Consumer<ViewResolverRegistry> consumer);
-
 	}
+
 
 	/**
 	 * Specification for customizing router function configuration.
@@ -296,8 +355,8 @@ public interface WebTestClient {
 		 * Configure handler strategies.
 		 */
 		RouterFunctionSpec handlerStrategies(HandlerStrategies handlerStrategies);
-
 	}
+
 
 	/**
 	 * Steps for customizing the {@link WebClient} used to test with
@@ -393,7 +452,6 @@ public interface WebTestClient {
 		 * Build the {@link WebTestClient} instance.
 		 */
 		WebTestClient build();
-
 	}
 
 
@@ -430,8 +488,8 @@ public interface WebTestClient {
 		 * @return spec to add headers or perform the exchange
 		 */
 		S uri(Function<UriBuilder, URI> uriFunction);
-
 	}
+
 
 	/**
 	 * Specification for adding request headers and performing an exchange.
@@ -530,8 +588,8 @@ public interface WebTestClient {
 		 * @return spec for decoding the response
 		 */
 		ResponseSpec exchange();
-
 	}
+
 
 	interface RequestBodySpec extends RequestHeadersSpec<RequestBodySpec> {
 		/**
@@ -573,70 +631,102 @@ public interface WebTestClient {
 		/**
 		 * Set the body of the request to the given synchronous {@code Object} and
 		 * perform the request.
+		 * <p>This method is a convenient shortcut for:
+		 * <pre class="code">
+		 * .body(BodyInserters.fromObject(object))
+		 * </pre>
+		 * <p>The body can be a
+		 * {@link org.springframework.util.MultiValueMap MultiValueMap} to create
+		 * a multipart request. The values in the {@code MultiValueMap} can be
+		 * any Object representing the body of the part, or an
+		 * {@link org.springframework.http.HttpEntity HttpEntity} representing a
+		 * part with body and headers. The {@code MultiValueMap} can be built
+		 * conveniently using
 		 * @param body the {@code Object} to write to the request
 		 * @return a {@code Mono} with the response
 		 */
 		RequestHeadersSpec<?> syncBody(Object body);
-
 	}
 
+
+	interface RequestHeadersUriSpec<S extends RequestHeadersSpec<S>> extends UriSpec<S>, RequestHeadersSpec<S> {
+	}
+
+
+	interface RequestBodyUriSpec extends RequestBodySpec, RequestHeadersUriSpec<RequestBodySpec> {
+	}
+
+
 	/**
-	 * Spec for declaring expectations on the response.
+	 * Chained API for applying assertions to a response.
 	 */
 	interface ResponseSpec {
 
 		/**
-		 * Declare expectations on the response status.
+		 * Assertions on the response status.
 		 */
 		StatusAssertions expectStatus();
 
 		/**
-		 * Declared expectations on the headers of the response.
+		 * Assertions on the headers of the response.
 		 */
 		HeaderAssertions expectHeader();
 
 		/**
-		 * Declare expectations on the response body decoded to {@code <B>}.
+		 * Consume and decode the response body to a single object of type
+		 * {@code <B>} and then apply assertions.
 		 * @param bodyType the expected body type
 		 */
 		<B> BodySpec<B, ?> expectBody(Class<B> bodyType);
 
 		/**
-		 * Variant of {@link #expectBody(Class)} for a body type with generics.
+		 * Alternative to {@link #expectBody(Class)} that accepts information
+		 * about a target type with generics.
 		 */
 		<B> BodySpec<B, ?> expectBody(ParameterizedTypeReference<B> bodyType);
 
 		/**
-		 * Declare expectations on the response body decoded to {@code List<E>}.
+		 * Consume and decode the response body to {@code List<E>} and then apply
+		 * List-specific assertions.
 		 * @param elementType the expected List element type
 		 */
 		<E> ListBodySpec<E> expectBodyList(Class<E> elementType);
 
 		/**
-		 * Variant of {@link #expectBodyList(Class)} for element types with generics.
+		 * Alternative to {@link #expectBodyList(Class)} that accepts information
+		 * about a target type with generics.
 		 */
 		<E> ListBodySpec<E> expectBodyList(ParameterizedTypeReference<E> elementType);
 
 		/**
-		 * Declare expectations on the response body content.
+		 * Consume and decode the response body to {@code byte[]} and then apply
+		 * assertions on the raw content (e.g. isEmpty, JSONPath, etc.)
 		 */
 		BodyContentSpec expectBody();
 
 		/**
-		 * Return the exchange result with the body decoded to {@code Flux<T>}.
-		 * Use this option for infinite streams and consume the stream with
-		 * the {@code StepVerifier} from the Reactor Add-Ons.
+		 * Exit the chained API and consume the response body externally. This
+		 * is useful for testing infinite streams (e.g. SSE) where you need to
+		 * to assert decoded objects as they come and then cancel at some point
+		 * when test objectives are met. Consider using {@code StepVerifier}
+		 * from {@literal "reactor-test"} to assert the {@code Flux<T>} stream
+		 * of decoded objects.
 		 *
-		 * @see <a href="https://github.com/reactor/reactor-addons">
-		 *     https://github.com/reactor/reactor-addons</a>
+		 * <p><strong>Note:</strong> Do not use this option for cases where there
+		 * is no content (e.g. 204, 4xx) or you're not interested in the content.
+		 * For such cases you can use {@code expectBody().isEmpty()} or
+		 * {@code expectBody(Void.class)} which ensures that resources are
+		 * released regardless of whether the response has content or not.
 		 */
 		<T> FluxExchangeResult<T> returnResult(Class<T> elementType);
 
 		/**
-		 * Variant of {@link #returnResult(Class)} for element types with generics.
+		 * Alternative to {@link #returnResult(Class)} that accepts information
+		 * about a target type with generics.
 		 */
 		<T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementType);
 	}
+
 
 	/**
 	 * Spec for expectations on the response body decoded to a single Object.
@@ -654,11 +744,12 @@ public interface WebTestClient {
 		<T extends S> T consumeWith(Consumer<EntityExchangeResult<B>> consumer);
 
 		/**
-		 * Return the exchange result with the decoded body.
+		 * Exit the chained API and return an {@code ExchangeResult} with the
+		 * decoded response content.
 		 */
 		EntityExchangeResult<B> returnResult();
-
 	}
+
 
 	/**
 	 * Spec for expectations on the response body decoded to a List.
@@ -684,8 +775,8 @@ public interface WebTestClient {
 		 */
 		@SuppressWarnings("unchecked")
 		ListBodySpec<E> doesNotContain(E... elements);
-
 	}
+
 
 	/**
 	 * Spec for expectations on the response body content.
@@ -726,10 +817,10 @@ public interface WebTestClient {
 		BodyContentSpec consumeWith(Consumer<EntityExchangeResult<byte[]>> consumer);
 
 		/**
-		 * Return the exchange result with body content as {@code byte[]}.
+		 * Exit the chained API and return an {@code ExchangeResult} with the
+		 * raw response content.
 		 */
 		EntityExchangeResult<byte[]> returnResult();
-
 	}
 
 }

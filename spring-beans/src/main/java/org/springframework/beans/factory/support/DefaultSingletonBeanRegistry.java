@@ -73,13 +73,6 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements SingletonBeanRegistry {
 
-	/**
-	 * Internal marker for a null singleton object:
-	 * used as marker value for concurrent Maps (which don't support null values).
-	 */
-	protected static final Object NULL_OBJECT = new Object();
-
-
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -125,7 +118,8 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 	@Override
 	public void registerSingleton(String beanName, Object singletonObject) throws IllegalStateException {
-		Assert.notNull(beanName, "'beanName' must not be null");
+		Assert.notNull(beanName, "Bean name must not be null");
+		Assert.notNull(singletonObject, "Singleton object must not be null");
 		synchronized (this.singletonObjects) {
 			Object oldObject = this.singletonObjects.get(beanName);
 			if (oldObject != null) {
@@ -142,9 +136,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @param beanName the name of the bean
 	 * @param singletonObject the singleton object
 	 */
-	protected void addSingleton(String beanName, @Nullable Object singletonObject) {
+	protected void addSingleton(String beanName, Object singletonObject) {
 		synchronized (this.singletonObjects) {
-			this.singletonObjects.put(beanName, (singletonObject != null ? singletonObject : NULL_OBJECT));
+			this.singletonObjects.put(beanName, singletonObject);
 			this.singletonFactories.remove(beanName);
 			this.earlySingletonObjects.remove(beanName);
 			this.registeredSingletons.add(beanName);
@@ -171,6 +165,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	@Override
+	@Nullable
 	public Object getSingleton(String beanName) {
 		return getSingleton(beanName, true);
 	}
@@ -199,7 +194,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				}
 			}
 		}
-		return (singletonObject != NULL_OBJECT ? singletonObject : null);
+		return singletonObject;
 	}
 
 	/**
@@ -210,9 +205,8 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * with, if necessary
 	 * @return the registered singleton object
 	 */
-	@Nullable
 	public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
-		Assert.notNull(beanName, "'beanName' must not be null");
+		Assert.notNull(beanName, "Bean name must not be null");
 		synchronized (this.singletonObjects) {
 			Object singletonObject = this.singletonObjects.get(beanName);
 			if (singletonObject == null) {
@@ -260,7 +254,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					addSingleton(beanName, singletonObject);
 				}
 			}
-			return (singletonObject != NULL_OBJECT ? singletonObject : null);
+			return singletonObject;
 		}
 	}
 

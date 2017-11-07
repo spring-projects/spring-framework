@@ -82,6 +82,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * is not transactional
 	 */
 	@Override
+	@Nullable
 	public TransactionAttribute getTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
 		if (method.getDeclaringClass() == Object.class) {
 			return null;

@@ -549,6 +549,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 
 
 	@Override
+	@Nullable
 	public SessionFactory getObject() {
 		return this.sessionFactory;
 	}

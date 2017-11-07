@@ -101,7 +101,7 @@ public abstract class AbstractFactoryBean<T>
 	}
 
 	@Override
-	public void setBeanFactory(BeanFactory beanFactory) {
+	public void setBeanFactory(@Nullable BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
@@ -206,6 +206,7 @@ public abstract class AbstractFactoryBean<T>
 	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
 	 */
 	@Override
+	@Nullable
 	public abstract Class<?> getObjectType();
 
 	/**

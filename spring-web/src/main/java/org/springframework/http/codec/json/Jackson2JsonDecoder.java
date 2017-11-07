@@ -16,35 +16,11 @@
 
 package org.springframework.http.codec.json;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.lang.annotation.Annotation;
 import java.util.List;
-import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
-import com.fasterxml.jackson.databind.util.TokenBuffer;
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
-import org.springframework.core.MethodParameter;
-import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.CodecException;
-import org.springframework.core.codec.DecodingException;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.codec.HttpMessageDecoder;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 /**
@@ -55,7 +31,7 @@ import org.springframework.util.MimeType;
  * @since 5.0
  * @see Jackson2JsonEncoder
  */
-public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMessageDecoder<Object> {
+public class Jackson2JsonDecoder extends AbstractJackson2Decoder {
 
 	public Jackson2JsonDecoder() {
 		super(Jackson2ObjectMapperBuilder.json().build());
@@ -65,96 +41,10 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 		super(mapper, mimeTypes);
 	}
 
-	@Override
-	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		JavaType javaType = objectMapper().getTypeFactory().constructType(elementType.getType());
-		// Skip String: CharSequenceDecoder + "*/*" comes after
-		return (!CharSequence.class.isAssignableFrom(elementType.resolve(Object.class)) &&
-				objectMapper().canDeserialize(javaType) && supportsMimeType(mimeType));
-	}
 
 	@Override
 	public List<MimeType> getDecodableMimeTypes() {
-		return JSON_MIME_TYPES;
-	}
-
-	@Override
-	public Flux<Object> decode(Publisher<DataBuffer> input, ResolvableType elementType,
-			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
-
-		Flux<TokenBuffer> tokens = tokenize(input, true);
-		return decodeInternal(tokens, elementType, mimeType, hints);
-	}
-
-	@Override
-	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
-			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
-
-		Flux<TokenBuffer> tokens = tokenize(input, false);
-		return decodeInternal(tokens, elementType, mimeType, hints).singleOrEmpty();
-	}
-
-	private Flux<TokenBuffer> tokenize(Publisher<DataBuffer> input, boolean tokenizeArrayElements) {
-		try {
-			JsonFactory factory = objectMapper().getFactory();
-			JsonParser nonBlockingParser = factory.createNonBlockingByteArrayParser();
-			Jackson2Tokenizer tokenizer = new Jackson2Tokenizer(nonBlockingParser,
-					tokenizeArrayElements);
-			return Flux.from(input)
-					.flatMap(tokenizer)
-					.doFinally(t -> tokenizer.endOfInput());
-		}
-		catch (IOException ex) {
-			return Flux.error(new UncheckedIOException(ex));
-		}
-
-	}
-
-	private Flux<Object> decodeInternal(Flux<TokenBuffer> tokens,
-			ResolvableType elementType, @Nullable MimeType mimeType,
-			@Nullable Map<String, Object> hints) {
-
-		Assert.notNull(tokens, "'tokens' must not be null");
-		Assert.notNull(elementType, "'elementType' must not be null");
-
-		MethodParameter param = getParameter(elementType);
-		Class<?> contextClass = (param != null ? param.getContainingClass() : null);
-		JavaType javaType = getJavaType(elementType.getType(), contextClass);
-		Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
-
-		ObjectReader reader = (jsonView != null ?
-				objectMapper().readerWithView(jsonView).forType(javaType) :
-				objectMapper().readerFor(javaType));
-
-		return tokens.map(tokenBuffer -> {
-			try {
-				return reader.readValue(tokenBuffer.asParser());
-			}
-			catch (InvalidDefinitionException ex) {
-				throw new CodecException("Type definition error: " + ex.getType(), ex);
-			}
-			catch (JsonProcessingException ex) {
-				throw new DecodingException("JSON decoding error: " + ex.getOriginalMessage(), ex);
-			}
-			catch (IOException ex) {
-				throw new DecodingException("I/O error while parsing input stream", ex);
-			}
-		});
-	}
-
-
-	// HttpMessageDecoder...
-
-	@Override
-	public Map<String, Object> getDecodeHints(ResolvableType actualType, ResolvableType elementType,
-			ServerHttpRequest request, ServerHttpResponse response) {
-
-		return getHints(actualType);
-	}
-
-	@Override
-	protected <A extends Annotation> A getAnnotation(MethodParameter parameter, Class<A> annotType) {
-		return parameter.getParameterAnnotation(annotType);
+		return getMimeTypes();
 	}
 
 }

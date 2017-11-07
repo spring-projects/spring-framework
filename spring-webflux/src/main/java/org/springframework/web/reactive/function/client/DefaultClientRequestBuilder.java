@@ -27,6 +27,7 @@ import java.util.function.Consumer;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -48,15 +49,15 @@ import org.springframework.web.reactive.function.BodyInserters;
  */
 class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
-	private final HttpMethod method;
-
-	private final URI url;
-
 	private final HttpHeaders headers = new HttpHeaders();
 
 	private final MultiValueMap<String, String> cookies = new LinkedMultiValueMap<>();
 
 	private final Map<String, Object> attributes = new LinkedHashMap<>();
+
+	private HttpMethod method;
+
+	private URI url;
 
 	private BodyInserter<?, ? super ClientHttpRequest> inserter = BodyInserters.empty();
 
@@ -66,6 +67,19 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 		this.url = url;
 	}
 
+	@Override
+	public ClientRequest.Builder method(HttpMethod method) {
+		Assert.notNull(method, "'method' must not be null");
+		this.method = method;
+		return this;
+	}
+
+	@Override
+	public ClientRequest.Builder url(URI url) {
+		Assert.notNull(url, "'url' must not be null");
+		this.url = url;
+		return this;
+	}
 
 	@Override
 	public ClientRequest.Builder header(String headerName, String... headerValues) {
@@ -103,6 +117,17 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 		Assert.notNull(elementClass, "'elementClass' must not be null");
 
 		this.inserter = BodyInserters.fromPublisher(publisher, elementClass);
+		return this;
+	}
+
+	@Override
+	public <S, P extends Publisher<S>> ClientRequest.Builder body(P publisher,
+			ParameterizedTypeReference<S> typeReference) {
+
+		Assert.notNull(publisher, "'publisher' must not be null");
+		Assert.notNull(typeReference, "'typeReference' must not be null");
+
+		this.inserter = BodyInserters.fromPublisher(publisher, typeReference);
 		return this;
 	}
 

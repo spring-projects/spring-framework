@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -54,6 +55,7 @@ public class ChainedPersistenceExceptionTranslator implements PersistenceExcepti
 
 
 	@Override
+	@Nullable
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		for (PersistenceExceptionTranslator pet : this.delegates) {
 			DataAccessException translatedDex = pet.translateExceptionIfPossible(ex);

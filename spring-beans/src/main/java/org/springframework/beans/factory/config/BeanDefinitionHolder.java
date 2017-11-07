@@ -113,6 +113,7 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 	 * @see BeanDefinition#getSource()
 	 */
 	@Override
+	@Nullable
 	public Object getSource() {
 		return this.beanDefinition.getSource();
 	}

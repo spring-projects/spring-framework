@@ -119,7 +119,7 @@ public class CciTemplate implements CciOperations {
 	/**
 	 * Set the CCI ConnectionFactory to obtain Connections from.
 	 */
-	public void setConnectionFactory(ConnectionFactory connectionFactory) {
+	public void setConnectionFactory(@Nullable ConnectionFactory connectionFactory) {
 		this.connectionFactory = connectionFactory;
 	}
 
@@ -141,7 +141,7 @@ public class CciTemplate implements CciOperations {
 	 * Set the CCI ConnectionSpec that this template instance is
 	 * supposed to obtain Connections for.
 	 */
-	public void setConnectionSpec(ConnectionSpec connectionSpec) {
+	public void setConnectionSpec(@Nullable ConnectionSpec connectionSpec) {
 		this.connectionSpec = connectionSpec;
 	}
 
@@ -165,7 +165,7 @@ public class CciTemplate implements CciOperations {
 	 * @see javax.resource.cci.Interaction#execute(javax.resource.cci.InteractionSpec, Record)
 	 * @see javax.resource.cci.Interaction#execute(javax.resource.cci.InteractionSpec, Record, Record)
 	 */
-	public void setOutputRecordCreator(RecordCreator creator) {
+	public void setOutputRecordCreator(@Nullable RecordCreator creator) {
 		this.outputRecordCreator = creator;
 	}
 
@@ -204,6 +204,7 @@ public class CciTemplate implements CciOperations {
 
 
 	@Override
+	@Nullable
 	public <T> T execute(ConnectionCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 		ConnectionFactory connectionFactory = obtainConnectionFactory();
@@ -226,6 +227,7 @@ public class CciTemplate implements CciOperations {
 	}
 
 	@Override
+	@Nullable
 	public <T> T execute(final InteractionCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 		return execute((ConnectionCallback<T>) (connection, connectionFactory) -> {
@@ -240,6 +242,7 @@ public class CciTemplate implements CciOperations {
 	}
 
 	@Override
+	@Nullable
 	public Record execute(InteractionSpec spec, Record inputRecord) throws DataAccessException {
 		return doExecute(spec, inputRecord, null, new SimpleRecordExtractor());
 	}

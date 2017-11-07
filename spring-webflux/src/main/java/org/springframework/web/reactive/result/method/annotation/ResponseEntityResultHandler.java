@@ -28,9 +28,12 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.server.reactive.AbstractServerHttpResponse;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerResult;
@@ -47,8 +50,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ResponseEntityResultHandler extends AbstractMessageWriterResultHandler
-		implements HandlerResultHandler {
+public class ResponseEntityResultHandler extends AbstractMessageWriterResultHandler implements HandlerResultHandler {
 
 	private static final List<HttpMethod> SAFE_METHODS = Arrays.asList(HttpMethod.GET, HttpMethod.HEAD);
 
@@ -80,7 +82,8 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 
 	@Override
 	public boolean supports(HandlerResult result) {
-		if (isSupportedType(result.getReturnType().getRawClass())) {
+		Class<?> valueType = resolveReturnValueType(result);
+		if (isSupportedType(valueType)) {
 			return true;
 		}
 		ReactiveAdapter adapter = getAdapter(result);
@@ -88,9 +91,20 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 				isSupportedType(result.getReturnType().getGeneric().resolve(Object.class));
 	}
 
+	@Nullable
+	private static Class<?> resolveReturnValueType(HandlerResult result) {
+		Class<?> valueType = result.getReturnType().getRawClass();
+		Object value = result.getReturnValue();
+		if ((valueType == null || valueType.equals(Object.class)) && value != null) {
+			valueType = value.getClass();
+		}
+		return valueType;
+	}
+
 	private boolean isSupportedType(@Nullable Class<?> clazz) {
-		return (clazz != null && HttpEntity.class.isAssignableFrom(clazz) &&
-				!RequestEntity.class.isAssignableFrom(clazz));
+		return (clazz != null && ((HttpEntity.class.isAssignableFrom(clazz) &&
+				!RequestEntity.class.isAssignableFrom(clazz)) ||
+				HttpHeaders.class.isAssignableFrom(clazz)));
 	}
 
 
@@ -112,12 +126,27 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 		}
 
 		return returnValueMono.flatMap(returnValue -> {
-			Assert.isInstanceOf(HttpEntity.class, returnValue, "HttpEntity expected");
-			HttpEntity<?> httpEntity = (HttpEntity<?>) returnValue;
+			HttpEntity<?> httpEntity;
+			if (returnValue instanceof HttpEntity) {
+				httpEntity = (HttpEntity<?>) returnValue;
+			}
+			else if (returnValue instanceof HttpHeaders) {
+				httpEntity = new ResponseEntity<Void>((HttpHeaders) returnValue, HttpStatus.OK);
+			}
+			else {
+				throw new IllegalArgumentException(
+						"HttpEntity or HttpHeaders expected but got: " + returnValue.getClass());
+			}
 
 			if (httpEntity instanceof ResponseEntity) {
 				ResponseEntity<?> responseEntity = (ResponseEntity<?>) httpEntity;
-				exchange.getResponse().setStatusCode(responseEntity.getStatusCode());
+				ServerHttpResponse response = exchange.getResponse();
+				if (response instanceof AbstractServerHttpResponse) {
+					((AbstractServerHttpResponse) response).setStatusCodeValue(responseEntity.getStatusCodeValue());
+				}
+				else {
+					response.setStatusCode(responseEntity.getStatusCode());
+				}
 			}
 
 			HttpHeaders entityHeaders = httpEntity.getHeaders();
@@ -128,7 +157,8 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 						.filter(entry -> !responseHeaders.containsKey(entry.getKey()))
 						.forEach(entry -> responseHeaders.put(entry.getKey(), entry.getValue()));
 			}
-			if(httpEntity.getBody() == null) {
+
+			if(httpEntity.getBody() == null || returnValue instanceof HttpHeaders) {
 				return exchange.getResponse().setComplete();
 			}
 

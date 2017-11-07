@@ -224,6 +224,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		}
 
 		@Override
+		@Nullable
 		protected WebSocketMessage read() throws IOException {
 			if (this.webSocketMessage != null) {
 				WebSocketMessage result = this.webSocketMessage;

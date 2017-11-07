@@ -43,7 +43,7 @@ import org.springframework.util.MultiValueMap;
  * @author Stephane Maldini
  * @since 5.0
  */
-public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
+class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpServerRequest<ByteBuf> request;
 
@@ -74,7 +74,8 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	private static URI createUrl(InetSocketAddress address, String requestUri) throws URISyntaxException {
-		URI baseUrl = new URI(null, null, address.getHostString(), address.getPort(), null, null, null);
+		// TODO: determine scheme
+		URI baseUrl = new URI("http", null, address.getHostString(), address.getPort(), null, null, null);
 		return new URI(baseUrl.toString() + requestUri);
 	}
 
@@ -86,10 +87,6 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 		return headers;
 	}
 
-
-	public HttpServerRequest<ByteBuf> getRxNettyRequest() {
-		return this.request;
-	}
 
 	@Override
 	public String getMethodValue() {
@@ -119,4 +116,9 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 		return Flux.from(RxReactiveStreams.toPublisher(content));
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getNativeRequest() {
+		return (T) this.request;
+	}
 }

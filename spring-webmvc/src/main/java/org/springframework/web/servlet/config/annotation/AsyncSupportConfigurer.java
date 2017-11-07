@@ -37,8 +37,10 @@ import org.springframework.web.context.request.async.WebAsyncTask;
  */
 public class AsyncSupportConfigurer {
 
+	@Nullable
 	private AsyncTaskExecutor taskExecutor;
 
+	@Nullable
 	private Long timeout;
 
 	private final List<CallableProcessingInterceptor> callableInterceptors = new ArrayList<>();
@@ -94,7 +96,9 @@ public class AsyncSupportConfigurer {
 	 * execution that starts when a controller returns a {@link DeferredResult}.
 	 * @param interceptors the interceptors to register
 	 */
-	public AsyncSupportConfigurer registerDeferredResultInterceptors(DeferredResultProcessingInterceptor... interceptors) {
+	public AsyncSupportConfigurer registerDeferredResultInterceptors(
+			DeferredResultProcessingInterceptor... interceptors) {
+
 		this.deferredResultInterceptors.addAll(Arrays.asList(interceptors));
 		return this;
 	}

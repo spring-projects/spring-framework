@@ -183,7 +183,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 * This implementation returns the underlying URL reference.
 	 */
 	@Override
-	public URL getURL() throws IOException {
+	public URL getURL() {
 		return this.url;
 	}
 

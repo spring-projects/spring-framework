@@ -30,7 +30,7 @@ import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.function.server.HandlerFunction;
 import org.springframework.web.reactive.function.server.RequestPredicates;
@@ -53,9 +53,8 @@ public class RouterFunctionMappingTests {
 
 	@Before
 	public void setUp() {
-		this.messageReaders =
-				Collections.singletonList(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
-		this.exchange = new MockServerWebExchange(MockServerHttpRequest.get("http://example.com/match").build());
+		this.messageReaders = Collections.singletonList(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
+		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://example.com/match"));
 		codecConfigurer = ServerCodecConfigurer.create();
 
 	}
@@ -66,7 +65,7 @@ public class RouterFunctionMappingTests {
 		RouterFunction<ServerResponse> routerFunction = request -> Mono.just(handlerFunction);
 
 		RouterFunctionMapping mapping = new RouterFunctionMapping(routerFunction);
-		mapping.setMessageCodecConfigurer(this.codecConfigurer);
+		mapping.setMessageReaders(this.codecConfigurer.getReaders());
 
 		Mono<Object> result = mapping.getHandler(this.exchange);
 
@@ -80,7 +79,7 @@ public class RouterFunctionMappingTests {
 	public void noMatch() {
 		RouterFunction<ServerResponse> routerFunction = request -> Mono.empty();
 		RouterFunctionMapping mapping = new RouterFunctionMapping(routerFunction);
-		mapping.setMessageCodecConfigurer(this.codecConfigurer);
+		mapping.setMessageReaders(this.codecConfigurer.getReaders());
 
 		Mono<Object> result = mapping.getHandler(this.exchange);
 

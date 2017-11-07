@@ -62,6 +62,7 @@ public class RedirectView extends AbstractUrlBasedView {
 
 	private boolean propagateQuery = false;
 
+	@Nullable
 	private String[] hosts;
 
 
@@ -112,15 +113,13 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * {@link HttpStatus#PERMANENT_REDIRECT}.
 	 */
 	public void setStatusCode(HttpStatus statusCode) {
-		Assert.notNull(statusCode, "HttpStatus must not be null");
-		Assert.isTrue(statusCode.is3xxRedirection(), "Must be a redirection (3xx status code)");
+		Assert.isTrue(statusCode.is3xxRedirection(), "Not a redirect status code");
 		this.statusCode = statusCode;
 	}
 
 	/**
 	 * Get the redirect status code to use.
 	 */
-	@Nullable
 	public HttpStatus getStatusCode() {
 		return this.statusCode;
 	}
@@ -149,13 +148,14 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * <p>If not set (the default) all redirect URLs are encoded.
 	 * @param hosts one or more application hosts
 	 */
-	public void setHosts(String... hosts) {
+	public void setHosts(@Nullable String... hosts) {
 		this.hosts = hosts;
 	}
 
 	/**
 	 * Return the configured application hosts.
 	 */
+	@Nullable
 	public String[] getHosts() {
 		return this.hosts;
 	}
@@ -164,9 +164,6 @@ public class RedirectView extends AbstractUrlBasedView {
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		super.afterPropertiesSet();
-		if (getStatusCode() == null) {
-			throw new IllegalArgumentException("Property 'statusCode' is required");
-		}
 	}
 
 
@@ -184,8 +181,8 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * Convert model to request parameters and redirect to the given URL.
 	 */
 	@Override
-	protected Mono<Void> renderInternal(Map<String, Object> model, MediaType contentType,
-			ServerWebExchange exchange) {
+	protected Mono<Void> renderInternal(
+			Map<String, Object> model, @Nullable MediaType contentType, ServerWebExchange exchange) {
 
 		String targetUrl = createTargetUrl(model, exchange);
 		return sendRedirect(targetUrl, exchange);
@@ -292,13 +289,10 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * @param exchange current exchange
 	 */
 	protected Mono<Void> sendRedirect(String targetUrl, ServerWebExchange exchange) {
+		String transformedUrl = (isRemoteHost(targetUrl) ? targetUrl : exchange.transformUrl(targetUrl));
 		ServerHttpResponse response = exchange.getResponse();
-		String encodedURL = (isRemoteHost(targetUrl) ? targetUrl : response.encodeUrl(targetUrl));
-		response.getHeaders().setLocation(URI.create(encodedURL));
-		HttpStatus status = getStatusCode();
-		if (status != null) {
-			response.setStatusCode(status);
-		}
+		response.getHeaders().setLocation(URI.create(transformedUrl));
+		response.setStatusCode(getStatusCode());
 		return Mono.empty();
 	}
 
