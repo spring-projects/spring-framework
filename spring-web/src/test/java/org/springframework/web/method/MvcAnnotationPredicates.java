@@ -24,6 +24,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.MatrixVariable;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -60,6 +61,10 @@ public class MvcAnnotationPredicates {
 
 	public static RequestPartPredicate requestPart() {
 		return new RequestPartPredicate();
+	}
+
+	public static RequestAttributePredicate requestAttribute() {
+		return new RequestAttributePredicate();
 	}
 
 	public static MatrixVariablePredicate matrixAttribute() {
@@ -253,6 +258,38 @@ public class MvcAnnotationPredicates {
 		public boolean test(Method method) {
 			ModelAttribute annot = AnnotatedElementUtils.findMergedAnnotation(method, ModelAttribute.class);
 			return annot != null && (this.name == null || annot.name().equals(this.name));
+		}
+	}
+
+	public static class RequestAttributePredicate implements Predicate<MethodParameter> {
+
+		private String name;
+
+		private boolean required = true;
+
+
+		public RequestAttributePredicate name(String name) {
+			this.name = name;
+			return this;
+		}
+
+		public RequestAttributePredicate noName() {
+			this.name = "";
+			return this;
+		}
+
+		public RequestAttributePredicate notRequired() {
+			this.required = false;
+			return this;
+		}
+
+
+		@Override
+		public boolean test(MethodParameter parameter) {
+			RequestAttribute annotation = parameter.getParameterAnnotation(RequestAttribute.class);
+			return annotation != null &&
+					(this.name == null || annotation.name().equals(this.name)) &&
+					annotation.required() == this.required;
 		}
 	}
 
