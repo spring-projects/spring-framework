@@ -37,10 +37,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.server.ServerWebExchange;
@@ -56,6 +60,8 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	private final HttpStatus statusCode;
 
 	private final HttpHeaders headers = new HttpHeaders();
+
+	private final MultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
 
 	private final Map<String, Object> hints = new HashMap<>();
 
@@ -77,6 +83,21 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	public ServerResponse.BodyBuilder headers(Consumer<HttpHeaders> headersConsumer) {
 		Assert.notNull(headersConsumer, "'headersConsumer' must not be null");
 		headersConsumer.accept(this.headers);
+		return this;
+	}
+
+	@Override
+	public ServerResponse.BodyBuilder cookie(ResponseCookie cookie) {
+		Assert.notNull(cookie, "'cookie' must not be null");
+		this.cookies.add(cookie.getName(), cookie);
+		return this;
+	}
+
+	@Override
+	public ServerResponse.BodyBuilder cookies(
+			Consumer<MultiValueMap<String, ResponseCookie>> cookiesConsumer) {
+		Assert.notNull(cookiesConsumer, "'cookiesConsumer' must not be null");
+		cookiesConsumer.accept(this.cookies);
 		return this;
 	}
 
@@ -166,7 +187,8 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 			BiFunction<ServerWebExchange, ServerResponse.Context, Mono<Void>> writeFunction) {
 
 		Assert.notNull(writeFunction, "'writeFunction' must not be null");
-		return Mono.just(new WriterFunctionServerResponse(this.statusCode, this.headers, writeFunction));
+		return Mono.just(new WriterFunctionServerResponse(this.statusCode, this.headers,
+				this.cookies, writeFunction));
 	}
 
 	@Override
@@ -214,7 +236,8 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	@Override
 	public Mono<ServerResponse> body(BodyInserter<?, ? super ServerHttpResponse> inserter) {
 		Assert.notNull(inserter, "'inserter' must not be null");
-		return Mono.just(new BodyInserterServerResponse<>(this.statusCode, this.headers, inserter, this.hints));
+		return Mono.just(new BodyInserterServerResponse<>(this.statusCode, this.headers,
+				this.cookies, inserter, this.hints));
 	}
 
 	@Override
@@ -248,15 +271,25 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		private final HttpHeaders headers;
 
-		protected AbstractServerResponse(HttpStatus statusCode, HttpHeaders headers) {
+		private final MultiValueMap<String, ResponseCookie> cookies;
+
+		protected AbstractServerResponse(HttpStatus statusCode, HttpHeaders headers,
+				MultiValueMap<String, ResponseCookie> cookies) {
 			this.statusCode = statusCode;
 			this.headers = readOnlyCopy(headers);
+			this.cookies = readOnlyCopy(cookies);
 		}
 
 		private static HttpHeaders readOnlyCopy(HttpHeaders headers) {
 			HttpHeaders copy = new HttpHeaders();
 			copy.putAll(headers);
 			return HttpHeaders.readOnlyHttpHeaders(copy);
+		}
+
+		private static <K, V> MultiValueMap<K,V> readOnlyCopy(MultiValueMap<K, V> map) {
+			MultiValueMap<K, V> copy = new LinkedMultiValueMap<>();
+			copy.putAll(map);
+			return CollectionUtils.unmodifiableMultiValueMap(copy);
 		}
 
 		@Override
@@ -269,16 +302,23 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 			return this.headers;
 		}
 
+		@Override
+		public MultiValueMap<String, ResponseCookie> cookies() {
+			return this.cookies;
+		}
+
 		protected void writeStatusAndHeaders(ServerHttpResponse response) {
 			response.setStatusCode(this.statusCode);
-			HttpHeaders responseHeaders = response.getHeaders();
 
-			HttpHeaders headers = headers();
-			if (!headers.isEmpty()) {
-				headers.entrySet().stream()
-						.filter(entry -> !responseHeaders.containsKey(entry.getKey()))
-						.forEach(entry -> responseHeaders
-								.put(entry.getKey(), entry.getValue()));
+			copy(this.headers, response.getHeaders());
+			copy(this.cookies, response.getCookies());
+		}
+
+		private static <K,V> void copy(MultiValueMap<K,V> src, MultiValueMap<K,V> dst) {
+			if (!src.isEmpty()) {
+				src.entrySet().stream()
+						.filter(entry -> !dst.containsKey(entry.getKey()))
+						.forEach(entry -> dst.put(entry.getKey(), entry.getValue()));
 			}
 		}
 	}
@@ -289,9 +329,10 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		private final BiFunction<ServerWebExchange, Context, Mono<Void>> writeFunction;
 
 		public WriterFunctionServerResponse(HttpStatus statusCode, HttpHeaders headers,
+				MultiValueMap<String, ResponseCookie> cookies,
 				BiFunction<ServerWebExchange, Context, Mono<Void>> writeFunction) {
 
-			super(statusCode, headers);
+			super(statusCode, headers, cookies);
 			this.writeFunction = writeFunction;
 		}
 
@@ -310,9 +351,10 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		private final Map<String, Object> hints;
 
 		public BodyInserterServerResponse(HttpStatus statusCode, HttpHeaders headers,
+				MultiValueMap<String, ResponseCookie> cookies,
 				BodyInserter<T, ? super ServerHttpResponse> inserter, Map<String, Object> hints) {
 
-			super(statusCode, headers);
+			super(statusCode, headers, cookies);
 			this.inserter = inserter;
 			this.hints = hints;
 		}

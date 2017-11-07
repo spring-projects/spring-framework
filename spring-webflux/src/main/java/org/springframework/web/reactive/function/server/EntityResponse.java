@@ -19,6 +19,7 @@ package org.springframework.web.reactive.function.server;
 import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -29,8 +30,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.codec.json.Jackson2CodecSupport;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 
@@ -122,6 +125,24 @@ public interface EntityResponse<T> extends ServerResponse {
 		 * @return this builder
 		 */
 		Builder<T> status(HttpStatus status);
+
+		/**
+		 * Add the given cookie to the response.
+		 * @param cookie the cookie to add
+		 * @return this builder
+		 */
+		Builder<T> cookie(ResponseCookie cookie);
+
+		/**
+		 * Manipulate this response's cookies with the given consumer. The
+		 * cookies provided to the consumer are "live", so that the consumer can be used to
+		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing cookies,
+		 * {@linkplain MultiValueMap#remove(Object) remove} cookies, or use any of the other
+		 * {@link MultiValueMap} methods.
+		 * @param cookiesConsumer a function that consumes the cookies
+		 * @return this builder
+		 */
+		Builder<T> cookies(Consumer<MultiValueMap<String, ResponseCookie>> cookiesConsumer);
 
 		/**
 		 * Set the set of allowed {@link HttpMethod HTTP methods}, as specified

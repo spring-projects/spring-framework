@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import reactor.core.publisher.Mono;
 
@@ -35,10 +36,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -58,6 +62,8 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 
 	private final HttpHeaders headers = new HttpHeaders();
 
+	private final MultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
+
 	private final Map<String, Object> hints = new HashMap<>();
 
 
@@ -71,6 +77,21 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 	public EntityResponse.Builder<T> status(HttpStatus status) {
 		Assert.notNull(status, "'status' must not be null");
 		this.status = status;
+		return this;
+	}
+
+	@Override
+	public EntityResponse.Builder<T> cookie(ResponseCookie cookie) {
+		Assert.notNull(cookie, "'cookie' must not be null");
+		this.cookies.add(cookie.getName(), cookie);
+		return this;
+	}
+
+	@Override
+	public EntityResponse.Builder<T> cookies(
+			Consumer<MultiValueMap<String, ResponseCookie>> cookiesConsumer) {
+		Assert.notNull(cookiesConsumer, "'cookiesConsumer' must not be null");
+		cookiesConsumer.accept(this.cookies);
 		return this;
 	}
 
@@ -161,8 +182,8 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 
 	@Override
 	public Mono<EntityResponse<T>> build() {
-		return Mono.just(new DefaultEntityResponse<T>(this.status, this.headers, this.entity,
-				this.inserter, this.hints));
+		return Mono.just(new DefaultEntityResponse<T>(this.status, this.headers, this.cookies,
+				this.entity, this.inserter, this.hints));
 	}
 
 
@@ -177,10 +198,11 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 		private final Map<String, Object> hints;
 
 
-		public DefaultEntityResponse(HttpStatus statusCode, HttpHeaders headers, T entity,
+		public DefaultEntityResponse(HttpStatus statusCode, HttpHeaders headers,
+				MultiValueMap<String, ResponseCookie> cookies, T entity,
 				BodyInserter<T, ? super ServerHttpResponse> inserter, Map<String, Object> hints) {
 
-			super(statusCode, headers);
+			super(statusCode, headers, cookies);
 			this.entity = entity;
 			this.inserter = inserter;
 			this.hints = hints;

@@ -34,10 +34,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2CodecSupport;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.result.view.ViewResolver;
@@ -65,6 +67,11 @@ public interface ServerResponse {
 	 * Return the headers of this response.
 	 */
 	HttpHeaders headers();
+
+	/**
+	 * Return the cookies of this response.
+	 */
+	MultiValueMap<String, ResponseCookie> cookies();
 
 	/**
 	 * Write this response to the given web exchange.
@@ -218,6 +225,24 @@ public interface ServerResponse {
 		 * @return this builder
 		 */
 		B headers(Consumer<HttpHeaders> headersConsumer);
+
+		/**
+		 * Add the given cookie to the response.
+		 * @param cookie the cookie to add
+		 * @return this builder
+		 */
+		B cookie(ResponseCookie cookie);
+
+		/**
+		 * Manipulate this response's cookies with the given consumer. The
+		 * cookies provided to the consumer are "live", so that the consumer can be used to
+		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing cookies,
+		 * {@linkplain MultiValueMap#remove(Object) remove} cookies, or use any of the other
+		 * {@link MultiValueMap} methods.
+		 * @param cookiesConsumer a function that consumes the cookies
+		 * @return this builder
+		 */
+		B cookies(Consumer<MultiValueMap<String, ResponseCookie>> cookiesConsumer);
 
 		/**
 		 * Set the set of allowed {@link HttpMethod HTTP methods}, as specified

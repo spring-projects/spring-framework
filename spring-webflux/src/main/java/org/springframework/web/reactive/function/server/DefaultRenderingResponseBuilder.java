@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import reactor.core.publisher.Flux;
@@ -32,9 +33,12 @@ import org.springframework.core.Conventions;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -52,6 +56,8 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 
 	private final HttpHeaders headers = new HttpHeaders();
 
+	private final MultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
+
 	private final Map<String, Object> model = new LinkedHashMap<>();
 
 
@@ -64,6 +70,20 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 	public RenderingResponse.Builder status(HttpStatus status) {
 		Assert.notNull(status, "'status' must not be null");
 		this.status = status;
+		return this;
+	}
+
+	@Override
+	public RenderingResponse.Builder cookie(ResponseCookie cookie) {
+		Assert.notNull(cookie, "'cookie' must not be null");
+		this.cookies.add(cookie.getName(), cookie);
+		return this;
+	}
+
+	@Override
+	public RenderingResponse.Builder cookies(Consumer<MultiValueMap<String, ResponseCookie>> cookiesConsumer) {
+		Assert.notNull(cookiesConsumer, "'cookiesConsumer' must not be null");
+		cookiesConsumer.accept(this.cookies);
 		return this;
 	}
 
@@ -117,7 +137,8 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 
 	@Override
 	public Mono<RenderingResponse> build() {
-		return Mono.just(new DefaultRenderingResponse(this.status, this.headers, this.name, this.model));
+		return Mono.just(new DefaultRenderingResponse(this.status, this.headers, this.cookies,
+				this.name, this.model));
 	}
 
 
@@ -129,9 +150,10 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 
 		private final Map<String, Object> model;
 
-		public DefaultRenderingResponse(HttpStatus statusCode, HttpHeaders headers, String name,
-				Map<String, Object> model) {
-			super(statusCode, headers);
+		public DefaultRenderingResponse(HttpStatus statusCode, HttpHeaders headers,
+				MultiValueMap<String, ResponseCookie> cookies,
+				String name, Map<String, Object> model) {
+			super(statusCode, headers, cookies);
 			this.name = name;
 			this.model = unmodifiableCopy(model);
 		}

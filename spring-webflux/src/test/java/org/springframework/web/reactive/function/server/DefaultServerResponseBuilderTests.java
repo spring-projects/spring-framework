@@ -32,7 +32,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
 
 import static org.junit.Assert.*;
@@ -265,9 +268,24 @@ public class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
+	public void cookies() throws Exception {
+		MultiValueMap<String, ResponseCookie> newCookies = new LinkedMultiValueMap<>();
+		newCookies.add("name", ResponseCookie.from("name", "value").build());
+		Mono<ServerResponse> result =
+				ServerResponse.ok().cookies(cookies -> cookies.addAll(newCookies)).build();
+		StepVerifier.create(result)
+				.expectNextMatches(response -> newCookies.equals(response.cookies()))
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
 	public void build() throws Exception {
+		ResponseCookie cookie = ResponseCookie.from("name", "value").build();
 		Mono<ServerResponse>
-				result = ServerResponse.status(HttpStatus.CREATED).header("MyKey", "MyValue").build();
+				result = ServerResponse.status(HttpStatus.CREATED)
+				.header("MyKey", "MyValue")
+				.cookie(cookie).build();
 
 		ServerWebExchange exchange = mock(ServerWebExchange.class);
 		MockServerHttpResponse response = new MockServerHttpResponse();
@@ -278,6 +296,7 @@ public class DefaultServerResponseBuilderTests {
 
 		assertEquals(HttpStatus.CREATED, response.getStatusCode());
 		assertEquals("MyValue", response.getHeaders().getFirst("MyKey"));
+		assertEquals("value", response.getCookies().getFirst("name").getValue());
 		StepVerifier.create(response.getBody()).expectComplete().verify();
 	}
 
