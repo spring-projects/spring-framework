@@ -2,163 +2,12 @@
 = WebSockets
 :doc-spring-security: {doc-root}/spring-security/site/docs/current/reference
 
-This part of the reference documentation covers support for Servlet stack WebSocket
-messaging, SockJS-based fallback options, and the use of STOMP as a WebSocket messaging
-sub-protocol.
+This part of the reference documentation covers support for Servlet stack, WebSocket
+messaging that includes raw WebSocket interactions, WebSocket emulation via SockJS, and
+pub-sub messaging via STOMP as a sub-protocol over WebSocket.
 
 
-
-
-[[websocket-intro]]
-== Introduction
-
-The WebSocket protocol http://tools.ietf.org/html/rfc6455[RFC 6455] provides a standardized
-way to establish a full-duplex, two-way communication channel between client and server
-over a single TCP connection. It is a different TCP protocol from HTTP but is designed to
-work over HTTP ports 80 and 443 thus allowing use of existing firewall rules.
-
-A WebSocket interaction begins with an HTTP compatible handshake request that uses the
-HTTP `"Upgrade"` header to request switching to the WebSocket protocol:
-
-[subs="quotes"]
-----
-GET /spring-websocket-portfolio/portfolio HTTP/1.1
-Host: localhost:8080
-**Upgrade: websocket**
-**Connection: Upgrade**
-Sec-WebSocket-Key: Uc9l9TMkWGbHFD2qnFHltg==
-Sec-WebSocket-Protocol: v10.stomp, v11.stomp
-Sec-WebSocket-Version: 13
-Origin: http://localhost:8080
-----
-
-The response from a server with WebSocket support:
-
-[subs="quotes"]
-----
-**HTTP/1.1 101 Switching Protocols**
-Upgrade: websocket
-Connection: Upgrade
-Sec-WebSocket-Accept: 1qVdfYHU9hPOl4JYYNXF623Gzn0=
-Sec-WebSocket-Protocol: v10.stomp
-----
-
-After a successful handshake the TCP socket underlying the HTTP upgrade request remains
-open and both client and server can use send and receive messages.
-
-If you Servlet container is running behind a web server (e.g. nginx) you will likely need
-to configure it to send WebSocket upgrades to the backend server. Likewise if running in a
-cloud environment check the instructions for WebSocket support of your cloud provider.
-
-Beyond that, what do you do about restrictive proxies, outside your control, that preclude
-WebSocket interactions either because they are not configured to pass on the `Upgrade`
-header or because they close long lived connections that appear idle? The answer to this
-is WebSocket emulation that tries to use WebSocket first and then falls back HTTP-based
-techniques that WebSocket-like communication. See <<websocket-fallback>>.
-
-
-
-
-WebSocket brings up important design considerations that are important to recognize
-early on, especially in contrast to what we know about building web applications today.
-
-Today REST is a widely accepted, understood, and supported
-architecture for building web applications. It is an architecture that relies
-on having many URLs (__nouns__), a handful of HTTP methods (__verbs__), and
-other principles such as using hypermedia (__links__), remaining stateless, etc.
-
-By contrast a WebSocket application may use a single URL only for the
-initial HTTP handshake. All messages thereafter share and flow on the
-same TCP connection. This points to an entirely different, asynchronous,
-event-driven, messaging architecture. One that is much closer
-to traditional messaging applications (e.g. JMS, AMQP).
-
-Spring Framework 4 includes a new `spring-messaging` module with key
-abstractions from the
-http://projects.spring.io/spring-integration/[Spring Integration] project
-such as `Message`, `MessageChannel`, `MessageHandler`, and others that can serve as
-a foundation for such a messaging architecture. The module also includes a
-set of annotations for mapping messages to methods, similar to the Spring MVC
-annotation based programming model.
-
-
-
-[[websocket-intro-sub-protocol]]
-=== WebSocket Sub-Protocol
-
-WebSocket does imply a __messaging architecture__ but does not mandate the
-use of any specific __messaging protocol__. It is a very thin layer over TCP
-that transforms a stream of bytes into a stream of messages
-(either text or binary) and not much more. It is up to applications
-to interpret the meaning of a message.
-
-Unlike HTTP, which is an application-level protocol, in the WebSocket protocol
-there is simply not enough information in an incoming message for a framework
-or container to know how to route it or process it. Therefore WebSocket is arguably
-too low level for anything but a very trivial application. It can be done, but
-it will likely lead to creating a framework on top. This is comparable to how
-most web applications today are written using a web framework rather than the
-Servlet API alone.
-
-For this reason the WebSocket RFC defines the use of
-http://tools.ietf.org/html/rfc6455#section-1.9[sub-protocols].
-During the handshake, the client and server can use the header
-`Sec-WebSocket-Protocol` to agree on a sub-protocol, i.e. a higher, application-level
-protocol to use. The use of a sub-protocol is not required, but
-even if not used, applications will still need to choose a message
-format that both the client and server can understand. That format can be custom,
-framework-specific, or a standard messaging protocol.
-
-The Spring Framework provides support for using
-http://stomp.github.io/stomp-specification-1.2.html#Abstract[STOMP] -- a simple, messaging protocol
-originally created for use in scripting languages with frames inspired
-by HTTP. STOMP is widely supported and well suited for use over
-WebSocket and over the web.
-
-
-
-[[websocket-intro-when-to-use]]
-=== Do I Use WebSocket?
-
-With all the design considerations surrounding the use of WebSocket, it is
-reasonable to ask, "When is it appropriate to use?".
-
-The best fit for WebSocket is in web applications where the client and
-server need to exchange events at high frequency and with low latency. Prime
-candidates include, but are not limited to, applications in finance, games,
-collaboration, and others. Such applications are both very sensitive to time
-delays and also need to exchange a wide variety of messages at a high
-frequency.
-
-For other application types, however, this may not be the case.
-For example, a news or social feed that shows breaking news as it becomes
-available may be perfectly okay with simple polling once every few minutes.
-Here latency is important, but it is acceptable if the news takes a
-few minutes to appear.
-
-Even in cases where latency is crucial, if the volume of messages is
-relatively low (e.g. monitoring network failures) the use of
-https://spring.io/blog/2012/05/08/spring-mvc-3-2-preview-techniques-for-real-time-updates[long polling]
-should be considered as a relatively simple alternative that
-works reliably and is comparable in terms of efficiency (again assuming the volume of
-messages is relatively low).
-
-It is the combination of both low latency and high frequency of messages that can make
-the use of the WebSocket protocol critical. Even in such applications,
-the choice remains whether all client-server
-communication should be done through WebSocket messages as opposed to using
-HTTP and REST. The answer is going to vary by application; however, it is likely
-that some functionality may be exposed over both WebSocket and as a REST API in
-order to provide clients with alternatives. Furthermore, a REST API call may need
-to broadcast a message to interested clients connected via WebSocket.
-
-The Spring Framework allows `@Controller` and `@RestController` classes to have both
-HTTP request handling and WebSocket message handling methods.
-Furthermore, a Spring MVC request handling method, or any application
-method for that matter, can easily broadcast a message to all interested
-WebSocket clients or to a specific user.
-
-
+include::websocket-intro.adoc[leveloffset=+1]
 
 
 [[websocket-server]]
@@ -620,12 +469,16 @@ XML configuration equivalent:
 [[websocket-fallback]]
 == SockJS Fallback
 
-As explained in the <<websocket-into-fallback-options,introduction>>, WebSocket is not
-supported in all browsers yet and may be precluded by restrictive network proxies.
-This is why Spring provides fallback options that emulate the WebSocket API as close
-as possible based on the https://github.com/sockjs/sockjs-protocol[SockJS protocol]
-(version 0.3.3).
+Over the public Internet, restrictive proxies outside your control may preclude WebSocket
+interactions either because they are not configured to pass on the `Upgrade` header or
+because they close long lived connections that appear idle.
 
+The solution to this problem is WebSocket emulation, i.e. attempting to use WebSocket
+first and then falling back on HTTP-based techniques that emulate a WebSocket
+interaction and expose the same application-level API.
+
+On the Servlet stack the Spring Framework provides both server (and also client) support
+for the SockJS protocol.
 
 
 [[websocket-fallback-sockjs-overview]]
