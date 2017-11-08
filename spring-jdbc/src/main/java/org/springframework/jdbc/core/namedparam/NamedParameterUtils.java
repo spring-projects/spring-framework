@@ -258,8 +258,11 @@ public abstract class NamedParameterUtils {
 	 */
 	public static String substituteNamedParameters(ParsedSql parsedSql, @Nullable SqlParameterSource paramSource) {
 		String originalSql = parsedSql.getOriginalSql();
-		StringBuilder actualSql = new StringBuilder();
 		List<String> paramNames = parsedSql.getParameterNames();
+		if (paramNames.isEmpty()) {
+			return originalSql;
+		}
+		StringBuilder actualSql = new StringBuilder(originalSql.length());
 		int lastIndex = 0;
 		for (int i = 0; i < paramNames.size(); i++) {
 			String paramName = paramNames.get(i);
@@ -283,26 +286,26 @@ public abstract class NamedParameterUtils {
 						Object entryItem = entryIter.next();
 						if (entryItem instanceof Object[]) {
 							Object[] expressionList = (Object[]) entryItem;
-							actualSql.append("(");
+							actualSql.append('(');
 							for (int m = 0; m < expressionList.length; m++) {
 								if (m > 0) {
 									actualSql.append(", ");
 								}
-								actualSql.append("?");
+								actualSql.append('?');
 							}
-							actualSql.append(")");
+							actualSql.append(')');
 						}
 						else {
-							actualSql.append("?");
+							actualSql.append('?');
 						}
 					}
 				}
 				else {
-					actualSql.append("?");
+					actualSql.append('?');
 				}
 			}
 			else {
-				actualSql.append("?");
+				actualSql.append('?');
 			}
 			lastIndex = endIndex;
 		}
