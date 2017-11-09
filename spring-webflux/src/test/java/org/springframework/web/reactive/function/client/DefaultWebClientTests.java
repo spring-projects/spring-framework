@@ -88,7 +88,9 @@ public class DefaultWebClientTests {
 	@Test
 	public void requestHeaderAndCookie() throws Exception {
 		WebClient client = builder().build();
-		client.get().uri("/path").accept(MediaType.APPLICATION_JSON).cookie("id", "123").exchange();
+		client.get().uri("/path").accept(MediaType.APPLICATION_JSON)
+				.cookies(cookies -> cookies.add("id", "123"))	// SPR-16178
+				.exchange();
 
 		ClientRequest request = verifyExchange();
 		assertEquals("application/json", request.headers().getFirst("Accept"));
