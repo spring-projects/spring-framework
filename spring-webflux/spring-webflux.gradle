@@ -48,9 +48,6 @@ dependencies {
 	testCompile("org.hibernate:hibernate-validator:6.0.4.Final")
 	testCompile "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 	testCompile("io.projectreactor:reactor-test")
-	testCompile("io.reactivex:rxnetty-http:0.5.2") {
-		exclude group: 'io.reactivex', module: 'rxjava'
-	}
 	testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 	testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")

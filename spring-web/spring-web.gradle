@@ -78,9 +78,6 @@ dependencies {
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 	testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
 	testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
-	testCompile("io.reactivex:rxnetty-http:0.5.2") {
-		exclude group: 'io.reactivex', module: 'rxjava'
-	}
 	testCompile("com.squareup.okhttp3:mockwebserver:3.9.0")
 	testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	testCompile("org.skyscreamer:jsonassert:1.5.0")

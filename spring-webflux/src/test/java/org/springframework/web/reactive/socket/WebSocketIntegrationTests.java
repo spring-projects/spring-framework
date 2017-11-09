@@ -27,7 +27,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hamcrest.Matchers;
 import org.junit.Test;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
@@ -168,7 +167,7 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 		public Mono<Void> handle(WebSocketSession session) {
 			String protocol = session.getHandshakeInfo().getSubProtocol();
 			WebSocketMessage message = session.textMessage(protocol);
-			return doSend(session, Mono.just(message));
+			return session.send(Mono.just(message));
 		}
 	}
 
@@ -180,16 +179,8 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 			HttpHeaders headers = session.getHandshakeInfo().getHeaders();
 			String payload = "my-header:" + headers.getFirst("my-header");
 			WebSocketMessage message = session.textMessage(payload);
-			return doSend(session, Mono.just(message));
+			return session.send(Mono.just(message));
 		}
-	}
-
-
-	// TODO: workaround for suspected RxNetty WebSocket client issue
-	// https://github.com/ReactiveX/RxNetty/issues/560
-
-	private static Mono<Void> doSend(WebSocketSession session, Publisher<WebSocketMessage> output) {
-		return session.send(Mono.delay(Duration.ofMillis(100)).thenMany(output));
 	}
 
 }
