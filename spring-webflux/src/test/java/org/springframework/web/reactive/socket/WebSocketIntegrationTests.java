@@ -63,7 +63,7 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 		Flux<String> input = Flux.range(1, count).map(index -> "msg-" + index);
 		ReplayProcessor<Object> output = ReplayProcessor.create(count);
 
-		client.execute(getUrl("/echo"),
+		this.client.execute(getUrl("/echo"),
 				session -> {
 					logger.debug("Starting to send messages");
 					return session
@@ -87,7 +87,7 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 		AtomicReference<HandshakeInfo> infoRef = new AtomicReference<>();
 		MonoProcessor<Object> output = MonoProcessor.create();
 
-		client.execute(getUrl("/sub-protocol"),
+		this.client.execute(getUrl("/sub-protocol"),
 				new WebSocketHandler() {
 					@Override
 					public List<String> getSubProtocols() {
@@ -117,7 +117,7 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 		headers.add("my-header", "my-value");
 		MonoProcessor<Object> output = MonoProcessor.create();
 
-		client.execute(getUrl("/custom-header"), headers,
+		this.client.execute(getUrl("/custom-header"), headers,
 				session -> session.receive()
 						.map(WebSocketMessage::getPayloadAsText)
 						.subscribeWith(output)

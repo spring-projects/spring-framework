@@ -62,8 +62,6 @@ import org.springframework.web.reactive.socket.server.upgrade.TomcatRequestUpgra
 import org.springframework.web.reactive.socket.server.upgrade.UndertowRequestUpgradeStrategy;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.junit.Assume.assumeFalse;
-
 /**
  * Base class for WebSocket integration tests. Sub-classes must implement
  * {@link #getWebConfigClass()} to return Spring config class with (server-side)
@@ -117,15 +115,6 @@ public abstract class AbstractWebSocketIntegrationTests {
 
 	@Before
 	public void setup() throws Exception {
-		// TODO
-		// Caused by: java.io.IOException: Upgrade responses cannot have a transfer coding
-		// at org.xnio.http.HttpUpgrade$HttpUpgradeState.handleUpgrade(HttpUpgrade.java:490)
-		// at org.xnio.http.HttpUpgrade$HttpUpgradeState.access$1200(HttpUpgrade.java:165)
-		// at org.xnio.http.HttpUpgrade$HttpUpgradeState$UpgradeResultListener.handleEvent(HttpUpgrade.java:461)
-		// at org.xnio.http.HttpUpgrade$HttpUpgradeState$UpgradeResultListener.handleEvent(HttpUpgrade.java:400)
-		// at org.xnio.ChannelListeners.invokeChannelListener(ChannelListeners.java:92)
-
-		assumeFalse(this.client instanceof UndertowWebSocketClient);
 
 		this.server.setHandler(createHttpHandler());
 		this.server.afterPropertiesSet();
