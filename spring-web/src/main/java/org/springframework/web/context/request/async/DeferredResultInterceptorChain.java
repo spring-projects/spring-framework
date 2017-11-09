@@ -82,17 +82,22 @@ class DeferredResultInterceptorChain {
 		}
 	}
 
-	public void triggerAfterError(NativeWebRequest request, DeferredResult<?> deferredResult, Throwable ex)
+	/**
+	 * @return true to continue error handling, or false to bypass any further
+	 * error handling
+	 */
+	public boolean triggerAfterError(NativeWebRequest request, DeferredResult<?> deferredResult, Throwable ex)
 			throws Exception {
 
 		for (DeferredResultProcessingInterceptor interceptor : this.interceptors) {
 			if (deferredResult.isSetOrExpired()) {
-				return;
+				return false;
 			}
 			if (!interceptor.handleError(request, deferredResult, ex)){
-				break;
+				return false;
 			}
 		}
+		return true;
 	}
 
 	public void triggerAfterCompletion(NativeWebRequest request, DeferredResult<?> deferredResult) {
