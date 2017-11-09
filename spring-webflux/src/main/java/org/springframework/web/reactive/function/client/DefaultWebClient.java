@@ -270,8 +270,7 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public DefaultRequestBodyUriSpec cookies(
-				Consumer<MultiValueMap<String, String>> cookiesConsumer) {
+		public DefaultRequestBodyUriSpec cookies(Consumer<MultiValueMap<String, String>> cookiesConsumer) {
 			Assert.notNull(cookiesConsumer, "'cookiesConsumer' must not be null");
 			cookiesConsumer.accept(getCookies());
 			return this;
