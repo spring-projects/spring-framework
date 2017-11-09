@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.springframework.mock.web.test.MockAsyncContext;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.web.context.request.async.StandardServletAsyncWebRequest.ErrorHandler;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
@@ -148,13 +149,26 @@ public class StandardServletAsyncWebRequestTests {
 
 	// SPR-13292
 
+	@SuppressWarnings("unchecked")
 	@Test
-	public void onCompletionHandlerAfterOnErrorEvent() throws Exception {
+	public void onErrorHandlerAfterOnErrorEvent() throws Exception {
+		ErrorHandler handler = mock(ErrorHandler.class);
+		this.asyncRequest.setErrorHandler(handler);
+
+		this.asyncRequest.startAsync();
+		Exception e = new Exception();
+		this.asyncRequest.onError(new AsyncEvent(this.request.getAsyncContext(), e));
+
+		verify(handler).handle(e);
+	}
+
+	@Test
+	public void onCompletionHandlerAfterOnCompleteEvent() throws Exception {
 		Runnable handler = mock(Runnable.class);
 		this.asyncRequest.addCompletionHandler(handler);
 
 		this.asyncRequest.startAsync();
-		this.asyncRequest.onError(new AsyncEvent(null));
+		this.asyncRequest.onComplete(new AsyncEvent(this.request.getAsyncContext()));
 
 		verify(handler).run();
 		assertTrue(this.asyncRequest.isAsyncComplete());

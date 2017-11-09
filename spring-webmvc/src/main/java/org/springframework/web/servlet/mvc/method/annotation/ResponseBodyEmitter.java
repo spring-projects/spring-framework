@@ -166,11 +166,9 @@ public class ResponseBodyEmitter {
 					this.handler.send(object, mediaType);
 				}
 				catch (IOException ex) {
-					completeWithError(ex);
 					throw ex;
 				}
 				catch (Throwable ex) {
-					completeWithError(ex);
 					throw new IllegalStateException("Failed to send " + object, ex);
 				}
 			}

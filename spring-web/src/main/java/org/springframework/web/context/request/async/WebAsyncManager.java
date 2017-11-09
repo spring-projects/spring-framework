@@ -298,6 +298,16 @@ public final class WebAsyncManager {
 			}
 		});
 
+		if (this.asyncWebRequest instanceof StandardServletAsyncWebRequest) {
+			((StandardServletAsyncWebRequest) this.asyncWebRequest).setErrorHandler(
+					new StandardServletAsyncWebRequest.ErrorHandler() {
+						@Override
+						public void handle(Throwable ex) {
+							setConcurrentResultAndDispatch(ex);
+						}
+					});
+		}
+
 		this.asyncWebRequest.addCompletionHandler(new Runnable() {
 			@Override
 			public void run() {
@@ -398,6 +408,16 @@ public final class WebAsyncManager {
 				}
 			}
 		});
+
+		if (this.asyncWebRequest instanceof StandardServletAsyncWebRequest) {
+			((StandardServletAsyncWebRequest) this.asyncWebRequest).setErrorHandler(
+					new StandardServletAsyncWebRequest.ErrorHandler() {
+						@Override
+						public void handle(Throwable ex) {
+							deferredResult.setErrorResult(ex);
+						}
+					});
+		}
 
 		this.asyncWebRequest.addCompletionHandler(new Runnable() {
 			@Override

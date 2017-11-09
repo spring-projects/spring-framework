@@ -50,6 +50,8 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 	private final List<Runnable> timeoutHandlers = new ArrayList<Runnable>();
 
+	private ErrorHandler errorHandler;
+
 	private final List<Runnable> completionHandlers = new ArrayList<Runnable>();
 
 
@@ -76,6 +78,10 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	@Override
 	public void addTimeoutHandler(Runnable timeoutHandler) {
 		this.timeoutHandlers.add(timeoutHandler);
+	}
+
+	void setErrorHandler(ErrorHandler errorHandler) {
+		this.errorHandler = errorHandler;
 	}
 
 	@Override
@@ -134,7 +140,9 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 	@Override
 	public void onError(AsyncEvent event) throws IOException {
-		onComplete(event);
+		if (this.errorHandler != null) {
+			this.errorHandler.handle(event.getThrowable());
+		}
 	}
 
 	@Override
@@ -151,6 +159,13 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 		}
 		this.asyncContext = null;
 		this.asyncCompleted.set(true);
+	}
+
+
+	interface ErrorHandler {
+
+		void handle(Throwable ex);
+
 	}
 
 }

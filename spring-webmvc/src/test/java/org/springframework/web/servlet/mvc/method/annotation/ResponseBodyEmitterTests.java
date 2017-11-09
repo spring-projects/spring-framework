@@ -150,7 +150,6 @@ public class ResponseBodyEmitterTests {
 			// expected
 		}
 		verify(this.handler).send("foo", MediaType.TEXT_PLAIN);
-		verify(this.handler).completeWithError(failure);
 		verifyNoMoreInteractions(this.handler);
 	}
 
