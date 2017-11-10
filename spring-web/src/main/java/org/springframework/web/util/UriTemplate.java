@@ -36,6 +36,9 @@ import org.springframework.util.Assert;
  * <p>See {@link #expand(Map)}, {@link #expand(Object[])}, and {@link #match(String)}
  * for example usages.
  *
+ * <p>This class is designed to be thread-safe and reusable, allowing for any number
+ * of expand or match calls.
+ *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
