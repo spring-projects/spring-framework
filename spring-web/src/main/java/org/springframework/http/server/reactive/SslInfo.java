@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
 import java.security.cert.X509Certificate;
@@ -20,15 +21,22 @@ import java.security.cert.X509Certificate;
 import org.springframework.lang.Nullable;
 
 /**
+ * A holder for SSL session information.
  *
  * @author Rossen Stoyanchev
  * @since 5.0.2
  */
 public interface SslInfo {
 
+	/**
+	 * Return the SSL session id, if any
+	 */
 	@Nullable
 	String getSessionId();
 
+	/**
+	 * Return the associated SSL certificates.
+	 */
 	X509Certificate[] getPeerCertificates();
 
 }

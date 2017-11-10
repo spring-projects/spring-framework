@@ -59,16 +59,20 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 	 * Return the remote address where this request is connected to, if available.
 	 */
 	@Nullable
-	InetSocketAddress getRemoteAddress();
+	default InetSocketAddress getRemoteAddress() {
+		return null;
+	}
 
 	/**
 	 * Return the SSL session information if the request has been transmitted
 	 * over a secure protocol including SSL certificates, if available.
-	 * @return the session information or {@code null}
+	 * @return the session information, or {@code null} if none available
 	 * @since 5.0.2
 	 */
 	@Nullable
-	SslInfo getSslInfo();
+	default SslInfo getSslInfo() {
+		return null;
+	}
 
 	/**
 	 * Return a builder to mutate properties of this request by wrapping it

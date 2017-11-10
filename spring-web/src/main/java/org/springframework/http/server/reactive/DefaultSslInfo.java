@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.net.ssl.SSLSession;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ * The default holder for SSL session information.
  *
  * @author Rossen Stoyanchev
- * @since 5.0
+ * @since 5.0.2
  */
 final class DefaultSslInfo implements SslInfo {
 
@@ -50,12 +51,26 @@ final class DefaultSslInfo implements SslInfo {
 		this.peerCertificates = initCertificates(session);
 	}
 
+
+	@Override
+	@Nullable
+	public String getSessionId() {
+		return this.sessionId;
+	}
+
+	@Override
+	public X509Certificate[] getPeerCertificates() {
+		return this.peerCertificates;
+	}
+
+
 	@Nullable
 	private static String initSessionId(SSLSession session) {
 		byte [] bytes = session.getId();
 		if (bytes == null) {
 			return null;
 		}
+
 		StringBuilder sb = new StringBuilder();
 		for (byte b : bytes) {
 			String digit = Integer.toHexString(b);
@@ -78,6 +93,7 @@ final class DefaultSslInfo implements SslInfo {
 		catch (Throwable ex) {
 			throw new IllegalStateException("Failed to get SSL certificates", ex);
 		}
+
 		List<X509Certificate> result = new ArrayList<>(certificates.length);
 		for (Certificate certificate : certificates) {
 			if (certificate instanceof X509Certificate) {
@@ -85,18 +101,6 @@ final class DefaultSslInfo implements SslInfo {
 			}
 		}
 		return result.toArray(new X509Certificate[result.size()]);
-	}
-
-
-	@Override
-	@Nullable
-	public String getSessionId() {
-		return this.sessionId;
-	}
-
-	@Override
-	public X509Certificate[] getPeerCertificates() {
-		return this.peerCertificates;
 	}
 
 }

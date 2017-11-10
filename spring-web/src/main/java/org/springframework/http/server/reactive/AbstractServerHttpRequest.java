@@ -166,7 +166,7 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 
 	/**
 	 * Obtain SSL session information from the underlying "native" request.
-	 * @return the SSL information or {@code null} if not available
+	 * @return the session information, or {@code null} if none available
 	 * @since 5.0.2
 	 */
 	@Nullable
