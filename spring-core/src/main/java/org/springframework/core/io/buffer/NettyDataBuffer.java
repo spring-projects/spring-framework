@@ -208,16 +208,18 @@ public class NettyDataBuffer implements PooledDataBuffer {
 	public NettyDataBuffer write(ByteBuf... byteBufs) {
 		Assert.notNull(byteBufs, "'byteBufs' must not be null");
 
-		CompositeByteBuf composite = new CompositeByteBuf(
-				this.byteBuf.alloc(), this.byteBuf.isDirect(), byteBufs.length + 1);
-		composite.addComponent(this.byteBuf);
-		composite.addComponents(byteBufs);
+		if (this.byteBuf instanceof CompositeByteBuf) {
+			CompositeByteBuf composite = (CompositeByteBuf) this.byteBuf;
+			composite.addComponents(true, byteBufs);
+		}
+		else {
+			ByteBuf oldByteBuf = this.byteBuf;
+			CompositeByteBuf composite = oldByteBuf.alloc().compositeBuffer(byteBufs.length + 1);
+			composite.addComponent(true, oldByteBuf);
+			composite.addComponents(true, byteBufs);
 
-		int writerIndex = this.byteBuf.readableBytes() +
-				Arrays.stream(byteBufs).mapToInt(ByteBuf::readableBytes).sum();
-		composite.writerIndex(writerIndex);
-
-		this.byteBuf = composite;
+			this.byteBuf = composite;
+		}
 		return this;
 	}
 
@@ -249,7 +251,7 @@ public class NettyDataBuffer implements PooledDataBuffer {
 
 	@Override
 	public PooledDataBuffer retain() {
-		return new NettyDataBuffer(this.byteBuf.retain(), dataBufferFactory);
+		return new NettyDataBuffer(this.byteBuf.retain(), this.dataBufferFactory);
 	}
 
 	@Override
