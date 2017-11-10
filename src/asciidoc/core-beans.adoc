@@ -399,6 +399,7 @@ a dependency on a specific bean through metadata (e.g. an autowiring annotation)
 
 [[beans-definition]]
 == Bean overview
+
 A Spring IoC container manages one or more __beans__. These beans are created with the
 configuration metadata that you supply to the container, for example, in the form of XML
 `<bean/>` definitions.
@@ -777,6 +778,7 @@ Spring container that will create objects through an
 
 [[beans-dependencies]]
 == Dependencies
+
 A typical enterprise application does not consist of a single object (or bean in the
 Spring parlance). Even the simplest application has a few objects that work together to
 present what the end-user sees as a coherent application. This next section explains how
@@ -2378,6 +2380,7 @@ shortest string that will match an argument type.
 
 [[beans-factory-scopes]]
 == Bean scopes
+
 When you create a bean definition, you create a __recipe__ for creating actual instances
 of the class defined by that bean definition. The idea that a bean definition is a
 recipe is important, because it means that, as with a class, you can create many object
@@ -3635,6 +3638,7 @@ beans that require programmatic access to the container.
 
 [[beans-child-bean-definitions]]
 == Bean definition inheritance
+
 A bean definition can contain a lot of configuration information, including constructor
 arguments, property values, and container-specific information such as initialization
 method, static factory method name, and so on. A child bean definition inherits
@@ -3720,6 +3724,7 @@ context will actually (attempt to) pre-instantiate the `abstract` bean.
 
 [[beans-factory-extension]]
 == Container Extension Points
+
 Typically, an application developer does not need to subclass `ApplicationContext`
 implementation classes. Instead, the Spring IoC container can be extended by plugging in
 implementations of special integration interfaces. The next few sections describe these
@@ -4237,11 +4242,13 @@ applicability. Spring 2.5 also added support for JSR-250 annotations such as
 Injection for Java) annotations contained in the javax.inject package such as `@Inject`
 and `@Named`. Details about those annotations can be found in the
 <<beans-standard-annotations,relevant section>>.
+
 [NOTE]
 ====
 Annotation injection is performed __before__ XML injection, thus the latter
 configuration will override the former for properties wired through both approaches.
 ====
+
 As always, you can register them as individual bean definitions, but they can also be
 implicitly registered by including the following tag in an XML-based Spring
 configuration (notice the inclusion of the `context` namespace):
@@ -4513,12 +4520,42 @@ non-required constructors can be annotated. In that case, each is considered amo
 candidates and Spring uses the __greediest__ constructor whose dependencies can be
 satisfied, that is the constructor that has the largest number of arguments.
 
-`@Autowired`'s __required__ attribute is recommended over the `@Required` annotation.
+The __required__ attribute of `@Autowired` is recommended over the `@Required` annotation.
 The __required__ attribute indicates that the property is not required for autowiring
 purposes, the property is ignored if it cannot be autowired. `@Required`, on the other
 hand, is stronger in that it enforces the property that was set by any means supported
 by the container. If no value is injected, a corresponding exception is raised.
 ====
+
+Alternatively, you may express the non-required nature of a particular dependency
+through Java 8's `java.util.Optional`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class SimpleMovieLister {
+
+		@Autowired
+		public void setMovieFinder(Optional<MovieFinder> movieFinder) {
+			...
+		}
+	}
+----
+
+As of Spring Framework 5.0, you may also use an `@Nullable` annotation (of any kind
+in any package, e.g. `javax.annotation.Nullable` from JSR-305):
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class SimpleMovieLister {
+
+		@Autowired
+		public void setMovieFinder(@Nullable MovieFinder movieFinder) {
+			...
+		}
+	}
+----
 
 You can also use `@Autowired` for interfaces that are well-known resolvable
 dependencies: `BeanFactory`, `ApplicationContext`, `Environment`, `ResourceLoader`,
@@ -4548,6 +4585,7 @@ automatically resolved, with no special setup necessary.
 annotations within your own `BeanPostProcessor` or `BeanFactoryPostProcessor` types (if
 any). These types must be 'wired up' explicitly via XML or using a Spring `@Bean` method.
 ====
+
 
 
 [[beans-autowired-annotation-primary]]
@@ -4726,9 +4764,16 @@ be injected into a `Set<MovieCatalog>` annotated with `@Qualifier("action")`.
 
 [TIP]
 ====
-If you intend to express annotation-driven injection by name, do not primarily use
-`@Autowired`, even if is technically capable of referring to a bean name through
-`@Qualifier` values. Instead, use the JSR-250 `@Resource` annotation, which is
+Letting qualifier values select against target bean names, within the type-matching
+candidates, doesn't even require a `@Qualifier` annotation at the injection point.
+If there is no other resolution indicator (e.g. a qualifier or a primary marker),
+for a non-unique dependency situation, Spring will match the injection point name
+(i.e. field name or parameter name) against the target bean names and choose the
+same-named candidate, if any.
+
+That said, if you intend to express annotation-driven injection by name, do not
+primarily use `@Autowired`, even if is capable of selecting by bean name among
+type-matching candidates. Instead, use the JSR-250 `@Resource` annotation, which is
 semantically defined to identify a specific target component by its unique name, with
 the declared type being irrelevant for the matching process. `@Autowired` has rather
 different semantics: After selecting candidate beans by type, the specified String
@@ -4896,7 +4941,6 @@ consider the following annotation definition:
 		String genre();
 
 		Format format();
-
 	}
 ----
 
@@ -5378,7 +5422,7 @@ comma/semicolon/space-separated list that includes the parent package of each cl
 
 [NOTE]
 ====
-for concision, the above may have used the `value` attribute of the
+For concision, the above may have used the `value` attribute of the
 annotation, i.e. `@ComponentScan("org.example")`
 ====
 
@@ -5427,7 +5471,7 @@ wired together - all without any bean configuration metadata provided in XML.
 ====
 You can disable the registration of `AutowiredAnnotationBeanPostProcessor` and
 `CommonAnnotationBeanPostProcessor` by including the __annotation-config__ attribute
-with a value of false.
+with a value of `false`.
 ====
 
 
@@ -5865,6 +5909,7 @@ metadata is provided per-instance rather than per-class.
 
 [[beans-standard-annotations]]
 == Using JSR 330 Standard Annotations
+
 Starting with Spring 3.0, Spring offers support for JSR-330 standard annotations
 (Dependency Injection). Those annotations are scanned in the same way as the Spring
 annotations. You just need to have the relevant jars in your classpath.
@@ -5961,6 +6006,34 @@ you should use the `@Named` annotation as follows:
 		}
 
 		// ...
+	}
+----
+
+Like `@Autowired`, `@Inject` can also be used with `java.util.Optional` or
+`@Nullable`. This is even more applicable here since `@Inject` does not have
+a `required` attribute.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class SimpleMovieLister {
+
+		@Inject
+		public void setMovieFinder(Optional<MovieFinder> movieFinder) {
+			...
+		}
+	}
+----
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class SimpleMovieLister {
+
+		@Inject
+		public void setMovieFinder(@Nullable MovieFinder movieFinder) {
+			...
+		}
 	}
 ----
 
@@ -6710,6 +6783,7 @@ annotation can be used:
 		}
 	}
 ----
+
 
 
 [[beans-java-configuration-annotation]]
@@ -7949,7 +8023,7 @@ AspectJ load-time weaving, see <<aop-aj-ltw>>.
 
 
 [[context-introduction]]
-== Additional Capabilities of the ApplicationContext
+== Additional capabilities of the ApplicationContext
 
 As was discussed in the chapter introduction, the `org.springframework.beans.factory`
 package provides basic functionality for managing and manipulating beans, including in a
@@ -8181,7 +8255,7 @@ out the `ReloadableResourceBundleMessageSource` javadocs for details.
 
 
 [[context-functionality-events]]
-=== Standard and Custom Events
+=== Standard and custom events
 
 Event handling in the `ApplicationContext` is provided through the `ApplicationEvent`
 class and `ApplicationListener` interface. If a bean that implements the
@@ -8370,8 +8444,9 @@ http://www.enterpriseintegrationpatterns.com[pattern-oriented], event-driven
 architectures that build upon the well-known Spring programming model.
 ====
 
+
 [[context-functionality-events-annotation]]
-==== Annotation-based Event Listeners
+==== Annotation-based event listeners
 
 As of Spring 4.2, an event listener can be registered on any public method of a managed
 bean via the `EventListener` annotation. The `BlackListNotifier` can be rewritten as
@@ -8478,6 +8553,7 @@ This new method will publish a new `ListUpdateEvent` for every `BlackListEvent` 
 by the method above. If you need to publish several events, just return a `Collection` of
 events instead.
 
+
 [[context-functionality-events-async]]
 ==== Asynchronous Listeners
 
@@ -8504,7 +8580,7 @@ Be aware of the following limitations when using asynchronous events:
 
 
 [[context-functionality-events-order]]
-==== Ordering Listeners
+==== Ordering listeners
 
 If you need the listener to be invoked before another one, just add the `@Order`
 annotation to the method declaration:
@@ -8519,8 +8595,9 @@ annotation to the method declaration:
 	}
 ----
 
+
 [[context-functionality-events-generics]]
-==== Generic Events
+==== Generic events
 
 You may also use generics to further define the structure of your event. Consider an
 `EntityCreatedEvent<T>` where `T` is the type of the actual entity that got created. You
@@ -8686,14 +8763,15 @@ be used by other application modules on the same machine.
 
 [[beans-beanfactory]]
 == The BeanFactory
+
 The `BeanFactory` provides the underlying basis for Spring's IoC functionality but it is
 only used directly in integration with other third-party frameworks and is now largely
 historical in nature for most users of Spring. The `BeanFactory` and related interfaces,
 such as `BeanFactoryAware`, `InitializingBean`, `DisposableBean`, are still present in
 Spring for the purposes of backward compatibility with the large number of third-party
 frameworks that integrate with Spring. Often third-party components that can not use
-more modern equivalents such as `@PostConstruct` or `@PreDestroy` in order to remain
-compatible with JDK 1.4 or to avoid a dependency on JSR-250.
+more modern equivalents such as `@PostConstruct` or `@PreDestroy` in order to avoid a
+dependency on JSR-250.
 
 This section provides additional background into the differences between the
 `BeanFactory` and `ApplicationContext` and how one might access the IoC container

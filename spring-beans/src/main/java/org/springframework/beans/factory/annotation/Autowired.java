@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,11 @@ import java.lang.annotation.Target;
  * applicable for all arguments.
  *
  * <p>In case of a {@link java.util.Collection} or {@link java.util.Map}
- * dependency type, the container will autowire all beans matching the
- * declared value type. In case of a Map, the keys must be declared as
- * type String and will be resolved to the corresponding bean names.
+ * dependency type, the container can autowire all beans matching the
+ * declared value type. For such purposes, the map keys must be declared
+ * as type String and will be resolved to the corresponding bean names.
+ * Alternatively, a target bean may also be of type {@code Collection} or
+ * {@code Map} itself, getting injected as such.
  *
  * <p>Note that actual injection is performed through a
  * {@link org.springframework.beans.factory.config.BeanPostProcessor
