@@ -4211,11 +4211,13 @@ applicability. Spring 2.5 also added support for JSR-250 annotations such as
 Injection for Java) annotations contained in the javax.inject package such as `@Inject`
 and `@Named`. Details about those annotations can be found in the
 <<beans-standard-annotations,relevant section>>.
+
 [NOTE]
 ====
 Annotation injection is performed __before__ XML injection, thus the latter
 configuration will override the former for properties wired through both approaches.
 ====
+
 As always, you can register them as individual bean definitions, but they can also be
 implicitly registered by including the following tag in an XML-based Spring
 configuration (notice the inclusion of the `context` namespace):
@@ -4494,6 +4496,36 @@ hand, is stronger in that it enforces the property that was set by any means sup
 by the container. If no value is injected, a corresponding exception is raised.
 ====
 
+Alternatively, you may express the non-required nature of a particular dependency
+through Java 8's `java.util.Optional`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class SimpleMovieLister {
+
+		@Autowired
+		public void setMovieFinder(Optional<MovieFinder> movieFinder) {
+			...
+		}
+	}
+----
+
+As of Spring Framework 5.0, you may also use an `@Nullable` annotation (of any kind
+in any package, e.g. `javax.annotation.Nullable` from JSR-305):
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class SimpleMovieLister {
+
+		@Autowired
+		public void setMovieFinder(@Nullable MovieFinder movieFinder) {
+			...
+		}
+	}
+----
+
 You can also use `@Autowired` for interfaces that are well-known resolvable
 dependencies: `BeanFactory`, `ApplicationContext`, `Environment`, `ResourceLoader`,
 `ApplicationEventPublisher`, and `MessageSource`. These interfaces and their extended
@@ -4601,6 +4633,7 @@ The corresponding bean definitions appear as follows.
 ----
 
 
+
 [[beans-autowired-annotation-qualifiers]]
 === Fine-tuning annotation-based autowiring with qualifiers
 
@@ -4700,9 +4733,16 @@ be injected into a `Set<MovieCatalog>` annotated with `@Qualifier("action")`.
 
 [TIP]
 ====
-If you intend to express annotation-driven injection by name, do not primarily use
-`@Autowired`, even if is technically capable of referring to a bean name through
-`@Qualifier` values. Instead, use the JSR-250 `@Resource` annotation, which is
+Letting qualifier values select against target bean names, within the type-matching
+candidates, doesn't even require a `@Qualifier` annotation at the injection point.
+If there is no other resolution indicator (e.g. a qualifier or a primary marker),
+for a non-unique dependency situation, Spring will match the injection point name
+(i.e. field name or parameter name) against the target bean names and choose the
+same-named candidate, if any.
+
+That said, if you intend to express annotation-driven injection by name, do not
+primarily use `@Autowired`, even if is capable of selecting by bean name among
+type-matching candidates. Instead, use the JSR-250 `@Resource` annotation, which is
 semantically defined to identify a specific target component by its unique name, with
 the declared type being irrelevant for the matching process. `@Autowired` has rather
 different semantics: After selecting candidate beans by type, the specified String
@@ -4870,7 +4910,6 @@ consider the following annotation definition:
 		String genre();
 
 		Format format();
-
 	}
 ----
 
@@ -6003,6 +6042,34 @@ you should use the `@Named` annotation as follows:
 		}
 
 		// ...
+	}
+----
+
+Like `@Autowired`, `@Inject` can also be used with `java.util.Optional` or
+`@Nullable`. This is even more applicable here since `@Inject` does not have
+a `required` attribute.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class SimpleMovieLister {
+
+		@Inject
+		public void setMovieFinder(Optional<MovieFinder> movieFinder) {
+			...
+		}
+	}
+----
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class SimpleMovieLister {
+
+		@Inject
+		public void setMovieFinder(@Nullable MovieFinder movieFinder) {
+			...
+		}
 	}
 ----
 
