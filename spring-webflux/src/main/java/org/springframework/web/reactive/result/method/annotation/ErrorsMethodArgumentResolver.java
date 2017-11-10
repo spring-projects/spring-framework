@@ -90,8 +90,10 @@ public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverS
 
 		Object errors = context.getModel().asMap().get(BindingResult.MODEL_KEY_PREFIX + name);
 
-		Assert.notNull(errors, "An Errors/BindingResult argument is expected to be declared " +
-				"immediately after the @ModelAttribute argument to which it applies: " +
+		Assert.notNull(errors, "An Errors/BindingResult argument is expected " +
+				"immediately after the @ModelAttribute argument to which it applies. " +
+				"For @RequestBody and @RequestPart arguments, please declare them with a reactive type wrapper " +
+				"and use its onError operators to handle WebExchangeBindException: " +
 				parameter.getMethod());
 
 		return errors;

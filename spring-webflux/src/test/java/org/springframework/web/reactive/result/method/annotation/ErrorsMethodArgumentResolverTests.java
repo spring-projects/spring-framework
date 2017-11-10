@@ -123,7 +123,7 @@ public class ErrorsMethodArgumentResolverTests {
 	public void resolveWithBindingResultNotFound() throws Exception {
 
 		this.expectedException.expectMessage("An Errors/BindingResult argument is expected " +
-				"to be declared immediately after the @ModelAttribute argument");
+				"immediately after the @ModelAttribute argument");
 
 		MethodParameter parameter = this.testMethod.arg(Errors.class);
 		this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
