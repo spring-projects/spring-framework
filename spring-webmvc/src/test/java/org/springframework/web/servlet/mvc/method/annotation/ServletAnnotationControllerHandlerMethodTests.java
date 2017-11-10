@@ -83,6 +83,8 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MarshallingHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -932,6 +934,26 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		getServlet().service(request, response);
 		assertEquals("MyValue", response.getHeader("MyResponseHeader"));
 		assertEquals(404, response.getStatus());
+	}
+
+	@Test // SPR-16172
+	public void httpEntityWithContentType() throws Exception {
+		initServlet(wac -> {
+			RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
+			List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
+			messageConverters.add(new MappingJackson2HttpMessageConverter());
+			messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
+			adapterDef.getPropertyValues().add("messageConverters", messageConverters);
+			wac.registerBeanDefinition("handlerAdapter", adapterDef);
+		}, ResponseEntityController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test-entity");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals(200, response.getStatus());
+		assertEquals("application/xml", response.getHeader("Content-Type"));
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
+						"<testEntity><name>Foo Bar</name></testEntity>", response.getContentAsString());
 	}
 
 	@Test  // SPR-6877
@@ -3210,7 +3232,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@Controller
 	public static class ResponseEntityController {
 
-		@RequestMapping(path = "/foo", method = RequestMethod.POST)
+		@PostMapping("/foo")
 		public ResponseEntity<String> foo(HttpEntity<byte[]> requestEntity) throws Exception {
 			assertNotNull(requestEntity);
 			assertEquals("MyValue", requestEntity.getHeaders().getFirst("MyRequestHeader"));
@@ -3222,12 +3244,12 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			return ResponseEntity.created(location).header("MyResponseHeader", "MyValue").body(body);
 		}
 
-		@RequestMapping(path = "/bar", method = RequestMethod.GET)
+		@GetMapping("/bar")
 		public ResponseEntity<Void> bar() {
 			return ResponseEntity.notFound().header("MyResponseHeader", "MyValue").build();
 		}
 
-		@RequestMapping(path = "/baz", method = RequestMethod.GET)
+		@GetMapping("/baz")
 		public ResponseEntity<String> baz() {
 			return ResponseEntity.ok().header("MyResponseHeader", "MyValue").body("body");
 		}
@@ -3237,9 +3259,31 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			return ResponseEntity.ok().header("h1", "v1").build();
 		}
 
-		@RequestMapping(path = "/stores", method = RequestMethod.GET)
+		@GetMapping("/stores")
 		public ResponseEntity<String> getResource() {
 			return ResponseEntity.ok().body("body");
+		}
+
+		@GetMapping("/test-entity")
+		public ResponseEntity<TestEntity> testEntity() {
+			TestEntity entity = new TestEntity();
+			entity.setName("Foo Bar");
+			return ResponseEntity.ok().contentType(MediaType.APPLICATION_XML).body(entity);
+		}
+	}
+
+	@XmlRootElement
+	static class TestEntity {
+
+		private String name;
+
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
 		}
 	}
 

@@ -212,7 +212,10 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 		HttpServletRequest request = inputMessage.getServletRequest();
 		List<MediaType> requestedMediaTypes = getAcceptableMediaTypes(request);
-		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(request, valueType, declaredType);
+
+		MediaType contentType = outputMessage.getHeaders().getContentType();
+		List<MediaType> producibleMediaTypes = (contentType != null && contentType.isConcrete() ?
+				Collections.singletonList(contentType) : getProducibleMediaTypes(request, valueType, declaredType));
 
 		if (outputValue != null && producibleMediaTypes.isEmpty()) {
 			throw new HttpMessageNotWritableException("No converter found for return value of type: " + valueType);
