@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,16 +30,18 @@ import org.springframework.util.Assert;
 
 /**
  * Represents a URI template. A URI template is a URI-like String that contains variables
- * enclosed by braces ({@code {}}), which can be expanded to produce an actual URI.
+ * enclosed by braces ({@code {}}) which can be expanded to produce an actual URI.
  *
  * <p>See {@link #expand(Map)}, {@link #expand(Object[])}, and {@link #match(String)}
  * for example usages.
+ *
+ * <p>This class is designed to be thread-safe and reusable, allowing for any number
+ * of expand or match calls.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @since 3.0
- * @see <a href="http://bitworking.org/projects/URI-Templates/">URI Templates</a>
  */
 @SuppressWarnings("serial")
 public class UriTemplate implements Serializable {
