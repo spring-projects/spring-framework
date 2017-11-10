@@ -19,7 +19,9 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.time.Duration;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 
@@ -29,9 +31,9 @@ import org.springframework.core.ResolvableType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.DataBinder;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 
@@ -42,29 +44,22 @@ import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link ErrorsMethodArgumentResolver}.
- *
  * @author Rossen Stoyanchev
  */
-public class ErrorsArgumentResolverTests {
+public class ErrorsMethodArgumentResolverTests {
 
-	private ErrorsMethodArgumentResolver resolver ;
+	private final ErrorsMethodArgumentResolver resolver =
+			new ErrorsMethodArgumentResolver(new ReactiveAdapterRegistry());
 
 	private final BindingContext bindingContext = new BindingContext();
 
-	private BindingResult bindingResult;
-
-	private MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("/path"));
+	private final MockServerWebExchange exchange =
+			MockServerWebExchange.from(MockServerHttpRequest.post("/path"));
 
 	private final ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
-
-	@Before
-	public void setup() throws Exception {
-		this.resolver = new ErrorsMethodArgumentResolver(new ReactiveAdapterRegistry());
-		Foo foo = new Foo();
-		WebExchangeDataBinder binder = this.bindingContext.createDataBinder(this.exchange, foo, "foo");
-		this.bindingResult = binder.getBindingResult();
-	}
+	@Rule
+	public final ExpectedException expectedException = ExpectedException.none();
 
 
 	@Test
@@ -82,48 +77,53 @@ public class ErrorsArgumentResolverTests {
 		MethodParameter parameter = this.testMethod.arg(String.class);
 		assertFalse(this.resolver.supportsParameter(parameter));
 
-		try {
-			parameter = this.testMethod.arg(ResolvableType.forClassWithGenerics(Mono.class, Errors.class));
-			assertFalse(this.resolver.supportsParameter(parameter));
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertTrue("Unexpected error message:\n" + ex.getMessage(),
-					ex.getMessage().startsWith(
-							"ErrorsMethodArgumentResolver doesn't support reactive type wrapper"));
-		}
+		this.expectedException.expectMessage("ErrorsMethodArgumentResolver doesn't support reactive type wrapper");
+		parameter = this.testMethod.arg(ResolvableType.forClassWithGenerics(Mono.class, Errors.class));
+		this.resolver.supportsParameter(parameter);
 	}
 
 	@Test
 	public void resolveErrors() throws Exception {
-		testResolve(this.bindingResult);
-	}
 
-	@Test
-	public void resolveErrorsMono() throws Exception {
-		MonoProcessor<BindingResult> monoProcessor = MonoProcessor.create();
-		monoProcessor.onNext(this.bindingResult);
-		testResolve(monoProcessor);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void resolveErrorsAfterMonoModelAttribute() throws Exception {
-		MethodParameter parameter = this.testMethod.arg(BindingResult.class);
-		this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange).block(Duration.ofMillis(5000));
-	}
-
-
-	private void testResolve(Object bindingResult) {
-
-		String key = BindingResult.MODEL_KEY_PREFIX + "foo";
-		this.bindingContext.getModel().asMap().put(key, bindingResult);
+		BindingResult bindingResult = createBindingResult(new Foo(), "foo");
+		this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "foo", bindingResult);
 
 		MethodParameter parameter = this.testMethod.arg(Errors.class);
-
 		Object actual = this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
 				.block(Duration.ofMillis(5000));
 
-		assertSame(this.bindingResult, actual);
+		assertSame(bindingResult, actual);
+	}
+
+	private BindingResult createBindingResult(Foo target, String name) {
+		DataBinder binder = this.bindingContext.createDataBinder(this.exchange, target, name);
+		return binder.getBindingResult();
+	}
+
+	@Test
+	public void resolveErrorsWithMono() throws Exception {
+
+		BindingResult bindingResult = createBindingResult(new Foo(), "foo");
+		MonoProcessor<BindingResult> monoProcessor = MonoProcessor.create();
+		monoProcessor.onNext(bindingResult);
+		this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "foo", monoProcessor);
+
+		MethodParameter parameter = this.testMethod.arg(Errors.class);
+		Object actual = this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
+				.block(Duration.ofMillis(5000));
+
+		assertSame(bindingResult, actual);
+	}
+
+	@Test
+	public void resolveErrorsAfterMonoModelAttribute() throws Exception {
+
+		this.expectedException.expectMessage("An @ModelAttribute and an Errors/BindingResult) arguments " +
+				"cannot both be declared with an async type wrapper.");
+
+		MethodParameter parameter = this.testMethod.arg(BindingResult.class);
+		this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
+				.block(Duration.ofMillis(5000));
 	}
 
 
@@ -148,6 +148,7 @@ public class ErrorsArgumentResolverTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	void handle(
 			@ModelAttribute Foo foo,
 			Errors errors,

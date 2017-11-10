@@ -75,6 +75,7 @@ public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverS
 	}
 
 	private String getModelAttributeName(MethodParameter parameter) {
+
 		Assert.isTrue(parameter.getParameterIndex() > 0,
 				"Errors argument must be immediately after a model attribute argument");
 
@@ -82,9 +83,10 @@ public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverS
 		MethodParameter attributeParam = MethodParameter.forExecutable(parameter.getExecutable(), index);
 		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(attributeParam.getParameterType());
 
-		Assert.isNull(adapter, "Errors/BindingResult cannot be used with an async model attribute. " +
-				"Either declare the model attribute without the async wrapper type " +
-				"or handle WebExchangeBindException through the async type.");
+		Assert.isNull(adapter, "An @ModelAttribute and an Errors/BindingResult) arguments " +
+				"cannot both be declared with an async type wrapper. " +
+				"Either declare the @ModelAttribute without an async wrapper type or " +
+				"handle a WebExchangeBindException error signal through the async type.");
 
 		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
 		if (ann != null && StringUtils.hasText(ann.value())) {
