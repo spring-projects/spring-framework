@@ -22,6 +22,7 @@ import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
+import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
 import org.springframework.beans.BeanUtils;
@@ -320,9 +321,8 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 		this.internalPersistenceUnitManager.setResourceLoader(resourceLoader);
 	}
 
-
 	@Override
-	protected EntityManagerFactory createNativeEntityManagerFactory() throws PersistenceException {
+	protected void beforeAfterPropertiesSet() {
 		PersistenceUnitManager managerToUse = this.persistenceUnitManager;
 		if (this.persistenceUnitManager == null) {
 			this.internalPersistenceUnitManager.afterPropertiesSet();
@@ -330,6 +330,10 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 		}
 
 		this.persistenceUnitInfo = determinePersistenceUnitInfo(managerToUse);
+	}
+
+	@Override
+	protected EntityManagerFactory createNativeEntityManagerFactory() throws PersistenceException {
 		JpaVendorAdapter jpaVendorAdapter = getJpaVendorAdapter();
 		if (jpaVendorAdapter != null && this.persistenceUnitInfo instanceof SmartPersistenceUnitInfo) {
 			String rootPackage = jpaVendorAdapter.getPersistenceProviderRootPackage();
@@ -392,6 +396,13 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	protected void postProcessEntityManagerFactory(EntityManagerFactory emf, PersistenceUnitInfo pui) {
 	}
 
+	@Override
+	protected PersistenceUnitTransactionType determineTransactionType() {
+		if (this.persistenceUnitInfo != null) {
+			return this.persistenceUnitInfo.getTransactionType();
+		}
+		return super.determineTransactionType();
+	}
 
 	@Override
 	@Nullable

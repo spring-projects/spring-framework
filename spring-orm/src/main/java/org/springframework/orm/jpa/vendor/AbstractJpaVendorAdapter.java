@@ -16,9 +16,11 @@
 
 package org.springframework.orm.jpa.vendor;
 
+import java.util.Collections;
 import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.JpaDialect;
@@ -127,6 +129,11 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	@Nullable
 	public Map<String, ?> getJpaPropertyMap() {
 		return null;
+	}
+
+	@Override
+	public Map<String, ?> getAdditionalJpaPropertyMapByTransactionType(@Nullable PersistenceUnitTransactionType transactionType) {
+		return Collections.emptyMap();
 	}
 
 	@Override

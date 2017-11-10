@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
+import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import org.springframework.lang.Nullable;
 
@@ -64,6 +65,20 @@ public interface JpaVendorAdapter {
 	 */
 	@Nullable
 	Map<String, ?> getJpaPropertyMap();
+
+	/**
+	 * Return a Map of vendor-specific JPA properties based on the transaction type,
+	 * typically based on settings in this JpaVendorAdapter instance.
+	 * <p>Note that there might be further JPA properties defined on
+	 * the EntityManagerFactory bean, which might potentially override
+	 * individual JPA property values specified here.
+	 * @param transactionType the transaction type if can determine it or null if we can't
+	 * @return a Map of JPA properties, as accepted by the standard
+	 * JPA bootstrap facilities, or an empty Map if there are no such properties to expose
+	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, java.util.Map)
+	 * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory(javax.persistence.spi.PersistenceUnitInfo, java.util.Map)
+	 */
+	Map<String, ?> getAdditionalJpaPropertyMapByTransactionType(@Nullable PersistenceUnitTransactionType transactionType);
 
 	/**
 	 * Return the vendor-specific JpaDialect implementation for this
