@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
+import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.dialect.DB2Dialect;
@@ -35,6 +36,8 @@ import org.hibernate.dialect.SQLServer2012Dialect;
 import org.hibernate.dialect.SybaseDialect;
 
 import org.springframework.lang.Nullable;
+
+import static javax.persistence.spi.PersistenceUnitTransactionType.JTA;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Hibernate
@@ -130,7 +133,13 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 			jpaProperties.put(AvailableSettings.SHOW_SQL, "true");
 		}
 
-		if (this.jpaDialect.prepareConnection) {
+		return jpaProperties;
+	}
+
+	@Override
+	public Map<String, ?> getAdditionalJpaPropertyMapByTransactionType(@Nullable PersistenceUnitTransactionType transactionType) {
+		Map<String, Object> jpaProperties = new HashMap<>();
+		if (this.jpaDialect.prepareConnection && transactionType != JTA) {
 			// Hibernate 5.1/5.2: manually enforce connection release mode ON_CLOSE (the former default)
 			try {
 				// Try Hibernate 5.2
@@ -148,7 +157,6 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 				}
 			}
 		}
-
 		return jpaProperties;
 	}
 

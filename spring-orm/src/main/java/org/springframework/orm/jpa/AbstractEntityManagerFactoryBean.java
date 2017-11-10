@@ -38,6 +38,7 @@ import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
+import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -336,18 +337,20 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 	@Override
 	public final void afterPropertiesSet() throws PersistenceException {
+		beforeAfterPropertiesSet();
 		if (this.jpaVendorAdapter != null) {
 			if (this.persistenceProvider == null) {
 				this.persistenceProvider = this.jpaVendorAdapter.getPersistenceProvider();
 			}
 			Map<String, ?> vendorPropertyMap = this.jpaVendorAdapter.getJpaPropertyMap();
 			if (vendorPropertyMap != null) {
-				vendorPropertyMap.forEach((key, value) -> {
-					if (!this.jpaPropertyMap.containsKey(key)) {
-						this.jpaPropertyMap.put(key, value);
-					}
-				});
+				vendorPropertyMap.forEach(this::addJpaPropertyIfNotExists);
 			}
+
+			PersistenceUnitTransactionType transactionType = determineTransactionType();
+			jpaVendorAdapter.getAdditionalJpaPropertyMapByTransactionType(transactionType)
+				.forEach(this::addJpaPropertyIfNotExists);
+
 			if (this.entityManagerFactoryInterface == null) {
 				this.entityManagerFactoryInterface = this.jpaVendorAdapter.getEntityManagerFactoryInterface();
 				if (!ClassUtils.isVisible(this.entityManagerFactoryInterface, this.beanClassLoader)) {
@@ -378,6 +381,21 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		// application-managed EntityManager proxy that automatically joins
 		// existing transactions.
 		this.entityManagerFactory = createEntityManagerFactoryProxy(this.nativeEntityManagerFactory);
+	}
+
+	@Nullable
+	protected PersistenceUnitTransactionType determineTransactionType() {
+		return null;
+	}
+
+	private void addJpaPropertyIfNotExists(String key, Object value) {
+		if (!this.jpaPropertyMap.containsKey(key)) {
+			this.jpaPropertyMap.put(key, value);
+		}
+	}
+
+	protected void beforeAfterPropertiesSet() {
+		// Allow subclasses to basically call afterPropertiesSet as well before this class
 	}
 
 	private EntityManagerFactory buildNativeEntityManagerFactory() {
