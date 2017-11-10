@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.time.Duration;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -40,7 +39,6 @@ import org.springframework.web.reactive.BindingContext;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link ErrorsMethodArgumentResolver}.
@@ -69,21 +67,16 @@ public class ErrorsMethodArgumentResolverTests {
 
 		parameter = this.testMethod.arg(BindingResult.class);
 		assertTrue(this.resolver.supportsParameter(parameter));
-	}
 
-	@Test
-	public void doesNotSupport() throws Exception {
-
-		MethodParameter parameter = this.testMethod.arg(String.class);
-		assertFalse(this.resolver.supportsParameter(parameter));
-
-		this.expectedException.expectMessage("ErrorsMethodArgumentResolver doesn't support reactive type wrapper");
 		parameter = this.testMethod.arg(ResolvableType.forClassWithGenerics(Mono.class, Errors.class));
-		this.resolver.supportsParameter(parameter);
+		assertTrue(this.resolver.supportsParameter(parameter));
+
+		parameter = this.testMethod.arg(String.class);
+		assertFalse(this.resolver.supportsParameter(parameter));
 	}
 
 	@Test
-	public void resolveErrors() throws Exception {
+	public void resolve() throws Exception {
 
 		BindingResult bindingResult = createBindingResult(new Foo(), "foo");
 		this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "foo", bindingResult);
@@ -101,7 +94,7 @@ public class ErrorsMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveErrorsWithMono() throws Exception {
+	public void resolveWithMono() throws Exception {
 
 		BindingResult bindingResult = createBindingResult(new Foo(), "foo");
 		MonoProcessor<BindingResult> monoProcessor = MonoProcessor.create();
@@ -116,12 +109,23 @@ public class ErrorsMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveErrorsAfterMonoModelAttribute() throws Exception {
+	public void resolveWithMonoOnBindingResultAndModelAttribute() throws Exception {
 
 		this.expectedException.expectMessage("An @ModelAttribute and an Errors/BindingResult) arguments " +
 				"cannot both be declared with an async type wrapper.");
 
 		MethodParameter parameter = this.testMethod.arg(BindingResult.class);
+		this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
+				.block(Duration.ofMillis(5000));
+	}
+
+	@Test // SPR-16187
+	public void resolveWithBindingResultNotFound() throws Exception {
+
+		this.expectedException.expectMessage("An Errors/BindingResult argument is expected " +
+				"to be declared immediately after the @ModelAttribute argument");
+
+		MethodParameter parameter = this.testMethod.arg(Errors.class);
 		this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
 				.block(Duration.ofMillis(5000));
 	}

@@ -48,7 +48,7 @@ public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverS
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return checkParameterTypeNoReactiveWrapper(parameter, Errors.class::isAssignableFrom);
+		return checkParameterType(parameter, Errors.class::isAssignableFrom);
 	}
 
 
@@ -56,25 +56,21 @@ public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverS
 	public Mono<Object> resolveArgument(
 			MethodParameter parameter, BindingContext context, ServerWebExchange exchange) {
 
-		String name = getModelAttributeName(parameter);
-		Object errors = context.getModel().asMap().get(BindingResult.MODEL_KEY_PREFIX + name);
+		Object errors = getErrors(parameter, context);
 
-		Mono<?> errorsMono;
 		if (Mono.class.isAssignableFrom(errors.getClass())) {
-			errorsMono = (Mono<?>) errors;
+			return ((Mono<?>) errors).cast(Object.class);
 		}
 		else if (Errors.class.isAssignableFrom(errors.getClass())) {
-			errorsMono = Mono.just(errors);
+			return Mono.just(errors);
 		}
 		else {
 			throw new IllegalStateException(
 					"Unexpected Errors/BindingResult type: " + errors.getClass().getName());
 		}
-
-		return errorsMono.cast(Object.class);
 	}
 
-	private String getModelAttributeName(MethodParameter parameter) {
+	private Object getErrors(MethodParameter parameter, BindingContext context) {
 
 		Assert.isTrue(parameter.getParameterIndex() > 0,
 				"Errors argument must be immediately after a model attribute argument");
@@ -88,11 +84,17 @@ public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverS
 				"Either declare the @ModelAttribute without an async wrapper type or " +
 				"handle a WebExchangeBindException error signal through the async type.");
 
-		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
-		if (ann != null && StringUtils.hasText(ann.value())) {
-			return ann.value();
-		}
-		return Conventions.getVariableNameForParameter(attributeParam);
+		ModelAttribute annot = parameter.getParameterAnnotation(ModelAttribute.class);
+		String name = (annot != null && StringUtils.hasText(annot.value()) ?
+				annot.value() : Conventions.getVariableNameForParameter(attributeParam));
+
+		Object errors = context.getModel().asMap().get(BindingResult.MODEL_KEY_PREFIX + name);
+
+		Assert.notNull(errors, "An Errors/BindingResult argument is expected to be declared " +
+				"immediately after the @ModelAttribute argument to which it applies: " +
+				parameter.getMethod());
+
+		return errors;
 	}
 
 }
