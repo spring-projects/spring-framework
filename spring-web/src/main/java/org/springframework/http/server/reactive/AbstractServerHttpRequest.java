@@ -59,6 +59,9 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	@Nullable
 	private MultiValueMap<String, HttpCookie> cookies;
 
+	@Nullable
+	private SslInfo sslInfo;
+
 
 	/**
 	 * Constructor with the URI and headers for the request.
@@ -151,6 +154,23 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	 * thread-safe access to cookie data.
 	 */
 	protected abstract MultiValueMap<String, HttpCookie> initCookies();
+
+	@Nullable
+	@Override
+	public SslInfo getSslInfo() {
+		if (this.sslInfo == null) {
+			this.sslInfo = initSslInfo();
+		}
+		return this.sslInfo;
+	}
+
+	/**
+	 * Obtain SSL session information from the underlying "native" request.
+	 * @return the SSL information or {@code null} if not available
+	 * @since 5.0.2
+	 */
+	@Nullable
+	protected abstract SslInfo initSslInfo();
 
 	/**
 	 * Return the underlying server response.

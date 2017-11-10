@@ -21,6 +21,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 import java.util.Map;
 import javax.servlet.AsyncContext;
@@ -88,7 +89,6 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		this.bodyPublisher = new RequestBodyPublisher(inputStream);
 		this.bodyPublisher.registerReadListener();
 	}
-
 
 	private static URI initUri(HttpServletRequest request) {
 		Assert.notNull(request, "'request' must not be null");
@@ -170,6 +170,16 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	public InetSocketAddress getRemoteAddress() {
 		return new InetSocketAddress(this.request.getRemoteHost(), this.request.getRemotePort());
+	}
+
+	@Nullable
+	protected SslInfo initSslInfo() {
+		if (!this.request.isSecure()) {
+			return null;
+		}
+		return new DefaultSslInfo(
+				(String) request.getAttribute("javax.servlet.request.ssl_session_id"),
+				(X509Certificate[]) request.getAttribute("java.security.cert.X509Certificate"));
 	}
 
 	@Override

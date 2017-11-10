@@ -19,6 +19,7 @@ package org.springframework.http.server.reactive;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import javax.net.ssl.SSLSession;
 
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -31,6 +32,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -108,6 +110,7 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 		return headers;
 	}
 
+
 	@Override
 	public String getMethodValue() {
 		return this.request.method().name();
@@ -128,6 +131,16 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	public InetSocketAddress getRemoteAddress() {
 		return this.request.remoteAddress();
+	}
+
+	@Nullable
+	protected SslInfo initSslInfo() {
+		SslHandler sslHandler = this.request.context().channel().pipeline().get(SslHandler.class);
+		if (sslHandler != null) {
+			SSLSession session = sslHandler.engine().getSession();
+			return new DefaultSslInfo(session);
+		}
+		return null;
 	}
 
 	@Override

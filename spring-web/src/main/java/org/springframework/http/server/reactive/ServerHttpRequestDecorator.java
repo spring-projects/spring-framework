@@ -96,6 +96,12 @@ public class ServerHttpRequestDecorator implements ServerHttpRequest {
 		return getDelegate().getRemoteAddress();
 	}
 
+	@Nullable
+	@Override
+	public SslInfo getSslInfo() {
+		return getDelegate().getSslInfo();
+	}
+
 	@Override
 	public Flux<DataBuffer> getBody() {
 		return getDelegate().getBody();

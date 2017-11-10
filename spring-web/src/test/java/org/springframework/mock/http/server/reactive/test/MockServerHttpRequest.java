@@ -38,6 +38,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.AbstractServerHttpRequest;
+import org.springframework.http.server.reactive.SslInfo;
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeType;
@@ -60,17 +61,22 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	@Nullable
 	private final InetSocketAddress remoteAddress;
 
+	@Nullable
+	private final SslInfo sslInfo;
+
 	private final Flux<DataBuffer> body;
 
 
 	private MockServerHttpRequest(HttpMethod httpMethod, URI uri, @Nullable String contextPath,
 			HttpHeaders headers, MultiValueMap<String, HttpCookie> cookies,
-			@Nullable InetSocketAddress remoteAddress, Publisher<? extends DataBuffer> body) {
+			@Nullable InetSocketAddress remoteAddress, @Nullable SslInfo sslInfo,
+			Publisher<? extends DataBuffer> body) {
 
 		super(uri, contextPath, headers);
 		this.httpMethod = httpMethod;
 		this.cookies = cookies;
 		this.remoteAddress = remoteAddress;
+		this.sslInfo = sslInfo;
 		this.body = Flux.from(body);
 	}
 
@@ -89,6 +95,12 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	@Nullable
 	public InetSocketAddress getRemoteAddress() {
 		return this.remoteAddress;
+	}
+
+	@Nullable
+	@Override
+	protected SslInfo initSslInfo() {
+		return this.sslInfo;
 	}
 
 	@Override
@@ -217,6 +229,11 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		 * Set the remote address to return.
 		 */
 		B remoteAddress(InetSocketAddress remoteAddress);
+
+		/**
+		 * Set SSL session information and certificates.
+		 */
+		void sslInfo(SslInfo sslInfo);
 
 		/**
 		 * Add one or more cookies.
@@ -365,6 +382,9 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		@Nullable
 		private InetSocketAddress remoteAddress;
 
+		@Nullable
+		private SslInfo sslInfo;
+
 
 		public DefaultBodyBuilder(HttpMethod method, URI url) {
 			this.method = method;
@@ -381,6 +401,11 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		public BodyBuilder remoteAddress(InetSocketAddress remoteAddress) {
 			this.remoteAddress = remoteAddress;
 			return this;
+		}
+
+		@Override
+		public void sslInfo(SslInfo sslInfo) {
+			this.sslInfo = sslInfo;
 		}
 
 		@Override
@@ -482,7 +507,7 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		public MockServerHttpRequest body(Publisher<? extends DataBuffer> body) {
 			applyCookiesIfNecessary();
 			return new MockServerHttpRequest(this.method, this.url, this.contextPath,
-					this.headers, this.cookies, this.remoteAddress, body);
+					this.headers, this.cookies, this.remoteAddress, this.sslInfo, body);
 		}
 
 		private void applyCookiesIfNecessary() {

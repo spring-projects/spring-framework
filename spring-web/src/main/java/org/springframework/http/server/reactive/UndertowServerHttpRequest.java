@@ -23,6 +23,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.function.IntPredicate;
+import javax.net.ssl.SSLSession;
 
 import io.undertow.connector.ByteBufferPool;
 import io.undertow.connector.PooledByteBuffer;
@@ -99,6 +100,16 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	public InetSocketAddress getRemoteAddress() {
 		return this.exchange.getSourceAddress();
+	}
+
+	@Nullable
+	@Override
+	protected SslInfo initSslInfo() {
+		SSLSession session = this.exchange.getConnection().getSslSession();
+		if (session != null) {
+			return new DefaultSslInfo(session);
+		}
+		return null;
 	}
 
 	@Override

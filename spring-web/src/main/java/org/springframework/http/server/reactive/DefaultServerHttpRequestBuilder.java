@@ -53,9 +53,6 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 	private final MultiValueMap<String, HttpCookie> cookies;
 
 	@Nullable
-	private final InetSocketAddress remoteAddress;
-
-	@Nullable
 	private String uriPath;
 
 	@Nullable
@@ -71,7 +68,6 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 		this.uri = original.getURI();
 		this.httpMethodValue = original.getMethodValue();
-		this.remoteAddress = original.getRemoteAddress();
 		this.body = original.getBody();
 
 		this.httpHeaders = new HttpHeaders();
@@ -135,8 +131,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 	public ServerHttpRequest build() {
 		URI uriToUse = getUriToUse();
 		return new DefaultServerHttpRequest(uriToUse, this.contextPath, this.httpHeaders,
-				this.httpMethodValue, this.cookies, this.remoteAddress, this.body,
-				this.originalRequest);
+				this.httpMethodValue, this.cookies, this.body, this.originalRequest);
 
 	}
 
@@ -162,6 +157,9 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		@Nullable
 		private final InetSocketAddress remoteAddress;
 
+		@Nullable
+		private final SslInfo sslInfo;
+
 		private final Flux<DataBuffer> body;
 
 		private final ServerHttpRequest originalRequest;
@@ -169,13 +167,13 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 		public DefaultServerHttpRequest(URI uri, @Nullable String contextPath,
 				HttpHeaders headers, String methodValue, MultiValueMap<String, HttpCookie> cookies,
-				@Nullable InetSocketAddress remoteAddress,
 				Flux<DataBuffer> body, ServerHttpRequest originalRequest) {
 
 			super(uri, contextPath, headers);
 			this.methodValue = methodValue;
 			this.cookies = cookies;
-			this.remoteAddress = remoteAddress;
+			this.remoteAddress = originalRequest.getRemoteAddress();
+			this.sslInfo = originalRequest.getSslInfo();
 			this.body = body;
 			this.originalRequest = originalRequest;
 		}
@@ -195,6 +193,12 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		@Override
 		public InetSocketAddress getRemoteAddress() {
 			return this.remoteAddress;
+		}
+
+		@Nullable
+		@Override
+		protected SslInfo initSslInfo() {
+			return this.sslInfo;
 		}
 
 		@Override
