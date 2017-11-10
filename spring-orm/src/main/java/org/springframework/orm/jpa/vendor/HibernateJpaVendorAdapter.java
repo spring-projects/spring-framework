@@ -21,6 +21,8 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
+import javax.persistence.spi.PersistenceUnitInfo;
+import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.dialect.DB2Dialect;
@@ -85,13 +87,15 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	 * new connection handling mode {@code DELAYED_ACQUISITION_AND_HOLD} in that case
 	 * unless a user-specified connection handling mode property indicates otherwise;
 	 * switch this flag to {@code false} to avoid that interference.
-	 * <p><b>NOTE: Per the explanation above, you may have to turn this flag off
-	 * when using Hibernate in a JTA environment, e.g. on WebLogic.</b> Alternatively,
-	 * set Hibernate 5.2's "hibernate.connection.handling_mode" property to
-	 * "DELAYED_ACQUISITION_AND_RELEASE_AFTER_TRANSACTION" or even
+	 * <p><b>NOTE: For a persistence unit with transaction type JTA e.g. on WebLogic,
+	 * the connection release mode will never be altered from its provider default,
+	 * i.e. not be forced to {@code DELAYED_ACQUISITION_AND_HOLD} by this flag.</b>
+	 * Alternatively, set Hibernate 5.2's "hibernate.connection.handling_mode"
+	 * property to "DELAYED_ACQUISITION_AND_RELEASE_AFTER_TRANSACTION" or even
 	 * "DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT" in such a scenario.
 	 * @since 4.3.1
-	 * @see #getJpaPropertyMap()
+	 * @see PersistenceUnitInfo#getTransactionType()
+	 * @see #getJpaPropertyMap(PersistenceUnitInfo)
 	 * @see HibernateJpaDialect#beginTransaction
 	 */
 	public void setPrepareConnection(boolean prepareConnection) {
@@ -107,6 +111,32 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	@Override
 	public String getPersistenceProviderRootPackage() {
 		return "org.hibernate";
+	}
+
+	@Override
+	public Map<String, Object> getJpaPropertyMap(PersistenceUnitInfo pui) {
+		Map<String, Object> jpaProperties = getJpaPropertyMap();
+
+		if (this.jpaDialect.prepareConnection && pui.getTransactionType() != PersistenceUnitTransactionType.JTA) {
+			// Hibernate 5.1/5.2: manually enforce connection release mode ON_CLOSE (the former default)
+			try {
+				// Try Hibernate 5.2
+				AvailableSettings.class.getField("CONNECTION_HANDLING");
+				jpaProperties.put("hibernate.connection.handling_mode", "DELAYED_ACQUISITION_AND_HOLD");
+			}
+			catch (NoSuchFieldException ex) {
+				// Try Hibernate 5.1
+				try {
+					AvailableSettings.class.getField("ACQUIRE_CONNECTIONS");
+					jpaProperties.put("hibernate.connection.release_mode", "ON_CLOSE");
+				}
+				catch (NoSuchFieldException ex2) {
+					// on Hibernate 5.0.x or lower - no need to change the default there
+				}
+			}
+		}
+
+		return jpaProperties;
 	}
 
 	@Override
@@ -128,25 +158,6 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		}
 		if (isShowSql()) {
 			jpaProperties.put(AvailableSettings.SHOW_SQL, "true");
-		}
-
-		if (this.jpaDialect.prepareConnection) {
-			// Hibernate 5.1/5.2: manually enforce connection release mode ON_CLOSE (the former default)
-			try {
-				// Try Hibernate 5.2
-				AvailableSettings.class.getField("CONNECTION_HANDLING");
-				jpaProperties.put("hibernate.connection.handling_mode", "DELAYED_ACQUISITION_AND_HOLD");
-			}
-			catch (NoSuchFieldException ex) {
-				// Try Hibernate 5.1
-				try {
-					AvailableSettings.class.getField("ACQUIRE_CONNECTIONS");
-					jpaProperties.put("hibernate.connection.release_mode", "ON_CLOSE");
-				}
-				catch (NoSuchFieldException ex2) {
-					// on Hibernate 5.0.x or lower - no need to change the default there
-				}
-			}
 		}
 
 		return jpaProperties;

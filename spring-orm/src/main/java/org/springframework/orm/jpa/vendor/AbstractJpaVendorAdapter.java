@@ -16,9 +16,11 @@
 
 package org.springframework.orm.jpa.vendor;
 
+import java.util.Collections;
 import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.spi.PersistenceUnitInfo;
 
 import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.JpaDialect;
@@ -124,9 +126,13 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	}
 
 	@Override
-	@Nullable
+	public Map<String, ?> getJpaPropertyMap(PersistenceUnitInfo pui) {
+		return getJpaPropertyMap();
+	}
+
+	@Override
 	public Map<String, ?> getJpaPropertyMap() {
-		return null;
+		return Collections.emptyMap();
 	}
 
 	@Override
@@ -145,10 +151,6 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 		return EntityManager.class;
 	}
 
-	/**
-	 * Post-process the EntityManagerFactory after it has been initialized.
-	 * @param emf the EntityManagerFactory to process
-	 */
 	@Override
 	public void postProcessEntityManagerFactory(EntityManagerFactory emf) {
 	}
