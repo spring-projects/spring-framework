@@ -27,7 +27,6 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -115,18 +114,15 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 	protected ListenableFuture<ClientHttpResponse> executeInternal(final HttpHeaders headers) throws IOException {
 		final SettableListenableFuture<ClientHttpResponse> responseFuture = new SettableListenableFuture<>();
 
-		ChannelFutureListener connectionListener = new ChannelFutureListener() {
-			@Override
-			public void operationComplete(ChannelFuture future) throws Exception {
-				if (future.isSuccess()) {
-					Channel channel = future.channel();
-					channel.pipeline().addLast(new RequestExecuteHandler(responseFuture));
-					FullHttpRequest nettyRequest = createFullHttpRequest(headers);
-					channel.writeAndFlush(nettyRequest);
-				}
-				else {
-					responseFuture.setException(future.cause());
-				}
+		ChannelFutureListener connectionListener = future -> {
+			if (future.isSuccess()) {
+				Channel channel = future.channel();
+				channel.pipeline().addLast(new RequestExecuteHandler(responseFuture));
+				FullHttpRequest nettyRequest = createFullHttpRequest(headers);
+				channel.writeAndFlush(nettyRequest);
+			}
+			else {
+				responseFuture.setException(future.cause());
 			}
 		};
 

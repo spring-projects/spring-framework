@@ -93,7 +93,6 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	 * <p><strong>Note:</strong> the charset is used only if the
 	 * {@link #setUrlPathHelper urlPathHelper} property is also configured and
 	 * its {@code urlDecode} property is set to true.
-	 * @param locationCharsets charsets by location
 	 * @since 4.3.13
 	 */
 	public void setLocationCharsets(Map<Resource, Charset> locationCharsets) {
@@ -106,14 +105,13 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	 * @since 4.3.13
 	 */
 	public Map<Resource, Charset> getLocationCharsets() {
-		return Collections.unmodifiableMap(locationCharsets);
+		return Collections.unmodifiableMap(this.locationCharsets);
 	}
 
 	/**
 	 * Provide a reference to the {@link UrlPathHelper} used to map requests to
 	 * static resources. This helps to derive information about the lookup path
 	 * such as whether it is decoded or not.
-	 * @param urlPathHelper a reference to the path helper
 	 * @since 4.3.13
 	 */
 	public void setUrlPathHelper(@Nullable UrlPathHelper urlPathHelper) {
@@ -128,6 +126,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	public UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}
+
 
 	@Override
 	protected Resource resolveResourceInternal(@Nullable HttpServletRequest request, String requestPath,

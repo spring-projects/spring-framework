@@ -153,13 +153,12 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * {@link org.springframework.core.io.UrlResource URL resources} such as a
 	 * file or an HTTP URL location and is used in {@link PathResourceResolver}
 	 * to correctly encode paths relative to the location.
-	 * <p><strong>Note:</strong> the charset is used only if the
+	 * <p><strong>Note:</strong> The charset is used only if the
 	 * {@link #setUrlPathHelper urlPathHelper} property is also configured and
-	 * its {@code urlDecode} property is set to true.
-	 * @param locationCharsets charsets by location
+	 * its {@code urlDecode} property is set to {@code true}.
 	 * @since 4.3.13
 	 */
-	public void setLocationCharsets(Map<Resource,Charset> locationCharsets) {
+	public void setLocationCharsets(Map<Resource, Charset> locationCharsets) {
 		this.locationCharsets.clear();
 		this.locationCharsets.putAll(locationCharsets);
 	}
@@ -169,7 +168,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * @since 4.3.13
 	 */
 	public Map<Resource, Charset> getLocationCharsets() {
-		return Collections.unmodifiableMap(locationCharsets);
+		return Collections.unmodifiableMap(this.locationCharsets);
 	}
 
 	/**
@@ -286,7 +285,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * Provide a reference to the {@link UrlPathHelper} used to map requests to
 	 * static resources. This helps to derive information about the lookup path
 	 * such as whether it is decoded or not.
-	 * @param urlPathHelper a reference to the path helper
 	 * @since 4.3.13
 	 */
 	public void setUrlPathHelper(@Nullable UrlPathHelper urlPathHelper) {
