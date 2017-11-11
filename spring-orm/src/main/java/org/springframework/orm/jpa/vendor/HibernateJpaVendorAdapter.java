@@ -115,32 +115,16 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
 	@Override
 	public Map<String, Object> getJpaPropertyMap(PersistenceUnitInfo pui) {
-		Map<String, Object> jpaProperties = getJpaPropertyMap();
-
-		if (this.jpaDialect.prepareConnection && pui.getTransactionType() != PersistenceUnitTransactionType.JTA) {
-			// Hibernate 5.1/5.2: manually enforce connection release mode ON_CLOSE (the former default)
-			try {
-				// Try Hibernate 5.2
-				AvailableSettings.class.getField("CONNECTION_HANDLING");
-				jpaProperties.put("hibernate.connection.handling_mode", "DELAYED_ACQUISITION_AND_HOLD");
-			}
-			catch (NoSuchFieldException ex) {
-				// Try Hibernate 5.1
-				try {
-					AvailableSettings.class.getField("ACQUIRE_CONNECTIONS");
-					jpaProperties.put("hibernate.connection.release_mode", "ON_CLOSE");
-				}
-				catch (NoSuchFieldException ex2) {
-					// on Hibernate 5.0.x or lower - no need to change the default there
-				}
-			}
-		}
-
-		return jpaProperties;
+		return buildJpaPropertyMap(this.jpaDialect.prepareConnection &&
+				pui.getTransactionType() != PersistenceUnitTransactionType.JTA);
 	}
 
 	@Override
 	public Map<String, Object> getJpaPropertyMap() {
+		return buildJpaPropertyMap(this.jpaDialect.prepareConnection);
+	}
+
+	private Map<String, Object> buildJpaPropertyMap(boolean connectionReleaseOnClose) {
 		Map<String, Object> jpaProperties = new HashMap<>();
 
 		if (getDatabasePlatform() != null) {
@@ -158,6 +142,25 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		}
 		if (isShowSql()) {
 			jpaProperties.put(AvailableSettings.SHOW_SQL, "true");
+		}
+
+		if (connectionReleaseOnClose) {
+			// Hibernate 5.1/5.2: manually enforce connection release mode ON_CLOSE (the former default)
+			try {
+				// Try Hibernate 5.2
+				AvailableSettings.class.getField("CONNECTION_HANDLING");
+				jpaProperties.put("hibernate.connection.handling_mode", "DELAYED_ACQUISITION_AND_HOLD");
+			}
+			catch (NoSuchFieldException ex) {
+				// Try Hibernate 5.1
+				try {
+					AvailableSettings.class.getField("ACQUIRE_CONNECTIONS");
+					jpaProperties.put("hibernate.connection.release_mode", "ON_CLOSE");
+				}
+				catch (NoSuchFieldException ex2) {
+					// on Hibernate 5.0.x or lower - no need to change the default there
+				}
+			}
 		}
 
 		return jpaProperties;
