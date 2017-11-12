@@ -22,7 +22,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Descriptor for a reactive type with information its stream semantics, i.e.
+ * Descriptor for a reactive type with information about its stream semantics, i.e.
  * how many values it can produce.
  *
  * @author Rossen Stoyanchev
