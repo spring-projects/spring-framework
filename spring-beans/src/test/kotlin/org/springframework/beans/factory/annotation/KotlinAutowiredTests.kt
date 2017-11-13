@@ -23,6 +23,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition
 import org.springframework.tests.sample.beans.TestBean
 
 import org.junit.Assert.*
+import org.springframework.beans.factory.BeanCreationException
 import org.springframework.tests.sample.beans.Colour
 
 /**
@@ -68,20 +69,36 @@ class KotlinAutowiredTests {
 	}
 	
 	@Test  // SPR-15847
-	fun `Autowiring by primary constructor with optional parameter`() {
+	fun `Autowiring by primary constructor with mandatory and optional parameters`() {
 		val bf = DefaultListableBeanFactory()
 		val bpp = AutowiredAnnotationBeanPostProcessor()
 		bpp.setBeanFactory(bf)
 		bf.addBeanPostProcessor(bpp)
-		val bd = RootBeanDefinition(KotlinBeanWithOptionalParameter::class.java)
+		val bd = RootBeanDefinition(KotlinBeanWithMandatoryAndOptionalParameters::class.java)
 		bd.scope = RootBeanDefinition.SCOPE_PROTOTYPE
 		bf.registerBeanDefinition("bean", bd)
 		val tb = TestBean()
 		bf.registerSingleton("testBean", tb)
 
-		val kb = bf.getBean("bean", KotlinBeanWithOptionalParameter::class.java)
+		val kb = bf.getBean("bean", KotlinBeanWithMandatoryAndOptionalParameters::class.java)
 		assertSame(tb, kb.injectedFromConstructor)
 		assertEquals("foo", kb.optional)
+		assertEquals("bar", kb.initializedField)
+	}
+
+	@Test
+	fun `Autowiring by primary constructor with optional parameters`() {
+		val bf = DefaultListableBeanFactory()
+		val bpp = AutowiredAnnotationBeanPostProcessor()
+		bpp.setBeanFactory(bf)
+		bf.addBeanPostProcessor(bpp)
+		val bd = RootBeanDefinition(KotlinBeanWithOptionalParameters::class.java)
+		bd.scope = RootBeanDefinition.SCOPE_PROTOTYPE
+		bf.registerBeanDefinition("bean", bd)
+
+		val kb = bf.getBean("bean", KotlinBeanWithOptionalParameters::class.java)
+		assertNotNull(kb.optional1)
+		assertEquals("foo", kb.optional2)
 		assertEquals("bar", kb.initializedField)
 	}
 
@@ -108,7 +125,7 @@ class KotlinAutowiredTests {
 		val bpp = AutowiredAnnotationBeanPostProcessor()
 		bpp.setBeanFactory(bf)
 		bf.addBeanPostProcessor(bpp)
-		val bd = RootBeanDefinition(KotlinBeanWithSecondaryConstructor::class.java)
+		val bd = RootBeanDefinition(KotlinBeanWithAutowiredSecondaryConstructor::class.java)
 		bd.scope = RootBeanDefinition.SCOPE_PROTOTYPE
 		bf.registerBeanDefinition("bean", bd)
 		val tb = TestBean()
@@ -116,7 +133,7 @@ class KotlinAutowiredTests {
 		val colour = Colour.BLUE
 		bf.registerSingleton("colour", colour)
 
-		val kb = bf.getBean("bean", KotlinBeanWithSecondaryConstructor::class.java)
+		val kb = bf.getBean("bean", KotlinBeanWithAutowiredSecondaryConstructor::class.java)
 		assertSame(tb, kb.injectedFromConstructor)
 		assertEquals("bar", kb.optional)
 		assertSame(colour, kb.injectedFromSecondaryConstructor)
@@ -152,6 +169,23 @@ class KotlinAutowiredTests {
 		assertEquals(tb, kb.testBean)
 	}
 
+	@Test(expected = BeanCreationException::class)  // SPR-16022
+	fun `No autowiring with primary and secondary non annotated constructors`() {
+		val bf = DefaultListableBeanFactory()
+		val bpp = AutowiredAnnotationBeanPostProcessor()
+		bpp.setBeanFactory(bf)
+		bf.addBeanPostProcessor(bpp)
+		val bd = RootBeanDefinition(KotlinBeanWithSecondaryConstructor::class.java)
+		bd.scope = RootBeanDefinition.SCOPE_PROTOTYPE
+		bf.registerBeanDefinition("bean", bd)
+		val tb = TestBean()
+		bf.registerSingleton("testBean", tb)
+		val colour = Colour.BLUE
+		bf.registerSingleton("colour", colour)
+
+		bf.getBean("bean", KotlinBeanWithSecondaryConstructor::class.java)
+	}
+
 
 	class KotlinBean(val injectedFromConstructor: TestBean?) {
 		
@@ -166,9 +200,20 @@ class KotlinAutowiredTests {
 		}
 	}
 
-	class KotlinBeanWithOptionalParameter(
+	class KotlinBeanWithMandatoryAndOptionalParameters(
 			val injectedFromConstructor: TestBean,
 			val optional: String = "foo"
+	) {
+		var initializedField: String? = null
+
+		init {
+			initializedField = "bar"
+		}
+	}
+
+	class KotlinBeanWithOptionalParameters(
+			val optional1: TestBean = TestBean(),
+			val optional2: String = "foo"
 	) {
 		var initializedField: String? = null
 
@@ -182,7 +227,7 @@ class KotlinAutowiredTests {
 			val injectedFromConstructor: TestBean
 	)
 
-	class KotlinBeanWithSecondaryConstructor(
+	class KotlinBeanWithAutowiredSecondaryConstructor(
 			val optional: String = "foo",
 			val injectedFromConstructor: TestBean
 	) {
@@ -196,6 +241,17 @@ class KotlinAutowiredTests {
 	@Suppress("unused")
 	class KotlinBeanWithPrimaryAndDefaultConstructors(val testBean: TestBean) {
 		constructor() : this(TestBean())
+	}
+
+	class KotlinBeanWithSecondaryConstructor(
+			val optional: String = "foo",
+			val injectedFromConstructor: TestBean
+	) {
+		constructor(injectedFromSecondaryConstructor: Colour, injectedFromConstructor: TestBean, optional: String = "bar") : this(optional, injectedFromConstructor) {
+			this.injectedFromSecondaryConstructor = injectedFromSecondaryConstructor
+		}
+
+		var injectedFromSecondaryConstructor: Colour? = null
 	}
 
 }
