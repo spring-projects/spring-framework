@@ -21,13 +21,22 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import javax.validation.Constraint;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
+import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -138,6 +147,43 @@ public class SpringValidatorAdapterTests {
 				is("Email required"));
 	}
 
+	@Test  // SPR-16177
+	public void testWithList() {
+		Parent parent = new Parent();
+		parent.setName("Parent whit list");
+		parent.getChildList().addAll(createChildren(parent));
+
+		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(parent, "parent");
+		validatorAdapter.validate(parent, errors);
+
+		assertTrue(errors.getErrorCount() > 0);
+	}
+
+	@Test  // SPR-16177
+	public void testWithSet() {
+		Parent parent = new Parent();
+		parent.setName("Parent whith set");
+		parent.getChildSet().addAll(createChildren(parent));
+
+		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(parent, "parent");
+		validatorAdapter.validate(parent, errors);
+
+		assertTrue(errors.getErrorCount() > 0);
+	}
+
+	private List<Child> createChildren(Parent parent) {
+		Child child1 = new Child();
+		child1.setName("Child1");
+		child1.setAge(null);
+		child1.setParent(parent);
+
+		Child child2 = new Child();
+		child2.setName(null);
+		child2.setAge(17);
+		child2.setParent(parent);
+
+		return Arrays.asList(child1, child2);
+	}
 
 	@Same(field = "password", comparingField = "confirmPassword")
 	@Same(field = "email", comparingField = "confirmEmail")
@@ -252,6 +298,143 @@ public class SpringValidatorAdapterTests {
 						.addConstraintViolation();
 				return false;
 			}
+		}
+	}
+
+
+	public static class Parent {
+
+		private Integer id;
+
+		@NotNull
+		private String name;
+
+		@Valid
+		private Set<Child> childSet = new LinkedHashSet<>();
+
+		@Valid
+		private List<Child> childList = new LinkedList<>();
+
+		public Integer getId() {
+			return id;
+		}
+
+		public void setId(Integer id) {
+			this.id = id;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public Set<Child> getChildSet() {
+			return childSet;
+		}
+
+		public void setChildSet(Set<Child> childSet) {
+			this.childSet = childSet;
+		}
+
+		public List<Child> getChildList() {
+			return childList;
+		}
+
+		public void setChildList(List<Child> childList) {
+			this.childList = childList;
+		}
+	}
+
+
+	@AnythingValid
+	public static class Child {
+
+		private Integer id;
+
+		@javax.validation.constraints.NotNull
+		private String name;
+
+		@javax.validation.constraints.NotNull
+		private Integer age;
+
+		@javax.validation.constraints.NotNull
+		private Parent parent;
+
+		public Integer getId() {
+			return id;
+		}
+
+		public void setId(Integer id) {
+			this.id = id;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public Integer getAge() {
+			return age;
+		}
+
+		public void setAge(Integer age) {
+			this.age = age;
+		}
+
+		public Parent getParent() {
+			return parent;
+		}
+
+		public void setParent(Parent parent) {
+			this.parent = parent;
+		}
+	}
+
+
+	@Constraint(validatedBy = AnythingValidator.class)
+	@Retention(RUNTIME)
+	public @interface AnythingValid {
+
+		String message() default "{AnythingValid.message}";
+
+		Class<?>[] groups() default {};
+
+		Class<? extends Payload>[] payload() default {};
+	}
+
+
+	public static class AnythingValidator implements ConstraintValidator<AnythingValid, Object> {
+
+		private static final String ID = "id";
+
+		@Override
+		public void initialize(AnythingValid constraintAnnotation) {
+		}
+
+		@Override
+		public boolean isValid(Object value, ConstraintValidatorContext context) {
+			List<Field> fieldsErros = new ArrayList<>();
+			Arrays.asList(value.getClass().getDeclaredFields()).forEach(f -> {
+				f.setAccessible(true);
+				try {
+					if (!f.getName().equals(ID) && f.get(value) == null) {
+						fieldsErros.add(f);
+						context.buildConstraintViolationWithTemplate(context.getDefaultConstraintMessageTemplate())
+								.addNode(f.getName())
+								.addConstraintViolation();
+					}
+				} catch (IllegalAccessException ex) {
+					throw new IllegalStateException(ex);
+				}
+
+			});
+			return fieldsErros.isEmpty();
 		}
 	}
 
