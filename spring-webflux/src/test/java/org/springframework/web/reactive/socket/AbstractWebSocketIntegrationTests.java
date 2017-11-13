@@ -92,7 +92,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	public static Object[][] arguments() throws IOException {
 
 		WebSocketClient[] clients = new WebSocketClient[] {
-				new TomcatWebSocketClient(new WsWebSocketContainer()),
+				new TomcatWebSocketClient(),
 				new JettyWebSocketClient(),
 				new ReactorNettyWebSocketClient(),
 				new UndertowWebSocketClient(Xnio.getInstance().createWorker(OptionMap.EMPTY))
