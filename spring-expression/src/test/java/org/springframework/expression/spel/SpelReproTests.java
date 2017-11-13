@@ -724,11 +724,30 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 		VarargsReceiver receiver = new VarargsReceiver();
 		VarargsInterface proxy = (VarargsInterface) Proxy.newProxyInstance(
-				getClass().getClassLoader(), new Class<?>[]{VarargsInterface.class},
+				getClass().getClassLoader(), new Class<?>[] {VarargsInterface.class},
 				(proxy1, method, args) -> method.invoke(receiver, args));
 
 		assertEquals("OK", expr.getValue(new StandardEvaluationContext(receiver)));
 		assertEquals("OK", expr.getValue(new StandardEvaluationContext(proxy)));
+	}
+
+	@Test
+	public void testCompiledExpressionForProxy_SPR16191() {
+		SpelExpressionParser expressionParser =
+				new SpelExpressionParser(new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE, null));
+		Expression expression = expressionParser.parseExpression("#target.process(#root)");
+
+		VarargsReceiver receiver = new VarargsReceiver();
+		VarargsInterface proxy = (VarargsInterface) Proxy.newProxyInstance(
+				getClass().getClassLoader(), new Class<?>[] {VarargsInterface.class},
+				(proxy1, method, args) -> method.invoke(receiver, args));
+
+		StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
+		evaluationContext.setVariable("target", proxy);
+
+		String result = expression.getValue(evaluationContext, "foo", String.class);
+		result = expression.getValue(evaluationContext, "foo", String.class);
+		assertEquals("OK", result);
 	}
 
 	@Test
