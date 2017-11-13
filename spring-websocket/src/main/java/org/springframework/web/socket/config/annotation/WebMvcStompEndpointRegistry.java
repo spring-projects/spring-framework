@@ -59,8 +59,7 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 
 	private final StompSubProtocolHandler stompHandler;
 
-	private final List<WebMvcStompWebSocketEndpointRegistration> registrations =
-			new ArrayList<>();
+	private final List<WebMvcStompWebSocketEndpointRegistration> registrations = new ArrayList<>();
 
 
 	public WebMvcStompEndpointRegistry(WebSocketHandler webSocketHandler,
