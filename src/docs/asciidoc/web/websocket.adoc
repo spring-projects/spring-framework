@@ -1,6 +1,7 @@
 [[websocket]]
 = WebSockets
 :doc-spring-security: {doc-root}/spring-security/site/docs/current/reference
+[.small]#<<web-reactive.adoc#webflux-websocket,Same in Spring WebFlux>>#
 
 This part of the reference documentation covers support for Servlet stack, WebSocket
 messaging that includes raw WebSocket interactions, WebSocket emulation via SockJS, and
@@ -10,32 +11,19 @@ pub-sub messaging via STOMP as a sub-protocol over WebSocket.
 include::websocket-intro.adoc[leveloffset=+1]
 
 
+
 [[websocket-server]]
 == WebSocket API
+[.small]#<<web-reactive.adoc#webflux-websocket-server,Same in Spring WebFlux>>#
 
-The Spring Framework provides a WebSocket API designed to adapt to various WebSocket engines.
-Currently the list includes WebSocket runtimes such as Tomcat 7.0.47+, Jetty 9.1+,
-GlassFish 4.1+, WebLogic 12.1.3+, and Undertow 1.0+ (and WildFly 8.0+). Additional support
-may be added as more WebSocket runtimes become available.
-
-[NOTE]
-====
-As explained in the <<websocket-intro-sub-protocol,introduction>>, direct use of a
-WebSocket API is too low level for applications -- until assumptions are made about the
-format of a message there is little a framework can do to interpret messages or route
-them via annotations. This is why applications should consider using a sub-protocol
-and Spring's <<websocket-stomp>> support.
-
-When using a higher level protocol, the details of the WebSocket API become less
-relevant, much like the details of TCP communication are not exposed to applications
-when using HTTP. Nevertheless this section covers the details of using WebSocket
-directly.
-====
+The Spring Framework provides a WebSocket API that can be used to write client and
+server side applications that handle WebSocket messages.
 
 
 
 [[websocket-server-handler]]
 === WebSocketHandler
+[.small]#<<web-reactive.adoc#webflux-websocket-server-handler,Same in Spring WebFlux>>#
 
 Creating a WebSocket server is as simple as implementing `WebSocketHandler` or more
 likely extending either `TextWebSocketHandler` or `BinaryWebSocketHandler`:
@@ -117,6 +105,7 @@ into other HTTP serving environments with the help of
 
 [[websocket-server-handshake]]
 === WebSocket Handshake
+[.small]#<<web-reactive.adoc#webflux-websocket-server-handshake,Same in Spring WebFlux>>#
 
 The easiest way to customize the initial HTTP WebSocket handshake request is through
 a `HandshakeInterceptor`, which exposes "before" and "after" the handshake methods.
@@ -204,16 +193,19 @@ Neither of these mechanism makes it possible to use a single "front controller"
 for all HTTP processing -- including WebSocket handshake and all other HTTP
 requests -- such as Spring MVC's `DispatcherServlet`.
 
-This is a significant limitation of JSR-356 that Spring's WebSocket support
-addresses by providing a server-specific `RequestUpgradeStrategy` even when
-running in a JSR-356 runtime.
+This is a significant limitation of JSR-356 that Spring's WebSocket support addresses
+server-specific ``RequestUpgradeStrategy``'s even when running in a JSR-356 runtime.
+Such strategies currently exist for Tomcat, Jetty, GlassFish, WebLogic, WebSphere, and
+Undertow (and WildFly).
+
+
 
 [NOTE]
 ====
 A request to overcome the above limitation in the Java WebSocket API has been
 created and can be followed at
 https://java.net/jira/browse/WEBSOCKET_SPEC-211[WEBSOCKET_SPEC-211].
-Also note that Tomcat and Jetty already provide native API alternatives that
+Tomcat, Jetty, and WebSphere provide their own API alternatives that
 makes it easy to overcome the limitation. We are hopeful that more servers
 will follow their example regardless of when it is addressed in the
 Java WebSocket API.
@@ -266,6 +258,7 @@ Java initialization API, if required:
 
 [[websocket-server-runtime-configuration]]
 === Server config
+[.small]#<<web-reactive.adoc#webflux-websocket-server-config,Same in Spring WebFlux>>#
 
 Each underlying WebSocket engine exposes configuration properties that control
 runtime characteristics such as the size of message buffer sizes, idle timeout,
@@ -394,6 +387,7 @@ or WebSocket XML namespace:
 
 [[websocket-server-allowed-origins]]
 === Allowed origins
+[.small]#<<web-reactive.adoc#webflux-websocket-server-cors,Same in Spring WebFlux>>#
 
 As of Spring Framework 4.1.5, the default behavior for WebSocket and SockJS is to accept
 only _same origin_ requests. It is also possible to allow _all_ or a specified list of origins.
