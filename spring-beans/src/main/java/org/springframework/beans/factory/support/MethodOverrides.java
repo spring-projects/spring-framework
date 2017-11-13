@@ -37,7 +37,7 @@ import org.springframework.lang.Nullable;
  */
 public class MethodOverrides {
 
-	private final Set<MethodOverride> overrides = Collections.synchronizedSet(new LinkedHashSet<>(0));
+	private final Set<MethodOverride> overrides = Collections.synchronizedSet(new LinkedHashSet<>(2));
 
 	private volatile boolean modified = false;
 

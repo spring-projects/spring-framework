@@ -190,7 +190,9 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param cargs the constructor argument values to apply
 	 * @param pvs the property values to apply
 	 */
-	public RootBeanDefinition(@Nullable Class<?> beanClass, ConstructorArgumentValues cargs, @Nullable MutablePropertyValues pvs) {
+	public RootBeanDefinition(@Nullable Class<?> beanClass, @Nullable ConstructorArgumentValues cargs,
+			@Nullable MutablePropertyValues pvs) {
+
 		super(cargs, pvs);
 		setBeanClass(beanClass);
 	}
