@@ -22,6 +22,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
 import reactor.core.publisher.Mono;
 
@@ -41,6 +42,7 @@ import org.springframework.web.reactive.socket.adapter.JettyWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
 
+
 /**
  * A {@link RequestUpgradeStrategy} for use with Jetty.
  * 
@@ -55,6 +57,9 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 
 	@Nullable
+	private WebSocketPolicy webSocketPolicy;
+
+	@Nullable
 	private WebSocketServerFactory factory;
 
 	@Nullable
@@ -65,6 +70,24 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	private final Object lifecycleMonitor = new Object();
 
 
+	/**
+	 * Configure a {@link WebSocketPolicy} to use to initialize
+	 * {@link WebSocketServerFactory}.
+	 * @param webSocketPolicy the WebSocket settings
+	 */
+	public void setWebSocketPolicy(WebSocketPolicy webSocketPolicy) {
+		this.webSocketPolicy = webSocketPolicy;
+	}
+
+	/**
+	 * Return the configured {@link WebSocketPolicy}, if any.
+	 */
+	@Nullable
+	public WebSocketPolicy getWebSocketPolicy() {
+		return webSocketPolicy;
+	}
+
+
 	@Override
 	public void start() {
 		synchronized (this.lifecycleMonitor) {
@@ -72,7 +95,9 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 			if (!isRunning() && servletContext != null) {
 				this.running = true;
 				try {
-					this.factory = new WebSocketServerFactory(servletContext);
+					this.factory = this.webSocketPolicy != null ?
+							new WebSocketServerFactory(servletContext, this.webSocketPolicy) :
+							new WebSocketServerFactory(servletContext);
 					this.factory.setCreator((request, response) -> {
 						WebSocketHandlerContainer container = adapterHolder.get();
 						String protocol = container.getProtocol();
@@ -114,7 +139,9 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, @Nullable String subProtocol) {
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler,
+			@Nullable String subProtocol) {
+
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
 
@@ -149,12 +176,12 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	}
 
 	private HttpServletRequest getHttpServletRequest(ServerHttpRequest request) {
-		Assert.isInstanceOf(AbstractServerHttpRequest.class, request, "ServletServerHttpRequest required");
+		Assert.isInstanceOf(AbstractServerHttpRequest.class, request);
 		return ((AbstractServerHttpRequest) request).getNativeRequest();
 	}
 
 	private HttpServletResponse getHttpServletResponse(ServerHttpResponse response) {
-		Assert.isInstanceOf(AbstractServerHttpResponse.class, response, "ServletServerHttpResponse required");
+		Assert.isInstanceOf(AbstractServerHttpResponse.class, response);
 		return ((AbstractServerHttpResponse) response).getNativeResponse();
 	}
 
