@@ -172,7 +172,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 			jpaProperties.put(Environment.SHOW_SQL, "true");
 		}
 
-		if (this.jpaDialect.prepareConnection) {
+		if (connectionReleaseOnClose) {
 			// Hibernate 5.1/5.2: manually enforce connection release mode ON_CLOSE (the former default)
 			try {
 				// Try Hibernate 5.2
