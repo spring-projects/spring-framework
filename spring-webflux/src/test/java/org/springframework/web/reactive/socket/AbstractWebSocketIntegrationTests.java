@@ -171,9 +171,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 
 		@Bean
 		public WebSocketService webSocketService() {
-			TomcatRequestUpgradeStrategy strategy = new TomcatRequestUpgradeStrategy();
-			strategy.setMaxSessionIdleTimeout(0L);
-			return new HandshakeWebSocketService(strategy);
+			return new HandshakeWebSocketService(getUpgradeStrategy());
 		}
 
 		protected abstract RequestUpgradeStrategy getUpgradeStrategy();
