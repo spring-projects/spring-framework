@@ -75,6 +75,22 @@ public class PeriodicTrigger implements Trigger {
 
 
 	/**
+	 * Return this trigger's period.
+	 * @since 5.0.2
+	 */
+	public long getPeriod() {
+		return this.period;
+	}
+
+	/**
+	 * Return this trigger's time unit (milliseconds by default).
+	 * @since 5.0.2
+	 */
+	public TimeUnit getTimeUnit() {
+		return this.timeUnit;
+	}
+
+	/**
 	 * Specify the delay for the initial execution. It will be evaluated in
 	 * terms of this trigger's {@link TimeUnit}. If no time unit was explicitly
 	 * provided upon instantiation, the default is milliseconds.
@@ -84,12 +100,29 @@ public class PeriodicTrigger implements Trigger {
 	}
 
 	/**
+	 * Return the initial delay, or 0 if none.
+	 * @since 5.0.2
+	 */
+	public long getInitialDelay() {
+		return this.initialDelay;
+	}
+
+	/**
 	 * Specify whether the periodic interval should be measured between the
 	 * scheduled start times rather than between actual completion times.
 	 * The latter, "fixed delay" behavior, is the default.
 	 */
 	public void setFixedRate(boolean fixedRate) {
 		this.fixedRate = fixedRate;
+	}
+
+	/**
+	 * Return whether this trigger uses fixed rate ({@code true}) or
+	 * fixed delay ({@code false}) behavior.
+	 * @since 5.0.2
+	 */
+	public boolean isFixedRate() {
+		return this.fixedRate;
 	}
 
 
