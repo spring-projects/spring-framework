@@ -815,6 +815,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Return if there are constructor argument values defined for this bean.
 	 */
+	@Override
 	public boolean hasConstructorArgumentValues() {
 		return (this.constructorArgumentValues != null && !this.constructorArgumentValues.isEmpty());
 	}
@@ -841,6 +842,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Return if there are property values values defined for this bean.
 	 * @since 5.0.2
 	 */
+	@Override
 	public boolean hasPropertyValues() {
 		return (this.propertyValues != null && !this.propertyValues.isEmpty());
 	}

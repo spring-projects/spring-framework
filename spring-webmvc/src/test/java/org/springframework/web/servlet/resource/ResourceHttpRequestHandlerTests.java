@@ -62,8 +62,7 @@ public class ResourceHttpRequestHandlerTests {
 
 
 	@Before
-	public void setUp() throws Exception {
-
+	public void setup() throws Exception {
 		List<Resource> paths = new ArrayList<>(2);
 		paths.add(new ClassPathResource("test/", getClass()));
 		paths.add(new ClassPathResource("testalternatepath/", getClass()));
@@ -78,6 +77,7 @@ public class ResourceHttpRequestHandlerTests {
 		this.request = new MockHttpServletRequest("GET", "");
 		this.response = new MockHttpServletResponse();
 	}
+
 
 	@Test
 	public void getResource() throws Exception {
@@ -598,8 +598,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals("t.", ranges[11]);
 	}
 
-	// SPR-14005
-	@Test
+	@Test  // SPR-14005
 	public void doOverwriteExistingCacheControlHeaders() throws Exception {
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
 		this.response.setHeader("Cache-Control", "no-store");
