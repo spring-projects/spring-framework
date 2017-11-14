@@ -96,7 +96,7 @@ public class WebSocketConfigurationSupport {
 				this.scheduler = new NoOpScheduler();
 			}
 		}
-		return scheduler;
+		return this.scheduler;
 	}
 
 

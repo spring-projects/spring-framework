@@ -105,8 +105,8 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 	private interface HandlerMappingStrategy {
 
 		void addMapping(Element mappingElement, ManagedMap<String, Object> map, ParserContext context);
-
 	}
+
 
 	private static class WebSocketHandlerMappingStrategy implements HandlerMappingStrategy {
 
@@ -114,7 +114,7 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 
 		private final ManagedList<?> interceptorsList;
 
-		private WebSocketHandlerMappingStrategy(RuntimeBeanReference handshakeHandler, ManagedList<?> interceptors) {
+		public WebSocketHandlerMappingStrategy(RuntimeBeanReference handshakeHandler, ManagedList<?> interceptors) {
 			this.handshakeHandlerReference = handshakeHandler;
 			this.interceptorsList = interceptors;
 		}
@@ -125,10 +125,10 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 			List<String> mappings = Arrays.asList(StringUtils.tokenizeToStringArray(pathAttribute, ","));
 			RuntimeBeanReference handlerReference = new RuntimeBeanReference(element.getAttribute("handler"));
 
-			ConstructorArgumentValues cavs = new ConstructorArgumentValues();
-			cavs.addIndexedArgumentValue(0, handlerReference);
-			cavs.addIndexedArgumentValue(1, this.handshakeHandlerReference);
-			RootBeanDefinition requestHandlerDef = new RootBeanDefinition(WebSocketHttpRequestHandler.class, cavs, null);
+			ConstructorArgumentValues cargs = new ConstructorArgumentValues();
+			cargs.addIndexedArgumentValue(0, handlerReference);
+			cargs.addIndexedArgumentValue(1, this.handshakeHandlerReference);
+			RootBeanDefinition requestHandlerDef = new RootBeanDefinition(WebSocketHttpRequestHandler.class, cargs, null);
 			requestHandlerDef.setSource(context.extractSource(element));
 			requestHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			requestHandlerDef.getPropertyValues().add("handshakeInterceptors", this.interceptorsList);
@@ -141,12 +141,12 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
+
 	private static class SockJsHandlerMappingStrategy implements HandlerMappingStrategy {
 
 		private final RuntimeBeanReference sockJsService;
 
-
-		private SockJsHandlerMappingStrategy(RuntimeBeanReference sockJsService) {
+		public SockJsHandlerMappingStrategy(RuntimeBeanReference sockJsService) {
 			this.sockJsService = sockJsService;
 		}
 
@@ -156,11 +156,11 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 			List<String> mappings = Arrays.asList(StringUtils.tokenizeToStringArray(pathAttribute, ","));
 			RuntimeBeanReference handlerReference = new RuntimeBeanReference(element.getAttribute("handler"));
 
-			ConstructorArgumentValues cavs = new ConstructorArgumentValues();
-			cavs.addIndexedArgumentValue(0, this.sockJsService, "SockJsService");
-			cavs.addIndexedArgumentValue(1, handlerReference, "WebSocketHandler");
+			ConstructorArgumentValues cargs = new ConstructorArgumentValues();
+			cargs.addIndexedArgumentValue(0, this.sockJsService, "SockJsService");
+			cargs.addIndexedArgumentValue(1, handlerReference, "WebSocketHandler");
 
-			RootBeanDefinition requestHandlerDef = new RootBeanDefinition(SockJsHttpRequestHandler.class, cavs, null);
+			RootBeanDefinition requestHandlerDef = new RootBeanDefinition(SockJsHttpRequestHandler.class, cargs, null);
 			requestHandlerDef.setSource(context.extractSource(element));
 			requestHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			String requestHandlerName = context.getReaderContext().registerWithGeneratedName(requestHandlerDef);

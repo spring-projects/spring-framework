@@ -291,24 +291,24 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
 		String resourceCache = element.getAttribute("resource-cache");
 		if ("true".equals(resourceCache)) {
-			ConstructorArgumentValues cavs = new ConstructorArgumentValues();
+			ConstructorArgumentValues cargs = new ConstructorArgumentValues();
 
 			RootBeanDefinition cachingResolverDef = new RootBeanDefinition(CachingResourceResolver.class);
 			cachingResolverDef.setSource(source);
 			cachingResolverDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			cachingResolverDef.setConstructorArgumentValues(cavs);
+			cachingResolverDef.setConstructorArgumentValues(cargs);
 
 			RootBeanDefinition cachingTransformerDef = new RootBeanDefinition(CachingResourceTransformer.class);
 			cachingTransformerDef.setSource(source);
 			cachingTransformerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			cachingTransformerDef.setConstructorArgumentValues(cavs);
+			cachingTransformerDef.setConstructorArgumentValues(cargs);
 
 			String cacheManagerName = element.getAttribute("cache-manager");
 			String cacheName = element.getAttribute("cache-name");
 			if (StringUtils.hasText(cacheManagerName) && StringUtils.hasText(cacheName)) {
 				RuntimeBeanReference cacheManagerRef = new RuntimeBeanReference(cacheManagerName);
-				cavs.addIndexedArgumentValue(0, cacheManagerRef);
-				cavs.addIndexedArgumentValue(1, cacheName);
+				cargs.addIndexedArgumentValue(0, cacheManagerRef);
+				cargs.addIndexedArgumentValue(1, cacheName);
 			}
 			else {
 				ConstructorArgumentValues cacheCavs = new ConstructorArgumentValues();
@@ -317,7 +317,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 				cacheDef.setSource(source);
 				cacheDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 				cacheDef.setConstructorArgumentValues(cacheCavs);
-				cavs.addIndexedArgumentValue(0, cacheDef);
+				cargs.addIndexedArgumentValue(0, cacheDef);
 			}
 			resourceResolvers.add(cachingResolverDef);
 			resourceTransformers.add(cachingTransformerDef);
@@ -386,12 +386,12 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 			String[] patterns = StringUtils.commaDelimitedListToStringArray(beanElement.getAttribute("patterns"));
 			Object strategy = null;
 			if (FIXED_VERSION_STRATEGY_ELEMENT.equals(beanElement.getLocalName())) {
-				ConstructorArgumentValues cavs = new ConstructorArgumentValues();
-				cavs.addIndexedArgumentValue(0, beanElement.getAttribute("version"));
+				ConstructorArgumentValues cargs = new ConstructorArgumentValues();
+				cargs.addIndexedArgumentValue(0, beanElement.getAttribute("version"));
 				RootBeanDefinition strategyDef = new RootBeanDefinition(FixedVersionStrategy.class);
 				strategyDef.setSource(source);
 				strategyDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-				strategyDef.setConstructorArgumentValues(cavs);
+				strategyDef.setConstructorArgumentValues(cargs);
 				strategy = strategyDef;
 			}
 			else if (CONTENT_VERSION_STRATEGY_ELEMENT.equals(beanElement.getLocalName())) {

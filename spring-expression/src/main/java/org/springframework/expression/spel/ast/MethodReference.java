@@ -19,6 +19,7 @@ package org.springframework.expression.spel.ast;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -260,7 +261,8 @@ public class MethodReference extends SpelNodeImpl {
 	@Override
 	public boolean isCompilable() {
 		CachedMethodExecutor executorToCheck = this.cachedExecutor;
-		if (executorToCheck == null || !(executorToCheck.get() instanceof ReflectiveMethodExecutor)) {
+		if (executorToCheck == null || executorToCheck.hasProxyTarget() ||
+				!(executorToCheck.get() instanceof ReflectiveMethodExecutor)) {
 			return false;
 		}
 
@@ -274,8 +276,7 @@ public class MethodReference extends SpelNodeImpl {
 		if (executor.didArgumentConversionOccur()) {
 			return false;
 		}
-		Method method = executor.getMethod();
-		Class<?> clazz = method.getDeclaringClass();
+		Class<?> clazz = executor.getMethod().getDeclaringClass();
 		if (!Modifier.isPublic(clazz.getModifiers()) && executor.getPublicDeclaringClass() == null) {
 			return false;
 		}
@@ -398,6 +399,10 @@ public class MethodReference extends SpelNodeImpl {
 		public boolean isSuitable(Object value, @Nullable TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
 			return ((this.staticClass == null || this.staticClass == value) &&
 					ObjectUtils.nullSafeEquals(this.target, target) && this.argumentTypes.equals(argumentTypes));
+		}
+
+		public boolean hasProxyTarget() {
+			return (this.target != null && Proxy.isProxyClass(this.target.getType()));
 		}
 
 		public MethodExecutor get() {

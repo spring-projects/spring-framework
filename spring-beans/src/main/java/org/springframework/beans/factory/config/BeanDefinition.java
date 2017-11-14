@@ -220,11 +220,27 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	ConstructorArgumentValues getConstructorArgumentValues();
 
 	/**
+	 * Return if there are constructor argument values defined for this bean.
+	 * @since 5.0.2
+	 */
+	default boolean hasConstructorArgumentValues() {
+		return !getConstructorArgumentValues().isEmpty();
+	}
+
+	/**
 	 * Return the property values to be applied to a new instance of the bean.
 	 * <p>The returned instance can be modified during bean factory post-processing.
 	 * @return the MutablePropertyValues object (never {@code null})
 	 */
 	MutablePropertyValues getPropertyValues();
+
+	/**
+	 * Return if there are property values values defined for this bean.
+	 * @since 5.0.2
+	 */
+	default boolean hasPropertyValues() {
+		return !getPropertyValues().isEmpty();
+	}
 
 
 	// Read-only attributes
