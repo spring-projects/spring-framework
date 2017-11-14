@@ -138,9 +138,12 @@ public class StompDecoder {
 				payload = readPayload(buffer, headerAccessor);
 			}
 			if (payload != null) {
-				if (payload.length > 0 && !headerAccessor.getCommand().isBodyAllowed()) {
-					throw new StompConversionException(headerAccessor.getCommand() +
-							" shouldn't have a payload: length=" + payload.length + ", headers=" + headers);
+				if (payload.length > 0) {
+					StompCommand stompCommand = headerAccessor.getCommand();
+					if (stompCommand != null && !stompCommand.isBodyAllowed()) {
+						throw new StompConversionException(stompCommand +
+								" shouldn't have a payload: length=" + payload.length + ", headers=" + headers);
+					}
 				}
 				headerAccessor.updateSimpMessageHeadersFromStompHeaders();
 				headerAccessor.setLeaveMutable(true);

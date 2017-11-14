@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -285,11 +285,12 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 					logger.trace("From client: " + headerAccessor.getShortLogMessage(message.getPayload()));
 				}
 
-				boolean isConnect = StompCommand.CONNECT.equals(headerAccessor.getCommand());
+				StompCommand command = headerAccessor.getCommand();
+				boolean isConnect = StompCommand.CONNECT.equals(command);
 				if (isConnect) {
 					this.stats.incrementConnectCount();
 				}
-				else if (StompCommand.DISCONNECT.equals(headerAccessor.getCommand())) {
+				else if (StompCommand.DISCONNECT.equals(command)) {
 					this.stats.incrementDisconnectCount();
 				}
 
@@ -308,10 +309,10 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 							if (isConnect) {
 								publishEvent(new SessionConnectEvent(this, message, getUser(session)));
 							}
-							else if (StompCommand.SUBSCRIBE.equals(headerAccessor.getCommand())) {
+							else if (StompCommand.SUBSCRIBE.equals(command)) {
 								publishEvent(new SessionSubscribeEvent(this, message, getUser(session)));
 							}
-							else if (StompCommand.UNSUBSCRIBE.equals(headerAccessor.getCommand())) {
+							else if (StompCommand.UNSUBSCRIBE.equals(command)) {
 								publishEvent(new SessionUnsubscribeEvent(this, message, getUser(session)));
 							}
 						}

@@ -535,8 +535,9 @@ public class MessageHeaderAccessor {
 	}
 
 	protected boolean isReadableContentType() {
+		MimeType contentType = getContentType();
 		for (MimeType mimeType : READABLE_MIME_TYPES) {
-			if (mimeType.includes(getContentType())) {
+			if (mimeType.includes(contentType)) {
 				return true;
 			}
 		}
@@ -557,6 +558,8 @@ public class MessageHeaderAccessor {
 	 * its type does not match the required type.
 	 * <p>This is for cases where the existence of an accessor is strongly expected
 	 * (followed up with an assertion) or where an accessor will be created otherwise.
+	 * @param message the message to get an accessor for
+	 * @param requiredType the required accessor type (or {@code null} for any)
 	 * @return an accessor instance of the specified type, or {@code null} if none
 	 * @since 4.1
 	 */
@@ -568,6 +571,8 @@ public class MessageHeaderAccessor {
 	 * A variation of {@link #getAccessor(org.springframework.messaging.Message, Class)}
 	 * with a {@code MessageHeaders} instance instead of a {@code Message}.
 	 * <p>This is for cases when a full message may not have been created yet.
+	 * @param messageHeaders the message headers to get an accessor for
+	 * @param requiredType the required accessor type (or {@code null} for any)
 	 * @return an accessor instance of the specified type, or {@code null} if none
 	 * @since 4.1
 	 */

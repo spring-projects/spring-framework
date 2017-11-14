@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -205,16 +205,20 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 	private StringBuilder getBaseLogMessage() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(getMessageType().name());
-		if (getDestination() != null) {
-			sb.append(" destination=").append(getDestination());
+		SimpMessageType messageType = getMessageType();
+		sb.append(messageType != null ? messageType.name() : SimpMessageType.OTHER);
+		String destination = getDestination();
+		if (destination != null) {
+			sb.append(" destination=").append(destination);
 		}
-		if (getSubscriptionId() != null) {
-			sb.append(" subscriptionId=").append(getSubscriptionId());
+		String subscriptionId = getSubscriptionId();
+		if (subscriptionId != null) {
+			sb.append(" subscriptionId=").append(subscriptionId);
 		}
 		sb.append(" session=").append(getSessionId());
-		if (getUser() != null) {
-			sb.append(" user=").append(getUser().getName());
+		Principal user = getUser();
+		if (user != null) {
+			sb.append(" user=").append(user.getName());
 		}
 		return sb;
 	}
