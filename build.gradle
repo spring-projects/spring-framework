@@ -14,7 +14,7 @@ buildscript {
 plugins {
 	id "com.gradle.build-scan" version "1.8"
 	id "io.spring.dependency-management" version "1.0.3.RELEASE" apply false
-	id "org.jetbrains.kotlin.jvm" version "1.1.51" apply false
+	id "org.jetbrains.kotlin.jvm" version "1.1.60" apply false
 	id "org.jetbrains.dokka" version "0.9.15"
 	id "org.asciidoctor.convert" version "1.5.6"
 }
@@ -50,7 +50,7 @@ configure(allprojects) { project ->
 	ext.junitJupiterVersion  = "5.0.2"
 	ext.junitPlatformVersion = "1.0.2"
 	ext.junitVintageVersion  = "4.12.2"
-	ext.kotlinVersion        = "1.1.51"
+	ext.kotlinVersion        = "1.1.60"
 	ext.log4jVersion         = "2.9.1"
 	ext.nettyVersion         = "4.1.17.Final"
 	ext.reactorVersion       = "Bismuth-SR3"
