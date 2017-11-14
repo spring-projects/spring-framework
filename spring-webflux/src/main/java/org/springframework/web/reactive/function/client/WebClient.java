@@ -51,8 +51,8 @@ import org.springframework.web.util.UriBuilderFactory;
  * // Perform requests...
  * Mono&#060;String&#062; result = client.get()
  *     .uri("/foo")
- *     .exchange()
- *     .then(response -> response.bodyToMono(String.class));
+ *     .retrieve()
+ *     .bodyToMono(String.class);
  * </pre>
  *
  * @author Rossen Stoyanchev
