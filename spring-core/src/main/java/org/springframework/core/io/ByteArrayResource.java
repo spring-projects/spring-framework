@@ -47,7 +47,7 @@ public class ByteArrayResource extends AbstractResource {
 
 
 	/**
-	 * Create a new ByteArrayResource.
+	 * Create a new {@code ByteArrayResource}.
 	 * @param byteArray the byte array to wrap
 	 */
 	public ByteArrayResource(byte[] byteArray) {
@@ -55,7 +55,7 @@ public class ByteArrayResource extends AbstractResource {
 	}
 
 	/**
-	 * Create a new ByteArrayResource.
+	 * Create a new {@code ByteArrayResource} with a description.
 	 * @param byteArray the byte array to wrap
 	 * @param description where the byte array comes from
 	 */
@@ -65,13 +65,13 @@ public class ByteArrayResource extends AbstractResource {
 		this.description = (description != null ? description : "");
 	}
 
+
 	/**
 	 * Return the underlying byte array.
 	 */
 	public final byte[] getByteArray() {
 		return this.byteArray;
 	}
-
 
 	/**
 	 * This implementation always returns {@code true}.

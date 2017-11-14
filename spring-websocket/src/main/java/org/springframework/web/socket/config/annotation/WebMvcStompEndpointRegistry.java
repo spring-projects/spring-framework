@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,10 +146,8 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 		this.stompHandler.setApplicationEventPublisher(applicationContext);
 	}
 
-
 	/**
-	 * Return a handler mapping with the mapped ViewControllers; or {@code null}
-	 * in case of no registrations.
+	 * Return a handler mapping with the mapped ViewControllers.
 	 */
 	public AbstractHandlerMapping getHandlerMapping() {
 		Map<String, Object> urlMap = new LinkedHashMap<String, Object>();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -755,7 +755,7 @@ public interface JdbcOperations {
 	 * list of arguments to bind to the query, expecting a SqlRowSet.
 	 * <p>The results will be mapped to an SqlRowSet which holds the data in a
 	 * disconnected fashion. This wrapper will translate any SQLExceptions thrown.
-	 * <p>Note that that, for the default implementation, JDBC RowSet support needs to
+	 * <p>Note that, for the default implementation, JDBC RowSet support needs to
 	 * be available at runtime: by default, Sun's {@code com.sun.rowset.CachedRowSetImpl}
 	 * class is used, which is part of JDK 1.5+ and also available separately as part of
 	 * Sun's JDBC RowSet Implementations download (rowset.jar).
@@ -778,7 +778,7 @@ public interface JdbcOperations {
 	 * list of arguments to bind to the query, expecting a SqlRowSet.
 	 * <p>The results will be mapped to an SqlRowSet which holds the data in a
 	 * disconnected fashion. This wrapper will translate any SQLExceptions thrown.
-	 * <p>Note that that, for the default implementation, JDBC RowSet support needs to
+	 * <p>Note that, for the default implementation, JDBC RowSet support needs to
 	 * be available at runtime: by default, Sun's {@code com.sun.rowset.CachedRowSetImpl}
 	 * class is used, which is part of JDK 1.5+ and also available separately as part of
 	 * Sun's JDBC RowSet Implementations download (rowset.jar).
@@ -882,7 +882,7 @@ public interface JdbcOperations {
 	 * @param batchArgs the List of Object arrays containing the batch of arguments for the query
 	 * @return an array containing the numbers of rows affected by each update in the batch
 	 */
-	public int[] batchUpdate(String sql, List<Object[]> batchArgs) throws DataAccessException;
+	int[] batchUpdate(String sql, List<Object[]> batchArgs) throws DataAccessException;
 
 	/**
 	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments.
@@ -892,7 +892,7 @@ public interface JdbcOperations {
 	 * (constants from {@code java.sql.Types})
 	 * @return an array containing the numbers of rows affected by each update in the batch
 	 */
-	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) throws DataAccessException;
+	int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) throws DataAccessException;
 
 	/**
 	 * Execute multiple batches using the supplied SQL statement with the collect of supplied arguments.
@@ -905,7 +905,7 @@ public interface JdbcOperations {
 	 * @return an array containing for each batch another array containing the numbers of rows affected
 	 * by each update in the batch
 	 */
-	public <T> int[][] batchUpdate(String sql, Collection<T> batchArgs, int batchSize,
+	<T> int[][] batchUpdate(String sql, Collection<T> batchArgs, int batchSize,
 			ParameterizedPreparedStatementSetter<T> pss) throws DataAccessException;
 
 

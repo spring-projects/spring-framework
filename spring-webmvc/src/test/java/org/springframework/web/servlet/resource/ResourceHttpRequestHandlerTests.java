@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for ResourceHttpRequestHandler.
+ * Unit tests for {@link ResourceHttpRequestHandler}.
  *
  * @author Keith Donald
  * @author Jeremy Grelle
@@ -67,7 +67,7 @@ public class ResourceHttpRequestHandlerTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
 		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
@@ -85,6 +85,7 @@ public class ResourceHttpRequestHandlerTests {
 		this.request = new MockHttpServletRequest("GET", "");
 		this.response = new MockHttpServletResponse();
 	}
+
 
 	@Test
 	public void getResource() throws Exception {
@@ -240,7 +241,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals("function foo() { console.log(\"hello world\"); }", this.response.getContentAsString());
 	}
 
-	@Test // SPR-13658
+	@Test  // SPR-13658
 	public void getResourceWithRegisteredMediaType() throws Exception {
 		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
 		factory.addMediaType("css", new MediaType("foo", "bar"));
@@ -261,7 +262,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals("h1 { color:red; }", this.response.getContentAsString());
 	}
 
-	@Test // SPR-14577
+	@Test  // SPR-14577
 	public void getMediaTypeWithFavorPathExtensionOff() throws Exception {
 		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
 		factory.setFavorPathExtension(false);
@@ -282,18 +283,16 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals("text/html", this.response.getContentType());
 	}
 
-	@Test // SPR-14368
+	@Test  // SPR-14368
 	public void getResourceWithMediaTypeResolvedThroughServletContext() throws Exception {
 		MockServletContext servletContext = new MockServletContext() {
-
 			@Override
 			public String getMimeType(String filePath) {
 				return "foo/bar";
 			}
-
 			@Override
 			public String getVirtualServerName() {
-				return null;
+				return "";
 			}
 		};
 
@@ -606,8 +605,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals("t.", ranges[11]);
 	}
 
-	// SPR-14005
-	@Test
+	@Test  // SPR-14005
 	public void doOverwriteExistingCacheControlHeaders() throws Exception {
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
 		this.response.setHeader("Cache-Control", "no-store");
@@ -618,10 +616,6 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 
-	private long dateHeaderAsLong(String responseHeaderName) throws Exception {
-		return dateFormat.parse(this.response.getHeader(responseHeaderName)).getTime();
-	}
-
 	private long resourceLastModified(String resourceName) throws IOException {
 		return new ClassPathResource(resourceName, getClass()).getFile().lastModified();
 	}
@@ -629,6 +623,10 @@ public class ResourceHttpRequestHandlerTests {
 	private String resourceLastModifiedDate(String resourceName) throws IOException {
 		long lastModified = new ClassPathResource(resourceName, getClass()).getFile().lastModified();
 		return dateFormat.format(lastModified);
+	}
+
+	private long dateHeaderAsLong(String responseHeaderName) throws Exception {
+		return dateFormat.parse(this.response.getHeader(responseHeaderName)).getTime();
 	}
 
 

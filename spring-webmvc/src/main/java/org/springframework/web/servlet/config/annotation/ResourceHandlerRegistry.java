@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,8 +90,7 @@ public class ResourceHandlerRegistry {
 	/**
 	 * A variant of
 	 * {@link #ResourceHandlerRegistry(ApplicationContext, ServletContext, ContentNegotiationManager)}
-	 * that also accepts the {@link UrlPathHelper} used for mapping requests
-	 * to static resources.
+	 * that also accepts the {@link UrlPathHelper} used for mapping requests to static resources.
 	 * @since 4.3.13
 	 */
 	public ResourceHandlerRegistry(ApplicationContext applicationContext, ServletContext servletContext,
@@ -106,13 +105,12 @@ public class ResourceHandlerRegistry {
 
 
 	/**
-	 * Add a resource handler for serving static resources based on the specified URL path
-	 * patterns. The handler will be invoked for every incoming request that matches to
-	 * one of the specified path patterns.
-	 * <p>Patterns like {@code "/static/**"} or {@code "/css/{filename:\\w+\\.css}"}
-	 * are allowed. See {@link org.springframework.util.AntPathMatcher} for more details on the
-	 * syntax.
-	 * @return A {@link ResourceHandlerRegistration} to use to further configure the
+	 * Add a resource handler for serving static resources based on the specified URL path patterns.
+	 * The handler will be invoked for every incoming request that matches to one of the specified
+	 * path patterns.
+	 * <p>Patterns like {@code "/static/**"} or {@code "/css/{filename:\\w+\\.css}"} are allowed.
+	 * See {@link org.springframework.util.AntPathMatcher} for more details on the syntax.
+	 * @return a {@link ResourceHandlerRegistration} to use to further configure the
 	 * registered resource handler
 	 */
 	public ResourceHandlerRegistration addResourceHandler(String... pathPatterns) {
