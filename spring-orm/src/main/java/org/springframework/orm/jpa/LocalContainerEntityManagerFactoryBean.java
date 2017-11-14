@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager
 import org.springframework.orm.jpa.persistenceunit.PersistenceUnitManager;
 import org.springframework.orm.jpa.persistenceunit.PersistenceUnitPostProcessor;
 import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -91,8 +92,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 
 	private PersistenceUnitManager persistenceUnitManager;
 
-	private final DefaultPersistenceUnitManager internalPersistenceUnitManager =
-			new DefaultPersistenceUnitManager();
+	private final DefaultPersistenceUnitManager internalPersistenceUnitManager = new DefaultPersistenceUnitManager();
 
 	private PersistenceUnitInfo persistenceUnitInfo;
 
@@ -319,7 +319,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 
 
 	@Override
-	protected EntityManagerFactory createNativeEntityManagerFactory() throws PersistenceException {
+	public void afterPropertiesSet() throws PersistenceException {
 		PersistenceUnitManager managerToUse = this.persistenceUnitManager;
 		if (this.persistenceUnitManager == null) {
 			this.internalPersistenceUnitManager.afterPropertiesSet();
@@ -332,6 +332,13 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 			((SmartPersistenceUnitInfo) this.persistenceUnitInfo).setPersistenceProviderPackageName(
 					jpaVendorAdapter.getPersistenceProviderRootPackage());
 		}
+
+		super.afterPropertiesSet();
+	}
+
+	@Override
+	protected EntityManagerFactory createNativeEntityManagerFactory() throws PersistenceException {
+		Assert.state(this.persistenceUnitInfo != null, "PersistenceUnitInfo not initialized");
 
 		PersistenceProvider provider = getPersistenceProvider();
 		if (provider == null) {

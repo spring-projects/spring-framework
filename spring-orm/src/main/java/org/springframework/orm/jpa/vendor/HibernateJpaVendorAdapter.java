@@ -21,6 +21,8 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
+import javax.persistence.spi.PersistenceUnitInfo;
+import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import org.hibernate.cfg.Environment;
 import org.hibernate.dialect.DB2Dialect;
@@ -113,13 +115,15 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	 * new connection handling mode {@code DELAYED_ACQUISITION_AND_HOLD} in that case
 	 * unless a user-specified connection handling mode property indicates otherwise;
 	 * switch this flag to {@code false} to avoid that interference.
-	 * <p><b>NOTE: Per the explanation above, you may have to turn this flag off
-	 * when using Hibernate in a JTA environment, e.g. on WebLogic.</b> Alternatively,
-	 * set Hibernate 5.2's "hibernate.connection.handling_mode" property to
-	 * "DELAYED_ACQUISITION_AND_RELEASE_AFTER_TRANSACTION" or even
+	 * <p><b>NOTE: For a persistence unit with transaction type JTA e.g. on WebLogic,
+	 * the connection release mode will never be altered from its provider default,
+	 * i.e. not be forced to {@code DELAYED_ACQUISITION_AND_HOLD} by this flag.</b>
+	 * Alternatively, set Hibernate 5.2's "hibernate.connection.handling_mode"
+	 * property to "DELAYED_ACQUISITION_AND_RELEASE_AFTER_TRANSACTION" or even
 	 * "DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT" in such a scenario.
 	 * @since 4.3.1
-	 * @see #getJpaPropertyMap()
+	 * @see PersistenceUnitInfo#getTransactionType()
+	 * @see #getJpaPropertyMap(PersistenceUnitInfo)
 	 * @see HibernateJpaDialect#beginTransaction
 	 */
 	public void setPrepareConnection(boolean prepareConnection) {
@@ -138,7 +142,17 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	}
 
 	@Override
+	public Map<String, Object> getJpaPropertyMap(PersistenceUnitInfo pui) {
+		return buildJpaPropertyMap(this.jpaDialect.prepareConnection &&
+				pui.getTransactionType() != PersistenceUnitTransactionType.JTA);
+	}
+
+	@Override
 	public Map<String, Object> getJpaPropertyMap() {
+		return buildJpaPropertyMap(this.jpaDialect.prepareConnection);
+	}
+
+	private Map<String, Object> buildJpaPropertyMap(boolean connectionReleaseOnClose) {
 		Map<String, Object> jpaProperties = new HashMap<String, Object>();
 
 		if (getDatabasePlatform() != null) {

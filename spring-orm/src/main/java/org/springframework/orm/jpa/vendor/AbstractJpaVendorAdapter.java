@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,11 @@
 
 package org.springframework.orm.jpa.vendor;
 
+import java.util.Collections;
 import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.spi.PersistenceUnitInfo;
 
 import org.springframework.orm.jpa.JpaDialect;
 import org.springframework.orm.jpa.JpaVendorAdapter;
@@ -120,8 +122,13 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	}
 
 	@Override
+	public Map<String, ?> getJpaPropertyMap(PersistenceUnitInfo pui) {
+		return getJpaPropertyMap();
+	}
+
+	@Override
 	public Map<String, ?> getJpaPropertyMap() {
-		return null;
+		return Collections.emptyMap();
 	}
 
 	@Override
@@ -139,10 +146,6 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 		return EntityManager.class;
 	}
 
-	/**
-	 * Post-process the EntityManagerFactory after it has been initialized.
-	 * @param emf the EntityManagerFactory to process
-	 */
 	@Override
 	public void postProcessEntityManagerFactory(EntityManagerFactory emf) {
 	}

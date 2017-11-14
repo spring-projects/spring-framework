@@ -55,7 +55,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -264,8 +263,8 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	}
 
 	/**
-	 * Return the JpaVendorAdapter implementation for this
-	 * EntityManagerFactory, or {@code null} if not known.
+	 * Return the JpaVendorAdapter implementation for this EntityManagerFactory,
+	 * or {@code null} if not known.
 	 */
 	public JpaVendorAdapter getJpaVendorAdapter() {
 		return this.jpaVendorAdapter;
@@ -317,13 +316,26 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 
 	@Override
-	public final void afterPropertiesSet() throws PersistenceException {
-		if (this.jpaVendorAdapter != null) {
+	public void afterPropertiesSet() throws PersistenceException {
+		JpaVendorAdapter jpaVendorAdapter = getJpaVendorAdapter();
+		if (jpaVendorAdapter != null) {
 			if (this.persistenceProvider == null) {
-				this.persistenceProvider = this.jpaVendorAdapter.getPersistenceProvider();
+				this.persistenceProvider = jpaVendorAdapter.getPersistenceProvider();
 			}
-			Map<String, ?> vendorPropertyMap = this.jpaVendorAdapter.getJpaPropertyMap();
-			if (vendorPropertyMap != null) {
+			PersistenceUnitInfo pui = getPersistenceUnitInfo();
+			Map<String, ?> vendorPropertyMap = null;
+			if (pui != null) {
+				try {
+					vendorPropertyMap = jpaVendorAdapter.getJpaPropertyMap(pui);
+				}
+				catch (AbstractMethodError err) {
+					// Spring 4.3.13 getJpaPropertyMap(PersistenceUnitInfo) not implemented
+				}
+			}
+			if (vendorPropertyMap == null) {
+				vendorPropertyMap = jpaVendorAdapter.getJpaPropertyMap();
+			}
+			if (!CollectionUtils.isEmpty(vendorPropertyMap)) {
 				for (Map.Entry<String, ?> entry : vendorPropertyMap.entrySet()) {
 					if (!this.jpaPropertyMap.containsKey(entry.getKey())) {
 						this.jpaPropertyMap.put(entry.getKey(), entry.getValue());
@@ -331,19 +343,19 @@ public abstract class AbstractEntityManagerFactoryBean implements
 				}
 			}
 			if (this.entityManagerFactoryInterface == null) {
-				this.entityManagerFactoryInterface = this.jpaVendorAdapter.getEntityManagerFactoryInterface();
+				this.entityManagerFactoryInterface = jpaVendorAdapter.getEntityManagerFactoryInterface();
 				if (!ClassUtils.isVisible(this.entityManagerFactoryInterface, this.beanClassLoader)) {
 					this.entityManagerFactoryInterface = EntityManagerFactory.class;
 				}
 			}
 			if (this.entityManagerInterface == null) {
-				this.entityManagerInterface = this.jpaVendorAdapter.getEntityManagerInterface();
+				this.entityManagerInterface = jpaVendorAdapter.getEntityManagerInterface();
 				if (!ClassUtils.isVisible(this.entityManagerInterface, this.beanClassLoader)) {
 					this.entityManagerInterface = EntityManager.class;
 				}
 			}
 			if (this.jpaDialect == null) {
-				this.jpaDialect = this.jpaVendorAdapter.getJpaDialect();
+				this.jpaDialect = jpaVendorAdapter.getJpaDialect();
 			}
 		}
 
@@ -372,8 +384,9 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			throw new IllegalStateException(
 					"JPA PersistenceProvider returned null EntityManagerFactory - check your JPA provider setup!");
 		}
-		if (this.jpaVendorAdapter != null) {
-			this.jpaVendorAdapter.postProcessEntityManagerFactory(emf);
+		JpaVendorAdapter jpaVendorAdapter = getJpaVendorAdapter();
+		if (jpaVendorAdapter != null) {
+			jpaVendorAdapter.postProcessEntityManagerFactory(emf);
 		}
 		if (logger.isInfoEnabled()) {
 			logger.info("Initialized JPA EntityManagerFactory for persistence unit '" + getPersistenceUnitName() + "'");
@@ -390,8 +403,9 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 */
 	protected EntityManagerFactory createEntityManagerFactoryProxy(EntityManagerFactory emf) {
 		Set<Class<?>> ifcs = new LinkedHashSet<Class<?>>();
-		if (this.entityManagerFactoryInterface != null) {
-			ifcs.add(this.entityManagerFactoryInterface);
+		Class<?> entityManagerFactoryInterface = this.entityManagerFactoryInterface;
+		if (entityManagerFactoryInterface != null) {
+			ifcs.add(entityManagerFactoryInterface);
 		}
 		else if (emf != null) {
 			ifcs.addAll(ClassUtils.getAllInterfacesForClassAsSet(emf.getClass(), this.beanClassLoader));
@@ -406,8 +420,8 @@ public abstract class AbstractEntityManagerFactoryBean implements
 					new ManagedEntityManagerFactoryInvocationHandler(this));
 		}
 		catch (IllegalArgumentException ex) {
-			if (this.entityManagerFactoryInterface != null) {
-				throw new IllegalStateException("EntityManagerFactory interface [" + this.entityManagerFactoryInterface +
+			if (entityManagerFactoryInterface != null) {
+				throw new IllegalStateException("EntityManagerFactory interface [" + entityManagerFactoryInterface +
 						"] seems to conflict with Spring's EntityManagerFactoryInfo mixin - consider resetting the "+
 						"'entityManagerFactoryInterface' property to plain [javax.persistence.EntityManagerFactory]", ex);
 			}
@@ -485,7 +499,8 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 */
 	@Override
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
-		return (this.jpaDialect != null ? this.jpaDialect.translateExceptionIfPossible(ex) :
+		JpaDialect jpaDialect = getJpaDialect();
+		return (jpaDialect != null ? jpaDialect.translateExceptionIfPossible(ex) :
 				EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex));
 	}
 
