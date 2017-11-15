@@ -38,7 +38,7 @@ Since CORS requests are automatically dispatched, you *do not need* to change th
 
 
 [[mvc-cors-controller]]
-== @Controller CORS
+== @CrossOrigin
 
 You can add an
 {api-spring-framework}/web/bind/annotation/CrossOrigin.html[`@CrossOrigin`]
@@ -54,12 +54,12 @@ it. By default `@CrossOrigin` allows all origins and the HTTP methods specified 
 public class AccountController {
 
 	@CrossOrigin
-	@RequestMapping("/{id}")
+	@GetMapping("/{id}")
 	public Account retrieve(@PathVariable Long id) {
 		// ...
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE, path = "/{id}")
+	@DeleteMapping("/{id}")
 	public void remove(@PathVariable Long id) {
 		// ...
 	}
@@ -76,12 +76,12 @@ It is also possible to enable CORS for the whole controller:
 @RequestMapping("/account")
 public class AccountController {
 
-	@RequestMapping("/{id}")
+	@GetMapping("/{id}")
 	public Account retrieve(@PathVariable Long id) {
 		// ...
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE, path = "/{id}")
+	@DeleteMapping("/{id}")
 	public void remove(@PathVariable Long id) {
 		// ...
 	}
@@ -216,7 +216,7 @@ It is also possible to declare several CORS mappings with customized properties:
 allows you to specify how the CORS requests should be processed: allowed origins, headers, methods, etc.
 It can be provided in various ways:
 
- * {api-spring-framework}/web/servlet/handler/AbstractHandlerMapping.html#setCorsConfiguration-java.util.Map-[`AbstractHandlerMapping#setCorsConfiguration()`]
+ * {api-spring-framework}/web/servlet/handler/AbstractHandlerMapping.html#setCorsConfigurations-java.util.Map-[`AbstractHandlerMapping#setCorsConfigurations()`]
    allows to specify a `Map` with several {api-spring-framework}/web/cors/CorsConfiguration.html[CorsConfiguration]
    instances mapped to path patterns like `/api/**`.
  * Subclasses can provide their own `CorsConfiguration` by overriding the
@@ -232,10 +232,17 @@ It can be provided in various ways:
 [[mvc-cors-filter]]
 == CORS Filter
 
-You can apply CORS checks through the built-in
-http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/filter/CorsFilter.html[`CorsFilter`]
-which can be used with http://projects.spring.io/spring-security/[Spring Security] and
-ordered ahead of its chain of filters. To configure the filter pass a
+You can apply CORS support through the built-in
+{api-spring-framework}/web/filter/CorsFilter.html[`CorsFilter`].
+
+[NOTE]
+====
+Spring Security now provides
+https://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#cors[builtin support for CORS]
+so you don't need to use a `CorsFilter`.
+====
+
+To configure the filter pass a
 `CorsConfigurationSource` to its constructor:
 
 [source,java,indent=0]
@@ -250,6 +257,13 @@ UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 source.registerCorsConfiguration("/**", config);
 
 CorsFilter filter = new CorsFilter(source);
+----
+
+You can also easily permit all cross-origin requests for GET, HEAD, and POST requests by writing
+[source,java,indent=0]
+
+----
+CorsFilter filter = new CorsFilter(exchange -> new CorsConfiguration().applyPermitDefaultValues());
 ----
 
 Also the information on
