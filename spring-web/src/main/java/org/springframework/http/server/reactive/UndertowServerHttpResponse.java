@@ -152,12 +152,10 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 		if (this.responseChannel == null) {
 			this.responseChannel = this.exchange.getResponseChannel();
 		}
-		if (this.responseChannel.isWriteResumed()) {
-			return true;
-		} else {
+		if (!this.responseChannel.isWriteResumed()) {
 			this.responseChannel.resumeWrites();
-			return false;
 		}
+		return this.responseChannel.isWriteResumed();
 	}
 
 

@@ -113,6 +113,12 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	@Nullable
 	protected abstract T read() throws IOException;
 
+	/**
+	 * Suspend reading. Defaults to no-op.
+	 */
+	protected void suspendReading() {
+	}
+
 
 	/**
 	 * Read and publish data from the input. Continue till there is no more
@@ -256,6 +262,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 						}
 						else {
 							publisher.changeState(READING, NO_DEMAND);
+							publisher.suspendReading();
 						}
 					}
 					catch (IOException ex) {
