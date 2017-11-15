@@ -40,20 +40,25 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
+import org.springframework.web.reactive.function.BodyInserters;
 
 /**
- * The main entry point for initiating web requests on the client side.
+ * A non-blocking, reactive client for performing HTTP requests with Reactive
+ * Streams back pressure. Provides a higher level, common API over HTTP client
+ * libraries. Reactor Netty is used by default but other clients may be plugged
+ * in with a {@link ClientHttpConnector}.
  *
- * <pre class="code">
- * // Initialize the client
- * WebClient client = WebClient.create("http://abc.com");
+ * <p>Use one of the static factory methods {@link #create()} or
+ * {@link #create(String)} or obtain a {@link WebClient#builder()} to create an
+ * instance.
  *
- * // Perform requests...
- * Mono&#060;String&#062; result = client.get()
- *     .uri("/foo")
- *     .exchange()
- *     .then(response -> response.bodyToMono(String.class));
- * </pre>
+ * <p>For examples with a response body see
+ * {@link RequestHeadersSpec#retrieve() retrieve()} and
+ * {@link RequestHeadersSpec#exchange() exchange()}.
+ * For examples with a request body see
+ * {@link RequestBodySpec#body(Publisher, Class) body(Publisher,Class)},
+ * {@link RequestBodySpec#syncBody(Object) syncBody(Object)}, and
+ * {@link RequestBodySpec#body(BodyInserter) body(BodyInserter)}.
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
@@ -119,54 +124,17 @@ public interface WebClient {
 	// Static, factory methods
 
 	/**
-	 * Create a new {@code WebClient} with no default, shared preferences across
-	 * requests such as base URI, default headers, and others.
+	 * Create a new {@code WebClient} with a Reactor Netty connector.
 	 * @see #create(String)
+	 * @see #builder()
 	 */
 	static WebClient create() {
 		return new DefaultWebClientBuilder().build();
 	}
 
 	/**
-	 * Configure a base URI for requests performed through the client for
-	 * example to avoid repeating the same host, port, base path, or even
-	 * query parameters with every request.
-	 * <p>For example given this initialization:
-	 * <pre class="code">
-	 * WebClient client = WebClient.create("http://abc.com/v1");
-	 * </pre>
-	 * <p>The base URI is applied to exchanges with a URI template:
-	 * <pre class="code">
-	 * // GET http://abc.com/v1/accounts/43
-	 * Mono&#060;Account&#062; result = client.get()
-	 *         .uri("/accounts/{id}", 43)
-	 *         .exchange()
-	 *         .then(response -> response.bodyToMono(Account.class));
-	 * </pre>
-	 * <p>The base URI is also applied to exchanges with a {@code UriBuilder}:
-	 * <pre class="code">
-	 * // GET http://abc.com/v1/accounts?q=12
-	 * Flux&#060;Account&#062; result = client.get()
-	 *         .uri(builder -> builder.path("/accounts").queryParam("q", "12").build())
-	 *         .exchange()
-	 *         .then(response -> response.bodyToFlux(Account.class));
-	 * </pre>
-	 * <p>The base URI can be overridden with an absolute URI:
-	 * <pre class="code">
-	 * // GET http://xyz.com/path
-	 * Mono&#060;Account&#062; result = client.get()
-	 *         .uri("http://xyz.com/path")
-	 *         .exchange()
-	 *         .then(response -> response.bodyToMono(Account.class));
-	 * </pre>
-	 * <p>The base URI can be partially overridden with a {@code UriBuilder}:
-	 * <pre class="code">
-	 * // GET http://abc.com/v2/accounts?q=12
-	 * Flux&#060;Account&#062; result = client.get()
-	 *         .uri(builder -> builder.replacePath("/v2/accounts").queryParam("q", "12").build())
-	 *         .exchange()
-	 *         .then(response -> response.bodyToFlux(Account.class));
-	 * </pre>
+	 * A variant of {@link #create()} that accepts a default base URL. For more
+	 * details see {@link Builder#baseUrl(String) Builder.baseUrl(String)}.
 	 * @param baseUrl the base URI for all requests
 	 */
 	static WebClient create(String baseUrl) {
@@ -182,13 +150,50 @@ public interface WebClient {
 
 
 	/**
-	 * A mutable builder for a {@link WebClient}.
+	 * A mutable builder for creating a {@link WebClient}.
 	 */
 	interface Builder {
 
 		/**
-		 * Configure a base URI as described in {@link WebClient#create(String)
-		 * WebClient.create(String)}.
+		 * Configure a base URL for requests performed through the client.
+		 *
+		 * <p>For example given base URL "http://abc.com/v1":
+		 * <p><pre class="code">
+		 * Mono&#060;Account&#062; result = client.get()
+		 *         .uri("/accounts/{id}", 43)
+		 *         .exchange()
+		 *         .then(response -> response.bodyToMono(Account.class));
+		 *
+		 * // Result: http://abc.com/v1/accounts/43
+		 *
+		 * Flux&#060;Account&#062; result = client.get()
+		 *         .uri(builder -> builder.path("/accounts").queryParam("q", "12").build())
+		 *         .exchange()
+		 *         .then(response -> response.bodyToFlux(Account.class));
+		 *
+		 * // Result: http://abc.com/v1/accounts?q=12
+		 * </pre>
+		 *
+		 * <p>The base URL can be overridden with an absolute URI:
+		 * <pre class="code">
+		 * Mono&#060;Account&#062; result = client.get()
+		 *         .uri("http://xyz.com/path")
+		 *         .exchange()
+		 *         .then(response -> response.bodyToMono(Account.class));
+		 *
+		 * // Result: http://xyz.com/path
+		 * </pre>
+		 *
+		 * <p>Or partially overridden with a {@code UriBuilder}:
+		 * <pre class="code">
+		 * Flux&#060;Account&#062; result = client.get()
+		 *         .uri(builder -> builder.replacePath("/v2/accounts").queryParam("q", "12").build())
+		 *         .exchange()
+		 *         .then(response -> response.bodyToFlux(Account.class));
+		 *
+		 * // Result: http://abc.com/v2/accounts?q=12
+		 * </pre>
+		 *
 		 * @see #defaultUriVariables(Map)
 		 * @see #uriBuilderFactory(UriBuilderFactory)
 		 */
@@ -510,30 +515,29 @@ public interface WebClient {
 		RequestBodySpec contentType(MediaType contentType);
 
 		/**
-		 * Set the body of the request to the given {@code BodyInserter}.
-		 * @param inserter the {@code BodyInserter} that writes to the request
+		 * Set the body of the request using the given body inserter.
+		 * {@link BodyInserters} provides access to built-in implementations of
+		 * {@link BodyInserter}.
+		 * @param inserter the body inserter to use for the request body
 		 * @return this builder
+		 * @see org.springframework.web.reactive.function.BodyInserters
 		 */
 		RequestHeadersSpec<?> body(BodyInserter<?, ? super ClientHttpRequest> inserter);
 
 		/**
-		 * Set the body of the request to the given asynchronous {@code Publisher}.
-		 * <p>This method is a convenient shortcut for {@link #body(BodyInserter)} with a
-		 * {@linkplain org.springframework.web.reactive.function.BodyInserters#fromPublisher}
-		 * Publisher body inserter}.
-		 * @param publisher the {@code Publisher} to write to the request
-		 * @param typeReference the type reference of elements contained in the publisher
-		 * @param <T> the type of the elements contained in the publisher
-		 * @param <P> the type of the {@code Publisher}
-		 * @return this builder
-		 */
-		<T, P extends Publisher<T>> RequestHeadersSpec<?> body(P publisher, ParameterizedTypeReference<T> typeReference);
-
-		/**
-		 * Set the body of the request to the given asynchronous {@code Publisher}.
-		 * <p>This method is a convenient shortcut for {@link #body(BodyInserter)} with a
-		 * {@linkplain org.springframework.web.reactive.function.BodyInserters#fromPublisher}
-		 * Publisher body inserter}.
+		 * A shortcut for {@link #body(BodyInserter)} with a
+		 * {@linkplain BodyInserters#fromPublisher Publisher inserter}.
+		 * For example:
+		 * <p><pre>
+		 * Mono<Person> personMono = ... ;
+		 *
+		 * Mono<Void> result = client.post()
+		 *     .uri("/persons/{id}", id)
+		 *     .contentType(MediaType.APPLICATION_JSON)
+		 *     .body(personMono, Person.class)
+		 *     .retrieve()
+		 *     .bodyToMono(Void.class);
+		 * </pre>
 		 * @param publisher the {@code Publisher} to write to the request
 		 * @param elementClass the class of elements contained in the publisher
 		 * @param <T> the type of the elements contained in the publisher
@@ -543,18 +547,40 @@ public interface WebClient {
 		<T, P extends Publisher<T>> RequestHeadersSpec<?> body(P publisher, Class<T> elementClass);
 
 		/**
-		 * Set the body of the request to the given synchronous {@code Object}.
-		 * <p>This method is a convenient shortcut for:
-		 * <pre class="code">
-		 * .body(BodyInserters.fromObject(object))
+		 * A variant of {@link #body(Publisher, Class)} that allows providing
+		 * element type information that includes generics via a
+		 * {@link ParameterizedTypeReference}.
+		 * @param publisher the {@code Publisher} to write to the request
+		 * @param typeReference the type reference of elements contained in the publisher
+		 * @param <T> the type of the elements contained in the publisher
+		 * @param <P> the type of the {@code Publisher}
+		 * @return this builder
+		 */
+		<T, P extends Publisher<T>> RequestHeadersSpec<?> body(P publisher,
+				ParameterizedTypeReference<T> typeReference);
+
+		/**
+		 * A shortcut for {@link #body(BodyInserter)} with an
+		 * {@linkplain BodyInserters#fromObject Object inserter}.
+		 * For example:
+		 * <p><pre class="code">
+		 * Person person = ... ;
+		 *
+		 * Mono<Void> result = client.post()
+		 *     .uri("/persons/{id}", id)
+		 *     .contentType(MediaType.APPLICATION_JSON)
+		 *     .syncBody(person)
+		 *     .retrieve()
+		 *     .bodyToMono(Void.class);
 		 * </pre>
-		 * <p>The body can be a
-		 * {@link org.springframework.util.MultiValueMap MultiValueMap} to create
-		 * a multipart request. The values in the {@code MultiValueMap} can be
-		 * any Object representing the body of the part, or an
-		 * {@link org.springframework.http.HttpEntity HttpEntity} representing a
-		 * part with body and headers. The {@code MultiValueMap} can be built
-		 * conveniently using
+		 * <p>For multipart requests, provide a
+		 * {@link org.springframework.util.MultiValueMap MultiValueMap}. The
+		 * values in the {@code MultiValueMap} can be any Object representing
+		 * the body of the part, or an
+		 * {@link org.springframework.http.HttpEntity HttpEntity} representing
+		 * a part with body and headers. The {@code MultiValueMap} can be built
+		 * with {@link org.springframework.http.client.MultipartBodyBuilder
+		 * MultipartBodyBuilder}.
 		 * @param body the {@code Object} to write to the request
 		 * @return this builder
 		 */
