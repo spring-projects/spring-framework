@@ -41,7 +41,7 @@ configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
 
-	ext.aspectjVersion       = "1.8.12"
+	ext.aspectjVersion       = "1.8.13"
 	ext.freemarkerVersion    = "2.3.27-incubating"
 	ext.groovyVersion        = "2.4.12"
 	ext.hsqldbVersion        = "2.4.0"
