@@ -241,3 +241,8 @@ RouterFunction<ServerResponse> filteredRoute =
 
 You can see in this example that invoking the `next.handle(ServerRequest)` is optional: we only
 allow the handler function to be executed when access is allowed.
+
+[NOTE]
+====
+CORS support for functional endpoints is provided via a dedicated <<webflux-cors-webfilter,`CorsWebFilter`>>.
+====

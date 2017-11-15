@@ -1448,6 +1448,7 @@ from the base class and you can still have any number of other ``WebMvcConfigure
 the classpath.
 
 
+include::webflux-cors.adoc[leveloffset=+1]
 
 
 [[webflux-http2]]
