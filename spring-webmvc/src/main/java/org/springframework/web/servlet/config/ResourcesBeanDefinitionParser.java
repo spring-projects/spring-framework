@@ -28,6 +28,7 @@ import org.w3c.dom.Element;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -139,13 +140,13 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		return null;
 	}
 
-	private void registerUrlProvider(ParserContext parserContext, @Nullable Object source) {
-		if (!parserContext.getRegistry().containsBeanDefinition(RESOURCE_URL_PROVIDER)) {
+	private void registerUrlProvider(ParserContext context, @Nullable Object source) {
+		if (!context.getRegistry().containsBeanDefinition(RESOURCE_URL_PROVIDER)) {
 			RootBeanDefinition urlProvider = new RootBeanDefinition(ResourceUrlProvider.class);
 			urlProvider.setSource(source);
 			urlProvider.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			parserContext.getRegistry().registerBeanDefinition(RESOURCE_URL_PROVIDER, urlProvider);
-			parserContext.registerComponent(new BeanComponentDefinition(urlProvider, RESOURCE_URL_PROVIDER));
+			context.getRegistry().registerBeanDefinition(RESOURCE_URL_PROVIDER, urlProvider);
+			context.registerComponent(new BeanComponentDefinition(urlProvider, RESOURCE_URL_PROVIDER));
 
 			RootBeanDefinition interceptor = new RootBeanDefinition(ResourceUrlProviderExposingInterceptor.class);
 			interceptor.setSource(source);
@@ -156,8 +157,8 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 			mappedInterceptor.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			mappedInterceptor.getConstructorArgumentValues().addIndexedArgumentValue(0, (Object) null);
 			mappedInterceptor.getConstructorArgumentValues().addIndexedArgumentValue(1, interceptor);
-			String mappedInterceptorName = parserContext.getReaderContext().registerWithGeneratedName(mappedInterceptor);
-			parserContext.registerComponent(new BeanComponentDefinition(mappedInterceptor, mappedInterceptorName));
+			String mappedInterceptorName = context.getReaderContext().registerWithGeneratedName(mappedInterceptor);
+			context.registerComponent(new BeanComponentDefinition(mappedInterceptor, mappedInterceptorName));
 		}
 	}
 
@@ -173,6 +174,13 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		String[] locationValues = StringUtils.commaDelimitedListToStringArray(locationAttr);
+		if (context.getRegistry() instanceof ConfigurableBeanFactory) {
+			ConfigurableBeanFactory cbf = ((ConfigurableBeanFactory) context.getRegistry());
+			for (int i = 0; i < locationValues.length; i++) {
+				locationValues[i] = cbf.resolveEmbeddedValue(locationValues[i]);
+			}
+		}
+
 		ManagedList<Object> locations = new ManagedList<>();
 		Map<Resource, Charset> locationCharsets = new HashMap<>();
 		ResourceLoader resourceLoader = context.getReaderContext().getResourceLoader();
@@ -223,29 +231,6 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 
-	private void parseResourceChain(RootBeanDefinition resourceHandlerDef, ParserContext parserContext,
-			Element element, @Nullable Object source) {
-
-		String autoRegistration = element.getAttribute("auto-registration");
-		boolean isAutoRegistration = !(StringUtils.hasText(autoRegistration) && "false".equals(autoRegistration));
-
-		ManagedList<? super Object> resourceResolvers = new ManagedList<>();
-		resourceResolvers.setSource(source);
-		ManagedList<? super Object> resourceTransformers = new ManagedList<>();
-		resourceTransformers.setSource(source);
-
-		parseResourceCache(resourceResolvers, resourceTransformers, element, source);
-		parseResourceResolversTransformers(isAutoRegistration, resourceResolvers, resourceTransformers,
-				parserContext, element, source);
-
-		if (!resourceResolvers.isEmpty()) {
-			resourceHandlerDef.getPropertyValues().add("resourceResolvers", resourceResolvers);
-		}
-		if (!resourceTransformers.isEmpty()) {
-			resourceHandlerDef.getPropertyValues().add("resourceTransformers", resourceTransformers);
-		}
-	}
-
 	private CacheControl parseCacheControl(Element element) {
 		CacheControl cacheControl = CacheControl.empty();
 		if ("true".equals(element.getAttribute("no-cache"))) {
@@ -286,6 +271,29 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		return cacheControl;
 	}
 
+	private void parseResourceChain(
+			RootBeanDefinition resourceHandlerDef, ParserContext context, Element element, @Nullable Object source) {
+
+		String autoRegistration = element.getAttribute("auto-registration");
+		boolean isAutoRegistration = !(StringUtils.hasText(autoRegistration) && "false".equals(autoRegistration));
+
+		ManagedList<? super Object> resourceResolvers = new ManagedList<>();
+		resourceResolvers.setSource(source);
+		ManagedList<? super Object> resourceTransformers = new ManagedList<>();
+		resourceTransformers.setSource(source);
+
+		parseResourceCache(resourceResolvers, resourceTransformers, element, source);
+		parseResourceResolversTransformers(
+				isAutoRegistration, resourceResolvers, resourceTransformers, context, element, source);
+
+		if (!resourceResolvers.isEmpty()) {
+			resourceHandlerDef.getPropertyValues().add("resourceResolvers", resourceResolvers);
+		}
+		if (!resourceTransformers.isEmpty()) {
+			resourceHandlerDef.getPropertyValues().add("resourceTransformers", resourceTransformers);
+		}
+	}
+
 	private void parseResourceCache(ManagedList<? super Object> resourceResolvers,
 			ManagedList<? super Object> resourceTransformers, Element element, @Nullable Object source) {
 
@@ -324,16 +332,15 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-
 	private void parseResourceResolversTransformers(boolean isAutoRegistration,
 			ManagedList<? super Object> resourceResolvers, ManagedList<? super Object> resourceTransformers,
-			ParserContext parserContext, Element element, @Nullable Object source) {
+			ParserContext context, Element element, @Nullable Object source) {
 
 		Element resolversElement = DomUtils.getChildElementByTagName(element, "resolvers");
 		if (resolversElement != null) {
 			for (Element beanElement : DomUtils.getChildElements(resolversElement)) {
 				if (VERSION_RESOLVER_ELEMENT.equals(beanElement.getLocalName())) {
-					RootBeanDefinition versionResolverDef = parseVersionResolver(parserContext, beanElement, source);
+					RootBeanDefinition versionResolverDef = parseVersionResolver(context, beanElement, source);
 					versionResolverDef.setSource(source);
 					resourceResolvers.add(versionResolverDef);
 					if (isAutoRegistration) {
@@ -344,7 +351,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 					}
 				}
 				else {
-					Object object = parserContext.getDelegate().parsePropertySubElement(beanElement, null);
+					Object object = context.getDelegate().parsePropertySubElement(beanElement, null);
 					resourceResolvers.add(object);
 				}
 			}
@@ -366,15 +373,13 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		Element transformersElement = DomUtils.getChildElementByTagName(element, "transformers");
 		if (transformersElement != null) {
 			for (Element beanElement : DomUtils.getChildElementsByTagName(transformersElement, "bean", "ref")) {
-				Object object = parserContext.getDelegate().parsePropertySubElement(beanElement, null);
+				Object object = context.getDelegate().parsePropertySubElement(beanElement, null);
 				resourceTransformers.add(object);
 			}
 		}
 	}
 
-	private RootBeanDefinition parseVersionResolver(
-			ParserContext parserContext, Element element, @Nullable Object source) {
-
+	private RootBeanDefinition parseVersionResolver(ParserContext context, Element element, @Nullable Object source) {
 		ManagedMap<String, ? super Object> strategyMap = new ManagedMap<>();
 		strategyMap.setSource(source);
 		RootBeanDefinition versionResolverDef = new RootBeanDefinition(VersionResourceResolver.class);
@@ -402,7 +407,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 			}
 			else if (VERSION_STRATEGY_ELEMENT.equals(beanElement.getLocalName())) {
 				Element childElement = DomUtils.getChildElementsByTagName(beanElement, "bean", "ref").get(0);
-				strategy = parserContext.getDelegate().parsePropertySubElement(childElement, null);
+				strategy = context.getDelegate().parsePropertySubElement(childElement, null);
 			}
 			for (String pattern : patterns) {
 				strategyMap.put(pattern, strategy);

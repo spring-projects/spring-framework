@@ -31,7 +31,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.UrlResource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
@@ -251,7 +250,9 @@ public abstract class MvcNamespaceUtils {
 			location = location.trim();
 			if (location.startsWith(URL_RESOURCE_CHARSET_PREFIX)) {
 				int endIndex = location.indexOf("]", URL_RESOURCE_CHARSET_PREFIX.length());
-				Assert.isTrue(endIndex != -1, "Invalid charset syntax in location: " + location);
+				if (endIndex == -1) {
+					throw new IllegalArgumentException("Invalid charset syntax in location: " + location);
+				}
 				String value = location.substring(URL_RESOURCE_CHARSET_PREFIX.length(), endIndex);
 				charset = Charset.forName(value);
 				location = location.substring(endIndex + 1);
@@ -259,7 +260,9 @@ public abstract class MvcNamespaceUtils {
 			Resource resource = resourceLoader.getResource(location);
 			outputLocations.add(resource);
 			if (charset != null) {
-				Assert.isInstanceOf(UrlResource.class, resource, "Unexpected charset for: " + resource);
+				if (!(resource instanceof UrlResource)) {
+					throw new IllegalArgumentException("Unexpected charset for non-UrlResource: " + resource);
+				}
 				outputLocationCharsets.put(resource, charset);
 			}
 		}
