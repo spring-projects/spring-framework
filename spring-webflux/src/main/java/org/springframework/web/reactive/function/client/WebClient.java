@@ -483,10 +483,9 @@ public interface WebClient {
 		 *     .exchange()
 		 *     .flatMapMany(response -> response.bodyToFlux(Person.class));
 		 * </pre>
-		 * <p><strong>NOTE:</strong> You must always use of the body or entity
-		 * methods on {@link ClientResponse} to ensure resources are released and
-		 * avoid potential issues with HTTP connection pooling. If not interested
-		 * in the response body, use {@code "bodyToMono(Void.class)"} to complete.
+		 * <p><strong>NOTE:</strong> You must always use one of the body or
+		 * entity methods of the response to ensure resources are released.
+		 * See {@link ClientResponse} for more details.
 		 * @return a {@code Mono} for the response
 		 * @see #retrieve()
 		 */

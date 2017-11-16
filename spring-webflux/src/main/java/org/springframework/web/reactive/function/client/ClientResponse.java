@@ -38,10 +38,14 @@ import org.springframework.web.reactive.function.BodyExtractor;
  * {@link ExchangeFunction}. Provides access to the response status and headers,
  * and also methods to consume the response body.
  *
- * <p><strong>NOTE:</strong> When given access to a {@link ClientResponse} you
- * must always use the response body or entity methods to ensure resources are
- * released and to avoid potential issues with HTTP connection pooling. If not
- * interested in the response body, use {@code "bodyToMono(Void.class)"}.
+ * <p><strong>NOTE:</strong> When given access to a {@link ClientResponse},
+ * through the {@code WebClient}
+ * {@link WebClient.RequestHeadersSpec#exchange() exchange()} method,
+ * you must always use one of the body or toEntity methods to ensure resources
+ * are released and avoid potential issues with HTTP connection pooling.
+ * You can use {@code bodyToMono(Void.class)} if no response content is
+ * expected. However keep in mind that if the response does have content, the
+ * connection will be closed and will not be placed back in the pool.
  *
  * @author Brian Clozel
  * @author Arjen Poutsma
