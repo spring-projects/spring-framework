@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.socket.adapter;
 
 import java.io.IOException;
+import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.reactivestreams.Publisher;
@@ -25,6 +26,7 @@ import org.reactivestreams.Subscription;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.util.concurrent.Queues;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.server.reactive.AbstractListenerReadPublisher;
@@ -148,6 +150,17 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	protected abstract void resumeReceiving();
 
 	/**
+	 * Returns {@code true} if receiving new message(s) is suspended otherwise
+	 * {@code false}.
+	 * <p><strong>Note:</strong> if the underlying WebSocket API does not provide
+	 * flow control for receiving messages, and this method should return
+	 * {@code false} and {@link #canSuspendReceiving()} should return {@code false}.
+	 * @return returns {@code true} if receiving new message(s) is suspended
+	 * otherwise {@code false}.
+	 */
+	protected abstract boolean isSuspended();
+
+	/**
 	 * Send the given WebSocket message.
 	 */
 	protected abstract boolean sendMessage(WebSocketMessage message) throws IOException;
@@ -213,32 +226,39 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 	private final class WebSocketReceivePublisher extends AbstractListenerReadPublisher<WebSocketMessage> {
 
-		@Nullable
-		private volatile WebSocketMessage webSocketMessage;
+		private volatile Queue<Object> pendingWebSocketMessages = Queues.unbounded().get();
 
 		@Override
 		protected void checkOnDataAvailable() {
-			if (this.webSocketMessage != null) {
+			if (isSuspended()) {
+				resumeReceiving();
+			}
+			if (!pendingWebSocketMessages.isEmpty()) {
 				onDataAvailable();
 			}
 		}
 
 		@Override
+		protected void suspendReading() {
+			suspendReceiving();
+		}
+
+		@Override
 		@Nullable
 		protected WebSocketMessage read() throws IOException {
-			if (this.webSocketMessage != null) {
-				WebSocketMessage result = this.webSocketMessage;
-				this.webSocketMessage = null;
-				resumeReceiving();
-				return result;
-			}
+			return (WebSocketMessage) pendingWebSocketMessages.poll();
+		}
 
-			return null;
+		@Override
+		public void onAllDataRead() {
+			if (isSuspended()) {
+				resumeReceiving();
+			}
+			super.onAllDataRead();
 		}
 
 		void handleMessage(WebSocketMessage webSocketMessage) {
-			this.webSocketMessage = webSocketMessage;
-			suspendReceiving();
+			this.pendingWebSocketMessages.offer(webSocketMessage);
 			onDataAvailable();
 		}
 	}
