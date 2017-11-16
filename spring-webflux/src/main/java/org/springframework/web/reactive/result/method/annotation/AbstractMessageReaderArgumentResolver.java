@@ -62,6 +62,7 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  * failure results in an {@link ServerWebInputException}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 public abstract class AbstractMessageReaderArgumentResolver extends HandlerMethodArgumentResolverSupport {
@@ -109,10 +110,37 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	}
 
 
+	/**
+	 * Read the body from a method argument with {@link HttpMessageReader}.
+	 * @param bodyParameter the {@link MethodParameter} to read
+	 * @param isBodyRequired true if the body is required
+	 * @param bindingContext the binding context to use
+	 * @param exchange the current exchange
+	 * @return the body
+	 * @see #readBody(MethodParameter, MethodParameter, boolean, BindingContext, ServerWebExchange)
+	 */
 	protected Mono<Object> readBody(MethodParameter bodyParameter, boolean isBodyRequired,
 			BindingContext bindingContext, ServerWebExchange exchange) {
+		return this.readBody(bodyParameter, null, isBodyRequired, bindingContext, exchange);
+	}
+
+	/**
+	 * Read the body from a method argument with {@link HttpMessageReader}.
+	 * @param bodyParameter the {@link MethodParameter} to read
+	 * @param actualParameter the actual {@link MethodParameter} to read; could be different
+	 * from {@code bodyParameter} when processing {@code HttpEntity} for example
+	 * @param isBodyRequired true if the body is required
+	 * @param bindingContext the binding context to use
+	 * @param exchange the current exchange
+	 * @return the body
+	 * @since 5.0.2
+	 */
+	protected Mono<Object> readBody(MethodParameter bodyParameter, @Nullable MethodParameter actualParameter,
+			boolean isBodyRequired, BindingContext bindingContext, ServerWebExchange exchange) {
 
 		ResolvableType bodyType = ResolvableType.forMethodParameter(bodyParameter);
+		ResolvableType actualType = (actualParameter == null ?
+				bodyType : ResolvableType.forMethodParameter(actualParameter));
 		Class<?> resolvedType = bodyType.resolve();
 		ReactiveAdapter adapter = (resolvedType != null ? getAdapterRegistry().getAdapter(resolvedType) : null);
 		ResolvableType elementType = (adapter != null ? bodyType.getGeneric() : bodyType);
@@ -127,7 +155,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 			if (reader.canRead(elementType, mediaType)) {
 				Map<String, Object> readHints = Collections.emptyMap();
 				if (adapter != null && adapter.isMultiValue()) {
-					Flux<?> flux = reader.read(bodyType, elementType, request, response, readHints);
+					Flux<?> flux = reader.read(actualType, elementType, request, response, readHints);
 					flux = flux.onErrorResume(ex -> Flux.error(handleReadError(bodyParameter, ex)));
 					if (isBodyRequired || !adapter.supportsEmpty()) {
 						flux = flux.switchIfEmpty(Flux.error(handleMissingBody(bodyParameter)));
@@ -141,7 +169,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 				}
 				else {
 					// Single-value (with or without reactive type wrapper)
-					Mono<?> mono = reader.readMono(bodyType, elementType, request, response, readHints);
+					Mono<?> mono = reader.readMono(actualType, elementType, request, response, readHints);
 					mono = mono.onErrorResume(ex -> Mono.error(handleReadError(bodyParameter, ex)));
 					if (isBodyRequired || (adapter != null && !adapter.supportsEmpty())) {
 						mono = mono.switchIfEmpty(Mono.error(handleMissingBody(bodyParameter)));
