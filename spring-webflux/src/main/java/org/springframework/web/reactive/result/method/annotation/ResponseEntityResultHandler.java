@@ -114,15 +114,16 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 		Mono<?> returnValueMono;
 		MethodParameter bodyParameter;
 		ReactiveAdapter adapter = getAdapter(result);
+		MethodParameter actualParameter = result.getReturnTypeSource();
 
 		if (adapter != null) {
 			Assert.isTrue(!adapter.isMultiValue(), "Only a single ResponseEntity supported");
 			returnValueMono = Mono.from(adapter.toPublisher(result.getReturnValue()));
-			bodyParameter = result.getReturnTypeSource().nested().nested();
+			bodyParameter = actualParameter.nested().nested();
 		}
 		else {
 			returnValueMono = Mono.justOrEmpty(result.getReturnValue());
-			bodyParameter = result.getReturnTypeSource().nested();
+			bodyParameter = actualParameter.nested();
 		}
 
 		return returnValueMono.flatMap(returnValue -> {
@@ -169,7 +170,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 				return exchange.getResponse().setComplete();
 			}
 
-			return writeBody(httpEntity.getBody(), bodyParameter, exchange);
+			return writeBody(httpEntity.getBody(), bodyParameter, actualParameter, exchange);
 		});
 	}
 
