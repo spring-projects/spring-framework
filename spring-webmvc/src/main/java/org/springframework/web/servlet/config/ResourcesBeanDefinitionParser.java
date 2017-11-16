@@ -168,8 +168,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
 		String locationAttr = element.getAttribute("location");
 		if (!StringUtils.hasText(locationAttr)) {
-			String message = "The 'location' attribute is required.";
-			context.getReaderContext().error(message, context.extractSource(element));
+			context.getReaderContext().error("The 'location' attribute is required.", context.extractSource(element));
 			return null;
 		}
 

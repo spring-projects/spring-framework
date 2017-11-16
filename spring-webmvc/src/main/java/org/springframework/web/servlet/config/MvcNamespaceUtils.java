@@ -160,13 +160,13 @@ public abstract class MvcNamespaceUtils {
 	 * Registers a {@link SimpleControllerHandlerAdapter} under a well-known
 	 * name unless already registered.
 	 */
-	private static void registerSimpleControllerHandlerAdapter(ParserContext cxt, @Nullable Object source) {
-		if (!cxt.getRegistry().containsBeanDefinition(SIMPLE_CONTROLLER_HANDLER_ADAPTER_BEAN_NAME)) {
+	private static void registerSimpleControllerHandlerAdapter(ParserContext context, @Nullable Object source) {
+		if (!context.getRegistry().containsBeanDefinition(SIMPLE_CONTROLLER_HANDLER_ADAPTER_BEAN_NAME)) {
 			RootBeanDefinition beanDef = new RootBeanDefinition(SimpleControllerHandlerAdapter.class);
 			beanDef.setSource(source);
 			beanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			cxt.getRegistry().registerBeanDefinition(SIMPLE_CONTROLLER_HANDLER_ADAPTER_BEAN_NAME, beanDef);
-			cxt.registerComponent(new BeanComponentDefinition(beanDef, SIMPLE_CONTROLLER_HANDLER_ADAPTER_BEAN_NAME));
+			context.getRegistry().registerBeanDefinition(SIMPLE_CONTROLLER_HANDLER_ADAPTER_BEAN_NAME, beanDef);
+			context.registerComponent(new BeanComponentDefinition(beanDef, SIMPLE_CONTROLLER_HANDLER_ADAPTER_BEAN_NAME));
 		}
 	}
 
@@ -215,7 +215,7 @@ public abstract class MvcNamespaceUtils {
 	/**
 	 * Find the {@code ContentNegotiationManager} bean created by or registered
 	 * with the {@code annotation-driven} element.
-	 * @return a bean definition, bean reference, or {@code null}
+	 * @return a bean definition, bean reference, or {@code null} if none defined
 	 */
 	@Nullable
 	public static Object getContentNegotiationManager(ParserContext context) {
@@ -234,12 +234,11 @@ public abstract class MvcNamespaceUtils {
 	/**
 	 * Load the {@link Resource}'s for the given locations with the given
 	 * {@link ResourceLoader} and add them to the output list. Also for
-	 * {@link org.springframework.core.io.UrlResource URL-based resources} (e.g.
-	 * files, HTTP URLs, etc) this method supports a special prefix to indicate
-	 * the charset associated with the URL so that relative paths appended to it
-	 * can be encoded correctly, e.g.
-	 * {@code [charset=Windows-31J]http://example.org/path}. The charsets, if
-	 * any, are added to the output map.
+	 * {@link org.springframework.core.io.UrlResource URL-based resources} (e.g. files,
+	 * HTTP URLs, etc) this method supports a special prefix to indicate the charset
+	 * associated with the URL so that relative paths appended to it can be encoded
+	 * correctly, e.g. {@code [charset=Windows-31J]http://example.org/path}.
+	 * The charsets, if any, are added to the output map.
 	 * @since 4.3.13
 	 */
 	public static void loadResourceLocations(String[] locations, ResourceLoader resourceLoader,
