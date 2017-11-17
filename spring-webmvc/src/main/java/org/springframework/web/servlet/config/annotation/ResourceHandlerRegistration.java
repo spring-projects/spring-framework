@@ -16,19 +16,14 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.cache.Cache;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.CacheControl;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.web.servlet.config.MvcNamespaceUtils;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
@@ -42,13 +37,9 @@ import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
  */
 public class ResourceHandlerRegistration {
 
-	private final ResourceLoader resourceLoader;
-
 	private final String[] pathPatterns;
 
-	private final List<Resource> locations = new ArrayList<>();
-
-	private final Map<Resource, Charset> locationCharsets = new HashMap<>();
+	private final List<String> locationValues = new ArrayList<>();
 
 	@Nullable
 	private Integer cachePeriod;
@@ -62,12 +53,10 @@ public class ResourceHandlerRegistration {
 
 	/**
 	 * Create a {@link ResourceHandlerRegistration} instance.
-	 * @param resourceLoader a resource loader for turning a String location into a {@link Resource}
 	 * @param pathPatterns one or more resource URL path patterns
 	 */
-	public ResourceHandlerRegistration(ResourceLoader resourceLoader, String... pathPatterns) {
+	public ResourceHandlerRegistration(String... pathPatterns) {
 		Assert.notEmpty(pathPatterns, "At least one path pattern is required for resource handling.");
-		this.resourceLoader = resourceLoader;
 		this.pathPatterns = pathPatterns;
 	}
 
@@ -91,8 +80,7 @@ public class ResourceHandlerRegistration {
 	 * chained method invocation
 	 */
 	public ResourceHandlerRegistration addResourceLocations(String... resourceLocations) {
-		MvcNamespaceUtils.loadResourceLocations(
-				resourceLocations, this.resourceLoader, this.locations, this.locationCharsets);
+		this.locationValues.addAll(Arrays.asList(resourceLocations));
 		return this;
 	}
 
@@ -182,8 +170,7 @@ public class ResourceHandlerRegistration {
 			handler.setResourceResolvers(this.resourceChainRegistration.getResourceResolvers());
 			handler.setResourceTransformers(this.resourceChainRegistration.getResourceTransformers());
 		}
-		handler.setLocations(this.locations);
-		handler.setLocationCharsets(this.locationCharsets);
+		handler.setLocationValues(this.locationValues);
 		if (this.cacheControl != null) {
 			handler.setCacheControl(this.cacheControl);
 		}

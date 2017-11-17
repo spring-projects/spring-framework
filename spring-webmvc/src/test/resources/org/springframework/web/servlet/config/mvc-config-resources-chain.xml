@@ -21,7 +21,13 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-	<mvc:resources mapping="/resources/**" location="/, classpath:/META-INF/, [charset=ISO-8859-1]file:///tmp">
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="properties">
+			<value>location=file:///tmp</value>
+		</property>
+	</bean>
+
+	<mvc:resources mapping="/resources/**" location="/, classpath:/META-INF/, [charset=ISO-8859-1]${location}">
 		<mvc:resource-chain resource-cache="true" cache-manager="resourceCache" cache-name="test-resource-cache">
 			<mvc:resolvers>
 				<mvc:version-resolver>

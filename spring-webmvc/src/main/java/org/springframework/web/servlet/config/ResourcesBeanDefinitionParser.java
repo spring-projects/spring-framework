@@ -16,11 +16,6 @@
 
 package org.springframework.web.servlet.config;
 
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -28,7 +23,6 @@ import org.w3c.dom.Element;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -39,8 +33,6 @@ import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.Ordered;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.CacheControl;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
@@ -172,35 +164,13 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 			return null;
 		}
 
-		String[] locationValues = StringUtils.commaDelimitedListToStringArray(locationAttr);
-		if (context.getRegistry() instanceof ConfigurableBeanFactory) {
-			ConfigurableBeanFactory cbf = ((ConfigurableBeanFactory) context.getRegistry());
-			for (int i = 0; i < locationValues.length; i++) {
-				locationValues[i] = cbf.resolveEmbeddedValue(locationValues[i]);
-			}
-		}
-
-		ManagedList<Object> locations = new ManagedList<>();
-		Map<Resource, Charset> locationCharsets = new HashMap<>();
-		ResourceLoader resourceLoader = context.getReaderContext().getResourceLoader();
-
-		if (resourceLoader != null) {
-			List<Resource> resources = new ArrayList<>();
-			MvcNamespaceUtils.loadResourceLocations(locationValues, resourceLoader, resources, locationCharsets);
-			locations.addAll(resources);
-		}
-		else {
-			locations.addAll(Arrays.asList(locationValues));
-		}
-
 		RootBeanDefinition resourceHandlerDef = new RootBeanDefinition(ResourceHttpRequestHandler.class);
 		resourceHandlerDef.setSource(source);
 		resourceHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 
 		MutablePropertyValues values = resourceHandlerDef.getPropertyValues();
 		values.add("urlPathHelper", pathHelperRef);
-		values.add("locations", locations);
-		values.add("locationCharsets", locationCharsets);
+		values.add("locationValues", StringUtils.commaDelimitedListToStringArray(locationAttr));
 
 		String cacheSeconds = element.getAttribute("cache-period");
 		if (StringUtils.hasText(cacheSeconds)) {
