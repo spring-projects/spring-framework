@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +32,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -101,10 +103,14 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	private static final Log logger = LogFactory.getLog(ResourceHttpRequestHandler.class);
 
+	private static final String URL_RESOURCE_CHARSET_PREFIX = "[charset=";
+
 
 	private final List<Resource> locations = new ArrayList<Resource>(4);
 
 	private final Map<Resource, Charset> locationCharsets = new HashMap<Resource, Charset>(4);
+
+	private final List<String> locationValues = new ArrayList<String>(4);
 
 	private final List<ResourceResolver> resourceResolvers = new ArrayList<ResourceResolver>(4);
 
@@ -129,8 +135,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 
 	/**
-	 * Set the {@code List} of {@code Resource} paths to use as sources
+	 * Set the {@code List} of {@code Resource} locations to use as sources
 	 * for serving static resources.
+	 * @see #setLocationValues(List)
 	 */
 	public void setLocations(List<Resource> locations) {
 		Assert.notNull(locations, "Locations list must not be null");
@@ -139,35 +146,27 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	}
 
 	/**
-	 * Return the {@code List} of {@code Resource} paths to use as sources
-	 * for serving static resources.
+	 * Return the configured {@code List} of {@code Resource} locations.
+	 * Note that if {@link #setLocationValues(List) locationValues} are provided,
+	 * instead of loaded Resource-based locations, this method will return
+	 * empty until after initialization via {@link #afterPropertiesSet()}.
 	 */
 	public List<Resource> getLocations() {
 		return this.locations;
 	}
 
 	/**
-	 * Specify charsets associated with the configured {@link #setLocations(List)
-	 * locations}. This is supported for
-	 * {@link org.springframework.core.io.UrlResource URL resources} such as a
-	 * file or an HTTP URL location and is used in {@link PathResourceResolver}
-	 * to correctly encode paths relative to the location.
-	 * <p><strong>Note:</strong> The charset is used only if the
-	 * {@link #setUrlPathHelper urlPathHelper} property is also configured and
-	 * its {@code urlDecode} property is set to {@code true}.
+	 * An alternative to {@link #setLocations(List)} that accepts a list of
+	 * String-based location values, with support for {@link UrlResource}'s
+	 * (e.g. files or HTTP URLs) with a special prefix to indicate the charset
+	 * to use when appending relative paths. For example
+	 * {@code "[charset=Windows-31J]http://example.org/path"}.
 	 * @since 4.3.13
 	 */
-	public void setLocationCharsets(Map<Resource,Charset> locationCharsets) {
-		this.locationCharsets.clear();
-		this.locationCharsets.putAll(locationCharsets);
-	}
-
-	/**
-	 * Return charsets associated with static resource locations.
-	 * @since 4.3.13
-	 */
-	public Map<Resource, Charset> getLocationCharsets() {
-		return Collections.unmodifiableMap(this.locationCharsets);
+	public void setLocationValues(List<String> locationValues) {
+		Assert.notNull(locationValues, "Location values list must not be null");
+		this.locationValues.clear();
+		this.locationValues.addAll(locationValues);
 	}
 
 	/**
@@ -297,6 +296,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
+
+		loadResourceLocations();
+
 		if (logger.isWarnEnabled() && CollectionUtils.isEmpty(this.locations)) {
 			logger.warn("Locations list is empty. No resources will be served unless a " +
 					"custom ResourceResolver is configured as an alternative to PathResourceResolver.");
@@ -305,6 +307,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		if (this.resourceResolvers.isEmpty()) {
 			this.resourceResolvers.add(new PathResourceResolver());
 		}
+
 		initAllowedLocations();
 
 		if (this.resourceHttpMessageConverter == null) {
@@ -315,6 +318,46 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 
 		this.contentNegotiationStrategy = initContentNegotiationStrategy();
+	}
+
+	private void loadResourceLocations() {
+		if (!CollectionUtils.isEmpty(this.locations) && !CollectionUtils.isEmpty(this.locationValues)) {
+			throw new IllegalArgumentException("Please set either Resource-based \"locations\" or " +
+					"String-based \"locationValues\", but not both.");
+		}
+		if (CollectionUtils.isEmpty(this.locationValues)) {
+			return;
+		}
+		ApplicationContext appContext = getApplicationContext();
+		ConfigurableBeanFactory beanFactory = null;
+		if (appContext.getAutowireCapableBeanFactory() instanceof ConfigurableBeanFactory) {
+			beanFactory = ((ConfigurableBeanFactory) appContext.getAutowireCapableBeanFactory());
+		}
+		for (String location : this.locationValues) {
+			if (beanFactory != null) {
+				location = beanFactory.resolveEmbeddedValue(location);
+				Assert.notNull(location, "Null location");
+			}
+			Charset charset = null;
+			location = location.trim();
+			if (location.startsWith(URL_RESOURCE_CHARSET_PREFIX)) {
+				int endIndex = location.indexOf("]", URL_RESOURCE_CHARSET_PREFIX.length());
+				if (endIndex == -1) {
+					throw new IllegalArgumentException("Invalid charset syntax in location: " + location);
+				}
+				String value = location.substring(URL_RESOURCE_CHARSET_PREFIX.length(), endIndex);
+				charset = Charset.forName(value);
+				location = location.substring(endIndex + 1);
+			}
+			Resource resource = appContext.getResource(location);
+			this.locations.add(resource);
+			if (charset != null) {
+				if (!(resource instanceof UrlResource)) {
+					throw new IllegalArgumentException("Unexpected charset for non-UrlResource: " + resource);
+				}
+				this.locationCharsets.put(resource, charset);
+			}
+		}
 	}
 
 	/**

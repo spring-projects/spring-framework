@@ -16,9 +16,7 @@
 
 package org.springframework.web.servlet.config;
 
-import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -26,9 +24,6 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.io.UrlResource;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.cors.CorsConfiguration;
@@ -63,8 +58,6 @@ public abstract class MvcNamespaceUtils {
 	private static final String CORS_CONFIGURATION_BEAN_NAME = "mvcCorsConfigurations";
 
 	private static final String HANDLER_MAPPING_INTROSPECTOR_BEAN_NAME = "mvcHandlerMappingIntrospector";
-
-	private static final String URL_RESOURCE_CHARSET_PREFIX = "[charset=";
 
 
 	public static void registerDefaultComponents(ParserContext parserContext, Object source) {
@@ -226,42 +219,6 @@ public abstract class MvcNamespaceUtils {
 			return new RuntimeBeanReference(name);
 		}
 		return null;
-	}
-
-	/**
-	 * Load the {@link Resource}'s for the given locations with the given
-	 * {@link ResourceLoader} and add them to the output list. Also for
-	 * {@link org.springframework.core.io.UrlResource URL-based resources} (e.g. files,
-	 * HTTP URLs, etc) this method supports a special prefix to indicate the charset
-	 * associated with the URL so that relative paths appended to it can be encoded
-	 * correctly, e.g. {@code [charset=Windows-31J]http://example.org/path}.
-	 * The charsets, if any, are added to the output map.
-	 * @since 4.3.13
-	 */
-	public static void loadResourceLocations(String[] locations, ResourceLoader resourceLoader,
-			List<Resource> outputLocations, Map<Resource, Charset> outputLocationCharsets) {
-
-		for (String location : locations) {
-			Charset charset = null;
-			location = location.trim();
-			if (location.startsWith(URL_RESOURCE_CHARSET_PREFIX)) {
-				int endIndex = location.indexOf("]", URL_RESOURCE_CHARSET_PREFIX.length());
-				if (endIndex == -1) {
-					throw new IllegalArgumentException("Invalid charset syntax in location: " + location);
-				}
-				String value = location.substring(URL_RESOURCE_CHARSET_PREFIX.length(), endIndex);
-				charset = Charset.forName(value);
-				location = location.substring(endIndex + 1);
-			}
-			Resource resource = resourceLoader.getResource(location);
-			outputLocations.add(resource);
-			if (charset != null) {
-				if (!(resource instanceof UrlResource)) {
-					throw new IllegalArgumentException("Unexpected charset for non-UrlResource: " + resource);
-				}
-				outputLocationCharsets.put(resource, charset);
-			}
-		}
 	}
 
 }
