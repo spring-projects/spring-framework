@@ -664,7 +664,7 @@ public class PathPatternTests {
 
 	@Test
 	public void extractPathWithinPattern_spr15259() { 
-		checkExtractPathWithinPattern("/**","//","/");
+		checkExtractPathWithinPattern("/**","//","");
 		checkExtractPathWithinPattern("/**","/","");
 		checkExtractPathWithinPattern("/**","","");
 		checkExtractPathWithinPattern("/**","/foobar","foobar");
@@ -682,6 +682,13 @@ public class PathPatternTests {
 		checkExtractPathWithinPattern("/*.html", "/commit.html", "commit.html");
 		checkExtractPathWithinPattern("/docs/*/*/*/*", "/docs/cvs/other/commit.html", "cvs/other/commit.html");
 		checkExtractPathWithinPattern("/d?cs/**", "/docs/cvs/commit", "docs/cvs/commit");
+		checkExtractPathWithinPattern("/*/**", "/docs/cvs/commit///", "docs/cvs/commit");
+		checkExtractPathWithinPattern("/*/**", "/docs/cvs/commit/", "docs/cvs/commit");
+		checkExtractPathWithinPattern("/aaa/bbb/**", "/aaa///","");
+		checkExtractPathWithinPattern("/aaa/bbb/**", "/aaa//","");
+		checkExtractPathWithinPattern("/aaa/bbb/**", "/aaa/","");
+		checkExtractPathWithinPattern("/docs/**", "/docs/cvs/commit///", "cvs/commit");
+		checkExtractPathWithinPattern("/docs/**", "/docs/cvs/commit/", "cvs/commit");
 		checkExtractPathWithinPattern("/docs/c?s/*.html", "/docs/cvs/commit.html", "cvs/commit.html");
 		checkExtractPathWithinPattern("/d?cs/*/*.html", "/docs/cvs/commit.html", "docs/cvs/commit.html");
 		checkExtractPathWithinPattern("/a/b/c*d*/*.html", "/a/b/cod/foo.html", "cod/foo.html");
