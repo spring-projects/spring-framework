@@ -52,7 +52,7 @@ public class ParsedSql {
 	/**
 	 * Return the SQL statement that is being parsed.
 	 */
-	String getOriginalSql() {
+	public String getOriginalSql() {
 		return this.originalSql;
 	}
 
@@ -72,7 +72,7 @@ public class ParsedSql {
 	 * Return all of the parameters (bind variables) in the parsed SQL statement.
 	 * Repeated occurrences of the same parameter name are included here.
 	 */
-	List<String> getParameterNames() {
+	public List<String> getParameterNames() {
 		return this.parameterNames;
 	}
 
