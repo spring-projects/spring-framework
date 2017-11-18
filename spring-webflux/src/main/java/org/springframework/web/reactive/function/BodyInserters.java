@@ -75,6 +75,11 @@ public abstract class BodyInserters {
 
 	/**
 	 * Return a {@code BodyInserter} that writes the given single object.
+	 * <p>Note also that
+	 * {@link org.springframework.web.reactive.function.client.WebClient WebClient} and
+	 * {@link org.springframework.web.reactive.function.server.ServerResponse ServerResponse}
+	 * each offer a {@code syncBody(Object)} shortcut for providing an Object
+	 * as the body.
 	 * @param body the body of the response
 	 * @return a {@code BodyInserter} that writes a single object
 	 */
@@ -85,6 +90,10 @@ public abstract class BodyInserters {
 
 	/**
 	 * Return a {@code BodyInserter} that writes the given {@link Publisher}.
+	 * <p>Note also that
+	 * {@link org.springframework.web.reactive.function.client.WebClient WebClient} and
+	 * {@link org.springframework.web.reactive.function.server.ServerResponse ServerResponse}
+	 * each offer {@code body} shortcut methods for providing a Publisher as the body.
 	 * @param publisher the publisher to stream to the response body
 	 * @param elementClass the class of elements contained in the publisher
 	 * @param <T> the type of the elements contained in the publisher
@@ -101,6 +110,10 @@ public abstract class BodyInserters {
 
 	/**
 	 * Return a {@code BodyInserter} that writes the given {@link Publisher}.
+	 * <p>Note also that
+	 * {@link org.springframework.web.reactive.function.client.WebClient WebClient} and
+	 * {@link org.springframework.web.reactive.function.server.ServerResponse ServerResponse}
+	 * each offer {@code body} shortcut methods for providing a Publisher as the body.
 	 * @param publisher the publisher to stream to the response body
 	 * @param typeReference the type of elements contained in the publisher
 	 * @param <T> the type of the elements contained in the publisher
@@ -178,14 +191,15 @@ public abstract class BodyInserters {
 	}
 
 	/**
-	 * Return a {@link FormInserter} that writes the given {@code MultiValueMap} as URL-encoded
-     * form data. Note that the returned inserter allows for additional entries to be added via
-     * {@link FormInserter#with(String, Object)}.
+	 * Return a {@link FormInserter} that writes the given {@code MultiValueMap}
+	 * as URL-encoded form data. The returned inserter allows for additional
+	 * entries to be added via {@link FormInserter#with(String, Object)}.
 	 *
-	 * <p><strong>Note:</strong> you can also use the {@code syncBody(Object)}
-	 * method in the request builders of both the {@code WebClient} and
-	 * {@code WebTestClient}. In that case setting the content type is not
-	 * required. Just make sure the map contains String values only.
+	 * <p>Note that you can also use the {@code syncBody(Object)} method in the
+	 * request builders of both the {@code WebClient} and {@code WebTestClient}.
+	 * In that case the setting of the content type is also not required, just
+	 * be sure the map contains String values only or otherwise it would be
+	 * interpreted as a multipart request.
 	 *
 	 * @param formData the form data to write to the output message
 	 * @return a {@code FormInserter} that writes form data
@@ -201,9 +215,9 @@ public abstract class BodyInserters {
 	}
 
 	/**
-	 * Return a {@link FormInserter} that writes the given key-value pair as URL-encoded
-	 * form data. Note that the returned inserter allows for additional entries to be added via
-	 * {@link FormInserter#with(String, Object)}.
+	 * Return a {@link FormInserter} that writes the given key-value pair as
+	 * URL-encoded form data. The returned inserter allows for additional
+	 * entries to be added via {@link FormInserter#with(String, Object)}.
 	 * @param key the key to add to the form
 	 * @param value the value to add to the form
 	 * @return a {@code FormInserter} that writes form data
@@ -228,11 +242,12 @@ public abstract class BodyInserters {
 	 * MultipartBodyBuilder}. Also the returned inserter allows for additional
 	 * entries to be added via {@link FormInserter#with(String, Object)}.
 	 *
-	 * <p><strong>Note:</strong> you can also use the {@code syncBody(Object)}
-	 * method in the request builders of both the {@code WebClient} and
-	 * {@code WebTestClient}. In that case setting the content type is optional.
-	 * Just make sure the {@code MultiValueMap} contains at least one non-String
-	 * value or otherwise it would be interpreted as plan form data.
+	 * <p>Note that you can also use the {@code syncBody(Object)} method in the
+	 * request builders of both the {@code WebClient} and {@code WebTestClient}.
+	 * In that case the setting of the content type is also not required, just
+	 * be sure the map contains at least one non-String value or otherwise,
+	 * without a content-type header as a hint, it would be interpreted as a
+	 * plain form data request.
 	 *
 	 * @param multipartData the form data to write to the output message
 	 * @return a {@code BodyInserter} that writes multipart data
@@ -267,7 +282,8 @@ public abstract class BodyInserters {
 	}
 
 	/**
-	 * Return a {@code BodyInserter} that writes the given {@code Publisher<DataBuffer>} to the body.
+	 * Return a {@code BodyInserter} that writes the given
+	 * {@code Publisher<DataBuffer>} to the body.
 	 * @param publisher the data buffer publisher to write
 	 * @param <T> the type of the publisher
 	 * @return a {@code BodyInserter} that writes directly to the body

@@ -40,9 +40,9 @@ import java.util.function.IntPredicate;
  * <p>The {@linkplain #capacity() capacity} of a {@code DataBuffer} is expanded on demand,
  * similar to {@code StringBuilder}.
  *
- * <p>The main purpose of the {@code DataBuffer} abstraction is provide a convenient wrapper around
- * {@link ByteBuffer}, similar to Netty's {@link io.netty.buffer.ByteBuf}, that can also be used on
- * non-Netty platforms (i.e. Servlet).
+ * <p>The main purpose of the {@code DataBuffer} abstraction is to provide a convenient wrapper
+ * around {@link ByteBuffer} that is similar to Netty's {@link io.netty.buffer.ByteBuf}, but that
+ * can also be used on non-Netty platforms (i.e. Servlet).
  *
  * @author Arjen Poutsma
  * @since 5.0
@@ -237,14 +237,14 @@ public interface DataBuffer {
 	ByteBuffer asByteBuffer(int index, int length);
 
 	/**
-	 * Expose this buffer's data as an {@link InputStream}. Both data and position are
+	 * Expose this buffer's data as an {@link InputStream}. Both data and read position are
 	 * shared between the returned stream and this data buffer.
 	 * @return this data buffer as an input stream
 	 */
 	InputStream asInputStream();
 
 	/**
-	 * Expose this buffer's data as an {@link OutputStream}. Both data and position are
+	 * Expose this buffer's data as an {@link OutputStream}. Both data and write position are
 	 * shared between the returned stream and this data buffer.
 	 * @return this data buffer as an output stream
 	 */

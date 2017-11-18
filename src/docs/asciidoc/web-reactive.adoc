@@ -18,6 +18,7 @@ include::web/webflux.adoc[leveloffset=+1]
 
 include::web/webflux-webclient.adoc[leveloffset=+1]
 
+include::web/webflux-websocket.adoc[leveloffset=+1]
 
 
 

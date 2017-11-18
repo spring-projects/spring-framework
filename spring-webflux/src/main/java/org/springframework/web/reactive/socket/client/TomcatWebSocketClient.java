@@ -23,6 +23,7 @@ import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.adapter.StandardWebSocketSession;
 import org.springframework.web.reactive.socket.adapter.TomcatWebSocketSession;
 
+import org.apache.tomcat.websocket.WsWebSocketContainer;
 import reactor.core.publisher.MonoProcessor;
 
 /**
@@ -35,6 +36,7 @@ public class TomcatWebSocketClient extends StandardWebSocketClient {
 
 
 	public TomcatWebSocketClient() {
+		this(new WsWebSocketContainer());
 	}
 
 	public TomcatWebSocketClient(WebSocketContainer webSocketContainer) {

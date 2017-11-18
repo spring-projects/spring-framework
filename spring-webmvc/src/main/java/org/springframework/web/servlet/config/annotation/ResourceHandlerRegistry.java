@@ -117,8 +117,7 @@ public class ResourceHandlerRegistry {
 	 * registered resource handler
 	 */
 	public ResourceHandlerRegistration addResourceHandler(String... pathPatterns) {
-		ResourceHandlerRegistration registration =
-				new ResourceHandlerRegistration(this.applicationContext, pathPatterns);
+		ResourceHandlerRegistration registration = new ResourceHandlerRegistration(pathPatterns);
 		this.registrations.add(registration);
 		return registration;
 	}

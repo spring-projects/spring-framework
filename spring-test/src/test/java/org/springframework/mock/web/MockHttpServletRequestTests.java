@@ -508,6 +508,7 @@ public class MockHttpServletRequestTests {
 		request.getDateHeader(IF_MODIFIED_SINCE);
 	}
 
+
 	private void assertEqualEnumerations(Enumeration<?> enum1, Enumeration<?> enum2) {
 		assertNotNull(enum1);
 		assertNotNull(enum2);

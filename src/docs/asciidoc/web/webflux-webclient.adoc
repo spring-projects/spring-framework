@@ -99,10 +99,11 @@ Note that unlike `retrieve()`, with `exchange()` there are no automatic error si
 
 [CAUTION]
 ====
-When using `exchange()` you must always use any of the body or entity methods of
+When using `exchange()` you must always use any of the body or toEntity methods of
 `ClientResponse` to ensure resources are released and to avoid potential issues with HTTP
-connection pooling. If not interested in the response body use `bodyToMono(Void.class)`
-to complete.
+connection pooling. You can use `bodyToMono(Void.class)` if no response content is
+expected. However keep in mind that if the response does have content, the connection
+will be closed and will not be placed back in the pool.
 ====
 
 

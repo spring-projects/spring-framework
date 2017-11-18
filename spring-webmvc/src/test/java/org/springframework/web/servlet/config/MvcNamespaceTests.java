@@ -20,8 +20,8 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -46,14 +46,13 @@ import org.junit.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.TypeMismatchException;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.Ordered;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.annotation.NumberFormat;
@@ -84,7 +83,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
-import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
@@ -169,7 +168,7 @@ public class MvcNamespaceTests {
 			"org.springframework.web.servlet.config.viewControllerHandlerMapping";
 
 
-	private GenericWebApplicationContext appContext;
+	private XmlWebApplicationContext appContext;
 
 	private TestController handler;
 
@@ -179,7 +178,7 @@ public class MvcNamespaceTests {
 	@Before
 	public void setUp() throws Exception {
 		TestMockServletContext servletContext = new TestMockServletContext();
-		appContext = new GenericWebApplicationContext();
+		appContext = new XmlWebApplicationContext();
 		appContext.setServletContext(servletContext);
 		LocaleContextHolder.setLocale(Locale.US);
 
@@ -422,8 +421,6 @@ public class MvcNamespaceTests {
 		assertNotNull(handler);
 
 		assertNotNull(handler.getUrlPathHelper());
-		assertEquals(1, handler.getLocationCharsets().size());
-		assertEquals(StandardCharsets.ISO_8859_1, handler.getLocationCharsets().values().iterator().next());
 
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
 		assertThat(resolvers, Matchers.hasSize(4));
@@ -443,8 +440,9 @@ public class MvcNamespaceTests {
 				Matchers.instanceOf(ContentVersionStrategy.class));
 
 		PathResourceResolver pathResolver = (PathResourceResolver) resolvers.get(3);
-		assertEquals(1, pathResolver.getLocationCharsets().size());
-		assertEquals(StandardCharsets.ISO_8859_1, handler.getLocationCharsets().values().iterator().next());
+		Map<Resource, Charset> locationCharsets = pathResolver.getLocationCharsets();
+		assertEquals(1, locationCharsets.size());
+		assertEquals(StandardCharsets.ISO_8859_1, locationCharsets.values().iterator().next());
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
 		assertThat(transformers, Matchers.hasSize(3));
@@ -942,11 +940,8 @@ public class MvcNamespaceTests {
 
 
 	private void loadBeanDefinitions(String fileName) {
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
-		ClassPathResource resource = new ClassPathResource(fileName, AnnotationDrivenBeanDefinitionParserTests.class);
-		reader.loadBeanDefinitions(resource);
-		String names = Arrays.toString(this.appContext.getBeanDefinitionNames());
-		appContext.refresh();
+		this.appContext.setConfigLocation("classpath:org/springframework/web/servlet/config/" + fileName);
+		this.appContext.refresh();
 	}
 
 

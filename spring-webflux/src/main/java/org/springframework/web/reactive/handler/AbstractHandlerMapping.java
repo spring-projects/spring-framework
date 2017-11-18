@@ -151,8 +151,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	 * <p>On CORS pre-flight requests this method should return a match not for
 	 * the pre-flight request but for the expected actual request based on the URL
 	 * path, the HTTP methods from the "Access-Control-Request-Method" header, and
-	 * the headers from the "Access-Control-Request-Headers" header thus allowing
-	 * the CORS configuration to be obtained via {@link #getCorsConfigurations},
+	 * the headers from the "Access-Control-Request-Headers" header.
 	 * @param exchange current exchange
 	 * @return {@code Mono} for the matching handler, if any
 	 */

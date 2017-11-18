@@ -152,7 +152,28 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		protected void checkOnDataAvailable() {
 			// TODO: The onDataAvailable() call below can cause a StackOverflowError
 			// since this method is being called from onDataAvailable() itself.
-			onDataAvailable();
+			if (isReadPossible()) {
+				onDataAvailable();
+			}
+		}
+
+		private boolean isReadPossible() {
+			if (!this.channel.isReadResumed()) {
+				this.channel.resumeReads();
+			}
+			return this.channel.isReadResumed();
+		}
+
+		@Override
+		protected void suspendReading() {
+			this.channel.suspendReads();
+		}
+
+		@Override
+		public void onAllDataRead() {
+			this.channel.getReadSetter().set(null);
+			this.channel.resumeReads();
+			super.onAllDataRead();
 		}
 
 		@Override

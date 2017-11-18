@@ -46,7 +46,6 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 	/** Minimum period between expiration checks */
 	private static final Duration EXPIRATION_CHECK_PERIOD = Duration.ofSeconds(60);
 
-
 	private static final IdGenerator idGenerator = new JdkIdGenerator();
 
 
@@ -210,11 +209,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 		@Override
 		public Mono<Void> changeSessionId() {
 			String currentId = this.id.get();
-			if (InMemoryWebSessionStore.this.sessions.remove(currentId) == null) {
-				return Mono.error(new IllegalStateException(
-						"Failed to change session id: " + currentId +
-								" because the Session is no longer present in the store."));
-			}
+			InMemoryWebSessionStore.this.sessions.remove(currentId);
 			String newId = String.valueOf(idGenerator.generateId());
 			this.id.set(newId);
 			InMemoryWebSessionStore.this.sessions.put(this.getId(), this);

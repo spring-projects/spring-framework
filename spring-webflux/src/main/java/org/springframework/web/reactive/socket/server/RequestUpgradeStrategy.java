@@ -46,6 +46,7 @@ public interface RequestUpgradeStrategy {
 	 * @return completion {@code Mono<Void>} to indicate the outcome of the
 	 * WebSocket session handling.
 	 */
-	Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler webSocketHandler, @Nullable String subProtocol);
+	Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler webSocketHandler,
+			@Nullable String subProtocol);
 
 }
