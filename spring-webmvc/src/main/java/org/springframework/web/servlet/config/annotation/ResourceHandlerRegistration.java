@@ -99,9 +99,7 @@ public class ResourceHandlerRegistration {
 	/**
 	 * Specify the {@link org.springframework.http.CacheControl} which should be used
 	 * by the resource handler.
-	 *
 	 * <p>Setting a custom value here will override the configuration set with {@link #setCachePeriod}.
-	 *
 	 * @param cacheControl the CacheControl configuration to use
 	 * @return the same {@link ResourceHandlerRegistration} instance, for chained method invocation
 	 * @since 4.2
@@ -114,11 +112,9 @@ public class ResourceHandlerRegistration {
 	/**
 	 * Configure a chain of resource resolvers and transformers to use. This
 	 * can be useful, for example, to apply a version strategy to resource URLs.
-	 *
 	 * <p>If this method is not invoked, by default only a simple
 	 * {@link PathResourceResolver} is used in order to match URL paths to
 	 * resources under the configured locations.
-	 *
 	 * @param cacheResources whether to cache the result of resource resolution;
 	 * setting this to "true" is recommended for production (and "false" for
 	 * development, especially when applying a version strategy)
@@ -133,11 +129,9 @@ public class ResourceHandlerRegistration {
 	/**
 	 * Configure a chain of resource resolvers and transformers to use. This
 	 * can be useful, for example, to apply a version strategy to resource URLs.
-	 *
 	 * <p>If this method is not invoked, by default only a simple
 	 * {@link PathResourceResolver} is used in order to match URL paths to
 	 * resources under the configured locations.
-	 *
 	 * @param cacheResources whether to cache the result of resource resolution;
 	 * setting this to "true" is recommended for production (and "false" for
 	 * development, especially when applying a version strategy
@@ -154,15 +148,16 @@ public class ResourceHandlerRegistration {
 		return this.resourceChainRegistration;
 	}
 
+
 	/**
-	 * Returns the URL path patterns for the resource handler.
+	 * Return the URL path patterns for the resource handler.
 	 */
 	protected String[] getPathPatterns() {
 		return this.pathPatterns;
 	}
 
 	/**
-	 * Returns a {@link ResourceHttpRequestHandler} instance.
+	 * Return a {@link ResourceHttpRequestHandler} instance.
 	 */
 	protected ResourceHttpRequestHandler getRequestHandler() {
 		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
