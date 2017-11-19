@@ -160,8 +160,7 @@ strategy__. A transaction strategy is defined by the
 ----
 	public interface PlatformTransactionManager {
 
-		TransactionStatus getTransaction(
-				TransactionDefinition definition) throws TransactionException;
+		TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException;
 
 		void commit(TransactionStatus status) throws TransactionException;
 
@@ -2990,10 +2989,10 @@ An `update()` convenience method supports the retrieval of primary keys generate
 database. This support is part of the JDBC 3.0 standard; see Chapter 13.6 of the
 specification for details. The method takes a `PreparedStatementCreator` as its first
 argument, and this is the way the required insert statement is specified. The other
-argument is a `KeyHolder`, which contains the generated key on successful return from
-the update. There is not a standard single way to create an appropriate
-`PreparedStatement` (which explains why the method signature is the way it is). The
-following example works on Oracle but may not work on other platforms:
+argument is a `KeyHolder`, which contains the generated key on successful return from the
+update. There is not a standard single way to create an appropriate `PreparedStatement`
+(which explains why the method signature is the way it is). The following example works
+on Oracle but may not work on other platforms:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3244,6 +3243,7 @@ based on entries in a list. The entire list is used as the batch in this example
 [subs="verbatim,quotes"]
 ----
 	public class JdbcActorDao implements ActorDao {
+
 		private JdbcTemplate jdbcTemplate;
 
 		public void setDataSource(DataSource dataSource) {
@@ -3251,20 +3251,18 @@ based on entries in a list. The entire list is used as the batch in this example
 		}
 
 		public int[] batchUpdate(final List<Actor> actors) {
-			int[] updateCounts = jdbcTemplate.batchUpdate("update t_actor set first_name = ?, " +
-					"last_name = ? where id = ?",
-				new BatchPreparedStatementSetter() {
-					public void setValues(PreparedStatement ps, int i) throws SQLException {
+			return this.jdbcTemplate.batchUpdate(
+					"update t_actor set first_name = ?, last_name = ? where id = ?",
+					new BatchPreparedStatementSetter() {
+						public void setValues(PreparedStatement ps, int i) throws SQLException {
 							ps.setString(1, actors.get(i).getFirstName());
 							ps.setString(2, actors.get(i).getLastName());
 							ps.setLong(3, actors.get(i).getId().longValue());
 						}
-
 						public int getBatchSize() {
 							return actors.size();
 						}
 					});
-			return updateCounts;
 		}
 
 		// ... additional methods
@@ -3287,8 +3285,9 @@ provide all parameter values in the call as a list. The framework loops over the
 values and uses an internal prepared statement setter. The API varies depending on
 whether you use named parameters. For the named parameters you provide an array of
 `SqlParameterSource`, one entry for each member of the batch. You can use the
-`SqlParameterSource.createBatch` method to create this array, passing in either an array
-of JavaBeans or an array of Maps containing the parameter values.
+`SqlParameterSourceUtils.createBatch` convenience methods to create this array, passing
+in an array of bean-style objects (with getter methods corresponding to parameters)
+and/or String-keyed Maps (containing the corresponding parameters as values).
 
 This example shows a batch update using named parameters:
 
@@ -3296,18 +3295,17 @@ This example shows a batch update using named parameters:
 [subs="verbatim,quotes"]
 ----
 	public class JdbcActorDao implements ActorDao {
+
 		private NamedParameterTemplate namedParameterJdbcTemplate;
 
 		public void setDataSource(DataSource dataSource) {
 			this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 		}
 
-		public int[] batchUpdate(final List<Actor> actors) {
-			SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(actors.toArray());
-			int[] updateCounts = namedParameterJdbcTemplate.batchUpdate(
+		public int[] batchUpdate(List<Actor> actors) {
+			return this.namedParameterJdbcTemplate.batchUpdate(
 					"update t_actor set first_name = :firstName, last_name = :lastName where id = :id",
-					batch);
-			return updateCounts;
+					SqlParameterSourceUtils.createBatch(actors));
 		}
 
 		// ... additional methods
@@ -3336,15 +3334,12 @@ The same example using classic JDBC "?" placeholders:
 			List<Object[]> batch = new ArrayList<Object[]>();
 			for (Actor actor : actors) {
 				Object[] values = new Object[] {
-						actor.getFirstName(),
-						actor.getLastName(),
-						actor.getId()};
+						actor.getFirstName(), actor.getLastName(), actor.getId()};
 				batch.add(values);
 			}
-			int[] updateCounts = jdbcTemplate.batchUpdate(
+			return this.jdbcTemplate.batchUpdate(
 					"update t_actor set first_name = ?, last_name = ? where id = ?",
 					batch);
-			return updateCounts;
 		}
 
 		// ... additional methods
@@ -3354,6 +3349,24 @@ The same example using classic JDBC "?" placeholders:
 All of the above batch update methods return an int array containing the number of
 affected rows for each batch entry. This count is reported by the JDBC driver. If the
 count is not available, the JDBC driver returns a -2 value.
+
+[NOTE]
+====
+In such a scenario with automatic setting of values on an underlying `PreparedStatement`,
+the corresponding JDBC type for each value needs to be derived from the given Java type.
+While this usually works well, there is a potential for issues, e.g. with Map-contained
+`null` values: Spring will by default call `ParameterMetaData.getParameterType` in such a
+case which may be expensive with your JDBC driver. Please make sure to use a recent driver
+version, and consider setting the "spring.jdbc.getParameterType.ignore" property to "true"
+(as a JVM system property or in a `spring.properties` file in the root of your classpath)
+if you encounter a performance issue, e.g. as reported on Oracle 12c (SPR-16139).
+
+Alternatively, simply consider specifying the corresponding JDBC types explicitly:
+either via a 'BatchPreparedStatementSetter' as shown above, or via an explicit type
+array given to a 'List<Object[]>' based call, or via 'registerSqlType' calls on a
+custom 'MapSqlParameterSource' instance, or via a 'BeanPropertySqlParameterSource'
+which derives the SQL type from the Java-declared property type even for a null value.
+====
 
 
 [[jdbc-batch-multi]]
