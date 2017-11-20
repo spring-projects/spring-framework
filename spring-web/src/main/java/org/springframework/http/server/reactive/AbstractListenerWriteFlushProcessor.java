@@ -190,6 +190,9 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 				if (processor.changeState(this, COMPLETED)) {
 					processor.resultPublisher.publishComplete();
 				}
+				else {
+					processor.state.get().onComplete(processor);
+				}
 			}
 		},
 
@@ -211,6 +214,9 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 					}
 					else if (processor.changeState(this, COMPLETED)) {
 						processor.resultPublisher.publishComplete();
+					}
+					else {
+						processor.state.get().onComplete(processor);
 					}
 				}
 				else {
@@ -237,6 +243,9 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 				}
 				if (processor.changeState(this, COMPLETED)) {
 					processor.resultPublisher.publishComplete();
+				}
+				else {
+					processor.state.get().onComplete(processor);
 				}
 			}
 			public <T> void onNext(AbstractListenerWriteFlushProcessor<T> processor, Publisher<? extends T> publisher) {
@@ -274,6 +283,9 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 		public <T> void onError(AbstractListenerWriteFlushProcessor<T> processor, Throwable ex) {
 			if (processor.changeState(this, COMPLETED)) {
 				processor.resultPublisher.publishError(ex);
+			}
+			else {
+				processor.state.get().onError(processor, ex);
 			}
 		}
 

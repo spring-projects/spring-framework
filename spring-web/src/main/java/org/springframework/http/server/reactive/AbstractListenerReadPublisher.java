@@ -312,7 +312,9 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 		}
 
 		<T> void cancel(AbstractListenerReadPublisher<T> publisher) {
-			publisher.changeState(this, COMPLETED);
+			if (!publisher.changeState(this, COMPLETED)) {
+				publisher.state.get().cancel(publisher);
+			}
 		}
 
 		<T> void onDataAvailable(AbstractListenerReadPublisher<T> publisher) {
@@ -325,6 +327,9 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 					publisher.subscriber.onComplete();
 				}
 			}
+			else {
+				publisher.state.get().onAllDataRead(publisher);
+			}
 		}
 
 		<T> void onError(AbstractListenerReadPublisher<T> publisher, Throwable t) {
@@ -332,6 +337,9 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 				if (publisher.subscriber != null) {
 					publisher.subscriber.onError(t);
 				}
+			}
+			else {
+				publisher.state.get().onError(publisher, t);
 			}
 		}
 	}

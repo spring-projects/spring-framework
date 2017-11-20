@@ -251,6 +251,9 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 					processor.writingComplete();
 					processor.resultPublisher.publishComplete();
 				}
+				else {
+					processor.state.get().onComplete(processor);
+				}
 			}
 		},
 
@@ -274,15 +277,29 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 						if (writeCompleted) {
 							processor.releaseData();
 							if (!processor.subscriberCompleted) {
-								processor.changeState(WRITING, REQUESTED);
-								processor.suspendWriting();
-								Assert.state(processor.subscription != null, "No subscription");
-								processor.subscription.request(1);
+								if (processor.changeState(WRITING, REQUESTED)) {
+									if (processor.subscriberCompleted) {
+										if (processor.changeState(REQUESTED, COMPLETED)) {
+											processor.writingComplete();
+											processor.resultPublisher.publishComplete();
+										} else {
+											processor.state.get().onComplete(processor);
+										}
+									}
+									else {
+										processor.suspendWriting();
+										Assert.state(processor.subscription != null, "No subscription");
+										processor.subscription.request(1);
+									}
+								}
 							}
 							else {
-								processor.changeState(WRITING, COMPLETED);
-								processor.writingComplete();
-								processor.resultPublisher.publishComplete();
+								if (processor.changeState(WRITING, COMPLETED)) {
+									processor.writingComplete();
+									processor.resultPublisher.publishComplete();
+								} else {
+									processor.state.get().onComplete(processor);
+								}
 							}
 						}
 						else {
@@ -342,6 +359,9 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 			if (processor.changeState(this, COMPLETED)) {
 				processor.writingComplete();
 				processor.resultPublisher.publishError(ex);
+			}
+			else {
+				processor.state.get().onError(processor, ex);
 			}
 		}
 

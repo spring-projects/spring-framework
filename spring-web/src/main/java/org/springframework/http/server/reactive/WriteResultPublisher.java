@@ -158,12 +158,18 @@ class WriteResultPublisher implements Publisher<Void> {
 					Assert.state(publisher.subscriber != null, "No subscriber");
 					publisher.subscriber.onComplete();
 				}
+				else {
+					publisher.state.get().publishComplete(publisher);
+				}
 			}
 			@Override
 			void publishError(WriteResultPublisher publisher, Throwable t) {
 				if (publisher.changeState(this, COMPLETED)) {
 					Assert.state(publisher.subscriber != null, "No subscriber");
 					publisher.subscriber.onError(t);
+				}
+				else {
+					publisher.state.get().publishError(publisher, t);
 				}
 			}
 		},
@@ -196,7 +202,9 @@ class WriteResultPublisher implements Publisher<Void> {
 		}
 
 		void cancel(WriteResultPublisher publisher) {
-			publisher.changeState(this, COMPLETED);
+			if (!publisher.changeState(this, COMPLETED)) {
+				publisher.state.get().cancel(publisher);
+			}
 		}
 
 		void publishComplete(WriteResultPublisher publisher) {
