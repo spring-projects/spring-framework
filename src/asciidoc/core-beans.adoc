@@ -4468,9 +4468,20 @@ The same applies for typed collections:
 
 [TIP]
 ====
-Your beans can implement the `org.springframework.core.Ordered` interface or either use
+Your target beans can implement the `org.springframework.core.Ordered` interface or use
 the `@Order` or standard `@Priority` annotation if you want items in the array or list
-to be sorted into a specific order.
+to be sorted into a specific order. Otherwise their order will follow the registration
+order of the corresponding target bean definitions in the container.
+
+The `@Order` annotation may be declared at target class level but also on `@Bean` methods,
+potentially being very individual per bean definition (in case of multiple definitions
+with the same bean class). `@Order` values may influence priorities at injection points
+but please be aware that they do not influence singleton startup order which is an
+orthogonal concern determined by dependency relationships and `@DependsOn` declarations.
+
+Note that the standard `javax.annotation.Priority` annotation is not available at the
+`@Bean` level since it cannot be declared on methods. Its semantics can be modelled
+through `@Order` values in combination with `@Primary` on a single bean per type.
 ====
 
 Even typed Maps can be autowired as long as the expected key type is `String`. The Map
@@ -6968,7 +6979,6 @@ another configuration class:
 		public A a() {
 			return new A();
 		}
-
 	}
 
 	@Configuration
@@ -7230,6 +7240,14 @@ the developer to get a type hierarchy of `RepositoryConfig` implementations. In 
 way, navigating `@Configuration` classes and their dependencies becomes no different
 than the usual process of navigating interface-based code.
 --
+
+[TIP]
+====
+If you would like to influence the startup creation order of certain beans, consider
+declaring some of them as `@Lazy` (for creation on first access instead of on startup)
+or as `@DependsOn` on certain other beans (making sure that specific other beans will
+be created before the current bean, beyond what the latter's direct dependencies imply).
+====
 
 
 [[beans-java-conditional]]
