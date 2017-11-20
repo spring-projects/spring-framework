@@ -114,7 +114,7 @@ public class InitBinderBindingContextTests {
 	public void createBinderTypeConversion() throws Exception {
 		MockServerHttpRequest request = MockServerHttpRequest.get("/path?requestParam=22").build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
-		ReactiveAdapterRegistry adapterRegistry = new ReactiveAdapterRegistry();
+		ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 		this.argumentResolvers.add(new RequestParamMethodArgumentResolver(null, adapterRegistry, false));
 
 		BindingContext context = createBindingContext("initBinderTypeConversion", WebDataBinder.class, int.class);

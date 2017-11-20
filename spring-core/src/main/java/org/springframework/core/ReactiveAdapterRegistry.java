@@ -33,7 +33,10 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
-import static org.springframework.core.ReactiveTypeDescriptor.*;
+import static org.springframework.core.ReactiveTypeDescriptor.multiValue;
+import static org.springframework.core.ReactiveTypeDescriptor.noValue;
+import static org.springframework.core.ReactiveTypeDescriptor.singleOptionalValue;
+import static org.springframework.core.ReactiveTypeDescriptor.singleRequiredValue;
 
 /**
  * A registry of adapters to adapt a Reactive Streams {@link Publisher} to/from
@@ -49,6 +52,9 @@ import static org.springframework.core.ReactiveTypeDescriptor.*;
  * @since 5.0
  */
 public class ReactiveAdapterRegistry {
+
+	@Nullable
+	private static volatile ReactiveAdapterRegistry sharedInstance;
 
 	private final boolean reactorPresent;
 
@@ -95,6 +101,31 @@ public class ReactiveAdapterRegistry {
 			// Ignore for the time being...
 			// We can fall back on "reactive-streams-flow-bridge" (once released)
 		}
+	}
+
+
+	/**
+	 * Return a shared default {@code ReactiveAdapterRegistry} instance, lazily
+	 * building it once needed.
+	 * <p><b>NOTE:</b> We highly recommend passing a long-lived, pre-configured
+	 * {@code ReactiveAdapterRegistry} instance for customization purposes.
+	 * This accessor is only meant as a fallback for code paths that want to
+	 * fall back on a default instance if one isn't provided.
+	 * @return the shared {@code ReactiveAdapterRegistry} instance (never {@code null})
+	 * @since 5.0.2
+	 */
+	public static ReactiveAdapterRegistry getSharedInstance() {
+		ReactiveAdapterRegistry ar = sharedInstance;
+		if (ar == null) {
+			synchronized (ReactiveAdapterRegistry.class) {
+				ar = sharedInstance;
+				if (ar == null) {
+					ar = new ReactiveAdapterRegistry();
+					sharedInstance = ar;
+				}
+			}
+		}
+		return ar;
 	}
 
 

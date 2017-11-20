@@ -56,7 +56,7 @@ public class ResponseBodyResultHandler extends AbstractMessageWriterResultHandle
 	public ResponseBodyResultHandler(List<HttpMessageWriter<?>> writers,
 			RequestedContentTypeResolver resolver) {
 
-		this(writers, resolver, new ReactiveAdapterRegistry());
+		this(writers, resolver, ReactiveAdapterRegistry.getSharedInstance());
 	}
 
 	/**

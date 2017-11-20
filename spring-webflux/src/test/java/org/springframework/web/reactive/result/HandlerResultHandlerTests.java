@@ -110,7 +110,7 @@ public class HandlerResultHandlerTests {
 		}
 
 		public TestResultHandler(RequestedContentTypeResolver contentTypeResolver) {
-			super(contentTypeResolver, new ReactiveAdapterRegistry());
+			super(contentTypeResolver, ReactiveAdapterRegistry.getSharedInstance());
 		}
 	}
 

@@ -70,7 +70,7 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 
 
 	public AbstractView() {
-		this(new ReactiveAdapterRegistry());
+		this(ReactiveAdapterRegistry.getSharedInstance());
 	}
 
 	public AbstractView(ReactiveAdapterRegistry registry) {

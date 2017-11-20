@@ -50,7 +50,7 @@ import static org.junit.Assert.assertTrue;
 @SuppressWarnings("unchecked")
 public class ReactiveAdapterRegistryTests {
 
-	private final ReactiveAdapterRegistry registry = new ReactiveAdapterRegistry();
+	private final ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();
 
 
 	@Test

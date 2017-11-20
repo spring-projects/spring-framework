@@ -39,7 +39,7 @@ import static org.junit.Assert.assertTrue;
 public class PrincipalArgumentResolverTests {
 
 	private final PrincipalArgumentResolver resolver =
-			new PrincipalArgumentResolver(new ReactiveAdapterRegistry());
+			new PrincipalArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
 
 	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 

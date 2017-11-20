@@ -101,7 +101,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 	public ViewResolutionResultHandler(List<ViewResolver> viewResolvers,
 			RequestedContentTypeResolver contentTypeResolver) {
 
-		this(viewResolvers, contentTypeResolver, new ReactiveAdapterRegistry());
+		this(viewResolvers, contentTypeResolver, ReactiveAdapterRegistry.getSharedInstance());
 	}
 
 	/**

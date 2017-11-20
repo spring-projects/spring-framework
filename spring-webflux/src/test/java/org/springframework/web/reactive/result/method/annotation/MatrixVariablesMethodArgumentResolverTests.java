@@ -49,7 +49,7 @@ import static org.springframework.web.method.MvcAnnotationPredicates.matrixAttri
 public class MatrixVariablesMethodArgumentResolverTests {
 
 	private MatrixVariableMethodArgumentResolver resolver =
-			new MatrixVariableMethodArgumentResolver(null, new ReactiveAdapterRegistry());
+			new MatrixVariableMethodArgumentResolver(null, ReactiveAdapterRegistry.getSharedInstance());
 
 	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 

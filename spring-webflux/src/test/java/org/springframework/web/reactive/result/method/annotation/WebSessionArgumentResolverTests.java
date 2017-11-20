@@ -44,7 +44,7 @@ import static org.mockito.Mockito.mock;
 public class WebSessionArgumentResolverTests {
 
 	private final WebSessionArgumentResolver resolver =
-			new WebSessionArgumentResolver(new ReactiveAdapterRegistry());
+			new WebSessionArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
 
 	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 

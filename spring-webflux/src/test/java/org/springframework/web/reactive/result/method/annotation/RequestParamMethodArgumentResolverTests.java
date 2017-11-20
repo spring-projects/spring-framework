@@ -63,7 +63,7 @@ public class RequestParamMethodArgumentResolverTests {
 	@Before
 	public void setup() throws Exception {
 
-		ReactiveAdapterRegistry adapterRegistry = new ReactiveAdapterRegistry();
+		ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 		this.resolver = new RequestParamMethodArgumentResolver(null, adapterRegistry, true);
 
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
@@ -100,7 +100,7 @@ public class RequestParamMethodArgumentResolverTests {
 
 	@Test
 	public void doesNotSupportParameterWithDefaultResolutionTurnedOff() {
-		ReactiveAdapterRegistry adapterRegistry = new ReactiveAdapterRegistry();
+		ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 		this.resolver = new RequestParamMethodArgumentResolver(null, adapterRegistry, false);
 
 		MethodParameter param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);

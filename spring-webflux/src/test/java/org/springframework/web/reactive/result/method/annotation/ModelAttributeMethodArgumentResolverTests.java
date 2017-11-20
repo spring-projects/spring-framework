@@ -75,7 +75,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 	@Test
 	public void supports() throws Exception {
 		ModelAttributeMethodArgumentResolver resolver =
-				new ModelAttributeMethodArgumentResolver(new ReactiveAdapterRegistry(), false);
+				new ModelAttributeMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance(), false);
 
 		MethodParameter param = this.testMethod.annotPresent(ModelAttribute.class).arg(Foo.class);
 		assertTrue(resolver.supportsParameter(param));
@@ -93,7 +93,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 	@Test
 	public void supportsWithDefaultResolution() throws Exception {
 		ModelAttributeMethodArgumentResolver resolver =
-				new ModelAttributeMethodArgumentResolver(new ReactiveAdapterRegistry(), true);
+				new ModelAttributeMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance(), true);
 
 		MethodParameter param = this.testMethod.annotNotPresent(ModelAttribute.class).arg(Foo.class);
 		assertTrue(resolver.supportsParameter(param));
@@ -306,7 +306,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 
 	private ModelAttributeMethodArgumentResolver createResolver() {
-		return new ModelAttributeMethodArgumentResolver(new ReactiveAdapterRegistry(), false);
+		return new ModelAttributeMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance(), false);
 	}
 
 	private ServerWebExchange postForm(String formData) throws URISyntaxException {

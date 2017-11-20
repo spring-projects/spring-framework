@@ -47,7 +47,7 @@ import static org.junit.Assert.assertTrue;
 public class ErrorsMethodArgumentResolverTests {
 
 	private final ErrorsMethodArgumentResolver resolver =
-			new ErrorsMethodArgumentResolver(new ReactiveAdapterRegistry());
+			new ErrorsMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
 
 	private final BindingContext bindingContext = new BindingContext();
 

@@ -64,7 +64,7 @@ public class RequestAttributeMethodArgumentResolverTests {
 	public void setup() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.refresh();
-		ReactiveAdapterRegistry registry = new ReactiveAdapterRegistry();
+		ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();
 		this.resolver = new RequestAttributeMethodArgumentResolver(context.getBeanFactory(), registry);
 	}
 

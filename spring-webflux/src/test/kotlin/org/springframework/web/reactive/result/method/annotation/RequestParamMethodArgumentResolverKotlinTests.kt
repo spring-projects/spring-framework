@@ -49,7 +49,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 
 	@Before
 	fun setup() {
-		this.resolver = RequestParamMethodArgumentResolver(null, ReactiveAdapterRegistry(), true)
+		this.resolver = RequestParamMethodArgumentResolver(null, ReactiveAdapterRegistry.getSharedInstance(), true)
 		val initializer = ConfigurableWebBindingInitializer()
 		initializer.conversionService = DefaultFormattingConversionService()
 		bindingContext = BindingContext(initializer)

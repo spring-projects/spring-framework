@@ -70,7 +70,7 @@ public class RequestBodyArgumentResolverTests {
 	public void setup() {
 		List<HttpMessageReader<?>> readers = new ArrayList<>();
 		readers.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
-		this.resolver = new RequestBodyArgumentResolver(readers, new ReactiveAdapterRegistry());
+		this.resolver = new RequestBodyArgumentResolver(readers, ReactiveAdapterRegistry.getSharedInstance());
 	}
 
 

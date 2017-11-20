@@ -66,7 +66,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
-	private ReactiveAdapterRegistry reactiveAdapterRegistry = new ReactiveAdapterRegistry();
+	private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
 
 	public InvocableHandlerMethod(HandlerMethod handlerMethod) {

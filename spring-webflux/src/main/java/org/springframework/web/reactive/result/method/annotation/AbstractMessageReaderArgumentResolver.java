@@ -81,7 +81,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	 * @param readers readers to convert from the request body
 	 */
 	protected AbstractMessageReaderArgumentResolver(List<HttpMessageReader<?>> readers) {
-		this(readers, new ReactiveAdapterRegistry());
+		this(readers, ReactiveAdapterRegistry.getSharedInstance());
 	}
 
 	/**

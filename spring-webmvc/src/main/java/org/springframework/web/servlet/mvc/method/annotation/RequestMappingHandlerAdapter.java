@@ -152,7 +152,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 	private DeferredResultProcessingInterceptor[] deferredResultInterceptors = new DeferredResultProcessingInterceptor[0];
 
-	private ReactiveAdapterRegistry reactiveRegistry = new ReactiveAdapterRegistry();
+	private ReactiveAdapterRegistry reactiveRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
 	private boolean ignoreDefaultModelOnRedirect = false;
 
