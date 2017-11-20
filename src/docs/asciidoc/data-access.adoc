@@ -4,6 +4,7 @@
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :toc: left
 :toclevels: 4
+:tabsize: 4
 :docinfo1:
 
 This part of the reference documentation is concerned with data access and the
@@ -1943,13 +1944,13 @@ transaction in which it has been published as committed successfully:
 [subs="verbatim,quotes"]
 ----
 	@Component
-    public class MyComponent {
+	public class MyComponent {
 
-    	@TransactionalEventListener
-    	public void handleOrderCreatedEvent(CreationEvent<Order> creationEvent) {
-      		...
-    	}
-    }
+		@TransactionalEventListener
+		public void handleOrderCreatedEvent(CreationEvent<Order> creationEvent) {
+			...
+		}
+	}
 ----
 
 The `TransactionalEventListener` annotation exposes a `phase` attribute  that allows to customize
@@ -4612,13 +4613,13 @@ standalone environment or in a standalone integration test like in the following
 [subs="verbatim,quotes"]
 ----
 EmbeddedDatabase db = new EmbeddedDatabaseBuilder()
-    .generateUniqueName(true)
-    .setType(H2)
-    .setScriptEncoding("UTF-8")
-    .ignoreFailedDrops(true)
-    .addScript("schema.sql")
-    .addScripts("user_data.sql", "country_data.sql")
-    .build();
+		.generateUniqueName(true)
+		.setType(H2)
+		.setScriptEncoding("UTF-8")
+		.ignoreFailedDrops(true)
+		.addScript("schema.sql")
+		.addScripts("user_data.sql", "country_data.sql")
+		.build();
 
 // perform actions against the db (EmbeddedDatabase extends javax.sql.DataSource)
 
@@ -4637,17 +4638,17 @@ Config like in the following example.
 @Configuration
 public class DataSourceConfig {
 
-    @Bean
-    public DataSource dataSource() {
-        return new EmbeddedDatabaseBuilder()
-            .generateUniqueName(true)
-            .setType(H2)
-            .setScriptEncoding("UTF-8")
-            .ignoreFailedDrops(true)
-            .addScript("schema.sql")
-            .addScripts("user_data.sql", "country_data.sql")
-            .build();
-    }
+	@Bean
+	public DataSource dataSource() {
+		return new EmbeddedDatabaseBuilder()
+				.generateUniqueName(true)
+				.setType(H2)
+				.setScriptEncoding("UTF-8")
+				.ignoreFailedDrops(true)
+				.addScript("schema.sql")
+				.addScripts("user_data.sql", "country_data.sql")
+				.build();
+	}
 }
 ----
 

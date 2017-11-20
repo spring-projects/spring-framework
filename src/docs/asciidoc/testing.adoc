@@ -5,6 +5,7 @@
 :doc-spring-boot: {doc-root}/spring-boot/docs/current/reference
 :toc: left
 :toclevels: 4
+:tabsize: 4
 :docinfo1:
 
 The adoption of the test-driven-development (TDD) approach to software
@@ -1142,13 +1143,13 @@ example, a custom `@EnabledOnMac` annotation can be created as follows.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-@Target({ ElementType.TYPE, ElementType.METHOD })
-@Retention(RetentionPolicy.RUNTIME)
-@EnabledIf(
-    expression = "#{systemProperties['os.name'].toLowerCase().contains('mac')}",
-    reason = "Enabled on Mac OS"
-)
-public @interface EnabledOnMac {}
+	@Target({ElementType.TYPE, ElementType.METHOD})
+	@Retention(RetentionPolicy.RUNTIME)
+	@EnabledIf(
+		expression = "#{systemProperties['os.name'].toLowerCase().contains('mac')}",
+		reason = "Enabled on Mac OS"
+	)
+	public @interface EnabledOnMac {}
 ----
 
 ===== @DisabledIf
@@ -1179,13 +1180,13 @@ example, a custom `@DisabledOnMac` annotation can be created as follows.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-@Target({ ElementType.TYPE, ElementType.METHOD })
-@Retention(RetentionPolicy.RUNTIME)
-@DisabledIf(
-    expression = "#{systemProperties['os.name'].toLowerCase().contains('mac')}",
-    reason = "Disabled on Mac OS"
-)
-public @interface DisabledOnMac {}
+	@Target({ElementType.TYPE, ElementType.METHOD})
+	@Retention(RetentionPolicy.RUNTIME)
+	@DisabledIf(
+		expression = "#{systemProperties['os.name'].toLowerCase().contains('mac')}",
+		reason = "Disabled on Mac OS"
+	)
+	public @interface DisabledOnMac {}
 ----
 
 
@@ -3901,15 +3902,15 @@ empty list in order to disable the default listeners, which otherwise would requ
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-@RunWith(SpringRunner.class)
-@TestExecutionListeners({})
-public class SimpleTest {
+	@RunWith(SpringRunner.class)
+	@TestExecutionListeners({})
+	public class SimpleTest {
 
-   @Test
-   public void testMethod() {
-      // execute test logic...
-   }
-}
+		@Test
+		public void testMethod() {
+			// execute test logic...
+		}
+	}
 ----
 
 [[testcontext-junit4-rules]]
@@ -3938,21 +3939,21 @@ demonstrates the proper way to declare these rules in an integration test.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-// Optionally specify a non-Spring Runner via @RunWith(...)
-@ContextConfiguration
-public class IntegrationTest {
+	// Optionally specify a non-Spring Runner via @RunWith(...)
+	@ContextConfiguration
+	public class IntegrationTest {
 
-   @ClassRule
-   public static final SpringClassRule springClassRule = new SpringClassRule();
+		@ClassRule
+		public static final SpringClassRule springClassRule = new SpringClassRule();
 
-   @Rule
-   public final SpringMethodRule springMethodRule = new SpringMethodRule();
+		@Rule
+		public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
-   @Test
-   public void testMethod() {
-      // execute test logic...
-   }
-}
+		@Test
+		public void testMethod() {
+			// execute test logic...
+		}
+	}
 ----
 
 [[testcontext-support-classes-junit4]]
@@ -4026,17 +4027,17 @@ The following code listing demonstrates how to configure a test class to use the
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-// Instructs JUnit Jupiter to extend the test with Spring support.
-@ExtendWith(SpringExtension.class)
-// Instructs Spring to load an ApplicationContext from TestConfig.class
-@ContextConfiguration(classes = TestConfig.class)
-class SimpleTests {
+	// Instructs JUnit Jupiter to extend the test with Spring support.
+	@ExtendWith(SpringExtension.class)
+	// Instructs Spring to load an ApplicationContext from TestConfig.class
+	@ContextConfiguration(classes = TestConfig.class)
+	class SimpleTests {
 
-   @Test
-   void testMethod() {
-      // execute test logic...
-   }
-}
+		@Test
+		void testMethod() {
+			// execute test logic...
+		}
+	}
 ----
 
 Since annotations in JUnit 5 can also be used as meta-annotations, Spring is able to
@@ -4049,16 +4050,16 @@ configuration used in the previous example.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-// Instructs Spring to register the SpringExtension with JUnit
-// Jupiter and load an ApplicationContext from TestConfig.class
-@SpringJUnitConfig(TestConfig.class)
-class SimpleTests {
+	// Instructs Spring to register the SpringExtension with JUnit
+	// Jupiter and load an ApplicationContext from TestConfig.class
+	@SpringJUnitConfig(TestConfig.class)
+	class SimpleTests {
 
-   @Test
-   void testMethod() {
-      // execute test logic...
-   }
-}
+		@Test
+		void testMethod() {
+			// execute test logic...
+		}
+	}
 ----
 
 Similarly, the following example uses `@SpringJUnitWebConfig` to create a
@@ -4067,16 +4068,16 @@ Similarly, the following example uses `@SpringJUnitWebConfig` to create a
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-// Instructs Spring to register the SpringExtension with JUnit
-// Jupiter and load a WebApplicationContext from TestWebConfig.class
-@SpringJUnitWebConfig(TestWebConfig.class)
-class SimpleWebTests {
+	// Instructs Spring to register the SpringExtension with JUnit
+	// Jupiter and load a WebApplicationContext from TestWebConfig.class
+	@SpringJUnitWebConfig(TestWebConfig.class)
+	class SimpleWebTests {
 
-   @Test
-   void testMethod() {
-      // execute test logic...
-   }
-}
+		@Test
+		void testMethod() {
+			// execute test logic...
+		}
+	}
 ----
 
 See the documentation for `@SpringJUnitConfig` and `@SpringJUnitWebConfig` in
@@ -4121,18 +4122,18 @@ dependencies to be `final` and therefore _immutable_.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-@SpringJUnitConfig(TestConfig.class)
-class OrderServiceIntegrationTests {
+	@SpringJUnitConfig(TestConfig.class)
+	class OrderServiceIntegrationTests {
 
-   private final OrderService orderService;
+		private final OrderService orderService;
 
-   @Autowired
-   OrderServiceIntegrationTests(OrderService orderService) {
-      this.orderService = orderService.
-   }
+		@Autowired
+		OrderServiceIntegrationTests(OrderService orderService) {
+			this.orderService = orderService.
+		}
 
-   // tests that use the injected OrderService
-}
+		// tests that use the injected OrderService
+	}
 ----
 
 [[testcontext-junit-jupiter-di-method]]
@@ -4149,14 +4150,14 @@ In the following example, Spring will inject the `OrderService` from the
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-@SpringJUnitConfig(TestConfig.class)
-class OrderServiceIntegrationTests {
+	@SpringJUnitConfig(TestConfig.class)
+	class OrderServiceIntegrationTests {
 
-   @Test
-   void deleteOrder(@Autowired OrderService orderService) {
-      // use orderService from the test's ApplicationContext
-   }
-}
+		@Test
+		void deleteOrder(@Autowired OrderService orderService) {
+			// use orderService from the test's ApplicationContext
+		}
+	}
 ----
 
 Due to the robustness of the `ParameterResolver` support in JUnit Jupiter, it is also
@@ -4171,17 +4172,17 @@ use of `@RepeatedTest` from JUnit Jupiter allows the test method to gain access 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-@SpringJUnitConfig(TestConfig.class)
-class OrderServiceIntegrationTests {
+	@SpringJUnitConfig(TestConfig.class)
+	class OrderServiceIntegrationTests {
 
-   @RepeatedTest(10)
-   void placeOrderRepeatedly(RepetitionInfo repetitionInfo,
-         @Autowired OrderService orderService) {
+		@RepeatedTest(10)
+		void placeOrderRepeatedly(RepetitionInfo repetitionInfo,
+				@Autowired OrderService orderService) {
 
-      // use orderService from the test's ApplicationContext
-      // and repetitionInfo from JUnit Jupiter
-   }
-}
+			// use orderService from the test's ApplicationContext
+			// and repetitionInfo from JUnit Jupiter
+		}
+	}
 ----
 
 [[testcontext-support-classes-testng]]
@@ -4276,29 +4277,28 @@ JUnit Jupiter based example of using Spring MVC Test:
 
 [source,java,indent=0]
 ----
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+	import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+	import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringJUnitWebConfig(locations = "test-servlet-context.xml")
-class ExampleTests {
+	@SpringJUnitWebConfig(locations = "test-servlet-context.xml")
+	class ExampleTests {
 
-   private MockMvc mockMvc;
+		private MockMvc mockMvc;
 
-   @BeforeEach
-   void setup(WebApplicationContext wac) {
-      this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-   }
+		@BeforeEach
+		void setup(WebApplicationContext wac) {
+			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+		}
 
-   @Test
-   void getAccount() throws Exception {
-      this.mockMvc.perform(get("/accounts/1")
-            .accept(MediaType.parseMediaType("application/json;charset=UTF-8")))
-         .andExpect(status().isOk())
-         .andExpect(content().contentType("application/json"))
-         .andExpect(jsonPath("$.name").value("Lee"));
-   }
-
-}
+		@Test
+		void getAccount() throws Exception {
+			this.mockMvc.perform(get("/accounts/1")
+					.accept(MediaType.parseMediaType("application/json;charset=UTF-8")))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType("application/json"))
+				.andExpect(jsonPath("$.name").value("Lee"));
+		}
+	}
 ----
 
 The above test relies on the `WebApplicationContext` support of the __TestContext framework__
@@ -4461,13 +4461,13 @@ session across requests. It can be used as follows:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-// static import of SharedHttpSessionConfigurer.sharedHttpSession
+	// static import of SharedHttpSessionConfigurer.sharedHttpSession
 
-MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new TestController())
-        .apply(sharedHttpSession())
-        .build();
+	MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new TestController())
+			.apply(sharedHttpSession())
+			.build();
 
-// Use mockMvc to perform requests...
+	// Use mockMvc to perform requests...
 ----
 
 See `ConfigurableMockMvcBuilder` for a list of all MockMvc builder features
@@ -4761,45 +4761,45 @@ paging through all messages. How would you go about testing it?
 
 With Spring MVC Test, we can easily test if we are able to create a `Message`.
 
-[source,java]
+[source,java,indent=0]
 ----
-MockHttpServletRequestBuilder createMessage = post("/messages/")
-	.param("summary", "Spring Rocks")
-	.param("text", "In case you didn't know, Spring Rocks!");
+	MockHttpServletRequestBuilder createMessage = post("/messages/")
+			.param("summary", "Spring Rocks")
+			.param("text", "In case you didn't know, Spring Rocks!");
 
-mockMvc.perform(createMessage)
-	.andExpect(status().is3xxRedirection())
-	.andExpect(redirectedUrl("/messages/123"));
+	mockMvc.perform(createMessage)
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/messages/123"));
 ----
 
 What if we want to test our form view that allows us to create the message? For example,
 assume our form looks like the following snippet:
 
-[source,xml]
+[source,xml,indent=0]
 ----
-<form id="messageForm" action="/messages/" method="post">
-  <div class="pull-right"><a href="/messages/">Messages</a></div>
+	<form id="messageForm" action="/messages/" method="post">
+		<div class="pull-right"><a href="/messages/">Messages</a></div>
 
-  <label for="summary">Summary</label>
-  <input type="text" class="required" id="summary" name="summary" value="" />
+		<label for="summary">Summary</label>
+		<input type="text" class="required" id="summary" name="summary" value="" />
 
-  <label for="text">Message</label>
-  <textarea id="text" name="text"></textarea>
+		<label for="text">Message</label>
+		<textarea id="text" name="text"></textarea>
 
-  <div class="form-actions">
-	<input type="submit" value="Create" />
-  </div>
-</form>
+		<div class="form-actions">
+			<input type="submit" value="Create" />
+		</div>
+	</form>
 ----
 
 How do we ensure that our form will produce the correct request to create a new message? A
 naive attempt would look like this:
 
-[source,java]
+[source,java,indent=0]
 ----
-mockMvc.perform(get("/messages/form"))
-	.andExpect(xpath("//input[@name='summary']").exists())
-	.andExpect(xpath("//textarea[@name='text']").exists());
+	mockMvc.perform(get("/messages/form"))
+			.andExpect(xpath("//input[@name='summary']").exists())
+			.andExpect(xpath("//textarea[@name='text']").exists());
 ----
 
 This test has some obvious drawbacks. If we update our controller to use the parameter
@@ -4807,21 +4807,21 @@ This test has some obvious drawbacks. If we update our controller to use the par
 form is out of synch with the controller. To resolve this we can combine our two tests.
 
 [[spring-mvc-test-server-htmlunit-mock-mvc-test]]
-[source,java]
+[source,java,indent=0]
 ----
-String summaryParamName = "summary";
-String textParamName = "text";
-mockMvc.perform(get("/messages/form"))
-		.andExpect(xpath("//input[@name='" + summaryParamName + "']").exists())
-		.andExpect(xpath("//textarea[@name='" + textParamName + "']").exists());
+	String summaryParamName = "summary";
+	String textParamName = "text";
+	mockMvc.perform(get("/messages/form"))
+			.andExpect(xpath("//input[@name='" + summaryParamName + "']").exists())
+			.andExpect(xpath("//textarea[@name='" + textParamName + "']").exists());
 
-MockHttpServletRequestBuilder createMessage = post("/messages/")
-		.param(summaryParamName, "Spring Rocks")
-		.param(textParamName, "In case you didn't know, Spring Rocks!");
+	MockHttpServletRequestBuilder createMessage = post("/messages/")
+			.param(summaryParamName, "Spring Rocks")
+			.param(textParamName, "In case you didn't know, Spring Rocks!");
 
-mockMvc.perform(createMessage)
-		.andExpect(status().is3xxRedirection())
-		.andExpect(redirectedUrl("/messages/123"));
+	mockMvc.perform(createMessage)
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/messages/123"));
 ----
 
 This would reduce the risk of our test incorrectly passing, but there are still some
@@ -4908,19 +4908,19 @@ In order to use HtmlUnit with Apache HttpComponents 4.5+, you will need to use H
 We can easily create an HtmlUnit `WebClient` that integrates with `MockMvc` using the
 `MockMvcWebClientBuilder` as follows.
 
-[source,java]
+[source,java,indent=0]
 ----
-@Autowired
-WebApplicationContext context;
+	@Autowired
+	WebApplicationContext context;
 
-WebClient webClient;
+	WebClient webClient;
 
-@Before
-public void setup() {
-	webClient = MockMvcWebClientBuilder
-		.webAppContextSetup(context)
-		.build();
-}
+	@Before
+	public void setup() {
+		webClient = MockMvcWebClientBuilder
+				.webAppContextSetup(context)
+				.build();
+	}
 ----
 
 [NOTE]
@@ -4941,9 +4941,9 @@ Now we can use HtmlUnit as we normally would, but without the need to deploy our
 application to a Servlet container. For example, we can request the view to create
 a message with the following.
 
-[source,java]
+[source,java,indent=0]
 ----
-HtmlPage createMsgFormPage = webClient.getPage("http://localhost/messages/form");
+	HtmlPage createMsgFormPage = webClient.getPage("http://localhost/messages/form");
 ----
 
 [NOTE]
@@ -4955,29 +4955,29 @@ illustrated in <<Advanced MockMvcWebClientBuilder>>.
 Once we have a reference to the `HtmlPage`, we can then fill out the form and submit
 it to create a message.
 
-[source,java]
+[source,java,indent=0]
 ----
-HtmlForm form = createMsgFormPage.getHtmlElementById("messageForm");
-HtmlTextInput summaryInput = createMsgFormPage.getHtmlElementById("summary");
-summaryInput.setValueAttribute("Spring Rocks");
-HtmlTextArea textInput = createMsgFormPage.getHtmlElementById("text");
-textInput.setText("In case you didn't know, Spring Rocks!");
-HtmlSubmitInput submit = form.getOneHtmlElementByAttribute("input", "type", "submit");
-HtmlPage newMessagePage = submit.click();
+	HtmlForm form = createMsgFormPage.getHtmlElementById("messageForm");
+	HtmlTextInput summaryInput = createMsgFormPage.getHtmlElementById("summary");
+	summaryInput.setValueAttribute("Spring Rocks");
+	HtmlTextArea textInput = createMsgFormPage.getHtmlElementById("text");
+	textInput.setText("In case you didn't know, Spring Rocks!");
+	HtmlSubmitInput submit = form.getOneHtmlElementByAttribute("input", "type", "submit");
+	HtmlPage newMessagePage = submit.click();
 ----
 
 Finally, we can verify that a new message was created successfully. The following
 assertions use the http://joel-costigliola.github.io/assertj/[AssertJ] library.
 
-[source,java]
+[source,java,indent=0]
 ----
-assertThat(newMessagePage.getUrl().toString()).endsWith("/messages/123");
-String id = newMessagePage.getHtmlElementById("id").getTextContent();
-assertThat(id).isEqualTo("123");
-String summary = newMessagePage.getHtmlElementById("summary").getTextContent();
-assertThat(summary).isEqualTo("Spring Rocks");
-String text = newMessagePage.getHtmlElementById("text").getTextContent();
-assertThat(text).isEqualTo("In case you didn't know, Spring Rocks!");
+	assertThat(newMessagePage.getUrl().toString()).endsWith("/messages/123");
+	String id = newMessagePage.getHtmlElementById("id").getTextContent();
+	assertThat(id).isEqualTo("123");
+	String summary = newMessagePage.getHtmlElementById("summary").getTextContent();
+	assertThat(summary).isEqualTo("Spring Rocks");
+	String text = newMessagePage.getHtmlElementById("text").getTextContent();
+	assertThat(text).isEqualTo("In case you didn't know, Spring Rocks!");
 ----
 
 This improves on our <<spring-mvc-test-server-htmlunit-mock-mvc-test,MockMvc test>> in a
@@ -4999,59 +4999,59 @@ In the examples so far, we have used `MockMvcWebClientBuilder` in the simplest w
 by building a `WebClient` based on the `WebApplicationContext` loaded for us by the Spring
 TestContext Framework. This approach is repeated here.
 
-[source,java]
+[source,java,indent=0]
 ----
-@Autowired
-WebApplicationContext context;
+	@Autowired
+	WebApplicationContext context;
 
-WebClient webClient;
+	WebClient webClient;
 
-@Before
-public void setup() {
-	webClient = MockMvcWebClientBuilder
-		.webAppContextSetup(context)
-		.build();
-}
+	@Before
+	public void setup() {
+		webClient = MockMvcWebClientBuilder
+				.webAppContextSetup(context)
+				.build();
+	}
 ----
 
 We can also specify additional configuration options.
 
-[source,java]
+[source,java,indent=0]
 ----
-WebClient webClient;
+	WebClient webClient;
 
-@Before
-public void setup() {
-	webClient = MockMvcWebClientBuilder
-		// demonstrates applying a MockMvcConfigurer (Spring Security)
-		.webAppContextSetup(context, springSecurity())
-		// for illustration only - defaults to ""
-		.contextPath("")
-		// By default MockMvc is used for localhost only;
-		// the following will use MockMvc for example.com and example.org as well
-		.useMockMvcForHosts("example.com","example.org")
-		.build();
-}
+	@Before
+	public void setup() {
+		webClient = MockMvcWebClientBuilder
+			// demonstrates applying a MockMvcConfigurer (Spring Security)
+			.webAppContextSetup(context, springSecurity())
+			// for illustration only - defaults to ""
+			.contextPath("")
+			// By default MockMvc is used for localhost only;
+			// the following will use MockMvc for example.com and example.org as well
+			.useMockMvcForHosts("example.com","example.org")
+			.build();
+	}
 ----
 
 As an alternative, we can perform the exact same setup by configuring the `MockMvc`
 instance separately and supplying it to the `MockMvcWebClientBuilder` as follows.
 
-[source,java]
+[source,java,indent=0]
 ----
-MockMvc mockMvc = MockMvcBuilders
-		.webAppContextSetup(context)
-		.apply(springSecurity())
-		.build();
+	MockMvc mockMvc = MockMvcBuilders
+			.webAppContextSetup(context)
+			.apply(springSecurity())
+			.build();
 
-webClient = MockMvcWebClientBuilder
-		.mockMvcSetup(mockMvc)
-		// for illustration only - defaults to ""
-		.contextPath("")
-		// By default MockMvc is used for localhost only;
-		// the following will use MockMvc for example.com and example.org as well
-		.useMockMvcForHosts("example.com","example.org")
-		.build();
+	webClient = MockMvcWebClientBuilder
+			.mockMvcSetup(mockMvc)
+			// for illustration only - defaults to ""
+			.contextPath("")
+			// By default MockMvc is used for localhost only;
+			// the following will use MockMvc for example.com and example.org as well
+			.useMockMvcForHosts("example.com","example.org")
+			.build();
 ----
 
 This is more verbose, but by building the `WebClient` with a `MockMvc` instance we have
@@ -5094,27 +5094,27 @@ be displayed afterwards.
 If one of the fields were named "summary", then we might have something like the
 following repeated in multiple places within our tests.
 
-[source,java]
+[source,java,indent=0]
 ----
-HtmlTextInput summaryInput = currentPage.getHtmlElementById("summary");
-summaryInput.setValueAttribute(summary);
+	HtmlTextInput summaryInput = currentPage.getHtmlElementById("summary");
+	summaryInput.setValueAttribute(summary);
 ----
 
 So what happens if we change the `id` to "smmry"? Doing so would force us to update all
 of our tests to incorporate this change! Of course, this violates the _DRY Principle_; so
 we should ideally extract this code into its own method as follows.
 
-[source,java]
+[source,java,indent=0]
 ----
-public HtmlPage createMessage(HtmlPage currentPage, String summary, String text) {
-	setSummary(currentPage, summary);
-	// ...
-}
+	public HtmlPage createMessage(HtmlPage currentPage, String summary, String text) {
+		setSummary(currentPage, summary);
+		// ...
+	}
 
-public void setSummary(HtmlPage currentPage, String summary) {
-	HtmlTextInput summaryInput = currentPage.getHtmlElementById("summary");
-	summaryInput.setValueAttribute(summary);
-}
+	public void setSummary(HtmlPage currentPage, String summary) {
+		HtmlTextInput summaryInput = currentPage.getHtmlElementById("summary");
+		summaryInput.setValueAttribute(summary);
+	}
 ----
 
 This ensures that we do not have to update all of our tests if we change the UI.
@@ -5122,39 +5122,39 @@ This ensures that we do not have to update all of our tests if we change the UI.
 We might even take this a step further and place this logic within an Object that
 represents the `HtmlPage` we are currently on.
 
-[source,java]
+[source,java,indent=0]
 ----
-public class CreateMessagePage {
+	public class CreateMessagePage {
 
-	final HtmlPage currentPage;
+		final HtmlPage currentPage;
 
-	final HtmlTextInput summaryInput;
+		final HtmlTextInput summaryInput;
 
-	final HtmlSubmitInput submit;
+		final HtmlSubmitInput submit;
 
-	public CreateMessagePage(HtmlPage currentPage) {
-		this.currentPage = currentPage;
-		this.summaryInput = currentPage.getHtmlElementById("summary");
-		this.submit = currentPage.getHtmlElementById("submit");
+		public CreateMessagePage(HtmlPage currentPage) {
+			this.currentPage = currentPage;
+			this.summaryInput = currentPage.getHtmlElementById("summary");
+			this.submit = currentPage.getHtmlElementById("submit");
+		}
+
+		public <T> T createMessage(String summary, String text) throws Exception {
+			setSummary(summary);
+
+			HtmlPage result = submit.click();
+			boolean error = CreateMessagePage.at(result);
+
+			return (T) (error ? new CreateMessagePage(result) : new ViewMessagePage(result));
+		}
+
+		public void setSummary(String summary) throws Exception {
+			summaryInput.setValueAttribute(summary);
+		}
+
+		public static boolean at(HtmlPage page) {
+			return "Create Message".equals(page.getTitleText());
+		}
 	}
-
-	public <T> T createMessage(String summary, String text) throws Exception {
-		setSummary(summary);
-
-		HtmlPage result = submit.click();
-		boolean error = CreateMessagePage.at(result);
-
-		return (T) (error ? new CreateMessagePage(result) : new ViewMessagePage(result));
-	}
-
-	public void setSummary(String summary) throws Exception {
-		summaryInput.setValueAttribute(summary);
-	}
-
-	public static boolean at(HtmlPage page) {
-		return "Create Message".equals(page.getTitleText());
-	}
-}
 ----
 
 Formerly, this pattern is known as the
@@ -5171,18 +5171,18 @@ includes a test dependency on `org.seleniumhq.selenium:selenium-htmlunit-driver`
 We can easily create a Selenium `WebDriver` that integrates with `MockMvc` using the
 `MockMvcHtmlUnitDriverBuilder` as follows.
 
-[source,java]
+[source,java,indent=0]
 ----
-@Autowired
-WebApplicationContext context;
+	@Autowired
+	WebApplicationContext context;
 
-WebDriver driver;
+	WebDriver driver;
 
-@Before
-public void setup() {
-	driver = MockMvcHtmlUnitDriverBuilder
-		.webAppContextSetup(context)
-		.build();
+	@Before
+	public void setup() {
+		driver = MockMvcHtmlUnitDriverBuilder
+				.webAppContextSetup(context)
+				.build();
 }
 ----
 
@@ -5204,17 +5204,17 @@ Now we can use WebDriver as we normally would, but without the need to deploy ou
 application to a Servlet container. For example, we can request the view to create
 a message with the following.
 
-[source,java]
+[source,java,indent=0]
 ----
-CreateMessagePage page = CreateMessagePage.to(driver);
+	CreateMessagePage page = CreateMessagePage.to(driver);
 ----
 
 We can then fill out the form and submit it to create a message.
 
-[source,java]
+[source,java,indent=0]
 ----
-ViewMessagePage viewMessagePage =
-	page.createMessage(ViewMessagePage.class, expectedSummary, expectedText);
+	ViewMessagePage viewMessagePage =
+			page.createMessage(ViewMessagePage.class, expectedSummary, expectedText);
 ----
 
 This improves on the design of our
@@ -5223,35 +5223,35 @@ Pattern_. As we mentioned in <<spring-mvc-test-server-htmlunit-webdriver-why>>, 
 use the Page Object Pattern with HtmlUnit, but it is much easier with WebDriver. Let's
 take a look at our new `CreateMessagePage` implementation.
 
-[source,java]
+[source,java,indent=0]
 ----
-public class CreateMessagePage
-		extends AbstractPage { // <1>
+	public class CreateMessagePage
+			extends AbstractPage { // <1>
 
-	// <2>
-	private WebElement summary;
-	private WebElement text;
+		// <2>
+		private WebElement summary;
+		private WebElement text;
 
-	// <3>
-	@FindBy(css = "input[type=submit]")
-	private WebElement submit;
+		// <3>
+		@FindBy(css = "input[type=submit]")
+		private WebElement submit;
 
-	public CreateMessagePage(WebDriver driver) {
-		super(driver);
+		public CreateMessagePage(WebDriver driver) {
+			super(driver);
+		}
+
+		public <T> T createMessage(Class<T> resultPage, String summary, String details) {
+			this.summary.sendKeys(summary);
+			this.text.sendKeys(details);
+			this.submit.click();
+			return PageFactory.initElements(driver, resultPage);
+		}
+
+		public static CreateMessagePage to(WebDriver driver) {
+			driver.get("http://localhost:9990/mail/messages/form");
+			return PageFactory.initElements(driver, CreateMessagePage.class);
+		}
 	}
-
-	public <T> T createMessage(Class<T> resultPage, String summary, String details) {
-		this.summary.sendKeys(summary);
-		this.text.sendKeys(details);
-		this.submit.click();
-		return PageFactory.initElements(driver, resultPage);
-	}
-
-	public static CreateMessagePage to(WebDriver driver) {
-		driver.get("http://localhost:9990/mail/messages/form");
-		return PageFactory.initElements(driver, CreateMessagePage.class);
-	}
-}
 ----
 
 <1> The first thing you will notice is that `CreateMessagePage` extends the
@@ -5277,39 +5277,39 @@ annotation to look up our submit button using a css selector, *input[type=submit
 Finally, we can verify that a new message was created successfully. The following
 assertions use the https://code.google.com/p/fest/[FEST assertion library].
 
-[source,java]
+[source,java,indent=0]
 ----
-assertThat(viewMessagePage.getMessage()).isEqualTo(expectedMessage);
-assertThat(viewMessagePage.getSuccess()).isEqualTo("Successfully created a new message");
+	assertThat(viewMessagePage.getMessage()).isEqualTo(expectedMessage);
+	assertThat(viewMessagePage.getSuccess()).isEqualTo("Successfully created a new message");
 ----
 
 We can see that our `ViewMessagePage` allows us to interact with our custom domain
 model. For example, it exposes a method that returns a `Message` object.
 
-[source,java]
+[source,java,indent=0]
 ----
-public Message getMessage() throws ParseException {
-	Message message = new Message();
-	message.setId(getId());
-	message.setCreated(getCreated());
-	message.setSummary(getSummary());
-	message.setText(getText());
-	return message;
-}
+	public Message getMessage() throws ParseException {
+		Message message = new Message();
+		message.setId(getId());
+		message.setCreated(getCreated());
+		message.setSummary(getSummary());
+		message.setText(getText());
+		return message;
+	}
 ----
 
 We can then leverage the rich domain objects in our assertions.
 
 Lastly, don't forget to _close_ the `WebDriver` instance when the test is complete.
 
-[source,java]
+[source,java,indent=0]
 ----
-@After
-public void destroy() {
-	if (driver != null) {
-		driver.close();
+	@After
+	public void destroy() {
+		if (driver != null) {
+			driver.close();
+		}
 	}
-}
 ----
 
 For additional information on using WebDriver, refer to the Selenium
@@ -5322,59 +5322,59 @@ In the examples so far, we have used `MockMvcHtmlUnitDriverBuilder` in the simpl
 possible, by building a `WebDriver` based on the `WebApplicationContext` loaded for us by
 the Spring TestContext Framework. This approach is repeated here.
 
-[source,java]
+[source,java,indent=0]
 ----
-@Autowired
-WebApplicationContext context;
+	@Autowired
+	WebApplicationContext context;
 
-WebDriver driver;
+	WebDriver driver;
 
-@Before
-public void setup() {
-	driver = MockMvcHtmlUnitDriverBuilder
-		.webAppContextSetup(context)
-		.build();
-}
+	@Before
+	public void setup() {
+		driver = MockMvcHtmlUnitDriverBuilder
+				.webAppContextSetup(context)
+				.build();
+	}
 ----
 
 We can also specify additional configuration options.
 
-[source,java]
+[source,java,indent=0]
 ----
-WebDriver driver;
+	WebDriver driver;
 
-@Before
-public void setup() {
-	driver = MockMvcHtmlUnitDriverBuilder
-		// demonstrates applying a MockMvcConfigurer (Spring Security)
-		.webAppContextSetup(context, springSecurity())
-		// for illustration only - defaults to ""
-		.contextPath("")
-		// By default MockMvc is used for localhost only;
-		// the following will use MockMvc for example.com and example.org as well
-		.useMockMvcForHosts("example.com","example.org")
-		.build();
+	@Before
+	public void setup() {
+		driver = MockMvcHtmlUnitDriverBuilder
+				// demonstrates applying a MockMvcConfigurer (Spring Security)
+				.webAppContextSetup(context, springSecurity())
+				// for illustration only - defaults to ""
+				.contextPath("")
+				// By default MockMvc is used for localhost only;
+				// the following will use MockMvc for example.com and example.org as well
+				.useMockMvcForHosts("example.com","example.org")
+				.build();
 }
 ----
 
 As an alternative, we can perform the exact same setup by configuring the `MockMvc`
 instance separately and supplying it to the `MockMvcHtmlUnitDriverBuilder` as follows.
 
-[source,java]
+[source,java,indent=0]
 ----
-MockMvc mockMvc = MockMvcBuilders
-		.webAppContextSetup(context)
-		.apply(springSecurity())
-		.build();
+	MockMvc mockMvc = MockMvcBuilders
+			.webAppContextSetup(context)
+			.apply(springSecurity())
+			.build();
 
-driver = MockMvcHtmlUnitDriverBuilder
-		.mockMvcSetup(mockMvc)
-		// for illustration only - defaults to ""
-		.contextPath("")
-		// By default MockMvc is used for localhost only;
-		// the following will use MockMvc for example.com and example.org as well
-		.useMockMvcForHosts("example.com","example.org")
-		.build();
+	driver = MockMvcHtmlUnitDriverBuilder
+			.mockMvcSetup(mockMvc)
+			// for illustration only - defaults to ""
+			.contextPath("")
+			// By default MockMvc is used for localhost only;
+			// the following will use MockMvc for example.com and example.org as well
+			.useMockMvcForHosts("example.com","example.org")
+			.build();
 ----
 
 This is more verbose, but by building the `WebDriver` with a `MockMvc` instance we have

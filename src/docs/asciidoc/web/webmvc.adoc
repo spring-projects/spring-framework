@@ -47,26 +47,23 @@ the `DispatcherServlet`. This class is auto-detected by the Servlet container
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-public class MyWebApplicationInitializer implements WebApplicationInitializer {
+	public class MyWebApplicationInitializer implements WebApplicationInitializer {
 
-  @Override
-  public void onStartup(ServletContext servletCxt) {
+		@Override
+		public void onStartup(ServletContext servletCxt) {
 
-    // Load Spring web application configuration
-    AnnotationConfigWebApplicationContext cxt = new AnnotationConfigWebApplicationContext();
-    cxt.register(AppConfig.class);
-    cxt.refresh();
+			// Load Spring web application configuration
+			AnnotationConfigWebApplicationContext ac = new AnnotationConfigWebApplicationContext();
+			ac.register(AppConfig.class);
+			ac.refresh();
 
-    // Create DispatcherServlet
-    DispatcherServlet servlet = new DispatcherServlet(cxt);
-
-    // Register and map the Servlet
-    ServletRegistration.Dynamic registration = servletCxt.addServlet("app", servlet);
-    registration.setLoadOnStartup(1);
-    registration.addMapping("/app/*");
-  }
-
-}
+			// Create and register the DispatcherServlet
+			DispatcherServlet servlet = new DispatcherServlet(ac);
+			ServletRegistration.Dynamic registration = servletCxt.addServlet("app", servlet);
+			registration.setLoadOnStartup(1);
+			registration.addMapping("/app/*");
+		}
+	}
 ----
 
 [NOTE]
@@ -83,29 +80,29 @@ Below is an example of `web.xml` configuration to register and initialize the `D
 ----
 <web-app>
 
-  <listener>
-    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-  </listener>
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
 
-  <context-param>
-    <param-name>contextConfigLocation</param-name>
-    <param-value>/WEB-INF/app-context.xml</param-value>
-  </context-param>
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/app-context.xml</param-value>
+	</context-param>
 
-  <servlet>
-    <servlet-name>app</servlet-name>
-    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-    <init-param>
-      <param-name>contextConfigLocation</param-name>
-      <param-value></param-value>
-    </init-param>
-    <load-on-startup>1</load-on-startup>
-  </servlet>
+	<servlet>
+		<servlet-name>app</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value></param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
 
-  <servlet-mapping>
-    <servlet-name>app</servlet-name>
-    <url-pattern>/app/*</url-pattern>
-  </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>app</servlet-name>
+		<url-pattern>/app/*</url-pattern>
+	</servlet-mapping>
 
 </web-app>
 ----
@@ -150,23 +147,23 @@ Below is example configuration with a `WebApplicationContext` hierarchy:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-  public class MyWebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
+	public class MyWebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
 
-    @Override
-    protected Class<?>[] getRootConfigClasses() {
-      return new Class[] { RootConfig.class };
-    }
+		@Override
+		protected Class<?>[] getRootConfigClasses() {
+			return new Class<?[] { RootConfig.class };
+		}
 
-    @Override
-    protected Class<?>[] getServletConfigClasses() {
-      return new Class[] { App1Config.class };
-    }
+		@Override
+		protected Class<?>[] getServletConfigClasses() {
+			return new Class<?[] { App1Config.class };
+		}
 
-    @Override
-    protected String[] getServletMappings() {
-      return new String[] { "/app1/*" };
-    }
-  }
+		@Override
+		protected String[] getServletMappings() {
+			return new String[] { "/app1/*" };
+		}
+	}
 ----
 
 [TIP]
@@ -182,29 +179,29 @@ And the `web.xml` equivalent:
 ----
 <web-app>
 
-  <listener>
-    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-  </listener>
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
 
-  <context-param>
-    <param-name>contextConfigLocation</param-name>
-    <param-value>/WEB-INF/root-context.xml</param-value>
-  </context-param>
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/root-context.xml</param-value>
+	</context-param>
 
-  <servlet>
-    <servlet-name>app1</servlet-name>
-    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-    <init-param>
-      <param-name>contextConfigLocation</param-name>
-      <param-value>/WEB-INF/app1-context.xml</param-value>
-    </init-param>
-    <load-on-startup>1</load-on-startup>
-  </servlet>
+	<servlet>
+		<servlet-name>app1</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/app1-context.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
 
-  <servlet-mapping>
-    <servlet-name>app1</servlet-name>
-    <url-pattern>/app1/*</url-pattern>
-  </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>app1</servlet-name>
+		<url-pattern>/app1/*</url-pattern>
+	</servlet-mapping>
 
 </web-app>
 ----
@@ -319,7 +316,6 @@ example of registering a `DispatcherServlet`:
 			registration.setLoadOnStartup(1);
 			registration.addMapping("/");
 		}
-
 	}
 ----
 
@@ -351,7 +347,6 @@ This is recommended for applications that use Java-based Spring configuration:
 		protected String[] getServletMappings() {
 			return new String[] { "/" };
 		}
-
 	}
 ----
 
@@ -379,7 +374,6 @@ If using XML-based Spring configuration, you should extend directly from
 		protected String[] getServletMappings() {
 			return new String[] { "/" };
 		}
-
 	}
 ----
 
@@ -1933,13 +1927,10 @@ following the `@ModelAttribute` argument:
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 	public String processSubmit(**@ModelAttribute("pet") Pet pet**, BindingResult result) {
-
 		if (result.hasErrors()) {
 			return "petForm";
 		}
-
 		// ...
-
 	}
 ----
 
@@ -1955,21 +1946,20 @@ controller or alternatively use the `binding` flag on the annotation:
 [subs="verbatim,quotes"]
 ----
 @ModelAttribute
-public AccountForm setUpForm() {
-    return new AccountForm();
-}
+	public AccountForm setUpForm() {
+		return new AccountForm();
+	}
 
-@ModelAttribute
-public Account findAccount(@PathVariable String accountId) {
-    return accountRepository.findOne(accountId);
-}
+	@ModelAttribute
+	public Account findAccount(@PathVariable String accountId) {
+		return accountRepository.findOne(accountId);
+	}
 
-@PostMapping("update")
-public String update(@Valid AccountUpdateForm form, BindingResult result,
-        **@ModelAttribute(binding=false)** Account account) {
-
-    // ...
-}
+	@PostMapping("update")
+	public String update(@Valid AccountUpdateForm form, BindingResult result,
+			**@ModelAttribute(binding=false)** Account account) {
+		// ...
+	}
 ----
 
 In addition to data binding you can also invoke validation using your own custom
@@ -1982,14 +1972,11 @@ subsequently reported back to the user:
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 	public String processSubmit(**@ModelAttribute("pet") Pet pet**, BindingResult result) {
-
 		new PetValidator().validate(pet, result);
 		if (result.hasErrors()) {
 			return "petForm";
 		}
-
 		// ...
-
 	}
 ----
 
@@ -2001,13 +1988,10 @@ annotation:
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 	public String processSubmit(**@Valid @ModelAttribute("pet") Pet pet**, BindingResult result) {
-
 		if (result.hasErrors()) {
 			return "petForm";
 		}
-
 		// ...
-
 	}
 ----
 
@@ -2327,31 +2311,32 @@ object and converting from an object to the HTTP response body. The
 `RequestMappingHandlerAdapter` supports the `@RequestBody` annotation with the following
 default `HttpMessageConverters`:
 
-* `ByteArrayHttpMessageConverter` converts byte arrays.
-* `StringHttpMessageConverter` converts strings.
-* `FormHttpMessageConverter` converts form data to/from a MultiValueMap<String, String>.
-* `SourceHttpMessageConverter` converts to/from a javax.xml.transform.Source.
+* `ByteArrayHttpMessageConverter` converts byte arrays
+* `StringHttpMessageConverter` converts strings
+* `FormHttpMessageConverter` converts form data to/from a `MultiValueMap<String, String>`
+* `SourceHttpMessageConverter` converts to/from a `javax.xml.transform.Source``
 
 For more information on these converters, see <<integration.adoc#rest-message-conversion,
-Message Converters>>. Also note that if using the MVC namespace or the MVC Java config, a
-wider range of message converters are registered by default. See <<mvc-config-enable>> for
-more information.
+Message Converters>>. Also note that if using the MVC namespace or the MVC Java config,
+a wider range of message converters are registered by default, including default JSON
+and XML payload converters (if e.g. Jackson, Gson and/or JAXB2 are present at runtime).
+See <<mvc-config-enable>> for more information on MVC setup options.
 
-If you intend to read and write XML, you will need to configure the
-`MarshallingHttpMessageConverter` with a specific `Marshaller` and an `Unmarshaller`
-implementation from the `org.springframework.oxm` package. The example below shows how
-to do that directly in your configuration but if your application is configured through
-the MVC namespace or the MVC Java config see <<mvc-config-enable>> instead.
+For a custom example, if you intend to read and write XML using the `spring-oxm` module,
+you need to configure the `MarshallingHttpMessageConverter` with a specific `Marshaller`
+implementation from the `org.springframework.oxm` package. The example below shows how to
+do that directly in your configuration but if your application is configured through the
+MVC namespace or the MVC Java config see <<mvc-config-enable>> instead.
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
 		<property name="messageConverters">
-			<util:list id="beanList">
+			<list>
 				<ref bean="stringHttpMessageConverter"/>
 				<ref bean="marshallingHttpMessageConverter"/>
-			</util:list>
+			<list>
 		</property>
 	</bean>
 
@@ -2360,11 +2345,10 @@ the MVC namespace or the MVC Java config see <<mvc-config-enable>> instead.
 
 	<bean id="marshallingHttpMessageConverter"
 			class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
-		<property name="marshaller" ref="castorMarshaller"/>
-		<property name="unmarshaller" ref="castorMarshaller"/>
+		<constructor-arg ref="xstreamMarshaller"/>
 	</bean>
 
-	<bean id="castorMarshaller" class="org.springframework.oxm.castor.CastorMarshaller"/>
+	<bean id="xstreamMarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller"/>
 ----
 
 An `@RequestBody` method parameter can be annotated with `@Valid`, in which case it will
@@ -2833,9 +2817,8 @@ Spring MVC also provides a mechanism for building links to controller methods. F
 
 		@GetMapping("/bookings/{booking}")
 		public String getBooking(@PathVariable Long booking) {
-
-		// ...
-        }
+			// ...
+		}
 	}
 ----
 
@@ -2923,12 +2906,12 @@ For example given:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-    @RequestMapping("/people/{id}/addresses")
-    public class PersonAddressController {
+	@RequestMapping("/people/{id}/addresses")
+	public class PersonAddressController {
 
-        @RequestMapping("/{country}")
-        public HttpEntity getAddress(@PathVariable String country) { ... }
-    }
+		@RequestMapping("/{country}")
+		public HttpEntity getAddress(@PathVariable String country) { ... }
+	}
 ----
 
 You can prepare a link from a JSP as follows:
@@ -3822,16 +3805,16 @@ accepted as an argument in several Spring Web MVC APIs.
 [subs="verbatim,quotes"]
 ----
 	// Cache for an hour - "Cache-Control: max-age=3600"
-    CacheControl ccCacheOneHour = CacheControl.maxAge(1, TimeUnit.HOURS);
+	CacheControl ccCacheOneHour = CacheControl.maxAge(1, TimeUnit.HOURS);
 
-    // Prevent caching - "Cache-Control: no-store"
-    CacheControl ccNoStore = CacheControl.noStore();
+	// Prevent caching - "Cache-Control: no-store"
+	CacheControl ccNoStore = CacheControl.noStore();
 
-    // Cache for ten days in public and private caches,
-    // public caches should not transform the response
-    // "Cache-Control: max-age=864000, public, no-transform"
-    CacheControl ccCustom = CacheControl.maxAge(10, TimeUnit.DAYS)
-    									.noTransform().cachePublic();
+	// Cache for ten days in public and private caches,
+	// public caches should not transform the response
+	// "Cache-Control: max-age=864000, public, no-transform"
+	CacheControl ccCustom = CacheControl.maxAge(10, TimeUnit.DAYS)
+										.noTransform().cachePublic();
 ----
 
 
@@ -4029,7 +4012,7 @@ In XML use the `<mvc:annotation-driven>` element:
 
 The above registers a number of Spring MVC
 <<mvc-servlet-special-bean-types,infrastructure beans>> also adapting to dependencies
-available on the classpath -- for JSON, XML, etc.
+available on the classpath: e.g. payload converters for JSON, XML, etc.
 
 
 
@@ -4047,7 +4030,6 @@ In Java config implement `WebMvcConfigurer` interface:
 	public class WebConfig implements WebMvcConfigurer {
 
 		// Implement configuration methods...
-
 	}
 ----
 
@@ -4079,7 +4061,6 @@ In Java config, register custom formatters and converters:
 		public void addFormatters(FormatterRegistry registry) {
 			// ...
 		}
-
 	}
 ----
 
@@ -4153,7 +4134,6 @@ In Java config, you can customize the global `Validator` instance:
 		public Validator getValidator(); {
 			// ...
 		}
-
 	}
 ----
 
@@ -4219,7 +4199,6 @@ In Java config, register interceptors to apply to incoming requests:
 			registry.addInterceptor(new ThemeInterceptor()).addPathPatterns("/**").excludePathPatterns("/admin/**");
 			registry.addInterceptor(new SecurityInterceptor()).addPathPatterns("/secure/*");
 		}
-
 	}
 ----
 
@@ -4324,7 +4303,6 @@ Below is an example that adds Jackson JSON and XML converters with a customized
 			converters.add(new MappingJackson2HttpMessageConverter(builder.build()));
 			converters.add(new MappingJackson2XmlHttpMessageConverter(builder.xml().build()));
 		}
-
 	}
 ----
 
@@ -4365,23 +4343,23 @@ It is also possible to do the same in XML:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-    <mvc:annotation-driven>
-        <mvc:message-converters>
-            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
-                <property name="objectMapper" ref="objectMapper"/>
-            </bean>
-            <bean class="org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter">
-                <property name="objectMapper" ref="xmlMapper"/>
-            </bean>
-        </mvc:message-converters>
-    </mvc:annotation-driven>
+	<mvc:annotation-driven>
+		<mvc:message-converters>
+			<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+				<property name="objectMapper" ref="objectMapper"/>
+			</bean>
+			<bean class="org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter">
+				<property name="objectMapper" ref="xmlMapper"/>
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
 
-    <bean id="objectMapper" class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean"
-          p:indentOutput="true"
-          p:simpleDateFormat="yyyy-MM-dd"
-          p:modulesToInstall="com.fasterxml.jackson.module.paramnames.ParameterNamesModule"/>
+	<bean id="objectMapper" class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean"
+		  p:indentOutput="true"
+		  p:simpleDateFormat="yyyy-MM-dd"
+		  p:modulesToInstall="com.fasterxml.jackson.module.paramnames.ParameterNamesModule"/>
 
-    <bean id="xmlMapper" parent="objectMapper" p:createXmlMapper="true"/>
+	<bean id="xmlMapper" parent="objectMapper" p:createXmlMapper="true"/>
 ----
 
 
@@ -4406,7 +4384,6 @@ An example of forwarding a request for `"/"` to a view called `"home"` in Java:
 		public void addViewControllers(ViewControllerRegistry registry) {
 			registry.addViewController("/").setViewName("home");
 		}
-
 	}
 ----
 
@@ -4442,7 +4419,6 @@ JSON rendering:
 			registry.enableContentNegotiation(new MappingJackson2JsonView());
 			registry.jsp();
 		}
-
 	}
 ----
 
@@ -4506,7 +4482,6 @@ In Java config simply add the respective "Configurer" bean:
 			configurer.setTemplateLoaderPath("/WEB-INF/");
 			return configurer;
 		}
-
 	}
 ----
 
@@ -4541,7 +4516,6 @@ In Java config:
 				.addResourceLocations("/public", "classpath:/static/")
 				.setCachePeriod(31556926);
 		}
-
 	}
 ----
 
@@ -4584,7 +4558,6 @@ For example in Java config;
 					.resourceChain(true)
 					.addResolver(new VersionResourceResolver().addContentVersionStrategy("/**"));
 		}
-
 	}
 ----
 
@@ -4647,7 +4620,6 @@ To enable the feature using the default setup use:
 		public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
 			configurer.enable();
 		}
-
 	}
 ----
 
@@ -4713,21 +4685,21 @@ Example in Java config:
 		@Override
 		public void configurePathMatch(PathMatchConfigurer configurer) {
 			configurer
-			    .setUseSuffixPatternMatch(true)
-			    .setUseTrailingSlashMatch(false)
-			    .setUseRegisteredSuffixPatternMatch(true)
-			    .setPathMatcher(antPathMatcher())
-			    .setUrlPathHelper(urlPathHelper());
+				.setUseSuffixPatternMatch(true)
+				.setUseTrailingSlashMatch(false)
+				.setUseRegisteredSuffixPatternMatch(true)
+				.setPathMatcher(antPathMatcher())
+				.setUrlPathHelper(urlPathHelper());
 		}
 
 		@Bean
 		public UrlPathHelper urlPathHelper() {
-		    //...
+			//...
 		}
 
 		@Bean
 		public PathMatcher antPathMatcher() {
-		    //...
+			//...
 		}
 
 	}
@@ -4738,17 +4710,17 @@ In XML, the same:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-    <mvc:annotation-driven>
-        <mvc:path-matching
-            suffix-pattern="true"
-            trailing-slash="false"
-            registered-suffixes-only="true"
-            path-helper="pathHelper"
-            path-matcher="pathMatcher"/>
-    </mvc:annotation-driven>
+	<mvc:annotation-driven>
+		<mvc:path-matching
+			suffix-pattern="true"
+			trailing-slash="false"
+			registered-suffixes-only="true"
+			path-helper="pathHelper"
+			path-matcher="pathMatcher"/>
+	</mvc:annotation-driven>
 
-    <bean id="pathHelper" class="org.example.app.MyPathHelper"/>
-    <bean id="pathMatcher" class="org.example.app.MyPathMatcher"/>
+	<bean id="pathHelper" class="org.example.app.MyPathHelper"/>
+	<bean id="pathMatcher" class="org.example.app.MyPathMatcher"/>
 ----
 
 
@@ -4797,7 +4769,6 @@ hook of the Spring `ApplicationContext`:
 		public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
 			// ...
 		}
-
 	}
 ----
 

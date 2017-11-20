@@ -6,6 +6,7 @@
 :doc-spring-gemfire: {doc-root}/spring-gemfire/docs/current/reference
 :toc: left
 :toclevels: 4
+:tabsize: 4
 :docinfo1:
 
 This part of the reference documentation covers the Spring Framework's integration with
@@ -1102,8 +1103,8 @@ construct a `HttpComponentsClientHttpRequestFactory` like so:
 [subs="verbatim,quotes"]
 ----
 	HttpClient httpClient = HttpClientBuilder.create().build();
-    ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
-    RestTemplate restTemplate = new RestTemplate(requestFactory);
+	ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+	RestTemplate restTemplate = new RestTemplate(requestFactory);
 ----
 ====
 
@@ -2447,12 +2448,12 @@ bean as a JMS listener endpoint.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-    @Component
-    public class MyService {
+	@Component
+	public class MyService {
 
-    	@JmsListener(destination = "myDestination")
-    	public void processOrder(String data) { ... }
-    }
+		@JmsListener(destination = "myDestination")
+		public void processOrder(String data) { ... }
+	}
 ----
 
 The idea of the example above is that whenever a message is available on the
@@ -2517,12 +2518,12 @@ element.
 ----
 	<jms:annotation-driven/>
 
-    <bean id="jmsListenerContainerFactory"
-            class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
-        <property name="connectionFactory" ref="connectionFactory"/>
-        <property name="destinationResolver" ref="destinationResolver"/>
-        <property name="concurrency" value="3-10"/>
-    </bean>
+	<bean id="jmsListenerContainerFactory"
+			class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
+		<property name="connectionFactory" ref="connectionFactory"/>
+		<property name="destinationResolver" ref="destinationResolver"/>
+		<property name="concurrency" value="3-10"/>
+	</bean>
 ----
 
 
@@ -2574,10 +2575,10 @@ a custom header:
 	@Component
 	public class MyService {
 
-    	@JmsListener(destination = "myDestination")
-    	public void processOrder(Order order, @Header("order_type") String orderType) {
-        	...
-    	}
+		@JmsListener(destination = "myDestination")
+		public void processOrder(Order order, @Header("order_type") String orderType) {
+			...
+		}
 	}
 ----
 
@@ -2624,17 +2625,17 @@ annotate the payload with `@Valid` and configure the necessary validator as foll
 	@EnableJms
 	public class AppConfig implements JmsListenerConfigurer {
 
-    	@Override
-    	public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
-        	registrar.setMessageHandlerMethodFactory(myJmsHandlerMethodFactory());
-    	}
+		@Override
+		public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
+			registrar.setMessageHandlerMethodFactory(myJmsHandlerMethodFactory());
+		}
 
-    	@Bean
-    	public DefaultMessageHandlerMethodFactory myHandlerMethodFactory() {
-        	DefaultMessageHandlerMethodFactory factory = new DefaultMessageHandlerMethodFactory();
-        	factory.setValidator(myValidator());
-        	return factory;
-    	}
+		@Bean
+		public DefaultMessageHandlerMethodFactory myHandlerMethodFactory() {
+			DefaultMessageHandlerMethodFactory factory = new DefaultMessageHandlerMethodFactory();
+			factory.setValidator(myValidator());
+			return factory;
+		}
 	}
 ----
 
@@ -2658,8 +2659,8 @@ as follow to automatically send a response:
 	@JmsListener(destination = "myDestination")
 	@SendTo("status")
 	public OrderStatus processOrder(Order order) {
-    	// order processing
-    	return status;
+		// order processing
+		return status;
 	}
 ----
 
@@ -2678,11 +2679,11 @@ If you need to set additional headers in a transport-independent manner, you cou
 	@JmsListener(destination = "myDestination")
 	@SendTo("status")
 	public Message<OrderStatus> processOrder(Order order) {
-    	// order processing
-    	return MessageBuilder
-        	    .withPayload(status)
-            	.setHeader("code", 1234)
-            	.build();
+		// order processing
+		return MessageBuilder
+				.withPayload(status)
+				.setHeader("code", 1234)
+				.build();
 	}
 ----
 
@@ -2695,11 +2696,11 @@ example can be rewritten as follows:
 ----
 	@JmsListener(destination = "myDestination")
 	public JmsResponse<Message<OrderStatus>> processOrder(Order order) {
-    	// order processing
-    	Message<OrderStatus> response = MessageBuilder
-        	    .withPayload(status)
-            	.setHeader("code", 1234)
-            	.build();
+		// order processing
+		Message<OrderStatus> response = MessageBuilder
+				.withPayload(status)
+				.setHeader("code", 1234)
+				.build();
 		return JmsResponse.forQueue(response, "status");
 	}
 ----
@@ -3722,7 +3723,7 @@ this interface as the definition for the management interface:
 		<bean id="testBean" class="org.springframework.jmx.JmxTestBean">
 			<property name="name" value="TEST"/>
 			<property name="age" value="100"/>
-	  	</bean>
+		</bean>
 
 	</beans>
 ----
@@ -6470,10 +6471,10 @@ however, the exception is uncaught and cannot be transmitted. For those cases, a
 ----
 	public class MyAsyncUncaughtExceptionHandler implements AsyncUncaughtExceptionHandler {
 
-    	@Override
-    	public void handleUncaughtException(Throwable ex, Method method, Object... params) {
+		@Override
+		public void handleUncaughtException(Throwable ex, Method method, Object... params) {
 			// handle exception
-    	}
+		}
 	}
 ----
 
@@ -7723,7 +7724,7 @@ the method again.
 [subs="verbatim,quotes"]
 ----
 	@CacheResult(cacheName="books", **exceptionCacheName="failures"**
-	             **cachedExceptions = InvalidIsbnNotFoundException.class**)
+				**cachedExceptions = InvalidIsbnNotFoundException.class**)
 	public Book findBook(ISBN isbn)
 ----
 
@@ -7853,11 +7854,11 @@ Again, to use it, one simply needs to declare the appropriate `CacheManager`:
 [subs="verbatim,quotes"]
 ----
 	<bean id="cacheManager"
-	      class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cache-manager-ref="ehcache"/>
+			class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cache-manager-ref="ehcache"/>
 
 	<!-- EhCache library setup -->
 	<bean id="ehcache"
-	      class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" p:config-location="ehcache.xml"/>
+			class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" p:config-location="ehcache.xml"/>
 ----
 
 This setup bootstraps the ehcache library inside Spring IoC (through the `ehcache` bean) which
@@ -7878,7 +7879,7 @@ Configuring a `CacheManager` that creates the cache on demand is straightforward
 [subs="verbatim,quotes"]
 ----
 	<bean id="cacheManager"
-	      class="org.springframework.cache.caffeine.CaffeineCacheManager"/>
+			class="org.springframework.cache.caffeine.CaffeineCacheManager"/>
 ----
 
 It is also possible to provide the caches to use explicitly. In that case, only those
@@ -7924,8 +7925,8 @@ Again, to use it, one simply needs to declare the appropriate `CacheManager`:
 [subs="verbatim,quotes"]
 ----
 	<bean id="cacheManager"
-	      class="org.springframework.cache.jcache.JCacheCacheManager"
-	      p:cache-manager-ref="jCacheManager"/>
+			class="org.springframework.cache.jcache.JCacheCacheManager"
+			p:cache-manager-ref="jCacheManager"/>
 
 	<!-- JSR-107 cache manager setup  -->
 	<bean id="jCacheManager" .../>

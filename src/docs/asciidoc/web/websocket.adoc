@@ -828,20 +828,19 @@ Consider also customizing these server-side SockJS related properties (see Javad
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-@Configuration
-public class WebSocketConfig extends WebSocketMessageBrokerConfigurationSupport {
+	@Configuration
+	public class WebSocketConfig extends WebSocketMessageBrokerConfigurationSupport {
 
-    @Override
-    public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/sockjs").withSockJS()
-            .setStreamBytesLimit(512 * 1024)
-            .setHttpMessageCacheSize(1000)
-            .setDisconnectDelay(30 * 1000);
-    }
+		@Override
+		public void registerStompEndpoints(StompEndpointRegistry registry) {
+			registry.addEndpoint("/sockjs").withSockJS()
+				.setStreamBytesLimit(512 * 1024)
+				.setHttpMessageCacheSize(1000)
+				.setDisconnectDelay(30 * 1000);
+		}
 
-    // ...
-
-}
+		// ...
+	}
 ----
 
 
@@ -992,10 +991,10 @@ broadcasting to other connected clients):
 		}
 
 		@Override
-        public void configureMessageBroker(MessageBrokerRegistry config) {
-            config.setApplicationDestinationPrefixes("/app");
-            config.enableSimpleBroker("/topic", "/queue");
-        }
+		public void configureMessageBroker(MessageBrokerRegistry config) {
+			config.setApplicationDestinationPrefixes("/app");
+			config.enableSimpleBroker("/topic", "/queue");
+		}
 
 	}
 ----
@@ -1458,20 +1457,19 @@ In Java config:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-  @Configuration
-  @EnableWebSocketMessageBroker
-  public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
+	@Configuration
+	@EnableWebSocketMessageBroker
+	public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
 
-    // ...
+		// ...
 
-    @Override
-    public void configureMessageBroker(MessageBrokerRegistry registry) {
-      registry.enableStompBrokerRelay("/queue/", "/topic/");
-      registry.setApplicationDestinationPrefixes("/app");
-      registry.setPathMatcher(new AntPathMatcher("."));
-    }
-
-  }
+		@Override
+		public void configureMessageBroker(MessageBrokerRegistry registry) {
+			registry.enableStompBrokerRelay("/queue/", "/topic/");
+			registry.setApplicationDestinationPrefixes("/app");
+			registry.setPathMatcher(new AntPathMatcher("."));
+		}
+	}
 ----
 
 In XML config:
@@ -1479,25 +1477,25 @@ In XML config:
 [source,xml,indent=0]
 [subs="verbatim,quotes,attributes"]
 ----
-  <beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:websocket="http://www.springframework.org/schema/websocket"
-    xsi:schemaLocation="
-      http://www.springframework.org/schema/beans
-      http://www.springframework.org/schema/beans/spring-beans.xsd
-      http://www.springframework.org/schema/websocket
-      http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+	<beans xmlns="http://www.springframework.org/schema/beans"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			xmlns:websocket="http://www.springframework.org/schema/websocket"
+			xsi:schemaLocation="
+					http://www.springframework.org/schema/beans
+					http://www.springframework.org/schema/beans/spring-beans.xsd
+					http://www.springframework.org/schema/websocket
+					http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
-    <websocket:message-broker application-destination-prefix="/app" path-matcher="pathMatcher">
-      <websocket:stomp-endpoint path="/stomp" />
-      <websocket:simple-broker prefix="/topic, /queue"/>
-    </websocket:message-broker>
+		<websocket:message-broker application-destination-prefix="/app" path-matcher="pathMatcher">
+			<websocket:stomp-endpoint path="/stomp"/>
+			<websocket:simple-broker prefix="/topic, /queue"/>
+		</websocket:message-broker>
 
-    <bean id="pathMatcher" class="org.springframework.util.AntPathMatcher">
-      <constructor-arg index="0" value="." />
-    </bean>
+		<bean id="pathMatcher" class="org.springframework.util.AntPathMatcher">
+			<constructor-arg index="0" value="."/>
+		</bean>
 
-  </beans>
+	</beans>
 ----
 
 And below is a simple example to illustrate a controller with "." separator:
@@ -1505,15 +1503,15 @@ And below is a simple example to illustrate a controller with "." separator:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-  @Controller
-  @MessageMapping("foo")
-  public class FooController {
-    
-    @MessageMapping("bar.{baz}")
-    public void handleBaz(@DestinationVariable String baz) {
-    }
+	@Controller
+	@MessageMapping("foo")
+	public class FooController {
 
-  }
+		@MessageMapping("bar.{baz}")
+		public void handleBaz(@DestinationVariable String baz) {
+			// ...
+		}
+	}
 ----
 
 If the application prefix is set to "/app" then the foo method is effectively mapped to "/app/foo.bar.{baz}".
@@ -1612,30 +1610,26 @@ user and associate it with subsequent STOMP messages on the same session:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-  @Configuration
-  @EnableWebSocketMessageBroker
-  public class MyConfig extends AbstractWebSocketMessageBrokerConfigurer {
+	@Configuration
+	@EnableWebSocketMessageBroker
+	public class MyConfig extends AbstractWebSocketMessageBrokerConfigurer {
 
-    @Override
-    public void configureClientInboundChannel(ChannelRegistration registration) {
-      registration.setInterceptors(new ChannelInterceptorAdapter() {
-
-          @Override
-          public Message<?> preSend(Message<?> message, MessageChannel channel) {
-
-              StompHeaderAccessor accessor =
-                  MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-
-              if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-                  Authentication user = ... ; // access authentication header(s)
-                  accessor.setUser(user);
-              }
-
-              return message;
-          }
-      });
-    }
-  }
+		@Override
+		public void configureClientInboundChannel(ChannelRegistration registration) {
+			registration.setInterceptors(new ChannelInterceptorAdapter() {
+				@Override
+				public Message<?> preSend(Message<?> message, MessageChannel channel) {
+					StompHeaderAccessor accessor =
+							MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+					if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+						Authentication user = ... ; // access authentication header(s)
+						accessor.setUser(user);
+					}
+					return message;
+				}
+			});
+		}
+	}
 ----
 
 Also note that when using Spring Security's authorization for messages, at present
@@ -1674,16 +1668,16 @@ the class-level to share a common destination):
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-@Controller
-public class PortfolioController {
+	@Controller
+	public class PortfolioController {
 
-    @MessageMapping("/trade")
-    @SendToUser("/queue/position-updates")
-    public TradeResult executeTrade(Trade trade, Principal principal) {
-        // ...
-        return tradeResult;
-    }
-}
+		@MessageMapping("/trade")
+		@SendToUser("/queue/position-updates")
+		public TradeResult executeTrade(Trade trade, Principal principal) {
+			// ...
+			return tradeResult;
+		}
+	}
 ----
 
 If the user has more than one session, by default all of the sessions subscribed
@@ -1694,23 +1688,22 @@ setting the `broadcast` attribute to false, for example:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-@Controller
-public class MyController {
+	@Controller
+	public class MyController {
 
-    @MessageMapping("/action")
-    public void handleAction() throws Exception{
-        // raise MyBusinessException here
-    }
+		@MessageMapping("/action")
+		public void handleAction() throws Exception{
+			// raise MyBusinessException here
+		}
 
-    @MessageExceptionHandler
-    @SendToUser(destinations="/queue/errors", broadcast=false)
-    public ApplicationError handleException(MyBusinessException exception) {
-        // ...
-        return appError;
-    }
-}
+		@MessageExceptionHandler
+		@SendToUser(destinations="/queue/errors", broadcast=false)
+		public ApplicationError handleException(MyBusinessException exception) {
+			// ...
+			return appError;
+		}
+	}
 ----
-
 
 [NOTE]
 ====
@@ -1817,15 +1810,15 @@ to intercept inbound messages:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-  @Configuration
-  @EnableWebSocketMessageBroker
-  public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
+	@Configuration
+	@EnableWebSocketMessageBroker
+	public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
 
-    @Override
-    public void configureClientInboundChannel(ChannelRegistration registration) {
-      registration.setInterceptors(new MyChannelInterceptor());
-    }
-  }
+		@Override
+		public void configureClientInboundChannel(ChannelRegistration registration) {
+			registration.setInterceptors(new MyChannelInterceptor());
+		}
+	}
 ----
 
 A custom `ChannelInterceptor` can extend the empty method base class
@@ -1835,16 +1828,16 @@ to access information about the message.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-  public class MyChannelInterceptor extends ChannelInterceptorAdapter {
+	public class MyChannelInterceptor extends ChannelInterceptorAdapter {
 
-    @Override
-    public Message<?> preSend(Message<?> message, MessageChannel channel) {
-      StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
-      StompCommand command = accessor.getStompCommand();
-      // ...
-      return message;
-    }
-  }
+		@Override
+		public Message<?> preSend(Message<?> message, MessageChannel channel) {
+			StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+			StompCommand command = accessor.getStompCommand();
+			// ...
+			return message;
+		}
+	}
 ----
 
 
@@ -1859,10 +1852,10 @@ To begin create and configure `WebSocketStompClient`:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-WebSocketClient webSocketClient = new StandardWebSocketClient();
-WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
-stompClient.setMessageConverter(new StringMessageConverter());
-stompClient.setTaskScheduler(taskScheduler); // for heartbeats
+	WebSocketClient webSocketClient = new StandardWebSocketClient();
+	WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
+	stompClient.setMessageConverter(new StringMessageConverter());
+	stompClient.setTaskScheduler(taskScheduler); // for heartbeats
 ----
 
 In the above example `StandardWebSocketClient` could be replaced with `SockJsClient`
@@ -1875,9 +1868,9 @@ Next establish a connection and provide a handler for the STOMP session:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-String url = "ws://127.0.0.1:8080/endpoint";
-StompSessionHandler sessionHandler = new MyStompSessionHandler();
-stompClient.connect(url, sessionHandler);
+	String url = "ws://127.0.0.1:8080/endpoint";
+	StompSessionHandler sessionHandler = new MyStompSessionHandler();
+	stompClient.connect(url, sessionHandler);
 ----
 
 When the session is ready for use the handler is notified:
@@ -1887,10 +1880,10 @@ When the session is ready for use the handler is notified:
 ----
 public class MyStompSessionHandler extends StompSessionHandlerAdapter {
 
-    @Override
-    public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
-        // ...
-    }
+	@Override
+	public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
+		// ...
+	}
 }
 ----
 
@@ -1913,15 +1906,15 @@ Object type the payload should be deserialized to:
 ----
 session.subscribe("/topic/foo", new StompFrameHandler() {
 
-    @Override
-    public Type getPayloadType(StompHeaders headers) {
-        return String.class;
-    }
+	@Override
+	public Type getPayloadType(StompHeaders headers) {
+		return String.class;
+	}
 
-    @Override
-    public void handleFrame(StompHeaders headers, Object payload) {
-        // ...
-    }
+	@Override
+	public void handleFrame(StompHeaders headers, Object payload) {
+		// ...
+	}
 
 });
 ----
@@ -1970,11 +1963,11 @@ inbound client messages and may be accessed from a controller method, for exampl
 @Controller
 public class MyController {
 
-    @MessageMapping("/action")
-    public void handle(SimpMessageHeaderAccessor headerAccessor) {
-        Map<String, Object> attrs = headerAccessor.getSessionAttributes();
-        // ...
-    }
+	@MessageMapping("/action")
+	public void handle(SimpMessageHeaderAccessor headerAccessor) {
+		Map<String, Object> attrs = headerAccessor.getSessionAttributes();
+		// ...
+	}
 }
 ----
 
@@ -1987,38 +1980,38 @@ scope proxy mode for WebSocket-scoped beans:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-@Component
-@Scope(scopeName = "websocket", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class MyBean {
+	@Component
+	@Scope(scopeName = "websocket", proxyMode = ScopedProxyMode.TARGET_CLASS)
+	public class MyBean {
 
-    @PostConstruct
-    public void init() {
-        // Invoked after dependencies injected
-    }
+		@PostConstruct
+		public void init() {
+			// Invoked after dependencies injected
+		}
 
-    // ...
+		// ...
 
-    @PreDestroy
-    public void destroy() {
-        // Invoked when the WebSocket session ends
-    }
-}
+		@PreDestroy
+		public void destroy() {
+			// Invoked when the WebSocket session ends
+		}
+	}
 
-@Controller
-public class MyController {
+	@Controller
+	public class MyController {
 
-    private final MyBean myBean;
+		private final MyBean myBean;
 
-    @Autowired
-    public MyController(MyBean myBean) {
-        this.myBean = myBean;
-    }
+		@Autowired
+		public MyController(MyBean myBean) {
+			this.myBean = myBean;
+		}
 
-    @MessageMapping("/action")
-    public void handle() {
-        // this.myBean from the current WebSocket session
-    }
-}
+		@MessageMapping("/action")
+		public void handle() {
+			// this.myBean from the current WebSocket session
+		}
+	}
 ----
 
 As with any custom scope, Spring initializes a new `MyBean` instance the first
@@ -2205,49 +2198,49 @@ every 30 minutes. This bean can be exported to JMX through Spring's
 Below is a summary of the available information.
 
 Client WebSocket Sessions::
-    Current::: indicates how many client sessions there are
-    currently with the count further broken down by WebSocket vs HTTP
-    streaming and polling SockJS sessions.
-    Total::: indicates how many total sessions have been established.
-    Abnormally Closed:::
-        Connect Failures:::: these are sessions that got established but were
-        closed after not having received any messages within 60 seconds. This is
-        usually an indication of proxy or network issues.
-        Send Limit Exceeded:::: sessions closed after exceeding the configured send
-        timeout or the send buffer limits which can occur with slow clients
-        (see previous section).
-        Transport Errors:::: sessions closed after a transport error such as
-        failure to read or write to a WebSocket connection or
-        HTTP request/response.
-    STOMP Frames::: the total number of CONNECT, CONNECTED, and DISCONNECT frames
-    processed indicating how many clients connected on the STOMP level. Note that
-    the DISCONNECT count may be lower when sessions get closed abnormally or when
-    clients close without sending a DISCONNECT frame.
+	Current::: indicates how many client sessions there are
+	currently with the count further broken down by WebSocket vs HTTP
+	streaming and polling SockJS sessions.
+	Total::: indicates how many total sessions have been established.
+	Abnormally Closed:::
+		Connect Failures:::: these are sessions that got established but were
+		closed after not having received any messages within 60 seconds. This is
+		usually an indication of proxy or network issues.
+		Send Limit Exceeded:::: sessions closed after exceeding the configured send
+		timeout or the send buffer limits which can occur with slow clients
+		(see previous section).
+		Transport Errors:::: sessions closed after a transport error such as
+		failure to read or write to a WebSocket connection or
+		HTTP request/response.
+	STOMP Frames::: the total number of CONNECT, CONNECTED, and DISCONNECT frames
+	processed indicating how many clients connected on the STOMP level. Note that
+	the DISCONNECT count may be lower when sessions get closed abnormally or when
+	clients close without sending a DISCONNECT frame.
 STOMP Broker Relay::
-    TCP Connections::: indicates how many TCP connections on behalf of client
-    WebSocket sessions are established to the broker. This should be equal to the
-    number of client WebSocket sessions + 1 additional shared "system" connection
-    for sending messages from within the application.
-    STOMP Frames::: the total number of CONNECT, CONNECTED, and DISCONNECT frames
-    forwarded to or received from the broker on behalf of clients. Note that a
-    DISCONNECT frame is sent to the broker regardless of how the client WebSocket
-    session was closed. Therefore a lower DISCONNECT frame count is an indication
-    that the broker is pro-actively closing connections, may be because of a
-    heartbeat that didn't arrive in time, an invalid input frame, or other.
+	TCP Connections::: indicates how many TCP connections on behalf of client
+	WebSocket sessions are established to the broker. This should be equal to the
+	number of client WebSocket sessions + 1 additional shared "system" connection
+	for sending messages from within the application.
+	STOMP Frames::: the total number of CONNECT, CONNECTED, and DISCONNECT frames
+	forwarded to or received from the broker on behalf of clients. Note that a
+	DISCONNECT frame is sent to the broker regardless of how the client WebSocket
+	session was closed. Therefore a lower DISCONNECT frame count is an indication
+	that the broker is pro-actively closing connections, may be because of a
+	heartbeat that didn't arrive in time, an invalid input frame, or other.
 Client Inbound Channel:: stats from thread pool backing the "clientInboundChannel"
-    providing insight into the health of incoming message processing. Tasks queueing
-    up here is an indication the application may be too slow to handle messages.
-    If there I/O bound tasks (e.g. slow database query, HTTP request to 3rd party
-    REST API, etc) consider increasing the thread pool size.
+	providing insight into the health of incoming message processing. Tasks queueing
+	up here is an indication the application may be too slow to handle messages.
+	If there I/O bound tasks (e.g. slow database query, HTTP request to 3rd party
+	REST API, etc) consider increasing the thread pool size.
 Client Outbound Channel:: stats from the thread pool backing the "clientOutboundChannel"
-    providing insight into the health of broadcasting messages to clients. Tasks
-    queueing up here is an indication clients are too slow to consume messages.
-    One way to address this is to increase the thread pool size to accommodate the
-    number of concurrent slow clients expected. Another option is to reduce the
-    send timeout and send buffer size limits (see the previous section).
+	providing insight into the health of broadcasting messages to clients. Tasks
+	queueing up here is an indication clients are too slow to consume messages.
+	One way to address this is to increase the thread pool size to accommodate the
+	number of concurrent slow clients expected. Another option is to reduce the
+	send timeout and send buffer size limits (see the previous section).
 SockJS Task Scheduler:: stats from thread pool of the SockJS task scheduler which
-    is used to send heartbeats. Note that when heartbeats are negotiated on the
-    STOMP level the SockJS heartbeats are disabled.
+	is used to send heartbeats. Note that when heartbeats are negotiated on the
+	STOMP level the SockJS heartbeats are disabled.
 
 
 
