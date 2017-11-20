@@ -479,7 +479,7 @@ initialization parameters ( `init-param` elements) to the Servlet declaration in
 All `HandlerMapping` implementations supports handler interceptors that are useful when
 you want to apply specific functionality to certain requests, for example, checking for
 a principal. Interceptors must implement `HandlerInterceptor` from the
-`org.springframework .web .servlet` package with three methods that should provide enough
+`org.springframework.web.servlet` package with three methods that should provide enough
 flexibility to do all kinds of pre-processing and post-processing:
 
 * `preHandle(..)` -- __before__ the actual handler is executed
@@ -498,7 +498,7 @@ configure interceptors. You can also register them directly via setters on indiv
 `HandlerMapping` implementations.
 
 Note that `postHandle` is less useful with `@ResponseBody` and `ResponseEntity` methods for
-which a the response is written and committed within the `HandlerAdapter` and before
+which the response is written and committed within the `HandlerAdapter` and before
 `postHandle`. That means its too late to make any changes to the response such as adding
 an extra header. For such scenarios you can implement `ResponseBodyAdvice` and either
 declare it as an <<mvc-ann-controller-advice>> bean or configure it directly on
@@ -2543,8 +2543,8 @@ on a container object that specifies request headers and body. Below is an examp
 	@PostMapping("/something")
 	public ResponseEntity<String> handle() {
 		// ...
-		URI location = ...
-		return new ResponseEntity.created(location).build();
+		URI location = ... ;
+		return ResponseEntity.created(location).build();
 	}
 ----
 
@@ -4167,8 +4167,7 @@ And the same in XML use the `<mvc:view-controller>` element:
 The MVC config simplifies the registration of view resolvers.
 
 The following is a Java config example that configures content negotiation view
-resolution using FreeMarker HTML templates and Jackson as a default `View` for
-JSON rendering:
+resolution using JSP and Jackson as a default `View` for JSON rendering:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4296,8 +4295,8 @@ See also
 <<mvc-caching-static-resources, HTTP caching support for static resources>>.
 
 The resource handler also supports a chain of
-{api-spring-framework}/web/servlet/resource/ResourceResolver.html[ResourceResolver]'s and
-{api-spring-framework}/web/servlet/resource/ResourceTransformer.html[ResourceTransformer]'s.
+{api-spring-framework}/web/servlet/resource/ResourceResolver.html[ResourceResolver]s and
+{api-spring-framework}/web/servlet/resource/ResourceTransformer.html[ResourceTransformer]s.
 which can be used to create a toolchain for working with optimized resources.
 
 The `VersionResourceResolver` can be used for versioned resource URLs based on an MD5 hash

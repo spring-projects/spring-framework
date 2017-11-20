@@ -778,11 +778,11 @@ expression based `matches` operator.
 
 	// evaluates to true
 	boolean trueValue = parser.parseExpression(
-			"'5.00' matches '\^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
+			"'5.00' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
 
 	//evaluates to false
 	boolean falseValue = parser.parseExpression(
-			"'5.0067' matches '\^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
+			"'5.0067' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
 ----
 
 [NOTE]
@@ -795,7 +795,7 @@ evaluates to `true`, as expected.
 Each symbolic operator can also be specified as a purely alphabetic equivalent. This
 avoids problems where the symbols used have special meaning for the document type in
 which the expression is embedded (eg. an XML document). The textual equivalents are
-shown here: `lt` (`<`), `gt` (`>`), `le` (`<=`), `ge` (`>=`), `eq` (`==`),
+shown here: `lt` (`<`), `gt` (`>`), `le` (`\<=`), `ge` (`>=`), `eq` (`==`),
 `ne` (`!=`), `div` (`/`), `mod` (`%`), `not` (`!`). These are case insensitive.
 
 
@@ -1230,7 +1230,8 @@ where the entry value is less than 27.
 
 In addition to returning all the selected elements, it is possible to retrieve just the
 first or the last value. To obtain the first entry matching the selection the syntax is
-`^[...]` whilst to obtain the last matching selection the syntax is `$[...]`.
+`.^[selectionExpression]` whilst to obtain the last matching selection the syntax is
+`.$[selectionExpression]`.
 
 
 
@@ -1238,7 +1239,7 @@ first or the last value. To obtain the first entry matching the selection the sy
 === Collection Projection
 
 Projection allows a collection to drive the evaluation of a sub-expression and the
-result is a new collection. The syntax for projection is `![projectionExpression]`. Most
+result is a new collection. The syntax for projection is `.![projectionExpression]`. Most
 easily understood by example, suppose we have a list of inventors but want the list of
 cities where they were born. Effectively we want to evaluate 'placeOfBirth.city' for
 every entry in the inventor list. Using projection:
