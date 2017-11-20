@@ -493,8 +493,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			try {
 				List<HttpRange> httpRanges = inputMessage.getHeaders().getRange();
 				response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-					this.resourceRegionHttpMessageConverter.write(
-							HttpRange.toResourceRegions(httpRanges, resource), mediaType, outputMessage);
+				this.resourceRegionHttpMessageConverter.write(
+						HttpRange.toResourceRegions(httpRanges, resource), mediaType, outputMessage);
 			}
 			catch (IllegalArgumentException ex) {
 				response.setHeader("Content-Range", "bytes */" + resource.contentLength());
@@ -654,8 +654,19 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 		if (resource instanceof HttpResource) {
 			HttpHeaders resourceHeaders = ((HttpResource) resource).getResponseHeaders();
-			resourceHeaders.toSingleValueMap().entrySet()
-					.stream().forEach(entry -> response.setHeader(entry.getKey(), entry.getValue()));
+			for (Map.Entry<String, List<String>> entry : resourceHeaders.entrySet()) {
+				String headerName = entry.getKey();
+				boolean first = true;
+				for (String headerValue : entry.getValue()) {
+					if (first) {
+						response.setHeader(headerName, headerValue);
+					}
+					else {
+						response.addHeader(headerName, headerValue);
+					}
+					first = false;
+				}
+			}
 		}
 		response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
 	}

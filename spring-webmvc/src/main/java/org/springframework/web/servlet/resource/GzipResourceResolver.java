@@ -158,7 +158,7 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 		@Override
 		public HttpHeaders getResponseHeaders() {
 			HttpHeaders headers;
-			if(this.original instanceof HttpResource) {
+			if (this.original instanceof HttpResource) {
 				headers = ((HttpResource) this.original).getResponseHeaders();
 			}
 			else {
@@ -167,7 +167,6 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 			headers.add(HttpHeaders.CONTENT_ENCODING, "gzip");
 			return headers;
 		}
-
 	}
 
 }
