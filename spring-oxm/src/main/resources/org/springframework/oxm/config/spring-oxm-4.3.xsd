@@ -85,7 +85,7 @@
 			<xsd:annotation>
 				<xsd:documentation
 					source="java:org.springframework.oxm.castor.CastorMarshaller">
-					Defines a Castor Marshaller.
+					Defines a Castor Marshaller. Deprecated as of Spring Framework 4.3.13!
 				</xsd:documentation>
 				<xsd:appinfo>
 					<tool:annotation>
