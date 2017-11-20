@@ -37,7 +37,8 @@ import org.springframework.util.ClassUtils;
 public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConverter {
 
 	private static final boolean jaxb2Present =
-			ClassUtils.isPresent("javax.xml.bind.Binder", AllEncompassingFormHttpMessageConverter.class.getClassLoader());
+			ClassUtils.isPresent("javax.xml.bind.Binder",
+					AllEncompassingFormHttpMessageConverter.class.getClassLoader());
 
 	private static final boolean jackson2Present =
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
