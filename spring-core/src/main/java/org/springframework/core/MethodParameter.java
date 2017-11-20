@@ -37,6 +37,7 @@ import kotlin.reflect.jvm.ReflectJvmMapping;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Helper class that encapsulates the specification of a method parameter, i.e. a {@link Method}
@@ -513,13 +514,25 @@ public class MethodParameter {
 	public Annotation[] getParameterAnnotations() {
 		Annotation[] paramAnns = this.parameterAnnotations;
 		if (paramAnns == null) {
-			Annotation[][] annotationArray = this.executable.getParameterAnnotations();
-			if (this.parameterIndex >= 0 && this.parameterIndex < annotationArray.length) {
-				paramAnns = adaptAnnotationArray(annotationArray[this.parameterIndex]);
+			// Executable is a method
+			if(this.getMethod() != null){
+				if (this.parameterIndex >= 0 && this.parameterIndex < this.executable.getParameterCount()) {
+					paramAnns = ReflectionUtils.getInheritedParamAnnotations(this.getMethod(), this.parameterIndex);
+				}
+				else{
+					paramAnns = ReflectionUtils.getInheritedParamAnnotations(this.getMethod(), 0);
+				}
 			}
-			else {
-				paramAnns = new Annotation[0];
+			else{
+				Annotation[][] annotationArray = this.executable.getParameterAnnotations();
+				if (this.parameterIndex >= 0 && this.parameterIndex < annotationArray.length) {
+					paramAnns = adaptAnnotationArray(annotationArray[this.parameterIndex]);
+				}
+				else {
+					paramAnns = new Annotation[0];
+				}
 			}
+
 			this.parameterAnnotations = paramAnns;
 		}
 		return paramAnns;
