@@ -22,8 +22,8 @@ import java.util.Map;
 import org.springframework.jdbc.core.SqlParameterValue;
 
 /**
- * Class that provides helper methods for the use of {@link SqlParameterSource}
- * with {@code SimpleJdbc} classes.
+ * Class that provides helper methods for the use of {@link SqlParameterSource},
+ * in particular with {@link NamedParameterJdbcTemplate}.
  *
  * @author Thomas Risberg
  * @since 2.5
@@ -31,38 +31,40 @@ import org.springframework.jdbc.core.SqlParameterValue;
 public class SqlParameterSourceUtils {
 
 	/**
-	 * Create an array of MapSqlParameterSource objects populated with data from the
-	 * values passed in. This will define what is included in a batch operation.
-	 * @param valueMaps array of Maps containing the values to be used
-	 * @return an array of SqlParameterSource
+	 * Create an array of {@link MapSqlParameterSource} objects populated with data from
+	 * the values passed in. This will define what is included in a batch operation.
+	 * @param valueMaps array of {@link Map} instances containing the values to be used
+	 * @return an array of {@link SqlParameterSource}
+	 * @see MapSqlParameterSource
+	 * @see NamedParameterJdbcTemplate#batchUpdate(String, Map[])
 	 */
 	public static SqlParameterSource[] createBatch(Map<String, ?>[] valueMaps) {
 		MapSqlParameterSource[] batch = new MapSqlParameterSource[valueMaps.length];
 		for (int i = 0; i < valueMaps.length; i++) {
-			Map<String, ?> valueMap = valueMaps[i];
-			batch[i] = new MapSqlParameterSource(valueMap);
+			batch[i] = new MapSqlParameterSource(valueMaps[i]);
 		}
 		return batch;
 	}
 
 	/**
-	 * Create an array of BeanPropertySqlParameterSource objects populated with data
+	 * Create an array of {@link BeanPropertySqlParameterSource} objects populated with data
 	 * from the values passed in. This will define what is included in a batch operation.
 	 * @param beans object array of beans containing the values to be used
-	 * @return an array of SqlParameterSource
+	 * @return an array of {@link SqlParameterSource}
+	 * @see BeanPropertySqlParameterSource
+	 * @see NamedParameterJdbcTemplate#batchUpdate(String, SqlParameterSource[])
 	 */
 	public static SqlParameterSource[] createBatch(Object[] beans) {
 		BeanPropertySqlParameterSource[] batch = new BeanPropertySqlParameterSource[beans.length];
 		for (int i = 0; i < beans.length; i++) {
-			Object bean = beans[i];
-			batch[i] = new BeanPropertySqlParameterSource(bean);
+			batch[i] = new BeanPropertySqlParameterSource(beans[i]);
 		}
 		return batch;
 	}
 
 	/**
 	 * Create a wrapped value if parameter has type information, plain object if not.
-	 * @param source the source of paramer values and type information
+	 * @param source the source of parameter values and type information
 	 * @param parameterName the name of the parameter
 	 * @return the value object
 	 */
@@ -83,13 +85,13 @@ public class SqlParameterSourceUtils {
 
 	/**
 	 * Create a Map of case insensitive parameter names together with the original name.
-	 * @param parameterSource the source of paramer names
+	 * @param parameterSource the source of parameter names
 	 * @return the Map that can be used for case insensitive matching of parameter names
 	 */
 	public static Map<String, String> extractCaseInsensitiveParameterNames(SqlParameterSource parameterSource) {
 		Map<String, String> caseInsensitiveParameterNames = new HashMap<String, String>();
 		if (parameterSource instanceof BeanPropertySqlParameterSource) {
-			String[] propertyNames = ((BeanPropertySqlParameterSource)parameterSource).getReadablePropertyNames();
+			String[] propertyNames = ((BeanPropertySqlParameterSource) parameterSource).getReadablePropertyNames();
 			for (String name : propertyNames) {
 				caseInsensitiveParameterNames.put(name.toLowerCase(), name);
 			}
