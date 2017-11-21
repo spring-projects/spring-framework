@@ -45,6 +45,15 @@ public class DefaultConversionService extends GenericConversionService {
 
 
 	/**
+	 * Create a new {@code DefaultConversionService} with the set of
+	 * {@linkplain DefaultConversionService#addDefaultConverters(ConverterRegistry) default converters}.
+	 */
+	public DefaultConversionService() {
+		addDefaultConverters(this);
+	}
+
+
+	/**
 	 * Return a shared default {@code ConversionService} instance,
 	 * lazily building it once needed.
 	 * <p><b>NOTE:</b> We highly recommend constructing individual
@@ -68,18 +77,6 @@ public class DefaultConversionService extends GenericConversionService {
 		}
 		return cs;
 	}
-
-
-	/**
-	 * Create a new {@code DefaultConversionService} with the set of
-	 * {@linkplain DefaultConversionService#addDefaultConverters(ConverterRegistry) default converters}.
-	 */
-	public DefaultConversionService() {
-		addDefaultConverters(this);
-	}
-
-
-	// static utility methods
 
 	/**
 	 * Add converters appropriate for most environments.
@@ -133,9 +130,6 @@ public class DefaultConversionService extends GenericConversionService {
 
 		converterRegistry.addConverter(new StreamConverter(conversionService));
 	}
-
-
-	// internal helpers
 
 	private static void addScalarConverters(ConverterRegistry converterRegistry) {
 		converterRegistry.addConverterFactory(new NumberToNumberConverterFactory());

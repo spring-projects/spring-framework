@@ -105,31 +105,6 @@ public class ReactiveAdapterRegistry {
 
 
 	/**
-	 * Return a shared default {@code ReactiveAdapterRegistry} instance, lazily
-	 * building it once needed.
-	 * <p><b>NOTE:</b> We highly recommend passing a long-lived, pre-configured
-	 * {@code ReactiveAdapterRegistry} instance for customization purposes.
-	 * This accessor is only meant as a fallback for code paths that want to
-	 * fall back on a default instance if one isn't provided.
-	 * @return the shared {@code ReactiveAdapterRegistry} instance (never {@code null})
-	 * @since 5.0.2
-	 */
-	public static ReactiveAdapterRegistry getSharedInstance() {
-		ReactiveAdapterRegistry ar = sharedInstance;
-		if (ar == null) {
-			synchronized (ReactiveAdapterRegistry.class) {
-				ar = sharedInstance;
-				if (ar == null) {
-					ar = new ReactiveAdapterRegistry();
-					sharedInstance = ar;
-				}
-			}
-		}
-		return ar;
-	}
-
-
-	/**
 	 * Whether the registry has any adapters which would be the case if any of
 	 * Reactor, RxJava 2, or RxJava 1 (+ RxJava Reactive Streams bridge) are
 	 * present on the classpath.
@@ -137,7 +112,6 @@ public class ReactiveAdapterRegistry {
 	public boolean hasAdapters() {
 		return !this.adapters.isEmpty();
 	}
-
 
 	/**
 	 * Register a reactive type along with functions to adapt to and from a
@@ -187,6 +161,31 @@ public class ReactiveAdapterRegistry {
 								.filter(adapter -> adapter.getReactiveType().isAssignableFrom(clazz))
 								.findFirst()
 								.orElse(null));
+	}
+
+
+	/**
+	 * Return a shared default {@code ReactiveAdapterRegistry} instance, lazily
+	 * building it once needed.
+	 * <p><b>NOTE:</b> We highly recommend passing a long-lived, pre-configured
+	 * {@code ReactiveAdapterRegistry} instance for customization purposes.
+	 * This accessor is only meant as a fallback for code paths that want to
+	 * fall back on a default instance if one isn't provided.
+	 * @return the shared {@code ReactiveAdapterRegistry} instance (never {@code null})
+	 * @since 5.0.2
+	 */
+	public static ReactiveAdapterRegistry getSharedInstance() {
+		ReactiveAdapterRegistry ar = sharedInstance;
+		if (ar == null) {
+			synchronized (ReactiveAdapterRegistry.class) {
+				ar = sharedInstance;
+				if (ar == null) {
+					ar = new ReactiveAdapterRegistry();
+					sharedInstance = ar;
+				}
+			}
+		}
+		return ar;
 	}
 
 
