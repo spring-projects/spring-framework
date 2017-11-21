@@ -1685,7 +1685,7 @@ The preceding example is equivalent to the following Java code:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-		exampleBean.setEmail("")
+	exampleBean.setEmail("");
 ----
 
 The `<null/>` element handles `null` values. For example:
@@ -1705,7 +1705,7 @@ The above configuration is equivalent to the following Java code:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	exampleBean.setEmail(null)
+	exampleBean.setEmail(null);
 ----
 
 

@@ -3818,6 +3818,7 @@ accepted as an argument in several Spring Web MVC APIs.
 ----
 
 
+
 [[mvc-caching-static-resources]]
 === Static resources
 
@@ -3829,7 +3830,6 @@ metadata, but also `'Cache-Control'` headers if properly configured.
 
 You can set the `cachePeriod` attribute on a `ResourceHttpRequestHandler` or use
 a `CacheControl` instance, which supports more specific directives:
-
 
 [source,java,indent=0]
 [subs="verbatim"]

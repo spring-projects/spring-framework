@@ -3147,7 +3147,7 @@ framework.
 				c:loginAction-ref="loginAction" />
 
 		<bean id="loginAction" class="com.example.LoginAction"
-				c:username="\#{request.getParameter('user')}"
+				c:username="#{request.getParameter('user')}"
 				c:password="#{request.getParameter('pswd')}"
 				scope="request">
 			<aop:scoped-proxy />
@@ -3602,8 +3602,8 @@ scripts against a `DataSource`.
 	public void databaseTest {
 		ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
 		populator.addScripts(
-			new ClassPathResource("test-schema.sql"),
-			new ClassPathResource("test-data.sql"));
+				new ClassPathResource("test-schema.sql"),
+				new ClassPathResource("test-data.sql"));
 		populator.setSeparator("@@");
 		populator.execute(this.dataSource);
 		// execute code that uses the test schema and data

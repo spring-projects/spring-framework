@@ -995,7 +995,6 @@ broadcasting to other connected clients):
 			config.setApplicationDestinationPrefixes("/app");
 			config.enableSimpleBroker("/topic", "/queue");
 		}
-
 	}
 ----
 
