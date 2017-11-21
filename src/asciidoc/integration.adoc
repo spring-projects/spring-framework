@@ -1148,8 +1148,8 @@ construct a `HttpComponentsClientHttpRequestFactory` like so:
 [subs="verbatim,quotes"]
 ----
 	HttpClient httpClient = HttpClientBuilder.create().build();
-    ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
-    RestTemplate restTemplate = new RestTemplate(requestFactory);
+	ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+	RestTemplate restTemplate = new RestTemplate(requestFactory);
 ----
 ====
 
@@ -2600,12 +2600,12 @@ bean as a JMS listener endpoint.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-    @Component
-    public class MyService {
+	@Component
+	public class MyService {
 
-    	@JmsListener(destination = "myDestination")
-    	public void processOrder(String data) { ... }
-    }
+		@JmsListener(destination = "myDestination")
+		public void processOrder(String data) { ... }
+	}
 ----
 
 The idea of the example above is that whenever a message is available on the
@@ -2670,12 +2670,12 @@ element.
 ----
 	<jms:annotation-driven/>
 
-    <bean id="jmsListenerContainerFactory"
-            class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
-        <property name="connectionFactory" ref="connectionFactory"/>
-        <property name="destinationResolver" ref="destinationResolver"/>
-        <property name="concurrency" value="3-10"/>
-    </bean>
+	<bean id="jmsListenerContainerFactory"
+			class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
+		<property name="connectionFactory" ref="connectionFactory"/>
+		<property name="destinationResolver" ref="destinationResolver"/>
+		<property name="concurrency" value="3-10"/>
+	</bean>
 ----
 
 
@@ -2727,10 +2727,10 @@ a custom header:
 	@Component
 	public class MyService {
 
-    	@JmsListener(destination = "myDestination")
-    	public void processOrder(Order order, @Header("order_type") String orderType) {
-        	...
-    	}
+		@JmsListener(destination = "myDestination")
+		public void processOrder(Order order, @Header("order_type") String orderType) {
+			...
+		}
 	}
 ----
 
@@ -2777,17 +2777,17 @@ annotate the payload with `@Valid` and configure the necessary validator as foll
 	@EnableJms
 	public class AppConfig implements JmsListenerConfigurer {
 
-    	@Override
-    	public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
-        	registrar.setMessageHandlerMethodFactory(myJmsHandlerMethodFactory());
-    	}
+		@Override
+		public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
+			registrar.setMessageHandlerMethodFactory(myJmsHandlerMethodFactory());
+		}
 
-    	@Bean
-    	public DefaultMessageHandlerMethodFactory myHandlerMethodFactory() {
-        	DefaultMessageHandlerMethodFactory factory = new DefaultMessageHandlerMethodFactory();
-        	factory.setValidator(myValidator());
-        	return factory;
-    	}
+		@Bean
+		public DefaultMessageHandlerMethodFactory myHandlerMethodFactory() {
+			DefaultMessageHandlerMethodFactory factory = new DefaultMessageHandlerMethodFactory();
+			factory.setValidator(myValidator());
+			return factory;
+		}
 	}
 ----
 
@@ -2811,8 +2811,8 @@ as follow to automatically send a response:
 	@JmsListener(destination = "myDestination")
 	@SendTo("status")
 	public OrderStatus processOrder(Order order) {
-    	// order processing
-    	return status;
+		// order processing
+		return status;
 	}
 ----
 
@@ -2831,11 +2831,11 @@ If you need to set additional headers in a transport-independent manner, you cou
 	@JmsListener(destination = "myDestination")
 	@SendTo("status")
 	public Message<OrderStatus> processOrder(Order order) {
-    	// order processing
-    	return MessageBuilder
-        	    .withPayload(status)
-            	.setHeader("code", 1234)
-            	.build();
+		// order processing
+		return MessageBuilder
+				.withPayload(status)
+				.setHeader("code", 1234)
+				.build();
 	}
 ----
 
@@ -2848,11 +2848,11 @@ example can be rewritten as follows:
 ----
 	@JmsListener(destination = "myDestination")
 	public JmsResponse<Message<OrderStatus>> processOrder(Order order) {
-    	// order processing
-    	Message<OrderStatus> response = MessageBuilder
-        	    .withPayload(status)
-            	.setHeader("code", 1234)
-            	.build();
+		// order processing
+		Message<OrderStatus> response = MessageBuilder
+				.withPayload(status)
+				.setHeader("code", 1234)
+				.build();
 		return JmsResponse.forQueue(response, "status");
 	}
 ----
@@ -3851,7 +3851,7 @@ this interface as the definition for the management interface:
 		<bean id="testBean" class="org.springframework.jmx.JmxTestBean">
 			<property name="name" value="TEST"/>
 			<property name="age" value="100"/>
-	  	</bean>
+		</bean>
 
 	</beans>
 ----
@@ -6059,6 +6059,7 @@ using the Velocity template library to create email content.
 
 [[mail-templates-example]]
 ===== A Velocity-based example
+
 To use http://velocity.apache.org[Velocity] to create your email template(s), you will
 need to have the Velocity libraries available on your classpath. You will also need to
 create one or more Velocity templates for the email content that your application needs.
@@ -6712,10 +6713,10 @@ however, the exception is uncaught and cannot be transmitted. For those cases, a
 ----
 	public class MyAsyncUncaughtExceptionHandler implements AsyncUncaughtExceptionHandler {
 
-    	@Override
-    	public void handleUncaughtException(Throwable ex, Method method, Object... params) {
+		@Override
+		public void handleUncaughtException(Throwable ex, Method method, Object... params) {
 			// handle exception
-    	}
+		}
 	}
 ----
 
@@ -9243,8 +9244,8 @@ Again, to use it, one simply needs to declare the appropriate `CacheManager`:
 [subs="verbatim,quotes"]
 ----
 	<bean id="cacheManager"
-	      class="org.springframework.cache.jcache.JCacheCacheManager"
-	      p:cache-manager-ref="jCacheManager"/>
+			class="org.springframework.cache.jcache.JCacheCacheManager"
+			p:cache-manager-ref="jCacheManager"/>
 
 	<!-- JSR-107 cache manager setup  -->
 	<bean id="jCacheManager" .../>

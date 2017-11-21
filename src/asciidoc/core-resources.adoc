@@ -3,8 +3,11 @@
 = Resources
 
 
+
+
 [[resources-introduction]]
 == Introduction
+
 Java's standard `java.net.URL` class and standard handlers for various URL prefixes
 unfortunately are not quite adequate enough for all access to low-level resources. For
 example, there is no standardized `URL` implementation that may be used to access a
@@ -13,6 +16,8 @@ resource that needs to be obtained from the classpath, or relative to a
 prefixes (similar to existing handlers for prefixes such as `http:`), this is generally
 quite complicated, and the `URL` interface still lacks some desirable functionality,
 such as a method to check for the existence of the resource being pointed to.
+
+
 
 
 [[resources-resource]]
@@ -378,6 +383,7 @@ used. The following two examples show how to force a `ClassPathResource` and a
 
 [[resources-app-ctx-construction]]
 === Constructing application contexts
+
 An application context constructor (for a specific application context type) generally
 takes a string or array of strings as the location path(s) of the resource(s) such as
 XML files that make up the definition of the context.
@@ -439,8 +445,8 @@ this:
 ----
 com/
   foo/
-	services.xml
-	daos.xml
+    services.xml
+    daos.xml
     MessengerService.class
 ----
 
@@ -461,6 +467,7 @@ on the various constructors.
 
 [[resources-app-ctx-wildcards-in-resource-paths]]
 === Wildcards in application context constructor resource paths
+
 The resource paths in application context constructor values may be a simple path (as
 shown above) which has a one-to-one mapping to a target Resource, or alternately may
 contain the special "classpath*:" prefix and/or internal Ant-style regular expressions
@@ -481,6 +488,7 @@ a resource points to just one resource at a time.
 
 [[resources-app-ctx-ant-patterns-in-paths]]
 ==== Ant-style Patterns
+
 When the path location contains an Ant-style pattern, for example:
 
 [literal]
@@ -503,6 +511,7 @@ the wildcards.
 
 [[resources-app-ctx-portability]]
 ===== Implications on portability
+
 If the specified path is already a file URL (either explicitly, or implicitly because
 the base `ResourceLoader` is a filesystem one, then wildcarding is guaranteed to work in
 a completely portable fashion.
@@ -525,7 +534,7 @@ environment before you rely on it.
 
 
 [[resources-classpath-wildcards]]
-==== The Classpath*: portability classpath*: prefix
+==== The classpath*: prefix
 
 When constructing an XML-based application context, a location string may use the
 special `classpath*:` prefix:
@@ -565,13 +574,28 @@ strategy described above is used for the wildcard subpath.
 
 [[resources-wildcards-in-path-other-stuff]]
 ==== Other notes relating to wildcards
+
 Please note that `classpath*:` when combined with Ant-style patterns will only work
 reliably with at least one root directory before the pattern starts, unless the actual
 target files reside in the file system. This means that a pattern like
-`classpath*:*.xml` will not retrieve files from the root of jar files but rather only
-from the root of expanded directories. This originates from a limitation in the JDK's
+`classpath*:*.xml` might not retrieve files from the root of jar files but rather only
+from the root of expanded directories.
+
+Spring's ability to retrieve classpath entries originates from the JDK's
 `ClassLoader.getResources()` method which only returns file system locations for a
-passed-in empty string (indicating potential roots to search).
+passed-in empty string (indicating potential roots to search). Spring evaluates
+`URLClassLoader` runtime configuration and the "java.class.path" manifest in jar files
+as well but this is not guaranteed to lead to portable behavior.
+
+[NOTE]
+====
+The scanning of classpath packages requires the presence of corresponding directory
+entries in the classpath. When you build JARs with Ant, make sure that you do __not__
+activate the files-only switch of the JAR task. Also, classpath directories may not
+get exposed based on security policies in some environments, e.g. standalone apps on
+JDK 1.7.0_45 and higher (which requires 'Trusted-Library' setup in your manifests; see
+http://stackoverflow.com/questions/19394570/java-jre-7u45-breaks-classloader-getresources).
+====
 
 Ant-style patterns with `classpath:` resources are not guaranteed to find matching
 resources if the root package to search is available in multiple class path locations.
@@ -663,4 +687,3 @@ just force the use of a `UrlResource`, by using the `file:` URL prefix.
 	ApplicationContext ctx =
 		new FileSystemXmlApplicationContext("file:///conf/context.xml");
 ----
-

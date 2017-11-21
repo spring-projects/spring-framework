@@ -1951,13 +1951,13 @@ transaction in which it has been published as committed successfully:
 [subs="verbatim,quotes"]
 ----
 	@Component
-    public class MyComponent {
+	public class MyComponent {
 
-    	@TransactionalEventListener
-    	public void handleOrderCreatedEvent(CreationEvent<Order> creationEvent) {
-      		...
-    	}
-    }
+		@TransactionalEventListener
+		public void handleOrderCreatedEvent(CreationEvent<Order> creationEvent) {
+			...
+		}
+	}
 ----
 
 The `TransactionalEventListener` annotation exposes a `phase` attribute  that allows to customize
@@ -3275,6 +3275,7 @@ based on entries in a list. The entire list is used as the batch in this example
 [subs="verbatim,quotes"]
 ----
 	public class JdbcActorDao implements ActorDao {
+
 		private JdbcTemplate jdbcTemplate;
 
 		public void setDataSource(DataSource dataSource) {
@@ -3282,20 +3283,18 @@ based on entries in a list. The entire list is used as the batch in this example
 		}
 
 		public int[] batchUpdate(final List<Actor> actors) {
-			int[] updateCounts = jdbcTemplate.batchUpdate("update t_actor set first_name = ?, " +
-					"last_name = ? where id = ?",
-				new BatchPreparedStatementSetter() {
-					public void setValues(PreparedStatement ps, int i) throws SQLException {
+			return this.jdbcTemplate.batchUpdate(
+					"update t_actor set first_name = ?, last_name = ? where id = ?",
+					new BatchPreparedStatementSetter() {
+						public void setValues(PreparedStatement ps, int i) throws SQLException {
 							ps.setString(1, actors.get(i).getFirstName());
 							ps.setString(2, actors.get(i).getLastName());
 							ps.setLong(3, actors.get(i).getId().longValue());
 						}
-
 						public int getBatchSize() {
 							return actors.size();
 						}
 					});
-			return updateCounts;
 		}
 
 		// ... additional methods
@@ -3318,8 +3317,9 @@ provide all parameter values in the call as a list. The framework loops over the
 values and uses an internal prepared statement setter. The API varies depending on
 whether you use named parameters. For the named parameters you provide an array of
 `SqlParameterSource`, one entry for each member of the batch. You can use the
-`SqlParameterSource.createBatch` method to create this array, passing in either an array
-of JavaBeans or an array of Maps containing the parameter values.
+`SqlParameterSourceUtils.createBatch` convenience methods to create this array, passing
+in an array of bean-style objects (with getter methods corresponding to parameters)
+and/or String-keyed Maps (containing the corresponding parameters as values).
 
 This example shows a batch update using named parameters:
 
@@ -3327,18 +3327,17 @@ This example shows a batch update using named parameters:
 [subs="verbatim,quotes"]
 ----
 	public class JdbcActorDao implements ActorDao {
+
 		private NamedParameterTemplate namedParameterJdbcTemplate;
 
 		public void setDataSource(DataSource dataSource) {
 			this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 		}
 
-		public int[] batchUpdate(final List<Actor> actors) {
-			SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(actors.toArray());
-			int[] updateCounts = namedParameterJdbcTemplate.batchUpdate(
+		public int[] batchUpdate(List<Actor> actors) {
+			return this.namedParameterJdbcTemplate.batchUpdate(
 					"update t_actor set first_name = :firstName, last_name = :lastName where id = :id",
-					batch);
-			return updateCounts;
+					SqlParameterSourceUtils.createBatch(actors.toArray()));
 		}
 
 		// ... additional methods
@@ -3367,15 +3366,12 @@ The same example using classic JDBC "?" placeholders:
 			List<Object[]> batch = new ArrayList<Object[]>();
 			for (Actor actor : actors) {
 				Object[] values = new Object[] {
-						actor.getFirstName(),
-						actor.getLastName(),
-						actor.getId()};
+						actor.getFirstName(), actor.getLastName(), actor.getId()};
 				batch.add(values);
 			}
-			int[] updateCounts = jdbcTemplate.batchUpdate(
+			return this.jdbcTemplate.batchUpdate(
 					"update t_actor set first_name = ?, last_name = ? where id = ?",
 					batch);
-			return updateCounts;
 		}
 
 		// ... additional methods
@@ -4630,13 +4626,13 @@ standalone environment or in a standalone integration test like in the following
 [subs="verbatim,quotes"]
 ----
 EmbeddedDatabase db = new EmbeddedDatabaseBuilder()
-    .generateUniqueName(true)
-    .setType(H2)
-    .setScriptEncoding("UTF-8")
-    .ignoreFailedDrops(true)
-    .addScript("schema.sql")
-    .addScripts("user_data.sql", "country_data.sql")
-    .build();
+		.generateUniqueName(true)
+		.setType(H2)
+		.setScriptEncoding("UTF-8")
+		.ignoreFailedDrops(true)
+		.addScript("schema.sql")
+		.addScripts("user_data.sql", "country_data.sql")
+		.build();
 
 // perform actions against the db (EmbeddedDatabase extends javax.sql.DataSource)
 
@@ -4655,17 +4651,17 @@ Config like in the following example.
 @Configuration
 public class DataSourceConfig {
 
-    @Bean
-    public DataSource dataSource() {
-        return new EmbeddedDatabaseBuilder()
-            .generateUniqueName(true)
-            .setType(H2)
-            .setScriptEncoding("UTF-8")
-            .ignoreFailedDrops(true)
-            .addScript("schema.sql")
-            .addScripts("user_data.sql", "country_data.sql")
-            .build();
-    }
+	@Bean
+	public DataSource dataSource() {
+		return new EmbeddedDatabaseBuilder()
+				.generateUniqueName(true)
+				.setType(H2)
+				.setScriptEncoding("UTF-8")
+				.ignoreFailedDrops(true)
+				.addScript("schema.sql")
+				.addScripts("user_data.sql", "country_data.sql")
+				.build();
+	}
 }
 ----
 

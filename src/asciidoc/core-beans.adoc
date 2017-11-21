@@ -370,7 +370,7 @@ delegates, e.g. with `XmlBeanDefinitionReader` for XML files:
 ----
 	GenericApplicationContext context = new GenericApplicationContext();
 	new XmlBeanDefinitionReader(context).loadBeanDefinitions("services.xml", "daos.xml");
-    context.refresh();
+	context.refresh();
 ----
 
 Or with `GroovyBeanDefinitionReader` for Groovy files:
@@ -380,7 +380,7 @@ Or with `GroovyBeanDefinitionReader` for Groovy files:
 ----
 	GenericApplicationContext context = new GenericApplicationContext();
 	new GroovyBeanDefinitionReader(context).loadBeanDefinitions("services.groovy", "daos.groovy");
-    context.refresh();
+	context.refresh();
 ----
 
 Such reader delegates can be mixed and matched on the same `ApplicationContext`,
@@ -1682,7 +1682,7 @@ The preceding example is equivalent to the following Java code:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-        exampleBean.setEmail("")
+	exampleBean.setEmail("");
 ----
 
 The `<null/>` element handles `null` values. For example:
@@ -1702,7 +1702,7 @@ The above configuration is equivalent to the following Java code:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	exampleBean.setEmail(null)
+	exampleBean.setEmail(null);
 ----
 
 
@@ -3853,7 +3853,6 @@ Find below the custom `BeanPostProcessor` implementation class definition:
 	package scripting;
 
 	import org.springframework.beans.factory.config.BeanPostProcessor;
-	import org.springframework.beans.BeansException;
 
 	public class InstantiationTracingBeanPostProcessor implements BeanPostProcessor {
 
@@ -5261,6 +5260,7 @@ For details about the effects of combining various lifecycle mechanisms, see
 
 [[beans-classpath-scanning]]
 == Classpath scanning and managed components
+
 Most examples in this chapter use XML to specify the configuration metadata that produces
 each `BeanDefinition` within the Spring container. The previous section
 (<<beans-annotation-config>>) demonstrates how to provide a lot of the configuration
@@ -5427,7 +5427,7 @@ comma/semicolon/space-separated list that includes the parent package of each cl
 	@Configuration
 	@ComponentScan(basePackages = "org.example")
 	public class AppConfig  {
-    	...
+		...
 	}
 ----
 
@@ -5532,12 +5532,12 @@ and using "stub" repositories instead.
 [subs="verbatim,quotes"]
 ----
 	@Configuration
-    @ComponentScan(basePackages = "org.example",
-    		includeFilters = @Filter(type = FilterType.REGEX, pattern = ".*Stub.*Repository"),
-    		excludeFilters = @Filter(Repository.class))
-    public class AppConfig {
-    	...
-    }
+	@ComponentScan(basePackages = "org.example",
+			includeFilters = @Filter(type = FilterType.REGEX, pattern = ".*Stub.*Repository"),
+			excludeFilters = @Filter(Repository.class))
+	public class AppConfig {
+		...
+	}
 ----
 
 and the equivalent using XML
@@ -5767,10 +5767,10 @@ fully-qualified class name when configuring the scanner:
 [subs="verbatim,quotes"]
 ----
 	@Configuration
-    @ComponentScan(basePackages = "org.example", nameGenerator = MyNameGenerator.class)
-    public class AppConfig {
-    	...
-    }
+	@ComponentScan(basePackages = "org.example", nameGenerator = MyNameGenerator.class)
+	public class AppConfig {
+		...
+	}
 ----
 
 [source,xml,indent=0]
@@ -5824,8 +5824,8 @@ fully-qualified class name when configuring the scanner:
 	@Configuration
 	@ComponentScan(basePackages = "org.example", scopeResolver = MyScopeResolver.class)
 	public class AppConfig {
-    	...
-    }
+		...
+	}
 ----
 
 [source,xml,indent=0]
@@ -5849,8 +5849,8 @@ the following configuration will result in standard JDK dynamic proxies:
 	@Configuration
 	@ComponentScan(basePackages = "org.example", scopedProxy = ScopedProxyMode.INTERFACES)
 	public class AppConfig {
-    	...
-    }
+		...
+	}
 ----
 
 [source,xml,indent=0]
@@ -6108,7 +6108,7 @@ exact same way as when using Spring annotations:
 	@Configuration
 	@ComponentScan(basePackages = "org.example")
 	public class AppConfig  {
-    	...
+		...
 	}
 ----
 
@@ -6338,7 +6338,7 @@ To enable component scanning, just annotate your `@Configuration` class as follo
 	@Configuration
 	@ComponentScan(basePackages = "com.acme")
 	public class AppConfig  {
-    	...
+		...
 	}
 ----
 
@@ -6657,7 +6657,7 @@ method directly during construction:
 		public Foo foo() {
 			Foo foo = new Foo();
 			foo.init();
-		    return foo;
+			return foo;
 		}
 
 		// ...
@@ -6975,7 +6975,7 @@ another configuration class:
 	@Configuration
 	public class ConfigA {
 
-	 	@Bean
+		@Bean
 		public A a() {
 			return new A();
 		}
@@ -8645,18 +8645,18 @@ environment provides:
 [subs="verbatim,quotes"]
 ----
 	public class EntityCreatedEvent<T>
-    		extends ApplicationEvent implements ResolvableTypeProvider {
+			extends ApplicationEvent implements ResolvableTypeProvider {
 
-    	public EntityCreatedEvent(T entity) {
-    		super(entity);
-    	}
+		public EntityCreatedEvent(T entity) {
+			super(entity);
+		}
 
-    	@Override
-    	public ResolvableType getResolvableType() {
-    		return ResolvableType.forClassWithGenerics(getClass(),
-    				ResolvableType.forInstance(getSource()));
-    	}
-    }
+		@Override
+		public ResolvableType getResolvableType() {
+			return ResolvableType.forClassWithGenerics(getClass(),
+					ResolvableType.forInstance(getSource()));
+		}
+	}
 ----
 
 [TIP]

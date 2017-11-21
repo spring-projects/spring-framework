@@ -34,7 +34,7 @@ documentation section for more details.
 
 
 [[view-groovymarkup]]
-== Groovy Markup Templates
+== Groovy Markup
 
 The http://groovy-lang.org/templating.html#_the_markuptemplateengine[Groovy Markup Template Engine]
 is another view technology, supported by Spring. This template engine is a template engine primarily
@@ -57,7 +57,7 @@ Configuring the Groovy Markup Template Engine is quite easy:
 	@EnableWebMvc
 	public class WebConfig extends WebMvcConfigurerAdapter {
 
-        @Override
+		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.groovy();
 		}

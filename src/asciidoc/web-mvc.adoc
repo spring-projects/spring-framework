@@ -2,8 +2,11 @@
 = Web MVC framework
 
 
+
+
 [[mvc-introduction]]
 == Introduction to Spring Web MVC framework
+
 The Spring Web model-view-controller (MVC) framework is designed around a
 `DispatcherServlet` that dispatches requests to handlers, with configurable handler
 mappings, view resolution, locale, time zone and theme resolution as well as support for
@@ -119,6 +122,7 @@ Spring's web module includes many unique web support features:
 
 [[mvc-introduction-pluggability]]
 === Pluggability of other MVC implementations
+
 Non-Spring MVC implementations are preferable for some projects. Many teams expect to
 leverage their existing investment in skills and tools, for example with JSF.
 
@@ -175,7 +179,6 @@ Java EE Servlet configuration in a Servlet 3.0+ environment:
 			registration.setLoadOnStartup(1);
 			registration.addMapping("/example/*");
 		}
-
 	}
 ----
 
@@ -323,7 +326,6 @@ Note that we can achieve the same with java-based configurations:
 		protected String[] getServletMappings() {
 			return new String[] { "/golfing/*" };
 		}
-
 	}
 ----
 
@@ -1792,22 +1794,22 @@ controller or alternatively use the `binding` flag on the annotation:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-@ModelAttribute
-public AccountForm setUpForm() {
-    return new AccountForm();
-}
+	@ModelAttribute
+	public AccountForm setUpForm() {
+		return new AccountForm();
+	}
 
-@ModelAttribute
-public Account findAccount(@PathVariable String accountId) {
-    return accountRepository.findOne(accountId);
-}
+	@ModelAttribute
+	public Account findAccount(@PathVariable String accountId) {
+		return accountRepository.findOne(accountId);
+	}
 
-@PostMapping("update")
-public String update(@Valid AccountUpdateForm form, BindingResult result,
-        **@ModelAttribute(binding=false)** Account account) {
+	@PostMapping("update")
+	public String update(@Valid AccountUpdateForm form, BindingResult result,
+			**@ModelAttribute(binding=false)** Account account) {
 
-    // ...
-}
+		// ...
+	}
 ----
 
 In addition to data binding you can also invoke validation using your own custom
@@ -3323,9 +3325,8 @@ Spring MVC also provides a mechanism for building links to controller methods. F
 
 		@GetMapping("/bookings/{booking}")
 		public String getBooking(@PathVariable Long booking) {
-
-		// ...
-        }
+			// ...
+		}
 	}
 ----
 
@@ -3444,12 +3445,12 @@ For example given:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-    @RequestMapping("/people/{id}/addresses")
-    public class PersonAddressController {
+	@RequestMapping("/people/{id}/addresses")
+	public class PersonAddressController {
 
-        @RequestMapping("/{country}")
-        public HttpEntity getAddress(@PathVariable String country) { ... }
-    }
+		@RequestMapping("/{country}")
+		public HttpEntity getAddress(@PathVariable String country) { ... }
+	}
 ----
 
 You can prepare a link from a JSP as follows:
@@ -4331,7 +4332,7 @@ semantics of name generation for collections clearer:
 
 
 [[mvc-coc-r2vnt]]
-=== The View - RequestToViewNameTranslator
+=== Default view name
 
 The `RequestToViewNameTranslator` interface determines a logical `View` name when no
 such logical view name is explicitly supplied. It has just one implementation, the
@@ -4410,6 +4411,7 @@ that can be configured.
 
 
 
+
 [[mvc-caching]]
 == HTTP caching support
 
@@ -4429,6 +4431,7 @@ content has not changed, the server returns `304: Not Modified`.
 
 This section describes the different choices available to configure HTTP caching in a
 Spring Web MVC application.
+
 
 
 [[mvc-caching-cachecontrol]]
@@ -4457,17 +4460,19 @@ accepted as an argument in several Spring Web MVC APIs.
 [subs="verbatim,quotes"]
 ----
 	// Cache for an hour - "Cache-Control: max-age=3600"
-    CacheControl ccCacheOneHour = CacheControl.maxAge(1, TimeUnit.HOURS);
+	CacheControl ccCacheOneHour = CacheControl.maxAge(1, TimeUnit.HOURS);
 
-    // Prevent caching - "Cache-Control: no-store"
-    CacheControl ccNoStore = CacheControl.noStore();
+	// Prevent caching - "Cache-Control: no-store"
+	CacheControl ccNoStore = CacheControl.noStore();
 
-    // Cache for ten days in public and private caches,
-    // public caches should not transform the response
-    // "Cache-Control: max-age=864000, public, no-transform"
-    CacheControl ccCustom = CacheControl.maxAge(10, TimeUnit.DAYS)
-    									.noTransform().cachePublic();
+	// Cache for ten days in public and private caches,
+	// public caches should not transform the response
+	// "Cache-Control: max-age=864000, public, no-transform"
+	CacheControl ccCustom = CacheControl.maxAge(10, TimeUnit.DAYS)
+										.noTransform().cachePublic();
 ----
+
+
 
 [[mvc-caching-static-resources]]
 === HTTP caching support for static resources
@@ -4480,7 +4485,6 @@ metadata, but also `'Cache-Control'` headers if properly configured.
 
 You can set the `cachePeriod` attribute on a `ResourceHttpRequestHandler` or use
 a `CacheControl` instance, which supports more specific directives:
-
 
 [source,java,indent=0]
 [subs="verbatim"]
@@ -4508,6 +4512,7 @@ And in XML:
 		<mvc:cache-control max-age="3600" cache-public="true"/>
 	</mvc:resources>
 ----
+
 
 
 [[mvc-caching-etag-lastmodified]]
@@ -4617,8 +4622,8 @@ You configure the `ShallowEtagHeaderFilter` in `web.xml`:
 		<filter-class>org.springframework.web.filter.ShallowEtagHeaderFilter</filter-class>
 		<!-- Optional parameter that configures the filter to write weak ETags
 		<init-param>
-        	<param-name>writeWeakETag</param-name>
-        	<param-value>true</param-value>
+			<param-name>writeWeakETag</param-name>
+			<param-value>true</param-value>
 		</init-param>
 		-->
 	</filter>
@@ -4769,6 +4774,7 @@ override the `createDispatcherServlet` method.
 
 [[mvc-config]]
 == Configuring Spring MVC
+
 <<mvc-servlet-special-bean-types>> and <<mvc-servlet-config>> explained about Spring
 MVC's special beans and the default implementations used by the `DispatcherServlet`. In
 this section you'll learn about two additional ways of configuring Spring MVC. Namely
@@ -4789,6 +4795,7 @@ to the created Spring MVC beans. But let's start from the beginning.
 
 [[mvc-config-enable]]
 === Enabling the MVC Java Config or the MVC XML Namespace
+
 To enable MVC Java config add the annotation `@EnableWebMvc` to one of your
 `@Configuration` classes:
 
@@ -4798,7 +4805,6 @@ To enable MVC Java config add the annotation `@EnableWebMvc` to one of your
 	@Configuration
 	@EnableWebMvc
 	public class WebConfig {
-
 	}
 ----
 
@@ -4905,7 +4911,6 @@ and override the methods you need:
 	public class WebConfig extends WebMvcConfigurerAdapter {
 
 		// Override configuration methods...
-
 	}
 ----
 
@@ -4933,9 +4938,8 @@ register custom formatters and converters, override the `addFormatters` method:
 
 		@Override
 		public void addFormatters(FormatterRegistry registry) {
-			// Add formatters and/or converters
+			// ...
 		}
-
 	}
 ----
 
@@ -5029,7 +5033,6 @@ Alternatively you can configure your own global `Validator` instance:
 		public Validator getValidator(); {
 			// return "global" validator
 		}
-
 	}
 ----
 
@@ -5123,6 +5126,7 @@ And in XML use the `<mvc:interceptors>` element:
 
 [[mvc-config-content-negotiation]]
 === Content Negotiation
+
 You can configure how Spring MVC determines the requested media types from the request.
 The available options are to check the URL path for a file extension, check the
 "Accept" header, a specific query parameter, or to fall back on a default content
@@ -5190,6 +5194,7 @@ JSON) if no content types were requested.
 
 [[mvc-config-view-controller]]
 === View Controllers
+
 This is a shortcut for defining a `ParameterizableViewController` that immediately
 forwards to a view when invoked. Use it in static cases when there is no Java controller
 logic to execute before the view generates the response.
@@ -5207,7 +5212,6 @@ An example of forwarding a request for `"/"` to a view called `"home"` in Java:
 		public void addViewControllers(ViewControllerRegistry registry) {
 			registry.addViewController("/").setViewName("home");
 		}
-
 	}
 ----
 
@@ -5220,8 +5224,10 @@ And the same in XML use the `<mvc:view-controller>` element:
 ----
 
 
+
 [[mvc-config-view-resolvers]]
 === View Resolvers
+
 The MVC config simplifies the registration of view resolvers.
 
 The following is a Java config example that configures content negotiation view
@@ -5240,7 +5246,6 @@ JSON rendering:
 			registry.enableContentNegotiation(new MappingJackson2JsonView());
 			registry.jsp();
 		}
-
 	}
 ----
 
@@ -5304,7 +5309,6 @@ In Java config simply add the respective "Configurer" bean:
 			configurer.setTemplateLoaderPath("/WEB-INF/");
 			return configurer;
 		}
-
 	}
 ----
 
@@ -5442,10 +5446,9 @@ Java config example;
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
 			registry.addResourceHandler("/resources/**")
 					.addResourceLocations("/public-resources/")
-					.resourceChain(true).addResolver(
-						new VersionResourceResolver().addContentVersionStrategy("/**"));
+					.resourceChain(true)
+					.addResolver(new VersionResourceResolver().addContentVersionStrategy("/**"));
 		}
-
 	}
 ----
 
@@ -5483,7 +5486,8 @@ It also works by rewriting resource URLs in templates
 
 
 [[mvc-default-servlet-handler]]
-=== Falling Back On the "Default" Servlet To Serve Resources
+=== Default Servlet
+
 This allows for mapping the `DispatcherServlet` to "/" (thus overriding the mapping
 of the container's default Servlet), while still allowing static resource requests to be
 handled by the container's default Servlet. It configures a
@@ -5509,7 +5513,6 @@ To enable the feature using the default setup use:
 		public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
 			configurer.enable();
 		}
-
 	}
 ----
 
@@ -5573,21 +5576,21 @@ Below is an example in Java config:
 		@Override
 		public void configurePathMatch(PathMatchConfigurer configurer) {
 			configurer
-			    .setUseSuffixPatternMatch(true)
-			    .setUseTrailingSlashMatch(false)
-			    .setUseRegisteredSuffixPatternMatch(true)
-			    .setPathMatcher(antPathMatcher())
-			    .setUrlPathHelper(urlPathHelper());
+				.setUseSuffixPatternMatch(true)
+				.setUseTrailingSlashMatch(false)
+				.setUseRegisteredSuffixPatternMatch(true)
+				.setPathMatcher(antPathMatcher())
+				.setUrlPathHelper(urlPathHelper());
 		}
 
 		@Bean
 		public UrlPathHelper urlPathHelper() {
-		    //...
+			//...
 		}
 
 		@Bean
 		public PathMatcher antPathMatcher() {
-		    //...
+			//...
 		}
 
 	}
@@ -5598,17 +5601,17 @@ And the same in XML, use the `<mvc:path-matching>` element:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-    <mvc:annotation-driven>
-        <mvc:path-matching
-            suffix-pattern="true"
-            trailing-slash="false"
-            registered-suffixes-only="true"
-            path-helper="pathHelper"
-            path-matcher="pathMatcher"/>
-    </mvc:annotation-driven>
+	<mvc:annotation-driven>
+		<mvc:path-matching
+			suffix-pattern="true"
+			trailing-slash="false"
+			registered-suffixes-only="true"
+			path-helper="pathHelper"
+			path-matcher="pathMatcher"/>
+	</mvc:annotation-driven>
 
-    <bean id="pathHelper" class="org.example.app.MyPathHelper"/>
-    <bean id="pathMatcher" class="org.example.app.MyPathMatcher"/>
+	<bean id="pathHelper" class="org.example.app.MyPathHelper"/>
+	<bean id="pathMatcher" class="org.example.app.MyPathMatcher"/>
 ----
 
 
@@ -5668,23 +5671,23 @@ It is also possible to do the same in XML:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-    <mvc:annotation-driven>
-        <mvc:message-converters>
-            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
-                <property name="objectMapper" ref="objectMapper"/>
-            </bean>
-            <bean class="org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter">
-                <property name="objectMapper" ref="xmlMapper"/>
-            </bean>
-        </mvc:message-converters>
-    </mvc:annotation-driven>
+	<mvc:annotation-driven>
+		<mvc:message-converters>
+			<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+				<property name="objectMapper" ref="objectMapper"/>
+			</bean>
+			<bean class="org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter">
+				<property name="objectMapper" ref="xmlMapper"/>
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
 
-    <bean id="objectMapper" class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean"
-          p:indentOutput="true"
-          p:simpleDateFormat="yyyy-MM-dd"
-          p:modulesToInstall="com.fasterxml.jackson.module.paramnames.ParameterNamesModule"/>
+	<bean id="objectMapper" class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean"
+		  p:indentOutput="true"
+		  p:simpleDateFormat="yyyy-MM-dd"
+		  p:modulesToInstall="com.fasterxml.jackson.module.paramnames.ParameterNamesModule"/>
 
-    <bean id="xmlMapper" parent="objectMapper" p:createXmlMapper="true"/>
+	<bean id="xmlMapper" parent="objectMapper" p:createXmlMapper="true"/>
 ----
 
 
