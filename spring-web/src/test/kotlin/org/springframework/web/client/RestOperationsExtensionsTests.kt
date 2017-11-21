@@ -30,7 +30,7 @@ import org.springframework.http.RequestEntity
 import java.net.URI
 
 /**
- * Mock object based tests for [RestOperations] Kotlin extensions
+ * Mock object based tests for [RestOperations] Kotlin extensions.
  *
  * @author Sebastien Deleuze
  */
@@ -135,7 +135,8 @@ class RestOperationsExtensionsTests {
 		val var1 = "var1"
 		val var2 = "var2"
 		template.exchange<List<Foo>>(url, method, entity, var1, var2)
-		verify(template, times(1)).exchange(url, method, entity, object : ParameterizedTypeReference<List<Foo>>() {}, var1, var2)
+		verify(template, times(1)).exchange(url, method, entity,
+				object : ParameterizedTypeReference<List<Foo>>() {}, var1, var2)
 	}
 
 	@Test
@@ -145,7 +146,8 @@ class RestOperationsExtensionsTests {
 		val entity = mock<HttpEntity<Foo>>()
 		val vars = mapOf(Pair("key1", "value1"), Pair("key2", "value2"))
 		template.exchange<List<Foo>>(url, method, entity, vars)
-		verify(template, times(1)).exchange(url, method, entity, object : ParameterizedTypeReference<List<Foo>>() {}, vars)
+		verify(template, times(1)).exchange(url, method, entity,
+				object : ParameterizedTypeReference<List<Foo>>() {}, vars)
 	}
 
 	@Test
@@ -154,14 +156,16 @@ class RestOperationsExtensionsTests {
 		val method = HttpMethod.GET
 		val entity = mock<HttpEntity<Foo>>()
 		template.exchange<List<Foo>>(url, method, entity)
-		verify(template, times(1)).exchange(url, method, entity, object : ParameterizedTypeReference<List<Foo>>() {})
+		verify(template, times(1)).exchange(url, method, entity,
+				object : ParameterizedTypeReference<List<Foo>>() {})
 	}
 
 	@Test
 	fun `exchange with reified type parameters, String, HttpEntity`() {
 		val entity = mock<RequestEntity<Foo>>()
 		template.exchange<List<Foo>>(entity)
-		verify(template, times(1)).exchange(entity, object : ParameterizedTypeReference<List<Foo>>() {})
+		verify(template, times(1)).exchange(entity,
+				object : ParameterizedTypeReference<List<Foo>>() {})
 	}
 
 	class Foo

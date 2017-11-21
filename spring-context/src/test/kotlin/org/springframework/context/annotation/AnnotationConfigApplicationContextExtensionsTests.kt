@@ -22,7 +22,7 @@ import org.springframework.beans.factory.getBean
 import org.springframework.context.support.registerBean
 
 /**
- * Tests for [AnnotationConfigApplicationContext] Kotlin extensions
+ * Tests for [AnnotationConfigApplicationContext] Kotlin extensions.
  *
  * @author Sebastien Deleuze
  */

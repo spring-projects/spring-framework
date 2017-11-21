@@ -28,7 +28,7 @@ import reactor.test.StepVerifier
 import java.net.URI
 
 /**
- * Tests for [RouterFunction] Kotlin DSL
+ * Tests for [RouterFunction] Kotlin DSL.
  *
  * @author Sebastien Deleuze
  */
@@ -52,7 +52,11 @@ class RouterFunctionDslTests {
 
 	@Test
 	fun acceptAndPOST() {
-		val request = builder().method(POST).uri(URI("/api/foo/")).header(ACCEPT, APPLICATION_JSON_VALUE).build()
+		val request = builder()
+				.method(POST)
+				.uri(URI("/api/foo/"))
+				.header(ACCEPT, APPLICATION_JSON_VALUE)
+				.build()
 		StepVerifier.create(sampleRouter().route(request))
 				.expectNextCount(1)
 				.verifyComplete()

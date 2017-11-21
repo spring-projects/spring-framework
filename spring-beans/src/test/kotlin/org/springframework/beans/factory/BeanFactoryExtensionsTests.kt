@@ -24,7 +24,7 @@ import org.mockito.Mockito.*
 import org.mockito.junit.MockitoJUnitRunner
 
 /**
- * Mock object based tests for BeanFactory Kotlin extensions
+ * Mock object based tests for BeanFactory Kotlin extensions.
  *
  * @author Sebastien Deleuze
  */

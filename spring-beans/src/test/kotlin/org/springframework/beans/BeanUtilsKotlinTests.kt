@@ -20,7 +20,7 @@ import org.junit.Assert.*
 import org.junit.Test
 
 /**
- * Kotlin tests for {@link BeanUtils}
+ * Kotlin tests for {@link BeanUtils}.
  * 
  * @author Sebastien Deleuze
  */

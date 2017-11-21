@@ -21,10 +21,10 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import reactor.core.publisher.Mono
 
-
 /**
  * Allow to create easily a `RouterFunction<ServerResponse>` from a Kotlin router DSL based
- * on the same building blocks than the Java one ([RouterFunction], [RequestPredicate], [HandlerFunction]).
+ * on the same building blocks than the Java one ([RouterFunction], [RequestPredicate],
+ * [HandlerFunction]).
  *
  * Example:
  *
@@ -126,9 +126,9 @@ open class RouterFunctionDsl {
 	operator fun RequestPredicate.not(): RequestPredicate = this.negate()
 
 	/**
-	 * Route to the given router function if the given request predicate applies. This method can be
-	 * used to create *nested routes*, where a group of routes share a common path (prefix),
-	 * header, or other request predicate.
+	 * Route to the given router function if the given request predicate applies. This
+	 * method can be used to create *nested routes*, where a group of routes share a
+	 * common path (prefix), header, or other request predicate.
 	 * @see RouterFunctions.nest
 	 */
 	fun RequestPredicate.nest(r: RouterFunctionDsl.() -> Unit) {
@@ -305,7 +305,8 @@ open class RouterFunctionDsl {
 	 * @param headersPredicate a predicate that tests against the request headers
 	 * @return a predicate that tests against the given header predicate
 	 */
-	fun headers(headersPredicate: (ServerRequest.Headers) -> Boolean): RequestPredicate = RequestPredicates.headers(headersPredicate)
+	fun headers(headersPredicate: (ServerRequest.Headers) -> Boolean): RequestPredicate =
+			RequestPredicates.headers(headersPredicate)
 
 	/**
 	 * Route to the given handler function if the given method predicate applies.
@@ -364,7 +365,8 @@ open class RouterFunctionDsl {
 	 * predicate.
 	 * @see RequestPredicates.pathExtension
 	 */
-	fun pathExtension(predicate: (String) -> Boolean): RequestPredicate = RequestPredicates.pathExtension(predicate)
+	fun pathExtension(predicate: (String) -> Boolean): RequestPredicate =
+			RequestPredicates.pathExtension(predicate)
 
 	/**
 	 * Route to the given handler function if the given queryParam predicate applies.
@@ -382,7 +384,8 @@ open class RouterFunctionDsl {
 	 * @return a predicate that matches the given predicate against the query parameter of the given name
 	 * @see ServerRequest#queryParam(String)
 	 */
-	fun queryParam(name: String, predicate: (String) -> Boolean): RequestPredicate = RequestPredicates.queryParam(name, predicate)
+	fun queryParam(name: String, predicate: (String) -> Boolean): RequestPredicate =
+			RequestPredicates.queryParam(name, predicate)
 
 	/**
 	 * Route to the given handler function if the given request predicate applies.

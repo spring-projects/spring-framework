@@ -20,7 +20,6 @@ import org.springframework.core.ParameterizedTypeReference
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
-
 /**
  * Extension for [ServerRequest.bodyToMono] providing a `bodyToMono<Foo>()` variant
  * leveraging Kotlin reified type parameters.
