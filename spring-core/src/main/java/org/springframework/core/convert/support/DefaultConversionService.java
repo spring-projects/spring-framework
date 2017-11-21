@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,12 @@ import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.util.ClassUtils;
 
 /**
- * A specialization of {@link GenericConversionService} configured by default with
- * converters appropriate for most environments.
+ * A specialization of {@link GenericConversionService} configured by default
+ * with converters appropriate for most environments.
  *
  * <p>Designed for direct instantiation but also exposes the static
- * {@link #addDefaultConverters(ConverterRegistry)} utility method for ad hoc use against any
- * {@code ConverterRegistry} instance.
+ * {@link #addDefaultConverters(ConverterRegistry)} utility method for ad-hoc
+ * use against any {@code ConverterRegistry} instance.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -56,6 +56,15 @@ public class DefaultConversionService extends GenericConversionService {
 
 
 	/**
+	 * Create a new {@code DefaultConversionService} with the set of
+	 * {@linkplain DefaultConversionService#addDefaultConverters(ConverterRegistry) default converters}.
+	 */
+	public DefaultConversionService() {
+		addDefaultConverters(this);
+	}
+
+
+	/**
 	 * Return a shared default {@code ConversionService} instance,
 	 * lazily building it once needed.
 	 * <p><b>NOTE:</b> We highly recommend constructing individual
@@ -77,22 +86,10 @@ public class DefaultConversionService extends GenericConversionService {
 		return sharedInstance;
 	}
 
-
-	/**
-	 * Create a new {@code DefaultConversionService} with the set of
-	 * {@linkplain DefaultConversionService#addDefaultConverters(ConverterRegistry) default converters}.
-	 */
-	public DefaultConversionService() {
-		addDefaultConverters(this);
-	}
-
-
-	// static utility methods
-
 	/**
 	 * Add converters appropriate for most environments.
-	 * @param converterRegistry the registry of converters to add to (must also be castable to ConversionService,
-	 * e.g. being a {@link ConfigurableConversionService})
+	 * @param converterRegistry the registry of converters to add to
+	 * (must also be castable to ConversionService, e.g. being a {@link ConfigurableConversionService})
 	 * @throws ClassCastException if the given ConverterRegistry could not be cast to a ConversionService
 	 */
 	public static void addDefaultConverters(ConverterRegistry converterRegistry) {
@@ -113,9 +110,9 @@ public class DefaultConversionService extends GenericConversionService {
 	}
 
 	/**
-	 * Add collection converters.
-	 * @param converterRegistry the registry of converters to add to (must also be castable to ConversionService,
-	 * e.g. being a {@link ConfigurableConversionService})
+	 * Add common collection converters.
+	 * @param converterRegistry the registry of converters to add to
+	 * (must also be castable to ConversionService, e.g. being a {@link ConfigurableConversionService})
 	 * @throws ClassCastException if the given ConverterRegistry could not be cast to a ConversionService
 	 * @since 4.2.3
 	 */
@@ -146,9 +143,6 @@ public class DefaultConversionService extends GenericConversionService {
 		}
 	}
 
-
-	// internal helpers
-
 	private static void addScalarConverters(ConverterRegistry converterRegistry) {
 		converterRegistry.addConverterFactory(new NumberToNumberConverterFactory());
 
@@ -166,7 +160,7 @@ public class DefaultConversionService extends GenericConversionService {
 
 		converterRegistry.addConverterFactory(new StringToEnumConverterFactory());
 		converterRegistry.addConverter(new EnumToStringConverter((ConversionService) converterRegistry));
-		
+
 		converterRegistry.addConverterFactory(new IntegerToEnumConverterFactory());
 		converterRegistry.addConverter(new EnumToIntegerConverter((ConversionService) converterRegistry));
 

@@ -104,9 +104,10 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		this.supportedMediaTypes.add(MediaType.APPLICATION_FORM_URLENCODED);
 		this.supportedMediaTypes.add(MediaType.MULTIPART_FORM_DATA);
 
-		this.partConverters.add(new ByteArrayHttpMessageConverter());
 		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
-		stringHttpMessageConverter.setWriteAcceptCharset(false);
+		stringHttpMessageConverter.setWriteAcceptCharset(false);  // see SPR-7316
+
+		this.partConverters.add(new ByteArrayHttpMessageConverter());
 		this.partConverters.add(stringHttpMessageConverter);
 		this.partConverters.add(new ResourceHttpMessageConverter());
 

@@ -174,20 +174,26 @@ import org.springframework.web.util.UrlPathHelper;
 public class WebMvcConfigurationSupport implements ApplicationContextAware, ServletContextAware {
 
 	private static boolean romePresent =
-			ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", WebMvcConfigurationSupport.class.getClassLoader());
+			ClassUtils.isPresent("com.rometools.rome.feed.WireFeed",
+					WebMvcConfigurationSupport.class.getClassLoader());
 
 	private static final boolean jaxb2Present =
-			ClassUtils.isPresent("javax.xml.bind.Binder", WebMvcConfigurationSupport.class.getClassLoader());
+			ClassUtils.isPresent("javax.xml.bind.Binder",
+					WebMvcConfigurationSupport.class.getClassLoader());
 
 	private static final boolean jackson2Present =
-			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", WebMvcConfigurationSupport.class.getClassLoader()) &&
-					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", WebMvcConfigurationSupport.class.getClassLoader());
+			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
+					WebMvcConfigurationSupport.class.getClassLoader()) &&
+			ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
+					WebMvcConfigurationSupport.class.getClassLoader());
 
 	private static final boolean jackson2XmlPresent =
-			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", WebMvcConfigurationSupport.class.getClassLoader());
+			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper",
+					WebMvcConfigurationSupport.class.getClassLoader());
 
 	private static final boolean gsonPresent =
-			ClassUtils.isPresent("com.google.gson.Gson", WebMvcConfigurationSupport.class.getClassLoader());
+			ClassUtils.isPresent("com.google.gson.Gson",
+					WebMvcConfigurationSupport.class.getClassLoader());
 
 
 	private ApplicationContext applicationContext;

@@ -122,20 +122,26 @@ import org.springframework.web.util.UriTemplateHandler;
 public class RestTemplate extends InterceptingHttpAccessor implements RestOperations {
 
 	private static boolean romePresent =
-			ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", RestTemplate.class.getClassLoader());
+			ClassUtils.isPresent("com.rometools.rome.feed.WireFeed",
+					RestTemplate.class.getClassLoader());
 
 	private static final boolean jaxb2Present =
-			ClassUtils.isPresent("javax.xml.bind.Binder", RestTemplate.class.getClassLoader());
+			ClassUtils.isPresent("javax.xml.bind.Binder",
+					RestTemplate.class.getClassLoader());
 
 	private static final boolean jackson2Present =
-			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", RestTemplate.class.getClassLoader()) &&
-					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", RestTemplate.class.getClassLoader());
+			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
+					RestTemplate.class.getClassLoader()) &&
+			ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
+					RestTemplate.class.getClassLoader());
 
 	private static final boolean jackson2XmlPresent =
-			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", RestTemplate.class.getClassLoader());
+			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper",
+					RestTemplate.class.getClassLoader());
 
 	private static final boolean gsonPresent =
-			ClassUtils.isPresent("com.google.gson.Gson", RestTemplate.class.getClassLoader());
+			ClassUtils.isPresent("com.google.gson.Gson",
+					RestTemplate.class.getClassLoader());
 
 
 	private final List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
@@ -215,7 +221,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	}
 
 	/**
-	 * Return the message body converters.
+	 * Return the list of message body converters.
+	 * <p>The returned {@link List} is active and may get appended to.
 	 */
 	public List<HttpMessageConverter<?>> getMessageConverters() {
 		return this.messageConverters;

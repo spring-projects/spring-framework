@@ -156,23 +156,30 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	public static final String CONTENT_NEGOTIATION_MANAGER_BEAN_NAME = "mvcContentNegotiationManager";
 
 	private static final boolean javaxValidationPresent =
-			ClassUtils.isPresent("javax.validation.Validator", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+			ClassUtils.isPresent("javax.validation.Validator",
+					AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
 	private static boolean romePresent =
-			ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+			ClassUtils.isPresent("com.rometools.rome.feed.WireFeed",
+					AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
 	private static final boolean jaxb2Present =
-			ClassUtils.isPresent("javax.xml.bind.Binder", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+			ClassUtils.isPresent("javax.xml.bind.Binder",
+					AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
 	private static final boolean jackson2Present =
-			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", AnnotationDrivenBeanDefinitionParser.class.getClassLoader()) &&
-					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
+					AnnotationDrivenBeanDefinitionParser.class.getClassLoader()) &&
+			ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
+					AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
 	private static final boolean jackson2XmlPresent =
-			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper",
+					AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
 	private static final boolean gsonPresent =
-			ClassUtils.isPresent("com.google.gson.Gson", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+			ClassUtils.isPresent("com.google.gson.Gson",
+					AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
 
 	@Override
