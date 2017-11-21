@@ -58,7 +58,7 @@ configure(allprojects) { project ->
 	ext.rxjavaAdapterVersion = "1.2.1"
 	ext.rxjava2Version       = "2.1.6"
 	ext.slf4jVersion         = "1.7.25"
-	ext.tiles3Version        = "3.0.7"
+	ext.tiles3Version        = "3.0.8"
 	ext.tomcatVersion        = "8.5.23"
 	ext.undertowVersion      = "1.4.21.Final"
 
