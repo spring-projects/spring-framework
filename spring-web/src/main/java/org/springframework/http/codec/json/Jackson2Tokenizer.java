@@ -18,6 +18,7 @@ package org.springframework.http.codec.json;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Function;
 
@@ -26,12 +27,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.async.ByteArrayFeeder;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
+import org.springframework.lang.Nullable;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.util.Assert;
+import reactor.util.function.Tuple2;
 
 /**
  * {@link Function} to transform a JSON stream of arbitrary size, byte array
@@ -41,7 +44,7 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 5.0
  */
-class Jackson2Tokenizer implements Function<DataBuffer, Flux<TokenBuffer>> {
+class Jackson2Tokenizer implements Function<Tuple2<DataBuffer, Boolean>, Flux<TokenBuffer>> {
 
 	private final JsonParser parser;
 
@@ -53,9 +56,16 @@ class Jackson2Tokenizer implements Function<DataBuffer, Flux<TokenBuffer>> {
 
 	private int arrayDepth;
 
+	private int offset;
+
 	// TODO: change to ByteBufferFeeder when supported by Jackson
 	private final ByteArrayFeeder inputFeeder;
 
+	private static final EnumSet<JsonToken> valueTokens = EnumSet.of(
+			JsonToken.VALUE_FALSE, JsonToken.VALUE_TRUE,
+			JsonToken.VALUE_NULL,
+			JsonToken.VALUE_NUMBER_FLOAT, JsonToken.VALUE_NUMBER_INT,
+			JsonToken.VALUE_STRING);
 
 	/**
 	 * Create a new instance of the {@code Jackson2Tokenizer}.
@@ -72,11 +82,15 @@ class Jackson2Tokenizer implements Function<DataBuffer, Flux<TokenBuffer>> {
 		this.tokenizeArrayElements = tokenizeArrayElements;
 		this.tokenBuffer = new TokenBuffer(parser);
 		this.inputFeeder = (ByteArrayFeeder) this.parser.getNonBlockingInputFeeder();
+		this.offset = 0;
 	}
 
 
 	@Override
-	public Flux<TokenBuffer> apply(DataBuffer dataBuffer) {
+	public Flux<TokenBuffer> apply(Tuple2<DataBuffer, Boolean> tuple) {
+		final DataBuffer dataBuffer = tuple.getT1();
+		final Boolean isLastBuffer = tuple.getT2();
+
 		byte[] bytes = new byte[dataBuffer.readableByteCount()];
 		dataBuffer.read(bytes);
 		DataBufferUtils.release(dataBuffer);
@@ -85,11 +99,8 @@ class Jackson2Tokenizer implements Function<DataBuffer, Flux<TokenBuffer>> {
 			this.inputFeeder.feedInput(bytes, 0, bytes.length);
 			List<TokenBuffer> result = new ArrayList<>();
 
-			while (true) {
-				JsonToken token = this.parser.nextToken();
-				if (token == JsonToken.NOT_AVAILABLE) {
-					break;
-				}
+			JsonToken token;
+			while ((token = nextToken(isLastBuffer, bytes.length)) != null) {
 				updateDepth(token);
 
 				if (!this.tokenizeArrayElements) {
@@ -108,6 +119,30 @@ class Jackson2Tokenizer implements Function<DataBuffer, Flux<TokenBuffer>> {
 		catch (Exception ex) {
 			return Flux.error(ex);
 		}
+	}
+
+	@Nullable
+	private JsonToken nextToken(boolean isLastBuffer, int endOffset) throws IOException {
+		JsonToken jsonToken;
+		while ((jsonToken = this.parser.nextToken()) == JsonToken.NOT_AVAILABLE) {
+			if (!this.inputFeeder.needMoreInput()) {
+				return null;
+			}
+
+			if (isLastBuffer) {
+				this.inputFeeder.endOfInput();
+			}
+			else if (hasParsedAllCurrentBuffer(endOffset)) {
+				this.offset += endOffset;
+				return null;
+			}
+		}
+
+		return jsonToken;
+	}
+
+	private boolean hasParsedAllCurrentBuffer(final int endOffset) {
+		return this.parser.getCurrentLocation().getByteOffset() == (this.offset + endOffset);
 	}
 
 	private void updateDepth(JsonToken token) {
@@ -130,7 +165,7 @@ class Jackson2Tokenizer implements Function<DataBuffer, Flux<TokenBuffer>> {
 	private void processTokenNormal(JsonToken token, List<TokenBuffer> result) throws IOException {
 		this.tokenBuffer.copyCurrentEvent(this.parser);
 
-		if (token == JsonToken.END_OBJECT || token == JsonToken.END_ARRAY) {
+		if (token == JsonToken.END_OBJECT || token == JsonToken.END_ARRAY || valueTokens.contains(token)) {
 			if (this.objectDepth == 0 && this.arrayDepth == 0) {
 				result.add(this.tokenBuffer);
 				this.tokenBuffer = new TokenBuffer(this.parser);
@@ -140,15 +175,20 @@ class Jackson2Tokenizer implements Function<DataBuffer, Flux<TokenBuffer>> {
 	}
 
 	private void processTokenArray(JsonToken token, List<TokenBuffer> result) throws IOException {
-		if (!isTopLevelArrayToken(token)) {
+		if (!isTopLevelArrayToken(token) || isValueTokenInTopLevelArray(token)) {
 			this.tokenBuffer.copyCurrentEvent(this.parser);
 		}
 
-		if (token == JsonToken.END_OBJECT && this.objectDepth == 0 &&
-				(this.arrayDepth == 1 || this.arrayDepth == 0)) {
+		if ((token == JsonToken.END_OBJECT && this.objectDepth == 0 &&
+				(this.arrayDepth == 1 || this.arrayDepth == 0)) ||
+			isValueTokenInTopLevelArray(token)) {
 			result.add(this.tokenBuffer);
 			this.tokenBuffer = new TokenBuffer(this.parser);
 		}
+	}
+
+	private boolean isValueTokenInTopLevelArray(final JsonToken token) {
+		return (objectDepth == 0 && arrayDepth == 1) && valueTokens.contains(token);
 	}
 
 	private boolean isTopLevelArrayToken(JsonToken token) {

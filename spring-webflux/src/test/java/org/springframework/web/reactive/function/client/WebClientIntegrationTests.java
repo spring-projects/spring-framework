@@ -236,6 +236,52 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
+	public void shouldReceiveBooleanValueJsonAsMonoBoolean() throws Exception {
+		String content = "true";
+		prepareResponse(response -> response
+				.setHeader("Content-Type", "application/json").setBody(content));
+
+		Mono<Boolean> result = this.webClient.get()
+				.uri("/json").accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(Boolean.class);
+
+		StepVerifier.create(result)
+				.expectNext(true)
+				.expectComplete().verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertEquals("/json", request.getPath());
+			assertEquals("application/json", request.getHeader(HttpHeaders.ACCEPT));
+		});
+	}
+
+	@Test
+	public void shouldReceiveBooleanJsonArrayAsFluxBoolean() throws Exception {
+		String content = "[true, false, true]";
+		prepareResponse(response -> response
+				.setHeader("Content-Type", "application/json").setBody(content));
+
+		Flux<Boolean> result = this.webClient.get()
+				.uri("/json").accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToFlux(Boolean.class);
+
+		StepVerifier.create(result)
+				.expectNext(true)
+				.expectNext(false)
+				.expectNext(true)
+				.expectComplete().verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertEquals("/json", request.getPath());
+			assertEquals("application/json", request.getHeader(HttpHeaders.ACCEPT));
+		});
+	}
+
+	@Test
 	public void shouldReceiveJsonAsPojo() throws Exception {
 		prepareResponse(response -> response
 				.setHeader("Content-Type", "application/json")

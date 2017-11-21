@@ -44,6 +44,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
+import reactor.util.function.Tuples;
 
 /**
  * Abstract base class for Jackson JSON 2.9 decoding.
@@ -92,7 +93,12 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 			JsonFactory factory = getObjectMapper().getFactory();
 			JsonParser parser = factory.createNonBlockingByteArrayParser();
 			Jackson2Tokenizer tokenizer = new Jackson2Tokenizer(parser, tokenizeArrayElements);
-			return Flux.from(input).flatMap(tokenizer).doFinally(t -> tokenizer.endOfInput());
+			final Flux<DataBuffer> from = Flux.from(input).share();
+
+			return Flux.mergeSequential(
+					from.skipLast(1).map(dataBuffer -> Tuples.of(dataBuffer, false)),
+					from.takeLast(1).map(dataBuffer -> Tuples.of(dataBuffer, true)))
+			.flatMap(tokenizer);
 		}
 		catch (IOException ex) {
 			return Flux.error(new UncheckedIOException(ex));
