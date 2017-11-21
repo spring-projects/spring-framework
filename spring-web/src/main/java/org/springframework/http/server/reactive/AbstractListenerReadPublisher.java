@@ -52,6 +52,11 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
 	private volatile long demand;
 
+	private volatile boolean publisherCompleted;
+
+	@Nullable
+	private volatile Throwable publisherError;
+
 	@SuppressWarnings("rawtypes")
 	private static final AtomicLongFieldUpdater<AbstractListenerReadPublisher> DEMAND_FIELD_UPDATER =
 			AtomicLongFieldUpdater.newUpdater(AbstractListenerReadPublisher.class, "demand");
@@ -208,14 +213,53 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 			<T> void subscribe(AbstractListenerReadPublisher<T> publisher, Subscriber<? super T> subscriber) {
 				Assert.notNull(publisher, "Publisher must not be null");
 				Assert.notNull(subscriber, "Subscriber must not be null");
-				if (publisher.changeState(this, NO_DEMAND)) {
+				if (publisher.changeState(this, SUBSCRIBING)) {
 					Subscription subscription = new ReadSubscription(publisher);
 					publisher.subscriber = subscriber;
 					subscriber.onSubscribe(subscription);
+					publisher.changeState(SUBSCRIBING, NO_DEMAND);
+					if (publisher.publisherCompleted) {
+						publisher.onAllDataRead();
+					}
+					Throwable publisherError = publisher.publisherError;
+					if (publisherError != null) {
+						publisher.onError(publisherError);
+					}
 				}
 				else {
 					throw new IllegalStateException(toString());
 				}
+			}
+
+			@Override
+			<T> void onAllDataRead(AbstractListenerReadPublisher<T> publisher) {
+				publisher.publisherCompleted = true;
+			}
+
+			@Override
+			<T> void onError(AbstractListenerReadPublisher<T> publisher, Throwable t) {
+				publisher.publisherError = t;
+			}
+		},
+
+		SUBSCRIBING {
+			<T> void request(AbstractListenerReadPublisher<T> publisher, long n) {
+				if (Operators.validate(n)) {
+					Operators.addCap(DEMAND_FIELD_UPDATER, publisher, n);
+					if (publisher.changeState(this, DEMAND)) {
+						publisher.checkOnDataAvailable();
+					}
+				}
+			}
+
+			@Override
+			<T> void onAllDataRead(AbstractListenerReadPublisher<T> publisher) {
+				publisher.publisherCompleted = true;
+			}
+
+			@Override
+			<T> void onError(AbstractListenerReadPublisher<T> publisher, Throwable t) {
+				publisher.publisherError = t;
 			}
 		},
 

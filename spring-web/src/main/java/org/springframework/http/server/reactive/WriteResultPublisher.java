@@ -119,23 +119,37 @@ class WriteResultPublisher implements Publisher<Void> {
 			@Override
 			void subscribe(WriteResultPublisher publisher, Subscriber<? super Void> subscriber) {
 				Assert.notNull(subscriber, "Subscriber must not be null");
-				publisher.subscriber = subscriber;
-				if (publisher.changeState(this, SUBSCRIBED)) {
+				if (publisher.changeState(this, SUBSCRIBING)) {
 					Subscription subscription = new ResponseBodyWriteResultSubscription(publisher);
+					publisher.subscriber = subscriber;
 					subscriber.onSubscribe(subscription);
+					publisher.changeState(SUBSCRIBING, SUBSCRIBED);
 					if (publisher.publisherCompleted) {
 						publisher.publishComplete();
 					}
-					else {
-						Throwable publisherError = publisher.publisherError;
-						if (publisherError != null) {
-							publisher.publishError(publisherError);
-						}
+					Throwable publisherError = publisher.publisherError;
+					if (publisherError != null) {
+						publisher.publishError(publisherError);
 					}
 				}
 				else {
 					throw new IllegalStateException(toString());
 				}
+			}
+			@Override
+			void publishComplete(WriteResultPublisher publisher) {
+				publisher.publisherCompleted = true;
+			}
+			@Override
+			void publishError(WriteResultPublisher publisher, Throwable t) {
+				publisher.publisherError = t;
+			}
+		},
+
+		SUBSCRIBING {
+			@Override
+			void request(WriteResultPublisher publisher, long n) {
+				Operators.validate(n);
 			}
 			@Override
 			void publishComplete(WriteResultPublisher publisher) {
@@ -183,14 +197,6 @@ class WriteResultPublisher implements Publisher<Void> {
 			void cancel(WriteResultPublisher publisher) {
 				// ignore
 			}
-			@Override
-			void publishComplete(WriteResultPublisher publisher) {
-				// ignore
-			}
-			@Override
-			void publishError(WriteResultPublisher publisher, Throwable t) {
-				// ignore
-			}
 		};
 
 		void subscribe(WriteResultPublisher publisher, Subscriber<? super Void> subscriber) {
@@ -208,11 +214,11 @@ class WriteResultPublisher implements Publisher<Void> {
 		}
 
 		void publishComplete(WriteResultPublisher publisher) {
-			throw new IllegalStateException(toString());
+			// ignore
 		}
 
 		void publishError(WriteResultPublisher publisher, Throwable t) {
-			throw new IllegalStateException(toString());
+			// ignore
 		}
 	}
 
