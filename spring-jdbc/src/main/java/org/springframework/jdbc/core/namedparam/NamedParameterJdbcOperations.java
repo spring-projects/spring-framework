@@ -239,7 +239,6 @@ public interface NamedParameterJdbcOperations {
 	 * one column in that row
 	 * @throws org.springframework.dao.DataAccessException if the query fails
 	 */
-	@Nullable
 	<T> T queryForObject(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
 			throws DataAccessException;
 
@@ -257,7 +256,6 @@ public interface NamedParameterJdbcOperations {
 	 * one column in that row
 	 * @throws org.springframework.dao.DataAccessException if the query fails
 	 */
-	@Nullable
 	<T> T queryForObject(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper)
 			throws DataAccessException;
 
@@ -276,7 +274,6 @@ public interface NamedParameterJdbcOperations {
 	 * @throws org.springframework.dao.DataAccessException if the query fails
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForObject(String, Class)
 	 */
-	@Nullable
 	<T> T queryForObject(String sql, SqlParameterSource paramSource, Class<T> requiredType)
 			throws DataAccessException;
 
@@ -296,7 +293,6 @@ public interface NamedParameterJdbcOperations {
 	 * @throws org.springframework.dao.DataAccessException if the query fails
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForObject(String, Class)
 	 */
-	@Nullable
 	<T> T queryForObject(String sql, Map<String, ?> paramMap, Class<T> requiredType)
 			throws DataAccessException;
 
