@@ -458,18 +458,16 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	@Override
 	public Map<String, Object> queryForMap(String sql) throws DataAccessException {
-		return result(queryForObject(sql, getColumnMapRowMapper()));
+		return queryForObject(sql, getColumnMapRowMapper());
 	}
 
 	@Override
-	@Nullable
 	public <T> T queryForObject(String sql, RowMapper<T> rowMapper) throws DataAccessException {
 		List<T> results = query(sql, rowMapper);
 		return DataAccessUtils.requiredSingleResult(results);
 	}
 
 	@Override
-	@Nullable
 	public <T> T queryForObject(String sql, Class<T> requiredType) throws DataAccessException {
 		return queryForObject(sql, getSingleColumnRowMapper(requiredType));
 	}
@@ -757,7 +755,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	@Nullable
 	public <T> T queryForObject(String sql, Object[] args, int[] argTypes, RowMapper<T> rowMapper)
 			throws DataAccessException {
 
@@ -766,21 +763,18 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	@Nullable
 	public <T> T queryForObject(String sql, @Nullable Object[] args, RowMapper<T> rowMapper) throws DataAccessException {
 		List<T> results = query(sql, args, new RowMapperResultSetExtractor<>(rowMapper, 1));
 		return DataAccessUtils.requiredSingleResult(results);
 	}
 
 	@Override
-	@Nullable
 	public <T> T queryForObject(String sql, RowMapper<T> rowMapper, @Nullable Object... args) throws DataAccessException {
 		List<T> results = query(sql, args, new RowMapperResultSetExtractor<>(rowMapper, 1));
 		return DataAccessUtils.requiredSingleResult(results);
 	}
 
 	@Override
-	@Nullable
 	public <T> T queryForObject(String sql, Object[] args, int[] argTypes, Class<T> requiredType)
 			throws DataAccessException {
 
@@ -799,12 +793,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	@Override
 	public Map<String, Object> queryForMap(String sql, Object[] args, int[] argTypes) throws DataAccessException {
-		return result(queryForObject(sql, args, argTypes, getColumnMapRowMapper()));
+		return queryForObject(sql, args, argTypes, getColumnMapRowMapper());
 	}
 
 	@Override
 	public Map<String, Object> queryForMap(String sql, @Nullable Object... args) throws DataAccessException {
-		return result(queryForObject(sql, args, getColumnMapRowMapper()));
+		return queryForObject(sql, args, getColumnMapRowMapper());
 	}
 
 	@Override

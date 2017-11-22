@@ -212,7 +212,6 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
-	@Nullable
 	public <T> T queryForObject(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
 			throws DataAccessException {
 
@@ -221,7 +220,6 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
-	@Nullable
 	public <T> T queryForObject(String sql, Map<String, ?> paramMap, RowMapper<T>rowMapper)
 			throws DataAccessException {
 
@@ -229,7 +227,6 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
-	@Nullable
 	public <T> T queryForObject(String sql, SqlParameterSource paramSource, Class<T> requiredType)
 			throws DataAccessException {
 
@@ -237,7 +234,6 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
-	@Nullable
 	public <T> T queryForObject(String sql, Map<String, ?> paramMap, Class<T> requiredType)
 			throws DataAccessException {
 
@@ -246,16 +242,12 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 	@Override
 	public Map<String, Object> queryForMap(String sql, SqlParameterSource paramSource) throws DataAccessException {
-		Map<String, Object> result = queryForObject(sql, paramSource, new ColumnMapRowMapper());
-		Assert.state(result != null, "No result map");
-		return result;
+		return queryForObject(sql, paramSource, new ColumnMapRowMapper());
 	}
 
 	@Override
 	public Map<String, Object> queryForMap(String sql, Map<String, ?> paramMap) throws DataAccessException {
-		Map<String, Object> result = queryForObject(sql, paramMap, new ColumnMapRowMapper());
-		Assert.state(result != null, "No result map");
-		return result;
+		return queryForObject(sql, paramMap, new ColumnMapRowMapper());
 	}
 
 	@Override
