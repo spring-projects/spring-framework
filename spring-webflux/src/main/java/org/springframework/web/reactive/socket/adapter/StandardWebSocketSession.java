@@ -72,6 +72,11 @@ public class StandardWebSocketSession extends AbstractListenerWebSocketSession<S
 	}
 
 	@Override
+	protected boolean isSuspended() {
+		return false;
+	}
+
+	@Override
 	protected boolean sendMessage(WebSocketMessage message) throws IOException {
 		ByteBuffer buffer = message.getPayload().asByteBuffer();
 		if (WebSocketMessage.Type.TEXT.equals(message.getType())) {

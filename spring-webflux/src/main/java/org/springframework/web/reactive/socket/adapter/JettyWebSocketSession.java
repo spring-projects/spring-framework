@@ -80,6 +80,11 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 	}
 
 	@Override
+	protected boolean isSuspended() {
+		return this.suspendToken != null;
+	}
+
+	@Override
 	protected boolean sendMessage(WebSocketMessage message) throws IOException {
 		ByteBuffer buffer = message.getPayload().asByteBuffer();
 		if (WebSocketMessage.Type.TEXT.equals(message.getType())) {

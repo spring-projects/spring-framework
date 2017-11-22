@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.socket.adapter;
 
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+
 import javax.websocket.Session;
 
 import org.apache.tomcat.websocket.WsSession;
@@ -33,6 +35,9 @@ import reactor.core.publisher.MonoProcessor;
  * @since 5.0
  */
 public class TomcatWebSocketSession extends StandardWebSocketSession {
+	private static final AtomicIntegerFieldUpdater<TomcatWebSocketSession> SUSPENDED =
+			AtomicIntegerFieldUpdater.newUpdater(TomcatWebSocketSession.class, "suspended");
+	private volatile int suspended;
 
 
 	public TomcatWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory) {
@@ -53,12 +58,21 @@ public class TomcatWebSocketSession extends StandardWebSocketSession {
 
 	@Override
 	protected void suspendReceiving() {
-		((WsSession) getDelegate()).suspend();
+		if (SUSPENDED.compareAndSet(this, 0, 1)) {
+			((WsSession) getDelegate()).suspend();
+		}
 	}
 
 	@Override
 	protected void resumeReceiving() {
-		((WsSession) getDelegate()).resume();
+		if (SUSPENDED.compareAndSet(this, 1, 0)) {
+			((WsSession) getDelegate()).resume();
+		}
+	}
+
+	@Override
+	protected boolean isSuspended() {
+		return this.suspended == 1;
 	}
 
 }

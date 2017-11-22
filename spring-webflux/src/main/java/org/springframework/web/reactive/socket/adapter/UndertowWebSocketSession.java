@@ -61,12 +61,19 @@ public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<W
 		return true;
 	}
 
+	@Override
 	protected void suspendReceiving() {
 		getDelegate().suspendReceives();
 	}
 
+	@Override
 	protected void resumeReceiving() {
 		getDelegate().resumeReceives();
+	}
+
+	@Override
+	protected boolean isSuspended() {
+		return !getDelegate().isReceivesResumed();
 	}
 
 	@Override
