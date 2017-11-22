@@ -17,15 +17,14 @@
 package org.springframework.web.reactive.socket.adapter;
 
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
-
 import javax.websocket.Session;
 
 import org.apache.tomcat.websocket.WsSession;
+import reactor.core.publisher.MonoProcessor;
+
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketSession;
-
-import reactor.core.publisher.MonoProcessor;
 
 /**
  * Spring {@link WebSocketSession} adapter for Tomcat's
@@ -35,8 +34,10 @@ import reactor.core.publisher.MonoProcessor;
  * @since 5.0
  */
 public class TomcatWebSocketSession extends StandardWebSocketSession {
+
 	private static final AtomicIntegerFieldUpdater<TomcatWebSocketSession> SUSPENDED =
 			AtomicIntegerFieldUpdater.newUpdater(TomcatWebSocketSession.class, "suspended");
+
 	private volatile int suspended;
 
 

@@ -266,6 +266,11 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 			return null;
 		}
 
+		@Override
+		protected void suspendReading() {
+			// no-op
+		}
+
 
 		private class RequestBodyPublisherReadListener implements ReadListener {
 

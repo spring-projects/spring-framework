@@ -116,10 +116,9 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	protected abstract T read() throws IOException;
 
 	/**
-	 * Suspend reading. Defaults to no-op.
+	 * Suspend reading, if the underlying API provides such a mechanism.
 	 */
-	protected void suspendReading() {
-	}
+	protected abstract void suspendReading();
 
 
 	// Private methods for use in State...

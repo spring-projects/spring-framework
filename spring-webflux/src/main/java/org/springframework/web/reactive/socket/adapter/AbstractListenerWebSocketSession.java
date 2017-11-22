@@ -150,13 +150,13 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	protected abstract void resumeReceiving();
 
 	/**
-	 * Returns {@code true} if receiving new message(s) is suspended otherwise
-	 * {@code false}.
+	 * Whether receiving new message(s) is suspended.
 	 * <p><strong>Note:</strong> if the underlying WebSocket API does not provide
-	 * flow control for receiving messages, and this method should return
-	 * {@code false} and {@link #canSuspendReceiving()} should return {@code false}.
-	 * @return returns {@code true} if receiving new message(s) is suspended
-	 * otherwise {@code false}.
+	 * flow control for receiving messages, then this method as well as
+	 * {@link #canSuspendReceiving()} should both return {@code false}.
+	 * @return returns {@code true} if receiving new message(s) is suspended,
+	 * or otherwise {@code false}.
+	 * @since 5.0.2
 	 */
 	protected abstract boolean isSuspended();
 
@@ -226,14 +226,15 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 	private final class WebSocketReceivePublisher extends AbstractListenerReadPublisher<WebSocketMessage> {
 
-		private volatile Queue<Object> pendingWebSocketMessages = Queues.unbounded().get();
+		private volatile Queue<Object> pendingMessages = Queues.unbounded(Queues.SMALL_BUFFER_SIZE).get();
+
 
 		@Override
 		protected void checkOnDataAvailable() {
 			if (isSuspended()) {
 				resumeReceiving();
 			}
-			if (!pendingWebSocketMessages.isEmpty()) {
+			if (!this.pendingMessages.isEmpty()) {
 				onDataAvailable();
 			}
 		}
@@ -246,7 +247,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		@Override
 		@Nullable
 		protected WebSocketMessage read() throws IOException {
-			return (WebSocketMessage) pendingWebSocketMessages.poll();
+			return (WebSocketMessage) this.pendingMessages.poll();
 		}
 
 		@Override
@@ -258,7 +259,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		}
 
 		void handleMessage(WebSocketMessage webSocketMessage) {
-			this.pendingWebSocketMessages.offer(webSocketMessage);
+			this.pendingMessages.offer(webSocketMessage);
 			onDataAvailable();
 		}
 	}
