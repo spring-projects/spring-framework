@@ -45,20 +45,20 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final WriteResultPublisher resultPublisher = new WriteResultPublisher();
-
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
+
+	@Nullable
+	private Subscription subscription;
 
 	@Nullable
 	protected volatile T currentData;
 
 	private volatile boolean subscriberCompleted;
 
-	@Nullable
-	private Subscription subscription;
+	private final WriteResultPublisher resultPublisher = new WriteResultPublisher();
 
 
-	// Subscriber implementation...
+	// Subscriber methods...
 
 	@Override
 	public final void onSubscribe(Subscription subscription) {
@@ -93,7 +93,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	}
 
 
-	// Publisher implementation...
+	// Publisher method...
 
 	@Override
 	public final void subscribe(Subscriber<? super Void> subscriber) {
@@ -101,18 +101,12 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	}
 
 
-	// Listener delegation methods...
+	// Methods for sub-classes to delegate to, when async I/O events occur...
 
-	/**
-	 * Listeners can call this to notify when writing is possible.
-	 */
 	public final void onWritePossible() {
 		this.state.get().onWritePossible(this);
 	}
 
-	/**
-	 * Listeners can call this method to cancel further writing.
-	 */
 	public void cancel() {
 		if (this.subscription != null) {
 			this.subscription.cancel();
@@ -120,10 +114,19 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	}
 
 
+	// Methods for sub-classes to implement or override...
+
 	/**
-	 * Called when a data item is received via {@link Subscriber#onNext(Object)}
+	 * Whether the given data item has any content to write.
+	 * If false the item is not written.
 	 */
-	protected void receiveData(T data) {
+	protected abstract boolean isDataEmpty(T data);
+
+	/**
+	 * Called when a data item is received via {@link Subscriber#onNext(Object)}.
+	 * The default implementation saves the data for writing when possible.
+	 */
+	protected void dataReceived(T data) {
 		if (this.currentData != null) {
 			throw new IllegalStateException("Current data not processed yet: " + this.currentData);
 		}
@@ -136,18 +139,13 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	protected abstract void releaseData();
 
 	/**
-	 * Whether the given data item contains any actual data to be processed.
-	 */
-	protected abstract boolean isDataEmpty(T data);
-
-	/**
 	 * Whether writing is possible.
 	 */
 	protected abstract boolean isWritePossible();
 
 	/**
-	 * Writes the given data to the output.
-	 * @param data the data to write
+	 * Write the given item.
+	 * @param data the item to write
 	 * @return whether the data was fully written ({@code true})
 	 * and new data can be requested, or otherwise ({@code false})
 	 */
@@ -174,9 +172,20 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	}
 
 
+	// Private methods for use in State...
 
 	private boolean changeState(State oldState, State newState) {
 		return this.state.compareAndSet(oldState, newState);
+	}
+
+	private void changeStateToComplete(State oldState) {
+		if (changeState(oldState, State.COMPLETED)) {
+			writingComplete();
+			this.resultPublisher.publishComplete();
+		}
+		else {
+			this.state.get().onComplete(this);
+		}
 	}
 
 	private void writeIfPossible() {
@@ -187,30 +196,23 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 
 	/**
-	 * Represents a state for the {@link Subscriber} to be in. The following figure
-	 * indicate the four different states that exist, and the relationships between them.
+	 * Represents a state for the {@link Processor} to be in.
 	 *
-	 * <pre>
-	 *       UNSUBSCRIBED
-	 *        |
-	 *        v
-	 * REQUESTED -------------------> RECEIVED
-	 *         ^                      ^
-	 *         |                      |
-	 *         --------- WRITING <-----
-	 *                      |
-	 *                      v
-	 *                  COMPLETED
+	 * <p><pre>
+	 *        UNSUBSCRIBED
+	 *             |
+	 *             v
+	 *   +--- REQUESTED -------------> RECEIVED ---+
+	 *   |        ^                       ^        |
+	 *   |        |                       |        |
+	 *   |        + ------ WRITING <------+        |
+	 *   |                    |                    |
+	 *   |                    v                    |
+	 *   +--------------> COMPLETED <--------------+
 	 * </pre>
-	 * Refer to the individual states for more information.
 	 */
 	private enum State {
 
-		/**
-		 * The initial unsubscribed state. Will respond to {@code onSubscribe} by
-		 * requesting 1 data from the subscription, and change state to {@link
-		 * #REQUESTED}.
-		 */
 		UNSUBSCRIBED {
 			@Override
 			public <T> void onSubscribe(AbstractListenerWriteProcessor<T> processor, Subscription subscription) {
@@ -225,12 +227,6 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 			}
 		},
 
-		/**
-		 * State that gets entered after a data has been
-		 * {@linkplain Subscription#request(long) requested}. Responds to {@code onNext}
-		 * by changing state to {@link #RECEIVED}, and responds to {@code onComplete} by
-		 * changing state to {@link #COMPLETED}.
-		 */
 		REQUESTED {
 			@Override
 			public <T> void onNext(AbstractListenerWriteProcessor<T> processor, T data) {
@@ -239,7 +235,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 					processor.subscription.request(1);
 				}
 				else {
-					processor.receiveData(data);
+					processor.dataReceived(data);
 					if (processor.changeState(this, RECEIVED)) {
 						processor.writeIfPossible();
 					}
@@ -247,25 +243,10 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 			}
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
-				if (processor.changeState(this, COMPLETED)) {
-					processor.writingComplete();
-					processor.resultPublisher.publishComplete();
-				}
-				else {
-					processor.state.get().onComplete(processor);
-				}
+				processor.changeStateToComplete(this);
 			}
 		},
 
-		/**
-		 * State that gets entered after a data has been
-		 * {@linkplain Subscriber#onNext(Object) received}. Responds to
-		 * {@code onWritePossible} by writing the current data and changes
-		 * the state to {@link #WRITING}. If it can be written completely,
-		 * changes the state to either {@link #REQUESTED} if the subscription
-		 * has not been completed; or {@link #COMPLETED} if it has. If it cannot
-		 * be written completely the state will be changed to {@code #RECEIVED}.
-		 */
 		RECEIVED {
 			@Override
 			public <T> void onWritePossible(AbstractListenerWriteProcessor<T> processor) {
@@ -276,35 +257,24 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 						boolean writeCompleted = processor.write(data);
 						if (writeCompleted) {
 							processor.releaseData();
-							if (!processor.subscriberCompleted) {
-								if (processor.changeState(WRITING, REQUESTED)) {
-									if (processor.subscriberCompleted) {
-										if (processor.changeState(REQUESTED, COMPLETED)) {
-											processor.writingComplete();
-											processor.resultPublisher.publishComplete();
-										} else {
-											processor.state.get().onComplete(processor);
-										}
-									}
-									else {
-										processor.suspendWriting();
-										Assert.state(processor.subscription != null, "No subscription");
-										processor.subscription.request(1);
-									}
+							if (processor.changeState(WRITING, REQUESTED)) {
+								if (processor.subscriberCompleted) {
+									processor.changeStateToComplete(REQUESTED);
 								}
-							}
-							else {
-								if (processor.changeState(WRITING, COMPLETED)) {
-									processor.writingComplete();
-									processor.resultPublisher.publishComplete();
-								} else {
-									processor.state.get().onComplete(processor);
+								else {
+									processor.suspendWriting();
+									Assert.state(processor.subscription != null, "No subscription");
+									processor.subscription.request(1);
 								}
 							}
 						}
-						else {
-							processor.changeState(WRITING, RECEIVED);
-							processor.writeIfPossible();
+						else if (processor.changeState(WRITING, RECEIVED)) {
+							if (processor.subscriberCompleted) {
+								processor.changeStateToComplete(RECEIVED);
+							}
+							else {
+								processor.writeIfPossible();
+							}
 						}
 					}
 					catch (IOException ex) {
@@ -312,16 +282,13 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 					}
 				}
 			}
+
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
 				processor.subscriberCompleted = true;
 			}
 		},
 
-		/**
-		 * State that gets entered after a writing of the current data has been
-		 * {@code onWritePossible started}.
-		 */
 		WRITING {
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
@@ -329,9 +296,6 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 			}
 		},
 
-		/**
-		 * The terminal completed state. Does not respond to any events.
-		 */
 		COMPLETED {
 			@Override
 			public <T> void onNext(AbstractListenerWriteProcessor<T> processor, T data) {

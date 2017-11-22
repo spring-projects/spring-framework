@@ -33,6 +33,7 @@ import org.springframework.util.Assert;
  *
  * @author Arjen Poutsma
  * @author Violeta Georgieva
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
 class WriteResultPublisher implements Publisher<Void> {
@@ -44,10 +45,10 @@ class WriteResultPublisher implements Publisher<Void> {
 	@Nullable
 	private Subscriber<? super Void> subscriber;
 
-	private volatile boolean publisherCompleted;
+	private volatile boolean completedBeforeSubscribed;
 
 	@Nullable
-	private volatile Throwable publisherError;
+	private volatile Throwable errorBeforeSubscribed;
 
 
 	@Override
@@ -58,12 +59,8 @@ class WriteResultPublisher implements Publisher<Void> {
 		this.state.get().subscribe(this, subscriber);
 	}
 
-	private boolean changeState(State oldState, State newState) {
-		return this.state.compareAndSet(oldState, newState);
-	}
-
 	/**
-	 * Publishes the complete signal to the subscriber of this publisher.
+	 * Delegate a completion signal to the subscriber.
 	 */
 	public void publishComplete() {
 		if (logger.isTraceEnabled()) {
@@ -73,7 +70,7 @@ class WriteResultPublisher implements Publisher<Void> {
 	}
 
 	/**
-	 * Publishes the given error signal to the subscriber of this publisher.
+	 * Delegate the given error signal to the subscriber.
 	 */
 	public void publishError(Throwable t) {
 		if (logger.isTraceEnabled()) {
@@ -82,12 +79,20 @@ class WriteResultPublisher implements Publisher<Void> {
 		this.state.get().publishError(this, t);
 	}
 
+	private boolean changeState(State oldState, State newState) {
+		return this.state.compareAndSet(oldState, newState);
+	}
 
-	private static final class ResponseBodyWriteResultSubscription implements Subscription {
+
+	/**
+	 * Subscription to receive and delegate request and cancel signals from the
+	 * suscbriber to this publisher.
+	 */
+	private static final class WriteResultSubscription implements Subscription {
 
 		private final WriteResultPublisher publisher;
 
-		public ResponseBodyWriteResultSubscription(WriteResultPublisher publisher) {
+		public WriteResultSubscription(WriteResultPublisher publisher) {
 			this.publisher = publisher;
 		}
 
@@ -113,6 +118,21 @@ class WriteResultPublisher implements Publisher<Void> {
 	}
 
 
+	/**
+	 * Represents a state for the {@link Publisher} to be in.
+	 * <p><pre>
+	 *     UNSUBSCRIBED
+	 *          |
+	 *          v
+	 *     SUBSCRIBING
+	 *          |
+	 *          v
+	 *      SUBSCRIBED
+	 *          |
+	 *          v
+	 *      COMPLETED
+	 * </pre>
+	 */
 	private enum State {
 
 		UNSUBSCRIBED {
@@ -120,14 +140,15 @@ class WriteResultPublisher implements Publisher<Void> {
 			void subscribe(WriteResultPublisher publisher, Subscriber<? super Void> subscriber) {
 				Assert.notNull(subscriber, "Subscriber must not be null");
 				if (publisher.changeState(this, SUBSCRIBING)) {
-					Subscription subscription = new ResponseBodyWriteResultSubscription(publisher);
+					Subscription subscription = new WriteResultSubscription(publisher);
 					publisher.subscriber = subscriber;
 					subscriber.onSubscribe(subscription);
 					publisher.changeState(SUBSCRIBING, SUBSCRIBED);
-					if (publisher.publisherCompleted) {
+					// Now safe to check "beforeSubscribed" flags, they won't change once in NO_DEMAND
+					if (publisher.completedBeforeSubscribed) {
 						publisher.publishComplete();
 					}
-					Throwable publisherError = publisher.publisherError;
+					Throwable publisherError = publisher.errorBeforeSubscribed;
 					if (publisherError != null) {
 						publisher.publishError(publisherError);
 					}
@@ -138,11 +159,11 @@ class WriteResultPublisher implements Publisher<Void> {
 			}
 			@Override
 			void publishComplete(WriteResultPublisher publisher) {
-				publisher.publisherCompleted = true;
+				publisher.completedBeforeSubscribed = true;
 			}
 			@Override
-			void publishError(WriteResultPublisher publisher, Throwable t) {
-				publisher.publisherError = t;
+			void publishError(WriteResultPublisher publisher, Throwable ex) {
+				publisher.errorBeforeSubscribed = ex;
 			}
 		},
 
@@ -153,11 +174,11 @@ class WriteResultPublisher implements Publisher<Void> {
 			}
 			@Override
 			void publishComplete(WriteResultPublisher publisher) {
-				publisher.publisherCompleted = true;
+				publisher.completedBeforeSubscribed = true;
 			}
 			@Override
-			void publishError(WriteResultPublisher publisher, Throwable t) {
-				publisher.publisherError = t;
+			void publishError(WriteResultPublisher publisher, Throwable ex) {
+				publisher.errorBeforeSubscribed = ex;
 			}
 		},
 
@@ -165,26 +186,6 @@ class WriteResultPublisher implements Publisher<Void> {
 			@Override
 			void request(WriteResultPublisher publisher, long n) {
 				Operators.validate(n);
-			}
-			@Override
-			void publishComplete(WriteResultPublisher publisher) {
-				if (publisher.changeState(this, COMPLETED)) {
-					Assert.state(publisher.subscriber != null, "No subscriber");
-					publisher.subscriber.onComplete();
-				}
-				else {
-					publisher.state.get().publishComplete(publisher);
-				}
-			}
-			@Override
-			void publishError(WriteResultPublisher publisher, Throwable t) {
-				if (publisher.changeState(this, COMPLETED)) {
-					Assert.state(publisher.subscriber != null, "No subscriber");
-					publisher.subscriber.onError(t);
-				}
-				else {
-					publisher.state.get().publishError(publisher, t);
-				}
 			}
 		},
 
@@ -195,6 +196,14 @@ class WriteResultPublisher implements Publisher<Void> {
 			}
 			@Override
 			void cancel(WriteResultPublisher publisher) {
+				// ignore
+			}
+			@Override
+			void publishComplete(WriteResultPublisher publisher) {
+				// ignore
+			}
+			@Override
+			void publishError(WriteResultPublisher publisher, Throwable t) {
 				// ignore
 			}
 		};
@@ -214,11 +223,23 @@ class WriteResultPublisher implements Publisher<Void> {
 		}
 
 		void publishComplete(WriteResultPublisher publisher) {
-			// ignore
+			if (publisher.changeState(this, COMPLETED)) {
+				Assert.state(publisher.subscriber != null, "No subscriber");
+				publisher.subscriber.onComplete();
+			}
+			else {
+				publisher.state.get().publishComplete(publisher);
+			}
 		}
 
 		void publishError(WriteResultPublisher publisher, Throwable t) {
-			// ignore
+			if (publisher.changeState(this, COMPLETED)) {
+				Assert.state(publisher.subscriber != null, "No subscriber");
+				publisher.subscriber.onError(t);
+			}
+			else {
+				publisher.state.get().publishError(publisher, t);
+			}
 		}
 	}
 

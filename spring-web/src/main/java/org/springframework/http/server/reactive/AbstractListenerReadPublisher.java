@@ -52,10 +52,10 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
 	private volatile long demand;
 
-	private volatile boolean publisherCompleted;
+	private volatile boolean completionBeforeDemand;
 
 	@Nullable
-	private volatile Throwable publisherError;
+	private volatile Throwable errorBeforeDemand;
 
 	@SuppressWarnings("rawtypes")
 	private static final AtomicLongFieldUpdater<AbstractListenerReadPublisher> DEMAND_FIELD_UPDATER =
@@ -76,11 +76,8 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	}
 
 
-	// Listener delegation methods...
+	// Methods for sub-classes to delegate to, when async I/O events occur...
 
-	/**
-	 * Listeners can call this to notify when reading is possible.
-	 */
 	public final void onDataAvailable() {
 		if (this.logger.isTraceEnabled()) {
 			this.logger.trace(this.state + " onDataAvailable");
@@ -88,9 +85,6 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 		this.state.get().onDataAvailable(this);
 	}
 
-	/**
-	 * Listeners can call this to notify when all data has been read.
-	 */
 	public void onAllDataRead() {
 		if (this.logger.isTraceEnabled()) {
 			this.logger.trace(this.state + " onAllDataRead");
@@ -98,9 +92,6 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 		this.state.get().onAllDataRead(this);
 	}
 
-	/**
-	 * Listeners can call this to notify when a read error has occurred.
-	 */
 	public final void onError(Throwable t) {
 		if (this.logger.isTraceEnabled()) {
 			this.logger.trace(this.state + " onError: " + t);
@@ -109,11 +100,17 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	}
 
 
+	// Methods for sub-classes to implement...
+
+	/**
+	 * Check if data is available, calling {@link #onDataAvailable()} either
+	 * immediately or later when reading is possible.
+	 */
 	protected abstract void checkOnDataAvailable();
 
 	/**
-	 * Reads a data from the input, if possible.
-	 * @return the data that was read; or {@code null}
+	 * Read once from the input, if possible.
+	 * @return the item that was read; or {@code null}
 	 */
 	@Nullable
 	protected abstract T read() throws IOException;
@@ -125,14 +122,17 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	}
 
 
+	// Private methods for use in State...
+
 	/**
-	 * Read and publish data from the input. Continue till there is no more
-	 * demand or there is no more data to be read.
-	 * @return {@code true} if there is more demand; {@code false} otherwise
+	 * Read and publish data one at a time until there is no more data, no more
+	 * demand, or perhaps we completed in the mean time.
+	 * @return {@code true} if there is more demand; {@code false} if there is
+	 * no more demand or we have completed.
 	 */
 	private boolean readAndPublish() throws IOException {
 		long r;
-		while ((r = demand) > 0 && !publisherCompleted) {
+		while ((r = this.demand) > 0 && !this.state.get().equals(State.COMPLETED)) {
 			T data = read();
 			if (data != null) {
 				if (r != Long.MAX_VALUE) {
@@ -152,96 +152,95 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 		return this.state.compareAndSet(oldState, newState);
 	}
 
+	private Subscription createSubscription() {
+		return new ReadSubscription();
+	}
 
-	private static final class ReadSubscription implements Subscription {
 
-		private final AbstractListenerReadPublisher<?> publisher;
+	/**
+	 * Subscription that delegates signals to State.
+	 */
+	private final class ReadSubscription implements Subscription {
 
-		public ReadSubscription(AbstractListenerReadPublisher<?> publisher) {
-			this.publisher = publisher;
-		}
 
 		@Override
 		public final void request(long n) {
-			if (this.publisher.logger.isTraceEnabled()) {
-				this.publisher.logger.trace(state() + " request: " + n);
+			if (logger.isTraceEnabled()) {
+				logger.trace(state + " request: " + n);
 			}
-			state().request(this.publisher, n);
+			state.get().request(AbstractListenerReadPublisher.this, n);
 		}
 
 		@Override
 		public final void cancel() {
-			if (this.publisher.logger.isTraceEnabled()) {
-				this.publisher.logger.trace(state() + " cancel");
+			if (logger.isTraceEnabled()) {
+				logger.trace(state + " cancel");
 			}
-			state().cancel(this.publisher);
-		}
-
-		private State state() {
-			return this.publisher.state.get();
+			state.get().cancel(AbstractListenerReadPublisher.this);
 		}
 	}
 
 
 	/**
-	 * Represents a state for the {@link Publisher} to be in. The following figure
-	 * indicate the four different states that exist, and the relationships between them.
-	 *
-	 * <pre>
-	 *       UNSUBSCRIBED
-	 *        |
-	 *        v
-	 * NO_DEMAND -------------------> DEMAND
-	 *    |    ^                      ^    |
-	 *    |    |                      |    |
-	 *    |    --------- READING <-----    |
-	 *    |                 |              |
-	 *    |                 v              |
-	 *    ------------> COMPLETED <---------
+	 * Represents a state for the {@link Publisher} to be in.
+	 * <p><pre>
+	 *        UNSUBSCRIBED
+	 *             |
+	 *             v
+	 *        SUBSCRIBING
+	 *             |
+	 *             v
+	 *    +---- NO_DEMAND ---------------> DEMAND ---+
+	 *    |        ^                         ^       |
+	 *    |        |                         |       |
+	 *    |        +------- READING <--------+       |
+	 *    |                    |                     |
+	 *    |                    v                     |
+	 *    +--------------> COMPLETED <---------------+
 	 * </pre>
-	 * Refer to the individual states for more information.
 	 */
 	private enum State {
 
-		/**
-		 * The initial unsubscribed state. Will respond to {@link
-		 * #subscribe(AbstractListenerReadPublisher, Subscriber)} by
-		 * changing state to {@link #NO_DEMAND}.
-		 */
 		UNSUBSCRIBED {
 			@Override
 			<T> void subscribe(AbstractListenerReadPublisher<T> publisher, Subscriber<? super T> subscriber) {
 				Assert.notNull(publisher, "Publisher must not be null");
 				Assert.notNull(subscriber, "Subscriber must not be null");
 				if (publisher.changeState(this, SUBSCRIBING)) {
-					Subscription subscription = new ReadSubscription(publisher);
+					Subscription subscription = publisher.createSubscription();
 					publisher.subscriber = subscriber;
 					subscriber.onSubscribe(subscription);
 					publisher.changeState(SUBSCRIBING, NO_DEMAND);
-					if (publisher.publisherCompleted) {
-						publisher.onAllDataRead();
+					// Now safe to check "beforeDemand" flags, they won't change once in NO_DEMAND
+					if (publisher.completionBeforeDemand) {
+						publisher.state.get().onAllDataRead(publisher);
 					}
-					Throwable publisherError = publisher.publisherError;
-					if (publisherError != null) {
-						publisher.onError(publisherError);
+					Throwable ex = publisher.errorBeforeDemand;
+					if (ex != null) {
+						publisher.state.get().onError(publisher, ex);
 					}
 				}
 				else {
-					throw new IllegalStateException(toString());
+					throw new IllegalStateException("Failed to transition to SUBSCRIBING, " +
+							"subscriber: " + subscriber);
 				}
 			}
 
 			@Override
 			<T> void onAllDataRead(AbstractListenerReadPublisher<T> publisher) {
-				publisher.publisherCompleted = true;
+				publisher.completionBeforeDemand = true;
 			}
 
 			@Override
-			<T> void onError(AbstractListenerReadPublisher<T> publisher, Throwable t) {
-				publisher.publisherError = t;
+			<T> void onError(AbstractListenerReadPublisher<T> publisher, Throwable ex) {
+				publisher.errorBeforeDemand = ex;
 			}
 		},
 
+		/**
+		 * Very brief state where we know we have a Subscriber but must not
+		 * send onComplete and onError until we after onSubscribe.
+		 */
 		SUBSCRIBING {
 			<T> void request(AbstractListenerReadPublisher<T> publisher, long n) {
 				if (Operators.validate(n)) {
@@ -254,21 +253,15 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
 			@Override
 			<T> void onAllDataRead(AbstractListenerReadPublisher<T> publisher) {
-				publisher.publisherCompleted = true;
+				publisher.completionBeforeDemand = true;
 			}
 
 			@Override
-			<T> void onError(AbstractListenerReadPublisher<T> publisher, Throwable t) {
-				publisher.publisherError = t;
+			<T> void onError(AbstractListenerReadPublisher<T> publisher, Throwable ex) {
+				publisher.errorBeforeDemand = ex;
 			}
 		},
 
-		/**
-		 * State that gets entered when there is no demand. Responds to {@link
-		 * #request(AbstractListenerReadPublisher, long)} by increasing the demand,
-		 * changing state to {@link #DEMAND} and will check whether there
-		 * is data available for reading.
-		 */
 		NO_DEMAND {
 			@Override
 			<T> void request(AbstractListenerReadPublisher<T> publisher, long n) {
@@ -277,21 +270,17 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 					if (publisher.changeState(this, DEMAND)) {
 						publisher.checkOnDataAvailable();
 					}
+					// or else we completed at the same time...
 				}
 			}
 		},
 
-		/**
-		 * State that gets entered when there is demand. Responds to
-		 * {@link #onDataAvailable(AbstractListenerReadPublisher)} by
-		 * reading the available data. The state will be changed to
-		 * {@link #NO_DEMAND} if there is no demand.
-		 */
 		DEMAND {
 			@Override
 			<T> void request(AbstractListenerReadPublisher<T> publisher, long n) {
 				if (Operators.validate(n)) {
 					Operators.addCap(DEMAND_FIELD_UPDATER, publisher, n);
+					// Did a concurrent read transition to NO_DEMAND just before us?
 					if (publisher.changeState(NO_DEMAND, DEMAND)) {
 						publisher.checkOnDataAvailable();
 					}
@@ -304,6 +293,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 					if (!read(publisher)) {
 						return;
 					}
+					// Maybe demand arrived between readAndPublish and READING->NO_DEMAND?
 					long r = publisher.demand;
 					if (r == 0  || publisher.changeState(NO_DEMAND, this)) {
 						break;
@@ -311,6 +301,10 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 				}
 			}
 
+			/**
+			 * @return whether to exit the read loop; false means stop trying
+			 * to read, true means check demand one more time.
+			 */
 			<T> boolean read(AbstractListenerReadPublisher<T> publisher) {
 				if (publisher.changeState(this, READING)) {
 					try {
@@ -318,18 +312,19 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 						if (demandAvailable) {
 							if (publisher.changeState(READING, DEMAND)) {
 								publisher.checkOnDataAvailable();
-								return false;
 							}
 						}
 						else if (publisher.changeState(READING, NO_DEMAND)) {
 							publisher.suspendReading();
+							return true;
 						}
 					}
 					catch (IOException ex) {
 						publisher.onError(ex);
 					}
-					return true;
 				}
+				// Either competing onDataAvailable calls (via request or container callback)
+				// Or a concurrent completion
 				return false;
 			}
 		},
@@ -339,6 +334,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 			<T> void request(AbstractListenerReadPublisher<T> publisher, long n) {
 				if (Operators.validate(n)) {
 					Operators.addCap(DEMAND_FIELD_UPDATER, publisher, n);
+					// Did a concurrent read transition to NO_DEMAND just before us?
 					if (publisher.changeState(NO_DEMAND, DEMAND)) {
 						publisher.checkOnDataAvailable();
 					}
@@ -346,9 +342,6 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 			}
 		},
 
-		/**
-		 * The terminal completed state. Does not respond to any events.
-		 */
 		COMPLETED {
 			@Override
 			<T> void request(AbstractListenerReadPublisher<T> publisher, long n) {
@@ -377,10 +370,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 		}
 
 		<T> void cancel(AbstractListenerReadPublisher<T> publisher) {
-			if (publisher.changeState(this, COMPLETED)) {
-				publisher.publisherCompleted = true;
-			}
-			else {
+			if (!publisher.changeState(this, COMPLETED)) {
 				publisher.state.get().cancel(publisher);
 			}
 		}
@@ -391,7 +381,6 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
 		<T> void onAllDataRead(AbstractListenerReadPublisher<T> publisher) {
 			if (publisher.changeState(this, COMPLETED)) {
-				publisher.publisherCompleted = true;
 				if (publisher.subscriber != null) {
 					publisher.subscriber.onComplete();
 				}
