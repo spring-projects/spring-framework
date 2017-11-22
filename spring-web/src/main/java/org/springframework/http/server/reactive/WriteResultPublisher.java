@@ -43,7 +43,7 @@ class WriteResultPublisher implements Publisher<Void> {
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
 
 	@Nullable
-	private Subscriber<? super Void> subscriber;
+	private volatile Subscriber<? super Void> subscriber;
 
 	private volatile boolean completedBeforeSubscribed;
 

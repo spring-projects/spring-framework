@@ -52,17 +52,17 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
 	private volatile long demand;
 
-	private volatile boolean completionBeforeDemand;
-
-	@Nullable
-	private volatile Throwable errorBeforeDemand;
-
 	@SuppressWarnings("rawtypes")
 	private static final AtomicLongFieldUpdater<AbstractListenerReadPublisher> DEMAND_FIELD_UPDATER =
 			AtomicLongFieldUpdater.newUpdater(AbstractListenerReadPublisher.class, "demand");
 
 	@Nullable
-	private Subscriber<? super T> subscriber;
+	private volatile Subscriber<? super T> subscriber;
+
+	private volatile boolean completionBeforeDemand;
+
+	@Nullable
+	private volatile Throwable errorBeforeDemand;
 
 
 	// Publisher implementation...
