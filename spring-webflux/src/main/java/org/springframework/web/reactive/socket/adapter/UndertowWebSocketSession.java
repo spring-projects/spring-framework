@@ -53,6 +53,7 @@ public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<W
 			DataBufferFactory factory, @Nullable MonoProcessor<Void> completionMono) {
 
 		super(channel, ObjectUtils.getIdentityHexString(channel), info, factory, completionMono);
+		suspendReceiving();
 	}
 
 

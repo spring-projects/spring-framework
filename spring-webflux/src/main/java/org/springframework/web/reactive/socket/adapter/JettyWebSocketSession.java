@@ -57,6 +57,8 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 			@Nullable MonoProcessor<Void> completionMono) {
 
 		super(session, ObjectUtils.getIdentityHexString(session), info, factory, completionMono);
+		// TODO: suspend causes failures if invoked at this stage
+		// suspendReceiving();
 	}
 
 

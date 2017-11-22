@@ -128,6 +128,8 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	/**
 	 * Whether the underlying WebSocket API has flow control and can suspend and
 	 * resume the receiving of messages.
+	 * <p><strong>Note:</strong> Sub-classes are encouraged to start out in
+	 * suspended mode, if possible, and wait until demand is received.
 	 */
 	protected abstract boolean canSuspendReceiving();
 
@@ -238,7 +240,10 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		}
 
 		void handleMessage(WebSocketMessage webSocketMessage) {
-			this.pendingMessages.offer(webSocketMessage);
+			if (!this.pendingMessages.offer(webSocketMessage)) {
+				throw new IllegalStateException("Too many messages received. " +
+						"Please ensure WebSocketSession.receive() is subscribed to.");
+			}
 			onDataAvailable();
 		}
 	}

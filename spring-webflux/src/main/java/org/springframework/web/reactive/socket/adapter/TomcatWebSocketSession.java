@@ -49,6 +49,7 @@ public class TomcatWebSocketSession extends StandardWebSocketSession {
 			MonoProcessor<Void> completionMono) {
 
 		super(session, info, factory, completionMono);
+		suspendReceiving();
 	}
 
 
