@@ -105,6 +105,9 @@ public class DefaultCorsProcessor implements CorsProcessor {
 
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
+		HttpHeaders responseHeaders = response.getHeaders();
+
+		response.getHeaders().add(HttpHeaders.VARY, HttpHeaders.ORIGIN);
 
 		String requestOrigin = request.getHeaders().getOrigin();
 		String allowOrigin = checkOrigin(config, requestOrigin);
@@ -130,9 +133,7 @@ public class DefaultCorsProcessor implements CorsProcessor {
 			return false;
 		}
 
-		HttpHeaders responseHeaders = response.getHeaders();
 		responseHeaders.setAccessControlAllowOrigin(allowOrigin);
-		responseHeaders.add(HttpHeaders.VARY, HttpHeaders.ORIGIN);
 
 		if (preFlightRequest) {
 			responseHeaders.setAccessControlAllowMethods(allowMethods);
