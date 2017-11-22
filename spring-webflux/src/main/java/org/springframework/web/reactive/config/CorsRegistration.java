@@ -113,9 +113,10 @@ public class CorsRegistration {
 	}
 
 	/**
-	 * Whether user credentials are supported.
-	 * <p>By default this is set to {@code true} in which case user credentials
-	 * are supported.
+	 * Whether user credentials are supported. Be aware that enabling this option
+	 * could increase the surface attack of the web application (for example via
+	 * exposing sensitive user-specific information like CSRF tokens).
+	 * <p>By default credentials are not allowed.
 	 */
 	public CorsRegistration allowCredentials(boolean allowCredentials) {
 		this.config.setAllowCredentials(allowCredentials);

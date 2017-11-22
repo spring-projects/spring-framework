@@ -126,7 +126,7 @@ public class CrossOriginTests {
 		assertNotNull(config);
 		assertArrayEquals(new String[] {"GET"}, config.getAllowedMethods().toArray());
 		assertArrayEquals(new String[] {"*"}, config.getAllowedOrigins().toArray());
-		assertTrue(config.getAllowCredentials());
+		assertNull(config.getAllowCredentials());
 		assertArrayEquals(new String[] {"*"}, config.getAllowedHeaders().toArray());
 		assertTrue(CollectionUtils.isEmpty(config.getExposedHeaders()));
 		assertEquals(new Long(1800), config.getMaxAge());
@@ -155,7 +155,7 @@ public class CrossOriginTests {
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertNotNull(config);
 		assertEquals(Arrays.asList("http://example.com"), config.getAllowedOrigins());
-		assertTrue(config.getAllowCredentials());
+		assertNull(config.getAllowCredentials());
 	}
 
 	@Test
@@ -166,7 +166,7 @@ public class CrossOriginTests {
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertNotNull(config);
 		assertEquals(Arrays.asList("http://example.com"), config.getAllowedOrigins());
-		assertTrue(config.getAllowCredentials());
+		assertNull(config.getAllowCredentials());
 	}
 
 	@Test
@@ -243,7 +243,7 @@ public class CrossOriginTests {
 		assertNotNull(config);
 		assertArrayEquals(new String[] {"GET"}, config.getAllowedMethods().toArray());
 		assertArrayEquals(new String[] {"*"}, config.getAllowedOrigins().toArray());
-		assertTrue(config.getAllowCredentials());
+		assertNull(config.getAllowCredentials());
 		assertArrayEquals(new String[] {"*"}, config.getAllowedHeaders().toArray());
 		assertTrue(CollectionUtils.isEmpty(config.getExposedHeaders()));
 		assertEquals(new Long(1800), config.getMaxAge());

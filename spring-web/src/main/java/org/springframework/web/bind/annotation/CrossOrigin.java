@@ -28,7 +28,7 @@ import org.springframework.web.cors.CorsConfiguration;
 /**
  * Marks the annotated method or type as permitting cross origin requests.
  *
- * <p>By default all origins and headers are permitted, credentials are allowed,
+ * <p>By default all origins and headers are permitted, credentials are not allowed,
  * and the maximum age is set to 1800 seconds (30 minutes). The list of HTTP
  * methods is set to the methods on the {@code @RequestMapping} if not
  * explicitly set on {@code @CrossOrigin}.
@@ -64,7 +64,7 @@ public @interface CrossOrigin {
 	 * @deprecated as of Spring 5.0, in favor of using {@link CorsConfiguration#applyPermitDefaultValues}
 	 */
 	@Deprecated
-	boolean DEFAULT_ALLOW_CREDENTIALS = true;
+	boolean DEFAULT_ALLOW_CREDENTIALS = false;
 
 	/**
 	 * @deprecated as of Spring 5.0, in favor of using {@link CorsConfiguration#applyPermitDefaultValues}
@@ -118,12 +118,13 @@ public @interface CrossOrigin {
 
 	/**
 	 * Whether the browser should include any cookies associated with the
-	 * domain of the request being annotated.
-	 * <p>Set to {@code "false"} if such cookies should not included.
-	 * An empty string ({@code ""}) means <em>undefined</em>.
-	 * {@code "true"} means that the pre-flight response will include the header
-	 * {@code Access-Control-Allow-Credentials=true}.
-	 * <p>If undefined, credentials are allowed.
+	 * domain of the request being annotated. Be aware that enabling this option could
+	 * increase the surface attack of the web application (for example via exposing
+	 * sensitive user-specific information like CSRF tokens).
+	 * <p>Set to {@code "true"} means that the pre-flight response will include the header
+	 * {@code Access-Control-Allow-Credentials=true} so such cookies should be included.
+	 * <p>If undefined or set to {@code "false"}, such header is not included and
+	 * credentials are not allowed.
 	 */
 	String allowCredentials() default "";
 
