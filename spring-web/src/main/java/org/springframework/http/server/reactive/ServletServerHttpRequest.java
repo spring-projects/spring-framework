@@ -267,7 +267,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
-		protected void suspendReading() {
+		protected void readingPaused() {
 			// no-op
 		}
 

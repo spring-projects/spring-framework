@@ -150,17 +150,6 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	protected abstract void resumeReceiving();
 
 	/**
-	 * Whether receiving new message(s) is suspended.
-	 * <p><strong>Note:</strong> if the underlying WebSocket API does not provide
-	 * flow control for receiving messages, then this method as well as
-	 * {@link #canSuspendReceiving()} should both return {@code false}.
-	 * @return returns {@code true} if receiving new message(s) is suspended,
-	 * or otherwise {@code false}.
-	 * @since 5.0.2
-	 */
-	protected abstract boolean isSuspended();
-
-	/**
 	 * Send the given WebSocket message.
 	 */
 	protected abstract boolean sendMessage(WebSocketMessage message) throws IOException;
@@ -231,16 +220,14 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 		@Override
 		protected void checkOnDataAvailable() {
-			if (isSuspended()) {
-				resumeReceiving();
-			}
+			resumeReceiving();
 			if (!this.pendingMessages.isEmpty()) {
 				onDataAvailable();
 			}
 		}
 
 		@Override
-		protected void suspendReading() {
+		protected void readingPaused() {
 			suspendReceiving();
 		}
 
@@ -248,14 +235,6 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		@Nullable
 		protected WebSocketMessage read() throws IOException {
 			return (WebSocketMessage) this.pendingMessages.poll();
-		}
-
-		@Override
-		public void onAllDataRead() {
-			if (isSuspended()) {
-				resumeReceiving();
-			}
-			super.onAllDataRead();
 		}
 
 		void handleMessage(WebSocketMessage webSocketMessage) {

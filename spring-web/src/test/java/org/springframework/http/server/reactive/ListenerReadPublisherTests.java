@@ -68,7 +68,7 @@ public class ListenerReadPublisherTests {
 		}
 
 		@Override
-		protected void suspendReading() {
+		protected void readingPaused() {
 			// No-op
 		}
 

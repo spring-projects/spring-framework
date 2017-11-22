@@ -74,14 +74,10 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 	@Override
 	protected void resumeReceiving() {
 		SuspendToken tokenToUse = this.suspendToken;
-		Assert.state(tokenToUse != null, "Not suspended");
-		tokenToUse.resume();
 		this.suspendToken = null;
-	}
-
-	@Override
-	protected boolean isSuspended() {
-		return this.suspendToken != null;
+		if (tokenToUse != null) {
+			tokenToUse.resume();
+		}
 	}
 
 	@Override

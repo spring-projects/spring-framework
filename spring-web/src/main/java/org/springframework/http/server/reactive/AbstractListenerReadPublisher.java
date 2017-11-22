@@ -116,9 +116,14 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	protected abstract T read() throws IOException;
 
 	/**
-	 * Suspend reading, if the underlying API provides such a mechanism.
+	 * Invoked when reading is paused due to a lack of demand.
+	 * <p><strong>Note:</strong> This method is guaranteed not to compete with
+	 * {@link #checkOnDataAvailable()} so it can be used to safely suspend
+	 * reading, if the underlying API supports it, i.e. without competing with
+	 * an implicit call to resume via {@code checkOnDataAvailable()}.
+	 * @since 5.0.2
 	 */
-	protected abstract void suspendReading();
+	protected abstract void readingPaused();
 
 
 	// Private methods for use in State...
@@ -280,7 +285,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 				if (Operators.validate(n)) {
 					Operators.addCap(DEMAND_FIELD_UPDATER, publisher, n);
 					// Did a concurrent read transition to NO_DEMAND just before us?
-					if (publisher.changeState(NO_DEMAND, DEMAND)) {
+					if (publisher.changeState(NO_DEMAND, this)) {
 						publisher.checkOnDataAvailable();
 					}
 				}
@@ -288,23 +293,6 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
 			@Override
 			<T> void onDataAvailable(AbstractListenerReadPublisher<T> publisher) {
-				for (;;) {
-					if (!read(publisher)) {
-						return;
-					}
-					// Maybe demand arrived between readAndPublish and READING->NO_DEMAND?
-					long r = publisher.demand;
-					if (r == 0  || publisher.changeState(NO_DEMAND, this)) {
-						break;
-					}
-				}
-			}
-
-			/**
-			 * @return whether to exit the read loop; false means stop trying
-			 * to read, true means check demand one more time.
-			 */
-			<T> boolean read(AbstractListenerReadPublisher<T> publisher) {
 				if (publisher.changeState(this, READING)) {
 					try {
 						boolean demandAvailable = publisher.readAndPublish();
@@ -313,18 +301,22 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 								publisher.checkOnDataAvailable();
 							}
 						}
-						else if (publisher.changeState(READING, NO_DEMAND)) {
-							publisher.suspendReading();
-							return true;
+						else {
+							publisher.readingPaused();
+							if (publisher.changeState(READING, NO_DEMAND)) {
+								// Demand may have arrived since readAndPublish returned
+								long r = publisher.demand;
+								if (r > 0  && publisher.changeState(NO_DEMAND, this)) {
+									publisher.checkOnDataAvailable();
+								}
+							}
 						}
 					}
 					catch (IOException ex) {
 						publisher.onError(ex);
 					}
 				}
-				// Either competing onDataAvailable calls (via request or container callback)
-				// Or a concurrent completion
-				return false;
+				// Else, either competing onDataAvailable (request vs container), or concurrent completion
 			}
 		},
 

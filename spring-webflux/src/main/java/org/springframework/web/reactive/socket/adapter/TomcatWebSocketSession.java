@@ -71,9 +71,4 @@ public class TomcatWebSocketSession extends StandardWebSocketSession {
 		}
 	}
 
-	@Override
-	protected boolean isSuspended() {
-		return this.suspended == 1;
-	}
-
 }

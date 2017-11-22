@@ -72,11 +72,6 @@ public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<W
 	}
 
 	@Override
-	protected boolean isSuspended() {
-		return !getDelegate().isReceivesResumed();
-	}
-
-	@Override
 	protected boolean sendMessage(WebSocketMessage message) throws IOException {
 		ByteBuffer buffer = message.getPayload().asByteBuffer();
 		if (WebSocketMessage.Type.TEXT.equals(message.getType())) {
