@@ -63,6 +63,17 @@ inline fun <reified T: Any> RestOperations.getForObject(url: URI): T? =
  * Extension for [RestOperations.getForEntity] avoiding requiring the type parameter
  * thanks to Kotlin reified type parameters.
  *
+ * @author Sebastien Deleuze
+ * @since 5.0.2
+ */
+@Throws(RestClientException::class)
+inline fun <reified T: Any> RestOperations.getForEntity(url: URI): ResponseEntity<T> =
+		getForEntity(url, T::class.java)
+
+/**
+ * Extension for [RestOperations.getForEntity] avoiding requiring the type parameter
+ * thanks to Kotlin reified type parameters.
+ *
  * @author Jon Schneider
  * @author Sebastien Deleuze
  * @since 5.0
@@ -70,6 +81,50 @@ inline fun <reified T: Any> RestOperations.getForObject(url: URI): T? =
 @Throws(RestClientException::class)
 inline fun <reified T: Any> RestOperations.getForEntity(url: String, vararg uriVariables: Any): ResponseEntity<T> =
 		getForEntity(url, T::class.java, *uriVariables)
+
+/**
+ * Extension for [RestOperations.getForEntity] avoiding requiring the type parameter
+ * thanks to Kotlin reified type parameters.
+ *
+ * @author Sebastien Deleuze
+ * @since 5.0.2
+ */
+@Throws(RestClientException::class)
+inline fun <reified T: Any> RestOperations.getForEntity(url: String, uriVariables: Map<String, *>): ResponseEntity<T> =
+		getForEntity(url, T::class.java, uriVariables)
+
+/**
+ * Extension for [RestOperations.patchForObject] avoiding specifying the type parameter
+ * thanks to Kotlin reified type parameters.
+ *
+ * @author Sebastien Deleuze
+ * @since 5.0.2
+ */
+@Throws(RestClientException::class)
+inline fun <reified T: Any> RestOperations.patchForObject(url: String, request: Any, vararg uriVariables: Any): T? =
+		patchForObject(url, request, T::class.java, *uriVariables)
+
+/**
+ * Extension for [RestOperations.patchForObject] avoiding specifying the type parameter
+ * thanks to Kotlin reified type parameters.
+ *
+ * @author Sebastien Deleuze
+ * @since 5.0.2
+ */
+@Throws(RestClientException::class)
+inline fun <reified T: Any> RestOperations.patchForObject(url: String, request: Any, uriVariables: Map<String, *>): T? =
+		patchForObject(url, request, T::class.java, uriVariables)
+
+/**
+ * Extension for [RestOperations.patchForObject] avoiding specifying the type parameter
+ * thanks to Kotlin reified type parameters.
+ *
+ * @author Sebastien Deleuze
+ * @since 5.0.2
+ */
+@Throws(RestClientException::class)
+inline fun <reified T: Any> RestOperations.patchForObject(url: URI, request: Any): T? =
+		patchForObject(url, request, T::class.java)
 
 /**
  * Extension for [RestOperations.postForObject] avoiding specifying the type parameter
