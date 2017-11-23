@@ -224,7 +224,11 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		protected void checkOnDataAvailable() {
 			resumeReceiving();
 			if (!this.pendingMessages.isEmpty()) {
+				logger.trace("checkOnDataAvailable, processing pending messages");
 				onDataAvailable();
+			}
+			else {
+				logger.trace("checkOnDataAvailable, no pending messages");
 			}
 		}
 
@@ -239,8 +243,11 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 			return (WebSocketMessage) this.pendingMessages.poll();
 		}
 
-		void handleMessage(WebSocketMessage webSocketMessage) {
-			if (!this.pendingMessages.offer(webSocketMessage)) {
+		void handleMessage(WebSocketMessage message) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Received message: " + message);
+			}
+			if (!this.pendingMessages.offer(message)) {
 				throw new IllegalStateException("Too many messages received. " +
 						"Please ensure WebSocketSession.receive() is subscribed to.");
 			}
@@ -255,6 +262,9 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 		@Override
 		protected boolean write(WebSocketMessage message) throws IOException {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Sending message " + message);
+			}
 			return sendMessage(message);
 		}
 
@@ -279,6 +289,9 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		 * async completion callback into simple flow control.
 		 */
 		public void setReadyToSend(boolean ready) {
+			if (ready) {
+				logger.trace("Send succeeded, ready to send again");
+			}
 			this.isReady = ready;
 		}
 	}

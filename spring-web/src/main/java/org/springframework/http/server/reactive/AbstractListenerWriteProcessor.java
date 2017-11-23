@@ -58,59 +58,58 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	private final WriteResultPublisher resultPublisher = new WriteResultPublisher();
 
 
-	// Subscriber methods...
+	// Subscriber methods and methods to notify of async I/O events...
 
 	@Override
 	public final void onSubscribe(Subscription subscription) {
-		if (logger.isTraceEnabled()) {
-			logger.trace(this.state + " onSubscribe: " + subscription);
-		}
 		this.state.get().onSubscribe(this, subscription);
 	}
 
 	@Override
 	public final void onNext(T data) {
-		if (logger.isTraceEnabled()) {
-			logger.trace(this.state + " onNext: " + data);
-		}
+		logger.trace("Received onNext data item");
 		this.state.get().onNext(this, data);
 	}
 
+	/**
+	 * Notify of an error. This can come from the upstream write Publisher or
+	 * from sub-classes as a result of an I/O error.
+	 */
 	@Override
-	public final void onError(Throwable t) {
+	public final void onError(Throwable ex) {
 		if (logger.isTraceEnabled()) {
-			logger.trace(this.state + " onError: " + t);
+			logger.trace("Received onError: " + ex);
 		}
-		this.state.get().onError(this, t);
+		this.state.get().onError(this, ex);
 	}
 
+	/**
+	 * Notify of completion. This can come from the upstream write Publisher or
+	 * from sub-classes as a result of an I/O completion event.
+	 */
 	@Override
 	public final void onComplete() {
-		if (logger.isTraceEnabled()) {
-			logger.trace(this.state + " onComplete");
-		}
+		logger.trace("Received onComplete");
 		this.state.get().onComplete(this);
 	}
 
+	public final void onWritePossible() {
+		this.logger.trace("Received onWritePossible");
+		this.state.get().onWritePossible(this);
+	}
+
+	public void cancel() {
+		this.logger.trace("Received request to cancel");
+		if (this.subscription != null) {
+			this.subscription.cancel();
+		}
+	}
 
 	// Publisher method...
 
 	@Override
 	public final void subscribe(Subscriber<? super Void> subscriber) {
 		this.resultPublisher.subscribe(subscriber);
-	}
-
-
-	// Methods for sub-classes to delegate to, when async I/O events occur...
-
-	public final void onWritePossible() {
-		this.state.get().onWritePossible(this);
-	}
-
-	public void cancel() {
-		if (this.subscription != null) {
-			this.subscription.cancel();
-		}
 	}
 
 
@@ -175,7 +174,11 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	// Private methods for use in State...
 
 	private boolean changeState(State oldState, State newState) {
-		return this.state.compareAndSet(oldState, newState);
+		boolean result = this.state.compareAndSet(oldState, newState);
+		if (result && logger.isTraceEnabled()) {
+			logger.trace(oldState + " -> " + newState);
+		}
+		return result;
 	}
 
 	private void changeStateToComplete(State oldState) {
@@ -189,7 +192,11 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	}
 
 	private void writeIfPossible() {
-		if (isWritePossible()) {
+		boolean result = isWritePossible();
+		if (logger.isTraceEnabled()) {
+			logger.trace("isWritePossible[" + result + "]");
+		}
+		if (result) {
 			onWritePossible();
 		}
 	}
