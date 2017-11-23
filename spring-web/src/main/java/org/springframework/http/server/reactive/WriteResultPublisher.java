@@ -60,7 +60,7 @@ class WriteResultPublisher implements Publisher<Void> {
 	}
 
 	/**
-	 * Delegate a completion signal to the subscriber.
+	 * Invoke this to delegate a completion signal to the subscriber.
 	 */
 	public void publishComplete() {
 		if (logger.isTraceEnabled()) {
@@ -70,7 +70,7 @@ class WriteResultPublisher implements Publisher<Void> {
 	}
 
 	/**
-	 * Delegate the given error signal to the subscriber.
+	 * Invoke this to delegate an error signal to the subscriber.
 	 */
 	public void publishError(Throwable t) {
 		if (logger.isTraceEnabled()) {
@@ -86,7 +86,7 @@ class WriteResultPublisher implements Publisher<Void> {
 
 	/**
 	 * Subscription to receive and delegate request and cancel signals from the
-	 * suscbriber to this publisher.
+	 * subscriber to this publisher.
 	 */
 	private static final class WriteResultSubscription implements Subscription {
 
@@ -224,8 +224,9 @@ class WriteResultPublisher implements Publisher<Void> {
 
 		void publishComplete(WriteResultPublisher publisher) {
 			if (publisher.changeState(this, COMPLETED)) {
-				Assert.state(publisher.subscriber != null, "No subscriber");
-				publisher.subscriber.onComplete();
+				Subscriber<? super Void> s = publisher.subscriber;
+				Assert.state(s != null, "No subscriber");
+				s.onComplete();
 			}
 			else {
 				publisher.state.get().publishComplete(publisher);
@@ -234,8 +235,9 @@ class WriteResultPublisher implements Publisher<Void> {
 
 		void publishError(WriteResultPublisher publisher, Throwable t) {
 			if (publisher.changeState(this, COMPLETED)) {
-				Assert.state(publisher.subscriber != null, "No subscriber");
-				publisher.subscriber.onError(t);
+				Subscriber<? super Void> s = publisher.subscriber;
+				Assert.state(s != null, "No subscriber");
+				s.onError(t);
 			}
 			else {
 				publisher.state.get().publishError(publisher, t);

@@ -73,18 +73,30 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	}
 
 
-	// Methods for sub-classes to delegate to, when async I/O events occur...
+	// Async I/O notification methods...
 
+	/**
+	 * Invoked when reading is possible, either in the same thread after a check
+	 * via {@link #checkOnDataAvailable()}, or as a callback from the underlying
+	 * container.
+	 */
 	public final void onDataAvailable() {
 		this.logger.trace("I/O event onDataAvailable");
 		this.state.get().onDataAvailable(this);
 	}
 
+	/**
+	 * Sub-classes can call this method to delegate a contain notification when
+	 * all data has been read.
+	 */
 	public void onAllDataRead() {
 		this.logger.trace("I/O event onAllDataRead");
 		this.state.get().onAllDataRead(this);
 	}
 
+	/**
+	 * Sub-classes can call this to delegate container error notifications.
+	 */
 	public final void onError(Throwable ex) {
 		if (this.logger.isTraceEnabled()) {
 			this.logger.trace("I/O event onError: " + ex);
@@ -93,11 +105,11 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	}
 
 
-	// Methods for sub-classes to implement...
+	// Read API methods to be implemented or template methods to override...
 
 	/**
-	 * Check if data is available, calling {@link #onDataAvailable()} either
-	 * immediately or later when reading is possible.
+	 * Check if data is available and either call {@link #onDataAvailable()}
+	 * immediately or schedule a notification.
 	 */
 	protected abstract void checkOnDataAvailable();
 

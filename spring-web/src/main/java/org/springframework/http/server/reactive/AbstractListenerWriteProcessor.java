@@ -58,7 +58,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	private final WriteResultPublisher resultPublisher = new WriteResultPublisher();
 
 
-	// Subscriber methods and methods to notify of async I/O events...
+	// Subscriber methods and async I/O notification methods...
 
 	@Override
 	public final void onSubscribe(Subscription subscription) {
@@ -72,8 +72,8 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	}
 
 	/**
-	 * Notify of an error. This can come from the upstream write Publisher or
-	 * from sub-classes as a result of an I/O error.
+	 * Error signal from the upstream, write Publisher. This is also used by
+	 * sub-classes to delegate error notifications from the container.
 	 */
 	@Override
 	public final void onError(Throwable ex) {
@@ -84,8 +84,8 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	}
 
 	/**
-	 * Notify of completion. This can come from the upstream write Publisher or
-	 * from sub-classes as a result of an I/O completion event.
+	 * Completion signal from the upstream, write Publisher. This is also used
+	 * by sub-classes to delegate completion notifications from the container.
 	 */
 	@Override
 	public final void onComplete() {
@@ -93,11 +93,20 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 		this.state.get().onComplete(this);
 	}
 
+	/**
+	 * Invoked when writing is possible, either in the same thread after a check
+	 * via {@link #isWritePossible()}, or as a callback from the underlying
+	 * container.
+	 */
 	public final void onWritePossible() {
 		this.logger.trace("Received onWritePossible");
 		this.state.get().onWritePossible(this);
 	}
 
+	/**
+	 * Invoked during an error or completion callback from the underlying
+	 * container to cancel the upstream subscription.
+	 */
 	public void cancel() {
 		this.logger.trace("Received request to cancel");
 		if (this.subscription != null) {
@@ -105,7 +114,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 		}
 	}
 
-	// Publisher method...
+	// Publisher implementation for result notifications...
 
 	@Override
 	public final void subscribe(Subscriber<? super Void> subscriber) {
@@ -113,7 +122,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	}
 
 
-	// Methods for sub-classes to implement or override...
+	// Write API methods to be implemented or template methods to override...
 
 	/**
 	 * Whether the given data item has any content to write.
@@ -122,8 +131,9 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	protected abstract boolean isDataEmpty(T data);
 
 	/**
-	 * Called when a data item is received via {@link Subscriber#onNext(Object)}.
-	 * The default implementation saves the data for writing when possible.
+	 * Template method invoked after a data item to write is received via
+	 * {@link Subscriber#onNext(Object)}. The default implementation saves the
+	 * data item for writing once that is possible.
 	 */
 	protected void dataReceived(T data) {
 		if (this.currentData != null) {
@@ -151,27 +161,31 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	protected abstract boolean write(T data) throws IOException;
 
 	/**
-	 * Suspend writing. Defaults to no-op.
+	 * Invoked after the current data has been written and before requesting
+	 * the next item from the upstream, write Publisher.
+	 * <p>The default implementation is a no-op.
 	 */
 	protected void suspendWriting() {
 	}
 
 	/**
-	 * Invoked when writing is complete. Defaults to no-op.
+	 * Invoked after onComplete or onError notification.
+	 * <p>The default implementation is a no-op.
 	 */
 	protected void writingComplete() {
 	}
 
 	/**
-	 * Invoked when an error happens while writing.
-	 * <p>Defaults to no-op. Servlet 3.1 based implementations will receive
-	 * {@code javax.servlet.WriteListener#onError(Throwable)} event.
+	 * Invoked when an I/O error occurs during a write. Sub-classes may choose
+	 * to ignore this if they know the underlying API will provide an error
+	 * notification in a container thread.
+	 * <p>Defaults to no-op.
 	 */
 	protected void writingFailed(Throwable ex) {
 	}
 
 
-	// Private methods for use in State...
+	// Private methods for use from State's...
 
 	private boolean changeState(State oldState, State newState) {
 		boolean result = this.state.compareAndSet(oldState, newState);
