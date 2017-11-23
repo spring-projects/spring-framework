@@ -324,7 +324,7 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 		}
 
 		public <T> void writeComplete(AbstractListenerWriteFlushProcessor<T> processor) {
-			// ignore
+			throw new IllegalStateException(toString());
 		}
 
 		public <T> void onFlushPossible(AbstractListenerWriteFlushProcessor<T> processor) {

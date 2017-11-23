@@ -35,7 +35,6 @@ import org.reactivestreams.Publisher;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
@@ -304,15 +303,6 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 		}
 
 		@Override
-		protected void releaseData() {
-			if (logger.isTraceEnabled()) {
-				logger.trace("releaseData: " + this.currentData);
-			}
-			DataBufferUtils.release(this.currentData);
-			this.currentData = null;
-		}
-
-		@Override
 		protected boolean isDataEmpty(DataBuffer dataBuffer) {
 			return dataBuffer.readableByteCount() == 0;
 		}
@@ -335,11 +325,15 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 				if (this.logger.isTraceEnabled()) {
 					this.logger.trace("written: " + written + " total: " + remaining);
 				}
-				return written == remaining;
+				if (written == remaining) {
+					if (logger.isTraceEnabled()) {
+						logger.trace("releaseData: " + dataBuffer);
+					}
+					DataBufferUtils.release(dataBuffer);
+					return true;
+				}
 			}
-			else {
-				return false;
-			}
+			return false;
 		}
 
 		@Override

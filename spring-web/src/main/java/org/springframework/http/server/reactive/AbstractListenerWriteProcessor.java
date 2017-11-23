@@ -51,7 +51,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	private Subscription subscription;
 
 	@Nullable
-	protected volatile T currentData;
+	private volatile T currentData;
 
 	private volatile boolean subscriberCompleted;
 
@@ -143,20 +143,18 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	}
 
 	/**
-	 * Called when the current received data item can be released.
-	 */
-	protected abstract void releaseData();
-
-	/**
 	 * Whether writing is possible.
 	 */
 	protected abstract boolean isWritePossible();
 
 	/**
 	 * Write the given item.
+	 * <p><strong>Note:</strong> Sub-classes are responsible for releasing any
+	 * data buffer associated with the item, once fully written, if pooled
+	 * buffers apply to the underlying container.
 	 * @param data the item to write
-	 * @return whether the data was fully written ({@code true})
-	 * and new data can be requested, or otherwise ({@code false})
+	 * @return whether the current data item was written and another one
+	 * requested ({@code true}), or or otherwise if more writes are required.
 	 */
 	protected abstract boolean write(T data) throws IOException;
 
@@ -165,7 +163,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * the next item from the upstream, write Publisher.
 	 * <p>The default implementation is a no-op.
 	 */
-	protected void suspendWriting() {
+	protected void writingPaused() {
 	}
 
 	/**
@@ -275,15 +273,14 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 					T data = processor.currentData;
 					Assert.state(data != null, "No data");
 					try {
-						boolean writeCompleted = processor.write(data);
-						if (writeCompleted) {
-							processor.releaseData();
+						if (processor.write(data)) {
 							if (processor.changeState(WRITING, REQUESTED)) {
+								processor.currentData = null;
 								if (processor.subscriberCompleted) {
 									processor.changeStateToComplete(REQUESTED);
 								}
 								else {
-									processor.suspendWriting();
+									processor.writingPaused();
 									Assert.state(processor.subscription != null, "No subscription");
 									processor.subscription.request(1);
 								}

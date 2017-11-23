@@ -153,6 +153,9 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 	/**
 	 * Send the given WebSocket message.
+	 * <p><strong>Note:</strong> Sub-classes are responsible for releasing the
+	 * payload data buffer, once fully written, if pooled buffers apply to the
+	 * underlying container.
 	 */
 	protected abstract boolean sendMessage(WebSocketMessage message) throws IOException;
 
@@ -269,18 +272,13 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		}
 
 		@Override
-		protected void releaseData() {
-			this.currentData = null;
-		}
-
-		@Override
 		protected boolean isDataEmpty(WebSocketMessage message) {
 			return (message.getPayload().readableByteCount() == 0);
 		}
 
 		@Override
 		protected boolean isWritePossible() {
-			return (this.isReady && this.currentData != null);
+			return (this.isReady);
 		}
 
 		/**
