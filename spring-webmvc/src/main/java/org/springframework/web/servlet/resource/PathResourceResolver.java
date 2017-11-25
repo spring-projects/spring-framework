@@ -258,7 +258,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 		if (resourcePath.contains("%")) {
 			// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars...
 			String decodedResourcePath = URLDecoder.decode(resourcePath, "UTF-8");
-			if (decodedResourcePath.contains("../") || decodedResourcePath.contains("..\")) {
+			if (decodedResourcePath.contains("../") || decodedResourcePath.contains("..\\")) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Resolved resource path contains \"../\" or \"..\\\" after decoding: " + resourcePath);
 				}
