@@ -33,6 +33,7 @@ import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.lang.Nullable;
@@ -80,7 +81,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * This allows for very efficient hash lookups, significantly faster
 	 * than the ResourceBundle class's own cache.
 	 */
-	private final Map<String, Map<Locale, ResourceBundle>> cachedResourceBundles = new HashMap<>();
+	private final Map<String, Map<Locale, ResourceBundle>> cachedResourceBundles = new ConcurrentHashMap<>();
 
 	/**
 	 * Cache to hold already generated MessageFormats.
@@ -90,7 +91,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * very efficient hash lookups without concatenated keys.
 	 * @see #getMessageFormat
 	 */
-	private final Map<ResourceBundle, Map<String, Map<Locale, MessageFormat>>> cachedBundleMessageFormats = new HashMap<>();
+	private final Map<ResourceBundle, Map<String, Map<Locale, MessageFormat>>> cachedBundleMessageFormats = new ConcurrentHashMap<>();
 
 
 	/**
@@ -178,31 +179,32 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 		}
 		else {
 			// Cache forever: prefer locale cache over repeated getBundle calls.
-			synchronized (this.cachedResourceBundles) {
-				Map<Locale, ResourceBundle> localeMap = this.cachedResourceBundles.get(basename);
-				if (localeMap != null) {
-					ResourceBundle bundle = localeMap.get(locale);
-					if (bundle != null) {
-						return bundle;
-					}
-				}
-				try {
-					ResourceBundle bundle = doGetBundle(basename, locale);
-					if (localeMap == null) {
-						localeMap = new HashMap<>();
-						this.cachedResourceBundles.put(basename, localeMap);
-					}
-					localeMap.put(locale, bundle);
+			Map<Locale, ResourceBundle> localeMap = this.cachedResourceBundles.get(basename);
+			if (localeMap != null) {
+				ResourceBundle bundle = localeMap.get(locale);
+				if (bundle != null) {
 					return bundle;
 				}
-				catch (MissingResourceException ex) {
-					if (logger.isWarnEnabled()) {
-						logger.warn("ResourceBundle [" + basename + "] not found for MessageSource: " + ex.getMessage());
+			}
+			try {
+				ResourceBundle bundle = doGetBundle(basename, locale);
+				if (localeMap == null) {
+					localeMap = new ConcurrentHashMap<>();
+					Map<Locale, ResourceBundle> existing = this.cachedResourceBundles.putIfAbsent(basename, localeMap);
+					if (existing != null) {
+						localeMap = existing;
 					}
-					// Assume bundle not found
-					// -> do NOT throw the exception to allow for checking parent message source.
-					return null;
 				}
+				localeMap.put(locale, bundle);
+				return bundle;
+			}
+			catch (MissingResourceException ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("ResourceBundle [" + basename + "] not found for MessageSource: " + ex.getMessage());
+				}
+				// Assume bundle not found
+				// -> do NOT throw the exception to allow for checking parent message source.
+				return null;
 			}
 		}
 	}
@@ -249,36 +251,40 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	protected MessageFormat getMessageFormat(ResourceBundle bundle, String code, Locale locale)
 			throws MissingResourceException {
 
-		synchronized (this.cachedBundleMessageFormats) {
-			Map<String, Map<Locale, MessageFormat>> codeMap = this.cachedBundleMessageFormats.get(bundle);
-			Map<Locale, MessageFormat> localeMap = null;
-			if (codeMap != null) {
-				localeMap = codeMap.get(code);
-				if (localeMap != null) {
-					MessageFormat result = localeMap.get(locale);
-					if (result != null) {
-						return result;
-					}
+		Map<String, Map<Locale, MessageFormat>> codeMap = this.cachedBundleMessageFormats.get(bundle);
+		Map<Locale, MessageFormat> localeMap = null;
+		if (codeMap != null) {
+			localeMap = codeMap.get(code);
+			if (localeMap != null) {
+				MessageFormat result = localeMap.get(locale);
+				if (result != null) {
+					return result;
 				}
 			}
-
-			String msg = getStringOrNull(bundle, code);
-			if (msg != null) {
-				if (codeMap == null) {
-					codeMap = new HashMap<>();
-					this.cachedBundleMessageFormats.put(bundle, codeMap);
-				}
-				if (localeMap == null) {
-					localeMap = new HashMap<>();
-					codeMap.put(code, localeMap);
-				}
-				MessageFormat result = createMessageFormat(msg, locale);
-				localeMap.put(locale, result);
-				return result;
-			}
-
-			return null;
 		}
+
+		String msg = getStringOrNull(bundle, code);
+		if (msg != null) {
+			if (codeMap == null) {
+				codeMap = new ConcurrentHashMap<>();
+				Map<String, Map<Locale, MessageFormat>> existing = this.cachedBundleMessageFormats.putIfAbsent(bundle, codeMap);
+				if (existing != null) {
+					codeMap = existing;
+				}
+			}
+			if (localeMap == null) {
+				localeMap = new ConcurrentHashMap<>();
+				Map<Locale, MessageFormat> existing = codeMap.putIfAbsent(code, localeMap);
+				if (existing != null) {
+					localeMap = existing;
+				}
+			}
+			MessageFormat result = createMessageFormat(msg, locale);
+			localeMap.put(locale, result);
+			return result;
+		}
+
+		return null;
 	}
 
 	/**
