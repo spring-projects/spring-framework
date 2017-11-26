@@ -50,7 +50,7 @@ import static org.junit.Assert.fail;
 public class ServerWebExchangeArgumentResolverTests {
 
 	private final ServerWebExchangeArgumentResolver resolver =
-			new ServerWebExchangeArgumentResolver(new ReactiveAdapterRegistry());
+			new ServerWebExchangeArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
 
 	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
 

@@ -23,7 +23,6 @@ import org.springframework.http.RequestEntity
 import org.springframework.http.ResponseEntity
 import java.net.URI
 
-
 /**
  * Extension for [RestOperations.getForObject] avoiding specifying the type
  * parameter thanks to Kotlin reified type parameters.
@@ -64,6 +63,17 @@ inline fun <reified T: Any> RestOperations.getForObject(url: URI): T? =
  * Extension for [RestOperations.getForEntity] avoiding requiring the type parameter
  * thanks to Kotlin reified type parameters.
  *
+ * @author Sebastien Deleuze
+ * @since 5.0.2
+ */
+@Throws(RestClientException::class)
+inline fun <reified T: Any> RestOperations.getForEntity(url: URI): ResponseEntity<T> =
+		getForEntity(url, T::class.java)
+
+/**
+ * Extension for [RestOperations.getForEntity] avoiding requiring the type parameter
+ * thanks to Kotlin reified type parameters.
+ *
  * @author Jon Schneider
  * @author Sebastien Deleuze
  * @since 5.0
@@ -71,6 +81,50 @@ inline fun <reified T: Any> RestOperations.getForObject(url: URI): T? =
 @Throws(RestClientException::class)
 inline fun <reified T: Any> RestOperations.getForEntity(url: String, vararg uriVariables: Any): ResponseEntity<T> =
 		getForEntity(url, T::class.java, *uriVariables)
+
+/**
+ * Extension for [RestOperations.getForEntity] avoiding requiring the type parameter
+ * thanks to Kotlin reified type parameters.
+ *
+ * @author Sebastien Deleuze
+ * @since 5.0.2
+ */
+@Throws(RestClientException::class)
+inline fun <reified T: Any> RestOperations.getForEntity(url: String, uriVariables: Map<String, *>): ResponseEntity<T> =
+		getForEntity(url, T::class.java, uriVariables)
+
+/**
+ * Extension for [RestOperations.patchForObject] avoiding specifying the type parameter
+ * thanks to Kotlin reified type parameters.
+ *
+ * @author Sebastien Deleuze
+ * @since 5.0.2
+ */
+@Throws(RestClientException::class)
+inline fun <reified T: Any> RestOperations.patchForObject(url: String, request: Any, vararg uriVariables: Any): T? =
+		patchForObject(url, request, T::class.java, *uriVariables)
+
+/**
+ * Extension for [RestOperations.patchForObject] avoiding specifying the type parameter
+ * thanks to Kotlin reified type parameters.
+ *
+ * @author Sebastien Deleuze
+ * @since 5.0.2
+ */
+@Throws(RestClientException::class)
+inline fun <reified T: Any> RestOperations.patchForObject(url: String, request: Any, uriVariables: Map<String, *>): T? =
+		patchForObject(url, request, T::class.java, uriVariables)
+
+/**
+ * Extension for [RestOperations.patchForObject] avoiding specifying the type parameter
+ * thanks to Kotlin reified type parameters.
+ *
+ * @author Sebastien Deleuze
+ * @since 5.0.2
+ */
+@Throws(RestClientException::class)
+inline fun <reified T: Any> RestOperations.patchForObject(url: URI, request: Any): T? =
+		patchForObject(url, request, T::class.java)
 
 /**
  * Extension for [RestOperations.postForObject] avoiding specifying the type parameter
@@ -117,7 +171,8 @@ inline fun <reified T: Any> RestOperations.postForObject(url: URI, request: Any)
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.postForEntity(url: String, request: Any, vararg uriVariables: Any): ResponseEntity<T> =
+inline fun <reified T: Any> RestOperations.postForEntity(url: String, request: Any,
+		vararg uriVariables: Any): ResponseEntity<T> =
 		postForEntity(url, request, T::class.java, *uriVariables)
 
 /**
@@ -129,7 +184,8 @@ inline fun <reified T: Any> RestOperations.postForEntity(url: String, request: A
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.postForEntity(url: String, request: Any, uriVariables: Map<String, *>): ResponseEntity<T> =
+inline fun <reified T: Any> RestOperations.postForEntity(url: String, request: Any,
+		uriVariables: Map<String, *>): ResponseEntity<T> =
 		postForEntity(url, request, T::class.java, uriVariables)
 
 /**
@@ -153,7 +209,8 @@ inline fun <reified T: Any> RestOperations.postForEntity(url: URI, request: Any)
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.exchange(url: String, method: HttpMethod, requestEntity: HttpEntity<*>, vararg uriVariables: Any): ResponseEntity<T> =
+inline fun <reified T: Any> RestOperations.exchange(url: String, method: HttpMethod,
+		requestEntity: HttpEntity<*>, vararg uriVariables: Any): ResponseEntity<T> =
 		exchange(url, method, requestEntity, object : ParameterizedTypeReference<T>() {}, *uriVariables)
 
 /**
@@ -165,7 +222,8 @@ inline fun <reified T: Any> RestOperations.exchange(url: String, method: HttpMet
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.exchange(url: String, method: HttpMethod, requestEntity: HttpEntity<*>, uriVariables: Map<String, *>): ResponseEntity<T> =
+inline fun <reified T: Any> RestOperations.exchange(url: String, method: HttpMethod,
+		requestEntity: HttpEntity<*>, uriVariables: Map<String, *>): ResponseEntity<T> =
 		exchange(url, method, requestEntity, object : ParameterizedTypeReference<T>() {}, uriVariables)
 
 /**
@@ -177,7 +235,8 @@ inline fun <reified T: Any> RestOperations.exchange(url: String, method: HttpMet
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.exchange(url: URI, method: HttpMethod, requestEntity: HttpEntity<*>): ResponseEntity<T> =
+inline fun <reified T: Any> RestOperations.exchange(url: URI, method: HttpMethod,
+		requestEntity: HttpEntity<*>): ResponseEntity<T> =
 		exchange(url, method, requestEntity, object : ParameterizedTypeReference<T>() {})
 
 /**

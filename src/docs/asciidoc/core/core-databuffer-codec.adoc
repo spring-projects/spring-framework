@@ -1,6 +1,9 @@
 [[databuffers]]
 = Data Buffers and Codecs
 
+
+
+
 == Introduction
 
 The `DataBuffer` interface defines an abstraction over byte buffers.
@@ -8,6 +11,9 @@ The main reason for introducing it, and not use the standard `java.nio.ByteBuffe
 Netty does not use `ByteBuffer`, but instead offers `ByteBuf` as an alternative.
 Spring's `DataBuffer` is a simple abstraction over `ByteBuf` that can also be used on non-Netty
 platforms (i.e. Servlet 3.1+).
+
+
+
 
 == `DataBufferFactory`
 
@@ -25,6 +31,9 @@ to be used on Netty platforms, such as Reactor Netty.
 The other implementation, the `DefaultDataBufferFactory`, is used on other platforms, such as
 Servlet 3.1+ servers.
 
+
+
+
 == The `DataBuffer` interface
 
 The `DataBuffer` interface is similar to `ByteBuffer`, but offers a number of advantages.
@@ -35,7 +44,7 @@ writing, and a separate `flip()` operation to switch between the two  I/O operat
 In general, the following invariant holds for the read position, write position, and the capacity:
 
 --
-`0` <= _read position_ <= _write position_ <= _capacity_
+	`0` <= _read position_ <= _write position_ <= _capacity_
 --
 
 When reading bytes from the `DataBuffer`, the read position is automatically updated in accordance with
@@ -54,6 +63,8 @@ Netty platforms, such as Reactor Netty.
 The other implementation, the `DefaultDataBuffer`, is used on other platforms, such as Servlet 3.1+
 servers.
 
+
+
 === `PooledDataBuffer`
 
 The `PooledDataBuffer` is an extension to `DataBuffer` that adds methods for reference counting.
@@ -66,6 +77,7 @@ Note that `DataBufferUtils` offers useful utility methods for releasing and reta
 buffers.
 These methods take a plain `DataBuffer` as parameter, but only call `retain` or `release` if the
 passed data buffer is an instance of `PooledDataBuffer`.
+
 
 [[databuffer-reference-counting]]
 ==== Reference Counting
@@ -95,23 +107,25 @@ throw exceptions:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-DataBufferFactory factory = ...
-DataBuffer buffer = factory.allocateBuffer(); <1>
-boolean release = true; <2>
-try {
-  writeDataToBuffer(buffer); <3>
-  putBufferInHttpBody(buffer);
-  release = false; <4>
-} finally {
-  if (release) {
-    DataBufferUtils.release(buffer); <5>
-  }
-}
+	DataBufferFactory factory = ...
+	DataBuffer buffer = factory.allocateBuffer(); <1>
+	boolean release = true; <2>
+	try {
+  		writeDataToBuffer(buffer); <3>
+  		putBufferInHttpBody(buffer);
+  		release = false; <4>
+	}
+	finally {
+  		if (release) {
+			DataBufferUtils.release(buffer); <5>
+		}
+	}
 
-private void writeDataToBuffer(DataBuffer buffer) throws IOException { <3>
-  ...
-}
+	private void writeDataToBuffer(DataBuffer buffer) throws IOException { <3>
+		...
+	}
 ----
+
 <1> A new buffer is allocated.
 <2> A boolean flag indicates whether the allocated buffer should be released.
 <3> This example method loads data into the buffer. Note that the method can throw an `IOException`,
@@ -121,6 +135,8 @@ released as part of sending the HTTP body across the wire.
 <5> If an exception did occur, the flag is still set to `true`, and the buffer will be released
 here.
 
+
+
 === DataBufferUtils
 
 `DataBufferUtils` contains various utility methods that operate on data buffers.
@@ -128,6 +144,9 @@ It contains methods for reading a `Flux` of `DataBuffer` objects from an `InputS
 `Channel`, and methods for writing a data buffer `Flux` to an `OutputStream` or `Channel`.
 `DataBufferUtils` also exposes `retain` and `release` methods that operate on plain `DataBuffer`
 instances (so that casting to a `PooledDataBuffer` is not required).
+
+
+
 
 [codecs]
 == Codecs

@@ -26,7 +26,6 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.reactivestreams.Publisher
 
-
 /**
  * Mock object based tests for [WebTestClient] Kotlin extensions
  *

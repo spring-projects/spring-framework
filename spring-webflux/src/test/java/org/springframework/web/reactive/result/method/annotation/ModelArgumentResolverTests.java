@@ -40,7 +40,8 @@ import static org.springframework.mock.http.server.reactive.test.MockServerHttpR
  */
 public class ModelArgumentResolverTests {
 
-	private final ModelArgumentResolver resolver = new ModelArgumentResolver(new ReactiveAdapterRegistry());
+	private final ModelArgumentResolver resolver =
+			new ModelArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
 
 	private final ServerWebExchange exchange = MockServerWebExchange.from(get("/"));
 

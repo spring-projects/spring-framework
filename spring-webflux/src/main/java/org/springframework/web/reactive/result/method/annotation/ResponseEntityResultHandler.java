@@ -63,7 +63,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 	public ResponseEntityResultHandler(List<HttpMessageWriter<?>> writers,
 			RequestedContentTypeResolver resolver) {
 
-		this(writers, resolver, new ReactiveAdapterRegistry());
+		this(writers, resolver, ReactiveAdapterRegistry.getSharedInstance());
 	}
 
 	/**

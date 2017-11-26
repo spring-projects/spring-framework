@@ -67,6 +67,11 @@ public class ListenerReadPublisherTests {
 			return mock(DataBuffer.class);
 		}
 
+		@Override
+		protected void readingPaused() {
+			// No-op
+		}
+
 		public int getReadCalls() {
 			return this.readCalls;
 		}

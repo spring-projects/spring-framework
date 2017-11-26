@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.socket.adapter;
 
 import java.io.IOException;
+import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.reactivestreams.Publisher;
@@ -25,6 +26,7 @@ import org.reactivestreams.Subscription;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.util.concurrent.Queues;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.server.reactive.AbstractListenerReadPublisher;
@@ -126,6 +128,8 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	/**
 	 * Whether the underlying WebSocket API has flow control and can suspend and
 	 * resume the receiving of messages.
+	 * <p><strong>Note:</strong> Sub-classes are encouraged to start out in
+	 * suspended mode, if possible, and wait until demand is received.
 	 */
 	protected abstract boolean canSuspendReceiving();
 
@@ -149,6 +153,9 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 	/**
 	 * Send the given WebSocket message.
+	 * <p><strong>Note:</strong> Sub-classes are responsible for releasing the
+	 * payload data buffer, once fully written, if pooled buffers apply to the
+	 * underlying container.
 	 */
 	protected abstract boolean sendMessage(WebSocketMessage message) throws IOException;
 
@@ -213,32 +220,40 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 	private final class WebSocketReceivePublisher extends AbstractListenerReadPublisher<WebSocketMessage> {
 
-		@Nullable
-		private volatile WebSocketMessage webSocketMessage;
+		private volatile Queue<Object> pendingMessages = Queues.unbounded(Queues.SMALL_BUFFER_SIZE).get();
+
 
 		@Override
 		protected void checkOnDataAvailable() {
-			if (this.webSocketMessage != null) {
+			resumeReceiving();
+			if (!this.pendingMessages.isEmpty()) {
+				logger.trace("checkOnDataAvailable, processing pending messages");
 				onDataAvailable();
 			}
+			else {
+				logger.trace("checkOnDataAvailable, no pending messages");
+			}
+		}
+
+		@Override
+		protected void readingPaused() {
+			suspendReceiving();
 		}
 
 		@Override
 		@Nullable
 		protected WebSocketMessage read() throws IOException {
-			if (this.webSocketMessage != null) {
-				WebSocketMessage result = this.webSocketMessage;
-				this.webSocketMessage = null;
-				resumeReceiving();
-				return result;
-			}
-
-			return null;
+			return (WebSocketMessage) this.pendingMessages.poll();
 		}
 
-		void handleMessage(WebSocketMessage webSocketMessage) {
-			this.webSocketMessage = webSocketMessage;
-			suspendReceiving();
+		void handleMessage(WebSocketMessage message) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Received message: " + message);
+			}
+			if (!this.pendingMessages.offer(message)) {
+				throw new IllegalStateException("Too many messages received. " +
+						"Please ensure WebSocketSession.receive() is subscribed to.");
+			}
 			onDataAvailable();
 		}
 	}
@@ -250,12 +265,10 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 		@Override
 		protected boolean write(WebSocketMessage message) throws IOException {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Sending message " + message);
+			}
 			return sendMessage(message);
-		}
-
-		@Override
-		protected void releaseData() {
-			this.currentData = null;
 		}
 
 		@Override
@@ -265,7 +278,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 		@Override
 		protected boolean isWritePossible() {
-			return (this.isReady && this.currentData != null);
+			return (this.isReady);
 		}
 
 		/**
@@ -274,6 +287,9 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		 * async completion callback into simple flow control.
 		 */
 		public void setReadyToSend(boolean ready) {
+			if (ready) {
+				logger.trace("Send succeeded, ready to send again");
+			}
 			this.isReady = ready;
 		}
 	}

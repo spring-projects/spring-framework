@@ -16,14 +16,15 @@
 
 package org.springframework.web.reactive.socket.adapter;
 
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import javax.websocket.Session;
 
 import org.apache.tomcat.websocket.WsSession;
+import reactor.core.publisher.MonoProcessor;
+
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketSession;
-
-import reactor.core.publisher.MonoProcessor;
 
 /**
  * Spring {@link WebSocketSession} adapter for Tomcat's
@@ -34,6 +35,11 @@ import reactor.core.publisher.MonoProcessor;
  */
 public class TomcatWebSocketSession extends StandardWebSocketSession {
 
+	private static final AtomicIntegerFieldUpdater<TomcatWebSocketSession> SUSPENDED =
+			AtomicIntegerFieldUpdater.newUpdater(TomcatWebSocketSession.class, "suspended");
+
+	private volatile int suspended;
+
 
 	public TomcatWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory) {
 		super(session, info, factory);
@@ -43,6 +49,7 @@ public class TomcatWebSocketSession extends StandardWebSocketSession {
 			MonoProcessor<Void> completionMono) {
 
 		super(session, info, factory, completionMono);
+		suspendReceiving();
 	}
 
 
@@ -53,12 +60,16 @@ public class TomcatWebSocketSession extends StandardWebSocketSession {
 
 	@Override
 	protected void suspendReceiving() {
-		((WsSession) getDelegate()).suspend();
+		if (SUSPENDED.compareAndSet(this, 0, 1)) {
+			((WsSession) getDelegate()).suspend();
+		}
 	}
 
 	@Override
 	protected void resumeReceiving() {
-		((WsSession) getDelegate()).resume();
+		if (SUSPENDED.compareAndSet(this, 1, 0)) {
+			((WsSession) getDelegate()).resume();
+		}
 	}
 
 }

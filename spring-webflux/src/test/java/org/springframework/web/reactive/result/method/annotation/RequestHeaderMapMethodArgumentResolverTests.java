@@ -58,7 +58,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 
 	@Before
 	public void setup() throws Exception {
-		resolver = new RequestHeaderMapMethodArgumentResolver(new ReactiveAdapterRegistry());
+		resolver = new RequestHeaderMapMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
 
 		Method method = ReflectionUtils.findMethod(getClass(), "params", (Class<?>[]) null);
 		paramMap = new SynthesizingMethodParameter(method, 0);

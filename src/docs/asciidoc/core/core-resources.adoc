@@ -444,8 +444,8 @@ this:
 ----
 com/
   foo/
-	services.xml
-	daos.xml
+    services.xml
+    daos.xml
     MessengerService.class
 ----
 

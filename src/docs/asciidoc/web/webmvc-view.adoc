@@ -57,7 +57,7 @@ Configuring the Groovy Markup Template Engine is quite easy:
 	@EnableWebMvc
 	public class WebConfig implements WebMvcConfigurer {
 
-        @Override
+		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.groovy();
 		}
@@ -1287,7 +1287,7 @@ The HTML would look like:
 					<input type="submit" value="Save Changes"/>
 				</td>
 			</tr>
-        </table>
+		</table>
 	</form>
 ----
 

@@ -193,7 +193,15 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 			if (logger.isTraceEnabled()) {
 				logger.trace("written: " + written + " total: " + total);
 			}
-			return written == total;
+			if (written != total) {
+				return false;
+			}
+			if (logger.isTraceEnabled()) {
+				logger.trace("releaseData: " + dataBuffer);
+			}
+			DataBufferUtils.release(dataBuffer);
+			this.byteBuffer = null;
+			return true;
 		}
 
 		private int writeByteBuffer(ByteBuffer byteBuffer) throws IOException {
@@ -208,20 +216,9 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 		}
 
 		@Override
-		protected void receiveData(DataBuffer dataBuffer) {
-			super.receiveData(dataBuffer);
+		protected void dataReceived(DataBuffer dataBuffer) {
+			super.dataReceived(dataBuffer);
 			this.byteBuffer = dataBuffer.asByteBuffer();
-		}
-
-		@Override
-		protected void releaseData() {
-			if (logger.isTraceEnabled()) {
-				logger.trace("releaseData: " + this.currentData);
-			}
-			DataBufferUtils.release(this.currentData);
-			this.currentData = null;
-
-			this.byteBuffer = null;
 		}
 
 		@Override
@@ -230,7 +227,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 		}
 
 		@Override
-		protected void suspendWriting() {
+		protected void writingPaused() {
 			this.channel.suspendWrites();
 		}
 

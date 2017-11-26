@@ -29,6 +29,13 @@ based on the CORS configuration you have provided.
 
 [NOTE]
 ====
+Be aware that cookies are not allowed by default to avoid increasing the surface attack of
+the web application (for example via exposing sensitive user-specific information like
+CSRF tokens). Set `allowedCredentials` property to `true` in order to allow them.
+====
+
+[NOTE]
+====
 Since CORS requests are automatically dispatched, you *do not need* to change the
 `DispatcherServlet` `dispatchOptionsRequest` init parameter value; using its default value
 (`false`) is the recommended approach.
@@ -165,7 +172,7 @@ public class WebConfig implements WebMvcConfigurer {
 			.allowedMethods("PUT", "DELETE")
 			.allowedHeaders("header1", "header2", "header3")
 			.exposedHeaders("header1", "header2")
-			.allowCredentials(false).maxAge(3600);
+			.allowCredentials(true).maxAge(3600);
 	}
 }
 ----
@@ -197,7 +204,7 @@ It is also possible to declare several CORS mappings with customized properties:
 		allowed-origins="http://domain1.com, http://domain2.com"
 		allowed-methods="GET, PUT"
 		allowed-headers="header1, header2, header3"
-		exposed-headers="header1, header2" allow-credentials="false"
+		exposed-headers="header1, header2" allow-credentials="true"
 		max-age="123" />
 
 	<mvc:mapping path="/resources/**"

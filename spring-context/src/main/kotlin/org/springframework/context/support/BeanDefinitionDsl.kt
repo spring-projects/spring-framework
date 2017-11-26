@@ -71,11 +71,13 @@ fun beans(init: BeanDefinitionDsl.() -> Unit): BeanDefinitionDsl {
  * Class implementing functional bean definition Kotlin DSL.
  *
  * @constructor Create a new bean definition DSL.
- * @param condition the predicate to fulfill in order to take in account the inner bean definition block
+ * @param condition the predicate to fulfill in order to take in account the inner
+ * bean definition block
  * @author Sebastien Deleuze
  * @since 5.0
  */
-open class BeanDefinitionDsl(private val condition: (ConfigurableEnvironment) -> Boolean = { true }) : ApplicationContextInitializer<GenericApplicationContext> {
+open class BeanDefinitionDsl(private val condition: (ConfigurableEnvironment) -> Boolean = { true })
+	: ApplicationContextInitializer<GenericApplicationContext> {
 
 	@PublishedApi
 	internal val registrations = arrayListOf<(GenericApplicationContext) -> Unit>()
@@ -131,7 +133,8 @@ open class BeanDefinitionDsl(private val condition: (ConfigurableEnvironment) ->
 	/**
 	 * Provide read access to some application context facilities.
 	 * @constructor Create a new bean definition context.
-	 * @param context the `ApplicationContext` instance to use for retrieving bean references, `Environment`, etc.
+	 * @param context the `ApplicationContext` instance to use for retrieving bean
+	 * references, `Environment`, etc.
 	 */
 	inner class BeanDefinitionContext(@PublishedApi internal val context: GenericApplicationContext) {
 
@@ -163,7 +166,8 @@ open class BeanDefinitionDsl(private val condition: (ConfigurableEnvironment) ->
 	 * @param isLazyInit Set whether this bean should be lazily initialized.
 	 * @param isPrimary Set whether this bean is a primary autowire candidate.
 	 * @param autowireMode Set the autowire mode, `Autowire.CONSTRUCTOR` by default
-	 * @param isAutowireCandidate Set whether this bean is a candidate for getting autowired into some other bean.
+	 * @param isAutowireCandidate Set whether this bean is a candidate for getting
+	 * autowired into some other bean.
 	 * @see GenericApplicationContext.registerBean
 	 * @see org.springframework.beans.factory.config.BeanDefinition
 	 */
@@ -200,7 +204,8 @@ open class BeanDefinitionDsl(private val condition: (ConfigurableEnvironment) ->
 	 * @param isLazyInit Set whether this bean should be lazily initialized.
 	 * @param isPrimary Set whether this bean is a primary autowire candidate.
 	 * @param autowireMode Set the autowire mode, `Autowire.NO` by default
-	 * @param isAutowireCandidate Set whether this bean is a candidate for getting autowired into some other bean.
+	 * @param isAutowireCandidate Set whether this bean is a candidate for getting
+	 * autowired into some other bean.
 	 * @param function the bean supplier function
 	 * @see GenericApplicationContext.registerBean
 	 * @see org.springframework.beans.factory.config.BeanDefinition
@@ -226,8 +231,10 @@ open class BeanDefinitionDsl(private val condition: (ConfigurableEnvironment) ->
 		registrations.add {
 			val beanContext = BeanDefinitionContext(it)
 			when (name) {
-				null -> it.registerBean(T::class.java, Supplier { function.invoke(beanContext) }, customizer)
-				else -> it.registerBean(name, T::class.java, Supplier { function.invoke(beanContext) }, customizer)
+				null -> it.registerBean(T::class.java,
+						Supplier { function.invoke(beanContext) }, customizer)
+				else -> it.registerBean(name, T::class.java,
+						Supplier { function.invoke(beanContext) }, customizer)
 			}
 		}
 	}
@@ -246,9 +253,11 @@ open class BeanDefinitionDsl(private val condition: (ConfigurableEnvironment) ->
 	/**
 	 * Take in account bean definitions enclosed in the provided lambda only when the
 	 * specified environment-based predicate is true.
-	 * @param condition the predicate to fulfill in order to take in account the inner bean definition block
+	 * @param condition the predicate to fulfill in order to take in account the inner
+	 * bean definition block
 	 */
-	fun environment(condition: ConfigurableEnvironment.() -> Boolean, init: BeanDefinitionDsl.() -> Unit): BeanDefinitionDsl {
+	fun environment(condition: ConfigurableEnvironment.() -> Boolean,
+					init: BeanDefinitionDsl.() -> Unit): BeanDefinitionDsl {
 		val beans = BeanDefinitionDsl(condition::invoke)
 		beans.init()
 		children.add(beans)

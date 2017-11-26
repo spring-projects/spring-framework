@@ -324,7 +324,6 @@ public class CorsConfiguration {
 	 *     <li>Allow all origins, i.e. {@code "*"}.</li>
 	 *     <li>Allow "simple" methods {@code GET}, {@code HEAD} and {@code POST}.</li>
 	 *     <li>Allow all headers.</li>
-	 *     <li>Allow credentials.</li>
 	 *     <li>Set max age to 1800 seconds (30 minutes).</li>
 	 * </ul>
 	 */
@@ -338,9 +337,6 @@ public class CorsConfiguration {
 		}
 		if (this.allowedHeaders == null) {
 			this.addAllowedHeader(ALL);
-		}
-		if (this.allowCredentials == null) {
-			this.setAllowCredentials(true);
 		}
 		if (this.maxAge == null) {
 			this.setMaxAge(1800L);

@@ -24,6 +24,13 @@ implementation (https://github.com/spring-projects/spring-framework/blob/master/
 by default) in order to add the relevant CORS response headers (like `Access-Control-Allow-Origin`)
 based on the CORS configuration you have provided.
 
+[NOTE]
+====
+Be aware that cookies are not allowed by default to avoid increasing the surface attack of
+the web application (for example via exposing sensitive user-specific information like
+CSRF tokens). Set `allowedCredentials` property to `true` in order to allow them.
+====
+
 
 [[webflux-cors-controller]]
 == @CrossOrigin
@@ -146,7 +153,7 @@ public class WebConfig implements WebFluxConfigurer {
 			.allowedMethods("PUT", "DELETE")
 			.allowedHeaders("header1", "header2", "header3")
 			.exposedHeaders("header1", "header2")
-			.allowCredentials(false).maxAge(3600);
+			.allowCredentials(true).maxAge(3600);
 	}
 }
 ----

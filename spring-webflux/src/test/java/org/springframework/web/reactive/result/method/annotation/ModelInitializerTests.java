@@ -73,7 +73,7 @@ public class ModelInitializerTests {
 	@Before
 	public void setUp() throws Exception {
 
-		ReactiveAdapterRegistry adapterRegistry = new ReactiveAdapterRegistry();
+		ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
 		ArgumentResolverConfigurer resolverConfigurer = new ArgumentResolverConfigurer();
 		resolverConfigurer.addCustomResolver(new ModelArgumentResolver(adapterRegistry));

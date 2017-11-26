@@ -63,6 +63,7 @@ public class DefaultCorsProcessorTests {
 
 		ServerHttpResponse response = exchange.getResponse();
 		assertFalse(response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertEquals(HttpHeaders.ORIGIN, response.getHeaders().getFirst(HttpHeaders.VARY));
 		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
 	}
 
@@ -87,6 +88,7 @@ public class DefaultCorsProcessorTests {
 		assertEquals("*", response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertFalse(response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_MAX_AGE));
 		assertFalse(response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS));
+		assertEquals(HttpHeaders.ORIGIN, response.getHeaders().getFirst(HttpHeaders.VARY));
 		assertNull(response.getStatusCode());
 	}
 
@@ -104,6 +106,7 @@ public class DefaultCorsProcessorTests {
 		assertEquals("http://domain2.com", response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertTrue(response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS));
 		assertEquals("true", response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS));
+		assertEquals(HttpHeaders.ORIGIN, response.getHeaders().getFirst(HttpHeaders.VARY));
 		assertNull(response.getStatusCode());
 	}
 
@@ -119,6 +122,7 @@ public class DefaultCorsProcessorTests {
 		assertEquals("http://domain2.com", response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertTrue(response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS));
 		assertEquals("true", response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS));
+		assertEquals(HttpHeaders.ORIGIN, response.getHeaders().getFirst(HttpHeaders.VARY));
 		assertNull(response.getStatusCode());
 	}
 
@@ -130,6 +134,7 @@ public class DefaultCorsProcessorTests {
 
 		ServerHttpResponse response = exchange.getResponse();
 		assertTrue(response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertEquals(HttpHeaders.ORIGIN, response.getHeaders().getFirst(HttpHeaders.VARY));
 		assertNull(response.getStatusCode());
 	}
 
@@ -147,6 +152,7 @@ public class DefaultCorsProcessorTests {
 		assertTrue(response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS));
 		assertTrue(response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS).contains("header1"));
 		assertTrue(response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS).contains("header2"));
+		assertEquals(HttpHeaders.ORIGIN, response.getHeaders().getFirst(HttpHeaders.VARY));
 		assertNull(response.getStatusCode());
 	}
 
@@ -157,7 +163,9 @@ public class DefaultCorsProcessorTests {
 		this.conf.addAllowedOrigin("*");
 		this.processor.process(this.conf, exchange);
 
-		assertNull(exchange.getResponse().getStatusCode());
+		ServerHttpResponse response = exchange.getResponse();
+		assertEquals(HttpHeaders.ORIGIN, response.getHeaders().getFirst(HttpHeaders.VARY));
+		assertNull(response.getStatusCode());
 	}
 
 
@@ -168,7 +176,9 @@ public class DefaultCorsProcessorTests {
 		this.conf.addAllowedOrigin("*");
 		this.processor.process(this.conf, exchange);
 
-		assertEquals(HttpStatus.FORBIDDEN, exchange.getResponse().getStatusCode());
+		ServerHttpResponse response = exchange.getResponse();
+		assertEquals(HttpHeaders.ORIGIN, response.getHeaders().getFirst(HttpHeaders.VARY));
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
 	}
 
 	@Test
@@ -180,6 +190,7 @@ public class DefaultCorsProcessorTests {
 
 		ServerHttpResponse response = exchange.getResponse();
 		assertNull(response.getStatusCode());
+		assertEquals(HttpHeaders.ORIGIN, response.getHeaders().getFirst(HttpHeaders.VARY));
 		assertEquals("GET,HEAD", response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS));
 	}
 
@@ -190,6 +201,7 @@ public class DefaultCorsProcessorTests {
 
 		ServerHttpResponse response = exchange.getResponse();
 		assertFalse(response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertEquals(HttpHeaders.ORIGIN, response.getHeaders().getFirst(HttpHeaders.VARY));
 		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
 	}
 
@@ -201,6 +213,7 @@ public class DefaultCorsProcessorTests {
 
 		ServerHttpResponse response = exchange.getResponse();
 		assertFalse(response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertEquals(HttpHeaders.ORIGIN, response.getHeaders().getFirst(HttpHeaders.VARY));
 		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
 	}
 
@@ -214,6 +227,7 @@ public class DefaultCorsProcessorTests {
 
 		ServerHttpResponse response = exchange.getResponse();
 		assertFalse(response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertEquals(HttpHeaders.ORIGIN, response.getHeaders().getFirst(HttpHeaders.VARY));
 		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
 	}
 
@@ -237,6 +251,7 @@ public class DefaultCorsProcessorTests {
 		assertTrue(response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS));
 		assertEquals("GET,PUT", response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS));
 		assertFalse(response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_MAX_AGE));
+		assertEquals(HttpHeaders.ORIGIN, response.getHeaders().getFirst(HttpHeaders.VARY));
 		assertNull(response.getStatusCode());
 	}
 
@@ -259,6 +274,7 @@ public class DefaultCorsProcessorTests {
 		assertEquals("http://domain2.com", response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertTrue(response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS));
 		assertEquals("true", response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS));
+		assertEquals(HttpHeaders.ORIGIN, response.getHeaders().getFirst(HttpHeaders.VARY));
 		assertNull(response.getStatusCode());
 	}
 
@@ -279,6 +295,7 @@ public class DefaultCorsProcessorTests {
 		ServerHttpResponse response = exchange.getResponse();
 		assertTrue(response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertEquals("http://domain2.com", response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertEquals(HttpHeaders.ORIGIN, response.getHeaders().getFirst(HttpHeaders.VARY));
 		assertNull(response.getStatusCode());
 	}
 
@@ -301,6 +318,7 @@ public class DefaultCorsProcessorTests {
 		assertTrue(response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_HEADERS).contains("Header1"));
 		assertTrue(response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_HEADERS).contains("Header2"));
 		assertFalse(response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_HEADERS).contains("Header3"));
+		assertEquals(HttpHeaders.ORIGIN, response.getHeaders().getFirst(HttpHeaders.VARY));
 		assertNull(response.getStatusCode());
 	}
 
@@ -321,6 +339,7 @@ public class DefaultCorsProcessorTests {
 		assertTrue(response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_HEADERS).contains("Header1"));
 		assertTrue(response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_HEADERS).contains("Header2"));
 		assertFalse(response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_HEADERS).contains("*"));
+		assertEquals(HttpHeaders.ORIGIN, response.getHeaders().getFirst(HttpHeaders.VARY));
 		assertNull(response.getStatusCode());
 	}
 
@@ -338,6 +357,7 @@ public class DefaultCorsProcessorTests {
 		ServerHttpResponse response = exchange.getResponse();
 		assertTrue(response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertFalse(response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_HEADERS));
+		assertEquals(HttpHeaders.ORIGIN, response.getHeaders().getFirst(HttpHeaders.VARY));
 		assertNull(response.getStatusCode());
 	}
 

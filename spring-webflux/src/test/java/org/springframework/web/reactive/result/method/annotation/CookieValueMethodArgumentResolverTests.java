@@ -62,7 +62,7 @@ public class CookieValueMethodArgumentResolverTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.refresh();
 
-		ReactiveAdapterRegistry adapterRegistry = new ReactiveAdapterRegistry();
+		ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 		this.resolver = new CookieValueMethodArgumentResolver(context.getBeanFactory(), adapterRegistry);
 		this.bindingContext = new BindingContext();
 

@@ -80,7 +80,7 @@ public class ReactiveTypeHandlerTests {
 		ContentNegotiationManagerFactoryBean factoryBean = new ContentNegotiationManagerFactoryBean();
 		factoryBean.afterPropertiesSet();
 		ContentNegotiationManager manager = factoryBean.getObject();
-		this.handler = new ReactiveTypeHandler(new ReactiveAdapterRegistry(), new SyncTaskExecutor(), manager);
+		this.handler = new ReactiveTypeHandler(ReactiveAdapterRegistry.getSharedInstance(), new SyncTaskExecutor(), manager);
 		resetRequest();
 	}
 

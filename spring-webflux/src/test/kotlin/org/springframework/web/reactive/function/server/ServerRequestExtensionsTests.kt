@@ -28,7 +28,7 @@ import org.springframework.web.reactive.function.server.bodyToFlux
 import org.springframework.web.reactive.function.server.bodyToMono
 
 /**
- * Mock object based tests for [ServerRequest] Kotlin extensions
+ * Mock object based tests for [ServerRequest] Kotlin extensions.
  *
  * @author Sebastien Deleuze
  */

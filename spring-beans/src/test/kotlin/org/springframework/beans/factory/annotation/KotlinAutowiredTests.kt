@@ -231,7 +231,8 @@ class KotlinAutowiredTests {
 			val optional: String = "foo",
 			val injectedFromConstructor: TestBean
 	) {
-		@Autowired constructor(injectedFromSecondaryConstructor: Colour, injectedFromConstructor: TestBean, optional: String = "bar") : this(optional, injectedFromConstructor) {
+		@Autowired constructor(injectedFromSecondaryConstructor: Colour, injectedFromConstructor: TestBean,
+							   optional: String = "bar") : this(optional, injectedFromConstructor) {
 			this.injectedFromSecondaryConstructor = injectedFromSecondaryConstructor
 		}
 
@@ -247,7 +248,8 @@ class KotlinAutowiredTests {
 			val optional: String = "foo",
 			val injectedFromConstructor: TestBean
 	) {
-		constructor(injectedFromSecondaryConstructor: Colour, injectedFromConstructor: TestBean, optional: String = "bar") : this(optional, injectedFromConstructor) {
+		constructor(injectedFromSecondaryConstructor: Colour, injectedFromConstructor: TestBean,
+					optional: String = "bar") : this(optional, injectedFromConstructor) {
 			this.injectedFromSecondaryConstructor = injectedFromSecondaryConstructor
 		}
 

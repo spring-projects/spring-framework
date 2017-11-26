@@ -195,7 +195,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	protected DataBuffer readFromInputStream() throws IOException {
 		int read = this.request.getInputStream().read(this.buffer);
 		if (logger.isTraceEnabled()) {
-			logger.trace("read:" + read);
+			logger.trace("InputStream read returned " + read + (read != -1 ? " bytes" : ""));
 		}
 
 		if (read > 0) {
@@ -264,6 +264,11 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 				return readFromInputStream();
 			}
 			return null;
+		}
+
+		@Override
+		protected void readingPaused() {
+			// no-op
 		}
 
 

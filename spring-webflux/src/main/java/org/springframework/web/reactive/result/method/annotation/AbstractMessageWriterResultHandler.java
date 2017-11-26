@@ -60,7 +60,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 	protected AbstractMessageWriterResultHandler(List<HttpMessageWriter<?>> messageWriters,
 			RequestedContentTypeResolver contentTypeResolver) {
 
-		this(messageWriters, contentTypeResolver, new ReactiveAdapterRegistry());
+		this(messageWriters, contentTypeResolver, ReactiveAdapterRegistry.getSharedInstance());
 	}
 
 	/**

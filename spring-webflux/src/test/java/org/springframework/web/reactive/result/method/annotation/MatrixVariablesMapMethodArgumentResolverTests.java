@@ -48,7 +48,7 @@ import static org.springframework.web.method.MvcAnnotationPredicates.matrixAttri
 public class MatrixVariablesMapMethodArgumentResolverTests {
 
 	private final MatrixVariableMapMethodArgumentResolver resolver =
-			new MatrixVariableMapMethodArgumentResolver(new ReactiveAdapterRegistry());
+			new MatrixVariableMapMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
 
 	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 

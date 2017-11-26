@@ -58,18 +58,18 @@ for their APIs, thus giving a better Kotlin development experience overall.
 
 To retrieve a list of `Foo` objects in Java, one would normally write:
 
-[source,java]
+[source,java,indent=0]
 ----
-Flux<User> users  = client.get().retrieve().bodyToFlux(User.class)
+	Flux<User> users  = client.get().retrieve().bodyToFlux(User.class)
 ----
 
 Whilst with Kotlin and Spring Framework extensions, one is able to write:
 
-[source,kotlin]
+[source,kotlin,indent=0]
 ----
-val users = client.get().retrieve().bodyToFlux<User>()
-// or (both are equivalent)
-val users : Flux<User> = client.get().retrieve().bodyToFlux()
+	val users = client.get().retrieve().bodyToFlux<User>()
+	// or (both are equivalent)
+	val users : Flux<User> = client.get().retrieve().bodyToFlux()
 ----
 
 As in Java, `users` in Kotlin is strongly typed, but Kotlin's clever type inference allows
@@ -172,24 +172,23 @@ This mechanism is very efficient as it does not require any reflection or CGLIB 
 
 In Java, one may for example write:
 
-[source,java]
+[source,java,indent=0]
 ----
-GenericApplicationContext context = new GenericApplicationContext();
-context.registerBean(Foo.class);
-context.registerBean(Bar.class, () -> new
-    Bar(context.getBean(Foo.class))
+	GenericApplicationContext context = new GenericApplicationContext();
+	context.registerBean(Foo.class);
+	context.registerBean(Bar.class, () -> new Bar(context.getBean(Foo.class))
 );
 ----
 
 Whilst in Kotlin with reified type parameters and `GenericApplicationContext`
 Kotlin extensions one can instead simply write:
 
-[source,kotlin]
+[source,kotlin,indent=0]
 ----
-val context = GenericApplicationContext().apply {
-    registerBean<Foo>()
-    registerBean { Bar(it.getBean<Foo>()) }
-}
+	val context = GenericApplicationContext().apply {
+		registerBean<Foo>()
+		registerBean { Bar(it.getBean<Foo>()) }
+	}
 ----
 
 In order to allow a more declarative approach and cleaner syntax, Spring Framework provides
@@ -198,36 +197,36 @@ It declares an `ApplicationContextInitializer` via a clean declarative API
 which enables one to deal with profiles and `Environment` for customizing
 how beans are registered.
 
-[source,kotlin]
+[source,kotlin,indent=0]
 ----
-fun beans() = beans {
-  bean<UserHandler>()
-  bean<Routes>()
-  bean<WebHandler>("webHandler") {
-    RouterFunctions.toWebHandler(
-      ref<Routes>().router(),
-      HandlerStrategies.builder().viewResolver(ref()).build()
-    )
-  }
-  bean("messageSource") {
-    ReloadableResourceBundleMessageSource().apply {
-      setBasename("messages")
-      setDefaultEncoding("UTF-8")
-    }
-  }
-  bean {
-    val prefix = "classpath:/templates/"
-    val suffix = ".mustache"
-    val loader = MustacheResourceTemplateLoader(prefix, suffix)
-    MustacheViewResolver(Mustache.compiler().withLoader(loader)).apply {
-      setPrefix(prefix)
-      setSuffix(suffix)
-    }
-  }
-  profile("foo") {
-    bean<Foo>()
-  }
-}
+	fun beans() = beans {
+		bean<UserHandler>()
+		bean<Routes>()
+		bean<WebHandler>("webHandler") {
+			RouterFunctions.toWebHandler(
+				ref<Routes>().router(),
+				HandlerStrategies.builder().viewResolver(ref()).build()
+			)
+		}
+		bean("messageSource") {
+			ReloadableResourceBundleMessageSource().apply {
+				setBasename("messages")
+				setDefaultEncoding("UTF-8")
+			}
+		}
+		bean {
+			val prefix = "classpath:/templates/"
+			val suffix = ".mustache"
+			val loader = MustacheResourceTemplateLoader(prefix, suffix)
+			MustacheViewResolver(Mustache.compiler().withLoader(loader)).apply {
+				setPrefix(prefix)
+				setSuffix(suffix)
+			}
+		}
+		profile("foo") {
+			bean<Foo>()
+		}
+	}
 ----
 
 In this example, `bean<Routes>()` is using autowiring by constructor and `ref<Routes>()`
@@ -235,12 +234,12 @@ is a shortcut for `applicationContext.getBean(Routes::class.java)`.
 
 This `beans()` function can then be used to register beans on the application context.
 
-[source,kotlin]
+[source,kotlin,indent=0]
 ----
-val context = GenericApplicationContext().apply {
-  beans().initialize(this)
-  refresh()
-}
+	val context = GenericApplicationContext().apply {
+		beans().initialize(this)
+		refresh()
+	}
 ----
 
 [NOTE]
@@ -276,24 +275,24 @@ Spring Framework now comes with a
 that allows one to leverage the <<web-reactive#webflux-fn,WebFlux functional
 API>> for writing clean and idiomatic Kotlin code:
 
-[source,kotlin]
+[source,kotlin,indent=0]
 ----
-router {
-  accept(TEXT_HTML).nest {
-    GET("/") { ok().render("index") }
-    GET("/sse") { ok().render("sse") }
-    GET("/users", userHandler::findAllView)
-  }
-  "/api".nest {
-    accept(APPLICATION_JSON).nest {
-      GET("/users", userHandler::findAll)
-    }
-    accept(TEXT_EVENT_STREAM).nest {
-      GET("/users", userHandler::stream)
-    }
-  }
-  resources("/**", ClassPathResource("static/"))
-}
+	router {
+		accept(TEXT_HTML).nest {
+			GET("/") { ok().render("index") }
+			GET("/sse") { ok().render("sse") }
+			GET("/users", userHandler::findAllView)
+		}
+		"/api".nest {
+			accept(APPLICATION_JSON).nest {
+				GET("/users", userHandler::findAll)
+			}
+			accept(TEXT_EVENT_STREAM).nest {
+				GET("/users", userHandler::stream)
+			}
+		}
+		resources("/**", ClassPathResource("static/"))
+	}
 ----
 
 [NOTE]
@@ -326,18 +325,18 @@ https://github.com/Kotlin/kotlinx.html[kotlinx.html] DSL or simply using Kotlin 
 This can allow one to write Kotlin templates with full autocompletion and
 refactoring support in a supported IDE:
 
-[source,kotlin]
+[source,kotlin,indent=0]
 ----
-import io.spring.demo.*
+	import io.spring.demo.*
 
-"""
-${include("header")}
-<h1>${i18n("title")}</h1>
-<ul>
-    ${users.joinToLine{ "<li>${i18n("user")} ${it.firstname} ${it.lastname}</li>" }}
-</ul>
-${include("footer")}
-"""
+	"""
+	${include("header")}
+	<h1>${i18n("title")}</h1>
+	<ul>
+	${users.joinToLine{ "<li>${i18n("user")} ${it.firstname} ${it.lastname}</li>" }}
+	</ul>
+	${include("footer")}
+	"""
 ----
 
 See https://github.com/sdeleuze/kotlin-script-templating[kotlin-script-templating] example
@@ -394,9 +393,9 @@ you will be able to write your Kotlin beans without any additional `open` keywor
 In Kotlin, it is very convenient and considered best practice to declare read-only properties
 within the primary constructor, as in the following example:
 
-[source,kotlin]
+[source,kotlin,indent=0]
 ----
-class Person(val name: String, val age: Int)
+	class Person(val name: String, val age: Int)
 ----
 
 You can optionally add https://kotlinlang.org/docs/reference/data-classes.html[the `data` keyword]
@@ -410,12 +409,12 @@ in the primary constructor:
 
 This allows for easy changes to individual properties even if `Person` properties are read-only:
 
-[source,kotlin]
+[source,kotlin,indent=0]
 ----
-data class Person(val name: String, val age: Int)
+	data class Person(val name: String, val age: Int)
 
-val jack = Person(name = "Jack", age = 1)
-val olderJack = jack.copy(age = 2)
+	val jack = Person(name = "Jack", age = 1)
+	val olderJack = jack.copy(age = 2)
 ----
 
 Common persistence technologies such as JPA require a default constructor, preventing this
@@ -442,13 +441,13 @@ mappings (like with MongoDB, Redis, Cassandra, etc).
 Our recommendation is to try and favor constructor injection with `val` read-only (and non-nullable when possible)
 https://kotlinlang.org/docs/reference/properties.html[properties].
 
-[source,kotlin]
+[source,kotlin,indent=0]
 ----
-@Component
-class YourBean(
-    private val mongoTemplate: MongoTemplate,
-    private val solrClient: SolrClient
-)
+	@Component
+	class YourBean(
+		private val mongoTemplate: MongoTemplate,
+		private val solrClient: SolrClient
+	)
 ----
 
 [NOTE]
@@ -461,17 +460,17 @@ explicit `@Autowired constructor` in the example shown above.
 If one really needs to use field injection, use the `lateinit var` construct,
 i.e.,
 
-[source,kotlin]
+[source,kotlin,indent=0]
 ----
-@Component
-class YourBean {
+	@Component
+	class YourBean {
 
-    @Autowired
-    lateinit var mongoTemplate: MongoTemplate
+		@Autowired
+		lateinit var mongoTemplate: MongoTemplate
 
-    @Autowired
-    lateinit var solrClient: SolrClient
-}
+		@Autowired
+		lateinit var solrClient: SolrClient
+	}
 ----
 
 
@@ -487,28 +486,27 @@ character will need to be escaped by writing `@Value("\${property}")`.
 As an alternative, it is possible to customize the properties placeholder prefix by declaring
 the following configuration beans:
 
-[source,kotlin]
+[source,kotlin,indent=0]
 ----
-@Bean
-fun propertyConfigurer() = PropertySourcesPlaceholderConfigurer().apply {
-    setPlaceholderPrefix("%{")
-}
+	@Bean
+	fun propertyConfigurer() = PropertySourcesPlaceholderConfigurer().apply {
+		setPlaceholderPrefix("%{")
+	}
 ----
 
-Existing code (like Spring Boot actuators or `@LocalServerPort`) that
-uses the `${...}` syntax, can be customised with configuration beans, like
-this:
+Existing code (like Spring Boot actuators or `@LocalServerPort`) that uses the `${...}` syntax,
+can be customised with configuration beans, like as follows:
 
-[source,kotlin]
+[source,kotlin,indent=0]
 ----
-@Bean
-fun kotlinPropertyConfigurer() = PropertySourcesPlaceholderConfigurer().apply {
-    setPlaceholderPrefix("%{")
-    setIgnoreUnresolvablePlaceholders(true)
-}
+	@Bean
+	fun kotlinPropertyConfigurer() = PropertySourcesPlaceholderConfigurer().apply {
+		setPlaceholderPrefix("%{")
+		setIgnoreUnresolvablePlaceholders(true)
+	}
 
-@Bean
-fun defaultPropertyConfigurer() = PropertySourcesPlaceholderConfigurer()
+	@Bean
+	fun defaultPropertyConfigurer() = PropertySourcesPlaceholderConfigurer()
 ----
 
 [NOTE]
@@ -535,20 +533,20 @@ attribute it is specified as a `vararg` parameter.
 To understand what that means, let's take `@RequestMapping`, which is one
 of the most widely used Spring annotations as an example. This Java annotation is declared as:
 
-[source,java]
+[source,java,indent=0]
 ----
-public @interface RequestMapping {
+	public @interface RequestMapping {
 
-  @AliasFor("path")
-  String[] value() default {};
+		@AliasFor("path")
+		String[] value() default {};
 
-  @AliasFor("value")
-  String[] path() default {};
+		@AliasFor("value")
+		String[] path() default {};
 
-  RequestMethod[] method() default {};
+		RequestMethod[] method() default {};
 
-  // ...
-}
+		// ...
+	}
 ----
 
 The typical use case for `@RequestMapping` is to map a handler method to a specific path
@@ -568,8 +566,8 @@ use a shortcut annotation such as `@GetMapping` or `@PostMapping`, etc.
 
 [NOTE]
 ====
-Remininder: if the `@RequestMapping` `method` attribute is not specified, all HTTP methods will be matched,
-not only the `GET` methods.
+Reminder: If the `@RequestMapping` `method` attribute is not specified,
+all HTTP methods will be matched, not only the `GET` methods.
 ====
 
 Improving the syntax and consistency of Kotlin annotation array attributes is discussed in

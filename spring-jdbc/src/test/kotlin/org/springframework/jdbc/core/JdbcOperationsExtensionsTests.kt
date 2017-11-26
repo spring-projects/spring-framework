@@ -16,7 +16,6 @@
 
 package org.springframework.jdbc.core
 
-
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith

@@ -24,7 +24,7 @@ import org.mockito.Mockito
 import org.mockito.junit.MockitoJUnitRunner
 
 /**
- * Mock object based tests for PropertyResolver Kotlin extensions
+ * Mock object based tests for PropertyResolver Kotlin extensions.
  *
  * @author Sebastien Deleuze
  */

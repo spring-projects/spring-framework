@@ -59,7 +59,7 @@ public abstract class Conventions {
 	}
 
 	private static final ReactiveAdapterRegistry reactiveAdapterRegistry =
-			new ReactiveAdapterRegistry();
+			ReactiveAdapterRegistry.getSharedInstance();
 
 
 	/**

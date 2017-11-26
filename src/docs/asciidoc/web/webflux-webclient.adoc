@@ -32,12 +32,12 @@ The `retrieve()` method is the easiest way to get a response body and decode it:
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-    WebClient client = WebClient.create("http://example.org");
+	WebClient client = WebClient.create("http://example.org");
 
-    Mono<Person> result = client.get()
-            .uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
-            .retrieve()
-            .bodyToMono(Person.class);
+	Mono<Person> result = client.get()
+			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+			.retrieve()
+			.bodyToMono(Person.class);
 ----
 
 You can also get a stream of objects decoded from the response:
@@ -45,10 +45,10 @@ You can also get a stream of objects decoded from the response:
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-    Flux<Quote> result = client.get()
-            .uri("/quotes").accept(MediaType.TEXT_EVENT_STREAM)
-            .retrieve()
-            .bodyToFlux(Quote.class);
+	Flux<Quote> result = client.get()
+			.uri("/quotes").accept(MediaType.TEXT_EVENT_STREAM)
+			.retrieve()
+			.bodyToFlux(Quote.class);
 ----
 
 By default, responses with 4xx or 5xx status codes result in an error of type
@@ -57,12 +57,12 @@ By default, responses with 4xx or 5xx status codes result in an error of type
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-    Mono<Person> result = client.get()
-            .uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
-            .retrieve()
-            .onStatus(HttpStatus::is4xxServerError, response -> ...)
-            .onStatus(HttpStatus::is5xxServerError, response -> ...)
-            .bodyToMono(Person.class);
+	Mono<Person> result = client.get()
+			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+			.retrieve()
+			.onStatus(HttpStatus::is4xxServerError, response -> ...)
+			.onStatus(HttpStatus::is5xxServerError, response -> ...)
+			.bodyToMono(Person.class);
 ----
 
 
@@ -77,10 +77,10 @@ to `retrieve()` but also provides access to the `ClientResponse`:
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-    Mono<Person> result = client.get()
-            .uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .flatMap(response -> response.bodyToMono(Person.class));
+	Mono<Person> result = client.get()
+			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+			.exchange()
+			.flatMap(response -> response.bodyToMono(Person.class));
 ----
 
 At this level you can also create a full `ResponseEntity`:
@@ -88,10 +88,10 @@ At this level you can also create a full `ResponseEntity`:
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-    Mono<ResponseEntity<Person>> result = client.get()
-            .uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .flatMap(response -> response.toEntity(Person.class));
+	Mono<ResponseEntity<Person>> result = client.get()
+			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+			.exchange()
+			.flatMap(response -> response.toEntity(Person.class));
 ----
 
 Note that unlike `retrieve()`, with `exchange()` there are no automatic error signals for
@@ -117,14 +117,14 @@ The request body can be encoded from an Object:
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-    Mono<Person> personMono = ... ;
+	Mono<Person> personMono = ... ;
 
-    Mono<Void> result = client.post()
-            .uri("/persons/{id}", id)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(personMono, Person.class)
-            .retrieve()
-            .bodyToMono(Void.class);
+	Mono<Void> result = client.post()
+			.uri("/persons/{id}", id)
+			.contentType(MediaType.APPLICATION_JSON)
+			.body(personMono, Person.class)
+			.retrieve()
+			.bodyToMono(Void.class);
 ----
 
 You can also have a stream of objects encoded:
@@ -132,14 +132,14 @@ You can also have a stream of objects encoded:
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-    Flux<Person> personFlux = ... ;
+	Flux<Person> personFlux = ... ;
 
-    Mono<Void> result = client.post()
-            .uri("/persons/{id}", id)
-            .contentType(MediaType.APPLICATION_STREAM_JSON)
-            .body(personFlux, Person.class)
-            .retrieve()
-            .bodyToMono(Void.class);
+	Mono<Void> result = client.post()
+			.uri("/persons/{id}", id)
+			.contentType(MediaType.APPLICATION_STREAM_JSON)
+			.body(personFlux, Person.class)
+			.retrieve()
+			.bodyToMono(Void.class);
 ----
 
 Or if you have the actual value, use the `syncBody` shortcut method:
@@ -147,14 +147,14 @@ Or if you have the actual value, use the `syncBody` shortcut method:
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-    Person person = ... ;
+	Person person = ... ;
 
-    Mono<Void> result = client.post()
-            .uri("/persons/{id}", id)
-            .contentType(MediaType.APPLICATION_JSON)
-            .syncBody(person)
-            .retrieve()
-            .bodyToMono(Void.class);
+	Mono<Void> result = client.post()
+			.uri("/persons/{id}", id)
+			.contentType(MediaType.APPLICATION_JSON)
+			.syncBody(person)
+			.retrieve()
+			.bodyToMono(Void.class);
 ----
 
 
@@ -169,13 +169,13 @@ content is automatically set to `"application/x-www-form-urlencoded"` by the
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-    MultiValueMap<String, String> formData = ... ;
+	MultiValueMap<String, String> formData = ... ;
 
-    Mono<Void> result = client.post()
-            .uri("/path", id)
-            .syncBody(formData)
-            .retrieve()
-            .bodyToMono(Void.class);
+	Mono<Void> result = client.post()
+			.uri("/path", id)
+			.syncBody(formData)
+			.retrieve()
+			.bodyToMono(Void.class);
 ----
 
 You can also supply form data in-line via `BodyInserters`:
@@ -183,13 +183,13 @@ You can also supply form data in-line via `BodyInserters`:
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-    import static org.springframework.web.reactive.function.BodyInserters.*;
+	import static org.springframework.web.reactive.function.BodyInserters.*;
 
-    Mono<Void> result = client.post()
-            .uri("/path", id)
-            .body(fromFormData("k1", "v1").with("k2", "v2"))
-            .retrieve()
-            .bodyToMono(Void.class);
+	Mono<Void> result = client.post()
+			.uri("/path", id)
+			.body(fromFormData("k1", "v1").with("k2", "v2"))
+			.retrieve()
+			.bodyToMono(Void.class);
 ----
 
 
@@ -204,18 +204,18 @@ headers. `MultipartBodyBuilder` can be used to build the parts:
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-MultipartBodyBuilder builder = new MultipartBodyBuilder();
-builder.part("fieldPart", "fieldValue");
-builder.part("filePart", new FileSystemResource("...logo.png"));
-builder.part("jsonPart", new Person("Jason"));
+	MultipartBodyBuilder builder = new MultipartBodyBuilder();
+	builder.part("fieldPart", "fieldValue");
+	builder.part("filePart", new FileSystemResource("...logo.png"));
+	builder.part("jsonPart", new Person("Jason"));
 
-MultiValueMap<String, HttpEntity<?>> parts = builder.build();
+	MultiValueMap<String, HttpEntity<?>> parts = builder.build();
 
-Mono<Void> result = client.post()
-		.uri("/path", id)
-		.syncBody(parts)
-		.retrieve()
-		.bodyToMono(Void.class);
+	Mono<Void> result = client.post()
+			.uri("/path", id)
+			.syncBody(parts)
+			.retrieve()
+			.bodyToMono(Void.class);
 ----
 
 Note that the content type for each part is automatically set based on the extension of the
@@ -227,13 +227,13 @@ You can also supply multipart data in-line via `BodyInserters`:
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-    import static org.springframework.web.reactive.function.BodyInserters.*;
+	import static org.springframework.web.reactive.function.BodyInserters.*;
 
-    Mono<Void> result = client.post()
-            .uri("/path", id)
-            .body(fromMultipartData("fieldPart", "value").with("filePart", resource))
-            .retrieve()
-            .bodyToMono(Void.class);
+	Mono<Void> result = client.post()
+			.uri("/path", id)
+			.body(fromMultipartData("fieldPart", "value").with("filePart", resource))
+			.retrieve()
+			.bodyToMono(Void.class);
 ----
 
 
@@ -250,14 +250,14 @@ To customize the underlying HTTP client:
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-    SslContext sslContext = ...
+	SslContext sslContext = ...
 
-    ClientHttpConnector connector = new ReactorClientHttpConnector(
-            builder -> builder.sslContext(sslContext));
+	ClientHttpConnector connector = new ReactorClientHttpConnector(
+			builder -> builder.sslContext(sslContext));
 
-    WebClient webClient = WebClient.builder()
-            .clientConnector(connector)
-            .build();
+	WebClient webClient = WebClient.builder()
+			.clientConnector(connector)
+			.build();
 ----
 
 To customize the <<web-reactive.adoc#webflux-codecs,HTTP codecs>> used for encoding and
@@ -266,16 +266,15 @@ decoding HTTP messages:
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-    ExchangeStrategies strategies = ExchangeStrategies.builder()
-            .codecs(configurer -> {
-                // ...
-            })
-            .build();
+	ExchangeStrategies strategies = ExchangeStrategies.builder()
+			.codecs(configurer -> {
+				// ...
+			})
+			.build();
 
-    WebClient webClient = WebClient.builder()
-            .exchangeStrategies(strategies)
-            .build();
-
+	WebClient webClient = WebClient.builder()
+			.exchangeStrategies(strategies)
+			.build();
 ----
 
 The builder can be used to insert <<webflux-client-filter>>.
@@ -289,9 +288,9 @@ build a new `WebClient`, based on, but without affecting the current instance:
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-    WebClient modifiedClient = client.mutate()
-            // user builder methods...
-            .build();
+	WebClient modifiedClient = client.mutate()
+			// user builder methods...
+			.build();
 ----
 
 
@@ -305,16 +304,14 @@ build a new `WebClient`, based on, but without affecting the current instance:
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-    WebClient client = WebClient.builder()
-        .filter((request, next) -> {
-
-    	    ClientRequest filtered = ClientRequest.from(request)
-        	    .header("foo", "bar")
-        	    .build();
-
-        	return next.exchange(filtered);
-        })
-        .build();
+	WebClient client = WebClient.builder()
+			.filter((request, next) -> {
+				ClientRequest filtered = ClientRequest.from(request)
+						.header("foo", "bar")
+						.build();
+				return next.exchange(filtered);
+			})
+			.build();
 ----
 
 `ExchangeFilterFunctions` provides a filter for basic authentication:
@@ -323,11 +320,11 @@ build a new `WebClient`, based on, but without affecting the current instance:
 [subs="verbatim,quotes"]
 ----
 
-// static import of ExchangeFilterFunctions.basicAuthentication
+	// static import of ExchangeFilterFunctions.basicAuthentication
 
-    WebClient client = WebClient.builder()
-        .filter(basicAuthentication("user", "pwd"))
-        .build();
+	WebClient client = WebClient.builder()
+			.filter(basicAuthentication("user", "pwd"))
+			.build();
 ----
 
 You can also mutate an existing `WebClient` instance without affecting the original:
@@ -335,7 +332,7 @@ You can also mutate an existing `WebClient` instance without affecting the origi
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-    WebClient filteredClient = client.mutate()
-            .filter(basicAuthentication("user", "pwd")
-            .build();
+	WebClient filteredClient = client.mutate()
+			.filter(basicAuthentication("user", "pwd")
+			.build();
 ----

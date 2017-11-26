@@ -83,7 +83,7 @@ class ReactiveTypeHandler {
 
 
 	public ReactiveTypeHandler() {
-		this(new ReactiveAdapterRegistry(), new SyncTaskExecutor(), new ContentNegotiationManager());
+		this(ReactiveAdapterRegistry.getSharedInstance(), new SyncTaskExecutor(), new ContentNegotiationManager());
 	}
 
 	ReactiveTypeHandler(ReactiveAdapterRegistry registry, TaskExecutor executor,

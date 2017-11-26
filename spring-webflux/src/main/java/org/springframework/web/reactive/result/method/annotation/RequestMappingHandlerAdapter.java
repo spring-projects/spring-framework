@@ -163,7 +163,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 			this.argumentResolverConfigurer = new ArgumentResolverConfigurer();
 		}
 		if (this.reactiveAdapterRegistry == null) {
-			this.reactiveAdapterRegistry = new ReactiveAdapterRegistry();
+			this.reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 		}
 
 		this.methodResolver = new ControllerMethodResolver(this.argumentResolverConfigurer,
