@@ -103,9 +103,9 @@ import org.springframework.web.util.UrlPathHelper;
  * It is typically imported by adding {@link EnableWebMvc @EnableWebMvc} to an
  * application {@link Configuration @Configuration} class. An alternative more
  * advanced option is to extend directly from this class and override methods as
- * necessary remembering to add {@link Configuration @Configuration} to the
+ * necessary, remembering to add {@link Configuration @Configuration} to the
  * subclass and {@link Bean @Bean} to overridden {@link Bean @Bean} methods.
- * For more details see the Javadoc of {@link EnableWebMvc @EnableWebMvc}.
+ * For more details see the javadoc of {@link EnableWebMvc @EnableWebMvc}.
  *
  * <p>This class registers the following {@link HandlerMapping}s:</p>
  * <ul>
