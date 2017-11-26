@@ -72,7 +72,7 @@ dependencies {
 	testCompile("org.junit.jupiter:junit-jupiter-params:${junitJupiterVersion}")
 	testCompile("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 	testCompile("com.thoughtworks.xstream:xstream:1.4.10")
-	testCompile("com.rometools:rome:1.8.0")
+	testCompile("com.rometools:rome:1.9.0")
 	testCompile("org.apache.tiles:tiles-api:${tiles3Version}")
 	testCompile("org.apache.tiles:tiles-core:${tiles3Version}") {
 		exclude group: "org.slf4j", module: "jcl-over-slf4j"
