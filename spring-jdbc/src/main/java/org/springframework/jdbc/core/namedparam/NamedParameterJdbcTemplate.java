@@ -217,7 +217,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 			throws DataAccessException {
 
 		List<T> results = getJdbcOperations().query(getPreparedStatementCreator(sql, paramSource), rowMapper);
-		return DataAccessUtils.requiredSingleResult(results);
+		return DataAccessUtils.nullableSingleResult(results);
 	}
 
 	@Override
