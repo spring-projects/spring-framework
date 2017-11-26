@@ -137,7 +137,8 @@ public interface JdbcOperations {
 	 * {@code null} as argument array.
 	 * @param sql SQL query to execute
 	 * @param rowMapper object that will map one object per row
-	 * @return the single mapped object
+	 * @return the single mapped object (may be {@code null} if the given
+	 * {@link RowMapper} returned {@code} null)
 	 * @throws IncorrectResultSizeDataAccessException if the query does not
 	 * return exactly one row
 	 * @throws DataAccessException if there is any problem executing the query
@@ -359,6 +360,7 @@ public interface JdbcOperations {
 	 * only the argument value but also the SQL type and optionally the scale
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws DataAccessException if the query fails
+	 * @since 3.0.1
 	 */
 	<T> T query(String sql, ResultSetExtractor<T> rse, Object... args) throws DataAccessException;
 
@@ -428,6 +430,7 @@ public interface JdbcOperations {
 	 * may also contain {@link SqlParameterValue} objects which indicate not
 	 * only the argument value but also the SQL type and optionally the scale
 	 * @throws DataAccessException if the query fails
+	 * @since 3.0.1
 	 */
 	void query(String sql, RowCallbackHandler rch, Object... args) throws DataAccessException;
 
@@ -501,6 +504,7 @@ public interface JdbcOperations {
 	 * only the argument value but also the SQL type and optionally the scale
 	 * @return the result List, containing mapped objects
 	 * @throws DataAccessException if the query fails
+	 * @since 3.0.1
 	 */
 	<T> List<T> query(String sql, RowMapper<T> rowMapper, Object... args) throws DataAccessException;
 
@@ -514,7 +518,8 @@ public interface JdbcOperations {
 	 * @param argTypes SQL types of the arguments
 	 * (constants from {@code java.sql.Types})
 	 * @param rowMapper object that will map one object per row
-	 * @return the single mapped object
+	 * @return the single mapped object (may be {@code null} if the given
+	 * {@link RowMapper} returned {@code} null)
 	 * @throws IncorrectResultSizeDataAccessException if the query does not
 	 * return exactly one row
 	 * @throws DataAccessException if the query fails
@@ -532,7 +537,8 @@ public interface JdbcOperations {
 	 * may also contain {@link SqlParameterValue} objects which indicate not
 	 * only the argument value but also the SQL type and optionally the scale
 	 * @param rowMapper object that will map one object per row
-	 * @return the single mapped object
+	 * @return the single mapped object (may be {@code null} if the given
+	 * {@link RowMapper} returned {@code} null)
 	 * @throws IncorrectResultSizeDataAccessException if the query does not
 	 * return exactly one row
 	 * @throws DataAccessException if the query fails
@@ -549,10 +555,12 @@ public interface JdbcOperations {
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
 	 * may also contain {@link SqlParameterValue} objects which indicate not
 	 * only the argument value but also the SQL type and optionally the scale
-	 * @return the single mapped object
+	 * @return the single mapped object (may be {@code null} if the given
+	 * {@link RowMapper} returned {@code} null)
 	 * @throws IncorrectResultSizeDataAccessException if the query does not
 	 * return exactly one row
 	 * @throws DataAccessException if the query fails
+	 * @since 3.0.1
 	 */
 	<T> T queryForObject(String sql, RowMapper<T> rowMapper, Object... args) throws DataAccessException;
 
@@ -610,6 +618,7 @@ public interface JdbcOperations {
 	 * @throws IncorrectResultSizeDataAccessException if the query does not return
 	 * exactly one row, or does not return exactly one column in that row
 	 * @throws DataAccessException if the query fails
+	 * @since 3.0.1
 	 * @see #queryForObject(String, Class)
 	 */
 	<T> T queryForObject(String sql, Class<T> requiredType, Object... args) throws DataAccessException;
@@ -709,6 +718,7 @@ public interface JdbcOperations {
 	 * only the argument value but also the SQL type and optionally the scale
 	 * @return a List of objects that match the specified element type
 	 * @throws DataAccessException if the query fails
+	 * @since 3.0.1
 	 * @see #queryForList(String, Class)
 	 * @see SingleColumnRowMapper
 	 */

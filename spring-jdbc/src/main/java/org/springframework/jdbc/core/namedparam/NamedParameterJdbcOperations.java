@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -226,7 +226,8 @@ public interface NamedParameterJdbcOperations {
 	 * @param sql SQL query to execute
 	 * @param paramSource container of arguments to bind to the query
 	 * @param rowMapper object that will map one object per row
-	 * @return the single mapped object
+	 * @return the single mapped object (may be {@code null} if the given
+	 * {@link RowMapper} returned {@code} null)
 	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
 	 * if the query does not return exactly one row, or does not return exactly
 	 * one column in that row
@@ -243,7 +244,8 @@ public interface NamedParameterJdbcOperations {
 	 * @param paramMap map of parameters to bind to the query
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @param rowMapper object that will map one object per row
-	 * @return the single mapped object
+	 * @return the single mapped object (may be {@code null} if the given
+	 * {@link RowMapper} returned {@code} null)
 	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
 	 * if the query does not return exactly one row, or does not return exactly
 	 * one column in that row
@@ -396,7 +398,7 @@ public interface NamedParameterJdbcOperations {
 	 * list of arguments to bind to the query, expecting a SqlRowSet.
 	 * <p>The results will be mapped to an SqlRowSet which holds the data in a
 	 * disconnected fashion. This wrapper will translate any SQLExceptions thrown.
-	 * <p>Note that that, for the default implementation, JDBC RowSet support needs to
+	 * <p>Note that, for the default implementation, JDBC RowSet support needs to
 	 * be available at runtime: by default, Sun's {@code com.sun.rowset.CachedRowSetImpl}
 	 * class is used, which is part of JDK 1.5+ and also available separately as part of
 	 * Sun's JDBC RowSet Implementations download (rowset.jar).
@@ -416,7 +418,7 @@ public interface NamedParameterJdbcOperations {
 	 * list of arguments to bind to the query, expecting a SqlRowSet.
 	 * <p>The results will be mapped to an SqlRowSet which holds the data in a
 	 * disconnected fashion. This wrapper will translate any SQLExceptions thrown.
-	 * <p>Note that that, for the default implementation, JDBC RowSet support needs to
+	 * <p>Note that, for the default implementation, JDBC RowSet support needs to
 	 * be available at runtime: by default, Sun's {@code com.sun.rowset.CachedRowSetImpl}
 	 * class is used, which is part of JDK 1.5+ and also available separately as part of
 	 * Sun's JDBC RowSet Implementations download (rowset.jar).

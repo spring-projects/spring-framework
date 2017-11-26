@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,12 +45,11 @@ public abstract class DataAccessUtils {
 	 * element has been found in the given Collection
 	 */
 	public static <T> T singleResult(Collection<T> results) throws IncorrectResultSizeDataAccessException {
-		int size = (results != null ? results.size() : 0);
-		if (size == 0) {
+		if (CollectionUtils.isEmpty(results)) {
 			return null;
 		}
 		if (results.size() > 1) {
-			throw new IncorrectResultSizeDataAccessException(1, size);
+			throw new IncorrectResultSizeDataAccessException(1, results.size());
 		}
 		return results.iterator().next();
 	}
@@ -66,12 +65,11 @@ public abstract class DataAccessUtils {
 	 * has been found in the given Collection
 	 */
 	public static <T> T requiredSingleResult(Collection<T> results) throws IncorrectResultSizeDataAccessException {
-		int size = (results != null ? results.size() : 0);
-		if (size == 0) {
+		if (CollectionUtils.isEmpty(results)) {
 			throw new EmptyResultDataAccessException(1);
 		}
 		if (results.size() > 1) {
-			throw new IncorrectResultSizeDataAccessException(1, size);
+			throw new IncorrectResultSizeDataAccessException(1, results.size());
 		}
 		return results.iterator().next();
 	}
@@ -87,12 +85,11 @@ public abstract class DataAccessUtils {
 	 * @see org.springframework.util.CollectionUtils#hasUniqueObject
 	 */
 	public static <T> T uniqueResult(Collection<T> results) throws IncorrectResultSizeDataAccessException {
-		int size = (results != null ? results.size() : 0);
-		if (size == 0) {
+		if (CollectionUtils.isEmpty(results)) {
 			return null;
 		}
 		if (!CollectionUtils.hasUniqueObject(results)) {
-			throw new IncorrectResultSizeDataAccessException(1, size);
+			throw new IncorrectResultSizeDataAccessException(1, results.size());
 		}
 		return results.iterator().next();
 	}
@@ -109,12 +106,11 @@ public abstract class DataAccessUtils {
 	 * @see org.springframework.util.CollectionUtils#hasUniqueObject
 	 */
 	public static <T> T requiredUniqueResult(Collection<T> results) throws IncorrectResultSizeDataAccessException {
-		int size = (results != null ? results.size() : 0);
-		if (size == 0) {
+		if (CollectionUtils.isEmpty(results)) {
 			throw new EmptyResultDataAccessException(1);
 		}
 		if (!CollectionUtils.hasUniqueObject(results)) {
-			throw new IncorrectResultSizeDataAccessException(1, size);
+			throw new IncorrectResultSizeDataAccessException(1, results.size());
 		}
 		return results.iterator().next();
 	}
@@ -200,11 +196,11 @@ public abstract class DataAccessUtils {
 
 	/**
 	 * Return a translated exception if this is appropriate,
-	 * otherwise return the input exception.
-	 * @param rawException exception we may wish to translate
+	 * otherwise return the given exception as-is.
+	 * @param rawException an exception that we may wish to translate
 	 * @param pet PersistenceExceptionTranslator to use to perform the translation
-	 * @return a translated exception if translation is possible, or
-	 * the raw exception if it is not
+	 * @return a translated persistence exception if translation is possible,
+	 * or the raw exception if it is not
 	 */
 	public static RuntimeException translateIfNecessary(
 			RuntimeException rawException, PersistenceExceptionTranslator pet) {
