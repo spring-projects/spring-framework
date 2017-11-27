@@ -32,7 +32,6 @@ import static org.junit.Assert.assertSame;
 
 /**
  * Unit tests for {@link ResponseStatusExceptionHandler}.
- *
  * @author Rossen Stoyanchev
  */
 public class ResponseStatusExceptionHandlerTests {
@@ -54,6 +53,16 @@ public class ResponseStatusExceptionHandlerTests {
 		Throwable expected = new IllegalStateException();
 		Mono<Void> mono = this.handler.handle(this.exchange, expected);
 		StepVerifier.create(mono).consumeErrorWith(actual -> assertSame(expected, actual)).verify();
+	}
+
+	@Test // SPR-16231
+	public void responseCommitted() throws Exception {
+		Throwable ex = new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops");
+		this.exchange.getResponse().setStatusCode(HttpStatus.CREATED);
+		this.exchange.getResponse().setComplete()
+				.then(this.handler.handle(this.exchange, ex))
+				.block(Duration.ofSeconds(5));
+		assertEquals(HttpStatus.CREATED, this.exchange.getResponse().getStatusCode());
 	}
 
 }

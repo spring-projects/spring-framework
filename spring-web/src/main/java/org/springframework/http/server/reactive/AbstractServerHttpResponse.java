@@ -89,9 +89,9 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	@Override
 	public boolean setStatusCode(@Nullable HttpStatus statusCode) {
 		if (this.state.get() == State.COMMITTED) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Can't set the status " + (statusCode != null ? statusCode.toString() : "null") +
-						" because the HTTP response has already been committed");
+			if (logger.isTraceEnabled()) {
+				logger.trace("HTTP response already committed. " +
+						"Status not set to " + (statusCode != null ? statusCode.toString() : "null"));
 			}
 			return false;
 		}
@@ -183,7 +183,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public Mono<Void> setComplete() {
-		return doCommit(null);
+		return !isCommitted() ? doCommit(null) : Mono.empty();
 	}
 
 	/**
