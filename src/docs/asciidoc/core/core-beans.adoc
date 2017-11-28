@@ -4438,17 +4438,17 @@ The same applies for typed collections:
 ====
 Your target beans can implement the `org.springframework.core.Ordered` interface or use
 the `@Order` or standard `@Priority` annotation if you want items in the array or list
-to be sorted into a specific order. Otherwise their order will follow the registration
+to be sorted in a specific order. Otherwise their order will follow the registration
 order of the corresponding target bean definitions in the container.
 
 The `@Order` annotation may be declared at target class level but also on `@Bean` methods,
 potentially being very individual per bean definition (in case of multiple definitions
-with the same bean class). `@Order` values may influence priorities at injection points
+with the same bean class). `@Order` values may influence priorities at injection points,
 but please be aware that they do not influence singleton startup order which is an
 orthogonal concern determined by dependency relationships and `@DependsOn` declarations.
 
 Note that the standard `javax.annotation.Priority` annotation is not available at the
-`@Bean` level since it cannot be declared on methods. Its semantics can be modelled
+`@Bean` level since it cannot be declared on methods. Its semantics can be modeled
 through `@Order` values in combination with `@Primary` on a single bean per type.
 ====
 
