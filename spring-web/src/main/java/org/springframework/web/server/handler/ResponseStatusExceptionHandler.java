@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
@@ -39,10 +40,11 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 	@Override
 	public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
 		if (ex instanceof ResponseStatusException) {
-			// Response may be committed but we'll try..
-			logger.debug(ex.getMessage());
-			exchange.getResponse().setStatusCode(((ResponseStatusException) ex).getStatus());
-			return exchange.getResponse().setComplete();
+			HttpStatus status = ((ResponseStatusException) ex).getStatus();
+			if (exchange.getResponse().setStatusCode(status)) {
+				logger.trace(ex.getMessage());
+				return exchange.getResponse().setComplete();
+			}
 		}
 		return Mono.error(ex);
 	}

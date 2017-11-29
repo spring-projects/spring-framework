@@ -59,10 +59,9 @@ public class ResponseStatusExceptionHandlerTests {
 	public void responseCommitted() throws Exception {
 		Throwable ex = new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops");
 		this.exchange.getResponse().setStatusCode(HttpStatus.CREATED);
-		this.exchange.getResponse().setComplete()
-				.then(this.handler.handle(this.exchange, ex))
-				.block(Duration.ofSeconds(5));
-		assertEquals(HttpStatus.CREATED, this.exchange.getResponse().getStatusCode());
+		Mono<Void> mono = this.exchange.getResponse().setComplete()
+				.then(this.handler.handle(this.exchange, ex));
+		StepVerifier.create(mono).consumeErrorWith(actual -> assertSame(ex, actual)).verify();
 	}
 
 }
