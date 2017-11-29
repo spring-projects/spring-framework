@@ -46,19 +46,19 @@ import org.springframework.web.cors.CorsConfiguration;
 @Documented
 public @interface CrossOrigin {
 
-	/** @deprecated as of Spring 5.0, in favor {@link CorsConfiguration#applyPermitDefaultValues} */
+	/** @deprecated as of Spring 5.0, in favor of {@link CorsConfiguration#applyPermitDefaultValues} */
 	@Deprecated
 	String[] DEFAULT_ORIGINS = { "*" };
 
-	/** @deprecated as of Spring 5.0, in favor {@link CorsConfiguration#applyPermitDefaultValues} */
+	/** @deprecated as of Spring 5.0, in favor of {@link CorsConfiguration#applyPermitDefaultValues} */
 	@Deprecated
 	String[] DEFAULT_ALLOWED_HEADERS = { "*" };
 
-	/** @deprecated as of Spring 5.0, in favor {@link CorsConfiguration#applyPermitDefaultValues} */
+	/** @deprecated as of Spring 5.0, in favor of {@link CorsConfiguration#applyPermitDefaultValues} */
 	@Deprecated
 	boolean DEFAULT_ALLOW_CREDENTIALS = false;
 
-	/** @deprecated as of Spring 5.0, in favor {@link CorsConfiguration#applyPermitDefaultValues} */
+	/** @deprecated as of Spring 5.0, in favor of {@link CorsConfiguration#applyPermitDefaultValues} */
 	@Deprecated
 	long DEFAULT_MAX_AGE = 1800;
 
