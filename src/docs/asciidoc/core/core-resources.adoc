@@ -494,9 +494,9 @@ When the path location contains an Ant-style pattern, for example:
 [subs="verbatim"]
 ----
 /WEB-INF/*-context.xml
-  com/mycompany/**/applicationContext.xml
-  file:C:/some/path/*-context.xml
-  classpath:com/mycompany/**/applicationContext.xml
+com/mycompany/**/applicationContext.xml
+file:C:/some/path/*-context.xml
+classpath:com/mycompany/**/applicationContext.xml
 ----
 
 The resolver follows a more complex but defined procedure to try to resolve the
@@ -512,7 +512,7 @@ the wildcards.
 ===== Implications on portability
 
 If the specified path is already a file URL (either explicitly, or implicitly because
-the base `ResourceLoader` is a filesystem one, then wildcarding is guaranteed to work in
+the base `ResourceLoader` is a filesystem one), then wildcarding is guaranteed to work in
 a completely portable fashion.
 
 If the specified path is a classpath location, then the resolver must obtain the last

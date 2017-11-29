@@ -477,7 +477,7 @@ initialization parameters ( `init-param` elements) to the Servlet declaration in
 All `HandlerMapping` implementations supports handler interceptors that are useful when
 you want to apply specific functionality to certain requests, for example, checking for
 a principal. Interceptors must implement `HandlerInterceptor` from the
-`org.springframework .web .servlet` package with three methods that should provide enough
+`org.springframework.web.servlet` package with three methods that should provide enough
 flexibility to do all kinds of pre-processing and post-processing:
 
 * `preHandle(..)` -- __before__ the actual handler is executed
@@ -496,7 +496,7 @@ configure interceptors. You can also register them directly via setters on indiv
 `HandlerMapping` implementations.
 
 Note that `postHandle` is less useful with `@ResponseBody` and `ResponseEntity` methods for
-which a the response is written and committed within the `HandlerAdapter` and before
+which the response is written and committed within the `HandlerAdapter` and before
 `postHandle`. That means its too late to make any changes to the response such as adding
 an extra header. For such scenarios you can implement `ResponseBodyAdvice` and either
 declare it as an <<mvc-ann-controller-advice>> bean or configure it directly on
@@ -1226,7 +1226,7 @@ controller mapped to `/person` is also implicitly mapped to `/person.{asterisk}`
 This is used for URL based content negotiation, e.g. `/person.pdf`, `/person.xml`, etc.
 
 Suffix pattern matching was quite helpful when browsers used to send Accept headers that
-are hard to interpet consistently. In the present, and for REST services, the `Accept`
+are hard to interpret consistently. In the present, and for REST services, the `Accept`
 header should be the preferred choice.
 
 Suffix patterns can cause ambiguity and complexity in combination with path parameters,
@@ -2430,7 +2430,7 @@ also allows setting response headers:
 	public ResponseEntity<String> handle() {
 		// ...
 		URI location = ... ;
-		return new ResponseEntity.created(location).build();
+		return ResponseEntity.created(location).build();
 	}
 ----
 
@@ -3665,7 +3665,7 @@ semantics of name generation for collections clearer:
 
 * An `x.y.User[]` array with zero or more `x.y.User` elements added will have the name
   `userList` generated.
-* An `x.y.Foo[]` array with zero or more `x.y.User` elements added will have the name
+* An `x.y.Foo[]` array with zero or more `x.y.Foo` elements added will have the name
   `fooList` generated.
 * A `java.util.ArrayList` with one or more `x.y.User` elements added will have the name
   `userList` generated.
@@ -4404,7 +4404,7 @@ And the same in XML use the `<mvc:view-controller>` element:
 The MVC config simplifies the registration of view resolvers.
 
 The following is a Java config example that configures content negotiation view
-resolution using FreeMarker HTML templates and Jackson as a default `View` for
+resolution using JSP HTML templates and Jackson as a default `View` for
 JSON rendering:
 
 [source,java,indent=0]
@@ -4533,8 +4533,8 @@ See also
 <<mvc-caching-static-resources, HTTP caching support for static resources>>.
 
 The resource handler also supports a chain of
-{api-spring-framework}/web/servlet/resource/ResourceResolver.html[ResourceResolver]'s and
-{api-spring-framework}/web/servlet/resource/ResourceTransformer.html[ResourceResolver]'s.
+{api-spring-framework}/web/servlet/resource/ResourceResolver.html[ResourceResolver]s and
+{api-spring-framework}/web/servlet/resource/ResourceTransformer.html[ResourceTransformer]s.
 which can be used to create a toolchain for working with optimized resources.
 
 The `VersionResourceResolver` can be used for versioned resource URLs based on an MD5 hash
