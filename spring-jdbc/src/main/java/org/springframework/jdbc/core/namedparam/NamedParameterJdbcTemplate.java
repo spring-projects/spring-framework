@@ -105,12 +105,24 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 
 	/**
-	 * Expose the classic Spring JdbcTemplate to allow invocation of
-	 * less commonly used methods.
+	 * Expose the classic Spring JdbcTemplate operations to allow invocation
+	 * of less commonly used methods.
 	 */
 	@Override
 	public JdbcOperations getJdbcOperations() {
 		return this.classicJdbcTemplate;
+	}
+
+	/**
+	 * Expose the classic Spring {@link JdbcTemplate} itself, if available,
+	 * in particular for passing it on to other {@code JdbcTemplate} consumers.
+	 * <p>If sufficient for the purposes at hand, {@link #getJdbcOperations()}
+	 * is recommended over this variant.
+	 * @since 5.0.3
+	 */
+	public JdbcTemplate getJdbcTemplate() {
+		Assert.state(this.classicJdbcTemplate instanceof JdbcTemplate, "No JdbcTemplate available");
+		return (JdbcTemplate) this.classicJdbcTemplate;
 	}
 
 	/**
