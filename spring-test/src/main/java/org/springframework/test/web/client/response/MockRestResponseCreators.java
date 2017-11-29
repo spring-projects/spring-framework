@@ -116,4 +116,15 @@ public abstract class MockRestResponseCreators {
 		return new DefaultResponseCreator(status);
 	}
 
+	/**
+	 * {@code ResponseCreator} with a specific HTTP status with String body.
+	 * @param status the response status
+	 * @param body the response body, a "UTF-8" string
+	 * @param contentType the type of the content (may be {@code null})
+	 */
+	public static DefaultResponseCreator withStatus(HttpStatus status, String body, @Nullable MediaType contentType) {
+		DefaultResponseCreator creator = new DefaultResponseCreator(status).body(body);
+		return (contentType != null ? creator.contentType(contentType) : creator);
+	}
+
 }
