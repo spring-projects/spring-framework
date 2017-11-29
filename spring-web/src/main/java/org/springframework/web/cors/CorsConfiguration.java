@@ -35,24 +35,20 @@ import org.springframework.util.StringUtils;
  *
  * <p>By default a newly created {@code CorsConfiguration} does not permit any
  * cross-origin requests and must be configured explicitly to indicate what
- * should be allowed.
- *
- * <p>Use {@link #applyPermitDefaultValues()} to flip the initialization model
- * to start with open defaults that permit all cross-origin requests for GET,
- * HEAD, and POST requests.
+ * should be allowed. Use {@link #applyPermitDefaultValues()} to flip the
+ * initialization model to start with open defaults that permit all cross-origin
+ * requests for GET, HEAD, and POST requests.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 4.2
- * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
+ * @see <a href="http://www.w3.org/TR/cors/">CORS spec</a>
  */
 public class CorsConfiguration {
 
-	/**
-	 * Wildcard representing <em>all</em> origins, methods, or headers.
-	 */
+	/** Wildcard representing <em>all</em> origins, methods, or headers. */
 	public static final String ALL = "*";
 
 	private static final List<HttpMethod> DEFAULT_METHODS;
@@ -321,7 +317,7 @@ public class CorsConfiguration {
 	 *
 	 * <p>The following defaults are applied if not already set:
 	 * <ul>
-	 *     <li>Allow all origins, i.e. {@code "*"}.</li>
+	 *     <li>Allow all origins.</li>
 	 *     <li>Allow "simple" methods {@code GET}, {@code HEAD} and {@code POST}.</li>
 	 *     <li>Allow all headers.</li>
 	 *     <li>Set max age to 1800 seconds (30 minutes).</li>

@@ -59,11 +59,14 @@ all global and all local origins. The only exception are those attributes where 
 single value can be accepted such as `allowCredentials` and `maxAge`, in which case the
 local overrides the global value.
 
+[TIP]
+====
 To learn more from the source or make advanced customizations, check:
 
 * `CorsConfiguration`
 * `CorsProcessor`, `DefaultCorsProcessor`
 * `AbstractHandlerMapping`
+====
 
 
 
