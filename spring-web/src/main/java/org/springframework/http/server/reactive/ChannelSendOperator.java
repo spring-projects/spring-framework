@@ -50,9 +50,7 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 	private final Flux<T> source;
 
 
-	public ChannelSendOperator(Publisher<? extends T> source, Function<Publisher<T>,
-			Publisher<Void>> writeFunction) {
-
+	public ChannelSendOperator(Publisher<? extends T> source, Function<Publisher<T>, Publisher<Void>> writeFunction) {
 		this.source = Flux.from(source);
 		this.writeFunction = writeFunction;
 	}
@@ -92,8 +90,7 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 	 * <p>Also uses {@link WriteCompletionBarrier} to communicate completion
 	 * and detect cancel signals from the completion subscriber.
 	 */
-	@SuppressWarnings("deprecation")
-	private final class WriteBarrier implements CoreSubscriber<T>, Subscription, Publisher<T> {
+	private class WriteBarrier implements CoreSubscriber<T>, Subscription, Publisher<T> {
 
 		/* Bridges signals to and from the completionSubscriber */
 		private final WriteCompletionBarrier writeCompletionBarrier;
