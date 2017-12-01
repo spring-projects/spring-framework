@@ -16,10 +16,14 @@
 
 package org.springframework.web.reactive.function.client;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.zip.CRC32;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -27,19 +31,27 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.Pojo;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Integration tests using a {@link ExchangeFunction} through {@link WebClient}.
@@ -333,6 +345,41 @@ public class WebClientIntegrationTests {
 			assertEquals("/test", request.getPath());
 			assertEquals("testkey=testvalue", request.getHeader(HttpHeaders.COOKIE));
 		});
+	}
+
+	@Test // SPR-16246
+	@Ignore
+	public void shouldSendLargeTextFile() throws Exception {
+		prepareResponse(response -> {});
+
+		Resource resource = new ClassPathResource("largeTextFile.txt", getClass());
+		byte[] expected = Files.readAllBytes(resource.getFile().toPath());
+		Flux<DataBuffer> body = DataBufferUtils.read(resource, new DefaultDataBufferFactory(), 4096);
+
+		this.webClient.post()
+				.uri("/")
+				.body(body, DataBuffer.class)
+				.retrieve()
+				.bodyToMono(Void.class)
+				.block(Duration.ofSeconds(5));
+
+		expectRequest(request -> {
+			ByteArrayOutputStream actual = new ByteArrayOutputStream();
+			try {
+				request.getBody().copyTo(actual);
+			}
+			catch (IOException ex) {
+				throw new IllegalStateException(ex);
+			}
+			assertEquals(expected.length, actual.size());
+			assertEquals(hash(expected), hash(actual.toByteArray()));
+		});
+	}
+
+	private static long hash(byte[] bytes) {
+		CRC32 crc = new CRC32();
+		crc.update(bytes, 0, bytes.length);
+		return crc.getValue();
 	}
 
 	@Test
