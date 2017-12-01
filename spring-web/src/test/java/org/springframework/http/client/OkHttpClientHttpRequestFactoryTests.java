@@ -16,6 +16,7 @@
 
 package org.springframework.http.client;
 
+import com.codahale.metrics.MetricRegistry;
 import org.junit.Test;
 
 import org.springframework.http.HttpMethod;
@@ -27,7 +28,9 @@ public class OkHttpClientHttpRequestFactoryTests extends AbstractHttpRequestFact
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {
-		return new OkHttpClientHttpRequestFactory();
+		OkHttpClientHttpRequestFactory okHttpClientHttpRequestFactory = new OkHttpClientHttpRequestFactory();
+		okHttpClientHttpRequestFactory.setMetricRegistry(new MetricRegistry());
+		return okHttpClientHttpRequestFactory;
 	}
 
 	@Override

@@ -20,6 +20,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
 
+import com.codahale.metrics.MetricRegistry;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.Configurable;
@@ -50,6 +51,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 
 	private HttpAsyncClient asyncClient;
 
+	private MetricRegistry metricRegistry;
 
 	/**
 	 * Create a new instance of the {@code HttpComponentsAsyncClientHttpRequestFactory}
@@ -150,6 +152,13 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 		return (CloseableHttpAsyncClient) this.asyncClient;
 	}
 
+	public MetricRegistry getMetricRegistry() {
+		return this.metricRegistry;
+	}
+
+	public void setMetricRegistry(MetricRegistry metricRegistry) {
+		this.metricRegistry = metricRegistry;
+	}
 
 	@Override
 	public void afterPropertiesSet() {
@@ -192,7 +201,10 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 			}
 		}
 
-		return new HttpComponentsAsyncClientHttpRequest(getAsyncClient(), httpRequest, context);
+		HttpComponentsAsyncClientHttpRequest httpComponentsAsyncClientHttpRequest =
+				new HttpComponentsAsyncClientHttpRequest(getAsyncClient(), httpRequest, context);
+		httpComponentsAsyncClientHttpRequest.setMetricRegistry(this.metricRegistry);
+		return httpComponentsAsyncClientHttpRequest;
 	}
 
 	@Override

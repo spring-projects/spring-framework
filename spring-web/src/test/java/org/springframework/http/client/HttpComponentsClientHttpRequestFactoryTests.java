@@ -18,6 +18,7 @@ package org.springframework.http.client;
 
 import java.net.URI;
 
+import com.codahale.metrics.MetricRegistry;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -70,6 +71,7 @@ public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpReq
 		hrf.setConnectTimeout(1234);
 		hrf.setConnectionRequestTimeout(4321);
 		hrf.setReadTimeout(4567);
+		hrf.setMetricRegistry(new MetricRegistry());
 
 		URI uri = new URI(baseUrl + "/status/ok");
 		HttpComponentsClientHttpRequest request = (HttpComponentsClientHttpRequest)

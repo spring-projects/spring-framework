@@ -17,6 +17,8 @@
 package org.springframework.http.client;
 
 
+import com.codahale.metrics.MetricRegistry;
+
 public class NoOutputStreamingStreamingSimpleHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
 
 	@Override
@@ -24,6 +26,7 @@ public class NoOutputStreamingStreamingSimpleHttpRequestFactoryTests extends Abs
 		SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
 		factory.setBufferRequestBody(false);
 		factory.setOutputStreaming(false);
+		factory.setMetricRegistry(new MetricRegistry());
 		return factory;
 	}
 }

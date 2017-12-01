@@ -23,6 +23,8 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 
+import com.codahale.metrics.MetricRegistry;
+
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
@@ -55,6 +57,7 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 
 	private AsyncListenableTaskExecutor taskExecutor;
 
+	private MetricRegistry metricRegistry;
 
 	/**
 	 * Set the {@link Proxy} to use for this request factory.
@@ -135,6 +138,13 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 		this.taskExecutor = taskExecutor;
 	}
 
+	public MetricRegistry getMetricRegistry() {
+		return this.metricRegistry;
+	}
+
+	public void setMetricRegistry(MetricRegistry metricRegistry) {
+		this.metricRegistry = metricRegistry;
+	}
 
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
@@ -142,10 +152,16 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 		prepareConnection(connection, httpMethod.name());
 
 		if (this.bufferRequestBody) {
-			return new SimpleBufferingClientHttpRequest(connection, this.outputStreaming);
+			SimpleBufferingClientHttpRequest simpleBufferingClientHttpRequest =
+					new SimpleBufferingClientHttpRequest(connection, this.outputStreaming);
+			simpleBufferingClientHttpRequest.setMetricRegistry(this.metricRegistry);
+			return simpleBufferingClientHttpRequest;
 		}
 		else {
-			return new SimpleStreamingClientHttpRequest(connection, this.chunkSize, this.outputStreaming);
+			SimpleStreamingClientHttpRequest simpleStreamingClientHttpRequest =
+					new SimpleStreamingClientHttpRequest(connection, this.chunkSize, this.outputStreaming);
+			simpleStreamingClientHttpRequest.setMetricRegistry(this.metricRegistry);
+			return simpleStreamingClientHttpRequest;
 		}
 	}
 
@@ -161,12 +177,18 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 		prepareConnection(connection, httpMethod.name());
 
 		if (this.bufferRequestBody) {
-			return new SimpleBufferingAsyncClientHttpRequest(
-					connection, this.outputStreaming, this.taskExecutor);
+			SimpleBufferingAsyncClientHttpRequest simpleBufferingAsyncClientHttpRequest=
+					new SimpleBufferingAsyncClientHttpRequest(
+							connection, this.outputStreaming, this.taskExecutor);
+			simpleBufferingAsyncClientHttpRequest.setMetricRegistry(this.metricRegistry);
+			return simpleBufferingAsyncClientHttpRequest;
 		}
 		else {
-			return new SimpleStreamingAsyncClientHttpRequest(
-					connection, this.chunkSize, this.outputStreaming, this.taskExecutor);
+			SimpleStreamingAsyncClientHttpRequest simpleStreamingAsyncClientHttpRequest =
+					new SimpleStreamingAsyncClientHttpRequest(
+							connection, this.chunkSize, this.outputStreaming, this.taskExecutor);
+			simpleStreamingAsyncClientHttpRequest.setMetricRegistry(this.metricRegistry);
+			return simpleStreamingAsyncClientHttpRequest;
 		}
 	}
 
