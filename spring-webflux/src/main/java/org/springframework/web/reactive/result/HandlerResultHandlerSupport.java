@@ -116,6 +116,11 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 	protected MediaType selectMediaType(ServerWebExchange exchange,
 			Supplier<List<MediaType>> producibleTypesSupplier) {
 
+		MediaType contentType = exchange.getResponse().getHeaders().getContentType();
+		if (contentType != null && contentType.isConcrete()) {
+			return contentType;
+		}
+
 		List<MediaType> acceptableTypes = getAcceptableTypes(exchange);
 		List<MediaType> producibleTypes = getProducibleTypes(exchange, producibleTypesSupplier);
 
@@ -152,10 +157,6 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 	private List<MediaType> getProducibleTypes(ServerWebExchange exchange,
 			Supplier<List<MediaType>> producibleTypesSupplier) {
 
-		MediaType contentType = exchange.getResponse().getHeaders().getContentType();
-		if (contentType != null && contentType.isConcrete()) {
-			return Collections.singletonList(contentType);
-		}
 		Set<MediaType> mediaTypes = exchange.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 		return (mediaTypes != null ? new ArrayList<>(mediaTypes) : producibleTypesSupplier.get());
 	}
