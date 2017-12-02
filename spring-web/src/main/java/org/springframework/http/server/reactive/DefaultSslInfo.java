@@ -26,7 +26,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * The default holder for SSL session information.
+ * Default implementation of {@link SslInfo}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0.2
@@ -36,6 +36,7 @@ final class DefaultSslInfo implements SslInfo {
 	@Nullable
 	private final String sessionId;
 
+	@Nullable
 	private final X509Certificate[] peerCertificates;
 
 
@@ -59,6 +60,7 @@ final class DefaultSslInfo implements SslInfo {
 	}
 
 	@Override
+	@Nullable
 	public X509Certificate[] getPeerCertificates() {
 		return this.peerCertificates;
 	}
@@ -85,13 +87,14 @@ final class DefaultSslInfo implements SslInfo {
 		return sb.toString();
 	}
 
+	@Nullable
 	private static X509Certificate[] initCertificates(SSLSession session) {
 		Certificate[] certificates;
 		try {
 			certificates = session.getPeerCertificates();
 		}
 		catch (Throwable ex) {
-			throw new IllegalStateException("Failed to get SSL certificates", ex);
+			return null;
 		}
 
 		List<X509Certificate> result = new ArrayList<>(certificates.length);
@@ -100,7 +103,7 @@ final class DefaultSslInfo implements SslInfo {
 				result.add((X509Certificate) certificate);
 			}
 		}
-		return result.toArray(new X509Certificate[result.size()]);
+		return !result.isEmpty() ? result.toArray(new X509Certificate[result.size()]) : null;
 	}
 
 }
