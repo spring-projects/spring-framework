@@ -46,7 +46,7 @@ configure(allprojects) { project ->
 	ext.groovyVersion        = "2.4.13"
 	ext.hsqldbVersion        = "2.4.0"
 	ext.jackson2Version      = "2.9.2"
-	ext.jettyVersion         = "9.4.7.v20170914"
+	ext.jettyVersion         = "9.4.8.v20171121"
 	ext.junitJupiterVersion  = "5.0.2"
 	ext.junitPlatformVersion = "1.0.2"
 	ext.junitVintageVersion  = "4.12.2"
@@ -59,7 +59,7 @@ configure(allprojects) { project ->
 	ext.rxjava2Version       = "2.1.7"
 	ext.slf4jVersion         = "1.7.25"
 	ext.tiles3Version        = "3.0.8"
-	ext.tomcatVersion        = "8.5.23"
+	ext.tomcatVersion        = "8.5.24"
 	ext.undertowVersion      = "1.4.21.Final"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
