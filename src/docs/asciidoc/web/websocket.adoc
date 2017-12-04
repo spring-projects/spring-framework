@@ -1383,7 +1383,7 @@ it acts as a "relay" that forwards messages in both directions.
 
 [NOTE]
 ====
-Please `org.projectreactor:reactor-net` and `io.netty:netty-all`
+Please add `org.projectreactor:reactor-net` and `io.netty:netty-all`
 dependencies to your project for TCP connection management.
 ====
 
