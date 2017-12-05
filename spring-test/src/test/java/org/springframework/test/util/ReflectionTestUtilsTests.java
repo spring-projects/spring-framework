@@ -24,11 +24,14 @@ import org.junit.rules.ExpectedException;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.subpackage.Component;
 import org.springframework.test.util.subpackage.LegacyEntity;
 import org.springframework.test.util.subpackage.Person;
 import org.springframework.test.util.subpackage.PersonEntity;
 import org.springframework.test.util.subpackage.StaticFields;
+
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -421,5 +424,28 @@ public class ReflectionTestUtilsTests {
 		invokeSetterMethod(entity, "collaborator", testCollaborator);
 		assertTrue(entity.toString().contains(testCollaborator));
 	}
+	@Test
+	public void invokeMockAutowiredWillAutoMockAllAutowiredFields() throws IllegalAccessException {
+		MockAutowiredStub stub = new MockAutowiredStub();
+		Map<Class<?>, Object> beans = mockAutowired(stub);
+		assertNotNull(beans);
 
+		assertNotNull(getBean(beans, LegacyEntity.class));
+		assertNotNull(getBean(beans, Component.class));
+	}
+	private static class MockAutowiredStub {
+		@Autowired
+		private LegacyEntity legacyEntity;
+
+		@Autowired
+		private Component component;
+
+		public LegacyEntity getLegacyEntity() {
+			return legacyEntity;
+		}
+
+		public Component getComponent() {
+			return component;
+		}
+	}
 }

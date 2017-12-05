@@ -18,10 +18,14 @@ package org.springframework.test.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -450,6 +454,36 @@ public abstract class ReflectionTestUtils {
 			return String.format("target of type [%s] whose toString() method threw [%s]",
 					(target != null ? target.getClass().getName() : "unknown"), ex);
 		}
+	}
+
+	public static Map<Class<?>, Object> mockAutowired(Object target) throws IllegalAccessException {
+		Map<Class<?>, Object> beans = new HashMap<>();
+		for(Field field : target.getClass().getDeclaredFields()) {
+			if (field.getDeclaredAnnotation(Autowired.class) == null) {
+				continue;
+			}
+
+			Object value = Mockito.mock(field.getType());
+			beans.put(field.getType(), value);
+			field.setAccessible(true);
+			field.set(target, value);
+		}
+
+		return beans;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T getBean(Map<Class<?>, Object> beans, Class<T> type) {
+		Object v = beans.get(type);
+		if (v == null) {
+			return null;
+		}
+
+		Class<?> dataType = v.getClass();
+		if (dataType == type || type.isAssignableFrom(v.getClass())) {
+			return (T) v;
+		}
+		return null;
 	}
 
 }

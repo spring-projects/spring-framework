@@ -59,6 +59,7 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	optional("io.projectreactor:reactor-test")
+	optional("org.mockito:mockito-core:1.10.19")
 	testCompile(project(":spring-context-support"))
 	testCompile(project(":spring-oxm"))
 	testCompile("javax.cache:cache-api:1.0.0")
