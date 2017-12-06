@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -251,7 +251,7 @@ public class SocketUtils {
 		 */
 		int findAvailablePort(int minPort, int maxPort) {
 			Assert.isTrue(minPort > 0, "'minPort' must be greater than 0");
-			Assert.isTrue(maxPort >= minPort, "'maxPort' must be greater than or equals 'minPort'");
+			Assert.isTrue(maxPort >= minPort, "'maxPort' must be greater than or equal to 'minPort'");
 			Assert.isTrue(maxPort <= PORT_RANGE_MAX, "'maxPort' must be less than or equal to " + PORT_RANGE_MAX);
 
 			int portRange = maxPort - minPort;
