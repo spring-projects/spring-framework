@@ -480,7 +480,7 @@ public abstract class ReflectionTestUtils {
 		}
 
 		Class<?> dataType = v.getClass();
-		if (dataType == type || type.isAssignableFrom(v.getClass())) {
+		if (dataType.equals(type) || type.isAssignableFrom(v.getClass())) {
 			return (T) v;
 		}
 		return null;
