@@ -258,12 +258,13 @@ public class SocketUtils {
 			int candidatePort;
 			int searchCounter = 0;
 			do {
-				if (searchCounter++ > portRange) {
+				if (searchCounter > portRange) {
 					throw new IllegalStateException(String.format(
 							"Could not find an available %s port in the range [%d, %d] after %d attempts",
 							name(), minPort, maxPort, searchCounter));
 				}
 				candidatePort = findRandomPort(minPort, maxPort);
+				searchCounter++;
 			}
 			while (!isPortAvailable(candidatePort));
 
