@@ -54,8 +54,8 @@ public class SocketUtilsTests {
 	}
 
 	@Test
-	public void findAvailableTcpPortWithMinPortEqualsMaxPort() {
-		int minMaxPort = 20000;
+	public void findAvailableTcpPortWithMinPortEqualToMaxPort() {
+		int minMaxPort = SocketUtils.findAvailableTcpPort();
 		int port = SocketUtils.findAvailableTcpPort(minMaxPort, minMaxPort);
 		assertEquals(minMaxPort, port);
 	}
