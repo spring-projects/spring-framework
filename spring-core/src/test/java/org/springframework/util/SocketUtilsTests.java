@@ -53,6 +53,13 @@ public class SocketUtilsTests {
 		assertPortInRange(port, PORT_RANGE_MIN, PORT_RANGE_MAX);
 	}
 
+	@Test
+	public void findAvailableTcpPortWithMinPortEqualToMaxPort() {
+		int minMaxPort = SocketUtils.findAvailableTcpPort();
+		int port = SocketUtils.findAvailableTcpPort(minMaxPort, minMaxPort);
+		assertEquals(minMaxPort, port);
+	}
+
 	@Test(expected = IllegalStateException.class)
 	public void findAvailableTcpPortWhenPortOnLoopbackInterfaceIsNotAvailable() throws Exception {
 		int port = SocketUtils.findAvailableTcpPort();
