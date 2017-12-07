@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.WebApplicationContext;
@@ -140,13 +141,12 @@ class StubWebApplicationContext implements WebApplicationContext {
 		this.beanFactory.addBean(name, bean);
 	}
 
-	public void addBeans(List<?> beans) {
-		if (beans == null) {
-			return;
-		}
-		for (Object bean : beans) {
-			String name = bean.getClass().getName() + "#" +  ObjectUtils.getIdentityHexString(bean);
-			this.beanFactory.addBean(name, bean);
+	public void addBeans(@Nullable List<?> beans) {
+		if (beans != null) {
+			for (Object bean : beans) {
+				String name = bean.getClass().getName() + "#" + ObjectUtils.getIdentityHexString(bean);
+				this.beanFactory.addBean(name, bean);
+			}
 		}
 	}
 
@@ -161,18 +161,18 @@ class StubWebApplicationContext implements WebApplicationContext {
 	}
 
 	@Override
-	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
+	public <T> T getBean(String name, @Nullable Class<T> requiredType) throws BeansException {
 		return this.beanFactory.getBean(name, requiredType);
-	}
-
-	@Override
-	public <T> T getBean(Class<T> requiredType) throws BeansException {
-		return this.beanFactory.getBean(requiredType);
 	}
 
 	@Override
 	public Object getBean(String name, Object... args) throws BeansException {
 		return this.beanFactory.getBean(name, args);
+	}
+
+	@Override
+	public <T> T getBean(Class<T> requiredType) throws BeansException {
+		return this.beanFactory.getBean(requiredType);
 	}
 
 	@Override
@@ -201,7 +201,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 	}
 
 	@Override
-	public boolean isTypeMatch(String name, Class<?> typeToMatch) throws NoSuchBeanDefinitionException {
+	public boolean isTypeMatch(String name, @Nullable Class<?> typeToMatch) throws NoSuchBeanDefinitionException {
 		return this.beanFactory.isTypeMatch(name, typeToMatch);
 	}
 
@@ -236,27 +236,27 @@ class StubWebApplicationContext implements WebApplicationContext {
 	}
 
 	@Override
-	public String[] getBeanNamesForType(ResolvableType type) {
+	public String[] getBeanNamesForType(@Nullable ResolvableType type) {
 		return this.beanFactory.getBeanNamesForType(type);
 	}
 
 	@Override
-	public String[] getBeanNamesForType(Class<?> type) {
+	public String[] getBeanNamesForType(@Nullable Class<?> type) {
 		return this.beanFactory.getBeanNamesForType(type);
 	}
 
 	@Override
-	public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
+	public String[] getBeanNamesForType(@Nullable Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
 		return this.beanFactory.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
 	}
 
 	@Override
-	public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException {
+	public <T> Map<String, T> getBeansOfType(@Nullable Class<T> type) throws BeansException {
 		return this.beanFactory.getBeansOfType(type);
 	}
 
 	@Override
-	public <T> Map<String, T> getBeansOfType(Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
+	public <T> Map<String, T> getBeansOfType(@Nullable Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
 			throws BeansException {
 
 		return this.beanFactory.getBeansOfType(type, includeNonSingletons, allowEagerInit);
@@ -275,6 +275,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 	}
 
 	@Override
+	@Nullable
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
 			throws NoSuchBeanDefinitionException{
 
@@ -302,12 +303,12 @@ class StubWebApplicationContext implements WebApplicationContext {
 	//---------------------------------------------------------------------
 
 	@Override
-	public String getMessage(String code, Object args[], String defaultMessage, Locale locale) {
+	public String getMessage(String code, @Nullable Object args[], @Nullable String defaultMessage, Locale locale) {
 		return this.messageSource.getMessage(code, args, defaultMessage, locale);
 	}
 
 	@Override
-	public String getMessage(String code, Object args[], Locale locale) throws NoSuchMessageException {
+	public String getMessage(String code, @Nullable Object args[], Locale locale) throws NoSuchMessageException {
 		return this.messageSource.getMessage(code, args, locale);
 	}
 
@@ -322,6 +323,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 	//---------------------------------------------------------------------
 
 	@Override
+	@Nullable
 	public ClassLoader getClassLoader() {
 		return ClassUtils.getDefaultClassLoader();
 	}
@@ -399,13 +401,15 @@ class StubWebApplicationContext implements WebApplicationContext {
 		}
 
 		@Override
-		public Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName) {
+		@Nullable
+		public Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName) {
 			throw new UnsupportedOperationException("Dependency resolution not supported");
 		}
 
 		@Override
-		public Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName,
-				Set<String> autowiredBeanNames, TypeConverter typeConverter) {
+		@Nullable
+		public Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName,
+				@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) {
 			throw new UnsupportedOperationException("Dependency resolution not supported");
 		}
 

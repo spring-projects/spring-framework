@@ -26,6 +26,7 @@ import reactor.test.StepVerifier;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
@@ -37,12 +38,10 @@ import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
-
 
 /**
  * @author Sebastien Deleuze
@@ -108,22 +107,22 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
-				.flatMapMany(response -> response.body(toFlux(type)));
+				.flatMapMany(response -> response.body(toFlux(new ParameterizedTypeReference<ServerSentEvent<String>>() {})));
 
 		StepVerifier.create(result)
 				.consumeNextWith( event -> {
-					assertEquals("0", event.id().get());
-					assertEquals("foo", event.data().get());
-					assertEquals("bar", event.comment().get());
-					assertFalse(event.event().isPresent());
-					assertFalse(event.retry().isPresent());
+					assertEquals("0", event.id());
+					assertEquals("foo", event.data());
+					assertEquals("bar", event.comment());
+					assertNull(event.event());
+					assertNull(event.retry());
 				})
 				.consumeNextWith( event -> {
-					assertEquals("1", event.id().get());
-					assertEquals("foo", event.data().get());
-					assertEquals("bar", event.comment().get());
-					assertFalse(event.event().isPresent());
-					assertFalse(event.retry().isPresent());
+					assertEquals("1", event.id());
+					assertEquals("foo", event.data());
+					assertEquals("bar", event.comment());
+					assertNull(event.event());
+					assertNull(event.retry());
 				})
 				.thenCancel()
 				.verify(Duration.ofSeconds(5L));
@@ -135,23 +134,22 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
-				.flatMapMany(response -> response.body(toFlux(
-						forClassWithGenerics(ServerSentEvent.class, String.class))));
+				.flatMapMany(response -> response.body(toFlux(new ParameterizedTypeReference<ServerSentEvent<String>>() {})));
 
 		StepVerifier.create(result)
 				.consumeNextWith( event -> {
-					assertEquals("0", event.id().get());
-					assertEquals("foo", event.data().get());
-					assertEquals("bar", event.comment().get());
-					assertFalse(event.event().isPresent());
-					assertFalse(event.retry().isPresent());
+					assertEquals("0", event.id());
+					assertEquals("foo", event.data());
+					assertEquals("bar", event.comment());
+					assertNull(event.event());
+					assertNull(event.retry());
 				})
 				.consumeNextWith( event -> {
-					assertEquals("1", event.id().get());
-					assertEquals("foo", event.data().get());
-					assertEquals("bar", event.comment().get());
-					assertFalse(event.event().isPresent());
-					assertFalse(event.retry().isPresent());
+					assertEquals("1", event.id());
+					assertEquals("foo", event.data());
+					assertEquals("bar", event.comment());
+					assertNull(event.event());
+					assertNull(event.retry());
 				})
 				.thenCancel()
 				.verify(Duration.ofSeconds(5L));

@@ -8,9 +8,14 @@
 	<Loggers>
 		<Logger name="org.springframework.http" level="debug" />
 		<!--<Logger name="org.springframework.web" level="debug" />-->
+
+		<!-- temporarily while we resolve random failures -->
+		<Logger name="org.springframework.web.reactive.socket.WebSocketIntegrationTests" level="debug" />
+		<Logger name="org.springframework.web.reactive.socket.adapter" level="trace" />
+
 		<Logger name="reactor" level="info" />
 		<Logger name="io.reactivex" level="info" />
-		<Root level="error">
+		<Root level="info">
 			<AppenderRef ref="Console" />
 		</Root>
 	</Loggers>

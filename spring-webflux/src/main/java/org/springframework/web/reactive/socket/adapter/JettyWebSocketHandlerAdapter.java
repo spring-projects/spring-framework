@@ -31,6 +31,7 @@ import org.eclipse.jetty.websocket.api.extensions.Frame;
 import org.eclipse.jetty.websocket.common.OpCode;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -56,6 +57,7 @@ public class JettyWebSocketHandlerAdapter {
 
 	private final Function<Session, JettyWebSocketSession> sessionFactory;
 
+	@Nullable
 	private JettyWebSocketSession delegateSession;
 
 

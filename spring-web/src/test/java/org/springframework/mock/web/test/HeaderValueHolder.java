@@ -40,7 +40,9 @@ class HeaderValueHolder {
 
 	public void setValue(Object value) {
 		this.values.clear();
-		this.values.add(value);
+		if (value != null) {
+			this.values.add(value);
+		}
 	}
 
 	public void addValue(Object value) {

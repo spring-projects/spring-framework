@@ -28,7 +28,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
@@ -64,14 +64,14 @@ public class ResourceTransformerSupportTests {
 		handler.setLocations(Collections.singletonList(new ClassPathResource("test/", getClass())));
 		handler.setResourceResolvers(resolvers);
 		ResourceUrlProvider urlProvider = new ResourceUrlProvider();
-		urlProvider.setHandlerMap(Collections.singletonMap("/resources/**", handler));
+		urlProvider.registerHandlers(Collections.singletonMap("/resources/**", handler));
 		return urlProvider;
 	}
 
 
 	@Test
 	public void resolveUrlPath() throws Exception {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("/resources/main.css").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/resources/main.css"));
 		String resourcePath = "/resources/bar.css";
 		Resource css = new ClassPathResource("test/main.css", getClass());
 		String actual = this.transformer.resolveUrlPath(
@@ -84,7 +84,7 @@ public class ResourceTransformerSupportTests {
 	@Test
 	public void resolveUrlPathWithRelativePath() throws Exception {
 		Resource css = new ClassPathResource("test/main.css", getClass());
-		MockServerWebExchange exchange = MockServerHttpRequest.get("").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		String actual = this.transformer.resolveUrlPath(
 				"bar.css", exchange, css, this.transformerChain).block(Duration.ofSeconds(5));
 
@@ -94,7 +94,7 @@ public class ResourceTransformerSupportTests {
 	@Test
 	public void resolveUrlPathWithRelativePathInParentDirectory() throws Exception {
 		Resource imagePng = new ClassPathResource("test/images/image.png", getClass());
-		MockServerWebExchange exchange = MockServerHttpRequest.get("").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		String actual = this.transformer.resolveUrlPath(
 				"../bar.css", exchange, imagePng, this.transformerChain).block(Duration.ofSeconds(5));
 

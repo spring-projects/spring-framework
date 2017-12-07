@@ -78,7 +78,7 @@ public class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingInte
 	public void actualRequestWithCorsEnabled() throws Exception {
 		ResponseEntity<String> entity = performGet("/cors", this.headers, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
-		assertEquals("http://localhost:9000", entity.getHeaders().getAccessControlAllowOrigin());
+		assertEquals("*", entity.getHeaders().getAccessControlAllowOrigin());
 		assertEquals("cors", entity.getBody());
 	}
 
@@ -106,7 +106,7 @@ public class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingInte
 		this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		ResponseEntity<String> entity = performOptions("/cors", this.headers, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
-		assertEquals("http://localhost:9000", entity.getHeaders().getAccessControlAllowOrigin());
+		assertEquals("*", entity.getHeaders().getAccessControlAllowOrigin());
 	}
 
 	@Test

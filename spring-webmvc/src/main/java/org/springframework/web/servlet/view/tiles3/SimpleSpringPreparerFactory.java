@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.apache.tiles.preparer.PreparerException;
 import org.apache.tiles.preparer.ViewPreparer;
 import org.apache.tiles.preparer.factory.NoSuchPreparerException;
 
+import org.springframework.util.ClassUtils;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -51,7 +52,7 @@ public class SimpleSpringPreparerFactory extends AbstractSpringPreparerFactory {
 				preparer = this.sharedPreparers.get(name);
 				if (preparer == null) {
 					try {
-						Class<?> beanClass = context.getClassLoader().loadClass(name);
+						Class<?> beanClass = ClassUtils.forName(name, context.getClassLoader());
 						if (!ViewPreparer.class.isAssignableFrom(beanClass)) {
 							throw new PreparerException(
 									"Invalid preparer class [" + name + "]: does not implement ViewPreparer interface");

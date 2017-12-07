@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.test.web.servlet;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.servlet.FlashMap;
@@ -41,12 +42,16 @@ class DefaultMvcResult implements MvcResult {
 
 	private final MockHttpServletResponse mockResponse;
 
+	@Nullable
 	private Object handler;
 
+	@Nullable
 	private HandlerInterceptor[] interceptors;
 
+	@Nullable
 	private ModelAndView modelAndView;
 
+	@Nullable
 	private Exception resolvedException;
 
 	private final AtomicReference<Object> asyncResult = new AtomicReference<>(RESULT_NONE);
@@ -71,20 +76,22 @@ class DefaultMvcResult implements MvcResult {
 		return this.mockResponse;
 	}
 
-	public void setHandler(Object handler) {
+	public void setHandler(@Nullable Object handler) {
 		this.handler = handler;
 	}
 
 	@Override
+	@Nullable
 	public Object getHandler() {
 		return this.handler;
 	}
 
-	public void setInterceptors(HandlerInterceptor... interceptors) {
+	public void setInterceptors(@Nullable HandlerInterceptor... interceptors) {
 		this.interceptors = interceptors;
 	}
 
 	@Override
+	@Nullable
 	public HandlerInterceptor[] getInterceptors() {
 		return this.interceptors;
 	}
@@ -94,15 +101,17 @@ class DefaultMvcResult implements MvcResult {
 	}
 
 	@Override
+	@Nullable
 	public Exception getResolvedException() {
 		return this.resolvedException;
 	}
 
-	public void setModelAndView(ModelAndView mav) {
+	public void setModelAndView(@Nullable ModelAndView mav) {
 		this.modelAndView = mav;
 	}
 
 	@Override
+	@Nullable
 	public ModelAndView getModelAndView() {
 		return this.modelAndView;
 	}

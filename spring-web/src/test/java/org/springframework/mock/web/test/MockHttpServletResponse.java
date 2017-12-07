@@ -23,6 +23,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -292,7 +293,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		this.characterEncoding = null;
 		this.contentLength = 0;
 		this.contentType = null;
-		this.locale = null;
+		this.locale = Locale.getDefault();
 		this.cookies.clear();
 		this.headers.clear();
 		this.status = HttpServletResponse.SC_OK;
@@ -302,9 +303,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	@Override
 	public void setLocale(Locale locale) {
 		this.locale = locale;
-		if (locale != null) {
-			doAddHeaderValue(HttpHeaders.ACCEPT_LANGUAGE, locale.toLanguageTag(), true);
-		}
+		doAddHeaderValue(HttpHeaders.ACCEPT_LANGUAGE, locale.toLanguageTag(), true);
 	}
 
 	@Override
@@ -507,27 +506,33 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		setHeaderValue(name, formatDate(value));
 	}
 
-	public long getDateHeader(String name) {
-		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.US);
-		dateFormat.setTimeZone(GMT);
-		try {
-			return dateFormat.parse(getHeader(name)).getTime();
-		}
-		catch (ParseException ex) {
-			throw new IllegalArgumentException(
-					"Value for header '" + name + "' is not a valid Date: " + getHeader(name));
-		}
-	}
-
 	@Override
 	public void addDateHeader(String name, long value) {
 		addHeaderValue(name, formatDate(value));
 	}
 
+	public long getDateHeader(String name) {
+		String headerValue = getHeader(name);
+		if (headerValue == null) {
+			return -1;
+		}
+		try {
+			return newDateFormat().parse(getHeader(name)).getTime();
+		}
+		catch (ParseException ex) {
+			throw new IllegalArgumentException(
+					"Value for header '" + name + "' is not a valid Date: " + headerValue);
+		}
+	}
+
 	private String formatDate(long date) {
+		return newDateFormat().format(new Date(date));
+	}
+
+	private DateFormat newDateFormat() {
 		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.US);
 		dateFormat.setTimeZone(GMT);
-		return dateFormat.format(new Date(date));
+		return dateFormat;
 	}
 
 	@Override
@@ -578,7 +583,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			HttpHeaders headers = new HttpHeaders();
 			headers.add(HttpHeaders.ACCEPT_LANGUAGE, value.toString());
 			List<Locale> locales = headers.getAcceptLanguageAsLocales();
-			setLocale(locales.isEmpty() ? null : locales.get(0));
+			this.locale = (!locales.isEmpty() ? locales.get(0) : Locale.getDefault());
 			return true;
 		}
 		else {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 package org.springframework.web.socket.config.annotation;
 
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.SimpSessionScope;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
@@ -48,13 +50,14 @@ import org.springframework.web.socket.messaging.WebSocketAnnotationMethodMessage
  */
 public abstract class WebSocketMessageBrokerConfigurationSupport extends AbstractMessageBrokerConfiguration {
 
+	@Nullable
 	private WebSocketTransportRegistration transportRegistration;
 
 
 	@Override
 	protected SimpAnnotationMethodMessageHandler createAnnotationMethodMessageHandler() {
-		return new WebSocketAnnotationMethodMessageHandler(clientInboundChannel(),
-				clientOutboundChannel(), brokerMessagingTemplate());
+		return new WebSocketAnnotationMethodMessageHandler(
+				clientInboundChannel(), clientOutboundChannel(), brokerMessagingTemplate());
 	}
 
 	@Override
@@ -65,9 +68,12 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	@Bean
 	public HandlerMapping stompWebSocketHandlerMapping() {
 		WebSocketHandler handler = decorateWebSocketHandler(subProtocolWebSocketHandler());
-		WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(handler,
-				getTransportRegistration(), messageBrokerTaskScheduler());
-		registry.setApplicationContext(getApplicationContext());
+		WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(
+				handler, getTransportRegistration(), messageBrokerTaskScheduler());
+		ApplicationContext applicationContext = getApplicationContext();
+		if (applicationContext != null) {
+			registry.setApplicationContext(applicationContext);
+		}
 		registerStompEndpoints(registry);
 		return registry.getHandlerMapping();
 	}
@@ -107,15 +113,15 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	@Bean
 	public WebSocketMessageBrokerStats webSocketMessageBrokerStats() {
 		AbstractBrokerMessageHandler relayBean = stompBrokerRelayMessageHandler();
-		StompBrokerRelayMessageHandler brokerRelay = (relayBean instanceof StompBrokerRelayMessageHandler ?
-				(StompBrokerRelayMessageHandler) relayBean : null);
 
 		// Ensure STOMP endpoints are registered
 		stompWebSocketHandlerMapping();
 
 		WebSocketMessageBrokerStats stats = new WebSocketMessageBrokerStats();
 		stats.setSubProtocolWebSocketHandler((SubProtocolWebSocketHandler) subProtocolWebSocketHandler());
-		stats.setStompBrokerRelay(brokerRelay);
+		if (relayBean instanceof StompBrokerRelayMessageHandler) {
+			stats.setStompBrokerRelay((StompBrokerRelayMessageHandler) relayBean);
+		}
 		stats.setInboundChannelExecutor(clientInboundChannelExecutor());
 		stats.setOutboundChannelExecutor(clientOutboundChannelExecutor());
 		stats.setSockJsTaskScheduler(messageBrokerTaskScheduler());
@@ -126,8 +132,12 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	protected MappingJackson2MessageConverter createJacksonConverter() {
 		MappingJackson2MessageConverter messageConverter = super.createJacksonConverter();
 		// Use Jackson builder in order to have JSR-310 and Joda-Time modules registered automatically
-		messageConverter.setObjectMapper(Jackson2ObjectMapperBuilder.json()
-				.applicationContext(this.getApplicationContext()).build());
+		Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.json();
+		ApplicationContext applicationContext = getApplicationContext();
+		if (applicationContext != null) {
+			builder.applicationContext(applicationContext);
+		}
+		messageConverter.setObjectMapper(builder.build());
 		return messageConverter;
 	}
 

@@ -22,6 +22,7 @@ import java.io.IOException;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -60,7 +61,7 @@ public class ByteArrayHttpMessageConverter extends AbstractHttpMessageConverter<
 	}
 
 	@Override
-	protected Long getContentLength(byte[] bytes, MediaType contentType) {
+	protected Long getContentLength(byte[] bytes, @Nullable MediaType contentType) {
 		return (long) bytes.length;
 	}
 

@@ -30,6 +30,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.function.BodyInserters;
 
 /**
@@ -54,23 +55,25 @@ class ResourceHandlerFunction implements HandlerFunction<ServerResponse> {
 
 	@Override
 	public Mono<ServerResponse> handle(ServerRequest request) {
-		switch (request.method()) {
-			case GET:
-				return ServerResponse.ok()
-						.body(BodyInserters.fromResource(this.resource));
-			case HEAD:
-				Resource headResource = new HeadMethodResource(this.resource);
-				return ServerResponse.ok()
-						.body(BodyInserters.fromResource(headResource));
-			case OPTIONS:
-				return ServerResponse.ok()
-						.allow(SUPPORTED_METHODS)
-						.body(BodyInserters.empty());
-			default:
-				return ServerResponse.status(HttpStatus.METHOD_NOT_ALLOWED)
-						.allow(SUPPORTED_METHODS)
-						.body(BodyInserters.empty());
+		HttpMethod method = request.method();
+		if (method != null) {
+			switch (method) {
+				case GET:
+					return EntityResponse.fromObject(this.resource).build()
+							.map(response -> response);
+				case HEAD:
+					Resource headResource = new HeadMethodResource(this.resource);
+					return EntityResponse.fromObject(headResource).build()
+							.map(response -> response);
+				case OPTIONS:
+					return ServerResponse.ok()
+							.allow(SUPPORTED_METHODS)
+							.body(BodyInserters.empty());
+			}
 		}
+		return ServerResponse.status(HttpStatus.METHOD_NOT_ALLOWED)
+				.allow(SUPPORTED_METHODS)
+				.body(BodyInserters.empty());
 	}
 
 
@@ -127,6 +130,7 @@ class ResourceHandlerFunction implements HandlerFunction<ServerResponse> {
 		}
 
 		@Override
+		@Nullable
 		public String getFilename() {
 			return this.delegate.getFilename();
 		}

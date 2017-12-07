@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans.factory.parsing;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -34,6 +35,7 @@ public class CompositeComponentDefinition extends AbstractComponentDefinition {
 
 	private final String name;
 
+	@Nullable
 	private final Object source;
 
 	private final List<ComponentDefinition> nestedComponents = new LinkedList<>();
@@ -44,7 +46,7 @@ public class CompositeComponentDefinition extends AbstractComponentDefinition {
 	 * @param name the name of the composite component
 	 * @param source the source element that defines the root of the composite component
 	 */
-	public CompositeComponentDefinition(String name, Object source) {
+	public CompositeComponentDefinition(String name, @Nullable Object source) {
 		Assert.notNull(name, "Name must not be null");
 		this.name = name;
 		this.source = source;
@@ -57,6 +59,7 @@ public class CompositeComponentDefinition extends AbstractComponentDefinition {
 	}
 
 	@Override
+	@Nullable
 	public Object getSource() {
 		return this.source;
 	}

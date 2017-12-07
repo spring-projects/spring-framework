@@ -20,7 +20,7 @@ import java.util.Collection;
 
 import org.junit.Test;
 
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
@@ -48,36 +48,42 @@ public class ParamsRequestConditionTests {
 	@Test
 	public void paramPresent() throws Exception {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo");
-		assertNotNull(condition.getMatchingCondition(get("/path?foo=").toExchange()));
+		assertNotNull(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?foo="))));
+	}
+
+	@Test // SPR-15831
+	public void paramPresentNullValue() throws Exception {
+		ParamsRequestCondition condition = new ParamsRequestCondition("foo");
+		assertNotNull(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?foo"))));
 	}
 
 	@Test
 	public void paramPresentNoMatch() throws Exception {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo");
-		assertNull(condition.getMatchingCondition(get("/path?bar=").toExchange()));
+		assertNull(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?bar="))));
 	}
 
 	@Test
 	public void paramNotPresent() throws Exception {
-		MockServerWebExchange exchange = get("/").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/"));
 		assertNotNull(new ParamsRequestCondition("!foo").getMatchingCondition(exchange));
 	}
 
 	@Test
 	public void paramValueMatch() throws Exception {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo=bar");
-		assertNotNull(condition.getMatchingCondition(get("/path?foo=bar").toExchange()));
+		assertNotNull(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?foo=bar"))));
 	}
 
 	@Test
 	public void paramValueNoMatch() throws Exception {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo=bar");
-		assertNull(condition.getMatchingCondition(get("/path?foo=bazz").toExchange()));
+		assertNull(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?foo=bazz"))));
 	}
 
 	@Test
 	public void compareTo() throws Exception {
-		ServerWebExchange exchange = get("/").toExchange();
+		ServerWebExchange exchange = MockServerWebExchange.from(get("/"));
 
 		ParamsRequestCondition condition1 = new ParamsRequestCondition("foo", "bar", "baz");
 		ParamsRequestCondition condition2 = new ParamsRequestCondition("foo", "bar");

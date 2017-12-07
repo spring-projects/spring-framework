@@ -4,11 +4,10 @@ package org.springframework.http.server.reactive;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import reactor.core.publisher.Mono;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
-
-import reactor.core.publisher.Mono;
 
 /**
  * {@code HttpHandler} delegating requests to one of several {@code HttpHandler}'s
@@ -17,7 +16,7 @@ import reactor.core.publisher.Mono;
  * <p>This is intended as a coarse-grained mechanism for delegating requests to
  * one of several applications -- each represented by an {@code HttpHandler}, with
  * the application "context path" (the prefix-based mapping) exposed via
- * {@link ServerHttpRequest#getContextPath()}.
+ * {@link ServerHttpRequest#getPath()}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -49,12 +48,13 @@ public class ContextPathCompositeHandler implements HttpHandler {
 
 	@Override
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-		String path = getPathWithinApplication(request);
+		// Remove underlying context path first (e.g. Servlet container)
+		String path = request.getPath().pathWithinApplication().value();
 		return this.handlerMap.entrySet().stream()
 				.filter(entry -> path.startsWith(entry.getKey()))
 				.findFirst()
 				.map(entry -> {
-					String contextPath = request.getContextPath() + entry.getKey();
+					String contextPath = request.getPath().contextPath().value() + entry.getKey();
 					ServerHttpRequest newRequest = request.mutate().contextPath(contextPath).build();
 					return entry.getValue().handle(newRequest, response);
 				})
@@ -63,20 +63,6 @@ public class ContextPathCompositeHandler implements HttpHandler {
 					response.setComplete();
 					return Mono.empty();
 				});
-	}
-
-	/**
-	 * Get the path within the "native" context path of the underlying server,
-	 * for example when running on a Servlet container.
-	 */
-	private String getPathWithinApplication(ServerHttpRequest request) {
-		String path = request.getURI().getRawPath();
-		String contextPath = request.getContextPath();
-		if (!StringUtils.hasText(contextPath)) {
-			return path;
-		}
-		int length = contextPath.length();
-		return (path.length() > length ? path.substring(length) : "");
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
+import org.springframework.lang.Nullable;
 
 /**
  * Represents a variable reference, eg. #someVar. Note this is different to a *local*
@@ -89,7 +90,7 @@ public class VariableReference extends SpelNodeImpl {
 	}
 
 	@Override
-	public void setValue(ExpressionState state, Object value) throws SpelEvaluationException {
+	public void setValue(ExpressionState state, @Nullable Object value) throws SpelEvaluationException {
 		state.setVariable(this.name, value);
 	}
 
@@ -127,7 +128,7 @@ public class VariableReference extends SpelNodeImpl {
 		}
 
 		@Override
-		public void setValue(Object newValue) {
+		public void setValue(@Nullable Object newValue) {
 			this.evaluationContext.setVariable(this.name, newValue);
 		}
 
@@ -152,7 +153,7 @@ public class VariableReference extends SpelNodeImpl {
 			mv.visitLdcInsn(name);
 			mv.visitMethodInsn(INVOKEINTERFACE, "org/springframework/expression/EvaluationContext", "lookupVariable", "(Ljava/lang/String;)Ljava/lang/Object;",true);
 		}
-		CodeFlow.insertCheckCast(mv,this.exitTypeDescriptor);
+		CodeFlow.insertCheckCast(mv, this.exitTypeDescriptor);
 		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 

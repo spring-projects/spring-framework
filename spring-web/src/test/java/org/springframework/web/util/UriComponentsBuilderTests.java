@@ -49,7 +49,9 @@ public class UriComponentsBuilderTests {
 	@Test
 	public void plain() throws URISyntaxException {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
-		UriComponents result = builder.scheme("http").host("example.com").path("foo").queryParam("bar").fragment("baz").build();
+		UriComponents result = builder.scheme("http").host("example.com")
+				.path("foo").queryParam("bar").fragment("baz")
+				.build();
 		assertEquals("http", result.getScheme());
 		assertEquals("example.com", result.getHost());
 		assertEquals("foo", result.getPath());
@@ -62,7 +64,8 @@ public class UriComponentsBuilderTests {
 
 	@Test
 	public void multipleFromSameBuilder() throws URISyntaxException {
-		UriComponentsBuilder builder = UriComponentsBuilder.newInstance().scheme("http").host("example.com").pathSegment("foo");
+		UriComponentsBuilder builder = UriComponentsBuilder.newInstance()
+				.scheme("http").host("example.com").pathSegment("foo");
 		UriComponents result1 = builder.build();
 		builder = builder.pathSegment("foo2").queryParam("bar").fragment("baz");
 		UriComponents result2 = builder.build();
@@ -129,7 +132,8 @@ public class UriComponentsBuilderTests {
 	public void fromUriEncodedQuery() throws URISyntaxException {
 		URI uri = new URI("http://www.example.org/?param=aGVsbG9Xb3JsZA%3D%3D");
 		String fromUri = UriComponentsBuilder.fromUri(uri).build().getQueryParams().get("param").get(0);
-		String fromUriString = UriComponentsBuilder.fromUriString(uri.toString()).build().getQueryParams().get("param").get(0);
+		String fromUriString = UriComponentsBuilder.fromUriString(uri.toString())
+				.build().getQueryParams().get("param").get(0);
 
 		assertEquals(fromUri, fromUriString);
 	}
@@ -146,9 +150,9 @@ public class UriComponentsBuilderTests {
 		assertNull(result.getQuery());
 		assertNull(result.getFragment());
 
-		result = UriComponentsBuilder.fromUriString(
-				"http://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar#and(java.util.BitSet)")
-				.build();
+		String url = "http://arjen:foobar@java.sun.com:80" +
+				"/javase/6/docs/api/java/util/BitSet.html?foo=bar#and(java.util.BitSet)";
+		result = UriComponentsBuilder.fromUriString(url).build();
 		assertEquals("http", result.getScheme());
 		assertEquals("arjen:foobar", result.getUserInfo());
 		assertEquals("java.sun.com", result.getHost());
@@ -635,7 +639,8 @@ public class UriComponentsBuilderTests {
 
 	@Test
 	public void buildAndExpandOpaque() {
-		UriComponents result = UriComponentsBuilder.fromUriString("mailto:{user}@{domain}").buildAndExpand("foo", "example.com");
+		UriComponents result = UriComponentsBuilder.fromUriString("mailto:{user}@{domain}")
+				.buildAndExpand("foo", "example.com");
 		assertEquals("mailto:foo@example.com", result.toUriString());
 
 		Map<String, String> values = new HashMap<>();
@@ -670,23 +675,38 @@ public class UriComponentsBuilderTests {
 
 	@Test
 	public void relativeUrls() throws Exception {
-		assertThat(UriComponentsBuilder.fromUriString("http://example.com/foo/../bar").build().toString(), equalTo("http://example.com/foo/../bar"));
-		assertThat(UriComponentsBuilder.fromUriString("http://example.com/foo/../bar").build().toUriString(), equalTo("http://example.com/foo/../bar"));
-		assertThat(UriComponentsBuilder.fromUriString("http://example.com/foo/../bar").build().toUri().getPath(), equalTo("/foo/../bar"));
-		assertThat(UriComponentsBuilder.fromUriString("../../").build().toString(), equalTo("../../"));
-		assertThat(UriComponentsBuilder.fromUriString("../../").build().toUriString(), equalTo("../../"));
-		assertThat(UriComponentsBuilder.fromUriString("../../").build().toUri().getPath(), equalTo("../../"));
-		assertThat(UriComponentsBuilder.fromUriString("http://example.com").path("foo/../bar").build().toString(), equalTo("http://example.com/foo/../bar"));
-		assertThat(UriComponentsBuilder.fromUriString("http://example.com").path("foo/../bar").build().toUriString(), equalTo("http://example.com/foo/../bar"));
-		assertThat(UriComponentsBuilder.fromUriString("http://example.com").path("foo/../bar").build().toUri().getPath(), equalTo("/foo/../bar"));
+		String baseUrl = "http://example.com";
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl + "/foo/../bar").build().toString(),
+				equalTo(baseUrl + "/foo/../bar"));
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl + "/foo/../bar").build().toUriString(),
+				equalTo(baseUrl + "/foo/../bar"));
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl + "/foo/../bar").build().toUri().getPath(),
+				equalTo("/foo/../bar"));
+		assertThat(UriComponentsBuilder.fromUriString("../../").build().toString(),
+				equalTo("../../"));
+		assertThat(UriComponentsBuilder.fromUriString("../../").build().toUriString(),
+				equalTo("../../"));
+		assertThat(UriComponentsBuilder.fromUriString("../../").build().toUri().getPath(),
+				equalTo("../../"));
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("foo/../bar").build().toString(),
+				equalTo(baseUrl + "/foo/../bar"));
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("foo/../bar").build().toUriString(),
+				equalTo(baseUrl + "/foo/../bar"));
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("foo/../bar").build().toUri().getPath(),
+				equalTo("/foo/../bar"));
 	}
 
 	@Test
 	public void emptySegments() throws Exception {
-		assertThat(UriComponentsBuilder.fromUriString("http://example.com/abc/").path("/x/y/z").build().toString(), equalTo("http://example.com/abc/x/y/z"));
-		assertThat(UriComponentsBuilder.fromUriString("http://example.com/abc/").pathSegment("x", "y", "z").build().toString(), equalTo("http://example.com/abc/x/y/z"));
-		assertThat(UriComponentsBuilder.fromUriString("http://example.com/abc/").path("/x/").path("/y/z").build().toString(), equalTo("http://example.com/abc/x/y/z"));
-		assertThat(UriComponentsBuilder.fromUriString("http://example.com/abc/").pathSegment("x").path("y").build().toString(), equalTo("http://example.com/abc/x/y"));
+		String baseUrl = "http://example.com/abc/";
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("/x/y/z").build().toString(),
+				equalTo("http://example.com/abc/x/y/z"));
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl).pathSegment("x", "y", "z").build().toString(),
+				equalTo("http://example.com/abc/x/y/z"));
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("/x/").path("/y/z").build().toString(),
+				equalTo("http://example.com/abc/x/y/z"));
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl).pathSegment("x").path("y").build().toString(),
+				equalTo("http://example.com/abc/x/y"));
 	}
 
 	@Test

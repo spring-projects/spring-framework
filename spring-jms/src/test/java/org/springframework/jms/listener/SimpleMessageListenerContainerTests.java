@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.StubQueue;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ErrorHandler;
 
 import static org.junit.Assert.*;
@@ -176,7 +177,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		this.container.setDestinationName(DESTINATION_NAME);
 		this.container.setMessageListener(new SessionAwareMessageListener<Message>() {
 			@Override
-			public void onMessage(Message message, Session sess) {
+			public void onMessage(Message message, @Nullable Session sess) {
 				try {
 					// Check correct Session passed into SessionAwareMessageListener.
 					assertSame(sess, session);
@@ -272,7 +273,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		this.container.setDestinationName(DESTINATION_NAME);
 		this.container.setMessageListener(new SessionAwareMessageListener<Message>() {
 			@Override
-			public void onMessage(Message message, Session session) throws JMSException {
+			public void onMessage(Message message, @Nullable Session session) throws JMSException {
 				throw theException;
 			}
 		});
@@ -322,7 +323,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		this.container.setDestinationName(DESTINATION_NAME);
 		this.container.setMessageListener(new SessionAwareMessageListener<Message>() {
 			@Override
-			public void onMessage(Message message, Session session) throws JMSException {
+			public void onMessage(Message message, @Nullable Session session) throws JMSException {
 				throw theException;
 			}
 		});

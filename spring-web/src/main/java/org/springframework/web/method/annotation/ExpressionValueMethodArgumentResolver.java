@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import javax.servlet.ServletException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -44,7 +46,7 @@ public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueMet
 	 * placeholder and #{...} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to contain expressions
 	 */
-	public ExpressionValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
+	public ExpressionValueMethodArgumentResolver(@Nullable ConfigurableBeanFactory beanFactory) {
 		super(beanFactory);
 	}
 
@@ -56,11 +58,13 @@ public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueMet
 
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		Value annotation = parameter.getParameterAnnotation(Value.class);
-		return new ExpressionValueNamedValueInfo(annotation);
+		Value ann = parameter.getParameterAnnotation(Value.class);
+		Assert.state(ann != null, "No Value annotation");
+		return new ExpressionValueNamedValueInfo(ann);
 	}
 
 	@Override
+	@Nullable
 	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest webRequest) throws Exception {
 		// No name to resolve
 		return null;

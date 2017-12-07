@@ -19,6 +19,7 @@ package org.springframework.messaging.simp.config;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
@@ -39,18 +40,24 @@ public class MessageBrokerRegistry {
 
 	private final MessageChannel clientOutboundChannel;
 
+	@Nullable
 	private SimpleBrokerRegistration simpleBrokerRegistration;
 
+	@Nullable
 	private StompBrokerRelayRegistration brokerRelayRegistration;
 
 	private final ChannelRegistration brokerChannelRegistration = new ChannelRegistration();
 
+	@Nullable
 	private String[] applicationDestinationPrefixes;
 
+	@Nullable
 	private String userDestinationPrefix;
 
+	@Nullable
 	private PathMatcher pathMatcher;
 
+	@Nullable
 	private Integer cacheLimit;
 
 
@@ -98,11 +105,13 @@ public class MessageBrokerRegistry {
 		return this.brokerChannelRegistration;
 	}
 
+	@Nullable
 	protected String getUserDestinationBroadcast() {
 		return (this.brokerRelayRegistration != null ?
 				this.brokerRelayRegistration.getUserDestinationBroadcast() : null);
 	}
 
+	@Nullable
 	protected String getUserRegistryBroadcast() {
 		return (this.brokerRelayRegistration != null ?
 				this.brokerRelayRegistration.getUserRegistryBroadcast() : null);
@@ -123,6 +132,7 @@ public class MessageBrokerRegistry {
 		return this;
 	}
 
+	@Nullable
 	protected Collection<String> getApplicationDestinationPrefixes() {
 		return (this.applicationDestinationPrefixes != null ?
 				Arrays.asList(this.applicationDestinationPrefixes) : null);
@@ -145,6 +155,7 @@ public class MessageBrokerRegistry {
 		return this;
 	}
 
+	@Nullable
 	protected String getUserDestinationPrefix() {
 		return this.userDestinationPrefix;
 	}
@@ -171,6 +182,7 @@ public class MessageBrokerRegistry {
 		return this;
 	}
 
+	@Nullable
 	protected PathMatcher getPathMatcher() {
 		return this.pathMatcher;
 	}
@@ -188,6 +200,7 @@ public class MessageBrokerRegistry {
 	}
 
 
+	@Nullable
 	protected SimpleBrokerMessageHandler getSimpleBroker(SubscribableChannel brokerChannel) {
 		if (this.simpleBrokerRegistration == null && this.brokerRelayRegistration == null) {
 			enableSimpleBroker();
@@ -201,6 +214,7 @@ public class MessageBrokerRegistry {
 		return null;
 	}
 
+	@Nullable
 	protected StompBrokerRelayMessageHandler getStompBrokerRelay(SubscribableChannel brokerChannel) {
 		if (this.brokerRelayRegistration != null) {
 			return this.brokerRelayRegistration.getMessageHandler(brokerChannel);

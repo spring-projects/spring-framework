@@ -24,7 +24,7 @@ import org.junit.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.web.util.patterns.PathPatternParser;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.junit.Assert.*;
 
@@ -88,6 +88,17 @@ public class RequestPredicatesTests {
 	public void path() throws Exception {
 		URI uri = URI.create("http://localhost/path");
 		RequestPredicate predicate = RequestPredicates.path("/p*");
+		MockServerRequest request = MockServerRequest.builder().uri(uri).build();
+		assertTrue(predicate.test(request));
+
+		request = MockServerRequest.builder().build();
+		assertFalse(predicate.test(request));
+	}
+
+	@Test
+	public void pathEncoded() throws Exception {
+		URI uri = URI.create("http://localhost/foo%20bar");
+		RequestPredicate predicate = RequestPredicates.path("/foo bar");
 		MockServerRequest request = MockServerRequest.builder().uri(uri).build();
 		assertTrue(predicate.test(request));
 

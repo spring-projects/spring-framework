@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.context.request.async;
 
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,10 +40,18 @@ class CallableInterceptorChain {
 
 	private int preProcessIndex = -1;
 
+	private volatile Future<?> taskFuture;
+
 
 	public CallableInterceptorChain(List<CallableProcessingInterceptor> interceptors) {
 		this.interceptors = interceptors;
 	}
+
+
+	public void setTaskFuture(Future<?> taskFuture) {
+		this.taskFuture = taskFuture;
+	}
+
 
 	public void applyBeforeConcurrentHandling(NativeWebRequest request, Callable<?> task) throws Exception {
 		for (CallableProcessingInterceptor interceptor : this.interceptors) {
@@ -77,9 +86,41 @@ class CallableInterceptorChain {
 	}
 
 	public Object triggerAfterTimeout(NativeWebRequest request, Callable<?> task) {
+		cancelTask();
 		for (CallableProcessingInterceptor interceptor : this.interceptors) {
 			try {
 				Object result = interceptor.handleTimeout(request, task);
+				if (result == CallableProcessingInterceptor.RESPONSE_HANDLED) {
+					break;
+				}
+				else if (result != CallableProcessingInterceptor.RESULT_NONE) {
+					return result;
+				}
+			}
+			catch (Throwable t) {
+				return t;
+			}
+		}
+		return CallableProcessingInterceptor.RESULT_NONE;
+	}
+
+	private void cancelTask() {
+		Future<?> future = this.taskFuture;
+		if (future != null) {
+			try {
+				future.cancel(true);
+			}
+			catch (Throwable ex) {
+				// Ignore
+			}
+		}
+	}
+
+	public Object triggerAfterError(NativeWebRequest request, Callable<?> task, Throwable throwable) {
+		cancelTask();
+		for (CallableProcessingInterceptor interceptor : this.interceptors) {
+			try {
+				Object result = interceptor.handleError(request, task, throwable);
 				if (result == CallableProcessingInterceptor.RESPONSE_HANDLED) {
 					break;
 				}

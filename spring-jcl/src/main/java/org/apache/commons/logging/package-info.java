@@ -10,7 +10,7 @@
  * or {@code java.util.logging}, with no extra bridge jars necessary, and
  * also easier setup of SLF4J with Logback (no JCL exclude, no JCL bridge).
  *
- * <p>{@link org.apache.commons.logging.Log} is an unmodified repackaging.
+ * <p>{@link org.apache.commons.logging.Log} is equivalent to the original.
  * However, {@link org.apache.commons.logging.LogFactory} is a very different
  * implementation which is minimized and optimized for Spring's purposes,
  * detecting Log4J 2.x and SLF4J 1.7 in the framework classpath and falling

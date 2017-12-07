@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.servlet.setup;
 
+import org.springframework.lang.Nullable;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -47,7 +48,8 @@ public interface MockMvcConfigurer {
 	 * {@link ConfigurableMockMvcBuilder#apply}.
 	 * @param builder the builder for the MockMvc
 	 */
-	void afterConfigurerAdded(ConfigurableMockMvcBuilder<?> builder);
+	default void afterConfigurerAdded(ConfigurableMockMvcBuilder<?> builder) {
+	}
 
 	/**
 	 * Invoked when the MockMvc instance is about to be created with the MockMvc
@@ -58,7 +60,11 @@ public interface MockMvcConfigurer {
 	 * @return a post processor to be applied to every request performed
 	 * through the {@code MockMvc} instance.
 	 */
-	RequestPostProcessor beforeMockMvcCreated(ConfigurableMockMvcBuilder<?> builder,
-			WebApplicationContext context);
+	@Nullable
+	default RequestPostProcessor beforeMockMvcCreated(
+			ConfigurableMockMvcBuilder<?> builder, WebApplicationContext context) {
+
+		return null;
+	}
 
 }

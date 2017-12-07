@@ -48,16 +48,9 @@ import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.mock;
-import static org.springframework.web.method.MvcAnnotationPredicates.requestParam;
-import static org.springframework.web.method.MvcAnnotationPredicates.requestPart;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+import static org.springframework.web.method.MvcAnnotationPredicates.*;
 
 /**
  * Test fixture with {@link org.springframework.web.method.annotation.RequestParamMethodArgumentResolver}.
@@ -76,12 +69,14 @@ public class RequestParamMethodArgumentResolverTests {
 
 	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
+
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		resolver = new RequestParamMethodArgumentResolver(null, true);
 		request = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
 	}
+
 
 	@Test
 	public void supportsParameter() {
@@ -471,6 +466,88 @@ public class RequestParamMethodArgumentResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
+	public void missingOptionalParamValue() throws Exception {
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(new DefaultConversionService());
+		WebDataBinderFactory binderFactory = new DefaultDataBinderFactory(initializer);
+
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(Optional.class, Integer.class);
+		Object result = resolver.resolveArgument(param, null, webRequest, binderFactory);
+		assertEquals(Optional.empty(), result);
+
+		result = resolver.resolveArgument(param, null, webRequest, binderFactory);
+		assertEquals(Optional.class, result.getClass());
+		assertFalse(((Optional) result).isPresent());
+	}
+
+	@Test
+	@SuppressWarnings("rawtypes")
+	public void resolveOptionalParamArray() throws Exception {
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(new DefaultConversionService());
+		WebDataBinderFactory binderFactory = new DefaultDataBinderFactory(initializer);
+
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(Optional.class, Integer[].class);
+		Object result = resolver.resolveArgument(param, null, webRequest, binderFactory);
+		assertEquals(Optional.empty(), result);
+
+		this.request.addParameter("name", "123", "456");
+		result = resolver.resolveArgument(param, null, webRequest, binderFactory);
+		assertEquals(Optional.class, result.getClass());
+		assertArrayEquals(new Integer[] {123, 456}, (Integer[]) ((Optional) result).get());
+	}
+
+	@Test
+	@SuppressWarnings("rawtypes")
+	public void missingOptionalParamArray() throws Exception {
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(new DefaultConversionService());
+		WebDataBinderFactory binderFactory = new DefaultDataBinderFactory(initializer);
+
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(Optional.class, Integer[].class);
+		Object result = resolver.resolveArgument(param, null, webRequest, binderFactory);
+		assertEquals(Optional.empty(), result);
+
+		result = resolver.resolveArgument(param, null, webRequest, binderFactory);
+		assertEquals(Optional.class, result.getClass());
+		assertFalse(((Optional) result).isPresent());
+	}
+
+	@Test
+	@SuppressWarnings("rawtypes")
+	public void resolveOptionalParamList() throws Exception {
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(new DefaultConversionService());
+		WebDataBinderFactory binderFactory = new DefaultDataBinderFactory(initializer);
+
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(Optional.class, List.class);
+		Object result = resolver.resolveArgument(param, null, webRequest, binderFactory);
+		assertEquals(Optional.empty(), result);
+
+		this.request.addParameter("name", "123", "456");
+		result = resolver.resolveArgument(param, null, webRequest, binderFactory);
+		assertEquals(Optional.class, result.getClass());
+		assertEquals(Arrays.asList("123", "456"), ((Optional) result).get());
+	}
+
+	@Test
+	@SuppressWarnings("rawtypes")
+	public void missingOptionalParamList() throws Exception {
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(new DefaultConversionService());
+		WebDataBinderFactory binderFactory = new DefaultDataBinderFactory(initializer);
+
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(Optional.class, List.class);
+		Object result = resolver.resolveArgument(param, null, webRequest, binderFactory);
+		assertEquals(Optional.empty(), result);
+
+		result = resolver.resolveArgument(param, null, webRequest, binderFactory);
+		assertEquals(Optional.class, result.getClass());
+		assertFalse(((Optional) result).isPresent());
+	}
+
+	@Test
 	public void resolveOptionalMultipartFile() throws Exception {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultConversionService());
@@ -536,6 +613,8 @@ public class RequestParamMethodArgumentResolverTests {
 			@RequestParam("name") String paramRequired,
 			@RequestParam(name = "name", required = false) String paramNotRequired,
 			@RequestParam("name") Optional<Integer> paramOptional,
+			@RequestParam("name") Optional<Integer[]> paramOptionalArray,
+			@RequestParam("name") Optional<List> paramOptionalList,
 			@RequestParam("mfile") Optional<MultipartFile> multipartFileOptional) {
 	}
 

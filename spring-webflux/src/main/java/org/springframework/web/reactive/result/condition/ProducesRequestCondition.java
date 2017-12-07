@@ -25,12 +25,13 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.cors.reactive.CorsUtils;
-import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
-import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -99,8 +100,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 
 		this.expressions = new ArrayList<>(expressions);
 		Collections.sort(this.expressions);
-		this.contentTypeResolver = (resolver != null ?
-				resolver : new RequestedContentTypeResolverBuilder().build());
+		this.contentTypeResolver = (resolver != null ? resolver : new RequestedContentTypeResolverBuilder().build());
 	}
 
 
@@ -182,6 +182,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * or {@code null} if no expressions match.
 	 */
 	@Override
+	@Nullable
 	public ProducesRequestCondition getMatchingCondition(ServerWebExchange exchange) {
 		if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
 			return PRE_FLIGHT_MATCH;

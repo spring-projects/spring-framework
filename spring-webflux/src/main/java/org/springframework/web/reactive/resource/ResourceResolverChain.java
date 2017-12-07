@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.List;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -38,9 +39,9 @@ public interface ResourceResolverChain {
 	 * @param exchange the current exchange
 	 * @param requestPath the portion of the request path to use
 	 * @param locations the locations to search in when looking up resources
-	 * @return the resolved resource or an empty {@code Mono} if unresolved
+	 * @return the resolved resource; or an empty {@code Mono} if unresolved
 	 */
-	Mono<Resource> resolveResource(ServerWebExchange exchange, String requestPath,
+	Mono<Resource> resolveResource(@Nullable ServerWebExchange exchange, String requestPath,
 			List<? extends Resource> locations);
 
 	/**
@@ -50,7 +51,7 @@ public interface ResourceResolverChain {
 	 * <p>This is useful when rendering URL links to clients.
 	 * @param resourcePath the internal resource path
 	 * @param locations the locations to search in when looking up resources
-	 * @return the resolved public URL path or an empty {@code Mono} if unresolved
+	 * @return the resolved public URL path; or an empty {@code Mono} if unresolved
 	 */
 	Mono<String> resolveUrlPath(String resourcePath, List<? extends Resource> locations);
 

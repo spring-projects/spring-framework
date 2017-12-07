@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -42,6 +43,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class PathResourceResolver extends AbstractResourceResolver {
 
+	@Nullable
 	private Resource[] allowedLocations;
 
 
@@ -60,18 +62,19 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	 * to match its list of locations.
 	 * @param locations the list of allowed locations
 	 */
-	public void setAllowedLocations(Resource... locations) {
+	public void setAllowedLocations(@Nullable Resource... locations) {
 		this.allowedLocations = locations;
 	}
 
+	@Nullable
 	public Resource[] getAllowedLocations() {
 		return this.allowedLocations;
 	}
 
 
 	@Override
-	protected Mono<Resource> resolveResourceInternal(ServerWebExchange exchange, String requestPath,
-			List<? extends Resource> locations, ResourceResolverChain chain) {
+	protected Mono<Resource> resolveResourceInternal(@Nullable ServerWebExchange exchange,
+			String requestPath, List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		return getResource(requestPath, locations);
 	}
@@ -100,7 +103,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	 * {@code Resource} for the given path relative to the location.
 	 * @param resourcePath the path to the resource
 	 * @param location the location to check
-	 * @return the resource, or {@code null} if none found
+	 * @return the resource, or empty {@link Mono} if none found
 	 */
 	protected Mono<Resource> getResource(String resourcePath, Resource location) {
 		try {
@@ -113,10 +116,11 @@ public class PathResourceResolver extends AbstractResourceResolver {
 					return Mono.just(resource);
 				}
 				else if (logger.isTraceEnabled()) {
+					Resource[] allowedLocations = getAllowedLocations();
 					logger.trace("Resource path=\"" + resourcePath + "\" was successfully resolved " +
 							"but resource=\"" + resource.getURL() + "\" is neither under the " +
 							"current location=\"" + location.getURL() + "\" nor under any of the " +
-							"allowed locations=" + Arrays.asList(getAllowedLocations()));
+							"allowed locations=" + (allowedLocations != null ? Arrays.asList(allowedLocations) : "[]"));
 				}
 			}
 			else if (logger.isTraceEnabled()) {

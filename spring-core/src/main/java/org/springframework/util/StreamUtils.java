@@ -28,6 +28,8 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Simple utility methods for dealing with streams. The copy methods of this class are
  * similar to those defined in {@link FileCopyUtils} except that all affected streams are
@@ -55,7 +57,7 @@ public abstract class StreamUtils {
 	 * @return the new byte array that has been copied to (possibly empty)
 	 * @throws IOException in case of I/O errors
 	 */
-	public static byte[] copyToByteArray(InputStream in) throws IOException {
+	public static byte[] copyToByteArray(@Nullable InputStream in) throws IOException {
 		if (in == null) {
 			return new byte[0];
 		}
@@ -72,7 +74,7 @@ public abstract class StreamUtils {
 	 * @return the String that has been copied to (possibly empty)
 	 * @throws IOException in case of I/O errors
 	 */
-	public static String copyToString(InputStream in, Charset charset) throws IOException {
+	public static String copyToString(@Nullable InputStream in, Charset charset) throws IOException {
 		if (in == null) {
 			return "";
 		}

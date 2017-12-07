@@ -77,7 +77,9 @@ public class ContentResultMatchers {
 		return result -> {
 			String actual = result.getResponse().getContentType();
 			assertTrue("Content type not set", actual != null);
-			assertEquals("Content type", contentType, MediaType.parseMediaType(actual));
+			if (actual != null) {
+				assertEquals("Content type", contentType, MediaType.parseMediaType(actual));
+			}
 		};
 	}
 
@@ -97,9 +99,11 @@ public class ContentResultMatchers {
 		return result -> {
 			String actual = result.getResponse().getContentType();
 			assertTrue("Content type not set", actual != null);
-			MediaType actualContentType = MediaType.parseMediaType(actual);
-			assertTrue("Content type [" + actual + "] is not compatible with [" + contentType + "]",
-					actualContentType.isCompatibleWith(contentType));
+			if (actual != null) {
+				MediaType actualContentType = MediaType.parseMediaType(actual);
+				assertTrue("Content type [" + actual + "] is not compatible with [" + contentType + "]",
+						actualContentType.isCompatibleWith(contentType));
+			}
 		};
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Base class for {@link org.springframework.jdbc.core.JdbcTemplate} and
@@ -40,8 +42,10 @@ public abstract class JdbcAccessor implements InitializingBean {
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private DataSource dataSource;
 
+	@Nullable
 	private SQLExceptionTranslator exceptionTranslator;
 
 	private boolean lazyInit = true;
@@ -50,15 +54,28 @@ public abstract class JdbcAccessor implements InitializingBean {
 	/**
 	 * Set the JDBC DataSource to obtain connections from.
 	 */
-	public void setDataSource(DataSource dataSource) {
+	public void setDataSource(@Nullable DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 
 	/**
 	 * Return the DataSource used by this template.
 	 */
+	@Nullable
 	public DataSource getDataSource() {
 		return this.dataSource;
+	}
+
+	/**
+	 * Obtain the DataSource for actual use.
+	 * @return the DataSource (never {@code null})
+	 * @throws IllegalStateException in case of no DataSource set
+	 * @since 5.0
+	 */
+	protected DataSource obtainDataSource() {
+		DataSource dataSource = getDataSource();
+		Assert.state(dataSource != null, "No DataSource set");
+		return dataSource;
 	}
 
 	/**

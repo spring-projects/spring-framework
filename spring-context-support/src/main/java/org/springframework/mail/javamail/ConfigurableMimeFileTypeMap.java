@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import javax.activation.MimetypesFileTypeMap;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 
 /**
  * Spring-configurable {@code FileTypeMap} implementation that will read
@@ -68,12 +69,14 @@ public class ConfigurableMimeFileTypeMap extends FileTypeMap implements Initiali
 	/**
 	 * Used to configure additional mappings.
 	 */
+	@Nullable
 	private String[] mappings;
 
 	/**
 	 * The delegate FileTypeMap, compiled from the mappings in the mapping file
 	 * and the entries in the {@code mappings} property.
 	 */
+	@Nullable
 	private FileTypeMap fileTypeMap;
 
 
@@ -139,7 +142,7 @@ public class ConfigurableMimeFileTypeMap extends FileTypeMap implements Initiali
 	 * @see javax.activation.MimetypesFileTypeMap#MimetypesFileTypeMap(java.io.InputStream)
 	 * @see javax.activation.MimetypesFileTypeMap#addMimeTypes(String)
 	 */
-	protected FileTypeMap createFileTypeMap(Resource mappingLocation, String[] mappings) throws IOException {
+	protected FileTypeMap createFileTypeMap(@Nullable Resource mappingLocation, @Nullable String[] mappings) throws IOException {
 		MimetypesFileTypeMap fileTypeMap = null;
 		if (mappingLocation != null) {
 			InputStream is = mappingLocation.getInputStream();

@@ -40,7 +40,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
@@ -75,7 +75,7 @@ public class HttpEntityArgumentResolverTests {
 	private HttpEntityArgumentResolver createResolver() {
 		List<HttpMessageReader<?>> readers = new ArrayList<>();
 		readers.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
-		return new HttpEntityArgumentResolver(readers, new ReactiveAdapterRegistry());
+		return new HttpEntityArgumentResolver(readers, ReactiveAdapterRegistry.getSharedInstance());
 	}
 
 
@@ -303,7 +303,7 @@ public class HttpEntityArgumentResolverTests {
 
 
 	private MockServerWebExchange postExchange(String body) {
-		return post("/path").header("foo", "bar").contentType(TEXT_PLAIN).body(body).toExchange();
+		return MockServerWebExchange.from(post("/path").header("foo", "bar").contentType(TEXT_PLAIN).body(body));
 	}
 
 	private ResolvableType httpEntityType(Class<?> bodyType, Class<?>... generics) {
@@ -328,7 +328,7 @@ public class HttpEntityArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> HttpEntity<T> resolveValueWithEmptyBody(ResolvableType type) {
-		ServerWebExchange exchange = post("/path").toExchange();
+		ServerWebExchange exchange = MockServerWebExchange.from(post("/path"));
 		MethodParameter param = this.testMethod.arg(type);
 		Mono<Object> result = this.resolver.resolveArgument(param, new BindingContext(), exchange);
 		HttpEntity<String> httpEntity = (HttpEntity<String>) result.block(Duration.ofSeconds(5));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -65,14 +67,18 @@ public abstract class AbstractFactoryBean<T>
 
 	private boolean singleton = true;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
+	@Nullable
 	private BeanFactory beanFactory;
 
 	private boolean initialized = false;
 
+	@Nullable
 	private T singletonInstance;
 
+	@Nullable
 	private T earlySingletonInstance;
 
 
@@ -95,13 +101,14 @@ public abstract class AbstractFactoryBean<T>
 	}
 
 	@Override
-	public void setBeanFactory(BeanFactory beanFactory) {
+	public void setBeanFactory(@Nullable BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
 	/**
 	 * Return the BeanFactory that this bean runs in.
 	 */
+	@Nullable
 	protected BeanFactory getBeanFactory() {
 		return this.beanFactory;
 	}
@@ -175,10 +182,9 @@ public abstract class AbstractFactoryBean<T>
 	 * @return the singleton instance that this FactoryBean holds
 	 * @throws IllegalStateException if the singleton instance is not initialized
 	 */
+	@Nullable
 	private T getSingletonInstance() throws IllegalStateException {
-		if (!this.initialized) {
-			throw new IllegalStateException("Singleton instance not initialized yet");
-		}
+		Assert.state(this.initialized, "Singleton instance not initialized yet");
 		return this.singletonInstance;
 	}
 
@@ -200,6 +206,7 @@ public abstract class AbstractFactoryBean<T>
 	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
 	 */
 	@Override
+	@Nullable
 	public abstract Class<?> getObjectType();
 
 	/**
@@ -225,6 +232,7 @@ public abstract class AbstractFactoryBean<T>
 	 * or {@code null} to indicate a FactoryBeanNotInitializedException
 	 * @see org.springframework.beans.factory.FactoryBeanNotInitializedException
 	 */
+	@Nullable
 	protected Class<?>[] getEarlySingletonInterfaces() {
 		Class<?> type = getObjectType();
 		return (type != null && type.isInterface() ? new Class<?>[] {type} : null);
@@ -239,7 +247,7 @@ public abstract class AbstractFactoryBean<T>
 	 * @throws Exception in case of shutdown errors
 	 * @see #createInstance()
 	 */
-	protected void destroyInstance(T instance) throws Exception {
+	protected void destroyInstance(@Nullable T instance) throws Exception {
 	}
 
 

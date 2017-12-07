@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -138,7 +139,7 @@ public class RequestMethodsRequestConditionTests {
 	}
 
 	private ServerWebExchange getExchange(String method) throws URISyntaxException {
-		return MockServerHttpRequest.method(HttpMethod.valueOf(method), "/").toExchange();
+		return MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.valueOf(method), "/"));
 	}
 
 }

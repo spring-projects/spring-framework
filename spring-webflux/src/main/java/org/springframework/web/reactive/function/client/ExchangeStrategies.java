@@ -16,9 +16,8 @@
 
 package org.springframework.web.reactive.function.client;
 
+import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.HttpMessageReader;
@@ -28,8 +27,7 @@ import org.springframework.http.codec.HttpMessageWriter;
  * Defines the strategies for invoking {@link ExchangeFunction}s. An instance of
  * this class is immutable; instances are typically created through the mutable {@link Builder}:
  * either through {@link #builder()} to set up default strategies, or {@link #empty()} to start
- * from scratch. Alternatively, {@code ExchangeStrategies} instances can be created through
- * {@link #of(Supplier, Supplier)}.
+ * from scratch.
  *
  * @author Brian Clozel
  * @author Arjen Poutsma
@@ -40,18 +38,16 @@ public interface ExchangeStrategies {
 	// Instance methods
 
 	/**
-	 * Supply a {@linkplain Stream stream} of {@link HttpMessageReader}s to be used for request
-	 * body conversion.
+	 * Return the {@link HttpMessageReader}s to be used for request body conversion.
 	 * @return the stream of message readers
 	 */
-	Supplier<Stream<HttpMessageReader<?>>> messageReaders();
+	List<HttpMessageReader<?>> messageReaders();
 
 	/**
-	 * Supply a {@linkplain Stream stream} of {@link HttpMessageWriter}s to be used for response
-	 * body conversion.
+	 * Return the {@link HttpMessageWriter}s to be used for response body conversion.
 	 * @return the stream of message writers
 	 */
-	Supplier<Stream<HttpMessageWriter<?>>> messageWriters();
+	List<HttpMessageWriter<?>> messageWriters();
 
 
 	// Static methods
@@ -91,20 +87,11 @@ public interface ExchangeStrategies {
 	interface Builder {
 
 		/**
-		 * Customize the list of default client-side HTTP message readers and writers.
-		 * @param consumer the consumer to customize the default codecs
+		 * Customize the list of client-side HTTP message readers and writers.
+		 * @param consumer the consumer to customize the codecs
 		 * @return this builder
-		 * @see #customCodecs(Consumer)
 		 */
-		Builder defaultCodecs(Consumer<ClientCodecConfigurer.ClientDefaultCodecsConfigurer> consumer);
-
-		/**
-		 * Customize the list of custom client-side HTTP message readers and writers.
-		 * @param consumer the consumer to customize the custom codecs
-		 * @return this builder
-		 * @see #defaultCodecs(Consumer)
-		 */
-		Builder customCodecs(Consumer<ClientCodecConfigurer.CustomCodecsConfigurer> consumer);
+		Builder codecs(Consumer<ClientCodecConfigurer> consumer);
 
 		/**
 		 * Builds the {@link ExchangeStrategies}.

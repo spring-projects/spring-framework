@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -121,6 +122,7 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 
 	private String contextConfigLocation = DEFAULT_CONTEXT_CONFIG_LOCATION;
 
+	@Nullable
 	private ConfigurableApplicationContext applicationContext;
 
 
@@ -176,15 +178,17 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	protected ConfigurableApplicationContext createApplicationContext(BootstrapContext bootstrapContext) {
 		ResourceAdapterApplicationContext applicationContext =
 				new ResourceAdapterApplicationContext(bootstrapContext);
+
 		// Set ResourceAdapter's ClassLoader as bean class loader.
 		applicationContext.setClassLoader(getClass().getClassLoader());
+
 		// Extract individual config locations.
 		String[] configLocations =
 				StringUtils.tokenizeToStringArray(getContextConfigLocation(), CONFIG_LOCATION_DELIMITERS);
-		if (configLocations != null) {
-			loadBeanDefinitions(applicationContext, configLocations);
-		}
+
+		loadBeanDefinitions(applicationContext, configLocations);
 		applicationContext.refresh();
+
 		return applicationContext;
 	}
 
@@ -205,7 +209,9 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	@Override
 	public void stop() {
 		logger.info("Stopping SpringContextResourceAdapter");
-		this.applicationContext.close();
+		if (this.applicationContext != null) {
+			this.applicationContext.close();
+		}
 	}
 
 
@@ -230,6 +236,7 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	 * This implementation always returns {@code null}.
 	 */
 	@Override
+	@Nullable
 	public XAResource[] getXAResources(ActivationSpec[] activationSpecs) throws ResourceException {
 		return null;
 	}

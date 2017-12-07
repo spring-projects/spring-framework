@@ -25,7 +25,7 @@ import org.springframework.core.codec.Encoder;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-
+import org.springframework.lang.Nullable;
 
 /**
  * Extension of {@code Encoder} exposing extra methods relevant in the context
@@ -45,7 +45,6 @@ public interface HttpMessageEncoder<T> extends Encoder<T> {
 	/**
 	 * Get decoding hints based on the server request or annotations on the
 	 * target controller method parameter.
-	 *
 	 * @param actualType the actual source type to encode, possibly a reactive
 	 * wrapper and sourced from {@link org.springframework.core.MethodParameter},
 	 * i.e. providing access to method annotations.
@@ -56,7 +55,7 @@ public interface HttpMessageEncoder<T> extends Encoder<T> {
 	 * @return a Map with hints, possibly empty
 	 */
 	default Map<String, Object> getEncodeHints(ResolvableType actualType, ResolvableType elementType,
-			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
+			@Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
 
 		return Collections.emptyMap();
 	}

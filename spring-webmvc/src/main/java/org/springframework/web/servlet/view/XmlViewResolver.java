@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,11 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.xml.ResourceEntityResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.View;
 
@@ -62,8 +64,10 @@ public class XmlViewResolver extends AbstractCachingViewResolver
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
+	@Nullable
 	private Resource location;
 
+	@Nullable
 	private ConfigurableApplicationContext cachedFactory;
 
 
@@ -128,20 +132,22 @@ public class XmlViewResolver extends AbstractCachingViewResolver
 			return this.cachedFactory;
 		}
 
+		ApplicationContext applicationContext = obtainApplicationContext();
+
 		Resource actualLocation = this.location;
 		if (actualLocation == null) {
-			actualLocation = getApplicationContext().getResource(DEFAULT_LOCATION);
+			actualLocation = applicationContext.getResource(DEFAULT_LOCATION);
 		}
 
 		// Create child ApplicationContext for views.
 		GenericWebApplicationContext factory = new GenericWebApplicationContext();
-		factory.setParent(getApplicationContext());
+		factory.setParent(applicationContext);
 		factory.setServletContext(getServletContext());
 
 		// Load XML resource with context-aware entity resolver.
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
-		reader.setEnvironment(getApplicationContext().getEnvironment());
-		reader.setEntityResolver(new ResourceEntityResolver(getApplicationContext()));
+		reader.setEnvironment(applicationContext.getEnvironment());
+		reader.setEntityResolver(new ResourceEntityResolver(applicationContext));
 		reader.loadBeanDefinitions(actualLocation);
 
 		factory.refresh();

@@ -22,11 +22,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -54,9 +56,9 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
 	private final MultiValueMap<String, HttpCookie> cookies;
 
-	private AtomicReference<State> state = new AtomicReference<>(State.NEW);
+	private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
 
-	private final List<Supplier<? extends Mono<Void>>> commitActions = new ArrayList<>(4);
+	private final List<Supplier<? extends Publisher<Void>>> commitActions = new ArrayList<>(4);
 
 
 	public AbstractClientHttpRequest() {
@@ -94,7 +96,7 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
 	@Override
 	public boolean isCommitted() {
-		return this.state.get() != State.NEW;
+		return (this.state.get() != State.NEW);
 	}
 
 	/**
@@ -108,11 +110,10 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 	/**
 	 * Apply {@link #beforeCommit(Supplier) beforeCommit} actions, apply the
 	 * request headers/cookies, and write the request body.
-	 * @param writeAction the action to write the request body or {@code null}
+	 * @param writeAction the action to write the request body (may be {@code null})
 	 * @return a completion publisher
 	 */
-	protected Mono<Void> doCommit(Supplier<? extends Mono<Void>> writeAction) {
-
+	protected Mono<Void> doCommit(@Nullable Supplier<? extends Publisher<Void>> writeAction) {
 		if (!this.state.compareAndSet(State.NEW, State.COMMITTING)) {
 			return Mono.empty();
 		}
@@ -128,21 +129,22 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 			this.commitActions.add(writeAction);
 		}
 
-		List<? extends Mono<Void>> actions = this.commitActions.stream()
+		List<? extends Publisher<Void>> actions = this.commitActions.stream()
 				.map(Supplier::get).collect(Collectors.toList());
 
-		return Flux.concat(actions).next();
+		return Mono.fromDirect(Flux.concat(actions));
 	}
 
+
 	/**
-	 * Implement this method to apply header changes from {@link #getHeaders()}
-	 * to the underlying response. This method is called once only.
+	 * Apply header changes from {@link #getHeaders()} to the underlying response.
+	 * This method is called once only.
 	 */
 	protected abstract void applyHeaders();
 
 	/**
-	 * Implement this method to add cookies from {@link #getHeaders()} to the
-	 * underlying response. This method is called once only.
+	 * Add cookies from {@link #getHeaders()} to the underlying response.
+	 * This method is called once only.
 	 */
 	protected abstract void applyCookies();
 

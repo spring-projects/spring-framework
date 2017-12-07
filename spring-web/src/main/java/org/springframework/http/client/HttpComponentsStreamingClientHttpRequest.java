@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.StreamingHttpOutputMessage;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link ClientHttpRequest} implementation based on
@@ -54,6 +54,7 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 
 	private final HttpContext httpContext;
 
+	@Nullable
 	private Body body;
 
 
@@ -65,8 +66,8 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 
 
 	@Override
-	public HttpMethod getMethod() {
-		return HttpMethod.resolve(this.httpRequest.getMethod());
+	public String getMethodValue() {
+		return this.httpRequest.getMethod();
 	}
 
 	@Override
@@ -89,9 +90,9 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 	protected ClientHttpResponse executeInternal(HttpHeaders headers) throws IOException {
 		HttpComponentsClientHttpRequest.addHeaders(this.httpRequest, headers);
 
-		if (this.httpRequest instanceof HttpEntityEnclosingRequest && body != null) {
+		if (this.httpRequest instanceof HttpEntityEnclosingRequest && this.body != null) {
 			HttpEntityEnclosingRequest entityEnclosingRequest = (HttpEntityEnclosingRequest) this.httpRequest;
-			HttpEntity requestEntity = new StreamingHttpEntity(getHeaders(), body);
+			HttpEntity requestEntity = new StreamingHttpEntity(getHeaders(), this.body);
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
 
@@ -127,12 +128,14 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 		}
 
 		@Override
+		@Nullable
 		public Header getContentType() {
 			MediaType contentType = this.headers.getContentType();
 			return (contentType != null ? new BasicHeader("Content-Type", contentType.toString()) : null);
 		}
 
 		@Override
+		@Nullable
 		public Header getContentEncoding() {
 			String contentEncoding = this.headers.getFirst("Content-Encoding");
 			return (contentEncoding != null ? new BasicHeader("Content-Encoding", contentEncoding) : null);

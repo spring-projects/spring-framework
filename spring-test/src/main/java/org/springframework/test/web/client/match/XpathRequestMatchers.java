@@ -18,12 +18,14 @@ package org.springframework.test.web.client.match;
 
 import java.io.IOException;
 import java.util.Map;
+
 import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
 import org.w3c.dom.Node;
 
 import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.test.util.XpathExpectationsHelper;
 import org.springframework.test.web.client.RequestMatcher;
@@ -53,7 +55,7 @@ public class XpathRequestMatchers {
 	 * formatting specifiers defined in {@link String#format(String, Object...)}
 	 * @throws XPathExpressionException
 	 */
-	protected XpathRequestMatchers(String expression, Map<String, String> namespaces, Object ... args)
+	protected XpathRequestMatchers(String expression, @Nullable Map<String, String> namespaces, Object ... args)
 			throws XPathExpressionException {
 
 		this.xpathHelper = new XpathExpectationsHelper(expression, namespaces, args);

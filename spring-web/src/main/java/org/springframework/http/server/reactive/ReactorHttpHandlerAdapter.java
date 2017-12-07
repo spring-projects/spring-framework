@@ -16,6 +16,7 @@
 
 package org.springframework.http.server.reactive;
 
+import java.net.URISyntaxException;
 import java.util.function.BiFunction;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -26,6 +27,7 @@ import reactor.ipc.netty.http.server.HttpServerResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
 /**
@@ -53,10 +55,23 @@ public class ReactorHttpHandlerAdapter
 	public Mono<Void> apply(HttpServerRequest request, HttpServerResponse response) {
 
 		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(response.alloc());
-		ReactorServerHttpRequest req = new ReactorServerHttpRequest(request, bufferFactory);
-		ReactorServerHttpResponse resp = new ReactorServerHttpResponse(response, bufferFactory);
+		ServerHttpRequest adaptedRequest;
+		ServerHttpResponse adaptedResponse;
+		try {
+			adaptedRequest = new ReactorServerHttpRequest(request, bufferFactory);
+			adaptedResponse = new ReactorServerHttpResponse(response, bufferFactory);
+		}
+		catch (URISyntaxException ex) {
+			logger.error("Invalid URL " + ex.getMessage(), ex);
+			response.status(HttpResponseStatus.BAD_REQUEST);
+			return Mono.empty();
+		}
 
-		return this.httpHandler.handle(req, resp)
+		if (HttpMethod.HEAD.equals(adaptedRequest.getMethod())) {
+			adaptedResponse = new HttpHeadResponseDecorator(adaptedResponse);
+		}
+
+		return this.httpHandler.handle(adaptedRequest, adaptedResponse)
 				.onErrorResume(ex -> {
 					logger.error("Could not complete request", ex);
 					response.status(HttpResponseStatus.INTERNAL_SERVER_ERROR);

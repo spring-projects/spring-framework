@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.socket;
 
 import java.net.URI;
 import java.security.Principal;
-import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -32,7 +33,6 @@ import org.springframework.util.Assert;
  * @since 5.0
  * @see WebSocketSession#getHandshakeInfo()
  */
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class HandshakeInfo {
 
 	private final URI uri;
@@ -41,7 +41,8 @@ public class HandshakeInfo {
 
 	private final HttpHeaders headers;
 
-	private final Optional<String> protocol;
+	@Nullable
+	private final String protocol;
 
 
 	/**
@@ -49,13 +50,12 @@ public class HandshakeInfo {
 	 * @param uri the endpoint URL
 	 * @param headers request headers for server or response headers or client
 	 * @param principal the principal for the session
-	 * @param protocol the negotiated sub-protocol
+	 * @param protocol the negotiated sub-protocol (may be {@code null})
 	 */
-	public HandshakeInfo(URI uri, HttpHeaders headers, Mono<Principal> principal, Optional<String> protocol) {
-		Assert.notNull(uri, "URI is required.");
-		Assert.notNull(headers, "HttpHeaders are required.");
-		Assert.notNull(principal, "Principal is required.");
-		Assert.notNull(protocol, "Sub-protocol is required.");
+	public HandshakeInfo(URI uri, HttpHeaders headers, Mono<Principal> principal, @Nullable String protocol) {
+		Assert.notNull(uri, "URI is required");
+		Assert.notNull(headers, "HttpHeaders are required");
+		Assert.notNull(principal, "Principal is required");
 		this.uri = uri;
 		this.headers = headers;
 		this.principalMono = principal;
@@ -86,11 +86,12 @@ public class HandshakeInfo {
 	}
 
 	/**
-	 * The sub-protocol negotiated at handshake time.
+	 * The sub-protocol negotiated at handshake time, or {@code null} if none.
 	 * @see <a href="https://tools.ietf.org/html/rfc6455#section-1.9">
-	 *     https://tools.ietf.org/html/rfc6455#section-1.9</a>
+	 * https://tools.ietf.org/html/rfc6455#section-1.9</a>
 	 */
-	public Optional<String> getSubProtocol() {
+	@Nullable
+	public String getSubProtocol() {
 		return this.protocol;
 	}
 

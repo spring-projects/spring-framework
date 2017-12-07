@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.junit.Before;
@@ -79,7 +80,7 @@ public class ReactiveTypeHandlerTests {
 		ContentNegotiationManagerFactoryBean factoryBean = new ContentNegotiationManagerFactoryBean();
 		factoryBean.afterPropertiesSet();
 		ContentNegotiationManager manager = factoryBean.getObject();
-		this.handler = new ReactiveTypeHandler(new ReactiveAdapterRegistry(), new SyncTaskExecutor(), manager);
+		this.handler = new ReactiveTypeHandler(ReactiveAdapterRegistry.getSharedInstance(), new SyncTaskExecutor(), manager);
 		resetRequest();
 	}
 
@@ -125,7 +126,8 @@ public class ReactiveTypeHandlerTests {
 		// RxJava 2 Single
 		AtomicReference<io.reactivex.SingleEmitter<String>> ref2 = new AtomicReference<>();
 		io.reactivex.Single<String> single2 = io.reactivex.Single.create(ref2::set);
-		testDeferredResultSubscriber(single2, io.reactivex.Single.class, forClass(String.class), () -> ref2.get().onSuccess("foo"), "foo");
+		testDeferredResultSubscriber(single2, io.reactivex.Single.class, forClass(String.class),
+				() -> ref2.get().onSuccess("foo"), "foo");
 	}
 
 	@Test
@@ -168,7 +170,8 @@ public class ReactiveTypeHandlerTests {
 		// RxJava 2 Single
 		AtomicReference<io.reactivex.SingleEmitter<String>> ref2 = new AtomicReference<>();
 		io.reactivex.Single<String> single2 = io.reactivex.Single.create(ref2::set);
-		testDeferredResultSubscriber(single2, io.reactivex.Single.class, forClass(String.class), () -> ref2.get().onError(ex), ex);
+		testDeferredResultSubscriber(single2, io.reactivex.Single.class, forClass(String.class),
+				() -> ref2.get().onError(ex), ex);
 	}
 
 	@Test
@@ -378,6 +381,10 @@ public class ReactiveTypeHandlerTests {
 
 		@Override
 		public void onTimeout(Runnable callback) {
+		}
+
+		@Override
+		public void onError(Consumer<Throwable> callback) {
 		}
 
 		@Override

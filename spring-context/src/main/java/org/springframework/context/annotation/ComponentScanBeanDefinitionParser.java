@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,8 @@ import org.springframework.core.type.filter.AspectJTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.core.type.filter.RegexPatternTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -77,6 +79,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 
 
 	@Override
+	@Nullable
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		String basePackage = element.getAttribute(BASE_PACKAGE_ATTRIBUTE);
 		basePackage = parserContext.getReaderContext().getEnvironment().resolvePlaceholders(basePackage);
@@ -222,16 +225,18 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected TypeFilter createTypeFilter(Element element, ClassLoader classLoader, ParserContext parserContext) {
+	protected TypeFilter createTypeFilter(
+			Element element, @Nullable ClassLoader classLoader, ParserContext parserContext) {
+
 		String filterType = element.getAttribute(FILTER_TYPE_ATTRIBUTE);
 		String expression = element.getAttribute(FILTER_EXPRESSION_ATTRIBUTE);
 		expression = parserContext.getReaderContext().getEnvironment().resolvePlaceholders(expression);
 		try {
 			if ("annotation".equals(filterType)) {
-				return new AnnotationTypeFilter((Class<Annotation>) classLoader.loadClass(expression));
+				return new AnnotationTypeFilter((Class<Annotation>) ClassUtils.forName(expression, classLoader));
 			}
 			else if ("assignable".equals(filterType)) {
-				return new AssignableTypeFilter(classLoader.loadClass(expression));
+				return new AssignableTypeFilter(ClassUtils.forName(expression, classLoader));
 			}
 			else if ("aspectj".equals(filterType)) {
 				return new AspectJTypeFilter(expression, classLoader);
@@ -240,7 +245,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 				return new RegexPatternTypeFilter(Pattern.compile(expression));
 			}
 			else if ("custom".equals(filterType)) {
-				Class<?> filterClass = classLoader.loadClass(expression);
+				Class<?> filterClass = ClassUtils.forName(expression, classLoader);
 				if (!TypeFilter.class.isAssignableFrom(filterClass)) {
 					throw new IllegalArgumentException(
 							"Class is not assignable to [" + TypeFilter.class.getName() + "]: " + expression);
@@ -257,10 +262,12 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Object instantiateUserDefinedStrategy(String className, Class<?> strategyType, ClassLoader classLoader) {
+	private Object instantiateUserDefinedStrategy(
+			String className, Class<?> strategyType, @Nullable ClassLoader classLoader) {
+
 		Object result;
 		try {
-			result = ReflectionUtils.accessibleConstructor(classLoader.loadClass(className)).newInstance();
+			result = ReflectionUtils.accessibleConstructor(ClassUtils.forName(className, classLoader)).newInstance();
 		}
 		catch (ClassNotFoundException ex) {
 			throw new IllegalArgumentException("Class [" + className + "] for strategy [" +

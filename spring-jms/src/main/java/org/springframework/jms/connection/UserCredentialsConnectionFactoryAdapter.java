@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import javax.jms.TopicConnectionFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.NamedThreadLocal;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -71,10 +72,13 @@ import org.springframework.util.StringUtils;
 public class UserCredentialsConnectionFactoryAdapter
 		implements ConnectionFactory, QueueConnectionFactory, TopicConnectionFactory, InitializingBean {
 
+	@Nullable
 	private ConnectionFactory targetConnectionFactory;
 
+	@Nullable
 	private String username;
 
+	@Nullable
 	private String password;
 
 	private final ThreadLocal<JmsUserCredentials> threadBoundCredentials =
@@ -173,7 +177,7 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * @see javax.jms.ConnectionFactory#createConnection(String, String)
 	 * @see javax.jms.ConnectionFactory#createConnection()
 	 */
-	protected Connection doCreateConnection(String username, String password) throws JMSException {
+	protected Connection doCreateConnection(@Nullable String username, @Nullable String password) throws JMSException {
 		ConnectionFactory target = obtainTargetConnectionFactory();
 		if (StringUtils.hasLength(username)) {
 			return target.createConnection(username, password);
@@ -219,7 +223,9 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * @see javax.jms.QueueConnectionFactory#createQueueConnection(String, String)
 	 * @see javax.jms.QueueConnectionFactory#createQueueConnection()
 	 */
-	protected QueueConnection doCreateQueueConnection(String username, String password) throws JMSException {
+	protected QueueConnection doCreateQueueConnection(
+			@Nullable String username, @Nullable String password) throws JMSException {
+
 		ConnectionFactory target = obtainTargetConnectionFactory();
 		if (!(target instanceof QueueConnectionFactory)) {
 			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is not a QueueConnectionFactory");
@@ -269,7 +275,9 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * @see javax.jms.TopicConnectionFactory#createTopicConnection(String, String)
 	 * @see javax.jms.TopicConnectionFactory#createTopicConnection()
 	 */
-	protected TopicConnection doCreateTopicConnection(String username, String password) throws JMSException {
+	protected TopicConnection doCreateTopicConnection(
+			@Nullable String username, @Nullable String password) throws JMSException {
+
 		ConnectionFactory target = obtainTargetConnectionFactory();
 		if (!(target instanceof TopicConnectionFactory)) {
 			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is not a TopicConnectionFactory");

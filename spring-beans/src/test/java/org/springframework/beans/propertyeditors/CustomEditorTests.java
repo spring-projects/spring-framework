@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -428,11 +428,6 @@ public class CustomEditorTests {
 		assertTrue("Correct double2 value", new Double("6.1").equals(tb.getDouble2()));
 		assertTrue("Correct bigDecimal value", new BigDecimal("4.5").equals(bw.getPropertyValue("bigDecimal")));
 		assertTrue("Correct bigDecimal value", new BigDecimal("4.5").equals(tb.getBigDecimal()));
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void testCustomNumberEditorCtorWithNullNumberType() throws Exception {
-		new CustomNumberEditor(null, true);
 	}
 
 	@Test

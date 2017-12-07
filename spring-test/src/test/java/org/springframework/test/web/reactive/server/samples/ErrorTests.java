@@ -39,7 +39,7 @@ public class ErrorTests {
 		this.client.get().uri("/invalid")
 				.exchange()
 				.expectStatus().isNotFound()
-				.expectBody().isEmpty();
+				.expectBody(Void.class);
 	}
 
 	@Test
@@ -47,7 +47,7 @@ public class ErrorTests {
 		this.client.get().uri("/server-error")
 				.exchange()
 				.expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-				.expectBody().isEmpty();
+				.expectBody(Void.class);
 	}
 
 

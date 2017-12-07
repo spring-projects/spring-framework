@@ -20,6 +20,8 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Session;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Strategy interface for resolving JMS destinations.
  *
@@ -52,7 +54,7 @@ public interface DestinationResolver {
 	 * @throws javax.jms.JMSException if the JMS Session failed to resolve the destination
 	 * @throws DestinationResolutionException in case of general destination resolution failure
 	 */
-	Destination resolveDestinationName(Session session, String destinationName, boolean pubSubDomain)
+	Destination resolveDestinationName(@Nullable Session session, String destinationName, boolean pubSubDomain)
 			throws JMSException;
 
 }

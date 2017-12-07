@@ -17,6 +17,7 @@
 package org.springframework.http.codec;
 
 import org.springframework.core.codec.Decoder;
+import org.springframework.core.codec.Encoder;
 
 /**
  * Helps to configure a list of client-side HTTP message readers and writers
@@ -34,34 +35,60 @@ import org.springframework.core.codec.Decoder;
  */
 public interface ClientCodecConfigurer extends CodecConfigurer {
 
-	/**
-	 * {@inheritDoc}
-	 * <p>Overriden to return {@link ClientDefaultCodecsConfigurer}.
-	 */
 	@Override
-	ClientDefaultCodecsConfigurer defaultCodecs();
+	ClientDefaultCodecs defaultCodecs();
 
 
 	/**
-	 * Creates a new instance of the {@code ClientCodecConfigurer}.
-	 * @return the created instance
+	 * Create a new instance of the {@code ClientCodecConfigurer}.
 	 */
 	static ClientCodecConfigurer create() {
-		return new DefaultClientCodecConfigurer();
+		return CodecConfigurerFactory.create(ClientCodecConfigurer.class);
 	}
 
+
 	/**
-	 * Extension of {@link DefaultCodecConfigurer} with extra client options.
+	 * Extension of {@link DefaultCodecs} with extra client options.
 	 */
-	interface ClientDefaultCodecsConfigurer extends DefaultCodecsConfigurer {
+	interface ClientDefaultCodecs extends DefaultCodecs {
+
+		/**
+		 * Configure encoders or writers for use with
+		 * {@link org.springframework.http.codec.multipart.MultipartHttpMessageWriter
+		 * MultipartHttpMessageWriter}.
+		 */
+		MultipartCodecs multipartCodecs();
 
 		/**
 		 * Configure the {@code Decoder} to use for Server-Sent Events.
-		 * <p>By default the {@link #jackson2Decoder} override is used for SSE.
+		 * <p>By default if this is not set, and Jackson is available, the
+		 * {@link #jackson2JsonDecoder} override is used instead. Use this property
+		 * if you want to further customize the SSE decoder.
 		 * @param decoder the decoder to use
 		 */
 		void serverSentEventDecoder(Decoder<?> decoder);
 	}
 
+
+	/**
+	 * Registry and container for multipart HTTP message writers.
+	 */
+	interface MultipartCodecs {
+
+		/**
+		 * Add a Part {@code Encoder}, internally wrapped with
+		 * {@link EncoderHttpMessageWriter}.
+		 * @param encoder the encoder to add
+		 */
+		MultipartCodecs encoder(Encoder<?> encoder);
+
+		/**
+		 * Add a Part {@link HttpMessageWriter}. For writers of type
+		 * {@link EncoderHttpMessageWriter} consider using the shortcut
+		 * {@link #encoder(Encoder)} instead.
+		 * @param writer the writer to add
+		 */
+		MultipartCodecs writer(HttpMessageWriter<?> writer);
+	}
 
 }

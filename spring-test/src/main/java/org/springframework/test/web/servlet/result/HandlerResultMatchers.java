@@ -64,11 +64,13 @@ public class HandlerResultMatchers {
 		return result -> {
 			Object handler = result.getHandler();
 			assertTrue("No handler", handler != null);
-			Class<?> actual = handler.getClass();
-			if (HandlerMethod.class.isInstance(handler)) {
-				actual = ((HandlerMethod) handler).getBeanType();
+			if (handler != null) {
+				Class<?> actual = handler.getClass();
+				if (HandlerMethod.class.isInstance(handler)) {
+					actual = ((HandlerMethod) handler).getBeanType();
+				}
+				assertEquals("Handler type", type, ClassUtils.getUserClass(actual));
 			}
-			assertEquals("Handler type", type, ClassUtils.getUserClass(actual));
 		};
 	}
 
@@ -93,7 +95,6 @@ public class HandlerResultMatchers {
 	 * mockMvc.perform(get("/"))
 	 *     .andExpect(handler().methodCall(on(SimpleController.class).handle()));
 	 * </pre>
-	 *
 	 * @param obj either the value returned from a "mock" controller invocation
 	 * or the "mock" controller itself after an invocation
 	 */
@@ -146,7 +147,9 @@ public class HandlerResultMatchers {
 	private static HandlerMethod getHandlerMethod(MvcResult result) {
 		Object handler = result.getHandler();
 		assertTrue("No handler", handler != null);
-		assertTrue("Not a HandlerMethod: " + handler, handler instanceof HandlerMethod);
+		if (!(handler instanceof HandlerMethod)) {
+			fail("Not a HandlerMethod: " + handler);
+		}
 		return (HandlerMethod) handler;
 	}
 

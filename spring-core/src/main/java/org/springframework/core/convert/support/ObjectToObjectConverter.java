@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.Set;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
@@ -81,7 +82,8 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 	}
 
 	@Override
-	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+	@Nullable
+	public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return null;
 		}
@@ -127,6 +129,7 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 		return (getValidatedMember(targetClass, sourceClass) != null);
 	}
 
+	@Nullable
 	private static Member getValidatedMember(Class<?> targetClass, Class<?> sourceClass) {
 		Member member = conversionMemberCache.get(targetClass);
 		if (isApplicable(member, sourceClass)) {
@@ -164,6 +167,7 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 		}
 	}
 
+	@Nullable
 	private static Method determineToMethod(Class<?> targetClass, Class<?> sourceClass) {
 		if (String.class == targetClass || String.class == sourceClass) {
 			// Do not accept a toString() method or any to methods on String itself
@@ -175,6 +179,7 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 				ClassUtils.isAssignable(targetClass, method.getReturnType()) ? method : null);
 	}
 
+	@Nullable
 	private static Method determineFactoryMethod(Class<?> targetClass, Class<?> sourceClass) {
 		if (String.class == targetClass) {
 			// Do not accept the String.valueOf(Object) method
@@ -191,6 +196,7 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 		return method;
 	}
 
+	@Nullable
 	private static Constructor<?> determineFactoryConstructor(Class<?> targetClass, Class<?> sourceClass) {
 		return ClassUtils.getConstructorIfAvailable(targetClass, sourceClass);
 	}

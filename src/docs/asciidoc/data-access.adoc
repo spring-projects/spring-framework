@@ -3,7 +3,9 @@
 :doc-root: https://docs.spring.io
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :toc: left
-:toclevels: 2
+:toclevels: 4
+:tabsize: 4
+:docinfo1:
 
 This part of the reference documentation is concerned with data access and the
 interaction between the data access layer and the business or service layer.
@@ -12,12 +14,17 @@ Spring's comprehensive transaction management support is covered in some detail,
 followed by thorough coverage of the various data access frameworks and technologies
 that the Spring Framework integrates with.
 
+
+
+
 [[transaction]]
 == Transaction Management
 
 
+
 [[transaction-intro]]
 === Introduction to Spring Framework transaction management
+
 Comprehensive transaction support is among the most compelling reasons to use the Spring
 Framework. The Spring Framework provides a consistent abstraction for transaction
 management that delivers the following benefits:
@@ -52,9 +59,9 @@ server integration, and solutions to common problems.)
 
 
 
-
 [[transaction-motivation]]
 === Advantages of the Spring Framework's transaction support model
+
 Traditionally, Java EE developers have had two choices for transaction management:
 __global__ or __local__ transactions, both of which have profound limitations. Global
 and local transaction management is reviewed in the next two sections, followed by a
@@ -62,9 +69,9 @@ discussion of how the Spring Framework's transaction management support addresse
 limitations of the global and local transaction models.
 
 
-
 [[transaction-global]]
 ==== Global transactions
+
 Global transactions enable you to work with multiple transactional resources, typically
 relational databases and message queues. The application server manages global
 transactions through the JTA, which is a cumbersome API to use (partly due to its
@@ -85,9 +92,9 @@ negatives of EJB in general are so great that this is not an attractive proposit
 especially in the face of compelling alternatives for declarative transaction management.
 
 
-
 [[transaction-local]]
 ==== Local transactions
+
 Local transactions are resource-specific, such as a transaction associated with a JDBC
 connection. Local transactions may be easier to use, but have significant disadvantages:
 they cannot work across multiple transactional resources. For example, code that manages
@@ -96,7 +103,6 @@ the application server is not involved in transaction management, it cannot help
 correctness across multiple resources. (It is worth noting that most applications use a
 single transaction resource.) Another downside is that local transactions are invasive
 to the programming model.
-
 
 
 [[transaction-programming-model]]
@@ -143,9 +149,9 @@ configuration file, rather than your code, need to change.
 
 
 
-
 [[transaction-strategies]]
 === Understanding the Spring Framework transaction abstraction
+
 The key to the Spring transaction abstraction is the notion of a __transaction
 strategy__. A transaction strategy is defined by the
 `org.springframework.transaction.PlatformTransactionManager` interface:
@@ -155,8 +161,7 @@ strategy__. A transaction strategy is defined by the
 ----
 	public interface PlatformTransactionManager {
 
-		TransactionStatus getTransaction(
-				TransactionDefinition definition) throws TransactionException;
+		TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException;
 
 		void commit(TransactionStatus status) throws TransactionException;
 
@@ -301,11 +306,8 @@ infrastructure.
 [NOTE]
 ====
 The above definition of the `dataSource` bean uses the `<jndi-lookup/>` tag from the
-`jee` namespace. For more information on schema-based configuration, see
-<<appendix.adoc#xsd-configuration, XML Schema-based configuration>>,
-and for more information on the `<jee/>`
-tags see the section entitled <<appendix.adoc#xsd-config-body-schemas-jee,
-the JEE schema>>.
+`jee` namespace. For more information see
+<<integration.adoc#xsd-schemas-jee, The JEE schema>>.
 ====
 
 You can also use Hibernate local transactions easily, as shown in the following
@@ -372,9 +374,9 @@ moving from local to global transactions or vice versa.
 
 
 
-
 [[tx-resource-synchronization]]
 === Synchronizing resources with transactions
+
 It should now be clear how you create different transaction managers, and how they are
 linked to related resources that need to be synchronized to transactions (for example
 `DataSourceTransactionManager` to a JDBC `DataSource`, `HibernateTransactionManager` to
@@ -385,9 +387,9 @@ also discusses how transaction synchronization is triggered (optionally) through
 relevant `PlatformTransactionManager`.
 
 
-
 [[tx-resource-synchronization-high]]
 ==== High-level synchronization approach
+
 The preferred approach is to use Spring's highest level template based persistence
 integration APIs or to use native ORM APIs with transaction- aware factory beans or
 proxies for managing the native resource factories. These transaction-aware solutions
@@ -399,9 +401,9 @@ for JDBC access by using the `JdbcTemplate`. These solutions are detailed in sub
 chapters of this reference documentation.
 
 
-
 [[tx-resource-synchronization-low]]
 ==== Low-level synchronization approach
+
 Classes such as `DataSourceUtils` (for JDBC), `EntityManagerFactoryUtils` (for JPA),
 `SessionFactoryUtils` (for Hibernate), and so on exist at a lower level. When you want the
 application code to deal directly with the resource types of the native persistence APIs,
@@ -440,7 +442,6 @@ with the relevant APIs. For example, if you use the Spring `JdbcTemplate` or
 behind the scenes and you won't need to write any special code.
 
 
-
 [[tx-resource-synchronization-tadsp]]
 ==== TransactionAwareDataSourceProxy
 
@@ -457,9 +458,9 @@ abstractions mentioned above.
 
 
 
-
 [[transaction-declarative]]
 === Declarative transaction management
+
 [NOTE]
 ====
 Most Spring Framework users choose declarative transaction management. This option has
@@ -523,9 +524,9 @@ declarative transaction management follows EJB convention (roll back is automati
 on unchecked exceptions), it is often useful to customize this behavior.
 
 
-
 [[tx-decl-explained]]
 ==== Understanding the Spring Framework's declarative transaction implementation
+
 It is not sufficient to tell you simply to annotate your classes with the
 `@Transactional` annotation, add `@EnableTransactionManagement` to your configuration,
 and then expect you to understand how it all works. This section explains the inner
@@ -550,9 +551,9 @@ Conceptually, calling a method on a transactional proxy looks like this...
 image::images/tx.png[]
 
 
-
 [[transaction-declarative-first-example]]
 ==== Example of declarative transaction implementation
+
 Consider the following interface, and its attendant implementation. This example uses
 `Foo` and `Bar` classes as placeholders so that you can concentrate on the transaction
 usage without focusing on a particular domain model. For the purposes of this example,
@@ -777,9 +778,9 @@ insertFoo(..) method of the DefaultFooService class have been truncated for clar
 ----
 
 
-
 [[transaction-declarative-rolling-back]]
 ==== Rolling back a declarative transaction
+
 The previous section outlined the basics of how to specify transactional settings for
 classes, typically service layer classes, declaratively in your application. This
 section describes how you can control the rollback of transactions in a simple
@@ -867,9 +868,9 @@ possible. Programmatic rollback is available should you absolutely need it, but 
 usage flies in the face of achieving a clean POJO-based architecture.
 
 
-
 [[transaction-declarative-diff-tx]]
 ==== Configuring different transactional semantics for different beans
+
 Consider the scenario where you have a number of service layer objects, and you want to
 apply a __totally different__ transactional configuration to each of them. You do this
 by defining distinct `<aop:advisor/>` elements with differing `pointcut` and
@@ -983,7 +984,6 @@ transactional settings.
 ----
 
 
-
 [[transaction-declarative-txadvice-settings]]
 ==== <tx:advice/> settings
 
@@ -1045,7 +1045,6 @@ that are nested within `<tx:advice/>` and `<tx:attributes/>` tags are summarized
 | `Exception(s)` that do __not__ trigger rollback; comma-delimited. For example,
   `com.foo.MyBusinessException,ServletException.`
 |===
-
 
 
 [[transaction-declarative-annotations]]
@@ -1228,6 +1227,14 @@ any kind of method.
 
 [NOTE]
 ====
+The default advice mode for processing `@Transactional` annotations is "proxy" which
+allows for interception of calls through the proxy only; local calls within the same
+class cannot get intercepted that way. For a more advanced mode of interception,
+consider switching to "aspectj" mode in combination with compile/load-time weaving.
+====
+
+[NOTE]
+====
 The `proxy-target-class` attribute controls what type of transactional proxies are
 created for classes annotated with the `@Transactional` annotation. If
 `proxy-target-class` is set to `true`, class-based proxies are created. If
@@ -1268,7 +1275,6 @@ precedence over the transactional settings defined at the class level.
 		}
 	}
 ----
-
 
 [[transaction-declarative-attransactional-settings]]
 ===== @Transactional settings
@@ -1338,9 +1344,9 @@ transactions, the transaction name is always the fully-qualified class name + ".
 `handlePayment(..)` method of the `BusinessService` class started a transaction, the
 name of the transaction would be: `com.foo.BusinessService.handlePayment`.
 
-
 [[tx-multiple-tx-mgrs-with-attransactional]]
 ===== Multiple Transaction Managers with @Transactional
+
 Most Spring applications only need a single transaction manager, but there may be
 situations where you want multiple independent transaction managers in a single
 application. The value attribute of the `@Transactional` annotation can be used to
@@ -1385,9 +1391,9 @@ transaction managers, differentiated by the "order" and "account" qualifiers. Th
 default `<tx:annotation-driven>` target bean name `transactionManager` will still be
 used if no specifically qualified PlatformTransactionManager bean is found.
 
-
 [[tx-custom-attributes]]
 ===== Custom shortcut annotations
+
 If you find you are repeatedly using the same attributes with `@Transactional` on many
 different methods, then <<core.adoc#beans-meta-annotations,Spring's meta-annotation support>> allows
 you to define custom shortcut annotations for your specific use cases. For example,
@@ -1428,9 +1434,9 @@ Here we have used the syntax to define the transaction manager qualifier, but co
 have included propagation behavior, rollback rules, timeouts etc.
 
 
-
 [[tx-propagation]]
 ==== Transaction propagation
+
 This section describes some semantics of transaction propagation in Spring. Please note
 that this section is not an introduction to transaction propagation proper; rather it
 details some of the semantics regarding transaction propagation in Spring.
@@ -1438,9 +1444,9 @@ details some of the semantics regarding transaction propagation in Spring.
 In Spring-managed transactions, be aware of the difference between __physical__ and
 __logical__ transactions, and how the propagation setting applies to this difference.
 
-
 [[tx-propagation-required]]
 ===== Required
+
 image::images/tx_prop_required.png[]
 
 PROPAGATION_REQUIRED
@@ -1464,9 +1470,9 @@ is not aware) silently marks a transaction as rollback-only, the outer caller st
 calls commit. The outer caller needs to receive an `UnexpectedRollbackException` to
 indicate clearly that a rollback was performed instead.
 
-
 [[tx-propagation-requires_new]]
 ===== RequiresNew
+
 image::images/tx_prop_requires_new.png[]
 
 PROPAGATION_REQUIRES_NEW
@@ -1477,9 +1483,9 @@ underlying physical transactions are different and hence can commit or roll back
 independently, with an outer transaction not affected by an inner transaction's rollback
 status.
 
-
 [[tx-propagation-nested]]
 ===== Nested
+
 `PROPAGATION_NESTED` uses a __single__ physical transaction with multiple savepoints
 that it can roll back to. Such partial rollbacks allow an inner transaction scope to
 trigger a rollback __for its scope__, with the outer transaction being able to continue
@@ -1488,9 +1494,9 @@ is typically mapped onto JDBC savepoints, so will only work with JDBC resource
 transactions. See Spring's `DataSourceTransactionManager`.
 
 
-
 [[transaction-declarative-applying-more-than-just-tx-advice]]
 ==== Advising transactional operations
+
 Suppose you want to execute __both__ transactional __and__ some basic profiling advice.
 How do you effect this in the context of `<tx:annotation-driven/>`?
 
@@ -1552,7 +1558,7 @@ is controlled through the `Ordered` interface. For full details on advice orderi
 ----
 
 [source,xml,indent=0]
-[subs="verbatim"]
+[subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -1608,7 +1614,7 @@ The following example effects the same setup as above, but uses the purely XML
 declarative approach.
 
 [source,xml,indent=0]
-[subs="verbatim"]
+[subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -1668,7 +1674,6 @@ order value.
 You configure additional aspects in similar fashion.
 
 
-
 [[transaction-declarative-aspectj]]
 ==== Using @Transactional with AspectJ
 
@@ -1723,9 +1728,9 @@ AspectJ in the Spring Framework>> for a discussion of load-time weaving with Asp
 
 
 
-
 [[transaction-programmatic]]
 === Programmatic transaction management
+
 The Spring Framework provides two means of programmatic transaction management:
 
 * Using the `TransactionTemplate`.
@@ -1734,7 +1739,6 @@ The Spring Framework provides two means of programmatic transaction management:
 The Spring team generally recommends the `TransactionTemplate` for programmatic
 transaction management. The second approach is similar to using the JTA
 `UserTransaction` API, although exception handling is less cumbersome.
-
 
 
 [[tx-prog-template]]
@@ -1820,9 +1824,9 @@ Code within the callback can roll the transaction back by calling the
 	});
 ----
 
-
 [[tx-prog-template-settings]]
 ===== Specifying transaction settings
+
 You can specify transaction settings such as the propagation mode, the isolation level,
 the timeout, and so forth on the `TransactionTemplate` either programmatically or in
 configuration. `TransactionTemplate` instances by default have the
@@ -1871,7 +1875,6 @@ different settings (for example, a different isolation level), then you need to 
 two distinct `TransactionTemplate` instances.
 
 
-
 [[transaction-programmatic-ptm]]
 ==== Using the PlatformTransactionManager
 
@@ -1902,9 +1905,9 @@ transactions, roll back, and commit.
 
 
 
-
 [[tx-decl-vs-prog]]
 === Choosing between programmatic and declarative transaction management
+
 Programmatic transaction management is usually a good idea only if you have a small
 number of transactional operations. For example, if you have a web application that
 require transactions only for certain update operations, you may not want to set up
@@ -1918,6 +1921,8 @@ declarative transaction management is usually worthwhile. It keeps transaction
 management out of business logic, and is not difficult to configure. When using the
 Spring Framework, rather than EJB CMT, the configuration cost of declarative transaction
 management is greatly reduced.
+
+
 
 [[transaction-event]]
 === Transaction bound event
@@ -1939,13 +1944,13 @@ transaction in which it has been published as committed successfully:
 [subs="verbatim,quotes"]
 ----
 	@Component
-    public class MyComponent {
+	public class MyComponent {
 
-    	@TransactionalEventListener
-    	public void handleOrderCreatedEvent(CreationEvent<Order> creationEvent) {
-      		...
-    	}
-    }
+		@TransactionalEventListener
+		public void handleOrderCreatedEvent(CreationEvent<Order> creationEvent) {
+			...
+		}
+	}
 ----
 
 The `TransactionalEventListener` annotation exposes a `phase` attribute  that allows to customize
@@ -1957,8 +1962,11 @@ If no transaction is running, the listener is not invoked at all since we can't 
 semantics. It is however possible to override that behaviour by setting the `fallbackExecution` attribute
 of the annotation to `true`.
 
+
+
 [[transaction-application-server-integration]]
 === Application server-specific integration
+
 Spring's transaction abstraction generally is application server agnostic. Additionally,
 Spring's `JtaTransactionManager` class, which can optionally perform a JNDI lookup for
 the JTA `UserTransaction` and `TransactionManager` objects, autodetects the location for
@@ -1983,9 +1991,9 @@ explicitly; rather, they are chosen automatically, with the standard
 `JtaTransactionManager` as default fallback.
 
 
-
 [[transaction-application-server-integration-websphere]]
 ==== IBM WebSphere
+
 On WebSphere 6.1.0.9 and above, the recommended Spring JTA transaction manager to use is
 `WebSphereUowTransactionManager`. This special adapter leverages IBM's `UOWManager` API,
 which is available in WebSphere Application Server 6.1.0.9 and later. With this adapter,
@@ -1993,9 +2001,9 @@ Spring-driven transaction suspension (suspend/resume as initiated by
 `PROPAGATION_REQUIRES_NEW`) is officially supported by IBM.
 
 
-
 [[transaction-application-server-integration-weblogic]]
 ==== Oracle WebLogic Server
+
 On WebLogic Server 9.0 or above, you typically would use the
 `WebLogicJtaTransactionManager` instead of the stock `JtaTransactionManager` class. This
 special WebLogic-specific subclass of the normal `JtaTransactionManager` supports the
@@ -2005,10 +2013,8 @@ per-transaction isolation levels, and proper resuming of transactions in all cas
 
 
 
-
 [[transaction-solutions-to-common-problems]]
 === Solutions to common problems
-
 
 
 [[transaction-solutions-to-common-problems-wrong-ptm]]
@@ -2027,9 +2033,9 @@ treats them as errors.
 
 
 
-
 [[transaction-resources]]
-=== Further Resources
+=== Further resources
+
 For more information about the Spring Framework's transaction support:
 
 * http://www.javaworld.com/javaworld/jw-01-2009/jw-01-spring-transactions.html[Distributed
@@ -2043,12 +2049,15 @@ For more information about the Spring Framework's transaction support:
 
 
 
+
 [[dao]]
 == DAO support
 
 
+
 [[dao-introduction]]
 === Introduction
+
 The Data Access Object (DAO) support in Spring is aimed at making it easy to work with
 data access technologies like JDBC, Hibernate or JPA in a consistent way. This
 allows one to switch between the aforementioned persistence technologies fairly easily
@@ -2057,9 +2066,9 @@ specific to each technology.
 
 
 
-
 [[dao-exceptions]]
 === Consistent exception hierarchy
+
 Spring provides a convenient translation from technology-specific exceptions like
 `SQLException` to its own exception class hierarchy with the `DataAccessException` as
 the root exception. These exceptions wrap the original exception so there is never any
@@ -2092,9 +2101,9 @@ image::images/DataAccessException.png[]
 
 
 
-
 [[dao-annotations]]
 === Annotations used for configuring DAO or Repository classes
+
 The best way to guarantee that your Data Access Objects (DAOs) or repositories provide
 exception translation is to use the `@Repository` annotation. This annotation also
 allows the component scanning support to find and configure your DAOs and repositories
@@ -2181,12 +2190,15 @@ configure the application context to take advantage of these annotations.
 
 
 
+
 [[jdbc]]
 == Data access with JDBC
 
 
+
 [[jdbc-introduction]]
 === Introduction to Spring Framework JDBC
+
 The value-add provided by the Spring Framework JDBC abstraction is perhaps best shown by
 the sequence of actions outlined in the table below. The table shows what actions Spring
 will take care of and which actions are the responsibility of you, the application
@@ -2242,9 +2254,9 @@ The Spring Framework takes care of all the low-level details that can make JDBC 
 tedious API to develop with.
 
 
-
 [[jdbc-choose-style]]
 ==== Choosing an approach for JDBC database access
+
 You can choose among several approaches to form the basis for your JDBC database access.
 In addition to three flavors of the JdbcTemplate, a new SimpleJdbcInsert and
 SimplejdbcCall approach optimizes database metadata, and the RDBMS Object style takes a
@@ -2271,9 +2283,9 @@ advanced features require a JDBC 3.0 driver.
   can be called multiple times with various parameter values passed in.
 
 
-
 [[jdbc-packages]]
 ==== Package hierarchy
+
 The Spring Framework's JDBC abstraction framework consists of four different packages,
 namely `core`, `datasource`, `object`, and `support`.
 
@@ -2308,10 +2320,8 @@ exceptions to be propagated to the caller. See <<jdbc-SQLExceptionTranslator>>.
 
 
 
-
 [[jdbc-core]]
 === Using the JDBC core classes to control basic JDBC processing and error handling
-
 
 
 [[jdbc-JdbcTemplate]]
@@ -2352,12 +2362,14 @@ corresponding to the fully qualified class name of the template instance (typica
 
 [[jdbc-JdbcTemplate-examples]]
 ===== Examples of JdbcTemplate class usage
+
 This section provides some examples of `JdbcTemplate` class usage. These examples are
 not an exhaustive list of all of the functionality exposed by the `JdbcTemplate`; see
 the attendant javadocs for that.
 
 [[jdbc-JdbcTemplate-examples-query]]
 ====== Querying (SELECT)
+
 Here is a simple query for getting the number of rows in a relation:
 
 [source,java,indent=0]
@@ -2445,7 +2457,8 @@ last code snippet as follows:
 ----
 
 [[jdbc-JdbcTemplate-examples-update]]
-====== Updating (INSERT/UPDATE/DELETE) with jdbcTemplate
+====== Updating (INSERT/UPDATE/DELETE) with JdbcTemplate
+
 You use the `update(..)` method to perform insert, update and delete operations.
 Parameter values are usually provided as var args or alternatively as an object array.
 
@@ -2474,7 +2487,8 @@ Parameter values are usually provided as var args or alternatively as an object 
 ----
 
 [[jdbc-JdbcTemplate-examples-other]]
-====== Other jdbcTemplate operations
+====== Other JdbcTemplate operations
+
 You can use the `execute(..)` method to execute any arbitrary SQL, and as such the
 method is often used for DDL statements. It is heavily overloaded with variants taking
 callback interfaces, binding variable arrays, and so on.
@@ -2495,7 +2509,6 @@ procedure support is <<jdbc-StoredProcedure,covered later>>.
 			"call SUPPORT.REFRESH_ACTORS_SUMMARY(?)",
 			Long.valueOf(unionId));
 ----
-
 
 [[jdbc-JdbcTemplate-idioms]]
 ===== JdbcTemplate best practices
@@ -2621,7 +2634,6 @@ time you want to execute SQL. Once configured, a `JdbcTemplate` instance is thre
 You may want multiple `JdbcTemplate` instances if your application accesses multiple
 databases, which requires multiple `DataSources`, and subsequently multiple differently
 configured `JdbcTemplates`.
-
 
 
 [[jdbc-NamedParameterJdbcTemplate]]
@@ -2757,7 +2769,6 @@ See also <<jdbc-JdbcTemplate-idioms>> for guidelines on using the
 `NamedParameterJdbcTemplate` class in the context of an application.
 
 
-
 [[jdbc-SQLExceptionTranslator]]
 ==== SQLExceptionTranslator
 
@@ -2851,9 +2862,9 @@ The custom translator is passed a data source in order to look up the error code
 `sql-error-codes.xml`.
 
 
-
 [[jdbc-statements-executing]]
 ==== Executing statements
+
 Executing an SQL statement requires very little code. You need a `DataSource` and a
 `JdbcTemplate`, including the convenience methods that are provided with the
 `JdbcTemplate`. The following example shows what you need to include for a minimal but
@@ -2880,9 +2891,9 @@ fully functional class that creates a new table:
 ----
 
 
-
 [[jdbc-statements-querying]]
 ==== Running queries
+
 Some query methods return a single value. To retrieve a count or a specific value from
 one row, use `queryForObject(..)`. The latter converts the returned JDBC `Type` to the
 Java class that is passed in as an argument. If the type conversion is invalid, then an
@@ -2942,9 +2953,9 @@ The list returned would look something like this:
 ----
 
 
-
 [[jdbc-updates]]
 ==== Updating the database
+
 The following example shows a column updated for a certain primary key. In this example,
 an SQL statement has placeholders for row parameters. The parameter values can be passed
 in as varargs or alternatively as an array of objects. Thus primitives should be wrapped
@@ -2972,17 +2983,17 @@ in the primitive wrapper classes explicitly or using auto-boxing.
 ----
 
 
-
 [[jdbc-auto-genereted-keys]]
 ==== Retrieving auto-generated keys
+
 An `update()` convenience method supports the retrieval of primary keys generated by the
 database. This support is part of the JDBC 3.0 standard; see Chapter 13.6 of the
 specification for details. The method takes a `PreparedStatementCreator` as its first
 argument, and this is the way the required insert statement is specified. The other
-argument is a `KeyHolder`, which contains the generated key on successful return from
-the update. There is not a standard single way to create an appropriate
-`PreparedStatement` (which explains why the method signature is the way it is). The
-following example works on Oracle but may not work on other platforms:
+argument is a `KeyHolder`, which contains the generated key on successful return from the
+update. There is not a standard single way to create an appropriate `PreparedStatement`
+(which explains why the method signature is the way it is). The following example works
+on Oracle but may not work on other platforms:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3006,10 +3017,8 @@ following example works on Oracle but may not work on other platforms:
 
 
 
-
 [[jdbc-connections]]
 === Controlling database connections
-
 
 
 [[jdbc-datasource]]
@@ -3104,14 +3113,12 @@ C3P0 configuration:
 ----
 
 
-
 [[jdbc-DataSourceUtils]]
 ==== DataSourceUtils
 
 The `DataSourceUtils` class is a convenient and powerful helper class that provides
 `static` methods to obtain connections from JNDI and close connections if necessary. It
 supports thread-bound connections with, for example, `DataSourceTransactionManager`.
-
 
 
 [[jdbc-SmartDataSource]]
@@ -3123,7 +3130,6 @@ classes using it to query whether the connection should be closed after a given
 operation. This usage is efficient when you know that you will reuse a connection.
 
 
-
 [[jdbc-AbstractDataSource]]
 ==== AbstractDataSource
 
@@ -3131,7 +3137,6 @@ operation. This usage is efficient when you know that you will reuse a connectio
 implementations that implements code that is common to all `DataSource` implementations.
 You extend the `AbstractDataSource` class if you are writing your own `DataSource`
 implementation.
-
 
 
 [[jdbc-SingleConnectionDataSource]]
@@ -3152,7 +3157,6 @@ application server, in conjunction with a simple JNDI environment. In contrast t
 excessive creation of physical connections.
 
 
-
 [[jdbc-DriverManagerDataSource]]
 ==== DriverManagerDataSource
 
@@ -3167,7 +3171,6 @@ close the connection, so any `DataSource`-aware persistence code should work. Ho
 using JavaBean-style connection pools such as `commons-dbcp` is so easy, even in a test
 environment, that it is almost always preferable to use such a connection pool over
 `DriverManagerDataSource`.
-
 
 
 [[jdbc-TransactionAwareDataSourceProxy]]
@@ -3220,14 +3223,15 @@ pattern. JTA does not support custom isolation levels!
 
 [[jdbc-advanced-jdbc]]
 === JDBC batch operations
+
 Most JDBC drivers provide improved performance if you batch multiple calls to the same
 prepared statement. By grouping updates into batches you limit the number of round trips
 to the database.
 
 
-
 [[jdbc-batch-classic]]
 ==== Basic batch operations with the JdbcTemplate
+
 You accomplish `JdbcTemplate` batch processing by implementing two methods of a special
 interface, `BatchPreparedStatementSetter`, and passing that in as the second parameter
 in your `batchUpdate` method call. Use the `getBatchSize` method to provide the size of
@@ -3240,6 +3244,7 @@ based on entries in a list. The entire list is used as the batch in this example
 [subs="verbatim,quotes"]
 ----
 	public class JdbcActorDao implements ActorDao {
+
 		private JdbcTemplate jdbcTemplate;
 
 		public void setDataSource(DataSource dataSource) {
@@ -3247,20 +3252,18 @@ based on entries in a list. The entire list is used as the batch in this example
 		}
 
 		public int[] batchUpdate(final List<Actor> actors) {
-			int[] updateCounts = jdbcTemplate.batchUpdate("update t_actor set first_name = ?, " +
-					"last_name = ? where id = ?",
-				new BatchPreparedStatementSetter() {
-					public void setValues(PreparedStatement ps, int i) throws SQLException {
+			return this.jdbcTemplate.batchUpdate(
+					"update t_actor set first_name = ?, last_name = ? where id = ?",
+					new BatchPreparedStatementSetter() {
+						public void setValues(PreparedStatement ps, int i) throws SQLException {
 							ps.setString(1, actors.get(i).getFirstName());
 							ps.setString(2, actors.get(i).getLastName());
 							ps.setLong(3, actors.get(i).getId().longValue());
 						}
-
 						public int getBatchSize() {
 							return actors.size();
 						}
 					});
-			return updateCounts;
 		}
 
 		// ... additional methods
@@ -3274,17 +3277,18 @@ you to interrupt a batch once the input source is exhausted. The `isBatchExhaust
 allows you to signal the end of the batch.
 
 
-
 [[jdbc-batch-list]]
 ==== Batch operations with a List of objects
+
 Both the `JdbcTemplate` and the `NamedParameterJdbcTemplate` provides an alternate way
 of providing the batch update. Instead of implementing a special batch interface, you
 provide all parameter values in the call as a list. The framework loops over these
 values and uses an internal prepared statement setter. The API varies depending on
 whether you use named parameters. For the named parameters you provide an array of
 `SqlParameterSource`, one entry for each member of the batch. You can use the
-`SqlParameterSource.createBatch` method to create this array, passing in either an array
-of JavaBeans or an array of Maps containing the parameter values.
+`SqlParameterSourceUtils.createBatch` convenience methods to create this array, passing
+in an array of bean-style objects (with getter methods corresponding to parameters)
+and/or String-keyed Maps (containing the corresponding parameters as values).
 
 This example shows a batch update using named parameters:
 
@@ -3292,18 +3296,17 @@ This example shows a batch update using named parameters:
 [subs="verbatim,quotes"]
 ----
 	public class JdbcActorDao implements ActorDao {
+
 		private NamedParameterTemplate namedParameterJdbcTemplate;
 
 		public void setDataSource(DataSource dataSource) {
 			this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 		}
 
-		public int[] batchUpdate(final List<Actor> actors) {
-			SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(actors.toArray());
-			int[] updateCounts = namedParameterJdbcTemplate.batchUpdate(
+		public int[] batchUpdate(List<Actor> actors) {
+			return this.namedParameterJdbcTemplate.batchUpdate(
 					"update t_actor set first_name = :firstName, last_name = :lastName where id = :id",
-					batch);
-			return updateCounts;
+					SqlParameterSourceUtils.createBatch(actors));
 		}
 
 		// ... additional methods
@@ -3332,19 +3335,15 @@ The same example using classic JDBC "?" placeholders:
 			List<Object[]> batch = new ArrayList<Object[]>();
 			for (Actor actor : actors) {
 				Object[] values = new Object[] {
-						actor.getFirstName(),
-						actor.getLastName(),
-						actor.getId()};
+						actor.getFirstName(), actor.getLastName(), actor.getId()};
 				batch.add(values);
 			}
-			int[] updateCounts = jdbcTemplate.batchUpdate(
+			return this.jdbcTemplate.batchUpdate(
 					"update t_actor set first_name = ?, last_name = ? where id = ?",
 					batch);
-			return updateCounts;
 		}
 
 		// ... additional methods
-
 	}
 ----
 
@@ -3352,10 +3351,28 @@ All of the above batch update methods return an int array containing the number 
 affected rows for each batch entry. This count is reported by the JDBC driver. If the
 count is not available, the JDBC driver returns a -2 value.
 
+[NOTE]
+====
+In such a scenario with automatic setting of values on an underlying `PreparedStatement`,
+the corresponding JDBC type for each value needs to be derived from the given Java type.
+While this usually works well, there is a potential for issues, e.g. with Map-contained
+`null` values: Spring will by default call `ParameterMetaData.getParameterType` in such a
+case which may be expensive with your JDBC driver. Please make sure to use a recent driver
+version, and consider setting the "spring.jdbc.getParameterType.ignore" property to "true"
+(as a JVM system property or in a `spring.properties` file in the root of your classpath)
+if you encounter a performance issue, e.g. as reported on Oracle 12c (SPR-16139).
+
+Alternatively, simply consider specifying the corresponding JDBC types explicitly:
+either via a 'BatchPreparedStatementSetter' as shown above, or via an explicit type
+array given to a 'List<Object[]>' based call, or via 'registerSqlType' calls on a
+custom 'MapSqlParameterSource' instance, or via a 'BeanPropertySqlParameterSource'
+which derives the SQL type from the Java-declared property type even for a null value.
+====
 
 
 [[jdbc-batch-multi]]
 ==== Batch operations with multiple batches
+
 The last example of a batch update deals with batches that are so large that you want to
 break them up into several smaller batches. You can of course do this with the methods
 mentioned above by making multiple calls to the `batchUpdate` method, but there is now a
@@ -3394,7 +3411,6 @@ This example shows a batch update using a batch size of 100:
 		}
 
 		// ... additional methods
-
 	}
 ----
 
@@ -3409,18 +3425,18 @@ available, the JDBC driver returns a -2 value.
 
 
 
-
 [[jdbc-simple-jdbc]]
 === Simplifying JDBC operations with the SimpleJdbc classes
+
 The `SimpleJdbcInsert` and `SimpleJdbcCall` classes provide a simplified configuration
 by taking advantage of database metadata that can be retrieved through the JDBC driver.
 This means there is less to configure up front, although you can override or turn off
 the metadata processing if you prefer to provide all the details in your code.
 
 
-
 [[jdbc-simple-jdbc-insert-1]]
 ==== Inserting data using SimpleJdbcInsert
+
 Let's start by looking at the `SimpleJdbcInsert` class with the minimal amount of
 configuration options. You should instantiate the `SimpleJdbcInsert` in the data access
 layer's initialization method. For this example, the initializing method is the
@@ -3461,9 +3477,9 @@ names of the table as defined in the database. This is because we read the metad
 order to construct the actual insert statement.
 
 
-
 [[jdbc-simple-jdbc-insert-2]]
 ==== Retrieving auto-generated keys using SimpleJdbcInsert
+
 This example uses the same insert as the preceding, but instead of passing in the id it
 retrieves the auto-generated key and sets it on the new Actor object. When you create
 the `SimpleJdbcInsert`, in addition to specifying the table name, you specify the name
@@ -3505,9 +3521,9 @@ multiple auto-generated columns, or the generated values are non-numeric, then y
 use a `KeyHolder` that is returned from the `executeAndReturnKeyHolder` method.
 
 
-
 [[jdbc-simple-jdbc-insert-3]]
 ==== Specifying columns for a SimpleJdbcInsert
+
 You can limit the columns for an insert by specifying a list of column names with the
 `usingColumns` method:
 
@@ -3536,7 +3552,6 @@ You can limit the columns for an insert by specifying a list of column names wit
 		}
 
 		// ... additional methods
-
 	}
 ----
 
@@ -3544,9 +3559,9 @@ The execution of the insert is the same as if you had relied on the metadata to 
 which columns to use.
 
 
-
 [[jdbc-simple-jdbc-parameters]]
 ==== Using SqlParameterSource to provide parameter values
+
 Using a `Map` to provide parameter values works fine, but it's not the most convenient
 class to use. Spring provides a couple of implementations of the `SqlParameterSource`
 interface that can be used instead.The first one is `BeanPropertySqlParameterSource`,
@@ -3576,7 +3591,6 @@ values. Here is an example:
 		}
 
 		// ... additional methods
-
 	}
 ----
 
@@ -3607,7 +3621,6 @@ convenient `addValue` method that can be chained.
 		}
 
 		// ... additional methods
-
 	}
 ----
 
@@ -3615,9 +3628,9 @@ As you can see, the configuration is the same; only the executing code has to ch
 use these alternative input classes.
 
 
-
 [[jdbc-simple-jdbc-call-1]]
 ==== Calling a stored procedure with SimpleJdbcCall
+
 The `SimpleJdbcCall` class leverages metadata in the database to look up names of `in`
 and `out` parameters, so that you do not have to declare them explicitly. You can
 declare parameters if you prefer to do that, or if you have parameters such as `ARRAY`
@@ -3679,7 +3692,6 @@ of the stored procedure.
 		}
 
 		// ... additional methods
-
 	}
 ----
 
@@ -3720,7 +3732,6 @@ the constructor of your `SimpleJdbcCall`. Here is an example of this configurati
 		}
 
 		// ... additional methods
-
 	}
 ----
 
@@ -3728,9 +3739,9 @@ By taking this action, you avoid conflicts in the case used for the names of you
 returned `out` parameters.
 
 
-
 [[jdbc-simple-jdbc-call-2]]
 ==== Explicitly declaring parameters to use for a SimpleJdbcCall
+
 You have seen how the parameters are deduced based on metadata, but you can declare then
 explicitly if you wish. You do this by creating and configuring `SimpleJdbcCall` with
 the `declareParameters` method, which takes a variable number of `SqlParameter` objects
@@ -3786,9 +3797,9 @@ The execution and end results of the two examples are the same; this one specifi
 details explicitly rather than relying on metadata.
 
 
-
 [[jdbc-params]]
 ==== How to define SqlParameters
+
 To define a parameter for the SimpleJdbc classes and also for the RDBMS operations
 classes, covered in <<jdbc-object>>, you use an `SqlParameter` or one of its subclasses.
 You typically specify the parameter name and SQL type in the constructor. The SQL type
@@ -3825,9 +3836,9 @@ option is to specify an `SqlReturnType` that provides an opportunity to define
 customized handling of the return values.
 
 
-
 [[jdbc-simple-jdbc-call-3]]
 ==== Calling a stored function using SimpleJdbcCall
+
 You call a stored function in almost the same way as you call a stored procedure, except
 that you provide a function name rather than a procedure name. You use the
 `withFunctionName` method as part of the configuration to indicate that we want to make
@@ -3879,7 +3890,6 @@ To call this function we again create a `SimpleJdbcCall` in the initialization m
 		}
 
 		// ... additional methods
-
 	}
 ----
 
@@ -3887,9 +3897,9 @@ The execute method used returns a `String` containing the return value from the 
 call.
 
 
-
 [[jdbc-simple-jdbc-call-4]]
 ==== Returning ResultSet/REF Cursor from a SimpleJdbcCall
+
 Calling a stored procedure or function that returns a result set is a bit tricky. Some
 databases return result sets during the JDBC results processing while others require an
 explicitly registered `out` parameter of a specific type. Both approaches need
@@ -3939,7 +3949,6 @@ created by passing in the required class to map to in the `newInstance` method.
 		}
 
 		// ... additional methods
-
 	}
 ----
 
@@ -3948,9 +3957,9 @@ The list of Actors is then retrieved from the results map and returned to the ca
 
 
 
-
 [[jdbc-object]]
 === Modeling JDBC operations as Java objects
+
 The `org.springframework.jdbc.object` package contains classes that allow you to access
 the database in a more object-oriented manner. As an example, you can execute queries
 and get the results back as a list containing business objects with the relational
@@ -3970,7 +3979,6 @@ continue using these classes.
 ====
 
 
-
 [[jdbc-SqlQuery]]
 ==== SqlQuery
 
@@ -3981,7 +3989,6 @@ during the execution of the query. The `SqlQuery` class is rarely used directly 
 the `MappingSqlQuery` subclass provides a much more convenient implementation for
 mapping rows to Java classes. Other implementations that extend `SqlQuery` are
 `MappingSqlQueryWithParameters` and `UpdatableSqlQuery`.
-
 
 
 [[jdbc-MappingSqlQuery]]
@@ -4058,7 +4065,6 @@ methods that takes an array of parameter values passed in as varargs.
 ----
 
 
-
 [[jdbc-SqlUpdate]]
 ==== SqlUpdate
 
@@ -4100,7 +4106,6 @@ class since it can easily be parameterized by setting SQL and declaring paramete
 		}
 	}
 ----
-
 
 
 [[jdbc-StoredProcedure]]
@@ -4323,16 +4328,16 @@ delegate to the superclass' untyped `execute(Map parameters)` method (which has
 
 
 
-
 [[jdbc-parameter-handling]]
 === Common problems with parameter and data value handling
+
 Common problems with parameters and data values exist in the different approaches
 provided by the Spring Framework JDBC.
 
 
-
 [[jdbc-type-information]]
 ==== Providing SQL type information for parameters
+
 Usually Spring determines the SQL type of the parameters based on the type of parameter
 passed in. It is possible to explicitly provide the SQL type to be used when setting
 parameter values. This is sometimes necessary to correctly set NULL values.
@@ -4352,9 +4357,9 @@ You can provide SQL type information in several ways:
   for registering the SQL type for any of the named parameter values.
 
 
-
 [[jdbc-lob]]
 ==== Handling BLOB and CLOB objects
+
 You can store images, other binary data, and large chunks of text in the database. These
 large objects are called BLOBs (Binary Large OBject) for binary data and CLOBs (Character
 Large OBject) for character data. In Spring you can handle these large objects by using
@@ -4446,9 +4451,9 @@ with the same instance variable `lobHandler` and a reference to a `DefaultLobHan
 <2> Using the method `getBlobAsBytes`, retrieve the contents of the BLOB.
 
 
-
 [[jdbc-in-clause]]
 ==== Passing in lists of values for IN clause
+
 The SQL standard allows for selecting rows based on an expression that includes a
 variable list of values. A typical example would be `select * from T_ACTOR where id in
 (1, 2, 3)`. This variable list is not directly supported for prepared statements by the
@@ -4474,9 +4479,9 @@ clause such as `select * from T_ACTOR where (id, last_name) in \((1, 'Johnson'),
 'Harrop'\))`. This of course requires that your database supports this syntax.
 
 
-
 [[jdbc-complex-types]]
 ==== Handling complex types for stored procedure calls
+
 When you call stored procedures you can sometimes use complex types specific to the
 database. To accommodate these types, Spring provides a `SqlReturnType` for handling
 them when they are returned from the stored procedure call and `SqlTypeValue` when they
@@ -4557,9 +4562,9 @@ it with values from the Java `ARRAY`.
 
 
 
-
 [[jdbc-embedded-database-support]]
 === Embedded database support
+
 The `org.springframework.jdbc.datasource.embedded` package provides support for embedded
 Java database engines. Support for http://www.hsqldb.org[HSQL],
 http://www.h2database.com[H2], and http://db.apache.org/derby[Derby] is provided
@@ -4567,13 +4572,12 @@ natively. You can also use an extensible API to plug in new embedded database ty
 `DataSource` implementations.
 
 
-
 [[jdbc-why-embedded-database]]
 ==== Why use an embedded database?
+
 An embedded database is useful during the development phase of a project because of its
 lightweight nature. Benefits include ease of configuration, quick startup time,
 testability, and the ability to rapidly evolve SQL during development.
-
 
 
 [[jdbc-embedded-database-xml]]
@@ -4598,7 +4602,6 @@ embedded database is made available to the Spring container as a bean of type
 `javax.sql.DataSource` which can then be injected into data access objects as needed.
 
 
-
 [[jdbc-embedded-database-java]]
 ==== Creating an embedded database programmatically
 
@@ -4610,13 +4613,13 @@ standalone environment or in a standalone integration test like in the following
 [subs="verbatim,quotes"]
 ----
 EmbeddedDatabase db = new EmbeddedDatabaseBuilder()
-    .generateUniqueName(true)
-    .setType(H2)
-    .setScriptEncoding("UTF-8")
-    .ignoreFailedDrops(true)
-    .addScript("schema.sql")
-    .addScripts("user_data.sql", "country_data.sql")
-    .build();
+		.generateUniqueName(true)
+		.setType(H2)
+		.setScriptEncoding("UTF-8")
+		.ignoreFailedDrops(true)
+		.addScript("schema.sql")
+		.addScripts("user_data.sql", "country_data.sql")
+		.build();
 
 // perform actions against the db (EmbeddedDatabase extends javax.sql.DataSource)
 
@@ -4635,26 +4638,27 @@ Config like in the following example.
 @Configuration
 public class DataSourceConfig {
 
-    @Bean
-    public DataSource dataSource() {
-        return new EmbeddedDatabaseBuilder()
-            .generateUniqueName(true)
-            .setType(H2)
-            .setScriptEncoding("UTF-8")
-            .ignoreFailedDrops(true)
-            .addScript("schema.sql")
-            .addScripts("user_data.sql", "country_data.sql")
-            .build();
-    }
+	@Bean
+	public DataSource dataSource() {
+		return new EmbeddedDatabaseBuilder()
+				.generateUniqueName(true)
+				.setType(H2)
+				.setScriptEncoding("UTF-8")
+				.ignoreFailedDrops(true)
+				.addScript("schema.sql")
+				.addScripts("user_data.sql", "country_data.sql")
+				.build();
+	}
 }
 ----
+
 
 [[jdbc-embedded-database-types]]
 ==== Selecting the embedded database type
 
-
 [[jdbc-embedded-database-using-HSQL]]
 ===== Using HSQL
+
 Spring supports HSQL 1.8.0 and above. HSQL is the default embedded database if no type is
 specified explicitly. To specify HSQL explicitly, set the `type` attribute of the
 `embedded-database` tag to `HSQL`. If you are using the builder API, call the
@@ -4663,6 +4667,7 @@ specified explicitly. To specify HSQL explicitly, set the `type` attribute of th
 
 [[jdbc-embedded-database-using-H2]]
 ===== Using H2
+
 Spring supports the H2 database as well. To enable H2, set the `type` attribute of the
 `embedded-database` tag to `H2`. If you are using the builder API, call the
 `setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.H2`.
@@ -4670,10 +4675,10 @@ Spring supports the H2 database as well. To enable H2, set the `type` attribute 
 
 [[jdbc-embedded-database-using-Derby]]
 ===== Using Derby
+
 Spring also supports Apache Derby 10.5 and above. To enable Derby, set the `type`
 attribute of the `embedded-database` tag to `DERBY`. If you are using the builder API,
 call the `setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.DERBY`.
-
 
 
 [[jdbc-embedded-database-dao-testing]]
@@ -4751,7 +4756,6 @@ the following options.
 * `<jdbc:embedded-database generate-name="true" ... >`
 
 
-
 [[jdbc-embedded-database-extension]]
 ==== Extending the embedded database support
 
@@ -4768,15 +4772,16 @@ https://jira.spring.io/browse/SPR[jira.spring.io].
 
 [[jdbc-initializing-datasource]]
 === Initializing a DataSource
+
 The `org.springframework.jdbc.datasource.init` package provides support for initializing
 an existing `DataSource`. The embedded database support provides one option for creating
 and initializing a `DataSource` for an application, but sometimes you need to initialize
 an instance running on a server somewhere.
 
 
-
 [[jdbc-initializing-datasource-xml]]
 ==== Initializing a database using Spring XML
+
 If you want to initialize a database and you can provide a reference to a `DataSource`
 bean, use the `initialize-database` tag in the `spring-jdbc` namespace:
 
@@ -4858,10 +4863,8 @@ In this example, the two `test-data` scripts use `@@` as statement separator and
 the `db-schema.sql` uses `;`. This configuration specifies that the default separator
 is `@@` and override that default for the `db-schema` script.
 
-
 If you need more control than you get from the XML namespace, you can simply use the
 `DataSourceInitializer` directly and define it as a component in your application.
-
 
 [[jdbc-client-component-initialization]]
 ===== Initialization of other components that depend on the database
@@ -4918,8 +4921,10 @@ The second option can also be easy. Some suggestions on how to implement this in
 == Object Relational Mapping (ORM) Data Access
 
 
+
 [[orm-introduction]]
 === Introduction to ORM with Spring
+
 The Spring Framework supports integration with the Java Persistence API (JPA) as well
 as native Hibernate for resource management, data access object (DAO) implementations,
 and transaction strategies. For example, for Hibernate there is first-class support with
@@ -4928,9 +4933,7 @@ You can configure all of the supported features for O/R (object relational) mapp
 tools through Dependency Injection. They can participate in Spring's resource and
 transaction management, and they comply with Spring's generic transaction and DAO
 exception hierarchies. The recommended integration style is to code DAOs against plain
-Hibernate or JPA APIs. The older style of using Spring's DAO templates is no longer
-recommended; however, coverage of this style can be found in the
-<<appendix.adoc#classic-spring-orm, Classic ORM usage>> in the appendices.
+Hibernate or JPA APIs.
 
 Spring adds significant enhancements to the ORM layer of your choice when you create
 data access applications. You can leverage as much of the integration support as you
@@ -4991,6 +4994,7 @@ Data with JPA] guide from https://spring.io provides a great introduction.
 
 [[orm-general]]
 === General ORM integration considerations
+
 This section highlights considerations that apply to all ORM technologies. The
 <<orm-hibernate>> section provides more details and also show these features and
 configurations in a concrete context.
@@ -5009,9 +5013,9 @@ transaction managers, business services that use the data access objects and tra
 managers, web view resolvers, web controllers that use the business services,and so on.
 
 
-
 [[orm-resource-mngmnt]]
 ==== Resource and transaction management
+
 Typical business applications are cluttered with repetitive resource management code.
 Many projects try to invent their own solutions, sometimes sacrificing proper handling
 of failures for programming convenience. Spring advocates simple solutions for proper
@@ -5034,9 +5038,9 @@ and JPA support through the Hibernate and JPA transaction managers as well as JT
 For details on transaction support, see the <<transaction>> chapter.
 
 
-
 [[orm-exception-translation]]
 ==== Exception translation
+
 When you use Hibernate or JPA in a DAO, you must decide how to handle the persistence
 technology's native exception classes. The DAO throws a subclass of a `HibernateException`
 or `PersistenceException` depending on the technology. These exceptions are all runtime
@@ -5085,9 +5089,9 @@ exception hierarchies.
 
 
 
-
 [[orm-hibernate]]
 === Hibernate
+
 We will start with a coverage of http://www.hibernate.org/[Hibernate 5] in a Spring
 environment, using it to demonstrate the approach that Spring takes towards integrating
 O/R mappers. This section will cover many issues in detail and show different variations
@@ -5097,12 +5101,11 @@ chapter will then cover the other ORM technologies, showing briefer examples the
 
 [NOTE]
 ====
-As of Spring 5.0, Spring requires Hibernate ORM 4.3 or later for JPA support and even
-Hibernate ORM 5.0+ for programming against the native Hibernate Session API. Note that
-the Hibernate team does not maintain any versions prior to 5.0 anymore and is likely
-to focus on 5.2+ exclusively soon.
+As of Spring Framework 5.0, Spring requires Hibernate ORM 4.3 or later for JPA support
+and even Hibernate ORM 5.0+ for programming against the native Hibernate Session API.
+Note that the Hibernate team does not maintain any versions prior to 5.0 anymore and
+is likely to focus on 5.2+ exclusively soon.
 ====
-
 
 
 [[orm-session-factory-setup]]
@@ -5163,9 +5166,9 @@ You can also access a JNDI-located `SessionFactory`, using Spring's
 is typically not common outside of an EJB context.
 
 
-
 [[orm-hibernate-straight]]
 ==== Implementing DAOs based on plain Hibernate API
+
 Hibernate has a feature called contextual sessions, wherein Hibernate itself manages
 one current `Session` per transaction. This is roughly equivalent to Spring's
 synchronization of one Hibernate `Session` per transaction. A corresponding DAO
@@ -5239,9 +5242,9 @@ In summary: you can implement DAOs based on the plain Hibernate API, while still
 able to participate in Spring-managed transactions.
 
 
-
 [[orm-hibernate-tx-declarative]]
 ==== Declarative transaction demarcation
+
 We recommend that you use Spring's declarative transaction support, which enables you to
 replace explicit transaction demarcation API calls in your Java code with an AOP
 transaction interceptor. This transaction interceptor can be configured in a Spring
@@ -5321,9 +5324,9 @@ opting into `@Transactional` processing at runtime.
 ----
 
 
-
 [[orm-hibernate-tx-programmatic]]
 ==== Programmatic transaction demarcation
+
 You can demarcate transactions in a higher level of the application, on top of such
 lower-level data access services spanning any number of operations. Nor do restrictions
 exist on the implementation of the surrounding business service; it just needs a Spring
@@ -5385,9 +5388,9 @@ application (via `TransactionStatus`). `TransactionInterceptor` behaves the same
 default but allows configurable rollback policies per method.
 
 
-
 [[orm-hibernate-tx-strategies]]
 ==== Transaction management strategies
+
 Both `TransactionTemplate` and `TransactionInterceptor` delegate the actual transaction
 handling to a `PlatformTransactionManager` instance, which can be a
 `HibernateTransactionManager` (for a single Hibernate `SessionFactory`, using a
@@ -5423,9 +5426,9 @@ exposes the Hibernate transaction as a JDBC transaction if you have set up the p
 `dataSource` property of the `HibernateTransactionManager` class.
 
 
-
 [[orm-hibernate-resources]]
 ==== Comparing container-managed and locally defined resources
+
 You can switch between a container-managed JNDI `SessionFactory` and a locally defined
 one, without having to change a single line of application code. Whether to keep
 resource definitions in the container or locally within the application is mainly a
@@ -5469,9 +5472,9 @@ Hibernate `SessionFactory` through the JCA connector only adds value when used i
 conjunction with EJBs.
 
 
-
 [[orm-hibernate-invalid-jdbc-access-error]]
 ==== Spurious application server warnings with Hibernate
+
 In some JTA environments with very strict `XADataSource` implementations -- currently
 only some WebLogic Server and WebSphere versions -- when Hibernate is configured without
 regard to the JTA `PlatformTransactionManager` object for that environment, it is
@@ -5538,9 +5541,9 @@ following events occur when a JTA transaction commits:
 
 
 
-
 [[orm-jpa]]
 === JPA
+
 The Spring JPA, available under the `org.springframework.orm.jpa` package, offers
 comprehensive support for the
 http://www.oracle.com/technetwork/articles/javaee/jpa-137156.html[Java Persistence
@@ -5548,12 +5551,11 @@ API] in a similar manner to the integration with Hibernate, while being aware of
 the underlying implementation in order to provide additional features.
 
 
-
 [[orm-jpa-setup]]
 ==== Three options for JPA setup in a Spring environment
+
 The Spring JPA support offers three ways of setting up the JPA `EntityManagerFactory`
 that will be used by the application to obtain an entity manager.
-
 
 [[orm-jpa-setup-lemfb]]
 ===== LocalEntityManagerFactoryBean
@@ -5586,7 +5588,6 @@ exists. Furthermore, weaving (byte-code transformation) of persistent classes is
 provider-specific, often requiring a specific JVM agent to specified on startup. This
 option is sufficient only for stand-alone applications and test environments, for which
 the JPA specification is designed.
-
 
 [[orm-jpa-setup-jndi]]
 ===== Obtaining an EntityManagerFactory from JNDI
@@ -5626,7 +5627,6 @@ If multiple persistence units are used in the same application, the bean names o
 JNDI-retrieved persistence units should match the persistence unit names that the
 application uses to refer to them, for example, in `@PersistenceUnit` and
 `@PersistenceContext` annotations.
-
 
 [[orm-jpa-setup-lcemfb]]
 ===== LocalContainerEntityManagerFactoryBean
@@ -5762,9 +5762,9 @@ This is important especially when the hosting applications rely on different JPA
 implementations because the JPA transformers are applied only at class loader level and
 thus are isolated from each other.
 
-
 [[orm-jpa-multiple]]
 ===== Dealing with multiple persistence units
+
 For applications that rely on multiple persistence units locations, stored in various
 JARS in the classpath, for example, Spring offers the `PersistenceUnitManager` to act as
 a central repository and to avoid the persistence units discovery process, which can be
@@ -5807,9 +5807,9 @@ affect __all__ hosted units, or programmatically, through the
 `LocalContainerEntityManagerFactoryBean`.
 
 
-
 [[orm-jpa-dao]]
 ==== Implementing DAOs based on JPA: EntityManagerFactory and EntityManager
+
 [NOTE]
 ====
 Although `EntityManagerFactory` instances are thread-safe, `EntityManager` instances are
@@ -5946,7 +5946,6 @@ the injections are applied automatically by the Spring container. This is appeal
 a non-invasiveness perspective, and might feel more natural to JPA developers.
 
 
-
 [[orm-jpa-tx]]
 ==== Spring-driven JPA transactions
 
@@ -5966,7 +5965,6 @@ to JDBC access code that accesses the same `DataSource`, provided that the regis
 `JpaDialect` supports retrieval of the underlying JDBC `Connection`. Out of the box,
 Spring provides dialects for the EclipseLink and Hibernate JPA implementations.
 See the next section for details on the `JpaDialect` mechanism.
-
 
 
 [[orm-jpa-dialect]]
@@ -6000,7 +5998,6 @@ Spring-driven transaction management, i.e. for use with `JpaTransactionManager`.
 
 See the `JpaDialect` and `JpaVendorAdapter` javadocs for more details of its operations
 and how they are used within Spring's JPA support.
-
 
 
 [[orm-jpa-jta]]
@@ -6044,8 +6041,10 @@ less portable, but will be set up for the server's JTA environment out of the bo
 == Marshalling XML using O/X Mappers
 
 
+
 [[oxm-introduction]]
 === Introduction
+
 In this chapter, we will describe Spring's Object/XML Mapping support. Object/XML
 Mapping, or O/X mapping for short, is the act of converting an XML document to and from
 an object. This conversion process is also known as XML Marshalling, or XML
@@ -6059,17 +6058,17 @@ stream, or a SAX handler.
 Some of the benefits of using Spring for your O/X mapping needs are:
 
 
-
 ==== Ease of configuration
+
 Spring's bean factory makes it easy to configure marshallers, without needing to
 construct JAXB context, JiBX binding factories, etc. The marshallers can be configured
-as any other bean in your application context. Additionally, XML Schema-based
+as any other bean in your application context. Additionally, XML namespace-based
 configuration is available for a number of marshallers, making the configuration even
 simpler.
 
 
+==== Consistent interfaces
 
-==== Consistent Interfaces
 Spring's O/X mapping operates through two global interfaces: the `Marshaller` and
 `Unmarshaller` interface. These abstractions allow you to switch O/X mapping frameworks
 with relative ease, with little or no changes required on the classes that do the
@@ -6079,25 +6078,25 @@ other using Castor) in a non-intrusive fashion, leveraging the strength of each
 technology.
 
 
+==== Consistent exception hierarchy
 
-==== Consistent Exception Hierarchy
 Spring provides a conversion from exceptions from the underlying O/X mapping tool to its
 own exception hierarchy with the `XmlMappingException` as the root exception. As can be
 expected, these runtime exceptions wrap the original exception so no information is lost.
 
 
 
-
 [[oxm-marshaller-unmarshaller]]
 === Marshaller and Unmarshaller
+
 As stated in the introduction, a __marshaller__ serializes an object to XML, and an
 __unmarshaller__ deserializes XML stream to an object. In this section, we will describe
 the two Spring interfaces used for this purpose.
 
 
-
 [[oxm-marshaller]]
 ==== Marshaller
+
 Spring abstracts all marshalling operations behind the
 `org.springframework.oxm.Marshaller` interface, the main method of which is shown below.
 
@@ -6142,9 +6141,9 @@ to determine how your O/X technology of choice manages this.
 ====
 
 
-
 [[oxm-unmarshaller]]
 ==== Unmarshaller
+
 Similar to the `Marshaller`, there is the `org.springframework.oxm.Unmarshaller`
 interface.
 
@@ -6185,9 +6184,9 @@ This means that you can wire up one marshaller class and refer to it both as a
 marshaller and an unmarshaller in your `applicationContext.xml`.
 
 
-
 [[oxm-xmlmappingexception]]
 ==== XmlMappingException
+
 Spring converts exceptions from the underlying O/X mapping tool to its own exception
 hierarchy with the `XmlMappingException` as the root exception. As can be expected,
 these runtime exceptions wrap the original exception so no information will be lost.
@@ -6204,9 +6203,9 @@ O/X Mapping exception hierarchy
 
 
 
-
 [[oxm-usage]]
 === Using Marshaller and Unmarshaller
+
 Spring's OXM can be used for a wide variety of situations. In the following example, we
 will use it to marshal the settings of a Spring-managed application as an XML file. We
 will use a simple JavaBean to represent the settings:
@@ -6329,9 +6328,9 @@ This sample application produces the following `settings.xml` file:
 
 
 
-
 [[oxm-schema-based-config]]
-=== XML Schema-based Configuration
+=== XML configuration namespace
+
 Marshallers could be configured more concisely using tags from the OXM namespace. To
 make these tags available, the appropriate schema has to be referenced first in the
 preamble of the XML configuration file. Note the 'oxm' related text below:
@@ -6362,9 +6361,9 @@ here is how the configuration of a JAXB2 marshaller might look like:
 
 
 
-
 [[oxm-jaxb]]
 === JAXB
+
 The JAXB binding compiler translates a W3C XML Schema into one or more Java classes, a
 `jaxb.properties` file, and possibly some resource files. JAXB also offers a way to
 generate a schema from annotated Java classes.
@@ -6375,9 +6374,9 @@ The corresponding integration classes reside in the `org.springframework.oxm.jax
 package.
 
 
-
 [[oxm-jaxb2]]
 ==== Jaxb2Marshaller
+
 The `Jaxb2Marshaller` class implements both the Spring `Marshaller` and `Unmarshaller`
 interface. It requires a context path to operate, which you can set using the
 `contextPath` property. The context path is a list of colon (:) separated Java package
@@ -6404,9 +6403,9 @@ validation is performed by specifying one or more schema resource to the bean, l
 	</beans>
 ----
 
-
 [[oxm-jaxb2-xsd]]
-===== XML Schema-based Configuration
+===== XML configuration namespace
+
 The `jaxb2-marshaller` tag configures a `org.springframework.oxm.jaxb.Jaxb2Marshaller`.
 Here is an example:
 
@@ -6445,9 +6444,9 @@ Available attributes are:
 
 
 
-
 [[oxm-castor]]
 === Castor
+
 Castor XML mapping is an open source XML binding framework. It allows you to transform
 the data contained in a java object model into/from an XML document. By default, it does
 not require any further configuration, though a mapping file can be used to have more
@@ -6458,9 +6457,9 @@ http://castor-data-binding.github.io/castor[__Castor web site__]. The Spring
 integration classes reside in the `org.springframework.oxm.castor` package.
 
 
-
 [[oxm-castor-marshaller]]
 ==== CastorMarshaller
+
 As with JAXB, the `CastorMarshaller` implements both the `Marshaller` and `Unmarshaller`
 interface. It can be wired up as follows:
 
@@ -6474,9 +6473,9 @@ interface. It can be wired up as follows:
 ----
 
 
-
 [[oxm-castor-mapping]]
 ==== Mapping
+
 Although it is possible to rely on Castor's default marshalling behavior, it might be
 necessary to have more control over it. This can be accomplished using a Castor mapping
 file. For more information, refer to http://castor-data-binding.github.io/castor/reference-guides/1.3.3/html-single/index.html#xml.mapping[Castor
@@ -6495,9 +6494,9 @@ with a classpath resource.
 	</beans>
 ----
 
-
 [[oxm-castor-xsd]]
-===== XML Schema-based Configuration
+===== XML configuration namespace
+
 The `castor-marshaller` tag configures a
 `org.springframework.oxm.castor.CastorMarshaller`. Here is an example:
 
@@ -6544,9 +6543,9 @@ Available attributes are:
 
 
 
-
 [[oxm-jibx]]
 === JiBX
+
 The JiBX framework offers a solution similar to that which Hibernate provides for ORM: a
 binding definition defines the rules for how your Java objects are converted to or from
 XML. After preparing the binding and compiling the classes, a JiBX binding compiler
@@ -6558,9 +6557,9 @@ site__]. The Spring integration classes reside in the `org.springframework.oxm.j
 package.
 
 
-
 [[oxm-jibx-marshaller]]
 ==== JibxMarshaller
+
 The `JibxMarshaller` class implements both the `Marshaller` and `Unmarshaller`
 interface. To operate, it requires the name of the class to marshal in, which you can
 set using the `targetClass` property. Optionally, you can set the binding name using the
@@ -6581,9 +6580,9 @@ A `JibxMarshaller` is configured for a single class. If you want to marshal mult
 classes, you have to configure multiple ``JibxMarshaller``s with different `targetClass`
 property values.
 
-
 [[oxm-jibx-xsd]]
-===== XML Schema-based Configuration
+===== XML configuration namespace
+
 The `jibx-marshaller` tag configures a `org.springframework.oxm.jibx.JibxMarshaller`.
 Here is an example:
 
@@ -6613,9 +6612,9 @@ Available attributes are:
 
 
 
-
 [[oxm-xstream]]
 === XStream
+
 XStream is a simple library to serialize objects to XML and back again. It does not
 require any mapping, and generates clean XML.
 
@@ -6624,9 +6623,9 @@ web site__]. The Spring integration classes reside in the
 `org.springframework.oxm.xstream` package.
 
 
-
 [[oxm-xstream-marshaller]]
 ==== XStreamMarshaller
+
 The `XStreamMarshaller` does not require any configuration, and can be configured in an
 application context directly. To further customize the XML, you can set an__alias map__,
 which consists of string aliases mapped to classes:
@@ -6679,3 +6678,8 @@ vulnerabilities do not get invoked.
 NOTE: Note that XStream is an XML serialization library, not a data binding library.
 Therefore, it has limited namespace support. As such, it is rather unsuitable for usage
 within Web services.
+
+
+
+
+include::data-access-appendix.adoc[leveloffset=+1]

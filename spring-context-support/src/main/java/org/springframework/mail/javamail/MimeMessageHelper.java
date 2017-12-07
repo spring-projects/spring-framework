@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import javax.mail.internet.MimeUtility;
 
 import org.springframework.core.io.InputStreamSource;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -162,10 +163,13 @@ public class MimeMessageHelper {
 
 	private final MimeMessage mimeMessage;
 
+	@Nullable
 	private MimeMultipart rootMimeMultipart;
 
+	@Nullable
 	private MimeMultipart mimeMultipart;
 
+	@Nullable
 	private final String encoding;
 
 	private FileTypeMap fileTypeMap;
@@ -197,7 +201,7 @@ public class MimeMessageHelper {
 	 * @param encoding the character encoding to use for the message
 	 * @see #MimeMessageHelper(javax.mail.internet.MimeMessage, boolean)
 	 */
-	public MimeMessageHelper(MimeMessage mimeMessage, String encoding) {
+	public MimeMessageHelper(MimeMessage mimeMessage, @Nullable String encoding) {
 		this.mimeMessage = mimeMessage;
 		this.encoding = (encoding != null ? encoding : getDefaultEncoding(mimeMessage));
 		this.fileTypeMap = getDefaultFileTypeMap(mimeMessage);
@@ -241,7 +245,7 @@ public class MimeMessageHelper {
 	 * @throws MessagingException if multipart creation failed
 	 * @see #MimeMessageHelper(javax.mail.internet.MimeMessage, int, String)
 	 */
-	public MimeMessageHelper(MimeMessage mimeMessage, boolean multipart, String encoding)
+	public MimeMessageHelper(MimeMessage mimeMessage, boolean multipart, @Nullable String encoding)
 			throws MessagingException {
 
 		this(mimeMessage, (multipart ? MULTIPART_MODE_MIXED_RELATED : MULTIPART_MODE_NO), encoding);
@@ -283,7 +287,7 @@ public class MimeMessageHelper {
 	 * @see #MULTIPART_MODE_RELATED
 	 * @see #MULTIPART_MODE_MIXED_RELATED
 	 */
-	public MimeMessageHelper(MimeMessage mimeMessage, int multipartMode, String encoding)
+	public MimeMessageHelper(MimeMessage mimeMessage, int multipartMode, @Nullable String encoding)
 			throws MessagingException {
 
 		this.mimeMessage = mimeMessage;
@@ -361,7 +365,7 @@ public class MimeMessageHelper {
 	 * will be added to (can be the same as the root multipart object, or an element
 	 * nested underneath the root multipart element)
 	 */
-	protected final void setMimeMultiparts(MimeMultipart root, MimeMultipart main) {
+	protected final void setMimeMultiparts(@Nullable MimeMultipart root, @Nullable MimeMultipart main) {
 		this.rootMimeMultipart = root;
 		this.mimeMultipart = main;
 	}
@@ -376,17 +380,6 @@ public class MimeMessageHelper {
 	}
 
 	/**
-	 * Throw an IllegalStateException if this helper is not in multipart mode.
-	 */
-	private void checkMultipart() throws IllegalStateException {
-		if (!isMultipart()) {
-			throw new IllegalStateException("Not in multipart mode - " +
-				"create an appropriate MimeMessageHelper via a constructor that takes a 'multipart' flag " +
-				"if you need to set alternative texts or add inline elements or attachments.");
-		}
-	}
-
-	/**
 	 * Return the root MIME "multipart/mixed" object, if any.
 	 * Can be used to manually add attachments.
 	 * <p>This will be the direct content of the MimeMessage,
@@ -397,7 +390,11 @@ public class MimeMessageHelper {
 	 * @see javax.mail.internet.MimeMultipart#addBodyPart
 	 */
 	public final MimeMultipart getRootMimeMultipart() throws IllegalStateException {
-		checkMultipart();
+		if (this.rootMimeMultipart == null) {
+			throw new IllegalStateException("Not in multipart mode - " +
+					"create an appropriate MimeMessageHelper via a constructor that takes a 'multipart' flag " +
+					"if you need to set alternative texts or add inline elements or attachments.");
+		}
 		return this.rootMimeMultipart;
 	}
 
@@ -412,7 +409,11 @@ public class MimeMessageHelper {
 	 * @see javax.mail.internet.MimeMultipart#addBodyPart
 	 */
 	public final MimeMultipart getMimeMultipart() throws IllegalStateException {
-		checkMultipart();
+		if (this.mimeMultipart == null) {
+			throw new IllegalStateException("Not in multipart mode - " +
+					"create an appropriate MimeMessageHelper via a constructor that takes a 'multipart' flag " +
+					"if you need to set alternative texts or add inline elements or attachments.");
+		}
 		return this.mimeMultipart;
 	}
 
@@ -423,6 +424,7 @@ public class MimeMessageHelper {
 	 * @return the default encoding associated with the MimeMessage,
 	 * or {@code null} if none found
 	 */
+	@Nullable
 	protected String getDefaultEncoding(MimeMessage mimeMessage) {
 		if (mimeMessage instanceof SmartMimeMessage) {
 			return ((SmartMimeMessage) mimeMessage).getDefaultEncoding();
@@ -433,6 +435,7 @@ public class MimeMessageHelper {
 	/**
 	 * Return the specific character encoding used for this message, if any.
 	 */
+	@Nullable
 	public String getEncoding() {
 		return this.encoding;
 	}
@@ -470,7 +473,7 @@ public class MimeMessageHelper {
 	 * @see javax.activation.FileTypeMap#getDefaultFileTypeMap
 	 * @see ConfigurableMimeFileTypeMap
 	 */
-	public void setFileTypeMap(FileTypeMap fileTypeMap) {
+	public void setFileTypeMap(@Nullable FileTypeMap fileTypeMap) {
 		this.fileTypeMap = (fileTypeMap != null ? fileTypeMap : getDefaultFileTypeMap(getMimeMessage()));
 	}
 

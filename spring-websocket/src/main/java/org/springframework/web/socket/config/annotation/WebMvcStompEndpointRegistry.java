@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
@@ -51,14 +52,14 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 
 	private int order = 1;
 
+	@Nullable
 	private UrlPathHelper urlPathHelper;
 
 	private final SubProtocolWebSocketHandler subProtocolWebSocketHandler;
 
 	private final StompSubProtocolHandler stompHandler;
 
-	private final List<WebMvcStompWebSocketEndpointRegistration> registrations =
-			new ArrayList<>();
+	private final List<WebMvcStompWebSocketEndpointRegistration> registrations = new ArrayList<>();
 
 
 	public WebMvcStompEndpointRegistry(WebSocketHandler webSocketHandler,
@@ -78,7 +79,6 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 		}
 
 		this.stompHandler = new StompSubProtocolHandler();
-
 		if (transportRegistration.getMessageSizeLimit() != null) {
 			this.stompHandler.setMessageSizeLimit(transportRegistration.getMessageSizeLimit());
 		}
@@ -124,10 +124,11 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 	 * used to map handshake requests.
 	 */
 	@Override
-	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+	public void setUrlPathHelper(@Nullable UrlPathHelper urlPathHelper) {
 		this.urlPathHelper = urlPathHelper;
 	}
 
+	@Nullable
 	protected UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}
@@ -143,8 +144,7 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 	}
 
 	/**
-	 * Return a handler mapping with the mapped ViewControllers; or {@code null}
-	 * in case of no registrations.
+	 * Return a handler mapping with the mapped ViewControllers.
 	 */
 	public AbstractHandlerMapping getHandlerMapping() {
 		Map<String, Object> urlMap = new LinkedHashMap<>();

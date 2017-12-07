@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.view;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -23,29 +23,23 @@ import java.util.Map;
 import org.junit.Test;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.ui.ExtendedModelMap;
-import org.springframework.ui.Model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link DefaultRenderingBuilder}.
+ *
  * @author Rossen Stoyanchev
  */
 public class DefaultRenderingBuilderTests {
-
 
 	@Test
 	public void defaultValues() {
 		Rendering rendering = Rendering.view("abc").build();
 
-		assertEquals("abc", rendering.view().orElse(null));
+		assertEquals("abc", rendering.view());
 		assertEquals(Collections.emptyMap(), rendering.modelAttributes());
-		assertNull(rendering.status().orElse(null));
+		assertNull(rendering.status());
 		assertEquals(0, rendering.headers().size());
 	}
 
@@ -53,7 +47,7 @@ public class DefaultRenderingBuilderTests {
 	public void defaultValuesForRedirect() throws Exception {
 		Rendering rendering = Rendering.redirectTo("abc").build();
 
-		Object view = rendering.view().orElse(null);
+		Object view = rendering.view();
 		assertEquals(RedirectView.class, view.getClass());
 		assertEquals("abc", ((RedirectView) view).getUrl());
 		assertTrue(((RedirectView) view).isContextRelative());
@@ -64,7 +58,7 @@ public class DefaultRenderingBuilderTests {
 	@Test
 	public void viewName() {
 		Rendering rendering = Rendering.view("foo").build();
-		assertEquals("foo", rendering.view().orElse(null));
+		assertEquals("foo", rendering.view());
 	}
 
 	@Test
@@ -118,7 +112,7 @@ public class DefaultRenderingBuilderTests {
 	public void redirectWithAbsoluteUrl() throws Exception {
 		Rendering rendering = Rendering.redirectTo("foo").contextRelative(false).build();
 
-		Object view = rendering.view().orElse(null);
+		Object view = rendering.view();
 		assertEquals(RedirectView.class, view.getClass());
 		assertFalse(((RedirectView) view).isContextRelative());
 	}
@@ -127,7 +121,7 @@ public class DefaultRenderingBuilderTests {
 	public void redirectWithPropagateQuery() throws Exception {
 		Rendering rendering = Rendering.redirectTo("foo").propagateQuery(true).build();
 
-		Object view = rendering.view().orElse(null);
+		Object view = rendering.view();
 		assertEquals(RedirectView.class, view.getClass());
 		assertTrue(((RedirectView) view).isPropagateQuery());
 	}

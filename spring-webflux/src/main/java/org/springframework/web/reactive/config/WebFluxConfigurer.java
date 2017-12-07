@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,18 @@
 
 package org.springframework.web.reactive.config;
 
-import java.util.List;
-import java.util.Optional;
-
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
-import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
-import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
-import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 
 /**
- * Defines callback methods to customize the configuration for Web Reactive
+ * Defines callback methods to customize the configuration for WebFlux
  * applications enabled via {@code @EnableWebFlux}.
  *
  * <p>{@code @EnableWebFlux}-annotated configuration classes may implement
@@ -48,11 +43,7 @@ public interface WebFluxConfigurer {
 
 	/**
 	 * Configure how the content type requested for the response is resolved.
-	 * <p>The given builder will create a composite of multiple
-	 * {@link RequestedContentTypeResolver}s, each defining a way to resolve
-	 * the requested content type (accept HTTP header, path extension,
-	 * parameter, etc).
-	 * @param builder factory that creates a {@link CompositeContentTypeResolver}
+	 * @param builder for configuring the resolvers to use
 	 */
 	default void configureContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
 	}
@@ -66,7 +57,7 @@ public interface WebFluxConfigurer {
 
 	/**
 	 * Configure path matching options.
-	 * <p>The given configurer assists with configuring
+	 * 
 	 * {@code HandlerMapping}s with path matching options.
 	 * @param configurer the {@link PathMatchConfigurer} instance
 	 */
@@ -106,17 +97,18 @@ public interface WebFluxConfigurer {
 	 * <p>By default a validator for standard bean validation is created if
 	 * bean validation api is present on the classpath.
 	 */
-	default Optional<Validator> getValidator() {
-		return Optional.empty();
+	@Nullable
+	default Validator getValidator() {
+		return null;
 	}
 
 	/**
-	 * Provide a custom {@link MessageCodesResolver} to use for data binding
-	 * instead of the one created by default in
-	 * {@link org.springframework.validation.DataBinder}.
+	 * Provide a custom {@link MessageCodesResolver} to use for data binding instead
+	 * of the one created by default in {@link org.springframework.validation.DataBinder}.
 	 */
-	default Optional<MessageCodesResolver> getMessageCodesResolver() {
-		return Optional.empty();
+	@Nullable
+	default MessageCodesResolver getMessageCodesResolver() {
+		return null;
 	}
 
 	/**

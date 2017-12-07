@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.view;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TimeZone;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.i18n.LocaleContext;
+import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -61,10 +65,13 @@ public class RequestContext {
 
 	private TimeZone timeZone;
 
+	@Nullable
 	private Boolean defaultHtmlEscape;
 
+	@Nullable
 	private Map<String, Errors> errorsMap;
 
+	@Nullable
 	private RequestDataValueProcessor dataValueProcessor;
 
 
@@ -73,20 +80,23 @@ public class RequestContext {
 	}
 
 	public RequestContext(ServerWebExchange exchange, Map<String, Object> model, MessageSource messageSource,
-			RequestDataValueProcessor dataValueProcessor) {
+			@Nullable RequestDataValueProcessor dataValueProcessor) {
 
-		Assert.notNull(exchange, "'exchange' is required");
-		Assert.notNull(model, "'model' is required");
-		Assert.notNull(messageSource, "'messageSource' is required");
+		Assert.notNull(exchange, "ServerWebExchange is required");
+		Assert.notNull(model, "Model is required");
+		Assert.notNull(messageSource, "MessageSource is required");
 		this.exchange = exchange;
 		this.model = model;
 		this.messageSource = messageSource;
 
-		List<Locale> locales = exchange.getRequest().getHeaders().getAcceptLanguageAsLocales();
-		this.locale = locales.isEmpty() ? Locale.getDefault() : locales.get(0);
-		this.timeZone = TimeZone.getDefault(); // TODO
+		LocaleContext localeContext = exchange.getLocaleContext();
+		Locale locale = localeContext.getLocale();
+		this.locale = (locale != null ? locale : Locale.getDefault());
+		TimeZone timeZone = (localeContext instanceof TimeZoneAwareLocaleContext ?
+				((TimeZoneAwareLocaleContext) localeContext).getTimeZone() : null);
+		this.timeZone = (timeZone != null ? timeZone : TimeZone.getDefault());
 
-		this.defaultHtmlEscape = null; // TODO
+		this.defaultHtmlEscape = null;  // TODO
 		this.dataValueProcessor = dataValueProcessor;
 	}
 
@@ -106,6 +116,7 @@ public class RequestContext {
 	 * Return the model Map that this RequestContext encapsulates, if any.
 	 * @return the populated model Map, or {@code null} if none available
 	 */
+	@Nullable
 	public Map<String, Object> getModel() {
 		return this.model;
 	}
@@ -119,7 +130,6 @@ public class RequestContext {
 
 	/**
 	 * Return the current TimeZone.
-	 * TODO: currently this is the Timezone.getDefault()
 	 */
 	public TimeZone getTimeZone() {
 		return this.timeZone;
@@ -162,6 +172,7 @@ public class RequestContext {
 	 * specified and an explicit value.
 	 * @return whether default HTML escaping is enabled (null = no explicit default)
 	 */
+	@Nullable
 	public Boolean getDefaultHtmlEscape() {
 		return this.defaultHtmlEscape;
 	}
@@ -170,17 +181,18 @@ public class RequestContext {
 	 * Return the {@link RequestDataValueProcessor} instance to apply to in form
 	 * tag libraries and to redirect URLs.
 	 */
-	public Optional<RequestDataValueProcessor> getRequestDataValueProcessor() {
-		return Optional.ofNullable(this.dataValueProcessor);
+	@Nullable
+	public RequestDataValueProcessor getRequestDataValueProcessor() {
+		return this.dataValueProcessor;
 	}
 
 	/**
 	 * Return the context path of the current web application. This is
 	 * useful for building links to other resources within the application.
-	 * <p>Delegates to {@link ServerHttpRequest#getContextPath()}.
+	 * <p>Delegates to {@link ServerHttpRequest#getPath()}.
 	 */
 	public String getContextPath() {
-		return this.exchange.getRequest().getContextPath();
+		return this.exchange.getRequest().getPath().contextPath().value();
 	}
 
 	/**
@@ -190,8 +202,8 @@ public class RequestContext {
 	 * absolute path also URL-encoded accordingly
 	 */
 	public String getContextUrl(String relativeUrl) {
-		String url = getContextPath() + relativeUrl;
-		return getExchange().getResponse().encodeUrl(url);
+		String url = StringUtils.applyRelativePath(getContextPath() + "/", relativeUrl);
+		return getExchange().transformUrl(url);
 	}
 
 	/**
@@ -205,10 +217,10 @@ public class RequestContext {
 	 * absolute path also URL-encoded accordingly
 	 */
 	public String getContextUrl(String relativeUrl, Map<String, ?> params) {
-		String url = getContextPath() + relativeUrl;
+		String url = StringUtils.applyRelativePath(getContextPath() + "/", relativeUrl);
 		UriTemplate template = new UriTemplate(url);
 		url = template.expand(params).toASCIIString();
-		return getExchange().getResponse().encodeUrl(url);
+		return getExchange().transformUrl(url);
 	}
 
 	/**
@@ -245,7 +257,7 @@ public class RequestContext {
 	 * @param defaultMessage String to return if the lookup fails
 	 * @return the message
 	 */
-	public String getMessage(String code, Object[] args, String defaultMessage) {
+	public String getMessage(String code, @Nullable Object[] args, String defaultMessage) {
 		return getMessage(code, args, defaultMessage, isDefaultHtmlEscape());
 	}
 
@@ -256,7 +268,7 @@ public class RequestContext {
 	 * @param defaultMessage String to return if the lookup fails
 	 * @return the message
 	 */
-	public String getMessage(String code, List<?> args, String defaultMessage) {
+	public String getMessage(String code, @Nullable List<?> args, String defaultMessage) {
 		return getMessage(code, (args != null ? args.toArray() : null), defaultMessage, isDefaultHtmlEscape());
 	}
 
@@ -268,8 +280,11 @@ public class RequestContext {
 	 * @param htmlEscape HTML escape the message?
 	 * @return the message
 	 */
-	public String getMessage(String code, Object[] args, String defaultMessage, boolean htmlEscape) {
+	public String getMessage(String code, @Nullable Object[] args, String defaultMessage, boolean htmlEscape) {
 		String msg = this.messageSource.getMessage(code, args, defaultMessage, this.locale);
+		if (msg == null) {
+			return "";
+		}
 		return (htmlEscape ? HtmlUtils.htmlEscape(msg) : msg);
 	}
 
@@ -290,7 +305,7 @@ public class RequestContext {
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
-	public String getMessage(String code, Object[] args) throws NoSuchMessageException {
+	public String getMessage(String code, @Nullable Object[] args) throws NoSuchMessageException {
 		return getMessage(code, args, isDefaultHtmlEscape());
 	}
 
@@ -301,7 +316,7 @@ public class RequestContext {
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
-	public String getMessage(String code, List<?> args) throws NoSuchMessageException {
+	public String getMessage(String code, @Nullable List<?> args) throws NoSuchMessageException {
 		return getMessage(code, (args != null ? args.toArray() : null), isDefaultHtmlEscape());
 	}
 
@@ -313,7 +328,7 @@ public class RequestContext {
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
-	public String getMessage(String code, Object[] args, boolean htmlEscape) throws NoSuchMessageException {
+	public String getMessage(String code, @Nullable Object[] args, boolean htmlEscape) throws NoSuchMessageException {
 		String msg = this.messageSource.getMessage(code, args, this.locale);
 		return (htmlEscape ? HtmlUtils.htmlEscape(msg) : msg);
 	}
@@ -346,7 +361,8 @@ public class RequestContext {
 	 * @param name name of the bind object
 	 * @return the Errors instance, or {@code null} if not found
 	 */
-	public Optional<Errors> getErrors(String name) {
+	@Nullable
+	public Errors getErrors(String name) {
 		return getErrors(name, isDefaultHtmlEscape());
 	}
 
@@ -356,34 +372,33 @@ public class RequestContext {
 	 * @param htmlEscape create an Errors instance with automatic HTML escaping?
 	 * @return the Errors instance, or {@code null} if not found
 	 */
-	public Optional<Errors> getErrors(String name, boolean htmlEscape) {
+	@Nullable
+	public Errors getErrors(String name, boolean htmlEscape) {
 		if (this.errorsMap == null) {
 			this.errorsMap = new HashMap<>();
 		}
 
-		// Since there is no Optional orElse + flatMap...
-		Optional<Errors> optional = Optional.ofNullable(this.errorsMap.get(name));
-		optional = optional.isPresent() ? optional : getModelObject(BindingResult.MODEL_KEY_PREFIX + name);
+		Errors errors = this.errorsMap.get(name);
+		if (errors == null) {
+			errors = getModelObject(BindingResult.MODEL_KEY_PREFIX + name);
+			if (errors == null) {
+				return null;
+			}
+		}
 
-		return optional
-				.map(errors -> {
-					if (errors instanceof BindException) {
-						return ((BindException) errors).getBindingResult();
-					}
-					else {
-						return errors;
-					}
-				})
-				.map(errors -> {
-					if (htmlEscape && !(errors instanceof EscapedErrors)) {
-						errors = new EscapedErrors(errors);
-					}
-					else if (!htmlEscape && errors instanceof EscapedErrors) {
-						errors = ((EscapedErrors) errors).getSource();
-					}
-					this.errorsMap.put(name, errors);
-					return errors;
-				});
+		if (errors instanceof BindException) {
+			errors = ((BindException) errors).getBindingResult();
+		}
+
+		if (htmlEscape && !(errors instanceof EscapedErrors)) {
+			errors = new EscapedErrors(errors);
+		}
+		else if (!htmlEscape && errors instanceof EscapedErrors) {
+			errors = ((EscapedErrors) errors).getSource();
+		}
+
+		this.errorsMap.put(name, errors);
+		return errors;
 	}
 
 	/**
@@ -393,10 +408,13 @@ public class RequestContext {
 	 * @return the model object
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T> Optional<T> getModelObject(String modelName) {
-		return Optional.ofNullable(this.model)
-				.map(model -> Optional.ofNullable((T) model.get(modelName)))
-				.orElse(this.exchange.getAttribute(modelName));
+	@Nullable
+	protected <T> T getModelObject(String modelName) {
+		T modelObject = (T) this.model.get(modelName);
+		if (modelObject == null) {
+			modelObject = this.exchange.getAttribute(modelName);
+		}
+		return modelObject;
 	}
 
 	/**

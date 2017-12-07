@@ -146,7 +146,9 @@ public class DelegatingFilterProxyTests {
 	}
 
 	@Test
-	public void testDelegatingFilterProxyWithTargetBeanNameAndNotYetRefreshedApplicationContext() throws ServletException, IOException {
+	public void testDelegatingFilterProxyWithTargetBeanNameAndNotYetRefreshedApplicationContext()
+			throws ServletException, IOException {
+
 		MockServletContext sc = new MockServletContext();
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
@@ -172,7 +174,9 @@ public class DelegatingFilterProxyTests {
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void testDelegatingFilterProxyWithTargetBeanNameAndNoApplicationContext() throws ServletException, IOException {
+	public void testDelegatingFilterProxyWithTargetBeanNameAndNoApplicationContext()
+			throws ServletException, IOException {
+
 		MockServletContext sc = new MockServletContext();
 
 		DelegatingFilterProxy filterProxy = new DelegatingFilterProxy("targetFilter", null);
@@ -325,7 +329,9 @@ public class DelegatingFilterProxyTests {
 	}
 
 	@Test
-	public void testDelegatingFilterProxyNotInjectedWacServletAttrPreferred() throws ServletException, IOException {
+	public void testDelegatingFilterProxyNotInjectedWacServletAttrPreferred()
+			throws ServletException, IOException {
+
 		ServletContext sc = new MockServletContext();
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(sc);
@@ -401,7 +407,9 @@ public class DelegatingFilterProxyTests {
 		}
 
 		@Override
-		public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+		public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
+				throws IOException, ServletException {
+
 			request.setAttribute("called", Boolean.TRUE);
 		}
 

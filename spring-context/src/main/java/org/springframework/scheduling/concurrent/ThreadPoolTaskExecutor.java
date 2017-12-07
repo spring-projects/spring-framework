@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.core.task.TaskRejectedException;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -83,8 +84,10 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 
 	private boolean allowCoreThreadTimeOut = false;
 
+	@Nullable
 	private TaskDecorator taskDecorator;
 
+	@Nullable
 	private ThreadPoolExecutor threadPoolExecutor;
 
 

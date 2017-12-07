@@ -32,6 +32,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.stomp.StompSession.Subscription;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -139,7 +140,7 @@ public class ReactorNettyTcpStompClientTests {
 		}
 
 		@Override
-		public void handleFrame(StompHeaders headers, Object payload) {
+		public void handleFrame(StompHeaders headers, @Nullable Object payload) {
 			logger.error("STOMP error frame " + headers + " payload=" + payload);
 		}
 
@@ -178,7 +179,7 @@ public class ReactorNettyTcpStompClientTests {
 						return String.class;
 					}
 					@Override
-					public void handleFrame(StompHeaders headers, Object payload) {
+					public void handleFrame(StompHeaders headers, @Nullable Object payload) {
 						received.add((String) payload);
 					}
 				});

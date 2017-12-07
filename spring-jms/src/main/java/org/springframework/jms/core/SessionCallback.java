@@ -19,6 +19,8 @@ package org.springframework.jms.core;
 import javax.jms.JMSException;
 import javax.jms.Session;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Callback for executing any number of operations on a provided {@link Session}.
  *
@@ -40,6 +42,7 @@ public interface SessionCallback<T> {
 	 * (or {@code null} if none)
 	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */
+	@Nullable
 	T doInJms(Session session) throws JMSException;
 
 }

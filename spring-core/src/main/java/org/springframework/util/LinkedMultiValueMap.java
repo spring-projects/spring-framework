@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Simple implementation of {@link MultiValueMap} that wraps a {@link LinkedHashMap},
  * storing multiple values in a {@link LinkedList}.
@@ -74,25 +76,33 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	// MultiValueMap implementation
 
 	@Override
-	public void add(K key, V value) {
-		List<V> values = this.targetMap.computeIfAbsent(key, k -> new LinkedList<>());
-		values.add(value);
-	}
-
-	@Override
-	public void addAll(K key, List<V> values) {
-		List<V> currentValues = this.targetMap.computeIfAbsent(key, k -> new LinkedList<>());
-		currentValues.addAll(values);
-	}
-
-	@Override
+	@Nullable
 	public V getFirst(K key) {
 		List<V> values = this.targetMap.get(key);
 		return (values != null ? values.get(0) : null);
 	}
 
 	@Override
-	public void set(K key, V value) {
+	public void add(K key, @Nullable V value) {
+		List<V> values = this.targetMap.computeIfAbsent(key, k -> new LinkedList<>());
+		values.add(value);
+	}
+
+	@Override
+	public void addAll(K key, List<? extends V> values) {
+		List<V> currentValues = this.targetMap.computeIfAbsent(key, k -> new LinkedList<>());
+		currentValues.addAll(values);
+	}
+
+	@Override
+	public void addAll(MultiValueMap<K, V> values) {
+		for (Entry<K, List<V>> entry : values.entrySet()) {
+			addAll(entry.getKey(), entry.getValue());
+		}
+	}
+
+	@Override
+	public void set(K key, @Nullable V value) {
 		List<V> values = new LinkedList<>();
 		values.add(value);
 		this.targetMap.put(key, values);
@@ -135,16 +145,19 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	}
 
 	@Override
+	@Nullable
 	public List<V> get(Object key) {
 		return this.targetMap.get(key);
 	}
 
 	@Override
+	@Nullable
 	public List<V> put(K key, List<V> value) {
 		return this.targetMap.put(key, value);
 	}
 
 	@Override
+	@Nullable
 	public List<V> remove(Object key) {
 		return this.targetMap.remove(key);
 	}
@@ -183,8 +196,7 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	 */
 	public LinkedMultiValueMap<K, V> deepCopy() {
 		LinkedMultiValueMap<K, V> copy = new LinkedMultiValueMap<>(this.targetMap.size());
-		this.targetMap.entrySet().forEach(entry -> 
-			copy.put(entry.getKey(), new LinkedList<>(entry.getValue())));
+		this.targetMap.forEach((k, v) -> copy.put(k, new LinkedList<>(v)));
 		
 		return copy;
 	}

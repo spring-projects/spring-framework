@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.mock.http.server.reactive.test;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
@@ -35,18 +38,16 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.AbstractServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.SslInfo;
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * Mock implementation of {@link ServerHttpRequest}.
- *
- * <p><strong>Note:</strong> this class extends the same
- * {@link AbstractServerHttpRequest} base class as actual server-specific
- * implementation and is therefore read-only once created. Use static builder
- * methods in this class to build up request instances.
+ * Mock extension of {@link AbstractServerHttpRequest} for use in tests without
+ * an actual server. Use the static methods to obtain a builder.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -55,25 +56,27 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpMethod httpMethod;
 
-	private final String contextPath;
-
 	private final MultiValueMap<String, HttpCookie> cookies;
 
+	@Nullable
 	private final InetSocketAddress remoteAddress;
+
+	@Nullable
+	private final SslInfo sslInfo;
 
 	private final Flux<DataBuffer> body;
 
 
-	private MockServerHttpRequest(HttpMethod httpMethod, URI uri, String contextPath,
+	private MockServerHttpRequest(HttpMethod httpMethod, URI uri, @Nullable String contextPath,
 			HttpHeaders headers, MultiValueMap<String, HttpCookie> cookies,
-			InetSocketAddress remoteAddress,
+			@Nullable InetSocketAddress remoteAddress, @Nullable SslInfo sslInfo,
 			Publisher<? extends DataBuffer> body) {
 
-		super(uri, headers);
+		super(uri, contextPath, headers);
 		this.httpMethod = httpMethod;
-		this.contextPath = (contextPath != null ? contextPath : "");
 		this.cookies = cookies;
 		this.remoteAddress = remoteAddress;
+		this.sslInfo = sslInfo;
 		this.body = Flux.from(body);
 	}
 
@@ -84,13 +87,20 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	public String getContextPath() {
-		return this.contextPath;
+	public String getMethodValue() {
+		return this.httpMethod.name();
 	}
 
 	@Override
-	public Optional<InetSocketAddress> getRemoteAddress() {
-		return Optional.ofNullable(this.remoteAddress);
+	@Nullable
+	public InetSocketAddress getRemoteAddress() {
+		return this.remoteAddress;
+	}
+
+	@Nullable
+	@Override
+	protected SslInfo initSslInfo() {
+		return this.sslInfo;
 	}
 
 	@Override
@@ -103,12 +113,9 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		return this.cookies;
 	}
 
-
-	/**
-	 * Shortcut to wrap the request with a {@code MockServerWebExchange}.
-	 */
-	public MockServerWebExchange toExchange() {
-		return new MockServerWebExchange(this);
+	@Override
+	public <T> T getNativeRequest() {
+		throw new IllegalStateException("This is a mock. No running server, no native request.");
 	}
 
 
@@ -224,9 +231,14 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		B remoteAddress(InetSocketAddress remoteAddress);
 
 		/**
+		 * Set SSL session information and certificates.
+		 */
+		void sslInfo(SslInfo sslInfo);
+
+		/**
 		 * Add one or more cookies.
 		 */
-		B cookie(String path, HttpCookie... cookie);
+		B cookie(HttpCookie... cookie);
 
 		/**
 		 * Add the given cookies.
@@ -261,6 +273,13 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		 * @param acceptableCharsets the acceptable charsets
 		 */
 		B acceptCharset(Charset... acceptableCharsets);
+
+		/**
+		 * Set the list of acceptable {@linkplain Locale locales}, as specified
+		 * by the {@code Accept-Languages} header.
+		 * @param acceptableLocales the acceptable locales
+		 */
+		B acceptLanguageAsLocales(Locale... acceptableLocales);
 
 		/**
 		 * Set the value of the {@code If-Modified-Since} header.
@@ -300,11 +319,6 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		 */
 		MockServerHttpRequest build();
 
-		/**
-		 * Shortcut for:<br>
-		 * {@code build().toExchange()}
-		 */
-		MockServerWebExchange toExchange();
 	}
 
 	/**
@@ -351,17 +365,25 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 	private static class DefaultBodyBuilder implements BodyBuilder {
 
+		private static final DataBufferFactory BUFFER_FACTORY = new DefaultDataBufferFactory();
+
+
 		private final HttpMethod method;
 
 		private final URI url;
 
+		@Nullable
 		private String contextPath;
 
 		private final HttpHeaders headers = new HttpHeaders();
 
 		private final MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
 
+		@Nullable
 		private InetSocketAddress remoteAddress;
+
+		@Nullable
+		private SslInfo sslInfo;
 
 
 		public DefaultBodyBuilder(HttpMethod method, URI url) {
@@ -382,8 +404,13 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
-		public BodyBuilder cookie(String path, HttpCookie... cookies) {
-			this.cookies.put(path, Arrays.asList(cookies));
+		public void sslInfo(SslInfo sslInfo) {
+			this.sslInfo = sslInfo;
+		}
+
+		@Override
+		public BodyBuilder cookie(HttpCookie... cookies) {
+			Arrays.stream(cookies).forEach(cookie -> this.cookies.add(cookie.getName(), cookie));
 			return this;
 		}
 
@@ -416,6 +443,12 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		@Override
 		public BodyBuilder acceptCharset(Charset... acceptableCharsets) {
 			this.headers.setAcceptCharset(Arrays.asList(acceptableCharsets));
+			return this;
+		}
+
+		@Override
+		public BodyBuilder acceptLanguageAsLocales(Locale... acceptableLocales) {
+			this.headers.setAcceptLanguageAsLocales(Arrays.asList(acceptableLocales));
 			return this;
 		}
 
@@ -456,35 +489,32 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
-		public MockServerHttpRequest body(Publisher<? extends DataBuffer> body) {
-			return new MockServerHttpRequest(this.method, this.url, this.contextPath,
-					this.headers, this.cookies, this.remoteAddress, body);
-		}
-
-		@Override
-		public MockServerHttpRequest body(String body) {
-			Charset charset = getCharset();
-			byte[] bytes = body.getBytes(charset);
-			ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
-			DataBuffer buffer = new DefaultDataBufferFactory().wrap(byteBuffer);
-			return body(Flux.just(buffer));
-		}
-
-		private Charset getCharset() {
-			MediaType contentType = this.headers.getContentType();
-			Charset charset = (contentType != null ? contentType.getCharset() : null);
-			charset = charset != null ? charset : StandardCharsets.UTF_8;
-			return charset;
-		}
-
-		@Override
 		public MockServerHttpRequest build() {
 			return body(Flux.empty());
 		}
 
 		@Override
-		public MockServerWebExchange toExchange() {
-			return build().toExchange();
+		public MockServerHttpRequest body(String body) {
+			return body(Flux.just(BUFFER_FACTORY.wrap(body.getBytes(getCharset()))));
+		}
+
+		private Charset getCharset() {
+			return Optional.ofNullable(this.headers.getContentType())
+					.map(MimeType::getCharset).orElse(StandardCharsets.UTF_8);
+		}
+
+		@Override
+		public MockServerHttpRequest body(Publisher<? extends DataBuffer> body) {
+			applyCookiesIfNecessary();
+			return new MockServerHttpRequest(this.method, this.url, this.contextPath,
+					this.headers, this.cookies, this.remoteAddress, this.sslInfo, body);
+		}
+
+		private void applyCookiesIfNecessary() {
+			if (this.headers.get(HttpHeaders.COOKIE) == null) {
+				this.cookies.values().stream().flatMap(Collection::stream)
+						.forEach(cookie -> this.headers.add(HttpHeaders.COOKIE, cookie.toString()));
+			}
 		}
 	}
 

@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,27 +33,25 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
-import org.springframework.web.server.WebSession;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 
 /**
@@ -62,93 +59,123 @@ import static org.springframework.web.reactive.function.BodyExtractors.toMono;
  */
 public class DefaultServerRequestTests {
 
-	private ServerHttpRequest mockRequest;
-
-	private ServerHttpResponse mockResponse;
-
-	private ServerWebExchange mockExchange;
-
-	private HandlerStrategies mockHandlerStrategies;
-
-	private DefaultServerRequest defaultRequest;
+	List<HttpMessageReader<?>> messageReaders;
 
 
 	@Before
 	public void createMocks() {
-		mockRequest = mock(ServerHttpRequest.class);
-		mockResponse = mock(ServerHttpResponse.class);
-
-		mockExchange = mock(ServerWebExchange.class);
-		when(mockExchange.getRequest()).thenReturn(mockRequest);
-		when(mockExchange.getResponse()).thenReturn(mockResponse);
-		mockHandlerStrategies = mock(HandlerStrategies.class);
-
-		defaultRequest = new DefaultServerRequest(mockExchange, mockHandlerStrategies);
+		this.messageReaders = Collections.singletonList(
+				new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 	}
 
 
 	@Test
 	public void method() throws Exception {
 		HttpMethod method = HttpMethod.HEAD;
-		when(mockRequest.getMethod()).thenReturn(method);
+		DefaultServerRequest request = new DefaultServerRequest(
+				MockServerWebExchange.from(MockServerHttpRequest.method(method, "http://example.com")),
+				this.messageReaders);
 
-		assertEquals(method, defaultRequest.method());
+		assertEquals(method, request.method());
 	}
 
 	@Test
 	public void uri() throws Exception {
 		URI uri = URI.create("https://example.com");
-		when(mockRequest.getURI()).thenReturn(uri);
 
-		assertEquals(uri, defaultRequest.uri());
+		DefaultServerRequest request = new DefaultServerRequest(
+				MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.GET, uri)),
+				this.messageReaders);
+
+		assertEquals(uri, request.uri());
+	}
+
+	@Test
+	public void uriBuilder() throws Exception {
+		URI uri = new URI("http", "localhost", "/path", "a=1", null);
+		DefaultServerRequest request = new DefaultServerRequest(
+				MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.GET, uri)),
+				this.messageReaders);
+
+
+		URI result = request.uriBuilder().build();
+		assertEquals("http", result.getScheme());
+		assertEquals("localhost", result.getHost());
+		assertEquals(-1, result.getPort());
+		assertEquals("/path", result.getPath());
+		assertEquals("a=1", result.getQuery());
 	}
 
 	@Test
 	public void attribute() throws Exception {
-		when(mockExchange.getAttribute("foo")).thenReturn(Optional.of("bar"));
+		MockServerWebExchange exchange = MockServerWebExchange.from(
+				MockServerHttpRequest.method(HttpMethod.GET, "http://example.com"));
+		exchange.getAttributes().put("foo", "bar");
 
-		assertEquals(Optional.of("bar"), defaultRequest.attribute("foo"));
+		DefaultServerRequest request = new DefaultServerRequest(exchange, messageReaders);
+
+		assertEquals(Optional.of("bar"), request.attribute("foo"));
 	}
 
 	@Test
 	public void queryParams() throws Exception {
-		MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-		queryParams.set("foo", "bar");
-		when(mockRequest.getQueryParams()).thenReturn(queryParams);
+		DefaultServerRequest request = new DefaultServerRequest(
+				MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.GET, "http://example.com?foo=bar")),
+				this.messageReaders);
 
-		assertEquals(Optional.of("bar"), defaultRequest.queryParam("foo"));
+		assertEquals(Optional.of("bar"), request.queryParam("foo"));
+	}
+
+	@Test
+	public void emptyQueryParam() throws Exception {
+		DefaultServerRequest request = new DefaultServerRequest(
+				MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.GET, "http://example.com?foo")),
+				this.messageReaders);
+
+		assertEquals(Optional.of(""), request.queryParam("foo"));
+	}
+
+	@Test
+	public void absentQueryParam() throws Exception {
+		DefaultServerRequest request = new DefaultServerRequest(
+				MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.GET, "http://example.com?foo")),
+				this.messageReaders);
+
+		assertEquals(Optional.empty(), request.queryParam("bar"));
 	}
 
 	@Test
 	public void pathVariable() throws Exception {
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://example.com"));
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
-		when(mockExchange.getAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(Optional.of(pathVariables));
+		exchange.getAttributes().put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, pathVariables);
 
-		assertEquals("bar", defaultRequest.pathVariable("foo"));
+		DefaultServerRequest request = new DefaultServerRequest(exchange, messageReaders);
+
+		assertEquals("bar", request.pathVariable("foo"));
 	}
+
 
 	@Test(expected = IllegalArgumentException.class)
 	public void pathVariableNotFound() throws Exception {
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://example.com"));
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
-		when(mockExchange.getAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(Optional.of(pathVariables));
+		exchange.getAttributes().put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, pathVariables);
 
-		assertEquals("bar", defaultRequest.pathVariable("baz"));
+		DefaultServerRequest request = new DefaultServerRequest(exchange, messageReaders);
+
+		request.pathVariable("baz");
 	}
 
 	@Test
 	public void pathVariables() throws Exception {
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://example.com"));
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
-		when(mockExchange.getAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(Optional.of(pathVariables));
+		exchange.getAttributes().put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, pathVariables);
 
-		assertEquals(pathVariables, defaultRequest.pathVariables());
-	}
+		DefaultServerRequest request = new DefaultServerRequest(exchange, messageReaders);
 
-	@Test
-	public void session() throws Exception {
-		WebSession session = mock(WebSession.class);
-		when(mockExchange.getSession()).thenReturn(Mono.just(session));
-
-		assertEquals(session, defaultRequest.session().block());
+		assertEquals(pathVariables, request.pathVariables());
 	}
 
 	@Test
@@ -168,14 +195,33 @@ public class DefaultServerRequestTests {
 		List<HttpRange> range = Collections.singletonList(HttpRange.createByteRange(0, 42));
 		httpHeaders.setRange(range);
 
-		when(mockRequest.getHeaders()).thenReturn(httpHeaders);
+		DefaultServerRequest request = new DefaultServerRequest(
+				MockServerWebExchange.from(MockServerHttpRequest
+						.method(HttpMethod.GET, "http://example.com?foo=bar")
+						.headers(httpHeaders)),
+				this.messageReaders);
 
-		ServerRequest.Headers headers = defaultRequest.headers();
+		ServerRequest.Headers headers = request.headers();
 		assertEquals(accept, headers.accept());
 		assertEquals(acceptCharset, headers.acceptCharset());
 		assertEquals(OptionalLong.of(contentLength), headers.contentLength());
 		assertEquals(Optional.of(contentType), headers.contentType());
 		assertEquals(httpHeaders, headers.asHttpHeaders());
+	}
+
+	@Test
+	public void cookies() {
+		HttpCookie cookie = new HttpCookie("foo", "bar");
+		MockServerWebExchange exchange = MockServerWebExchange.from(
+				MockServerHttpRequest.method(HttpMethod.GET, "http://example.com").cookie(cookie));
+
+		DefaultServerRequest request = new DefaultServerRequest(exchange, messageReaders);
+
+		MultiValueMap<String, HttpCookie> expected = new LinkedMultiValueMap<>();
+		expected.add("foo", cookie);
+
+		assertEquals(expected, request.cookies());
+
 	}
 
 	@Test
@@ -187,14 +233,14 @@ public class DefaultServerRequestTests {
 
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
-		when(mockRequest.getHeaders()).thenReturn(httpHeaders);
-		when(mockRequest.getBody()).thenReturn(body);
 
-		Set<HttpMessageReader<?>> messageReaders = Collections
-				.singleton(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
-		when(mockHandlerStrategies.messageReaders()).thenReturn(messageReaders::stream);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.GET, "http://example.com?foo=bar")
+				.headers(httpHeaders)
+				.body(body);
+		DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), messageReaders);
 
-		Mono<String> resultMono = defaultRequest.body(toMono(String.class));
+		Mono<String> resultMono = request.body(toMono(String.class));
 		assertEquals("foo", resultMono.block());
 	}
 
@@ -207,14 +253,33 @@ public class DefaultServerRequestTests {
 
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
-		when(mockRequest.getHeaders()).thenReturn(httpHeaders);
-		when(mockRequest.getBody()).thenReturn(body);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.GET, "http://example.com?foo=bar")
+				.headers(httpHeaders)
+				.body(body);
+		DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), messageReaders);
 
-		Set<HttpMessageReader<?>> messageReaders = Collections
-				.singleton(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
-		when(mockHandlerStrategies.messageReaders()).thenReturn(messageReaders::stream);
+		Mono<String> resultMono = request.bodyToMono(String.class);
+		assertEquals("foo", resultMono.block());
+	}
 
-		Mono<String> resultMono = defaultRequest.bodyToMono(String.class);
+	@Test
+	public void bodyToMonoParameterizedTypeReference() throws Exception {
+		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+		DefaultDataBuffer dataBuffer =
+				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		Flux<DataBuffer> body = Flux.just(dataBuffer);
+
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.GET, "http://example.com?foo=bar")
+				.headers(httpHeaders)
+				.body(body);
+		DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), messageReaders);
+
+		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<String>() {};
+		Mono<String> resultMono = request.bodyToMono(typeReference);
 		assertEquals("foo", resultMono.block());
 	}
 
@@ -227,16 +292,34 @@ public class DefaultServerRequestTests {
 
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
-		when(mockRequest.getHeaders()).thenReturn(httpHeaders);
-		when(mockRequest.getBody()).thenReturn(body);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.GET, "http://example.com?foo=bar")
+				.headers(httpHeaders)
+				.body(body);
+		DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), messageReaders);
 
-		Set<HttpMessageReader<?>> messageReaders = Collections
-				.singleton(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
-		when(mockHandlerStrategies.messageReaders()).thenReturn(messageReaders::stream);
+		Flux<String> resultFlux = request.bodyToFlux(String.class);
+		assertEquals(Collections.singletonList("foo"), resultFlux.collectList().block());
+	}
 
-		Flux<String> resultFlux = defaultRequest.bodyToFlux(String.class);
-		Mono<List<String>> result = resultFlux.collectList();
-		assertEquals(Collections.singletonList("foo"), result.block());
+	@Test
+	public void bodyToFluxParameterizedTypeReference() throws Exception {
+		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+		DefaultDataBuffer dataBuffer =
+				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		Flux<DataBuffer> body = Flux.just(dataBuffer);
+
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.GET, "http://example.com?foo=bar")
+				.headers(httpHeaders)
+				.body(body);
+		DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), messageReaders);
+
+		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<String>() {};
+		Flux<String> resultFlux = request.bodyToFlux(typeReference);
+		assertEquals(Collections.singletonList("foo"), resultFlux.collectList().block());
 	}
 
 	@Test
@@ -248,16 +331,16 @@ public class DefaultServerRequestTests {
 
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
-		when(mockRequest.getHeaders()).thenReturn(httpHeaders);
-		when(mockRequest.getBody()).thenReturn(body);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.GET, "http://example.com?foo=bar")
+				.headers(httpHeaders)
+				.body(body);
+		this.messageReaders = Collections.emptyList();
+		DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), messageReaders);
 
-		Set<HttpMessageReader<?>> messageReaders = Collections.emptySet();
-		when(mockHandlerStrategies.messageReaders()).thenReturn(messageReaders::stream);
-
-		Flux<String> resultFlux = defaultRequest.bodyToFlux(String.class);
+		Flux<String> resultFlux = request.bodyToFlux(String.class);
 		StepVerifier.create(resultFlux)
 				.expectError(UnsupportedMediaTypeStatusException.class)
 				.verify();
 	}
-
 }

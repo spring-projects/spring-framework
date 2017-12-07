@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -49,12 +50,15 @@ public class CookieGenerator {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private String cookieName;
 
+	@Nullable
 	private String cookieDomain;
 
 	private String cookiePath = DEFAULT_COOKIE_PATH;
 
+	@Nullable 
 	private Integer cookieMaxAge;
 
 	private boolean cookieSecure = false;
@@ -66,13 +70,14 @@ public class CookieGenerator {
 	 * Use the given name for cookies created by this generator.
 	 * @see javax.servlet.http.Cookie#getName()
 	 */
-	public void setCookieName(String cookieName) {
+	public void setCookieName(@Nullable String cookieName) {
 		this.cookieName = cookieName;
 	}
 
 	/**
 	 * Return the given name for cookies created by this generator.
 	 */
+	@Nullable
 	public String getCookieName() {
 		return this.cookieName;
 	}
@@ -82,13 +87,14 @@ public class CookieGenerator {
 	 * The cookie is only visible to servers in this domain.
 	 * @see javax.servlet.http.Cookie#setDomain
 	 */
-	public void setCookieDomain(String cookieDomain) {
+	public void setCookieDomain(@Nullable String cookieDomain) {
 		this.cookieDomain = cookieDomain;
 	}
 
 	/**
 	 * Return the domain for cookies created by this generator, if any.
 	 */
+	@Nullable
 	public String getCookieDomain() {
 		return this.cookieDomain;
 	}
@@ -116,13 +122,14 @@ public class CookieGenerator {
 	 * default.
 	 * @see javax.servlet.http.Cookie#setMaxAge
 	 */
-	public void setCookieMaxAge(Integer cookieMaxAge) {
+	public void setCookieMaxAge(@Nullable Integer cookieMaxAge) {
 		this.cookieMaxAge = cookieMaxAge;
 	}
 
 	/**
 	 * Return the maximum age for cookies created by this generator.
 	 */
+	@Nullable
 	public Integer getCookieMaxAge() {
 		return this.cookieMaxAge;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.util.Map;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -36,15 +38,20 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * Resolves method arguments of type Map annotated with
- * {@link MatrixVariable @MatrixVariable} where the annotation does not
- * specify a name. If a name is specified then the argument will by resolved by the
+ * Resolves arguments of type {@link Map} annotated with {@link MatrixVariable
+ * @MatrixVariable} where the annotation does not specify a name. In other words
+ * the purpose of this resolver is to provide access to multiple matrix
+ * variables, either all or associted with a specific path variable.
+ *
+ * <p>When a name is specified, an argument of type Map is considered to be an
+ * single attribute with a Map value, and is resolved by
  * {@link MatrixVariableMethodArgumentResolver} instead.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
  */
 public class MatrixVariableMapMethodArgumentResolver implements HandlerMethodArgumentResolver {
+
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -58,8 +65,9 @@ public class MatrixVariableMapMethodArgumentResolver implements HandlerMethodArg
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest request, WebDataBinderFactory binderFactory) throws Exception {
+	@Nullable
+	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+			NativeWebRequest request, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 
 		@SuppressWarnings("unchecked")
 		Map<String, MultiValueMap<String, String>> matrixVariables =
@@ -71,7 +79,9 @@ public class MatrixVariableMapMethodArgumentResolver implements HandlerMethodArg
 		}
 
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-		String pathVariable = parameter.getParameterAnnotation(MatrixVariable.class).pathVar();
+		MatrixVariable ann = parameter.getParameterAnnotation(MatrixVariable.class);
+		Assert.state(ann != null, "No MatrixVariable annotation");
+		String pathVariable = ann.pathVar();
 
 		if (!pathVariable.equals(ValueConstants.DEFAULT_NONE)) {
 			MultiValueMap<String, String> mapForPathVariable = matrixVariables.get(pathVariable);
@@ -97,7 +107,8 @@ public class MatrixVariableMapMethodArgumentResolver implements HandlerMethodArg
 		if (!MultiValueMap.class.isAssignableFrom(parameter.getParameterType())) {
 			ResolvableType[] genericTypes = ResolvableType.forMethodParameter(parameter).getGenerics();
 			if (genericTypes.length == 2) {
-				return !List.class.isAssignableFrom(genericTypes[1].getRawClass());
+				Class<?> declaredClass = genericTypes[1].getRawClass();
+				return (declaredClass == null || !List.class.isAssignableFrom(declaredClass));
 			}
 		}
 		return false;

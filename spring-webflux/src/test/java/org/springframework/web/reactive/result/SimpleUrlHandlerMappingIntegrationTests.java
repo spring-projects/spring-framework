@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,7 +62,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		wac.refresh();
 
 		return WebHttpHandlerBuilder.webHandler(new DispatcherHandler(wac))
-				.exceptionHandlers(Collections.singletonList(new ResponseStatusExceptionHandler()))
+				.exceptionHandler(new ResponseStatusExceptionHandler())
 				.build();
 	}
 

@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -175,11 +176,12 @@ public class VersionResourceResolverTests {
 
 		this.resolver.addFixedVersionStrategy("fixedversion", "/js/**", "/css/**", "/fixedversion/css/**");
 
+		Matcher<VersionStrategy> matcher = Matchers.instanceOf(FixedVersionStrategy.class);
 		assertThat(this.resolver.getStrategyMap().size(), is(4));
-		assertThat(this.resolver.getStrategyForPath("js/something.js"), Matchers.instanceOf(FixedVersionStrategy.class));
-		assertThat(this.resolver.getStrategyForPath("fixedversion/js/something.js"), Matchers.instanceOf(FixedVersionStrategy.class));
-		assertThat(this.resolver.getStrategyForPath("css/something.css"), Matchers.instanceOf(FixedVersionStrategy.class));
-		assertThat(this.resolver.getStrategyForPath("fixedversion/css/something.css"), Matchers.instanceOf(FixedVersionStrategy.class));
+		assertThat(this.resolver.getStrategyForPath("js/something.js"), matcher);
+		assertThat(this.resolver.getStrategyForPath("fixedversion/js/something.js"), matcher);
+		assertThat(this.resolver.getStrategyForPath("css/something.css"), matcher);
+		assertThat(this.resolver.getStrategyForPath("fixedversion/css/something.css"), matcher);
 	}
 
 	@Test // SPR-15372

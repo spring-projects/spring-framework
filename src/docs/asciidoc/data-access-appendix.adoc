@@ -1,0 +1,83 @@
+= Appendix
+
+
+
+[[xsd-schemas]]
+== XML Schemas
+
+This part of the appendix lists XML schemas for data access.
+
+
+
+[[xsd-schemas-tx]]
+=== The `tx` schema
+
+The `tx` tags deal with configuring all of those beans in Spring's comprehensive support
+for transactions. These tags are covered in the chapter entitled
+<<data-access.adoc#transaction,Transaction Management>>.
+
+[TIP]
+====
+
+You are strongly encouraged to look at the `'spring-tx.xsd'` file that ships with the
+Spring distribution. This file is (of course), the XML Schema for Spring's transaction
+configuration, and covers all of the various tags in the `tx` namespace, including
+attribute defaults and suchlike. This file is documented inline, and thus the
+information is not repeated here in the interests of adhering to the DRY (Don't Repeat
+Yourself) principle.
+====
+
+In the interest of completeness, to use the tags in the `tx` schema, you need to have
+the following preamble at the top of your Spring XML configuration file; the text in the
+following snippet references the correct schema so that the tags in the `tx` namespace
+are available to you.
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			xmlns:aop="http://www.springframework.org/schema/aop"
+			__xmlns:tx="http://www.springframework.org/schema/tx"__ xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			__http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd__
+			http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"> <!-- bean definitions here -->
+
+	</beans>
+----
+
+[NOTE]
+====
+Often when using the tags in the `tx` namespace you will also be using the tags from the
+`aop` namespace (since the declarative transaction support in Spring is implemented
+using AOP). The above XML snippet contains the relevant lines needed to reference the
+`aop` schema so that the tags in the `aop` namespace are available to you.
+====
+
+
+
+[[xsd-schemas-jdbc]]
+=== The `jdbc` schema
+
+The `jdbc` tags allow you to quickly configure an embedded database or initialize an
+existing data source. These tags are documented in
+<<data-access.adoc#jdbc-embedded-database-support,Embedded database support>>
+and <<data-access.adoc#jdbc-initializing-datasource,Initializing a DataSource>> respectively.
+
+To use the tags in the `jdbc` schema, you need to have the following preamble at the top
+of your Spring XML configuration file; the text in the following snippet references the
+correct schema so that the tags in the `jdbc` namespace are available to you.
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		__xmlns:jdbc="http://www.springframework.org/schema/jdbc"__ xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			__http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd"__> <!-- bean definitions here -->
+
+	</beans>
+----

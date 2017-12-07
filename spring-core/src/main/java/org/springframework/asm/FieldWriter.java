@@ -118,7 +118,7 @@ final class FieldWriter extends FieldVisitor {
      */
     FieldWriter(final ClassWriter cw, final int access, final String name,
             final String desc, final String signature, final Object value) {
-        super(Opcodes.ASM5);
+        super(Opcodes.ASM6);
         if (cw.firstField == null) {
             cw.firstField = this;
         } else {

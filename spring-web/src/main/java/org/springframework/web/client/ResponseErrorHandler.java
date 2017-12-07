@@ -17,7 +17,9 @@
 package org.springframework.web.client;
 
 import java.io.IOException;
+import java.net.URI;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpResponse;
 
 /**
@@ -47,5 +49,18 @@ public interface ResponseErrorHandler {
 	 * @throws IOException in case of I/O errors
 	 */
 	void handleError(ClientHttpResponse response) throws IOException;
+
+	/**
+	 * Alternative to {@link #handleError(ClientHttpResponse)} with extra
+	 * information providing access to the request URL and HTTP method.
+	 * @param url the request URL
+	 * @param method the HTTP method
+	 * @param response the response with the error
+	 * @throws IOException in case of I/O errors
+	 * @since 5.0
+	 */
+	default void handleError(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {
+		handleError(response);
+	}
 
 }

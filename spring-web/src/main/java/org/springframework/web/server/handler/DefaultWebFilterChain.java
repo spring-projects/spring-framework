@@ -40,25 +40,44 @@ public class DefaultWebFilterChain implements WebFilterChain {
 
 	private final WebHandler handler;
 
-	private volatile int index;
+	private final int index;
 
 
 	public DefaultWebFilterChain(WebHandler handler, WebFilter... filters) {
 		Assert.notNull(handler, "WebHandler is required");
 		this.filters = ObjectUtils.isEmpty(filters) ? Collections.emptyList() : Arrays.asList(filters);
 		this.handler = handler;
+		this.index = 0;
+	}
+
+	private DefaultWebFilterChain(DefaultWebFilterChain parent, int index) {
+		this.filters = parent.getFilters();
+		this.handler = parent.getHandler();
+		this.index = index;
+	}
+
+
+	public List<WebFilter> getFilters() {
+		return this.filters;
+	}
+
+	public WebHandler getHandler() {
+		return this.handler;
 	}
 
 
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange) {
-		if (this.index < this.filters.size()) {
-			WebFilter filter = this.filters.get(this.index++);
-			return filter.filter(exchange, this);
-		}
-		else {
-			return this.handler.handle(exchange);
-		}
+		return Mono.defer(() -> {
+			if (this.index < this.filters.size()) {
+				WebFilter filter = this.filters.get(this.index);
+				WebFilterChain chain = new DefaultWebFilterChain(this, this.index + 1);
+				return filter.filter(exchange, chain);
+			}
+			else {
+				return this.handler.handle(exchange);
+			}
+		});
 	}
 
 }

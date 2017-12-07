@@ -41,12 +41,12 @@ public class UnorderedRequestExpectationManager extends AbstractRequestExpectati
 	@Override
 	public ClientHttpResponse validateRequestInternal(ClientHttpRequest request) throws IOException {
 		RequestExpectation expectation = this.remainingExpectations.findExpectation(request);
-		if (expectation != null) {
-			ClientHttpResponse response = expectation.createResponse(request);
-			this.remainingExpectations.update(expectation);
-			return response;
+		if (expectation == null) {
+			throw createUnexpectedRequestError(request);
 		}
-		throw createUnexpectedRequestError(request);
+		ClientHttpResponse response = expectation.createResponse(request);
+		this.remainingExpectations.update(expectation);
+		return response;
 	}
 
 	@Override

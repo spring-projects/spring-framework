@@ -28,7 +28,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -63,6 +65,12 @@ public class JacksonHintsIntegrationTests extends AbstractRequestMappingIntegrat
 		assertEquals(expected, performGet("/response/mono", MediaType.APPLICATION_JSON_UTF8, String.class).getBody());
 	}
 
+	@Test  // SPR-16098
+	public void jsonViewWithMonoResponseEntity() throws Exception {
+		String expected = "{\"withView1\":\"with\"}";
+		assertEquals(expected, performGet("/response/entity", MediaType.APPLICATION_JSON_UTF8, String.class).getBody());
+	}
+
 	@Test
 	public void jsonViewWithFluxResponse() throws Exception {
 		String expected = "[{\"withView1\":\"with\"},{\"withView1\":\"with\"}]";
@@ -83,11 +91,33 @@ public class JacksonHintsIntegrationTests extends AbstractRequestMappingIntegrat
 				new JacksonViewBean("with", "with", "without"), MediaType.APPLICATION_JSON_UTF8, String.class).getBody());
 	}
 
+	@Test  // SPR-16098
+	public void jsonViewWithEntityMonoRequest() throws Exception {
+		String expected = "{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}";
+		assertEquals(expected, performPost("/request/entity/mono", MediaType.APPLICATION_JSON,
+				new JacksonViewBean("with", "with", "without"),
+				MediaType.APPLICATION_JSON_UTF8, String.class).getBody());
+	}
+
+	@Test  // SPR-16098
+	public void jsonViewWithEntityFluxRequest() throws Exception {
+		String expected = "[" +
+				"{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}," +
+				"{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}]";
+		assertEquals(expected, performPost("/request/entity/flux", MediaType.APPLICATION_JSON,
+				Arrays.asList(new JacksonViewBean("with", "with", "without"),
+						new JacksonViewBean("with", "with", "without")),
+				MediaType.APPLICATION_JSON_UTF8, String.class).getBody());
+	}
+
 	@Test
 	public void jsonViewWithFluxRequest() throws Exception {
-		String expected = "[{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}," +
+		String expected = "[" +
+				"{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}," +
 				"{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}]";
-		List<JacksonViewBean> beans = Arrays.asList(new JacksonViewBean("with", "with", "without"), new JacksonViewBean("with", "with", "without"));
+		List<JacksonViewBean> beans = Arrays.asList(
+				new JacksonViewBean("with", "with", "without"),
+				new JacksonViewBean("with", "with", "without"));
 		assertEquals(expected, performPost("/request/flux", MediaType.APPLICATION_JSON, beans,
 				MediaType.APPLICATION_JSON_UTF8, String.class).getBody());
 	}
@@ -117,6 +147,12 @@ public class JacksonHintsIntegrationTests extends AbstractRequestMappingIntegrat
 			return Mono.just(new JacksonViewBean("with", "with", "without"));
 		}
 
+		@GetMapping("/response/entity")
+		@JsonView(MyJacksonView1.class)
+		public Mono<ResponseEntity<JacksonViewBean>> monoResponseEntity() {
+			return Mono.just(ResponseEntity.ok(new JacksonViewBean("with", "with", "without")));
+		}
+
 		@GetMapping("/response/flux")
 		@JsonView(MyJacksonView1.class)
 		public Flux<JacksonViewBean> fluxResponse() {
@@ -131,6 +167,16 @@ public class JacksonHintsIntegrationTests extends AbstractRequestMappingIntegrat
 		@PostMapping("/request/mono")
 		public Mono<JacksonViewBean> monoRequest(@JsonView(MyJacksonView1.class) @RequestBody Mono<JacksonViewBean> mono) {
 			return mono;
+		}
+
+		@PostMapping("/request/entity/mono")
+		public Mono<JacksonViewBean> entityMonoRequest(@JsonView(MyJacksonView1.class) HttpEntity<Mono<JacksonViewBean>> entityMono) {
+			return entityMono.getBody();
+		}
+
+		@PostMapping("/request/entity/flux")
+		public Flux<JacksonViewBean> entityFluxRequest(@JsonView(MyJacksonView1.class) HttpEntity<Flux<JacksonViewBean>> entityFlux) {
+			return entityFlux.getBody();
 		}
 
 		@PostMapping("/request/flux")

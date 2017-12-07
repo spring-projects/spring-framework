@@ -86,7 +86,7 @@ public @interface DisabledIf {
 	 * <pre style="code">@DisabledIf("#{systemProperties['os.name'].toLowerCase().contains('mac')}")</pre>
 	 * <li>Placeholder for a property available in the Spring
 	 * {@link org.springframework.core.env.Environment Environment} &mdash; for example:
-	 * <pre style="code">@DisabledIf("${smoke.tests.enabled}")</pre>
+	 * <pre style="code">@DisabledIf("${smoke.tests.disabled}")</pre>
 	 * <li>Text literal &mdash; for example:
 	 * <pre style="code">@DisabledIf("true")</pre>
 	 * </ul>

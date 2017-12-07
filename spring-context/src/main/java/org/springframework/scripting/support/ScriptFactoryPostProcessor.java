@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,8 +53,10 @@ import org.springframework.core.Conventions;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.ScriptSource;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -160,6 +162,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 	private static final String SCRIPTED_OBJECT_NAME_PREFIX = "scriptedObject.";
 
+
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -167,8 +170,10 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 	private boolean defaultProxyTargetClass = false;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
+	@Nullable
 	private ConfigurableBeanFactory beanFactory;
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
@@ -177,6 +182,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 	/** Map from bean name String to ScriptSource object */
 	private final Map<String, ScriptSource> scriptSourceCache = new HashMap<>();
+
 
 	/**
 	 * Set the delay between refresh checks, in milliseconds.
@@ -236,13 +242,16 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		return Integer.MIN_VALUE;
 	}
 
+
 	@Override
+	@Nullable
 	public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
 		// We only apply special treatment to ScriptFactory implementations here.
 		if (!ScriptFactory.class.isAssignableFrom(beanClass)) {
 			return null;
 		}
 
+		Assert.state(this.beanFactory != null, "No BeanFactory set");
 		BeanDefinition bd = this.beanFactory.getMergedBeanDefinition(beanName);
 
 		try {
@@ -263,16 +272,13 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 			}
 			else {
 				if (bd.isSingleton()) {
-					Object bean = this.scriptBeanFactory.getBean(scriptedObjectBeanName);
-					if (bean != null) {
-						return bean.getClass();
-					}
+					return this.scriptBeanFactory.getBean(scriptedObjectBeanName).getClass();
 				}
 			}
 		}
 		catch (Exception ex) {
-			if (ex instanceof BeanCreationException
-					&& ((BeanCreationException) ex).getMostSpecificCause() instanceof BeanCurrentlyInCreationException) {
+			if (ex instanceof BeanCreationException &&
+					((BeanCreationException) ex).getMostSpecificCause() instanceof BeanCurrentlyInCreationException) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Could not determine scripted object type for bean '" + beanName + "': "
 							+ ex.getMessage());
@@ -295,6 +301,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 			return null;
 		}
 
+		Assert.state(this.beanFactory != null, "No BeanFactory set");
 		BeanDefinition bd = this.beanFactory.getMergedBeanDefinition(beanName);
 		String scriptFactoryBeanName = SCRIPT_FACTORY_NAME_PREFIX + beanName;
 		String scriptedObjectBeanName = SCRIPTED_OBJECT_NAME_PREFIX + beanName;
@@ -489,7 +496,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * @see org.springframework.cglib.proxy.InterfaceMaker
 	 * @see org.springframework.beans.BeanUtils#findPropertyType
 	 */
-	protected Class<?> createConfigInterface(BeanDefinition bd, Class<?>[] interfaces) {
+	protected Class<?> createConfigInterface(BeanDefinition bd, @Nullable Class<?>[] interfaces) {
 		InterfaceMaker maker = new InterfaceMaker();
 		PropertyValue[] pvs = bd.getPropertyValues().getPropertyValues();
 		for (PropertyValue pv : pvs) {
@@ -538,7 +545,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * @see org.springframework.scripting.ScriptFactory#getScriptedObject
 	 */
 	protected BeanDefinition createScriptedObjectBeanDefinition(BeanDefinition bd, String scriptFactoryBeanName,
-			ScriptSource scriptSource, Class<?>[] interfaces) {
+			ScriptSource scriptSource, @Nullable Class<?>[] interfaces) {
 
 		GenericBeanDefinition objectBd = new GenericBeanDefinition(bd);
 		objectBd.setFactoryBeanName(scriptFactoryBeanName);
@@ -557,15 +564,21 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * @return the generated proxy
 	 * @see RefreshableScriptTargetSource
 	 */
-	protected Object createRefreshableProxy(TargetSource ts, Class<?>[] interfaces, boolean proxyTargetClass) {
+	protected Object createRefreshableProxy(TargetSource ts, @Nullable Class<?>[] interfaces, boolean proxyTargetClass) {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTargetSource(ts);
 		ClassLoader classLoader = this.beanClassLoader;
 
-		if (interfaces == null) {
-			interfaces = ClassUtils.getAllInterfacesForClass(ts.getTargetClass(), this.beanClassLoader);
+		if (interfaces != null) {
+			proxyFactory.setInterfaces(interfaces);
 		}
-		proxyFactory.setInterfaces(interfaces);
+		else {
+			Class<?> targetClass = ts.getTargetClass();
+			if (targetClass != null) {
+				proxyFactory.setInterfaces(ClassUtils.getAllInterfacesForClass(targetClass, this.beanClassLoader));
+			}
+		}
+
 		if (proxyTargetClass) {
 			classLoader = null;  // force use of Class.getClassLoader()
 			proxyFactory.setProxyTargetClass(true);

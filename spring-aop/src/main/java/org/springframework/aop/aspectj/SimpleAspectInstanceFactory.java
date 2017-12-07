@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -76,6 +77,7 @@ public class SimpleAspectInstanceFactory implements AspectInstanceFactory {
 	}
 
 	@Override
+	@Nullable
 	public ClassLoader getAspectClassLoader() {
 		return this.aspectClass.getClassLoader();
 	}

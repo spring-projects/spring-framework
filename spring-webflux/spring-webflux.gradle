@@ -1,0 +1,69 @@
+description = "Spring WebFlux"
+
+apply plugin: "io.spring.dependency-management"
+
+dependencyManagement {
+	imports {
+		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
+		mavenBom "io.netty:netty-bom:${nettyVersion}"
+	}
+	resolutionStrategy {
+		cacheChangingModulesFor 0, 'seconds'
+	}
+	applyMavenExclusions = false
+}
+
+dependencies {
+	compile(project(":spring-beans"))
+	compile(project(":spring-core"))
+	compile(project(":spring-web"))
+	compile("io.projectreactor:reactor-core")
+	optional(project(":spring-context"))
+	optional(project(":spring-context-support"))  // for FreeMarker support
+	optional("javax.servlet:javax.servlet-api:3.1.0")
+	optional("javax.websocket:javax.websocket-api:1.1")
+	optional("org.webjars:webjars-locator:0.32-1")
+	optional("org.freemarker:freemarker:${freemarkerVersion}")
+	optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
+	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jackson2Version}")
+	optional("io.reactivex:rxjava:${rxjavaVersion}")
+	optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
+	optional("io.projectreactor.ipc:reactor-netty")
+	optional("org.apache.tomcat:tomcat-websocket:${tomcatVersion}") {
+		exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
+		exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
+	}
+	optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
+		exclude group: "javax.servlet", module: "javax.servlet"
+	}
+	optional("io.undertow:undertow-websockets-jsr:${undertowVersion}") {
+		exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.1_spec"
+	}
+	optional("org.apache.httpcomponents:httpclient:4.5.3") {
+		exclude group: "commons-logging", module: "commons-logging"
+	}
+	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+	testCompile("javax.xml.bind:jaxb-api:2.3.0")
+	testCompile("org.hibernate:hibernate-validator:6.0.5.Final")
+	testCompile "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
+	testCompile("io.projectreactor:reactor-test")
+	testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
+	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
+	testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
+	testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
+	testCompile("io.undertow:undertow-core:${undertowVersion}")
+	testCompile("com.fasterxml:aalto-xml:1.0.0")
+	testCompile("com.squareup.okhttp3:mockwebserver:3.9.1")
+	testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
+	testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}")
+	testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
+	testRuntime("org.jruby:jruby:9.1.14.0")
+	testRuntime("org.python:jython-standalone:2.7.1")
+	testRuntime("org.synchronoss.cloud:nio-multipart-parser:1.1.0")
+	testRuntime("org.webjars:underscorejs:1.8.3")
+	testRuntime("org.glassfish:javax.el:3.0.1-b08")
+	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0")
+	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0")
+	testRuntime("com.sun.activation:javax.activation:1.2.0")
+}

@@ -16,7 +16,7 @@
 
 package org.springframework.http.converter;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 
 /**
  * Thrown by {@link HttpMessageConverter} implementations when the
@@ -41,19 +41,8 @@ public class HttpMessageNotReadableException extends HttpMessageConversionExcept
 	 * @param msg the detail message
 	 * @param cause the root cause (if any)
 	 */
-	public HttpMessageNotReadableException(String msg, Throwable cause) {
+	public HttpMessageNotReadableException(String msg, @Nullable Throwable cause) {
 		super(msg, cause);
-	}
-
-	/**
-	 * Create a new HttpMessageNotReadableException.
-	 * @since 5.0
-	 * @param msg the detail message
-	 * @param cause the root cause (if any)
-	 * @param errorStatus the HTTP error status related to this exception
-	 */
-	public HttpMessageNotReadableException(String msg, Throwable cause, HttpStatus errorStatus) {
-		super(msg, cause, errorStatus);
 	}
 
 }

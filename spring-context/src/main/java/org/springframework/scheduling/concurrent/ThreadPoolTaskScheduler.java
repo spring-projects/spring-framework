@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskRejectedException;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
@@ -60,9 +61,11 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 
 	private volatile boolean removeOnCancelPolicy = false;
 
-	private volatile ScheduledExecutorService scheduledExecutor;
-
+	@Nullable
 	private volatile ErrorHandler errorHandler;
+
+	@Nullable
+	private ScheduledExecutorService scheduledExecutor;
 
 
 	/**
@@ -235,8 +238,9 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		ExecutorService executor = getScheduledExecutor();
 		try {
 			Callable<T> taskToUse = task;
-			if (this.errorHandler != null) {
-				taskToUse = new DelegatingErrorHandlingCallable<>(task, this.errorHandler);
+			ErrorHandler errorHandler = this.errorHandler;
+			if (errorHandler != null) {
+				taskToUse = new DelegatingErrorHandlingCallable<>(task, errorHandler);
 			}
 			return executor.submit(taskToUse);
 		}
@@ -280,11 +284,14 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	// TaskScheduler implementation
 
 	@Override
+	@Nullable
 	public ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		try {
-			ErrorHandler errorHandler =
-					(this.errorHandler != null ? this.errorHandler : TaskUtils.getDefaultErrorHandler(true));
+			ErrorHandler errorHandler = this.errorHandler;
+			if (errorHandler == null) {
+				errorHandler = TaskUtils.getDefaultErrorHandler(true);
+			}
 			return new ReschedulingRunnable(task, trigger, executor, errorHandler).schedule();
 		}
 		catch (RejectedExecutionException ex) {
@@ -368,6 +375,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 
 		@Override
+		@Nullable
 		public V call() throws Exception {
 			try {
 				return this.delegate.call();

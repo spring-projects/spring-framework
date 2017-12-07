@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,14 +81,23 @@ public abstract class MockMvcResultMatchers {
 
 	/**
 	 * Asserts the request was forwarded to the given URL.
-	 * <p>This method accepts exact matches against the expanded URL template.
+	 * <p>This method accepts only exact matches.
+	 * @param expectedUrl the exact URL expected
+	 */
+	public static ResultMatcher forwardedUrl(String expectedUrl) {
+		return result -> assertEquals("Forwarded URL", expectedUrl, result.getResponse().getForwardedUrl());
+	}
+
+	/**
+	 * Asserts the request was forwarded to the given URL template.
+	 * <p>This method accepts exact matches against the expanded and encoded URL template.
 	 * @param urlTemplate a URL template; the expanded URL will be encoded
 	 * @param uriVars zero or more URI variables to populate the template
 	 * @see UriComponentsBuilder#fromUriString(String)
 	 */
-	public static ResultMatcher forwardedUrl(String urlTemplate, Object... uriVars) {
+	public static ResultMatcher forwardedUrlTemplate(String urlTemplate, Object... uriVars) {
 		String uri = UriComponentsBuilder.fromUriString(urlTemplate).buildAndExpand(uriVars).encode().toUriString();
-		return result -> assertEquals("Forwarded URL", uri, result.getResponse().getForwardedUrl());
+		return forwardedUrl(uri);
 	}
 
 	/**
@@ -102,21 +111,31 @@ public abstract class MockMvcResultMatchers {
 	public static ResultMatcher forwardedUrlPattern(String urlPattern) {
 		return result -> {
 			assertTrue("AntPath pattern", pathMatcher.isPattern(urlPattern));
+			String url = result.getResponse().getForwardedUrl();
 			assertTrue("Forwarded URL does not match the expected URL pattern",
-					pathMatcher.match(urlPattern, result.getResponse().getForwardedUrl()));
+					(url != null && pathMatcher.match(urlPattern, url)));
 		};
 	}
 
 	/**
 	 * Asserts the request was redirected to the given URL.
-	 * <p>This method accepts exact matches against the expanded URL template.
+	 * <p>This method accepts only exact matches.
+	 * @param expectedUrl the exact URL expected
+	 */
+	public static ResultMatcher redirectedUrl(String expectedUrl) {
+		return result -> assertEquals("Redirected URL", expectedUrl, result.getResponse().getRedirectedUrl());
+	}
+
+	/**
+	 * Asserts the request was redirected to the given URL template.
+	 * <p>This method accepts exact matches against the expanded and encoded URL template.
 	 * @param urlTemplate a URL template; the expanded URL will be encoded
 	 * @param uriVars zero or more URI variables to populate the template
 	 * @see UriComponentsBuilder#fromUriString(String)
 	 */
-	public static ResultMatcher redirectedUrl(String urlTemplate, Object... uriVars) {
+	public static ResultMatcher redirectedUrlTemplate(String urlTemplate, Object... uriVars) {
 		String uri = UriComponentsBuilder.fromUriString(urlTemplate).buildAndExpand(uriVars).encode().toUriString();
-		return result -> assertEquals("Redirected URL", uri, result.getResponse().getRedirectedUrl());
+		return redirectedUrl(uri);
 	}
 
 	/**
@@ -129,9 +148,10 @@ public abstract class MockMvcResultMatchers {
 	 */
 	public static ResultMatcher redirectedUrlPattern(String urlPattern) {
 		return result -> {
-			assertTrue("AntPath pattern", pathMatcher.isPattern(urlPattern));
+			assertTrue("No Ant-style path pattern", pathMatcher.isPattern(urlPattern));
+			String url = result.getResponse().getRedirectedUrl();
 			assertTrue("Redirected URL does not match the expected URL pattern",
-					pathMatcher.match(urlPattern, result.getResponse().getRedirectedUrl()));
+					(url != null && pathMatcher.match(urlPattern, url)));
 		};
 	}
 

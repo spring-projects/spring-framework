@@ -22,6 +22,7 @@ import java.io.Writer;
 import javax.servlet.ServletResponse;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -57,8 +58,8 @@ public class ServletResponseMethodArgumentResolver implements HandlerMethodArgum
 	 * {@code null}, the request is considered directly handled.
 	 */
 	@Override
-	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 
 		if (mavContainer != null) {
 			mavContainer.setRequestHandled(true);

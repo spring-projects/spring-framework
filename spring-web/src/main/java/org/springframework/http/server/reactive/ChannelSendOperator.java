@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,14 @@ import java.util.function.Function;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import reactor.core.Exceptions;
-import reactor.core.publisher.MonoSource;
+import reactor.core.CoreSubscriber;
+import reactor.core.Scannable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.publisher.Operators;
+import reactor.util.context.Context;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -39,25 +43,61 @@ import org.springframework.util.Assert;
  * @author Stephane Maldini
  * @since 5.0
  */
-public class ChannelSendOperator<T> extends MonoSource<T, Void> {
+public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 
 	private final Function<Publisher<T>, Publisher<Void>> writeFunction;
 
+	private final Flux<T> source;
+
 
 	public ChannelSendOperator(Publisher<? extends T> source, Function<Publisher<T>, Publisher<Void>> writeFunction) {
-		super(source);
+		this.source = Flux.from(source);
 		this.writeFunction = writeFunction;
 	}
 
 
 	@Override
-	public void subscribe(Subscriber<? super Void> s) {
-		this.source.subscribe(new WriteWithBarrier(s));
+	@Nullable
+	@SuppressWarnings("rawtypes")
+	public Object scanUnsafe(Attr key) {
+		if (key == Attr.PREFETCH) {
+			return Integer.MAX_VALUE;
+		}
+		if (key == Attr.PARENT) {
+			return this.source;
+		}
+		return null;
+	}
+
+	@Override
+	public void subscribe(CoreSubscriber<? super Void> actual) {
+		this.source.subscribe(new WriteBarrier(actual));
 	}
 
 
-	@SuppressWarnings("deprecation")
-	private class WriteWithBarrier extends SubscriberAdapter<T, Void> implements Publisher<T> {
+	/**
+	 * A barrier inserted between the write source and the write subscriber
+	 * (i.e. the HTTP server adapter) that pre-fetches and waits for the first
+	 * signal before deciding whether to hook in to the write subscriber.
+	 *
+	 * <p>Acts as:
+	 * <ul>
+	 * <li>Subscriber to the write source.
+	 * <li>Subscription to the write subscriber.
+	 * <li>Publisher to the write subscriber.
+	 * </ul>
+	 *
+	 * <p>Also uses {@link WriteCompletionBarrier} to communicate completion
+	 * and detect cancel signals from the completion subscriber.
+	 */
+	private class WriteBarrier implements CoreSubscriber<T>, Subscription, Publisher<T> {
+
+		/* Bridges signals to and from the completionSubscriber */
+		private final WriteCompletionBarrier writeCompletionBarrier;
+
+		/* Upstream write source subscription */
+		@Nullable
+		private Subscription subscription;
 
 		/**
 		 * We've at at least one emission, we've called the write function, the write
@@ -70,62 +110,80 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 		private boolean beforeFirstEmission = true;
 
 		/** Cached signal before readyToWrite */
+		@Nullable
 		private T item;
 
 		/** Cached 1st/2nd signal before readyToWrite */
+		@Nullable
 		private Throwable error;
 
 		/** Cached 1st/2nd signal before readyToWrite */
 		private boolean completed = false;
 
-		/** The actual writeSubscriber vs the downstream completion subscriber */
+		/** The actual writeSubscriber from the HTTP server adapter */
+		@Nullable
 		private Subscriber<? super T> writeSubscriber;
 
-		public WriteWithBarrier(Subscriber<? super Void> subscriber) {
-			super(subscriber);
+
+		WriteBarrier(CoreSubscriber<? super Void> completionSubscriber) {
+			this.writeCompletionBarrier = new WriteCompletionBarrier(completionSubscriber, this);
+		}
+
+
+		// Subscriber<T> methods (we're the subscriber to the write source)..
+
+		@Override
+		public final void onSubscribe(Subscription s) {
+			if (Operators.validate(this.subscription, s)) {
+				this.subscription = s;
+				this.writeCompletionBarrier.connect();
+				s.request(1);
+			}
 		}
 
 		@Override
-		protected void doOnSubscribe(Subscription subscription) {
-			super.doOnSubscribe(subscription);
-			super.upstream().request(1);  // bypass doRequest
-		}
-
-		@Override
-		public void doNext(T item) {
+		public final void onNext(T item) {
 			if (this.readyToWrite) {
-				this.writeSubscriber.onNext(item);
+				requiredWriteSubscriber().onNext(item);
 				return;
 			}
+			//FIXME revisit in case of reentrant sync deadlock
 			synchronized (this) {
 				if (this.readyToWrite) {
-					this.writeSubscriber.onNext(item);
+					requiredWriteSubscriber().onNext(item);
 				}
 				else if (this.beforeFirstEmission) {
 					this.item = item;
 					this.beforeFirstEmission = false;
-					writeFunction.apply(this).subscribe(new DownstreamBridge(downstream()));
+					writeFunction.apply(this).subscribe(this.writeCompletionBarrier);
 				}
 				else {
-					subscription.cancel();
-					downstream().onError(new IllegalStateException("Unexpected item."));
+					if (this.subscription != null) {
+						this.subscription.cancel();
+					}
+					this.writeCompletionBarrier.onError(new IllegalStateException("Unexpected item."));
 				}
 			}
 		}
 
+		private Subscriber<? super T> requiredWriteSubscriber() {
+			Assert.state(this.writeSubscriber != null, "No write subscriber");
+			return this.writeSubscriber;
+		}
+
 		@Override
-		public void doError(Throwable ex) {
+		public final void onError(Throwable ex) {
 			if (this.readyToWrite) {
-				this.writeSubscriber.onError(ex);
+				requiredWriteSubscriber().onError(ex);
 				return;
 			}
 			synchronized (this) {
 				if (this.readyToWrite) {
-					this.writeSubscriber.onError(ex);
+					requiredWriteSubscriber().onError(ex);
 				}
 				else if (this.beforeFirstEmission) {
 					this.beforeFirstEmission = false;
-					downstream().onError(ex);
+					this.writeCompletionBarrier.onError(ex);
 				}
 				else {
 					this.error = ex;
@@ -134,19 +192,19 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 		}
 
 		@Override
-		public void doComplete() {
+		public final void onComplete() {
 			if (this.readyToWrite) {
-				this.writeSubscriber.onComplete();
+				requiredWriteSubscriber().onComplete();
 				return;
 			}
 			synchronized (this) {
 				if (this.readyToWrite) {
-					this.writeSubscriber.onComplete();
+					requiredWriteSubscriber().onComplete();
 				}
 				else if (this.beforeFirstEmission) {
 					this.completed = true;
 					this.beforeFirstEmission = false;
-					writeFunction.apply(this).subscribe(new DownstreamBridge(downstream()));
+					writeFunction.apply(this).subscribe(this.writeCompletionBarrier);
 				}
 				else {
 					this.completed = true;
@@ -155,11 +213,70 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 		}
 
 		@Override
+		public Context currentContext() {
+			return this.writeCompletionBarrier.currentContext();
+		}
+
+
+		// Subscription methods (we're the Subscription to the writeSubscriber)..
+
+		@Override
+		public void request(long n) {
+			Subscription s = this.subscription;
+			if (s == null) {
+				return;
+			}
+			if (this.readyToWrite) {
+				s.request(n);
+				return;
+			}
+			synchronized (this) {
+				if (this.writeSubscriber != null) {
+					this.readyToWrite = true;
+					if (emitCachedSignals()) {
+						return;
+					}
+					n--;
+					if (n == 0) {
+						return;
+					}
+				}
+			}
+			s.request(n);
+		}
+
+		private boolean emitCachedSignals() {
+			if (this.item != null) {
+				requiredWriteSubscriber().onNext(this.item);
+			}
+			if (this.error != null) {
+				requiredWriteSubscriber().onError(this.error);
+				return true;
+			}
+			if (this.completed) {
+				requiredWriteSubscriber().onComplete();
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public void cancel() {
+			Subscription s = this.subscription;
+			if (s != null) {
+				this.subscription = null;
+				s.cancel();
+			}
+		}
+
+
+		// Publisher<T> methods (we're the Publisher to the writeSubscriber)..
+
+		@Override
 		public void subscribe(Subscriber<? super T> writeSubscriber) {
 			synchronized (this) {
-				Assert.isNull(this.writeSubscriber, "Only one writeSubscriber supported");
+				Assert.state(this.writeSubscriber == null, "Only one write subscriber supported");
 				this.writeSubscriber = writeSubscriber;
-
 				if (this.error != null || this.completed) {
 					this.writeSubscriber.onSubscribe(Operators.emptySubscription());
 					emitCachedSignals();
@@ -169,184 +286,41 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 				}
 			}
 		}
-
-		/**
-		 * Emit cached signals to the write subscriber.
-		 * @return true if no more signals expected
-		 */
-		private boolean emitCachedSignals() {
-			if (this.item != null) {
-				this.writeSubscriber.onNext(this.item);
-			}
-			if (this.error != null) {
-				this.writeSubscriber.onError(this.error);
-				return true;
-			}
-			if (this.completed) {
-				this.writeSubscriber.onComplete();
-				return true;
-			}
-			return false;
-		}
-
-		@Override
-		protected void doRequest(long n) {
-			if (readyToWrite) {
-				super.doRequest(n);
-				return;
-			}
-			synchronized (this) {
-				if (this.writeSubscriber != null) {
-					readyToWrite = true;
-					if (emitCachedSignals()) {
-						return;
-					}
-					n--;
-					if (n == 0) {
-						return;
-					}
-					super.doRequest(n);
-				}
-			}
-		}
-	}
-
-	// TODO Remove this copy of Reactor 3.0.x Operators.SubscriberAdapter
-	private static class SubscriberAdapter<I, O> implements Subscriber<I>, Subscription {
-
-		protected final Subscriber<? super O> subscriber;
-
-		protected Subscription subscription;
-
-		public SubscriberAdapter(Subscriber<? super O> subscriber) {
-			this.subscriber = subscriber;
-		}
-
-		public Subscriber<? super O> downstream() {
-			return subscriber;
-		}
-
-		@Override
-		public final void cancel() {
-			try {
-				doCancel();
-			} catch (Throwable throwable) {
-				doOnSubscriberError(Operators.onOperatorError(subscription, throwable));
-			}
-		}
-
-		@Override
-		public final void onComplete() {
-			try {
-				doComplete();
-			} catch (Throwable throwable) {
-				doOnSubscriberError(Operators.onOperatorError(throwable));
-			}
-		}
-
-		@Override
-		public final void onError(Throwable t) {
-			if (t == null) {
-				throw Exceptions.argumentIsNullException();
-			}
-			doError(t);
-		}
-
-		@Override
-		public final void onNext(I i) {
-			if (i == null) {
-				throw Exceptions.argumentIsNullException();
-			}
-			try {
-				doNext(i);
-			}
-			catch (Throwable throwable) {
-				doOnSubscriberError(Operators.onOperatorError(subscription, throwable, i));
-			}
-		}
-
-		@Override
-		public final void onSubscribe(Subscription s) {
-			if (Operators.validate(subscription, s)) {
-				try {
-					subscription = s;
-					doOnSubscribe(s);
-				}
-				catch (Throwable throwable) {
-					doOnSubscriberError(Operators.onOperatorError(s, throwable));
-				}
-			}
-		}
-
-		@Override
-		public final void request(long n) {
-			try {
-				Operators.checkRequest(n);
-				doRequest(n);
-			} catch (Throwable throwable) {
-				doCancel();
-				doOnSubscriberError(Operators.onOperatorError(throwable));
-			}
-		}
-
-		@Override
-		public String toString() {
-			return getClass().getSimpleName();
-		}
-
-		/**
-		 * Hook for further processing of onSubscribe's Subscription.
-		 * @param subscription the subscription to optionally process
-		 */
-		protected void doOnSubscribe(Subscription subscription) {
-			subscriber.onSubscribe(this);
-		}
-
-		public Subscription upstream() {
-			return subscription;
-		}
-
-		@SuppressWarnings("unchecked")
-		protected void doNext(I i) {
-			subscriber.onNext((O) i);
-		}
-
-		protected void doError(Throwable throwable) {
-			subscriber.onError(throwable);
-		}
-
-		protected void doOnSubscriberError(Throwable throwable){
-			subscriber.onError(throwable);
-		}
-
-		protected void doComplete() {
-			subscriber.onComplete();
-		}
-
-		protected void doRequest(long n) {
-			Subscription s = this.subscription;
-			if (s != null) {
-				s.request(n);
-			}
-		}
-
-		protected void doCancel() {
-			Subscription s = this.subscription;
-			if (s != null) {
-				this.subscription = null;
-				s.cancel();
-			}
-		}
 	}
 
 
-	private class DownstreamBridge implements Subscriber<Void> {
+	/**
+	 * We need an extra barrier between the WriteBarrier itself and the actual
+	 * completion subscriber.
+	 *
+	 * <p>The completionSubscriber is subscribed initially to the WriteBarrier.
+	 * Later after the first signal is received, we need one more subscriber
+	 * instance (per spec can only subscribe once) to subscribe to the write
+	 * function and switch to delegating completion signals from it.
+	 */
+	private class WriteCompletionBarrier implements CoreSubscriber<Void>, Subscription {
 
-		private final Subscriber<? super Void> downstream;
+		/* Downstream write completion subscriber */
+		private final CoreSubscriber<? super Void> completionSubscriber;
 
-		public DownstreamBridge(Subscriber<? super Void> downstream) {
-			this.downstream = downstream;
+		private final WriteBarrier writeBarrier;
+
+
+		public WriteCompletionBarrier(CoreSubscriber<? super Void> subscriber, WriteBarrier writeBarrier) {
+			this.completionSubscriber = subscriber;
+			this.writeBarrier = writeBarrier;
 		}
+
+
+		/**
+		 * Connect the underlying completion subscriber to this barrier in order
+		 * to track cancel signals and pass them on to the write barrier.
+		 */
+		public void connect() {
+			this.completionSubscriber.onSubscribe(this);
+		}
+
+		// Subscriber methods (we're the subscriber to the write function)..
 
 		@Override
 		public void onSubscribe(Subscription subscription) {
@@ -359,12 +333,28 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 
 		@Override
 		public void onError(Throwable ex) {
-			this.downstream.onError(ex);
+			this.completionSubscriber.onError(ex);
 		}
 
 		@Override
 		public void onComplete() {
-			this.downstream.onComplete();
+			this.completionSubscriber.onComplete();
+		}
+
+		@Override
+		public Context currentContext() {
+			return this.completionSubscriber.currentContext();
+		}
+
+
+		@Override
+		public void request(long n) {
+			// Ignore: we don't produce data
+		}
+
+		@Override
+		public void cancel() {
+			this.writeBarrier.cancel();
 		}
 	}
 

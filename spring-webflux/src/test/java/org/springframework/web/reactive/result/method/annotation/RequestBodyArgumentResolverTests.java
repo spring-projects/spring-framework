@@ -19,6 +19,7 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import io.reactivex.Maybe;
@@ -37,6 +38,7 @@ import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
@@ -68,7 +70,7 @@ public class RequestBodyArgumentResolverTests {
 	public void setup() {
 		List<HttpMessageReader<?>> readers = new ArrayList<>();
 		readers.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
-		this.resolver = new RequestBodyArgumentResolver(readers, new ReactiveAdapterRegistry());
+		this.resolver = new RequestBodyArgumentResolver(readers, ReactiveAdapterRegistry.getSharedInstance());
 	}
 
 
@@ -101,6 +103,14 @@ public class RequestBodyArgumentResolverTests {
 	@Test
 	public void emptyBodyWithStringNotRequired() throws Exception {
 		MethodParameter param = this.testMethod.annot(requestBody().notRequired()).arg(String.class);
+		String body = resolveValueWithEmptyBody(param);
+
+		assertNull(body);
+	}
+
+	@Test // SPR-15758
+	public void emptyBodyWithoutContentType() throws Exception {
+		MethodParameter param = this.testMethod.annot(requestBody().notRequired()).arg(Map.class);
 		String body = resolveValueWithEmptyBody(param);
 
 		assertNull(body);
@@ -214,7 +224,7 @@ public class RequestBodyArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> T resolveValue(MethodParameter param, String body) {
-		ServerWebExchange exchange = MockServerHttpRequest.post("/path").body(body).toExchange();
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("/path").body(body));
 		Mono<Object> result = this.resolver.readBody(param, true, new BindingContext(), exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
@@ -228,7 +238,7 @@ public class RequestBodyArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> T resolveValueWithEmptyBody(MethodParameter param) {
-		ServerWebExchange exchange = MockServerHttpRequest.post("/path").build().toExchange();
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("/path"));
 		Mono<Object> result = this.resolver.resolveArgument(param, new BindingContext(), exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
@@ -262,6 +272,7 @@ public class RequestBodyArgumentResolverTests {
 			@RequestBody(required = false) Observable<String> obsNotRequired,
 			@RequestBody(required = false) io.reactivex.Observable<String> rxjava2ObsNotRequired,
 			@RequestBody(required = false) CompletableFuture<String> futureNotRequired,
+			@RequestBody(required = false) Map<?, ?> mapNotRequired,
 			String notAnnotated) {}
 
 }

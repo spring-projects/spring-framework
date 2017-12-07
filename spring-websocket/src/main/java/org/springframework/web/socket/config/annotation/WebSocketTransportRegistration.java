@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.socket.config.annotation;
 
+package org.springframework.web.socket.config.annotation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory;
 
 /**
@@ -30,30 +31,29 @@ import org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory;
  */
 public class WebSocketTransportRegistration {
 
+	@Nullable
 	private Integer messageSizeLimit;
 
+	@Nullable
 	private Integer sendTimeLimit;
 
+	@Nullable
 	private Integer sendBufferSizeLimit;
 
-	private final List<WebSocketHandlerDecoratorFactory> decoratorFactories =
-			new ArrayList<>(2);
+	private final List<WebSocketHandlerDecoratorFactory> decoratorFactories = new ArrayList<>(2);
 
 
 	/**
 	 * Configure the maximum size for an incoming sub-protocol message.
 	 * For example a STOMP message may be received as multiple WebSocket messages
 	 * or multiple HTTP POST requests when SockJS fallback options are in use.
-	 *
 	 * <p>In theory a WebSocket message can be almost unlimited in size.
 	 * In practice WebSocket servers impose limits on incoming message size.
 	 * STOMP clients for example tend to split large messages around 16K
 	 * boundaries. Therefore a server must be able to buffer partial content
 	 * and decode when enough data is received. Use this property to configure
 	 * the max size of the buffer to use.
-	 *
 	 * <p>The default value is 64K (i.e. 64 * 1024).
-	 *
 	 * <p><strong>NOTE</strong> that the current version 1.2 of the STOMP spec
 	 * does not specifically discuss how to send STOMP messages over WebSocket.
 	 * Version 2 of the spec will but in the mean time existing client libraries
@@ -67,6 +67,7 @@ public class WebSocketTransportRegistration {
 	/**
 	 * Protected accessor for internal use.
 	 */
+	@Nullable
 	protected Integer getMessageSizeLimit() {
 		return this.messageSizeLimit;
 	}
@@ -75,7 +76,6 @@ public class WebSocketTransportRegistration {
 	 * Configure a time limit (in milliseconds) for the maximum amount of a time
 	 * allowed when sending messages to a WebSocket session or writing to an
 	 * HTTP response when SockJS fallback option are in use.
-	 *
 	 * <p>In general WebSocket servers expect that messages to a single WebSocket
 	 * session are sent from a single thread at a time. This is automatically
 	 * guaranteed when using {@code @EnableWebSocketMessageBroker} configuration.
@@ -83,14 +83,12 @@ public class WebSocketTransportRegistration {
 	 * subsequent messages are buffered until either the {@code sendTimeLimit}
 	 * or the {@code sendBufferSizeLimit} are reached at which point the session
 	 * state is cleared and an attempt is made to close the session.
-	 *
 	 * <p><strong>NOTE</strong> that the session time limit is checked only
 	 * on attempts to send additional messages. So if only a single message is
 	 * sent and it hangs, the session will not time out until another message is
 	 * sent or the underlying physical socket times out. So this is not a
 	 * replacement for WebSocket server or HTTP connection timeout but is rather
 	 * intended to control the extent of buffering of unsent messages.
-	 *
 	 * <p><strong>NOTE</strong> that closing the session may not succeed in
 	 * actually closing the physical socket and may also hang. This is true
 	 * especially when using blocking IO such as the BIO connector in Tomcat
@@ -99,11 +97,9 @@ public class WebSocketTransportRegistration {
 	 * is used by default on Tomcat 8. If you must use blocking IO consider
 	 * customizing OS-level TCP settings, for example
 	 * {@code /proc/sys/net/ipv4/tcp_retries2} on Linux.
-	 *
 	 * <p>The default value is 10 seconds (i.e. 10 * 10000).
-	 *
 	 * @param timeLimit the timeout value in milliseconds; the value must be
-	 * 	greater than 0, otherwise it is ignored.
+	 * greater than 0, otherwise it is ignored.
 	 */
 	public WebSocketTransportRegistration setSendTimeLimit(int timeLimit) {
 		this.sendTimeLimit = timeLimit;
@@ -113,6 +109,7 @@ public class WebSocketTransportRegistration {
 	/**
 	 * Protected accessor for internal use.
 	 */
+	@Nullable
 	protected Integer getSendTimeLimit() {
 		return this.sendTimeLimit;
 	}
@@ -121,7 +118,6 @@ public class WebSocketTransportRegistration {
 	 * Configure the maximum amount of data to buffer when sending messages
 	 * to a WebSocket session, or an HTTP response when SockJS fallback
 	 * option are in use.
-	 *
 	 * <p>In general WebSocket servers expect that messages to a single WebSocket
 	 * session are sent from a single thread at a time. This is automatically
 	 * guaranteed when using {@code @EnableWebSocketMessageBroker} configuration.
@@ -129,7 +125,6 @@ public class WebSocketTransportRegistration {
 	 * subsequent messages are buffered until either the {@code sendTimeLimit}
 	 * or the {@code sendBufferSizeLimit} are reached at which point the session
 	 * state is cleared and an attempt is made to close the session.
-	 *
 	 * <p><strong>NOTE</strong> that closing the session may not succeed in
 	 * actually closing the physical socket and may also hang. This is true
 	 * especially when using blocking IO such as the BIO connector in Tomcat
@@ -138,12 +133,10 @@ public class WebSocketTransportRegistration {
 	 * by default on Tomcat 8. If you must use blocking IO consider customizing
 	 * OS-level TCP settings, for example {@code /proc/sys/net/ipv4/tcp_retries2}
 	 * on Linux.
-	 *
 	 * <p>The default value is 512K (i.e. 512 * 1024).
-	 *
 	 * @param sendBufferSizeLimit the maximum number of bytes to buffer when
-	 *  sending messages; if the value is less than or equal to 0 then buffering
-	 *  is effectively disabled.
+	 * sending messages; if the value is less than or equal to 0 then buffering
+	 * is effectively disabled.
 	 */
 	public WebSocketTransportRegistration setSendBufferSizeLimit(int sendBufferSizeLimit) {
 		this.sendBufferSizeLimit = sendBufferSizeLimit;
@@ -153,6 +146,7 @@ public class WebSocketTransportRegistration {
 	/**
 	 * Protected accessor for internal use.
 	 */
+	@Nullable
 	protected Integer getSendBufferSizeLimit() {
 		return this.sendBufferSizeLimit;
 	}
@@ -165,9 +159,7 @@ public class WebSocketTransportRegistration {
 	 * @since 4.1.2
 	 */
 	public WebSocketTransportRegistration setDecoratorFactories(WebSocketHandlerDecoratorFactory... factories) {
-		if (factories != null) {
-			this.decoratorFactories.addAll(Arrays.asList(factories));
-		}
+		this.decoratorFactories.addAll(Arrays.asList(factories));
 		return this;
 	}
 

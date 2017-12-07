@@ -25,6 +25,7 @@ import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
+import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -60,6 +61,11 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 	}
 
 	@Override
+	public String getMethodValue() {
+		return this.method.name();
+	}
+
+	@Override
 	public URI getURI() {
 		return this.uri;
 	}
@@ -86,7 +92,9 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 				return nextInterceptor.intercept(request, body, this);
 			}
 			else {
-				ClientHttpRequest delegate = requestFactory.createRequest(request.getURI(), request.getMethod());
+				HttpMethod method = request.getMethod();
+				Assert.state(method != null, "No standard HTTP method");
+				ClientHttpRequest delegate = requestFactory.createRequest(request.getURI(), method);
 				for (Map.Entry<String, List<String>> entry : request.getHeaders().entrySet()) {
 					delegate.getHeaders().addAll(entry.getKey(), entry.getValue());
 				}

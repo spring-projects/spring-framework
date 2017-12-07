@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.Optional;
+import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.server.ServerWebExchange;
@@ -41,26 +45,47 @@ public class RequestAttributeMethodArgumentResolver extends AbstractNamedValueSy
 	 * or {@code null} if default values are not expected to have expressions
 	 * @param registry for checking reactive type wrappers
 	 */
-	public RequestAttributeMethodArgumentResolver(ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
+	public RequestAttributeMethodArgumentResolver(@Nullable ConfigurableBeanFactory factory,
+			ReactiveAdapterRegistry registry) {
+
 		super(factory, registry);
 	}
 
 
 	@Override
 	public boolean supportsParameter(MethodParameter param) {
-		return checkAnnotatedParamNoReactiveWrapper(param, RequestAttribute.class, (annot, type) -> true);
+		return param.hasParameterAnnotation(RequestAttribute.class);
 	}
 
 
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		RequestAttribute annot = parameter.getParameterAnnotation(RequestAttribute.class);
-		return new NamedValueInfo(annot.name(), annot.required(), ValueConstants.DEFAULT_NONE);
+		RequestAttribute ann = parameter.getParameterAnnotation(RequestAttribute.class);
+		Assert.state(ann != null, "No RequestAttribute annotation");
+		return new NamedValueInfo(ann.name(), ann.required(), ValueConstants.DEFAULT_NONE);
 	}
 
 	@Override
-	protected Optional<Object> resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
-		return exchange.getAttribute(name);
+	protected Object resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
+		Object value = exchange.getAttribute(name);
+		ReactiveAdapter toAdapter = getAdapterRegistry().getAdapter(parameter.getParameterType());
+		if (toAdapter != null) {
+			if (value == null) {
+				Assert.isTrue(toAdapter.supportsEmpty(),
+						() -> "No request attribute '" + name + "' and target type " +
+								parameter.getGenericParameterType() + " doesn't support empty values.");
+				return toAdapter.fromPublisher(Mono.empty());
+			}
+			if (parameter.getParameterType().isAssignableFrom(value.getClass())) {
+				return value;
+			}
+			ReactiveAdapter fromAdapter = getAdapterRegistry().getAdapter(value.getClass());
+			Assert.isTrue(fromAdapter != null,
+					() -> getClass().getSimpleName() + " doesn't support " +
+							"reactive type wrapper: " + parameter.getGenericParameterType());
+			return toAdapter.fromPublisher(fromAdapter.toPublisher(value));
+		}
+		return value;
 	}
 
 	@Override

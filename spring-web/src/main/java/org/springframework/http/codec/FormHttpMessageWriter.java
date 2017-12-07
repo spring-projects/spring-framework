@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,23 +27,35 @@ import java.util.List;
 import java.util.Map;
 
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Implementation of an {@link HttpMessageWriter} to write HTML form data, i.e.
- * response body with media type {@code "application/x-www-form-urlencoded"}.
+ * {@link HttpMessageWriter} for writing a {@code MultiValueMap<String, String>}
+ * as HTML form data, i.e. {@code "application/x-www-form-urlencoded"}, to the
+ * body of a request.
+ *
+ * <p>Note that unless the media type is explicitly set to
+ * {@link MediaType#APPLICATION_FORM_URLENCODED}, the {@link #canWrite} method
+ * will need generic type information to confirm the target map has String values.
+ * This is because a MultiValueMap with non-String values can be used to write
+ * multipart requests.
+ *
+ * <p>To support both form data and multipart requests, consider using
+ * {@link org.springframework.http.codec.multipart.MultipartHttpMessageWriter}
+ * configured with this writer as the fallback for writing plain form data.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @see org.springframework.http.codec.multipart.MultipartHttpMessageWriter
  */
 public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<String, String>> {
 
@@ -51,6 +63,9 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 
 	private static final ResolvableType MULTIVALUE_TYPE =
 			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
+
+	private static final List<MediaType> MEDIA_TYPES =
+			Collections.singletonList(MediaType.APPLICATION_FORM_URLENCODED);
 
 
 	private Charset defaultCharset = DEFAULT_CHARSET;
@@ -62,7 +77,7 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 	 * <p>By default this is set to "UTF-8".
 	 */
 	public void setDefaultCharset(Charset charset) {
-		Assert.notNull(charset, "'charset' must not be null");
+		Assert.notNull(charset, "Charset must not be null");
 		this.defaultCharset = charset;
 	}
 
@@ -75,14 +90,31 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 
 
 	@Override
-	public boolean canWrite(ResolvableType elementType, MediaType mediaType) {
-		return MULTIVALUE_TYPE.isAssignableFrom(elementType) &&
-				(mediaType == null || MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType));
+	public List<MediaType> getWritableMediaTypes() {
+		return MEDIA_TYPES;
+	}
+
+
+	@Override
+	public boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType) {
+		Class<?> rawClass = elementType.getRawClass();
+		if (rawClass == null || !MultiValueMap.class.isAssignableFrom(rawClass)) {
+			return false;
+		}
+		if (MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType)) {
+			// Optimistically, any MultiValueMap with or without generics
+			return true;
+		}
+		if (mediaType == null) {
+			// Only String-based MultiValueMap
+			return MULTIVALUE_TYPE.isAssignableFrom(elementType);
+		}
+		return false;
 	}
 
 	@Override
 	public Mono<Void> write(Publisher<? extends MultiValueMap<String, String>> inputStream,
-			ResolvableType elementType, MediaType mediaType, ReactiveHttpOutputMessage message,
+			ResolvableType elementType, @Nullable MediaType mediaType, ReactiveHttpOutputMessage message,
 			Map<String, Object> hints) {
 
 		MediaType contentType = message.getHeaders().getContentType();
@@ -93,11 +125,8 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 
 		Charset charset = getMediaTypeCharset(contentType);
 
-		return Flux
-				.from(inputStream)
-				.single()
-				.map(form -> generateForm(form, charset))
-				.flatMap(value -> {
+		return Mono.from(inputStream).flatMap(form -> {
+					String value = serializeForm(form, charset);
 					ByteBuffer byteBuffer = charset.encode(value);
 					DataBuffer buffer = message.bufferFactory().wrap(byteBuffer);
 					message.getHeaders().setContentLength(byteBuffer.remaining());
@@ -106,7 +135,7 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 
 	}
 
-	private Charset getMediaTypeCharset(MediaType mediaType) {
+	private Charset getMediaTypeCharset(@Nullable MediaType mediaType) {
 		if (mediaType != null && mediaType.getCharset() != null) {
 			return mediaType.getCharset();
 		}
@@ -115,17 +144,20 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 		}
 	}
 
-	private String generateForm(MultiValueMap<String, String> form, Charset charset) {
+	private String serializeForm(MultiValueMap<String, String> form, Charset charset) {
 		StringBuilder builder = new StringBuilder();
 		try {
 			for (Iterator<String> names = form.keySet().iterator(); names.hasNext();) {
 				String name = names.next();
-				for (Iterator<String> values = form.get(name).iterator(); values.hasNext();) {
-					String value = values.next();
+				for (Iterator<?> values = form.get(name).iterator(); values.hasNext();) {
+					Object rawValue = values.next();
 					builder.append(URLEncoder.encode(name, charset.name()));
-					if (value != null) {
+					if (rawValue != null) {
 						builder.append('=');
-						builder.append(URLEncoder.encode(value, charset.name()));
+						Assert.isInstanceOf(String.class, rawValue,
+								"FormHttpMessageWriter supports String values only. " +
+										"Use MultipartHttpMessageWriter for multipart requests.");
+						builder.append(URLEncoder.encode((String) rawValue, charset.name()));
 						if (values.hasNext()) {
 							builder.append('&');
 						}
@@ -140,11 +172,6 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 			throw new IllegalStateException(ex);
 		}
 		return builder.toString();
-	}
-
-	@Override
-	public List<MediaType> getWritableMediaTypes() {
-		return Collections.singletonList(MediaType.APPLICATION_FORM_URLENCODED);
 	}
 
 }

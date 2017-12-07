@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,7 +146,8 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 
 		@Override
 		protected boolean matchValue(ServerWebExchange exchange) {
-			return this.value.equals(exchange.getRequest().getQueryParams().getFirst(this.name));
+			return (this.value != null &&
+					this.value.equals(exchange.getRequest().getQueryParams().getFirst(this.name)));
 		}
 	}
 

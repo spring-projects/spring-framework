@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.util.Assert;
 import org.springframework.util.NumberUtils;
 
 /**
@@ -136,14 +137,17 @@ public class OpMultiply extends Operator {
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		getLeftOperand().generateCode(mv, cf);
 		String leftDesc = getLeftOperand().exitTypeDescriptor;
-		CodeFlow.insertNumericUnboxOrPrimitiveTypeCoercion(mv, leftDesc, this.exitTypeDescriptor.charAt(0));
+		String exitDesc = this.exitTypeDescriptor;
+		Assert.state(exitDesc != null, "No exit type descriptor");
+		char targetDesc = exitDesc.charAt(0);
+		CodeFlow.insertNumericUnboxOrPrimitiveTypeCoercion(mv, leftDesc, targetDesc);
 		if (this.children.length > 1) {
 			cf.enterCompilationScope();
 			getRightOperand().generateCode(mv, cf);
 			String rightDesc = getRightOperand().exitTypeDescriptor;
 			cf.exitCompilationScope();
-			CodeFlow.insertNumericUnboxOrPrimitiveTypeCoercion(mv, rightDesc, this.exitTypeDescriptor.charAt(0));
-			switch (this.exitTypeDescriptor.charAt(0)) {
+			CodeFlow.insertNumericUnboxOrPrimitiveTypeCoercion(mv, rightDesc, targetDesc);
+			switch (targetDesc) {
 				case 'I':
 					mv.visitInsn(IMUL);
 					break;

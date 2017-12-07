@@ -58,6 +58,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.NestedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.junit.Assert.*;
@@ -205,41 +206,60 @@ public class ConfigurationClassProcessingTests {
 	}
 
 	@Test
+	public void configurationWithNullReference() {
+		BeanFactory factory = initBeanFactory(ConfigWithNullReference.class);
+
+		TestBean foo = factory.getBean("foo", TestBean.class);
+		assertTrue(factory.getBean("bar").equals(null));
+		assertNull(foo.getSpouse());
+	}
+
+	@Test
 	public void configurationWithAdaptivePrototypes() {
-		AnnotationConfigApplicationContext factory = new AnnotationConfigApplicationContext();
-		factory.register(ConfigWithPrototypeBean.class, AdaptiveInjectionPoints.class);
-		factory.refresh();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithPrototypeBean.class, AdaptiveInjectionPoints.class);
+		ctx.refresh();
 
-		AdaptiveInjectionPoints adaptive = factory.getBean(AdaptiveInjectionPoints.class);
+		AdaptiveInjectionPoints adaptive = ctx.getBean(AdaptiveInjectionPoints.class);
 		assertEquals("adaptiveInjectionPoint1", adaptive.adaptiveInjectionPoint1.getName());
 		assertEquals("setAdaptiveInjectionPoint2", adaptive.adaptiveInjectionPoint2.getName());
 
-		adaptive = factory.getBean(AdaptiveInjectionPoints.class);
+		adaptive = ctx.getBean(AdaptiveInjectionPoints.class);
 		assertEquals("adaptiveInjectionPoint1", adaptive.adaptiveInjectionPoint1.getName());
 		assertEquals("setAdaptiveInjectionPoint2", adaptive.adaptiveInjectionPoint2.getName());
-		factory.close();
+		ctx.close();
 	}
 
 	@Test
 	public void configurationWithPostProcessor() {
-		AnnotationConfigApplicationContext factory = new AnnotationConfigApplicationContext();
-		factory.register(ConfigWithPostProcessor.class);
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithPostProcessor.class);
 		RootBeanDefinition placeholderConfigurer = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
 		placeholderConfigurer.getPropertyValues().add("properties", "myProp=myValue");
-		factory.registerBeanDefinition("placeholderConfigurer", placeholderConfigurer);
-		factory.refresh();
+		ctx.registerBeanDefinition("placeholderConfigurer", placeholderConfigurer);
+		ctx.refresh();
 
-		TestBean foo = factory.getBean("foo", TestBean.class);
-		ITestBean bar = factory.getBean("bar", ITestBean.class);
-		ITestBean baz = factory.getBean("baz", ITestBean.class);
+		TestBean foo = ctx.getBean("foo", TestBean.class);
+		ITestBean bar = ctx.getBean("bar", ITestBean.class);
+		ITestBean baz = ctx.getBean("baz", ITestBean.class);
 
 		assertEquals("foo-processed-myValue", foo.getName());
 		assertEquals("bar-processed-myValue", bar.getName());
 		assertEquals("baz-processed-myValue", baz.getName());
 
-		SpousyTestBean listener = factory.getBean("listenerTestBean", SpousyTestBean.class);
+		SpousyTestBean listener = ctx.getBean("listenerTestBean", SpousyTestBean.class);
 		assertTrue(listener.refreshed);
-		factory.close();
+		ctx.close();
+	}
+
+	@Test
+	public void configurationWithFunctionalRegistration() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithFunctionalRegistration.class);
+		ctx.refresh();
+
+		assertSame(ctx.getBean("spouse"), ctx.getBean(TestBean.class).getSpouse());
+		assertEquals("functional", ctx.getBean(NestedTestBean.class).getCompany());
 	}
 
 
@@ -296,7 +316,7 @@ public class ConfigurationClassProcessingTests {
 
 		static TestBean testBean = new TestBean(ConfigWithBeanWithAliases.class.getSimpleName());
 
-		@Bean(name = { "name1", "alias1", "alias2", "alias3" })
+		@Bean(name = {"name1", "alias1", "alias2", "alias3"})
 		public TestBean methodName() {
 			return testBean;
 		}
@@ -308,7 +328,7 @@ public class ConfigurationClassProcessingTests {
 
 		static TestBean testBean = new TestBean(ConfigWithBeanWithAliasesConfiguredViaValueAttribute.class.getSimpleName());
 
-		@Bean({ "enigma", "alias1", "alias2", "alias3" })
+		@Bean({"enigma", "alias1", "alias2", "alias3"})
 		public TestBean methodName() {
 			return testBean;
 		}
@@ -404,6 +424,16 @@ public class ConfigurationClassProcessingTests {
 	}
 
 
+	@Configuration
+	static class ConfigWithNullReference extends ConfigWithPrototypeBean {
+
+		@Override
+		public TestBean bar() {
+			return null;
+		}
+	}
+
+
 	@Scope("prototype")
 	static class AdaptiveInjectionPoints {
 
@@ -419,7 +449,6 @@ public class ConfigurationClassProcessingTests {
 	}
 
 
-	@SuppressWarnings("unused")
 	static class ConfigWithPostProcessor extends ConfigWithPrototypeBean {
 
 		@Value("${myProp}")
@@ -493,6 +522,26 @@ public class ConfigurationClassProcessingTests {
 		@Override
 		public void onApplicationEvent(ContextRefreshedEvent event) {
 			this.refreshed = true;
+		}
+	}
+
+
+	@Configuration
+	static class ConfigWithFunctionalRegistration {
+
+		@Autowired
+		void register(GenericApplicationContext ctx) {
+			ctx.registerBean("spouse", TestBean.class,
+					() -> new TestBean("functional"));
+			Supplier<TestBean> testBeanSupplier = () -> new TestBean(ctx.getBean("spouse", TestBean.class));
+			ctx.registerBean(TestBean.class,
+					testBeanSupplier,
+					bd -> bd.setPrimary(true));
+		}
+
+		@Bean
+		public NestedTestBean nestedTestBean(TestBean testBean) {
+			return new NestedTestBean(testBean.getSpouse().getName());
 		}
 	}
 

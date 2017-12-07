@@ -20,6 +20,8 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Interface specifying the API to be implemented by a class providing table metadata.
  * This is intended for internal use by the Simple JDBC classes.
@@ -45,38 +47,42 @@ public interface TableMetaDataProvider {
 	 * @param tableName name of the table
 	 * @throws SQLException in case of initialization failure
 	 */
-	void initializeWithTableColumnMetaData(
-			DatabaseMetaData databaseMetaData, String catalogName, String schemaName, String tableName)
-			throws SQLException;
+	void initializeWithTableColumnMetaData(DatabaseMetaData databaseMetaData, @Nullable String catalogName,
+			@Nullable String schemaName, @Nullable String tableName) throws SQLException;
 
 	/**
 	 * Get the table name formatted based on metadata information. This could include altering the case.
 	 */
-	String tableNameToUse(String tableName);
+	@Nullable
+	String tableNameToUse(@Nullable String tableName);
 
 	/**
 	 * Get the catalog name formatted based on metadata information. This could include altering the case.
 	 */
-	String catalogNameToUse(String catalogName);
+	@Nullable
+	String catalogNameToUse(@Nullable String catalogName);
 
 	/**
 	 * Get the schema name formatted based on metadata information. This could include altering the case.
 	 */
-	String schemaNameToUse(String schemaName);
+	@Nullable
+	String schemaNameToUse(@Nullable String schemaName);
 
 	/**
 	 * Provide any modification of the catalog name passed in to match the meta data currently used.
 	 * The returned value will be used for meta data lookups.  This could include altering the case used or
 	 * providing a base catalog if none is provided.
 	 */
-	String metaDataCatalogNameToUse(String catalogName) ;
+	@Nullable
+	String metaDataCatalogNameToUse(@Nullable String catalogName) ;
 
 	/**
 	 * Provide any modification of the schema name passed in to match the meta data currently used.
 	 * The returned value will be used for meta data lookups.  This could include altering the case used or
 	 * providing a base schema if none is provided.
 	 */
-	String metaDataSchemaNameToUse(String schemaName) ;
+	@Nullable
+	String metaDataSchemaNameToUse(@Nullable String schemaName) ;
 
 	/**
 	 * Are we using the meta data for the table columns?
@@ -99,6 +105,7 @@ public interface TableMetaDataProvider {
 	/**
 	 * Get the simple query to retrieve a generated key
 	 */
+	@Nullable
 	String getSimpleQueryForGetGeneratedKey(String tableName, String keyColumnName);
 
 	/**

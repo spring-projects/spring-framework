@@ -25,6 +25,7 @@ import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
+import org.springframework.lang.Nullable;
 
 /**
  * Extension of the generic JCA 1.5
@@ -59,6 +60,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 
 	private JmsActivationSpecFactory activationSpecFactory = new DefaultJmsActivationSpecFactory();
 
+	@Nullable
 	private JmsActivationSpecConfig activationSpecConfig;
 
 
@@ -108,7 +110,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	 * (plus a couple of autodetected vendor-specific properties).
 	 * @see DefaultJmsActivationSpecFactory
 	 */
-	public void setActivationSpecFactory(JmsActivationSpecFactory activationSpecFactory) {
+	public void setActivationSpecFactory(@Nullable JmsActivationSpecFactory activationSpecFactory) {
 		this.activationSpecFactory =
 				(activationSpecFactory != null ? activationSpecFactory : new DefaultJmsActivationSpecFactory());
 	}
@@ -136,7 +138,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	 * <p>This config object will be turned into a concrete JCA 1.5 ActivationSpec
 	 * object through a {@link #setActivationSpecFactory JmsActivationSpecFactory}.
 	 */
-	public void setActivationSpecConfig(JmsActivationSpecConfig activationSpecConfig) {
+	public void setActivationSpecConfig(@Nullable JmsActivationSpecConfig activationSpecConfig) {
 		this.activationSpecConfig = activationSpecConfig;
 	}
 
@@ -144,6 +146,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	 * Return the {@link JmsActivationSpecConfig} object that this endpoint manager
 	 * should use for activating its listener. Return {@code null} if none is set.
 	 */
+	@Nullable
 	public JmsActivationSpecConfig getActivationSpecConfig() {
 		return this.activationSpecConfig;
 	}
@@ -160,6 +163,9 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 
 	@Override
 	public void afterPropertiesSet() throws ResourceException {
+		if (getResourceAdapter() == null) {
+			throw new IllegalArgumentException("Property 'resourceAdapter' is required");
+		}
 		if (this.messageListenerSet) {
 			setMessageEndpointFactory(this.endpointFactory);
 		}
@@ -167,6 +173,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 			setActivationSpec(
 					this.activationSpecFactory.createActivationSpec(getResourceAdapter(), this.activationSpecConfig));
 		}
+
 		super.afterPropertiesSet();
 	}
 
@@ -184,6 +191,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	}
 
 	@Override
+	@Nullable
 	public MessageConverter getMessageConverter() {
 		JmsActivationSpecConfig config = getActivationSpecConfig();
 		if (config != null) {
@@ -193,6 +201,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	}
 
 	@Override
+	@Nullable
 	public DestinationResolver getDestinationResolver() {
 		if (this.activationSpecFactory instanceof StandardJmsActivationSpecFactory) {
 			return ((StandardJmsActivationSpecFactory) this.activationSpecFactory).getDestinationResolver();
@@ -219,6 +228,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	}
 
 	@Override
+	@Nullable
 	public QosSettings getReplyQosSettings() {
 		JmsActivationSpecConfig config = getActivationSpecConfig();
 		if (config != null) {

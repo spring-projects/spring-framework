@@ -29,8 +29,8 @@ import rx.Single;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
-import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.stereotype.Controller;
@@ -83,7 +83,7 @@ public class ResponseBodyResultHandlerTests {
 		method = on(TestController.class).annotPresent(ResponseBody.class).resolveMethod();
 		testSupports(controller, method);
 
-		method = on(TestController.class).annotNotPresent(ResponseBody.class).resolveMethod();
+		method = on(TestController.class).annotNotPresent(ResponseBody.class).resolveMethod("doWork");
 		HandlerResult handlerResult = getHandlerResult(controller, method);
 		assertFalse(this.resultHandler.supports(handlerResult));
 	}

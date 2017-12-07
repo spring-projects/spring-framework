@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.util.WebUtils;
 
@@ -54,10 +56,8 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 
 	private static Collection<ParamExpression> parseExpressions(String... params) {
 		Set<ParamExpression> expressions = new LinkedHashSet<>();
-		if (params != null) {
-			for (String param : params) {
-				expressions.add(new ParamExpression(param));
-			}
+		for (String param : params) {
+			expressions.add(new ParamExpression(param));
 		}
 		return expressions;
 	}
@@ -96,6 +96,7 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	 * or {@code null} otherwise.
 	 */
 	@Override
+	@Nullable
 	public ParamsRequestCondition getMatchingCondition(HttpServletRequest request) {
 		for (ParamExpression expression : expressions) {
 			if (!expression.match(request)) {
@@ -143,12 +144,13 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 
 		@Override
 		protected boolean matchName(HttpServletRequest request) {
-			return WebUtils.hasSubmitParameter(request, name);
+			return (WebUtils.hasSubmitParameter(request, this.name) ||
+					request.getParameterMap().containsKey(this.name));
 		}
 
 		@Override
 		protected boolean matchValue(HttpServletRequest request) {
-			return value.equals(request.getParameter(name));
+			return ObjectUtils.nullSafeEquals(this.value, request.getParameter(this.name));
 		}
 	}
 

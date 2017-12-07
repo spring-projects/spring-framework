@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.function.client;
 
-import java.util.Optional;
-
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -30,15 +28,15 @@ public class ExchangeStrategiesTests {
 	@Test
 	public void empty() {
 		ExchangeStrategies strategies = ExchangeStrategies.empty().build();
-		assertEquals(Optional.empty(), strategies.messageReaders().get().findFirst());
-		assertEquals(Optional.empty(), strategies.messageWriters().get().findFirst());
+		assertTrue(strategies.messageReaders().isEmpty());
+		assertTrue(strategies.messageWriters().isEmpty());
 	}
 
 	@Test
 	public void withDefaults() {
 		ExchangeStrategies strategies = ExchangeStrategies.withDefaults();
-		assertNotEquals(Optional.empty(), strategies.messageReaders().get().findFirst());
-		assertNotEquals(Optional.empty(), strategies.messageWriters().get().findFirst());
+		assertFalse(strategies.messageReaders().isEmpty());
+		assertFalse(strategies.messageWriters().isEmpty());
 	}
 
 }

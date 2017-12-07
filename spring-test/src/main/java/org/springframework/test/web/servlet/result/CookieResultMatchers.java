@@ -20,6 +20,8 @@ import javax.servlet.http.Cookie;
 
 import org.hamcrest.Matcher;
 
+import org.springframework.test.util.AssertionErrors;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 
 import static org.hamcrest.MatcherAssert.*;
@@ -50,8 +52,7 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher value(final String name, final Matcher<? super String> matcher) {
 		return result -> {
-			Cookie cookie = result.getResponse().getCookie(name);
-			assertTrue("Response cookie '" + name + "' not found", cookie != null);
+			Cookie cookie = getCookie(result, name);
 			assertThat("Response cookie '" + name + "'", cookie.getValue(), matcher);
 		};
 	}
@@ -61,8 +62,7 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher value(final String name, final String expectedValue) {
 		return result -> {
-			Cookie cookie = result.getResponse().getCookie(name);
-			assertTrue("Response cookie '" + name + "' not found", cookie != null);
+			Cookie cookie = getCookie(result, name);
 			assertEquals("Response cookie", expectedValue, cookie.getValue());
 		};
 	}
@@ -72,10 +72,7 @@ public class CookieResultMatchers {
 	 * max age is 0 (i.e. expired).
 	 */
 	public ResultMatcher exists(final String name) {
-		return result -> {
-			Cookie cookie = result.getResponse().getCookie(name);
-			assertTrue("No cookie with name '" + name + "'", cookie != null);
-		};
+		return result -> getCookie(result, name);
 	}
 
 	/**
@@ -94,8 +91,7 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher maxAge(final String name, final Matcher<? super Integer> matcher) {
 		return result -> {
-			Cookie cookie = result.getResponse().getCookie(name);
-			assertTrue("No cookie with name '" + name + "'", cookie != null);
+			Cookie cookie = getCookie(result, name);
 			assertThat("Response cookie '" + name + "' maxAge", cookie.getMaxAge(), matcher);
 		};
 	}
@@ -105,8 +101,7 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher maxAge(final String name, final int maxAge) {
 		return result -> {
-			Cookie cookie = result.getResponse().getCookie(name);
-			assertTrue("No cookie with name: " + name, cookie != null);
+			Cookie cookie = getCookie(result, name);
 			assertEquals("Response cookie '" + name + "' maxAge", maxAge, cookie.getMaxAge());
 		};
 	}
@@ -116,14 +111,14 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher path(final String name, final Matcher<? super String> matcher) {
 		return result -> {
-			Cookie cookie = result.getResponse().getCookie(name);
+			Cookie cookie = getCookie(result, name);
 			assertThat("Response cookie '" + name + "' path", cookie.getPath(), matcher);
 		};
 	}
 
 	public ResultMatcher path(final String name, final String path) {
 		return result -> {
-			Cookie cookie = result.getResponse().getCookie(name);
+			Cookie cookie = getCookie(result, name);
 			assertEquals("Response cookie '" + name + "' path", path, cookie.getPath());
 		};
 	}
@@ -133,7 +128,7 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher domain(final String name, final Matcher<? super String> matcher) {
 		return result -> {
-			Cookie cookie = result.getResponse().getCookie(name);
+			Cookie cookie = getCookie(result, name);
 			assertThat("Response cookie '" + name + "' domain", cookie.getDomain(), matcher);
 		};
 	}
@@ -143,7 +138,7 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher domain(final String name, final String domain) {
 		return result -> {
-			Cookie cookie = result.getResponse().getCookie(name);
+			Cookie cookie = getCookie(result, name);
 			assertEquals("Response cookie '" + name + "' domain", domain, cookie.getDomain());
 		};
 	}
@@ -153,7 +148,7 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher comment(final String name, final Matcher<? super String> matcher) {
 		return result -> {
-			Cookie cookie = result.getResponse().getCookie(name);
+			Cookie cookie = getCookie(result, name);
 			assertThat("Response cookie '" + name + "' comment", cookie.getComment(), matcher);
 		};
 	}
@@ -163,7 +158,7 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher comment(final String name, final String comment) {
 		return result -> {
-			Cookie cookie = result.getResponse().getCookie(name);
+			Cookie cookie = getCookie(result, name);
 			assertEquals("Response cookie '" + name + "' comment", comment, cookie.getComment());
 		};
 	}
@@ -173,7 +168,7 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher version(final String name, final Matcher<? super Integer> matcher) {
 		return result -> {
-			Cookie cookie = result.getResponse().getCookie(name);
+			Cookie cookie = getCookie(result, name);
 			assertThat("Response cookie '" + name + "' version", cookie.getVersion(), matcher);
 		};
 	}
@@ -183,7 +178,7 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher version(final String name, final int version) {
 		return result -> {
-			Cookie cookie = result.getResponse().getCookie(name);
+			Cookie cookie = getCookie(result, name);
 			assertEquals("Response cookie '" + name + "' version", version, cookie.getVersion());
 		};
 	}
@@ -193,7 +188,7 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher secure(final String name, final boolean secure) {
 		return result -> {
-			Cookie cookie = result.getResponse().getCookie(name);
+			Cookie cookie = getCookie(result, name);
 			assertEquals("Response cookie '" + name + "' secure", secure, cookie.getSecure());
 		};
 	}
@@ -204,9 +199,18 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher httpOnly(final String name, final boolean httpOnly) {
 		return result -> {
-			Cookie cookie = result.getResponse().getCookie(name);
+			Cookie cookie = getCookie(result, name);
 			assertEquals("Response cookie '" + name + "' httpOnly", httpOnly, cookie.isHttpOnly());
 		};
+	}
+
+
+	private static Cookie getCookie(MvcResult result, String name) {
+		Cookie cookie = result.getResponse().getCookie(name);
+		if (cookie == null) {
+			AssertionErrors.fail("No cookie with name '" + name + "'");
+		}
+		return cookie;
 	}
 
 }

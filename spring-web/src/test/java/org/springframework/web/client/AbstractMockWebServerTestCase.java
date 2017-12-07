@@ -121,9 +121,9 @@ public class AbstractMockWebServerTestCase {
 	}
 
 	private MockResponse multipartRequest(RecordedRequest request) {
-		String contentType = request.getHeader("Content-Type");
-		assertTrue(contentType.startsWith("multipart/form-data"));
-		String boundary = contentType.split("boundary=")[1];
+		MediaType mediaType = MediaType.parseMediaType(request.getHeader("Content-Type"));
+		assertTrue(mediaType.isCompatibleWith(MediaType.MULTIPART_FORM_DATA));
+		String boundary = mediaType.getParameter("boundary");
 		Buffer body = request.getBody();
 		try {
 			assertPart(body, "form-data", boundary, "name 1", "text/plain", "value 1");

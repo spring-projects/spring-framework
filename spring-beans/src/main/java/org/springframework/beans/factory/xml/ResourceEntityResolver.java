@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.xml.sax.SAXException;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 
 /**
  * EntityResolver implementation that tries to resolve entity references
@@ -70,7 +71,8 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 
 
 	@Override
-	public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+	@Nullable
+	public InputSource resolveEntity(String publicId, @Nullable String systemId) throws SAXException, IOException {
 		InputSource source = super.resolveEntity(publicId, systemId);
 		if (source == null && systemId != null) {
 			String resourcePath = null;

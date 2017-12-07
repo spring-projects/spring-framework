@@ -20,6 +20,8 @@ import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Callback for sending a message to a JMS destination.
  *
@@ -49,6 +51,7 @@ public interface ProducerCallback<T> {
 	 * (or {@code null} if none)
 	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */
+	@Nullable
 	T doInJms(Session session, MessageProducer producer) throws JMSException;
 
 }

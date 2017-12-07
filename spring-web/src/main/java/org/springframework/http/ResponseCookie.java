@@ -17,13 +17,14 @@
 package org.springframework.http;
 
 import java.time.Duration;
-import java.util.Optional;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
- * An {@code HttpCookie} sub-class with the additional attributes allowed in
+ * An {@code HttpCookie} subclass with the additional attributes allowed in
  * the "Set-Cookie" response header. To build an instance use the {@link #from}
  * static method.
  *
@@ -35,9 +36,11 @@ public final class ResponseCookie extends HttpCookie {
 
 	private final Duration maxAge;
 
-	private final Optional<String> domain;
+	@Nullable
+	private final String domain;
 
-	private final Optional<String> path;
+	@Nullable
+	private final String path;
 
 	private final boolean secure;
 
@@ -47,14 +50,14 @@ public final class ResponseCookie extends HttpCookie {
 	/**
 	 * Private constructor. See {@link #from(String, String)}.
 	 */
-	private ResponseCookie(String name, String value, Duration maxAge, String domain,
-			String path, boolean secure, boolean httpOnly) {
+	private ResponseCookie(String name, String value, Duration maxAge, @Nullable String domain,
+			@Nullable String path, boolean secure, boolean httpOnly) {
 
 		super(name, value);
 		Assert.notNull(maxAge, "Max age must not be null");
 		this.maxAge = maxAge;
-		this.domain = Optional.ofNullable(domain);
-		this.path = Optional.ofNullable(path);
+		this.domain = domain;
+		this.path = path;
 		this.secure = secure;
 		this.httpOnly = httpOnly;
 	}
@@ -72,16 +75,18 @@ public final class ResponseCookie extends HttpCookie {
 	}
 
 	/**
-	 * Return the cookie "Domain" attribute.
+	 * Return the cookie "Domain" attribute, or {@code null} if not set.
 	 */
-	public Optional<String> getDomain() {
+	@Nullable
+	public String getDomain() {
 		return this.domain;
 	}
 
 	/**
-	 * Return the cookie "Path" attribute.
+	 * Return the cookie "Path" attribute, or {@code null} if not set.
 	 */
-	public Optional<String> getPath() {
+	@Nullable
+	public String getPath() {
 		return this.path;
 	}
 
@@ -123,6 +128,34 @@ public final class ResponseCookie extends HttpCookie {
 		return result;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getName()).append('=').append(getValue());
+		if (StringUtils.hasText(getPath())) {
+			sb.append("; Path=").append(getPath());
+		}
+		if (StringUtils.hasText(this.domain)) {
+			sb.append("; Domain=").append(this.domain);
+		}
+		if (!this.maxAge.isNegative()) {
+			sb.append("; Max-Age=").append(this.maxAge);
+			sb.append("; Expires=");
+			HttpHeaders headers = new HttpHeaders();
+			long seconds = this.maxAge.getSeconds();
+			headers.setExpires(seconds > 0 ? System.currentTimeMillis() + seconds : 0);
+			sb.append(headers.getFirst(HttpHeaders.EXPIRES));
+		}
+
+		if (this.secure) {
+			sb.append("; Secure");
+		}
+		if (this.httpOnly) {
+			sb.append("; HttpOnly");
+		}
+		return sb.toString();
+	}
+
 
 	/**
 	 * Factory method to obtain a builder for a server-defined cookie that starts
@@ -137,8 +170,10 @@ public final class ResponseCookie extends HttpCookie {
 
 			private Duration maxAge = Duration.ofSeconds(-1);
 
+			@Nullable
 			private String domain;
 
+			@Nullable
 			private String path;
 
 			private boolean secure;

@@ -17,6 +17,8 @@
 package org.springframework.web.reactive.function.server;
 
 import java.net.URI;
+import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -33,15 +35,21 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.WebSession;
+import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriUtils;
-import org.springframework.web.util.patterns.PathPattern;
-import org.springframework.web.util.patterns.PathPatternParser;
+import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Implementations of {@link RequestPredicate} that implement various useful
@@ -95,11 +103,7 @@ public abstract class RequestPredicates {
 	 */
 	public static Function<String, RequestPredicate> pathPredicates(PathPatternParser patternParser) {
 		Assert.notNull(patternParser, "'patternParser' must not be null");
-		return pattern -> {
-			synchronized (patternParser) {
-				return new PathPatternPredicate(patternParser.parse(pattern));
-			}
-		};
+		return pattern -> new PathPatternPredicate(patternParser.parse(pattern));
 	}
 
 	/**
@@ -296,7 +300,7 @@ public abstract class RequestPredicates {
 	}
 
 
-	private static void traceMatch(String prefix, Object desired, Object actual, boolean match) {
+	private static void traceMatch(String prefix, Object desired, @Nullable Object actual, boolean match) {
 		if (logger.isTraceEnabled()) {
 			String message = String.format("%s \"%s\" %s against value \"%s\"",
 					prefix, desired, match ? "matches" : "does not match", actual);
@@ -339,11 +343,11 @@ public abstract class RequestPredicates {
 
 		@Override
 		public boolean test(ServerRequest request) {
-			String path = request.path();
-			boolean match = this.pattern.matches(path);
-			traceMatch("Pattern", this.pattern.getPatternString(), path, match);
-			if (match) {
-				mergeTemplateVariables(request, this.pattern.matchAndExtract(request.path()));
+			PathContainer pathContainer = request.pathContainer();
+			PathPattern.PathMatchInfo info = this.pattern.matchAndExtract(pathContainer);
+			traceMatch("Pattern", this.pattern.getPatternString(), request.path(), info != null);
+			if (info != null) {
+				mergeTemplateVariables(request, info.getUriVariables());
 				return true;
 			}
 			else {
@@ -353,14 +357,10 @@ public abstract class RequestPredicates {
 
 		@Override
 		public Optional<ServerRequest> nest(ServerRequest request) {
-			return Optional.ofNullable(this.pattern.getPathRemaining(request.path()))
+			return Optional.ofNullable(this.pattern.matchStartOfPath(request.pathContainer()))
 					.map(info -> {
-						mergeTemplateVariables(request, info.getMatchingVariables());
-						String path = info.getPathRemaining();
-						if (!path.startsWith("/")) {
-							path = "/" + path;
-						}
-						return new SubPathServerRequestWrapper(request, path);
+						mergeTemplateVariables(request, info.getUriVariables());
+						return new SubPathServerRequestWrapper(request, info);
 					});
 		}
 
@@ -464,12 +464,12 @@ public abstract class RequestPredicates {
 
 		private final ServerRequest request;
 
-		private final String subPath;
+		private final PathContainer subPathContainer;
 
 
-		public SubPathServerRequestWrapper(ServerRequest request, String subPath) {
+		public SubPathServerRequestWrapper(ServerRequest request, PathPattern.PathRemainingMatchInfo info) {
 			this.request = request;
-			this.subPath = subPath;
+			this.subPathContainer = new SubPathContainer(info.getPathRemaining());
 		}
 
 		@Override
@@ -478,18 +478,38 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public String methodName() {
+			return this.request.methodName();
+		}
+
+		@Override
 		public URI uri() {
 			return this.request.uri();
 		}
 
 		@Override
+		public UriBuilder uriBuilder() {
+			return this.request.uriBuilder();
+		}
+
+		@Override
 		public String path() {
-			return this.subPath;
+			return this.subPathContainer.value();
+		}
+
+		@Override
+		public PathContainer pathContainer() {
+			return this.subPathContainer;
 		}
 
 		@Override
 		public Headers headers() {
 			return this.request.headers();
+		}
+
+		@Override
+		public MultiValueMap<String, HttpCookie> cookies() {
+			return this.request.cookies();
 		}
 
 		@Override
@@ -508,12 +528,22 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference) {
+			return this.request.bodyToMono(typeReference);
+		}
+
+		@Override
 		public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
 			return this.request.bodyToFlux(elementClass);
 		}
 
 		@Override
-		public <T> Optional<T> attribute(String name) {
+		public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference) {
+			return this.request.bodyToFlux(typeReference);
+		}
+
+		@Override
+		public Optional<Object> attribute(String name) {
 			return this.request.attribute(name);
 		}
 
@@ -528,8 +558,8 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
-		public List<String> queryParams(String name) {
-			return this.request.queryParams(name);
+		public MultiValueMap<String, String> queryParams() {
+			return this.request.queryParams();
 		}
 
 		@Override
@@ -548,8 +578,54 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public Mono<? extends Principal> principal() {
+			return this.request.principal();
+		}
+
+		@Override
 		public String toString() {
 			return method() + " " +  path();
+		}
+
+		private static class SubPathContainer implements PathContainer {
+
+			private static final PathContainer.Separator SEPARATOR = () -> "/";
+
+
+			private final String value;
+
+			private final List<Element> elements;
+
+			public SubPathContainer(PathContainer original) {
+				this.value = prefixWithSlash(original.value());
+				this.elements = prependWithSeparator(original.elements());
+			}
+
+			private static String prefixWithSlash(String path) {
+				if (!path.startsWith("/")) {
+					path = "/" + path;
+				}
+				return path;
+			}
+
+			private static List<Element> prependWithSeparator(List<Element> elements) {
+				List<Element> result = new ArrayList<>(elements);
+				if (result.isEmpty() || !(result.get(0) instanceof Separator)) {
+					result.add(0, SEPARATOR);
+				}
+				return Collections.unmodifiableList(result);
+			}
+
+
+			@Override
+			public String value() {
+				return this.value;
+			}
+
+			@Override
+			public List<Element> elements() {
+				return this.elements;
+			}
 		}
 	}
 

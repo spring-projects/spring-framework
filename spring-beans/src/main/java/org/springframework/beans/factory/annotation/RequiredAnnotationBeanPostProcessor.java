@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.core.Conventions;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -88,6 +89,7 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 
 	private int order = Ordered.LOWEST_PRECEDENCE - 1;
 
+	@Nullable
 	private ConfigurableListableBeanFactory beanFactory;
 
 	/**
@@ -170,7 +172,7 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 	 * @param beanName the name of the bean to check against
 	 * @return {@code true} to skip the bean; {@code false} to process it
 	 */
-	protected boolean shouldSkip(ConfigurableListableBeanFactory beanFactory, String beanName) {
+	protected boolean shouldSkip(@Nullable ConfigurableListableBeanFactory beanFactory, String beanName) {
 		if (beanFactory == null || !beanFactory.containsBeanDefinition(beanName)) {
 			return false;
 		}

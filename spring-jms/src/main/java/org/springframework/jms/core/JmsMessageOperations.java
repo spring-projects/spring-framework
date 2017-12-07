@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.jms.core;
 import java.util.Map;
 import javax.jms.Destination;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.core.MessagePostProcessor;
@@ -91,8 +92,8 @@ public interface JmsMessageOperations extends MessageSendingOperations<Destinati
 	 * @param headers headers for the message to send
 	 * @param postProcessor the post processor to apply to the message
 	 */
-	void convertAndSend(String destinationName, Object payload, Map<String,
-			Object> headers, MessagePostProcessor postProcessor) throws MessagingException;
+	void convertAndSend(String destinationName, Object payload, @Nullable Map<String, Object> headers,
+			@Nullable MessagePostProcessor postProcessor) throws MessagingException;
 
 	/**
 	 * Receive a message from the given destination.
@@ -100,6 +101,7 @@ public interface JmsMessageOperations extends MessageSendingOperations<Destinati
 	 * @return the received message, possibly {@code null} if the message could not
 	 * be received, for example due to a timeout
 	 */
+	@Nullable
 	Message<?> receive(String destinationName) throws MessagingException;
 
 	/**
@@ -110,6 +112,7 @@ public interface JmsMessageOperations extends MessageSendingOperations<Destinati
 	 * @return the converted payload of the reply message, possibly {@code null} if
 	 * the message could not be received, for example due to a timeout
 	 */
+	@Nullable
 	<T> T receiveAndConvert(String destinationName, Class<T> targetClass) throws MessagingException;
 
 	/**
@@ -119,6 +122,7 @@ public interface JmsMessageOperations extends MessageSendingOperations<Destinati
 	 * @return the reply, possibly {@code null} if the message could not be received,
 	 * for example due to a timeout
 	 */
+	@Nullable
 	Message<?> sendAndReceive(String destinationName, Message<?> requestMessage) throws MessagingException;
 
 	/**
@@ -132,6 +136,7 @@ public interface JmsMessageOperations extends MessageSendingOperations<Destinati
 	 * @return the payload of the reply message, possibly {@code null} if the message
 	 * could not be received, for example due to a timeout
 	 */
+	@Nullable
 	<T> T convertSendAndReceive(String destinationName, Object request, Class<T> targetClass) throws MessagingException;
 
 	/**
@@ -146,7 +151,8 @@ public interface JmsMessageOperations extends MessageSendingOperations<Destinati
 	 * @return the payload of the reply message, possibly {@code null} if the message
 	 * could not be received, for example due to a timeout
 	 */
-	<T> T convertSendAndReceive(String destinationName, Object request, Map<String, Object> headers, Class<T> targetClass)
+	@Nullable
+	<T> T convertSendAndReceive(String destinationName, Object request, @Nullable Map<String, Object> headers, Class<T> targetClass)
 			throws MessagingException;
 
 	/**
@@ -162,6 +168,7 @@ public interface JmsMessageOperations extends MessageSendingOperations<Destinati
 	 * @return the payload of the reply message, possibly {@code null} if the message
 	 * could not be received, for example due to a timeout
 	 */
+	@Nullable
 	<T> T convertSendAndReceive(String destinationName, Object request, Class<T> targetClass,
 			MessagePostProcessor requestPostProcessor) throws MessagingException;
 
@@ -178,6 +185,7 @@ public interface JmsMessageOperations extends MessageSendingOperations<Destinati
 	 * @return the payload of the reply message, possibly {@code null} if the message
 	 * could not be received, for example due to a timeout
 	 */
+	@Nullable
 	<T> T convertSendAndReceive(String destinationName, Object request, Map<String, Object> headers,
 			Class<T> targetClass, MessagePostProcessor requestPostProcessor) throws MessagingException;
 

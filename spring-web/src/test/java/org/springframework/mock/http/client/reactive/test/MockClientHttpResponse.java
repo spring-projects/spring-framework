@@ -19,6 +19,7 @@ package org.springframework.mock.http.client.reactive.test;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -62,15 +63,22 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 	}
 
 
+	@Override
 	public HttpStatus getStatusCode() {
 		return this.status;
 	}
 
 	@Override
 	public HttpHeaders getHeaders() {
+		String headerName = HttpHeaders.SET_COOKIE;
+		if (!getCookies().isEmpty() && this.headers.get(headerName) == null) {
+			getCookies().values().stream().flatMap(Collection::stream)
+					.forEach(cookie -> getHeaders().add(headerName, cookie.toString()));
+		}
 		return this.headers;
 	}
 
+	@Override
 	public MultiValueMap<String, ResponseCookie> getCookies() {
 		return this.cookies;
 	}
@@ -94,6 +102,7 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 		return this.bufferFactory.wrap(byteBuffer);
 	}
 
+	@Override
 	public Flux<DataBuffer> getBody() {
 		return this.body;
 	}

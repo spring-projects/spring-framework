@@ -24,7 +24,6 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -87,10 +86,22 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 
 	@Override
 	public void setSessionId(ServerWebExchange exchange, String id) {
-		Duration maxAge = (StringUtils.hasText(id) ? getCookieMaxAge() : Duration.ofSeconds(0));
-		ResponseCookie cookie = ResponseCookie.from(getCookieName(), id).maxAge(maxAge).build();
-		MultiValueMap<String, ResponseCookie> cookieMap = exchange.getResponse().getCookies();
-		cookieMap.set(getCookieName(), cookie);
+		Assert.notNull(id, "'id' is required");
+		setSessionCookie(exchange, id, getCookieMaxAge());
+	}
+
+	@Override
+	public void expireSession(ServerWebExchange exchange) {
+		setSessionCookie(exchange, "", Duration.ofSeconds(0));
+	}
+
+	private void setSessionCookie(ServerWebExchange exchange, String id, Duration maxAge) {
+		String name = getCookieName();
+		boolean secure = "https".equalsIgnoreCase(exchange.getRequest().getURI().getScheme());
+		String path = exchange.getRequest().getPath().contextPath().value() + "/";
+		exchange.getResponse().getCookies().set(name,
+				ResponseCookie.from(name, id).path(path)
+						.maxAge(maxAge).httpOnly(true).secure(secure).build());
 	}
 
 }

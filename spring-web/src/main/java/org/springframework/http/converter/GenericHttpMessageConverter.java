@@ -22,6 +22,7 @@ import java.lang.reflect.Type;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 
 /**
  * A specialization of {@link HttpMessageConverter} that can convert an HTTP request
@@ -48,7 +49,7 @@ public interface GenericHttpMessageConverter<T> extends HttpMessageConverter<T> 
 	 * Typically the value of a {@code Content-Type} header.
 	 * @return {@code true} if readable; {@code false} otherwise
 	 */
-	boolean canRead(Type type, Class<?> contextClass, MediaType mediaType);
+	boolean canRead(Type type, @Nullable Class<?> contextClass, @Nullable MediaType mediaType);
 
 	/**
 	 * Read an object of the given type form the given input message, and returns it.
@@ -62,7 +63,7 @@ public interface GenericHttpMessageConverter<T> extends HttpMessageConverter<T> 
 	 * @throws IOException in case of I/O errors
 	 * @throws HttpMessageNotReadableException in case of conversion errors
 	 */
-	T read(Type type, Class<?> contextClass, HttpInputMessage inputMessage)
+	T read(Type type, @Nullable Class<?> contextClass, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException;
 
 	/**
@@ -78,7 +79,7 @@ public interface GenericHttpMessageConverter<T> extends HttpMessageConverter<T> 
 	 * @return {@code true} if writable; {@code false} otherwise
 	 * @since 4.2
 	 */
-	boolean canWrite(Type type, Class<?> clazz, MediaType mediaType);
+	boolean canWrite(@Nullable Type type, Class<?> clazz, @Nullable MediaType mediaType);
 
 	/**
 	 * Write an given object to the given output message.
@@ -98,7 +99,7 @@ public interface GenericHttpMessageConverter<T> extends HttpMessageConverter<T> 
 	 * @throws HttpMessageNotWritableException in case of conversion errors
 	 * @since 4.2
 	 */
-	void write(T t, Type type, MediaType contentType, HttpOutputMessage outputMessage)
+	void write(T t, @Nullable Type type, @Nullable MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException;
 
 }

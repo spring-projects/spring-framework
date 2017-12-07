@@ -66,7 +66,7 @@ public class ContentBasedVersionStrategyTests {
 	public void getResourceVersion() throws Exception {
 		Resource expected = new ClassPathResource("test/bar.css", getClass());
 		String hash = DigestUtils.md5DigestAsHex(FileCopyUtils.copyToByteArray(expected.getInputStream()));
-		assertEquals(hash, this.strategy.getResourceVersion(expected));
+		assertEquals(hash, this.strategy.getResourceVersion(expected).block());
 	}
 
 	@Test

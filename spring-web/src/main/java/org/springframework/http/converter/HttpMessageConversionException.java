@@ -17,9 +17,7 @@
 package org.springframework.http.converter;
 
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.http.HttpStatus;
-
-import java.util.Optional;
+import org.springframework.lang.Nullable;
 
 /**
  * Thrown by {@link HttpMessageConverter} implementations when a conversion attempt fails.
@@ -31,15 +29,12 @@ import java.util.Optional;
 @SuppressWarnings("serial")
 public class HttpMessageConversionException extends NestedRuntimeException {
 
-	private final HttpStatus errorStatus;
-
 	/**
 	 * Create a new HttpMessageConversionException.
 	 * @param msg the detail message
 	 */
 	public HttpMessageConversionException(String msg) {
 		super(msg);
-		this.errorStatus = null;
 	}
 
 	/**
@@ -47,27 +42,8 @@ public class HttpMessageConversionException extends NestedRuntimeException {
 	 * @param msg the detail message
 	 * @param cause the root cause (if any)
 	 */
-	public HttpMessageConversionException(String msg, Throwable cause) {
+	public HttpMessageConversionException(String msg, @Nullable Throwable cause) {
 		super(msg, cause);
-		this.errorStatus = null;
 	}
 
-	/**
-	 * Create a new HttpMessageConversionException.
-	 * @since 5.0
-	 * @param msg the detail message
-	 * @param cause the root cause (if any)
-	 * @param errorStatus the HTTP error status related to this exception
-	 */
-	public HttpMessageConversionException(String msg, Throwable cause, HttpStatus errorStatus) {
-		super(msg, cause);
-		this.errorStatus = errorStatus;
-	}
-
-	/**
-	 * Return the HTTP error status related to this exception if any.
-	 */
-	public Optional<HttpStatus> getErrorStatus() {
-		return Optional.ofNullable(errorStatus);
-	}
 }

@@ -27,7 +27,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilterChain;
 
@@ -84,10 +84,10 @@ public class HiddenHttpMethodFilterTests {
 	@Test
 	public void filterWithHttpPut() {
 
-		ServerWebExchange exchange = MockServerHttpRequest.put("/")
-				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-				.body("_method=DELETE")
-				.toExchange();
+		ServerWebExchange exchange = MockServerWebExchange.from(
+				MockServerHttpRequest.put("/")
+						.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+						.body("_method=DELETE"));
 
 		this.filter.filter(exchange, this.filterChain).block(Duration.ZERO);
 		assertEquals(HttpMethod.PUT, this.filterChain.getHttpMethod());
@@ -96,10 +96,10 @@ public class HiddenHttpMethodFilterTests {
 
 	private Mono<Void> postForm(String body) {
 
-		MockServerWebExchange exchange = MockServerHttpRequest.post("/")
-				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-				.body(body)
-				.toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(
+				MockServerHttpRequest.post("/")
+						.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+						.body(body));
 
 		return this.filter.filter(exchange, this.filterChain);
 	}

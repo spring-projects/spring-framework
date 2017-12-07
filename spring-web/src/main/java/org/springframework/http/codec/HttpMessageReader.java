@@ -28,6 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 
 /**
  * Strategy for reading from a {@link ReactiveHttpInputMessage} and decoding
@@ -50,14 +51,13 @@ public interface HttpMessageReader<T> {
 	/**
 	 * Whether the given object type is supported by this reader.
 	 * @param elementType the type of object to check
-	 * @param mediaType the media type for the read, possibly {@code null}
+	 * @param mediaType the media type for the read (possibly {@code null})
 	 * @return {@code true} if readable, {@code false} otherwise
 	 */
-	boolean canRead(ResolvableType elementType, MediaType mediaType);
+	boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType);
 
 	/**
 	 * Read from the input message and encode to a stream of objects.
-	 *
 	 * @param elementType the type of objects in the stream which must have been
 	 * previously checked via {@link #canRead(ResolvableType, MediaType)}
 	 * @param message the message to read from
@@ -68,7 +68,6 @@ public interface HttpMessageReader<T> {
 
 	/**
 	 * Read from the input message and encode to a single object.
-	 *
 	 * @param elementType the type of objects in the stream which must have been
 	 * previously checked via {@link #canRead(ResolvableType, MediaType)}
 	 * @param message the message to read from
@@ -79,12 +78,11 @@ public interface HttpMessageReader<T> {
 
 	/**
 	 * Server-side only alternative to
-	 * {@link #read(ResolvableType, ReactiveHttpInputMessage, Map)} with
-	 * additional context available.
-	 *
-	 * @param actualType the actual type of the target method parameter; for
-	 * annotated controllers, the {@link MethodParameter} can be accessed via
-	 * {@link ResolvableType#getSource()}.
+	 * {@link #read(ResolvableType, ReactiveHttpInputMessage, Map)}
+	 * with additional context available.
+	 * @param actualType the actual type of the target method parameter;
+	 * for annotated controllers, the {@link MethodParameter} can be accessed
+	 * via {@link ResolvableType#getSource()}.
 	 * @param elementType the type of Objects in the output stream
 	 * @param request the current request
 	 * @param response the current response
@@ -99,12 +97,11 @@ public interface HttpMessageReader<T> {
 
 	/**
 	 * Server-side only alternative to
-	 * {@link #readMono(ResolvableType, ReactiveHttpInputMessage, Map)} with
-	 * additional, context available.
-	 *
-	 * @param actualType the actual type of the target method parameter; for
-	 * annotated controllers, the {@link MethodParameter} can be accessed via
-	 * {@link ResolvableType#getSource()}.
+	 * {@link #readMono(ResolvableType, ReactiveHttpInputMessage, Map)}
+	 * with additional, context available.
+	 * @param actualType the actual type of the target method parameter;
+	 * for annotated controllers, the {@link MethodParameter} can be accessed
+	 * via {@link ResolvableType#getSource()}.
 	 * @param elementType the type of Objects in the output stream
 	 * @param request the current request
 	 * @param response the current response

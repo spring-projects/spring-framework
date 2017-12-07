@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import javax.jms.TransactionInProgressException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -52,6 +53,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 
 	private static final Log logger = LogFactory.getLog(JmsResourceHolder.class);
 
+	@Nullable
 	private ConnectionFactory connectionFactory;
 
 	private boolean frozen = false;
@@ -60,8 +62,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 
 	private final List<Session> sessions = new LinkedList<>();
 
-	private final Map<Connection, List<Session>> sessionsPerConnection =
-			new HashMap<>();
+	private final Map<Connection, List<Session>> sessionsPerConnection = new HashMap<>();
 
 
 	/**
@@ -77,7 +78,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	 * @param connectionFactory the JMS ConnectionFactory that this
 	 * resource holder is associated with (may be {@code null})
 	 */
-	public JmsResourceHolder(ConnectionFactory connectionFactory) {
+	public JmsResourceHolder(@Nullable ConnectionFactory connectionFactory) {
 		this.connectionFactory = connectionFactory;
 	}
 
@@ -108,7 +109,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	 * @param connection the JMS Connection
 	 * @param session the JMS Session
 	 */
-	public JmsResourceHolder(ConnectionFactory connectionFactory, Connection connection, Session session) {
+	public JmsResourceHolder(@Nullable ConnectionFactory connectionFactory, Connection connection, Session session) {
 		this.connectionFactory = connectionFactory;
 		addConnection(connection);
 		addSession(session, connection);
@@ -132,7 +133,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 		addSession(session, null);
 	}
 
-	public final void addSession(Session session, Connection connection) {
+	public final void addSession(Session session, @Nullable Connection connection) {
 		Assert.isTrue(!this.frozen, "Cannot add Session because JmsResourceHolder is frozen");
 		Assert.notNull(session, "Session must not be null");
 		if (!this.sessions.contains(session)) {
@@ -153,27 +154,29 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	}
 
 
+	@Nullable
 	public Connection getConnection() {
 		return (!this.connections.isEmpty() ? this.connections.get(0) : null);
 	}
 
+	@Nullable
 	public Connection getConnection(Class<? extends Connection> connectionType) {
 		return CollectionUtils.findValueOfType(this.connections, connectionType);
 	}
 
+	@Nullable
 	public Session getSession() {
 		return (!this.sessions.isEmpty() ? this.sessions.get(0) : null);
 	}
 
+	@Nullable
 	public Session getSession(Class<? extends Session> sessionType) {
 		return getSession(sessionType, null);
 	}
 
-	public Session getSession(Class<? extends Session> sessionType, Connection connection) {
-		List<Session> sessions = this.sessions;
-		if (connection != null) {
-			sessions = this.sessionsPerConnection.get(connection);
-		}
+	@Nullable
+	public Session getSession(Class<? extends Session> sessionType, @Nullable Connection connection) {
+		List<Session> sessions = (connection != null ? this.sessionsPerConnection.get(connection) : this.sessions);
 		return CollectionUtils.findValueOfType(sessions, sessionType);
 	}
 

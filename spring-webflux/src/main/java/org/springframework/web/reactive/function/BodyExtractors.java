@@ -21,12 +21,12 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpMessage;
@@ -48,12 +48,15 @@ import org.springframework.util.MultiValueMap;
  */
 public abstract class BodyExtractors {
 
-	private static final ResolvableType FORM_TYPE =
+	private static final ResolvableType FORM_MAP_TYPE =
 			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
 
-	private static final ResolvableType MULTIPART_TYPE = ResolvableType.forClassWithGenerics(
+	private static final ResolvableType MULTIPART_MAP_TYPE = ResolvableType.forClassWithGenerics(
 			MultiValueMap.class, String.class, Part.class);
 
+	private static final ResolvableType PART_TYPE = ResolvableType.forClass(Part.class);
+
+	private static final ResolvableType VOID_TYPE = ResolvableType.forClass(Void.class);
 
 	/**
 	 * Return a {@code BodyExtractor} that reads into a Reactor {@link Mono}.
@@ -68,15 +71,31 @@ public abstract class BodyExtractors {
 
 	/**
 	 * Return a {@code BodyExtractor} that reads into a Reactor {@link Mono}.
-	 * @param elementType the type of element in the {@code Mono}
+	 * The given {@link ParameterizedTypeReference} is used to pass generic type information, for
+	 * instance when using the {@link org.springframework.web.reactive.function.client.WebClient WebClient}
+	 * <pre class="code">
+	 * Mono&lt;Map&lt;String, String&gt;&gt; body = this.webClient
+	 *  .get()
+	 *  .uri("http://example.com")
+	 *  .exchange()
+	 *  .flatMap(r -> r.body(toMono(new ParameterizedTypeReference&lt;Map&lt;String,String&gt;&gt;() {})));
+	 * </pre>
+	 * @param typeReference a reference to the type of element in the {@code Mono}
 	 * @param <T> the element type
 	 * @return a {@code BodyExtractor} that reads a mono
 	 */
-	public static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(ResolvableType elementType) {
+	public static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(
+			ParameterizedTypeReference<T> typeReference) {
+
+		Assert.notNull(typeReference, "'typeReference' must not be null");
+		return toMono(ResolvableType.forType(typeReference.getType()));
+	}
+
+	static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(ResolvableType elementType) {
 		Assert.notNull(elementType, "'elementType' must not be null");
 		return (inputMessage, context) -> readWithMessageReaders(inputMessage, context,
 				elementType,
-				reader -> {
+				(HttpMessageReader<T> reader) -> {
 					Optional<ServerHttpResponse> serverResponse = context.serverResponse();
 					if (serverResponse.isPresent() && inputMessage instanceof ServerHttpRequest) {
 						return reader.readMono(elementType, elementType, (ServerHttpRequest) inputMessage,
@@ -86,14 +105,16 @@ public abstract class BodyExtractors {
 						return reader.readMono(elementType, inputMessage, context.hints());
 					}
 				},
-				Mono::error);
+				ex -> (inputMessage.getHeaders().getContentType() == null) ?
+						Mono.from(permitEmptyOrFail(inputMessage, ex)) : Mono.error(ex),
+				Mono::empty);
 	}
 
 	/**
 	 * Return a {@code BodyExtractor} that reads into a Reactor {@link Flux}.
 	 * @param elementClass the class of element in the {@code Flux}
 	 * @param <T> the element type
-	 * @return a {@code BodyExtractor} that reads a mono
+	 * @return a {@code BodyExtractor} that reads a flux
 	 */
 	public static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(Class<? extends T> elementClass) {
 		Assert.notNull(elementClass, "'elementClass' must not be null");
@@ -102,15 +123,32 @@ public abstract class BodyExtractors {
 
 	/**
 	 * Return a {@code BodyExtractor} that reads into a Reactor {@link Flux}.
-	 * @param elementType the type of element in the {@code Flux}
+	 * The given {@link ParameterizedTypeReference} is used to pass generic type information, for
+	 * instance when using the {@link org.springframework.web.reactive.function.client.WebClient WebClient}
+	 * <pre class="code">
+	 * Flux&lt;ServerSentEvent&lt;String&gt;&gt; body = this.webClient
+	 *  .get()
+	 *  .uri("http://example.com")
+	 *  .exchange()
+	 *  .flatMap(r -> r.body(toFlux(new ParameterizedTypeReference&lt;ServerSentEvent&lt;String&gt;&gt;() {})));
+	 * </pre>
+	 * @param typeReference a reference to the type of element in the {@code Flux}
 	 * @param <T> the element type
-	 * @return a {@code BodyExtractor} that reads a mono
+	 * @return a {@code BodyExtractor} that reads a flux
 	 */
-	public static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(ResolvableType elementType) {
+	public static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(
+			ParameterizedTypeReference<T> typeReference) {
+
+		Assert.notNull(typeReference, "'typeReference' must not be null");
+		return toFlux(ResolvableType.forType(typeReference.getType()));
+	}
+
+	@SuppressWarnings("unchecked")
+	static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(ResolvableType elementType) {
 		Assert.notNull(elementType, "'elementType' must not be null");
 		return (inputMessage, context) -> readWithMessageReaders(inputMessage, context,
 				elementType,
-				reader -> {
+				(HttpMessageReader<T> reader) -> {
 					Optional<ServerHttpResponse> serverResponse = context.serverResponse();
 					if (serverResponse.isPresent() && inputMessage instanceof ServerHttpRequest) {
 						return reader.read(elementType, elementType, (ServerHttpRequest) inputMessage,
@@ -120,7 +158,16 @@ public abstract class BodyExtractors {
 						return reader.read(elementType, inputMessage, context.hints());
 					}
 				},
-				Flux::error);
+				ex -> (inputMessage.getHeaders().getContentType() == null) ?
+						permitEmptyOrFail(inputMessage, ex) : Flux.error(ex),
+				Flux::empty);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> Flux<T> permitEmptyOrFail(ReactiveHttpInputMessage message, UnsupportedMediaTypeException ex) {
+		return message.getBody().doOnNext(buffer -> {
+			throw ex;
+		}).map(o -> (T) o);
 	}
 
 	/**
@@ -131,17 +178,19 @@ public abstract class BodyExtractors {
 	// ReactiveHttpInputMessage like other methods, since reading form data only typically happens on
 	// the server-side
 	public static BodyExtractor<Mono<MultiValueMap<String, String>>, ServerHttpRequest> toFormData() {
-		return (serverRequest, context) -> {
-			HttpMessageReader<MultiValueMap<String, String>> messageReader =
-					formMessageReader(context);
+		return (request, context) -> {
+			ResolvableType type = FORM_MAP_TYPE;
+			HttpMessageReader<MultiValueMap<String, String>> reader =
+					messageReader(type, MediaType.APPLICATION_FORM_URLENCODED, context);
 			return context.serverResponse()
-					.map(serverResponse -> messageReader.readMono(FORM_TYPE, FORM_TYPE, serverRequest, serverResponse, context.hints()))
-					.orElseGet(() -> messageReader.readMono(FORM_TYPE, serverRequest, context.hints()));
+					.map(response -> reader.readMono(type, type, request, response, context.hints()))
+					.orElseGet(() -> reader.readMono(type, request, context.hints()));
 		};
 	}
 
 	/**
-	 * Return a {@code BodyExtractor} that reads form data into a {@link MultiValueMap}.
+	 * Return a {@code BodyExtractor} that reads multipart (i.e. file upload) form data into a
+	 * {@link MultiValueMap}.
 	 * @return a {@code BodyExtractor} that reads multipart data
 	 */
 	// Note that the returned BodyExtractor is parameterized to ServerHttpRequest, not
@@ -149,11 +198,30 @@ public abstract class BodyExtractors {
 	// the server-side
 	public static BodyExtractor<Mono<MultiValueMap<String, Part>>, ServerHttpRequest> toMultipartData() {
 		return (serverRequest, context) -> {
-			HttpMessageReader<MultiValueMap<String, Part>> messageReader =
-					multipartMessageReader(context);
+			ResolvableType type = MULTIPART_MAP_TYPE;
+			HttpMessageReader<MultiValueMap<String, Part>> reader =
+					messageReader(type, MediaType.MULTIPART_FORM_DATA, context);
 			return context.serverResponse()
-					.map(serverResponse -> messageReader.readMono(MULTIPART_TYPE, MULTIPART_TYPE, serverRequest, serverResponse, context.hints()))
-					.orElseGet(() -> messageReader.readMono(MULTIPART_TYPE, serverRequest, context.hints()));
+					.map(response -> reader.readMono(type, type, serverRequest, response, context.hints()))
+					.orElseGet(() -> reader.readMono(type, serverRequest, context.hints()));
+		};
+	}
+
+	/**
+	 * Return a {@code BodyExtractor} that reads multipart (i.e. file upload) form data into a
+	 * {@link MultiValueMap}.
+	 * @return a {@code BodyExtractor} that reads multipart data
+	 */
+	// Note that the returned BodyExtractor is parameterized to ServerHttpRequest, not
+	// ReactiveHttpInputMessage like other methods, since reading form data only typically happens on
+	// the server-side
+	public static BodyExtractor<Flux<Part>, ServerHttpRequest> toParts() {
+		return (serverRequest, context) -> {
+			ResolvableType type = PART_TYPE;
+			HttpMessageReader<Part> reader = messageReader(type, MediaType.MULTIPART_FORM_DATA, context);
+			return context.serverResponse()
+					.map(response -> reader.read(type, type, serverRequest, response, context.hints()))
+					.orElseGet(() -> reader.read(type, serverRequest, context.hints()));
 		};
 	}
 
@@ -172,17 +240,22 @@ public abstract class BodyExtractors {
 
 	private static <T, S extends Publisher<T>> S readWithMessageReaders(
 			ReactiveHttpInputMessage inputMessage, BodyExtractor.Context context, ResolvableType elementType,
-			Function<HttpMessageReader<T>, S> readerFunction, Function<Throwable, S> unsupportedError) {
+			Function<HttpMessageReader<T>, S> readerFunction,
+			Function<UnsupportedMediaTypeException, S> unsupportedError,
+			Supplier<S> empty) {
 
+		if (VOID_TYPE.equals(elementType)) {
+			return empty.get();
+		}
 		MediaType contentType = contentType(inputMessage);
-		Supplier<Stream<HttpMessageReader<?>>> messageReaders = context.messageReaders();
-		return messageReaders.get()
+		List<HttpMessageReader<?>> messageReaders = context.messageReaders();
+		return messageReaders.stream()
 				.filter(r -> r.canRead(elementType, contentType))
 				.findFirst()
 				.map(BodyExtractors::<T>cast)
 				.map(readerFunction)
 				.orElseGet(() -> {
-					List<MediaType> supportedMediaTypes = messageReaders.get()
+					List<MediaType> supportedMediaTypes = messageReaders.stream()
 							.flatMap(reader -> reader.getReadableMediaTypes().stream())
 							.collect(Collectors.toList());
 					UnsupportedMediaTypeException error =
@@ -191,26 +264,15 @@ public abstract class BodyExtractors {
 				});
 	}
 
-	private static HttpMessageReader<MultiValueMap<String, String>> formMessageReader(BodyExtractor.Context context) {
-		return context.messageReaders().get()
-				.filter(messageReader -> messageReader
-						.canRead(FORM_TYPE, MediaType.APPLICATION_FORM_URLENCODED))
+	private static <T> HttpMessageReader<T> messageReader(ResolvableType elementType,
+			MediaType mediaType, BodyExtractor.Context context) {
+		return context.messageReaders().stream()
+				.filter(messageReader -> messageReader.canRead(elementType, mediaType))
 				.findFirst()
-				.map(BodyExtractors::<MultiValueMap<String, String>>cast)
+				.map(BodyExtractors::<T>cast)
 				.orElseThrow(() -> new IllegalStateException(
-						"Could not find HttpMessageReader that supports " +
-								MediaType.APPLICATION_FORM_URLENCODED_VALUE));
-	}
-
-	private static HttpMessageReader<MultiValueMap<String, Part>> multipartMessageReader(BodyExtractor.Context context) {
-		return context.messageReaders().get()
-				.filter(messageReader -> messageReader
-						.canRead(MULTIPART_TYPE, MediaType.MULTIPART_FORM_DATA))
-				.findFirst()
-				.map(BodyExtractors::<MultiValueMap<String, Part>>cast)
-				.orElseThrow(() -> new IllegalStateException(
-						"Could not find HttpMessageReader that supports " +
-								MediaType.MULTIPART_FORM_DATA));
+						"Could not find HttpMessageReader that supports \"" + mediaType +
+								"\" and \"" + elementType + "\""));
 	}
 
 	private static MediaType contentType(HttpMessage message) {

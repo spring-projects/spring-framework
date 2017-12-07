@@ -21,6 +21,7 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -51,7 +52,7 @@ public class SimpleTransactionFactory implements TransactionFactory {
 
 
 	@Override
-	public Transaction createTransaction(String name, int timeout) throws NotSupportedException, SystemException {
+	public Transaction createTransaction(@Nullable String name, int timeout) throws NotSupportedException, SystemException {
 		if (timeout >= 0) {
 			this.transactionManager.setTransactionTimeout(timeout);
 		}

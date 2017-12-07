@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -108,7 +109,7 @@ public class AnnotatedBeanDefinitionReader {
 	 * Set the BeanNameGenerator to use for detected bean classes.
 	 * <p>The default is a {@link AnnotationBeanNameGenerator}.
 	 */
-	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
+	public void setBeanNameGenerator(@Nullable BeanNameGenerator beanNameGenerator) {
 		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : new AnnotationBeanNameGenerator());
 	}
 
@@ -116,7 +117,7 @@ public class AnnotatedBeanDefinitionReader {
 	 * Set the ScopeMetadataResolver to use for detected bean classes.
 	 * <p>The default is an {@link AnnotationScopeMetadataResolver}.
 	 */
-	public void setScopeMetadataResolver(ScopeMetadataResolver scopeMetadataResolver) {
+	public void setScopeMetadataResolver(@Nullable ScopeMetadataResolver scopeMetadataResolver) {
 		this.scopeMetadataResolver =
 				(scopeMetadataResolver != null ? scopeMetadataResolver : new AnnotationScopeMetadataResolver());
 	}
@@ -153,7 +154,7 @@ public class AnnotatedBeanDefinitionReader {
 	 * (may be {@code null})
 	 * @since 5.0
 	 */
-	public <T> void registerBean(Class<T> annotatedClass, Supplier<T> instanceSupplier) {
+	public <T> void registerBean(Class<T> annotatedClass, @Nullable Supplier<T> instanceSupplier) {
 		doRegisterBean(annotatedClass, instanceSupplier, null, null);
 	}
 
@@ -167,7 +168,7 @@ public class AnnotatedBeanDefinitionReader {
 	 * (may be {@code null})
 	 * @since 5.0
 	 */
-	public <T> void registerBean(Class<T> annotatedClass, String name, Supplier<T> instanceSupplier) {
+	public <T> void registerBean(Class<T> annotatedClass, String name, @Nullable Supplier<T> instanceSupplier) {
 		doRegisterBean(annotatedClass, instanceSupplier, name, null);
 	}
 
@@ -209,8 +210,8 @@ public class AnnotatedBeanDefinitionReader {
 	 * factory's {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
 	 * @since 5.0
 	 */
-	<T> void doRegisterBean(Class<T> annotatedClass, Supplier<T> instanceSupplier, String name,
-			Class<? extends Annotation>[] qualifiers, BeanDefinitionCustomizer... definitionCustomizers) {
+	<T> void doRegisterBean(Class<T> annotatedClass, @Nullable Supplier<T> instanceSupplier, @Nullable String name,
+			@Nullable Class<? extends Annotation>[] qualifiers, BeanDefinitionCustomizer... definitionCustomizers) {
 
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
 		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
@@ -236,10 +237,8 @@ public class AnnotatedBeanDefinitionReader {
 				}
 			}
 		}
-		if (definitionCustomizers != null) {
-			for (BeanDefinitionCustomizer customizer : definitionCustomizers) {
-				customizer.customize(abd);
-			}
+		for (BeanDefinitionCustomizer customizer : definitionCustomizers) {
+			customizer.customize(abd);
 		}
 
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);

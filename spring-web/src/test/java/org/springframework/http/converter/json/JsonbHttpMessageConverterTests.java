@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -36,9 +35,11 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import static org.junit.Assert.*;
 
 /**
+ * Integration tests for the JSON Binding API, running against Apache Johnzon.
+ *
  * @author Juergen Hoeller
+ * @since 5.0
  */
-@Ignore  // until we are able to include Eclipse Yasson (the JSONB RI) in our build setup
 public class JsonbHttpMessageConverterTests {
 
 	private final JsonbHttpMessageConverter converter = new JsonbHttpMessageConverter();
@@ -133,7 +134,7 @@ public class JsonbHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		String body = "H\u00e9llo W\u00f6rld";
 		this.converter.write(body, contentType, outputMessage);
-		assertEquals("Invalid result", "\"" + body + "\"", outputMessage.getBodyAsString(StandardCharsets.UTF_16BE));
+		assertEquals("Invalid result", body, outputMessage.getBodyAsString(StandardCharsets.UTF_16BE));
 		assertEquals("Invalid content-type", contentType, outputMessage.getHeaders().getContentType());
 	}
 

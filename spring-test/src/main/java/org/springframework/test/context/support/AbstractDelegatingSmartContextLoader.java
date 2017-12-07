@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextLoader;
@@ -268,7 +269,7 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	 * @throws UnsupportedOperationException
 	 */
 	@Override
-	public final String[] processLocations(Class<?> clazz, String... locations) {
+	public final String[] processLocations(Class<?> clazz, @Nullable String... locations) {
 		throw new UnsupportedOperationException("DelegatingSmartContextLoaders do not support the ContextLoader SPI. "
 				+ "Call processContextConfiguration(ContextConfigurationAttributes) instead.");
 	}

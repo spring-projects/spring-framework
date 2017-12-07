@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,8 @@ public class JdbcTestUtils {
 	 * @return the number of rows in the table
 	 */
 	public static int countRowsInTable(JdbcTemplate jdbcTemplate, String tableName) {
-		return jdbcTemplate.queryForObject("SELECT COUNT(0) FROM " + tableName, Integer.class);
+		Integer result = jdbcTemplate.queryForObject("SELECT COUNT(0) FROM " + tableName, Integer.class);
+		return (result != null ? result : 0);
 	}
 
 	/**
@@ -72,7 +73,8 @@ public class JdbcTestUtils {
 		if (StringUtils.hasText(whereClause)) {
 			sql += " WHERE " + whereClause;
 		}
-		return jdbcTemplate.queryForObject(sql, Integer.class);
+		Integer result = jdbcTemplate.queryForObject(sql, Integer.class);
+		return (result != null ? result : 0);
 	}
 
 	/**
@@ -112,14 +114,14 @@ public class JdbcTestUtils {
 	 * optionally the scale.
 	 * @return the number of rows deleted from the table
 	 */
-	public static int deleteFromTableWhere(JdbcTemplate jdbcTemplate, String tableName, String whereClause,
-			Object... args) {
+	public static int deleteFromTableWhere(
+			JdbcTemplate jdbcTemplate, String tableName, String whereClause, Object... args) {
 
 		String sql = "DELETE FROM " + tableName;
 		if (StringUtils.hasText(whereClause)) {
 			sql += " WHERE " + whereClause;
 		}
-		int rowCount = (args != null && args.length > 0 ? jdbcTemplate.update(sql, args) : jdbcTemplate.update(sql));
+		int rowCount = (args.length > 0 ? jdbcTemplate.update(sql, args) : jdbcTemplate.update(sql));
 		if (logger.isInfoEnabled()) {
 			logger.info("Deleted " + rowCount + " rows from table " + tableName);
 		}

@@ -27,6 +27,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.jdbc.datasource.init.CompositeDatabasePopulator;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
@@ -82,6 +83,7 @@ class DatabasePopulatorConfigUtils {
 		return builder.getBeanDefinition();
 	}
 
+	@Nullable
 	private static String getSeparator(Element element, Element scriptElement) {
 		String scriptSeparator = scriptElement.getAttribute("separator");
 		if (StringUtils.hasLength(scriptSeparator)) {

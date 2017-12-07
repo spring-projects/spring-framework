@@ -21,7 +21,6 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.BiFunction;
 
 /**
  * Adapts a {@link CompletableFuture} or {@link CompletionStage} into a
@@ -51,17 +50,14 @@ public class CompletableToListenableFutureAdapter<T> implements ListenableFuture
 	 */
 	public CompletableToListenableFutureAdapter(CompletableFuture<T> completableFuture) {
 		this.completableFuture = completableFuture;
-		this.completableFuture.handle(new BiFunction<T, Throwable, Object>() {
-			@Override
-			public Object apply(T result, Throwable ex) {
-				if (ex != null) {
-					callbacks.failure(ex);
-				}
-				else {
-					callbacks.success(result);
-				}
-				return null;
+		this.completableFuture.handle((result, ex) -> {
+			if (ex != null) {
+				callbacks.failure(ex);
 			}
+			else {
+				callbacks.success(result);
+			}
+			return null;
 		});
 	}
 
@@ -76,6 +72,12 @@ public class CompletableToListenableFutureAdapter<T> implements ListenableFuture
 		this.callbacks.addSuccessCallback(successCallback);
 		this.callbacks.addFailureCallback(failureCallback);
 	}
+
+	@Override
+	public CompletableFuture<T> completable() {
+		return this.completableFuture;
+	}
+
 
 	@Override
 	public boolean cancel(boolean mayInterruptIfRunning) {

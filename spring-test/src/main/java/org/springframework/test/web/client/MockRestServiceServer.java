@@ -23,6 +23,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.support.RestGatewaySupport;
@@ -135,7 +136,10 @@ public class MockRestServiceServer {
 	 * Return a builder for a {@code MockRestServiceServer} that should be used
 	 * to reply to the given {@code AsyncRestTemplate}.
 	 * @since 4.3
+	 * @deprecated see deprecation notice on
+	 * {@link org.springframework.web.client.AsyncRestTemplate} itself
 	 */
+	@Deprecated
 	public static MockRestServiceServerBuilder bindTo(org.springframework.web.client.AsyncRestTemplate asyncRestTemplate) {
 		return new DefaultBuilder(asyncRestTemplate);
 	}
@@ -164,7 +168,10 @@ public class MockRestServiceServer {
 	 * A shortcut for {@code bindTo(asyncRestTemplate).build()}.
 	 * @param asyncRestTemplate the AsyncRestTemplate to set up for mock testing
 	 * @return the created mock server
+	 * @deprecated see deprecation notice on
+	 * {@link org.springframework.web.client.AsyncRestTemplate} itself
 	 */
+	@Deprecated
 	public static MockRestServiceServer createServer(org.springframework.web.client.AsyncRestTemplate asyncRestTemplate) {
 		return bindTo(asyncRestTemplate).build();
 	}
@@ -187,8 +194,9 @@ public class MockRestServiceServer {
 		/**
 		 * Whether to allow expected requests to be executed in any order not
 		 * necessarily matching the order of declaration.
-		 * <p>When set to "true" this is effectively a shortcut for:<br>
+		 * <p>Effectively a shortcut for:<br>
 		 * {@code builder.build(new UnorderedRequestExpectationManager)}.
+		 * <p>By default this is set to {@code false}
 		 * @param ignoreExpectOrder whether to ignore the order of expectations
 		 */
 		MockRestServiceServerBuilder ignoreExpectOrder(boolean ignoreExpectOrder);
@@ -210,8 +218,10 @@ public class MockRestServiceServer {
 
 	private static class DefaultBuilder implements MockRestServiceServerBuilder {
 
+		@Nullable
 		private final RestTemplate restTemplate;
 
+		@Nullable
 		private final org.springframework.web.client.AsyncRestTemplate asyncRestTemplate;
 
 		private boolean ignoreExpectOrder;
@@ -263,7 +273,8 @@ public class MockRestServiceServer {
 	 * Mock ClientHttpRequestFactory that creates requests by iterating
 	 * over the list of expected {@link DefaultRequestExpectation}'s.
 	 */
-	private class MockClientHttpRequestFactory implements ClientHttpRequestFactory, org.springframework.http.client.AsyncClientHttpRequestFactory {
+	private class MockClientHttpRequestFactory implements ClientHttpRequestFactory,
+			org.springframework.http.client.AsyncClientHttpRequestFactory {
 
 		@Override
 		public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) {

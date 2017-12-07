@@ -25,6 +25,7 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.util.ClassUtils;
@@ -103,6 +104,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @exception Exception raised if no suitable argument resolver can be found,
 	 * or if the method raised an exception
 	 */
+	@Nullable
 	public Object invoke(Message<?> message, Object... providedArgs) throws Exception {
 		Object[] args = getMethodArgumentValues(message, providedArgs);
 		if (logger.isTraceEnabled()) {
@@ -158,10 +160,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	/**
 	 * Attempt to resolve a method parameter from the list of provided argument values.
 	 */
+	@Nullable
 	private Object resolveProvidedArgument(MethodParameter parameter, Object... providedArgs) {
-		if (providedArgs == null) {
-			return null;
-		}
 		for (Object providedArg : providedArgs) {
 			if (parameter.getParameterType().isInstance(providedArg)) {
 				return providedArg;
@@ -174,6 +174,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	/**
 	 * Invoke the handler method with the given argument values.
 	 */
+	@Nullable
 	protected Object doInvoke(Object... args) throws Exception {
 		ReflectionUtils.makeAccessible(getBridgedMethod());
 		try {
@@ -251,18 +252,19 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 
-	MethodParameter getAsyncReturnValueType(Object returnValue) {
+	MethodParameter getAsyncReturnValueType(@Nullable Object returnValue) {
 		return new AsyncResultMethodParameter(returnValue);
 	}
 
 
 	private class AsyncResultMethodParameter extends HandlerMethodParameter {
 
+		@Nullable
 		private final Object returnValue;
 
 		private final ResolvableType returnType;
 
-		public AsyncResultMethodParameter(Object returnValue) {
+		public AsyncResultMethodParameter(@Nullable Object returnValue) {
 			super(-1);
 			this.returnValue = returnValue;
 			this.returnType = ResolvableType.forType(super.getGenericParameterType()).getGeneric();
@@ -280,7 +282,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				return this.returnValue.getClass();
 			}
 			if (!ResolvableType.NONE.equals(this.returnType)) {
-				return this.returnType.resolve();
+				return this.returnType.resolve(Object.class);
 			}
 			return super.getParameterType();
 		}

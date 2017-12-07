@@ -68,7 +68,8 @@ public class ContextLoaderTests {
 		ServletContextListener listener = new ContextLoaderListener();
 		ServletContextEvent event = new ServletContextEvent(sc);
 		listener.contextInitialized(event);
-		WebApplicationContext context = (WebApplicationContext) sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+		String contextAttr = WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE;
+		WebApplicationContext context = (WebApplicationContext) sc.getAttribute(contextAttr);
 		assertTrue("Correct WebApplicationContext exposed in ServletContext", context instanceof XmlWebApplicationContext);
 		assertTrue(WebApplicationContextUtils.getRequiredWebApplicationContext(sc) instanceof XmlWebApplicationContext);
 		LifecycleBean lb = (LifecycleBean) context.getBean("lifecycle");
@@ -80,7 +81,7 @@ public class ContextLoaderTests {
 		assertFalse(context.containsBean("beans1.bean2"));
 		listener.contextDestroyed(event);
 		assertTrue("Destroyed", lb.isDestroyed());
-		assertNull(sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE));
+		assertNull(sc.getAttribute(contextAttr));
 		assertNull(WebApplicationContextUtils.getWebApplicationContext(sc));
 	}
 
@@ -207,7 +208,8 @@ public class ContextLoaderTests {
 				"/org/springframework/web/context/WEB-INF/empty-context.xml");
 
 		sc.addInitParameter("someProperty", "someValue");
-		sc.addInitParameter(ContextLoader.CONTEXT_INITIALIZER_CLASSES_PARAM, EnvApplicationContextInitializer.class.getName());
+		sc.addInitParameter(ContextLoader.CONTEXT_INITIALIZER_CLASSES_PARAM,
+				EnvApplicationContextInitializer.class.getName());
 		ContextLoaderListener listener = new ContextLoaderListener();
 		listener.contextInitialized(new ServletContextEvent(sc));
 	}
@@ -238,8 +240,10 @@ public class ContextLoaderTests {
 		ServletContextListener listener = new ContextLoaderListener();
 		ServletContextEvent event = new ServletContextEvent(sc);
 		listener.contextInitialized(event);
-		WebApplicationContext wc = (WebApplicationContext) sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
-		assertTrue("Correct WebApplicationContext exposed in ServletContext", wc instanceof SimpleWebApplicationContext);
+		String contextAttr = WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE;
+		WebApplicationContext wc = (WebApplicationContext) sc.getAttribute(contextAttr);
+		assertTrue("Correct WebApplicationContext exposed in ServletContext",
+				wc instanceof SimpleWebApplicationContext);
 	}
 
 	@Test
@@ -376,7 +380,8 @@ public class ContextLoaderTests {
 	}
 
 
-	private static class TestWebContextInitializer implements ApplicationContextInitializer<ConfigurableWebApplicationContext> {
+	private static class TestWebContextInitializer implements
+			ApplicationContextInitializer<ConfigurableWebApplicationContext> {
 
 		@Override
 		public void initialize(ConfigurableWebApplicationContext applicationContext) {
@@ -386,7 +391,8 @@ public class ContextLoaderTests {
 	}
 
 
-	private static class EnvApplicationContextInitializer implements ApplicationContextInitializer<ConfigurableWebApplicationContext> {
+	private static class EnvApplicationContextInitializer
+			implements ApplicationContextInitializer<ConfigurableWebApplicationContext> {
 
 		@Override
 		public void initialize(ConfigurableWebApplicationContext applicationContext) {

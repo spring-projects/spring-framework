@@ -24,6 +24,8 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -130,7 +132,7 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 	 * @see com.ibm.websphere.rsadapter.WSDataSource#getConnection(com.ibm.websphere.rsadapter.JDBCConnectionSpec)
 	 */
 	@Override
-	protected Connection doGetConnection(String username, String password) throws SQLException {
+	protected Connection doGetConnection(@Nullable String username, @Nullable String password) throws SQLException {
 		// Create JDBCConnectionSpec using current isolation level value and read-only flag.
 		Object connSpec = createConnectionSpec(
 				getCurrentIsolationLevel(), getCurrentReadOnlyFlag(), username, password);
@@ -139,8 +141,10 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 					getTargetDataSource() + "], using ConnectionSpec [" + connSpec + "]");
 		}
 		// Create Connection through invoking WSDataSource.getConnection(JDBCConnectionSpec)
-		return (Connection) ReflectionUtils.invokeJdbcMethod(
-				this.wsDataSourceGetConnectionMethod, getTargetDataSource(), connSpec);
+		Connection con = (Connection) ReflectionUtils.invokeJdbcMethod(
+				this.wsDataSourceGetConnectionMethod, obtainTargetDataSource(), connSpec);
+		Assert.state(con != null, "No Connection");
+		return con;
 	}
 
 	/**
@@ -156,10 +160,11 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 	 * @throws SQLException if thrown by JDBCConnectionSpec API methods
 	 * @see com.ibm.websphere.rsadapter.JDBCConnectionSpec
 	 */
-	protected Object createConnectionSpec(
-			Integer isolationLevel, Boolean readOnlyFlag, String username, String password) throws SQLException {
+	protected Object createConnectionSpec(@Nullable Integer isolationLevel, @Nullable Boolean readOnlyFlag,
+			@Nullable String username, @Nullable String password) throws SQLException {
 
 		Object connSpec = ReflectionUtils.invokeJdbcMethod(this.newJdbcConnSpecMethod, null);
+		Assert.state(connSpec != null, "No JDBCConnectionSpec");
 		if (isolationLevel != null) {
 			ReflectionUtils.invokeJdbcMethod(this.setTransactionIsolationMethod, connSpec, isolationLevel);
 		}

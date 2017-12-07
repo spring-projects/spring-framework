@@ -267,6 +267,11 @@ public class InterceptingClientHttpRequestFactoryTests {
 			return method;
 		}
 
+		@Override
+		public String getMethodValue() {
+			return method.name();
+		}
+
 		public void setMethod(HttpMethod method) {
 			this.method = method;
 		}

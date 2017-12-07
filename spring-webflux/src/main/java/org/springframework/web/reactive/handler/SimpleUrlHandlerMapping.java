@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import org.springframework.util.CollectionUtils;
  * various Ant-style pattern matches, e.g. a registered "/t*" pattern matches
  * both "/test" and "/team", "/test/*" matches all paths under "/test",
  * "/test/**" matches all paths below "/test". For details, see the
- * {@link org.springframework.web.util.ParsingPathMatcher ParsingPathMatcher} javadoc.
+ * {@link org.springframework.web.util.pattern.PathPattern} javadoc.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -59,8 +59,8 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	/**
 	 * Map URL paths to handler bean names.
 	 * This is the typical way of configuring this HandlerMapping.
-	 * <p>Supports direct URL matches and Ant-style pattern matches. For syntax
-	 * details, see the {@link org.springframework.web.util.ParsingPathMatcher} javadoc.
+	 * <p>Supports direct URL matches and Ant-style pattern matches. For syntax details,
+	 * see the {@link org.springframework.web.util.pattern.PathPattern} javadoc.
 	 * @param mappings properties with URLs as keys and bean names as values
 	 * @see #setUrlMap
 	 */
@@ -71,8 +71,8 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	/**
 	 * Set a Map with URL paths as keys and handler beans (or handler bean names)
 	 * as values. Convenient for population with bean references.
-	 * <p>Supports direct URL matches and Ant-style pattern matches. For syntax
-	 * details, see the {@link org.springframework.web.util.ParsingPathMatcher} javadoc.
+	 * <p>Supports direct URL matches and Ant-style pattern matches. For syntax details,
+	 * see the {@link org.springframework.web.util.pattern.PathPattern} javadoc.
 	 * @param urlMap map with URLs as keys and beans as values
 	 * @see #setMappings
 	 */

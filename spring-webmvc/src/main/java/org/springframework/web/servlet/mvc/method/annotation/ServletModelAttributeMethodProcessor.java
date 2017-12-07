@@ -24,6 +24,8 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.ServletRequestDataBinder;
@@ -43,6 +45,7 @@ import org.springframework.web.servlet.HandlerMapping;
  * model attribute name and there is an appropriate type conversion strategy.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodProcessor {
@@ -66,19 +69,19 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * @see #createAttributeFromRequestValue
 	 */
 	@Override
-	protected final Object createAttribute(String attributeName, MethodParameter methodParam,
+	protected final Object createAttribute(String attributeName, MethodParameter parameter,
 			WebDataBinderFactory binderFactory, NativeWebRequest request) throws Exception {
 
 		String value = getRequestValueForAttribute(attributeName, request);
 		if (value != null) {
 			Object attribute = createAttributeFromRequestValue(
-					value, attributeName, methodParam, binderFactory, request);
+					value, attributeName, parameter, binderFactory, request);
 			if (attribute != null) {
 				return attribute;
 			}
 		}
 
-		return super.createAttribute(attributeName, methodParam, binderFactory, request);
+		return super.createAttribute(attributeName, parameter, binderFactory, request);
 	}
 
 	/**
@@ -90,6 +93,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * @param request the current request
 	 * @return the request value to try to convert, or {@code null} if none
 	 */
+	@Nullable
 	protected String getRequestValueForAttribute(String attributeName, NativeWebRequest request) {
 		Map<String, String> variables = getUriTemplateVariables(request);
 		String variableValue = variables.get(attributeName);
@@ -117,24 +121,24 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * {@link Converter} that can perform the conversion.
 	 * @param sourceValue the source value to create the model attribute from
 	 * @param attributeName the name of the attribute (never {@code null})
-	 * @param methodParam the method parameter
+	 * @param parameter the method parameter
 	 * @param binderFactory for creating WebDataBinder instance
 	 * @param request the current request
 	 * @return the created model attribute, or {@code null} if no suitable
 	 * conversion found
-	 * @throws Exception
 	 */
+	@Nullable
 	protected Object createAttributeFromRequestValue(String sourceValue, String attributeName,
-			MethodParameter methodParam, WebDataBinderFactory binderFactory, NativeWebRequest request)
+			MethodParameter parameter, WebDataBinderFactory binderFactory, NativeWebRequest request)
 			throws Exception {
 
 		DataBinder binder = binderFactory.createBinder(request, null, attributeName);
 		ConversionService conversionService = binder.getConversionService();
 		if (conversionService != null) {
 			TypeDescriptor source = TypeDescriptor.valueOf(String.class);
-			TypeDescriptor target = new TypeDescriptor(methodParam);
+			TypeDescriptor target = new TypeDescriptor(parameter);
 			if (conversionService.canConvert(source, target)) {
-				return binder.convertIfNecessary(sourceValue, methodParam.getParameterType(), methodParam);
+				return binder.convertIfNecessary(sourceValue, parameter.getParameterType(), parameter);
 			}
 		}
 		return null;
@@ -148,6 +152,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	@Override
 	protected void bindRequestParameters(WebDataBinder binder, NativeWebRequest request) {
 		ServletRequest servletRequest = request.getNativeRequest(ServletRequest.class);
+		Assert.state(servletRequest != null, "No ServletRequest");
 		ServletRequestDataBinder servletBinder = (ServletRequestDataBinder) binder;
 		servletBinder.bind(servletRequest);
 	}

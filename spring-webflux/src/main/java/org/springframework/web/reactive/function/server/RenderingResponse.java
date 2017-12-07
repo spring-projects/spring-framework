@@ -18,12 +18,16 @@ package org.springframework.web.reactive.function.server;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Rendering-specific subtype of {@link ServerResponse} that exposes model and template data.
@@ -92,7 +96,7 @@ public interface RenderingResponse extends ServerResponse {
 		 * @param name the name of the model attribute (never {@code null})
 		 * @param value the model attribute value (can be {@code null})
 		 */
-		Builder modelAttribute(String name, Object value);
+		Builder modelAttribute(String name, @Nullable Object value);
 
 		/**
 		 * Copy all attributes in the supplied array into the model,
@@ -137,6 +141,24 @@ public interface RenderingResponse extends ServerResponse {
 		 * @return this builder
 		 */
 		Builder status(HttpStatus status);
+
+		/**
+		 * Add the given cookie to the response.
+		 * @param cookie the cookie to add
+		 * @return this builder
+		 */
+		Builder cookie(ResponseCookie cookie);
+
+		/**
+		 * Manipulate this response's cookies with the given consumer. The
+		 * cookies provided to the consumer are "live", so that the consumer can be used to
+		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing cookies,
+		 * {@linkplain MultiValueMap#remove(Object) remove} cookies, or use any of the other
+		 * {@link MultiValueMap} methods.
+		 * @param cookiesConsumer a function that consumes the cookies
+		 * @return this builder
+		 */
+		Builder cookies(Consumer<MultiValueMap<String, ResponseCookie>> cookiesConsumer);
 
 		/**
 		 * Build the response.

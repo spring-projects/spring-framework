@@ -26,6 +26,8 @@ import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.SpringAsmInfo;
 import org.springframework.asm.Type;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -41,10 +43,11 @@ abstract class AbstractRecursiveAnnotationVisitor extends AnnotationVisitor {
 
 	protected final AnnotationAttributes attributes;
 
+	@Nullable
 	protected final ClassLoader classLoader;
 
 
-	public AbstractRecursiveAnnotationVisitor(ClassLoader classLoader, AnnotationAttributes attributes) {
+	public AbstractRecursiveAnnotationVisitor(@Nullable ClassLoader classLoader, AnnotationAttributes attributes) {
 		super(SpringAsmInfo.ASM_VERSION);
 		this.classLoader = classLoader;
 		this.attributes = attributes;
@@ -78,7 +81,7 @@ abstract class AbstractRecursiveAnnotationVisitor extends AnnotationVisitor {
 	protected Object getEnumValue(String asmTypeDescriptor, String attributeValue) {
 		Object valueToUse = attributeValue;
 		try {
-			Class<?> enumType = this.classLoader.loadClass(Type.getType(asmTypeDescriptor).getClassName());
+			Class<?> enumType = ClassUtils.forName(Type.getType(asmTypeDescriptor).getClassName(), this.classLoader);
 			Field enumConstant = ReflectionUtils.findField(enumType, attributeValue);
 			if (enumConstant != null) {
 				ReflectionUtils.makeAccessible(enumConstant);

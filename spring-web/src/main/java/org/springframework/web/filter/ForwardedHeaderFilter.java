@@ -31,7 +31,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.http.HttpRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
@@ -40,20 +42,25 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * Filter that wraps the request and response in order to override its
+ * Extract values from "Forwarded" and "X-Forwarded-*" headers in order to wrap
+ * and override the following from the request and response:
  * {@link HttpServletRequest#getServerName() getServerName()},
  * {@link HttpServletRequest#getServerPort() getServerPort()},
  * {@link HttpServletRequest#getScheme() getScheme()},
- * {@link HttpServletRequest#isSecure() isSecure()},
- * {@link HttpServletResponse#sendRedirect(String) sendRedirect(String)},
- * methods with values derived from "Forwarded" or "X-Forwarded-*"
- * headers. In effect the wrapped request and response reflects the
- * client-originated protocol and address.
+ * {@link HttpServletRequest#isSecure() isSecure()}, and
+ * {@link HttpServletResponse#sendRedirect(String) sendRedirect(String)}.
+ * In effect the wrapped request and response reflect the client-originated
+ * protocol and address.
+ *
+ * <p><strong>Note:</strong> This filter can also be used in a
+ * {@link #setRemoveOnly removeOnly} mode where "Forwarded" and "X-Forwarded-*"
+ * headers are only eliminated without being used.
  *
  * @author Rossen Stoyanchev
  * @author Eddú Meléndez
  * @author Rob Winch
  * @since 4.3
+ * @see <a href="https://tools.ietf.org/html/rfc7239">https://tools.ietf.org/html/rfc7239</a>
  */
 public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
@@ -71,11 +78,41 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 	private final UrlPathHelper pathHelper;
 
+	private boolean removeOnly;
+
+	private boolean relativeRedirects;
+
 
 	public ForwardedHeaderFilter() {
 		this.pathHelper = new UrlPathHelper();
 		this.pathHelper.setUrlDecode(false);
 		this.pathHelper.setRemoveSemicolonContent(false);
+	}
+
+
+	/**
+	 * Enables mode in which any "Forwarded" or "X-Forwarded-*" headers are
+	 * removed only and the information in them ignored.
+	 * @param removeOnly whether to discard and ignore forwarded headers
+	 * @since 4.3.9
+	 */
+	public void setRemoveOnly(boolean removeOnly) {
+		this.removeOnly = removeOnly;
+	}
+
+	/**
+	 * Use this property to enable relative redirects as explained in and also
+	 * using the same response wrapper as {@link RelativeRedirectFilter} does.
+	 * Or if both filters are used, only one will wrap the response.
+	 * <p>By default, if this property is set to false, in which case calls to
+	 * {@link HttpServletResponse#sendRedirect(String)} are overridden in order
+	 * to turn relative into absolute URLs since (which Servlet containers are
+	 * also required to do) also taking forwarded headers into consideration.
+	 * @param relativeRedirects whether to use relative redirects
+	 * @since 4.3.10
+	 */
+	public void setRelativeRedirects(boolean relativeRedirects) {
+		this.relativeRedirects = relativeRedirects;
 	}
 
 
@@ -105,18 +142,77 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 			FilterChain filterChain) throws ServletException, IOException {
 
-		ForwardedHeaderRequestWrapper wrappedRequest = new ForwardedHeaderRequestWrapper(request, this.pathHelper);
-		ForwardedHeaderResponseWrapper wrappedResponse = new ForwardedHeaderResponseWrapper(response, wrappedRequest);
-		filterChain.doFilter(wrappedRequest, wrappedResponse);
+		if (this.removeOnly) {
+			ForwardedHeaderRemovingRequest theRequest = new ForwardedHeaderRemovingRequest(request);
+			filterChain.doFilter(theRequest, response);
+		}
+		else {
+			HttpServletRequest theRequest = new ForwardedHeaderExtractingRequest(request, this.pathHelper);
+			HttpServletResponse theResponse = (this.relativeRedirects ?
+					RelativeRedirectResponseWrapper.wrapIfNecessary(response, HttpStatus.SEE_OTHER) :
+					new ForwardedHeaderExtractingResponse(response, theRequest));
+			filterChain.doFilter(theRequest, theResponse);
+		}
 	}
 
 
-	private static class ForwardedHeaderRequestWrapper extends HttpServletRequestWrapper {
+	/**
+	 * Hide "Forwarded" or "X-Forwarded-*" headers.
+	 */
+	private static class ForwardedHeaderRemovingRequest extends HttpServletRequestWrapper {
 
+		private final Map<String, List<String>> headers;
+
+		public ForwardedHeaderRemovingRequest(HttpServletRequest request) {
+			super(request);
+			this.headers = initHeaders(request);
+		}
+
+		private static Map<String, List<String>> initHeaders(HttpServletRequest request) {
+			Map<String, List<String>> headers = new LinkedCaseInsensitiveMap<>(Locale.ENGLISH);
+			Enumeration<String> names = request.getHeaderNames();
+			while (names.hasMoreElements()) {
+				String name = names.nextElement();
+				if (!FORWARDED_HEADER_NAMES.contains(name)) {
+					headers.put(name, Collections.list(request.getHeaders(name)));
+				}
+			}
+			return headers;
+		}
+
+		// Override header accessors to not expose forwarded headers
+
+		@Override
+		@Nullable
+		public String getHeader(String name) {
+			List<String> value = this.headers.get(name);
+			return (CollectionUtils.isEmpty(value) ? null : value.get(0));
+		}
+
+		@Override
+		public Enumeration<String> getHeaders(String name) {
+			List<String> value = this.headers.get(name);
+			return (Collections.enumeration(value != null ? value : Collections.emptySet()));
+		}
+
+		@Override
+		public Enumeration<String> getHeaderNames() {
+			return Collections.enumeration(this.headers.keySet());
+		}
+	}
+
+
+	/**
+	 * Extract and use "Forwarded" or "X-Forwarded-*" headers.
+	 */
+	private static class ForwardedHeaderExtractingRequest extends ForwardedHeaderRemovingRequest {
+
+		@Nullable
 		private final String scheme;
 
 		private final boolean secure;
 
+		@Nullable
 		private final String host;
 
 		private final int port;
@@ -127,9 +223,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		private final String requestUrl;
 
-		private final Map<String, List<String>> headers;
-
-		public ForwardedHeaderRequestWrapper(HttpServletRequest request, UrlPathHelper pathHelper) {
+		public ForwardedHeaderExtractingRequest(HttpServletRequest request, UrlPathHelper pathHelper) {
 			super(request);
 
 			HttpRequest httpRequest = new ServletServerHttpRequest(request);
@@ -145,9 +239,9 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			this.contextPath = (prefix != null ? prefix : request.getContextPath());
 			this.requestUri = this.contextPath + pathHelper.getPathWithinApplication(request);
 			this.requestUrl = this.scheme + "://" + this.host + (port == -1 ? "" : ":" + port) + this.requestUri;
-			this.headers = initHeaders(request);
 		}
 
+		@Nullable
 		private static String getForwardedPrefix(HttpServletRequest request) {
 			String prefix = null;
 			Enumeration<String> names = request.getHeaderNames();
@@ -165,27 +259,14 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			return prefix;
 		}
 
-		/**
-		 * Copy the headers excluding any {@link #FORWARDED_HEADER_NAMES}.
-		 */
-		private static Map<String, List<String>> initHeaders(HttpServletRequest request) {
-			Map<String, List<String>> headers = new LinkedCaseInsensitiveMap<>(Locale.ENGLISH);
-			Enumeration<String> names = request.getHeaderNames();
-			while (names.hasMoreElements()) {
-				String name = names.nextElement();
-				if (!FORWARDED_HEADER_NAMES.contains(name)) {
-					headers.put(name, Collections.list(request.getHeaders(name)));
-				}
-			}
-			return headers;
-		}
-
 		@Override
+		@Nullable
 		public String getScheme() {
 			return this.scheme;
 		}
 
 		@Override
+		@Nullable
 		public String getServerName() {
 			return this.host;
 		}
@@ -214,35 +295,16 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		public StringBuffer getRequestURL() {
 			return new StringBuffer(this.requestUrl);
 		}
-
-		// Override header accessors to not expose forwarded headers
-
-		@Override
-		public String getHeader(String name) {
-			List<String> value = this.headers.get(name);
-			return (CollectionUtils.isEmpty(value) ? null : value.get(0));
-		}
-
-		@Override
-		public Enumeration<String> getHeaders(String name) {
-			List<String> value = this.headers.get(name);
-			return (Collections.enumeration(value != null ? value : Collections.emptySet()));
-		}
-
-		@Override
-		public Enumeration<String> getHeaderNames() {
-			return Collections.enumeration(this.headers.keySet());
-		}
 	}
 
 
-	private static class ForwardedHeaderResponseWrapper extends HttpServletResponseWrapper {
+	private static class ForwardedHeaderExtractingResponse extends HttpServletResponseWrapper {
 
 		private static final String FOLDER_SEPARATOR = "/";
 
 		private final HttpServletRequest request;
 
-		public ForwardedHeaderResponseWrapper(HttpServletResponse response, HttpServletRequest request) {
+		public ForwardedHeaderExtractingResponse(HttpServletResponse response, HttpServletRequest request) {
 			super(response);
 			this.request = request;
 		}

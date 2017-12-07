@@ -29,6 +29,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -57,6 +58,7 @@ public class HandlerMethod {
 
 	private final Object bean;
 
+	@Nullable
 	private final BeanFactory beanFactory;
 
 	private final Class<?> beanType;
@@ -67,10 +69,13 @@ public class HandlerMethod {
 
 	private final MethodParameter[] parameters;
 
+	@Nullable
 	private HttpStatus responseStatus;
 
+	@Nullable
 	private String responseStatusReason;
 
+	@Nullable
 	private HandlerMethod resolvedFromHandlerMethod;
 
 
@@ -116,7 +121,11 @@ public class HandlerMethod {
 		Assert.notNull(method, "Method is required");
 		this.bean = beanName;
 		this.beanFactory = beanFactory;
-		this.beanType = ClassUtils.getUserClass(beanFactory.getType(beanName));
+		Class<?> beanType = beanFactory.getType(beanName);
+		if (beanType == null) {
+			throw new IllegalStateException("Cannot resolve bean type for bean with name '" + beanName + "'");
+		}
+		this.beanType = ClassUtils.getUserClass(beanType);
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 		this.parameters = initMethodParameters();
@@ -223,6 +232,7 @@ public class HandlerMethod {
 	 * @since 4.3.8
 	 * @see ResponseStatus#code()
 	 */
+	@Nullable
 	protected HttpStatus getResponseStatus() {
 		return this.responseStatus;
 	}
@@ -232,6 +242,7 @@ public class HandlerMethod {
 	 * @since 4.3.8
 	 * @see ResponseStatus#reason()
 	 */
+	@Nullable
 	protected String getResponseStatusReason() {
 		return this.responseStatusReason;
 	}
@@ -246,7 +257,7 @@ public class HandlerMethod {
 	/**
 	 * Return the actual return value type.
 	 */
-	public MethodParameter getReturnValueType(Object returnValue) {
+	public MethodParameter getReturnValueType(@Nullable Object returnValue) {
 		return new ReturnValueMethodParameter(returnValue);
 	}
 
@@ -266,6 +277,7 @@ public class HandlerMethod {
 	 * @return the annotation, or {@code null} if none found
 	 * @see AnnotatedElementUtils#findMergedAnnotation
 	 */
+	@Nullable
 	public <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
 		return AnnotatedElementUtils.findMergedAnnotation(this.method, annotationType);
 	}
@@ -284,6 +296,7 @@ public class HandlerMethod {
 	 * Return the HandlerMethod from which this HandlerMethod instance was
 	 * resolved via {@link #createWithResolvedBean()}.
 	 */
+	@Nullable
 	public HandlerMethod getResolvedFromHandlerMethod() {
 		return this.resolvedFromHandlerMethod;
 	}
@@ -295,6 +308,7 @@ public class HandlerMethod {
 	public HandlerMethod createWithResolvedBean() {
 		Object handler = this.bean;
 		if (this.bean instanceof String) {
+			Assert.state(this.beanFactory != null, "Cannot resolve bean name without BeanFactory");
 			String beanName = (String) this.bean;
 			handler = this.beanFactory.getBean(beanName);
 		}
@@ -374,9 +388,10 @@ public class HandlerMethod {
 	 */
 	private class ReturnValueMethodParameter extends HandlerMethodParameter {
 
+		@Nullable
 		private final Object returnValue;
 
-		public ReturnValueMethodParameter(Object returnValue) {
+		public ReturnValueMethodParameter(@Nullable Object returnValue) {
 			super(-1);
 			this.returnValue = returnValue;
 		}

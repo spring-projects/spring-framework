@@ -24,7 +24,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.Ordered;
-import org.springframework.util.Assert;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.result.view.HttpMessageWriterView;
 import org.springframework.web.reactive.result.view.UrlBasedViewResolver;
@@ -46,17 +46,18 @@ import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewRes
  */
 public class ViewResolverRegistry {
 
+	@Nullable
 	private final ApplicationContext applicationContext;
 
 	private final List<ViewResolver> viewResolvers = new ArrayList<>(4);
 
 	private final List<View> defaultViews = new ArrayList<>(4);
 
+	@Nullable
 	private Integer order;
 
 
-	public ViewResolverRegistry(ApplicationContext applicationContext) {
-		Assert.notNull(applicationContext, "ApplicationContext must not be null");
+	public ViewResolverRegistry(@Nullable ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 
@@ -67,7 +68,7 @@ public class ViewResolverRegistry {
 	 * adding a {@link FreeMarkerConfigurer} bean.
 	 */
 	public UrlBasedViewResolverRegistration freeMarker() {
-		if (this.applicationContext != null && !hasBeanOfType(FreeMarkerConfigurer.class)) {
+		if (!checkBeanOfType(FreeMarkerConfigurer.class)) {
 			throw new BeanInitializationException("In addition to a FreeMarker view resolver " +
 					"there must also be a single FreeMarkerConfig bean in this web application context " +
 					"(or its parent): FreeMarkerConfigurer is the usual implementation. " +
@@ -75,14 +76,11 @@ public class ViewResolverRegistry {
 		}
 		FreeMarkerRegistration registration = new FreeMarkerRegistration();
 		UrlBasedViewResolver resolver = registration.getViewResolver();
-		resolver.setApplicationContext(this.applicationContext);
+		if (this.applicationContext != null) {
+			resolver.setApplicationContext(this.applicationContext);
+		}
 		this.viewResolvers.add(resolver);
 		return registration;
-	}
-
-	protected boolean hasBeanOfType(Class<?> beanType) {
-		return !ObjectUtils.isEmpty(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
-				this.applicationContext, beanType, false, false));
 	}
 
 	/**
@@ -122,6 +120,13 @@ public class ViewResolverRegistry {
 	 */
 	public void order(int order) {
 		this.order = order;
+	}
+
+
+	private boolean checkBeanOfType(Class<?> beanType) {
+		return (this.applicationContext == null ||
+				!ObjectUtils.isEmpty(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
+						this.applicationContext, beanType, false, false)));
 	}
 
 	protected int getOrder() {

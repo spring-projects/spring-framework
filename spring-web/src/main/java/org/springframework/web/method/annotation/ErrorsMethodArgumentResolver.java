@@ -19,7 +19,9 @@ package org.springframework.web.method.annotation;
 import java.util.ArrayList;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.Assert;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -47,8 +49,13 @@ public class ErrorsMethodArgumentResolver implements HandlerMethodArgumentResolv
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+	@Nullable
+	public Object resolveArgument(MethodParameter parameter,
+			@Nullable ModelAndViewContainer mavContainer, NativeWebRequest webRequest,
+			@Nullable WebDataBinderFactory binderFactory) throws Exception {
+
+		Assert.state(mavContainer != null,
+				"Errors/BindingResult argument only supported on regular handler methods");
 
 		ModelMap model = mavContainer.getModel();
 		if (model.size() > 0) {
@@ -60,8 +67,9 @@ public class ErrorsMethodArgumentResolver implements HandlerMethodArgumentResolv
 		}
 
 		throw new IllegalStateException(
-				"An Errors/BindingResult argument is expected to be declared immediately after the model attribute, " +
-				"the @RequestBody or the @RequestPart arguments to which they apply: " + parameter.getMethod());
+				"An Errors/BindingResult argument is expected to be declared immediately after " +
+						"the model attribute, the @RequestBody or the @RequestPart arguments " +
+						"to which they apply: " + parameter.getMethod());
 	}
 
 }

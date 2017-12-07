@@ -23,7 +23,7 @@ import org.junit.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.reactive.result.condition.ConsumesRequestCondition.ConsumeMediaTypeExpression;
 
 import static org.junit.Assert.assertEquals;
@@ -101,7 +101,7 @@ public class ConsumesRequestConditionTests {
 
 	@Test
 	public void compareToSingle() throws Exception {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 		ConsumesRequestCondition condition1 = new ConsumesRequestCondition("text/plain");
 		ConsumesRequestCondition condition2 = new ConsumesRequestCondition("text/*");
@@ -115,7 +115,7 @@ public class ConsumesRequestConditionTests {
 
 	@Test
 	public void compareToMultiple() throws Exception {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 		ConsumesRequestCondition condition1 = new ConsumesRequestCondition("*/*", "text/plain");
 		ConsumesRequestCondition condition2 = new ConsumesRequestCondition("text/*", "text/plain;q=0.7");
@@ -188,7 +188,8 @@ public class ConsumesRequestConditionTests {
 	}
 
 	private MockServerWebExchange postExchange(String contentType) {
-		return MockServerHttpRequest.post("/").header(HttpHeaders.CONTENT_TYPE, contentType).toExchange();
+		return MockServerWebExchange.from(
+				MockServerHttpRequest.post("/").header(HttpHeaders.CONTENT_TYPE, contentType));
 	}
 
 }

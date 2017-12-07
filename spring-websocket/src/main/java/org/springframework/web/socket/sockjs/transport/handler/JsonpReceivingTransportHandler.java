@@ -24,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketHandler;
@@ -62,6 +63,7 @@ public class JsonpReceivingTransportHandler extends AbstractHttpReceivingTranspo
 	}
 
 	@Override
+	@Nullable
 	protected String[] readMessages(ServerHttpRequest request) throws IOException {
 		SockJsMessageCodec messageCodec = getServiceConfig().getMessageCodec();
 		MediaType contentType = request.getHeaders().getContentType();

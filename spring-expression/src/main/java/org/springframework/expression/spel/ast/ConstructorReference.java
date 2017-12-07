@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.support.ReflectiveConstructorExecutor;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Represents the invocation of a constructor. Either a constructor on a regular type or
@@ -57,12 +59,12 @@ public class ConstructorReference extends SpelNodeImpl {
 
 	private boolean isArrayConstructor = false;
 
+	@Nullable
 	private SpelNodeImpl[] dimensions;
 
 	// TODO is this caching safe - passing the expression around will mean this executor is also being passed around
-	/**
-	 * The cached executor that may be reused on subsequent evaluations.
-	 */
+	/** The cached executor that may be reused on subsequent evaluations */
+	@Nullable
 	private volatile ConstructorExecutor cachedExecutor;
 
 
@@ -152,12 +154,13 @@ public class ConstructorReference extends SpelNodeImpl {
 
 		// Either there was no accessor or it no longer exists
 		String typeName = (String) this.children[0].getValueInternal(state).getValue();
+		Assert.state(typeName != null, "No type name");
 		executorToUse = findExecutorForConstructor(typeName, argumentTypes, state);
 		try {
 			this.cachedExecutor = executorToUse;
-			if (this.cachedExecutor instanceof ReflectiveConstructorExecutor) {
+			if (executorToUse instanceof ReflectiveConstructorExecutor) {
 				this.exitTypeDescriptor = CodeFlow.toDescriptor(
-						((ReflectiveConstructorExecutor) this.cachedExecutor).getConstructor().getDeclaringClass());
+						((ReflectiveConstructorExecutor) executorToUse).getConstructor().getDeclaringClass());
 				
 			}
 			return executorToUse.execute(state.getEvaluationContext(), arguments);
@@ -179,24 +182,21 @@ public class ConstructorReference extends SpelNodeImpl {
 	 * @throws SpelEvaluationException if there is a problem locating the constructor
 	 */
 	private ConstructorExecutor findExecutorForConstructor(String typeName,
-			List<TypeDescriptor> argumentTypes, ExpressionState state)
-			throws SpelEvaluationException {
+			List<TypeDescriptor> argumentTypes, ExpressionState state) throws SpelEvaluationException {
 
 		EvaluationContext evalContext = state.getEvaluationContext();
 		List<ConstructorResolver> ctorResolvers = evalContext.getConstructorResolvers();
-		if (ctorResolvers != null) {
-			for (ConstructorResolver ctorResolver : ctorResolvers) {
-				try {
-					ConstructorExecutor ce = ctorResolver.resolve(state.getEvaluationContext(), typeName, argumentTypes);
-					if (ce != null) {
-						return ce;
-					}
+		for (ConstructorResolver ctorResolver : ctorResolvers) {
+			try {
+				ConstructorExecutor ce = ctorResolver.resolve(state.getEvaluationContext(), typeName, argumentTypes);
+				if (ce != null) {
+					return ce;
 				}
-				catch (AccessException ex) {
-					throw new SpelEvaluationException(getStartPosition(), ex,
-							SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM, typeName,
-							FormatHelper.formatMethodForMessage("", argumentTypes));
-				}
+			}
+			catch (AccessException ex) {
+				throw new SpelEvaluationException(getStartPosition(), ex,
+						SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM, typeName,
+						FormatHelper.formatMethodForMessage("", argumentTypes));
 			}
 		}
 		throw new SpelEvaluationException(getStartPosition(), SpelMessage.CONSTRUCTOR_NOT_FOUND, typeName,
@@ -231,7 +231,8 @@ public class ConstructorReference extends SpelNodeImpl {
 		if (!(intendedArrayType instanceof String)) {
 			throw new SpelEvaluationException(getChild(0).getStartPosition(),
 					SpelMessage.TYPE_NAME_EXPECTED_FOR_ARRAY_CONSTRUCTION,
-					FormatHelper.formatClassNameForMessage(intendedArrayType.getClass()));
+					FormatHelper.formatClassNameForMessage(
+							intendedArrayType != null ? intendedArrayType.getClass() : null));
 		}
 		String type = (String) intendedArrayType;
 		Class<?> componentType;
@@ -245,9 +246,11 @@ public class ConstructorReference extends SpelNodeImpl {
 		Object newArray;
 		if (!hasInitializer()) {
 			// Confirm all dimensions were specified (for example [3][][5] is missing the 2nd dimension)
-			for (SpelNodeImpl dimension : this.dimensions) {
-				if (dimension == null) {
-					throw new SpelEvaluationException(getStartPosition(), SpelMessage.MISSING_ARRAY_DIMENSION);
+			if (this.dimensions != null) {
+				for (SpelNodeImpl dimension : this.dimensions) {
+					if (dimension == null) {
+						throw new SpelEvaluationException(getStartPosition(), SpelMessage.MISSING_ARRAY_DIMENSION);
+					}
 				}
 			}
 			TypeConverter typeConverter = state.getEvaluationContext().getTypeConverter();
@@ -270,7 +273,7 @@ public class ConstructorReference extends SpelNodeImpl {
 		}
 		else {
 			// There is an initializer
-			if (this.dimensions.length > 1) {
+			if (this.dimensions == null || this.dimensions.length > 1) {
 				// There is an initializer but this is a multi-dimensional array (e.g. new int[][]{{1,2},{3,4}}) - this
 				// is not currently supported
 				throw new SpelEvaluationException(getStartPosition(),
@@ -436,6 +439,9 @@ public class ConstructorReference extends SpelNodeImpl {
 		}
 
 		ReflectiveConstructorExecutor executor = (ReflectiveConstructorExecutor) this.cachedExecutor;
+		if (executor == null) {
+			return false;
+		}
 		Constructor<?> constructor = executor.getConstructor();
 		return (Modifier.isPublic(constructor.getModifiers()) &&
 				Modifier.isPublic(constructor.getDeclaringClass().getModifiers()));
@@ -444,10 +450,13 @@ public class ConstructorReference extends SpelNodeImpl {
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		ReflectiveConstructorExecutor executor = ((ReflectiveConstructorExecutor) this.cachedExecutor);
-		Constructor<?> constructor = executor.getConstructor();		
+		Assert.state(executor != null, "No cached executor");
+
+		Constructor<?> constructor = executor.getConstructor();
 		String classDesc = constructor.getDeclaringClass().getName().replace('.', '/');
 		mv.visitTypeInsn(NEW, classDesc);
 		mv.visitInsn(DUP);
+
 		// children[0] is the type of the constructor, don't want to include that in argument processing
 		SpelNodeImpl[] arguments = new SpelNodeImpl[children.length - 1];
 		System.arraycopy(children, 1, arguments, 0, children.length - 1);

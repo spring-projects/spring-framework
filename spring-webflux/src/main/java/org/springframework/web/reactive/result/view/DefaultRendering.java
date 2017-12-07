@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.view;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 
 /**
@@ -38,22 +39,24 @@ class DefaultRendering implements Rendering {
 
 	private final Map<String, Object> model;
 
+	@Nullable
 	private final HttpStatus status;
 
 	private final HttpHeaders headers;
 
 
-	DefaultRendering(Object view, Model model, HttpStatus status, HttpHeaders headers) {
+	DefaultRendering(Object view, @Nullable Model model, @Nullable HttpStatus status, @Nullable HttpHeaders headers) {
 		this.view = view;
 		this.model = (model != null ? model.asMap() : Collections.emptyMap());
 		this.status = status;
-		this.headers = headers != null ? headers : EMPTY_HEADERS;
+		this.headers = (headers != null ? headers : EMPTY_HEADERS);
 	}
 
 
 	@Override
-	public Optional<Object> view() {
-		return Optional.ofNullable(this.view);
+	@Nullable
+	public Object view() {
+		return this.view;
 	}
 
 	@Override
@@ -62,8 +65,9 @@ class DefaultRendering implements Rendering {
 	}
 
 	@Override
-	public Optional<HttpStatus> status() {
-		return Optional.ofNullable(this.status);
+	@Nullable
+	public HttpStatus status() {
+		return this.status;
 	}
 
 	@Override

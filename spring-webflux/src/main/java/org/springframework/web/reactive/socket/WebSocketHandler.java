@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.socket;
+
+import java.util.Collections;
+import java.util.List;
 
 import reactor.core.publisher.Mono;
 
@@ -27,10 +31,10 @@ public interface WebSocketHandler {
 
 	/**
 	 * Return the list of sub-protocols supported by this handler.
-	 * <p>By default an empty array is returned.
+	 * <p>By default an empty list is returned.
 	 */
-	default String[] getSubProtocols() {
-		return new String[0];
+	default List<String> getSubProtocols() {
+		return Collections.emptyList();
 	}
 
 	/**

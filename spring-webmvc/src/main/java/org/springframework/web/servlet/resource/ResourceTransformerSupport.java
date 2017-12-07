@@ -20,6 +20,8 @@ import java.util.Collections;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -28,10 +30,12 @@ import org.springframework.util.StringUtils;
  *
  * @author Brian Clozel
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.1
  */
 public abstract class ResourceTransformerSupport implements ResourceTransformer {
 
+	@Nullable
 	private ResourceUrlProvider resourceUrlProvider;
 
 
@@ -40,15 +44,15 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	 * URL of links in a transformed resource (e.g. import links in a CSS file).
 	 * This is required only for links expressed as full paths and not for
 	 * relative links.
-	 * @param resourceUrlProvider the URL provider to use
 	 */
-	public void setResourceUrlProvider(ResourceUrlProvider resourceUrlProvider) {
+	public void setResourceUrlProvider(@Nullable ResourceUrlProvider resourceUrlProvider) {
 		this.resourceUrlProvider = resourceUrlProvider;
 	}
 
 	/**
-	 * @return the configured {@code ResourceUrlProvider}.
+	 * Return the configured {@code ResourceUrlProvider}.
 	 */
+	@Nullable
 	public ResourceUrlProvider getResourceUrlProvider() {
 		return this.resourceUrlProvider;
 	}
@@ -63,8 +67,9 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	 * @param request the current request
 	 * @param resource the resource being transformed
 	 * @param transformerChain the transformer chain
-	 * @return the resolved URL or null
+	 * @return the resolved URL, or {@code} if not resolvable
 	 */
+	@Nullable
 	protected String resolveUrlPath(String resourcePath, HttpServletRequest request,
 			Resource resource, ResourceTransformerChain transformerChain) {
 
@@ -89,11 +94,14 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	 * @return the absolute request path for the given resource path
 	 */
 	protected String toAbsolutePath(String path, HttpServletRequest request) {
-		String requestPath = this.findResourceUrlProvider(request).getUrlPathHelper().getRequestUri(request);
+		ResourceUrlProvider urlProvider = findResourceUrlProvider(request);
+		Assert.state(urlProvider != null, "No ResourceUrlProvider");
+		String requestPath = urlProvider.getUrlPathHelper().getRequestUri(request);
 		String absolutePath = StringUtils.applyRelativePath(requestPath, path);
 		return StringUtils.cleanPath(absolutePath);
 	}
 
+	@Nullable
 	private ResourceUrlProvider findResourceUrlProvider(HttpServletRequest request) {
 		if (this.resourceUrlProvider != null) {
 			return this.resourceUrlProvider;

@@ -82,19 +82,15 @@ public abstract class AbstractWebSocketSession<T> implements WebSocketSession {
 	}
 
 	@Override
-	public Flux<WebSocketMessage> receive() {
-		return null;
-	}
-
-	@Override
-	public Mono<Void> send(Publisher<WebSocketMessage> messages) {
-		return null;
-	}
-
-	@Override
 	public DataBufferFactory bufferFactory() {
 		return this.bufferFactory;
 	}
+
+	@Override
+	public abstract Flux<WebSocketMessage> receive();
+
+	@Override
+	public abstract Mono<Void> send(Publisher<WebSocketMessage> messages);
 
 
 	// WebSocketMessage factory methods

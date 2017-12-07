@@ -33,6 +33,7 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
+import org.springframework.lang.Nullable;
 import org.springframework.oxm.UncategorizedMappingException;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -64,7 +65,7 @@ class ClassPathJaxb2TypeScanner {
 	private final String[] packagesToScan;
 
 
-	public ClassPathJaxb2TypeScanner(ClassLoader classLoader, String... packagesToScan) {
+	public ClassPathJaxb2TypeScanner(@Nullable ClassLoader classLoader, String... packagesToScan) {
 		Assert.notEmpty(packagesToScan, "'packagesToScan' must not be empty");
 		this.resourcePatternResolver = new PathMatchingResourcePatternResolver(classLoader);
 		this.packagesToScan = packagesToScan;
@@ -87,7 +88,8 @@ class ClassPathJaxb2TypeScanner {
 					MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(resource);
 					if (isJaxb2Class(metadataReader, metadataReaderFactory)) {
 						String className = metadataReader.getClassMetadata().getClassName();
-						Class<?> jaxb2AnnotatedClass = this.resourcePatternResolver.getClassLoader().loadClass(className);
+						Class<?> jaxb2AnnotatedClass =
+								ClassUtils.forName(className, this.resourcePatternResolver.getClassLoader());
 						jaxb2Classes.add(jaxb2AnnotatedClass);
 					}
 				}

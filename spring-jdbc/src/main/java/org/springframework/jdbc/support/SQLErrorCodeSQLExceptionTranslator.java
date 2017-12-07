@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
+import org.springframework.lang.Nullable;
 
 /**
  * Implementation of {@link SQLExceptionTranslator} that analyzes vendor-specific error codes.
@@ -73,6 +74,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 
 
 	/** Error codes used by this translator */
+	@Nullable
 	private SQLErrorCodes sqlErrorCodes;
 
 
@@ -150,7 +152,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 * Set custom error codes to be used for translation.
 	 * @param sec custom error codes to use
 	 */
-	public void setSqlErrorCodes(SQLErrorCodes sec) {
+	public void setSqlErrorCodes(@Nullable SQLErrorCodes sec) {
 		this.sqlErrorCodes = sec;
 	}
 
@@ -159,13 +161,15 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 * Usually determined via a DataSource.
 	 * @see #setDataSource
 	 */
+	@Nullable
 	public SQLErrorCodes getSqlErrorCodes() {
 		return this.sqlErrorCodes;
 	}
 
 
 	@Override
-	protected DataAccessException doTranslate(String task, String sql, SQLException ex) {
+	@Nullable
+	protected DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex) {
 		SQLException sqlEx = ex;
 		if (sqlEx instanceof BatchUpdateException && sqlEx.getNextException() != null) {
 			SQLException nestedSqlEx = sqlEx.getNextException();
@@ -228,11 +232,11 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 				// Next, look for grouped error codes.
 				if (Arrays.binarySearch(this.sqlErrorCodes.getBadSqlGrammarCodes(), errorCode) >= 0) {
 					logTranslation(task, sql, sqlEx, false);
-					return new BadSqlGrammarException(task, sql, sqlEx);
+					return new BadSqlGrammarException(task, (sql != null ? sql : ""), sqlEx);
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getInvalidResultSetAccessCodes(), errorCode) >= 0) {
 					logTranslation(task, sql, sqlEx, false);
-					return new InvalidResultSetAccessException(task, sql, sqlEx);
+					return new InvalidResultSetAccessException(task, (sql != null ? sql : ""), sqlEx);
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getDuplicateKeyCodes(), errorCode) >= 0) {
 					logTranslation(task, sql, sqlEx, false);
@@ -295,7 +299,8 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 * as a nested root cause. This implementation always returns null, meaning that
 	 * the translator always falls back to the default error codes.
 	 */
-	protected DataAccessException customTranslate(String task, String sql, SQLException sqlEx) {
+	@Nullable
+	protected DataAccessException customTranslate(String task, @Nullable String sql, SQLException sqlEx) {
 		return null;
 	}
 
@@ -312,8 +317,9 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 * sqlEx parameter as a nested root cause.
 	 * @see CustomSQLErrorCodesTranslation#setExceptionClass
 	 */
+	@Nullable
 	protected DataAccessException createCustomException(
-			String task, String sql, SQLException sqlEx, Class<?> exceptionClass) {
+			String task, @Nullable String sql, SQLException sqlEx, Class<?> exceptionClass) {
 
 		// find appropriate constructor
 		try {
@@ -391,12 +397,12 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 		}
 	}
 
-	private void logTranslation(String task, String sql, SQLException sqlEx, boolean custom) {
+	private void logTranslation(String task, @Nullable String sql, SQLException sqlEx, boolean custom) {
 		if (logger.isDebugEnabled()) {
 			String intro = custom ? "Custom translation of" : "Translating";
 			logger.debug(intro + " SQLException with SQL state '" + sqlEx.getSQLState() +
-					"', error code '" + sqlEx.getErrorCode() + "', message [" + sqlEx.getMessage() +
-					"]; SQL was [" + sql + "] for task [" + task + "]");
+					"', error code '" + sqlEx.getErrorCode() + "', message [" + sqlEx.getMessage() + "]" +
+					(sql != null ? "; SQL was [" + sql + "]": "") + " for task [" + task + "]");
 		}
 	}
 

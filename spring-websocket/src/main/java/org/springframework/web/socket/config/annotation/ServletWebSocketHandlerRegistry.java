@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.MultiValueMap;
@@ -42,20 +43,20 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 
 	private final List<ServletWebSocketHandlerRegistration> registrations = new ArrayList<>(4);
 
+	@Nullable
 	private TaskScheduler scheduler;
 
 	private int order = 1;
 
+	@Nullable
 	private UrlPathHelper urlPathHelper;
 
 
 	public ServletWebSocketHandlerRegistry() {
-		this.scheduler = null;
 	}
 
 	/**
 	 * Deprecated constructor with a TaskScheduler for SockJS use.
-	 *
 	 * @deprecated as of 5.0 a TaskScheduler is not provided upfront, not until
 	 * it is obvious that it is needed, see {@link #requiresTaskScheduler()} and
 	 * {@link #setTaskScheduler}.
@@ -91,10 +92,11 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 	 * Set the UrlPathHelper to configure on the {@code SimpleUrlHandlerMapping}
 	 * used to map handshake requests.
 	 */
-	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+	public void setUrlPathHelper(@Nullable UrlPathHelper urlPathHelper) {
 		this.urlPathHelper = urlPathHelper;
 	}
 
+	@Nullable
 	public UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}
@@ -142,7 +144,7 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 
 	private void updateTaskScheduler(ServletWebSocketHandlerRegistration registration) {
 		SockJsServiceRegistration sockJsRegistration = registration.getSockJsServiceRegistration();
-		if (sockJsRegistration != null && sockJsRegistration.getTaskScheduler() == null) {
+		if (sockJsRegistration != null && this.scheduler != null && sockJsRegistration.getTaskScheduler() == null) {
 			sockJsRegistration.setTaskScheduler(this.scheduler);
 		}
 	}

@@ -17,6 +17,7 @@
 package org.springframework.web.context.request;
 
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.lang.Nullable;
 
 /**
  * Session-backed {@link org.springframework.beans.factory.config.Scope}
@@ -58,6 +59,7 @@ public class SessionScope extends AbstractRequestAttributesScope {
 	}
 
 	@Override
+	@Nullable
 	public Object remove(String name) {
 		Object mutex = RequestContextHolder.currentRequestAttributes().getSessionMutex();
 		synchronized (mutex) {

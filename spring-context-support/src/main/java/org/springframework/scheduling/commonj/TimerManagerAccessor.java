@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.Lifecycle;
 import org.springframework.jndi.JndiLocatorSupport;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Base class for classes that are accessing a CommonJ {@link commonj.timers.TimerManager}
@@ -36,8 +38,10 @@ import org.springframework.jndi.JndiLocatorSupport;
 public abstract class TimerManagerAccessor extends JndiLocatorSupport
 		implements InitializingBean, DisposableBean, Lifecycle {
 
+	@Nullable
 	private TimerManager timerManager;
 
+	@Nullable
 	private String timerManagerName;
 
 	private boolean shared = false;
@@ -105,7 +109,23 @@ public abstract class TimerManagerAccessor extends JndiLocatorSupport
 		}
 	}
 
+	/**
+	 * Return the configured TimerManager, if any.
+	 * @return the TimerManager, or {@code null} if not available
+	 */
+	@Nullable
 	protected final TimerManager getTimerManager() {
+		return this.timerManager;
+	}
+
+	/**
+	 * Obtain the TimerManager for actual use.
+	 * @return the TimerManager (never {@code null})
+	 * @throws IllegalStateException in case of no TimerManager set
+	 * @since 5.0
+	 */
+	protected TimerManager obtainTimerManager() {
+		Assert.notNull(this.timerManager, "No TimerManager set");
 		return this.timerManager;
 	}
 
@@ -121,7 +141,7 @@ public abstract class TimerManagerAccessor extends JndiLocatorSupport
 	@Override
 	public void start() {
 		if (!this.shared) {
-			this.timerManager.resume();
+			obtainTimerManager().resume();
 		}
 	}
 
@@ -132,7 +152,7 @@ public abstract class TimerManagerAccessor extends JndiLocatorSupport
 	@Override
 	public void stop() {
 		if (!this.shared) {
-			this.timerManager.suspend();
+			obtainTimerManager().suspend();
 		}
 	}
 
@@ -144,7 +164,8 @@ public abstract class TimerManagerAccessor extends JndiLocatorSupport
 	 */
 	@Override
 	public boolean isRunning() {
-		return (!this.timerManager.isSuspending() && !this.timerManager.isStopping());
+		TimerManager tm = obtainTimerManager();
+		return (!tm.isSuspending() && !tm.isStopping());
 	}
 
 
@@ -159,7 +180,7 @@ public abstract class TimerManagerAccessor extends JndiLocatorSupport
 	@Override
 	public void destroy() {
 		// Stop the entire TimerManager, if necessary.
-		if (!this.shared) {
+		if (this.timerManager != null && !this.shared) {
 			// May return early, but at least we already cancelled all known Timers.
 			this.timerManager.stop();
 		}

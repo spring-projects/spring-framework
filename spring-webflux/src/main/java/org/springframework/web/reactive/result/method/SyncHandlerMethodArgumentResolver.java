@@ -16,11 +16,10 @@
 
 package org.springframework.web.reactive.result.method;
 
-import java.util.Optional;
-
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -50,9 +49,10 @@ public interface SyncHandlerMethodArgumentResolver extends HandlerMethodArgument
 	 * @param parameter the method parameter
 	 * @param bindingContext the binding context to use
 	 * @param exchange the current exchange
-	 * @return an {@code Optional} with the resolved value, possibly empty
+	 * @return the resolved value, if any
 	 */
-	Optional<Object> resolveArgumentValue(
-			MethodParameter parameter, BindingContext bindingContext, ServerWebExchange exchange);
+	@Nullable
+	Object resolveArgumentValue(MethodParameter parameter, BindingContext bindingContext,
+			ServerWebExchange exchange);
 
 }

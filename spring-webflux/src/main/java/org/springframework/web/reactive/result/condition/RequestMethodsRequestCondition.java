@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -102,17 +103,18 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 * request method is OPTIONS.
 	 */
 	@Override
+	@Nullable
 	public RequestMethodsRequestCondition getMatchingCondition(ServerWebExchange exchange) {
 		if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
 			return matchPreFlight(exchange.getRequest());
 		}
 		if (getMethods().isEmpty()) {
-			if (RequestMethod.OPTIONS.name().equals(exchange.getRequest().getMethod().name())) {
+			if (RequestMethod.OPTIONS.name().equals(exchange.getRequest().getMethodValue())) {
 				return null; // No implicit match for OPTIONS (we handle it)
 			}
 			return this;
 		}
-		return matchRequestMethod(exchange.getRequest().getMethod().name());
+		return matchRequestMethod(exchange.getRequest().getMethod());
 	}
 
 	/**
@@ -125,11 +127,11 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 			return this;
 		}
 		HttpMethod expectedMethod = request.getHeaders().getAccessControlRequestMethod();
-		return matchRequestMethod(expectedMethod.name());
+		return matchRequestMethod(expectedMethod);
 	}
 
-	private RequestMethodsRequestCondition matchRequestMethod(String httpMethodValue) {
-		HttpMethod httpMethod = HttpMethod.resolve(httpMethodValue);
+	@Nullable
+	private RequestMethodsRequestCondition matchRequestMethod(@Nullable HttpMethod httpMethod) {
 		if (httpMethod != null) {
 			for (RequestMethod method : getMethods()) {
 				if (httpMethod.matches(method.name())) {

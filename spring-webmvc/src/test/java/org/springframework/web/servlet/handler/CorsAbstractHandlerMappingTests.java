@@ -189,7 +189,9 @@ public class CorsAbstractHandlerMappingTests {
 		}
 
 		@Override
-		public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		public void handleRequest(HttpServletRequest request, HttpServletResponse response)
+				throws ServletException, IOException {
+
 			response.setStatus(HttpStatus.OK.value());
 		}
 

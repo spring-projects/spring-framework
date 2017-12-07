@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
+import org.springframework.lang.Nullable;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -126,6 +127,7 @@ public class SessionLocaleResolver extends AbstractLocaleContextResolver {
 				return locale;
 			}
 			@Override
+			@Nullable
 			public TimeZone getTimeZone() {
 				TimeZone timeZone = (TimeZone) WebUtils.getSessionAttribute(request, timeZoneAttributeName);
 				if (timeZone == null) {
@@ -137,7 +139,9 @@ public class SessionLocaleResolver extends AbstractLocaleContextResolver {
 	}
 
 	@Override
-	public void setLocaleContext(HttpServletRequest request, HttpServletResponse response, LocaleContext localeContext) {
+	public void setLocaleContext(HttpServletRequest request, @Nullable HttpServletResponse response,
+			@Nullable LocaleContext localeContext) {
+
 		Locale locale = null;
 		TimeZone timeZone = null;
 		if (localeContext != null) {
@@ -178,6 +182,7 @@ public class SessionLocaleResolver extends AbstractLocaleContextResolver {
 	 * @return the default time zone (or {@code null} if none defined)
 	 * @see #setDefaultTimeZone
 	 */
+	@Nullable
 	protected TimeZone determineDefaultTimeZone(HttpServletRequest request) {
 		return getDefaultTimeZone();
 	}

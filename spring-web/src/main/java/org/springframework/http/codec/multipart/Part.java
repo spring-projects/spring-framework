@@ -16,11 +16,7 @@
 
 package org.springframework.http.codec.multipart;
 
-import java.io.File;
-import java.util.Optional;
-
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
@@ -28,10 +24,11 @@ import org.springframework.http.HttpHeaders;
 /**
  * Representation for a part in a "multipart/form-data" request.
  *
- * <p>The origin of a multipart request may a browser form in which case each
- * part represents a text-based form field or a file upload. Multipart requests
- * may also be used outside of browsers to transfer data with any content type
- * such as JSON, PDF, etc.
+ * <p>The origin of a multipart request may be a browser form in which case each
+ * part is either a {@link FormFieldPart} or a {@link FilePart}.
+ *
+ * <p>Multipart requests may also be used outside of a browser for data of any
+ * content type (e.g. JSON, PDF, etc).
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
@@ -46,37 +43,18 @@ public interface Part {
 	 * Return the name of the part in the multipart form.
 	 * @return the name of the part, never {@code null} or empty
 	 */
-	String getName();
+	String name();
 
 	/**
 	 * Return the headers associated with the part.
 	 */
-	HttpHeaders getHeaders();
+	HttpHeaders headers();
 
 	/**
-	 *
-	 * Return the name of the file selected by the user in a browser form.
-	 * @return the filename if defined and available
+	 * Return the content for this part.
+	 * <p>Note that for a {@link FormFieldPart} the content may be accessed
+	 * more easily via {@link FormFieldPart#value()}.
 	 */
-	Optional<String> getFilename();
-
-	/**
-	 * Return the part content converted to a String with the charset from the
-	 * {@code Content-Type} header or {@code UTF-8} by default.
-	 */
-	Mono<String> getContentAsString();
-
-	/**
-	 * Return the part raw content as a stream of DataBuffer's.
-	 */
-	Flux<DataBuffer> getContent();
-
-	/**
-	 * Transfer the file in this part to the given file destination.
-	 * @param destination the target file
-	 * @return completion {@code Mono} with the result of the file transfer,
-	 * possibly {@link IllegalStateException} if the part isn't a file
-	 */
-	Mono<Void> transferTo(File destination);
+	Flux<DataBuffer> content();
 
 }

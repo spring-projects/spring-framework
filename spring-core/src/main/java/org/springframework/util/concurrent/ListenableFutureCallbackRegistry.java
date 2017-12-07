@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.util.concurrent;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -40,7 +41,8 @@ public class ListenableFutureCallbackRegistry<T> {
 
 	private State state = State.NEW;
 
-	private Object result = null;
+	@Nullable
+	private Object result;
 
 	private final Object mutex = new Object();
 
@@ -78,6 +80,7 @@ public class ListenableFutureCallbackRegistry<T> {
 	}
 
 	private void notifyFailure(FailureCallback callback) {
+		Assert.state(this.result instanceof Throwable, "No Throwable result for failure state");
 		try {
 			callback.onFailure((Throwable) this.result);
 		}
@@ -129,7 +132,7 @@ public class ListenableFutureCallbackRegistry<T> {
 	 * added callbacks with the given result.
 	 * @param result the result to trigger the callbacks with
 	 */
-	public void success(T result) {
+	public void success(@Nullable T result) {
 		synchronized (this.mutex) {
 			this.state = State.SUCCESS;
 			this.result = result;

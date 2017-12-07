@@ -7,4 +7,9 @@
  * <p>Also provides implementations adapting to different runtimes
  * including Servlet 3.1 containers, Netty + Reactor IO, and Undertow.
  */
+@NonNullApi
+@NonNullFields
 package org.springframework.http.server.reactive;
+
+import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

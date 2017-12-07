@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.scripting;
 
 import org.springframework.core.NestedRuntimeException;
+import org.springframework.lang.Nullable;
 
 /**
  * Exception to be thrown on script compilation failure.
@@ -27,6 +28,7 @@ import org.springframework.core.NestedRuntimeException;
 @SuppressWarnings("serial")
 public class ScriptCompilationException extends NestedRuntimeException {
 
+	@Nullable
 	private ScriptSource scriptSource;
 
 
@@ -84,6 +86,7 @@ public class ScriptCompilationException extends NestedRuntimeException {
 	 * Return the source for the offending script.
 	 * @return the source, or {@code null} if not available
 	 */
+	@Nullable
 	public ScriptSource getScriptSource() {
 		return this.scriptSource;
 	}

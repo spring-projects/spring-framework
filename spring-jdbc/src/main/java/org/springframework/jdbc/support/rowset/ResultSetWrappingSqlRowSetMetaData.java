@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 import org.springframework.jdbc.InvalidResultSetAccessException;
+import org.springframework.lang.Nullable;
 
 /**
  * The default implementation of Spring's {@link SqlRowSetMetaData} interface, wrapping
@@ -37,6 +38,7 @@ public class ResultSetWrappingSqlRowSetMetaData implements SqlRowSetMetaData {
 
 	private final ResultSetMetaData resultSetMetaData;
 
+	@Nullable
 	private String[] columnNames;
 
 

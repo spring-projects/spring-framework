@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,26 +42,6 @@ import static org.junit.Assert.assertSame;
  */
 public class ServerHttpResponseTests {
 
-	@Test
-	public void encodeUrlDefault() throws Exception {
-		TestServerHttpResponse response = new TestServerHttpResponse();
-		assertEquals("/foo", response.encodeUrl("/foo"));
-	}
-
-	@Test
-	public void encodeUrlWithEncoder() throws Exception {
-		TestServerHttpResponse response = new TestServerHttpResponse();
-		response.registerUrlEncoder(s -> s + "?nonce=123");
-		assertEquals("/foo?nonce=123", response.encodeUrl("/foo"));
-	}
-
-	@Test
-	public void encodeUrlWithMultipleEncoders() throws Exception {
-		TestServerHttpResponse response = new TestServerHttpResponse();
-		response.registerUrlEncoder(s -> s + ";p=abc");
-		response.registerUrlEncoder(s -> s + "?q=123");
-		assertEquals("/foo;p=abc?q=123", response.encodeUrl("/foo"));
-	}
 
 	@Test
 	public void writeWith() throws Exception {
@@ -172,6 +152,11 @@ public class ServerHttpResponseTests {
 
 		public TestServerHttpResponse() {
 			super(new DefaultDataBufferFactory());
+		}
+
+		@Override
+		public <T> T getNativeResponse() {
+			throw new IllegalStateException("This is a mock. No running server, no native response.");
 		}
 
 		@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import org.springframework.context.annotation.Import;
  * &#064;EnableWebFlux
  * &#064;ComponentScan(basePackageClasses = MyConfiguration.class)
  * public class MyConfiguration {
- *
  * }
  * </pre>
  *
@@ -55,15 +54,13 @@ import org.springframework.context.annotation.Import;
  * 	   public void configureMessageWriters(List&lt;HttpMessageWriter&lt;?&gt&gt messageWriters) {
  *         messageWriters.add(new MyHttpMessageWriter());
  * 	   }
- *
  * }
  * </pre>
  *
  * <p><strong>Note:</strong> only one {@code @Configuration} class may have the
- * {@code @EnableWebFlux} annotation to import the Spring Web Reactive
- * configuration. There can however be multiple {@code @Configuration} classes
- * implementing {@code WebFluxConfigurer} in order to customize the provided
- * configuration.
+ * {@code @EnableWebFlux} annotation to import the Spring WebFlux configuration.
+ * There can however be multiple {@code @Configuration} classes implementing
+ * {@code WebFluxConfigurer} in order to customize the provided configuration.
  *
  * <p>If {@link WebFluxConfigurer} does not expose some more advanced setting
  * that needs to be configured consider removing the {@code @EnableWebFlux}

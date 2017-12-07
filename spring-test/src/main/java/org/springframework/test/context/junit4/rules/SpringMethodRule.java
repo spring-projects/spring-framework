@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.junit.ClassRule;
 import org.junit.rules.MethodRule;
 import org.junit.runners.model.FrameworkMethod;
@@ -62,7 +61,7 @@ import org.springframework.util.ReflectionUtils;
  * <pre><code> public class ExampleSpringIntegrationTest {
  *
  *    &#064;ClassRule
- *    public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+ *    public static final SpringClassRule springClassRule = new SpringClassRule();
  *
  *    &#064;Rule
  *    public final SpringMethodRule springMethodRule = new SpringMethodRule();
@@ -233,7 +232,9 @@ public class SpringMethodRule implements MethodRule {
 				"SpringClassRule field [%s] must be annotated with JUnit's @ClassRule annotation. " +
 				"Consult the javadoc for SpringClassRule for details.", ruleField));
 
-		return (SpringClassRule) ReflectionUtils.getField(ruleField, null);
+		Object result = ReflectionUtils.getField(ruleField, null);
+		Assert.state(result instanceof SpringClassRule, "SpringClassRule field mismatch");
+		return (SpringClassRule) result;
 	}
 
 	private static Optional<Field> findSpringClassRuleField(Class<?> testClass) {

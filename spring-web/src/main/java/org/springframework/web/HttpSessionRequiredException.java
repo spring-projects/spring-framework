@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.web;
 
 import javax.servlet.ServletException;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Exception thrown when an HTTP request handler requires a pre-existing session.
  *
@@ -27,6 +29,7 @@ import javax.servlet.ServletException;
 @SuppressWarnings("serial")
 public class HttpSessionRequiredException extends ServletException {
 
+	@Nullable
 	private String expectedAttribute;
 
 
@@ -54,6 +57,7 @@ public class HttpSessionRequiredException extends ServletException {
 	 * Return the name of the expected session attribute, if any.
 	 * @since 4.3
 	 */
+	@Nullable
 	public String getExpectedAttribute() {
 		return this.expectedAttribute;
 	}

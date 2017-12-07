@@ -24,6 +24,7 @@ import javax.servlet.http.Part;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.util.WebUtils;
@@ -66,6 +67,7 @@ public abstract class MultipartResolutionDelegate {
 				(Part.class == paramType || isPartCollection(parameter) || isPartArray(parameter)));
 	}
 
+	@Nullable
 	public static Object resolveMultipartArgument(String name, MethodParameter parameter, HttpServletRequest request)
 			throws Exception {
 
@@ -127,6 +129,7 @@ public abstract class MultipartResolutionDelegate {
 		return (Part.class == methodParam.getNestedParameterType().getComponentType());
 	}
 
+	@Nullable
 	private static Class<?> getCollectionParameterType(MethodParameter methodParam) {
 		Class<?> paramType = methodParam.getNestedParameterType();
 		if (Collection.class == paramType || List.class.isAssignableFrom(paramType)){
