@@ -39,23 +39,18 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.util.DefaultUriTemplateHandler;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
-import static org.mockito.BDDMockito.any;
-import static org.mockito.BDDMockito.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.mock;
-import static org.mockito.BDDMockito.verify;
-import static org.mockito.BDDMockito.willThrow;
-import static org.springframework.http.MediaType.parseMediaType;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.MediaType.*;
 
 /**
  * @author Arjen Poutsma
@@ -836,6 +831,32 @@ public class RestTemplateTests {
 		assertEquals("Invalid Accept header", MediaType.TEXT_PLAIN_VALUE, requestHeaders.getFirst("Accept"));
 		assertEquals("Invalid custom header", "MyValue", requestHeaders.getFirst("MyHeader"));
 		assertEquals("Invalid status code", HttpStatus.OK, result.getStatusCode());
+
+		verify(response).close();
+	}
+
+	@Test // SPR-15066
+	public void requestInterceptorCanAddExistingHeaderValue() throws Exception {
+		ClientHttpRequestInterceptor interceptor = (request, body, execution) -> {
+			request.getHeaders().add("MyHeader", "MyInterceptorValue");
+			return execution.execute(request, body);
+		};
+		template.setInterceptors(Collections.singletonList(interceptor));
+
+		given(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).willReturn(request);
+		HttpHeaders requestHeaders = new HttpHeaders();
+		given(request.getHeaders()).willReturn(requestHeaders);
+		given(request.execute()).willReturn(response);
+		given(errorHandler.hasError(response)).willReturn(false);
+		HttpStatus status = HttpStatus.OK;
+		given(response.getStatusCode()).willReturn(status);
+		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+
+		HttpHeaders entityHeaders = new HttpHeaders();
+		entityHeaders.add("MyHeader", "MyEntityValue");
+		HttpEntity<Void> entity = new HttpEntity<>(null, entityHeaders);
+		template.exchange("http://example.com", HttpMethod.POST, entity, Void.class);
+		assertThat(requestHeaders.get("MyHeader"), contains("MyEntityValue", "MyInterceptorValue"));
 
 		verify(response).close();
 	}
