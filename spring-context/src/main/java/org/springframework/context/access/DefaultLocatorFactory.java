@@ -25,6 +25,7 @@ import org.springframework.beans.factory.access.BeanFactoryLocator;
  * @author Colin Sampaleanu
  * @see org.springframework.context.access.ContextSingletonBeanFactoryLocator
  */
+@Deprecated
 public class DefaultLocatorFactory {
 
 	/**

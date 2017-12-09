@@ -28,6 +28,7 @@ import org.springframework.beans.factory.BeanFactory;
  * @author Colin Sampaleanu
  * @see BeanFactoryLocator
  * @see org.springframework.context.access.ContextBeanFactoryReference
+ * @deprecated removed in 5
  */
 public interface BeanFactoryReference {
 

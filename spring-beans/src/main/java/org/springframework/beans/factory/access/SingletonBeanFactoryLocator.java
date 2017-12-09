@@ -268,6 +268,7 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  * @see org.springframework.context.access.ContextSingletonBeanFactoryLocator
  * @see org.springframework.context.access.DefaultLocatorFactory
  */
+@Deprecated
 public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 
 	private static final String DEFAULT_RESOURCE_LOCATION = "classpath*:beanRefFactory.xml";

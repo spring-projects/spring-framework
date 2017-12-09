@@ -38,6 +38,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Juergen Hoeller
  * @since 1.1
  */
+@Deprecated
 public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 	private static final String JDBC_ADAPTER_CONNECTION_NAME = "com.ibm.ws.rsadapter.jdbc.WSJdbcConnection";

@@ -34,6 +34,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  * @since 13.02.2004
  * @see org.springframework.context.ConfigurableApplicationContext#close
  */
+@Deprecated
 public class ContextBeanFactoryReference implements BeanFactoryReference {
 
 	private ApplicationContext applicationContext;

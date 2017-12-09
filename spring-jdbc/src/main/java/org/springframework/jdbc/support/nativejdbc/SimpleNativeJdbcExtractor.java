@@ -60,6 +60,7 @@ package org.springframework.jdbc.support.nativejdbc;
  * @see org.springframework.jdbc.core.JdbcTemplate#setNativeJdbcExtractor
  * @see org.springframework.jdbc.support.lob.OracleLobHandler#setNativeJdbcExtractor
  */
+@Deprecated
 public class SimpleNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 	private boolean nativeConnectionNecessaryForNativeStatements = false;

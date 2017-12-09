@@ -23,6 +23,7 @@ import org.springframework.beans.FatalBeanException;
  *
  * @author Rod Johnson
  * @since 02.12.2002
+ * @deprecated removed in 5
  */
 @SuppressWarnings("serial")
 public class BootstrapException extends FatalBeanException {

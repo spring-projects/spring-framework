@@ -35,6 +35,7 @@ import org.springframework.beans.factory.BeanFactory;
  * @author Juergen Hoeller
  * @since 2.5.2
  * @see org.springframework.web.jsf.el.SpringBeanFacesELResolver
+ * @deprecated removed in 5
  */
 public abstract class SpringBeanELResolver extends ELResolver {
 
