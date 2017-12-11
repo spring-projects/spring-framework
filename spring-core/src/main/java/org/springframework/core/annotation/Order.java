@@ -42,7 +42,7 @@ import org.springframework.core.Ordered;
  *
  * <p>Since Spring 4.1, the standard {@link javax.annotation.Priority} annotation
  * can be used as a drop-in replacement for this annotation in ordering scenarios.
- * Note that {@code Priority} may have additional semantics when a single element
+ * Note that {@code @Priority} may have additional semantics when a single element
  * has to be picked (see {@link AnnotationAwareOrderComparator#getPriority}).
  *
  * <p>Alternatively, order values may also be determined on a per-instance basis

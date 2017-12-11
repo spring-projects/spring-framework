@@ -17,7 +17,6 @@
 package org.springframework.http.codec.multipart;
 
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -26,19 +25,15 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.EncoderHttpMessageWriter;
-import org.springframework.http.codec.ResourceHttpMessageWriter;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.assertEquals;
@@ -48,14 +43,12 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  */
 public class MultipartHttpMessageWriterTests {
 
-	private final MultipartHttpMessageWriter writer = new MultipartHttpMessageWriter(Arrays.asList(
-			new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()),
-			new ResourceHttpMessageWriter(),
-			new EncoderHttpMessageWriter<>(new Jackson2JsonEncoder())
-	));
+	private final MultipartHttpMessageWriter writer =
+			new MultipartHttpMessageWriter(ClientCodecConfigurer.create().getWriters());
 
 
 	@Test
@@ -77,45 +70,30 @@ public class MultipartHttpMessageWriterTests {
 
 	@Test
 	public void writeMultipart() throws Exception {
-		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-		map.add("name 1", "value 1");
-		map.add("name 2", "value 2+1");
-		map.add("name 2", "value 2+2");
 
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
-		map.add("logo", logo);
-
-		// SPR-12108
 		Resource utf8 = new ClassPathResource("/org/springframework/http/converter/logo.jpg") {
 			@Override
 			public String getFilename() {
+				// SPR-12108
 				return "Hall\u00F6le.jpg";
 			}
 		};
-		map.add("utf8", utf8);
 
-		HttpHeaders entityHeaders = new HttpHeaders();
-		entityHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-		HttpEntity<Foo> entity = new HttpEntity<>(new Foo("bar"), entityHeaders);
-		map.add("json", entity);
+		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+		bodyBuilder.part("name 1", "value 1");
+		bodyBuilder.part("name 2", "value 2+1");
+		bodyBuilder.part("name 2", "value 2+2");
+		bodyBuilder.part("logo", logo);
+		bodyBuilder.part("utf8", utf8);
+		bodyBuilder.part("json", new Foo("bar"), MediaType.APPLICATION_JSON_UTF8);
+		Mono<MultiValueMap<String, HttpEntity<?>>> publisher = Mono.just(bodyBuilder.build());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Map<String, Object> hints = Collections.emptyMap();
-		this.writer.write(Mono.just(map), null, MediaType.MULTIPART_FORM_DATA, response, hints).block();
+		this.writer.write(publisher, null, MediaType.MULTIPART_FORM_DATA, response, hints).block(Duration.ofSeconds(5));
 
-		MediaType contentType = response.getHeaders().getContentType();
-		assertNotNull("No boundary found", contentType.getParameter("boundary"));
-
-		// see if Synchronoss NIO Multipart can read what we wrote
-		SynchronossPartHttpMessageReader synchronossReader = new SynchronossPartHttpMessageReader();
-		MultipartHttpMessageReader reader = new MultipartHttpMessageReader(synchronossReader);
-
-		MockServerHttpRequest request = MockServerHttpRequest.post("/foo")
-				.contentType(MediaType.parseMediaType(contentType.toString()))
-				.body(response.getBody());
-
-		ResolvableType elementType = ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
-		MultiValueMap<String, Part> requestParts = reader.readMono(elementType, request, hints).block();
+		MultiValueMap<String, Part> requestParts = parse(response, hints);
 		assertEquals(5, requestParts.size());
 
 		Part part = requestParts.getFirst("name 1");
@@ -158,6 +136,28 @@ public class MultipartHttpMessageWriterTests {
 
 		assertEquals("{\"bar\":\"bar\"}", value);
 
+	}
+
+	private MultiValueMap<String, Part> parse(MockServerHttpResponse response, Map<String, Object> hints) {
+		MediaType contentType = response.getHeaders().getContentType();
+		assertNotNull("No boundary found", contentType.getParameter("boundary"));
+
+		// see if Synchronoss NIO Multipart can read what we wrote
+		SynchronossPartHttpMessageReader synchronossReader = new SynchronossPartHttpMessageReader();
+		MultipartHttpMessageReader reader = new MultipartHttpMessageReader(synchronossReader);
+
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.contentType(MediaType.parseMediaType(contentType.toString()))
+				.body(response.getBody());
+
+		ResolvableType elementType = ResolvableType.forClassWithGenerics(
+				MultiValueMap.class, String.class, Part.class);
+
+		MultiValueMap<String, Part> result = reader.readMono(elementType, request, hints)
+				.block(Duration.ofSeconds(5));
+
+		assertNotNull(result);
+		return result;
 	}
 
 

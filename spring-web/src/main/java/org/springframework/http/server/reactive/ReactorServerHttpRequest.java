@@ -36,6 +36,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 /**
  * Adapt {@link ServerHttpRequest} to the Reactor {@link HttpServerRequest}.
@@ -62,7 +63,7 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	private static URI initUri(HttpServerRequest request) throws URISyntaxException {
 		Assert.notNull(request, "'request' must not be null");
-		return new URI(resolveBaseUrl(request).toString() + request.uri());
+		return new URI(resolveBaseUrl(request).toString() + resolveRequestUri(request));
 	}
 
 	private static URI resolveBaseUrl(HttpServerRequest request) throws URISyntaxException {
@@ -100,6 +101,28 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 		ChannelPipeline pipeline = request.context().channel().pipeline();
 		boolean ssl = pipeline.get(SslHandler.class) != null;
 		return ssl ? "https" : "http";
+	}
+
+	private static String resolveRequestUri(HttpServerRequest request) {
+		String uri = request.uri();
+		for (int i = 0; i < uri.length(); i++) {
+			char c = uri.charAt(i);
+			if (c == '/' || c == '?' || c == '#') {
+				break;
+			}
+			if (c == ':' && (i + 2 < uri.length())) {
+				if (uri.charAt(i + 1) == '/' && uri.charAt(i + 2) == '/') {
+					for (int j = i + 3; j < uri.length(); j++) {
+						c = uri.charAt(j);
+						if (c == '/' || c == '?' || c == '#') {
+							return uri.substring(j);
+						}
+					}
+					return "";
+				}
+			}
+		}
+		return uri;
 	}
 
 	private static HttpHeaders initHeaders(HttpServerRequest channel) {

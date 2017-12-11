@@ -25,6 +25,7 @@ include::web/webflux-websocket.adoc[leveloffset=+1]
 
 [[webflux-test]]
 == Testing
+[.small]#<<web.adoc#testing,Same in Spring MVC>>#
 
 The `spring-test` module provides mock implementations of `ServerHttpRequest`,
 `ServerHttpResponse`, and `ServerWebExchange`.

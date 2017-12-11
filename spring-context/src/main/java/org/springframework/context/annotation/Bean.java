@@ -78,7 +78,7 @@ import org.springframework.core.annotation.AliasFor;
  * </pre>
  *
  * The semantics of the above-mentioned annotations match their use at the component
- * class level: {@code Profile} allows for selective inclusion of certain beans.
+ * class level: {@code @Profile} allows for selective inclusion of certain beans.
  * {@code @Scope} changes the bean's scope from singleton to the specified scope.
  * {@code @Lazy} only has an actual effect in case of the default singleton scope.
  * {@code @DependsOn} enforces the creation of specific other beans before this
@@ -96,12 +96,12 @@ import org.springframework.core.annotation.AliasFor;
  * order values determine the order of resolved elements in case of collection
  * injection points (with several target beans matching by type and qualifier).
  *
- * <p><b>NOTE:</b> {@code @Order} values may influence priorities at injection points
+ * <p><b>NOTE:</b> {@code @Order} values may influence priorities at injection points,
  * but please be aware that they do not influence singleton startup order which is an
  * orthogonal concern determined by dependency relationships and {@code @DependsOn}
  * declarations as mentioned above. Also, {@link javax.annotation.Priority} is not
  * available at this level since it cannot be declared on methods; its semantics can
- * be modelled through {@code @Order} values in combination with {@code @Primary} on
+ * be modeled through {@code @Order} values in combination with {@code @Primary} on
  * a single bean per type.
  *
  * <h3>{@code @Bean} Methods in {@code @Configuration} Classes</h3>

@@ -35,8 +35,9 @@ public interface SslInfo {
 	String getSessionId();
 
 	/**
-	 * Return the associated SSL certificates.
+	 * Return SSL certificates associated with the request, if any.
 	 */
+	@Nullable
 	X509Certificate[] getPeerCertificates();
 
 }

@@ -22,8 +22,9 @@ wiki page.
 
 ## Documentation
 
-The Spring Frameworks maintains
-[reference documentation](http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/),
+The Spring Frameworks maintains reference documentation
+([published](http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/) and
+[source](src/docs/asciidoc)),
 Github [wiki pages](https://github.com/spring-projects/spring-framework/wiki), and an
 [API reference](http://docs.spring.io/spring-framework/docs/current/javadoc-api/).
 There are also [guides and tutorials](https://spring.io/guides) across Spring projects.

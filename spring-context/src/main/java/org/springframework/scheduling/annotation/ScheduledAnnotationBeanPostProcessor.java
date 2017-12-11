@@ -365,7 +365,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					}
 					catch (NumberFormatException ex) {
 						throw new IllegalArgumentException(
-								"Invalid initialDelayString value \"" + initialDelayString + "\" - cannot parse into integer");
+								"Invalid initialDelayString value \"" + initialDelayString + "\" - cannot parse into long");
 					}
 				}
 			}

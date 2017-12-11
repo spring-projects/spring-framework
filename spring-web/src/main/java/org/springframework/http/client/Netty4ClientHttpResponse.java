@@ -60,13 +60,11 @@ class Netty4ClientHttpResponse extends AbstractClientHttpResponse {
 
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public int getRawStatusCode() throws IOException {
 		return this.nettyResponse.getStatus().code();
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public String getStatusText() throws IOException {
 		return this.nettyResponse.getStatus().reasonPhrase();
 	}

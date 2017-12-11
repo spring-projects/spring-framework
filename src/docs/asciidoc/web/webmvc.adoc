@@ -1223,20 +1223,29 @@ in the configuration section.
 
 By default Spring MVC performs `".{asterisk}"` suffix pattern matching so that a
 controller mapped to `/person` is also implicitly mapped to `/person.{asterisk}`.
-This is used for URL based content negotiation, e.g. `/person.pdf`, `/person.xml`, etc.
+The file extension is then used to interpret the requested content type to use for
+the response (i.e. instead of the "Accept" header), e.g. `/person.pdf`,
+`/person.xml`, etc.
 
-Suffix pattern matching was quite helpful when browsers used to send Accept headers that
-are hard to interpet consistently. In the present, and for REST services, the `Accept`
-header should be the preferred choice.
+Using file extensions like this was necessary when browsers used to send Accept headers
+that were hard to interpret consistently. At present that is no longer a necessity and
+using the "Accept" header should be the preferred choice.
 
-Suffix patterns can cause ambiguity and complexity in combination with path parameters,
-encoded characters, and URI variables. It also makes it harder to reason about URL-based
-authorization rules and security (see <<mvc-ann-requestmapping-rfd>>).
+Over time the use of file name extensions has proven problematic in a variety of ways.
+It can cause ambiguity when overlayed with the use of URI variables, path parameters,
+URI encoding, and it also makes it difficult to reason about URL-based authorization
+and security (see next section for more details).
 
-Suffix pattern matching can be turned off completely or restricted to a set of explicitly
-registered path extensions. We strongly recommend using of one those options. See
-<<mvc-config-path-matching>> and <<mvc-config-content-negotiation>>. If you need URL based
-content negotiation consider using query parameters instead.
+To completely disable the use of file extensions, you must set both of these:
+
+* `useSuffixPatternMatching(false)`, see <<mvc-config-path-matching,PathMatchConfigurer>>
+* `favorPathExtension(false)`, see <<mvc-config-content-negotiation,ContentNeogiationConfigurer>>
+
+URL-based content negotiation can still be useful, for example when typing a URL in a
+browser. To enable that we recommend a query parameter based strategy to avoid most of
+the issues that come with file extensions. Or if you must use file extensions, consider
+restricting them to a list of explicitly registered extensions through the
+`mediaTypes` property of <<mvc-config-content-negotiation,ContentNeogiationConfigurer>>.
 
 
 [[mvc-ann-requestmapping-rfd]]

@@ -1,5 +1,6 @@
 [[testing]]
 = Testing
+[.small]#<<web-reactive.adoc#webflux-test,Same in Spring WebFlux>>#
 
 
 
@@ -26,11 +27,12 @@ See <<testing.adoc#testcontext-framework,TestContext Framework>> for more detail
 
 
 [[testing-mockmvc]]
-== Spring MVC Tests
+== Spring MVC Test (MockMvc)
 
-`spring-test` provides an integration test framework for testing annotated controllers
-through the `DispatcherServlet`, complete with Spring MVC infrastructure, but without an
-HTTP server. See <<testing.adoc#spring-mvc-test-framework,Spring MVC Test>> for more details.
+`spring-test` provides a framework for testing annotated controllers through the
+`DispatcherServlet`, i.e. supporting annotations and complete with Spring MVC
+infrastructure, but without an HTTP server.
+See <<testing.adoc#spring-mvc-test-framework,Spring MVC Test>> for more details.
 
 
 
@@ -41,3 +43,13 @@ HTTP server. See <<testing.adoc#spring-mvc-test-framework,Spring MVC Test>> for 
 `spring-test` provides a `MockRestServiceServer` that can be used as a mock server for
 testing client-side code that internally uses the `RestTemplate`.
 See <<testing.adoc#spring-mvc-test-client,Client REST Tests>> for more details.
+
+
+
+
+[[testing-webtestclient]]
+== WebTestClient
+
+`spring-test` provides a dedicated `WebTestClient` for end-to-end integration testing.
+`WebTestClient` can connect to any server over an HTTP connection. It is non-blocking,
+reactive client and well suited for testing asynchronous and streaming scenarios.
