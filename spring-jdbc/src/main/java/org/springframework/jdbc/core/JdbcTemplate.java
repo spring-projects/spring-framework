@@ -187,6 +187,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * Useful if native Statement and/or ResultSet handles are expected for casting
 	 * to database-specific implementation classes, but a connection pool that wraps
 	 * JDBC objects is used (note: <i>any</i> pool will return wrapped Connections).
+	 * @deprecated use {@link Wrapper#unwrap(Class)}
 	 */
 	public void setNativeJdbcExtractor(NativeJdbcExtractor extractor) {
 		this.nativeJdbcExtractor = extractor;
@@ -194,6 +195,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	/**
 	 * Return the current NativeJdbcExtractor implementation.
+	 * @deprecated use {@link Wrapper#unwrap(Class)}
 	 */
 	public NativeJdbcExtractor getNativeJdbcExtractor() {
 		return this.nativeJdbcExtractor;

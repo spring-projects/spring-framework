@@ -40,6 +40,7 @@ import java.sql.Statement;
  * @author Juergen Hoeller
  * @since 3.0.5
  */
+@Deprecated
 public class OracleJdbc4NativeJdbcExtractor extends Jdbc4NativeJdbcExtractor {
 
 	@SuppressWarnings("unchecked")

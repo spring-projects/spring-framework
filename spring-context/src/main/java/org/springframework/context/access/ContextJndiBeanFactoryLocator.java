@@ -39,6 +39,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @see #createBeanFactory
  */
+@Deprecated
 public class ContextJndiBeanFactoryLocator extends JndiLocatorSupport implements BeanFactoryLocator {
 
 	/**

@@ -45,6 +45,7 @@ import org.springframework.util.ReflectionUtils;
  * @see com.mchange.v2.c3p0.C3P0ProxyConnection#rawConnectionOperation
  * @see SimpleNativeJdbcExtractor
  */
+@Deprecated
 public class C3P0NativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 	private final Method getRawConnectionMethod;

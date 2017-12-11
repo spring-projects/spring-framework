@@ -71,6 +71,7 @@ import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
  * @see org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor
  * @see org.springframework.context.access.ContextSingletonBeanFactoryLocator
  * @see #getBeanFactoryLocatorKey
+ * @deprecated removed in 5
  */
 public class SpringBeanAutowiringInterceptor {
 

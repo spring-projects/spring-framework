@@ -28,6 +28,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 2.5.2
  */
+@Deprecated
 public class SimpleSpringBeanELResolver extends SpringBeanELResolver {
 
 	private final BeanFactory beanFactory;

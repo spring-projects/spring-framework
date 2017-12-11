@@ -49,6 +49,7 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  * @see org.springframework.beans.factory.access.SingletonBeanFactoryLocator
  * @see org.springframework.context.access.DefaultLocatorFactory
  */
+@Deprecated
 public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLocator {
 
 	private static final String DEFAULT_RESOURCE_LOCATION = "classpath*:beanRefContext.xml";

@@ -41,6 +41,7 @@ import org.springframework.util.ReflectionUtils;
  * @see #getNativeConnection
  * @see weblogic.jdbc.extensions.WLConnection#getVendorConnection
  */
+@Deprecated
 public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 	private static final String JDBC_EXTENSION_NAME = "weblogic.jdbc.extensions.WLConnection";

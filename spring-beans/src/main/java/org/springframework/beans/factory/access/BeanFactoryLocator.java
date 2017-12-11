@@ -49,6 +49,7 @@ import org.springframework.beans.BeansException;
  * @see org.springframework.beans.factory.BeanFactory
  * @see org.springframework.context.access.DefaultLocatorFactory
  * @see org.springframework.context.ApplicationContext
+ * @deprecated removed in 5
  */
 public interface BeanFactoryLocator {
 

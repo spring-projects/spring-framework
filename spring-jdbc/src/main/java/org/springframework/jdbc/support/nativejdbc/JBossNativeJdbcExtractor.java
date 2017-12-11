@@ -46,6 +46,7 @@ import org.springframework.util.ReflectionUtils;
  * @see org.jboss.resource.adapter.jdbc.WrappedStatement#getUnderlyingStatement
  * @see org.jboss.resource.adapter.jdbc.WrappedResultSet#getUnderlyingResultSet
  */
+@Deprecated
 public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 	// JBoss 7

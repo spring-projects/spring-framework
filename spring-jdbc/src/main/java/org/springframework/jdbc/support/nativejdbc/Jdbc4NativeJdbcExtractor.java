@@ -44,6 +44,7 @@ import java.sql.Statement;
  * @see org.springframework.jdbc.core.JdbcTemplate#setNativeJdbcExtractor
  * @see org.springframework.jdbc.support.lob.OracleLobHandler#setNativeJdbcExtractor
  */
+@Deprecated
 public class Jdbc4NativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 	private Class<? extends Connection> connectionType = Connection.class;

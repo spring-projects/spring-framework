@@ -56,6 +56,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @see #getNativeConnectionFromStatement
  * @see org.springframework.jdbc.datasource.ConnectionProxy
  */
+@Deprecated
 public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor {
 
 	/**
