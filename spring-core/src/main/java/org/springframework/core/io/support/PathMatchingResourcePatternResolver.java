@@ -427,7 +427,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 					int prefixIndex = filePath.indexOf(':');
 					if (prefixIndex == 1) {
 						// Possibly "c:" drive prefix on Windows, to be upper-cased for proper duplicate detection
-						filePath = filePath.substring(0, 1).toUpperCase() + filePath.substring(1);
+						filePath = StringUtils.capitalize(filePath);
 					}
 					UrlResource jarResource = new UrlResource(ResourceUtils.JAR_URL_PREFIX +
 							ResourceUtils.FILE_URL_PREFIX + filePath + ResourceUtils.JAR_URL_SEPARATOR);
