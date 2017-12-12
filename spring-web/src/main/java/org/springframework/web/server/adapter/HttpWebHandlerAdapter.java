@@ -157,10 +157,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 		ServerWebExchange exchange = createExchange(request, response);
 		return getDelegate().handle(exchange)
-				.onErrorResume(ex -> {
-					handleFailure(response, ex);
-					return Mono.empty();
-				})
+				.onErrorResume(ex -> handleFailure(response, ex))
 				.then(Mono.defer(response::setComplete));
 	}
 
@@ -169,8 +166,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 				getCodecConfigurer(), getLocaleContextResolver());
 	}
 
-	private void handleFailure(ServerHttpResponse response, Throwable ex) {
-		boolean statusCodeChanged = response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+	private Mono<Void> handleFailure(ServerHttpResponse response, Throwable ex) {
 		if (isDisconnectedClientError(ex)) {
 			if (disconnectedClientLogger.isTraceEnabled()) {
 				disconnectedClientLogger.trace("Looks like the client has gone away", ex);
@@ -180,14 +176,16 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 						" (For a full stack trace, set the log category '" + DISCONNECTED_CLIENT_LOG_CATEGORY +
 						"' to TRACE level.)");
 			}
+			return Mono.empty();
 		}
-		else if (!statusCodeChanged) {
-			logger.error("Unhandled failure: " + ex.getMessage() + ", " +
-					"response already committed with status=" + response.getStatusCode());
-		}
-		else {
+		if (response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR)) {
 			logger.error("Failed to handle request", ex);
+			return Mono.empty();
 		}
+		// After the response is committed, propagate errors to the server..
+		HttpStatus status = response.getStatusCode();
+		logger.error("Unhandled failure: " + ex.getMessage() + ", response already set (status=" + status + ")");
+		return Mono.error(ex);
 	}
 
 	private boolean isDisconnectedClientError(Throwable ex)  {

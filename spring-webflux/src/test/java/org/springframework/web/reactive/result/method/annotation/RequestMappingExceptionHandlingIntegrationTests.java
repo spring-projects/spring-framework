@@ -18,8 +18,10 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.io.IOException;
 
+import org.junit.Assume;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.ApplicationContext;
@@ -28,6 +30,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,28 +56,44 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 
 
 	@Test
-	public void controllerThrowingException() throws Exception {
-		String expected = "Recovered from error: State";
-		assertEquals(expected, performGet("/thrown-exception", new HttpHeaders(), String.class).getBody());
+	public void thrownException() throws Exception {
+		doTest("/thrown-exception", "Recovered from error: State");
 	}
 
 	@Test
-	public void controllerThrowingExceptionWithCause() throws Exception {
-		String expected = "Recovered from error: State";
-		assertEquals(expected, performGet("/thrown-exception-with-cause", new HttpHeaders(), String.class).getBody());
+	public void thrownExceptionWithCause() throws Exception {
+		doTest("/thrown-exception-with-cause", "Recovered from error: State");
 	}
 
 	@Test
-	public void controllerThrowingExceptionWithCauseToHandle() throws Exception {
-		String expected = "Recovered from error: IO";
-		String url = "/thrown-exception-with-cause-to-handle";
+	public void thrownExceptionWithCauseToHandle() throws Exception {
+		doTest("/thrown-exception-with-cause-to-handle", "Recovered from error: IO");
+	}
+
+	@Test
+	public void errorBeforeFirstItem() throws Exception {
+		doTest("/mono-error", "Recovered from error: Argument");
+	}
+
+	@Test // SPR-16051
+	public void exceptionAfterSeveralItems() throws Exception {
+
+		// TODO: uncomment and try after https://github.com/reactor/reactor-netty/issues/231
+		Assume.assumeFalse(server instanceof ReactorHttpServer);
+
+		try {
+			performGet("/SPR-16051", new HttpHeaders(), String.class).getBody();
+			fail();
+		}
+		catch (Throwable ex) {
+			String message = ex.getMessage();
+			assertNotNull(message);
+			assertTrue("Actual: " + message, message.startsWith("Error while extracting response"));
+		}
+	}
+
+	private void doTest(String url, String expected) throws Exception {
 		assertEquals(expected, performGet(url, new HttpHeaders(), String.class).getBody());
-	}
-
-	@Test
-	public void controllerReturnsMonoError() throws Exception {
-		String expected = "Recovered from error: Argument";
-		assertEquals(expected, performGet("/mono-error", new HttpHeaders(), String.class).getBody());
 	}
 
 
@@ -109,6 +128,18 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 		public Publisher<String> handleWithError() {
 			return Mono.error(new IllegalArgumentException("Argument"));
 		}
+
+		@GetMapping("/SPR-16051")
+		public Flux<String> errors() {
+			return Flux.range(1, 10000)
+					.map(i -> {
+						if (i == 1000) {
+							throw new RuntimeException("Random error");
+						}
+						return i + ". foo bar";
+					});
+		}
+
 
 		@ExceptionHandler
 		public Publisher<String> handleArgumentException(IOException ex) {

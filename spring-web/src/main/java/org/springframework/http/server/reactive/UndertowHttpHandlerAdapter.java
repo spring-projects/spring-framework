@@ -16,6 +16,8 @@
 
 package org.springframework.http.server.reactive;
 
+import java.io.IOException;
+
 import io.undertow.server.HttpServerExchange;
 
 import org.apache.commons.logging.Log;
@@ -98,16 +100,26 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 		@Override
 		public void onError(Throwable ex) {
-			logger.error("Could not complete request", ex);
-			if (!this.exchange.isResponseStarted() && this.exchange.getStatusCode() < 500) {
-				this.exchange.setStatusCode(500);
+			logger.error("Handling completed with error", ex);
+			if (this.exchange.isResponseStarted()) {
+				try {
+					logger.debug("Closing connection");
+					this.exchange.getConnection().close();
+				}
+				catch (IOException e) {
+					// Ignore
+				}
 			}
-			this.exchange.endExchange();
+			else {
+				logger.debug("Setting response status code to 500");
+				this.exchange.setStatusCode(500);
+				this.exchange.endExchange();
+			}
 		}
 
 		@Override
 		public void onComplete() {
-			logger.debug("Successfully completed request");
+			logger.debug("Handling completed with success");
 			this.exchange.endExchange();
 		}
 	}

@@ -72,12 +72,8 @@ public class ReactorHttpHandlerAdapter
 		}
 
 		return this.httpHandler.handle(adaptedRequest, adaptedResponse)
-				.onErrorResume(ex -> {
-					logger.error("Could not complete request", ex);
-					response.status(HttpResponseStatus.INTERNAL_SERVER_ERROR);
-					return Mono.empty();
-				})
-				.doOnSuccess(aVoid -> logger.debug("Successfully completed request"));
+				.doOnError(ex -> logger.error("Handling completed with error", ex))
+				.doOnSuccess(aVoid -> logger.debug("Handling completed with success"));
 	}
 
 }
