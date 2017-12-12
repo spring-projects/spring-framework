@@ -341,10 +341,10 @@ public class CachedIntrospectionResults {
 	PropertyDescriptor getPropertyDescriptor(String name) {
 		PropertyDescriptor pd = this.propertyDescriptorCache.get(name);
 		if (pd == null && StringUtils.hasLength(name)) {
-			// Same lenient fallback checking as in PropertyTypeDescriptor...
-			pd = this.propertyDescriptorCache.get(name.substring(0, 1).toLowerCase() + name.substring(1));
+			// Same lenient fallback checking as in Property...
+			pd = this.propertyDescriptorCache.get(StringUtils.uncapitalize(name));
 			if (pd == null) {
-				pd = this.propertyDescriptorCache.get(name.substring(0, 1).toUpperCase() + name.substring(1));
+				pd = this.propertyDescriptorCache.get(StringUtils.capitalize(name));
 			}
 		}
 		return (pd == null || pd instanceof GenericTypeAwarePropertyDescriptor ? pd :

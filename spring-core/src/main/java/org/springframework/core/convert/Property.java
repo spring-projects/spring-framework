@@ -239,11 +239,9 @@ public final class Property {
 			field = ReflectionUtils.findField(declaringClass, name);
 			if (field == null) {
 				// Same lenient fallback checking as in CachedIntrospectionResults...
-				field = ReflectionUtils.findField(declaringClass,
-						name.substring(0, 1).toLowerCase() + name.substring(1));
+				field = ReflectionUtils.findField(declaringClass, StringUtils.uncapitalize(name));
 				if (field == null) {
-					field = ReflectionUtils.findField(declaringClass,
-							name.substring(0, 1).toUpperCase() + name.substring(1));
+					field = ReflectionUtils.findField(declaringClass, StringUtils.capitalize(name));
 				}
 			}
 		}
