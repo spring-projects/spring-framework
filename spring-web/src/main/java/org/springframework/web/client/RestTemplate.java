@@ -852,6 +852,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				Class<?> requestBodyClass = requestBody.getClass();
 				Type requestBodyType = (this.requestEntity instanceof RequestEntity ?
 						((RequestEntity<?>)this.requestEntity).getType() : requestBodyClass);
+				HttpHeaders httpHeaders = httpRequest.getHeaders();
 				HttpHeaders requestHeaders = this.requestEntity.getHeaders();
 				MediaType requestContentType = requestHeaders.getContentType();
 				for (HttpMessageConverter<?> messageConverter : getMessageConverters()) {
@@ -859,7 +860,9 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 						GenericHttpMessageConverter<Object> genericMessageConverter = (GenericHttpMessageConverter<Object>) messageConverter;
 						if (genericMessageConverter.canWrite(requestBodyType, requestBodyClass, requestContentType)) {
 							if (!requestHeaders.isEmpty()) {
-								httpRequest.getHeaders().putAll(requestHeaders);
+								for (Map.Entry<String, List<String>> entry : requestHeaders.entrySet()) {
+									httpHeaders.put(entry.getKey(), new LinkedList<String>(entry.getValue()));
+								}
 							}
 							if (logger.isDebugEnabled()) {
 								if (requestContentType != null) {
@@ -878,7 +881,9 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 					}
 					else if (messageConverter.canWrite(requestBodyClass, requestContentType)) {
 						if (!requestHeaders.isEmpty()) {
-							httpRequest.getHeaders().putAll(requestHeaders);
+							for (Map.Entry<String, List<String>> entry : requestHeaders.entrySet()) {
+								httpHeaders.put(entry.getKey(), new LinkedList<String>(entry.getValue()));
+							}
 						}
 						if (logger.isDebugEnabled()) {
 							if (requestContentType != null) {

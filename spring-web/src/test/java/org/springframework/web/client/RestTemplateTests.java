@@ -836,7 +836,7 @@ public class RestTemplateTests {
 	}
 
 	@Test // SPR-15066
-	public void requestInterceptorCanAddExistingHeaderValue() throws Exception {
+	public void requestInterceptorCanAddExistingHeaderValueWithoutBody() throws Exception {
 		ClientHttpRequestInterceptor interceptor = (request, body, execution) -> {
 			request.getHeaders().add("MyHeader", "MyInterceptorValue");
 			return execution.execute(request, body);
@@ -855,6 +855,37 @@ public class RestTemplateTests {
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.add("MyHeader", "MyEntityValue");
 		HttpEntity<Void> entity = new HttpEntity<>(null, entityHeaders);
+		template.exchange("http://example.com", HttpMethod.POST, entity, Void.class);
+		assertThat(requestHeaders.get("MyHeader"), contains("MyEntityValue", "MyInterceptorValue"));
+
+		verify(response).close();
+	}
+
+	@Test // SPR-15066
+	public void requestInterceptorCanAddExistingHeaderValueWithBody() throws Exception {
+		ClientHttpRequestInterceptor interceptor = (request, body, execution) -> {
+			request.getHeaders().add("MyHeader", "MyInterceptorValue");
+			return execution.execute(request, body);
+		};
+		template.setInterceptors(Collections.singletonList(interceptor));
+
+		MediaType contentType = MediaType.TEXT_PLAIN;
+		given(converter.canWrite(String.class, contentType)).willReturn(true);
+		given(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).willReturn(request);
+		String helloWorld = "Hello World";
+		HttpHeaders requestHeaders = new HttpHeaders();
+		given(request.getHeaders()).willReturn(requestHeaders);
+		converter.write(helloWorld, contentType, request);
+		given(request.execute()).willReturn(response);
+		given(errorHandler.hasError(response)).willReturn(false);
+		HttpStatus status = HttpStatus.OK;
+		given(response.getStatusCode()).willReturn(status);
+		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+
+		HttpHeaders entityHeaders = new HttpHeaders();
+		entityHeaders.setContentType(contentType);
+		entityHeaders.add("MyHeader", "MyEntityValue");
+		HttpEntity<String> entity = new HttpEntity<>(helloWorld, entityHeaders);
 		template.exchange("http://example.com", HttpMethod.POST, entity, Void.class);
 		assertThat(requestHeaders.get("MyHeader"), contains("MyEntityValue", "MyInterceptorValue"));
 
