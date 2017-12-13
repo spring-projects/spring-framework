@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -396,7 +397,9 @@ public class MethodParameter {
 		if (paramType == null) {
 			if (this.parameterIndex < 0) {
 				Method method = getMethod();
-				paramType = (method != null ? method.getReturnType() : void.class);
+				paramType = (method != null ?
+                        (KotlinDetector.isKotlinType(getContainingClass()) ?
+								KotlinDelegate.getReturnType(method) : method.getReturnType()) : void.class);
 			}
 			else {
 				paramType = this.executable.getParameterTypes()[this.parameterIndex];
@@ -416,7 +419,9 @@ public class MethodParameter {
 		if (paramType == null) {
 			if (this.parameterIndex < 0) {
 				Method method = getMethod();
-				paramType = (method != null ? method.getGenericReturnType() : void.class);
+				paramType = (method != null ?
+						(KotlinDetector.isKotlinType(getContainingClass()) ?
+								KotlinDelegate.getGenericReturnType(method) : method.getGenericReturnType()) : void.class);
 			}
 			else {
 				Type[] genericParameterTypes = this.executable.getGenericParameterTypes();
@@ -777,6 +782,47 @@ public class MethodParameter {
 			}
 			return false;
 		}
-	}
 
+		/**
+		 * Returns a return type of a method using Kotlin Reflection API.
+		 * Introduced to support suspending functions.
+		 */
+		static private Class<?> getReturnType(Method method) {
+		    if (isSuspend(method)) {
+		    	final Class<?> returnType = getSuspendReturnType(method).resolve();
+				Assert.notNull(returnType, "returnType cannot be null");
+		        return returnType;
+            } else {
+                return method.getReturnType();
+            }
+		}
+
+		/**
+		 * Returns a generic return type of a method using Kotlin Reflection API.
+		 * Introduced to support suspending functions.
+		 */
+		static private Type getGenericReturnType(Method method) {
+            if (isSuspend(method)) {
+                return getSuspendReturnType(method).getType();
+            } else {
+                return method.getGenericReturnType();
+            }
+		}
+
+		static private boolean isSuspend(Method method) {
+            KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
+            return (function != null && function.isSuspend());
+        }
+
+        static private ResolvableType getSuspendReturnType(Method method) {
+            ResolvableType cgeneric = ResolvableType.forMethodParameter(method, method.getParameterCount() - 1)
+                    .getGeneric(0);
+
+            if (cgeneric.getType() instanceof WildcardType) {
+				return ResolvableType.forType(((WildcardType) cgeneric.getType()).getLowerBounds()[0]);
+			} else {
+            	return cgeneric;
+			}
+        }
+	}
 }
