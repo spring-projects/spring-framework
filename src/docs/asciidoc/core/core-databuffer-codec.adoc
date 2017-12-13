@@ -160,7 +160,7 @@ Note that a decoder instance needs to consider <<databuffer-reference-counting, 
 
 Spring comes with a wide array of default codecs, capable of converting from/to `String`,
 `ByteBuffer`, byte arrays, and also codecs that support marshalling libraries such as JAXB and
-Jackson.
+Jackson (with https://github.com/FasterXML/jackson-core/issues/57[Jackson 2.9+ support for non-blocking parsing]).
 Withing the context of Spring WebFlux, codecs are used to convert the request body into a
 `@RequestMapping` parameter, or to convert the return type into the response body that is sent back
 to the client.

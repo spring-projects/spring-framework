@@ -21,6 +21,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
+import reactor.core.publisher.Flux;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -29,6 +30,8 @@ import org.springframework.util.MimeType;
 
 /**
  * Encode from an {@code Object} stream to a byte stream of Smile objects using Jackson 2.9.
+ * For non-streaming use cases, {@link Flux} elements are collected into a {@link List}
+ * before serialization for performance reason.
  *
  * @author Sebastien Deleuze
  * @since 5.0

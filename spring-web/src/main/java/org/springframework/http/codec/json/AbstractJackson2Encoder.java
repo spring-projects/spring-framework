@@ -48,7 +48,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 /**
- * Base class providing support methods for Jackson 2.9 encoding.
+ * Base class providing support methods for Jackson 2.9 encoding. For non-streaming use
+ * cases, {@link Flux} elements are collected into a {@link List} before serialization for
+ * performance reason.
  *
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
