@@ -402,7 +402,9 @@ public class MethodParameter {
 		if (paramType == null) {
 			if (this.parameterIndex < 0) {
 				Method method = getMethod();
-				paramType = (method != null ? method.getReturnType() : void.class);
+				paramType = (method != null ?
+						(KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(getContainingClass()) ?
+						KotlinDelegate.getReturnType(method) : method.getReturnType()) : void.class);
 			}
 			else {
 				paramType = this.executable.getParameterTypes()[this.parameterIndex];
@@ -422,7 +424,9 @@ public class MethodParameter {
 		if (paramType == null) {
 			if (this.parameterIndex < 0) {
 				Method method = getMethod();
-				paramType = (method != null ? method.getGenericReturnType() : void.class);
+				paramType = (method != null ?
+						(KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(getContainingClass()) ?
+						KotlinDelegate.getGenericReturnType(method) : method.getGenericReturnType()) : void.class);
 			}
 			else {
 				Type[] genericParameterTypes = this.executable.getGenericParameterTypes();
@@ -799,6 +803,32 @@ public class MethodParameter {
 			}
 			return false;
 		}
-	}
 
+		/**
+		 * Return the generic return type of the method, with support of suspending
+		 * functions via Kotlin reflection.
+		 */
+		static private Type getGenericReturnType(Method method) {
+			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
+			if (function != null && function.isSuspend()) {
+				return ReflectJvmMapping.getJavaType(function.getReturnType());
+			}
+			return method.getGenericReturnType();
+		}
+
+		/**
+		 * Return the return type of the method, with support of suspending
+		 * functions via Kotlin reflection.
+		 */
+		static private Class<?> getReturnType(Method method) {
+			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
+			if (function != null && function.isSuspend()) {
+				Type paramType = ReflectJvmMapping.getJavaType(function.getReturnType());
+				Class<?> paramClass = ResolvableType.forType(paramType).resolve();
+				Assert.notNull(paramClass, "Type " + paramType + "can't be resolved to a class");
+				return paramClass;
+			}
+			return method.getReturnType();
+		}
+	}
 }
