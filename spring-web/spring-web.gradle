@@ -73,7 +73,7 @@ dependencies {
 	}
 	testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jackson2Version}")
 	testCompile("com.fasterxml.jackson.datatype:jackson-datatype-joda:${jackson2Version}")
-	testCompile("com.fasterxml.jackson.module:jackson-module-kotlin:${jackson2Version}")
+	testCompile("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.2")  // no 2.9.3 yet
 	testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 	testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
