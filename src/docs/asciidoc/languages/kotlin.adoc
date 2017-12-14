@@ -137,11 +137,6 @@ for serializing / deserializing JSON data is automatically registered when
 found in the classpath and a warning message will be logged if Jackson and Kotlin are
 detected without the Jackson Kotlin module present.
 
-[NOTE]
-====
-As of Spring Boot 2.0, Jackson Kotlin module is automatically provided via the JSON starter.
-====
-
 
 
 
@@ -158,6 +153,15 @@ In a similar fashion, Spring bean injection with `@Autowired` or `@Inject` uses 
 to determine if a bean is required or not. `@Autowired lateinit var foo: Foo` implies that a bean
 of type `Foo` must be registered in the application context while `@Autowired lateinit var foo: Foo?`
 won’t raise an error if such bean does not exist.
+
+[NOTE]
+====
+If you are using bean validation on classes with
+https://kotlinlang.org/docs/reference/classes.html#constructors[primary constructor properties],
+make sure to use
+https://kotlinlang.org/docs/reference/annotations.html#annotation-use-site-targets[annotation use-site targets]
+as described in https://stackoverflow.com/a/35853200/1092077[this Stack Overflow response].
+====
 
 
 
