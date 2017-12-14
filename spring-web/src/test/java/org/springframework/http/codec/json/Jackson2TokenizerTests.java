@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.TokenBuffer;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,44 +43,39 @@ import static java.util.Collections.singletonList;
  */
 public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase {
 
-	private JsonParser jsonParser;
-
-	private Jackson2Tokenizer tokenizer;
-
 	private ObjectMapper objectMapper;
+
+	private JsonFactory jsonFactory;
 
 	@Before
 	public void createParser() throws IOException {
-		JsonFactory factory = new JsonFactory();
-		this.jsonParser = factory.createNonBlockingByteArrayParser();
-		this.objectMapper = new ObjectMapper(factory);
+		jsonFactory = new JsonFactory();
+		this.objectMapper = new ObjectMapper(jsonFactory);
 	}
 
 	@Test
 	public void doNotTokenizeArrayElements() {
-		this.tokenizer = new Jackson2Tokenizer(this.jsonParser, false);
-
 		testTokenize(
 				singletonList("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"),
-				singletonList("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"));
+				singletonList("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"), false);
 
 		testTokenize(
 				asList("{\"foo\": \"foofoo\"",
 						", \"bar\": \"barbar\"}"),
-				singletonList("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"));
+				singletonList("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"), false);
 
 		testTokenize(
 				singletonList("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"),
-				singletonList("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"));
+				singletonList("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"), false);
 
 		testTokenize(
 				singletonList("[{\"foo\": \"bar\"},{\"foo\": \"baz\"}]"),
-				singletonList("[{\"foo\": \"bar\"},{\"foo\": \"baz\"}]"));
+				singletonList("[{\"foo\": \"bar\"},{\"foo\": \"baz\"}]"), false);
 
 		testTokenize(
 				asList("[{\"foo\": \"foofoo\", \"bar\"",
 						": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"),
-				singletonList("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"));
+				singletonList("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"), false);
 
 		testTokenize(
 				asList("[",
@@ -90,31 +85,43 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 						",",
 						"{\"id\":3,\"name\":\"Ford\"}",
 						"]"),
-				singletonList("[{\"id\":1,\"name\":\"Robert\"},{\"id\":2,\"name\":\"Raide\"},{\"id\":3,\"name\":\"Ford\"}]"));
+				singletonList("[{\"id\":1,\"name\":\"Robert\"},{\"id\":2,\"name\":\"Raide\"},{\"id\":3,\"name\":\"Ford\"}]"), false);
+
+		// SPR-16166: top-level JSON values
+		testTokenize(asList("\"foo", "bar\"")
+			,singletonList("\"foobar\""), false);
+
+		testTokenize(asList("12", "34")
+			,singletonList("1234"), false);
+
+		testTokenize(asList("12.", "34")
+			,singletonList("12.34"), false);
+
+		// note that we do not test for null, true, or false, which are also valid top-level values,
+		// but are unsupported by JSONassert
+
 	}
 
 	@Test
 	public void tokenizeArrayElements() {
-		this.tokenizer = new Jackson2Tokenizer(this.jsonParser, true);
-
 		testTokenize(
 				singletonList("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"),
-				singletonList("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"));
+				singletonList("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"), true);
 
 		testTokenize(
 				asList("{\"foo\": \"foofoo\"",
 						", \"bar\": \"barbar\"}"),
-				singletonList("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"));
+				singletonList("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"), true);
 
 		testTokenize(
 				singletonList("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"),
 				asList("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}",
-						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}"));
+						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}"), true);
 
 		testTokenize(
 				singletonList("[{\"foo\": \"bar\"},{\"foo\": \"baz\"}]"),
 				asList("{\"foo\": \"bar\"}",
-						"{\"foo\": \"baz\"}"));
+						"{\"foo\": \"baz\"}"), true);
 
 		// SPR-15803: nested array
 		testTokenize(
@@ -126,19 +133,19 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 				asList(
 						"{\"id\":\"0\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}",
 						"{\"id\":\"1\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}",
-						"{\"id\":\"2\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}")
-		);
+						"{\"id\":\"2\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}"),
+				true);
 
 		// SPR-15803: nested array, no top-level array
 		testTokenize(
 				singletonList("{\"speakerIds\":[\"tastapod\"],\"language\":\"ENGLISH\"}"),
-				singletonList("{\"speakerIds\":[\"tastapod\"],\"language\":\"ENGLISH\"}"));
+				singletonList("{\"speakerIds\":[\"tastapod\"],\"language\":\"ENGLISH\"}"), true);
 
 		testTokenize(
 				asList("[{\"foo\": \"foofoo\", \"bar\"",
 						": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"),
 				asList("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}",
-						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}"));
+						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}"), true);
 
 		testTokenize(
 				asList("[",
@@ -150,15 +157,27 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 						"]"),
 				asList("{\"id\":1,\"name\":\"Robert\"}",
 						"{\"id\":2,\"name\":\"Raide\"}",
-						"{\"id\":3,\"name\":\"Ford\"}"));
+						"{\"id\":3,\"name\":\"Ford\"}"), true);
+
+		// SPR-16166: top-level JSON values
+		testTokenize(asList("\"foo", "bar\"")
+			,singletonList("\"foobar\""), true);
+
+		testTokenize(asList("12", "34")
+			,singletonList("1234"), true);
+
+		testTokenize(asList("12.", "34")
+			,singletonList("12.34"), true);
 	}
 
-	private void testTokenize(List<String> source, List<String> expected) {
+	private void testTokenize(List<String> source, List<String> expected, boolean tokenizeArrayElements) {
 		Flux<DataBuffer> sourceFlux = Flux.fromIterable(source)
 				.map(this::stringBuffer);
 
-		Flux<String> result = sourceFlux
-				.flatMap(this.tokenizer)
+		Flux<TokenBuffer> tokenBufferFlux =
+				Jackson2Tokenizer.tokenize(sourceFlux, jsonFactory, tokenizeArrayElements);
+
+		Flux<String> result = tokenBufferFlux
 				.map(tokenBuffer -> {
 					try {
 						TreeNode root = this.objectMapper.readTree(tokenBuffer.asParser());

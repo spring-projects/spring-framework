@@ -17,12 +17,10 @@
 package org.springframework.http.codec.json;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.lang.annotation.Annotation;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -89,15 +87,9 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	}
 
 	private Flux<TokenBuffer> tokenize(Publisher<DataBuffer> input, boolean tokenizeArrayElements) {
-		try {
-			JsonFactory factory = getObjectMapper().getFactory();
-			JsonParser parser = factory.createNonBlockingByteArrayParser();
-			Jackson2Tokenizer tokenizer = new Jackson2Tokenizer(parser, tokenizeArrayElements);
-			return Flux.from(input).flatMap(tokenizer).doFinally(t -> tokenizer.endOfInput());
-		}
-		catch (IOException ex) {
-			return Flux.error(new UncheckedIOException(ex));
-		}
+		Flux<DataBuffer> inputFlux = Flux.from(input);
+		JsonFactory factory = getObjectMapper().getFactory();
+		return Jackson2Tokenizer.tokenize(inputFlux, factory, tokenizeArrayElements);
 	}
 
 	private Flux<Object> decodeInternal(Flux<TokenBuffer> tokens, ResolvableType elementType,
