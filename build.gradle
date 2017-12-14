@@ -73,7 +73,7 @@ configure(allprojects) { project ->
 	compileKotlin {
 		kotlinOptions {
 			jvmTarget = "1.8"
-			freeCompilerArgs = ["-Xskip-runtime-version-check", "-Xjsr305=strict"]
+			freeCompilerArgs = ["-Xjsr305=strict"]
 			apiVersion = "1.1"
 			languageVersion = "1.1"
 		}
@@ -82,7 +82,7 @@ configure(allprojects) { project ->
 	compileTestKotlin {
 		kotlinOptions {
 			jvmTarget = "1.8"
-			freeCompilerArgs = ["-Xskip-runtime-version-check", "-Xjsr305=strict"]
+			freeCompilerArgs = ["-Xjsr305=strict"]
 		}
 	}
 
