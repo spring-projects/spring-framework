@@ -18,9 +18,6 @@ package org.springframework.core.codec;
 
 import java.util.Map;
 
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -32,9 +29,11 @@ import org.springframework.util.MimeTypeUtils;
  * Decoder for {@code byte} arrays.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ByteArrayDecoder extends AbstractDecoder<byte[]> {
+public class ByteArrayDecoder extends AbstractDataBufferDecoder<byte[]> {
+
 
 	public ByteArrayDecoder() {
 		super(MimeTypeUtils.ALL);
@@ -48,16 +47,13 @@ public class ByteArrayDecoder extends AbstractDecoder<byte[]> {
 	}
 
 	@Override
-	public Flux<byte[]> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+	protected byte[] decodeDataBuffer(DataBuffer dataBuffer, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return Flux.from(inputStream).map((dataBuffer) -> {
-			byte[] result = new byte[dataBuffer.readableByteCount()];
-			dataBuffer.read(result);
-			DataBufferUtils.release(dataBuffer);
-			return result ;
-		});
+		byte[] result = new byte[dataBuffer.readableByteCount()];
+		dataBuffer.read(result);
+		DataBufferUtils.release(dataBuffer);
+		return result;
 	}
-
 
 }

@@ -34,9 +34,11 @@ import org.springframework.util.MimeTypeUtils;
  * {@link org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer)}.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class DataBufferDecoder extends AbstractDecoder<DataBuffer> {
+public class DataBufferDecoder extends AbstractDataBufferDecoder<DataBuffer> {
+
 
 	public DataBufferDecoder() {
 		super(MimeTypeUtils.ALL);
@@ -54,6 +56,13 @@ public class DataBufferDecoder extends AbstractDecoder<DataBuffer> {
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		return Flux.from(inputStream);
+	}
+
+	@Override
+	protected DataBuffer decodeDataBuffer(DataBuffer buffer, ResolvableType elementType,
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
+		return buffer;
 	}
 
 }

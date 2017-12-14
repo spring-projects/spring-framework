@@ -26,7 +26,6 @@ import java.util.function.IntPredicate;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -49,7 +48,7 @@ import org.springframework.util.MimeTypeUtils;
  * @since 5.0
  * @see CharSequenceEncoder
  */
-public class StringDecoder extends AbstractDecoder<String> {
+public class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
@@ -84,16 +83,7 @@ public class StringDecoder extends AbstractDecoder<String> {
 		if (this.splitOnNewline) {
 			inputFlux = Flux.from(inputStream).flatMap(StringDecoder::splitOnNewline);
 		}
-		return inputFlux.map(buffer ->  decodeDataBuffer(buffer, mimeType));
-	}
-
-	@Override
-	public Mono<String> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
-
-		return Flux.from(inputStream)
-				.reduce(DataBuffer::write)
-				.map(buffer -> decodeDataBuffer(buffer, mimeType));
+		return super.decode(inputFlux, elementType, mimeType, hints);
 	}
 
 	private static Flux<DataBuffer> splitOnNewline(DataBuffer dataBuffer) {
@@ -113,7 +103,10 @@ public class StringDecoder extends AbstractDecoder<String> {
 		return Flux.fromIterable(results);
 	}
 
-	private String decodeDataBuffer(DataBuffer dataBuffer, @Nullable MimeType mimeType) {
+	@Override
+	protected String decodeDataBuffer(DataBuffer dataBuffer, ResolvableType elementType,
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
 		Charset charset = getCharset(mimeType);
 		CharBuffer charBuffer = charset.decode(dataBuffer.asByteBuffer());
 		DataBufferUtils.release(dataBuffer);
