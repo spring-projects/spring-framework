@@ -124,4 +124,16 @@ public class ResponseCreatorsTests {
 		assertEquals(0, StreamUtils.copyToByteArray(response.getBody()).length);
 	}
 
+	@Test
+	public void withStatusAndContent() throws Exception {
+		DefaultResponseCreator responseCreator =
+				MockRestResponseCreators.withStatus(HttpStatus.FORBIDDEN, "foo", MediaType.TEXT_PLAIN);
+		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
+
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+		assertEquals(response.getHeaders().size(), 1);
+		assertEquals(MediaType.TEXT_PLAIN, response.getHeaders().getContentType());
+		assertArrayEquals("foo".getBytes(), StreamUtils.copyToByteArray(response.getBody()));
+	}
+
 }
