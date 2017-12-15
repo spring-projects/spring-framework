@@ -229,7 +229,7 @@ SecurityManager securityManager = ...
 RouterFunction<ServerResponse> route = ...
 
 RouterFunction<ServerResponse> filteredRoute =
-	route.filter(request, next) -> {
+	route.filter((request, next) -> {
 		if (securityManager.allowAccessTo(request.path())) {
 			return next.handle(request);
 		}
