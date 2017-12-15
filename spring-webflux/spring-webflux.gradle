@@ -45,7 +45,7 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	testCompile("javax.xml.bind:jaxb-api:2.3.0")
-	testCompile("org.hibernate:hibernate-validator:6.0.5.Final")
+	testCompile("org.hibernate:hibernate-validator:6.0.6.Final")
 	testCompile "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 	testCompile("io.projectreactor:reactor-test")
 	testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")

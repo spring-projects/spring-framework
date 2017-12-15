@@ -17,7 +17,7 @@ dependencies {
 	testCompile(project(":spring-context"))
 	testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 	testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
-	testCompile("org.hibernate:hibernate-validator:6.0.5.Final")
+	testCompile("org.hibernate:hibernate-validator:6.0.6.Final")
 	testRuntime("org.ehcache:jcache:1.0.1")
 	testRuntime("org.ehcache:ehcache:3.4.0")
 	testRuntime("org.glassfish:javax.el:3.0.1-b08")

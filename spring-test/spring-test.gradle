@@ -66,7 +66,7 @@ dependencies {
 	testCompile("javax.interceptor:javax.interceptor-api:1.2.1")
 	testCompile("javax.mail:javax.mail-api:1.6.0")
 	testCompile("org.hibernate:hibernate-core:5.2.12.Final")
-	testCompile("org.hibernate:hibernate-validator:6.0.5.Final")
+	testCompile("org.hibernate:hibernate-validator:6.0.6.Final")
 	// Enable use of the JUnitPlatform Runner
 	testCompile("org.junit.platform:junit-platform-runner:${junitPlatformVersion}")
 	testCompile("org.junit.jupiter:junit-jupiter-params:${junitJupiterVersion}")
