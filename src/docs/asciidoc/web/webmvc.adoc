@@ -3151,6 +3151,9 @@ status code or exception type. Starting with Servlet 3 an error page does not ne
 mapped, which effectively means the specified location customizes the default Servlet
 container error page.
 
+Note that the actual location for the error page can be a JSP page or some other URL
+within the container including one handled through an `@Controller` method:
+
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3158,9 +3161,6 @@ container error page.
 		<location>/error</location>
 	</error-page>
 ----
-
-Note that the actual location for the error page can be a JSP page or some other URL
-within the container including one handled through an `@Controller` method:
 
 When writing error information, the status code and the error message set on the
 `HttpServletResponse` can be accessed through request attributes in a controller:
@@ -3674,7 +3674,7 @@ semantics of name generation for collections clearer:
 
 * An `x.y.User[]` array with zero or more `x.y.User` elements added will have the name
   `userList` generated.
-* An `x.y.Foo[]` array with zero or more `x.y.User` elements added will have the name
+* An `x.y.Foo[]` array with zero or more `x.y.Foo` elements added will have the name
   `fooList` generated.
 * A `java.util.ArrayList` with one or more `x.y.User` elements added will have the name
   `userList` generated.
