@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.OrderUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -53,6 +54,7 @@ public class ControllerAdviceBean implements Ordered {
 
 	private final Object bean;
 
+	@Nullable
 	private final BeanFactory beanFactory;
 
 	private final int order;
@@ -77,11 +79,11 @@ public class ControllerAdviceBean implements Ordered {
 	 * @param beanName the name of the bean
 	 * @param beanFactory a BeanFactory that can be used later to resolve the bean
 	 */
-	public ControllerAdviceBean(String beanName, BeanFactory beanFactory) {
+	public ControllerAdviceBean(String beanName, @Nullable BeanFactory beanFactory) {
 		this((Object) beanName, beanFactory);
 	}
 
-	private ControllerAdviceBean(Object bean, BeanFactory beanFactory) {
+	private ControllerAdviceBean(Object bean, @Nullable BeanFactory beanFactory) {
 		this.bean = bean;
 		this.beanFactory = beanFactory;
 		Class<?> beanType;
@@ -103,8 +105,8 @@ public class ControllerAdviceBean implements Ordered {
 			this.order = initOrderFromBean(bean);
 		}
 
-		ControllerAdvice annotation =
-				AnnotatedElementUtils.findMergedAnnotation(beanType, ControllerAdvice.class);
+		ControllerAdvice annotation = (beanType != null ?
+				AnnotatedElementUtils.findMergedAnnotation(beanType, ControllerAdvice.class) : null);
 
 		if (annotation != null) {
 			this.basePackages = initBasePackages(annotation);
@@ -133,17 +135,23 @@ public class ControllerAdviceBean implements Ordered {
 	 * <p>If the bean type is a CGLIB-generated class, the original
 	 * user-defined class is returned.
 	 */
+	@Nullable
 	public Class<?> getBeanType() {
-		Class<?> clazz = (this.bean instanceof String ?
-				this.beanFactory.getType((String) this.bean) : this.bean.getClass());
-		return ClassUtils.getUserClass(clazz);
+		Class<?> beanType = (this.bean instanceof String ?
+				obtainBeanFactory().getType((String) this.bean) : this.bean.getClass());
+		return (beanType != null ? ClassUtils.getUserClass(beanType) : null);
 	}
 
 	/**
 	 * Return a bean instance if necessary resolving the bean name through the BeanFactory.
 	 */
 	public Object resolveBean() {
-		return (this.bean instanceof String ? this.beanFactory.getBean((String) this.bean) : this.bean);
+		return (this.bean instanceof String ? obtainBeanFactory().getBean((String) this.bean) : this.bean);
+	}
+
+	private BeanFactory obtainBeanFactory() {
+		Assert.state(this.beanFactory != null, "No BeanFactory set");
+		return this.beanFactory;
 	}
 
 	/**
@@ -153,7 +161,7 @@ public class ControllerAdviceBean implements Ordered {
 	 * @see org.springframework.web.bind.annotation.ControllerAdvice
 	 * @since 4.0
 	 */
-	public boolean isApplicableToBeanType(Class<?> beanType) {
+	public boolean isApplicableToBeanType(@Nullable Class<?> beanType) {
 		if (!hasSelectors()) {
 			return true;
 		}
@@ -224,8 +232,12 @@ public class ControllerAdviceBean implements Ordered {
 		return (bean instanceof Ordered ? ((Ordered) bean).getOrder() : initOrderFromBeanType(bean.getClass()));
 	}
 
-	private static int initOrderFromBeanType(Class<?> beanType) {
-		return OrderUtils.getOrder(beanType, Ordered.LOWEST_PRECEDENCE);
+	private static int initOrderFromBeanType(@Nullable Class<?> beanType) {
+		Integer order = null;
+		if (beanType != null) {
+			order = OrderUtils.getOrder(beanType);
+		}
+		return (order != null ? order : Ordered.LOWEST_PRECEDENCE);
 	}
 
 	private static Set<String> initBasePackages(ControllerAdvice annotation) {

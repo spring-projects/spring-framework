@@ -26,6 +26,7 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -43,6 +44,7 @@ import org.springframework.util.ClassUtils;
 public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCandidateResolver
 		implements BeanFactoryAware {
 
+	@Nullable
 	private BeanFactory beanFactory;
 
 
@@ -51,6 +53,7 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 		this.beanFactory = beanFactory;
 	}
 
+	@Nullable
 	protected final BeanFactory getBeanFactory() {
 		return this.beanFactory;
 	}
@@ -62,7 +65,7 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 			// If explicitly false, do not proceed with any other checks...
 			return false;
 		}
-		return (descriptor == null || checkGenericTypeMatch(bdHolder, descriptor));
+		return checkGenericTypeMatch(bdHolder, descriptor);
 	}
 
 	/**
@@ -131,6 +134,7 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 		return dependencyType.isAssignableFrom(targetType);
 	}
 
+	@Nullable
 	protected RootBeanDefinition getResolvedDecoratedDefinition(RootBeanDefinition rbd) {
 		BeanDefinitionHolder decDef = rbd.getDecoratedDefinition();
 		if (decDef != null && this.beanFactory instanceof ConfigurableListableBeanFactory) {
@@ -145,6 +149,7 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 		return null;
 	}
 
+	@Nullable
 	protected ResolvableType getReturnTypeForFactoryMethod(RootBeanDefinition rbd, DependencyDescriptor descriptor) {
 		// Should typically be set for any kind of factory method, since the BeanFactory
 		// pre-resolves them before reaching out to the AutowireCandidateResolver...

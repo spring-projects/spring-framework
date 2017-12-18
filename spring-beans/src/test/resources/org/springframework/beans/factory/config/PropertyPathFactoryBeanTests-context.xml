@@ -57,6 +57,16 @@
 		<property name="friends">
 			<bean name="otb.spouse" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
 		</property>
-  </bean>
+	</bean>
+
+	<bean id="tbWithNullReference" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="spouse" ref="tb.spouse.spouse"/>
+	</bean>
+
+	<bean id="tbWithInnerNull" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="spouse">
+			<bean name="tb.spouse.spouse" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
+		</property>
+	</bean>
 
 </beans>

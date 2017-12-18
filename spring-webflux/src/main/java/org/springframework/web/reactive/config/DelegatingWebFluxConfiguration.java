@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,12 +86,14 @@ public class DelegatingWebFluxConfiguration extends WebFluxConfigurationSupport 
 
 	@Override
 	protected Validator getValidator() {
-		return this.configurers.getValidator().orElse(super.getValidator());
+		Validator validator = this.configurers.getValidator();
+		return (validator != null ? validator : super.getValidator());
 	}
 
 	@Override
 	protected MessageCodesResolver getMessageCodesResolver() {
-		return this.configurers.getMessageCodesResolver().orElse(super.getMessageCodesResolver());
+		MessageCodesResolver messageCodesResolver = this.configurers.getMessageCodesResolver();
+		return (messageCodesResolver != null ? messageCodesResolver : super.getMessageCodesResolver());
 	}
 
 	@Override

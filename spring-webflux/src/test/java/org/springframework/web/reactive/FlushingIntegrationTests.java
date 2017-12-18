@@ -32,12 +32,9 @@ import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTe
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
-import org.springframework.http.server.reactive.bootstrap.RxNettyHttpServer;
-import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Sebastien Deleuze
@@ -59,8 +56,8 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 	public void writeAndFlushWith() throws Exception {
 		Mono<String> result = this.webClient.get()
 				.uri("/write-and-flush")
-				.exchange()
-				.flatMapMany(response -> response.body(BodyExtractors.toFlux(String.class)))
+				.retrieve()
+				.bodyToFlux(String.class)
 				.takeUntil(s -> s.endsWith("data1"))
 				.reduce((s1, s2) -> s1 + s2);
 
@@ -74,20 +71,20 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 	public void writeAndAutoFlushOnComplete() {
 		Mono<String> result = this.webClient.get()
 				.uri("/write-and-complete")
-				.exchange()
-				.flatMapMany(response -> response.bodyToFlux(String.class))
+				.retrieve()
+				.bodyToFlux(String.class)
 				.reduce((s1, s2) -> s1 + s2);
 
 		try {
 			StepVerifier.create(result)
-					.consumeNextWith(value -> assertTrue(value.length() == 200000))
+					.consumeNextWith(value -> assertTrue(value.length() == 20000 * "0123456789".length()))
 					.expectComplete()
 					.verify(Duration.ofSeconds(5L));
 		}
 		catch (AssertionError err) {
-			if (err.getMessage().startsWith("VerifySubscriber timed out") &&
-					(this.server instanceof RxNettyHttpServer || this.server instanceof ReactorHttpServer)) {
-				// TODO: RxNetty usually times out here; Reactor does the same on Windows at least...
+			String os = System.getProperty("os.name").toLowerCase();
+			if (os.contains("windows") && err.getMessage().startsWith("VerifySubscriber timed out")) {
+				// TODO: Reactor usually times out on Windows ...
 				err.printStackTrace();
 				return;
 			}
@@ -97,26 +94,16 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 
 	@Test  // SPR-14992
 	public void writeAndAutoFlushBeforeComplete() {
-		Flux<String> result = this.webClient.get()
+		Mono<String> result = this.webClient.get()
 				.uri("/write-and-never-complete")
-				.exchange()
-				.flatMapMany(response -> response.bodyToFlux(String.class));
+				.retrieve()
+				.bodyToFlux(String.class)
+				.next();
 
-		try {
-			StepVerifier.create(result)
-					.expectNextMatches(s -> s.startsWith("0123456789"))
-					.thenCancel()
-					.verify(Duration.ofSeconds(5L));
-		}
-		catch (AssertionError err) {
-			if (err.getMessage().startsWith("VerifySubscriber timed out") &&
-					this.server instanceof RxNettyHttpServer) {
-				// TODO: RxNetty usually times out here
-				err.printStackTrace();
-				return;
-			}
-			throw err;
-		}
+		StepVerifier.create(result)
+				.expectNextMatches(s -> s.startsWith("0123456789"))
+				.expectComplete()
+				.verify(Duration.ofSeconds(5L));
 	}
 
 

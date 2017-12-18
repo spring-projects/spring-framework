@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.messaging.converter;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -57,12 +58,10 @@ public class GenericMessageConverter extends SimpleMessageConverter {
 
 
 	@Override
+	@Nullable
 	public Object fromMessage(Message<?> message, Class<?> targetClass) {
 		Object payload = message.getPayload();
-		if (targetClass == null) {
-			return payload;
-		}
-		if (payload != null && this.conversionService.canConvert(payload.getClass(), targetClass)) {
+		if (this.conversionService.canConvert(payload.getClass(), targetClass)) {
 			try {
 				return this.conversionService.convert(payload, targetClass);
 			}

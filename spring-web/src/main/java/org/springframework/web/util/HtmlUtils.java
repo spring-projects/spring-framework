@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,10 +79,8 @@ public abstract class HtmlUtils {
 	 * @since 4.1.2
 	 */
 	public static String htmlEscape(String input, String encoding) {
+		Assert.notNull(input, "Input is required");
 		Assert.notNull(encoding, "Encoding is required");
-		if (input == null) {
-			return null;
-		}
 		StringBuilder escaped = new StringBuilder(input.length() * 2);
 		for (int i = 0; i < input.length(); i++) {
 			char character = input.charAt(i);
@@ -130,10 +128,8 @@ public abstract class HtmlUtils {
 	 * @since 4.1.2
 	 */
 	public static String htmlEscapeDecimal(String input, String encoding) {
+		Assert.notNull(input, "Input is required");
 		Assert.notNull(encoding, "Encoding is required");
-		if (input == null) {
-			return null;
-		}
 		StringBuilder escaped = new StringBuilder(input.length() * 2);
 		for (int i = 0; i < input.length(); i++) {
 			char character = input.charAt(i);
@@ -182,10 +178,8 @@ public abstract class HtmlUtils {
 	 * @since 4.1.2
 	 */
 	public static String htmlEscapeHex(String input, String encoding) {
+		Assert.notNull(input, "Input is required");
 		Assert.notNull(encoding, "Encoding is required");
-		if (input == null) {
-			return null;
-		}
 		StringBuilder escaped = new StringBuilder(input.length() * 2);
 		for (int i = 0; i < input.length(); i++) {
 			char character = input.charAt(i);
@@ -221,9 +215,6 @@ public abstract class HtmlUtils {
 	 * @return the unescaped string
 	 */
 	public static String htmlUnescape(String input) {
-		if (input == null) {
-			return null;
-		}
 		return new HtmlCharacterEntityDecoder(characterEntityReferences, input).decode();
 	}
 

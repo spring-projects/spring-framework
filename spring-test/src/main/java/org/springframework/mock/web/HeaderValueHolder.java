@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -38,9 +39,11 @@ class HeaderValueHolder {
 	private final List<Object> values = new LinkedList<>();
 
 
-	public void setValue(Object value) {
+	public void setValue(@Nullable Object value) {
 		this.values.clear();
-		this.values.add(value);
+		if (value != null) {
+			this.values.add(value);
+		}
 	}
 
 	public void addValue(Object value) {
@@ -67,10 +70,12 @@ class HeaderValueHolder {
 		return Collections.unmodifiableList(stringList);
 	}
 
+	@Nullable
 	public Object getValue() {
 		return (!this.values.isEmpty() ? this.values.get(0) : null);
 	}
 
+	@Nullable
 	public String getStringValue() {
 		return (!this.values.isEmpty() ? String.valueOf(this.values.get(0)) : null);
 	}
@@ -88,6 +93,7 @@ class HeaderValueHolder {
 	 * @return the corresponding HeaderValueHolder,
 	 * or {@code null} if none found
 	 */
+	@Nullable
 	public static HeaderValueHolder getByName(Map<String, HeaderValueHolder> headers, String name) {
 		Assert.notNull(name, "Header name must not be null");
 		for (String headerName : headers.keySet()) {

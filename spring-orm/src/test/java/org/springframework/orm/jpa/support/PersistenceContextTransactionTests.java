@@ -27,6 +27,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -69,7 +70,7 @@ public class PersistenceContextTransactionTests {
 		@SuppressWarnings("serial")
 		PersistenceAnnotationBeanPostProcessor pabpp = new PersistenceAnnotationBeanPostProcessor() {
 			@Override
-			protected EntityManagerFactory findEntityManagerFactory(String unitName, String requestingBeanName) {
+			protected EntityManagerFactory findEntityManagerFactory(@Nullable String unitName, String requestingBeanName) {
 				return factory;
 			}
 		};

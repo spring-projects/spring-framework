@@ -83,6 +83,7 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.tests.sample.beans.DependenciesBean;
@@ -3120,7 +3121,7 @@ public class DefaultListableBeanFactoryTests {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public Object convertIfNecessary(Object value, Class requiredType) {
+		public Object convertIfNecessary(Object value, @Nullable Class requiredType) {
 			if (value instanceof String && Float.class.isAssignableFrom(requiredType)) {
 				try {
 					return new Float(this.numberFormat.parse((String) value).floatValue());
@@ -3139,13 +3140,13 @@ public class DefaultListableBeanFactoryTests {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public Object convertIfNecessary(Object value, Class requiredType, MethodParameter methodParam) {
+		public Object convertIfNecessary(Object value, @Nullable Class requiredType, @Nullable MethodParameter methodParam) {
 			return convertIfNecessary(value, requiredType);
 		}
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public Object convertIfNecessary(Object value, Class requiredType, Field field) {
+		public Object convertIfNecessary(Object value, @Nullable Class requiredType, @Nullable Field field) {
 			return convertIfNecessary(value, requiredType);
 		}
 	}

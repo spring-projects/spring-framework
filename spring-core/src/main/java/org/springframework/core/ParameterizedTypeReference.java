@@ -53,6 +53,10 @@ public abstract class ParameterizedTypeReference<T> {
 		this.type = parameterizedType.getActualTypeArguments()[0];
 	}
 
+	private ParameterizedTypeReference(Type type) {
+		this.type = type;
+	}
+
 
 	public Type getType() {
 		return this.type;
@@ -74,6 +78,19 @@ public abstract class ParameterizedTypeReference<T> {
 		return "ParameterizedTypeReference<" + this.type + ">";
 	}
 
+
+	/**
+	 * Build a {@code ParameterizedTypeReference} wrapping the given type.
+	 * @param type a generic type (possibly obtained via reflection,
+	 * e.g. from {@link java.lang.reflect.Method#getGenericReturnType()})
+	 * @return a corresponding reference which may be passed into
+	 * {@code ParameterizedTypeReference}-accepting methods
+	 * @since 4.3.12
+	 */
+	public static <T> ParameterizedTypeReference<T> forType(Type type) {
+		return new ParameterizedTypeReference<T>(type) {
+		};
+	}
 
 	private static Class<?> findParameterizedTypeReferenceSubclass(Class<?> child) {
 		Class<?> parent = child.getSuperclass();

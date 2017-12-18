@@ -18,6 +18,7 @@ package org.springframework.transaction.support;
 
 import java.util.Date;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionTimedOutException;
 
 /**
@@ -38,6 +39,7 @@ public abstract class ResourceHolderSupport implements ResourceHolder {
 
 	private boolean rollbackOnly = false;
 
+	@Nullable
 	private Date deadline;
 
 	private int referenceCount = 0;
@@ -111,6 +113,7 @@ public abstract class ResourceHolderSupport implements ResourceHolder {
 	 * Return the expiration deadline of this object.
 	 * @return the deadline as Date object
 	 */
+	@Nullable
 	public Date getDeadline() {
 		return this.deadline;
 	}

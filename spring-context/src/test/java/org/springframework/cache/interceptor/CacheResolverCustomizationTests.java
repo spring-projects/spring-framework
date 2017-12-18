@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 import static org.junit.Assert.*;
@@ -57,13 +58,13 @@ public class CacheResolverCustomizationTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		this.cacheManager = context.getBean("cacheManager", CacheManager.class);
 		this.anotherCacheManager = context.getBean("anotherCacheManager", CacheManager.class);
-
 		this.simpleService = context.getBean(SimpleService.class);
 	}
+
 
 	@Test
 	public void noCustomization() {
@@ -161,12 +162,6 @@ public class CacheResolverCustomizationTests {
 			return CacheTestUtils.createSimpleCacheManager("default", "primary", "secondary");
 		}
 
-		@Override
-		@Bean
-		public KeyGenerator keyGenerator() {
-			return null;
-		}
-
 		@Bean
 		public CacheManager anotherCacheManager() {
 			return CacheTestUtils.createSimpleCacheManager("default", "primary", "secondary");
@@ -261,6 +256,7 @@ public class CacheResolverCustomizationTests {
 		}
 
 		@Override
+		@Nullable
 		protected Collection<String> getCacheNames(CacheOperationInvocationContext<?> context) {
 			String cacheName = (String) context.getArgs()[1];
 			return Collections.singleton(cacheName);
@@ -275,6 +271,7 @@ public class CacheResolverCustomizationTests {
 		}
 
 		@Override
+		@Nullable
 		protected Collection<String> getCacheNames(CacheOperationInvocationContext<?> context) {
 			return null;
 		}

@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link javax.servlet.http.HttpServletRequest} wrapper that caches all content read from
@@ -53,10 +54,13 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 
 	private final ByteArrayOutputStream cachedContent;
 
+	@Nullable
 	private final Integer contentCacheLimit;
 
+	@Nullable
 	private ServletInputStream inputStream;
 
+	@Nullable
 	private BufferedReader reader;
 
 

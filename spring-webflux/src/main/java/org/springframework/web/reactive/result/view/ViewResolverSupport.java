@@ -21,19 +21,19 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.Ordered;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
  * Base class for {@code ViewResolver} implementations with shared properties.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 5.0
  */
-public abstract class ViewResolverSupport implements ApplicationContextAware, Ordered {
+public abstract class ViewResolverSupport implements Ordered {
 
 	public static final MediaType DEFAULT_CONTENT_TYPE = MediaType.parseMediaType("text/html;charset=UTF-8");
 
@@ -41,8 +41,6 @@ public abstract class ViewResolverSupport implements ApplicationContextAware, Or
 	private List<MediaType> mediaTypes = new ArrayList<>(4);
 
 	private Charset defaultCharset = StandardCharsets.UTF_8;
-
-	private ApplicationContext applicationContext;
 
 	private int order = Integer.MAX_VALUE;
 
@@ -56,7 +54,7 @@ public abstract class ViewResolverSupport implements ApplicationContextAware, Or
 	 * Set the supported media types for this view.
 	 * Default is "text/html;charset=UTF-8".
 	 */
-	public void setSupportedMediaTypes(List<MediaType> supportedMediaTypes) {
+	public void setSupportedMediaTypes(@Nullable List<MediaType> supportedMediaTypes) {
 		Assert.notEmpty(supportedMediaTypes, "MediaType List must not be empty");
 		this.mediaTypes.clear();
 		if (supportedMediaTypes != null) {
@@ -90,18 +88,8 @@ public abstract class ViewResolverSupport implements ApplicationContextAware, Or
 	}
 
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
-
-	public ApplicationContext getApplicationContext() {
-		return this.applicationContext;
-	}
-
 	/**
-	 * Set the order in which this {@link ViewResolver}
-	 * is evaluated.
+	 * Set the order in which this {@link ViewResolver} is evaluated.
 	 */
 	public void setOrder(int order) {
 		this.order = order;

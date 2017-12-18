@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.CloseStatus;
@@ -47,6 +48,7 @@ import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
  */
 public class WebSocketServerSockJsSession extends AbstractSockJsSession implements NativeWebSocketSession {
 
+	@Nullable
 	private WebSocketSession webSocketSession;
 
 	private volatile boolean openFrameSent;
@@ -61,90 +63,89 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 
 
 	public WebSocketServerSockJsSession(String id, SockJsServiceConfig config,
-			WebSocketHandler handler, Map<String, Object> attributes) {
+			WebSocketHandler handler, @Nullable Map<String, Object> attributes) {
 
 		super(id, config, handler, attributes);
 	}
 
 
 	@Override
+	@Nullable
 	public URI getUri() {
-		checkDelegateSessionInitialized();
+		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getUri();
 	}
 
 	@Override
 	public HttpHeaders getHandshakeHeaders() {
-		checkDelegateSessionInitialized();
+		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getHandshakeHeaders();
 	}
 
 	@Override
 	public Principal getPrincipal() {
-		checkDelegateSessionInitialized();
+		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getPrincipal();
 	}
 
 	@Override
 	public InetSocketAddress getLocalAddress() {
-		checkDelegateSessionInitialized();
+		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getLocalAddress();
 	}
 
 	@Override
 	public InetSocketAddress getRemoteAddress() {
-		checkDelegateSessionInitialized();
+		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getRemoteAddress();
 	}
 
 	@Override
 	public String getAcceptedProtocol() {
-		checkDelegateSessionInitialized();
+		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getAcceptedProtocol();
 	}
 
 	@Override
 	public void setTextMessageSizeLimit(int messageSizeLimit) {
-		checkDelegateSessionInitialized();
+		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		this.webSocketSession.setTextMessageSizeLimit(messageSizeLimit);
 	}
 
 	@Override
 	public int getTextMessageSizeLimit() {
-		checkDelegateSessionInitialized();
+		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getTextMessageSizeLimit();
 	}
 
 	@Override
 	public void setBinaryMessageSizeLimit(int messageSizeLimit) {
-		checkDelegateSessionInitialized();
+		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		this.webSocketSession.setBinaryMessageSizeLimit(messageSizeLimit);
 	}
 
 	@Override
 	public int getBinaryMessageSizeLimit() {
-		checkDelegateSessionInitialized();
+		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getBinaryMessageSizeLimit();
 	}
 
 	@Override
 	public List<WebSocketExtension> getExtensions() {
-		checkDelegateSessionInitialized();
-		return this.webSocketSession.getExtensions();
-	}
-
-	private void checkDelegateSessionInitialized() {
 		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
+		return this.webSocketSession.getExtensions();
 	}
 
 	@Override
 	public Object getNativeSession() {
+		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return (this.webSocketSession instanceof NativeWebSocketSession ?
-				((NativeWebSocketSession) this.webSocketSession).getNativeSession() : null);
+				((NativeWebSocketSession) this.webSocketSession).getNativeSession() : this.webSocketSession);
 	}
 
 	@Override
-	public <T> T getNativeSession(Class<T> requiredType) {
+	@Nullable
+	public <T> T getNativeSession(@Nullable Class<T> requiredType) {
 		return (this.webSocketSession instanceof NativeWebSocketSession ?
 				((NativeWebSocketSession) this.webSocketSession).getNativeSession(requiredType) : null);
 	}
@@ -190,7 +191,9 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 			tryCloseWithSockJsTransportError(ex, CloseStatus.BAD_DATA);
 			return;
 		}
-		delegateMessages(messages);
+		if (messages != null) {
+			delegateMessages(messages);
+		}
 	}
 
 	@Override
@@ -213,6 +216,7 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 
 	@Override
 	protected void writeFrameInternal(SockJsFrame frame) throws IOException {
+		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		if (logger.isTraceEnabled()) {
 			logger.trace("Writing " + frame);
 		}
@@ -226,7 +230,9 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 			synchronized (this.disconnectLock) {
 				if (isActive()) {
 					this.disconnected = true;
-					this.webSocketSession.close(status);
+					if (this.webSocketSession != null) {
+						this.webSocketSession.close(status);
+					}
 				}
 			}
 		}

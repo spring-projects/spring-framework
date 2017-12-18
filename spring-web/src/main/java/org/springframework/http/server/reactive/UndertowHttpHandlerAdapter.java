@@ -16,6 +16,8 @@
 
 package org.springframework.http.server.reactive;
 
+import java.io.IOException;
+
 import io.undertow.server.HttpServerExchange;
 
 import org.apache.commons.logging.Log;
@@ -25,6 +27,7 @@ import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
 /**
@@ -67,6 +70,10 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 		ServerHttpRequest request = new UndertowServerHttpRequest(exchange, getDataBufferFactory());
 		ServerHttpResponse response = new UndertowServerHttpResponse(exchange, getDataBufferFactory());
 
+		if (HttpMethod.HEAD.equals(request.getMethod())) {
+			response = new HttpHeadResponseDecorator(response);
+		}
+
 		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber(exchange);
 		this.httpHandler.handle(request, response).subscribe(resultSubscriber);
 	}
@@ -93,16 +100,26 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 		@Override
 		public void onError(Throwable ex) {
-			logger.error("Could not complete request", ex);
-			if (!this.exchange.isResponseStarted() && this.exchange.getStatusCode() < 500) {
-				this.exchange.setStatusCode(500);
+			logger.error("Handling completed with error", ex);
+			if (this.exchange.isResponseStarted()) {
+				try {
+					logger.debug("Closing connection");
+					this.exchange.getConnection().close();
+				}
+				catch (IOException e) {
+					// Ignore
+				}
 			}
-			this.exchange.endExchange();
+			else {
+				logger.debug("Setting response status code to 500");
+				this.exchange.setStatusCode(500);
+				this.exchange.endExchange();
+			}
 		}
 
 		@Override
 		public void onComplete() {
-			logger.debug("Successfully completed request");
+			logger.debug("Handling completed with success");
 			this.exchange.endExchange();
 		}
 	}

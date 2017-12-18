@@ -31,6 +31,7 @@ import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
 import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
@@ -48,24 +49,30 @@ import org.springframework.util.StringValueResolver;
  */
 public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint implements BeanFactoryAware {
 
+	@Nullable
 	private Object bean;
 
+	@Nullable
 	private Method method;
 
+	@Nullable
 	private Method mostSpecificMethod;
 
+	@Nullable
 	private MessageHandlerMethodFactory messageHandlerMethodFactory;
 
+	@Nullable
 	private StringValueResolver embeddedValueResolver;
 
 
 	/**
 	 * Set the actual bean instance to invoke this endpoint method on.
 	 */
-	public void setBean(Object bean) {
+	public void setBean(@Nullable Object bean) {
 		this.bean = bean;
 	}
 
+	@Nullable
 	public Object getBean() {
 		return this.bean;
 	}
@@ -73,10 +80,11 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 	/**
 	 * Set the method to invoke for processing a message managed by this endpoint.
 	 */
-	public void setMethod(Method method) {
+	public void setMethod(@Nullable Method method) {
 		this.method = method;
 	}
 
+	@Nullable
 	public Method getMethod() {
 		return this.method;
 	}
@@ -87,20 +95,22 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 	 * (if annotated itself, that is, if not just annotated in an interface).
 	 * @since 4.2.3
 	 */
-	public void setMostSpecificMethod(Method mostSpecificMethod) {
+	public void setMostSpecificMethod(@Nullable Method mostSpecificMethod) {
 		this.mostSpecificMethod = mostSpecificMethod;
 	}
 
+	@Nullable
 	public Method getMostSpecificMethod() {
 		if (this.mostSpecificMethod != null) {
 			return this.mostSpecificMethod;
 		}
-		else if (AopUtils.isAopProxy(this.bean)) {
+		Method method = getMethod();
+		if (method != null && AopUtils.isAopProxy(this.bean)) {
 			Class<?> target = AopProxyUtils.ultimateTargetClass(this.bean);
-			return AopUtils.getMostSpecificMethod(getMethod(), target);
+			return AopUtils.getMostSpecificMethod(method, target);
 		}
 		else {
-			return getMethod();
+			return method;
 		}
 	}
 
@@ -116,7 +126,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 	/**
 	 * Set a value resolver for embedded placeholders and expressions.
 	 */
-	public void setEmbeddedValueResolver(StringValueResolver embeddedValueResolver) {
+	public void setEmbeddedValueResolver(@Nullable StringValueResolver embeddedValueResolver) {
 		this.embeddedValueResolver = embeddedValueResolver;
 	}
 
@@ -124,7 +134,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 	 * Set the {@link BeanFactory} to use to resolve expressions (may be {@code null}).
 	 */
 	@Override
-	public void setBeanFactory(BeanFactory beanFactory) {
+	public void setBeanFactory(@Nullable BeanFactory beanFactory) {
 		if (this.embeddedValueResolver == null && beanFactory instanceof ConfigurableBeanFactory) {
 			this.embeddedValueResolver = new EmbeddedValueResolver((ConfigurableBeanFactory) beanFactory);
 		}
@@ -174,8 +184,12 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 	/**
 	 * Return the default response destination, if any.
 	 */
+	@Nullable
 	protected String getDefaultResponseDestination() {
 		Method specificMethod = getMostSpecificMethod();
+		if (specificMethod == null) {
+			return null;
+		}
 		SendTo ann = getSendTo(specificMethod);
 		if (ann != null) {
 			Object[] destinations = ann.value();
@@ -188,6 +202,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 		return null;
 	}
 
+	@Nullable
 	private SendTo getSendTo(Method specificMethod) {
 		SendTo ann = AnnotatedElementUtils.findMergedAnnotation(specificMethod, SendTo.class);
 		if (ann == null) {
@@ -196,6 +211,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 		return ann;
 	}
 
+	@Nullable
 	private String resolve(String value) {
 		return (this.embeddedValueResolver != null ? this.embeddedValueResolver.resolveStringValue(value) : value);
 	}

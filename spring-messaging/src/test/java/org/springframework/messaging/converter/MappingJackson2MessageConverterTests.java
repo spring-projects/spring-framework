@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -33,8 +34,16 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.MimeType;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test fixture for {@link org.springframework.messaging.converter.MappingJackson2MessageConverter}.
@@ -47,8 +56,10 @@ public class MappingJackson2MessageConverterTests {
 	@Test
 	public void defaultConstructor() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
-		assertThat(converter.getSupportedMimeTypes(), contains(new MimeType("application", "json", StandardCharsets.UTF_8)));
-		assertFalse(converter.getObjectMapper().getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
+		assertThat(converter.getSupportedMimeTypes(),
+				contains(new MimeType("application", "json", StandardCharsets.UTF_8)));
+		assertFalse(converter.getObjectMapper().getDeserializationConfig()
+				.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
 	}
 
 	@Test  // SPR-12724
@@ -56,7 +67,8 @@ public class MappingJackson2MessageConverterTests {
 		MimeType mimetype = new MimeType("application", "xml", StandardCharsets.UTF_8);
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter(mimetype);
 		assertThat(converter.getSupportedMimeTypes(), contains(mimetype));
-		assertFalse(converter.getObjectMapper().getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
+		assertFalse(converter.getObjectMapper().getDeserializationConfig()
+				.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
 	}
 
 	@Test  // SPR-12724
@@ -65,13 +77,20 @@ public class MappingJackson2MessageConverterTests {
 		MimeType xmlMimetype = new MimeType("application", "xml", StandardCharsets.UTF_8);
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter(jsonMimetype, xmlMimetype);
 		assertThat(converter.getSupportedMimeTypes(), contains(jsonMimetype, xmlMimetype));
-		assertFalse(converter.getObjectMapper().getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
+		assertFalse(converter.getObjectMapper().getDeserializationConfig()
+				.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
 	}
 
 	@Test
 	public void fromMessage() throws Exception {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
-		String payload = "{\"bytes\":\"AQI=\",\"array\":[\"Foo\",\"Bar\"],\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
+		String payload = "{" +
+				"\"bytes\":\"AQI=\"," +
+				"\"array\":[\"Foo\",\"Bar\"]," +
+				"\"number\":42," +
+				"\"string\":\"Foo\"," +
+				"\"bool\":true," +
+				"\"fraction\":42.0}";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
 		MyBean actual = (MyBean) converter.fromMessage(message, MyBean.class);
 
@@ -115,6 +134,20 @@ public class MappingJackson2MessageConverterTests {
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
 		MyBean myBean = (MyBean)converter.fromMessage(message, MyBean.class);
 		assertEquals("string", myBean.getString());
+	}
+
+	@Test // SPR-16252
+	public void fromMessageToList() throws Exception {
+		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
+		String payload = "[1, 2, 3, 4, 5, 6, 7, 8, 9]";
+		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
+
+		Method method = getClass().getDeclaredMethod("handleList", List.class);
+		MethodParameter param = new MethodParameter(method, 0);
+		Object actual = converter.fromMessage(message, List.class, param);
+
+		assertNotNull(actual);
+		assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L), actual);
 	}
 
 	@Test
@@ -206,6 +239,8 @@ public class MappingJackson2MessageConverterTests {
 
 	public void jsonViewPayload(@JsonView(MyJacksonView2.class) JacksonViewBean payload) {
 	}
+
+	void handleList(List<Long> payload) {}
 
 
 	public static class MyBean {

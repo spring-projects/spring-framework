@@ -18,10 +18,10 @@ package org.springframework.web.reactive.function;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown to indicate that a {@code Content-Type} is not supported.
@@ -32,6 +32,7 @@ import org.springframework.http.MediaType;
 @SuppressWarnings("serial")
 public class UnsupportedMediaTypeException extends NestedRuntimeException {
 
+	@Nullable
 	private final MediaType contentType;
 
 	private final List<MediaType> supportedMediaTypes;
@@ -49,18 +50,20 @@ public class UnsupportedMediaTypeException extends NestedRuntimeException {
 	/**
 	 * Constructor for when the Content-Type can be parsed but is not supported.
 	 */
-	public UnsupportedMediaTypeException(MediaType contentType, List<MediaType> supportedMediaTypes) {
-		super("Content type '" + contentType + "' not supported");
+	public UnsupportedMediaTypeException(@Nullable MediaType contentType, List<MediaType> supportedMediaTypes) {
+		super("Content type '" + (contentType != null ? contentType : "") + "' not supported");
 		this.contentType = contentType;
 		this.supportedMediaTypes = Collections.unmodifiableList(supportedMediaTypes);
 	}
 
 
 	/**
-	 * Return the request Content-Type header if it was parsed successfully.
+	 * Return the request Content-Type header if it was parsed successfully,
+	 * or {@code null} otherwise.
 	 */
-	public Optional<MediaType> getContentType() {
-		return Optional.ofNullable(this.contentType);
+	@Nullable
+	public MediaType getContentType() {
+		return this.contentType;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.cache.interceptor;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Class describing a cache 'put' operation.
  *
@@ -26,6 +28,7 @@ package org.springframework.cache.interceptor;
  */
 public class CachePutOperation extends CacheOperation {
 
+	@Nullable
 	private final String unless;
 
 
@@ -38,6 +41,7 @@ public class CachePutOperation extends CacheOperation {
 	}
 
 
+	@Nullable
 	public String getUnless() {
 		return this.unless;
 	}
@@ -48,6 +52,7 @@ public class CachePutOperation extends CacheOperation {
 	 */
 	public static class Builder extends CacheOperation.Builder {
 
+		@Nullable
 		private String unless;
 
 		public void setUnless(String unless) {

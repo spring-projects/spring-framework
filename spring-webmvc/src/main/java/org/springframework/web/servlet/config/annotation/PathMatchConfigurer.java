@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -37,14 +38,19 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public class PathMatchConfigurer {
 
+	@Nullable
 	private Boolean suffixPatternMatch;
 
+	@Nullable
 	private Boolean trailingSlashMatch;
 
+	@Nullable
 	private Boolean registeredSuffixPatternMatch;
 
+	@Nullable
 	private UrlPathHelper urlPathHelper;
 
+	@Nullable
 	private PathMatcher pathMatcher;
 
 
@@ -78,9 +84,7 @@ public class PathMatchConfigurer {
 	 * <p>By default this is set to "false".
 	 * @see WebMvcConfigurer#configureContentNegotiation
 	 */
-	public PathMatchConfigurer setUseRegisteredSuffixPatternMatch(
-			Boolean registeredSuffixPatternMatch) {
-
+	public PathMatchConfigurer setUseRegisteredSuffixPatternMatch(Boolean registeredSuffixPatternMatch) {
 		this.registeredSuffixPatternMatch = registeredSuffixPatternMatch;
 		return this;
 	}
@@ -106,22 +110,28 @@ public class PathMatchConfigurer {
 		return this;
 	}
 
+
+	@Nullable
 	public Boolean isUseSuffixPatternMatch() {
 		return this.suffixPatternMatch;
 	}
 
+	@Nullable
 	public Boolean isUseTrailingSlashMatch() {
 		return this.trailingSlashMatch;
 	}
 
+	@Nullable
 	public Boolean isUseRegisteredSuffixPatternMatch() {
 		return this.registeredSuffixPatternMatch;
 	}
 
+	@Nullable
 	public UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}
 
+	@Nullable
 	public PathMatcher getPathMatcher() {
 		return this.pathMatcher;
 	}

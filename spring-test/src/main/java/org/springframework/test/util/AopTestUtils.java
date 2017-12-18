@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
  * {@link org.springframework.aop.framework.AopProxyUtils AopProxyUtils}.
  *
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 4.2
  * @see org.springframework.aop.support.AopUtils
  * @see org.springframework.aop.framework.AopProxyUtils
@@ -54,7 +55,10 @@ public abstract class AopTestUtils {
 		Assert.notNull(candidate, "Candidate must not be null");
 		try {
 			if (AopUtils.isAopProxy(candidate) && candidate instanceof Advised) {
-				return (T) ((Advised) candidate).getTargetSource().getTarget();
+				Object target = ((Advised) candidate).getTargetSource().getTarget();
+				if (target != null) {
+					return (T) target;
+				}
 			}
 		}
 		catch (Throwable ex) {
@@ -83,7 +87,10 @@ public abstract class AopTestUtils {
 		Assert.notNull(candidate, "Candidate must not be null");
 		try {
 			if (AopUtils.isAopProxy(candidate) && candidate instanceof Advised) {
-				return (T) getUltimateTargetObject(((Advised) candidate).getTargetSource().getTarget());
+				Object target = ((Advised) candidate).getTargetSource().getTarget();
+				if (target != null) {
+					return (T) getUltimateTargetObject(target);
+				}
 			}
 		}
 		catch (Throwable ex) {

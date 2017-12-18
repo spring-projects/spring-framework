@@ -26,6 +26,7 @@ import org.junit.rules.ExpectedException;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -303,7 +304,7 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 	public static class SerializableTransactionManager implements PlatformTransactionManager, Serializable {
 
 		@Override
-		public TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {
+		public TransactionStatus getTransaction(@Nullable TransactionDefinition definition) throws TransactionException {
 			throw new UnsupportedOperationException();
 		}
 

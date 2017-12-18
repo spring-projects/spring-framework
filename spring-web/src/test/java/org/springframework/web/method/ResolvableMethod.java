@@ -54,7 +54,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.ValueConstants;
 
-import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.*;
 
 /**
  * Convenience class to resolve method parameters from hints.
@@ -238,9 +238,8 @@ public class ResolvableMethod {
 	}
 
 	private static ResolvableType toResolvableType(Class<?> type, Class<?>... generics) {
-		return ObjectUtils.isEmpty(generics) ?
-				ResolvableType.forClass(type) :
-				ResolvableType.forClassWithGenerics(type, generics);
+		return (ObjectUtils.isEmpty(generics) ? ResolvableType.forClass(type) :
+				ResolvableType.forClassWithGenerics(type, generics));
 	}
 
 	private static ResolvableType toResolvableType(Class<?> type, ResolvableType generic, ResolvableType... generics) {

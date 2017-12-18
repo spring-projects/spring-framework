@@ -13,246 +13,148 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.accept;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.springframework.http.MediaType;
-import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
-
+import org.springframework.lang.Nullable;
 
 /**
- * Factory to create a {@link CompositeContentTypeResolver} and configure it with
- * one or more {@link RequestedContentTypeResolver} instances with build style
- * methods. The following table shows methods, resulting strategy instances, and
- * if in use by default:
+ * Builder for a composite {@link RequestedContentTypeResolver} that delegates
+ * to other resolvers each implementing a different strategy to determine the
+ * requested content type -- e.g. Accept header, query parameter, or other.
  *
- * <table>
- * <tr>
- *     <th>Property Setter</th>
- *     <th>Underlying Strategy</th>
- *     <th>Default Setting</th>
- * </tr>
- * <tr>
- *     <td>{@link #favorPathExtension}</td>
- *     <td>{@link PathExtensionContentTypeResolver Path Extension resolver}</td>
- *     <td>On</td>
- * </tr>
- * <tr>
- *     <td>{@link #favorParameter}</td>
- *     <td>{@link ParameterContentTypeResolver Parameter resolver}</td>
- *     <td>Off</td>
- * </tr>
- * <tr>
- *     <td>{@link #ignoreAcceptHeader}</td>
- *     <td>{@link HeaderContentTypeResolver Header resolver}</td>
- *     <td>Off</td>
- * </tr>
- * <tr>
- *     <td>{@link #defaultContentType}</td>
- *     <td>{@link FixedContentTypeResolver Fixed content resolver}</td>
- *     <td>Not set</td>
- * </tr>
- * <tr>
- *     <td>{@link #defaultContentTypeResolver}</td>
- *     <td>{@link RequestedContentTypeResolver}</td>
- *     <td>Not set</td>
- * </tr>
- * </table>
+ * <p>Use builder methods to add resolvers in the desired order. For a given
+ * request he first resolver to return a list that is not empty and does not
+ * consist of just {@link MediaType#ALL}, will be used.
  *
- * <p>The order in which resolvers are configured is fixed. Config methods may
- * only turn individual resolvers on or off. If you need a custom order for any
- * reason simply instantiate {@code {@link CompositeContentTypeResolver}}
- * directly.
- *
- * <p>For the path extension and parameter resolvers you may explicitly add
- * {@link #mediaTypes(Map)}. This will be used to resolve path extensions or a
- * parameter value such as "json" to a media type such as "application/json".
- *
- * <p>The path extension strategy will also use
- * {@link org.springframework.http.MediaTypeFactory} to resolve a path extension
- * to a MediaType.
+ * <p>By default, if no resolvers are explicitly configured, the builder will
+ * add {@link HeaderContentTypeResolver}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class RequestedContentTypeResolverBuilder {
 
-	private boolean favorPathExtension = true;
-
-	private boolean favorParameter = false;
-
-	private boolean ignoreAcceptHeader = false;
-
-	private Map<String, MediaType> mediaTypes = new HashMap<>();
-
-	private boolean ignoreUnknownPathExtensions = true;
-
-	private Boolean useRegisteredExtensionsOnly;
-
-	private String parameterName = "format";
-
-	private RequestedContentTypeResolver contentTypeResolver;
+	private final List<Supplier<RequestedContentTypeResolver>> candidates = new ArrayList<>();
 
 
 	/**
-	 * Whether the path extension in the URL path should be used to determine
-	 * the requested media type.
-	 * <p>By default this is set to {@code true} in which case a request
-	 * for {@code /hotels.pdf} will be interpreted as a request for
-	 * {@code "application/pdf"} regardless of the 'Accept' header.
+	 * Add a resolver to get the requested content type from a query parameter.
+	 * By default the query parameter name is {@code "format"}.
 	 */
-	public RequestedContentTypeResolverBuilder favorPathExtension(boolean favorPathExtension) {
-		this.favorPathExtension = favorPathExtension;
-		return this;
+	public ParameterResolverConfigurer parameterResolver() {
+		ParameterResolverConfigurer parameterBuilder = new ParameterResolverConfigurer();
+		this.candidates.add(parameterBuilder::createResolver);
+		return parameterBuilder;
 	}
 
 	/**
-	 * Add a mapping from a key, extracted from a path extension or a query
-	 * parameter, to a MediaType. This is required in order for the parameter
-	 * strategy to work. Any extensions explicitly registered here are also
-	 * whitelisted for the purpose of Reflected File Download attack detection
-	 * (see Spring Framework reference documentation for more details on RFD
-	 * attack protection).
-	 * <p>The path extension strategy will also use the
-	 * {@link org.springframework.http.MediaTypeFactory} to resolve path
-	 * extensions.
-	 * @param mediaTypes media type mappings
+	 * Add resolver to get the requested content type from the
+	 * {@literal "Accept"} header.
 	 */
-	public RequestedContentTypeResolverBuilder mediaTypes(Map<String, MediaType> mediaTypes) {
-		if (!CollectionUtils.isEmpty(mediaTypes)) {
-			for (Map.Entry<String, MediaType> entry : mediaTypes.entrySet()) {
-				String extension = entry.getKey().toLowerCase(Locale.ENGLISH);
-				this.mediaTypes.put(extension, entry.getValue());
+	public void headerResolver() {
+		this.candidates.add(HeaderContentTypeResolver::new);
+	}
+
+	/**
+	 * Add resolver that returns a fixed set of media types.
+	 * @param mediaTypes the media types to use
+	 */
+	public void fixedResolver(MediaType... mediaTypes) {
+		this.candidates.add(() -> new FixedContentTypeResolver(Arrays.asList(mediaTypes)));
+	}
+
+	/**
+	 * Add a custom resolver.
+	 * @param resolver the resolver to add
+	 */
+	public void resolver(RequestedContentTypeResolver resolver) {
+		this.candidates.add(() -> resolver);
+	}
+
+	/**
+	 * Build a {@link RequestedContentTypeResolver} that delegates to the list
+	 * of resolvers configured through this builder.
+	 */
+	public RequestedContentTypeResolver build() {
+
+		List<RequestedContentTypeResolver> resolvers =
+				this.candidates.isEmpty() ?
+						Collections.singletonList(new HeaderContentTypeResolver()) :
+						this.candidates.stream().map(Supplier::get).collect(Collectors.toList());
+
+		return exchange -> {
+			for (RequestedContentTypeResolver resolver : resolvers) {
+				List<MediaType> type = resolver.resolveMediaTypes(exchange);
+				if (type.isEmpty() || (type.size() == 1 && type.contains(MediaType.ALL))) {
+					continue;
+				}
+				return type;
 			}
-		}
-		return this;
+			return Collections.emptyList();
+		};
 	}
+
 
 	/**
-	 * Alternative to {@link #mediaTypes} to add a single mapping.
+	 * Helper to create and configure {@link ParameterContentTypeResolver}.
 	 */
-	public RequestedContentTypeResolverBuilder mediaType(String key, MediaType mediaType) {
-		this.mediaTypes.put(key, mediaType);
-		return this;
-	}
+	public static class ParameterResolverConfigurer {
 
-	/**
-	 * Whether to ignore requests with path extension that cannot be resolved
-	 * to any media type. Setting this to {@code false} will result in an
-	 * {@link org.springframework.web.HttpMediaTypeNotAcceptableException} if
-	 * there is no match.
-	 * <p>By default this is set to {@code true}.
-	 */
-	public RequestedContentTypeResolverBuilder ignoreUnknownPathExtensions(boolean ignore) {
-		this.ignoreUnknownPathExtensions = ignore;
-		return this;
-	}
+		private final Map<String, MediaType> mediaTypes = new HashMap<>();
 
-	/**
-	 * When {@link #favorPathExtension favorPathExtension} is set, this
-	 * property determines whether to use only registered {@code MediaType} mappings
-	 * to resolve a path extension to a specific MediaType.
-	 * <p>By default this is not set in which case
-	 * {@code PathExtensionContentNegotiationStrategy} will use defaults if available.
-	 */
-	public RequestedContentTypeResolverBuilder useRegisteredExtensionsOnly(boolean useRegisteredExtensionsOnly) {
-		this.useRegisteredExtensionsOnly = useRegisteredExtensionsOnly;
-		return this;
-	}
+		@Nullable
+		private String parameterName;
 
-	/**
-	 * Whether a request parameter ("format" by default) should be used to
-	 * determine the requested media type. For this option to work you must
-	 * register {@link #mediaTypes media type mappings}.
-	 * <p>By default this is set to {@code false}.
-	 * @see #parameterName
-	 */
-	public RequestedContentTypeResolverBuilder favorParameter(boolean favorParameter) {
-		this.favorParameter = favorParameter;
-		return this;
-	}
-
-	/**
-	 * Set the query parameter name to use when {@link #favorParameter} is on.
-	 * <p>The default parameter name is {@code "format"}.
-	 */
-	public RequestedContentTypeResolverBuilder parameterName(String parameterName) {
-		Assert.notNull(parameterName, "parameterName is required");
-		this.parameterName = parameterName;
-		return this;
-	}
-
-	/**
-	 * Whether to disable checking the 'Accept' request header.
-	 * <p>By default this value is set to {@code false}.
-	 */
-	public RequestedContentTypeResolverBuilder ignoreAcceptHeader(boolean ignoreAcceptHeader) {
-		this.ignoreAcceptHeader = ignoreAcceptHeader;
-		return this;
-	}
-
-	/**
-	 * Set the default content type(s) to use when no content type is requested
-	 * in order of priority.
-	 *
-	 * <p>If destinations are present that do not support any of the given media
-	 * types, consider appending {@link MediaType#ALL} at the end.
-	 *
-	 * <p>By default this is not set.
-	 *
-	 * @see #defaultContentTypeResolver
-	 */
-	public RequestedContentTypeResolverBuilder defaultContentType(MediaType... contentTypes) {
-		this.contentTypeResolver = new FixedContentTypeResolver(Arrays.asList(contentTypes));
-		return this;
-	}
-
-	/**
-	 * Set a custom {@link RequestedContentTypeResolver} to use to determine
-	 * the content type to use when no content type is requested.
-	 * <p>By default this is not set.
-	 * @see #defaultContentType
-	 */
-	public RequestedContentTypeResolverBuilder defaultContentTypeResolver(RequestedContentTypeResolver resolver) {
-		this.contentTypeResolver = resolver;
-		return this;
-	}
-
-
-	public CompositeContentTypeResolver build() {
-		List<RequestedContentTypeResolver> resolvers = new ArrayList<>();
-
-		if (this.favorPathExtension) {
-			PathExtensionContentTypeResolver resolver = new PathExtensionContentTypeResolver(this.mediaTypes);
-			resolver.setIgnoreUnknownExtensions(this.ignoreUnknownPathExtensions);
-			if (this.useRegisteredExtensionsOnly != null) {
-				resolver.setUseRegisteredExtensionsOnly(this.useRegisteredExtensionsOnly);
-			}
-			resolvers.add(resolver);
+		/**
+		 * Configure a mapping between a lookup key (extracted from a query
+		 * parameter value) and a corresponding {@code MediaType}.
+		 * @param key the lookup key
+		 * @param mediaType the MediaType for that key
+		 */
+		public ParameterResolverConfigurer mediaType(String key, MediaType mediaType) {
+			this.mediaTypes.put(key, mediaType);
+			return this;
 		}
 
-		if (this.favorParameter) {
+		/**
+		 * Map-based variant of {@link #mediaType(String, MediaType)}.
+		 * @param mediaTypes the mappings to copy
+		 */
+		public ParameterResolverConfigurer mediaType(Map<String, MediaType> mediaTypes) {
+			this.mediaTypes.putAll(mediaTypes);
+			return this;
+		}
+
+		/**
+		 * Set the name of the parameter to use to determine requested media types.
+		 * <p>By default this is set to {@literal "format"}.
+		 */
+		public ParameterResolverConfigurer parameterName(String parameterName) {
+			this.parameterName = parameterName;
+			return this;
+		}
+
+		/**
+		 * Private factory method to create the resolver.
+		 */
+		private RequestedContentTypeResolver createResolver() {
 			ParameterContentTypeResolver resolver = new ParameterContentTypeResolver(this.mediaTypes);
-			resolver.setParameterName(this.parameterName);
-			resolvers.add(resolver);
+			if (this.parameterName != null) {
+				resolver.setParameterName(this.parameterName);
+			}
+			return resolver;
 		}
-
-		if (!this.ignoreAcceptHeader) {
-			resolvers.add(new HeaderContentTypeResolver());
-		}
-
-		if (this.contentTypeResolver != null) {
-			resolvers.add(this.contentTypeResolver);
-		}
-
-		return new CompositeContentTypeResolver(resolvers);
 	}
 
 }

@@ -28,6 +28,7 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -42,6 +43,7 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 
 	private final Type responseType;
 
+	@Nullable
 	private final Class<T> responseClass;
 
 	private final List<HttpMessageConverter<?>> messageConverters;
@@ -70,7 +72,7 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 		Assert.notNull(responseType, "'responseType' must not be null");
 		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
 		this.responseType = responseType;
-		this.responseClass = (responseType instanceof Class) ? (Class<T>) responseType : null;
+		this.responseClass = (responseType instanceof Class ? (Class<T>) responseType : null);
 		this.messageConverters = messageConverters;
 		this.logger = logger;
 	}

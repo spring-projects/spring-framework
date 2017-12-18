@@ -22,7 +22,6 @@ import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.core.ResolvableType;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
@@ -49,7 +48,7 @@ public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverS
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return checkParameterTypeNoReactiveWrapper(parameter, Errors.class::isAssignableFrom);
+		return checkParameterType(parameter, Errors.class::isAssignableFrom);
 	}
 
 
@@ -57,43 +56,47 @@ public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverS
 	public Mono<Object> resolveArgument(
 			MethodParameter parameter, BindingContext context, ServerWebExchange exchange) {
 
-		String name = getModelAttributeName(parameter);
-		Object errors = context.getModel().asMap().get(BindingResult.MODEL_KEY_PREFIX + name);
+		Object errors = getErrors(parameter, context);
 
-		Mono<?> errorsMono;
 		if (Mono.class.isAssignableFrom(errors.getClass())) {
-			errorsMono = (Mono<?>) errors;
+			return ((Mono<?>) errors).cast(Object.class);
 		}
 		else if (Errors.class.isAssignableFrom(errors.getClass())) {
-			errorsMono = Mono.just(errors);
+			return Mono.just(errors);
 		}
 		else {
 			throw new IllegalStateException(
 					"Unexpected Errors/BindingResult type: " + errors.getClass().getName());
 		}
-
-		return errorsMono.cast(Object.class);
 	}
 
-	private String getModelAttributeName(MethodParameter parameter) {
+	private Object getErrors(MethodParameter parameter, BindingContext context) {
+
 		Assert.isTrue(parameter.getParameterIndex() > 0,
 				"Errors argument must be immediately after a model attribute argument");
 
 		int index = parameter.getParameterIndex() - 1;
-		MethodParameter attributeParam = new MethodParameter(parameter.getMethod(), index);
+		MethodParameter attributeParam = MethodParameter.forExecutable(parameter.getExecutable(), index);
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(attributeParam.getParameterType());
 
-		ResolvableType type = ResolvableType.forMethodParameter(attributeParam);
-		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(type.resolve());
-
-		Assert.isNull(adapter, "Errors/BindingResult cannot be used with an async model attribute. " +
-				"Either declare the model attribute without the async wrapper type " +
-				"or handle WebExchangeBindException through the async type.");
+		Assert.isNull(adapter, "An @ModelAttribute and an Errors/BindingResult) arguments " +
+				"cannot both be declared with an async type wrapper. " +
+				"Either declare the @ModelAttribute without an async wrapper type or " +
+				"handle a WebExchangeBindException error signal through the async type.");
 
 		ModelAttribute annot = parameter.getParameterAnnotation(ModelAttribute.class);
-		if (annot != null && StringUtils.hasText(annot.value())) {
-			return annot.value();
-		}
-		return Conventions.getVariableNameForParameter(attributeParam);
+		String name = (annot != null && StringUtils.hasText(annot.value()) ?
+				annot.value() : Conventions.getVariableNameForParameter(attributeParam));
+
+		Object errors = context.getModel().asMap().get(BindingResult.MODEL_KEY_PREFIX + name);
+
+		Assert.notNull(errors, "An Errors/BindingResult argument is expected " +
+				"immediately after the @ModelAttribute argument to which it applies. " +
+				"For @RequestBody and @RequestPart arguments, please declare them with a reactive type wrapper " +
+				"and use its onError operators to handle WebExchangeBindException: " +
+				parameter.getMethod());
+
+		return errors;
 	}
 
 }

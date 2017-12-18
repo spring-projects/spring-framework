@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client;
+
+import java.net.SocketException;
 
 import org.junit.Test;
 
 import org.springframework.test.web.client.MockRestServiceServer.MockRestServiceServerBuilder;
 import org.springframework.web.client.RestTemplate;
 
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static org.springframework.http.HttpMethod.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
 
 /**
  * Unit tests for {@link MockRestServiceServer}.
+ *
  * @author Rossen Stoyanchev
  */
 public class MockRestServiceServerTests {
 
-	private RestTemplate restTemplate = new RestTemplate();
+	private final RestTemplate restTemplate = new RestTemplate();
 
 
 	@Test
-	public void buildMultipleTimes() throws Exception {
+	public void buildMultipleTimes() {
 		MockRestServiceServerBuilder builder = MockRestServiceServer.bindTo(this.restTemplate);
 
 		MockRestServiceServer server = builder.build();
@@ -55,7 +60,7 @@ public class MockRestServiceServerTests {
 	}
 
 	@Test(expected = AssertionError.class)
-	public void exactExpectOrder() throws Exception {
+	public void exactExpectOrder() {
 		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate)
 				.ignoreExpectOrder(false).build();
 
@@ -65,7 +70,7 @@ public class MockRestServiceServerTests {
 	}
 
 	@Test
-	public void ignoreExpectOrder() throws Exception {
+	public void ignoreExpectOrder() {
 		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate)
 				.ignoreExpectOrder(true).build();
 
@@ -77,7 +82,7 @@ public class MockRestServiceServerTests {
 	}
 
 	@Test
-	public void resetAndReuseServer() throws Exception {
+	public void resetAndReuseServer() {
 		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate).build();
 
 		server.expect(requestTo("/foo")).andRespond(withSuccess());
@@ -91,7 +96,7 @@ public class MockRestServiceServerTests {
 	}
 
 	@Test
-	public void resetAndReuseServerWithUnorderedExpectationManager() throws Exception {
+	public void resetAndReuseServerWithUnorderedExpectationManager() {
 		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate)
 				.ignoreExpectOrder(true).build();
 
@@ -104,6 +109,26 @@ public class MockRestServiceServerTests {
 		server.expect(requestTo("/bar")).andRespond(withSuccess());
 		this.restTemplate.getForObject("/bar", Void.class);
 		this.restTemplate.getForObject("/foo", Void.class);
+		server.verify();
+	}
+
+	@Test  // SPR-16132
+	public void followUpRequestAfterFailure() {
+		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate).build();
+
+		server.expect(requestTo("/some-service/some-endpoint"))
+				.andRespond(request -> { throw new SocketException("pseudo network error"); });
+
+		server.expect(requestTo("/reporting-service/report-error"))
+				.andExpect(method(POST)).andRespond(withSuccess());
+
+		try {
+			this.restTemplate.getForEntity("/some-service/some-endpoint", String.class);
+		}
+		catch (Exception ex) {
+			this.restTemplate.postForEntity("/reporting-service/report-error", ex.toString(), String.class);
+		}
+
 		server.verify();
 	}
 

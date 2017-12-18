@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,11 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -61,17 +63,22 @@ import org.springframework.util.ObjectUtils;
  */
 public class ResponseBodyEmitter {
 
+	@Nullable
 	private final Long timeout;
 
 	private final Set<DataWithMediaType> earlySendAttempts = new LinkedHashSet<>(8);
 
+	@Nullable
 	private Handler handler;
 
 	private boolean complete;
 
+	@Nullable
 	private Throwable failure;
 
 	private final DefaultCallback timeoutCallback = new DefaultCallback();
+
+	private final ErrorCallback errorCallback = new ErrorCallback();
 
 	private final DefaultCallback completionCallback = new DefaultCallback();
 
@@ -98,6 +105,7 @@ public class ResponseBodyEmitter {
 	/**
 	 * Return the configured timeout value, if any.
 	 */
+	@Nullable
 	public Long getTimeout() {
 		return this.timeout;
 	}
@@ -121,6 +129,7 @@ public class ResponseBodyEmitter {
 		}
 		else {
 			this.handler.onTimeout(this.timeoutCallback);
+			this.handler.onError(this.errorCallback);
 			this.handler.onCompletion(this.completionCallback);
 		}
 	}
@@ -155,29 +164,25 @@ public class ResponseBodyEmitter {
 	 * @throws IOException raised when an I/O error occurs
 	 * @throws java.lang.IllegalStateException wraps any other errors
 	 */
-	public synchronized void send(Object object, MediaType mediaType) throws IOException {
+	public synchronized void send(Object object, @Nullable MediaType mediaType) throws IOException {
 		Assert.state(!this.complete, "ResponseBodyEmitter is already set complete");
 		sendInternal(object, mediaType);
 	}
 
-	private void sendInternal(Object object, MediaType mediaType) throws IOException {
-		if (object != null) {
-			if (this.handler != null) {
-				try {
-					this.handler.send(object, mediaType);
-				}
-				catch (IOException ex) {
-					completeWithError(ex);
-					throw ex;
-				}
-				catch (Throwable ex) {
-					completeWithError(ex);
-					throw new IllegalStateException("Failed to send " + object, ex);
-				}
+	private void sendInternal(Object object, @Nullable MediaType mediaType) throws IOException {
+		if (this.handler != null) {
+			try {
+				this.handler.send(object, mediaType);
 			}
-			else {
-				this.earlySendAttempts.add(new DataWithMediaType(object, mediaType));
+			catch (IOException ex) {
+				throw ex;
 			}
+			catch (Throwable ex) {
+				throw new IllegalStateException("Failed to send " + object, ex);
+			}
+		}
+		else {
+			this.earlySendAttempts.add(new DataWithMediaType(object, mediaType));
 		}
 	}
 
@@ -215,6 +220,16 @@ public class ResponseBodyEmitter {
 	}
 
 	/**
+	 * Register code to invoke for an error during async request processing.
+	 * This method is called from a container thread when an error occurred
+	 * while processing an async request.
+	 * @since 5.0
+	 */
+	public synchronized void onError(Consumer<Throwable> callback) {
+		this.errorCallback.setDelegate(callback);
+	}
+
+	/**
 	 * Register code to invoke when the async request completes. This method is
 	 * called from a container thread when an async request completed for any
 	 * reason including timeout and network error. This method is useful for
@@ -236,13 +251,15 @@ public class ResponseBodyEmitter {
 	 */
 	interface Handler {
 
-		void send(Object data, MediaType mediaType) throws IOException;
+		void send(Object data, @Nullable MediaType mediaType) throws IOException;
 
 		void complete();
 
 		void completeWithError(Throwable failure);
 
 		void onTimeout(Runnable callback);
+
+		void onError(Consumer<Throwable> callback);
 
 		void onCompletion(Runnable callback);
 	}
@@ -256,9 +273,10 @@ public class ResponseBodyEmitter {
 
 		private final Object data;
 
+		@Nullable
 		private final MediaType mediaType;
 
-		public DataWithMediaType(Object data, MediaType mediaType) {
+		public DataWithMediaType(Object data, @Nullable MediaType mediaType) {
 			this.data = data;
 			this.mediaType = mediaType;
 		}
@@ -267,6 +285,7 @@ public class ResponseBodyEmitter {
 			return this.data;
 		}
 
+		@Nullable
 		public MediaType getMediaType() {
 			return this.mediaType;
 		}
@@ -275,6 +294,7 @@ public class ResponseBodyEmitter {
 
 	private class DefaultCallback implements Runnable {
 
+		@Nullable
 		private Runnable delegate;
 
 		public void setDelegate(Runnable delegate) {
@@ -286,6 +306,25 @@ public class ResponseBodyEmitter {
 			ResponseBodyEmitter.this.complete = true;
 			if (this.delegate != null) {
 				this.delegate.run();
+			}
+		}
+	}
+
+
+	private class ErrorCallback implements Consumer<Throwable> {
+
+		@Nullable
+		private Consumer<Throwable> delegate;
+
+		public void setDelegate(Consumer<Throwable> callback) {
+			this.delegate = callback;
+		}
+
+		@Override
+		public void accept(Throwable t) {
+			ResponseBodyEmitter.this.complete = true;
+			if (this.delegate != null) {
+				this.delegate.accept(t);
 			}
 		}
 	}

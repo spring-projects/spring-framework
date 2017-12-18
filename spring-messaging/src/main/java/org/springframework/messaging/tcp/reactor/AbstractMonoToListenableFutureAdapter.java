@@ -24,6 +24,7 @@ import java.util.concurrent.TimeoutException;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -62,17 +63,19 @@ abstract class AbstractMonoToListenableFutureAdapter<S, T> implements Listenable
 					registry.success(adapted);
 				})
 				.doOnError(this.registry::failure)
-				.subscribe();
+				.toProcessor();
 	}
 
 
 	@Override
+	@Nullable
 	public T get() throws InterruptedException {
 		S result = this.monoProcessor.block();
 		return adapt(result);
 	}
 
 	@Override
+	@Nullable
 	public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 		Assert.notNull(unit, "TimeUnit must not be null");
 		Duration duration = Duration.ofMillis(TimeUnit.MILLISECONDS.convert(timeout, unit));
@@ -111,6 +114,7 @@ abstract class AbstractMonoToListenableFutureAdapter<S, T> implements Listenable
 	}
 
 
-	protected abstract T adapt(S result);
+	@Nullable
+	protected abstract T adapt(@Nullable S result);
 
 }

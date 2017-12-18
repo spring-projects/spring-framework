@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -81,16 +82,20 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 
 	/** Set of supported HTTP methods */
+	@Nullable
 	private Set<String> supportedMethods;
 
+	@Nullable
 	private String allowHeader;
 
 	private boolean requireSession = false;
 
+	@Nullable
 	private CacheControl cacheControl;
 
 	private int cacheSeconds = -1;
 
+	@Nullable
 	private String[] varyByRequestHeaders;
 
 
@@ -146,7 +151,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * <p>Default is GET, HEAD and POST for simple form controller types;
 	 * unrestricted for general controllers and interceptors.
 	 */
-	public final void setSupportedMethods(String... methods) {
+	public final void setSupportedMethods(@Nullable String... methods) {
 		if (!ObjectUtils.isEmpty(methods)) {
 			this.supportedMethods = new LinkedHashSet<>(Arrays.asList(methods));
 		}
@@ -159,8 +164,9 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	/**
 	 * Return the HTTP methods that this content generator supports.
 	 */
+	@Nullable
 	public final String[] getSupportedMethods() {
-		return StringUtils.toStringArray(this.supportedMethods);
+		return (this.supportedMethods != null ? StringUtils.toStringArray(this.supportedMethods) : null);
 	}
 
 	private void initAllowHeader() {
@@ -193,6 +199,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * requests are handled before making a call to
 	 * {@link #checkRequest(HttpServletRequest)}.
 	 */
+	@Nullable
 	protected String getAllowHeader() {
 		return this.allowHeader;
 	}
@@ -216,7 +223,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * the Cache-Control HTTP response header.
 	 * @since 4.2
 	 */
-	public final void setCacheControl(CacheControl cacheControl) {
+	public final void setCacheControl(@Nullable CacheControl cacheControl) {
 		this.cacheControl = cacheControl;
 	}
 
@@ -225,6 +232,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * that builds the Cache-Control HTTP response header.
 	 * @since 4.2
 	 */
+	@Nullable
 	public final CacheControl getCacheControl() {
 		return this.cacheControl;
 	}
@@ -261,7 +269,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * @param varyByRequestHeaders one or more request header names
 	 * @since 4.3
 	 */
-	public final void setVaryByRequestHeaders(String... varyByRequestHeaders) {
+	public final void setVaryByRequestHeaders(@Nullable String... varyByRequestHeaders) {
 		this.varyByRequestHeaders = varyByRequestHeaders;
 	}
 
@@ -269,6 +277,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * Return the configured request header names for the "Vary" response header.
 	 * @since 4.3
 	 */
+	@Nullable
 	public final String[] getVaryByRequestHeaders() {
 		return this.varyByRequestHeaders;
 	}
@@ -391,7 +400,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 			applyCacheSeconds(response, this.cacheSeconds);
 		}
 		if (this.varyByRequestHeaders != null) {
-			for (String value : getVaryRequestHeadersToAdd(response)) {
+			for (String value : getVaryRequestHeadersToAdd(response, this.varyByRequestHeaders)) {
 				response.addHeader("Vary", value);
 			}
 		}
@@ -587,18 +596,18 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	}
 
 
-	private Collection<String> getVaryRequestHeadersToAdd(HttpServletResponse response) {
+	private Collection<String> getVaryRequestHeadersToAdd(HttpServletResponse response, String[] varyByRequestHeaders) {
 		if (!response.containsHeader(HttpHeaders.VARY)) {
-			return Arrays.asList(getVaryByRequestHeaders());
+			return Arrays.asList(varyByRequestHeaders);
 		}
-		Collection<String> result = new ArrayList<>(getVaryByRequestHeaders().length);
-		Collections.addAll(result, getVaryByRequestHeaders());
+		Collection<String> result = new ArrayList<>(varyByRequestHeaders.length);
+		Collections.addAll(result, varyByRequestHeaders);
 		for (String header : response.getHeaders(HttpHeaders.VARY)) {
 			for (String existing : StringUtils.tokenizeToStringArray(header, ",")) {
 				if ("*".equals(existing)) {
 					return Collections.emptyList();
 				}
-				for (String value : getVaryByRequestHeaders()) {
+				for (String value : varyByRequestHeaders) {
 					if (value.equalsIgnoreCase(existing)) {
 						result.remove(value);
 					}

@@ -33,6 +33,8 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Miscellaneous {@link String} utility methods.
  *
@@ -83,7 +85,7 @@ public abstract class StringUtils {
 	 * @param str the candidate String
 	 * @since 3.2.1
 	 */
-	public static boolean isEmpty(Object str) {
+	public static boolean isEmpty(@Nullable Object str) {
 		return (str == null || "".equals(str));
 	}
 
@@ -102,7 +104,7 @@ public abstract class StringUtils {
 	 * @return {@code true} if the {@code CharSequence} is not {@code null} and has length
 	 * @see #hasText(String)
 	 */
-	public static boolean hasLength(CharSequence str) {
+	public static boolean hasLength(@Nullable CharSequence str) {
 		return (str != null && str.length() > 0);
 	}
 
@@ -115,8 +117,8 @@ public abstract class StringUtils {
 	 * @see #hasLength(CharSequence)
 	 * @see #hasText(String)
 	 */
-	public static boolean hasLength(String str) {
-		return hasLength((CharSequence) str);
+	public static boolean hasLength(@Nullable String str) {
+		return (str != null && !str.isEmpty());
 	}
 
 	/**
@@ -136,18 +138,8 @@ public abstract class StringUtils {
 	 * its length is greater than 0, and it does not contain whitespace only
 	 * @see Character#isWhitespace
 	 */
-	public static boolean hasText(CharSequence str) {
-		if (!hasLength(str)) {
-			return false;
-		}
-
-		int strLen = str.length();
-		for (int i = 0; i < strLen; i++) {
-			if (!Character.isWhitespace(str.charAt(i))) {
-				return true;
-			}
-		}
-		return false;
+	public static boolean hasText(@Nullable CharSequence str) {
+		return (str != null && str.length() > 0 && containsText(str));
 	}
 
 	/**
@@ -160,8 +152,18 @@ public abstract class StringUtils {
 	 * length is greater than 0, and it does not contain whitespace only
 	 * @see #hasText(CharSequence)
 	 */
-	public static boolean hasText(String str) {
-		return hasText((CharSequence) str);
+	public static boolean hasText(@Nullable String str) {
+		return (str != null && !str.isEmpty() && containsText(str));
+	}
+
+	private static boolean containsText(CharSequence str) {
+		int strLen = str.length();
+		for (int i = 0; i < strLen; i++) {
+			if (!Character.isWhitespace(str.charAt(i))) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -171,7 +173,7 @@ public abstract class StringUtils {
 	 * contains at least 1 whitespace character
 	 * @see Character#isWhitespace
 	 */
-	public static boolean containsWhitespace(CharSequence str) {
+	public static boolean containsWhitespace(@Nullable CharSequence str) {
 		if (!hasLength(str)) {
 			return false;
 		}
@@ -192,7 +194,7 @@ public abstract class StringUtils {
 	 * contains at least 1 whitespace character
 	 * @see #containsWhitespace(CharSequence)
 	 */
-	public static boolean containsWhitespace(String str) {
+	public static boolean containsWhitespace(@Nullable String str) {
 		return containsWhitespace((CharSequence) str);
 	}
 
@@ -312,7 +314,6 @@ public abstract class StringUtils {
 		return sb.toString();
 	}
 
-
 	/**
 	 * Test if the given {@code String} starts with the specified prefix,
 	 * ignoring upper/lower case.
@@ -320,20 +321,9 @@ public abstract class StringUtils {
 	 * @param prefix the prefix to look for
 	 * @see java.lang.String#startsWith
 	 */
-	public static boolean startsWithIgnoreCase(String str, String prefix) {
-		if (str == null || prefix == null) {
-			return false;
-		}
-		if (str.startsWith(prefix)) {
-			return true;
-		}
-		if (str.length() < prefix.length()) {
-			return false;
-		}
-
-		String lcStr = str.substring(0, prefix.length()).toLowerCase();
-		String lcPrefix = prefix.toLowerCase();
-		return lcStr.equals(lcPrefix);
+	public static boolean startsWithIgnoreCase(@Nullable String str, @Nullable String prefix) {
+		return (str != null && prefix != null && str.length() >= prefix.length() &&
+				str.regionMatches(true, 0, prefix, 0, prefix.length()));
 	}
 
 	/**
@@ -343,20 +333,9 @@ public abstract class StringUtils {
 	 * @param suffix the suffix to look for
 	 * @see java.lang.String#endsWith
 	 */
-	public static boolean endsWithIgnoreCase(String str, String suffix) {
-		if (str == null || suffix == null) {
-			return false;
-		}
-		if (str.endsWith(suffix)) {
-			return true;
-		}
-		if (str.length() < suffix.length()) {
-			return false;
-		}
-
-		String lcStr = str.substring(str.length() - suffix.length()).toLowerCase();
-		String lcSuffix = suffix.toLowerCase();
-		return lcStr.equals(lcSuffix);
+	public static boolean endsWithIgnoreCase(@Nullable String str, @Nullable String suffix) {
+		return (str != null && suffix != null && str.length() >= suffix.length() &&
+				str.regionMatches(true, str.length() - suffix.length(), suffix, 0, suffix.length()));
 	}
 
 	/**
@@ -367,9 +346,11 @@ public abstract class StringUtils {
 	 * @param substring the substring to match at the given index
 	 */
 	public static boolean substringMatch(CharSequence str, int index, CharSequence substring) {
-		for (int j = 0; j < substring.length(); j++) {
-			int i = index + j;
-			if (i >= str.length() || str.charAt(i) != substring.charAt(j)) {
+		if (index + substring.length() > str.length()) {
+			return false;
+		}
+		for (int i = 0; i < substring.length(); i++) {
+			if (str.charAt(index + i) != substring.charAt(i)) {
 				return false;
 			}
 		}
@@ -378,8 +359,8 @@ public abstract class StringUtils {
 
 	/**
 	 * Count the occurrences of the substring {@code sub} in string {@code str}.
-	 * @param str string to search in. Return 0 if this is {@code null}.
-	 * @param sub string to search for. Return 0 if this is {@code null}.
+	 * @param str string to search in
+	 * @param sub string to search for
 	 */
 	public static int countOccurrencesOf(String str, String sub) {
 		if (!hasLength(str) || !hasLength(sub)) {
@@ -397,14 +378,13 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Replace all occurrences of a substring within a string with
-	 * another string.
+	 * Replace all occurrences of a substring within a string with another string.
 	 * @param inString {@code String} to examine
 	 * @param oldPattern {@code String} to replace
 	 * @param newPattern {@code String} to insert
 	 * @return a {@code String} with the replacements
 	 */
-	public static String replace(String inString, String oldPattern, String newPattern) {
+	public static String replace(String inString, String oldPattern, @Nullable String newPattern) {
 		if (!hasLength(inString) || !hasLength(oldPattern) || newPattern == null) {
 			return inString;
 		}
@@ -451,7 +431,7 @@ public abstract class StringUtils {
 	 * E.g. "az\n" will delete 'a's, 'z's and new lines.
 	 * @return the resulting {@code String}
 	 */
-	public static String deleteAny(String inString, String charsToDelete) {
+	public static String deleteAny(String inString, @Nullable String charsToDelete) {
 		if (!hasLength(inString) || !hasLength(charsToDelete)) {
 			return inString;
 		}
@@ -477,7 +457,8 @@ public abstract class StringUtils {
 	 * @return the quoted {@code String} (e.g. "'myString'"),
 	 * or {@code null} if the input was {@code null}
 	 */
-	public static String quote(String str) {
+	@Nullable
+	public static String quote(@Nullable String str) {
 		return (str != null ? "'" + str + "'" : null);
 	}
 
@@ -488,7 +469,8 @@ public abstract class StringUtils {
 	 * @return the quoted {@code String} (e.g. "'myString'"),
 	 * or the input object as-is if not a {@code String}
 	 */
-	public static Object quoteIfString(Object obj) {
+	@Nullable
+	public static Object quoteIfString(@Nullable Object obj) {
 		return (obj instanceof String ? quote((String) obj) : obj);
 	}
 
@@ -515,9 +497,8 @@ public abstract class StringUtils {
 	 * Capitalize a {@code String}, changing the first letter to
 	 * upper case as per {@link Character#toUpperCase(char)}.
 	 * No other letters are changed.
-	 * @param str the {@code String} to capitalize, may be {@code null}
-	 * @return the capitalized {@code String}, or {@code null} if the supplied
-	 * string is {@code null}
+	 * @param str the {@code String} to capitalize
+	 * @return the capitalized {@code String}
 	 */
 	public static String capitalize(String str) {
 		return changeFirstCharacterCase(str, true);
@@ -527,9 +508,8 @@ public abstract class StringUtils {
 	 * Uncapitalize a {@code String}, changing the first letter to
 	 * lower case as per {@link Character#toLowerCase(char)}.
 	 * No other letters are changed.
-	 * @param str the {@code String} to uncapitalize, may be {@code null}
-	 * @return the uncapitalized {@code String}, or {@code null} if the supplied
-	 * string is {@code null}
+	 * @param str the {@code String} to uncapitalize
+	 * @return the uncapitalized {@code String}
 	 */
 	public static String uncapitalize(String str) {
 		return changeFirstCharacterCase(str, false);
@@ -563,7 +543,8 @@ public abstract class StringUtils {
 	 * @param path the file path (may be {@code null})
 	 * @return the extracted filename, or {@code null} if none
 	 */
-	public static String getFilename(String path) {
+	@Nullable
+	public static String getFilename(@Nullable String path) {
 		if (path == null) {
 			return null;
 		}
@@ -578,7 +559,8 @@ public abstract class StringUtils {
 	 * @param path the file path (may be {@code null})
 	 * @return the extracted filename extension, or {@code null} if none
 	 */
-	public static String getFilenameExtension(String path) {
+	@Nullable
+	public static String getFilenameExtension(@Nullable String path) {
 		if (path == null) {
 			return null;
 		}
@@ -599,15 +581,10 @@ public abstract class StringUtils {
 	/**
 	 * Strip the filename extension from the given Java resource path,
 	 * e.g. "mypath/myfile.txt" -> "mypath/myfile".
-	 * @param path the file path (may be {@code null})
-	 * @return the path with stripped filename extension,
-	 * or {@code null} if none
+	 * @param path the file path
+	 * @return the path with stripped filename extension
 	 */
 	public static String stripFilenameExtension(String path) {
-		if (path == null) {
-			return null;
-		}
-
 		int extIndex = path.lastIndexOf(EXTENSION_SEPARATOR);
 		if (extIndex == -1) {
 			return path;
@@ -652,8 +629,8 @@ public abstract class StringUtils {
 	 * @return the normalized path
 	 */
 	public static String cleanPath(String path) {
-		if (path == null) {
-			return null;
+		if (!hasLength(path)) {
+			return path;
 		}
 		String pathToUse = replace(path, WINDOWS_FOLDER_SEPARATOR, FOLDER_SEPARATOR);
 
@@ -728,7 +705,7 @@ public abstract class StringUtils {
 	 * <li>Special characters {@code "-"}, {@code "_"}, {@code "."}, and {@code "*"} stay the same.</li>
 	 * <li>A sequence "{@code %<i>xy</i>}" is interpreted as a hexadecimal representation of the character.</li>
 	 * </ul>
-	 * @param source the encoded String (may be {@code null})
+	 * @param source the encoded String
 	 * @param charset the character set
 	 * @return the decoded value
 	 * @throws IllegalArgumentException when the given source contains invalid encoded sequences
@@ -736,9 +713,6 @@ public abstract class StringUtils {
 	 * @see java.net.URLDecoder#decode(String, String)
 	 */
 	public static String uriDecode(String source, Charset charset) {
-		if (source == null) {
-			return null;
-		}
 		int length = source.length();
 		if (length == 0) {
 			return source;
@@ -779,9 +753,10 @@ public abstract class StringUtils {
 	 * @param localeString the locale {@code String}, following {@code Locale's}
 	 * {@code toString()} format ("en", "en_UK", etc);
 	 * also accepts spaces as separators, as an alternative to underscores
-	 * @return a corresponding {@code Locale} instance
+	 * @return a corresponding {@code Locale} instance, or {@code null} if none
 	 * @throws IllegalArgumentException in case of an invalid locale specification
 	 */
+	@Nullable
 	public static Locale parseLocaleString(String localeString) {
 		String[] parts = tokenizeToStringArray(localeString, "_ ", false, false);
 		String language = (parts.length > 0 ? parts[0] : "");
@@ -853,7 +828,7 @@ public abstract class StringUtils {
 	 * @param str the {@code String} to append
 	 * @return the new array (never {@code null})
 	 */
-	public static String[] addStringToArray(String[] array, String str) {
+	public static String[] addStringToArray(@Nullable String[] array, String str) {
 		if (ObjectUtils.isEmpty(array)) {
 			return new String[] {str};
 		}
@@ -872,7 +847,8 @@ public abstract class StringUtils {
 	 * @param array2 the second array (can be {@code null})
 	 * @return the new array ({@code null} if both given arrays were {@code null})
 	 */
-	public static String[] concatenateStringArrays(String[] array1, String[] array2) {
+	@Nullable
+	public static String[] concatenateStringArrays(@Nullable String[] array1, @Nullable String[] array2) {
 		if (ObjectUtils.isEmpty(array1)) {
 			return array2;
 		}
@@ -896,7 +872,8 @@ public abstract class StringUtils {
 	 * @param array2 the second array (can be {@code null})
 	 * @return the new array ({@code null} if both given arrays were {@code null})
 	 */
-	public static String[] mergeStringArrays(String[] array1, String[] array2) {
+	@Nullable
+	public static String[] mergeStringArrays(@Nullable String[] array1, @Nullable String[] array2) {
 		if (ObjectUtils.isEmpty(array1)) {
 			return array2;
 		}
@@ -932,14 +909,9 @@ public abstract class StringUtils {
 	 * Copy the given {@code Collection} into a {@code String} array.
 	 * <p>The {@code Collection} must contain {@code String} elements only.
 	 * @param collection the {@code Collection} to copy
-	 * @return the {@code String} array ({@code null} if the supplied
-	 * {@code Collection} was {@code null})
+	 * @return the {@code String} array
 	 */
 	public static String[] toStringArray(Collection<String> collection) {
-		if (collection == null) {
-			return null;
-		}
-
 		return collection.toArray(new String[collection.size()]);
 	}
 
@@ -947,14 +919,9 @@ public abstract class StringUtils {
 	 * Copy the given Enumeration into a {@code String} array.
 	 * The Enumeration must contain {@code String} elements only.
 	 * @param enumeration the Enumeration to copy
-	 * @return the {@code String} array ({@code null} if the passed-in
-	 * Enumeration was {@code null})
+	 * @return the {@code String} array
 	 */
 	public static String[] toStringArray(Enumeration<String> enumeration) {
-		if (enumeration == null) {
-			return null;
-		}
-
 		List<String> list = Collections.list(enumeration);
 		return list.toArray(new String[list.size()]);
 	}
@@ -965,7 +932,7 @@ public abstract class StringUtils {
 	 * @param array the original {@code String} array
 	 * @return the resulting array (of the same size) with trimmed elements
 	 */
-	public static String[] trimArrayElements(String[] array) {
+	public static String[] trimArrayElements(@Nullable String[] array) {
 		if (ObjectUtils.isEmpty(array)) {
 			return new String[0];
 		}
@@ -1005,7 +972,8 @@ public abstract class StringUtils {
 	 * index 1 being after the delimiter (neither element includes the delimiter);
 	 * or {@code null} if the delimiter wasn't found in the given input {@code String}
 	 */
-	public static String[] split(String toSplit, String delimiter) {
+	@Nullable
+	public static String[] split(@Nullable String toSplit, @Nullable String delimiter) {
 		if (!hasLength(toSplit) || !hasLength(delimiter)) {
 			return null;
 		}
@@ -1030,6 +998,7 @@ public abstract class StringUtils {
 	 * @return a {@code Properties} instance representing the array contents,
 	 * or {@code null} if the array to process was {@code null} or empty
 	 */
+	@Nullable
 	public static Properties splitArrayElementsIntoProperties(String[] array, String delimiter) {
 		return splitArrayElementsIntoProperties(array, delimiter, null);
 	}
@@ -1048,8 +1017,9 @@ public abstract class StringUtils {
 	 * @return a {@code Properties} instance representing the array contents,
 	 * or {@code null} if the array to process was {@code null} or empty
 	 */
+	@Nullable
 	public static Properties splitArrayElementsIntoProperties(
-			String[] array, String delimiter, String charsToDelete) {
+			String[] array, String delimiter, @Nullable String charsToDelete) {
 
 		if (ObjectUtils.isEmpty(array)) {
 			return null;
@@ -1085,7 +1055,7 @@ public abstract class StringUtils {
 	 * @see String#trim()
 	 * @see #delimitedListToStringArray
 	 */
-	public static String[] tokenizeToStringArray(String str, String delimiters) {
+	public static String[] tokenizeToStringArray(@Nullable String str, String delimiters) {
 		return tokenizeToStringArray(str, delimiters, true, true);
 	}
 
@@ -1103,17 +1073,16 @@ public abstract class StringUtils {
 	 * @param ignoreEmptyTokens omit empty tokens from the result array
 	 * (only applies to tokens that are empty after trimming; StringTokenizer
 	 * will not consider subsequent delimiters as token in the first place).
-	 * @return an array of the tokens ({@code null} if the input {@code String}
-	 * was {@code null})
+	 * @return an array of the tokens
 	 * @see java.util.StringTokenizer
 	 * @see String#trim()
 	 * @see #delimitedListToStringArray
 	 */
 	public static String[] tokenizeToStringArray(
-			String str, String delimiters, boolean trimTokens, boolean ignoreEmptyTokens) {
+			@Nullable String str, String delimiters, boolean trimTokens, boolean ignoreEmptyTokens) {
 
 		if (str == null) {
-			return null;
+			return new String[0];
 		}
 
 		StringTokenizer st = new StringTokenizer(str, delimiters);
@@ -1143,7 +1112,7 @@ public abstract class StringUtils {
 	 * @return an array of the tokens in the list
 	 * @see #tokenizeToStringArray
 	 */
-	public static String[] delimitedListToStringArray(String str, String delimiter) {
+	public static String[] delimitedListToStringArray(@Nullable String str, @Nullable String delimiter) {
 		return delimitedListToStringArray(str, delimiter, null);
 	}
 
@@ -1162,7 +1131,9 @@ public abstract class StringUtils {
 	 * @return an array of the tokens in the list
 	 * @see #tokenizeToStringArray
 	 */
-	public static String[] delimitedListToStringArray(String str, String delimiter, String charsToDelete) {
+	public static String[] delimitedListToStringArray(
+			@Nullable String str, @Nullable String delimiter, @Nullable String charsToDelete) {
+
 		if (str == null) {
 			return new String[0];
 		}
@@ -1197,7 +1168,7 @@ public abstract class StringUtils {
 	 * @param str the input {@code String}
 	 * @return an array of strings, or the empty array in case of empty input
 	 */
-	public static String[] commaDelimitedListToStringArray(String str) {
+	public static String[] commaDelimitedListToStringArray(@Nullable String str) {
 		return delimitedListToStringArray(str, ",");
 	}
 
@@ -1209,7 +1180,7 @@ public abstract class StringUtils {
 	 * @return a set of {@code String} entries in the list
 	 * @see #removeDuplicateStrings(String[])
 	 */
-	public static Set<String> commaDelimitedListToSet(String str) {
+	public static Set<String> commaDelimitedListToSet(@Nullable String str) {
 		Set<String> set = new LinkedHashSet<>();
 		String[] tokens = commaDelimitedListToStringArray(str);
 		for (String token : tokens) {
@@ -1227,7 +1198,9 @@ public abstract class StringUtils {
 	 * @param suffix the {@code String} to end each element with
 	 * @return the delimited {@code String}
 	 */
-	public static String collectionToDelimitedString(Collection<?> coll, String delim, String prefix, String suffix) {
+	public static String collectionToDelimitedString(
+			@Nullable Collection<?> coll, String delim, String prefix, String suffix) {
+
 		if (CollectionUtils.isEmpty(coll)) {
 			return "";
 		}
@@ -1250,7 +1223,7 @@ public abstract class StringUtils {
 	 * @param delim the delimiter to use (typically a ",")
 	 * @return the delimited {@code String}
 	 */
-	public static String collectionToDelimitedString(Collection<?> coll, String delim) {
+	public static String collectionToDelimitedString(@Nullable Collection<?> coll, String delim) {
 		return collectionToDelimitedString(coll, delim, "", "");
 	}
 
@@ -1271,7 +1244,7 @@ public abstract class StringUtils {
 	 * @param delim the delimiter to use (typically a ",")
 	 * @return the delimited {@code String}
 	 */
-	public static String arrayToDelimitedString(Object[] arr, String delim) {
+	public static String arrayToDelimitedString(@Nullable Object[] arr, String delim) {
 		if (ObjectUtils.isEmpty(arr)) {
 			return "";
 		}
@@ -1296,7 +1269,7 @@ public abstract class StringUtils {
 	 * @param arr the array to display
 	 * @return the delimited {@code String}
 	 */
-	public static String arrayToCommaDelimitedString(Object[] arr) {
+	public static String arrayToCommaDelimitedString(@Nullable Object[] arr) {
 		return arrayToDelimitedString(arr, ",");
 	}
 

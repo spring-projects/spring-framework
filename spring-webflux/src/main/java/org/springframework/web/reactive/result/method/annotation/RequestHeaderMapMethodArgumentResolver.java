@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -61,14 +60,14 @@ public class RequestHeaderMapMethodArgumentResolver extends HandlerMethodArgumen
 
 
 	@Override
-	public Optional<Object> resolveArgumentValue(MethodParameter methodParameter,
+	public Object resolveArgumentValue(MethodParameter methodParameter,
 			BindingContext context, ServerWebExchange exchange) {
 
 		Class<?> paramType = methodParameter.getParameterType();
 		boolean isMultiValueMap = MultiValueMap.class.isAssignableFrom(paramType);
 
 		HttpHeaders headers = exchange.getRequest().getHeaders();
-		return Optional.of(isMultiValueMap ? headers : headers.toSingleValueMap());
+		return isMultiValueMap ? headers : headers.toSingleValueMap();
 	}
 
 }

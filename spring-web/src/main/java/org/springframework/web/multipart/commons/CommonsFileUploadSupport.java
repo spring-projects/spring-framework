@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -145,6 +146,10 @@ public abstract class CommonsFileUploadSupport {
 		this.fileUpload.setHeaderEncoding(defaultEncoding);
 	}
 
+	/**
+	 * Determine the default encoding to use for parsing requests.
+	 * @see #setDefaultEncoding
+	 */
 	protected String getDefaultEncoding() {
 		String encoding = getFileUpload().getHeaderEncoding();
 		if (encoding == null) {
@@ -166,6 +171,10 @@ public abstract class CommonsFileUploadSupport {
 		this.uploadTempDirSpecified = true;
 	}
 
+	/**
+	 * Return the temporary directory where uploaded files get stored.
+	 * @see #setUploadTempDir
+	 */
 	protected boolean isUploadTempDirSpecified() {
 		return this.uploadTempDirSpecified;
 	}
@@ -212,7 +221,7 @@ public abstract class CommonsFileUploadSupport {
 	 * @param encoding the character encoding to use
 	 * @return an appropriate FileUpload instance.
 	 */
-	protected FileUpload prepareFileUpload(String encoding) {
+	protected FileUpload prepareFileUpload(@Nullable String encoding) {
 		FileUpload fileUpload = getFileUpload();
 		FileUpload actualFileUpload = fileUpload;
 
@@ -246,19 +255,14 @@ public abstract class CommonsFileUploadSupport {
 			if (fileItem.isFormField()) {
 				String value;
 				String partEncoding = determineEncoding(fileItem.getContentType(), encoding);
-				if (partEncoding != null) {
-					try {
-						value = fileItem.getString(partEncoding);
-					}
-					catch (UnsupportedEncodingException ex) {
-						if (logger.isWarnEnabled()) {
-							logger.warn("Could not decode multipart item '" + fileItem.getFieldName() +
-									"' with encoding '" + partEncoding + "': using platform default");
-						}
-						value = fileItem.getString();
-					}
+				try {
+					value = fileItem.getString(partEncoding);
 				}
-				else {
+				catch (UnsupportedEncodingException ex) {
+					if (logger.isWarnEnabled()) {
+						logger.warn("Could not decode multipart item '" + fileItem.getFieldName() +
+								"' with encoding '" + partEncoding + "': using platform default");
+					}
 					value = fileItem.getString();
 				}
 				String[] curParam = multipartParameters.get(fileItem.getFieldName());

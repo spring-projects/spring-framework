@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import javax.persistence.PersistenceException;
 
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.jdbc.datasource.ConnectionHandle;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 
@@ -78,6 +79,7 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * @see javax.persistence.EntityTransaction#begin
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils#prepareConnectionForTransaction
 	 */
+	@Nullable
 	Object beginTransaction(EntityManager entityManager, TransactionDefinition definition)
 			throws PersistenceException, SQLException, TransactionException;
 
@@ -100,7 +102,8 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * @throws javax.persistence.PersistenceException if thrown by JPA methods
 	 * @see #cleanupTransaction
 	 */
-	Object prepareTransaction(EntityManager entityManager, boolean readOnly, String name)
+	@Nullable
+	Object prepareTransaction(EntityManager entityManager, boolean readOnly, @Nullable String name)
 			throws PersistenceException;
 
 	/**
@@ -114,7 +117,7 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * @see #beginTransaction
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils#resetConnectionAfterTransaction
 	 */
-	void cleanupTransaction(Object transactionData);
+	void cleanupTransaction(@Nullable Object transactionData);
 
 	/**
 	 * Retrieve the JDBC Connection that the given JPA EntityManager uses underneath,
@@ -146,6 +149,7 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * @see org.springframework.jdbc.datasource.SimpleConnectionHandle
 	 * @see JpaTransactionManager#setDataSource
 	 */
+	@Nullable
 	ConnectionHandle getJdbcConnection(EntityManager entityManager, boolean readOnly)
 			throws PersistenceException, SQLException;
 

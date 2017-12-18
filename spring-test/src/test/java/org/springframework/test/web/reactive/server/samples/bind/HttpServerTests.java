@@ -30,7 +30,7 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**
- * Bind to a running server, making actual requests over a socket.
+ * Sample tests demonstrating live server integration tests.
  *
  * @author Rossen Stoyanchev
  * @since 5.0

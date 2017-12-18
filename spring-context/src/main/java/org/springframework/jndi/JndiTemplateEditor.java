@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.beans.PropertyEditorSupport;
 import java.util.Properties;
 
 import org.springframework.beans.propertyeditors.PropertiesEditor;
+import org.springframework.lang.Nullable;
 
 /**
  * Properties editor for JndiTemplate objects. Allows properties of type
@@ -33,7 +34,7 @@ public class JndiTemplateEditor extends PropertyEditorSupport {
 	private final PropertiesEditor propertiesEditor = new PropertiesEditor();
 
 	@Override
-	public void setAsText(String text) throws IllegalArgumentException {
+	public void setAsText(@Nullable String text) throws IllegalArgumentException {
 		if (text == null) {
 			throw new IllegalArgumentException("JndiTemplate cannot be created from null string");
 		}

@@ -24,6 +24,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
@@ -38,7 +39,7 @@ import static org.junit.Assert.assertTrue;
 public class PrincipalArgumentResolverTests {
 
 	private final PrincipalArgumentResolver resolver =
-			new PrincipalArgumentResolver(new ReactiveAdapterRegistry());
+			new PrincipalArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
 
 	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
@@ -56,7 +57,7 @@ public class PrincipalArgumentResolverTests {
 
 		BindingContext context = new BindingContext();
 		Principal user = () -> "Joe";
-		ServerWebExchange exchange = MockServerHttpRequest.get("/").build().toExchange()
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"))
 				.mutate().principal(Mono.just(user)).build();
 
 		MethodParameter param = this.testMethod.arg(Principal.class);

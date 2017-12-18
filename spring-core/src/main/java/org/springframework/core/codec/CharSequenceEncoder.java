@@ -28,6 +28,7 @@ import reactor.core.publisher.Flux;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -51,7 +52,7 @@ public class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 
 
 	@Override
-	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
+	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		Class<?> clazz = elementType.resolve(Object.class);
 		return super.canEncode(elementType, mimeType) && CharSequence.class.isAssignableFrom(clazz);
 	}
@@ -59,7 +60,7 @@ public class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 	@Override
 	public Flux<DataBuffer> encode(Publisher<? extends CharSequence> inputStream,
 			DataBufferFactory bufferFactory, ResolvableType elementType,
-			MimeType mimeType, Map<String, Object> hints) {
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Charset charset;
 		if (mimeType != null && mimeType.getCharset() != null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -90,7 +91,7 @@ public abstract class CollectionFactory {
 	 * @param collectionType the collection type to check
 	 * @return {@code true} if the type is <em>approximable</em>
 	 */
-	public static boolean isApproximableCollectionType(Class<?> collectionType) {
+	public static boolean isApproximableCollectionType(@Nullable Class<?> collectionType) {
 		return (collectionType != null && approximableCollectionTypes.contains(collectionType));
 	}
 
@@ -115,7 +116,7 @@ public abstract class CollectionFactory {
 	 * @see java.util.LinkedHashSet
 	 */
 	@SuppressWarnings({ "unchecked", "cast", "rawtypes" })
-	public static <E> Collection<E> createApproximateCollection(Object collection, int capacity) {
+	public static <E> Collection<E> createApproximateCollection(@Nullable Object collection, int capacity) {
 		if (collection instanceof LinkedList) {
 			return new LinkedList<>();
 		}
@@ -174,7 +175,7 @@ public abstract class CollectionFactory {
 	 * the supplied {@code elementType} is not a subtype of {@link Enum}
 	 */
 	@SuppressWarnings({ "unchecked", "cast" })
-	public static <E> Collection<E> createCollection(Class<?> collectionType, Class<?> elementType, int capacity) {
+	public static <E> Collection<E> createCollection(Class<?> collectionType, @Nullable Class<?> elementType, int capacity) {
 		Assert.notNull(collectionType, "Collection type must not be null");
 		if (collectionType.isInterface()) {
 			if (Set.class == collectionType || Collection.class == collectionType) {
@@ -215,7 +216,7 @@ public abstract class CollectionFactory {
 	 * @param mapType the map type to check
 	 * @return {@code true} if the type is <em>approximable</em>
 	 */
-	public static boolean isApproximableMapType(Class<?> mapType) {
+	public static boolean isApproximableMapType(@Nullable Class<?> mapType) {
 		return (mapType != null && approximableMapTypes.contains(mapType));
 	}
 
@@ -237,7 +238,7 @@ public abstract class CollectionFactory {
 	 * @see java.util.LinkedHashMap
 	 */
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	public static <K, V> Map<K, V> createApproximateMap(Object map, int capacity) {
+	public static <K, V> Map<K, V> createApproximateMap(@Nullable Object map, int capacity) {
 		if (map instanceof EnumMap) {
 			EnumMap enumMap = new EnumMap((EnumMap) map);
 			enumMap.clear();
@@ -290,7 +291,7 @@ public abstract class CollectionFactory {
 	 * the supplied {@code keyType} is not a subtype of {@link Enum}
 	 */
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	public static <K, V> Map<K, V> createMap(Class<?> mapType, Class<?> keyType, int capacity) {
+	public static <K, V> Map<K, V> createMap(Class<?> mapType, @Nullable Class<?> keyType, int capacity) {
 		Assert.notNull(mapType, "Map type must not be null");
 		if (mapType.isInterface()) {
 			if (Map.class == mapType) {
@@ -333,6 +334,7 @@ public abstract class CollectionFactory {
 	public static Properties createStringAdaptingProperties() {
 		return new Properties() {
 			@Override
+			@Nullable
 			public String getProperty(String key) {
 				Object value = get(key);
 				return (value != null ? value.toString() : null);

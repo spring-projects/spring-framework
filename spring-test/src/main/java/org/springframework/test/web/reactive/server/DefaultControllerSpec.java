@@ -19,13 +19,13 @@ package org.springframework.test.web.reactive.server;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.Validator;
@@ -139,22 +139,29 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 
 	private class TestWebFluxConfigurer implements WebFluxConfigurer {
 
+		@Nullable
 		private Consumer<RequestedContentTypeResolverBuilder> contentTypeResolverConsumer;
 
+		@Nullable
 		private Consumer<CorsRegistry> corsRegistryConsumer;
 
+		@Nullable
 		private Consumer<ArgumentResolverConfigurer> argumentResolverConsumer;
 
+		@Nullable
 		private Consumer<PathMatchConfigurer> pathMatchConsumer;
 
+		@Nullable
 		private Consumer<ServerCodecConfigurer> messageCodecsConsumer;
 
+		@Nullable
 		private Consumer<FormatterRegistry> formattersConsumer;
 
+		@Nullable
 		private Validator validator;
 
+		@Nullable
 		private Consumer<ViewResolverRegistry> viewResolversConsumer;
-
 
 		@Override
 		public void configureContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
@@ -199,8 +206,9 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 		}
 
 		@Override
-		public Optional<Validator> getValidator() {
-			return Optional.ofNullable(this.validator);
+		@Nullable
+		public Validator getValidator() {
+			return this.validator;
 		}
 
 		@Override

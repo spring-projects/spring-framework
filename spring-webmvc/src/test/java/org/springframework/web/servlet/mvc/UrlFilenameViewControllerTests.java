@@ -152,16 +152,16 @@ public class UrlFilenameViewControllerTests {
 	public void settingPrefixToNullCausesEmptyStringToBeUsed() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		ctrl.setPrefix(null);
-		assertNotNull("When setPrefix(..) is called with a null argument, the empty string value must be used instead.", ctrl.getPrefix());
-		assertEquals("When setPrefix(..) is called with a null argument, the empty string value must be used instead.", "", ctrl.getPrefix());
+		assertNotNull("For setPrefix(..) with null, the empty string must be used instead.", ctrl.getPrefix());
+		assertEquals("For setPrefix(..) with null, the empty string must be used instead.", "", ctrl.getPrefix());
 	}
 
 	@Test
 	public void settingSuffixToNullCausesEmptyStringToBeUsed() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		ctrl.setSuffix(null);
-		assertNotNull("When setSuffix(..) is called with a null argument, the empty string value must be used instead.", ctrl.getSuffix());
-		assertEquals("When setSuffix(..) is called with a null argument, the empty string value must be used instead.", "", ctrl.getSuffix());
+		assertNotNull("For setPrefix(..) with null, the empty string must be used instead.", ctrl.getSuffix());
+		assertEquals("For setPrefix(..) with null, the empty string must be used instead.", "", ctrl.getSuffix());
 	}
 
 	/**

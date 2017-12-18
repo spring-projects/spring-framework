@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.accept;
 
 import java.util.List;
@@ -22,8 +23,10 @@ import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Strategy for resolving the requested media types for a
- * {@code ServerWebExchange}.
+ * Strategy to resolve the requested media types for a {@code ServerWebExchange}.
+ *
+ * <p>See {@link RequestedContentTypeResolverBuilder} to create a sequence of
+ * strategies.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -33,13 +36,10 @@ public interface RequestedContentTypeResolver {
 	/**
 	 * Resolve the given request to a list of requested media types. The returned
 	 * list is ordered by specificity first and by quality parameter second.
-	 *
 	 * @param exchange the current exchange
 	 * @return the requested media types or an empty list
-	 *
-	 * @throws NotAcceptableStatusException if the requested media types is invalid
+	 * @throws NotAcceptableStatusException if the requested media type is invalid
 	 */
-	List<MediaType> resolveMediaTypes(ServerWebExchange exchange)
-			throws NotAcceptableStatusException;
+	List<MediaType> resolveMediaTypes(ServerWebExchange exchange);
 
 }

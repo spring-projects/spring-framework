@@ -18,6 +18,7 @@ package org.springframework.http.codec.multipart;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,44 +45,91 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
+import org.springframework.http.codec.FormHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 
 /**
- * {@code HttpMessageWriter} for {@code "multipart/form-data"} requests.
+ * {@link HttpMessageWriter} for writing a {@code MultiValueMap<String, ?>}
+ * as multipart form data, i.e. {@code "multipart/form-data"}, to the body
+ * of a request.
  *
- * <p>This writer delegates to other message writers to write the respective
- * parts. By default basic writers are registered for {@code String}, and
- * {@code Resources}. These can be overridden through the provided constructors.
+ * <p>The serialization of individual parts is delegated to other writers.
+ * By default only {@link String} and {@link Resource} parts are supported but
+ * you can configure others through a constructor argument.
+ *
+ * <p>This writer can be configured with a {@link FormHttpMessageWriter} to
+ * delegate to. It is the preferred way of supporting both form data and
+ * multipart data (as opposed to registering each writer separately) so that
+ * when the {@link MediaType} is not specified and generics are not present on
+ * the target element type, we can inspect the values in the actual map and
+ * decide whether to write plain form data (String values only) or otherwise.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @see FormHttpMessageWriter
  */
 public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueMap<String, ?>> {
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
-
 	private final List<HttpMessageWriter<?>> partWriters;
+
+	@Nullable
+	private final HttpMessageWriter<MultiValueMap<String, String>> formWriter;
 
 	private Charset charset = DEFAULT_CHARSET;
 
+	private final List<MediaType> supportedMediaTypes;
 
+	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
+
+
+	/**
+	 * Constructor with a default list of part writers (String and Resource).
+	 */
 	public MultipartHttpMessageWriter() {
-		this.partWriters = Arrays.asList(
+		this(Arrays.asList(
 				new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()),
 				new ResourceHttpMessageWriter()
-		);
+		));
 	}
 
+	/**
+	 * Constructor with explicit list of writers for serializing parts.
+	 */
 	public MultipartHttpMessageWriter(List<HttpMessageWriter<?>> partWriters) {
+		this(partWriters, new FormHttpMessageWriter());
+	}
+
+	/**
+	 * Constructor with explicit list of writers for serializing parts and a
+	 * writer for plain form data to fall back when no media type is specified
+	 * and the actual map consists of String values only.
+	 * @param partWriters the writers for serializing parts
+	 * @param formWriter the fallback writer for form data, {@code null} by default
+	 */
+	public MultipartHttpMessageWriter(List<HttpMessageWriter<?>> partWriters,
+			@Nullable  HttpMessageWriter<MultiValueMap<String, String>> formWriter) {
+
 		this.partWriters = partWriters;
+		this.formWriter = formWriter;
+		this.supportedMediaTypes = initMediaTypes(formWriter);
+	}
+
+	private static List<MediaType> initMediaTypes(@Nullable HttpMessageWriter<?> formWriter) {
+		List<MediaType> result = new ArrayList<>();
+		result.add(MediaType.MULTIPART_FORM_DATA);
+		if (formWriter != null) {
+			result.addAll(formWriter.getWritableMediaTypes());
+		}
+		return Collections.unmodifiableList(result);
 	}
 
 
@@ -105,33 +153,63 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 
 	@Override
 	public List<MediaType> getWritableMediaTypes() {
-		return Collections.singletonList(MediaType.MULTIPART_FORM_DATA);
+		return this.supportedMediaTypes;
 	}
 
 	@Override
-	public boolean canWrite(ResolvableType elementType, MediaType mediaType) {
-		return MultiValueMap.class.isAssignableFrom(elementType.getRawClass()) &&
-				(mediaType == null || MediaType.MULTIPART_FORM_DATA.isCompatibleWith(mediaType));
+	public boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType) {
+		Class<?> rawClass = elementType.getRawClass();
+		return rawClass != null && MultiValueMap.class.isAssignableFrom(rawClass) &&
+				(mediaType == null ||
+						this.supportedMediaTypes.stream().anyMatch(m -> m.isCompatibleWith(mediaType)));
 	}
 
 	@Override
 	public Mono<Void> write(Publisher<? extends MultiValueMap<String, ?>> inputStream,
-			ResolvableType elementType, MediaType mediaType, ReactiveHttpOutputMessage outputMessage,
+			ResolvableType elementType, @Nullable MediaType mediaType, ReactiveHttpOutputMessage outputMessage,
 			Map<String, Object> hints) {
 
+		return Mono.from(inputStream).flatMap(map -> {
+			if (this.formWriter == null || isMultipart(map, mediaType)) {
+				return writeMultipart(map, outputMessage);
+			}
+			else {
+				@SuppressWarnings("unchecked")
+				MultiValueMap<String, String> formData = (MultiValueMap<String, String>) map;
+				return this.formWriter.write(Mono.just(formData), elementType, mediaType, outputMessage, hints);
+			}
+
+		});
+	}
+
+	private boolean isMultipart(MultiValueMap<String, ?> map, @Nullable MediaType contentType) {
+		if (contentType != null) {
+			return MediaType.MULTIPART_FORM_DATA.includes(contentType);
+		}
+		for (String name : map.keySet()) {
+			for (Object value : map.get(name)) {
+				if (value != null && !(value instanceof String)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private Mono<Void> writeMultipart(MultiValueMap<String, ?> map, ReactiveHttpOutputMessage outputMessage) {
 		byte[] boundary = generateMultipartBoundary();
 
 		Map<String, String> params = new HashMap<>(2);
 		params.put("boundary", new String(boundary, StandardCharsets.US_ASCII));
 		params.put("charset", getCharset().name());
+
 		outputMessage.getHeaders().setContentType(new MediaType(MediaType.MULTIPART_FORM_DATA, params));
 
-		return Mono.from(inputStream).flatMap(map -> {
-			Flux<DataBuffer> body = Flux.fromIterable(map.entrySet())
-					.concatMap(entry -> encodePartValues(boundary, entry.getKey(), entry.getValue()))
-					.concatWith(Mono.just(generateLastLine(boundary)));
-			return outputMessage.writeWith(body);
-		});
+		Flux<DataBuffer> body = Flux.fromIterable(map.entrySet())
+				.concatMap(entry -> encodePartValues(boundary, entry.getKey(), entry.getValue()))
+				.concatWith(Mono.just(generateLastLine(boundary)));
+
+		return outputMessage.writeWith(body);
 	}
 
 	/**
@@ -155,6 +233,7 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 		if (value instanceof HttpEntity) {
 			outputMessage.getHeaders().putAll(((HttpEntity<T>) value).getHeaders());
 			body = ((HttpEntity<T>) value).getBody();
+			Assert.state(body != null, "MultipartHttpMessageWriter only supports HttpEntity with body");
 		}
 		else {
 			body = value;
@@ -227,6 +306,7 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 
 		private final AtomicBoolean committed = new AtomicBoolean();
 
+		@Nullable
 		private Flux<DataBuffer> body;
 
 		public MultipartHttpOutputMessage(DataBufferFactory bufferFactory, Charset charset) {

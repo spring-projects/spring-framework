@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.servlet.samples.spr;
 
 import org.junit.Test;
@@ -41,20 +42,21 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @ContextConfiguration
 public class MockMvcBuilderMethodChainTests {
 
-    @Autowired
-    private WebApplicationContext wac;
+	@Autowired
+	private WebApplicationContext wac;
 
-    @Test
-    public void chainMultiple() {
-        MockMvcBuilders
-                .webAppContextSetup(wac)
-                .addFilter(new CharacterEncodingFilter() )
-                .defaultRequest(get("/").contextPath("/mywebapp"))
-                .build();
-    }
+	@Test
+	public void chainMultiple() {
+		MockMvcBuilders
+				.webAppContextSetup(wac)
+				.addFilter(new CharacterEncodingFilter() )
+				.defaultRequest(get("/").contextPath("/mywebapp"))
+				.build();
+	}
 
-    @Configuration
-    @EnableWebMvc
-    static class WebConfig implements WebMvcConfigurer {
-    }
+	@Configuration
+	@EnableWebMvc
+	static class WebConfig implements WebMvcConfigurer {
+	}
+
 }

@@ -30,11 +30,13 @@ import reactor.test.StepVerifier;
 
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Unit tests for {@link AbstractView}.
@@ -47,7 +49,7 @@ public class AbstractViewTests {
 
     @Before
     public void setup() {
-        this.exchange = MockServerHttpRequest.get("/").toExchange();
+        this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
     }
 
     @SuppressWarnings("unchecked")
@@ -66,11 +68,12 @@ public class AbstractViewTests {
         TestView view = new TestView();
         StepVerifier.create(view.render(attributes, null, this.exchange)).verifyComplete();
 
-        assertEquals(testBean1, view.attributes.get("attr1"));
-        assertArrayEquals(new TestBean[] {testBean1, testBean2}, ((List<TestBean>)view.attributes.get("attr2")).toArray());
-        assertEquals(testBean2, view.attributes.get("attr3"));
-        assertArrayEquals(new TestBean[] {testBean1, testBean2}, ((List<TestBean>)view.attributes.get("attr4")).toArray());
-        assertNull(view.attributes.get("attr5"));
+		Map<String, Object> actual = view.attributes;
+		assertEquals(testBean1, actual.get("attr1"));
+        assertArrayEquals(new TestBean[] {testBean1, testBean2}, ((List<TestBean>) actual.get("attr2")).toArray());
+        assertEquals(testBean2, actual.get("attr3"));
+        assertArrayEquals(new TestBean[] {testBean1, testBean2}, ((List<TestBean>) actual.get("attr4")).toArray());
+        assertNull(actual.get("attr5"));
     }
 
 
@@ -79,7 +82,9 @@ public class AbstractViewTests {
         private Map<String, Object> attributes;
 
         @Override
-        protected Mono<Void> renderInternal(Map<String, Object> renderAttributes, MediaType contentType, ServerWebExchange exchange) {
+        protected Mono<Void> renderInternal(Map<String, Object> renderAttributes,
+				MediaType contentType, ServerWebExchange exchange) {
+
             this.attributes = renderAttributes;
             return Mono.empty();
         }

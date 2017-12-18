@@ -24,6 +24,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -43,6 +44,7 @@ final class HttpComponentsAsyncClientHttpResponse extends AbstractClientHttpResp
 
 	private final HttpResponse httpResponse;
 
+	@Nullable
 	private HttpHeaders headers;
 
 

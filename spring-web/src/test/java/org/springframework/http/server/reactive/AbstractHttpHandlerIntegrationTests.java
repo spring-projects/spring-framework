@@ -28,7 +28,6 @@ import org.junit.runners.Parameterized;
 import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.http.server.reactive.bootstrap.JettyHttpServer;
 import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
-import org.springframework.http.server.reactive.bootstrap.RxNettyHttpServer;
 import org.springframework.http.server.reactive.bootstrap.TomcatHttpServer;
 import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
 
@@ -48,7 +47,6 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 		File base = new File(System.getProperty("java.io.tmpdir"));
 		return new Object[][] {
 				{new JettyHttpServer()},
-				{new RxNettyHttpServer()},
 				{new ReactorHttpServer()},
 				{new TomcatHttpServer(base.getAbsolutePath())},
 				{new UndertowHttpServer()}

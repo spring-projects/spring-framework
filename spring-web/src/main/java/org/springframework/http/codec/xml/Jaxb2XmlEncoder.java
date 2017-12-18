@@ -33,6 +33,7 @@ import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.EncodingException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -56,7 +57,7 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 
 
 	@Override
-	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
+	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		if (super.canEncode(elementType, mimeType)) {
 			Class<?> outputClass = elementType.resolve(Object.class);
 			return (outputClass.isAnnotationPresent(XmlRootElement.class) ||
@@ -70,7 +71,7 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 
 	@Override
 	protected Flux<DataBuffer> encode(Object value, DataBufferFactory dataBufferFactory,
-			ResolvableType type, MimeType mimeType, Map<String, Object> hints) {
+			ResolvableType type, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 		try {
 			DataBuffer buffer = dataBufferFactory.allocateBuffer(1024);
 			OutputStream outputStream = buffer.asOutputStream();

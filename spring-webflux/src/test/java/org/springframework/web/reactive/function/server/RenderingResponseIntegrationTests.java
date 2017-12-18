@@ -31,6 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.reactive.result.view.ViewResolver;
@@ -141,7 +142,7 @@ public class RenderingResponseIntegrationTests extends AbstractRouterFunctionInt
 		}
 
 		@Override
-		public Mono<Void> render(Map<String, ?> model, MediaType contentType,
+		public Mono<Void> render(@Nullable Map<String, ?> model, @Nullable MediaType contentType,
 				ServerWebExchange exchange) {
 			StringBuilder builder = new StringBuilder();
 			builder.append("name=").append(this.name).append('\n');

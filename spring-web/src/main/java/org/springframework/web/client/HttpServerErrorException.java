@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown when an HTTP 5xx is received.
@@ -62,7 +63,7 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	 * @since 3.0.5
 	 */
 	public HttpServerErrorException(HttpStatus statusCode, String statusText,
-			byte[] responseBody, Charset responseCharset) {
+			@Nullable byte[] responseBody, @Nullable Charset responseCharset) {
 
 		super(statusCode, statusText, responseBody, responseCharset);
 	}
@@ -78,7 +79,7 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	 * @since 3.1.2
 	 */
 	public HttpServerErrorException(HttpStatus statusCode, String statusText,
-			HttpHeaders responseHeaders, byte[] responseBody, Charset responseCharset) {
+			@Nullable HttpHeaders responseHeaders, @Nullable byte[] responseBody, @Nullable Charset responseCharset) {
 
 		super(statusCode, statusText, responseHeaders, responseBody, responseCharset);
 	}

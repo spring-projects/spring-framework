@@ -28,6 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 
 /**
  * Strategy for reading from a {@link ReactiveHttpInputMessage} and decoding
@@ -50,10 +51,10 @@ public interface HttpMessageReader<T> {
 	/**
 	 * Whether the given object type is supported by this reader.
 	 * @param elementType the type of object to check
-	 * @param mediaType the media type for the read, possibly {@code null}
+	 * @param mediaType the media type for the read (possibly {@code null})
 	 * @return {@code true} if readable, {@code false} otherwise
 	 */
-	boolean canRead(ResolvableType elementType, MediaType mediaType);
+	boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType);
 
 	/**
 	 * Read from the input message and encode to a stream of objects.

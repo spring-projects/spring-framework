@@ -23,6 +23,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.junit.Test;
@@ -42,6 +43,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
@@ -180,9 +182,23 @@ public class EnableAsyncTests {
 	}
 
 	@Test
-	public void customExecutorIsPropagated() throws InterruptedException {
+	public void customExecutorBean() throws InterruptedException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(CustomExecutorAsyncConfig.class);
+		ctx.register(CustomExecutorBean.class);
+		ctx.refresh();
+
+		AsyncBean asyncBean = ctx.getBean(AsyncBean.class);
+		asyncBean.work();
+		Thread.sleep(500);
+		assertThat(asyncBean.getThreadOfExecution().getName(), startsWith("Custom-"));
+
+		ctx.close();
+	}
+
+	@Test
+	public void customExecutorConfig() throws InterruptedException {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(CustomExecutorConfig.class);
 		ctx.refresh();
 
 		AsyncBean asyncBean = ctx.getBean(AsyncBean.class);
@@ -381,7 +397,23 @@ public class EnableAsyncTests {
 
 	@Configuration
 	@EnableAsync
-	static class CustomExecutorAsyncConfig implements AsyncConfigurer {
+	static class CustomExecutorBean {
+
+		@Bean
+		public AsyncBean asyncBean() {
+			return new AsyncBean();
+		}
+
+		@Bean
+		public Executor taskExecutor() {
+			return Executors.newSingleThreadExecutor(new CustomizableThreadFactory("Custom-"));
+		}
+	}
+
+
+	@Configuration
+	@EnableAsync
+	static class CustomExecutorConfig implements AsyncConfigurer {
 
 		@Bean
 		public AsyncBean asyncBean() {

@@ -58,8 +58,8 @@ final class SimpleBufferingAsyncClientHttpRequest extends AbstractBufferingAsync
 
 
 	@Override
-	public HttpMethod getMethod() {
-		return HttpMethod.resolve(this.connection.getRequestMethod());
+	public String getMethodValue() {
+		return this.connection.getRequestMethod();
 	}
 
 	@Override

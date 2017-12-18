@@ -29,6 +29,8 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.WebDataBinder;
@@ -44,7 +46,6 @@ import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.multipart.support.MultipartResolutionDelegate;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.util.WebUtils;
 
 /**
  * Resolves method arguments annotated with @{@link RequestParam}, arguments of
@@ -99,7 +100,9 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	 * is treated as a request parameter even if it isn't annotated, the
 	 * request parameter name is derived from the method parameter name.
 	 */
-	public RequestParamMethodArgumentResolver(ConfigurableBeanFactory beanFactory, boolean useDefaultResolution) {
+	public RequestParamMethodArgumentResolver(@Nullable ConfigurableBeanFactory beanFactory,
+			boolean useDefaultResolution) {
+
 		super(beanFactory);
 		this.useDefaultResolution = useDefaultResolution;
 	}
@@ -124,8 +127,8 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	public boolean supportsParameter(MethodParameter parameter) {
 		if (parameter.hasParameterAnnotation(RequestParam.class)) {
 			if (Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType())) {
-				String paramName = parameter.getParameterAnnotation(RequestParam.class).name();
-				return StringUtils.hasText(paramName);
+				RequestParam requestParam = parameter.getParameterAnnotation(RequestParam.class);
+				return (requestParam != null && StringUtils.hasText(requestParam.name()));
 			}
 			else {
 				return true;
@@ -155,17 +158,19 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	}
 
 	@Override
+	@Nullable
 	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
 		HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
-		MultipartHttpServletRequest multipartRequest =
-				WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
 
-		Object mpArg = MultipartResolutionDelegate.resolveMultipartArgument(name, parameter, servletRequest);
-		if (mpArg != MultipartResolutionDelegate.UNRESOLVABLE) {
-			return mpArg;
+		if (servletRequest != null) {
+			Object mpArg = MultipartResolutionDelegate.resolveMultipartArgument(name, parameter, servletRequest);
+			if (mpArg != MultipartResolutionDelegate.UNRESOLVABLE) {
+				return mpArg;
+			}
 		}
 
 		Object arg = null;
+		MultipartHttpServletRequest multipartRequest = request.getNativeRequest(MultipartHttpServletRequest.class);
 		if (multipartRequest != null) {
 			List<MultipartFile> files = multipartRequest.getFiles(name);
 			if (!files.isEmpty()) {
@@ -187,7 +192,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 
 		HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
 		if (MultipartResolutionDelegate.isMultipartArgument(parameter)) {
-			if (!MultipartResolutionDelegate.isMultipartRequest(servletRequest)) {
+			if (servletRequest == null || !MultipartResolutionDelegate.isMultipartRequest(servletRequest)) {
 				throw new MultipartException("Current request is not a multipart request");
 			}
 			else {
@@ -201,7 +206,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	}
 
 	@Override
-	public void contributeMethodArgument(MethodParameter parameter, Object value,
+	public void contributeMethodArgument(MethodParameter parameter, @Nullable Object value,
 			UriComponentsBuilder builder, Map<String, Object> uriVariables, ConversionService conversionService) {
 
 		Class<?> paramType = parameter.getNestedParameterType();
@@ -212,6 +217,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 		RequestParam requestParam = parameter.getParameterAnnotation(RequestParam.class);
 		String name = (requestParam == null || StringUtils.isEmpty(requestParam.name()) ?
 				parameter.getParameterName() : requestParam.name());
+		Assert.state(name != null, "Unresolvable parameter name");
 
 		if (value == null) {
 			if (requestParam != null) {
@@ -232,7 +238,10 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 		}
 	}
 
-	protected String formatUriValue(ConversionService cs, TypeDescriptor sourceType, Object value) {
+	@Nullable
+	protected String formatUriValue(
+			@Nullable ConversionService cs, @Nullable TypeDescriptor sourceType, @Nullable Object value) {
+
 		if (value == null) {
 			return null;
 		}

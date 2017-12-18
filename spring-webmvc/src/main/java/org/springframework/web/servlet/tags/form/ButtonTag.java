@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,49 @@ import javax.servlet.jsp.JspException;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
 
 /**
- * An HTML button tag. This tag is provided for completeness if the application
- * relies on a {@link RequestDataValueProcessor}.
+ * The {@code <button>} tag renders a form field label in an HTML 'button' tag.
+ * It is provided for completeness if the application relies on a
+ * {@link RequestDataValueProcessor}.
+ *
+ * <p>
+ * <table>
+ * <caption>Attribute Summary</caption>
+ * <thead>
+ * <tr>
+ * <th class="colFirst">Attribute</th>
+ * <th class="colOne">Required?</th>
+ * <th class="colOne">Runtime Expression?</th>
+ * <th class="colLast">Description</th>
+ * </tr>
+ * </thead>
+ * <tbody>
+ * <tr class="altColor">
+ * <td><p>disabled</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Optional Attribute. Setting the value of this attribute to 'true'
+ * will disable the HTML element.</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>id</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Standard Attribute</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td><p>name</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>The name attribute for the HTML button tag</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>value</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>The name attribute for the HTML button tag</p></td>
+ * </tr>
+ * </tbody>
+ * </table>
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -57,7 +98,7 @@ public class ButtonTag extends AbstractHtmlElementTag {
 	 */
 	@Override
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	/**

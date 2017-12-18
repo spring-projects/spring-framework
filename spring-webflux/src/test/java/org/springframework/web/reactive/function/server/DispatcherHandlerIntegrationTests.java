@@ -36,16 +36,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
-import org.springframework.web.reactive.HandlerAdapter;
-import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.config.EnableWebFlux;
-import org.springframework.web.reactive.config.WebFluxConfigurationSupport;
-import org.springframework.web.reactive.function.server.support.HandlerFunctionAdapter;
-import org.springframework.web.reactive.function.server.support.ServerResponseResultHandler;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.junit.Assert.*;
-import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 import static org.springframework.web.reactive.function.BodyInserters.fromPublisher;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -108,8 +102,9 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 	}
 
 
+	@EnableWebFlux
 	@Configuration
-	static class TestConfiguration extends WebFluxConfigurationSupport {
+	static class TestConfiguration {
 
 		@Bean
 		public PersonHandler personHandler() {
@@ -122,31 +117,23 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		}
 
 		@Bean
-		public HandlerAdapter handlerAdapter() {
-			return new HandlerFunctionAdapter();
+		public RouterFunction<EntityResponse<Person>> monoRouterFunction(PersonHandler personHandler) {
+			return route(RequestPredicates.GET("/mono"), personHandler::mono);
 		}
 
 		@Bean
-		public HandlerMapping handlerMapping() {
-
-			PersonHandler personHandler = personHandler();
-			return RouterFunctions.toHandlerMapping(
-					route(RequestPredicates.GET("/mono"), personHandler::mono)
-							.and(route(RequestPredicates.GET("/flux"), personHandler::flux)));
+		public RouterFunction<ServerResponse> fluxRouterFunction(PersonHandler personHandler) {
+			return route(RequestPredicates.GET("/flux"), personHandler::flux);
 		}
 
-		@Bean
-		public ServerResponseResultHandler responseResultHandler() {
-			return new ServerResponseResultHandler();
-		}
 	}
 
 
 	private static class PersonHandler {
 
-		public Mono<ServerResponse> mono(ServerRequest request) {
+		public Mono<EntityResponse<Person>> mono(ServerRequest request) {
 			Person person = new Person("John");
-			return ServerResponse.ok().body(fromObject(person));
+			return EntityResponse.fromObject(person).build();
 		}
 
 		public Mono<ServerResponse> flux(ServerRequest request) {

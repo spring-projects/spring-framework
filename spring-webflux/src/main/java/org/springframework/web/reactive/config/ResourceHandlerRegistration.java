@@ -23,6 +23,7 @@ import org.springframework.cache.Cache;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.CacheControl;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.resource.ResourceWebHandler;
 
@@ -40,8 +41,10 @@ public class ResourceHandlerRegistration {
 
 	private final List<Resource> locations = new ArrayList<>();
 
+	@Nullable
 	private CacheControl cacheControl;
 
+	@Nullable
 	private ResourceChainRegistration resourceChainRegistration;
 
 
@@ -52,7 +55,8 @@ public class ResourceHandlerRegistration {
 	 * @param pathPatterns one or more resource URL path patterns
 	 */
 	public ResourceHandlerRegistration(ResourceLoader resourceLoader, String... pathPatterns) {
-		Assert.notEmpty(pathPatterns, "At least one path pattern is required for resource handling.");
+		Assert.notNull(resourceLoader, "ResourceLoader is required");
+		Assert.notEmpty(pathPatterns, "At least one path pattern is required for resource handling");
 		this.resourceLoader = resourceLoader;
 		this.pathPatterns = pathPatterns;
 	}
@@ -74,7 +78,7 @@ public class ResourceHandlerRegistration {
 	 */
 	public ResourceHandlerRegistration addResourceLocations(String... resourceLocations) {
 		for (String location : resourceLocations) {
-			this.locations.add(resourceLoader.getResource(location));
+			this.locations.add(this.resourceLoader.getResource(location));
 		}
 		return this;
 	}
@@ -82,7 +86,6 @@ public class ResourceHandlerRegistration {
 	/**
 	 * Specify the {@link CacheControl} which should be used
 	 * by the resource handler.
-	 *
 	 * @param cacheControl the CacheControl configuration to use
 	 * @return the same {@link ResourceHandlerRegistration} instance, for
 	 * chained method invocation
@@ -95,11 +98,9 @@ public class ResourceHandlerRegistration {
 	/**
 	 * Configure a chain of resource resolvers and transformers to use. This
 	 * can be useful, for example, to apply a version strategy to resource URLs.
-	 *
 	 * <p>If this method is not invoked, by default only a simple
 	 * {@code PathResourceResolver} is used in order to match URL paths to
 	 * resources under the configured locations.
-	 *
 	 * @param cacheResources whether to cache the result of resource resolution;
 	 * setting this to "true" is recommended for production (and "false" for
 	 * development, especially when applying a version strategy)
@@ -114,11 +115,9 @@ public class ResourceHandlerRegistration {
 	/**
 	 * Configure a chain of resource resolvers and transformers to use. This
 	 * can be useful, for example, to apply a version strategy to resource URLs.
-	 *
 	 * <p>If this method is not invoked, by default only a simple
 	 * {@code PathResourceResolver} is used in order to match URL paths to
 	 * resources under the configured locations.
-	 *
 	 * @param cacheResources whether to cache the result of resource resolution;
 	 * setting this to "true" is recommended for production (and "false" for
 	 * development, especially when applying a version strategy

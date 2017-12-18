@@ -32,15 +32,20 @@ public class UrlBasedCorsConfigurationSourceTests {
 
 	@Test
 	public void empty() {
-		assertNull(this.configSource.getCorsConfiguration(new MockHttpServletRequest(HttpMethod.GET.name(), "/bar/test.html")));
+		MockHttpServletRequest request = new MockHttpServletRequest(HttpMethod.GET.name(), "/bar/test.html");
+		assertNull(this.configSource.getCorsConfiguration(request));
 	}
 
 	@Test
 	public void registerAndMatch() {
 		CorsConfiguration config = new CorsConfiguration();
 		this.configSource.registerCorsConfiguration("/bar/**", config);
-		assertNull(this.configSource.getCorsConfiguration(new MockHttpServletRequest(HttpMethod.GET.name(), "/foo/test.html")));
-		assertEquals(config, this.configSource.getCorsConfiguration(new MockHttpServletRequest(HttpMethod.GET.name(), "/bar/test.html")));
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo/test.html");
+		assertNull(this.configSource.getCorsConfiguration(request));
+
+		request.setRequestURI("/bar/test.html");
+		assertEquals(config, this.configSource.getCorsConfiguration(request));
 	}
 
 	@Test(expected = UnsupportedOperationException.class)

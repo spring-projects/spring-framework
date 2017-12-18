@@ -21,6 +21,7 @@ import javax.jms.Session;
 import org.springframework.core.Constants;
 import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.lang.Nullable;
 
 /**
  * Common configuration object for activating a JMS message endpoint.
@@ -43,22 +44,28 @@ public class JmsActivationSpecConfig {
 	private static final Constants sessionConstants = new Constants(Session.class);
 
 
+	@Nullable
 	private String destinationName;
 
 	private boolean pubSubDomain = false;
 
+	@Nullable
 	private Boolean replyPubSubDomain;
 
+	@Nullable
 	private QosSettings replyQosSettings;
 
 	private boolean subscriptionDurable = false;
 
 	private boolean subscriptionShared = false;
 
+	@Nullable
 	private String subscriptionName;
 
+	@Nullable
 	private String clientId;
 
+	@Nullable
 	private String messageSelector;
 
 	private int acknowledgeMode = Session.AUTO_ACKNOWLEDGE;
@@ -67,13 +74,15 @@ public class JmsActivationSpecConfig {
 
 	private int prefetchSize = -1;
 
+	@Nullable
 	private MessageConverter messageConverter;
 
 
-	public void setDestinationName(String destinationName) {
+	public void setDestinationName(@Nullable String destinationName) {
 		this.destinationName = destinationName;
 	}
 
+	@Nullable
 	public String getDestinationName() {
 		return this.destinationName;
 	}
@@ -99,10 +108,11 @@ public class JmsActivationSpecConfig {
 		}
 	}
 
-	public void setReplyQosSettings(QosSettings replyQosSettings) {
+	public void setReplyQosSettings(@Nullable QosSettings replyQosSettings) {
 		this.replyQosSettings = replyQosSettings;
 	}
 
+	@Nullable
 	public QosSettings getReplyQosSettings() {
 		return this.replyQosSettings;
 	}
@@ -129,35 +139,39 @@ public class JmsActivationSpecConfig {
 		return this.subscriptionShared;
 	}
 
-	public void setSubscriptionName(String subscriptionName) {
+	public void setSubscriptionName(@Nullable String subscriptionName) {
 		this.subscriptionName = subscriptionName;
 	}
 
+	@Nullable
 	public String getSubscriptionName() {
 		return this.subscriptionName;
 	}
 
-	public void setDurableSubscriptionName(String durableSubscriptionName) {
+	public void setDurableSubscriptionName(@Nullable String durableSubscriptionName) {
 		this.subscriptionName = durableSubscriptionName;
-		this.subscriptionDurable = true;
+		this.subscriptionDurable = (durableSubscriptionName != null);
 	}
 
+	@Nullable
 	public String getDurableSubscriptionName() {
 		return (this.subscriptionDurable ? this.subscriptionName : null);
 	}
 
-	public void setClientId(String clientId) {
+	public void setClientId(@Nullable String clientId) {
 		this.clientId = clientId;
 	}
 
+	@Nullable
 	public String getClientId() {
 		return this.clientId;
 	}
 
-	public void setMessageSelector(String messageSelector) {
+	public void setMessageSelector(@Nullable String messageSelector) {
 		this.messageSelector = messageSelector;
 	}
 
+	@Nullable
 	public String getMessageSelector() {
 		return this.messageSelector;
 	}
@@ -260,13 +274,14 @@ public class JmsActivationSpecConfig {
 	 * Set the {@link MessageConverter} strategy for converting JMS Messages.
 	 * @param messageConverter the message converter to use
 	 */
-	public void setMessageConverter(MessageConverter messageConverter) {
+	public void setMessageConverter(@Nullable MessageConverter messageConverter) {
 		this.messageConverter = messageConverter;
 	}
 
 	/**
 	 * Return the {@link MessageConverter} to use, if any.
 	 */
+	@Nullable
 	public MessageConverter getMessageConverter() {
 		return this.messageConverter;
 	}

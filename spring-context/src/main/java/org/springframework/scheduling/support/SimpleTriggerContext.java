@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.scheduling.support;
 
 import java.util.Date;
 
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TriggerContext;
 
 /**
@@ -28,10 +29,13 @@ import org.springframework.scheduling.TriggerContext;
  */
 public class SimpleTriggerContext implements TriggerContext {
 
+	@Nullable
 	private volatile Date lastScheduledExecutionTime;
 
+	@Nullable
 	private volatile Date lastActualExecutionTime;
 
+	@Nullable
 	private volatile Date lastCompletionTime;
 
 
@@ -68,16 +72,19 @@ public class SimpleTriggerContext implements TriggerContext {
 
 
 	@Override
+	@Nullable
 	public Date lastScheduledExecutionTime() {
 		return this.lastScheduledExecutionTime;
 	}
 
 	@Override
+	@Nullable
 	public Date lastActualExecutionTime() {
 		return this.lastActualExecutionTime;
 	}
 
 	@Override
+	@Nullable
 	public Date lastCompletionTime() {
 		return this.lastCompletionTime;
 	}

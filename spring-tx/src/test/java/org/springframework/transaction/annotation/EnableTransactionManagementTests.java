@@ -158,8 +158,9 @@ public class EnableTransactionManagementTests {
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
 
 		bean.saveFoo();
-		assertThat(txManager.begun, equalTo(1));
-		assertThat(txManager.commits, equalTo(1));
+		bean.saveBar();
+		assertThat(txManager.begun, equalTo(2));
+		assertThat(txManager.commits, equalTo(2));
 		assertThat(txManager.rollbacks, equalTo(0));
 
 		ctx.close();
@@ -172,8 +173,9 @@ public class EnableTransactionManagementTests {
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
 
 		bean.saveFoo();
-		assertThat(txManager.begun, equalTo(1));
-		assertThat(txManager.commits, equalTo(1));
+		bean.saveBar();
+		assertThat(txManager.begun, equalTo(2));
+		assertThat(txManager.commits, equalTo(2));
 		assertThat(txManager.rollbacks, equalTo(0));
 
 		ctx.close();
@@ -298,7 +300,15 @@ public class EnableTransactionManagementTests {
 	}
 
 
-	public interface TransactionalTestInterface {
+	public interface BaseTransactionalInterface {
+
+		@Transactional
+		default void saveBar() {
+		}
+	}
+
+
+	public interface TransactionalTestInterface extends BaseTransactionalInterface {
 
 		@Transactional
 		void saveFoo();

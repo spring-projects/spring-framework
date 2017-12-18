@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -43,7 +44,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 
 
 	@Override
-	public void setNestedPath(String nestedPath) {
+	public void setNestedPath(@Nullable String nestedPath) {
 		doSetNestedPath(nestedPath);
 		this.nestedPathStack.clear();
 	}
@@ -74,7 +75,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	 * Actually set the nested path.
 	 * Delegated to by setNestedPath and pushNestedPath.
 	 */
-	protected void doSetNestedPath(String nestedPath) {
+	protected void doSetNestedPath(@Nullable String nestedPath) {
 		if (nestedPath == null) {
 			nestedPath = "";
 		}
@@ -89,7 +90,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	 * Transform the given field into its full path,
 	 * regarding the nested path of this instance.
 	 */
-	protected String fixedField(String field) {
+	protected String fixedField(@Nullable String field) {
 		if (StringUtils.hasLength(field)) {
 			return getNestedPath() + canonicalFieldName(field);
 		}
@@ -122,12 +123,12 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	}
 
 	@Override
-	public void rejectValue(String field, String errorCode) {
+	public void rejectValue(@Nullable String field, String errorCode) {
 		rejectValue(field, errorCode, null, null);
 	}
 
 	@Override
-	public void rejectValue(String field, String errorCode, String defaultMessage) {
+	public void rejectValue(@Nullable String field, String errorCode, String defaultMessage) {
 		rejectValue(field, errorCode, null, defaultMessage);
 	}
 
@@ -161,6 +162,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	}
 
 	@Override
+	@Nullable
 	public ObjectError getGlobalError() {
 		List<ObjectError> globalErrors = getGlobalErrors();
 		return (!globalErrors.isEmpty() ? globalErrors.get(0) : null);
@@ -177,6 +179,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	}
 
 	@Override
+	@Nullable
 	public FieldError getFieldError() {
 		List<FieldError> fieldErrors = getFieldErrors();
 		return (!fieldErrors.isEmpty() ? fieldErrors.get(0) : null);
@@ -206,13 +209,14 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	}
 
 	@Override
+	@Nullable
 	public FieldError getFieldError(String field) {
 		List<FieldError> fieldErrors = getFieldErrors(field);
 		return (!fieldErrors.isEmpty() ? fieldErrors.get(0) : null);
 	}
 
-
 	@Override
+	@Nullable
 	public Class<?> getFieldType(String field) {
 		Object value = getFieldValue(field);
 		return (value != null ? value.getClass() : null);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.transaction.support;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.NestedTransactionNotSupportedException;
 import org.springframework.transaction.SavepointManager;
 import org.springframework.transaction.TransactionException;
@@ -49,6 +50,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 
 	private boolean completed = false;
 
+	@Nullable
 	private Object savepoint;
 
 
@@ -119,13 +121,14 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	 * Set a savepoint for this transaction. Useful for PROPAGATION_NESTED.
 	 * @see org.springframework.transaction.TransactionDefinition#PROPAGATION_NESTED
 	 */
-	protected void setSavepoint(Object savepoint) {
+	protected void setSavepoint(@Nullable Object savepoint) {
 		this.savepoint = savepoint;
 	}
 
 	/**
 	 * Get the savepoint for this transaction, if any.
 	 */
+	@Nullable
 	protected Object getSavepoint() {
 		return this.savepoint;
 	}
@@ -149,12 +152,13 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	 * and release the savepoint right afterwards.
 	 */
 	public void rollbackToHeldSavepoint() throws TransactionException {
-		if (!hasSavepoint()) {
+		Object savepoint = getSavepoint();
+		if (savepoint == null) {
 			throw new TransactionUsageException(
 					"Cannot roll back to savepoint - no savepoint associated with current transaction");
 		}
-		getSavepointManager().rollbackToSavepoint(getSavepoint());
-		getSavepointManager().releaseSavepoint(getSavepoint());
+		getSavepointManager().rollbackToSavepoint(savepoint);
+		getSavepointManager().releaseSavepoint(savepoint);
 		setSavepoint(null);
 	}
 
@@ -162,11 +166,12 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	 * Release the savepoint that is held for the transaction.
 	 */
 	public void releaseHeldSavepoint() throws TransactionException {
-		if (!hasSavepoint()) {
+		Object savepoint = getSavepoint();
+		if (savepoint == null) {
 			throw new TransactionUsageException(
 					"Cannot release savepoint - no savepoint associated with current transaction");
 		}
-		getSavepointManager().releaseSavepoint(getSavepoint());
+		getSavepointManager().releaseSavepoint(savepoint);
 		setSavepoint(null);
 	}
 

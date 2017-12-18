@@ -19,6 +19,7 @@ package org.springframework.web.server;
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -33,6 +34,7 @@ public class ResponseStatusException extends NestedRuntimeException {
 
 	private final HttpStatus status;
 
+	@Nullable
 	private final String reason;
 
 
@@ -50,7 +52,7 @@ public class ResponseStatusException extends NestedRuntimeException {
 	 * @param status the HTTP status (required)
 	 * @param reason the associated reason (optional)
 	 */
-	public ResponseStatusException(HttpStatus status, String reason) {
+	public ResponseStatusException(HttpStatus status, @Nullable String reason) {
 		this(status, reason, null);
 	}
 
@@ -61,7 +63,7 @@ public class ResponseStatusException extends NestedRuntimeException {
 	 * @param reason the associated reason (optional)
 	 * @param cause a nested exception (optional)
 	 */
-	public ResponseStatusException(HttpStatus status, String reason, Throwable cause) {
+	public ResponseStatusException(HttpStatus status, @Nullable String reason, @Nullable Throwable cause) {
 		super(null, cause);
 		Assert.notNull(status, "HttpStatus is required");
 		this.status = status;
@@ -79,13 +81,15 @@ public class ResponseStatusException extends NestedRuntimeException {
 	/**
 	 * The reason explaining the exception (potentially {@code null} or empty).
 	 */
+	@Nullable
 	public String getReason() {
 		return this.reason;
 	}
 
 	@Override
 	public String getMessage() {
-		String msg = "Response status " + this.status + (this.reason != null ? " with reason \"" + reason + "\"" : "");
+		String msg = "Response status " + this.status +
+				(this.reason != null ? " with reason \"" + reason + "\"" : "");
 		return NestedExceptionUtils.buildMessage(msg, getCause());
 	}
 

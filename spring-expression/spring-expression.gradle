@@ -1,0 +1,5 @@
+description = "Spring Expression Language (SpEL)"
+
+dependencies {
+	compile(project(":spring-core"))
+}

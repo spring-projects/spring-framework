@@ -35,6 +35,7 @@ import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockMultipartFile;
@@ -102,7 +103,7 @@ public class RequestPartMethodArgumentResolverTests {
 		messageConverter = mock(HttpMessageConverter.class);
 		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 
-		resolver = new RequestPartMethodArgumentResolver(Collections.<HttpMessageConverter<?>>singletonList(messageConverter));
+		resolver = new RequestPartMethodArgumentResolver(Collections.singletonList(messageConverter));
 		reset(messageConverter);
 
 		byte[] content = "doesn't matter as long as not empty".getBytes(StandardCharsets.UTF_8);
@@ -491,7 +492,8 @@ public class RequestPartMethodArgumentResolverTests {
 
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 
-		Object actualValue = resolver.resolveArgument(optionalRequestPart, mavContainer, webRequest, new ValidatingBinderFactory());
+		Object actualValue = resolver.resolveArgument(
+				optionalRequestPart, mavContainer, webRequest, new ValidatingBinderFactory());
 		assertEquals("Invalid argument value", Optional.of(simpleBean), actualValue);
 		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
 
@@ -557,7 +559,9 @@ public class RequestPartMethodArgumentResolverTests {
 	private final class ValidatingBinderFactory implements WebDataBinderFactory {
 
 		@Override
-		public WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName) throws Exception {
+		public WebDataBinder createBinder(NativeWebRequest webRequest, @Nullable Object target,
+				String objectName) throws Exception {
+
 			LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 			validator.afterPropertiesSet();
 			WebDataBinder dataBinder = new WebDataBinder(target, objectName);

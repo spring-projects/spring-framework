@@ -270,7 +270,8 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 
 	@Test
 	 public void handleTransportRequestJsonp() throws Exception {
-		TransportHandlingSockJsService jsonpService = new TransportHandlingSockJsService(this.taskScheduler, this.jsonpHandler, this.jsonpSendHandler);
+		TransportHandlingSockJsService jsonpService = new TransportHandlingSockJsService(
+				this.taskScheduler, this.jsonpHandler, this.jsonpSendHandler);
 		String sockJsPath = sessionUrlPrefix+ "jsonp";
 		setRequest("GET", sockJsPrefix + sockJsPath);
 		jsonpService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
@@ -291,7 +292,8 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 
 	@Test
 	public void handleTransportRequestWebsocket() throws Exception {
-		TransportHandlingSockJsService wsService = new TransportHandlingSockJsService(this.taskScheduler, this.wsTransportHandler);
+		TransportHandlingSockJsService wsService = new TransportHandlingSockJsService(
+				this.taskScheduler, this.wsTransportHandler);
 		String sockJsPath = "/websocket";
 		setRequest("GET", sockJsPrefix + sockJsPath);
 		wsService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);

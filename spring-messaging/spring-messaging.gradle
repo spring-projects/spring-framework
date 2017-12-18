@@ -1,0 +1,47 @@
+description = "Spring Messaging"
+
+apply plugin: "io.spring.dependency-management"
+
+dependencyManagement {
+	imports {
+		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
+		mavenBom "io.netty:netty-bom:${nettyVersion}"
+	}
+	resolutionStrategy {
+		cacheChangingModulesFor 0, 'seconds'
+	}
+	applyMavenExclusions = false
+}
+
+dependencies {
+	compile(project(":spring-beans"))
+	compile(project(":spring-core"))
+	optional(project(":spring-context"))
+	optional(project(":spring-oxm"))
+	optional("io.projectreactor.ipc:reactor-netty")
+	optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
+		exclude group: "javax.servlet", module: "javax.servlet-api"
+	}
+	optional("org.eclipse.jetty.websocket:websocket-client:${jettyVersion}")
+	optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
+	optional("javax.xml.bind:jaxb-api:2.3.0")
+	testCompile("javax.inject:javax.inject-tck:1")
+	testCompile("javax.servlet:javax.servlet-api:3.1.0")
+	testCompile("javax.validation:validation-api:1.1.0.Final")
+	testCompile("com.thoughtworks.xstream:xstream:1.4.10")
+	testCompile("org.apache.activemq:activemq-broker:5.8.0")
+	testCompile("org.apache.activemq:activemq-kahadb-store:5.8.0") {
+		exclude group: "org.springframework", module: "spring-context"
+	}
+	testCompile("org.apache.activemq:activemq-stomp:5.8.0")
+	testCompile("org.eclipse.jetty:jetty-webapp:${jettyVersion}") {
+		exclude group: "javax.servlet", module: "javax.servlet-api"
+	}
+	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
+	testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
+	testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+	testCompile("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0")
+	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0")
+	testRuntime("com.sun.activation:javax.activation:1.2.0")
+}

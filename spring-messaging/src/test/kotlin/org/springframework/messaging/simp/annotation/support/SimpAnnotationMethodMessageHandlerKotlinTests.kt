@@ -155,7 +155,7 @@ class SimpAnnotationMethodMessageHandlerKotlinTests {
                                                          clientOutboundChannel: MessageChannel) :
             SimpAnnotationMethodMessageHandler(clientInboundChannel, clientOutboundChannel, brokerTemplate) {
 
-        fun registerHandler(handler: Any?) {
+        fun registerHandler(handler: Any) {
             super.detectHandlerMethods(handler)
         }
     }

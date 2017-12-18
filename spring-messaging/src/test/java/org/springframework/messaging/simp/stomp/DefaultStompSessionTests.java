@@ -217,7 +217,8 @@ public class DefaultStompSessionTests {
 		StompHeaders stompHeaders = StompHeaders.readOnlyStompHeaders(accessor.getNativeHeaders());
 		when(this.sessionHandler.getPayloadType(stompHeaders)).thenReturn(String.class);
 
-		this.session.handleMessage(MessageBuilder.createMessage(payload.getBytes(StandardCharsets.UTF_8), accessor.getMessageHeaders()));
+		this.session.handleMessage(MessageBuilder.createMessage(
+				payload.getBytes(StandardCharsets.UTF_8), accessor.getMessageHeaders()));
 
 		verify(this.sessionHandler).getPayloadType(stompHeaders);
 		verify(this.sessionHandler).handleFrame(stompHeaders, payload);

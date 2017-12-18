@@ -112,13 +112,17 @@ public class WebSocketConnectionManagerTests {
 		}
 
 		@Override
-		public ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler handler, String uriTemplate, Object... uriVars) {
+		public ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler handler,
+				String uriTemplate, Object... uriVars) {
+
 			URI uri = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVars).encode().toUri();
 			return doHandshake(handler, null, uri);
 		}
 
 		@Override
-		public ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler handler, WebSocketHttpHeaders headers, URI uri) {
+		public ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler handler,
+				WebSocketHttpHeaders headers, URI uri) {
+
 			this.webSocketHandler = handler;
 			this.headers = headers;
 			this.uri = uri;

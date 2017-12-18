@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Sebastien Deleuze
@@ -40,6 +38,7 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 
 	private ServerSentEventHttpMessageReader messageReader =
 			new ServerSentEventHttpMessageReader(new Jackson2JsonDecoder());
+
 
 	@Test
 	public void cantRead() {
@@ -58,7 +57,6 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 
 	@Test
 	public void readServerSentEvents() {
-
 		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(
 				"id:c42\nevent:foo\nretry:123\n:bla\n:bla bla\n:bla bla bla\ndata:bar\n\n" +
 			 	"id:c43\nevent:bar\nretry:456\ndata:baz\n\n");
@@ -69,18 +67,18 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 
 		StepVerifier.create(events)
 				.consumeNextWith(event -> {
-					assertEquals("c42", event.id().get());
-					assertEquals("foo", event.event().get());
-					assertEquals(Duration.ofMillis(123), event.retry().get());
-					assertEquals("bla\nbla bla\nbla bla bla", event.comment().get());
-					assertEquals("bar", event.data().get());
+					assertEquals("c42", event.id());
+					assertEquals("foo", event.event());
+					assertEquals(Duration.ofMillis(123), event.retry());
+					assertEquals("bla\nbla bla\nbla bla bla", event.comment());
+					assertEquals("bar", event.data());
 				})
 				.consumeNextWith(event -> {
-					assertEquals("c43", event.id().get());
-					assertEquals("bar", event.event().get());
-					assertEquals(Duration.ofMillis(456), event.retry().get());
-					assertFalse(event.comment().isPresent());
-					assertEquals("baz", event.data().get());
+					assertEquals("c43", event.id());
+					assertEquals("bar", event.event());
+					assertEquals(Duration.ofMillis(456), event.retry());
+					assertNull(event.comment());
+					assertEquals("baz", event.data());
 				})
 				.expectComplete()
 				.verify();
@@ -88,7 +86,6 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 
 	@Test
 	public void readServerSentEventsWithMultipleChunks() {
-
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")
 				.body(Flux.just(
 						stringBuffer("id:c42\nev"),
@@ -101,18 +98,18 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 
 		StepVerifier.create(events)
 				.consumeNextWith(event -> {
-					assertEquals("c42", event.id().get());
-					assertEquals("foo", event.event().get());
-					assertEquals(Duration.ofMillis(123), event.retry().get());
-					assertEquals("bla\nbla bla\nbla bla bla", event.comment().get());
-					assertEquals("bar", event.data().get());
+					assertEquals("c42", event.id());
+					assertEquals("foo", event.event());
+					assertEquals(Duration.ofMillis(123), event.retry());
+					assertEquals("bla\nbla bla\nbla bla bla", event.comment());
+					assertEquals("bar", event.data());
 				})
 				.consumeNextWith(event -> {
-					assertEquals("c43", event.id().get());
-					assertEquals("bar", event.event().get());
-					assertEquals(Duration.ofMillis(456), event.retry().get());
-					assertFalse(event.comment().isPresent());
-					assertEquals("baz", event.data().get());
+					assertEquals("c43", event.id());
+					assertEquals("bar", event.event());
+					assertEquals(Duration.ofMillis(456), event.retry());
+					assertNull(event.comment());
+					assertEquals("baz", event.data());
 				})
 				.expectComplete()
 				.verify();
@@ -120,7 +117,6 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 
 	@Test
 	public void readString() {
-
 		String body = "data:foo\ndata:bar\n\ndata:baz\n\n";
 		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(body);
 
@@ -136,7 +132,6 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 
 	@Test
 	public void readPojo() {
-
 		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(
 				"data:{\"foo\": \"foofoo\", \"bar\": \"barbar\"}\n\n" +
 				"data:{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}\n\n");
@@ -157,9 +152,8 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 				.verify();
 	}
 
-	@Test // SPR-15331
+	@Test  // SPR-15331
 	public void decodeFullContentAsString() {
-
 		String body = "data:foo\ndata:bar\n\ndata:baz\n\n";
 		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(body);
 

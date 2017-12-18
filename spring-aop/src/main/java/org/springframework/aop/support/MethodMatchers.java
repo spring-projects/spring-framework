@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAwareMethodMatcher;
 import org.springframework.aop.MethodMatcher;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -87,7 +88,7 @@ public abstract class MethodMatchers {
 	 * asking is the subject on one or more introductions; {@code false} otherwise
 	 * @return whether or not this method matches statically
 	 */
-	public static boolean matches(MethodMatcher mm, Method method, Class<?> targetClass, boolean hasIntroductions) {
+	public static boolean matches(MethodMatcher mm, Method method, @Nullable Class<?> targetClass, boolean hasIntroductions) {
 		Assert.notNull(mm, "MethodMatcher must not be null");
 		return ((mm instanceof IntroductionAwareMethodMatcher &&
 				((IntroductionAwareMethodMatcher) mm).matches(method, targetClass, hasIntroductions)) ||
@@ -113,22 +114,22 @@ public abstract class MethodMatchers {
 		}
 
 		@Override
-		public boolean matches(Method method, Class<?> targetClass, boolean hasIntroductions) {
+		public boolean matches(Method method, @Nullable Class<?> targetClass, boolean hasIntroductions) {
 			return (matchesClass1(targetClass) && MethodMatchers.matches(this.mm1, method, targetClass, hasIntroductions)) ||
 					(matchesClass2(targetClass) && MethodMatchers.matches(this.mm2, method, targetClass, hasIntroductions));
 		}
 
 		@Override
-		public boolean matches(Method method, Class<?> targetClass) {
+		public boolean matches(Method method, @Nullable Class<?> targetClass) {
 			return (matchesClass1(targetClass) && this.mm1.matches(method, targetClass)) ||
 					(matchesClass2(targetClass) && this.mm2.matches(method, targetClass));
 		}
 
-		protected boolean matchesClass1(Class<?> targetClass) {
+		protected boolean matchesClass1(@Nullable Class<?> targetClass) {
 			return true;
 		}
 
-		protected boolean matchesClass2(Class<?> targetClass) {
+		protected boolean matchesClass2(@Nullable Class<?> targetClass) {
 			return true;
 		}
 
@@ -138,7 +139,7 @@ public abstract class MethodMatchers {
 		}
 
 		@Override
-		public boolean matches(Method method, Class<?> targetClass, Object... args) {
+		public boolean matches(Method method, @Nullable Class<?> targetClass, Object... args) {
 			return this.mm1.matches(method, targetClass, args) || this.mm2.matches(method, targetClass, args);
 		}
 
@@ -182,13 +183,13 @@ public abstract class MethodMatchers {
 		}
 
 		@Override
-		protected boolean matchesClass1(Class<?> targetClass) {
-			return this.cf1.matches(targetClass);
+		protected boolean matchesClass1(@Nullable Class<?> targetClass) {
+			return (targetClass != null && this.cf1.matches(targetClass));
 		}
 
 		@Override
-		protected boolean matchesClass2(Class<?> targetClass) {
-			return this.cf2.matches(targetClass);
+		protected boolean matchesClass2(@Nullable Class<?> targetClass) {
+			return (targetClass != null && this.cf2.matches(targetClass));
 		}
 
 		@Override
@@ -229,13 +230,13 @@ public abstract class MethodMatchers {
 		}
 
 		@Override
-		public boolean matches(Method method, Class<?> targetClass, boolean hasIntroductions) {
+		public boolean matches(Method method, @Nullable Class<?> targetClass, boolean hasIntroductions) {
 			return MethodMatchers.matches(this.mm1, method, targetClass, hasIntroductions) &&
 					MethodMatchers.matches(this.mm2, method, targetClass, hasIntroductions);
 		}
 
 		@Override
-		public boolean matches(Method method, Class<?> targetClass) {
+		public boolean matches(Method method, @Nullable Class<?> targetClass) {
 			return this.mm1.matches(method, targetClass) && this.mm2.matches(method, targetClass);
 		}
 
@@ -245,7 +246,7 @@ public abstract class MethodMatchers {
 		}
 
 		@Override
-		public boolean matches(Method method, Class<?> targetClass, Object... args) {
+		public boolean matches(Method method, @Nullable Class<?> targetClass, Object... args) {
 			// Because a dynamic intersection may be composed of a static and dynamic part,
 			// we must avoid calling the 3-arg matches method on a dynamic matcher, as
 			// it will probably be an unsupported operation.

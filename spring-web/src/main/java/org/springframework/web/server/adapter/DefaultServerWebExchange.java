@@ -23,11 +23,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.i18n.LocaleContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -39,6 +40,7 @@ import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -46,6 +48,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
+import org.springframework.web.server.i18n.LocaleContextResolver;
 import org.springframework.web.server.session.WebSessionManager;
 
 /**
@@ -81,27 +84,31 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 	private final Mono<WebSession> sessionMono;
 
+	private final LocaleContextResolver localeContextResolver;
+
 	private final Mono<MultiValueMap<String, String>> formDataMono;
 
 	private final Mono<MultiValueMap<String, Part>> multipartDataMono;
 
 	private volatile boolean notModified;
 
+	private Function<String, String> urlTransformer = url -> url;
 
-	/**
-	 * Alternate constructor with a WebSessionManager parameter.
-	 */
+
 	public DefaultServerWebExchange(ServerHttpRequest request, ServerHttpResponse response,
-			WebSessionManager sessionManager, ServerCodecConfigurer codecConfigurer) {
+			WebSessionManager sessionManager, ServerCodecConfigurer codecConfigurer,
+			LocaleContextResolver localeContextResolver) {
 
 		Assert.notNull(request, "'request' is required");
 		Assert.notNull(response, "'response' is required");
 		Assert.notNull(sessionManager, "'sessionManager' is required");
 		Assert.notNull(codecConfigurer, "'codecConfigurer' is required");
+		Assert.notNull(localeContextResolver, "'localeContextResolver' is required");
 
 		this.request = request;
 		this.response = response;
 		this.sessionMono = sessionManager.getSession(this).cache();
+		this.localeContextResolver = localeContextResolver;
 		this.formDataMono = initFormData(request, codecConfigurer);
 		this.multipartDataMono = initMultipartData(request, codecConfigurer);
 	}
@@ -174,11 +181,6 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		return this.attributes;
 	}
 
-	@Override @SuppressWarnings("unchecked")
-	public <T> Optional<T> getAttribute(String name) {
-		return Optional.ofNullable((T) this.attributes.get(name));
-	}
-
 	@Override
 	public Mono<WebSession> getSession() {
 		return this.sessionMono;
@@ -187,6 +189,11 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	@Override
 	public <T extends Principal> Mono<T> getPrincipal() {
 		return Mono.empty();
+	}
+
+	@Override
+	public LocaleContext getLocaleContext() {
+		return this.localeContextResolver.resolveLocaleContext(this);
 	}
 
 	@Override
@@ -215,7 +222,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	}
 
 	@Override
-	public boolean checkNotModified(String etag, Instant lastModified) {
+	public boolean checkNotModified(@Nullable String etag, Instant lastModified) {
 		HttpStatus status = getResponse().getStatusCode();
 		if (this.notModified || (status != null && !HttpStatus.OK.equals(status))) {
 			return this.notModified;
@@ -232,7 +239,6 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		}
 
 		boolean validated = validateIfNoneMatch(etag);
-
 		if (!validated) {
 			validateIfModifiedSince(lastModified);
 		}
@@ -270,7 +276,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		return true;
 	}
 
-	private boolean validateIfNoneMatch(String etag) {
+	private boolean validateIfNoneMatch(@Nullable String etag) {
 		if (!StringUtils.hasLength(etag)) {
 			return false;
 		}
@@ -319,5 +325,17 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		this.notModified = ChronoUnit.SECONDS.between(lastModified, Instant.ofEpochMilli(ifModifiedSince)) >= 0;
 		return true;
 	}
+
+	@Override
+	public String transformUrl(String url) {
+		return this.urlTransformer.apply(url);
+	}
+
+	@Override
+	public void addUrlTransformer(Function<String, String> transformer) {
+		Assert.notNull(transformer, "'encoder' must not be null");
+		this.urlTransformer = this.urlTransformer.andThen(transformer);
+	}
+
 
 }

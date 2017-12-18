@@ -17,6 +17,7 @@
 package org.springframework.test.context.transaction;
 
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -26,6 +27,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.TransactionManagementConfigurer;
@@ -86,7 +88,8 @@ public abstract class TestContextTransactionUtils {
 	 * @throws BeansException if an error occurs while retrieving an explicitly
 	 * named {@code DataSource}
 	 */
-	public static DataSource retrieveDataSource(TestContext testContext, String name) {
+	@Nullable
+	public static DataSource retrieveDataSource(TestContext testContext, @Nullable String name) {
 		Assert.notNull(testContext, "TestContext must not be null");
 		BeanFactory bf = testContext.getApplicationContext().getAutowireCapableBeanFactory();
 
@@ -158,7 +161,8 @@ public abstract class TestContextTransactionUtils {
 	 * @throws IllegalStateException if more than one TransactionManagementConfigurer
 	 * exists in the ApplicationContext
 	 */
-	public static PlatformTransactionManager retrieveTransactionManager(TestContext testContext, String name) {
+	@Nullable
+	public static PlatformTransactionManager retrieveTransactionManager(TestContext testContext, @Nullable String name) {
 		Assert.notNull(testContext, "TestContext must not be null");
 		BeanFactory bf = testContext.getApplicationContext().getAutowireCapableBeanFactory();
 
@@ -247,6 +251,7 @@ public abstract class TestContextTransactionUtils {
 		}
 
 		@Override
+		@Nullable
 		public String getName() {
 			return this.name;
 		}

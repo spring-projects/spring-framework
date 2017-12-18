@@ -31,6 +31,7 @@ import org.springframework.jms.JmsException;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.destination.CachingDestinationResolver;
 import org.springframework.jms.support.destination.DestinationResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
@@ -173,6 +174,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	private static final Constants constants = new Constants(DefaultMessageListenerContainer.class);
 
 
+	@Nullable
 	private Executor taskExecutor;
 
 	private BackOff backOff = new FixedBackOff(DEFAULT_RECOVERY_INTERVAL, Long.MAX_VALUE);
@@ -199,6 +201,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	private volatile boolean interrupted = false;
 
+	@Nullable
 	private Runnable stopCallback;
 
 	private Object currentRecoveryMarker = new Object();
@@ -256,7 +259,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #setCacheLevel
 	 */
 	public void setCacheLevelName(String constantName) throws IllegalArgumentException {
-		if (constantName == null || !constantName.startsWith("CACHE_")) {
+		if (!constantName.startsWith("CACHE_")) {
 			throw new IllegalArgumentException("Only cache constants allowed");
 		}
 		setCacheLevel(constants.asNumber(constantName).intValue());
@@ -717,6 +720,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	@Override
 	protected void doRescheduleTask(Object task) {
+		Assert.state(this.taskExecutor != null, "No TaskExecutor available");
 		this.taskExecutor.execute((Runnable) task);
 	}
 
@@ -1031,10 +1035,13 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	private class AsyncMessageListenerInvoker implements SchedulingAwareRunnable {
 
+		@Nullable
 		private Session session;
 
+		@Nullable
 		private MessageConsumer consumer;
 
+		@Nullable
 		private Object lastRecoveryMarker;
 
 		private boolean lastMessageSucceeded;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,13 @@ import org.springframework.context.annotation.ConfigurationCondition.Configurati
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
+import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
 
@@ -38,6 +42,7 @@ import org.springframework.util.MultiValueMap;
  * Internal class used to evaluate {@link Conditional} annotations.
  *
  * @author Phillip Webb
+ * @author Juergen Hoeller
  * @since 4.0
  */
 class ConditionEvaluator {
@@ -48,7 +53,9 @@ class ConditionEvaluator {
 	/**
 	 * Create a new {@link ConditionEvaluator} instance.
 	 */
-	public ConditionEvaluator(BeanDefinitionRegistry registry, Environment environment, ResourceLoader resourceLoader) {
+	public ConditionEvaluator(@Nullable BeanDefinitionRegistry registry,
+			@Nullable Environment environment, @Nullable ResourceLoader resourceLoader) {
+
 		this.context = new ConditionContextImpl(registry, environment, resourceLoader);
 	}
 
@@ -70,7 +77,7 @@ class ConditionEvaluator {
 	 * @param phase the phase of the call
 	 * @return if the item should be skipped
 	 */
-	public boolean shouldSkip(AnnotatedTypeMetadata metadata, ConfigurationPhase phase) {
+	public boolean shouldSkip(@Nullable AnnotatedTypeMetadata metadata, @Nullable ConfigurationPhase phase) {
 		if (metadata == null || !metadata.isAnnotated(Conditional.class.getName())) {
 			return false;
 		}
@@ -126,22 +133,31 @@ class ConditionEvaluator {
 	 */
 	private static class ConditionContextImpl implements ConditionContext {
 
+		@Nullable
 		private final BeanDefinitionRegistry registry;
 
+		@Nullable
 		private final ConfigurableListableBeanFactory beanFactory;
 
 		private final Environment environment;
 
 		private final ResourceLoader resourceLoader;
 
-		public ConditionContextImpl(BeanDefinitionRegistry registry, Environment environment, ResourceLoader resourceLoader) {
+		@Nullable
+		private final ClassLoader classLoader;
+
+		public ConditionContextImpl(@Nullable BeanDefinitionRegistry registry,
+				@Nullable Environment environment, @Nullable ResourceLoader resourceLoader) {
+
 			this.registry = registry;
 			this.beanFactory = deduceBeanFactory(registry);
 			this.environment = (environment != null ? environment : deduceEnvironment(registry));
 			this.resourceLoader = (resourceLoader != null ? resourceLoader : deduceResourceLoader(registry));
+			this.classLoader = deduceClassLoader(resourceLoader, this.beanFactory);
 		}
 
-		private ConfigurableListableBeanFactory deduceBeanFactory(BeanDefinitionRegistry source) {
+		@Nullable
+		private ConfigurableListableBeanFactory deduceBeanFactory(@Nullable BeanDefinitionRegistry source) {
 			if (source instanceof ConfigurableListableBeanFactory) {
 				return (ConfigurableListableBeanFactory) source;
 			}
@@ -151,27 +167,45 @@ class ConditionEvaluator {
 			return null;
 		}
 
-		private Environment deduceEnvironment(BeanDefinitionRegistry source) {
+		private Environment deduceEnvironment(@Nullable BeanDefinitionRegistry source) {
 			if (source instanceof EnvironmentCapable) {
 				return ((EnvironmentCapable) source).getEnvironment();
 			}
-			return null;
+			return new StandardEnvironment();
 		}
 
-		private ResourceLoader deduceResourceLoader(BeanDefinitionRegistry source) {
+		private ResourceLoader deduceResourceLoader(@Nullable BeanDefinitionRegistry source) {
 			if (source instanceof ResourceLoader) {
 				return (ResourceLoader) source;
 			}
-			return null;
+			return new DefaultResourceLoader();
+		}
+
+		@Nullable
+		private ClassLoader deduceClassLoader(@Nullable ResourceLoader resourceLoader,
+				@Nullable ConfigurableListableBeanFactory beanFactory) {
+
+			if (resourceLoader != null) {
+				ClassLoader classLoader = resourceLoader.getClassLoader();
+				if (classLoader != null) {
+					return classLoader;
+				}
+			}
+			if (beanFactory != null) {
+				return beanFactory.getBeanClassLoader();
+			}
+			return ClassUtils.getDefaultClassLoader();
 		}
 
 		@Override
 		public BeanDefinitionRegistry getRegistry() {
+			Assert.state(this.registry != null, "No BeanDefinitionRegistry available");
 			return this.registry;
 		}
 
 		@Override
 		public ConfigurableListableBeanFactory getBeanFactory() {
+			Assert.state(this.beanFactory != null, "No ConfigurableListableBeanFactory available");
 			return this.beanFactory;
 		}
 
@@ -187,13 +221,8 @@ class ConditionEvaluator {
 
 		@Override
 		public ClassLoader getClassLoader() {
-			if (this.resourceLoader != null) {
-				return this.resourceLoader.getClassLoader();
-			}
-			if (this.beanFactory != null) {
-				return this.beanFactory.getBeanClassLoader();
-			}
-			return null;
+			Assert.state(this.classLoader != null, "No ClassLoader available");
+			return this.classLoader;
 		}
 	}
 

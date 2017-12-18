@@ -21,11 +21,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Before;
@@ -34,6 +33,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -56,7 +56,9 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW_HINT;
 
 /**
@@ -86,8 +88,8 @@ public class BodyExtractorsTests {
 
 		this.context = new BodyExtractor.Context() {
 			@Override
-			public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
-				return messageReaders::stream;
+			public List<HttpMessageReader<?>> messageReaders() {
+				return messageReaders;
 			}
 
 			@Override
@@ -123,6 +125,28 @@ public class BodyExtractorsTests {
 	}
 
 	@Test
+	public void toMonoParameterizedTypeReference() throws Exception {
+		BodyExtractor<Mono<Map<String, String>>, ReactiveHttpInputMessage> extractor =
+				BodyExtractors.toMono(new ParameterizedTypeReference<Map<String, String>>() {});
+
+		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+		DefaultDataBuffer dataBuffer =
+				factory.wrap(ByteBuffer.wrap("{\"username\":\"foo\",\"password\":\"bar\"}".getBytes(StandardCharsets.UTF_8)));
+		Flux<DataBuffer> body = Flux.just(dataBuffer);
+
+		MockServerHttpRequest request = MockServerHttpRequest.post("/").contentType(MediaType.APPLICATION_JSON).body(body);
+		Mono<Map<String, String>> result = extractor.extract(request, this.context);
+
+		Map<String, String > expected = new LinkedHashMap<>();
+		expected.put("username", "foo");
+		expected.put("password", "bar");
+		StepVerifier.create(result)
+				.expectNext(expected)
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
 	public void toMonoWithHints() throws Exception {
 		BodyExtractor<Mono<User>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(User.class);
 		this.hints.put(JSON_VIEW_HINT, SafeToDeserialize.class);
@@ -145,6 +169,17 @@ public class BodyExtractorsTests {
 				})
 				.expectComplete()
 				.verify();
+	}
+
+	@Test // SPR-15758
+	public void toMonoWithEmptyBodyAndNoContentType() throws Exception {
+		BodyExtractor<Mono<Map<String, String>>, ReactiveHttpInputMessage> extractor =
+				BodyExtractors.toMono(new ParameterizedTypeReference<Map<String, String>>() {});
+
+		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(Flux.empty());
+		Mono<Map<String, String>> result = extractor.extract(request, this.context);
+
+		StepVerifier.create(result).expectComplete().verify();
 	}
 
 	@Test
@@ -171,8 +206,8 @@ public class BodyExtractorsTests {
 		this.hints.put(JSON_VIEW_HINT, SafeToDeserialize.class);
 
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("[{\"username\":\"foo\",\"password\":\"bar\"},{\"username\":\"bar\",\"password\":\"baz\"}]".getBytes(StandardCharsets.UTF_8)));
+		String text = "[{\"username\":\"foo\",\"password\":\"bar\"},{\"username\":\"bar\",\"password\":\"baz\"}]";
+		DefaultDataBuffer dataBuffer = factory.wrap(ByteBuffer.wrap(text.getBytes(StandardCharsets.UTF_8)));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")
@@ -209,8 +244,8 @@ public class BodyExtractorsTests {
 
 		BodyExtractor.Context emptyContext = new BodyExtractor.Context() {
 			@Override
-			public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
-				return Stream::empty;
+			public List<HttpMessageReader<?>> messageReaders() {
+				return Collections.emptyList();
 			}
 
 			@Override
@@ -235,8 +270,8 @@ public class BodyExtractorsTests {
 		BodyExtractor<Mono<MultiValueMap<String, String>>, ServerHttpRequest> extractor = BodyExtractors.toFormData();
 
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3".getBytes(StandardCharsets.UTF_8)));
+		String text = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
+		DefaultDataBuffer dataBuffer = factory.wrap(ByteBuffer.wrap(text.getBytes(StandardCharsets.UTF_8)));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")

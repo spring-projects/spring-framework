@@ -639,6 +639,9 @@
 	"/, classpath:/META-INF/public-web-resources/" will allow resources to be served both from the web app
 	root and from any JAR on the classpath  that contains a /META-INF/public-web-resources/ directory,
 	with resources in the web app root taking precedence.
+	For URL-based resources (e.g. files, HTTP URLs, etc) this property supports a special prefix to
+	indicate the charset associated with the URL so that relative paths appended to it can be encoded
+	correctly, e.g. "[charset=Windows-31J]http://example.org/path".
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -959,7 +962,7 @@
 		<xsd:attribute name="cache-views" type="xsd:boolean">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	Enable or disable thew caching of resolved views.
+	Enable or disable the caching of resolved views.
 	Default is "true": caching is enabled.
 	Disable this only for debugging and development.
 				]]></xsd:documentation>
@@ -969,7 +972,7 @@
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
 	The view class that should be used to create views.
-	Configure this if you want to provide a custom View implementation, typically a ub-class of the expected View type.
+	Configure this if you want to provide a custom View implementation, typically a sub-class of the expected View type.
 				]]></xsd:documentation>
 				<xsd:appinfo>
 					<tool:annotation kind="ref">
@@ -1307,8 +1310,11 @@
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
 	Enable cross origin requests processing on the specified path pattern.
-	By default, all origins, GET HEAD POST methods, all headers and credentials
-	are allowed and max age is set to 30 minutes.
+	The following defaults are applied to the resulting CorsRegistration:
+	 - Allow all origins.
+	 - Allow "simple" methods {@code GET}, {@code HEAD} and {@code POST}.
+	 - Allow all headers.
+	 - Set max age to 1800 seconds (30 minutes).
 						]]></xsd:documentation>
 					</xsd:annotation>
 					<xsd:complexType>
@@ -1358,7 +1364,19 @@
 						<xsd:attribute name="allow-credentials" type="xsd:boolean">
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
-	Whether user credentials are supported (true by default).
+	Whether the browser should send credentials, such as cookies along with
+	cross domain requests, to the annotated endpoint. The configured value is
+	set on the "Access-Control-Allow-Credentials" response header of
+	preflight requests.
+
+	NOTE: Be aware that this option establishes a high
+	level of trust with the configured domains and also increases the surface
+	attack of the web application by exposing sensitive user-specific
+	information such as cookies and CSRF tokens.
+
+	By default this is not set in which case the
+	"Access-Control-Allow-Credentials" header is also not set and
+	credentials are therefore not allowed.
 								]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>

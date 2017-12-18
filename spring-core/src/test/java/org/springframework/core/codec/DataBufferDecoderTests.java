@@ -17,20 +17,22 @@
 package org.springframework.core.codec;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Collections;
 
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.util.MimeTypeUtils;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Sebastien Deleuze
@@ -55,9 +57,25 @@ public class DataBufferDecoderTests extends AbstractDataBufferAllocatingTestCase
 		DataBuffer barBuffer = stringBuffer("bar");
 		Flux<DataBuffer> source = Flux.just(fooBuffer, barBuffer);
 		Flux<DataBuffer> output = this.decoder.decode(source,
-				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class),
+				ResolvableType.forClassWithGenerics(Publisher.class, DataBuffer.class),
 				null, Collections.emptyMap());
 
 		assertSame(source, output);
+
+		release(fooBuffer, barBuffer);
 	}
-}
+
+	@Test
+	public void decodeToMono() {
+		DataBuffer fooBuffer = stringBuffer("foo");
+		DataBuffer barBuffer = stringBuffer("bar");
+		Flux<DataBuffer> source = Flux.just(fooBuffer, barBuffer);
+		Mono<DataBuffer> output = this.decoder.decodeToMono(source,
+				ResolvableType.forClassWithGenerics(Publisher.class, DataBuffer.class),
+				null, Collections.emptyMap());
+
+		DataBuffer outputBuffer = output.block(Duration.ofSeconds(5));
+		assertEquals("foobar", DataBufferTestUtils.dumpString(outputBuffer, StandardCharsets.UTF_8));
+
+		release(outputBuffer);
+	}}

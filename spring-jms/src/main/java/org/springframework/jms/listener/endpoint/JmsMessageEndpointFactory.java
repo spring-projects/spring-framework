@@ -22,6 +22,8 @@ import javax.resource.ResourceException;
 import javax.resource.spi.UnavailableException;
 
 import org.springframework.jca.endpoint.AbstractMessageEndpointFactory;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * JMS-specific implementation of the JCA 1.7
@@ -47,6 +49,7 @@ import org.springframework.jca.endpoint.AbstractMessageEndpointFactory;
  */
 public class JmsMessageEndpointFactory extends AbstractMessageEndpointFactory  {
 
+	@Nullable
 	private MessageListener messageListener;
 
 
@@ -61,6 +64,7 @@ public class JmsMessageEndpointFactory extends AbstractMessageEndpointFactory  {
 	 * Return the JMS MessageListener for this endpoint.
 	 */
 	protected MessageListener getMessageListener() {
+		Assert.state(messageListener != null, "No MessageListener set");
 		return this.messageListener;
 	}
 
@@ -90,15 +94,11 @@ public class JmsMessageEndpointFactory extends AbstractMessageEndpointFactory  {
 				}
 			}
 			try {
-				messageListener.onMessage(message);
+				getMessageListener().onMessage(message);
 			}
-			catch (RuntimeException ex) {
+			catch (RuntimeException | Error ex) {
 				onEndpointException(ex);
 				throw ex;
-			}
-			catch (Error err) {
-				onEndpointException(err);
-				throw err;
 			}
 			finally {
 				if (applyDeliveryCalls) {
@@ -114,7 +114,7 @@ public class JmsMessageEndpointFactory extends AbstractMessageEndpointFactory  {
 
 		@Override
 		protected ClassLoader getEndpointClassLoader() {
-			return messageListener.getClass().getClassLoader();
+			return getMessageListener().getClass().getClassLoader();
 		}
 	}
 

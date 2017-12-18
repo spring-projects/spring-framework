@@ -23,6 +23,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.util.Assert;
@@ -37,14 +38,19 @@ import org.springframework.util.Assert;
  */
 public class JmsListenerEndpointRegistrar implements BeanFactoryAware, InitializingBean {
 
+	@Nullable
 	private JmsListenerEndpointRegistry endpointRegistry;
 
+	@Nullable
 	private MessageHandlerMethodFactory messageHandlerMethodFactory;
 
+	@Nullable
 	private JmsListenerContainerFactory<?> containerFactory;
 
+	@Nullable
 	private String containerFactoryBeanName;
 
+	@Nullable
 	private BeanFactory beanFactory;
 
 	private final List<JmsListenerEndpointDescriptor> endpointDescriptors = new ArrayList<>();
@@ -57,7 +63,7 @@ public class JmsListenerEndpointRegistrar implements BeanFactoryAware, Initializ
 	/**
 	 * Set the {@link JmsListenerEndpointRegistry} instance to use.
 	 */
-	public void setEndpointRegistry(JmsListenerEndpointRegistry endpointRegistry) {
+	public void setEndpointRegistry(@Nullable JmsListenerEndpointRegistry endpointRegistry) {
 		this.endpointRegistry = endpointRegistry;
 	}
 
@@ -65,6 +71,7 @@ public class JmsListenerEndpointRegistrar implements BeanFactoryAware, Initializ
 	 * Return the {@link JmsListenerEndpointRegistry} instance for this
 	 * registrar, may be {@code null}.
 	 */
+	@Nullable
 	public JmsListenerEndpointRegistry getEndpointRegistry() {
 		return this.endpointRegistry;
 	}
@@ -77,13 +84,14 @@ public class JmsListenerEndpointRegistrar implements BeanFactoryAware, Initializ
 	 * or to customize conversion and validation support. See
 	 * {@link DefaultMessageHandlerMethodFactory} javadoc for more details.
 	 */
-	public void setMessageHandlerMethodFactory(MessageHandlerMethodFactory messageHandlerMethodFactory) {
+	public void setMessageHandlerMethodFactory(@Nullable MessageHandlerMethodFactory messageHandlerMethodFactory) {
 		this.messageHandlerMethodFactory = messageHandlerMethodFactory;
 	}
 
 	/**
 	 * Return the custom {@link MessageHandlerMethodFactory} to use, if any.
 	 */
+	@Nullable
 	public MessageHandlerMethodFactory getMessageHandlerMethodFactory() {
 		return this.messageHandlerMethodFactory;
 	}
@@ -128,6 +136,7 @@ public class JmsListenerEndpointRegistrar implements BeanFactoryAware, Initializ
 	}
 
 	protected void registerAllEndpoints() {
+		Assert.state(this.endpointRegistry != null, "No JmsListenerEndpointRegistry set");
 		synchronized (this.mutex) {
 			for (JmsListenerEndpointDescriptor descriptor : this.endpointDescriptors) {
 				this.endpointRegistry.registerListenerContainer(
@@ -164,8 +173,8 @@ public class JmsListenerEndpointRegistrar implements BeanFactoryAware, Initializ
 	 * <p>The {@code factory} may be {@code null} if the default factory has to be
 	 * used for that endpoint.
 	 */
-	public void registerEndpoint(JmsListenerEndpoint endpoint, JmsListenerContainerFactory<?> factory) {
-		Assert.notNull(endpoint, "Endpoint must be set");
+	public void registerEndpoint(JmsListenerEndpoint endpoint, @Nullable JmsListenerContainerFactory<?> factory) {
+		Assert.notNull(endpoint, "Endpoint must not be null");
 		Assert.hasText(endpoint.getId(), "Endpoint id must be set");
 
 		// Factory may be null, we defer the resolution right before actually creating the container
@@ -173,6 +182,7 @@ public class JmsListenerEndpointRegistrar implements BeanFactoryAware, Initializ
 
 		synchronized (this.mutex) {
 			if (this.startImmediately) {  // register and start immediately
+				Assert.state(this.endpointRegistry != null, "No JmsListenerEndpointRegistry set");
 				this.endpointRegistry.registerListenerContainer(descriptor.endpoint,
 						resolveContainerFactory(descriptor), true);
 			}
@@ -197,9 +207,12 @@ public class JmsListenerEndpointRegistrar implements BeanFactoryAware, Initializ
 
 		public final JmsListenerEndpoint endpoint;
 
+		@Nullable
 		public final JmsListenerContainerFactory<?> containerFactory;
 
-		public JmsListenerEndpointDescriptor(JmsListenerEndpoint endpoint, JmsListenerContainerFactory<?> containerFactory) {
+		public JmsListenerEndpointDescriptor(JmsListenerEndpoint endpoint,
+				@Nullable JmsListenerContainerFactory<?> containerFactory) {
+
 			this.endpoint = endpoint;
 			this.containerFactory = containerFactory;
 		}

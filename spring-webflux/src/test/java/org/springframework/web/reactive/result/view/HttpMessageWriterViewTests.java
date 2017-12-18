@@ -34,7 +34,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
 
@@ -53,7 +53,7 @@ public class HttpMessageWriterViewTests {
 
 	private final ModelMap model = new ExtendedModelMap();
 
-	private final MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 
 	@Test

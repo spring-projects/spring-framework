@@ -6,6 +6,7 @@
 
 [[expressions-intro]]
 == Introduction
+
 The Spring Expression Language (SpEL for short) is a powerful expression language that
 supports querying and manipulating an object graph at runtime. The language syntax is
 similar to Unified EL but offers additional features, most notably method invocation and
@@ -39,7 +40,8 @@ populate them are listed at the end of the chapter.
 
 
 [[expressions-features]]
-== Feature Overview
+== Feature overview
+
 The expression language supports the following functionality
 
 * Literal expressions
@@ -66,7 +68,8 @@ The expression language supports the following functionality
 
 
 [[expressions-evaluation]]
-== Expression Evaluation using Spring's Expression Interface
+== Expression evaluation using Spring's Expression interface
+
 This section introduces the simple use of SpEL interfaces and its expression language.
 The complete language reference can be found in the section
 <<expressions-language-ref,Language Reference>>.
@@ -235,6 +238,7 @@ Inventor object in the previous example.
 
 [[expressions-evaluation-context]]
 === The EvaluationContext interface
+
 The interface `EvaluationContext` is used when evaluating an expression to resolve
 properties, methods, fields, and to help perform type conversion. The out-of-the-box
 implementation, `StandardEvaluationContext`, uses reflection to manipulate the object,
@@ -253,7 +257,8 @@ evaluates expressions. Please refer to the javadoc of these classes for more det
 
 
 [[expressions-type-conversion]]
-==== Type Conversion
+==== Type conversion
+
 By default SpEL uses the conversion service available in Spring core (
 `org.springframework.core.convert.ConversionService`). This conversion service comes
 with many converters built in for common conversions but is also fully extensible so
@@ -288,9 +293,12 @@ being placed in it. A simple example:
 	Boolean b = simple.booleanList.get(0);
 ----
 
+
+
 [[expressions-parser-configuration]]
 === Parser configuration
-It is possible to configure the SpEL expression parser using a parser configuration object 
+
+It is possible to configure the SpEL expression parser using a parser configuration object
 (`org.springframework.expression.spel.SpelParserConfiguration`). The configuration
 object controls the behavior of some of the expression components. For example, if
 indexing into an array or collection and the element at the specified index is `null`
@@ -325,6 +333,8 @@ list it is possible to automatically grow the array or list to accommodate that 
 
 It is also possible to configure the behaviour of the SpEL expression compiler.
 
+
+
 [[expressions-spel-compilation]]
 === SpEL compilation
 
@@ -355,6 +365,7 @@ which involves array access, some property derefencing and numeric operations, t
 gain can be very noticeable. In an example micro benchmark run of 50000 iterations, it was
 taking 75ms to evaluate using only the interpreter and just 3ms using the compiled version
 of the expression.
+
 
 [[expressions-compiler-configuration]]
 ==== Compiler configuration
@@ -415,6 +426,7 @@ In these cases it is possible to use a system property. The property
 `spring.expression.compiler.mode` can be set to one of the `SpelCompilerMode` 
 enum values (`off`, `immediate`, or `mixed`).
 
+
 [[expressions-compiler-limitations]]
 ==== Compiler limitations
 
@@ -430,8 +442,12 @@ at the moment:
 
 More and more types of expression will be compilable in the future.
 
+
+
+
 [[expressions-beandef]]
 == Expression support for defining bean definitions
+
 SpEL expressions can be used with XML or annotation-based configuration metadata for
 defining ``BeanDefinition``s. In both cases the syntax to define the expression is of the
 form `#{ <expression string> }`.
@@ -440,6 +456,7 @@ form `#{ <expression string> }`.
 
 [[expressions-beandef-xml-based]]
 === XML based configuration
+
 A property or constructor-arg value can be set using expressions as shown below.
 
 [source,xml,indent=0]
@@ -488,6 +505,7 @@ You can also refer to other bean properties by name, for example.
 
 [[expressions-beandef-annotation-based]]
 === Annotation-based configuration
+
 The `@Value` annotation can be placed on fields, methods and method/constructor
 parameters to specify a default value.
 
@@ -584,6 +602,7 @@ Autowired methods and constructors can also use the `@Value` annotation.
 
 [[expressions-ref-literal]]
 === Literal expressions
+
 The types of literal expressions supported are strings, numeric values (int, real, hex),
 boolean and null. Strings are delimited by single quotes. To put a single quote itself
 in a string, use two single quote characters.
@@ -617,6 +636,7 @@ By default real numbers are parsed using Double.parseDouble().
 
 [[expressions-properties-arrays]]
 === Properties, Arrays, Lists, Maps, Indexers
+
 Navigating with property references is easy: just use a period to indicate a nested
 property value. The instances of the `Inventor` class, pupin, and tesla, were populated with
 data listed in the section <<expressions-example-classes,Classes used in the examples>>.
@@ -685,6 +705,7 @@ string literals.
 
 [[expressions-inline-lists]]
 === Inline lists
+
 Lists can be expressed directly in an expression using `{}` notation.
 
 [source,java,indent=0]
@@ -700,8 +721,11 @@ Lists can be expressed directly in an expression using `{}` notation.
 entirely composed of fixed literals then a constant list is created to represent the
 expression, rather than building a new list on each evaluation.
 
+
+
 [[expressions-inline-maps]]
 === Inline Maps
+
 Maps can also be expressed directly in an expression using `{key:value}` notation.
 
 [source,java,indent=0]
@@ -717,8 +741,11 @@ of fixed literals or other nested constant structures (lists or maps) then a con
 to represent the expression, rather than building a new map on each evaluation. Quoting of the map keys
 is optional, the examples above are not using quoted keys.
 
+
+
 [[expressions-array-construction]]
 === Array construction
+
 Arrays can be built using the familiar Java syntax, optionally supplying an initializer
 to have the array populated at construction time.
 
@@ -741,6 +768,7 @@ multi-dimensional array.
 
 [[expressions-methods]]
 === Methods
+
 Methods are invoked using typical Java programming syntax. You may also invoke methods
 on literals. Varargs are also supported.
 
@@ -748,7 +776,7 @@ on literals. Varargs are also supported.
 [subs="verbatim,quotes"]
 ----
 	// string literal, evaluates to "bc"
-	String c = parser.parseExpression("'abc'.substring(2, 3)").getValue(String.class);
+	String bc = parser.parseExpression("'abc'.substring(1, 3)").getValue(String.class);
 
 	// evaluates to true
 	boolean isMember = parser.parseExpression("isMember('Mihajlo Pupin')").getValue(
@@ -763,6 +791,7 @@ on literals. Varargs are also supported.
 
 [[expressions-operators-relational]]
 ==== Relational operators
+
 The relational operators; equal, not equal, less than, less than or equal, greater than,
 and greater than or equal are supported using standard operator notation.
 
@@ -825,6 +854,7 @@ shown here: `lt` (`<`), `gt` (`>`), `le` (`<=`), `ge` (`>=`), `eq` (`==`),
 
 [[expressions-operators-logical]]
 ==== Logical operators
+
 The logical operators that are supported are and, or, and not. Their use is demonstrated
 below.
 
@@ -862,6 +892,7 @@ below.
 
 [[expressions-operators-mathematical]]
 ==== Mathematical operators
+
 The addition operator can be used on both numbers and strings. Subtraction, multiplication
 and division can be used only on numbers. Other mathematical operators supported are
 modulus (%) and exponential power (^). Standard operator precedence is enforced. These
@@ -904,6 +935,7 @@ operators are demonstrated below.
 
 [[expressions-assignment]]
 === Assignment
+
 Setting of a property is done by using the assignment operator. This would typically be
 done within a call to `setValue` but can also be done inside a call to `getValue`.
 
@@ -925,6 +957,7 @@ done within a call to `setValue` but can also be done inside a call to `getValue
 
 [[expressions-types]]
 === Types
+
 The special `T` operator can be used to specify an instance of java.lang.Class (the
 _type_). Static methods are invoked using this operator as well. The
 `StandardEvaluationContext` uses a `TypeLocator` to find types and the
@@ -948,6 +981,7 @@ fully qualified, but all other type references must be.
 
 [[expressions-constructors]]
 === Constructors
+
 Constructors can be invoked using the new operator. The fully qualified class name
 should be used for all but the primitive type and String (where int, float, etc, can be
 used).
@@ -969,6 +1003,7 @@ used).
 
 [[expressions-ref-variables]]
 === Variables
+
 Variables can be referenced in the expression using the syntax `#variableName`. Variables
 are set using the method setVariable on the `StandardEvaluationContext`.
 
@@ -987,6 +1022,7 @@ are set using the method setVariable on the `StandardEvaluationContext`.
 
 [[expressions-this-root]]
 ==== The #this and #root variables
+
 The variable #this is always defined and refers to the current evaluation object
 (against which unqualified references are resolved). The variable #root is always
 defined and refers to the root context object. Although #this may vary as components of
@@ -1014,6 +1050,7 @@ an expression are evaluated, #root always refers to the root.
 
 [[expressions-ref-functions]]
 === Functions
+
 You can extend SpEL by registering user defined functions that can be called within the
 expression string. The function is registered with the `StandardEvaluationContext` using
 the method.
@@ -1062,6 +1099,7 @@ expression string.
 
 [[expressions-bean-references]]
 === Bean references
+
 If the evaluation context has been configured with a bean resolver it is possible to
 lookup beans from an expression using the (@) symbol.
 
@@ -1092,6 +1130,7 @@ To access a factory bean itself, the bean name should instead be prefixed with a
 
 [[expressions-operator-ternary]]
 === Ternary Operator (If-Then-Else)
+
 You can use the ternary operator for performing if-then-else conditional logic inside
 the expression. A minimal example is:
 
@@ -1126,6 +1165,7 @@ ternary operator.
 
 [[expressions-operator-elvis]]
 === The Elvis Operator
+
 The Elvis operator is a shortening of the ternary operator syntax and is used in the
 http://www.groovy-lang.org/operators.html#_elvis_operator[Groovy] language.
 With the ternary operator syntax you usually have to repeat a variable twice, for
@@ -1175,6 +1215,7 @@ Here is a more complex example.
 
 [[expressions-operator-safe-navigation]]
 === Safe Navigation operator
+
 The Safe Navigation operator is used to avoid a `NullPointerException` and comes from
 the http://www.groovy-lang.org/operators.html#_safe_navigation_operator[Groovy]
 language. Typically when you have a reference to an object you might need to verify that
@@ -1219,6 +1260,7 @@ This will inject a system property `pop3.port` if it is defined or 25 if not.
 
 [[expressions-collection-selection]]
 === Collection Selection
+
 Selection is a powerful expression language feature that allows you to transform some
 source collection into another by selecting from its entries.
 
@@ -1256,6 +1298,7 @@ first or the last value. To obtain the first entry matching the selection the sy
 
 [[expressions-collection-projection]]
 === Collection Projection
+
 Projection allows a collection to drive the evaluation of a sub-expression and the
 result is a new collection. The syntax for projection is `![projectionExpression]`. Most
 easily understood by example, suppose we have a list of inventors but want the list of
@@ -1278,6 +1321,7 @@ expression against each map entry.
 
 [[expressions-templating]]
 === Expression templating
+
 Expression templates allow a mixing of literal text with one or more evaluation blocks.
 Each evaluation block is delimited with prefix and suffix characters that you can
 define, a common choice is to use `#{ }` as the delimiters. For example,
@@ -1323,6 +1367,7 @@ The definition of `TemplateParserContext` is shown below.
 
 [[expressions-example-classes]]
 == Classes used in the examples
+
 Inventor.java
 
 [source,java,indent=0]

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.http.client.reactive;
 
+import java.io.File;
 import java.net.URI;
 import java.util.Collection;
 
@@ -30,6 +31,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ZeroCopyHttpOutputMessage;
 
 /**
  * {@link ClientHttpRequest} implementation for the Reactor-Netty HTTP client.
@@ -38,7 +40,7 @@ import org.springframework.http.HttpMethod;
  * @since 5.0
  * @see reactor.ipc.netty.http.client.HttpClient
  */
-public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
+class ReactorClientHttpRequest extends AbstractClientHttpRequest implements ZeroCopyHttpOutputMessage {
 
 	private final HttpMethod httpMethod;
 
@@ -53,7 +55,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 			HttpClientRequest httpRequest) {
 		this.httpMethod = httpMethod;
 		this.uri = uri;
-		this.httpRequest = httpRequest.failOnClientError(false);
+		this.httpRequest = httpRequest.failOnClientError(false).failOnServerError(false);
 		this.bufferFactory = new NettyDataBufferFactory(httpRequest.alloc());
 	}
 
@@ -81,14 +83,17 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
-		Publisher<Publisher<ByteBuf>> byteBufs = Flux.from(body).
-				map(ReactorClientHttpRequest::toByteBufs);
+		Publisher<Publisher<ByteBuf>> byteBufs = Flux.from(body).map(ReactorClientHttpRequest::toByteBufs);
 		return doCommit(() -> this.httpRequest.sendGroups(byteBufs).then());
 	}
 
 	private static Publisher<ByteBuf> toByteBufs(Publisher<? extends DataBuffer> dataBuffers) {
-		return Flux.from(dataBuffers).
-				map(NettyDataBufferFactory::toByteBuf);
+		return Flux.from(dataBuffers).map(NettyDataBufferFactory::toByteBuf);
+	}
+
+	@Override
+	public Mono<Void> writeWith(File file, long position, long count) {
+		return doCommit(() -> this.httpRequest.sendFile(file.toPath(), position, count).then());
 	}
 
 	@Override
@@ -98,8 +103,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	protected void applyHeaders() {
-		getHeaders().entrySet()
-				.forEach(e -> this.httpRequest.requestHeaders().set(e.getKey(), e.getValue()));
+		getHeaders().entrySet().forEach(e -> this.httpRequest.requestHeaders().set(e.getKey(), e.getValue()));
 	}
 
 	@Override

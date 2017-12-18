@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,7 @@
 
 package org.springframework.web.reactive.result.view.script;
 
-import java.util.Locale;
-
-import reactor.core.publisher.Mono;
-
 import org.springframework.web.reactive.result.view.UrlBasedViewResolver;
-import org.springframework.web.reactive.result.view.View;
 
 /**
  * Convenience subclass of {@link UrlBasedViewResolver} that supports
@@ -60,13 +55,6 @@ public class ScriptTemplateViewResolver extends UrlBasedViewResolver {
 		setSuffix(suffix);
 	}
 
-	@Override
-	public Mono<View> resolveViewName(String viewName, Locale locale) {
-		return super.resolveViewName(viewName, locale).map(view -> {
-			((ScriptTemplateView)view).setLocale(locale);
-			return view;
-		});
-	}
 
 	@Override
 	protected Class<?> requiredViewClass() {

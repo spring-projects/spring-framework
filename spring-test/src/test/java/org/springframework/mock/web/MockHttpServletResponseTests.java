@@ -169,7 +169,7 @@ public class MockHttpServletResponseTests {
 		response.addCookie(cookie);
 
 		assertEquals("foo=bar; Path=/path; Domain=example.com; " +
-				"Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; " +
+				"Max-Age=0; Expires=Thu, 1 Jan 1970 00:00:00 GMT; " +
 				"Secure; HttpOnly", response.getHeader(HttpHeaders.SET_COOKIE));
 	}
 
@@ -289,6 +289,12 @@ public class MockHttpServletResponseTests {
 		response.setHeader("Last-Modified", "invalid");
 		assertEquals("invalid", response.getHeader("Last-Modified"));
 		response.getDateHeader("Last-Modified");
+	}
+
+	@Test  // SPR-16160
+	public void getNonExistentDateHeader() {
+		assertNull(response.getHeader("Last-Modified"));
+		assertEquals(-1, response.getDateHeader("Last-Modified"));
 	}
 
 	@Test  // SPR-10414

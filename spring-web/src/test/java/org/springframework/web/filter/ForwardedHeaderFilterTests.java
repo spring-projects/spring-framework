@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ public class ForwardedHeaderFilterTests {
 
 	@Before
 	@SuppressWarnings("serial")
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.request = new MockHttpServletRequest();
 		this.request.setScheme("http");
 		this.request.setServerName("localhost");
@@ -240,6 +240,30 @@ public class ForwardedHeaderFilterTests {
 	}
 
 	@Test
+	public void forwardedRequestInRemoveOnlyMode() throws Exception {
+		this.request.setRequestURI("/mvc-showcase");
+		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_HOST, "84.198.58.199");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
+		this.request.addHeader("foo", "bar");
+
+		this.filter.setRemoveOnly(true);
+		this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
+		HttpServletRequest actual = (HttpServletRequest) this.filterChain.getRequest();
+
+		assertEquals("http://localhost/mvc-showcase", actual.getRequestURL().toString());
+		assertEquals("http", actual.getScheme());
+		assertEquals("localhost", actual.getServerName());
+		assertEquals(80, actual.getServerPort());
+		assertFalse(actual.isSecure());
+
+		assertNull(actual.getHeader(X_FORWARDED_PROTO));
+		assertNull(actual.getHeader(X_FORWARDED_HOST));
+		assertNull(actual.getHeader(X_FORWARDED_PORT));
+		assertEquals("bar", actual.getHeader("foo"));
+	}
+
+	@Test
 	public void requestUriWithForwardedPrefix() throws Exception {
 		this.request.addHeader(X_FORWARDED_PREFIX, "/prefix");
 		this.request.setRequestURI("/mvc-showcase");
@@ -376,6 +400,26 @@ public class ForwardedHeaderFilterTests {
 		assertEquals("../foo/bar", redirectedUrl);
 	}
 
+	@Test
+	public void sendRedirectWhenRequestOnlyAndXForwardedThenUsesRelativeRedirects() throws Exception {
+		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_HOST, "example.com");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
+		this.filter.setRelativeRedirects(true);
+
+		String location = sendRedirect("/a");
+
+		assertEquals("/a", location);
+	}
+
+	@Test
+	public void sendRedirectWhenRequestOnlyAndNoXForwardedThenUsesRelativeRedirects() throws Exception {
+		this.filter.setRelativeRedirects(true);
+
+		String location = sendRedirect("/a");
+
+		assertEquals("/a", location);
+	}
 
 	private String sendRedirect(final String location) throws ServletException, IOException {
 		MockHttpServletResponse response = doWithFiltersAndGetResponse(this.filter, new OncePerRequestFilter() {

@@ -24,7 +24,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.Assert.assertEquals;
@@ -32,14 +32,13 @@ import static org.junit.Assert.assertSame;
 
 /**
  * Unit tests for {@link ResponseStatusExceptionHandler}.
- *
  * @author Rossen Stoyanchev
  */
 public class ResponseStatusExceptionHandlerTests {
 
 	private final ResponseStatusExceptionHandler handler = new ResponseStatusExceptionHandler();
 
-	private  final MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 
 	@Test
@@ -54,6 +53,15 @@ public class ResponseStatusExceptionHandlerTests {
 		Throwable expected = new IllegalStateException();
 		Mono<Void> mono = this.handler.handle(this.exchange, expected);
 		StepVerifier.create(mono).consumeErrorWith(actual -> assertSame(expected, actual)).verify();
+	}
+
+	@Test // SPR-16231
+	public void responseCommitted() throws Exception {
+		Throwable ex = new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops");
+		this.exchange.getResponse().setStatusCode(HttpStatus.CREATED);
+		Mono<Void> mono = this.exchange.getResponse().setComplete()
+				.then(this.handler.handle(this.exchange, ex));
+		StepVerifier.create(mono).consumeErrorWith(actual -> assertSame(ex, actual)).verify();
 	}
 
 }

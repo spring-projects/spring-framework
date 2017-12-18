@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.socket.CloseStatus;
@@ -58,8 +59,10 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 
 	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
+	@Nullable
 	private volatile State state = State.NEW;
 
+	@Nullable
 	private volatile CloseStatus closeStatus;
 
 
@@ -115,12 +118,7 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 	 * request.
 	 */
 	Runnable getTimeoutTask() {
-		return new Runnable() {
-			@Override
-			public void run() {
-				closeInternal(new CloseStatus(2007, "Transport timed out"));
-			}
-		};
+		return () -> closeInternal(new CloseStatus(2007, "Transport timed out"));
 	}
 
 	@Override
@@ -161,15 +159,16 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 
 	@Override
 	public final void close(CloseStatus status) {
-		Assert.isTrue(status != null && isUserSetStatus(status), "Invalid close status: " + status);
+		Assert.isTrue(isUserSetStatus(status), "Invalid close status: " + status);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Closing session with " +  status + " in " + this);
 		}
 		closeInternal(status);
 	}
 
-	private boolean isUserSetStatus(CloseStatus status) {
-		return (status.getCode() == 1000 || (status.getCode() >= 3000 && status.getCode() <= 4999));
+	private boolean isUserSetStatus(@Nullable CloseStatus status) {
+		return (status != null && (status.getCode() == 1000 ||
+				(status.getCode() >= 3000 && status.getCode() <= 4999)));
 	}
 
 	protected void closeInternal(CloseStatus status) {
@@ -250,15 +249,21 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 			return;
 		}
 
-		String[] messages;
-		try {
-			messages = getMessageCodec().decode(frame.getFrameData());
-		}
-		catch (IOException ex) {
-			if (logger.isErrorEnabled()) {
-				logger.error("Failed to decode data for SockJS \"message\" frame: " + frame + " in " + this, ex);
+		String[] messages = null;
+		String frameData = frame.getFrameData();
+		if (frameData != null) {
+			try {
+				messages = getMessageCodec().decode(frameData);
 			}
-			closeInternal(CloseStatus.BAD_DATA);
+			catch (IOException ex) {
+				if (logger.isErrorEnabled()) {
+					logger.error("Failed to decode data for SockJS \"message\" frame: " + frame + " in " + this, ex);
+				}
+				closeInternal(CloseStatus.BAD_DATA);
+				return;
+			}
+		}
+		if (messages == null) {
 			return;
 		}
 
@@ -280,12 +285,15 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 	private void handleCloseFrame(SockJsFrame frame) {
 		CloseStatus closeStatus = CloseStatus.NO_STATUS_CODE;
 		try {
-			String[] data = getMessageCodec().decode(frame.getFrameData());
-			if (data.length == 2) {
-				closeStatus = new CloseStatus(Integer.valueOf(data[0]), data[1]);
-			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("Processing SockJS close frame with " + closeStatus + " in " + this);
+			String frameData = frame.getFrameData();
+			if (frameData != null) {
+				String[] data = getMessageCodec().decode(frameData);
+				if (data != null && data.length == 2) {
+					closeStatus = new CloseStatus(Integer.valueOf(data[0]), data[1]);
+				}
+				if (logger.isDebugEnabled()) {
+					logger.debug("Processing SockJS close frame with " + closeStatus + " in " + this);
+				}
 			}
 		}
 		catch (IOException ex) {
@@ -308,16 +316,20 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 		}
 	}
 
-	public void afterTransportClosed(CloseStatus closeStatus) {
-		this.closeStatus = (this.closeStatus != null ? this.closeStatus : closeStatus);
-		Assert.state(this.closeStatus != null, "CloseStatus not available");
+	public void afterTransportClosed(@Nullable CloseStatus closeStatus) {
+		CloseStatus cs = this.closeStatus;
+		if (cs == null) {
+			cs = closeStatus;
+			this.closeStatus = closeStatus;
+		}
+		Assert.state(cs != null, "CloseStatus not available");
 		if (logger.isDebugEnabled()) {
-			logger.debug("Transport closed with " + this.closeStatus + " in " + this);
+			logger.debug("Transport closed with " + cs + " in " + this);
 		}
 
 		this.state = State.CLOSED;
 		try {
-			this.webSocketHandler.afterConnectionClosed(this, this.closeStatus);
+			this.webSocketHandler.afterConnectionClosed(this, cs);
 		}
 		catch (Throwable ex) {
 			logger.error("WebSocketHandler.afterConnectionClosed threw an exception", ex);

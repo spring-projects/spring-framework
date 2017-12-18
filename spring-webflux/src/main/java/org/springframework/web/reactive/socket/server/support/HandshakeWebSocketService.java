@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.socket.server.support;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,6 +27,7 @@ import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -63,12 +63,12 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 			"org.eclipse.jetty.websocket.server.WebSocketServerFactory",
 			HandshakeWebSocketService.class.getClassLoader());
 
-	private static final boolean reactorNettyPresent = ClassUtils.isPresent(
-			"reactor.ipc.netty.http.server.HttpServerResponse",
-			HandshakeWebSocketService.class.getClassLoader());
-
 	private static final boolean undertowPresent = ClassUtils.isPresent(
 			"io.undertow.websockets.WebSocketProtocolHandshakeHandler",
+			HandshakeWebSocketService.class.getClassLoader());
+
+	private static final boolean reactorNettyPresent = ClassUtils.isPresent(
+			"reactor.ipc.netty.http.server.HttpServerResponse",
 			HandshakeWebSocketService.class.getClassLoader());
 
 
@@ -93,7 +93,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 	 * @param upgradeStrategy the strategy to use
 	 */
 	public HandshakeWebSocketService(RequestUpgradeStrategy upgradeStrategy) {
-		Assert.notNull(upgradeStrategy, "'upgradeStrategy' is required");
+		Assert.notNull(upgradeStrategy, "RequestUpgradeStrategy is required");
 		this.upgradeStrategy = upgradeStrategy;
 	}
 
@@ -105,11 +105,12 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		else if (jettyPresent) {
 			className = "JettyRequestUpgradeStrategy";
 		}
-		else if (reactorNettyPresent) {
-			className = "ReactorNettyRequestUpgradeStrategy";
-		}
 		else if (undertowPresent) {
 			className = "UndertowRequestUpgradeStrategy";
+		}
+		else if (reactorNettyPresent) {
+			// As late as possible (Reactor Netty commonly used for WebClient)
+			className = "ReactorNettyRequestUpgradeStrategy";
 		}
 		else {
 			throw new IllegalStateException("No suitable default RequestUpgradeStrategy found");
@@ -170,7 +171,6 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
 	@Override
 	public Mono<Void> handleRequest(ServerWebExchange exchange, WebSocketHandler handler) {
-
 		ServerHttpRequest request = exchange.getRequest();
 		HttpMethod method = request.getMethod();
 		HttpHeaders headers = request.getHeaders();
@@ -180,7 +180,8 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		}
 
 		if (HttpMethod.GET != method) {
-			return Mono.error(new MethodNotAllowedException(method, Collections.singleton(HttpMethod.GET)));
+			return Mono.error(new MethodNotAllowedException(
+					request.getMethodValue(), Collections.singleton(HttpMethod.GET)));
 		}
 
 		if (!"WebSocket".equalsIgnoreCase(headers.getUpgrade())) {
@@ -197,7 +198,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 			return handleBadRequest("Missing \"Sec-WebSocket-Key\" header");
 		}
 
-		Optional<String> protocol = selectProtocol(headers, handler);
+		String protocol = selectProtocol(headers, handler);
 		return this.upgradeStrategy.upgrade(exchange, handler, protocol);
 	}
 
@@ -208,15 +209,18 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		return Mono.error(new ServerWebInputException(reason));
 	}
 
-	private Optional<String> selectProtocol(HttpHeaders headers, WebSocketHandler handler) {
+	@Nullable
+	private String selectProtocol(HttpHeaders headers, WebSocketHandler handler) {
 		String protocolHeader = headers.getFirst(SEC_WEBSOCKET_PROTOCOL);
-		if (protocolHeader == null) {
-			return Optional.empty();
+		if (protocolHeader != null) {
+			List<String> supportedProtocols = handler.getSubProtocols();
+			for (String protocol : StringUtils.commaDelimitedListToStringArray(protocolHeader)) {
+				if (supportedProtocols.contains(protocol)) {
+					return protocol;
+				}
+			}
 		}
-		String[] protocols = handler.getSubProtocols();
-		return StringUtils.commaDelimitedListToSet(protocolHeader).stream()
-				.filter(protocol -> Arrays.stream(protocols).anyMatch(protocol::equals))
-				.findFirst();
+		return null;
 	}
 
 }

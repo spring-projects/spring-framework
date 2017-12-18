@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
@@ -51,7 +52,7 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 
 	public AnnotationAttributesReadingVisitor(String annotationType,
 			MultiValueMap<String, AnnotationAttributes> attributesMap, Map<String, Set<String>> metaAnnotationMap,
-			ClassLoader classLoader) {
+			@Nullable ClassLoader classLoader) {
 
 		super(annotationType, new AnnotationAttributes(annotationType, classLoader), classLoader);
 		this.attributesMap = attributesMap;
@@ -81,13 +82,11 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 					}
 				}
 			}
-			if (this.metaAnnotationMap != null) {
-				Set<String> metaAnnotationTypeNames = new LinkedHashSet<>(visited.size());
-				for (Annotation ann : visited) {
-					metaAnnotationTypeNames.add(ann.annotationType().getName());
-				}
-				this.metaAnnotationMap.put(annotationClass.getName(), metaAnnotationTypeNames);
+			Set<String> metaAnnotationTypeNames = new LinkedHashSet<>(visited.size());
+			for (Annotation ann : visited) {
+				metaAnnotationTypeNames.add(ann.annotationType().getName());
 			}
+			this.metaAnnotationMap.put(annotationClass.getName(), metaAnnotationTypeNames);
 		}
 	}
 

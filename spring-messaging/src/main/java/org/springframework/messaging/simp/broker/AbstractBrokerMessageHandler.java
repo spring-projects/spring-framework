@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
@@ -58,6 +59,7 @@ public abstract class AbstractBrokerMessageHandler
 
 	private final Collection<String> destinationPrefixes;
 
+	@Nullable
 	private ApplicationEventPublisher eventPublisher;
 
 	private AtomicBoolean brokerAvailable = new AtomicBoolean(false);
@@ -95,7 +97,7 @@ public abstract class AbstractBrokerMessageHandler
 	 * @param destinationPrefixes prefixes to use to filter out messages
 	 */
 	public AbstractBrokerMessageHandler(SubscribableChannel inboundChannel, MessageChannel outboundChannel,
-			SubscribableChannel brokerChannel, Collection<String> destinationPrefixes) {
+			SubscribableChannel brokerChannel, @Nullable Collection<String> destinationPrefixes) {
 
 		Assert.notNull(inboundChannel, "'inboundChannel' must not be null");
 		Assert.notNull(outboundChannel, "'outboundChannel' must not be null");
@@ -105,7 +107,7 @@ public abstract class AbstractBrokerMessageHandler
 		this.clientOutboundChannel = outboundChannel;
 		this.brokerChannel = brokerChannel;
 
-		destinationPrefixes = (destinationPrefixes != null) ? destinationPrefixes : Collections.emptyList();
+		destinationPrefixes = (destinationPrefixes != null ? destinationPrefixes : Collections.emptyList());
 		this.destinationPrefixes = Collections.unmodifiableCollection(destinationPrefixes);
 	}
 
@@ -127,10 +129,11 @@ public abstract class AbstractBrokerMessageHandler
 	}
 
 	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
+	public void setApplicationEventPublisher(@Nullable ApplicationEventPublisher publisher) {
 		this.eventPublisher = publisher;
 	}
 
+	@Nullable
 	public ApplicationEventPublisher getApplicationEventPublisher() {
 		return this.eventPublisher;
 	}
@@ -241,8 +244,8 @@ public abstract class AbstractBrokerMessageHandler
 	protected abstract void handleMessageInternal(Message<?> message);
 
 
-	protected boolean checkDestinationPrefix(String destination) {
-		if ((destination == null) || CollectionUtils.isEmpty(this.destinationPrefixes)) {
+	protected boolean checkDestinationPrefix(@Nullable String destination) {
+		if (destination == null || CollectionUtils.isEmpty(this.destinationPrefixes)) {
 			return true;
 		}
 		for (String prefix : this.destinationPrefixes) {
@@ -280,7 +283,9 @@ public abstract class AbstractBrokerMessageHandler
 	private class UnsentDisconnectChannelInterceptor extends ChannelInterceptorAdapter {
 
 		@Override
-		public void afterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, Exception ex) {
+		public void afterSendCompletion(
+				Message<?> message, MessageChannel channel, boolean sent, @Nullable Exception ex) {
+
 			if (!sent) {
 				SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
 				if (SimpMessageType.DISCONNECT.equals(messageType)) {

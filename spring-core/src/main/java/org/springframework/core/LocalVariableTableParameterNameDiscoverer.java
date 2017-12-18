@@ -35,6 +35,7 @@ import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
 import org.springframework.asm.SpringAsmInfo;
 import org.springframework.asm.Type;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -64,6 +65,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 
 
 	@Override
+	@Nullable
 	public String[] getParameterNames(Method method) {
 		Method originalMethod = BridgeMethodResolver.findBridgedMethod(method);
 		Class<?> declaringClass = originalMethod.getDeclaringClass();
@@ -79,6 +81,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	}
 
 	@Override
+	@Nullable
 	public String[] getParameterNames(Constructor<?> ctor) {
 		Class<?> declaringClass = ctor.getDeclaringClass();
 		Map<Member, String[]> map = this.parameterNamesCache.get(declaringClass);
@@ -157,6 +160,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		}
 
 		@Override
+		@Nullable
 		public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 			// exclude synthetic + bridged && static class initialization
 			if (!isSyntheticOrBridged(access) && !STATIC_CLASS_INIT.equals(name)) {

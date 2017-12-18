@@ -19,14 +19,17 @@ package org.springframework.web.server;
 import java.security.Principal;
 import java.time.Instant;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.i18n.LocaleContext;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -60,7 +63,37 @@ public interface ServerWebExchange {
 	 * @param <T> the attribute type
 	 * @return the attribute value
 	 */
-	<T> Optional<T> getAttribute(String name);
+	@SuppressWarnings("unchecked")
+	@Nullable
+	default <T> T getAttribute(String name) {
+		return (T) getAttributes().get(name);
+	}
+
+	/**
+	 * Return the request attribute value or if not present raise an
+	 * {@link IllegalArgumentException}.
+	 * @param name the attribute name
+	 * @param <T> the attribute type
+	 * @return the attribute value
+	 */
+	@SuppressWarnings("unchecked")
+	default <T> T getRequiredAttribute(String name) {
+		T value = getAttribute(name);
+		Assert.notNull(value, "Required attribute '" + name + "' is missing.");
+		return value;
+	}
+
+	/**
+	 * Return the request attribute value, or a default, fallback value.
+	 * @param name the attribute name
+	 * @param defaultValue a default value to return instead
+	 * @param <T> the attribute type
+	 * @return the attribute value
+	 */
+	@SuppressWarnings("unchecked")
+	default <T> T getAttributeOrDefault(String name, T defaultValue) {
+		return (T) getAttributes().getOrDefault(name, defaultValue);
+	}
 
 	/**
 	 * Return the web session for the current request. Always guaranteed  to
@@ -98,6 +131,12 @@ public interface ServerWebExchange {
 	Mono<MultiValueMap<String, Part>> getMultipartData();
 
 	/**
+	 * Return the {@link LocaleContext} using the configured
+	 * {@link org.springframework.web.server.i18n.LocaleContextResolver}.
+	 */
+	LocaleContext getLocaleContext();
+
+	/**
 	 * Returns {@code true} if the one of the {@code checkNotModified} methods
 	 * in this contract were used and they returned true.
 	 */
@@ -126,12 +165,10 @@ public interface ServerWebExchange {
 	 * status, and adding "ETag" and "Last-Modified" headers when applicable.
 	 * This method works with conditional GET/HEAD requests as well as with
 	 * conditional POST/PUT/DELETE requests.
-	 *
 	 * <p><strong>Note:</strong> The HTTP specification recommends setting both
 	 * ETag and Last-Modified values, but you can also use
 	 * {@code #checkNotModified(String)} or
 	 * {@link #checkNotModified(Instant)}.
-	 *
 	 * @param etag the entity tag that the application determined for the
 	 * underlying resource. This parameter will be padded with quotes (")
 	 * if necessary.
@@ -139,8 +176,25 @@ public interface ServerWebExchange {
 	 * determined for the underlying resource
 	 * @return true if the request does not require further processing.
 	 */
-	boolean checkNotModified(String etag, Instant lastModified);
+	boolean checkNotModified(@Nullable String etag, Instant lastModified);
 
+	/**
+	 * Transform the given url according to the registered transformation function(s).
+	 * By default, this method returns the given {@code url}, though additional
+	 * transformation functions can by registered with {@link #addUrlTransformer}
+	 * @param url the URL to transform
+	 * @return the transformed URL
+	 */
+	String transformUrl(String url);
+
+	/**
+	 * Register an additional URL transformation function for use with {@link #transformUrl}.
+	 * The given function can be used to insert an id for authentication, a nonce for CSRF
+	 * protection, etc.
+	 * <p>Note that the given function is applied after any previously registered functions.
+	 * @param transformer a URL transformation function to add
+	 */
+	void addUrlTransformer(Function<String, String> transformer);
 
 	/**
 	 * Return a builder to mutate properties of this exchange by wrapping it

@@ -17,10 +17,14 @@
 package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ClientHttpRequest;
@@ -68,6 +72,27 @@ public interface ClientRequest {
 	BodyInserter<?, ? super ClientHttpRequest> body();
 
 	/**
+	 * Return the request attribute value if present.
+	 * @param name the attribute name
+	 * @return the attribute value
+	 */
+	default Optional<Object> attribute(String name) {
+		Map<String, Object> attributes = attributes();
+		if (attributes.containsKey(name)) {
+			return Optional.of(attributes.get(name));
+		}
+		else {
+			return Optional.empty();
+		}
+	}
+
+
+	/**
+	 * Return the attributes of this request.
+	 */
+	Map<String, Object> attributes();
+
+	/**
 	 * Writes this request to the given {@link ClientHttpRequest}.
 	 *
 	 * @param request the client http request to write to
@@ -87,8 +112,9 @@ public interface ClientRequest {
 	static Builder from(ClientRequest other) {
 		Assert.notNull(other, "'other' must not be null");
 		return new DefaultClientRequestBuilder(other.method(), other.url())
-				.headers(other.headers())
-				.cookies(other.cookies())
+				.headers(headers -> headers.addAll(other.headers()))
+				.cookies(cookies -> cookies.addAll(other.cookies()))
+				.attributes(attributes -> attributes.putAll(other.attributes()))
 				.body(other.body());
 	}
 
@@ -109,7 +135,23 @@ public interface ClientRequest {
 	interface Builder {
 
 		/**
-		 * Add the given, single header value under the given name.
+		 * Set the method of the request.
+		 * @param method the new method
+		 * @return this builder
+		 * @since 5.0.1
+		 */
+		Builder method(HttpMethod method);
+
+		/**
+		 * Set the url of the request.
+		 * @param url the new url
+		 * @return this builder
+		 * @since 5.0.1
+		 */
+		Builder url(URI url);
+
+		/**
+		 * Add the given header value(s) under the given name.
 		 * @param headerName  the header name
 		 * @param headerValues the header value(s)
 		 * @return this builder
@@ -118,26 +160,34 @@ public interface ClientRequest {
 		Builder header(String headerName, String... headerValues);
 
 		/**
-		 * Copy the given headers into the entity's headers map.
-		 * @param headers the existing HttpHeaders to copy from
+		 * Manipulate this request's headers with the given consumer. The
+		 * headers provided to the consumer are "live", so that the consumer can be used to
+		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
+		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
+		 * {@link HttpHeaders} methods.
+		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
 		 * @return this builder
 		 */
-		Builder headers(HttpHeaders headers);
+		Builder headers(Consumer<HttpHeaders> headersConsumer);
 
 		/**
-		 * Add a cookie with the given name and value.
+		 * Add a cookie with the given name and value(s).
 		 * @param name the cookie name
-		 * @param value the cookie value
+		 * @param values the cookie value(s)
 		 * @return this builder
 		 */
-		Builder cookie(String name, String value);
+		Builder cookie(String name, String... values);
 
 		/**
-		 * Copy the given cookies into the entity's cookies map.
-		 * @param cookies the existing cookies to copy from
+		 * Manipulate this request's cookies with the given consumer. The
+		 * map provided to the consumer is "live", so that the consumer can be used to
+		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing header values,
+		 * {@linkplain MultiValueMap#remove(Object) remove} values, or use any of the other
+		 * {@link MultiValueMap} methods.
+		 * @param cookiesConsumer a function that consumes the cookies map
 		 * @return this builder
 		 */
-		Builder cookies(MultiValueMap<String, String> cookies);
+		Builder cookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
 
 		/**
 		 * Set the body of the request to the given {@code BodyInserter}.
@@ -155,6 +205,34 @@ public interface ClientRequest {
 		 * @return the built request
 		 */
 		<S, P extends Publisher<S>> Builder body(P publisher, Class<S> elementClass);
+
+		/**
+		 * Set the body of the request to the given {@code Publisher} and return it.
+		 * @param publisher the {@code Publisher} to write to the request
+		 * @param typeReference a type reference describing the elements contained in the publisher
+		 * @param <S> the type of the elements contained in the publisher
+		 * @param <P> the type of the {@code Publisher}
+		 * @return the built request
+		 */
+		<S, P extends Publisher<S>> Builder body(P publisher,
+				ParameterizedTypeReference<S> typeReference);
+
+		/**
+		 * Set the attribute with the given name to the given value.
+		 * @param name the name of the attribute to add
+		 * @param value the value of the attribute to add
+		 * @return this builder
+		 */
+		Builder attribute(String name, Object value);
+
+		/**
+		 * Manipulate the request attributes with the given consumer. The attributes provided to
+		 * the consumer are "live", so that the consumer can be used to inspect attributes,
+		 * remove attributes, or use any of the other map-provided methods.
+		 * @param attributesConsumer a function that consumes the attributes
+		 * @return this builder
+		 */
+		Builder attributes(Consumer<Map<String, Object>> attributesConsumer);
 
 		/**
 		 * Builds the request entity with no body.

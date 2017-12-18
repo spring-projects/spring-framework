@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util;
 
 import java.net.URI;
@@ -21,21 +22,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Default implementation of {@link UriBuilderFactory} using
- * {@link UriComponentsBuilder} for building, encoding, and expanding URI
- * templates.
+ * Default implementation of {@link UriBuilderFactory} providing options to
+ * pre-configure all UriBuilder instances with common properties such as a base
+ * URI, encoding mode, and default URI variables.
  *
- * <p>Exposes configuration properties that customize the creation of all URIs
- * built through this factory instance including a base URI, default URI
- * variables, and an encoding mode.
+ * <p>Uses {@link UriComponentsBuilder} for URI building.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @see UriComponentsBuilder
  */
 public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
@@ -53,26 +54,28 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 	/**
 	 * Default constructor without a base URI.
+	 * <p>The target address must be specified on each UriBuilder.
 	 */
 	public DefaultUriBuilderFactory() {
-		this(UriComponentsBuilder.fromPath(null));
+		this(UriComponentsBuilder.newInstance());
 	}
 
 	/**
-	 * Constructor with a String "base URI".
-	 * <p>The String given here is used to create a single "base"
-	 * {@code UriComponentsBuilder}. Each time a new URI is prepared via
-	 * {@link #uriString(String)} a new {@code UriComponentsBuilder} is created and
-	 * merged with a clone of the "base" {@code UriComponentsBuilder}.
-	 * <p>Note that the base URI may contain any or all components of a URI and
-	 * those will apply to every URI.
+	 * Constructor with a base URI.
+	 * <p>The given URI template is parsed via
+	 * {@link UriComponentsBuilder#fromUriString} and then applied as a base URI
+	 * to every UriBuilder via {@link UriComponentsBuilder#uriComponents} unless
+	 * the UriBuilder itself was created with a URI template that already has a
+	 * target address.
+	 * @param baseUriTemplate the URI template to use a base URL
 	 */
-	public DefaultUriBuilderFactory(String baseUri) {
-		this(UriComponentsBuilder.fromUriString(baseUri));
+	public DefaultUriBuilderFactory(String baseUriTemplate) {
+		this(UriComponentsBuilder.fromUriString(baseUriTemplate));
 	}
 
 	/**
-	 * Alternate constructor with a {@code UriComponentsBuilder} as the base URI.
+	 * Variant of {@link #DefaultUriBuilderFactory(String)} with a
+	 * {@code UriComponentsBuilder}.
 	 */
 	public DefaultUriBuilderFactory(UriComponentsBuilder baseUri) {
 		Assert.notNull(baseUri, "'baseUri' is required.");
@@ -81,12 +84,11 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 
 	/**
-	 * Configure default URI variable values to use when expanding a URI with a
-	 * Map of values. The map supplied when expanding a given URI can override
-	 * default values.
-	 * @param defaultUriVariables the default URI variables
+	 * Provide default URI variable values to use when expanding URI templates
+	 * with a Map of variables.
+	 * @param defaultUriVariables default URI variable values
 	 */
-	public void setDefaultUriVariables(Map<String, ?> defaultUriVariables) {
+	public void setDefaultUriVariables(@Nullable Map<String, ?> defaultUriVariables) {
 		this.defaultUriVariables.clear();
 		if (defaultUriVariables != null) {
 			this.defaultUriVariables.putAll(defaultUriVariables);
@@ -210,19 +212,19 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
-		public DefaultUriBuilder scheme(String scheme) {
+		public DefaultUriBuilder scheme(@Nullable String scheme) {
 			this.uriComponentsBuilder.scheme(scheme);
 			return this;
 		}
 
 		@Override
-		public DefaultUriBuilder userInfo(String userInfo) {
+		public DefaultUriBuilder userInfo(@Nullable String userInfo) {
 			this.uriComponentsBuilder.userInfo(userInfo);
 			return this;
 		}
 
 		@Override
-		public DefaultUriBuilder host(String host) {
+		public DefaultUriBuilder host(@Nullable String host) {
 			this.uriComponentsBuilder.host(host);
 			return this;
 		}
@@ -234,7 +236,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
-		public DefaultUriBuilder port(String port) {
+		public DefaultUriBuilder port(@Nullable String port) {
 			this.uriComponentsBuilder.port(port);
 			return this;
 		}
@@ -246,7 +248,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
-		public DefaultUriBuilder replacePath(String path) {
+		public DefaultUriBuilder replacePath(@Nullable String path) {
 			this.uriComponentsBuilder.replacePath(path);
 			return this;
 		}
@@ -264,7 +266,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
-		public DefaultUriBuilder replaceQuery(String query) {
+		public DefaultUriBuilder replaceQuery(@Nullable String query) {
 			this.uriComponentsBuilder.replaceQuery(query);
 			return this;
 		}
@@ -294,7 +296,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
-		public DefaultUriBuilder fragment(String fragment) {
+		public DefaultUriBuilder fragment(@Nullable String fragment) {
 			this.uriComponentsBuilder.fragment(fragment);
 			return this;
 		}

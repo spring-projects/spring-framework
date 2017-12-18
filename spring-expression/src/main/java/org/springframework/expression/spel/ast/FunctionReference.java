@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.ReflectionHelper;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -53,13 +55,14 @@ public class FunctionReference extends SpelNodeImpl {
 
 	// Captures the most recently used method for the function invocation *if* the method
 	// can safely be used for compilation (i.e. no argument conversion is going on)
+	@Nullable
 	private Method method;
 	
 	private boolean argumentConversionOccurred;
 
 
 	public FunctionReference(String functionName, int pos, SpelNodeImpl... arguments) {
-		super(pos,arguments);
+		super(pos, arguments);
 		this.name = functionName;
 	}
 
@@ -67,7 +70,7 @@ public class FunctionReference extends SpelNodeImpl {
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		TypedValue value = state.lookupVariable(this.name);
-		if (value == null) {
+		if (value == TypedValue.NULL) {
 			throw new SpelEvaluationException(getStartPosition(), SpelMessage.FUNCTION_NOT_DEFINED, this.name);
 		}
 
@@ -107,15 +110,12 @@ public class FunctionReference extends SpelNodeImpl {
 					SpelMessage.FUNCTION_MUST_BE_STATIC, ClassUtils.getQualifiedMethodName(method), this.name);
 		}
 
-		argumentConversionOccurred = false;
 		// Convert arguments if necessary and remap them for varargs if required
-		if (functionArgs != null) {
-			TypeConverter converter = state.getEvaluationContext().getTypeConverter();
-			argumentConversionOccurred = ReflectionHelper.convertAllArguments(converter, functionArgs, method);
-		}
+		TypeConverter converter = state.getEvaluationContext().getTypeConverter();
+		argumentConversionOccurred = ReflectionHelper.convertAllArguments(converter, functionArgs, method);
 		if (method.isVarArgs()) {
-			functionArgs =
-					ReflectionHelper.setupArgumentsForVarargsInvocation(method.getParameterTypes(), functionArgs);
+			functionArgs = ReflectionHelper.setupArgumentsForVarargsInvocation(
+					method.getParameterTypes(), functionArgs);
 		}
 
 		try {
@@ -180,6 +180,7 @@ public class FunctionReference extends SpelNodeImpl {
 	
 	@Override 
 	public void generateCode(MethodVisitor mv,CodeFlow cf) {
+		Assert.state(this.method != null, "No method handle");
 		String classDesc = this.method.getDeclaringClass().getName().replace('.', '/');
 		generateCodeForArguments(mv, cf, this.method, this.children);
 		mv.visitMethodInsn(INVOKESTATIC, classDesc, this.method.getName(),

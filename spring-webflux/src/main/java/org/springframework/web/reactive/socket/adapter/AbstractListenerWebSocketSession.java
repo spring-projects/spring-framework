@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.socket.adapter;
 
 import java.io.IOException;
+import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.reactivestreams.Publisher;
@@ -25,10 +26,13 @@ import org.reactivestreams.Subscription;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.util.concurrent.Queues;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.server.reactive.AbstractListenerReadPublisher;
 import org.springframework.http.server.reactive.AbstractListenerWriteProcessor;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketMessage;
@@ -57,10 +61,12 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	private static final int RECEIVE_BUFFER_SIZE = 8192;
 
 
+	@Nullable
 	private final MonoProcessor<Void> completionMono;
 
 	private final WebSocketReceivePublisher receivePublisher = new WebSocketReceivePublisher();
 
+	@Nullable
 	private volatile WebSocketSendProcessor sendProcessor;
 
 	private final AtomicBoolean sendCalled = new AtomicBoolean();
@@ -84,7 +90,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	 * the session completion (success or error) (for client-side use).
 	 */
 	public AbstractListenerWebSocketSession(T delegate, String id, HandshakeInfo handshakeInfo,
-			DataBufferFactory bufferFactory, MonoProcessor<Void> completionMono) {
+			DataBufferFactory bufferFactory, @Nullable MonoProcessor<Void> completionMono) {
 
 		super(delegate, id, handshakeInfo, bufferFactory);
 		this.completionMono = completionMono;
@@ -92,7 +98,9 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 
 	protected WebSocketSendProcessor getSendProcessor() {
-		return this.sendProcessor;
+		WebSocketSendProcessor sendProcessor = this.sendProcessor;
+		Assert.state(sendProcessor != null, "No WebSocketSendProcessor available");
+		return sendProcessor;
 	}
 
 	@Override
@@ -105,10 +113,11 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	@Override
 	public Mono<Void> send(Publisher<WebSocketMessage> messages) {
 		if (this.sendCalled.compareAndSet(false, true)) {
-			this.sendProcessor = new WebSocketSendProcessor();
+			WebSocketSendProcessor sendProcessor = new WebSocketSendProcessor();
+			this.sendProcessor = sendProcessor;
 			return Mono.from(subscriber -> {
-					messages.subscribe(this.sendProcessor);
-					this.sendProcessor.subscribe(subscriber);
+					messages.subscribe(sendProcessor);
+					sendProcessor.subscribe(subscriber);
 			});
 		}
 		else {
@@ -119,6 +128,8 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	/**
 	 * Whether the underlying WebSocket API has flow control and can suspend and
 	 * resume the receiving of messages.
+	 * <p><strong>Note:</strong> Sub-classes are encouraged to start out in
+	 * suspended mode, if possible, and wait until demand is received.
 	 */
 	protected abstract boolean canSuspendReceiving();
 
@@ -142,6 +153,9 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 	/**
 	 * Send the given WebSocket message.
+	 * <p><strong>Note:</strong> Sub-classes are responsible for releasing the
+	 * payload data buffer, once fully written, if pooled buffers apply to the
+	 * underlying container.
 	 */
 	protected abstract boolean sendMessage(WebSocketMessage message) throws IOException;
 
@@ -156,18 +170,20 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	/** Handle an error callback from the WebSocketHandler adapter */
 	void handleError(Throwable ex) {
 		this.receivePublisher.onError(ex);
-		if (this.sendProcessor != null) {
-			this.sendProcessor.cancel();
-			this.sendProcessor.onError(ex);
+		WebSocketSendProcessor sendProcessor = this.sendProcessor;
+		if (sendProcessor != null) {
+			sendProcessor.cancel();
+			sendProcessor.onError(ex);
 		}
 	}
 
 	/** Handle a close callback from the WebSocketHandler adapter */
 	void handleClose(CloseStatus reason) {
 		this.receivePublisher.onAllDataRead();
-		if (this.sendProcessor != null) {
-			this.sendProcessor.cancel();
-			this.sendProcessor.onComplete();
+		WebSocketSendProcessor sendProcessor = this.sendProcessor;
+		if (sendProcessor != null) {
+			sendProcessor.cancel();
+			sendProcessor.onComplete();
 		}
 	}
 
@@ -204,30 +220,40 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 	private final class WebSocketReceivePublisher extends AbstractListenerReadPublisher<WebSocketMessage> {
 
-		private volatile WebSocketMessage webSocketMessage;
+		private volatile Queue<Object> pendingMessages = Queues.unbounded(Queues.SMALL_BUFFER_SIZE).get();
+
 
 		@Override
 		protected void checkOnDataAvailable() {
-			if (this.webSocketMessage != null) {
+			resumeReceiving();
+			if (!this.pendingMessages.isEmpty()) {
+				logger.trace("checkOnDataAvailable, processing pending messages");
 				onDataAvailable();
+			}
+			else {
+				logger.trace("checkOnDataAvailable, no pending messages");
 			}
 		}
 
 		@Override
-		protected WebSocketMessage read() throws IOException {
-			if (this.webSocketMessage != null) {
-				WebSocketMessage result = this.webSocketMessage;
-				this.webSocketMessage = null;
-				resumeReceiving();
-				return result;
-			}
-
-			return null;
+		protected void readingPaused() {
+			suspendReceiving();
 		}
 
-		void handleMessage(WebSocketMessage webSocketMessage) {
-			this.webSocketMessage = webSocketMessage;
-			suspendReceiving();
+		@Override
+		@Nullable
+		protected WebSocketMessage read() throws IOException {
+			return (WebSocketMessage) this.pendingMessages.poll();
+		}
+
+		void handleMessage(WebSocketMessage message) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Received message: " + message);
+			}
+			if (!this.pendingMessages.offer(message)) {
+				throw new IllegalStateException("Too many messages received. " +
+						"Please ensure WebSocketSession.receive() is subscribed to.");
+			}
 			onDataAvailable();
 		}
 	}
@@ -239,12 +265,10 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 		@Override
 		protected boolean write(WebSocketMessage message) throws IOException {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Sending message " + message);
+			}
 			return sendMessage(message);
-		}
-
-		@Override
-		protected void releaseData() {
-			this.currentData = null;
 		}
 
 		@Override
@@ -254,7 +278,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 		@Override
 		protected boolean isWritePossible() {
-			return (this.isReady && this.currentData != null);
+			return (this.isReady);
 		}
 
 		/**
@@ -263,6 +287,9 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		 * async completion callback into simple flow control.
 		 */
 		public void setReadyToSend(boolean ready) {
+			if (ready) {
+				logger.trace("Send succeeded, ready to send again");
+			}
 			this.isReady = ready;
 		}
 	}

@@ -82,15 +82,20 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 
 	@Test
 	public void canRead() throws Exception {
-		assertTrue("Converter does not support reading @XmlRootElement", converter.canRead(RootElement.class, null));
-		assertTrue("Converter does not support reading @XmlType", converter.canRead(Type.class, null));
+		assertTrue("Converter does not support reading @XmlRootElement",
+				converter.canRead(RootElement.class, null));
+		assertTrue("Converter does not support reading @XmlType",
+				converter.canRead(Type.class, null));
 	}
 
 	@Test
 	public void canWrite() throws Exception {
-		assertTrue("Converter does not support writing @XmlRootElement", converter.canWrite(RootElement.class, null));
-		assertTrue("Converter does not support writing @XmlRootElement subclass", converter.canWrite(RootElementSubclass.class, null));
-		assertTrue("Converter does not support writing @XmlRootElement subclass", converter.canWrite(rootElementCglib.getClass(), null));
+		assertTrue("Converter does not support writing @XmlRootElement",
+				converter.canWrite(RootElement.class, null));
+		assertTrue("Converter does not support writing @XmlRootElement subclass",
+				converter.canWrite(RootElementSubclass.class, null));
+		assertTrue("Converter does not support writing @XmlRootElement subclass",
+				converter.canWrite(rootElementCglib.getClass(), null));
 		assertFalse("Converter supports writing @XmlType", converter.canWrite(Type.class, null));
 	}
 

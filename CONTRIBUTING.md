@@ -1,304 +1,120 @@
-_Have something you'd like to contribute to the framework?  We welcome pull
-requests but ask that you carefully read this document first to understand how
-best to submit them; what kind of changes are likely to be accepted; and what
-to expect from the Spring team when evaluating your submission._
+# Contributing  to the Spring Framework
 
-_Please refer back to this document as a checklist before issuing any pull
-request; this will save time for everyone!_
+First off, thank you for taking the time to contribute! :+1: :tada: 
 
-## Code of Conduct
-This project adheres to the Contributor Covenant [code of conduct](CODE_OF_CONDUCT.adoc).
-By participating, you  are expected to uphold this code. Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
+### Table of Contents
 
-## Take Your First Steps
+* [Code of Conduct](#code-of-conduct)
+* [How to Contribute](#how-to-contribute)
+  * [Discuss](#discuss)
+  * [Create a Ticket](#create-a-ticket)
+  * [Submit a Pull Request](#submit-a-pull-request)
+* [Build from Source](#build-from-source)
+* [Source Code Style](#source-code-style)
+* [Reference Docs](#reference-docs)
 
-### Understand the basics
+### Code of Conduct
 
-Not sure what a pull request is, or how to submit one? Take a look at GitHub's
-excellent [help documentation][] first.
+This project is governed by the [Spring Code of Conduct](CODE_OF_CONDUCT.adoc).
+By participating you are expected to uphold this code.
+Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
 
-### Search Stack Overflow first; discuss if necessary
+### How to Contribute
 
-If you're unsure why something isn't working or wondering if there is a better
-way of doing it please check on Stack Overflow first and if necessary start
-a discussion. This is the official list of
-[Spring project tags](https://spring.io/questions). In short the issue tracker
-should be used to report issues and make feature requests.
+#### Discuss
 
-### Search JIRA; create an issue if necessary
+If you have a question, check StackOverflow using
+[this list of tags](https://spring.io/questions), organized by Spring project.
+Find an existing discussion or start a new one if necessary.
 
-Is there already an issue that addresses your concern? Do a bit of searching
-in our [JIRA issue tracker][] to see if you can find something similar. If you
-do not find something similar, please create a new JIRA issue before submitting
-a pull request unless the change is truly trivial -- for example: typo fixes,
-removing compiler warnings, etc.
+If you suspect an issue, perform a search in the
+[JIRA issue tracker](https://jira.spring.io/browse/SPR), using a few different keywords.
+When you find related issues and discussions, prior or current, it helps you to learn and
+it helps us to make a decision.
 
-### Sign the Contributor License Agreement (CLA)
+#### Create a Ticket
 
-If you have not previously done so, please sign the [Contributor License Agreement][].
-If you forget to do so, you'll be reminded when you submit a pull request.
+Reporting an issue or making a feature request is a great way to contribute. Your feedback
+and the conversations that result from it provide a continuous flow of ideas. However,
+before you do that, please take the time to [research first](#Discuss).
 
-## Create a Branch
+When an issue is first created, it may not be assigned and will not have a fix version.
+Within a day or two, the issue is assigned to a specific committer and the target
+version is set to "Waiting for Triage". The committer will then review the issue, ask for
+further information if needed, and based on the findings, the issue is either assigned a fix
+version or rejected.
 
-### Branch from `master`
+When a fix is ready, the issue is marked "Resolved" and may still be re-opened. Once a fix
+is released, the issue is permanently "Closed". If necessary, you will need to create a new,
+related ticket with a fresh description.
 
-Master currently represents work toward Spring Framework 5.0. Please submit
-all pull requests there, even bug fixes and minor improvements. Backports to
-`4.3.x` will be considered on a case-by-case basis.
+#### Submit a Pull Request
 
+You can contribute a source code change by submitting a pull request.
 
-### Use short branch names
+1. If you have not previously done so, please sign the
+[Contributor License Agreement](https://cla.pivotal.io/sign/spring). You will also be reminded
+automatically when you submit a pull request.
 
-Branches used when submitting pull requests should preferably be named
-according to JIRA issues, e.g. 'SPR-1234'. Otherwise, use succinct, lower-case,
-dash (-) delimited names, such as 'fix-warnings', 'fix-typo', etc. In
-[fork-and-edit][] cases, the GitHub default 'patch-1' is fine as well. This is
-important, because branch names show up in the merge commits that result from
-accepting pull requests and should be as expressive and concise as possible.
+1. For all but the most trivial of contributions, please [create a ticket](#Create-a-Ticket).
+The purpose of the ticket is to understand and discuss the underlying issue or feature.
+We use the JIRA issue tracker as the preferred place of record for conversations and
+conclusions. In that sense discussions directly under a PR are more implementation detail
+oriented and transient in nature.
 
-## Use Spring Framework Code Style
+1. Always check out the `master` branch and submit pull requests against it
+(for target version see [settings.gradle](settings.gradle)).
+Backports to prior versions will be considered on a case-by-case basis and reflected as
+the fix version in the issue tracker.
 
-The complete [Spring Framework Code Style][] reference is available on the wiki, but
-here's a quick summary:
+1. Use short branch names, preferably based on the JIRA issue (e.g. `SPR-1234`), or
+otherwise using succinct, lower-case, dash (-) delimited names, such as `fix-warnings'.
 
-### Mind the whitespace
+1. Choose the granularity of your commits consciously and squash commits that represent
+multiple edits or corrections of the same logical change. See
+[Rewriting History section of Pro Git](http://git-scm.com/book/en/Git-Tools-Rewriting-History)
+for an overview of streamlining commit history.
 
-Please carefully follow the whitespace and formatting conventions already
-present in the framework.
+1. Format commit messages using 55 characters for the subject line, 72 lines for the
+description, followed by related issues, e.g. `Issues: SPR-1234, SPR-1235`.
+See the
+[Commit Guidelines section of Pro Git](http://git-scm.com/book/en/Distributed-Git-Contributing-to-a-Project#Commit-Guidelines)
+for best practices around commit messages and use `git log` to see some examples.
 
-1. Tabs, not spaces
-1. Unix (LF), not DOS (CRLF) line endings
-1. Eliminate all trailing whitespace
-1. Wrap Javadoc at 90 characters
-1. Aim to wrap code at 90 characters, but favor readability over wrapping
-1. Preserve existing formatting; i.e. do not reformat code for its own sake
-1. Search the codebase using `git grep` and other tools to discover common
-    naming conventions, etc.
-1. UTF-8 encoding for Java sources
+1. List the JIRA issue number in the PR description.
 
+If accepted, your contribution may be heavily modified as needed prior to merging.
+You will likely retain author attribution for your Git commits granted that the bulk of
+your changes remain intact. You may also be asked to rework the submission.
 
-### Add Apache license header to all new classes
+If asked to make corrections, simply push the changes against the same branch, and your
+pull request will be updated. In other words, you do not need to create a new pull request
+when asked to make changes.
 
-```java
-/*
- * Copyright 2002-2017 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+### Build from Source
 
-package ...;
-```
+See the [Build from Source](https://github.com/spring-projects/spring-framework/wiki/Build-from-Source)
+wiki page for instructions on how to check out, build, and import the Spring Framework
+source code into your IDE.
 
-### Update Apache license header in modified files as necessary
+### Source Code Style
 
-Always check the date range in the license header. For example, if you've
-modified a file in 2017 whose header still reads:
+The wiki pages
+[Code Style](https://github.com/spring-projects/spring-framework/wiki/Code-Style) and
+[IntelliJ IDEA Editor Settings](https://github.com/spring-projects/spring-framework/wiki/IntelliJ-IDEA-Editor-Settings)
+defines the source file coding standards we use along with some IDEA editor settings we customize.
 
-```java
-/*
- * Copyright 2002-2011 the original author or authors.
-```
+### Reference Docs
 
-Then be sure to update it to 2017 accordingly:
+The reference documentation is in the [src/docs/asciidoc](src/docs/asciidoc) directory and, in
+[Asciidoctor](http://asciidoctor.org/) format. For trivial changes, you may be able to browse,
+edit source files, and submit directly from Github.
 
-```java
-/*
- * Copyright 2002-2017 the original author or authors.
-```
+When making changes locally, use `./gradlew asciidoctor` and then browse the result under
+`build/asciidoc/html5/index.html`.
 
-### Use @since tags for newly-added public API types and methods
-
-For example:
-
-```java
-/**
- * ...
- *
- * @author First Last
- * @since 5.0
- * @see ...
- */
-```
-
-## Prepare Your Commit
-
-### Submit JUnit test cases for all behavior changes
-
-Search the codebase to find related tests and add additional `@Test` methods
-as appropriate. It is also acceptable to submit test cases on a per JIRA issue
-basis, for example:
-
-```java
-package org.springframework.beans.factory.support;
-
-/**
- * Unit tests for SPR-8954, in which a custom {@link InstantiationAwareBeanPostProcessor}
- * forces the predicted type of a FactoryBean, effectively preventing retrieval of the
- * bean from calls to #getBeansOfType(FactoryBean.class). The implementation of
- * {@link AbstractBeanFactory#isFactoryBean(String, RootBeanDefinition)} now ensures
- * that not only the predicted bean type is considered, but also the original bean
- * definition's beanClass.
- *
- * @author Chris Beams
- */
-public class Spr8954Tests {
-
-    @Test
-    public void cornerSpr8954() {
-        // ...
-    }
-}
-```
-
-
-### Squash commits
-
-Use `git rebase --interactive --autosquash`, `git add --patch`, and other tools
-to "squash" multiple commits into a single atomic commit. In addition to the man
-pages for git, there are many resources online to help you understand how these
-tools work. The [Rewriting History section of Pro Git][] provides a good overview.
-
-
-### Use real name in git commits
-
-Please configure git to use your real first and last name for any commits you
-intend to submit as pull requests. For example, this is not acceptable:
-
-    Author: Nickname <user@mail.com>
-
-Rather, please include your first and last name, properly capitalized, as
-submitted against the Spring Individual Contributor License Agreement (ICLA):
-
-    Author: First Last <user@mail.com>
-
-This helps ensure traceability against the ICLA and also goes a long way to
-ensuring useful output from tools like `git shortlog` and others.
-
-You can configure this via the account admin area in GitHub (useful for
-fork-and-edit cases); _globally_ on your machine with
-
-    git config --global user.name "First Last"
-    git config --global user.email user@mail.com
-
-or _locally_ for the `spring-framework` repository only by omitting the
-'--global' flag:
-
-    cd spring-framework
-    git config user.name "First Last"
-    git config user.email user@mail.com
-
-
-### Format commit messages
-
-Please read and follow the [Commit Guidelines section of Pro Git][].
-
-Most importantly, please format your commit messages in the following way
-(adapted from the commit template in the link above):
-
-    Short (50 chars or less) summary of changes
-
-    More detailed explanatory text, if necessary. Wrap it to about 72
-    characters or so. In some contexts, the first line is treated as the
-    subject of an email and the rest of the text as the body. The blank
-    line separating the summary from the body is critical (unless you omit
-    the body entirely); tools like rebase can get confused if you run the
-    two together.
-
-    Further paragraphs come after blank lines.
-
-     - Bullet points are okay, too
-
-     - Typically a hyphen or asterisk is used for the bullet, preceded by a
-       single space, with blank lines in between, but conventions vary here
-
-    Issue: SPR-1234, SPR-1235
-
-
-1. Use imperative statements in the subject line, e.g. "Fix broken Javadoc link".
-1. Begin the subject line with a capitalized verb, e.g. "Add, Prune, Fix,
-    Introduce, Avoid, etc."
-1. Do not end the subject line with a period.
-1. Restrict the subject line to 50 characters or less if possible.
-1. Wrap lines in the body at 72 characters or less.
-1. Mention associated JIRA issue(s) at the end of the commit comment, prefixed
-    with "Issue: " as above.
-1. In the body of the commit message, explain how things worked before this
-    commit, what has changed, and how things work now.
-
-For examples of this style, issue a `git log --author=cbeams` in the
-`spring-framework` git repository. For convenience, here are several such commits:
-
-- https://github.com/spring-projects/spring-framework/commit/08e2669b84ec0faa2f7904441fe39ac70b65b078
-- https://github.com/spring-projects/spring-framework/commit/1d9d3e6ff79ce9f0eca03b02cd1df705925575da
-- https://github.com/spring-projects/spring-framework/commit/8e0b1c3a5f957af3049cfa0438317177e16d6de6
-- https://github.com/spring-projects/spring-framework/commit/b787a68f2050df179f7036b209aa741230a02477
-
-## Run the Final Checklist
-
-### Run all tests prior to submission
-
-See the [building from source][] section of the `README` for instructions. Make
-sure that all tests pass prior to submitting your pull request.
-
-
-### Submit your pull request
-
-Subject line:
-
-Follow the same conventions for pull request subject lines as mentioned above
-for commit message subject lines.
-
-In the body:
-
-1. Explain your use case. What led you to submit this change? Why were existing
-    mechanisms in the framework insufficient? Make a case that this is a
-    general-purpose problem and that yours is a general-purpose solution, etc.
-1. Add any additional information and ask questions; start a conversation or
-    continue one from JIRA.
-1. Mention the JIRA issue ID.
-1. Also mention that you have submitted the ICLA as described above.
-
-Note that for pull requests containing a single commit, GitHub will default the
-subject line and body of the pull request to match the subject line and body of
-the commit message. This is fine, but please also include the items above in the
-body of the request.
-
-
-### Mention your pull request on the associated JIRA issue
-
-Add a comment to the associated JIRA issue(s) linking to your new pull request.
-
-
-### Expect discussion and rework
-
-The Spring team takes a very conservative approach to accepting contributions to
-the framework. This is to keep code quality and stability as high as possible,
-and to keep complexity at a minimum. Your changes, if accepted, may be heavily
-modified prior to merging. You will retain "Author:" attribution for your Git
-commits granted that the bulk of your changes remain intact. You may be asked to
-rework the submission for style (as explained above) and/or substance. Again, we
-strongly recommend discussing any serious submissions with the Spring Framework 
-team _prior_ to engaging in serious development work.
-
-Note that you can always force push (`git push -f`) reworked / rebased commits
-against the branch used to submit your pull request. In other words, you do not
-need to issue a new pull request when asked to make changes.
-
-[help documentation]: https://help.github.com/categories/collaborating-on-projects-using-issues-and-pull-requests/
-[JIRA issue tracker]: https://jira.spring.io/browse/SPR
-[Contributor License Agreement]: https://cla.pivotal.io/sign/spring
-[fork-and-edit]: https://github.com/blog/844-forking-with-the-edit-button
-[Spring Framework Code Style]: https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Code-Style
-[Rewriting History section of Pro Git]: http://git-scm.com/book/en/Git-Tools-Rewriting-History
-[Commit Guidelines section of Pro Git]: http://git-scm.com/book/en/Distributed-Git-Contributing-to-a-Project#Commit-Guidelines
-[building from source]: https://github.com/spring-projects/spring-framework#building-from-source
+Asciidoctor also supports live editing. For more details read
+[Editing AsciiDoc with Live Preview](http://asciidoctor.org/docs/editing-asciidoc-with-live-preview/).
+Note that if you choose the
+[System Monitor](http://asciidoctor.org/docs/editing-asciidoc-with-live-preview/#using-a-system-monitor)
+option, you can find a Guardfile under `src/docs/asciidoc`.

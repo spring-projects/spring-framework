@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -24,6 +25,7 @@ import java.util.Map;
 
 import org.springframework.beans.BeansException;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -57,7 +59,7 @@ public abstract class BeanFactoryUtils {
 	 * @return whether the given name is a factory dereference
 	 * @see BeanFactory#FACTORY_BEAN_PREFIX
 	 */
-	public static boolean isFactoryDereference(String name) {
+	public static boolean isFactoryDereference(@Nullable String name) {
 		return (name != null && name.startsWith(BeanFactory.FACTORY_BEAN_PREFIX));
 	}
 
@@ -86,7 +88,7 @@ public abstract class BeanFactoryUtils {
 	 * @see org.springframework.beans.factory.support.BeanDefinitionReaderUtils#generateBeanName
 	 * @see org.springframework.beans.factory.support.DefaultBeanNameGenerator
 	 */
-	public static boolean isGeneratedBeanName(String name) {
+	public static boolean isGeneratedBeanName(@Nullable String name) {
 		return (name != null && name.contains(GENERATED_BEAN_NAME_SEPARATOR));
 	}
 
@@ -264,10 +266,9 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				Map<String, T> parentResult = beansOfTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type);
-				parentResult.entrySet().forEach(entry -> {
-					String beanName = entry.getKey();
+				parentResult.forEach((beanName, beanType) -> {
 					if (!result.containsKey(beanName) && !hbf.containsLocalBean(beanName)) {
-						result.put(beanName, entry.getValue());
+						result.put(beanName, beanType);
 					}
 				});
 			}
@@ -313,11 +314,9 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				Map<String, T> parentResult = beansOfTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includeNonSingletons, allowEagerInit);
-				
-				parentResult.entrySet().forEach(entry -> {
-					String beanName = entry.getKey();
+				parentResult.forEach((beanName, beanType) -> {
 					if (!result.containsKey(beanName) && !hbf.containsLocalBean(beanName)) {
-						result.put(beanName, entry.getValue());
+						result.put(beanName, beanType);
 					}
 				});
 			}
@@ -353,6 +352,37 @@ public abstract class BeanFactoryUtils {
 
 		Map<String, T> beansOfType = beansOfTypeIncludingAncestors(lbf, type);
 		return uniqueBean(type, beansOfType);
+	}
+
+	/**
+	 * Get all bean names whose {@code Class} has the supplied {@link Annotation}
+	 * type, including those defined in ancestor factories, without creating any bean
+	 * instances yet. Will return unique names in case of overridden bean definitions.
+	 * @param lbf the bean factory
+	 * @param annotationType the type of annotation to look for
+	 * @return the array of matching bean names, or an empty array if none
+	 * @since 5.0
+	 */
+	public static String[] beanNamesForAnnotationIncludingAncestors(
+			ListableBeanFactory lbf, Class<? extends Annotation> annotationType) {
+		Assert.notNull(lbf, "ListableBeanFactory must not be null");
+		String[] result = lbf.getBeanNamesForAnnotation(annotationType);
+		if (lbf instanceof HierarchicalBeanFactory) {
+			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
+			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
+				String[] parentResult = beanNamesForAnnotationIncludingAncestors(
+						(ListableBeanFactory) hbf.getParentBeanFactory(), annotationType);
+				List<String> resultList = new ArrayList<>();
+				resultList.addAll(Arrays.asList(result));
+				for (String beanName : parentResult) {
+					if (!resultList.contains(beanName) && !hbf.containsLocalBean(beanName)) {
+						resultList.add(beanName);
+					}
+				}
+				result = StringUtils.toStringArray(resultList);
+			}
+		}
+		return result;
 	}
 
 	/**

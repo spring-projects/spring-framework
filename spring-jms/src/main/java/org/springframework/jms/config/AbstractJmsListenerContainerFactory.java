@@ -25,6 +25,7 @@ import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ErrorHandler;
 
 /**
@@ -39,32 +40,46 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private ConnectionFactory connectionFactory;
 
+	@Nullable
 	private DestinationResolver destinationResolver;
 
+	@Nullable
 	private ErrorHandler errorHandler;
 
+	@Nullable
 	private MessageConverter messageConverter;
 
+	@Nullable
 	private Boolean sessionTransacted;
 
+	@Nullable
 	private Integer sessionAcknowledgeMode;
 
+	@Nullable
 	private Boolean pubSubDomain;
 
+	@Nullable
 	private Boolean replyPubSubDomain;
 
+	@Nullable
 	private QosSettings replyQosSettings;
 
+	@Nullable
 	private Boolean subscriptionDurable;
 
+	@Nullable
 	private Boolean subscriptionShared;
 
+	@Nullable
 	private String clientId;
 
+	@Nullable
 	private Integer phase;
 
+	@Nullable
 	private Boolean autoStartup;
 
 

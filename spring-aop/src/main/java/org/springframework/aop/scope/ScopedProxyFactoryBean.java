@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -56,9 +58,11 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean<O
 	private final SimpleBeanTargetSource scopedTargetSource = new SimpleBeanTargetSource();
 
 	/** The name of the target bean */
+	@Nullable
 	private String targetBeanName;
 
 	/** The cached singleton proxy */
+	@Nullable
 	private Object proxy;
 
 
@@ -91,6 +95,7 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean<O
 		pf.copyFrom(this);
 		pf.setTargetSource(this.scopedTargetSource);
 
+		Assert.notNull(this.targetBeanName, "Property 'targetBeanName' is required");
 		Class<?> beanType = beanFactory.getType(this.targetBeanName);
 		if (beanType == null) {
 			throw new IllegalStateException("Cannot create scoped proxy for bean '" + this.targetBeanName +

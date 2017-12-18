@@ -18,6 +18,8 @@ package org.springframework.transaction;
 
 import java.sql.Connection;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Interface that defines Spring-compliant transaction properties.
  * Based on the propagation behavior definitions analogous to EJB CMT attributes.
@@ -253,6 +255,7 @@ public interface TransactionDefinition {
 	 * @see org.springframework.transaction.interceptor.TransactionAspectSupport
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#getCurrentTransactionName()
 	 */
+	@Nullable
 	String getName();
 
 }

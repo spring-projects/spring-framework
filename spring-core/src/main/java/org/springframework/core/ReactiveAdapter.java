@@ -16,11 +16,11 @@
 
 package org.springframework.core;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -105,8 +105,7 @@ public class ReactiveAdapter {
 	 * @return the Publisher representing the adaptation
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> Publisher<T> toPublisher(Object source) {
-		source = (source instanceof Optional ? ((Optional<?>) source).orElse(null) : source);
+	public <T> Publisher<T> toPublisher(@Nullable Object source) {
 		if (source == null) {
 			source = getDescriptor().getEmptyValue();
 		}
@@ -119,7 +118,7 @@ public class ReactiveAdapter {
 	 * @return the reactive type instance representing the adapted publisher
 	 */
 	public Object fromPublisher(Publisher<?> publisher) {
-		return (publisher != null ? this.fromPublisherFunction.apply(publisher) : null);
+		return this.fromPublisherFunction.apply(publisher);
 	}
 
 }

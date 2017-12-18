@@ -109,7 +109,10 @@ public class HeaderResultMatchers {
 		return result -> {
 			MockHttpServletResponse response = result.getResponse();
 			assertTrue("Response does not contain header '" + name + "'", response.containsHeader(name));
-			assertEquals("Response header '" + name + "'", value, Long.parseLong(response.getHeader(name)));
+			String headerValue = response.getHeader(name);
+			if (headerValue != null) {
+				assertEquals("Response header '" + name + "'", value, Long.parseLong(headerValue));
+			}
 		};
 	}
 

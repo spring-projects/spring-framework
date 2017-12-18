@@ -45,7 +45,7 @@ public class CompositeFilter implements Filter {
 
 
 	public void setFilters(List<? extends Filter> filters) {
-		this.filters = new ArrayList<Filter>(filters);
+		this.filters = new ArrayList<>(filters);
 	}
 
 

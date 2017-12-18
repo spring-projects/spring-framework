@@ -25,7 +25,7 @@ import org.junit.runner.RunWith;
 
 /**
  * JUnit 4 based test suite for tests that involve the Spring TestContext
- * Framework and JUnit Jupiter (a.k.a., JUnit 5).
+ * Framework and JUnit Jupiter (i.e., JUnit 5's programming model).
  *
  * <p>This class intentionally does not reside in the "jupiter" package
  * so that the entire "jupiter" package can be excluded from the Gradle

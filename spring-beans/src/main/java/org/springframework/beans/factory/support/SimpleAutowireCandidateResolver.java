@@ -18,6 +18,7 @@ package org.springframework.beans.factory.support;
 
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link AutowireCandidateResolver} implementation to use when no annotation
@@ -40,12 +41,14 @@ public class SimpleAutowireCandidateResolver implements AutowireCandidateResolve
 	}
 
 	@Override
+	@Nullable
 	public Object getSuggestedValue(DependencyDescriptor descriptor) {
 		return null;
 	}
 
 	@Override
-	public Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, String beanName) {
+	@Nullable
+	public Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, @Nullable String beanName) {
 		return null;
 	}
 

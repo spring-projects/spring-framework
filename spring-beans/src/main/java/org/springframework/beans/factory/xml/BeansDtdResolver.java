@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.xml.sax.InputSource;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 
 /**
  * EntityResolver implementation for the Spring beans DTD,
@@ -50,7 +51,8 @@ public class BeansDtdResolver implements EntityResolver {
 
 
 	@Override
-	public InputSource resolveEntity(String publicId, String systemId) throws IOException {
+	@Nullable
+	public InputSource resolveEntity(String publicId, @Nullable String systemId) throws IOException {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Trying to resolve XML entity with public ID [" + publicId +
 					"] and system ID [" + systemId + "]");

@@ -31,8 +31,15 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.SerializationTestUtils;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.startsWith;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test fixture for {@link MessageHeaderAccessor}.
@@ -314,9 +321,10 @@ public class MessageHeaderAccessorTests {
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
 		accessor.setContentType(MimeTypeUtils.TEXT_PLAIN);
 
-		assertEquals("headers={contentType=text/plain} payload=p", accessor.getShortLogMessage("p"));
-		assertEquals("headers={contentType=text/plain} payload=p", accessor.getShortLogMessage("p".getBytes(StandardCharsets.UTF_8)));
-		assertEquals("headers={contentType=text/plain} payload=p", accessor.getShortLogMessage(new Object() {
+		String expected = "headers={contentType=text/plain} payload=p";
+		assertEquals(expected, accessor.getShortLogMessage("p"));
+		assertEquals(expected, accessor.getShortLogMessage("p".getBytes(StandardCharsets.UTF_8)));
+		assertEquals(expected, accessor.getShortLogMessage(new Object() {
 			@Override
 			public String toString() {
 				return "p";
@@ -349,9 +357,10 @@ public class MessageHeaderAccessorTests {
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
 		accessor.setContentType(MimeTypeUtils.TEXT_PLAIN);
 
-		assertEquals("headers={contentType=text/plain} payload=p", accessor.getDetailedLogMessage("p"));
-		assertEquals("headers={contentType=text/plain} payload=p", accessor.getDetailedLogMessage("p".getBytes(StandardCharsets.UTF_8)));
-		assertEquals("headers={contentType=text/plain} payload=p", accessor.getDetailedLogMessage(new Object() {
+		String expected = "headers={contentType=text/plain} payload=p";
+		assertEquals(expected, accessor.getDetailedLogMessage("p"));
+		assertEquals(expected, accessor.getDetailedLogMessage("p".getBytes(StandardCharsets.UTF_8)));
+		assertEquals(expected, accessor.getDetailedLogMessage(new Object() {
 			@Override
 			public String toString() {
 				return "p";

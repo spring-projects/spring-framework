@@ -17,15 +17,16 @@
 package org.springframework.core.io;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
+import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -35,9 +36,15 @@ import org.springframework.util.StringUtils;
  * Supports resolution as a {@code File} and also as a {@code URL}.
  * Implements the extended {@link WritableResource} interface.
  *
+ * <p>Note: As of Spring Framework 5.0, this {@link Resource} implementation
+ * uses NIO.2 API for read/write interactions. Nevertheless, in contrast to
+ * {@link PathResource}, it primarily manages a {@code java.io.File} handle.
+ *
  * @author Juergen Hoeller
  * @since 28.12.2003
+ * @see PathResource
  * @see java.io.File
+ * @see java.nio.file.Files
  */
 public class FileSystemResource extends AbstractResource implements WritableResource {
 
@@ -113,7 +120,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 */
 	@Override
 	public InputStream getInputStream() throws IOException {
-		return new FileInputStream(this.file);
+		return Files.newInputStream(this.file.toPath());
 	}
 
 	/**
@@ -133,7 +140,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 */
 	@Override
 	public OutputStream getOutputStream() throws IOException {
-		return new FileOutputStream(this.file);
+		return Files.newOutputStream(this.file.toPath());
 	}
 
 	/**
@@ -176,7 +183,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 */
 	@Override
 	public ReadableByteChannel readableChannel() throws IOException {
-		return new FileInputStream(this.file).getChannel();
+		return FileChannel.open(this.file.toPath(), StandardOpenOption.READ);
 	}
 
 	/**
@@ -185,7 +192,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 */
 	@Override
 	public WritableByteChannel writableChannel() throws IOException {
-		return new FileOutputStream(this.file).getChannel();
+		return FileChannel.open(this.file.toPath(), StandardOpenOption.WRITE);
 	}
 
 	/**

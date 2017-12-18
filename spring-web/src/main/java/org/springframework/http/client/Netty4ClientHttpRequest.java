@@ -27,7 +27,6 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -50,7 +49,8 @@ import org.springframework.util.concurrent.SettableListenableFuture;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @since 4.1.2
- * @deprecated as of Spring 5.0, in favor of {@link org.springframework.http.client.reactive.ReactorClientHttpConnector}
+ * @deprecated as of Spring 5.0, in favor of
+ * {@link org.springframework.http.client.reactive.ReactorClientHttpConnector}
  */
 @Deprecated
 class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements ClientHttpRequest {
@@ -75,6 +75,11 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 	@Override
 	public HttpMethod getMethod() {
 		return this.method;
+	}
+
+	@Override
+	public String getMethodValue() {
+		return this.method.name();
 	}
 
 	@Override
@@ -109,18 +114,15 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 	protected ListenableFuture<ClientHttpResponse> executeInternal(final HttpHeaders headers) throws IOException {
 		final SettableListenableFuture<ClientHttpResponse> responseFuture = new SettableListenableFuture<>();
 
-		ChannelFutureListener connectionListener = new ChannelFutureListener() {
-			@Override
-			public void operationComplete(ChannelFuture future) throws Exception {
-				if (future.isSuccess()) {
-					Channel channel = future.channel();
-					channel.pipeline().addLast(new RequestExecuteHandler(responseFuture));
-					FullHttpRequest nettyRequest = createFullHttpRequest(headers);
-					channel.writeAndFlush(nettyRequest);
-				}
-				else {
-					responseFuture.setException(future.cause());
-				}
+		ChannelFutureListener connectionListener = future -> {
+			if (future.isSuccess()) {
+				Channel channel = future.channel();
+				channel.pipeline().addLast(new RequestExecuteHandler(responseFuture));
+				FullHttpRequest nettyRequest = createFullHttpRequest(headers);
+				channel.writeAndFlush(nettyRequest);
+			}
+			else {
+				responseFuture.setException(future.cause());
 			}
 		};
 
@@ -137,7 +139,7 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 		FullHttpRequest nettyRequest = new DefaultFullHttpRequest(
 				HttpVersion.HTTP_1_1, nettyMethod, path, this.body.buffer());
 
-		nettyRequest.headers().set(HttpHeaders.HOST, this.uri.getHost());
+		nettyRequest.headers().set(HttpHeaders.HOST, this.uri.getHost() + ":" + getPort(uri));
 		nettyRequest.headers().set(HttpHeaders.CONNECTION, "close");
 		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
 			nettyRequest.headers().add(entry.getKey(), entry.getValue());

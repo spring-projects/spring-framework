@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.view;
 
 import java.util.Arrays;
@@ -20,6 +21,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
@@ -34,10 +36,13 @@ class DefaultRenderingBuilder implements Rendering.RedirectBuilder {
 
 	private final Object view;
 
+	@Nullable
 	private Model model;
 
+	@Nullable
 	private HttpStatus status;
 
+	@Nullable
 	private HttpHeaders headers;
 
 
@@ -48,36 +53,33 @@ class DefaultRenderingBuilder implements Rendering.RedirectBuilder {
 
 	@Override
 	public DefaultRenderingBuilder modelAttribute(String name, Object value) {
-		initModel();
-		this.model.addAttribute(name, value);
+		initModel().addAttribute(name, value);
 		return this;
-	}
-
-	private void initModel() {
-		if (this.model == null) {
-			this.model = new ExtendedModelMap();
-		}
 	}
 
 	@Override
 	public DefaultRenderingBuilder modelAttribute(Object value) {
-		initModel();
-		this.model.addAttribute(value);
+		initModel().addAttribute(value);
 		return this;
 	}
 
 	@Override
 	public DefaultRenderingBuilder modelAttributes(Object... values) {
-		initModel();
-		this.model.addAllAttributes(Arrays.asList(values));
+		initModel().addAllAttributes(Arrays.asList(values));
 		return this;
 	}
 
 	@Override
 	public DefaultRenderingBuilder model(Map<String, ?> map) {
-		initModel();
-		this.model.addAllAttributes(map);
+		initModel().addAllAttributes(map);
 		return this;
+	}
+
+	private Model initModel() {
+		if (this.model == null) {
+			this.model = new ExtendedModelMap();
+		}
+		return this.model;
 	}
 
 	@Override
@@ -88,22 +90,21 @@ class DefaultRenderingBuilder implements Rendering.RedirectBuilder {
 
 	@Override
 	public DefaultRenderingBuilder header(String headerName, String... headerValues) {
-		initHeaders();
-		this.headers.put(headerName, Arrays.asList(headerValues));
+		initHeaders().put(headerName, Arrays.asList(headerValues));
 		return this;
 	}
 
 	@Override
 	public DefaultRenderingBuilder headers(HttpHeaders headers) {
-		initHeaders();
-		this.headers.putAll(headers);
+		initHeaders().putAll(headers);
 		return this;
 	}
 
-	private void initHeaders() {
+	private HttpHeaders initHeaders() {
 		if (this.headers == null) {
 			this.headers = new HttpHeaders();
 		}
+		return this.headers;
 	}
 
 	@Override
@@ -122,6 +123,7 @@ class DefaultRenderingBuilder implements Rendering.RedirectBuilder {
 		Assert.isInstanceOf(RedirectView.class, this.view);
 		return (RedirectView) this.view;
 	}
+
 
 	@Override
 	public Rendering build() {

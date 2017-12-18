@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,56 +37,53 @@ import static org.junit.Assert.*;
  */
 public class AnnotationExceptionHandlerMethodResolverTests {
 
+	private final AnnotationExceptionHandlerMethodResolver resolver =
+			new AnnotationExceptionHandlerMethodResolver(ExceptionController.class);
+
+
 	@Test
 	public void resolveMethodFromAnnotation() {
-		AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(ExceptionController.class);
 		IOException exception = new IOException();
-		assertEquals("handleIOException", resolver.resolveMethod(exception).getName());
+		assertEquals("handleIOException", this.resolver.resolveMethod(exception).getName());
 	}
 
 	@Test
 	public void resolveMethodFromArgument() {
-		AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(ExceptionController.class);
 		IllegalArgumentException exception = new IllegalArgumentException();
-		assertEquals("handleIllegalArgumentException", resolver.resolveMethod(exception).getName());
+		assertEquals("handleIllegalArgumentException", this.resolver.resolveMethod(exception).getName());
 	}
 
 	@Test
 	public void resolveMethodFromArgumentWithErrorType() {
-		AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(ExceptionController.class);
 		AssertionError exception = new AssertionError();
-		assertEquals("handleAssertionError", resolver.resolveMethod(new IllegalStateException(exception)).getName());
+		assertEquals("handleAssertionError", this.resolver.resolveMethod(new IllegalStateException(exception)).getName());
 	}
 
 	@Test
 	public void resolveMethodExceptionSubType() {
-		AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(ExceptionController.class);
 		IOException ioException = new FileNotFoundException();
-		assertEquals("handleIOException", resolver.resolveMethod(ioException).getName());
+		assertEquals("handleIOException", this.resolver.resolveMethod(ioException).getName());
 		SocketException bindException = new BindException();
-		assertEquals("handleSocketException", resolver.resolveMethod(bindException).getName());
+		assertEquals("handleSocketException", this.resolver.resolveMethod(bindException).getName());
 	}
 
 	@Test
 	public void resolveMethodBestMatch() {
-		AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(ExceptionController.class);
 		SocketException exception = new SocketException();
-		assertEquals("handleSocketException", resolver.resolveMethod(exception).getName());
+		assertEquals("handleSocketException", this.resolver.resolveMethod(exception).getName());
 	}
 
 	@Test
 	public void resolveMethodNoMatch() {
-		AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(ExceptionController.class);
 		Exception exception = new Exception();
-		assertNull("1st lookup", resolver.resolveMethod(exception));
-		assertNull("2nd lookup from cache", resolver.resolveMethod(exception));
+		assertNull("1st lookup", this.resolver.resolveMethod(exception));
+		assertNull("2nd lookup from cache", this.resolver.resolveMethod(exception));
 	}
 
 	@Test
 	public void resolveMethodInherited() {
-		AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(InheritedController.class);
 		IOException exception = new IOException();
-		assertEquals("handleIOException", resolver.resolveMethod(exception).getName());
+		assertEquals("handleIOException", this.resolver.resolveMethod(exception).getName());
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -94,13 +91,14 @@ public class AnnotationExceptionHandlerMethodResolverTests {
 		new AnnotationExceptionHandlerMethodResolver(AmbiguousController.class);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = IllegalStateException.class)
 	public void noExceptionMapping() {
 		new AnnotationExceptionHandlerMethodResolver(NoExceptionController.class);
 	}
 
 
 	@Controller
+	@SuppressWarnings("unused")
 	static class ExceptionController {
 
 		public void handle() {}

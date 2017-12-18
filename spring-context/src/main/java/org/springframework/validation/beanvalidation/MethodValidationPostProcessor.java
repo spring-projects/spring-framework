@@ -28,6 +28,7 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 
@@ -61,6 +62,7 @@ public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvis
 
 	private Class<? extends Annotation> validatedAnnotationType = Validated.class;
 
+	@Nullable
 	private Validator validator;
 
 
@@ -82,8 +84,12 @@ public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvis
 	 * <p>Default is the default ValidatorFactory's default Validator.
 	 */
 	public void setValidator(Validator validator) {
+		// Unwrap to the native Validator with forExecutables support
 		if (validator instanceof LocalValidatorFactoryBean) {
 			this.validator = ((LocalValidatorFactoryBean) validator).getValidator();
+		}
+		else if (validator instanceof SpringValidatorAdapter) {
+			this.validator = validator.unwrap(Validator.class);
 		}
 		else {
 			this.validator = validator;
@@ -115,7 +121,7 @@ public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvis
 	 * a {@link MethodValidationInterceptor} or subclass thereof)
 	 * @since 4.2
 	 */
-	protected Advice createMethodValidationAdvice(Validator validator) {
+	protected Advice createMethodValidationAdvice(@Nullable Validator validator) {
 		return (validator != null ? new MethodValidationInterceptor(validator) : new MethodValidationInterceptor());
 	}
 

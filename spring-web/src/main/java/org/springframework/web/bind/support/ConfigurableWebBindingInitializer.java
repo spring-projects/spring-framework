@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.bind.support;
 
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.BindingErrorProcessor;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
@@ -43,14 +44,19 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 
 	private boolean directFieldAccess = false;
 
+	@Nullable
 	private MessageCodesResolver messageCodesResolver;
 
+	@Nullable
 	private BindingErrorProcessor bindingErrorProcessor;
 
+	@Nullable
 	private Validator validator;
 
+	@Nullable
 	private ConversionService conversionService;
 
+	@Nullable
 	private PropertyEditorRegistrar[] propertyEditorRegistrars;
 
 
@@ -100,13 +106,14 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 	 * the data binder.
 	 * @see org.springframework.validation.DataBinder#setMessageCodesResolver
 	 */
-	public final void setMessageCodesResolver(MessageCodesResolver messageCodesResolver) {
+	public final void setMessageCodesResolver(@Nullable MessageCodesResolver messageCodesResolver) {
 		this.messageCodesResolver = messageCodesResolver;
 	}
 
 	/**
 	 * Return the strategy to use for resolving errors into message codes.
 	 */
+	@Nullable
 	public final MessageCodesResolver getMessageCodesResolver() {
 		return this.messageCodesResolver;
 	}
@@ -118,13 +125,14 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 	 * of the data binder.
 	 * @see org.springframework.validation.DataBinder#setBindingErrorProcessor
 	 */
-	public final void setBindingErrorProcessor(BindingErrorProcessor bindingErrorProcessor) {
+	public final void setBindingErrorProcessor(@Nullable BindingErrorProcessor bindingErrorProcessor) {
 		this.bindingErrorProcessor = bindingErrorProcessor;
 	}
 
 	/**
 	 * Return the strategy to use for processing binding errors.
 	 */
+	@Nullable
 	public final BindingErrorProcessor getBindingErrorProcessor() {
 		return this.bindingErrorProcessor;
 	}
@@ -132,13 +140,14 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 	/**
 	 * Set the Validator to apply after each binding step.
 	 */
-	public final void setValidator(Validator validator) {
+	public final void setValidator(@Nullable Validator validator) {
 		this.validator = validator;
 	}
 
 	/**
 	 * Return the Validator to apply after each binding step, if any.
 	 */
+	@Nullable
 	public final Validator getValidator() {
 		return this.validator;
 	}
@@ -147,13 +156,14 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 	 * Specify a ConversionService which will apply to every DataBinder.
 	 * @since 3.0
 	 */
-	public final void setConversionService(ConversionService conversionService) {
+	public final void setConversionService(@Nullable ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
 	/**
 	 * Return the ConversionService which will apply to every DataBinder.
 	 */
+	@Nullable
 	public final ConversionService getConversionService() {
 		return this.conversionService;
 	}
@@ -168,13 +178,14 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 	/**
 	 * Specify multiple PropertyEditorRegistrars to be applied to every DataBinder.
 	 */
-	public final void setPropertyEditorRegistrars(PropertyEditorRegistrar[] propertyEditorRegistrars) {
+	public final void setPropertyEditorRegistrars(@Nullable PropertyEditorRegistrar[] propertyEditorRegistrars) {
 		this.propertyEditorRegistrars = propertyEditorRegistrars;
 	}
 
 	/**
 	 * Return the PropertyEditorRegistrars to be applied to every DataBinder.
 	 */
+	@Nullable
 	public final PropertyEditorRegistrar[] getPropertyEditorRegistrars() {
 		return this.propertyEditorRegistrars;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,23 +20,21 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.reactive.DispatcherHandler;
 
 /**
- * Base class for {@link org.springframework.web.WebApplicationInitializer}
- * implementations that register a {@link DispatcherHandler} configured with annotated
- * {@link org.springframework.context.annotation.Configuration @Configuration} classes in the
- * servlet context, wrapping it in a {@link ServletHttpHandlerAdapter}.
- *
- * <p>Concrete implementations are required to implement {@link #getConfigClasses()}.
- * Further template and customization methods are provided by
- * {@link AbstractDispatcherHandlerInitializer}.
+ * {@link org.springframework.web.WebApplicationInitializer WebApplicationInitializer}
+ * to register a {@code DispatcherHandler}, wrapping it in a
+ * {@link ServletHttpHandlerAdapter}, and use Java-based Spring configuration.
  *
  * @author Arjen Poutsma
- * @since 5.0
+ * @deprecated in favor of
+ * {@link org.springframework.web.server.adapter.AbstractReactiveWebInitializer
+ * AbstractReactiveWebInitializer}
  */
+@Deprecated
 public abstract class AbstractAnnotationConfigDispatcherHandlerInitializer
 		extends AbstractDispatcherHandlerInitializer {
+
 
 	/**
 	 * {@inheritDoc}
@@ -45,19 +43,18 @@ public abstract class AbstractAnnotationConfigDispatcherHandlerInitializer
 	 */
 	@Override
 	protected ApplicationContext createApplicationContext() {
-		AnnotationConfigApplicationContext servletAppContext = new AnnotationConfigApplicationContext();
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		Class<?>[] configClasses = getConfigClasses();
 		if (!ObjectUtils.isEmpty(configClasses)) {
-			servletAppContext.register(configClasses);
+			context.register(configClasses);
 		}
-		return servletAppContext;
+		return context;
 	}
 
 	/**
-	 * Specify {@link org.springframework.context.annotation.Configuration @Configuration}
-	 * and/or {@link org.springframework.stereotype.Component @Component} classes to be
-	 * provided to the {@linkplain #createApplicationContext() application context}.
-	 * @return the configuration classes for the dispatcher servlet application context
+	 * Specify {@code @Configuration} and/or {@code @Component} classes for
+	 * the {@linkplain #createApplicationContext() application context}.
+	 * @return the configuration for the application context
 	 */
 	protected abstract Class<?>[] getConfigClasses();
 

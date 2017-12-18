@@ -19,14 +19,19 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.bind.support.SimpleSessionStatus;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.reactive.BindingContext;
+import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebSession;
 
 /**
  * Extends {@link BindingContext} with {@code @InitBinder} method initialization.
@@ -41,13 +46,27 @@ class InitBinderBindingContext extends BindingContext {
 	/* Simple BindingContext to help with the invoking @InitBinder methods */
 	private final BindingContext binderMethodContext;
 
+	private final SessionStatus sessionStatus = new SimpleSessionStatus();
 
-	InitBinderBindingContext(WebBindingInitializer initializer,
+	@Nullable
+	private Runnable saveModelOperation;
+
+
+	InitBinderBindingContext(@Nullable WebBindingInitializer initializer,
 			List<SyncInvocableHandlerMethod> binderMethods) {
 
 		super(initializer);
 		this.binderMethods = binderMethods;
 		this.binderMethodContext = new BindingContext(initializer);
+	}
+
+
+	/**
+	 * Return the {@link SessionStatus} instance to use that can be used to
+	 * signal that session processing is complete.
+	 */
+	public SessionStatus getSessionStatus() {
+		return this.sessionStatus;
 	}
 
 
@@ -57,8 +76,9 @@ class InitBinderBindingContext extends BindingContext {
 
 		this.binderMethods.stream()
 				.filter(binderMethod -> {
-					InitBinder annotation = binderMethod.getMethodAnnotation(InitBinder.class);
-					Collection<String> names = Arrays.asList(annotation.value());
+					InitBinder ann = binderMethod.getMethodAnnotation(InitBinder.class);
+					Assert.state(ann != null, "No InitBinder annotation");
+					Collection<String> names = Arrays.asList(ann.value());
 					return (names.size() == 0 || names.contains(dataBinder.getObjectName()));
 				})
 				.forEach(method -> invokeBinderMethod(dataBinder, exchange, method));
@@ -69,20 +89,43 @@ class InitBinderBindingContext extends BindingContext {
 	private void invokeBinderMethod(WebExchangeDataBinder dataBinder,
 			ServerWebExchange exchange, SyncInvocableHandlerMethod binderMethod) {
 
-		Optional<Object> returnValue = binderMethod
-				.invokeForHandlerResult(exchange, this.binderMethodContext, dataBinder)
-				.getReturnValue();
+		HandlerResult result = binderMethod.invokeForHandlerResult(
+				exchange, this.binderMethodContext, dataBinder);
 
-		if (returnValue.isPresent()) {
+		if (result != null && result.getReturnValue() != null) {
 			throw new IllegalStateException(
 					"@InitBinder methods should return void: " + binderMethod);
 		}
 
 		// Should not happen (no Model argument resolution) ...
-
 		if (!this.binderMethodContext.getModel().asMap().isEmpty()) {
 			throw new IllegalStateException(
 					"@InitBinder methods should not add model attributes: " + binderMethod);
+		}
+	}
+
+	/**
+	 * Provide the context required to apply {@link #saveModel()} after the
+	 * controller method has been invoked.
+	 */
+	public void setSessionContext(SessionAttributesHandler attributesHandler, WebSession session) {
+		this.saveModelOperation = () -> {
+			if (getSessionStatus().isComplete()) {
+				attributesHandler.cleanupAttributes(session);
+			}
+			else {
+				attributesHandler.storeAttributes(session, getModel().asMap());
+			}
+		};
+	}
+
+	/**
+	 * Save model attributes in the session based on a type-level declarations
+	 * in an {@code @SessionAttributes} annotation.
+	 */
+	public void saveModel() {
+		if (this.saveModelOperation != null) {
+			this.saveModelOperation.run();
 		}
 	}
 

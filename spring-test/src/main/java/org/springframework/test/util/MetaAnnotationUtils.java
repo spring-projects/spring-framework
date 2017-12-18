@@ -24,6 +24,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -80,6 +81,7 @@ public abstract class MetaAnnotationUtils {
 	 * @see AnnotationUtils#findAnnotationDeclaringClass(Class, Class)
 	 * @see #findAnnotationDescriptorForTypes(Class, Class...)
 	 */
+	@Nullable
 	public static <T extends Annotation> AnnotationDescriptor<T> findAnnotationDescriptor(
 			Class<?> clazz, Class<T> annotationType) {
 
@@ -96,8 +98,9 @@ public abstract class MetaAnnotationUtils {
 	 * @return the corresponding annotation descriptor if the annotation was found;
 	 * otherwise {@code null}
 	 */
+	@Nullable
 	private static <T extends Annotation> AnnotationDescriptor<T> findAnnotationDescriptor(
-			Class<?> clazz, Set<Annotation> visited, Class<T> annotationType) {
+			@Nullable Class<?> clazz, Set<Annotation> visited, Class<T> annotationType) {
 
 		Assert.notNull(annotationType, "Annotation type must not be null");
 		if (clazz == null || Object.class == clazz) {
@@ -165,6 +168,7 @@ public abstract class MetaAnnotationUtils {
 	 * @see #findAnnotationDescriptor(Class, Class)
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public static UntypedAnnotationDescriptor findAnnotationDescriptorForTypes(
 			Class<?> clazz, Class<? extends Annotation>... annotationTypes) {
 
@@ -182,7 +186,8 @@ public abstract class MetaAnnotationUtils {
 	 * was found; otherwise {@code null}
 	 */
 	@SuppressWarnings("unchecked")
-	private static UntypedAnnotationDescriptor findAnnotationDescriptorForTypes(Class<?> clazz,
+	@Nullable
+	private static UntypedAnnotationDescriptor findAnnotationDescriptorForTypes(@Nullable Class<?> clazz,
 			Set<Annotation> visited, Class<? extends Annotation>... annotationTypes) {
 
 		assertNonEmptyAnnotationTypeArray(annotationTypes, "The list of annotation types must not be empty");
@@ -282,6 +287,7 @@ public abstract class MetaAnnotationUtils {
 
 		private final Class<?> declaringClass;
 
+		@Nullable
 		private final Annotation composedAnnotation;
 
 		private final T annotation;
@@ -293,7 +299,7 @@ public abstract class MetaAnnotationUtils {
 		}
 
 		public AnnotationDescriptor(Class<?> rootDeclaringClass, Class<?> declaringClass,
-				Annotation composedAnnotation, T annotation) {
+				@Nullable Annotation composedAnnotation, T annotation) {
 
 			Assert.notNull(rootDeclaringClass, "'rootDeclaringClass' must not be null");
 			Assert.notNull(annotation, "Annotation must not be null");
@@ -301,8 +307,10 @@ public abstract class MetaAnnotationUtils {
 			this.declaringClass = declaringClass;
 			this.composedAnnotation = composedAnnotation;
 			this.annotation = annotation;
-			this.annotationAttributes = AnnotatedElementUtils.findMergedAnnotationAttributes(
+			AnnotationAttributes attributes = AnnotatedElementUtils.findMergedAnnotationAttributes(
 					rootDeclaringClass, annotation.annotationType().getName(), false, false);
+			Assert.state(attributes != null, "No annotation attributes");
+			this.annotationAttributes = attributes;
 		}
 
 		public Class<?> getRootDeclaringClass() {
@@ -340,10 +348,12 @@ public abstract class MetaAnnotationUtils {
 			return this.annotationAttributes;
 		}
 
+		@Nullable
 		public Annotation getComposedAnnotation() {
 			return this.composedAnnotation;
 		}
 
+		@Nullable
 		public Class<? extends Annotation> getComposedAnnotationType() {
 			return (this.composedAnnotation != null ? this.composedAnnotation.annotationType() : null);
 		}
@@ -375,7 +385,7 @@ public abstract class MetaAnnotationUtils {
 		}
 
 		public UntypedAnnotationDescriptor(Class<?> rootDeclaringClass, Class<?> declaringClass,
-				Annotation composedAnnotation, Annotation annotation) {
+				@Nullable Annotation composedAnnotation, Annotation annotation) {
 
 			super(rootDeclaringClass, declaringClass, composedAnnotation, annotation);
 		}

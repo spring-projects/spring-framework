@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,11 @@
 
 package org.springframework.beans.factory;
 
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.springframework.beans.BeansException;
+import org.springframework.lang.Nullable;
 
 /**
  * A variant of {@link ObjectFactory} designed specifically for injection points,
@@ -48,6 +50,7 @@ public interface ObjectProvider<T> extends ObjectFactory<T> {
 	 * @throws BeansException in case of creation errors
 	 * @see #getObject()
 	 */
+	@Nullable
 	T getIfAvailable() throws BeansException;
 
 	/**
@@ -67,6 +70,22 @@ public interface ObjectProvider<T> extends ObjectFactory<T> {
 	}
 
 	/**
+	 * Consume an instance (possibly shared or independent) of the object
+	 * managed by this factory, if available.
+	 * @param dependencyConsumer a callback for processing the target object
+	 * if available (not called otherwise)
+	 * @throws BeansException in case of creation errors
+	 * @since 5.0
+	 * @see #getIfAvailable()
+	 */
+	default void ifAvailable(Consumer<T> dependencyConsumer) throws BeansException {
+		T dependency = getIfAvailable();
+		if (dependency != null) {
+			dependencyConsumer.accept(dependency);
+		}
+	}
+
+	/**
 	 * Return an instance (possibly shared or independent) of the object
 	 * managed by this factory.
 	 * @return an instance of the bean, or {@code null} if not available or
@@ -74,6 +93,7 @@ public interface ObjectProvider<T> extends ObjectFactory<T> {
 	 * @throws BeansException in case of creation errors
 	 * @see #getObject()
 	 */
+	@Nullable
 	T getIfUnique() throws BeansException;
 
 	/**
@@ -91,6 +111,22 @@ public interface ObjectProvider<T> extends ObjectFactory<T> {
 	default T getIfUnique(Supplier<T> defaultSupplier) throws BeansException {
 		T dependency = getIfUnique();
 		return (dependency != null ? dependency : defaultSupplier.get());
+	}
+
+	/**
+	 * Consume an instance (possibly shared or independent) of the object
+	 * managed by this factory, if unique.
+	 * @param dependencyConsumer a callback for processing the target object
+	 * if unique (not called otherwise)
+	 * @throws BeansException in case of creation errors
+	 * @since 5.0
+	 * @see #getIfAvailable()
+	 */
+	default void ifUnique(Consumer<T> dependencyConsumer) throws BeansException {
+		T dependency = getIfUnique();
+		if (dependency != null) {
+			dependencyConsumer.accept(dependency);
+		}
 	}
 
 }

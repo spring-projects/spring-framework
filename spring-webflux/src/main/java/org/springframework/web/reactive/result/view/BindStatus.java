@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.view;
 
 import java.beans.PropertyEditor;
@@ -22,6 +23,8 @@ import java.util.List;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -49,25 +52,34 @@ public class BindStatus {
 
 	private final boolean htmlEscape;
 
+	@Nullable
 	private final String expression;
 
+	@Nullable
 	private final Errors errors;
 
 
+	@Nullable
 	private BindingResult bindingResult;
 
+	@Nullable
 	private Object value;
 
+	@Nullable
 	private Class<?> valueType;
 
+	@Nullable
 	private Object actualValue;
 
+	@Nullable
 	private PropertyEditor editor;
 
+	@Nullable
 	private List<? extends ObjectError> objectErrors;
 
-	private String[] errorCodes;
+	private String[] errorCodes = new String[0];
 
+	@Nullable
 	private String[] errorMessages;
 
 
@@ -99,7 +111,7 @@ public class BindStatus {
 			this.expression = path.substring(dotPos + 1);
 		}
 
-		this.errors = requestContext.getErrors(beanName, false).orElse(null);
+		this.errors = requestContext.getErrors(beanName, false);
 
 		if (this.errors != null) {
 			// Usual case: A BindingResult is available as request attribute.
@@ -185,6 +197,7 @@ public class BindStatus {
 	 * Note that the complete bind path as required by the bind tag is
 	 * "customer.address.street", if bound to a "customer" bean.
 	 */
+	@Nullable
 	public String getExpression() {
 		return this.expression;
 	}
@@ -195,6 +208,7 @@ public class BindStatus {
 	 * <p>This value will be an HTML-escaped String if the original value
 	 * already was a String.
 	 */
+	@Nullable
 	public Object getValue() {
 		return this.value;
 	}
@@ -204,6 +218,7 @@ public class BindStatus {
 	 * '{@code getValue().getClass()}' since '{@code getValue()}' may
 	 * return '{@code null}'.
 	 */
+	@Nullable
 	public Class<?> getValueType() {
 		return this.valueType;
 	}
@@ -212,6 +227,7 @@ public class BindStatus {
 	 * Return the actual value of the field, i.e. the raw property value,
 	 * or {@code null} if not available.
 	 */
+	@Nullable
 	public Object getActualValue() {
 		return this.actualValue;
 	}
@@ -238,7 +254,7 @@ public class BindStatus {
 	 * Return if this status represents a field or object error.
 	 */
 	public boolean isError() {
-		return (this.errorCodes != null && this.errorCodes.length > 0);
+		return (this.errorCodes.length > 0);
 	}
 
 	/**
@@ -253,7 +269,7 @@ public class BindStatus {
 	 * Return the first error codes for the field or object, if any.
 	 */
 	public String getErrorCode() {
-		return (this.errorCodes.length > 0 ? this.errorCodes[0] : "");
+		return (!ObjectUtils.isEmpty(this.errorCodes) ? this.errorCodes[0] : "");
 	}
 
 	/**
@@ -261,16 +277,15 @@ public class BindStatus {
 	 * if any. Returns an empty array instead of null if none.
 	 */
 	public String[] getErrorMessages() {
-		initErrorMessages();
-		return this.errorMessages;
+		return initErrorMessages();
 	}
 
 	/**
 	 * Return the first error message for the field or object, if any.
 	 */
 	public String getErrorMessage() {
-		initErrorMessages();
-		return (this.errorMessages.length > 0 ? this.errorMessages[0] : "");
+		String[] errorMessages = initErrorMessages();
+		return (errorMessages.length > 0 ? errorMessages[0] : "");
 	}
 
 	/**
@@ -280,21 +295,26 @@ public class BindStatus {
 	 * @return the error message string
 	 */
 	public String getErrorMessagesAsString(String delimiter) {
-		initErrorMessages();
-		return StringUtils.arrayToDelimitedString(this.errorMessages, delimiter);
+		return StringUtils.arrayToDelimitedString(initErrorMessages(), delimiter);
 	}
 
 	/**
 	 * Extract the error messages from the ObjectError list.
 	 */
-	private void initErrorMessages() throws NoSuchMessageException {
+	private String[] initErrorMessages() throws NoSuchMessageException {
 		if (this.errorMessages == null) {
-			this.errorMessages = new String[this.objectErrors.size()];
-			for (int i = 0; i < this.objectErrors.size(); i++) {
-				ObjectError error = this.objectErrors.get(i);
-				this.errorMessages[i] = this.requestContext.getMessage(error, this.htmlEscape);
+			if (this.objectErrors != null) {
+				this.errorMessages = new String[this.objectErrors.size()];
+				for (int i = 0; i < this.objectErrors.size(); i++) {
+					ObjectError error = this.objectErrors.get(i);
+					this.errorMessages[i] = this.requestContext.getMessage(error, this.htmlEscape);
+				}
+			}
+			else {
+				this.errorMessages = new String[0];
 			}
 		}
+		return this.errorMessages;
 	}
 
 	/**
@@ -303,6 +323,7 @@ public class BindStatus {
 	 * @return the current Errors instance, or {@code null} if none
 	 * @see org.springframework.validation.BindingResult
 	 */
+	@Nullable
 	public Errors getErrors() {
 		return this.errors;
 	}
@@ -312,6 +333,7 @@ public class BindStatus {
 	 * is currently bound to.
 	 * @return the current PropertyEditor, or {@code null} if none
 	 */
+	@Nullable
 	public PropertyEditor getEditor() {
 		return this.editor;
 	}
@@ -322,6 +344,7 @@ public class BindStatus {
 	 * @param valueClass the value class that an editor is needed for
 	 * @return the associated PropertyEditor, or {@code null} if none
 	 */
+	@Nullable
 	public PropertyEditor findEditor(Class<?> valueClass) {
 		return (this.bindingResult != null ?
 				this.bindingResult.findEditor(this.expression, valueClass) : null);
@@ -333,7 +356,7 @@ public class BindStatus {
 		StringBuilder sb = new StringBuilder("BindStatus: ");
 		sb.append("expression=[").append(this.expression).append("]; ");
 		sb.append("value=[").append(this.value).append("]");
-		if (isError()) {
+		if (!ObjectUtils.isEmpty(this.errorCodes)) {
 			sb.append("; errorCodes=").append(Arrays.asList(this.errorCodes));
 		}
 		return sb.toString();

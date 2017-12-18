@@ -19,6 +19,7 @@ package org.springframework.expression.spel.ast;
 import java.util.List;
 
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -60,7 +61,7 @@ public class FormatHelper {
 	 * @return a formatted String suitable for message inclusion
 	 * @see ClassUtils#getQualifiedName(Class)
 	 */
-	public static String formatClassNameForMessage(Class<?> clazz) {
+	public static String formatClassNameForMessage(@Nullable Class<?> clazz) {
 		return (clazz != null ? ClassUtils.getQualifiedName(clazz) : "null");
 	}
 

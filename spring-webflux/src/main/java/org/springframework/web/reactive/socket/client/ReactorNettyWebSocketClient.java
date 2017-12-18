@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.springframework.web.reactive.socket.client;
 
 import java.net.URI;
+import java.util.List;
 import java.util.function.Consumer;
 
 import io.netty.buffer.ByteBufAllocator;
@@ -51,10 +52,10 @@ public class ReactorNettyWebSocketClient extends WebSocketClientSupport implemen
 	}
 
 	/**
-	 * Constructor that accepts an {@link HttpClientOptions} consumer to supply
-	 * to {@link HttpClient#create(Consumer)}.
+	 * Constructor that accepts an {@link HttpClientOptions.Builder} consumer
+	 * to supply to {@link HttpClient#create(Consumer)}.
 	 */
-	public ReactorNettyWebSocketClient(Consumer<? super HttpClientOptions> clientOptions) {
+	public ReactorNettyWebSocketClient(Consumer<? super HttpClientOptions.Builder> clientOptions) {
 		this.httpClient = HttpClient.create(clientOptions);
 	}
 
@@ -74,13 +75,12 @@ public class ReactorNettyWebSocketClient extends WebSocketClientSupport implemen
 
 	@Override
 	public Mono<Void> execute(URI url, HttpHeaders headers, WebSocketHandler handler) {
-
-		String[] protocols = beforeHandshake(url, headers, handler);
+		List<String> protocols = beforeHandshake(url, headers, handler);
 
 		return getHttpClient()
 				.ws(url.toString(),
 						nettyHeaders -> setNettyHeaders(headers, nettyHeaders),
-						StringUtils.arrayToCommaDelimitedString(protocols))
+						StringUtils.collectionToCommaDelimitedString(protocols))
 				.flatMap(response -> {
 					HandshakeInfo info = afterHandshake(url, toHttpHeaders(response));
 					ByteBufAllocator allocator = response.channel().alloc();
@@ -93,7 +93,7 @@ public class ReactorNettyWebSocketClient extends WebSocketClientSupport implemen
 	}
 
 	private void setNettyHeaders(HttpHeaders headers, io.netty.handler.codec.http.HttpHeaders nettyHeaders) {
-		headers.keySet().stream().forEach(key -> nettyHeaders.set(key, headers.get(key)));
+		headers.forEach(nettyHeaders::set);
 	}
 
 	private HttpHeaders toHttpHeaders(HttpClientResponse response) {

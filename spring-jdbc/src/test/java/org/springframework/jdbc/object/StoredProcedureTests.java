@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.springframework.jdbc.core.support.AbstractSqlTypeValue;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.junit.Assert.*;
@@ -687,13 +688,10 @@ public class StoredProcedureTests {
 			setDataSource(ds);
 			setSql(SQL);
 			getJdbcTemplate().setExceptionTranslator(new SQLExceptionTranslator() {
-
 				@Override
-				public DataAccessException translate(String task, String sql,
-						SQLException sqlex) {
-					return new CustomDataException(sql, sqlex);
+				public DataAccessException translate(String task, @Nullable String sql, SQLException ex) {
+					return new CustomDataException(sql, ex);
 				}
-
 			});
 			compile();
 		}

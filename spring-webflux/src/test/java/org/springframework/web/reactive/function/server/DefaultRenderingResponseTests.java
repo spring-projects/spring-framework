@@ -28,13 +28,15 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Arjen Poutsma
@@ -105,11 +107,24 @@ public class DefaultRenderingResponseTests {
 	}
 
 	@Test
+	public void cookies() throws Exception {
+		MultiValueMap<String, ResponseCookie> newCookies = new LinkedMultiValueMap<>();
+		newCookies.add("name", ResponseCookie.from("name", "value").build());
+		Mono<RenderingResponse> result =
+				RenderingResponse.create("foo").cookies(cookies -> cookies.addAll(newCookies)).build();
+		StepVerifier.create(result)
+				.expectNextMatches(response -> newCookies.equals(response.cookies()))
+				.expectComplete()
+				.verify();
+	}
+
+
+	@Test
 	public void render() throws Exception {
 		Map<String, Object> model = Collections.singletonMap("foo", "bar");
 		Mono<RenderingResponse> result = RenderingResponse.create("view").modelAttributes(model).build();
 
-		MockServerWebExchange exchange = MockServerHttpRequest.get("http://localhost").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://localhost"));
 		ViewResolver viewResolver = mock(ViewResolver.class);
 		View view = mock(View.class);
 		when(viewResolver.resolveViewName("view", Locale.ENGLISH)).thenReturn(Mono.just(view));
@@ -119,7 +134,7 @@ public class DefaultRenderingResponseTests {
 		viewResolvers.add(viewResolver);
 
 		HandlerStrategies mockConfig = mock(HandlerStrategies.class);
-		when(mockConfig.viewResolvers()).thenReturn(viewResolvers::stream);
+		when(mockConfig.viewResolvers()).thenReturn(viewResolvers);
 
 		StepVerifier.create(result)
 				.expectNextMatches(response -> "view".equals(response.name()) &&

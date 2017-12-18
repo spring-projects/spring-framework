@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.core.Conventions;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.HttpSessionRequiredException;
@@ -74,7 +76,7 @@ public final class ModelFactory {
 	 * @param binderFactory for preparation of {@link BindingResult} attributes
 	 * @param attributeHandler for access to session attributes
 	 */
-	public ModelFactory(List<InvocableHandlerMethod> handlerMethods,
+	public ModelFactory(@Nullable List<InvocableHandlerMethod> handlerMethods,
 			WebDataBinderFactory binderFactory, SessionAttributesHandler attributeHandler) {
 
 		if (handlerMethods != null) {
@@ -129,6 +131,7 @@ public final class ModelFactory {
 		while (!this.modelMethods.isEmpty()) {
 			InvocableHandlerMethod modelMethod = getNextModelMethod(container).getHandlerMethod();
 			ModelAttribute ann = modelMethod.getMethodAnnotation(ModelAttribute.class);
+			Assert.state(ann != null, "No ModelAttribute annotation");
 			if (container.containsAttribute(ann.name())) {
 				if (!ann.binding()) {
 					container.setBindingDisabled(ann.name());
@@ -212,7 +215,7 @@ public final class ModelFactory {
 		List<String> keyNames = new ArrayList<>(model.keySet());
 		for (String name : keyNames) {
 			Object value = model.get(name);
-			if (isBindingCandidate(name, value)) {
+			if (value != null && isBindingCandidate(name, value)) {
 				String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + name;
 				if (!model.containsAttribute(bindingResultKey)) {
 					WebDataBinder dataBinder = this.dataBinderFactory.createBinder(request, value, name);
@@ -230,24 +233,22 @@ public final class ModelFactory {
 			return false;
 		}
 
-		Class<?> attrType = (value != null ? value.getClass() : null);
-		if (this.sessionAttributesHandler.isHandlerSessionAttribute(attributeName, attrType)) {
+		if (this.sessionAttributesHandler.isHandlerSessionAttribute(attributeName, value.getClass())) {
 			return true;
 		}
 
-		return (value != null && !value.getClass().isArray() && !(value instanceof Collection) &&
+		return (!value.getClass().isArray() && !(value instanceof Collection) &&
 				!(value instanceof Map) && !BeanUtils.isSimpleValueType(value.getClass()));
 	}
 
 
 	/**
-	 * Derive the model attribute name for a method parameter based on:
-	 * <ol>
-	 * <li>the parameter {@code @ModelAttribute} annotation value
-	 * <li>the parameter type
-	 * </ol>
+	 * Derive the model attribute name for the given method parameter based on
+	 * a {@code @ModelAttribute} parameter annotation (if present) or falling
+	 * back on parameter type based conventions.
 	 * @param parameter a descriptor for the method parameter
-	 * @return the derived name (never {@code null} or empty String)
+	 * @return the derived name
+	 * @see Conventions#getVariableNameForParameter(MethodParameter)
 	 */
 	public static String getNameForParameter(MethodParameter parameter) {
 		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
@@ -266,13 +267,14 @@ public final class ModelFactory {
 	 * @param returnType a descriptor for the return type of the method
 	 * @return the derived name (never {@code null} or empty String)
 	 */
-	public static String getNameForReturnValue(Object returnValue, MethodParameter returnType) {
+	public static String getNameForReturnValue(@Nullable Object returnValue, MethodParameter returnType) {
 		ModelAttribute ann = returnType.getMethodAnnotation(ModelAttribute.class);
 		if (ann != null && StringUtils.hasText(ann.value())) {
 			return ann.value();
 		}
 		else {
 			Method method = returnType.getMethod();
+			Assert.state(method != null, "No handler method");
 			Class<?> containingClass = returnType.getContainingClass();
 			Class<?> resolvedType = GenericTypeResolver.resolveReturnType(method, containingClass);
 			return Conventions.getVariableNameForReturnType(method, resolvedType, returnValue);

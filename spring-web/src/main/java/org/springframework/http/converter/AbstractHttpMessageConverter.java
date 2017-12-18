@@ -32,6 +32,7 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.StreamingHttpOutputMessage;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -53,6 +54,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 
 	private List<MediaType> supportedMediaTypes = Collections.emptyList();
 
+	@Nullable
 	private Charset defaultCharset;
 
 
@@ -109,7 +111,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * Set the default character set, if any.
 	 * @since 4.3
 	 */
-	public void setDefaultCharset(Charset defaultCharset) {
+	public void setDefaultCharset(@Nullable Charset defaultCharset) {
 		this.defaultCharset = defaultCharset;
 	}
 
@@ -117,6 +119,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * Return the default character set, if any.
 	 * @since 4.3
 	 */
+	@Nullable
 	public Charset getDefaultCharset() {
 		return this.defaultCharset;
 	}
@@ -128,7 +131,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * {@linkplain MediaType#includes(MediaType) include} the given media type.
 	 */
 	@Override
-	public boolean canRead(Class<?> clazz, MediaType mediaType) {
+	public boolean canRead(Class<?> clazz, @Nullable MediaType mediaType) {
 		return supports(clazz) && canRead(mediaType);
 	}
 
@@ -141,7 +144,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * @return {@code true} if the supported media types include the media type,
 	 * or if the media type is {@code null}
 	 */
-	protected boolean canRead(MediaType mediaType) {
+	protected boolean canRead(@Nullable MediaType mediaType) {
 		if (mediaType == null) {
 			return true;
 		}
@@ -160,7 +163,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * {@linkplain MediaType#includes(MediaType) include} the given media type.
 	 */
 	@Override
-	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
 		return supports(clazz) && canWrite(mediaType);
 	}
 
@@ -172,7 +175,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * @return {@code true} if the supported media types are compatible with the media type,
 	 * or if the media type is {@code null}
 	 */
-	protected boolean canWrite(MediaType mediaType) {
+	protected boolean canWrite(@Nullable MediaType mediaType) {
 		if (mediaType == null || MediaType.ALL.equals(mediaType)) {
 			return true;
 		}
@@ -198,7 +201,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * and then calls {@link #writeInternal}.
 	 */
 	@Override
-	public final void write(final T t, MediaType contentType, HttpOutputMessage outputMessage)
+	public final void write(final T t, @Nullable MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
 		final HttpHeaders headers = outputMessage.getHeaders();
@@ -236,7 +239,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * {@link #getContentLength}, and sets the corresponding headers.
 	 * @since 4.2
 	 */
-	protected void addDefaultHeaders(HttpHeaders headers, T t, MediaType contentType) throws IOException{
+	protected void addDefaultHeaders(HttpHeaders headers, T t, @Nullable MediaType contentType) throws IOException{
 		if (headers.getContentType() == null) {
 			MediaType contentTypeToUse = contentType;
 			if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
@@ -273,6 +276,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * @param t the type to return the content type for
 	 * @return the content type, or {@code null} if not known
 	 */
+	@Nullable
 	protected MediaType getDefaultContentType(T t) throws IOException {
 		List<MediaType> mediaTypes = getSupportedMediaTypes();
 		return (!mediaTypes.isEmpty() ? mediaTypes.get(0) : null);
@@ -285,7 +289,8 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * @param t the type to return the content length for
 	 * @return the content length, or {@code null} if not known
 	 */
-	protected Long getContentLength(T t, MediaType contentType) throws IOException {
+	@Nullable
+	protected Long getContentLength(T t, @Nullable MediaType contentType) throws IOException {
 		return null;
 	}
 

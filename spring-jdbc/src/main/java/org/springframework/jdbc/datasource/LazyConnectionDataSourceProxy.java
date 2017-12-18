@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.Constants;
+import org.springframework.lang.Nullable;
 
 /**
  * Proxy for a target DataSource, fetching actual JDBC Connections lazily,
@@ -82,8 +83,10 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 
 	private static final Log logger = LogFactory.getLog(LazyConnectionDataSourceProxy.class);
 
+	@Nullable
 	private Boolean defaultAutoCommit;
 
+	@Nullable
 	private Integer defaultTransactionIsolation;
 
 
@@ -156,7 +159,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 		// via a Connection from the target DataSource, if possible.
 		if (this.defaultAutoCommit == null || this.defaultTransactionIsolation == null) {
 			try {
-				Connection con = getTargetDataSource().getConnection();
+				Connection con = obtainTargetDataSource().getConnection();
 				try {
 					checkDefaultConnectionProperties(con);
 				}
@@ -192,6 +195,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	/**
 	 * Expose the default auto-commit value.
 	 */
+	@Nullable
 	protected Boolean defaultAutoCommit() {
 		return this.defaultAutoCommit;
 	}
@@ -199,6 +203,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	/**
 	 * Expose the default transaction isolation value.
 	 */
+	@Nullable
 	protected Integer defaultTransactionIsolation() {
 		return this.defaultTransactionIsolation;
 	}
@@ -245,18 +250,23 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	 */
 	private class LazyConnectionInvocationHandler implements InvocationHandler {
 
+		@Nullable
 		private String username;
 
+		@Nullable
 		private String password;
 
 		private Boolean readOnly = Boolean.FALSE;
 
-		private Integer transactionIsolation;
-
+		@Nullable
 		private Boolean autoCommit;
+
+		@Nullable
+		private Integer transactionIsolation;
 
 		private boolean closed = false;
 
+		@Nullable
 		private Connection target;
 
 		public LazyConnectionInvocationHandler() {
@@ -271,6 +281,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 		}
 
 		@Override
+		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
@@ -396,8 +407,8 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 
 				// Fetch physical Connection from DataSource.
 				this.target = (this.username != null) ?
-						getTargetDataSource().getConnection(this.username, this.password) :
-						getTargetDataSource().getConnection();
+						obtainTargetDataSource().getConnection(this.username, this.password) :
+						obtainTargetDataSource().getConnection();
 
 				// If we still lack default connection properties, check them now.
 				checkDefaultConnectionProperties(this.target);
@@ -405,7 +416,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 				// Apply kept transaction settings, if any.
 				if (this.readOnly) {
 					try {
-						this.target.setReadOnly(this.readOnly);
+						this.target.setReadOnly(true);
 					}
 					catch (Exception ex) {
 						// "read-only not supported" -> ignore, it's just a hint anyway

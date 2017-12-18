@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.lang.Nullable;
 
 /**
  * TransactionAttribute implementation that works out whether a given exception
@@ -50,6 +52,7 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 	/** Static for optimal serializability */
 	private static final Log logger = LogFactory.getLog(RuleBasedTransactionAttribute.class);
 
+	@Nullable
 	private List<RollbackRuleAttribute> rollbackRules;
 
 
@@ -78,7 +81,7 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 	 */
 	public RuleBasedTransactionAttribute(RuleBasedTransactionAttribute other) {
 		super(other);
-		this.rollbackRules = new ArrayList<>(other.rollbackRules);
+		this.rollbackRules = (other.rollbackRules != null ? new ArrayList<>(other.rollbackRules) : null);
 	}
 
 	/**

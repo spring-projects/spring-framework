@@ -31,6 +31,7 @@ import javax.cache.annotation.CacheResult;
 
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -157,6 +158,7 @@ public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJC
 		}
 	}
 
+	@Nullable
 	protected CacheResolverFactory determineCacheResolverFactory(CacheDefaults defaults,
 			Class<? extends CacheResolverFactory> candidate) {
 

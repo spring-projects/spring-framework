@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -93,6 +94,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 
 	private final ResourcePatternResolver resourcePatternResolver;
 
+	@Nullable
 	private TypeFilter[] entityTypeFilters = DEFAULT_ENTITY_TYPE_FILTERS;
 
 
@@ -101,7 +103,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * @param dataSource the JDBC DataSource that the resulting Hibernate SessionFactory should be using
 	 * (may be {@code null})
 	 */
-	public LocalSessionFactoryBuilder(DataSource dataSource) {
+	public LocalSessionFactoryBuilder(@Nullable DataSource dataSource) {
 		this(dataSource, new PathMatchingResourcePatternResolver());
 	}
 
@@ -111,7 +113,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * (may be {@code null})
 	 * @param classLoader the ClassLoader to load application classes from
 	 */
-	public LocalSessionFactoryBuilder(DataSource dataSource, ClassLoader classLoader) {
+	public LocalSessionFactoryBuilder(@Nullable DataSource dataSource, ClassLoader classLoader) {
 		this(dataSource, new PathMatchingResourcePatternResolver(classLoader));
 	}
 
@@ -121,7 +123,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * (may be {@code null})
 	 * @param resourceLoader the ResourceLoader to load application classes from
 	 */
-	public LocalSessionFactoryBuilder(DataSource dataSource, ResourceLoader resourceLoader) {
+	public LocalSessionFactoryBuilder(@Nullable DataSource dataSource, ResourceLoader resourceLoader) {
 		this(dataSource, resourceLoader, new MetadataSources(
 				new BootstrapServiceRegistryBuilder().applyClassLoader(resourceLoader.getClassLoader()).build()));
 	}
@@ -134,7 +136,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * @param metadataSources the Hibernate MetadataSources service to use (e.g. reusing an existing one)
 	 * @since 4.3
 	 */
-	public LocalSessionFactoryBuilder(DataSource dataSource, ResourceLoader resourceLoader, MetadataSources metadataSources) {
+	public LocalSessionFactoryBuilder(@Nullable DataSource dataSource, ResourceLoader resourceLoader, MetadataSources metadataSources) {
 		super(metadataSources);
 
 		getProperties().put(AvailableSettings.CURRENT_SESSION_CONTEXT_CLASS, SpringSessionContext.class.getName());
@@ -321,10 +323,10 @@ public class LocalSessionFactoryBuilder extends Configuration {
 		try {
 			ClassLoader cl = this.resourcePatternResolver.getClassLoader();
 			for (String className : entityClassNames) {
-				addAnnotatedClass(cl.loadClass(className));
+				addAnnotatedClass(ClassUtils.forName(className, cl));
 			}
 			for (String className : converterClassNames) {
-				addAttributeConverter((Class<? extends AttributeConverter<?, ?>>) cl.loadClass(className));
+				addAttributeConverter((Class<? extends AttributeConverter<?, ?>>) ClassUtils.forName(className, cl));
 			}
 			for (String packageName : packageNames) {
 				addPackage(packageName);
@@ -383,12 +385,8 @@ public class LocalSessionFactoryBuilder extends Configuration {
 		private final Future<SessionFactory> sessionFactoryFuture;
 
 		public BootstrapSessionFactoryInvocationHandler(AsyncTaskExecutor bootstrapExecutor) {
-			this.sessionFactoryFuture = bootstrapExecutor.submit(new Callable<SessionFactory>() {
-				@Override
-				public SessionFactory call() throws Exception {
-					return buildSessionFactory();
-				}
-			});
+			this.sessionFactoryFuture = bootstrapExecutor.submit(
+					(Callable<SessionFactory>) LocalSessionFactoryBuilder.this::buildSessionFactory);
 		}
 
 		@Override

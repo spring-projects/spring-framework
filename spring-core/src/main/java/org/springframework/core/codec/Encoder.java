@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 
 /**
@@ -43,10 +44,11 @@ public interface Encoder<T> {
 	 * Whether the encoder supports the given source element type and the MIME
 	 * type for the output stream.
 	 * @param elementType the type of elements in the source stream
-	 * @param mimeType the MIME type for the output stream, can be {@code null} if not specified.
+	 * @param mimeType the MIME type for the output stream
+	 * (can be {@code null} if not specified)
 	 * @return {@code true} if supported, {@code false} otherwise
 	 */
-	boolean canEncode(ResolvableType elementType, MimeType mimeType);
+	boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType);
 
 	/**
 	 * Encode a stream of Objects of type {@code T} into a {@link DataBuffer}
@@ -58,12 +60,12 @@ public interface Encoder<T> {
 	 * @param elementType the expected type of elements in the input stream;
 	 * this type must have been previously passed to the {@link #canEncode}
 	 * method and it must have returned {@code true}.
-	 * @param mimeType the MIME type for the output stream
+	 * @param mimeType the MIME type for the output stream (optional)
 	 * @param hints additional information about how to do encode
 	 * @return the output stream
 	 */
 	Flux<DataBuffer> encode(Publisher<? extends T> inputStream, DataBufferFactory bufferFactory,
-			ResolvableType elementType, MimeType mimeType, Map<String, Object> hints);
+			ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints);
 
 	/**
 	 * Return the list of mime types this encoder supports.

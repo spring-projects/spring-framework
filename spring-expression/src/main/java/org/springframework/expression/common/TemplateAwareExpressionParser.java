@@ -24,6 +24,7 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
+import org.springframework.lang.Nullable;
 
 /**
  * An expression parser that understands templates. It can be subclassed by expression
@@ -36,37 +37,14 @@ import org.springframework.expression.ParserContext;
  */
 public abstract class TemplateAwareExpressionParser implements ExpressionParser {
 
-	/**
-	 * Default ParserContext instance for non-template expressions.
-	 */
-	private static final ParserContext NON_TEMPLATE_PARSER_CONTEXT = new ParserContext() {
-		@Override
-		public String getExpressionPrefix() {
-			return null;
-		}
-		@Override
-		public String getExpressionSuffix() {
-			return null;
-		}
-		@Override
-		public boolean isTemplate() {
-			return false;
-		}
-	};
-
-
 	@Override
 	public Expression parseExpression(String expressionString) throws ParseException {
-		return parseExpression(expressionString, NON_TEMPLATE_PARSER_CONTEXT);
+		return parseExpression(expressionString, null);
 	}
 
 	@Override
-	public Expression parseExpression(String expressionString, ParserContext context) throws ParseException {
-		if (context == null) {
-			context = NON_TEMPLATE_PARSER_CONTEXT;
-		}
-
-		if (context.isTemplate()) {
+	public Expression parseExpression(String expressionString, @Nullable ParserContext context) throws ParseException {
+		if (context != null && context.isTemplate()) {
 			return parseTemplate(expressionString, context);
 		}
 		else {
@@ -112,6 +90,7 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 		String prefix = context.getExpressionPrefix();
 		String suffix = context.getExpressionSuffix();
 		int startIdx = 0;
+
 		while (startIdx < expressionString.length()) {
 			int prefixIndex = expressionString.indexOf(prefix, startIdx);
 			if (prefixIndex >= startIdx) {
@@ -126,22 +105,18 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 							"No ending suffix '" + suffix + "' for expression starting at character " +
 							prefixIndex + ": " + expressionString.substring(prefixIndex));
 				}
-
 				if (suffixIndex == afterPrefixIndex) {
 					throw new ParseException(expressionString, prefixIndex,
 							"No expression defined within delimiter '" + prefix + suffix +
 							"' at character " + prefixIndex);
 				}
-
 				String expr = expressionString.substring(prefixIndex + prefix.length(), suffixIndex);
 				expr = expr.trim();
-
 				if (expr.isEmpty()) {
 					throw new ParseException(expressionString, prefixIndex,
 							"No expression defined within delimiter '" + prefix + suffix +
 							"' at character " + prefixIndex);
 				}
-
 				expressions.add(doParseExpression(expr, context));
 				startIdx = suffixIndex + suffix.length();
 			}
@@ -151,6 +126,7 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 				startIdx = expressionString.length();
 			}
 		}
+
 		return expressions.toArray(new Expression[expressions.size()]);
 	}
 
@@ -255,7 +231,7 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 	 * @return an evaluator for the parsed expression
 	 * @throws ParseException an exception occurred during parsing
 	 */
-	protected abstract Expression doParseExpression(String expressionString, ParserContext context)
+	protected abstract Expression doParseExpression(String expressionString, @Nullable ParserContext context)
 			throws ParseException;
 
 

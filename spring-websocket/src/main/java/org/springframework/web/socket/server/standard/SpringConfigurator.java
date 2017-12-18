@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -97,6 +98,7 @@ public class SpringConfigurator extends Configurator {
 		return wac.getAutowireCapableBeanFactory().createBean(endpointClass);
 	}
 
+	@Nullable
 	private String getBeanNameByType(WebApplicationContext wac, Class<?> endpointClass) {
 		String wacId = wac.getId();
 

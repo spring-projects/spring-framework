@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -45,14 +46,17 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 
 	private final MultiValueMap<WebSocketHandler, String> handlerMap = new LinkedMultiValueMap<>();
 
+	@Nullable
 	private HandshakeHandler handshakeHandler;
 
 	private final List<HandshakeInterceptor> interceptors = new ArrayList<>();
 
 	private final List<String> allowedOrigins = new ArrayList<>();
 
+	@Nullable
 	private SockJsServiceRegistration sockJsServiceRegistration;
 
+	@Nullable
 	private TaskScheduler scheduler;
 
 
@@ -80,11 +84,12 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 	}
 
 	@Override
-	public WebSocketHandlerRegistration setHandshakeHandler(HandshakeHandler handshakeHandler) {
+	public WebSocketHandlerRegistration setHandshakeHandler(@Nullable HandshakeHandler handshakeHandler) {
 		this.handshakeHandler = handshakeHandler;
 		return this;
 	}
 
+	@Nullable
 	protected HandshakeHandler getHandshakeHandler() {
 		return this.handshakeHandler;
 	}
@@ -140,6 +145,7 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 	 * if the application did not provide one. This should be done prior to
 	 * calling {@link #getMappings()}.
 	 */
+	@Nullable
 	protected SockJsServiceRegistration getSockJsServiceRegistration() {
 		return this.sockJsServiceRegistration;
 	}

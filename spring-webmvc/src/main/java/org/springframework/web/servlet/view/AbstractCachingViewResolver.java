@@ -20,9 +20,11 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
@@ -48,11 +50,12 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	/** Dummy marker object for unresolved views in the cache Maps */
 	private static final View UNRESOLVED_VIEW = new View() {
 		@Override
+		@Nullable
 		public String getContentType() {
 			return null;
 		}
 		@Override
-		public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
+		public void render(@Nullable Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
 		}
 	};
 
@@ -141,6 +144,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 
 
 	@Override
+	@Nullable
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
 		if (!isCache()) {
 			return createView(viewName, locale);
@@ -240,6 +244,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	 * @throws Exception if the view couldn't be resolved
 	 * @see #loadView
 	 */
+	@Nullable
 	protected View createView(String viewName, Locale locale) throws Exception {
 		return loadView(viewName, locale);
 	}
@@ -257,6 +262,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	 * @throws Exception if the view couldn't be resolved
 	 * @see #resolveViewName
 	 */
+	@Nullable
 	protected abstract View loadView(String viewName, Locale locale) throws Exception;
 
 }

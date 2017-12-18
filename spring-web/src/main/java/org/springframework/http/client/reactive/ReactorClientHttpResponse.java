@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,10 @@ import org.springframework.util.MultiValueMap;
  * {@link ClientHttpResponse} implementation for the Reactor-Netty HTTP client.
  *
  * @author Brian Clozel
- * @see reactor.ipc.netty.http.client.HttpClient
  * @since 5.0
+ * @see reactor.ipc.netty.http.client.HttpClient
  */
-public class ReactorClientHttpResponse implements ClientHttpResponse {
+class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	private final NettyDataBufferFactory dataBufferFactory;
 
@@ -62,8 +62,7 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public HttpHeaders getHeaders() {
 		HttpHeaders headers = new HttpHeaders();
-		this.response.responseHeaders()
-		             .entries()
+		this.response.responseHeaders().entries()
 		             .forEach(e -> headers.add(e.getKey(), e.getValue()));
 		return headers;
 	}
@@ -93,9 +92,8 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public String toString() {
 		return "ReactorClientHttpResponse{" +
-				"request=" + this.response.method().name() + " " + this.response.uri() + "," +
-				"status=" + getStatusCode() +
-				'}';
+				"request=[" + this.response.method().name() + " " + this.response.uri() + "]," +
+				"status=" + getStatusCode() + '}';
 	}
 
 }

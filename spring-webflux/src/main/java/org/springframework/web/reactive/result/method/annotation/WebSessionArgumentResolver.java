@@ -35,6 +35,9 @@ import org.springframework.web.server.WebSession;
  */
 public class WebSessionArgumentResolver extends HandlerMethodArgumentResolverSupport {
 
+	// We need this resolver separate from ServerWebExchangeArgumentResolver which
+	// implements SyncHandlerMethodArgumentResolver.
+
 
 	public WebSessionArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
 		super(adapterRegistry);

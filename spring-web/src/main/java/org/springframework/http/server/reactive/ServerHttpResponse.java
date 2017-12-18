@@ -16,11 +16,10 @@
 
 package org.springframework.http.server.reactive;
 
-import java.util.function.Function;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.ResponseCookie;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -38,11 +37,12 @@ public interface ServerHttpResponse extends ReactiveHttpOutputMessage {
 	 * @return {@code false} if the status code has not been set because the HTTP response
 	 * is already committed, {@code true} if it has been set correctly.
 	 */
-	boolean setStatusCode(HttpStatus status);
+	boolean setStatusCode(@Nullable HttpStatus status);
 
 	/**
 	 * Return the HTTP status code or {@code null} if not set.
 	 */
+	@Nullable
 	HttpStatus getStatusCode();
 
 	/**
@@ -56,23 +56,5 @@ public interface ServerHttpResponse extends ReactiveHttpOutputMessage {
 	 * @throws IllegalStateException if the response has already been committed
 	 */
 	void addCookie(ResponseCookie cookie);
-
-	/**
-	 * A mechanism for URL rewriting that applications and libraries such as
-	 * HTML template libraries to use consistently for all URLs emitted by
-	 * the application. Doing so enables the registration of URL encoders via
-	 * {@link #registerUrlEncoder} that can insert an id for authentication,
-	 * a nonce for CSRF protection, a version for a static resource, etc.
-	 * @param url the URL to encode
-	 * @return the encoded URL or the same
-	 */
-	String encodeUrl(String url);
-
-	/**
-	 * Register a URL rewriting function for use with {@link #encodeUrl}.
-	 * The function must return an encoded URL or the same URL.
-	 * @param encoder a URL encoding function to use
-	 */
-	void registerUrlEncoder(Function<String, String> encoder);
 
 }

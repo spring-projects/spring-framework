@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@
 
 package org.springframework.aop.framework;
 
+import java.io.Closeable;
+
 import org.springframework.beans.factory.Aware;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -42,6 +45,7 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 	 */
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
+	@Nullable
 	private ClassLoader proxyClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private boolean classLoaderConfigured = false;
@@ -68,7 +72,7 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 	 * {@link org.springframework.beans.factory.BeanFactory} for loading all bean classes.
 	 * This can be overridden here for specific proxies.
 	 */
-	public void setProxyClassLoader(ClassLoader classLoader) {
+	public void setProxyClassLoader(@Nullable ClassLoader classLoader) {
 		this.proxyClassLoader = classLoader;
 		this.classLoaderConfigured = (classLoader != null);
 	}
@@ -76,6 +80,7 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 	/**
 	 * Return the configured proxy ClassLoader for this processor.
 	 */
+	@Nullable
 	protected ClassLoader getProxyClassLoader() {
 		return this.proxyClassLoader;
 	}
@@ -126,8 +131,8 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 	 * @return whether the given interface is just a container callback
 	 */
 	protected boolean isConfigurationCallbackInterface(Class<?> ifc) {
-		return (InitializingBean.class == ifc || DisposableBean.class == ifc ||
-				ObjectUtils.containsElement(ifc.getInterfaces(), Aware.class));
+		return (InitializingBean.class == ifc || DisposableBean.class == ifc || Closeable.class == ifc ||
+				AutoCloseable.class == ifc || ObjectUtils.containsElement(ifc.getInterfaces(), Aware.class));
 	}
 
 	/**

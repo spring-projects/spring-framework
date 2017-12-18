@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.core.InfrastructureProxy;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -127,7 +128,7 @@ public abstract class TransactionSynchronizationUtils {
 	 * @param synchronizations List of TransactionSynchronization objects
 	 * @see TransactionSynchronization#afterCommit()
 	 */
-	public static void invokeAfterCommit(List<TransactionSynchronization> synchronizations) {
+	public static void invokeAfterCommit(@Nullable List<TransactionSynchronization> synchronizations) {
 		if (synchronizations != null) {
 			for (TransactionSynchronization synchronization : synchronizations) {
 				synchronization.afterCommit();
@@ -161,7 +162,9 @@ public abstract class TransactionSynchronizationUtils {
 	 * @see TransactionSynchronization#STATUS_ROLLED_BACK
 	 * @see TransactionSynchronization#STATUS_UNKNOWN
 	 */
-	public static void invokeAfterCompletion(List<TransactionSynchronization> synchronizations, int completionStatus) {
+	public static void invokeAfterCompletion(@Nullable List<TransactionSynchronization> synchronizations,
+			int completionStatus) {
+
 		if (synchronizations != null) {
 			for (TransactionSynchronization synchronization : synchronizations) {
 				try {

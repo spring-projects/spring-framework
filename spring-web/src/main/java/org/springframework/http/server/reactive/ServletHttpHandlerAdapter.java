@@ -17,11 +17,16 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
+import javax.servlet.DispatcherType;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebServlet;
@@ -36,7 +41,10 @@ import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.web.util.NestedServletException;
 
 /**
  * Adapt {@link HttpHandler} to an {@link HttpServlet} using Servlet Async
@@ -52,17 +60,18 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 	private static final Log logger = LogFactory.getLog(ServletHttpHandlerAdapter.class);
 
-
 	private static final int DEFAULT_BUFFER_SIZE = 8192;
+
+	private static final String WRITE_ERROR_ATTRIBUTE_NAME = ServletHttpHandlerAdapter.class.getName() + ".ERROR";
 
 
 	private final HttpHandler httpHandler;
 
 	private int bufferSize = DEFAULT_BUFFER_SIZE;
 
+	@Nullable
+	private String servletPath;
 
-	// Servlet is based on blocking I/O, hence the usage of non-direct, heap-based buffers
-	// (i.e. 'false' as constructor argument)
 	private DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory(false);
 
 
@@ -88,6 +97,18 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		return this.bufferSize;
 	}
 
+	/**
+	 * Return the Servlet path under which the Servlet is deployed by checking
+	 * the Servlet registration from {@link #init(ServletConfig)}.
+	 * @return the path, or an empty string if the Servlet is deployed without
+	 * a prefix (i.e. "/" or "/*"), or {@code null} if this method is invoked
+	 * before the {@link #init(ServletConfig)} Servlet container callback.
+	 */
+	@Nullable
+	public String getServletPath() {
+		return this.servletPath;
+	}
+
 	public void setDataBufferFactory(DataBufferFactory dataBufferFactory) {
 		Assert.notNull(dataBufferFactory, "DataBufferFactory must not be null");
 		this.dataBufferFactory = dataBufferFactory;
@@ -98,10 +119,51 @@ public class ServletHttpHandlerAdapter implements Servlet {
 	}
 
 
-	// The Servlet.service method
+	// Servlet methods...
 
 	@Override
-	public void service(ServletRequest request, ServletResponse response) throws IOException {
+	public void init(ServletConfig config) {
+		this.servletPath = getServletPath(config);
+	}
+
+	private String getServletPath(ServletConfig config) {
+		String name = config.getServletName();
+		ServletRegistration registration = config.getServletContext().getServletRegistration(name);
+		if (registration == null) {
+			throw new IllegalStateException("ServletRegistration not found for Servlet '" + name + "'");
+		}
+
+		Collection<String> mappings = registration.getMappings();
+		if (mappings.size() == 1) {
+			String mapping = mappings.iterator().next();
+			if (mapping.equals("/")) {
+				return "";
+			}
+			if (mapping.endsWith("/*")) {
+				String path = mapping.substring(0, mapping.length() - 2);
+				if (!path.isEmpty()) {
+					logger.info("Found Servlet mapping '" + path + "' for Servlet '" + name + "'");
+				}
+				return path;
+			}
+		}
+
+		throw new IllegalArgumentException("Expected a single Servlet mapping: " +
+				"either the default Servlet mapping (i.e. '/'), " +
+				"or a path based mapping (e.g. '/*', '/foo/*'). " +
+				"Actual mappings: " + mappings + " for Servlet '" + name + "'");
+	}
+
+
+	@Override
+	public void service(ServletRequest request, ServletResponse response) throws ServletException, IOException {
+
+		if (DispatcherType.ASYNC.equals(request.getDispatcherType())) {
+			Throwable ex = (Throwable) request.getAttribute(WRITE_ERROR_ATTRIBUTE_NAME);
+			Assert.notNull(ex, "Unexpected async dispatch");
+			throw new NestedServletException("Write publisher error", ex);
+		}
+
 		// Start async before Read/WriteListener registration
 		AsyncContext asyncContext = request.startAsync();
 		asyncContext.setTimeout(-1);
@@ -109,37 +171,37 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		ServerHttpRequest httpRequest = createRequest(((HttpServletRequest) request), asyncContext);
 		ServerHttpResponse httpResponse = createResponse(((HttpServletResponse) response), asyncContext);
 
-		asyncContext.addListener(ERROR_LISTENER);
+		if (HttpMethod.HEAD.equals(httpRequest.getMethod())) {
+			httpResponse = new HttpHeadResponseDecorator(httpResponse);
+		}
 
-		HandlerResultSubscriber subscriber = new HandlerResultSubscriber(asyncContext);
+		AtomicBoolean isCompleted = new AtomicBoolean();
+		HandlerResultAsyncListener listener = new HandlerResultAsyncListener(isCompleted);
+		asyncContext.addListener(listener);
+
+		HandlerResultSubscriber subscriber = new HandlerResultSubscriber(asyncContext, isCompleted);
 		this.httpHandler.handle(httpRequest, httpResponse).subscribe(subscriber);
 	}
 
 	protected ServerHttpRequest createRequest(HttpServletRequest request, AsyncContext context) throws IOException {
+		Assert.notNull(this.servletPath, "Servlet path is not initialized");
 		return new ServletServerHttpRequest(
-				request, context, getDataBufferFactory(), getBufferSize());
+				request, context, this.servletPath, getDataBufferFactory(), getBufferSize());
 	}
 
 	protected ServerHttpResponse createResponse(HttpServletResponse response, AsyncContext context) throws IOException {
-		return new ServletServerHttpResponse(
-				response, context, getDataBufferFactory(), getBufferSize());
-	}
-
-
-	// Other Servlet methods...
-
-	@Override
-	public void init(ServletConfig config) {
-	}
-
-	@Override
-	public ServletConfig getServletConfig() {
-		return null;
+		return new ServletServerHttpResponse(response, context, getDataBufferFactory(), getBufferSize());
 	}
 
 	@Override
 	public String getServletInfo() {
 		return "";
+	}
+
+	@Override
+	@Nullable
+	public ServletConfig getServletConfig() {
+		return null;
 	}
 
 	@Override
@@ -151,9 +213,9 @@ public class ServletHttpHandlerAdapter implements Servlet {
 	 * We cannot combine ERROR_LISTENER and HandlerResultSubscriber due to:
 	 * https://issues.jboss.org/browse/WFLY-8515
 	 */
-	private static void runIfAsyncNotComplete(AsyncContext asyncContext, Runnable task) {
+	private static void runIfAsyncNotComplete(AsyncContext asyncContext, AtomicBoolean isCompleted, Runnable task) {
 		try {
-			if (asyncContext.getRequest().isAsyncStarted()) {
+			if (asyncContext.getRequest().isAsyncStarted() && isCompleted.compareAndSet(false, true)) {
 				task.run();
 			}
 		}
@@ -164,28 +226,37 @@ public class ServletHttpHandlerAdapter implements Servlet {
 	}
 
 
-	private final static AsyncListener ERROR_LISTENER = new AsyncListener() {
+	private static class HandlerResultAsyncListener implements AsyncListener {
+
+		private final AtomicBoolean isCompleted;
+
+
+		public HandlerResultAsyncListener(AtomicBoolean isCompleted) {
+			this.isCompleted = isCompleted;
+		}
 
 		@Override
-		public void onTimeout(AsyncEvent event) throws IOException {
+		public void onTimeout(AsyncEvent event) {
+			logger.debug("Timeout notification from Servlet container");
 			AsyncContext context = event.getAsyncContext();
-			runIfAsyncNotComplete(context, context::complete);
+			runIfAsyncNotComplete(context, this.isCompleted, context::complete);
 		}
 
 		@Override
-		public void onError(AsyncEvent event) throws IOException {
+		public void onError(AsyncEvent event) {
+			logger.debug("Error notification from Servlet container");
 			AsyncContext context = event.getAsyncContext();
-			runIfAsyncNotComplete(context, context::complete);
+			runIfAsyncNotComplete(context, this.isCompleted, context::complete);
 		}
 
 		@Override
-		public void onStartAsync(AsyncEvent event) throws IOException {
-			// No-op
+		public void onStartAsync(AsyncEvent event) {
+			// no-op
 		}
 
 		@Override
-		public void onComplete(AsyncEvent event) throws IOException {
-			// No-op
+		public void onComplete(AsyncEvent event) {
+			// no-op
 		}
 	};
 
@@ -194,8 +265,12 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		private final AsyncContext asyncContext;
 
-		HandlerResultSubscriber(AsyncContext asyncContext) {
+		private final AtomicBoolean isCompleted;
+
+
+		public HandlerResultSubscriber(AsyncContext asyncContext, AtomicBoolean isCompleted) {
 			this.asyncContext = asyncContext;
+			this.isCompleted = isCompleted;
 		}
 
 		@Override
@@ -205,25 +280,35 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		@Override
 		public void onNext(Void aVoid) {
-			// no op
+			// no-op
 		}
 
 		@Override
 		public void onError(Throwable ex) {
-			runIfAsyncNotComplete(this.asyncContext, () -> {
-				logger.error("Could not complete request", ex);
-				HttpServletResponse response = (HttpServletResponse) this.asyncContext.getResponse();
-				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-				this.asyncContext.complete();
+			logger.error("Handling completed with error", ex);
+			runIfAsyncNotComplete(this.asyncContext, this.isCompleted, () -> {
+				if (this.asyncContext.getResponse().isCommitted()) {
+					logger.debug("Dispatching into container to raise error");
+					this.asyncContext.getRequest().setAttribute(WRITE_ERROR_ATTRIBUTE_NAME, ex);
+					this.asyncContext.dispatch();
+				}
+				else {
+					try {
+						logger.debug("Setting response status code to 500");
+						this.asyncContext.getResponse().resetBuffer();
+						((HttpServletResponse) this.asyncContext.getResponse()).setStatus(500);
+					}
+					finally {
+						this.asyncContext.complete();
+					}
+				}
 			});
 		}
 
 		@Override
 		public void onComplete() {
-			runIfAsyncNotComplete(this.asyncContext, () -> {
-				logger.debug("Successfully completed request");
-				this.asyncContext.complete();
-			});
+			logger.debug("Handling completed with success");
+			runIfAsyncNotComplete(this.asyncContext, this.isCompleted, this.asyncContext::complete);
 		}
 	}
 

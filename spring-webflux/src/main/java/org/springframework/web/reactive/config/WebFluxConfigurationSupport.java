@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.config;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,12 +29,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
-import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
@@ -45,8 +46,11 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.HandlerMapping;
-import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.reactive.function.server.support.HandlerFunctionAdapter;
+import org.springframework.web.reactive.function.server.support.RouterFunctionMapping;
+import org.springframework.web.reactive.function.server.support.ServerResponseResultHandler;
 import org.springframework.web.reactive.handler.AbstractHandlerMapping;
 import org.springframework.web.reactive.result.SimpleHandlerAdapter;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
@@ -59,6 +63,8 @@ import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
+import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
+import org.springframework.web.server.i18n.LocaleContextResolver;
 
 /**
  * The main class for Spring WebFlux configuration.
@@ -70,26 +76,26 @@ import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
  */
 public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
-	static final boolean jackson2Present =
-			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
-					WebFluxConfigurationSupport.class.getClassLoader()) &&
-			ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-					WebFluxConfigurationSupport.class.getClassLoader());
-
-
+	@Nullable
 	private Map<String, CorsConfiguration> corsConfigurations;
 
+	@Nullable
 	private PathMatchConfigurer pathMatchConfigurer;
 
+	@Nullable
+	private ViewResolverRegistry viewResolverRegistry;
+
+	@Nullable
 	private ApplicationContext applicationContext;
 
 
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
+	public void setApplicationContext(@Nullable ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 
-	protected ApplicationContext getApplicationContext() {
+	@Nullable
+	public final ApplicationContext getApplicationContext() {
 		return this.applicationContext;
 	}
 
@@ -113,22 +119,14 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		mapping.setCorsConfigurations(getCorsConfigurations());
 
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
-		if (configurer.isUseSuffixPatternMatch() != null) {
-			mapping.setUseSuffixPatternMatch(configurer.isUseSuffixPatternMatch());
+		Boolean useTrailingSlashMatch = configurer.isUseTrailingSlashMatch();
+		Boolean useCaseSensitiveMatch = configurer.isUseCaseSensitiveMatch();
+		if (useTrailingSlashMatch != null) {
+			mapping.setUseTrailingSlashMatch(useTrailingSlashMatch);
 		}
-		if (configurer.isUseRegisteredSuffixPatternMatch() != null) {
-			mapping.setUseRegisteredSuffixPatternMatch(configurer.isUseRegisteredSuffixPatternMatch());
+		if (useCaseSensitiveMatch != null) {
+			mapping.setUseCaseSensitiveMatch(useCaseSensitiveMatch);
 		}
-		if (configurer.isUseTrailingSlashMatch() != null) {
-			mapping.setUseTrailingSlashMatch(configurer.isUseTrailingSlashMatch());
-		}
-		if (configurer.getPathMatcher() != null) {
-			mapping.setPathMatcher(configurer.getPathMatcher());
-		}
-		if (configurer.getPathHelper() != null) {
-			mapping.setPathHelper(configurer.getPathHelper());
-		}
-
 		return mapping;
 	}
 
@@ -140,23 +138,10 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 	@Bean
-	public CompositeContentTypeResolver webFluxContentTypeResolver() {
+	public RequestedContentTypeResolver webFluxContentTypeResolver() {
 		RequestedContentTypeResolverBuilder builder = new RequestedContentTypeResolverBuilder();
-		builder.mediaTypes(getDefaultMediaTypeMappings());
 		configureContentTypeResolver(builder);
 		return builder.build();
-	}
-
-	/**
-	 * Override to configure media type mappings.
-	 * @see RequestedContentTypeResolverBuilder#mediaTypes(Map)
-	 */
-	protected Map<String, MediaType> getDefaultMediaTypeMappings() {
-		Map<String, MediaType> map = new HashMap<>();
-		if (jackson2Present) {
-			map.put("json", MediaType.APPLICATION_JSON);
-		}
-		return map;
 	}
 
 	/**
@@ -203,6 +188,23 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	public void configurePathMatching(PathMatchConfigurer configurer) {
 	}
 
+	@Bean
+	public RouterFunctionMapping routerFunctionMapping() {
+		RouterFunctionMapping mapping = createRouterFunctionMapping();
+		mapping.setOrder(-1); // go before RequestMappingHandlerMapping
+		mapping.setMessageReaders(serverCodecConfigurer().getReaders());
+		mapping.setCorsConfigurations(getCorsConfigurations());
+
+		return mapping;
+	}
+
+	/**
+	 * Override to plug a sub-class of {@link RouterFunctionMapping}.
+	 */
+	protected RouterFunctionMapping createRouterFunctionMapping() {
+		return new RouterFunctionMapping();
+	}
+
 	/**
 	 * Return a handler mapping ordered at Integer.MAX_VALUE-1 with mapped
 	 * resource handlers. To configure resource handling, override
@@ -210,18 +212,23 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 */
 	@Bean
 	public HandlerMapping resourceHandlerMapping() {
-		ResourceHandlerRegistry registry =
-				new ResourceHandlerRegistry(this.applicationContext, webFluxContentTypeResolver());
+		ResourceLoader resourceLoader = this.applicationContext;
+		if (resourceLoader == null) {
+			resourceLoader = new DefaultResourceLoader();
+		}
+		ResourceHandlerRegistry registry = new ResourceHandlerRegistry(resourceLoader);
 		addResourceHandlers(registry);
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
 		if (handlerMapping != null) {
-			PathMatchConfigurer pathMatchConfigurer = getPathMatchConfigurer();
-			if (pathMatchConfigurer.getPathMatcher() != null) {
-				handlerMapping.setPathMatcher(pathMatchConfigurer.getPathMatcher());
+			PathMatchConfigurer configurer = getPathMatchConfigurer();
+			Boolean useTrailingSlashMatch = configurer.isUseTrailingSlashMatch();
+			Boolean useCaseSensitiveMatch = configurer.isUseCaseSensitiveMatch();
+			if (useTrailingSlashMatch != null) {
+				handlerMapping.setUseTrailingSlashMatch(useTrailingSlashMatch);
 			}
-			if (pathMatchConfigurer.getPathHelper() != null) {
-				handlerMapping.setPathHelper(pathMatchConfigurer.getPathHelper());
+			if (useCaseSensitiveMatch != null) {
+				handlerMapping.setUseCaseSensitiveMatch(useCaseSensitiveMatch);
 			}
 		}
 		else {
@@ -240,7 +247,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	@Bean
 	public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
 		RequestMappingHandlerAdapter adapter = createRequestMappingHandlerAdapter();
-		adapter.setMessageCodecConfigurer(serverCodecConfigurer());
+		adapter.setMessageReaders(serverCodecConfigurer().getReaders());
 		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer());
 		adapter.setReactiveAdapterRegistry(webFluxAdapterRegistry());
 
@@ -277,6 +284,18 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 	/**
+	 * Override to plug a sub-class of {@link LocaleContextResolver}.
+	 */
+	protected LocaleContextResolver createLocaleContextResolver() {
+		return new AcceptHeaderLocaleContextResolver();
+	}
+
+	@Bean
+	public LocaleContextResolver localeContextResolver() {
+		return createLocaleContextResolver();
+	}
+
+	/**
 	 * Override to configure the HTTP message readers and writers to use.
 	 */
 	protected void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
@@ -290,7 +309,10 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(webFluxConversionService());
 		initializer.setValidator(webFluxValidator());
-		initializer.setMessageCodesResolver(getMessageCodesResolver());
+		MessageCodesResolver messageCodesResolver = getMessageCodesResolver();
+		if (messageCodesResolver != null) {
+			initializer.setMessageCodesResolver(messageCodesResolver);
+		}
 		return initializer;
 	}
 
@@ -351,6 +373,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	/**
 	 * Override this method to provide a custom {@link Validator}.
 	 */
+	@Nullable
 	protected Validator getValidator() {
 		return null;
 	}
@@ -358,8 +381,14 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	/**
 	 * Override this method to provide a custom {@link MessageCodesResolver}.
 	 */
+	@Nullable
 	protected MessageCodesResolver getMessageCodesResolver() {
 		return null;
+	}
+
+	@Bean
+	public HandlerFunctionAdapter handlerFunctionAdapter() {
+		return new HandlerFunctionAdapter();
 	}
 
 	@Bean
@@ -381,15 +410,38 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 	@Bean
 	public ViewResolutionResultHandler viewResolutionResultHandler() {
-		ViewResolverRegistry registry = new ViewResolverRegistry(getApplicationContext());
-		configureViewResolvers(registry);
+		ViewResolverRegistry registry = getViewResolverRegistry();
 		List<ViewResolver> resolvers = registry.getViewResolvers();
 		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(
 				resolvers, webFluxContentTypeResolver(), webFluxAdapterRegistry());
 		handler.setDefaultViews(registry.getDefaultViews());
 		handler.setOrder(registry.getOrder());
 		return handler;
+	}
 
+	@Bean
+	public ServerResponseResultHandler serverResponseResultHandler() {
+		ViewResolverRegistry registry = getViewResolverRegistry();
+		List<ViewResolver> resolvers = registry.getViewResolvers();
+
+		ServerResponseResultHandler handler = new ServerResponseResultHandler();
+		handler.setMessageWriters(serverCodecConfigurer().getWriters());
+		handler.setViewResolvers(resolvers);
+		handler.setOrder(registry.getOrder() + 1);
+
+		return handler;
+	}
+
+	/**
+	 * Callback for building the {@link ViewResolverRegistry}. This method is final,
+	 * use {@link #configureViewResolvers} to customize view resolvers.
+	 */
+	protected final ViewResolverRegistry getViewResolverRegistry() {
+		if (this.viewResolverRegistry == null) {
+			this.viewResolverRegistry = new ViewResolverRegistry(this.applicationContext);
+			configureViewResolvers(this.viewResolverRegistry);
+		}
+		return this.viewResolverRegistry;
 	}
 
 	/**
@@ -417,7 +469,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		}
 
 		@Override
-		public void validate(Object target, Errors errors) {
+		public void validate(@Nullable Object target, Errors errors) {
 		}
 	}
 

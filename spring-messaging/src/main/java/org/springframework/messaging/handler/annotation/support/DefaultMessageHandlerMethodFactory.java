@@ -55,7 +55,8 @@ import org.springframework.validation.Validator;
  * @see #setValidator
  * @see #setCustomArgumentResolvers
  */
-public class DefaultMessageHandlerMethodFactory implements MessageHandlerMethodFactory, BeanFactoryAware, InitializingBean {
+public class DefaultMessageHandlerMethodFactory
+		implements MessageHandlerMethodFactory, BeanFactoryAware, InitializingBean {
 
 	private ConversionService conversionService = new DefaultFormattingConversionService();
 

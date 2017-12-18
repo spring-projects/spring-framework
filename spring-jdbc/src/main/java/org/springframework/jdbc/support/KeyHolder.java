@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface for retrieving keys, typically used for auto-generated keys
@@ -54,6 +55,7 @@ public interface KeyHolder {
 	 * @return the generated key
 	 * @throws InvalidDataAccessApiUsageException if multiple keys are encountered.
 	 */
+	@Nullable
 	Number getKey() throws InvalidDataAccessApiUsageException;
 
 	/**
@@ -63,6 +65,7 @@ public interface KeyHolder {
 	 * @return the Map of generated keys
 	 * @throws InvalidDataAccessApiUsageException if keys for multiple rows are encountered
 	 */
+	@Nullable
 	Map<String, Object> getKeys() throws InvalidDataAccessApiUsageException;
 
 	/**

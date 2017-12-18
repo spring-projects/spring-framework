@@ -33,6 +33,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -75,8 +76,10 @@ public class FormHttpMessageReader implements HttpMessageReader<MultiValueMap<St
 
 
 	@Override
-	public boolean canRead(ResolvableType elementType, MediaType mediaType) {
-		return (MULTIVALUE_TYPE.isAssignableFrom(elementType) &&
+	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
+		return ((MULTIVALUE_TYPE.isAssignableFrom(elementType) ||
+				(elementType.hasUnresolvableGenerics() &&
+						MultiValueMap.class.isAssignableFrom(elementType.resolve(Object.class)))) &&
 				(mediaType == null || MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType)));
 	}
 
@@ -104,7 +107,7 @@ public class FormHttpMessageReader implements HttpMessageReader<MultiValueMap<St
 				});
 	}
 
-	private Charset getMediaTypeCharset(MediaType mediaType) {
+	private Charset getMediaTypeCharset(@Nullable MediaType mediaType) {
 		if (mediaType != null && mediaType.getCharset() != null) {
 			return mediaType.getCharset();
 		}

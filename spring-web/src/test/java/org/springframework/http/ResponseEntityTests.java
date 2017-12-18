@@ -160,7 +160,7 @@ public class ResponseEntityTests {
 		HttpHeaders responseHeaders = responseEntity.getHeaders();
 
 		assertEquals("GET", responseHeaders.getFirst("Allow"));
-		assertEquals("Thu, 01 Jan 1970 00:00:12 GMT",
+		assertEquals("Thu, 1 Jan 1970 00:00:12 GMT",
 				responseHeaders.getFirst("Last-Modified"));
 		assertEquals(location.toASCIIString(),
 				responseHeaders.getFirst("Location"));
@@ -240,7 +240,8 @@ public class ResponseEntityTests {
 		assertTrue(responseEntity.getHeaders().containsKey(HttpHeaders.CACHE_CONTROL));
 		assertEquals(entity, responseEntity.getBody());
 		String cacheControlHeader = responseEntity.getHeaders().getCacheControl();
-		assertThat(cacheControlHeader, Matchers.equalTo("max-age=3600, must-revalidate, private, proxy-revalidate, s-maxage=1800"));
+		assertThat(cacheControlHeader,
+				Matchers.equalTo("max-age=3600, must-revalidate, private, proxy-revalidate, s-maxage=1800"));
 	}
 
 	@Test

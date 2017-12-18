@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import example.scannable.NamedStubDao;
 import example.scannable.ScopedProxyTestBean;
 import example.scannable.ServiceInvocationCounter;
 import example.scannable.StubFooDao;
+import example.scannable.sub.BarComponent;
 import org.aspectj.lang.annotation.Aspect;
 import org.junit.Test;
 
@@ -98,7 +99,31 @@ public class ClassPathScanningCandidateComponentProviderTests {
 		assertTrue(containsBeanClass(candidates, StubFooDao.class));
 		assertTrue(containsBeanClass(candidates, NamedStubDao.class));
 		assertTrue(containsBeanClass(candidates, ServiceInvocationCounter.class));
-		assertEquals(6, candidates.size());
+		assertTrue(containsBeanClass(candidates, BarComponent.class));
+		assertEquals(7, candidates.size());
+		assertBeanDefinitionType(candidates, expectedBeanDefinitionType);
+	}
+
+	@Test
+	public void antStylePackageWithScan() {
+		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(true);
+		provider.setResourceLoader(new DefaultResourceLoader(
+				CandidateComponentsTestClassLoader.disableIndex(getClass().getClassLoader())));
+		testAntStyle(provider, ScannedGenericBeanDefinition.class);
+	}
+
+	@Test
+	public void antStylePackageWithIndex() {
+		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(true);
+		provider.setResourceLoader(new DefaultResourceLoader(TEST_BASE_CLASSLOADER));
+		testAntStyle(provider, AnnotatedGenericBeanDefinition.class);
+	}
+
+	private void testAntStyle(ClassPathScanningCandidateComponentProvider provider,
+			Class<? extends BeanDefinition> expectedBeanDefinitionType) {
+		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE + ".**.sub");
+		assertTrue(containsBeanClass(candidates, BarComponent.class));
+		assertEquals(1, candidates.size());
 		assertBeanDefinitionType(candidates, expectedBeanDefinitionType);
 	}
 
@@ -200,7 +225,8 @@ public class ClassPathScanningCandidateComponentProviderTests {
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
 		assertTrue(containsBeanClass(candidates, NamedComponent.class));
 		assertTrue(containsBeanClass(candidates, ServiceInvocationCounter.class));
-		assertEquals(2, candidates.size());
+		assertTrue(containsBeanClass(candidates, BarComponent.class));
+		assertEquals(3, candidates.size());
 		assertBeanDefinitionType(candidates, expectedBeanDefinitionType);
 	}
 
@@ -251,7 +277,8 @@ public class ClassPathScanningCandidateComponentProviderTests {
 		assertTrue(containsBeanClass(candidates, FooServiceImpl.class));
 		assertTrue(containsBeanClass(candidates, StubFooDao.class));
 		assertTrue(containsBeanClass(candidates, ServiceInvocationCounter.class));
-		assertEquals(3, candidates.size());
+		assertTrue(containsBeanClass(candidates, BarComponent.class));
+		assertEquals(4, candidates.size());
 		assertBeanDefinitionType(candidates, expectedBeanDefinitionType);
 	}
 
@@ -270,9 +297,10 @@ public class ClassPathScanningCandidateComponentProviderTests {
 		provider.addExcludeFilter(new AnnotationTypeFilter(Service.class));
 		provider.addExcludeFilter(new AnnotationTypeFilter(Controller.class));
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
-		assertEquals(2, candidates.size());
+		assertEquals(3, candidates.size());
 		assertTrue(containsBeanClass(candidates, NamedComponent.class));
 		assertTrue(containsBeanClass(candidates, ServiceInvocationCounter.class));
+		assertTrue(containsBeanClass(candidates, BarComponent.class));
 		assertFalse(containsBeanClass(candidates, FooServiceImpl.class));
 		assertFalse(containsBeanClass(candidates, StubFooDao.class));
 		assertFalse(containsBeanClass(candidates, NamedStubDao.class));
@@ -311,10 +339,11 @@ public class ClassPathScanningCandidateComponentProviderTests {
 		provider.addIncludeFilter(new AnnotationTypeFilter(Component.class));
 		provider.addIncludeFilter(new AssignableTypeFilter(FooServiceImpl.class));
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
-		assertEquals(6, candidates.size());
+		assertEquals(7, candidates.size());
 		assertTrue(containsBeanClass(candidates, NamedComponent.class));
 		assertTrue(containsBeanClass(candidates, ServiceInvocationCounter.class));
 		assertTrue(containsBeanClass(candidates, FooServiceImpl.class));
+		assertTrue(containsBeanClass(candidates, BarComponent.class));
 	}
 
 	@Test
@@ -324,9 +353,10 @@ public class ClassPathScanningCandidateComponentProviderTests {
 		provider.addIncludeFilter(new AssignableTypeFilter(FooServiceImpl.class));
 		provider.addExcludeFilter(new AssignableTypeFilter(FooService.class));
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
-		assertEquals(5, candidates.size());
+		assertEquals(6, candidates.size());
 		assertTrue(containsBeanClass(candidates, NamedComponent.class));
 		assertTrue(containsBeanClass(candidates, ServiceInvocationCounter.class));
+		assertTrue(containsBeanClass(candidates, BarComponent.class));
 		assertFalse(containsBeanClass(candidates, FooServiceImpl.class));
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.socket.client;
 
 import java.net.URI;
+import java.util.List;
 
 import org.eclipse.jetty.websocket.api.UpgradeRequest;
 import org.eclipse.jetty.websocket.api.UpgradeResponse;
@@ -154,7 +155,7 @@ public class JettyWebSocketClient extends WebSocketClientSupport implements WebS
 		MonoProcessor<Void> completionMono = MonoProcessor.create();
 		return Mono.fromCallable(
 				() -> {
-					String[] protocols = beforeHandshake(url, headers, handler);
+					List<String> protocols = beforeHandshake(url, headers, handler);
 					ClientUpgradeRequest upgradeRequest = new ClientUpgradeRequest();
 					upgradeRequest.setSubProtocols(protocols);
 					Object jettyHandler = createJettyHandler(url, handler, completionMono);

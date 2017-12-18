@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.util.Optional;
-
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -30,19 +28,17 @@ public class HandlerStrategiesTests {
 	@Test
 	public void empty() {
 		HandlerStrategies strategies = HandlerStrategies.empty().build();
-		assertEquals(Optional.empty(), strategies.messageReaders().get().findFirst());
-		assertEquals(Optional.empty(), strategies.messageWriters().get().findFirst());
-		assertEquals(Optional.empty(), strategies.viewResolvers().get().findFirst());
-		assertNull(strategies.localeResolver().get());
+		assertTrue(strategies.messageReaders().isEmpty());
+		assertTrue(strategies.messageWriters().isEmpty());
+		assertTrue(strategies.viewResolvers().isEmpty());
 	}
 
 	@Test
 	public void withDefaults() {
 		HandlerStrategies strategies = HandlerStrategies.withDefaults();
-		assertNotEquals(Optional.empty(), strategies.messageReaders().get().findFirst());
-		assertNotEquals(Optional.empty(), strategies.messageWriters().get().findFirst());
-		assertEquals(Optional.empty(), strategies.viewResolvers().get().findFirst());
-		assertNotNull(strategies.localeResolver().get());
+		assertFalse(strategies.messageReaders().isEmpty());
+		assertFalse(strategies.messageWriters().isEmpty());
+		assertTrue(strategies.viewResolvers().isEmpty());
 	}
 
 }

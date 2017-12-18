@@ -30,8 +30,8 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.web.server.ServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -55,7 +55,7 @@ public class AppCacheManifestTransformerTests {
 		ClassPathResource allowedLocation = new ClassPathResource("test/", getClass());
 		ResourceWebHandler resourceHandler = new ResourceWebHandler();
 		ResourceUrlProvider resourceUrlProvider = new ResourceUrlProvider();
-		resourceUrlProvider.setHandlerMap(Collections.singletonMap("/static/**", resourceHandler));
+		resourceUrlProvider.registerHandlers(Collections.singletonMap("/static/**", resourceHandler));
 
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
@@ -79,7 +79,8 @@ public class AppCacheManifestTransformerTests {
 
 	@Test
 	public void noTransformIfExtensionNoMatch() throws Exception {
-		ServerWebExchange exchange = MockServerHttpRequest.get("/static/foobar.file").toExchange();
+		MockServerHttpRequest request = MockServerHttpRequest.get("/static/foobar.file").build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		this.chain = mock(ResourceTransformerChain.class);
 		Resource resource = mock(Resource.class);
 		given(resource.getFilename()).willReturn("foobar.file");
@@ -91,7 +92,8 @@ public class AppCacheManifestTransformerTests {
 
 	@Test
 	public void syntaxErrorInManifest() throws Exception {
-		ServerWebExchange exchange = MockServerHttpRequest.get("/static/error.appcache").toExchange();
+		MockServerHttpRequest request = MockServerHttpRequest.get("/static/error.appcache").build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		this.chain = mock(ResourceTransformerChain.class);
 		Resource resource = new ClassPathResource("test/error.appcache", getClass());
 		given(this.chain.transform(exchange, resource)).willReturn(Mono.just(resource));
@@ -102,7 +104,8 @@ public class AppCacheManifestTransformerTests {
 
 	@Test
 	public void transformManifest() throws Exception {
-		ServerWebExchange exchange = MockServerHttpRequest.get("/static/test.appcache").toExchange();
+		MockServerHttpRequest request = MockServerHttpRequest.get("/static/test.appcache").build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
 
@@ -134,7 +137,7 @@ public class AppCacheManifestTransformerTests {
 				Matchers.containsString("http://example.org/image.png"));
 
 		assertThat("should generate fingerprint", content,
-				Matchers.containsString("# Hash: 4bf0338bcbeb0a5b3a4ec9ed8864107d"));
+				Matchers.containsString("# Hash: 8eefc904df3bd46537fa7bdbbc5ab9fb"));
 	}
 
 }

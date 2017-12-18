@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderInitializer;
@@ -52,6 +53,7 @@ public class StompDecoder {
 
 	private static final Log logger = LogFactory.getLog(StompDecoder.class);
 
+	@Nullable
 	private MessageHeaderInitializer headerInitializer;
 
 
@@ -59,13 +61,14 @@ public class StompDecoder {
 	 * Configure a {@link MessageHeaderInitializer} to apply to the headers of
 	 * {@link Message}s from decoded STOMP frames.
 	 */
-	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+	public void setHeaderInitializer(@Nullable MessageHeaderInitializer headerInitializer) {
 		this.headerInitializer = headerInitializer;
 	}
 
 	/**
 	 * Return the configured {@code MessageHeaderInitializer}, if any.
 	 */
+	@Nullable
 	public MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
 	}
@@ -103,7 +106,9 @@ public class StompDecoder {
 	 * @return the decoded messages, or an empty list if none
 	 * @throws StompConversionException raised in case of decoding issues
 	 */
-	public List<Message<byte[]>> decode(ByteBuffer byteBuffer, MultiValueMap<String, String> partialMessageHeaders) {
+	public List<Message<byte[]>> decode(ByteBuffer byteBuffer,
+			@Nullable MultiValueMap<String, String> partialMessageHeaders) {
+
 		List<Message<byte[]>> messages = new ArrayList<>();
 		while (byteBuffer.hasRemaining()) {
 			Message<byte[]> message = decodeMessage(byteBuffer, partialMessageHeaders);
@@ -120,7 +125,8 @@ public class StompDecoder {
 	/**
 	 * Decode a single STOMP frame from the given {@code buffer} into a {@link Message}.
 	 */
-	private Message<byte[]> decodeMessage(ByteBuffer byteBuffer, MultiValueMap<String, String> headers) {
+	@Nullable
+	private Message<byte[]> decodeMessage(ByteBuffer byteBuffer, @Nullable MultiValueMap<String, String> headers) {
 		Message<byte[]> decodedMessage = null;
 		skipLeadingEol(byteBuffer);
 
@@ -141,9 +147,12 @@ public class StompDecoder {
 				payload = readPayload(byteBuffer, headerAccessor);
 			}
 			if (payload != null) {
-				if (payload.length > 0 && !headerAccessor.getCommand().isBodyAllowed()) {
-					throw new StompConversionException(headerAccessor.getCommand() +
-							" shouldn't have a payload: length=" + payload.length + ", headers=" + headers);
+				if (payload.length > 0) {
+					StompCommand stompCommand = headerAccessor.getCommand();
+					if (stompCommand != null && !stompCommand.isBodyAllowed()) {
+						throw new StompConversionException(stompCommand +
+								" shouldn't have a payload: length=" + payload.length + ", headers=" + headers);
+					}
 				}
 				headerAccessor.updateSimpMessageHeadersFromStompHeaders();
 				headerAccessor.setLeaveMutable(true);
@@ -153,9 +162,7 @@ public class StompDecoder {
 				}
 			}
 			else {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Incomplete frame, resetting input buffer...");
-				}
+				logger.trace("Incomplete frame, resetting input buffer...");
 				if (headers != null && headerAccessor != null) {
 					String name = NativeMessageHeaderAccessor.NATIVE_HEADERS;
 					@SuppressWarnings("unchecked")
@@ -285,13 +292,16 @@ public class StompDecoder {
 		return sb.toString();
 	}
 
+	@Nullable
 	private byte[] readPayload(ByteBuffer byteBuffer, StompHeaderAccessor headerAccessor) {
 		Integer contentLength;
 		try {
 			contentLength = headerAccessor.getContentLength();
 		}
 		catch (NumberFormatException ex) {
-			logger.warn("Ignoring invalid content-length: '" + headerAccessor);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Ignoring invalid content-length: '" + headerAccessor);
+			}
 			contentLength = null;
 		}
 

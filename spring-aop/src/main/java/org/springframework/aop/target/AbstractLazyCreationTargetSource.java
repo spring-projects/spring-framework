@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.TargetSource;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.aop.TargetSource} implementation that will
@@ -65,6 +66,7 @@ public abstract class AbstractLazyCreationTargetSource implements TargetSource {
 	 * @see #isInitialized()
 	 */
 	@Override
+	@Nullable
 	public synchronized Class<?> getTargetClass() {
 		return (this.lazyTarget != null ? this.lazyTarget.getClass() : null);
 	}

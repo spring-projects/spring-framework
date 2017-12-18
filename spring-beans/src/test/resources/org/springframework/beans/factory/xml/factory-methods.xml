@@ -27,7 +27,7 @@
 	</bean>
 
 	<bean id="null" class="org.springframework.beans.factory.xml.FactoryMethods"
-			factory-method="nullInstance"/>
+			factory-method="nullInstance" init-method="getName"/>
 
 	<bean id="nullWithProperty" class="org.springframework.beans.factory.xml.FactoryMethods"
 			factory-method="nullInstance" init-method="getName" scope="prototype">

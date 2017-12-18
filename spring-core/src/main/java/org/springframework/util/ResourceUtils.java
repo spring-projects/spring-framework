@@ -24,6 +24,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Utility methods for resolving resource locations to files in the
  * file system. Mainly for internal use within the framework.
@@ -99,7 +101,7 @@ public abstract class ResourceUtils {
 	 * @see #CLASSPATH_URL_PREFIX
 	 * @see java.net.URL
 	 */
-	public static boolean isUrl(String resourceLocation) {
+	public static boolean isUrl(@Nullable String resourceLocation) {
 		if (resourceLocation == null) {
 			return false;
 		}
@@ -341,8 +343,11 @@ public abstract class ResourceUtils {
 
 		int endIndex = urlFile.indexOf(WAR_URL_SEPARATOR);
 		if (endIndex != -1) {
-			// Tomcat's "jar:war:file:...mywar.war*/WEB-INF/lib/myjar.jar!/myentry.txt"
+			// Tomcat's "war:file:...mywar.war*/WEB-INF/lib/myjar.jar!/myentry.txt"
 			String warFile = urlFile.substring(0, endIndex);
+			if (URL_PROTOCOL_WAR.equals(jarUrl.getProtocol())) {
+				return new URL(warFile);
+			}
 			int startIndex = warFile.indexOf(WAR_URL_PREFIX);
 			if (startIndex != -1) {
 				return new URL(warFile.substring(startIndex + WAR_URL_PREFIX.length()));
@@ -356,8 +361,6 @@ public abstract class ResourceUtils {
 	/**
 	 * Create a URI instance for the given URL,
 	 * replacing spaces with "%20" URI encoding first.
-	 * <p>Furthermore, this method works on JDK 1.4 as well,
-	 * in contrast to the {@code URL.toURI()} method.
 	 * @param url the URL to convert into a URI instance
 	 * @return the URI instance
 	 * @throws URISyntaxException if the URL wasn't a valid URI

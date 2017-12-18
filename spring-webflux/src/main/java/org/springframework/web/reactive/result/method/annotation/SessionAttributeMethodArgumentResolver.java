@@ -16,13 +16,12 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.Optional;
-
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.server.ServerWebExchange;
@@ -49,16 +48,16 @@ public class SessionAttributeMethodArgumentResolver extends AbstractNamedValueAr
 
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		SessionAttribute annot = parameter.getParameterAnnotation(SessionAttribute.class);
-		return new NamedValueInfo(annot.name(), annot.required(), ValueConstants.DEFAULT_NONE);
+		SessionAttribute ann = parameter.getParameterAnnotation(SessionAttribute.class);
+		Assert.state(ann != null, "No SessionAttribute annotation");
+		return new NamedValueInfo(ann.name(), ann.required(), ValueConstants.DEFAULT_NONE);
 	}
 
 	@Override
 	protected Mono<Object> resolveName(String name, MethodParameter parameter, ServerWebExchange exchange) {
 		return exchange.getSession()
-				.map(session -> session.getAttribute(name))
-				.filter(Optional::isPresent)
-				.map(Optional::get);
+				.filter(session -> session.getAttribute(name) != null)
+				.map(session -> session.getAttribute(name));
 	}
 
 	@Override

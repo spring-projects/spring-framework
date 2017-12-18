@@ -64,6 +64,11 @@ class OkHttp3AsyncClientHttpRequest extends AbstractBufferingAsyncClientHttpRequ
 	}
 
 	@Override
+	public String getMethodValue() {
+		return this.method.name();
+	}
+
+	@Override
 	public URI getURI() {
 		return this.uri;
 	}

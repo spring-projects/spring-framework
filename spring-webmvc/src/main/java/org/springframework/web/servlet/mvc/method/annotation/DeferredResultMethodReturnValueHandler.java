@@ -20,6 +20,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -37,17 +38,16 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class DeferredResultMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
-
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		Class<?> type = returnType.getParameterType();
-		return DeferredResult.class.isAssignableFrom(type) ||
+		return (DeferredResult.class.isAssignableFrom(type) ||
 				ListenableFuture.class.isAssignableFrom(type) ||
-				CompletionStage.class.isAssignableFrom(type);
+				CompletionStage.class.isAssignableFrom(type));
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType,
+	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		if (returnValue == null) {
@@ -78,7 +78,7 @@ public class DeferredResultMethodReturnValueHandler implements HandlerMethodRetu
 		DeferredResult<Object> result = new DeferredResult<>();
 		future.addCallback(new ListenableFutureCallback<Object>() {
 			@Override
-			public void onSuccess(Object value) {
+			public void onSuccess(@Nullable Object value) {
 				result.setResult(value);
 			}
 			@Override

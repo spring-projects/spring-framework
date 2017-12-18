@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -75,14 +76,17 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 
 	private String encoding = DEFAULT_ENCODING;
 
+	@Nullable
 	private String encodingPropertyName;
 
+	@Nullable
 	private String typeIdPropertyName;
 
 	private Map<String, Class<?>> idClassMappings = new HashMap<>();
 
 	private Map<Class<?>, String> classIdMappings = new HashMap<>();
 
+	@Nullable
 	private ClassLoader beanClassLoader;
 
 
@@ -157,12 +161,10 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	 */
 	public void setTypeIdMappings(Map<String, Class<?>> typeIdMappings) {
 		this.idClassMappings = new HashMap<>();
-		for (Map.Entry<String, Class<?>> entry : typeIdMappings.entrySet()) {
-			String id = entry.getKey();
-			Class<?> clazz = entry.getValue();
+		typeIdMappings.forEach((id, clazz) -> {
 			this.idClassMappings.put(id, clazz);
 			this.classIdMappings.put(clazz, id);
-		}
+		});
 	}
 
 	@Override
@@ -194,7 +196,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	}
 
 	@Override
-	public Message toMessage(Object object, Session session, Object conversionHint)
+	public Message toMessage(Object object, Session session, @Nullable Object conversionHint)
 			throws JMSException, MessageConversionException {
 
 		return toMessage(object, session, getSerializationView(conversionHint));
@@ -211,7 +213,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	 * @throws MessageConversionException in case of conversion failure
 	 * @since 4.3
 	 */
-	public Message toMessage(Object object, Session session, Class<?> jsonView)
+	public Message toMessage(Object object, Session session, @Nullable Class<?> jsonView)
 			throws JMSException, MessageConversionException {
 
 		if (jsonView != null) {
@@ -456,7 +458,8 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	 * converter for the current conversion attempt
 	 * @return the serialization view class, or {@code null} if none
 	 */
-	protected Class<?> getSerializationView(Object conversionHint) {
+	@Nullable
+	protected Class<?> getSerializationView(@Nullable Object conversionHint) {
 		if (conversionHint instanceof MethodParameter) {
 			MethodParameter methodParam = (MethodParameter) conversionHint;
 			JsonView annotation = methodParam.getParameterAnnotation(JsonView.class);

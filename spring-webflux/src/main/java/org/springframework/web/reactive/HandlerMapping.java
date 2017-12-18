@@ -31,29 +31,31 @@ import org.springframework.web.server.ServerWebExchange;
 public interface HandlerMapping {
 
 	/**
-	 * Name of the {@link ServerWebExchange} attribute that contains the
-	 * best matching pattern within the handler mapping.
-	 * <p>Note: This attribute is not required to be supported by all
-	 * HandlerMapping implementations. URL-based HandlerMappings will
-	 * typically support it, but handlers should not necessarily expect
-	 * this request attribute to be present in all scenarios.
+	 * Name of the {@link ServerWebExchange#getAttributes() attribute} that
+	 * contains the mapped handler for the best matching pattern.
+	 */
+	String BEST_MATCHING_HANDLER_ATTRIBUTE = HandlerMapping.class.getName() + ".bestMatchingHandler";
+
+	/**
+	 * Name of the {@link ServerWebExchange#getAttributes() attribute} that
+	 * contains the best matching pattern within the handler mapping.
 	 */
 	String BEST_MATCHING_PATTERN_ATTRIBUTE = HandlerMapping.class.getName() + ".bestMatchingPattern";
 
 	/**
-	 * Name of the {@link ServerWebExchange} attribute that contains the path
-	 * within the handler mapping, in case of a pattern match, or the full
-	 * relevant URI (typically within the DispatcherServlet's mapping) else.
+	 * Name of the {@link ServerWebExchange#getAttributes() attribute} that
+	 * contains the path within the handler mapping, in case of a pattern match
+	 * such as {@code "/static/**"} or the full relevant URI otherwise.
 	 * <p>Note: This attribute is not required to be supported by all
 	 * HandlerMapping implementations. URL-based HandlerMappings will
-	 * typically support it, but handlers should not necessarily expect
+	 * typically support it but handlers should not necessarily expect
 	 * this request attribute to be present in all scenarios.
 	 */
 	String PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE = HandlerMapping.class.getName() + ".pathWithinHandlerMapping";
 
 	/**
-	 * Name of the {@link ServerWebExchange} attribute that contains the URI
-	 * templates map, mapping variable names to values.
+	 * Name of the {@link ServerWebExchange#getAttributes() attribute} that
+	 * contains the URI templates map mapping variable names to values.
 	 * <p>Note: This attribute is not required to be supported by all
 	 * HandlerMapping implementations. URL-based HandlerMappings will
 	 * typically support it, but handlers should not necessarily expect
@@ -62,8 +64,9 @@ public interface HandlerMapping {
 	String URI_TEMPLATE_VARIABLES_ATTRIBUTE = HandlerMapping.class.getName() + ".uriTemplateVariables";
 
 	/**
-	 * Name of the {@link ServerWebExchange} attribute that contains a map with
-	 * URI matrix variables.
+	 * Name of the {@link ServerWebExchange#getAttributes() attribute} that
+	 * contains a map with URI variable names and a corresponding MultiValueMap
+	 * of URI matrix variables for each.
 	 * <p>Note: This attribute is not required to be supported by all
 	 * HandlerMapping implementations and may also not be present depending on
 	 * whether the HandlerMapping is configured to keep matrix variable content
@@ -72,8 +75,8 @@ public interface HandlerMapping {
 	String MATRIX_VARIABLES_ATTRIBUTE = HandlerMapping.class.getName() + ".matrixVariables";
 
 	/**
-	 * Name of the {@link ServerWebExchange} attribute that contains the set of
-	 * producible MediaTypes applicable to the mapped handler.
+	 * Name of the {@link ServerWebExchange#getAttributes() attribute} containing
+	 * the set of producible MediaType's applicable to the mapped handler.
 	 * <p>Note: This attribute is not required to be supported by all
 	 * HandlerMapping implementations. Handlers should not necessarily expect
 	 * this request attribute to be present in all scenarios.

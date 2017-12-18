@@ -33,7 +33,7 @@ import reactor.test.StepVerifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.StringUtils;
 
 import static org.junit.Assert.assertEquals;
@@ -54,7 +54,7 @@ public class CssLinkResourceTransformerTests {
 		ResourceWebHandler resourceHandler = new ResourceWebHandler();
 
 		ResourceUrlProvider resourceUrlProvider = new ResourceUrlProvider();
-		resourceUrlProvider.setHandlerMap(Collections.singletonMap("/static/**", resourceHandler));
+		resourceUrlProvider.registerHandlers(Collections.singletonMap("/static/**", resourceHandler));
 
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
@@ -76,16 +76,16 @@ public class CssLinkResourceTransformerTests {
 
 	@Test
 	public void transform() throws Exception {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("/static/main.css").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/static/main.css"));
 		Resource css = new ClassPathResource("test/main.css", getClass());
 
 		String expected = "\n" +
-				"@import url(\"/static/bar-11e16cf79faee7ac698c805cf28248d2.css\");\n" +
-				"@import url('/static/bar-11e16cf79faee7ac698c805cf28248d2.css');\n" +
+				"@import url(\"/static/bar-11e16cf79faee7ac698c805cf28248d2.css?#iefix\");\n" +
+				"@import url('/static/bar-11e16cf79faee7ac698c805cf28248d2.css#bla-normal');\n" +
 				"@import url(/static/bar-11e16cf79faee7ac698c805cf28248d2.css);\n\n" +
 				"@import \"/static/foo-e36d2e05253c6c7085a91522ce43a0b4.css\";\n" +
 				"@import '/static/foo-e36d2e05253c6c7085a91522ce43a0b4.css';\n\n" +
-				"body { background: url(\"/static/images/image-f448cd1d5dba82b774f3202c878230b3.png\") }\n";
+				"body { background: url(\"/static/images/image-f448cd1d5dba82b774f3202c878230b3.png?#iefix\") }\n";
 
 		StepVerifier.create(this.transformerChain.transform(exchange, css).cast(TransformedResource.class))
 				.consumeNextWith(resource -> {
@@ -98,7 +98,7 @@ public class CssLinkResourceTransformerTests {
 
 	@Test
 	public void transformNoLinks() throws Exception {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("/static/foo.css").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/static/foo.css"));
 		Resource expected = new ClassPathResource("test/foo.css", getClass());
 		StepVerifier.create(this.transformerChain.transform(exchange, expected))
 				.consumeNextWith(resource -> assertSame(expected, resource))
@@ -107,7 +107,7 @@ public class CssLinkResourceTransformerTests {
 
 	@Test
 	public void transformExtLinksNotAllowed() throws Exception {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("/static/external.css").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/static/external.css"));
 		ResourceResolverChain resolverChain = Mockito.mock(DefaultResourceResolverChain.class);
 		ResourceTransformerChain transformerChain = new DefaultResourceTransformerChain(resolverChain,
 				Collections.singletonList(new CssLinkResourceTransformer()));
@@ -133,7 +133,7 @@ public class CssLinkResourceTransformerTests {
 
 	@Test
 	public void transformWithNonCssResource() throws Exception {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("/static/images/image.png").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/static/images/image.png"));
 		Resource expected = new ClassPathResource("test/images/image.png", getClass());
 		StepVerifier.create(this.transformerChain.transform(exchange, expected))
 				.expectNext(expected)
@@ -142,7 +142,7 @@ public class CssLinkResourceTransformerTests {
 
 	@Test
 	public void transformWithGzippedResource() throws Exception {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("/static/main.css").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/static/main.css"));
 		Resource original = new ClassPathResource("test/main.css", getClass());
 		createTempCopy("main.css", "main.css.gz");
 		GzipResourceResolver.GzippedResource expected = new GzipResourceResolver.GzippedResource(original);

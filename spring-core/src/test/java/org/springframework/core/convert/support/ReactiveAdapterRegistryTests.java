@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert.support;
 
 import java.time.Duration;
@@ -22,7 +23,6 @@ import java.util.concurrent.CompletableFuture;
 
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
-import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -50,13 +50,7 @@ import static org.junit.Assert.assertTrue;
 @SuppressWarnings("unchecked")
 public class ReactiveAdapterRegistryTests {
 
-	private ReactiveAdapterRegistry registry;
-
-
-	@Before
-	public void setUp() throws Exception {
-		this.registry = new ReactiveAdapterRegistry();
-	}
+	private final ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();
 
 
 	@Test
@@ -137,7 +131,7 @@ public class ReactiveAdapterRegistryTests {
 		Publisher<Integer> source = Flowable.fromIterable(sequence);
 		Object target = getAdapter(rx.Observable.class).fromPublisher(source);
 		assertTrue(target instanceof rx.Observable);
-		assertEquals(sequence, ((rx.Observable) target).toList().toBlocking().first());
+		assertEquals(sequence, ((rx.Observable<?>) target).toList().toBlocking().first());
 	}
 
 	@Test
@@ -162,7 +156,7 @@ public class ReactiveAdapterRegistryTests {
 		Publisher<Integer> source = Flux.fromIterable(sequence);
 		Object target = getAdapter(io.reactivex.Flowable.class).fromPublisher(source);
 		assertTrue(target instanceof io.reactivex.Flowable);
-		assertEquals(sequence, ((io.reactivex.Flowable) target).toList().blockingGet());
+		assertEquals(sequence, ((io.reactivex.Flowable<?>) target).toList().blockingGet());
 	}
 
 	@Test
@@ -171,7 +165,7 @@ public class ReactiveAdapterRegistryTests {
 		Publisher<Integer> source = Flowable.fromIterable(sequence);
 		Object target = getAdapter(io.reactivex.Observable.class).fromPublisher(source);
 		assertTrue(target instanceof io.reactivex.Observable);
-		assertEquals(sequence, ((io.reactivex.Observable) target).toList().blockingGet());
+		assertEquals(sequence, ((io.reactivex.Observable<?>) target).toList().blockingGet());
 	}
 
 	@Test
@@ -251,7 +245,7 @@ public class ReactiveAdapterRegistryTests {
 
 	@Test
 	public void CompletableFutureToPublisher() throws Exception {
-		CompletableFuture<Integer> future = new CompletableFuture();
+		CompletableFuture<Integer> future = new CompletableFuture<>();
 		future.complete(1);
 		Object target = getAdapter(CompletableFuture.class).toPublisher(future);
 		assertTrue("Expected Mono Publisher: " + target.getClass().getName(), target instanceof Mono);

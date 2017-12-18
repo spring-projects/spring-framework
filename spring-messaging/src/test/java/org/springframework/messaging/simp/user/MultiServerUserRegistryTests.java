@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class MultiServerUserRegistryTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.localRegistry = Mockito.mock(SimpUserRegistry.class);
 		this.registry = new MultiServerUserRegistry(this.localRegistry);
 		this.converter = new MappingJackson2MessageConverter();
@@ -70,7 +70,6 @@ public class MultiServerUserRegistryTests {
 
 	@Test
 	public void getUserFromRemoteRegistry() throws Exception {
-
 		// Prepare broadcast message from remote server
 		TestSimpUser testUser = new TestSimpUser("joe");
 		TestSimpSession testSession = new TestSimpSession("remote-sess");
@@ -83,7 +82,6 @@ public class MultiServerUserRegistryTests {
 
 		// Add remote registry
 		this.registry.addRemoteRegistryDto(message, this.converter, 20000);
-
 
 		assertEquals(1, this.registry.getUserCount());
 		SimpUser user = this.registry.getUser("joe");
@@ -103,7 +101,6 @@ public class MultiServerUserRegistryTests {
 
 	@Test
 	public void findSubscriptionsFromRemoteRegistry() throws Exception {
-
 		// Prepare broadcast message from remote server
 		TestSimpUser user1 = new TestSimpUser("joe");
 		TestSimpUser user2 = new TestSimpUser("jane");
@@ -125,7 +122,6 @@ public class MultiServerUserRegistryTests {
 		// Add remote registry
 		this.registry.addRemoteRegistryDto(message, this.converter, 20000);
 
-
 		assertEquals(3, this.registry.getUserCount());
 		Set<SimpSubscription> matches = this.registry.findSubscriptions(s -> s.getDestination().equals("/match"));
 		assertEquals(2, matches.size());
@@ -136,9 +132,8 @@ public class MultiServerUserRegistryTests {
 		assertEquals(new HashSet<>(Arrays.asList("sess1", "sess2")), sessionIds);
 	}
 
-	@Test // SPR-13800
+	@Test  // SPR-13800
 	public void getSessionsWhenUserIsConnectedToMultipleServers() throws Exception {
-
 		// Add user to local registry
 		TestSimpUser localUser = new TestSimpUser("joe");
 		TestSimpSession localSession = new TestSimpSession("sess123");
@@ -175,7 +170,6 @@ public class MultiServerUserRegistryTests {
 
 	@Test
 	public void purgeExpiredRegistries() throws Exception {
-
 		// Prepare broadcast message from remote server
 		TestSimpUser testUser = new TestSimpUser("joe");
 		testUser.addSessions(new TestSimpSession("remote-sub"));

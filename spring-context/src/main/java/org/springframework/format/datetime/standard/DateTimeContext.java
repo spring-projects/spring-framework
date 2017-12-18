@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.TimeZone;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
+import org.springframework.lang.Nullable;
 
 /**
  * A context that holds user-specific <code>java.time</code> (JSR-310) settings
@@ -36,21 +37,24 @@ import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
  */
 public class DateTimeContext {
 
+	@Nullable
 	private Chronology chronology;
 
+	@Nullable
 	private ZoneId timeZone;
 
 
 	/**
 	 * Set the user's chronology (calendar system).
 	 */
-	public void setChronology(Chronology chronology) {
+	public void setChronology(@Nullable Chronology chronology) {
 		this.chronology = chronology;
 	}
 
 	/**
 	 * Return the user's chronology (calendar system), if any.
 	 */
+	@Nullable
 	public Chronology getChronology() {
 		return this.chronology;
 	}
@@ -63,13 +67,14 @@ public class DateTimeContext {
 	 * @see org.springframework.context.i18n.LocaleContextHolder#getTimeZone()
 	 * @see org.springframework.context.i18n.LocaleContextHolder#setLocaleContext
 	 */
-	public void setTimeZone(ZoneId timeZone) {
+	public void setTimeZone(@Nullable ZoneId timeZone) {
 		this.timeZone = timeZone;
 	}
 
 	/**
 	 * Return the user's time zone, if any.
 	 */
+	@Nullable
 	public ZoneId getTimeZone() {
 		return this.timeZone;
 	}

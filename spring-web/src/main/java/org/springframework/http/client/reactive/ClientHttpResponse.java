@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,13 @@ import org.springframework.util.MultiValueMap;
  * Represents a client-side reactive HTTP response.
  *
  * @author Arjen Poutsma
+ * @author Brian Clozel
  * @since 5.0
  */
 public interface ClientHttpResponse extends ReactiveHttpInputMessage {
 
 	/**
-	 * @return the HTTP status as an {@link HttpStatus} enum value
+	 * Return the HTTP status as an {@link HttpStatus} enum value.
 	 */
 	HttpStatus getStatusCode();
 

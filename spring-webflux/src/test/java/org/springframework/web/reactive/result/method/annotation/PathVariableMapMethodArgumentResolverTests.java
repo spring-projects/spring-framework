@@ -28,7 +28,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.reactive.BindingContext;
@@ -48,7 +48,7 @@ public class PathVariableMapMethodArgumentResolverTests {
 
 	private PathVariableMapMethodArgumentResolver resolver;
 
-	private final MockServerWebExchange exchange= MockServerHttpRequest.get("/").toExchange();
+	private final MockServerWebExchange exchange= MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 	private MethodParameter paramMap;
 	private MethodParameter paramNamedMap;
@@ -58,7 +58,7 @@ public class PathVariableMapMethodArgumentResolverTests {
 
 	@Before
 	public void setup() throws Exception {
-		this.resolver = new PathVariableMapMethodArgumentResolver(new ReactiveAdapterRegistry());
+		this.resolver = new PathVariableMapMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
 
 		Method method = ReflectionUtils.findMethod(getClass(), "handle", (Class<?>[]) null);
 		this.paramMap = new MethodParameter(method, 0);

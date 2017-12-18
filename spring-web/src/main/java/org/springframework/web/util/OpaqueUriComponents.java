@@ -22,6 +22,7 @@ import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
@@ -39,26 +40,30 @@ final class OpaqueUriComponents extends UriComponents {
 
 	private static final MultiValueMap<String, String> QUERY_PARAMS_NONE = new LinkedMultiValueMap<>(0);
 
+	@Nullable
 	private final String ssp;
 
 
-	OpaqueUriComponents(String scheme, String schemeSpecificPart, String fragment) {
+	OpaqueUriComponents(@Nullable String scheme, @Nullable String schemeSpecificPart, @Nullable String fragment) {
 		super(scheme, fragment);
 		this.ssp = schemeSpecificPart;
 	}
 
 
 	@Override
+	@Nullable
 	public String getSchemeSpecificPart() {
 		return this.ssp;
 	}
 
 	@Override
+	@Nullable
 	public String getUserInfo() {
 		return null;
 	}
 
 	@Override
+	@Nullable
 	public String getHost() {
 		return null;
 	}
@@ -69,6 +74,7 @@ final class OpaqueUriComponents extends UriComponents {
 	}
 
 	@Override
+	@Nullable
 	public String getPath() {
 		return null;
 	}
@@ -79,6 +85,7 @@ final class OpaqueUriComponents extends UriComponents {
 	}
 
 	@Override
+	@Nullable
 	public String getQuery() {
 		return null;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -52,6 +53,7 @@ public class InjectionMetadata {
 
 	private final Collection<InjectedElement> injectedElements;
 
+	@Nullable
 	private volatile Set<InjectedElement> checkedElements;
 
 
@@ -76,9 +78,10 @@ public class InjectionMetadata {
 		this.checkedElements = checkedElements;
 	}
 
-	public void inject(Object target, String beanName, PropertyValues pvs) throws Throwable {
+	public void inject(Object target, @Nullable String beanName, @Nullable PropertyValues pvs) throws Throwable {
+		Collection<InjectedElement> checkedElements = this.checkedElements;
 		Collection<InjectedElement> elementsToIterate =
-				(this.checkedElements != null ? this.checkedElements : this.injectedElements);
+				(checkedElements != null ? checkedElements : this.injectedElements);
 		if (!elementsToIterate.isEmpty()) {
 			boolean debug = logger.isDebugEnabled();
 			for (InjectedElement element : elementsToIterate) {
@@ -93,9 +96,10 @@ public class InjectionMetadata {
 	/**
 	 * @since 3.2.13
 	 */
-	public void clear(PropertyValues pvs) {
+	public void clear(@Nullable PropertyValues pvs) {
+		Collection<InjectedElement> checkedElements = this.checkedElements;
 		Collection<InjectedElement> elementsToIterate =
-				(this.checkedElements != null ? this.checkedElements : this.injectedElements);
+				(checkedElements != null ? checkedElements : this.injectedElements);
 		if (!elementsToIterate.isEmpty()) {
 			for (InjectedElement element : elementsToIterate) {
 				element.clearPropertySkipping(pvs);
@@ -104,7 +108,7 @@ public class InjectionMetadata {
 	}
 
 
-	public static boolean needsRefresh(InjectionMetadata metadata, Class<?> clazz) {
+	public static boolean needsRefresh(@Nullable InjectionMetadata metadata, Class<?> clazz) {
 		return (metadata == null || metadata.targetClass != clazz);
 	}
 
@@ -115,11 +119,13 @@ public class InjectionMetadata {
 
 		protected final boolean isField;
 
+		@Nullable
 		protected final PropertyDescriptor pd;
 
+		@Nullable
 		protected volatile Boolean skip;
 
-		protected InjectedElement(Member member, PropertyDescriptor pd) {
+		protected InjectedElement(Member member, @Nullable PropertyDescriptor pd) {
 			this.member = member;
 			this.isField = (member instanceof Field);
 			this.pd = pd;
@@ -162,7 +168,9 @@ public class InjectionMetadata {
 		/**
 		 * Either this or {@link #getResourceToInject} needs to be overridden.
 		 */
-		protected void inject(Object target, String requestingBeanName, PropertyValues pvs) throws Throwable {
+		protected void inject(Object target, @Nullable String requestingBeanName, @Nullable PropertyValues pvs)
+				throws Throwable {
+
 			if (this.isField) {
 				Field field = (Field) this.member;
 				ReflectionUtils.makeAccessible(field);
@@ -188,17 +196,19 @@ public class InjectionMetadata {
 		 * an explicit property value having been specified. Also marks the
 		 * affected property as processed for other processors to ignore it.
 		 */
-		protected boolean checkPropertySkipping(PropertyValues pvs) {
-			if (this.skip != null) {
-				return this.skip;
+		protected boolean checkPropertySkipping(@Nullable PropertyValues pvs) {
+			Boolean skip = this.skip;
+			if (skip != null) {
+				return skip;
 			}
 			if (pvs == null) {
 				this.skip = false;
 				return false;
 			}
 			synchronized (pvs) {
-				if (this.skip != null) {
-					return this.skip;
+				skip = this.skip;
+				if (skip != null) {
+					return skip;
 				}
 				if (this.pd != null) {
 					if (pvs.contains(this.pd.getName())) {
@@ -218,7 +228,7 @@ public class InjectionMetadata {
 		/**
 		 * @since 3.2.13
 		 */
-		protected void clearPropertySkipping(PropertyValues pvs) {
+		protected void clearPropertySkipping(@Nullable PropertyValues pvs) {
 			if (pvs == null) {
 				return;
 			}
@@ -232,7 +242,8 @@ public class InjectionMetadata {
 		/**
 		 * Either this or {@link #inject} needs to be overridden.
 		 */
-		protected Object getResourceToInject(Object target, String requestingBeanName) {
+		@Nullable
+		protected Object getResourceToInject(Object target, @Nullable String requestingBeanName) {
 			return null;
 		}
 

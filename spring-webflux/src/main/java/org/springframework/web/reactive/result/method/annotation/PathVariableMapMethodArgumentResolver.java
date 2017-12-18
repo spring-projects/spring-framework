@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -59,12 +58,11 @@ public class PathVariableMapMethodArgumentResolver extends HandlerMethodArgument
 
 
 	@Override
-	public Optional<Object> resolveArgumentValue(MethodParameter methodParameter,
-			BindingContext context, ServerWebExchange exchange) {
+	public Object resolveArgumentValue(MethodParameter methodParameter, BindingContext context,
+			ServerWebExchange exchange) {
 
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-		Object value = exchange.getAttribute(name).orElse(Collections.emptyMap());
-		return Optional.of(value);
+		return exchange.getAttributeOrDefault(name, Collections.emptyMap());
 	}
 
 }

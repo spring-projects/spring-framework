@@ -62,7 +62,7 @@ public class MethodArgumentResolutionException extends MessagingException {
 
 	private static String getMethodParameterMessage(MethodParameter parameter) {
 		return "Could not resolve method parameter at index " + parameter.getParameterIndex() +
-				" in " + parameter.getMethod().toGenericString();
+				" in " + parameter.getExecutable().toGenericString();
 	}
 
 }

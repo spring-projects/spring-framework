@@ -30,6 +30,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.SqlInOutParameter;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -105,8 +106,8 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	@Override
-	public void initializeWithProcedureColumnMetaData(DatabaseMetaData databaseMetaData, String catalogName,
-			String schemaName, String procedureName) throws SQLException {
+	public void initializeWithProcedureColumnMetaData(DatabaseMetaData databaseMetaData, @Nullable String catalogName,
+			@Nullable String schemaName, @Nullable String procedureName) throws SQLException {
 
 		this.procedureColumnMetaDataUsed = true;
 		processProcedureColumns(databaseMetaData, catalogName, schemaName,  procedureName);
@@ -118,7 +119,8 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	@Override
-	public String procedureNameToUse(String procedureName) {
+	@Nullable
+	public String procedureNameToUse(@Nullable String procedureName) {
 		if (procedureName == null) {
 			return null;
 		}
@@ -134,7 +136,8 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	@Override
-	public String catalogNameToUse(String catalogName) {
+	@Nullable
+	public String catalogNameToUse(@Nullable String catalogName) {
 		if (catalogName == null) {
 			return null;
 		}
@@ -150,7 +153,8 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	@Override
-	public String schemaNameToUse(String schemaName) {
+	@Nullable
+	public String schemaNameToUse(@Nullable String schemaName) {
 		if (schemaName == null) {
 			return null;
 		}
@@ -166,7 +170,8 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	@Override
-	public String metaDataCatalogNameToUse(String catalogName) {
+	@Nullable
+	public String metaDataCatalogNameToUse(@Nullable String catalogName) {
 		if (isSupportsCatalogsInProcedureCalls()) {
 			return catalogNameToUse(catalogName);
 		}
@@ -176,7 +181,8 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	@Override
-	public String metaDataSchemaNameToUse(String schemaName) {
+	@Nullable
+	public String metaDataSchemaNameToUse(@Nullable String schemaName) {
 		if (isSupportsSchemasInProcedureCalls()) {
 			return schemaNameToUse(schemaName);
 		}
@@ -186,7 +192,8 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	@Override
-	public String parameterNameToUse(String parameterName) {
+	@Nullable
+	public String parameterNameToUse(@Nullable String parameterName) {
 		if (parameterName == null) {
 			return null;
 		}
@@ -309,8 +316,8 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	/**
 	 * Process the procedure column metadata
 	 */
-	private void processProcedureColumns(
-			DatabaseMetaData databaseMetaData, String catalogName, String schemaName, String procedureName) {
+	private void processProcedureColumns(DatabaseMetaData databaseMetaData,
+			@Nullable String catalogName, @Nullable String schemaName, @Nullable String procedureName) {
 
 		String metaDataCatalogName = metaDataCatalogNameToUse(catalogName);
 		String metaDataSchemaName = metaDataSchemaNameToUse(schemaName);
@@ -336,7 +343,8 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 						"procedures/functions/signatures for '" + metaDataProcedureName + "': found " + found);
 			}
 			else if (found.isEmpty()) {
-				if (metaDataProcedureName.contains(".") && !StringUtils.hasText(metaDataCatalogName)) {
+				if (metaDataProcedureName != null && metaDataProcedureName.contains(".") &&
+						!StringUtils.hasText(metaDataCatalogName)) {
 					String packageName = metaDataProcedureName.substring(0, metaDataProcedureName.indexOf("."));
 					throw new InvalidDataAccessApiUsageException(
 							"Unable to determine the correct call signature for '" + metaDataProcedureName +

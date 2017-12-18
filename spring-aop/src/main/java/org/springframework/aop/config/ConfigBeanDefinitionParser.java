@@ -45,6 +45,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
@@ -96,6 +97,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 
 	@Override
+	@Nullable
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		CompositeComponentDefinition compositeDef =
 				new CompositeComponentDefinition(element.getTagName(), parserContext.extractSource(element));
@@ -466,6 +468,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * {@link org.springframework.beans.factory.config.BeanDefinition} for the pointcut if  necessary
 	 * and returns its bean name, otherwise returns the bean name of the referred pointcut.
 	 */
+	@Nullable
 	private Object parsePointcutProperty(Element element, ParserContext parserContext) {
 		if (element.hasAttribute(POINTCUT) && element.hasAttribute(POINTCUT_REF)) {
 			parserContext.getReaderContext().error(

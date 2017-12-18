@@ -2,28 +2,33 @@
 = Spring AOP APIs
 
 
+
+
 [[aop-api-introduction]]
 == Introduction
+
 The previous chapter described the Spring's support for AOP using
 @AspectJ and schema-based aspect definitions. In this chapter we discuss the lower-level
-Spring AOP APIs and the AOP support used in Spring 1.2 applications. For new
+Spring AOP APIs and the AOP support typically used in Spring 1.2 applications. For new
 applications, we recommend the use of the Spring 2.0 and later AOP support described in
 the previous chapter, but when working with existing applications, or when reading books
-and articles, you may come across Spring 1.2 style examples. Spring 4.0 is backwards
+and articles, you may come across Spring 1.2 style examples. Spring 5 remains backwards
 compatible with Spring 1.2 and everything described in this chapter is fully supported
-in Spring 4.0.
+in Spring 5.
 
 
 
 
 [[aop-api-pointcuts]]
 == Pointcut API in Spring
+
 Let's look at how Spring handles the crucial pointcut concept.
 
 
 
 [[aop-api-concepts]]
 === Concepts
+
 Spring's pointcut model enables pointcut reuse independent of advice types. It's
 possible to target different advice using the same pointcut.
 
@@ -88,7 +93,6 @@ In this case, the 3-argument matches method will never be invoked.
 
 [TIP]
 ====
-
 If possible, try to make pointcuts static, allowing the AOP framework to cache the
 results of pointcut evaluation when an AOP proxy is created.
 ====
@@ -97,6 +101,7 @@ results of pointcut evaluation when an AOP proxy is created.
 
 [[aop-api-pointcut-ops]]
 === Operations on pointcuts
+
 Spring supports operations on pointcuts: notably, __union__ and __intersection__.
 
 * Union means the methods that either pointcut matches.
@@ -111,6 +116,7 @@ Spring supports operations on pointcuts: notably, __union__ and __intersection__
 
 [[aop-api-pointcuts-aspectj]]
 === AspectJ expression pointcuts
+
 Since 2.0, the most important type of pointcut used by Spring is
 `org.springframework.aop.aspectj.AspectJExpressionPointcut`. This is a pointcut that
 uses an AspectJ supplied library to parse an AspectJ pointcut expression string.
@@ -121,12 +127,14 @@ See the previous chapter for a discussion of supported AspectJ pointcut primitiv
 
 [[aop-api-pointcuts-impls]]
 === Convenience pointcut implementations
+
 Spring provides several convenient pointcut implementations. Some can be used out of the
 box; others are intended to be subclassed in application-specific pointcuts.
 
 
 [[aop-api-pointcuts-static]]
 ==== Static pointcuts
+
 Static pointcuts are based on method and target class, and cannot take into account the
 method's arguments. Static pointcuts are sufficient - __and best__ - for most usages.
 It's possible for Spring to evaluate a static pointcut only once, when a method is first
@@ -137,10 +145,11 @@ Let's consider some static pointcut implementations included with Spring.
 
 [[aop-api-pointcuts-regex]]
 ===== Regular expression pointcuts
+
 One obvious way to specify static pointcuts is regular expressions. Several AOP
 frameworks besides Spring make this possible.
 `org.springframework.aop.support.JdkRegexpMethodPointcut` is a generic regular
-expression pointcut, using the regular expression support in JDK 1.4+.
+expression pointcut, using the regular expression support in the JDK.
 
 Using the `JdkRegexpMethodPointcut` class, you can provide a list of pattern Strings. If
 any of these is a match, the pointcut will evaluate to true. (So the result is
@@ -189,12 +198,14 @@ __RegexpMethodPointcutAdvisor__ can be used with any Advice type.
 
 [[aop-api-pointcuts-attribute-driven]]
 ===== Attribute-driven pointcuts
+
 An important type of static pointcut is a __metadata-driven__ pointcut. This uses the
 values of metadata attributes: typically, source-level metadata.
 
 
 [[aop-api-pointcuts-dynamic]]
 ==== Dynamic pointcuts
+
 Dynamic pointcuts are costlier to evaluate than static pointcuts. They take into account
 method __arguments__, as well as static information. This means that they must be
 evaluated with every method invocation; the result cannot be cached, as arguments will
@@ -204,12 +215,14 @@ The main example is the `control flow` pointcut.
 
 [[aop-api-pointcuts-cflow]]
 ===== Control flow pointcuts
+
 Spring control flow pointcuts are conceptually similar to AspectJ __cflow__ pointcuts,
 although less powerful. (There is currently no way to specify that a pointcut executes
 below a join point matched by another pointcut.) A control flow pointcut matches the
 current call stack. For example, it might fire if the join point was invoked by a method
 in the `com.mycompany.web` package, or by the `SomeCaller` class. Control flow pointcuts
 are specified using the `org.springframework.aop.support.ControlFlowPointcut` class.
+
 [NOTE]
 ====
 Control flow pointcuts are significantly more expensive to evaluate at runtime than even
@@ -221,6 +234,7 @@ pointcuts.
 
 [[aop-api-pointcuts-superclasses]]
 === Pointcut superclasses
+
 Spring provides useful pointcut superclasses to help you to implement your own pointcuts.
 
 Because static pointcuts are most useful, you'll probably subclass
@@ -246,6 +260,7 @@ You can use custom pointcuts with any advice type in Spring 1.0 RC2 and above.
 
 [[aop-api-pointcuts-custom]]
 === Custom pointcuts
+
 Because pointcuts in Spring AOP are Java classes, rather than language features (as in
 AspectJ) it's possible to declare custom pointcuts, whether static or dynamic. Custom
 pointcuts in Spring can be arbitrarily complex. However, using the AspectJ pointcut
@@ -262,12 +277,14 @@ for example, "all methods that change instance variables in the target object."
 
 [[aop-api-advice]]
 == Advice API in Spring
+
 Let's now look at how Spring AOP handles advice.
 
 
 
 [[aop-api-advice-lifecycle]]
 === Advice lifecycles
+
 Each advice is a Spring bean. An advice instance can be shared across all advised
 objects, or unique to each advised object. This corresponds to __per-class__ or
 __per-instance__ advice.
@@ -285,12 +302,14 @@ It's possible to use a mix of shared and per-instance advice in the same AOP pro
 
 [[aop-api-advice-types]]
 === Advice types in Spring
+
 Spring provides several advice types out of the box, and is extensible to support
 arbitrary advice types. Let us look at the basic concepts and standard advice types.
 
 
 [[aop-api-advice-around]]
 ==== Interception around advice
+
 The most fundamental advice type in Spring is __interception around advice__.
 
 Spring is compliant with the AOP Alliance interface for around advice using method
@@ -347,6 +366,7 @@ currently define pointcut interfaces.
 
 [[aop-api-advice-before]]
 ==== Before advice
+
 A simpler advice type is a __before advice__. This does not need a `MethodInvocation`
 object, since it will only be called before entering the method.
 
@@ -395,13 +415,13 @@ An example of a before advice in Spring, which counts all method invocations:
 
 [TIP]
 ====
-
 Before advice can be used with any pointcut.
 ====
 
 
 [[aop-api-advice-throws]]
 ==== Throws advice
+
 __Throws advice__ is invoked after the return of the join point if the join point threw
 an exception. Spring offers typed throws advice. Note that this means that the
 `org.springframework.aop.ThrowsAdvice` interface does not contain any methods: It is a
@@ -478,13 +498,13 @@ exception that is incompatible with the target method's signature!__
 
 [TIP]
 ====
-
 Throws advice can be used with any pointcut.
 ====
 
 
 [[aop-api-advice-after-returning]]
 ==== After Returning advice
+
 An after returning advice in Spring must implement the
 __org.springframework.aop.AfterReturningAdvice__ interface, shown below:
 
@@ -527,13 +547,13 @@ thrown up the interceptor chain instead of the return value.
 
 [TIP]
 ====
-
 After returning advice can be used with any pointcut.
 ====
 
 
 [[aop-api-advice-introduction]]
 ==== Introduction advice
+
 Spring treats introduction advice as a special kind of interception advice.
 
 Introduction requires an `IntroductionAdvisor`, and an `IntroductionInterceptor`,
@@ -696,6 +716,7 @@ and stateful mixins.
 
 [[aop-api-advisor]]
 == Advisor API in Spring
+
 In Spring, an Advisor is an aspect that contains just a single advice object associated
 with a pointcut expression.
 
@@ -714,6 +735,7 @@ chain.
 
 [[aop-pfb]]
 == Using the ProxyFactoryBean to create AOP proxies
+
 If you're using the Spring IoC container (an ApplicationContext or BeanFactory) for your
 business objects - and you should be! - you will want to use one of Spring's AOP
 FactoryBeans. (Remember that a factory bean introduces a layer of indirection, enabling
@@ -733,10 +755,11 @@ options that are preferable if you don't need such control.
 
 [[aop-pfb-1]]
 === Basics
+
 The `ProxyFactoryBean`, like other Spring `FactoryBean` implementations, introduces a
 level of indirection. If you define a `ProxyFactoryBean` with name `foo`, what objects
 referencing `foo` see is not the `ProxyFactoryBean` instance itself, but an object
-created by the `ProxyFactoryBean`'s implementation of the `getObject()` method. This
+created by the ``ProxyFactoryBean``'s implementation of the `getObject()` method. This
 method will create an AOP proxy wrapping a target object.
 
 One of the most important benefits of using a `ProxyFactoryBean` or another IoC-aware
@@ -750,6 +773,7 @@ framework), benefiting from all the pluggability provided by Dependency Injectio
 
 [[aop-pfb-2]]
 === JavaBean properties
+
 In common with most `FactoryBean` implementations provided with Spring, the
 `ProxyFactoryBean` class is itself a JavaBean. Its properties are used to:
 
@@ -803,6 +827,7 @@ to be applied. An example of using this feature can be found in <<aop-global-adv
 
 [[aop-pfb-proxy-types]]
 === JDK- and CGLIB-based proxies
+
 This section serves as the definitive documentation on how the `ProxyFactoryBean`
 chooses to create one of either a JDK- and CGLIB-based proxy for a particular target
 object (that is to be proxied).
@@ -855,6 +880,7 @@ it is significantly less work, and less prone to typos.
 
 [[aop-api-proxying-intf]]
 === Proxying interfaces
+
 Let's look at a simple example of `ProxyFactoryBean` in action. This example involves:
 
 * A __target bean__ that will be proxied. This is the "personTarget" bean definition in
@@ -972,6 +998,7 @@ factory might actually be an __advantage__: for example, in certain test scenari
 
 [[aop-api-proxying-class]]
 === Proxying classes
+
 What if you need to proxy a class, rather than one or more interfaces?
 
 Imagine that in our example above, there was no `Person` interface: we needed to advise
@@ -1006,6 +1033,7 @@ Performance should not be a decisive consideration in this case.
 
 [[aop-global-advisors]]
 === Using 'global' advisors
+
 By appending an asterisk to an interceptor name, all advisors with bean names matching
 the part before the asterisk, will be added to the advisor chain. This can come in handy
 if you need to add a standard set of 'global' advisors:
@@ -1031,6 +1059,7 @@ if you need to add a standard set of 'global' advisors:
 
 [[aop-concise-proxy]]
 == Concise proxy definitions
+
 Especially when defining transactional proxies, you may end up with many similar proxy
 definitions. The use of parent and child bean definitions, along with inner bean
 definitions, can result in much cleaner and more concise proxy definitions.
@@ -1103,6 +1132,7 @@ pre-instantiate it.
 
 [[aop-prog]]
 == Creating AOP proxies programmatically with the ProxyFactory
+
 It's easy to create AOP proxies programmatically using Spring. This enables you to use
 Spring AOP without dependency on Spring IoC.
 
@@ -1135,7 +1165,6 @@ AdvisedSupport is the superclass of both ProxyFactory and ProxyFactoryBean.
 
 [TIP]
 ====
-
 Integrating AOP proxy creation with the IoC framework is best practice in most
 applications. We recommend that you externalize configuration from Java code with AOP,
 as in general.
@@ -1146,6 +1175,7 @@ as in general.
 
 [[aop-api-advised]]
 == Manipulating advised objects
+
 However you create AOP proxies, you can manipulate them using the
 `org.springframework.aop.framework.Advised` interface. Any AOP proxy can be cast to this
 interface, whichever other interfaces it implements. This interface includes the
@@ -1238,6 +1268,7 @@ required.
 
 [[aop-autoproxy]]
 == Using the "auto-proxy" facility
+
 So far we've considered explicit creation of AOP proxies using a `ProxyFactoryBean` or
 similar factory bean.
 
@@ -1259,12 +1290,14 @@ There are two ways to do this:
 
 [[aop-autoproxy-choices]]
 === Autoproxy bean definitions
+
 The `org.springframework.aop.framework.autoproxy` package provides the following
 standard auto-proxy creators.
 
 
 [[aop-api-autoproxy]]
 ==== BeanNameAutoProxyCreator
+
 The `BeanNameAutoProxyCreator` class is a `BeanPostProcessor` that automatically creates
 AOP proxies for beans with names matching literal values or wildcards.
 
@@ -1299,6 +1332,7 @@ the above example), the pointcuts may apply differently to different beans.
 
 [[aop-api-autoproxy-default]]
 ==== DefaultAdvisorAutoProxyCreator
+
 A more general and extremely powerful auto proxy creator is
 `DefaultAdvisorAutoProxyCreator`. This will automagically apply eligible advisors in the
 current context, without the need to include specific bean names in the auto-proxy
@@ -1359,147 +1393,11 @@ correct ordering if this is an issue. The TransactionAttributeSourceAdvisor used
 above example has a configurable order value; the default setting is unordered.
 
 
-[[aop-api-autoproxy-abstract]]
-==== AbstractAdvisorAutoProxyCreator
-This is the superclass of DefaultAdvisorAutoProxyCreator. You can create your own
-auto-proxy creators by subclassing this class, in the unlikely event that advisor
-definitions offer insufficient customization to the behavior of the framework
-`DefaultAdvisorAutoProxyCreator`.
-
-
-
-[[aop-autoproxy-metadata]]
-=== Using metadata-driven auto-proxying
-A particularly important type of auto-proxying is driven by metadata. This produces a
-similar programming model to .NET `ServicedComponents`. Instead of defining metadata in
-XML descriptors, configuration for transaction management and other enterprise services
-is held in source-level attributes.
-
-In this case, you use the `DefaultAdvisorAutoProxyCreator`, in combination with Advisors
-that understand metadata attributes. The metadata specifics are held in the pointcut
-part of the candidate advisors, rather than in the auto-proxy creation class itself.
-
-This is really a special case of the `DefaultAdvisorAutoProxyCreator`, but deserves
-consideration on its own. (The metadata-aware code is in the pointcuts contained in the
-advisors, not the AOP framework itself.)
-
-The `/attributes` directory of the JPetStore sample application shows the use of
-attribute-driven auto-proxying. In this case, there's no need to use the
-`TransactionProxyFactoryBean`. Simply defining transactional attributes on business
-objects is sufficient, because of the use of metadata-aware pointcuts. The bean
-definitions include the following code, in `/WEB-INF/declarativeServices.xml`. Note that
-this is generic, and can be used outside the JPetStore:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
-
-	<bean class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor">
-		<property name="transactionInterceptor" ref="transactionInterceptor"/>
-	</bean>
-
-	<bean id="transactionInterceptor"
-			class="org.springframework.transaction.interceptor.TransactionInterceptor">
-		<property name="transactionManager" ref="transactionManager"/>
-		<property name="transactionAttributeSource">
-			<bean class="org.springframework.transaction.interceptor.AttributesTransactionAttributeSource">
-				<property name="attributes" ref="attributes"/>
-			</bean>
-		</property>
-	</bean>
-
-	<bean id="attributes" class="org.springframework.metadata.commons.CommonsAttributes"/>
-----
-
-The `DefaultAdvisorAutoProxyCreator` bean definition (the name is not significant, hence
-it can even be omitted) will pick up all eligible pointcuts in the current application
-context. In this case, the "transactionAdvisor" bean definition, of type
-`TransactionAttributeSourceAdvisor`, will apply to classes or methods carrying a
-transaction attribute. The TransactionAttributeSourceAdvisor depends on a
-TransactionInterceptor, via constructor dependency. The example resolves this via
-autowiring. The `AttributesTransactionAttributeSource` depends on an implementation of
-the `org.springframework.metadata.Attributes` interface. In this fragment, the
-"attributes" bean satisfies this, using the Jakarta Commons Attributes API to obtain
-attribute information. (The application code must have been compiled using the Commons
-Attributes compilation task.)
-
-The `/annotation` directory of the JPetStore sample application contains an analogous
-example for auto-proxying driven by JDK 1.5+ annotations. The following configuration
-enables automatic detection of Spring's `Transactional` annotation, leading to implicit
-proxies for beans containing that annotation:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
-
-	<bean class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor">
-		<property name="transactionInterceptor" ref="transactionInterceptor"/>
-	</bean>
-
-	<bean id="transactionInterceptor"
-			class="org.springframework.transaction.interceptor.TransactionInterceptor">
-		<property name="transactionManager" ref="transactionManager"/>
-		<property name="transactionAttributeSource">
-			<bean class="org.springframework.transaction.annotation.AnnotationTransactionAttributeSource"/>
-		</property>
-	</bean>
-----
-
-The `TransactionInterceptor` defined here depends on a `PlatformTransactionManager`
-definition, which is not included in this generic file (although it could be) because it
-will be specific to the application's transaction requirements (typically JTA, as in
-this example, or Hibernate or JDBC):
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="transactionManager"
-			class="org.springframework.transaction.jta.JtaTransactionManager"/>
-----
-
-[TIP]
-====
-
-If you require only declarative transaction management, using these generic XML
-definitions will result in Spring automatically proxying all classes or methods with
-transaction attributes. You won't need to work directly with AOP, and the programming
-model is similar to that of .NET ServicedComponents.
-====
-
-This mechanism is extensible. It's possible to do auto-proxying based on custom
-attributes. You need to:
-
-* Define your custom attribute.
-* Specify an Advisor with the necessary advice, including a pointcut that is triggered
-  by the presence of the custom attribute on a class or method. You may be able to use
-  an existing advice, merely implementing a static pointcut that picks up the custom
-  attribute.
-
-It's possible for such advisors to be unique to each advised class (for example, mixins):
-they simply need to be defined as prototype, rather than singleton, bean definitions.
-For example, the `LockMixin` introduction interceptor from the Spring test suite,
-shown above, could be used in conjunction with a generic `DefaultIntroductionAdvisor`:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="lockMixin" class="test.mixin.LockMixin" scope="prototype"/>
-
-	<bean id="lockableAdvisor" class="org.springframework.aop.support.DefaultIntroductionAdvisor"
-			scope="prototype">
-		<constructor-arg ref="lockMixin"/>
-	</bean>
-----
-
-Note that both `lockMixin` and `lockableAdvisor` are defined as prototypes.
-
-
 
 
 [[aop-targetsource]]
 == Using TargetSources
+
 Spring offers the concept of a __TargetSource__, expressed in the
 `org.springframework.aop.TargetSource` interface. This interface is responsible for
 returning the "target object" implementing the join point. The `TargetSource`
@@ -1518,7 +1416,6 @@ Let's look at the standard target sources provided with Spring, and how you can 
 
 [TIP]
 ====
-
 When using a custom target source, your target will usually need to be a prototype
 rather than a singleton bean definition. This allows Spring to create a new target
 instance when required.
@@ -1528,6 +1425,7 @@ instance when required.
 
 [[aop-ts-swap]]
 === Hot swappable target sources
+
 The `org.springframework.aop.target.HotSwappableTargetSource` exists to allow the target
 of an AOP proxy to be switched while allowing callers to keep their references to it.
 
@@ -1571,6 +1469,7 @@ arbitrary advice.
 
 [[aop-ts-pool]]
 === Pooling target sources
+
 Using a pooling target source provides a similar programming model to stateless session
 EJBs, in which a pool of identical instances is maintained, with method invocations
 going to free objects in the pool.
@@ -1665,6 +1564,7 @@ used by any auto-proxy creator.
 
 [[aop-ts-prototype]]
 === Prototype target sources
+
 Setting up a "prototype" target source is similar to a pooling TargetSource. In this
 case, a new instance of the target will be created on every method invocation. Although
 the cost of creating a new object isn't high in a modern JVM, the cost of wiring up the
@@ -1736,15 +1636,3 @@ The only constraint on a custom `Advice` type is that it must implement the
 
 Please refer to the `org.springframework.aop.framework.adapter` javadocs for further
 information.
-
-
-
-
-[[aop-api-resources]]
-== Further resources
-Please refer to the Spring sample applications for further examples of Spring AOP:
-
-* The JPetStore's default configuration illustrates the use of the
-  `TransactionProxyFactoryBean` for declarative transaction management.
-* The `/attributes` directory of the JPetStore illustrates the use of attribute-driven
-  declarative transaction management.

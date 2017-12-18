@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import javax.cache.processor.EntryProcessorException;
 import javax.cache.processor.MutableEntry;
 
 import org.springframework.cache.support.AbstractValueAdaptingCache;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -75,6 +76,7 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
+	@Nullable
 	public <T> T get(Object key, Callable<T> valueLoader) {
 		try {
 			return this.cache.invoke(key, new ValueLoaderEntryProcessor<T>(), valueLoader);
@@ -85,12 +87,13 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
-	public void put(Object key, Object value) {
+	public void put(Object key, @Nullable Object value) {
 		this.cache.put(key, toStoreValue(value));
 	}
 
 	@Override
-	public ValueWrapper putIfAbsent(Object key, Object value) {
+	@Nullable
+	public ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
 		boolean set = this.cache.putIfAbsent(key, toStoreValue(value));
 		return (set ? null : get(key));
 	}
@@ -110,8 +113,8 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public T process(MutableEntry<Object, Object> entry, Object... arguments)
-				throws EntryProcessorException {
+		@Nullable
+		public T process(MutableEntry<Object, Object> entry, Object... arguments) throws EntryProcessorException {
 			Callable<T> valueLoader = (Callable<T>) arguments[0];
 			if (entry.exists()) {
 				return (T) fromStoreValue(entry.getValue());

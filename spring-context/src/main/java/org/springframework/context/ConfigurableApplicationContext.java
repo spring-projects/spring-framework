@@ -24,6 +24,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ProtocolResolver;
+import org.springframework.lang.Nullable;
 
 /**
  * SPI interface to be implemented by most if not all application contexts.
@@ -100,7 +101,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * @param parent the parent context
 	 * @see org.springframework.web.context.ConfigurableWebApplicationContext
 	 */
-	void setParent(ApplicationContext parent);
+	void setParent(@Nullable ApplicationContext parent);
 
 	/**
 	 * Set the {@code Environment} for this application context.

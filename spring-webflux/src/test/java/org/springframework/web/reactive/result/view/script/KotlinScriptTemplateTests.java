@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -29,41 +30,57 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 
 /**
- * Unit tests for Kotlin script templates running on Kotlin JSR 223 support
+ * Unit tests for Kotlin script templates running on Kotlin JSR-223 support.
  *
  * @author Sebastien Deleuze
  */
+@Ignore  // for JDK 9 compatibility, see KT-18833
 public class KotlinScriptTemplateTests {
 
 	@Test
 	public void renderTemplateWithFrenchLocale() throws Exception {
 		Map<String, Object> model = new HashMap<>();
 		model.put("foo", "Foo");
-		MockServerHttpResponse response = renderViewWithModel("org/springframework/web/reactive/result/view/script/kotlin/template.kts",
-				model, Locale.FRENCH, ScriptTemplatingConfiguration.class);
-		assertEquals("<html><body>\n<p>Bonjour Foo</p>\n</body></html>",
-				response.getBodyAsString().block());
+		String url = "org/springframework/web/reactive/result/view/script/kotlin/template.kts";
+		MockServerHttpResponse response = render(url, model, Locale.FRENCH, ScriptTemplatingConfiguration.class);
+		assertEquals("<html><body>\n<p>Bonjour Foo</p>\n</body></html>", response.getBodyAsString().block());
 	}
 
 	@Test
 	public void renderTemplateWithEnglishLocale() throws Exception {
 		Map<String, Object> model = new HashMap<>();
 		model.put("foo", "Foo");
-		MockServerHttpResponse response = renderViewWithModel("org/springframework/web/reactive/result/view/script/kotlin/template.kts",
-				model, Locale.ENGLISH, ScriptTemplatingConfiguration.class);
+		String url = "org/springframework/web/reactive/result/view/script/kotlin/template.kts";
+		MockServerHttpResponse response = render(url, model, Locale.ENGLISH, ScriptTemplatingConfiguration.class);
+		assertEquals("<html><body>\n<p>Hello Foo</p>\n</body></html>", response.getBodyAsString().block());
+	}
+
+	@Test
+	public void renderTemplateWithoutRenderFunction() throws Exception {
+		Map<String, Object> model = new HashMap<>();
+		model.put("header", "<html><body>");
+		model.put("hello", "Hello");
+		model.put("foo", "Foo");
+		model.put("footer", "</body></html>");
+		String url = "org/springframework/web/reactive/result/view/script/kotlin/eval.kts";
+		Class<?> configClass = ScriptTemplatingConfigurationWithoutRenderFunction.class;
+		MockServerHttpResponse response = render(url, model, Locale.ENGLISH, configClass);
 		assertEquals("<html><body>\n<p>Hello Foo</p>\n</body></html>",
 				response.getBodyAsString().block());
 	}
 
-	private MockServerHttpResponse renderViewWithModel(String viewUrl, Map<String, Object> model, Locale locale, Class<?> configuration) throws Exception {
+
+	private MockServerHttpResponse render(String viewUrl, Map<String, Object> model,
+			Locale locale, Class<?> configuration) throws Exception {
+
 		ScriptTemplateView view = createViewWithUrl(viewUrl, configuration);
-		view.setLocale(locale);
-		MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").acceptLanguageAsLocales(locale).build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		view.renderInternal(model, MediaType.TEXT_HTML, exchange).block();
 		return exchange.getResponse();
 	}
@@ -98,6 +115,16 @@ public class KotlinScriptTemplateTests {
 			ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
 			messageSource.setBasename("org/springframework/web/reactive/result/view/script/messages");
 			return messageSource;
+		}
+	}
+
+
+	@Configuration
+	static class ScriptTemplatingConfigurationWithoutRenderFunction {
+
+		@Bean
+		public ScriptTemplateConfigurer kotlinScriptConfigurer() {
+			return new ScriptTemplateConfigurer("kotlin");
 		}
 	}
 

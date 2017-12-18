@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -59,6 +60,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 
 	private final ResourcePatternResolver resourcePatternResolver;
 
+	@Nullable
 	private PropertyResolver propertyResolver;
 
 	private final boolean ignoreUnresolvablePlaceholders;
@@ -80,7 +82,9 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	 * @param resourcePatternResolver the ResourcePatternResolver to use
 	 * @param propertyResolver the PropertyResolver to use
 	 */
-	public ResourceArrayPropertyEditor(ResourcePatternResolver resourcePatternResolver, PropertyResolver propertyResolver) {
+	public ResourceArrayPropertyEditor(
+			ResourcePatternResolver resourcePatternResolver, @Nullable PropertyResolver propertyResolver) {
+
 		this(resourcePatternResolver, propertyResolver, true);
 	}
 
@@ -93,7 +97,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	 * if no corresponding system property could be found
 	 */
 	public ResourceArrayPropertyEditor(ResourcePatternResolver resourcePatternResolver,
-			PropertyResolver propertyResolver, boolean ignoreUnresolvablePlaceholders) {
+			@Nullable PropertyResolver propertyResolver, boolean ignoreUnresolvablePlaceholders) {
 
 		Assert.notNull(resourcePatternResolver, "ResourcePatternResolver must not be null");
 		this.resourcePatternResolver = resourcePatternResolver;

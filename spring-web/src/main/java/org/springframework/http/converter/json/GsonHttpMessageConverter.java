@@ -22,6 +22,7 @@ import java.lang.reflect.Type;
 
 import com.google.gson.Gson;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -51,7 +52,7 @@ public class GsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
 	 * Construct a new {@code GsonHttpMessageConverter} with default configuration.
 	 */
 	public GsonHttpMessageConverter() {
-		this(new Gson());
+		this.gson = new Gson();
 	}
 
 	/**
@@ -60,7 +61,8 @@ public class GsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
 	 * @since 5.0
 	 */
 	public GsonHttpMessageConverter(Gson gson) {
-		setGson(gson);
+		Assert.notNull(gson, "A Gson instance is required");
+		this.gson = gson;
 	}
 
 
@@ -90,7 +92,7 @@ public class GsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
 	}
 
 	@Override
-	protected void writeInternal(Object o, Type type, Writer writer) throws Exception {
+	protected void writeInternal(Object o, @Nullable Type type, Writer writer) throws Exception {
 		if (type != null) {
 			getGson().toJson(o, type, writer);
 		}

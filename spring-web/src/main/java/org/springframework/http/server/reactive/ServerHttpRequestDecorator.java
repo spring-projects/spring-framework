@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.util.Optional;
 
 import reactor.core.publisher.Flux;
 
@@ -25,6 +25,8 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.server.RequestPath;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
@@ -54,13 +56,24 @@ public class ServerHttpRequestDecorator implements ServerHttpRequest {
 	// ServerHttpRequest delegation methods...
 
 	@Override
+	@Nullable
 	public HttpMethod getMethod() {
 		return getDelegate().getMethod();
 	}
 
 	@Override
+	public String getMethodValue() {
+		return getDelegate().getMethodValue();
+	}
+
+	@Override
 	public URI getURI() {
 		return getDelegate().getURI();
+	}
+
+	@Override
+	public RequestPath getPath() {
+		return getDelegate().getPath();
 	}
 
 	@Override
@@ -79,8 +92,14 @@ public class ServerHttpRequestDecorator implements ServerHttpRequest {
 	}
 
 	@Override
-	public Optional<InetSocketAddress> getRemoteAddress() {
+	public InetSocketAddress getRemoteAddress() {
 		return getDelegate().getRemoteAddress();
+	}
+
+	@Nullable
+	@Override
+	public SslInfo getSslInfo() {
+		return getDelegate().getSslInfo();
 	}
 
 	@Override

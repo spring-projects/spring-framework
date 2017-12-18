@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.beans.factory;
 
 import org.springframework.beans.BeansException;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 
 /**
  * The root interface for accessing a Spring bean container.
@@ -156,7 +157,23 @@ public interface BeanFactory {
 	 * @throws BeanNotOfRequiredTypeException if the bean is not of the required type
 	 * @throws BeansException if the bean could not be created
 	 */
-	<T> T getBean(String name, Class<T> requiredType) throws BeansException;
+	<T> T getBean(String name, @Nullable Class<T> requiredType) throws BeansException;
+
+	/**
+	 * Return an instance, which may be shared or independent, of the specified bean.
+	 * <p>Allows for specifying explicit constructor arguments / factory method arguments,
+	 * overriding the specified default arguments (if any) in the bean definition.
+	 * @param name the name of the bean to retrieve
+	 * @param args arguments to use when creating a bean instance using explicit arguments
+	 * (only applied when creating a new instance as opposed to retrieving an existing one)
+	 * @return an instance of the bean
+	 * @throws NoSuchBeanDefinitionException if there is no such bean definition
+	 * @throws BeanDefinitionStoreException if arguments have been given but
+	 * the affected bean isn't a prototype
+	 * @throws BeansException if the bean could not be created
+	 * @since 2.5
+	 */
+	Object getBean(String name, Object... args) throws BeansException;
 
 	/**
 	 * Return the bean instance that uniquely matches the given object type, if any.
@@ -174,22 +191,6 @@ public interface BeanFactory {
 	 * @see ListableBeanFactory
 	 */
 	<T> T getBean(Class<T> requiredType) throws BeansException;
-
-	/**
-	 * Return an instance, which may be shared or independent, of the specified bean.
-	 * <p>Allows for specifying explicit constructor arguments / factory method arguments,
-	 * overriding the specified default arguments (if any) in the bean definition.
-	 * @param name the name of the bean to retrieve
-	 * @param args arguments to use when creating a bean instance using explicit arguments
-	 * (only applied when creating a new instance as opposed to retrieving an existing one)
-	 * @return an instance of the bean
-	 * @throws NoSuchBeanDefinitionException if there is no such bean definition
-	 * @throws BeanDefinitionStoreException if arguments have been given but
-	 * the affected bean isn't a prototype
-	 * @throws BeansException if the bean could not be created
-	 * @since 2.5
-	 */
-	Object getBean(String name, Object... args) throws BeansException;
 
 	/**
 	 * Return an instance, which may be shared or independent, of the specified bean.
@@ -297,7 +298,7 @@ public interface BeanFactory {
 	 * @see #getBean
 	 * @see #getType
 	 */
-	boolean isTypeMatch(String name, Class<?> typeToMatch) throws NoSuchBeanDefinitionException;
+	boolean isTypeMatch(String name, @Nullable Class<?> typeToMatch) throws NoSuchBeanDefinitionException;
 
 	/**
 	 * Determine the type of the bean with the given name. More specifically,
@@ -313,6 +314,7 @@ public interface BeanFactory {
 	 * @see #getBean
 	 * @see #isTypeMatch
 	 */
+	@Nullable
 	Class<?> getType(String name) throws NoSuchBeanDefinitionException;
 
 	/**

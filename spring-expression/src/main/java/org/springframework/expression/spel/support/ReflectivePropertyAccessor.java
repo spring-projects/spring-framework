@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -40,6 +39,8 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.CompilablePropertyAccessor;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -69,15 +70,13 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	}
 
 
-	private final Map<PropertyCacheKey, InvokerPair> readerCache =
-			new ConcurrentHashMap<>(64);
+	private final Map<PropertyCacheKey, InvokerPair> readerCache = new ConcurrentHashMap<>(64);
 
-	private final Map<PropertyCacheKey, Member> writerCache =
-			new ConcurrentHashMap<>(64);
+	private final Map<PropertyCacheKey, Member> writerCache = new ConcurrentHashMap<>(64);
 
-	private final Map<PropertyCacheKey, TypeDescriptor> typeDescriptorCache =
-			new ConcurrentHashMap<>(64);
+	private final Map<PropertyCacheKey, TypeDescriptor> typeDescriptorCache = new ConcurrentHashMap<>(64);
 
+	@Nullable
 	private InvokerPair lastReadInvokerPair;
 
 
@@ -85,12 +84,13 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 * Returns {@code null} which means this is a general purpose accessor.
 	 */
 	@Override
+	@Nullable
 	public Class<?>[] getSpecificTargetClasses() {
 		return null;
 	}
 
 	@Override
-	public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+	public boolean canRead(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
 		if (target == null) {
 			return false;
 		}
@@ -124,15 +124,15 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		return false;
 	}
 
+	@Nullable
 	public Member getLastReadInvokerPair() {
-		return this.lastReadInvokerPair.member;
+		InvokerPair lastReadInvoker = this.lastReadInvokerPair;
+		return (lastReadInvoker != null ? lastReadInvoker.member : null);
 	}
 
 	@Override
-	public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-		if (target == null) {
-			throw new AccessException("Cannot read property of null target");
-		}
+	public TypedValue read(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
+		Assert.state(target != null, "Target must not be null");
 		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
 
 		if (type.isArray() && name.equals("length")) {
@@ -199,7 +199,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	}
 
 	@Override
-	public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
+	public boolean canWrite(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
 		if (target == null) {
 			return false;
 		}
@@ -229,10 +229,10 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	}
 
 	@Override
-	public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
-		if (target == null) {
-			throw new AccessException("Cannot write property on null target");
-		}
+	public void write(EvaluationContext context, @Nullable Object target, String name, @Nullable Object newValue)
+			throws AccessException {
+
+		Assert.state(target != null, "Target must not be null");
 		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
 
 		Object possiblyConvertedNewValue = newValue;
@@ -294,10 +294,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		throw new AccessException("Neither setter method nor field found for property '" + name + "'");
 	}
 
+	@Nullable
 	private TypeDescriptor getTypeDescriptor(EvaluationContext context, Object target, String name) {
-		if (target == null) {
-			return null;
-		}
 		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
 
 		if (type.isArray() && name.equals("length")) {
@@ -322,6 +320,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		return typeDescriptor;
 	}
 
+	@Nullable
 	private Method findGetterForProperty(String propertyName, Class<?> clazz, Object target) {
 		Method method = findGetterForProperty(propertyName, clazz, target instanceof Class);
 		if (method == null && target instanceof Class) {
@@ -330,6 +329,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		return method;
 	}
 
+	@Nullable
 	private Method findSetterForProperty(String propertyName, Class<?> clazz, Object target) {
 		Method method = findSetterForProperty(propertyName, clazz, target instanceof Class);
 		if (method == null && target instanceof Class) {
@@ -338,6 +338,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		return method;
 	}
 
+	@Nullable
 	private Field findField(String name, Class<?> clazz, Object target) {
 		Field field = findField(name, clazz, target instanceof Class);
 		if (field == null && target instanceof Class) {
@@ -349,6 +350,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	/**
 	 * Find a getter method for the specified property.
 	 */
+	@Nullable
 	protected Method findGetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
 		Method method = findMethodForProperty(getPropertyMethodSuffixes(propertyName),
 				 "get", clazz, mustBeStatic, 0, ANY_TYPES);
@@ -362,11 +364,13 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	/**
 	 * Find a setter method for the specified property.
 	 */
+	@Nullable
 	protected Method findSetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
 		return findMethodForProperty(getPropertyMethodSuffixes(propertyName),
 				"set", clazz, mustBeStatic, 1, ANY_TYPES);
 	}
 
+	@Nullable
 	private Method findMethodForProperty(String[] methodSuffixes, String prefix, Class<?> clazz,
 			boolean mustBeStatic, int numberOfParams, Set<Class<?>> requiredReturnTypes) {
 
@@ -390,12 +394,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 */
 	private Method[] getSortedClassMethods(Class<?> clazz) {
 		Method[] methods = clazz.getMethods();
-		Arrays.sort(methods, new Comparator<Method>() {
-			@Override
-			public int compare(Method o1, Method o2) {
-				return (o1.isBridge() == o2.isBridge()) ? 0 : (o1.isBridge() ? 1 : -1);
-			}
-		});
+		Arrays.sort(methods, (o1, o2) -> (o1.isBridge() == o2.isBridge()) ? 0 : (o1.isBridge() ? 1 : -1));
 		return methods;
 	}
 
@@ -427,6 +426,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	/**
 	 * Find a field of a certain name on a specified class.
 	 */
+	@Nullable
 	protected Field findField(String name, Class<?> clazz, boolean mustBeStatic) {
 		Field[] fields = clazz.getFields();
 		for (Field field : fields) {
@@ -458,7 +458,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 * This method will just return the ReflectivePropertyAccessor instance if it is unable to build
 	 * something more optimal.
 	 */
-	public PropertyAccessor createOptimalAccessor(EvaluationContext evalContext, Object target, String name) {
+	public PropertyAccessor createOptimalAccessor(EvaluationContext evalContext, @Nullable Object target, String name) {
 		// Don't be clever for arrays or null target
 		if (target == null) {
 			return this;
@@ -585,26 +585,22 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 		private final TypeDescriptor typeDescriptor;
 
-		private final boolean needsToBeMadeAccessible;
-
 		OptimalPropertyAccessor(InvokerPair target) {
 			this.member = target.member;
 			this.typeDescriptor = target.typeDescriptor;
-			this.needsToBeMadeAccessible = (!Modifier.isPublic(this.member.getModifiers()) ||
-					!Modifier.isPublic(this.member.getDeclaringClass().getModifiers()));
 		}
 
 		@Override
+		@Nullable
 		public Class<?>[] getSpecificTargetClasses() {
 			throw new UnsupportedOperationException("Should not be called on an OptimalPropertyAccessor");
 		}
 
 		@Override
-		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+		public boolean canRead(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
 			if (target == null) {
 				return false;
 			}
-
 			Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
 			if (type.isArray()) {
 				return false;
@@ -626,13 +622,11 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		}
 
 		@Override
-		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+		public TypedValue read(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
 			if (this.member instanceof Method) {
 				Method method = (Method) this.member;
 				try {
-					if (this.needsToBeMadeAccessible && !method.isAccessible()) {
-						method.setAccessible(true);
-					}
+					ReflectionUtils.makeAccessible(method);
 					Object value = method.invoke(target);
 					return new TypedValue(value, this.typeDescriptor.narrow(value));
 				}
@@ -643,9 +637,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			else {
 				Field field = (Field) this.member;
 				try {
-					if (this.needsToBeMadeAccessible && !field.isAccessible()) {
-						field.setAccessible(true);
-					}
+					ReflectionUtils.makeAccessible(field);
 					Object value = field.get(target);
 					return new TypedValue(value, this.typeDescriptor.narrow(value));
 				}
@@ -656,12 +648,12 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		}
 
 		@Override
-		public boolean canWrite(EvaluationContext context, Object target, String name) {
+		public boolean canWrite(EvaluationContext context, @Nullable Object target, String name) {
 			throw new UnsupportedOperationException("Should not be called on an OptimalPropertyAccessor");
 		}
 
 		@Override
-		public void write(EvaluationContext context, Object target, String name, Object newValue) {
+		public void write(EvaluationContext context, @Nullable Object target, String name, @Nullable Object newValue) {
 			throw new UnsupportedOperationException("Should not be called on an OptimalPropertyAccessor");
 		}
 

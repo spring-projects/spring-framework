@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.config;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -34,10 +33,11 @@ import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.Ordered;
+import org.springframework.http.CacheControl;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
-import org.springframework.http.CacheControl;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
@@ -86,12 +86,15 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
 
 	@Override
-	public BeanDefinition parse(Element element, ParserContext parserContext) {
-		Object source = parserContext.extractSource(element);
+	public BeanDefinition parse(Element element, ParserContext context) {
+		Object source = context.extractSource(element);
 
-		registerUrlProvider(parserContext, source);
+		registerUrlProvider(context, source);
 
-		String resourceHandlerName = registerResourceHandler(parserContext, element, source);
+		RuntimeBeanReference pathMatcherRef = MvcNamespaceUtils.registerPathMatcher(null, context, source);
+		RuntimeBeanReference pathHelperRef = MvcNamespaceUtils.registerUrlPathHelper(null, context, source);
+
+		String resourceHandlerName = registerResourceHandler(context, element, pathHelperRef, source);
 		if (resourceHandlerName == null) {
 			return null;
 		}
@@ -99,13 +102,10 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		Map<String, String> urlMap = new ManagedMap<>();
 		String resourceRequestPath = element.getAttribute("mapping");
 		if (!StringUtils.hasText(resourceRequestPath)) {
-			parserContext.getReaderContext().error("The 'mapping' attribute is required.", parserContext.extractSource(element));
+			context.getReaderContext().error("The 'mapping' attribute is required.", context.extractSource(element));
 			return null;
 		}
 		urlMap.put(resourceRequestPath, resourceHandlerName);
-
-		RuntimeBeanReference pathMatcherRef = MvcNamespaceUtils.registerPathMatcher(null, parserContext, source);
-		RuntimeBeanReference pathHelperRef = MvcNamespaceUtils.registerUrlPathHelper(null, parserContext, source);
 
 		RootBeanDefinition handlerMappingDef = new RootBeanDefinition(SimpleUrlHandlerMapping.class);
 		handlerMappingDef.setSource(source);
@@ -113,31 +113,32 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		handlerMappingDef.getPropertyValues().add("urlMap", urlMap);
 		handlerMappingDef.getPropertyValues().add("pathMatcher", pathMatcherRef).add("urlPathHelper", pathHelperRef);
 
-		String order = element.getAttribute("order");
+		String orderValue = element.getAttribute("order");
 		// Use a default of near-lowest precedence, still allowing for even lower precedence in other mappings
-		handlerMappingDef.getPropertyValues().add("order", StringUtils.hasText(order) ? order : Ordered.LOWEST_PRECEDENCE - 1);
+		Object order = StringUtils.hasText(orderValue) ? orderValue : Ordered.LOWEST_PRECEDENCE - 1;
+		handlerMappingDef.getPropertyValues().add("order", order);
 
-		RuntimeBeanReference corsConfigurationsRef = MvcNamespaceUtils.registerCorsConfigurations(null, parserContext, source);
-		handlerMappingDef.getPropertyValues().add("corsConfigurations", corsConfigurationsRef);
+		RuntimeBeanReference corsRef = MvcNamespaceUtils.registerCorsConfigurations(null, context, source);
+		handlerMappingDef.getPropertyValues().add("corsConfigurations", corsRef);
 
-		String beanName = parserContext.getReaderContext().generateBeanName(handlerMappingDef);
-		parserContext.getRegistry().registerBeanDefinition(beanName, handlerMappingDef);
-		parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef, beanName));
+		String beanName = context.getReaderContext().generateBeanName(handlerMappingDef);
+		context.getRegistry().registerBeanDefinition(beanName, handlerMappingDef);
+		context.registerComponent(new BeanComponentDefinition(handlerMappingDef, beanName));
 
 		// Ensure BeanNameUrlHandlerMapping (SPR-8289) and default HandlerAdapters are not "turned off"
 		// Register HttpRequestHandlerAdapter
-		MvcNamespaceUtils.registerDefaultComponents(parserContext, source);
+		MvcNamespaceUtils.registerDefaultComponents(context, source);
 
 		return null;
 	}
 
-	private void registerUrlProvider(ParserContext parserContext, Object source) {
-		if (!parserContext.getRegistry().containsBeanDefinition(RESOURCE_URL_PROVIDER)) {
+	private void registerUrlProvider(ParserContext context, @Nullable Object source) {
+		if (!context.getRegistry().containsBeanDefinition(RESOURCE_URL_PROVIDER)) {
 			RootBeanDefinition urlProvider = new RootBeanDefinition(ResourceUrlProvider.class);
 			urlProvider.setSource(source);
 			urlProvider.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			parserContext.getRegistry().registerBeanDefinition(RESOURCE_URL_PROVIDER, urlProvider);
-			parserContext.registerComponent(new BeanComponentDefinition(urlProvider, RESOURCE_URL_PROVIDER));
+			context.getRegistry().registerBeanDefinition(RESOURCE_URL_PROVIDER, urlProvider);
+			context.registerComponent(new BeanComponentDefinition(urlProvider, RESOURCE_URL_PROVIDER));
 
 			RootBeanDefinition interceptor = new RootBeanDefinition(ResourceUrlProviderExposingInterceptor.class);
 			interceptor.setSource(source);
@@ -148,27 +149,28 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 			mappedInterceptor.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			mappedInterceptor.getConstructorArgumentValues().addIndexedArgumentValue(0, (Object) null);
 			mappedInterceptor.getConstructorArgumentValues().addIndexedArgumentValue(1, interceptor);
-			String mappedInterceptorName = parserContext.getReaderContext().registerWithGeneratedName(mappedInterceptor);
-			parserContext.registerComponent(new BeanComponentDefinition(mappedInterceptor, mappedInterceptorName));
+			String mappedInterceptorName = context.getReaderContext().registerWithGeneratedName(mappedInterceptor);
+			context.registerComponent(new BeanComponentDefinition(mappedInterceptor, mappedInterceptorName));
 		}
 	}
 
-	private String registerResourceHandler(ParserContext parserContext, Element element, Object source) {
+	@Nullable
+	private String registerResourceHandler(ParserContext context, Element element,
+			RuntimeBeanReference pathHelperRef, @Nullable Object source) {
+
 		String locationAttr = element.getAttribute("location");
 		if (!StringUtils.hasText(locationAttr)) {
-			parserContext.getReaderContext().error("The 'location' attribute is required.", parserContext.extractSource(element));
+			context.getReaderContext().error("The 'location' attribute is required.", context.extractSource(element));
 			return null;
 		}
-
-		ManagedList<String> locations = new ManagedList<>();
-		locations.addAll(Arrays.asList(StringUtils.commaDelimitedListToStringArray(locationAttr)));
 
 		RootBeanDefinition resourceHandlerDef = new RootBeanDefinition(ResourceHttpRequestHandler.class);
 		resourceHandlerDef.setSource(source);
 		resourceHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 
 		MutablePropertyValues values = resourceHandlerDef.getPropertyValues();
-		values.add("locations", locations);
+		values.add("urlPathHelper", pathHelperRef);
+		values.add("locationValues", StringUtils.commaDelimitedListToStringArray(locationAttr));
 
 		String cacheSeconds = element.getAttribute("cache-period");
 		if (StringUtils.hasText(cacheSeconds)) {
@@ -183,43 +185,20 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
 		Element resourceChainElement = DomUtils.getChildElementByTagName(element, "resource-chain");
 		if (resourceChainElement != null) {
-			parseResourceChain(resourceHandlerDef, parserContext, resourceChainElement, source);
+			parseResourceChain(resourceHandlerDef, context, resourceChainElement, source);
 		}
 
-		Object manager = MvcNamespaceUtils.getContentNegotiationManager(parserContext);
+		Object manager = MvcNamespaceUtils.getContentNegotiationManager(context);
 		if (manager != null) {
 			values.add("contentNegotiationManager", manager);
 		}
 
-		String beanName = parserContext.getReaderContext().generateBeanName(resourceHandlerDef);
-		parserContext.getRegistry().registerBeanDefinition(beanName, resourceHandlerDef);
-		parserContext.registerComponent(new BeanComponentDefinition(resourceHandlerDef, beanName));
+		String beanName = context.getReaderContext().generateBeanName(resourceHandlerDef);
+		context.getRegistry().registerBeanDefinition(beanName, resourceHandlerDef);
+		context.registerComponent(new BeanComponentDefinition(resourceHandlerDef, beanName));
 		return beanName;
 	}
 
-
-	private void parseResourceChain(RootBeanDefinition resourceHandlerDef, ParserContext parserContext,
-			Element element, Object source) {
-
-		String autoRegistration = element.getAttribute("auto-registration");
-		boolean isAutoRegistration = !(StringUtils.hasText(autoRegistration) && "false".equals(autoRegistration));
-
-		ManagedList<? super Object> resourceResolvers = new ManagedList<>();
-		resourceResolvers.setSource(source);
-		ManagedList<? super Object> resourceTransformers = new ManagedList<>();
-		resourceTransformers.setSource(source);
-
-		parseResourceCache(resourceResolvers, resourceTransformers, element, source);
-		parseResourceResolversTransformers(isAutoRegistration, resourceResolvers, resourceTransformers,
-				parserContext, element, source);
-
-		if (!resourceResolvers.isEmpty()) {
-			resourceHandlerDef.getPropertyValues().add("resourceResolvers", resourceResolvers);
-		}
-		if (!resourceTransformers.isEmpty()) {
-			resourceHandlerDef.getPropertyValues().add("resourceTransformers", resourceTransformers);
-		}
-	}
 
 	private CacheControl parseCacheControl(Element element) {
 		CacheControl cacheControl = CacheControl.empty();
@@ -261,29 +240,52 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		return cacheControl;
 	}
 
+	private void parseResourceChain(
+			RootBeanDefinition resourceHandlerDef, ParserContext context, Element element, @Nullable Object source) {
+
+		String autoRegistration = element.getAttribute("auto-registration");
+		boolean isAutoRegistration = !(StringUtils.hasText(autoRegistration) && "false".equals(autoRegistration));
+
+		ManagedList<? super Object> resourceResolvers = new ManagedList<>();
+		resourceResolvers.setSource(source);
+		ManagedList<? super Object> resourceTransformers = new ManagedList<>();
+		resourceTransformers.setSource(source);
+
+		parseResourceCache(resourceResolvers, resourceTransformers, element, source);
+		parseResourceResolversTransformers(
+				isAutoRegistration, resourceResolvers, resourceTransformers, context, element, source);
+
+		if (!resourceResolvers.isEmpty()) {
+			resourceHandlerDef.getPropertyValues().add("resourceResolvers", resourceResolvers);
+		}
+		if (!resourceTransformers.isEmpty()) {
+			resourceHandlerDef.getPropertyValues().add("resourceTransformers", resourceTransformers);
+		}
+	}
+
 	private void parseResourceCache(ManagedList<? super Object> resourceResolvers,
-			ManagedList<? super Object> resourceTransformers, Element element, Object source) {
+			ManagedList<? super Object> resourceTransformers, Element element, @Nullable Object source) {
 
 		String resourceCache = element.getAttribute("resource-cache");
 		if ("true".equals(resourceCache)) {
-			ConstructorArgumentValues cavs = new ConstructorArgumentValues();
+			ConstructorArgumentValues cargs = new ConstructorArgumentValues();
 
 			RootBeanDefinition cachingResolverDef = new RootBeanDefinition(CachingResourceResolver.class);
 			cachingResolverDef.setSource(source);
 			cachingResolverDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			cachingResolverDef.setConstructorArgumentValues(cavs);
+			cachingResolverDef.setConstructorArgumentValues(cargs);
 
 			RootBeanDefinition cachingTransformerDef = new RootBeanDefinition(CachingResourceTransformer.class);
 			cachingTransformerDef.setSource(source);
 			cachingTransformerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			cachingTransformerDef.setConstructorArgumentValues(cavs);
+			cachingTransformerDef.setConstructorArgumentValues(cargs);
 
 			String cacheManagerName = element.getAttribute("cache-manager");
 			String cacheName = element.getAttribute("cache-name");
 			if (StringUtils.hasText(cacheManagerName) && StringUtils.hasText(cacheName)) {
 				RuntimeBeanReference cacheManagerRef = new RuntimeBeanReference(cacheManagerName);
-				cavs.addIndexedArgumentValue(0, cacheManagerRef);
-				cavs.addIndexedArgumentValue(1, cacheName);
+				cargs.addIndexedArgumentValue(0, cacheManagerRef);
+				cargs.addIndexedArgumentValue(1, cacheName);
 			}
 			else {
 				ConstructorArgumentValues cacheCavs = new ConstructorArgumentValues();
@@ -292,23 +294,22 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 				cacheDef.setSource(source);
 				cacheDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 				cacheDef.setConstructorArgumentValues(cacheCavs);
-				cavs.addIndexedArgumentValue(0, cacheDef);
+				cargs.addIndexedArgumentValue(0, cacheDef);
 			}
 			resourceResolvers.add(cachingResolverDef);
 			resourceTransformers.add(cachingTransformerDef);
 		}
 	}
 
-
 	private void parseResourceResolversTransformers(boolean isAutoRegistration,
 			ManagedList<? super Object> resourceResolvers, ManagedList<? super Object> resourceTransformers,
-			ParserContext parserContext, Element element, Object source) {
+			ParserContext context, Element element, @Nullable Object source) {
 
 		Element resolversElement = DomUtils.getChildElementByTagName(element, "resolvers");
 		if (resolversElement != null) {
 			for (Element beanElement : DomUtils.getChildElements(resolversElement)) {
 				if (VERSION_RESOLVER_ELEMENT.equals(beanElement.getLocalName())) {
-					RootBeanDefinition versionResolverDef = parseVersionResolver(parserContext, beanElement, source);
+					RootBeanDefinition versionResolverDef = parseVersionResolver(context, beanElement, source);
 					versionResolverDef.setSource(source);
 					resourceResolvers.add(versionResolverDef);
 					if (isAutoRegistration) {
@@ -319,7 +320,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 					}
 				}
 				else {
-					Object object = parserContext.getDelegate().parsePropertySubElement(beanElement, null);
+					Object object = context.getDelegate().parsePropertySubElement(beanElement, null);
 					resourceResolvers.add(object);
 				}
 			}
@@ -341,13 +342,13 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		Element transformersElement = DomUtils.getChildElementByTagName(element, "transformers");
 		if (transformersElement != null) {
 			for (Element beanElement : DomUtils.getChildElementsByTagName(transformersElement, "bean", "ref")) {
-				Object object = parserContext.getDelegate().parsePropertySubElement(beanElement, null);
+				Object object = context.getDelegate().parsePropertySubElement(beanElement, null);
 				resourceTransformers.add(object);
 			}
 		}
 	}
 
-	private RootBeanDefinition parseVersionResolver(ParserContext parserContext, Element element, Object source) {
+	private RootBeanDefinition parseVersionResolver(ParserContext context, Element element, @Nullable Object source) {
 		ManagedMap<String, ? super Object> strategyMap = new ManagedMap<>();
 		strategyMap.setSource(source);
 		RootBeanDefinition versionResolverDef = new RootBeanDefinition(VersionResourceResolver.class);
@@ -359,12 +360,12 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 			String[] patterns = StringUtils.commaDelimitedListToStringArray(beanElement.getAttribute("patterns"));
 			Object strategy = null;
 			if (FIXED_VERSION_STRATEGY_ELEMENT.equals(beanElement.getLocalName())) {
-				ConstructorArgumentValues cavs = new ConstructorArgumentValues();
-				cavs.addIndexedArgumentValue(0, beanElement.getAttribute("version"));
+				ConstructorArgumentValues cargs = new ConstructorArgumentValues();
+				cargs.addIndexedArgumentValue(0, beanElement.getAttribute("version"));
 				RootBeanDefinition strategyDef = new RootBeanDefinition(FixedVersionStrategy.class);
 				strategyDef.setSource(source);
 				strategyDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-				strategyDef.setConstructorArgumentValues(cavs);
+				strategyDef.setConstructorArgumentValues(cargs);
 				strategy = strategyDef;
 			}
 			else if (CONTENT_VERSION_STRATEGY_ELEMENT.equals(beanElement.getLocalName())) {
@@ -375,7 +376,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 			}
 			else if (VERSION_STRATEGY_ELEMENT.equals(beanElement.getLocalName())) {
 				Element childElement = DomUtils.getChildElementsByTagName(beanElement, "bean", "ref").get(0);
-				strategy = parserContext.getDelegate().parsePropertySubElement(childElement, null);
+				strategy = context.getDelegate().parsePropertySubElement(childElement, null);
 			}
 			for (String pattern : patterns) {
 				strategyMap.put(pattern, strategy);

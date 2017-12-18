@@ -138,6 +138,12 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@Test
+	public void personResponseBodyWithMonoDeclaredAsObject() throws Exception {
+		Person expected = new Person("Robert");
+		assertEquals(expected, performGet("/person-response/mono-declared-as-object", JSON, Person.class).getBody());
+	}
+
+	@Test
 	public void personResponseBodyWithSingle() throws Exception {
 		Person expected = new Person("Robert");
 		assertEquals(expected, performGet("/person-response/single", JSON, Person.class).getBody());
@@ -147,6 +153,16 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	public void personResponseBodyWithMonoResponseEntity() throws Exception {
 		Person expected = new Person("Robert");
 		assertEquals(expected, performGet("/person-response/mono-response-entity", JSON, Person.class).getBody());
+	}
+
+	@Test // SPR-16172
+	public void personResponseBodyWithMonoResponseEntityXml() throws Exception {
+
+		String actual = performGet("/person-response/mono-response-entity-xml",
+				new HttpHeaders(), String.class).getBody();
+
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
+				"<person><name>Robert</name></person>", actual);
 	}
 
 	@Test
@@ -354,7 +370,8 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	@Test
 	public void personCreateWithRxJava2ObservableXml() throws Exception {
 		People people = new People(new Person("Robert"), new Person("Marie"));
-		ResponseEntity<Void> response = performPost("/person-create/rxjava2-observable", APPLICATION_XML, people, null, Void.class);
+		String url = "/person-create/rxjava2-observable";
+		ResponseEntity<Void> response = performPost(url, APPLICATION_XML, people, null, Void.class);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals(2, getApplicationContext().getBean(PersonCreateController.class).persons.size());
@@ -442,6 +459,11 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 			return Mono.just(new Person("Robert"));
 		}
 
+		@GetMapping("/mono-declared-as-object")
+		public Object getMonoDeclaredAsObject() {
+			return Mono.just(new Person("Robert"));
+		}
+
 		@GetMapping("/single")
 		public Single<Person> getSingle() {
 			return Single.just(new Person("Robert"));
@@ -451,6 +473,12 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		public ResponseEntity<Mono<Person>> getMonoResponseEntity() {
 			Mono<Person> body = Mono.just(new Person("Robert"));
 			return ResponseEntity.ok(body);
+		}
+
+		@GetMapping("/mono-response-entity-xml")
+		public ResponseEntity<Mono<Person>> getMonoResponseEntityXml() {
+			Mono<Person> body = Mono.just(new Person("Robert"));
+			return ResponseEntity.ok().contentType(MediaType.APPLICATION_XML).body(body);
 		}
 
 		@GetMapping("/list")
@@ -589,7 +617,9 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		}
 
 		@PostMapping("/rxjava2-observable")
-		public io.reactivex.Completable createWithRxJava2Observable(@RequestBody io.reactivex.Observable<Person> observable) {
+		public io.reactivex.Completable createWithRxJava2Observable(
+				@RequestBody io.reactivex.Observable<Person> observable) {
+
 			return observable.toList().doOnSuccess(persons::addAll).toCompletable();
 		}
 

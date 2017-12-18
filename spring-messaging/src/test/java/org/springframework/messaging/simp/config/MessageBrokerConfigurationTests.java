@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
@@ -66,6 +67,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.PathMatcher;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean;
@@ -131,7 +133,8 @@ public class MessageBrokerConfigurationTests {
 	@Test
 	public void clientOutboundChannelUsedByAnnotatedMethod() {
 		TestChannel channel = this.simpleBrokerContext.getBean("clientOutboundChannel", TestChannel.class);
-		SimpAnnotationMethodMessageHandler messageHandler = this.simpleBrokerContext.getBean(SimpAnnotationMethodMessageHandler.class);
+		SimpAnnotationMethodMessageHandler messageHandler =
+				this.simpleBrokerContext.getBean(SimpAnnotationMethodMessageHandler.class);
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
 		headers.setSessionId("sess1");
@@ -326,7 +329,8 @@ public class MessageBrokerConfigurationTests {
 
 	@Test
 	public void customArgumentAndReturnValueTypes() throws Exception {
-		SimpAnnotationMethodMessageHandler handler = this.customContext.getBean(SimpAnnotationMethodMessageHandler.class);
+		SimpAnnotationMethodMessageHandler handler =
+				this.customContext.getBean(SimpAnnotationMethodMessageHandler.class);
 
 		List<HandlerMethodArgumentResolver> customResolvers = handler.getCustomArgumentResolvers();
 		assertEquals(1, customResolvers.size());
@@ -384,8 +388,10 @@ public class MessageBrokerConfigurationTests {
 		DefaultSubscriptionRegistry registry = (DefaultSubscriptionRegistry) broker.getSubscriptionRegistry();
 		assertEquals("a.a", registry.getPathMatcher().combine("a", "a"));
 
-		SimpAnnotationMethodMessageHandler handler = this.customContext.getBean(SimpAnnotationMethodMessageHandler.class);
-		assertEquals("a.a", handler.getPathMatcher().combine("a", "a"));
+		PathMatcher pathMatcher =
+				this.customContext.getBean(SimpAnnotationMethodMessageHandler.class).getPathMatcher();
+
+		assertEquals("a.a", pathMatcher.combine("a", "a"));
 
 		DefaultUserDestinationResolver resolver = this.customContext.getBean(DefaultUserDestinationResolver.class);
 		assertNotNull(resolver);
@@ -511,14 +517,14 @@ public class MessageBrokerConfigurationTests {
 
 		@Override
 		protected void configureClientInboundChannel(ChannelRegistration registration) {
-			registration.setInterceptors(this.interceptor);
+			registration.interceptors(this.interceptor);
 			registration.taskExecutor(new CustomThreadPoolTaskExecutor())
 					.corePoolSize(11).maxPoolSize(12).keepAliveSeconds(13).queueCapacity(14);
 		}
 
 		@Override
 		protected void configureClientOutboundChannel(ChannelRegistration registration) {
-			registration.setInterceptors(this.interceptor, this.interceptor);
+			registration.interceptors(this.interceptor, this.interceptor);
 			registration.taskExecutor().corePoolSize(21).maxPoolSize(22).keepAliveSeconds(23).queueCapacity(24);
 		}
 
@@ -534,8 +540,9 @@ public class MessageBrokerConfigurationTests {
 
 		@Override
 		protected void configureMessageBroker(MessageBrokerRegistry registry) {
-			registry.configureBrokerChannel().setInterceptors(this.interceptor, this.interceptor, this.interceptor);
-			registry.configureBrokerChannel().taskExecutor().corePoolSize(31).maxPoolSize(32).keepAliveSeconds(33).queueCapacity(34);
+			registry.configureBrokerChannel().interceptors(this.interceptor, this.interceptor, this.interceptor);
+			registry.configureBrokerChannel().taskExecutor()
+					.corePoolSize(31).maxPoolSize(32).keepAliveSeconds(33).queueCapacity(34);
 			registry.setPathMatcher(new AntPathMatcher(".")).enableSimpleBroker("/topic", "/queue");
 			registry.setCacheLimit(8192);
 		}
@@ -562,7 +569,7 @@ public class MessageBrokerConfigurationTests {
 		}
 
 		@Override
-		public void validate(Object target, Errors errors) {
+		public void validate(@Nullable Object target, Errors errors) {
 		}
 	}
 

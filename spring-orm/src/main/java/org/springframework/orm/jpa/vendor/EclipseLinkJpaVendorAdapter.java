@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,15 @@ package org.springframework.orm.jpa.vendor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
+
 import javax.persistence.EntityManager;
 import javax.persistence.spi.PersistenceProvider;
 
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.eclipse.persistence.config.TargetDatabase;
 import org.eclipse.persistence.jpa.JpaEntityManager;
+
+import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Eclipse
@@ -62,7 +65,7 @@ public class EclipseLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		if (getDatabasePlatform() != null) {
 			jpaProperties.put(PersistenceUnitProperties.TARGET_DATABASE, getDatabasePlatform());
 		}
-		else if (getDatabase() != null) {
+		else {
 			String targetDatabase = determineTargetDatabaseName(getDatabase());
 			if (targetDatabase != null) {
 				jpaProperties.put(PersistenceUnitProperties.TARGET_DATABASE, targetDatabase);
@@ -88,6 +91,7 @@ public class EclipseLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	 * @param database the specified database
 	 * @return the EclipseLink target database name, or {@code null} if none found
 	 */
+	@Nullable
 	protected String determineTargetDatabaseName(Database database) {
 		switch (database) {
 			case DB2: return TargetDatabase.DB2;

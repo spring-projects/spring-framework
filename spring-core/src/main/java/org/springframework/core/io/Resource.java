@@ -24,6 +24,8 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Interface for a resource descriptor that abstracts from the actual
  * type of underlying resource, such as a file or class path resource.
@@ -159,6 +161,7 @@ public interface Resource extends InputStreamSource {
 	 * <p>Returns {@code null} if this type of resource does not
 	 * have a filename.
 	 */
+	@Nullable
 	String getFilename();
 
 	/**

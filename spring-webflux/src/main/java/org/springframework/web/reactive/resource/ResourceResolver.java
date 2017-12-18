@@ -21,6 +21,7 @@ import java.util.List;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -44,7 +45,7 @@ public interface ResourceResolver {
 	 * @param chain the chain of remaining resolvers to delegate to
 	 * @return the resolved resource or an empty {@code Mono} if unresolved
 	 */
-	Mono<Resource> resolveResource(ServerWebExchange exchange, String requestPath,
+	Mono<Resource> resolveResource(@Nullable ServerWebExchange exchange, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain);
 
 	/**

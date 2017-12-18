@@ -20,6 +20,7 @@ import java.net.URI;
 import java.security.Principal;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 
 /**
@@ -62,6 +63,7 @@ public interface TransportRequest {
 	/**
 	 * Return the user associated with the request, if any.
 	 */
+	@Nullable
 	Principal getUser();
 
 	/**

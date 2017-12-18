@@ -19,7 +19,7 @@ package org.springframework.jms.support;
 import javax.jms.Message;
 
 /**
- * Gather the Quality of Service settings that can be used when sending a message.
+ * Gather the Quality-of-Service settings that can be used when sending a message.
  *
  * @author Stephane Nicoll
  * @since 5.0
@@ -32,6 +32,7 @@ public class QosSettings {
 
 	private long timeToLive;
 
+
 	/**
 	 * Create a new instance with the default settings.
 	 * @see Message#DEFAULT_DELIVERY_MODE
@@ -39,8 +40,7 @@ public class QosSettings {
 	 * @see Message#DEFAULT_TIME_TO_LIVE
 	 */
 	public QosSettings() {
-		this(Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY,
-				Message.DEFAULT_TIME_TO_LIVE);
+		this(Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
 	}
 
 	/**
@@ -51,6 +51,7 @@ public class QosSettings {
 		this.priority = priority;
 		this.timeToLive = timeToLive;
 	}
+
 
 	/**
 	 * Set the delivery mode to use when sending a message.
@@ -105,31 +106,30 @@ public class QosSettings {
 		return this.timeToLive;
 	}
 
+
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof QosSettings)) {
+			return false;
+		}
 
-		QosSettings that = (QosSettings) o;
-
-		if (this.deliveryMode != that.deliveryMode) return false;
-		if (this.priority != that.priority) return false;
-		return this.timeToLive == that.timeToLive;
+		QosSettings otherSettings = (QosSettings) other;
+		return (this.deliveryMode == otherSettings.deliveryMode &&
+				this.priority == otherSettings.priority &&
+				this.timeToLive == otherSettings.timeToLive);
 	}
 
 	@Override
 	public int hashCode() {
-		int result = this.deliveryMode;
-		result = 31 * result + this.priority;
-		result = 31 * result + (int) (this.timeToLive ^ (this.timeToLive >>> 32));
-		return result;
+		return (this.deliveryMode * 31 + this.priority);
 	}
 
 	@Override
 	public String toString() {
-		return "QosSettings{" + "deliveryMode=" + deliveryMode +
-				", priority=" + priority +
-				", timeToLive=" + timeToLive +
-				'}';
+		return "QosSettings{" + "deliveryMode=" + this.deliveryMode +
+				", priority=" + this.priority + ", timeToLive=" + this.timeToLive + '}';
 	}
 }

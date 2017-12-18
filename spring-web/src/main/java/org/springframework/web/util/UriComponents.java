@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
@@ -49,12 +50,14 @@ public abstract class UriComponents implements Serializable {
 	private static final Pattern NAMES_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
 
 
+	@Nullable
 	private final String scheme;
 
+	@Nullable
 	private final String fragment;
 
 
-	protected UriComponents(String scheme, String fragment) {
+	protected UriComponents(@Nullable String scheme, @Nullable String fragment) {
 		this.scheme = scheme;
 		this.fragment = fragment;
 	}
@@ -65,23 +68,35 @@ public abstract class UriComponents implements Serializable {
 	/**
 	 * Return the scheme. Can be {@code null}.
 	 */
+	@Nullable
 	public final String getScheme() {
 		return this.scheme;
 	}
 
 	/**
+	 * Return the fragment. Can be {@code null}.
+	 */
+	@Nullable
+	public final String getFragment() {
+		return this.fragment;
+	}
+
+	/**
 	 * Return the scheme specific part. Can be {@code null}.
 	 */
+	@Nullable
 	public abstract String getSchemeSpecificPart();
 
 	/**
 	 * Return the user info. Can be {@code null}.
 	 */
+	@Nullable
 	public abstract String getUserInfo();
 
 	/**
 	 * Return the host. Can be {@code null}.
 	 */
+	@Nullable
 	public abstract String getHost();
 
 	/**
@@ -92,6 +107,7 @@ public abstract class UriComponents implements Serializable {
 	/**
 	 * Return the path. Can be {@code null}.
 	 */
+	@Nullable
 	public abstract String getPath();
 
 	/**
@@ -102,19 +118,13 @@ public abstract class UriComponents implements Serializable {
 	/**
 	 * Return the query. Can be {@code null}.
 	 */
+	@Nullable
 	public abstract String getQuery();
 
 	/**
 	 * Return the map of query parameters. Empty if no query has been set.
 	 */
 	public abstract MultiValueMap<String, String> getQueryParams();
-
-	/**
-	 * Return the fragment. Can be {@code null}.
-	 */
-	public final String getFragment() {
-		return this.fragment;
-	}
 
 
 	/**
@@ -177,7 +187,9 @@ public abstract class UriComponents implements Serializable {
 	abstract UriComponents expandInternal(UriTemplateVariables uriVariables);
 
 	/**
-	 * Normalize the path removing sequences like "path/..".
+	 * Normalize the path removing sequences like "path/..". Note that calling this method will
+	 * combine all path segments into a full path before doing the actual normalisation, i.e.
+	 * individual path segments will not be normalized individually.
 	 * @see org.springframework.util.StringUtils#cleanPath(String)
 	 */
 	public abstract UriComponents normalize();
@@ -206,7 +218,8 @@ public abstract class UriComponents implements Serializable {
 
 	// Static expansion helpers
 
-	static String expandUriComponent(String source, UriTemplateVariables uriVariables) {
+	@Nullable
+	static String expandUriComponent(@Nullable String source, UriTemplateVariables uriVariables) {
 		if (source == null) {
 			return null;
 		}
@@ -259,7 +272,7 @@ public abstract class UriComponents implements Serializable {
 		return (colonIdx != -1 ? match.substring(0, colonIdx) : match);
 	}
 
-	private static String getVariableValueAsString(Object variableValue) {
+	private static String getVariableValueAsString(@Nullable Object variableValue) {
 		return (variableValue != null ? variableValue.toString() : "");
 	}
 
@@ -279,7 +292,8 @@ public abstract class UriComponents implements Serializable {
 		 * @param name the variable name
 		 * @return the variable value, possibly {@code null} or {@link #SKIP_VALUE}
 		 */
-		Object getValue(String name);
+		@Nullable
+		Object getValue(@Nullable String name);
 	}
 
 
@@ -295,7 +309,8 @@ public abstract class UriComponents implements Serializable {
 		}
 
 		@Override
-		public Object getValue(String name) {
+		@Nullable
+		public Object getValue(@Nullable String name) {
 			if (!this.uriVariables.containsKey(name)) {
 				throw new IllegalArgumentException("Map has no value for '" + name + "'");
 			}
@@ -316,7 +331,8 @@ public abstract class UriComponents implements Serializable {
 		}
 
 		@Override
-		public Object getValue(String name) {
+		@Nullable
+		public Object getValue(@Nullable String name) {
 			if (!this.valueIterator.hasNext()) {
 				throw new IllegalArgumentException("Not enough variable values available to expand '" + name + "'");
 			}

@@ -27,7 +27,7 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**
- * Bind to a {@link RouterFunction} and functional endpoints.
+ * Sample tests demonstrating "mock" server tests binding to a RouterFunction.
  *
  * @author Rossen Stoyanchev
  * @since 5.0

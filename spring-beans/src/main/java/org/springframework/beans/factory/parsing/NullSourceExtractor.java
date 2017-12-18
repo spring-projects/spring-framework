@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.parsing;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 
 /**
  * Simple implementation of {@link SourceExtractor} that returns {@code null}
@@ -34,7 +35,8 @@ public class NullSourceExtractor implements SourceExtractor {
 	 * This implementation simply returns {@code null} for any input.
 	 */
 	@Override
-	public Object extractSource(Object sourceCandidate, Resource definitionResource) {
+	@Nullable
+	public Object extractSource(Object sourceCandidate, @Nullable Resource definitionResource) {
 		return null;
 	}
 

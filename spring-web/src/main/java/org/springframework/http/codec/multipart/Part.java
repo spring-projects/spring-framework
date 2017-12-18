@@ -24,7 +24,7 @@ import org.springframework.http.HttpHeaders;
 /**
  * Representation for a part in a "multipart/form-data" request.
  *
- * <p>The origin of a multipart request may a browser form in which case each
+ * <p>The origin of a multipart request may be a browser form in which case each
  * part is either a {@link FormFieldPart} or a {@link FilePart}.
  *
  * <p>Multipart requests may also be used outside of a browser for data of any

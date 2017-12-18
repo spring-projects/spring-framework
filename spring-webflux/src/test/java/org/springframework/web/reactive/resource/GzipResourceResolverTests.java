@@ -39,7 +39,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.FileCopyUtils;
 
 import static org.junit.Assert.assertEquals;
@@ -104,8 +104,8 @@ public class GzipResourceResolverTests {
 
 	@Test
 	public void resolveGzippedFile() throws IOException {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("")
-				.header("Accept-Encoding", "gzip").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("")
+				.header("Accept-Encoding", "gzip"));
 
 		String file = "js/foo.js";
 		Resource resolved = this.resolver.resolveResource(exchange, file, this.locations).block(TIMEOUT);
@@ -120,8 +120,8 @@ public class GzipResourceResolverTests {
 
 	@Test
 	public void resolveFingerprintedGzippedFile() throws IOException {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("")
-				.header("Accept-Encoding", "gzip").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("")
+				.header("Accept-Encoding", "gzip"));
 
 		String file = "foo-e36d2e05253c6c7085a91522ce43a0b4.css";
 		Resource resolved = this.resolver.resolveResource(exchange, file, this.locations).block(TIMEOUT);
@@ -136,8 +136,8 @@ public class GzipResourceResolverTests {
 
 	@Test
 	public void resolveFromCacheWithEncodingVariants() throws IOException {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("")
-				.header("Accept-Encoding", "gzip").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("")
+				.header("Accept-Encoding", "gzip"));
 
 		String file = "js/foo.js";
 		Resource resolved = this.resolver.resolveResource(exchange, file, this.locations).block(TIMEOUT);
@@ -151,7 +151,7 @@ public class GzipResourceResolverTests {
 
 		// resolved resource is now cached in CachingResourceResolver
 
-		exchange = MockServerHttpRequest.get("/js/foo.js").toExchange();
+		exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/js/foo.js"));
 		resolved = this.resolver.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 
 		Resource resource = new ClassPathResource("test/"+file, getClass());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.http.codec;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.core.ResolvableType;
@@ -27,7 +26,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Sebastien Deleuze
@@ -36,10 +38,15 @@ public class FormHttpMessageReaderTests {
 
 	private final FormHttpMessageReader reader = new FormHttpMessageReader();
 
+
 	@Test
 	public void canRead() {
 		assertTrue(this.reader.canRead(
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
+				MediaType.APPLICATION_FORM_URLENCODED));
+
+		assertTrue(this.reader.canRead(
+				ResolvableType.forInstance(new LinkedMultiValueMap<String, String>()),
 				MediaType.APPLICATION_FORM_URLENCODED));
 
 		assertFalse(this.reader.canRead(
@@ -88,6 +95,7 @@ public class FormHttpMessageReaderTests {
 		assertEquals("Invalid result", "value 2+2", values.get(1));
 		assertNull("Invalid result", result.getFirst("name 3"));
 	}
+
 
 	private MockServerHttpRequest request(String body) {
 		return MockServerHttpRequest

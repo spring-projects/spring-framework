@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,12 @@ import org.junit.Test;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 
-import static java.util.Collections.*;
-import static org.junit.Assert.*;
+import static java.util.Collections.singletonMap;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link MimeType}.
@@ -122,12 +126,15 @@ public class MimeTypeTests {
 
 		MimeType applicationSoapXml = new MimeType("application", "soap+xml");
 		MimeType applicationWildcardXml = new MimeType("application", "*+xml");
+		MimeType suffixXml = new MimeType("application", "x.y+z+xml"); // SPR-15795
 
 		assertTrue(applicationSoapXml.includes(applicationSoapXml));
 		assertTrue(applicationWildcardXml.includes(applicationWildcardXml));
+		assertTrue(applicationWildcardXml.includes(suffixXml));
 
 		assertTrue(applicationWildcardXml.includes(applicationSoapXml));
 		assertFalse(applicationSoapXml.includes(applicationWildcardXml));
+		assertFalse(suffixXml.includes(applicationWildcardXml));
 
 		assertFalse(applicationWildcardXml.includes(MimeTypeUtils.APPLICATION_JSON));
 	}
@@ -149,12 +156,15 @@ public class MimeTypeTests {
 
 		MimeType applicationSoapXml = new MimeType("application", "soap+xml");
 		MimeType applicationWildcardXml = new MimeType("application", "*+xml");
+		MimeType suffixXml = new MimeType("application", "x.y+z+xml"); // SPR-15795
 
 		assertTrue(applicationSoapXml.isCompatibleWith(applicationSoapXml));
 		assertTrue(applicationWildcardXml.isCompatibleWith(applicationWildcardXml));
+		assertTrue(applicationWildcardXml.isCompatibleWith(suffixXml));
 
 		assertTrue(applicationWildcardXml.isCompatibleWith(applicationSoapXml));
 		assertTrue(applicationSoapXml.isCompatibleWith(applicationWildcardXml));
+		assertTrue(suffixXml.isCompatibleWith(applicationWildcardXml));
 
 		assertFalse(applicationWildcardXml.isCompatibleWith(MimeTypeUtils.APPLICATION_JSON));
 	}

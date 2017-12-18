@@ -36,8 +36,8 @@ import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebHandler;
 
-import static java.time.Duration.*;
-import static org.junit.Assert.*;
+import static java.time.Duration.ofMillis;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link WebHttpHandlerBuilder}.
@@ -117,7 +117,8 @@ public class WebHttpHandlerBuilderTests {
 
 		private WebFilter createFilter(String name) {
 			return (exchange, chain) -> {
-				String value = exchange.getAttribute(ATTRIBUTE).map(v -> v + "::" + name).orElse(name);
+				String value = exchange.getAttribute(ATTRIBUTE);
+				value = (value != null ? value + "::" + name : name);
 				exchange.getAttributes().put(ATTRIBUTE, value);
 				return chain.filter(exchange);
 			};
@@ -126,7 +127,7 @@ public class WebHttpHandlerBuilderTests {
 		@Bean
 		public WebHandler webHandler() {
 			return exchange -> {
-				String value = exchange.getAttribute(ATTRIBUTE).map(v -> (String) v).orElse("none");
+				String value = exchange.getAttributeOrDefault(ATTRIBUTE, "none");
 				return writeToResponse(exchange, value);
 			};
 		}

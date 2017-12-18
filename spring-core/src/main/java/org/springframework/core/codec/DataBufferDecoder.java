@@ -23,6 +23,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -33,9 +34,11 @@ import org.springframework.util.MimeTypeUtils;
  * {@link org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer)}.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class DataBufferDecoder extends AbstractDecoder<DataBuffer> {
+public class DataBufferDecoder extends AbstractDataBufferDecoder<DataBuffer> {
+
 
 	public DataBufferDecoder() {
 		super(MimeTypeUtils.ALL);
@@ -43,15 +46,23 @@ public class DataBufferDecoder extends AbstractDecoder<DataBuffer> {
 
 
 	@Override
-	public boolean canDecode(ResolvableType elementType, MimeType mimeType) {
+	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		Class<?> clazz = elementType.getRawClass();
-		return (super.canDecode(elementType, mimeType) && DataBuffer.class.isAssignableFrom(clazz));
+		return (super.canDecode(elementType, mimeType) && clazz != null && DataBuffer.class.isAssignableFrom(clazz));
 	}
 
 	@Override
 	public Flux<DataBuffer> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Map<String, Object> hints) {
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
 		return Flux.from(inputStream);
+	}
+
+	@Override
+	protected DataBuffer decodeDataBuffer(DataBuffer buffer, ResolvableType elementType,
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
+		return buffer;
 	}
 
 }

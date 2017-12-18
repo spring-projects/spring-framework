@@ -37,6 +37,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.AbstractEntityManagerFactoryBeanTests;
 import org.springframework.orm.jpa.DefaultJpaDialect;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
@@ -697,7 +698,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	private static class MockPersistenceAnnotationBeanPostProcessor extends PersistenceAnnotationBeanPostProcessor {
 
 		@Override
-		protected EntityManagerFactory findEntityManagerFactory(String emfName, String requestingBeanName) {
+		protected EntityManagerFactory findEntityManagerFactory(@Nullable String emfName, String requestingBeanName) {
 			return mockEmf;
 		}
 	}
