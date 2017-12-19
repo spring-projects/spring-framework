@@ -133,6 +133,8 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 	/**
 	 * Alternative to {@link #method(HttpMethod, URI)} that accepts a URI template.
+	 * The given URI may contain query parameters, or those may be added later via
+	 * {@link BaseBuilder#queryParam queryParam} builder methods.
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param urlTemplate the URL template
 	 * @param vars variables to expand into the template
@@ -144,7 +146,9 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	/**
-	 * Create an HTTP GET builder with the given url.
+	 * Create an HTTP GET builder with the given URI template. The given URI may
+	 * contain query parameters, or those may be added later via
+	 * {@link BaseBuilder#queryParam queryParam} builder methods.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param uriVars zero or more URI variables
 	 * @return the created builder
@@ -154,7 +158,7 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	/**
-	 * Create an HTTP HEAD builder with the given url.
+	 * HTTP HEAD variant. See {@link #get(String, Object...)} for general info.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param uriVars zero or more URI variables
 	 * @return the created builder
@@ -164,7 +168,7 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	/**
-	 * Create an HTTP POST builder with the given url.
+	 * HTTP POST variant. See {@link #get(String, Object...)} for general info.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param uriVars zero or more URI variables
 	 * @return the created builder
@@ -174,7 +178,8 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	/**
-	 * Create an HTTP PUT builder with the given url.
+	 * HTTP PUT variant. See {@link #get(String, Object...)} for general info.
+	 * {@link BaseBuilder#queryParam queryParam} builder methods.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param uriVars zero or more URI variables
 	 * @return the created builder
@@ -184,7 +189,7 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	/**
-	 * Create an HTTP PATCH builder with the given url.
+	 * HTTP PATCH variant. See {@link #get(String, Object...)} for general info.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param uriVars zero or more URI variables
 	 * @return the created builder
@@ -194,7 +199,7 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	/**
-	 * Create an HTTP DELETE builder with the given url.
+	 * HTTP DELETE variant. See {@link #get(String, Object...)} for general info.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param uriVars zero or more URI variables
 	 * @return the created builder
@@ -204,7 +209,7 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	/**
-	 * Creates an HTTP OPTIONS builder with the given url.
+	 * HTTP OPTIONS variant. See {@link #get(String, Object...)} for general info.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param uriVars zero or more URI variables
 	 * @return the created builder
@@ -224,6 +229,25 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		 * Set the contextPath to return.
 		 */
 		B contextPath(String contextPath);
+
+		/**
+		 * Append the given query parameter to the existing query parameters.
+		 * If no values are given, the resulting URI will contain the query
+		 * parameter name only (i.e. {@code ?foo} instead of {@code ?foo=bar}).
+		 * <p>The provided query name and values will be encoded.
+		 * @param name the query parameter name
+		 * @param values the query parameter values
+		 * @return this UriComponentsBuilder
+		 */
+		B queryParam(String name, Object... values);
+
+		/**
+		 * Add the given query parameters and values. The provided query name
+		 * and corresponding values will be encoded.
+		 * @param params the params
+		 * @return this UriComponentsBuilder
+		 */
+		B queryParams(MultiValueMap<String, String> params);
 
 		/**
 		 * Set the remote address to return.
@@ -375,6 +399,8 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		@Nullable
 		private String contextPath;
 
+		private final UriComponentsBuilder queryParamsBuilder = UriComponentsBuilder.newInstance();
+
 		private final HttpHeaders headers = new HttpHeaders();
 
 		private final MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
@@ -394,6 +420,18 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		@Override
 		public BodyBuilder contextPath(String contextPath) {
 			this.contextPath = contextPath;
+			return this;
+		}
+
+		@Override
+		public BodyBuilder queryParam(String name, Object... values) {
+			this.queryParamsBuilder.queryParam(name, values);
+			return this;
+		}
+
+		@Override
+		public BodyBuilder queryParams(MultiValueMap<String, String> params) {
+			this.queryParamsBuilder.queryParams(params);
 			return this;
 		}
 
@@ -506,7 +544,7 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		@Override
 		public MockServerHttpRequest body(Publisher<? extends DataBuffer> body) {
 			applyCookiesIfNecessary();
-			return new MockServerHttpRequest(this.method, this.url, this.contextPath,
+			return new MockServerHttpRequest(this.method, getUrlToUse(), this.contextPath,
 					this.headers, this.cookies, this.remoteAddress, this.sslInfo, body);
 		}
 
@@ -515,6 +553,17 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 				this.cookies.values().stream().flatMap(Collection::stream)
 						.forEach(cookie -> this.headers.add(HttpHeaders.COOKIE, cookie.toString()));
 			}
+		}
+
+		private URI getUrlToUse() {
+			MultiValueMap<String, String> params =
+					this.queryParamsBuilder.buildAndExpand().encode().getQueryParams();
+
+			if (!params.isEmpty()) {
+				return UriComponentsBuilder.fromUri(this.url).queryParams(params).build(true).toUri();
+			}
+
+			return this.url;
 		}
 	}
 

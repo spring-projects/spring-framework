@@ -632,7 +632,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * Append the given query parameter to the existing query parameters. The
 	 * given name or any of the values may contain URI template variables. If no
 	 * values are given, the resulting URI will contain the query parameter name
-	 * only (i.e. {@code ?foo} instead of {@code ?foo=bar}.
+	 * only (i.e. {@code ?foo} instead of {@code ?foo=bar}).
 	 * @param name the query parameter name
 	 * @param values the query parameter values
 	 * @return this UriComponentsBuilder
