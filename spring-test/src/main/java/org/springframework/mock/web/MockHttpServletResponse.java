@@ -311,7 +311,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	@Override
 	public void setLocale(Locale locale) {
 		this.locale = locale;
-		doAddHeaderValue(HttpHeaders.ACCEPT_LANGUAGE, locale.toLanguageTag(), true);
+		doAddHeaderValue(HttpHeaders.CONTENT_LANGUAGE, locale.toLanguageTag(), true);
 	}
 
 	@Override
@@ -591,11 +591,11 @@ public class MockHttpServletResponse implements HttpServletResponse {
 					Integer.parseInt(value.toString()));
 			return true;
 		}
-		else if (HttpHeaders.ACCEPT_LANGUAGE.equalsIgnoreCase(name)) {
+		else if (HttpHeaders.CONTENT_LANGUAGE.equalsIgnoreCase(name)) {
 			HttpHeaders headers = new HttpHeaders();
-			headers.add(HttpHeaders.ACCEPT_LANGUAGE, value.toString());
-			List<Locale> locales = headers.getAcceptLanguageAsLocales();
-			this.locale = (!locales.isEmpty() ? locales.get(0) : Locale.getDefault());
+			headers.add(HttpHeaders.CONTENT_LANGUAGE, value.toString());
+			Locale language = headers.getContentLanguage();
+			this.locale = language != null ? language : Locale.getDefault();
 			return true;
 		}
 		else {
