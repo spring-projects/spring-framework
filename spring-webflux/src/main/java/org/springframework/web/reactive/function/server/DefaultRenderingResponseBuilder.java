@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -177,7 +178,7 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 		public Mono<Void> writeTo(ServerWebExchange exchange, Context context) {
 			ServerHttpResponse response = exchange.getResponse();
 			writeStatusAndHeaders(response);
-			MediaType contentType = exchange.getResponse().getHeaders().getContentType();
+			MediaType responseContentType = exchange.getResponse().getHeaders().getContentType();
 			Locale locale = LocaleContextHolder.getLocale(exchange.getLocaleContext());
 			Stream<ViewResolver> viewResolverStream = context.viewResolvers().stream();
 
@@ -186,7 +187,11 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 					.next()
 					.switchIfEmpty(Mono.error(new IllegalArgumentException("Could not resolve view with name '" +
 							name() +"'")))
-					.flatMap(view -> view.render(model(), contentType, exchange));
+					.flatMap(view -> {
+						List<MediaType> mediaTypes = view.getSupportedMediaTypes();
+						MediaType contentType = (responseContentType == null && !mediaTypes.isEmpty() ? mediaTypes.get(0) : responseContentType);
+						return view.render(model(), contentType, exchange);
+					});
 		}
 
 	}
