@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
@@ -51,14 +52,14 @@ public class CorsConfiguration {
 	/** Wildcard representing <em>all</em> origins, methods, or headers. */
 	public static final String ALL = "*";
 
-	private static final List<HttpMethod> DEFAULT_METHODS;
+	private static final List<HttpMethod> DEFAULT_METHODS =
+			Collections.unmodifiableList(Arrays.asList(HttpMethod.GET, HttpMethod.HEAD));
 
-	static {
-		List<HttpMethod> rawMethods = new ArrayList<>(2);
-		rawMethods.add(HttpMethod.GET);
-		rawMethods.add(HttpMethod.HEAD);
-		DEFAULT_METHODS = Collections.unmodifiableList(rawMethods);
-	}
+	private static final List<String> DEFAULT_PERMIT_ALL =
+			Collections.unmodifiableList(Arrays.asList(ALL));
+
+	private static final List<String> DEFAULT_PERMIT_METHODS =
+			Collections.unmodifiableList(Arrays.asList(HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name()));
 
 
 	@Nullable
@@ -132,6 +133,9 @@ public class CorsConfiguration {
 		if (this.allowedOrigins == null) {
 			this.allowedOrigins = new ArrayList<>(4);
 		}
+		else if (this.allowedOrigins == DEFAULT_PERMIT_ALL) {
+			setAllowedOrigins(DEFAULT_PERMIT_ALL);
+		}
 		this.allowedOrigins.add(origin);
 	}
 
@@ -187,6 +191,9 @@ public class CorsConfiguration {
 				this.allowedMethods = new ArrayList<>(4);
 				this.resolvedMethods = new ArrayList<>(4);
 			}
+			else if (this.allowedMethods == DEFAULT_PERMIT_METHODS) {
+				setAllowedMethods(DEFAULT_PERMIT_METHODS);
+			}
 			this.allowedMethods.add(method);
 			if (ALL.equals(method)) {
 				this.resolvedMethods = null;
@@ -227,6 +234,9 @@ public class CorsConfiguration {
 	public void addAllowedHeader(String allowedHeader) {
 		if (this.allowedHeaders == null) {
 			this.allowedHeaders = new ArrayList<>(4);
+		}
+		else if (this.allowedHeaders == DEFAULT_PERMIT_ALL) {
+			setAllowedHeaders(DEFAULT_PERMIT_ALL);
 		}
 		this.allowedHeaders.add(allowedHeader);
 	}
@@ -325,25 +335,41 @@ public class CorsConfiguration {
 	 */
 	public CorsConfiguration applyPermitDefaultValues() {
 		if (this.allowedOrigins == null) {
-			this.addAllowedOrigin(ALL);
+			this.allowedOrigins = DEFAULT_PERMIT_ALL;
 		}
 		if (this.allowedMethods == null) {
-			this.setAllowedMethods(Arrays.asList(
-					HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name()));
+			this.allowedMethods = DEFAULT_PERMIT_METHODS;
+			this.resolvedMethods = DEFAULT_PERMIT_METHODS
+					.stream().map(HttpMethod::resolve).collect(Collectors.toList());
 		}
 		if (this.allowedHeaders == null) {
-			this.addAllowedHeader(ALL);
+			this.allowedHeaders = DEFAULT_PERMIT_ALL;
 		}
 		if (this.maxAge == null) {
-			this.setMaxAge(1800L);
+			this.maxAge = 1800L;
 		}
 		return this;
 	}
 
 	/**
-	 * Combine the supplied {@code CorsConfiguration} with this one.
-	 * <p>Properties of this configuration are overridden by any non-null
-	 * properties of the supplied one.
+	 * Combine the non-null properties of the supplied
+	 * {@code CorsConfiguration} with this one.
+	 *
+	 * <p>When combining single values like {@code allowCredentials} or
+	 * {@code maxAge}, {@code this} properties are overridden by non-null
+	 * {@code other} properties if any.
+	 *
+	 * <p>Combining lists like {@code allowedOrigins}, {@code allowedMethods},
+	 * {@code allowedHeaders} or {@code exposedHeaders} is done in an additive
+	 * way. For example, combining {@code ["GET", "POST"]} with
+	 * {@code ["PATCH"]} results in {@code ["GET", "POST", "PATCH"]}, but keep
+	 * in mind that combining {@code ["GET", "POST"]} with {@code ["*"]}
+	 * results in {@code ["*"]}.
+	 *
+	 * <p>Notice that default permit values set by
+	 * {@link CorsConfiguration#applyPermitDefaultValues()} are overridden by
+	 * any value explicitly defined.
+	 *
 	 * @return the combined {@code CorsConfiguration} or {@code this}
 	 * configuration if the supplied configuration is {@code null}
 	 */
@@ -369,11 +395,20 @@ public class CorsConfiguration {
 	}
 
 	private List<String> combine(@Nullable List<String> source, @Nullable List<String> other) {
-		if (other == null || other.contains(ALL)) {
+		if (other == null) {
 			return (source != null ? source : Collections.emptyList());
 		}
-		if (source == null || source.contains(ALL)) {
+		if (source == null) {
 			return other;
+		}
+		if (source == DEFAULT_PERMIT_ALL || source == DEFAULT_PERMIT_METHODS) {
+			return other;
+		}
+		if (other == DEFAULT_PERMIT_ALL || other == DEFAULT_PERMIT_METHODS) {
+			return source;
+		}
+		if (source.contains(ALL) || other.contains(ALL)) {
+			return new ArrayList<>(Collections.singletonList(ALL));
 		}
 		Set<String> combined = new LinkedHashSet<>(source);
 		combined.addAll(other);
