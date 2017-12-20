@@ -52,7 +52,7 @@ configure(allprojects) { project ->
 	ext.junitVintageVersion  = "4.12.2"
 	ext.kotlinVersion        = "1.2.10"
 	ext.log4jVersion         = "2.10.0"
-	ext.nettyVersion         = "4.1.18.Final"
+	ext.nettyVersion         = "4.1.19.Final"
 	ext.reactorVersion       = "Bismuth-SR4"
 	ext.rxjavaVersion        = "1.3.4"
 	ext.rxjavaAdapterVersion = "1.2.1"
@@ -274,7 +274,7 @@ configure(rootProject) {
 
 	task wrapper(type: Wrapper) {
 		description = "Generates gradlew[.bat] scripts"
-		gradleVersion = '4.4'
+		gradleVersion = '4.4.1'
 
 		doLast() {
 			def gradleOpts = "-XX:MaxMetaspaceSize=1024m -Xmx1024m"
