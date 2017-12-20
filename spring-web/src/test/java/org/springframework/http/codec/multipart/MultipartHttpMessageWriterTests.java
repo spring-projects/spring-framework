@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
@@ -36,10 +38,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Sebastien Deleuze
@@ -80,6 +79,8 @@ public class MultipartHttpMessageWriterTests {
 			}
 		};
 
+		Publisher<String> publisher = Flux.just("foo", "bar", "baz");
+
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
 		bodyBuilder.part("name 1", "value 1");
 		bodyBuilder.part("name 2", "value 2+1");
@@ -87,14 +88,15 @@ public class MultipartHttpMessageWriterTests {
 		bodyBuilder.part("logo", logo);
 		bodyBuilder.part("utf8", utf8);
 		bodyBuilder.part("json", new Foo("bar"), MediaType.APPLICATION_JSON_UTF8);
-		Mono<MultiValueMap<String, HttpEntity<?>>> publisher = Mono.just(bodyBuilder.build());
+		bodyBuilder.asyncPart("publisher", publisher, String.class);
+		Mono<MultiValueMap<String, HttpEntity<?>>> result = Mono.just(bodyBuilder.build());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Map<String, Object> hints = Collections.emptyMap();
-		this.writer.write(publisher, null, MediaType.MULTIPART_FORM_DATA, response, hints).block(Duration.ofSeconds(5));
+		this.writer.write(result, null, MediaType.MULTIPART_FORM_DATA, response, hints).block(Duration.ofSeconds(5));
 
 		MultiValueMap<String, Part> requestParts = parse(response, hints);
-		assertEquals(5, requestParts.size());
+		assertEquals(6, requestParts.size());
 
 		Part part = requestParts.getFirst("name 1");
 		assertTrue(part instanceof FormFieldPart);
@@ -135,6 +137,17 @@ public class MultipartHttpMessageWriterTests {
 				Collections.emptyMap()).block(Duration.ZERO);
 
 		assertEquals("{\"bar\":\"bar\"}", value);
+
+		part = requestParts.getFirst("publisher");
+		assertEquals("publisher", part.name());
+
+		value = StringDecoder.textPlainOnly(false).decodeToMono(part.content(),
+				ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN,
+				Collections.emptyMap()).block(Duration.ZERO);
+
+		assertEquals("foobarbaz", value);
+
+
 
 	}
 

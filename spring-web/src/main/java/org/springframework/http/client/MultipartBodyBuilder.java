@@ -20,6 +20,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.reactivestreams.Publisher;
+
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -96,6 +100,11 @@ public final class MultipartBodyBuilder {
 		Assert.hasLength(name, "'name' must not be empty");
 		Assert.notNull(part, "'part' must not be null");
 
+		if (part instanceof Publisher) {
+			throw new IllegalArgumentException("Use publisher(String, Publisher, Class) or " +
+				"publisher(String, Publisher, ParameterizedTypeReference) for adding Publisher parts");
+		}
+
 		Object partBody;
 		HttpHeaders partHeaders = new HttpHeaders();
 
@@ -116,6 +125,54 @@ public final class MultipartBodyBuilder {
 		return builder;
 	}
 
+	/**
+	 * Adds a {@link Publisher} part to this builder, allowing for further header customization with
+	 * the returned {@link PartBuilder}.
+	 * @param name the name of the part to add (may not be empty)
+	 * @param publisher the contents of the part to add
+	 * @param elementClass the class of elements contained in the publisher
+	 * @return a builder that allows for further header customization
+	 */
+	public <T, P extends Publisher<T>> PartBuilder asyncPart(String name, P publisher,
+			Class<T> elementClass) {
+
+		Assert.notNull(elementClass, "'elementClass' must not be null");
+		ResolvableType elementType = ResolvableType.forClass(elementClass);
+		Assert.hasLength(name, "'name' must not be empty");
+		Assert.notNull(publisher, "'publisher' must not be null");
+		Assert.notNull(elementType, "'elementType' must not be null");
+
+		HttpHeaders partHeaders = new HttpHeaders();
+		PublisherClassPartBuilder<T, P> builder =
+				new PublisherClassPartBuilder<>(publisher, elementClass, partHeaders);
+		this.parts.add(name, builder);
+		return builder;
+
+	}
+
+	/**
+	 * Adds a {@link Publisher} part to this builder, allowing for further header customization with
+	 * the returned {@link PartBuilder}.
+	 * @param name the name of the part to add (may not be empty)
+	 * @param publisher the contents of the part to add
+	 * @param elementType the type of elements contained in the publisher
+	 * @return a builder that allows for further header customization
+	 */
+	public <T, P extends Publisher<T>> PartBuilder asyncPart(String name, P publisher,
+			ParameterizedTypeReference<T> elementType) {
+
+		Assert.notNull(elementType, "'elementType' must not be null");
+		ResolvableType elementType1 = ResolvableType.forType(elementType);
+		Assert.hasLength(name, "'name' must not be empty");
+		Assert.notNull(publisher, "'publisher' must not be null");
+		Assert.notNull(elementType1, "'elementType' must not be null");
+
+		HttpHeaders partHeaders = new HttpHeaders();
+		PublisherTypReferencePartBuilder<T, P> builder =
+				new PublisherTypReferencePartBuilder<>(publisher, elementType, partHeaders);
+		this.parts.add(name, builder);
+		return builder;
+	}
 
 	/**
 	 * Builder interface that allows for customization of part headers.
@@ -136,10 +193,9 @@ public final class MultipartBodyBuilder {
 	private static class DefaultPartBuilder implements PartBuilder {
 
 		@Nullable
-		private final Object body;
+		protected final Object body;
 
-		private final HttpHeaders headers;
-
+		protected final HttpHeaders headers;
 
 		public DefaultPartBuilder(@Nullable Object body, HttpHeaders headers) {
 			this.body = body;
@@ -154,6 +210,46 @@ public final class MultipartBodyBuilder {
 
 		public HttpEntity<?> build() {
 			return new HttpEntity<>(this.body, this.headers);
+		}
+	}
+
+	private static class PublisherClassPartBuilder<S, P extends Publisher<S>>
+			extends DefaultPartBuilder {
+
+		private final Class<S> bodyType;
+
+		public PublisherClassPartBuilder(P body, Class<S> bodyType, HttpHeaders headers) {
+			super(body, headers);
+			this.bodyType = bodyType;
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public HttpEntity<?> build() {
+			P body = (P) this.body;
+			Assert.state(body != null, "'body' must not be null");
+			return HttpEntity.fromPublisher(body, this.bodyType, this.headers);
+		}
+	}
+
+	private static class PublisherTypReferencePartBuilder<S, P extends Publisher<S>>
+			extends DefaultPartBuilder {
+
+		private final ParameterizedTypeReference<S> bodyType;
+
+		public PublisherTypReferencePartBuilder(P body, ParameterizedTypeReference<S> bodyType,
+				HttpHeaders headers) {
+
+			super(body, headers);
+			this.bodyType = bodyType;
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public HttpEntity<?> build() {
+			P body = (P) this.body;
+			Assert.state(body != null, "'body' must not be null");
+			return HttpEntity.fromPublisher(body, this.bodyType, this.headers);
 		}
 	}
 

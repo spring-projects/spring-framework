@@ -230,31 +230,41 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 		MultipartHttpOutputMessage outputMessage = new MultipartHttpOutputMessage(this.bufferFactory, getCharset());
 
 		T body;
+		ResolvableType bodyType = null;
 		if (value instanceof HttpEntity) {
-			outputMessage.getHeaders().putAll(((HttpEntity<T>) value).getHeaders());
-			body = ((HttpEntity<T>) value).getBody();
+			HttpEntity<T> httpEntity = (HttpEntity<T>) value;
+			outputMessage.getHeaders().putAll(httpEntity.getHeaders());
+			body = httpEntity.getBody();
 			Assert.state(body != null, "MultipartHttpMessageWriter only supports HttpEntity with body");
+			bodyType = httpEntity.getBodyType();
 		}
 		else {
 			body = value;
 		}
 
+		if (bodyType == null) {
+			bodyType = ResolvableType.forClass(body.getClass());
+		}
+
 		String filename = (body instanceof Resource ? ((Resource) body).getFilename() : null);
 		outputMessage.getHeaders().setContentDispositionFormData(name, filename);
 
-		ResolvableType bodyType = ResolvableType.forClass(body.getClass());
 		MediaType contentType = outputMessage.getHeaders().getContentType();
 
+		final ResolvableType finalBodyType = bodyType;
 		Optional<HttpMessageWriter<?>> writer = this.partWriters.stream()
-				.filter(partWriter -> partWriter.canWrite(bodyType, contentType))
+				.filter(partWriter -> partWriter.canWrite(finalBodyType, contentType))
 				.findFirst();
 
 		if (!writer.isPresent()) {
 			return Flux.error(new CodecException("No suitable writer found for part: " + name));
 		}
 
+		Publisher<T> bodyPublisher =
+				body instanceof Publisher ? (Publisher<T>) body : Mono.just(body);
+
 		Mono<Void> partWritten = ((HttpMessageWriter<T>) writer.get())
-				.write(Mono.just(body), bodyType, contentType, outputMessage, Collections.emptyMap());
+				.write(bodyPublisher, bodyType, contentType, outputMessage, Collections.emptyMap());
 
 		// partWritten.subscribe() is required in order to make sure MultipartHttpOutputMessage#getBody()
 		// returns a non-null value (occurs with ResourceHttpMessageWriter that invokes

@@ -17,7 +17,10 @@
 package org.springframework.http.client;
 
 import org.junit.Test;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
@@ -34,23 +37,25 @@ public class MultipartBodyBuilderTests {
 
 	@Test
 	public void builder() throws Exception {
-		MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
-		form.add("form field", "form value");
+		MultiValueMap<String, String> multipartData = new LinkedMultiValueMap<>();
+		multipartData.add("form field", "form value");
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.add("foo", "bar");
 		HttpEntity<String> entity = new HttpEntity<>("body", entityHeaders);
+		Publisher<String> publisher = Flux.just("foo", "bar", "baz");
 
 		MultipartBodyBuilder builder = new MultipartBodyBuilder();
-		builder.part("key", form).header("foo", "bar");
+		builder.part("key", multipartData).header("foo", "bar");
 		builder.part("logo", logo).header("baz", "qux");
 		builder.part("entity", entity).header("baz", "qux");
+		builder.asyncPart("publisher", publisher, String.class).header("baz", "qux");
 
 		MultiValueMap<String, HttpEntity<?>> result = builder.build();
 
-		assertEquals(3, result.size());
+		assertEquals(4, result.size());
 		assertNotNull(result.getFirst("key"));
-		assertEquals(form, result.getFirst("key").getBody());
+		assertEquals(multipartData, result.getFirst("key").getBody());
 		assertEquals("bar", result.getFirst("key").getHeaders().getFirst("foo"));
 
 		assertNotNull(result.getFirst("logo"));
@@ -59,6 +64,12 @@ public class MultipartBodyBuilderTests {
 
 		assertNotNull(result.getFirst("entity"));
 		assertEquals("body", result.getFirst("entity").getBody());
+		assertEquals("bar", result.getFirst("entity").getHeaders().getFirst("foo"));
+		assertEquals("qux", result.getFirst("entity").getHeaders().getFirst("baz"));
+
+		assertNotNull(result.getFirst("publisher"));
+		assertEquals(publisher, result.getFirst("publisher").getBody());
+		assertEquals(ResolvableType.forClass(String.class), result.getFirst("publisher").getBodyType());
 		assertEquals("bar", result.getFirst("entity").getHeaders().getFirst("foo"));
 		assertEquals("qux", result.getFirst("entity").getHeaders().getFirst("baz"));
 	}
