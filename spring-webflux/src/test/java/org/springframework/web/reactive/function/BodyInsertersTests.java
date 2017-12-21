@@ -53,6 +53,7 @@ import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -89,6 +90,7 @@ public class BodyInsertersTests {
 		messageWriters.add(new ServerSentEventHttpMessageWriter(jsonEncoder));
 		messageWriters.add(new FormHttpMessageWriter());
 		messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
+		messageWriters.add(new MultipartHttpMessageWriter(messageWriters));
 
 		this.context = new BodyInserter.Context() {
 			@Override
@@ -299,6 +301,22 @@ public class BodyInsertersTests {
 				})
 				.expectComplete()
 				.verify();
+
+	}
+
+	@Test
+	public void fromMultipartData() throws Exception {
+		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+		map.set("name 3", "value 3");
+
+		BodyInserters.FormInserter<Object> inserter =
+				BodyInserters.fromMultipartData("name 1", "value 1")
+						.withPublisher("name 2", Flux.just("foo", "bar", "baz"), String.class)
+						.with(map);
+
+		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("http://example.com"));
+		Mono<Void> result = inserter.insert(request, this.context);
+		StepVerifier.create(result).expectComplete().verify();
 
 	}
 
