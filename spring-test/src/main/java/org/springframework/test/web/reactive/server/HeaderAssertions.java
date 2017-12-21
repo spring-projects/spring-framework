@@ -25,12 +25,15 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 
-import static org.springframework.test.util.AssertionErrors.*;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.springframework.test.util.AssertionErrors.fail;
 
 /**
  * Assertions on headers of the response.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  * @see WebTestClient.ResponseSpec#expectHeader()
  */
@@ -72,6 +75,17 @@ public class HeaderAssertions {
 	}
 
 	/**
+	 * Expect that the header with the given name is not present.
+	 */
+	public WebTestClient.ResponseSpec doesNotExist(String name) {
+		if (getHeaders().containsKey(name)) {
+			String message = getMessage(name) + " exists with value=[" + getHeaders().getFirst(name) + "]";
+			this.exchangeResult.assertWithDiagnostics(() -> fail(message));
+		}
+		return this.responseSpec;
+	}
+
+	/**
 	 * Expect a "Cache-Control" header with the given value.
 	 */
 	public WebTestClient.ResponseSpec cacheControl(CacheControl cacheControl) {
@@ -97,6 +111,32 @@ public class HeaderAssertions {
 	 */
 	public WebTestClient.ResponseSpec contentType(MediaType mediaType) {
 		return assertHeader("Content-Type", mediaType, getHeaders().getContentType());
+	}
+
+	/**
+	 * Expect a "Content-Type" header with the given value.
+	 */
+	public WebTestClient.ResponseSpec contentType(String mediaType) {
+		return contentType(MediaType.parseMediaType(mediaType));
+	}
+
+	/**
+	 * Expect a "Content-Type" header compatible with the given value.
+	 */
+	public WebTestClient.ResponseSpec contentTypeCompatibleWith(MediaType mediaType) {
+		MediaType actual = getHeaders().getContentType();
+		String message = getMessage("Content-Type") + "=[" + actual.toString() + "]"
+				+ " is not compatible with [" + mediaType.toString() + "]";
+		this.exchangeResult.assertWithDiagnostics(() ->
+				assertTrue(message, actual.isCompatibleWith(mediaType)));
+		return this.responseSpec;
+	}
+
+	/**
+	 * Expect a "Content-Type" header compatible with the given value.
+	 */
+	public WebTestClient.ResponseSpec contentTypeCompatibleWith(String mediaType) {
+		return contentTypeCompatibleWith(MediaType.parseMediaType(mediaType));
 	}
 
 	/**
