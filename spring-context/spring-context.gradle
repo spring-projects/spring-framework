@@ -23,7 +23,7 @@ dependencies {
 	optional("org.hibernate:hibernate-validator:5.4.2.Final")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
-	testCompile("org.apache.commons:commons-pool2:2.4.3")
+	testCompile("org.apache.commons:commons-pool2:2.5.0")
 	testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
 	testCompile("javax.inject:javax.inject-tck:1")
 	testRuntime("javax.xml.bind:jaxb-api:2.3.0")
