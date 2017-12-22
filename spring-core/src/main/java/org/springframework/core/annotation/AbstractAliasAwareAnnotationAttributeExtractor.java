@@ -21,8 +21,8 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -57,10 +57,8 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements Anno
 	 * @param source the underlying source of annotation attributes; never {@code null}
 	 */
 	AbstractAliasAwareAnnotationAttributeExtractor(
-			Class<? extends Annotation> annotationType, @Nullable Object annotatedElement, S source) {
+			@NonNull Class<? extends Annotation> annotationType, @Nullable Object annotatedElement, @NonNull S source) {
 
-		Assert.notNull(annotationType, "annotationType must not be null");
-		Assert.notNull(source, "source must not be null");
 		this.annotationType = annotationType;
 		this.annotatedElement = annotatedElement;
 		this.source = source;
