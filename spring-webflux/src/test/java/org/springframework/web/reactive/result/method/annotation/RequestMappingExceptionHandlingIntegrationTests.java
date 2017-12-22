@@ -77,10 +77,6 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 
 	@Test // SPR-16051
 	public void exceptionAfterSeveralItems() throws Exception {
-
-		// TODO: uncomment and try after https://github.com/reactor/reactor-netty/issues/231
-		Assume.assumeFalse(server instanceof ReactorHttpServer);
-
 		try {
 			performGet("/SPR-16051", new HttpHeaders(), String.class).getBody();
 			fail();
