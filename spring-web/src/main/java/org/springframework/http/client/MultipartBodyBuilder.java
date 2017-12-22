@@ -143,8 +143,8 @@ public final class MultipartBodyBuilder {
 		Assert.notNull(elementType, "'elementType' must not be null");
 
 		HttpHeaders partHeaders = new HttpHeaders();
-		PublisherClassPartBuilder<T, P> builder =
-				new PublisherClassPartBuilder<>(publisher, elementClass, partHeaders);
+		PublisherPartBuilder<T, P> builder =
+				new PublisherPartBuilder<>(publisher, elementClass, partHeaders);
 		this.parts.add(name, builder);
 		return builder;
 
@@ -155,21 +155,21 @@ public final class MultipartBodyBuilder {
 	 * the returned {@link PartBuilder}.
 	 * @param name the name of the part to add (may not be empty)
 	 * @param publisher the contents of the part to add
-	 * @param elementType the type of elements contained in the publisher
+	 * @param typeReference the type of elements contained in the publisher
 	 * @return a builder that allows for further header customization
 	 */
 	public <T, P extends Publisher<T>> PartBuilder asyncPart(String name, P publisher,
-			ParameterizedTypeReference<T> elementType) {
+			ParameterizedTypeReference<T> typeReference) {
 
-		Assert.notNull(elementType, "'elementType' must not be null");
-		ResolvableType elementType1 = ResolvableType.forType(elementType);
+		Assert.notNull(typeReference, "'typeReference' must not be null");
+		ResolvableType elementType1 = ResolvableType.forType(typeReference);
 		Assert.hasLength(name, "'name' must not be empty");
 		Assert.notNull(publisher, "'publisher' must not be null");
-		Assert.notNull(elementType1, "'elementType' must not be null");
+		Assert.notNull(elementType1, "'typeReference' must not be null");
 
 		HttpHeaders partHeaders = new HttpHeaders();
-		PublisherTypReferencePartBuilder<T, P> builder =
-				new PublisherTypReferencePartBuilder<>(publisher, elementType, partHeaders);
+		PublisherPartBuilder<T, P> builder =
+				new PublisherPartBuilder<>(publisher, typeReference, partHeaders);
 		this.parts.add(name, builder);
 		return builder;
 	}
@@ -213,43 +213,57 @@ public final class MultipartBodyBuilder {
 		}
 	}
 
-	private static class PublisherClassPartBuilder<S, P extends Publisher<S>>
+	private static class PublisherPartBuilder<S, P extends Publisher<S>>
 			extends DefaultPartBuilder {
 
-		private final Class<S> bodyType;
+		private final ResolvableType resolvableType;
 
-		public PublisherClassPartBuilder(P body, Class<S> bodyType, HttpHeaders headers) {
+		public PublisherPartBuilder(P body, Class<S> elementClass, HttpHeaders headers) {
 			super(body, headers);
-			this.bodyType = bodyType;
+			this.resolvableType = ResolvableType.forClass(elementClass);
 		}
 
-		@Override
-		@SuppressWarnings("unchecked")
-		public HttpEntity<?> build() {
-			P body = (P) this.body;
-			Assert.state(body != null, "'body' must not be null");
-			return HttpEntity.fromPublisher(body, this.bodyType, this.headers);
-		}
-	}
-
-	private static class PublisherTypReferencePartBuilder<S, P extends Publisher<S>>
-			extends DefaultPartBuilder {
-
-		private final ParameterizedTypeReference<S> bodyType;
-
-		public PublisherTypReferencePartBuilder(P body, ParameterizedTypeReference<S> bodyType,
+		public PublisherPartBuilder(P body, ParameterizedTypeReference<S> typeReference,
 				HttpHeaders headers) {
 
 			super(body, headers);
-			this.bodyType = bodyType;
+			this.resolvableType = ResolvableType.forType(typeReference);
 		}
 
 		@Override
 		@SuppressWarnings("unchecked")
 		public HttpEntity<?> build() {
-			P body = (P) this.body;
-			Assert.state(body != null, "'body' must not be null");
-			return HttpEntity.fromPublisher(body, this.bodyType, this.headers);
+			P publisher = (P) this.body;
+			Assert.state(publisher != null, "'publisher' must not be null");
+			return new PublisherEntity<>(publisher, this.resolvableType, this.headers);
+		}
+	}
+
+
+	/**
+	 * Specific subtype of {@link HttpEntity} for containing {@link Publisher}s as body.
+	 * Exposes the type contained in the publisher through {@link #getResolvableType()}.
+	 * @param <T> The type contained in the publisher
+	 * @param <P> The publisher
+	 */
+	public static final class PublisherEntity<T, P extends Publisher<T>> extends HttpEntity<P> {
+
+		private final ResolvableType resolvableType;
+
+
+		PublisherEntity(P publisher, ResolvableType resolvableType,
+				@Nullable MultiValueMap<String, String> headers) {
+			super(publisher, headers);
+			Assert.notNull(publisher, "'publisher' must not be null");
+			Assert.notNull(resolvableType, "'resolvableType' must not be null");
+			this.resolvableType = resolvableType;
+		}
+
+		/**
+		 * Return the resolvable type for this entry.
+		 */
+		public ResolvableType getResolvableType() {
+			return this.resolvableType;
 		}
 	}
 

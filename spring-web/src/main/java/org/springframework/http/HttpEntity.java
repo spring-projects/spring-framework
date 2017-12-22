@@ -16,12 +16,7 @@
 
 package org.springframework.http;
 
-import org.reactivestreams.Publisher;
-
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
@@ -72,9 +67,6 @@ public class HttpEntity<T> {
 	@Nullable
 	private final T body;
 
-	@Nullable
-	private final ResolvableType bodyType;
-
 
 	/**
 	 * Create a new, empty {@code HttpEntity}.
@@ -105,18 +97,7 @@ public class HttpEntity<T> {
 	 * @param headers the entity headers
 	 */
 	public HttpEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers) {
-		this(body, null, headers);
-	}
-
-	private HttpEntity(@Nullable T body, @Nullable ResolvableType bodyType,
-			@Nullable MultiValueMap<String, String> headers) {
 		this.body = body;
-
-		if (bodyType == null && body != null) {
-			bodyType = ResolvableType.forClass(body.getClass());
-		}
-		this.bodyType = bodyType ;
-
 		HttpHeaders tempHeaders = new HttpHeaders();
 		if (headers != null) {
 			tempHeaders.putAll(headers);
@@ -147,13 +128,6 @@ public class HttpEntity<T> {
 		return (this.body != null);
 	}
 
-	/**
-	 * Returns the type of the body.
-	 */
-	@Nullable
-	public ResolvableType getBodyType() {
-		return this.bodyType;
-	}
 
 	@Override
 	public boolean equals(@Nullable Object other) {
@@ -183,46 +157,6 @@ public class HttpEntity<T> {
 		builder.append(this.headers);
 		builder.append('>');
 		return builder.toString();
-	}
-
-
-	// Static builder methods
-
-	/**
-	 * Create a new {@code HttpEntity} with the given {@link Publisher} as body, class contained in
-	 * {@code publisher}, and headers.
-	 * @param publisher the publisher to use as body
-	 * @param elementClass the class of elements contained in the publisher
-	 * @param headers the entity headers
-	 * @param <S> the type of the elements contained in the publisher
-	 * @param <P> the type of the {@code Publisher}
-	 * @return the created entity
-	 */
-	public static <S, P extends Publisher<S>> HttpEntity<P> fromPublisher(P publisher,
-			Class<S> elementClass, @Nullable MultiValueMap<String, String> headers) {
-
-		Assert.notNull(publisher, "'publisher' must not be null");
-		Assert.notNull(elementClass, "'elementClass' must not be null");
-		return new HttpEntity<>(publisher, ResolvableType.forClass(elementClass), headers);
-	}
-
-	/**
-	 * Create a new {@code HttpEntity} with the given {@link Publisher} as body, type contained in
-	 * {@code publisher}, and headers.
-	 * @param publisher the publisher to use as body
-	 * @param typeReference the type of elements contained in the publisher
-	 * @param headers the entity headers
-	 * @param <S> the type of the elements contained in the publisher
-	 * @param <P> the type of the {@code Publisher}
-	 * @return the created entity
-	 */
-	public static <S, P extends Publisher<S>> HttpEntity<P> fromPublisher(P publisher,
-			ParameterizedTypeReference<S> typeReference,
-			@Nullable MultiValueMap<String, String> headers) {
-
-		Assert.notNull(publisher, "'publisher' must not be null");
-		Assert.notNull(typeReference, "'typeReference' must not be null");
-		return new HttpEntity<>(publisher, ResolvableType.forType(typeReference), headers);
 	}
 
 }

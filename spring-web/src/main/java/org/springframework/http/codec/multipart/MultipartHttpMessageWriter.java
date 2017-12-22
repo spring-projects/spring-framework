@@ -44,6 +44,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.FormHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
@@ -230,20 +231,25 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 		MultipartHttpOutputMessage outputMessage = new MultipartHttpOutputMessage(this.bufferFactory, getCharset());
 
 		T body;
-		ResolvableType bodyType = null;
+		ResolvableType resolvableType = null;
 		if (value instanceof HttpEntity) {
 			HttpEntity<T> httpEntity = (HttpEntity<T>) value;
 			outputMessage.getHeaders().putAll(httpEntity.getHeaders());
 			body = httpEntity.getBody();
 			Assert.state(body != null, "MultipartHttpMessageWriter only supports HttpEntity with body");
-			bodyType = httpEntity.getBodyType();
+
+			if (httpEntity instanceof MultipartBodyBuilder.PublisherEntity<?, ?>) {
+				MultipartBodyBuilder.PublisherEntity<?, ?> publisherEntity =
+						(MultipartBodyBuilder.PublisherEntity<?, ?>) httpEntity;
+				resolvableType = publisherEntity.getResolvableType();
+			}
 		}
 		else {
 			body = value;
 		}
 
-		if (bodyType == null) {
-			bodyType = ResolvableType.forClass(body.getClass());
+		if (resolvableType == null) {
+			resolvableType = ResolvableType.forClass(body.getClass());
 		}
 
 		String filename = (body instanceof Resource ? ((Resource) body).getFilename() : null);
@@ -251,7 +257,7 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 
 		MediaType contentType = outputMessage.getHeaders().getContentType();
 
-		final ResolvableType finalBodyType = bodyType;
+		final ResolvableType finalBodyType = resolvableType;
 		Optional<HttpMessageWriter<?>> writer = this.partWriters.stream()
 				.filter(partWriter -> partWriter.canWrite(finalBodyType, contentType))
 				.findFirst();
@@ -264,7 +270,7 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 				body instanceof Publisher ? (Publisher<T>) body : Mono.just(body);
 
 		Mono<Void> partWritten = ((HttpMessageWriter<T>) writer.get())
-				.write(bodyPublisher, bodyType, contentType, outputMessage, Collections.emptyMap());
+				.write(bodyPublisher, resolvableType, contentType, outputMessage, Collections.emptyMap());
 
 		// partWritten.subscribe() is required in order to make sure MultipartHttpOutputMessage#getBody()
 		// returns a non-null value (occurs with ResourceHttpMessageWriter that invokes

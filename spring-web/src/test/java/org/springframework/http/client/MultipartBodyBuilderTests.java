@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -49,11 +50,12 @@ public class MultipartBodyBuilderTests {
 		builder.part("key", multipartData).header("foo", "bar");
 		builder.part("logo", logo).header("baz", "qux");
 		builder.part("entity", entity).header("baz", "qux");
-		builder.asyncPart("publisher", publisher, String.class).header("baz", "qux");
+		builder.asyncPart("publisherClass", publisher, String.class).header("baz", "qux");
+		builder.asyncPart("publisherPtr", publisher, new ParameterizedTypeReference<String>() {}).header("baz", "qux");
 
 		MultiValueMap<String, HttpEntity<?>> result = builder.build();
 
-		assertEquals(4, result.size());
+		assertEquals(5, result.size());
 		assertNotNull(result.getFirst("key"));
 		assertEquals(multipartData, result.getFirst("key").getBody());
 		assertEquals("bar", result.getFirst("key").getHeaders().getFirst("foo"));
@@ -67,11 +69,15 @@ public class MultipartBodyBuilderTests {
 		assertEquals("bar", result.getFirst("entity").getHeaders().getFirst("foo"));
 		assertEquals("qux", result.getFirst("entity").getHeaders().getFirst("baz"));
 
-		assertNotNull(result.getFirst("publisher"));
-		assertEquals(publisher, result.getFirst("publisher").getBody());
-		assertEquals(ResolvableType.forClass(String.class), result.getFirst("publisher").getBodyType());
-		assertEquals("bar", result.getFirst("entity").getHeaders().getFirst("foo"));
-		assertEquals("qux", result.getFirst("entity").getHeaders().getFirst("baz"));
+		assertNotNull(result.getFirst("publisherClass"));
+		assertEquals(publisher, result.getFirst("publisherClass").getBody());
+		assertEquals(ResolvableType.forClass(String.class), ((MultipartBodyBuilder.PublisherEntity<?,?>) result.getFirst("publisherClass")).getResolvableType());
+		assertEquals("qux", result.getFirst("publisherClass").getHeaders().getFirst("baz"));
+
+		assertNotNull(result.getFirst("publisherPtr"));
+		assertEquals(publisher, result.getFirst("publisherPtr").getBody());
+		assertEquals(ResolvableType.forClass(String.class), ((MultipartBodyBuilder.PublisherEntity<?,?>) result.getFirst("publisherPtr")).getResolvableType());
+		assertEquals("qux", result.getFirst("publisherPtr").getHeaders().getFirst("baz"));
 	}
 
 
