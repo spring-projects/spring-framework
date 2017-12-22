@@ -31,6 +31,7 @@ import java.util.Set;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -1100,137 +1101,190 @@ public class AnnotatedElementUtils {
 
 		if (visited.add(element)) {
 			try {
-				// Locally declared annotations (ignoring @Inherited)
-				Annotation[] annotations = element.getDeclaredAnnotations();
-				List<T> aggregatedResults = (processor.aggregates() ? new ArrayList<>() : null);
+				return doSearchWithFindSemantics(element, annotationType, annotationName,
+						containerType, processor, visited, metaDepth);
+			}
+			catch (Throwable ex) {
+				AnnotationUtils.handleIntrospectionFailure(element, ex);
+			}
+		}
+		return null;
+	}
 
-				// Search in local annotations
-				for (Annotation annotation : annotations) {
-					Class<? extends Annotation> currentAnnotationType = annotation.annotationType();
-					if (!AnnotationUtils.isInJavaLangAnnotationPackage(currentAnnotationType)) {
-						if (currentAnnotationType == annotationType ||
-								currentAnnotationType.getName().equals(annotationName) ||
-								processor.alwaysProcesses()) {
-							T result = processor.process(element, annotation, metaDepth);
-							if (result != null) {
-								if (aggregatedResults != null && metaDepth == 0) {
-									aggregatedResults.add(result);
-								}
-								else {
-									return result;
-								}
-							}
-						}
-						// Repeatable annotations in container?
-						else if (currentAnnotationType == containerType) {
-							for (Annotation contained : getRawAnnotationsFromContainer(element, annotation)) {
-								T result = processor.process(element, contained, metaDepth);
-								if (aggregatedResults != null && result != null) {
-									// No need to post-process since repeatable annotations within a
-									// container cannot be composed annotations.
-									aggregatedResults.add(result);
-								}
-							}
-						}
-					}
-				}
+	private static <T> T doSearchWithFindSemantics(AnnotatedElement element,
+			@Nullable Class<? extends Annotation> annotationType, @Nullable String annotationName,
+			@Nullable Class<? extends Annotation> containerType, Processor<T> processor,
+			Set<AnnotatedElement> visited, int metaDepth) {
 
-				// Search in meta annotations on local annotations
-				for (Annotation annotation : annotations) {
-					Class<? extends Annotation> currentAnnotationType = annotation.annotationType();
-					if (!AnnotationUtils.isInJavaLangAnnotationPackage(currentAnnotationType)) {
-						T result = searchWithFindSemantics(currentAnnotationType, annotationType, annotationName,
-								containerType, processor, visited, metaDepth + 1);
-						if (result != null) {
-							processor.postProcess(currentAnnotationType, annotation, result);
-							if (aggregatedResults != null && metaDepth == 0) {
-								aggregatedResults.add(result);
-							}
-							else {
-								return result;
-							}
-						}
-					}
-				}
+		// Locally declared annotations (ignoring @Inherited)
+		Annotation[] annotations = element.getDeclaredAnnotations();
+		List<T> aggregatedResults = (processor.aggregates() ? new ArrayList<>() : null);
 
-				if (aggregatedResults != null) {
-					// Prepend to support top-down ordering within class hierarchies
-					processor.getAggregatedResults().addAll(0, aggregatedResults);
-				}
+		T result = doSearchWithFindSemanticsInLocalAnnotations(element, annotationType,
+				annotationName, containerType, processor, metaDepth, annotations,
+				aggregatedResults);
+		if (result != null) {
+			return result;
+		}
+		result = doSearchWithFindSemanticsInMetaAnnotationsOnLocalAnnotations(element,
+				annotationType, annotationName, containerType, processor, visited,
+				metaDepth, annotations, aggregatedResults);
+		if (result != null) {
+			return result;
+		}
 
-				if (element instanceof Method) {
-					Method method = (Method) element;
+		if (aggregatedResults != null) {
+			// Prepend to support top-down ordering within class hierarchies
+			processor.getAggregatedResults().addAll(0, aggregatedResults);
+		}
 
-					// Search on possibly bridged method
-					Method resolvedMethod = BridgeMethodResolver.findBridgedMethod(method);
-					T result = searchWithFindSemantics(resolvedMethod, annotationType, annotationName, containerType,
-							processor, visited, metaDepth);
+		if (element instanceof Method) {
+			return doSearchWithFindSemanticsOnMethod((Method) element, annotationType,
+					annotationName, containerType, processor, visited, metaDepth);
+		}
+		else if (element instanceof Class) {
+			return doSearchWithFindSemanticsOnClass((Class<?>) element, annotationType,
+					annotationName, containerType, processor, visited, metaDepth);
+		}
+		else {
+			return null;
+		}
+	}
+
+	private static <T> T doSearchWithFindSemanticsInLocalAnnotations(
+			AnnotatedElement element,
+			@Nullable Class<? extends Annotation> annotationType,
+			@Nullable String annotationName,
+			@Nullable Class<? extends Annotation> containerType, Processor<T> processor,
+			int metaDepth, Annotation[] annotations, List<T> aggregatedResults) {
+
+		for (Annotation annotation : annotations) {
+			Class<? extends Annotation> currentAnnotationType = annotation.annotationType();
+			if (!AnnotationUtils.isInJavaLangAnnotationPackage(currentAnnotationType)) {
+				if (currentAnnotationType == annotationType ||
+						currentAnnotationType.getName().equals(annotationName) ||
+						processor.alwaysProcesses()) {
+					T result = processor.process(element, annotation, metaDepth);
 					if (result != null) {
-						return result;
-					}
-
-					// Search on methods in interfaces declared locally
-					Class<?>[] ifcs = method.getDeclaringClass().getInterfaces();
-					result = searchOnInterfaces(method, annotationType, annotationName, containerType, processor,
-							visited, metaDepth, ifcs);
-					if (result != null) {
-						return result;
-					}
-
-					// Search on methods in class hierarchy and interface hierarchy
-					Class<?> clazz = method.getDeclaringClass();
-					while (true) {
-						clazz = clazz.getSuperclass();
-						if (clazz == null || Object.class == clazz) {
-							break;
+						if (aggregatedResults != null && metaDepth == 0) {
+							aggregatedResults.add(result);
 						}
-
-						try {
-							Method equivalentMethod = clazz.getDeclaredMethod(method.getName(), method.getParameterTypes());
-							Method resolvedEquivalentMethod = BridgeMethodResolver.findBridgedMethod(equivalentMethod);
-							result = searchWithFindSemantics(resolvedEquivalentMethod, annotationType, annotationName,
-									containerType, processor, visited, metaDepth);
-							if (result != null) {
-								return result;
-							}
-						}
-						catch (NoSuchMethodException ex) {
-							// No equivalent method found
-						}
-
-						// Search on interfaces declared on superclass
-						result = searchOnInterfaces(method, annotationType, annotationName, containerType, processor,
-								visited, metaDepth, clazz.getInterfaces());
-						if (result != null) {
+						else {
 							return result;
 						}
 					}
 				}
-				else if (element instanceof Class) {
-					Class<?> clazz = (Class<?>) element;
-
-					// Search on interfaces
-					for (Class<?> ifc : clazz.getInterfaces()) {
-						T result = searchWithFindSemantics(ifc, annotationType, annotationName, containerType,
-								processor, visited, metaDepth);
-						if (result != null) {
-							return result;
-						}
-					}
-
-					// Search on superclass
-					Class<?> superclass = clazz.getSuperclass();
-					if (superclass != null && Object.class != superclass) {
-						T result = searchWithFindSemantics(superclass, annotationType, annotationName, containerType,
-								processor, visited, metaDepth);
-						if (result != null) {
-							return result;
+				// Repeatable annotations in container?
+				else if (currentAnnotationType == containerType) {
+					for (Annotation contained : getRawAnnotationsFromContainer(element, annotation)) {
+						T result = processor.process(element, contained, metaDepth);
+						if (aggregatedResults != null && result != null) {
+							// No need to post-process since repeatable annotations within a
+							// container cannot be composed annotations.
+							aggregatedResults.add(result);
 						}
 					}
 				}
 			}
-			catch (Throwable ex) {
-				AnnotationUtils.handleIntrospectionFailure(element, ex);
+		}
+		return null;
+	}
+
+	private static <T> T doSearchWithFindSemanticsInMetaAnnotationsOnLocalAnnotations(
+			AnnotatedElement element, Class<? extends Annotation> annotationType,
+			String annotationName, Class<? extends Annotation> containerType,
+			Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth,
+			Annotation[] annotations, List<T> aggregatedResults) {
+
+		// Search in meta annotations on local annotations
+		for (Annotation annotation : annotations) {
+			Class<? extends Annotation> currentAnnotationType = annotation.annotationType();
+			if (!AnnotationUtils.isInJavaLangAnnotationPackage(currentAnnotationType)) {
+				T result = searchWithFindSemantics(currentAnnotationType, annotationType, annotationName,
+						containerType, processor, visited, metaDepth + 1);
+				if (result != null) {
+					processor.postProcess(currentAnnotationType, annotation, result);
+					if (aggregatedResults != null && metaDepth == 0) {
+						aggregatedResults.add(result);
+					}
+					else {
+						return result;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	private static <T> T doSearchWithFindSemanticsOnMethod(Method method,
+			@Nullable Class<? extends Annotation> annotationType, @Nullable String annotationName,
+			@Nullable Class<? extends Annotation> containerType, Processor<T> processor,
+			Set<AnnotatedElement> visited, int metaDepth) {
+		// Search on possibly bridged method
+		Method resolvedMethod = BridgeMethodResolver.findBridgedMethod(method);
+		T result = searchWithFindSemantics(resolvedMethod, annotationType, annotationName, containerType,
+				processor, visited, metaDepth);
+		if (result != null) {
+			return result;
+		}
+
+		// Search on methods in interfaces declared locally
+		Class<?>[] ifcs = method.getDeclaringClass().getInterfaces();
+		result = searchOnInterfaces(method, annotationType, annotationName, containerType, processor,
+				visited, metaDepth, ifcs);
+		if (result != null) {
+			return result;
+		}
+
+		// Search on methods in class hierarchy and interface hierarchy
+		Class<?> clazz = method.getDeclaringClass();
+		while (true) {
+			clazz = clazz.getSuperclass();
+			if (clazz == null || Object.class == clazz) {
+				break;
+			}
+
+			Method equivalentMethod = findEquivalentMethod(clazz, method);
+			if (equivalentMethod != null) {
+				Method resolvedEquivalentMethod = BridgeMethodResolver.findBridgedMethod(equivalentMethod);
+				result = searchWithFindSemantics(resolvedEquivalentMethod, annotationType, annotationName,
+						containerType, processor, visited, metaDepth);
+				if (result != null) {
+					return result;
+				}
+			}
+
+			// Search on interfaces declared on superclass
+			result = searchOnInterfaces(method, annotationType, annotationName, containerType, processor,
+					visited, metaDepth, clazz.getInterfaces());
+			if (result != null) {
+				return result;
+			}
+		}
+		return null;
+	}
+
+	private static <T> T doSearchWithFindSemanticsOnClass(		Class<?> clazz,
+			@Nullable Class<? extends Annotation> annotationType, @Nullable String annotationName,
+			@Nullable Class<? extends Annotation> containerType, Processor<T> processor,
+			Set<AnnotatedElement> visited, int metaDepth) {
+
+		// Search on interfaces
+		for (Class<?> ifc : clazz.getInterfaces()) {
+			T result = searchWithFindSemantics(ifc, annotationType, annotationName, containerType,
+					processor, visited, metaDepth);
+			if (result != null) {
+				return result;
+			}
+		}
+
+		// Search on superclass
+		Class<?> superclass = clazz.getSuperclass();
+		if (superclass != null && Object.class != superclass) {
+			T result = searchWithFindSemantics(superclass, annotationType, annotationName, containerType,
+					processor, visited, metaDepth);
+			if (result != null) {
+				return result;
 			}
 		}
 		return null;
@@ -1243,22 +1297,32 @@ public class AnnotatedElementUtils {
 
 		for (Class<?> iface : ifcs) {
 			if (AnnotationUtils.isInterfaceWithAnnotatedMethods(iface)) {
-				try {
-					Method equivalentMethod = iface.getMethod(method.getName(), method.getParameterTypes());
+				Method equivalentMethod = findEquivalentMethod(iface, method);
+				if (equivalentMethod != null) {
 					T result = searchWithFindSemantics(equivalentMethod, annotationType, annotationName, containerType,
 							processor, visited, metaDepth);
 					if (result != null) {
 						return result;
 					}
 				}
-				catch (NoSuchMethodException ex) {
-					// Skip this interface - it doesn't have the method...
-				}
 			}
 		}
 
 		return null;
 	}
+
+	private static Method findEquivalentMethod(Class<?> clazz, Method method) {
+		Method[] candidates = clazz.getDeclaredMethods();
+		for (Method candidate : candidates) {
+			if (candidate.getName().equals(method.getName()) &&
+					candidate.getParameterCount() == method.getParameterCount() &&
+					Arrays.equals(candidate.getParameterTypes(), method.getParameterTypes())) {
+				return candidate;
+			}
+		}
+		return null;
+	}
+
 
 	/**
 	 * Get the array of raw (unsynthesized) annotations from the {@code value}
