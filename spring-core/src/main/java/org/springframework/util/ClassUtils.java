@@ -658,30 +658,35 @@ public abstract class ClassUtils {
 	 * @see Class#getMethod
 	 */
 	@Nullable
-	public static Method getMethodIfAvailable(Class<?> clazz, String methodName, @Nullable Class<?>... paramTypes) {
+	public static Method getMethodIfAvailable(Class<?> clazz, String methodName,
+			@Nullable Class<?>... paramTypes) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
-		if (paramTypes != null) {
-			try {
-				return clazz.getMethod(methodName, paramTypes);
-			}
-			catch (NoSuchMethodException ex) {
-				return null;
+		if (paramTypes == null) {
+			return findSingleMethod(clazz, methodName);
+		}
+		Method[] methods = clazz.getMethods();
+		for (Method method : methods) {
+			if (method.getName().equals(methodName)
+					&& Arrays.equals(method.getParameterTypes(), paramTypes)) {
+				return method;
 			}
 		}
-		else {
-			Set<Method> candidates = new HashSet<>(1);
-			Method[] methods = clazz.getMethods();
-			for (Method method : methods) {
-				if (methodName.equals(method.getName())) {
-					candidates.add(method);
-				}
+		return null;
+	}
+
+	private static Method findSingleMethod(Class<?> clazz, String methodName) {
+		Set<Method> candidates = new HashSet<>(1);
+		Method[] methods = clazz.getMethods();
+		for (Method method : methods) {
+			if (methodName.equals(method.getName())) {
+				candidates.add(method);
 			}
-			if (candidates.size() == 1) {
-				return candidates.iterator().next();
-			}
-			return null;
 		}
+		if (candidates.size() == 1) {
+			return candidates.iterator().next();
+		}
+		return null;
 	}
 
 	/**
