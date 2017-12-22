@@ -148,7 +148,7 @@ public class AspectMetadata implements Serializable {
 	}
 
 	/**
-	 * Return the aspect class.
+	 * Return the aspect name.
 	 */
 	public String getAspectName() {
 		return this.aspectName;
