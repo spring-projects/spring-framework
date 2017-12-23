@@ -809,7 +809,8 @@ public class BridgeMethodResolverTests {
 	@SuppressWarnings("unchecked")
 	public static class MessageBroadcasterImpl extends
 			GenericEventBroadcasterImpl<MessageEvent>
-					implements MessageBroadcaster {
+					implements Serializable,  // implement more that one interface, see SPR-16288
+			MessageBroadcaster {
 
 		public MessageBroadcasterImpl() {
 			super(NewMessageEvent.class);
