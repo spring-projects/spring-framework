@@ -91,7 +91,7 @@ public abstract class ResourceHolderSupport implements ResourceHolder {
 	 * @param seconds number of seconds until expiration
 	 */
 	public void setTimeoutInSeconds(int seconds) {
-		setTimeoutInMillis(seconds * 1000);
+		setTimeoutInMillis(seconds * 1000L);
 	}
 
 	/**
