@@ -401,6 +401,22 @@ public class UriComponentsBuilderTests {
 		assertEquals(-1, result.getPort());
 	}
 
+	@Test // SPR-16262
+	public void fromHttpRequestWithForwardedProtoWithDefaultPort() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setScheme("http");
+		request.setServerName("example.org");
+		request.setServerPort(10080);
+		request.addHeader("X-Forwarded-Proto", "https");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
+
+		assertEquals("https", result.getScheme());
+		assertEquals("example.org", result.getHost());
+		assertEquals(-1, result.getPort());
+	}
+
 
 	@Test
 	public void fromHttpRequestWithForwardedHostWithForwardedScheme() {
@@ -836,5 +852,24 @@ public class UriComponentsBuilderTests {
 		assertEquals("/rest/mobile/users/1", result.getPath());
 		assertEquals(-1, result.getPort());
 		assertEquals("https://84.198.58.199/rest/mobile/users/1", result.toUriString());
+	}
+
+	@Test  // SPR-16262
+	public void fromHttpRequestForwardedHeaderWithProtoAndServerPort() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader("Forwarded", "proto=https");
+		request.setScheme("http");
+		request.setServerPort(8080);
+		request.setServerName("example.com");
+		request.setRequestURI("/rest/mobile/users/1");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
+
+		assertEquals("https", result.getScheme());
+		assertEquals("example.com", result.getHost());
+		assertEquals("/rest/mobile/users/1", result.getPath());
+		assertEquals(-1, result.getPort());
+		assertEquals("https://example.com/rest/mobile/users/1", result.toUriString());
 	}
 }

@@ -812,7 +812,8 @@ public abstract class WebUtils {
 
 	/**
 	 * Check if the request is a same-origin one, based on {@code Origin}, {@code Host},
-	 * {@code Forwarded} and {@code X-Forwarded-Host} headers.
+	 * {@code Forwarded}, {@code X-Forwarded-Proto}, {@code X-Forwarded-Host} and
+	 * @code X-Forwarded-Port} headers.
 	 * @return {@code true} if the request is a same-origin one, {@code false} in case
 	 * of cross-origin request
 	 * @since 4.2
