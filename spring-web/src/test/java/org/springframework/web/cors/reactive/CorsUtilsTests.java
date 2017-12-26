@@ -66,4 +66,54 @@ public class CorsUtilsTests {
 		assertFalse(CorsUtils.isPreFlightRequest(request));
 	}
 
+	@Test  // SPR-16262
+	public void isSameOriginWithXForwardedHeaders() {
+		assertTrue(checkSameOriginWithXForwardedHeaders("mydomain1.com", -1, "https", null, -1, "https://mydomain1.com"));
+		assertTrue(checkSameOriginWithXForwardedHeaders("mydomain1.com", 123, "https", null, -1, "https://mydomain1.com"));
+		assertTrue(checkSameOriginWithXForwardedHeaders("mydomain1.com", -1, "https", "mydomain2.com", -1, "https://mydomain2.com"));
+		assertTrue(checkSameOriginWithXForwardedHeaders("mydomain1.com", 123, "https", "mydomain2.com", -1, "https://mydomain2.com"));
+		assertTrue(checkSameOriginWithXForwardedHeaders("mydomain1.com", -1, "https", "mydomain2.com", 456, "https://mydomain2.com:456"));
+		assertTrue(checkSameOriginWithXForwardedHeaders("mydomain1.com", 123, "https", "mydomain2.com", 456, "https://mydomain2.com:456"));
+	}
+
+	@Test  // SPR-16262
+	public void isSameOriginWithForwardedHeader() {
+		assertTrue(checkSameOriginWithForwardedHeader("mydomain1.com", -1, "proto=https", "https://mydomain1.com"));
+		assertTrue(checkSameOriginWithForwardedHeader("mydomain1.com", 123, "proto=https", "https://mydomain1.com"));
+		assertTrue(checkSameOriginWithForwardedHeader("mydomain1.com", -1, "proto=https; host=mydomain2.com", "https://mydomain2.com"));
+		assertTrue(checkSameOriginWithForwardedHeader("mydomain1.com", 123, "proto=https; host=mydomain2.com", "https://mydomain2.com"));
+		assertTrue(checkSameOriginWithForwardedHeader("mydomain1.com", -1, "proto=https; host=mydomain2.com:456", "https://mydomain2.com:456"));
+		assertTrue(checkSameOriginWithForwardedHeader("mydomain1.com", 123, "proto=https; host=mydomain2.com:456", "https://mydomain2.com:456"));
+	}
+
+	private boolean checkSameOriginWithXForwardedHeaders(String serverName, int port, String forwardedProto, String forwardedHost, int forwardedPort, String originHeader) {
+		String url = "http://" + serverName;
+		if (port != -1) {
+			url = url + ":" + port;
+		}
+		MockServerHttpRequest.BaseBuilder<?> builder = get(url)
+				.header(HttpHeaders.ORIGIN, originHeader);
+		if (forwardedProto != null) {
+			builder.header("X-Forwarded-Proto", forwardedProto);
+		}
+		if (forwardedHost != null) {
+			builder.header("X-Forwarded-Host", forwardedHost);
+		}
+		if (forwardedPort != -1) {
+			builder.header("X-Forwarded-Port", String.valueOf(forwardedPort));
+		}
+		return CorsUtils.isSameOrigin(builder.build());
+	}
+
+	private boolean checkSameOriginWithForwardedHeader(String serverName, int port, String forwardedHeader, String originHeader) {
+		String url = "http://" + serverName;
+		if (port != -1) {
+			url = url + ":" + port;
+		}
+		MockServerHttpRequest.BaseBuilder<?> builder = get(url)
+				.header("Forwarded", forwardedHeader)
+				.header(HttpHeaders.ORIGIN, originHeader);
+		return CorsUtils.isSameOrigin(builder.build());
+	}
+
 }
