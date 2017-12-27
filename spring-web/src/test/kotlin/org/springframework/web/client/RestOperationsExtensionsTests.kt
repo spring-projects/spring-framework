@@ -112,11 +112,18 @@ class RestOperationsExtensionsTests {
 	}
 
 	@Test
-	fun `patchForObject with reified type parameters`() {
+	fun `patchForObject with reified type parameters and String`() {
 		val url = "https://spring.io"
 		val body: Any = "body"
 		template.patchForObject<Foo>(url, body)
 		verify(template, times(1)).patchForObject(url, body, Foo::class.java)
+	}
+
+	@Test
+	fun `patchForObject with reified type parameters`() {
+		val url = "https://spring.io"
+		template.patchForObject<Foo>(url)
+		verify(template, times(1)).patchForObject(url, null, Foo::class.java)
 	}
 
 	@Test
@@ -139,11 +146,18 @@ class RestOperationsExtensionsTests {
 	}
 
 	@Test
-	fun `postForObject with reified type parameters`() {
+	fun `postForObject with reified type parameters and String`() {
 		val url = "https://spring.io"
 		val body: Any = "body"
 		template.postForObject<Foo>(url, body)
 		verify(template, times(1)).postForObject(url, body, Foo::class.java)
+	}
+
+	@Test
+	fun `postForObject with reified type parameters`() {
+		val url = "https://spring.io"
+		template.postForObject<Foo>(url)
+		verify(template, times(1)).postForObject(url, null, Foo::class.java)
 	}
 
 	@Test
@@ -166,11 +180,18 @@ class RestOperationsExtensionsTests {
 	}
 
 	@Test
-	fun `postForEntity with reified type parameters`() {
+	fun `postForEntity with reified type parameters and String`() {
 		val url = "https://spring.io"
 		val body: Any = "body"
 		template.postForEntity<Foo>(url, body)
 		verify(template, times(1)).postForEntity(url, body, Foo::class.java)
+	}
+
+	@Test
+	fun `postForEntity with reified type parameters`() {
+		val url = "https://spring.io"
+		template.postForEntity<Foo>(url)
+		verify(template, times(1)).postForEntity(url, null, Foo::class.java)
 	}
 
 	@Test
@@ -197,7 +218,7 @@ class RestOperationsExtensionsTests {
 	}
 
 	@Test
-	fun `exchange with reified type parameters, String, HttpMethod, HttpEntity`() {
+	fun `exchange with reified type parameters, String, HttpMethod and HttpEntity`() {
 		val url = "https://spring.io"
 		val method = HttpMethod.GET
 		val entity = mock<HttpEntity<Foo>>()
@@ -207,7 +228,16 @@ class RestOperationsExtensionsTests {
 	}
 
 	@Test
-	fun `exchange with reified type parameters, String, HttpEntity`() {
+	fun `exchange with reified type parameters, String and HttpMethod`() {
+		val url = "https://spring.io"
+		val method = HttpMethod.GET
+		template.exchange<List<Foo>>(url, method)
+		verify(template, times(1)).exchange(url, method, null,
+				object : ParameterizedTypeReference<List<Foo>>() {})
+	}
+
+	@Test
+	fun `exchange with reified type parameters, String and HttpEntity`() {
 		val entity = mock<RequestEntity<Foo>>()
 		template.exchange<List<Foo>>(entity)
 		verify(template, times(1)).exchange(entity,
