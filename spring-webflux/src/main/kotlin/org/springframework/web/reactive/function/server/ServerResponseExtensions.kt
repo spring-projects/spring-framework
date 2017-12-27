@@ -22,7 +22,9 @@ import org.springframework.http.MediaType
 import reactor.core.publisher.Mono
 
 /**
- * Extension for [ServerResponse.BodyBuilder.body] providing a `body(Publisher<T>)` variant.
+ * Extension for [ServerResponse.BodyBuilder.body] providing a `body(Publisher<T>)`
+ * variant. This extension is not subject to type erasure and retains actual generic
+ * type arguments.
  *
  * @author Sebastien Deleuze
  * @since 5.0
@@ -31,7 +33,9 @@ inline fun <reified T : Any> ServerResponse.BodyBuilder.body(publisher: Publishe
 		body(publisher, object : ParameterizedTypeReference<T>() {})
 
 /**
- * Extension for [ServerResponse.BodyBuilder.body] providing a `bodyToServerSentEvents(Publisher<T>)` variant.
+ * Extension for [ServerResponse.BodyBuilder.body] providing a
+ * `bodyToServerSentEvents(Publisher<T>)` variant. This extension is not subject to type
+ * erasure and retains actual generic type arguments.
  *
  * @author Sebastien Deleuze
  * @since 5.0

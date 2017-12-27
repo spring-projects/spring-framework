@@ -24,8 +24,10 @@ import org.springframework.http.ResponseEntity
 import java.net.URI
 
 /**
- * Extension for [RestOperations.getForObject] avoiding specifying the type
- * parameter thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.getForObject] providing a `getForObject<Foo>(...)`
+ * variant leveraging Kotlin reified type parameters. Like the original Java method, this
+ * extension is subject to type erasure. Use [exchange] if you need to retain actual
+ * generic type arguments.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -36,8 +38,10 @@ inline fun <reified T: Any> RestOperations.getForObject(url: String, vararg uriV
 		getForObject(url, T::class.java, *uriVariables)
 
 /**
- * Extension for [RestOperations.getForObject] avoiding specifying the type
- * parameter thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.getForObject] providing a `getForObject<Foo>(...)`
+ * variant leveraging Kotlin reified type parameters. Like the original Java method, this
+ * extension is subject to type erasure. Use [exchange] if you need to retain actual
+ * generic type arguments.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -48,8 +52,10 @@ inline fun <reified T: Any> RestOperations.getForObject(url: String, uriVariable
 		getForObject(url, T::class.java, uriVariables)
 
 /**
- * Extension for [RestOperations.getForObject] avoiding specifying the type parameter
- * thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.getForObject] providing a `getForObject<Foo>(...)`
+ * variant leveraging Kotlin reified type parameters. Like the original Java method, this
+ * extension is subject to type erasure. Use [exchange] if you need to retain actual
+ * generic type arguments.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -60,8 +66,10 @@ inline fun <reified T: Any> RestOperations.getForObject(url: URI): T? =
 		getForObject(url, T::class.java)
 
 /**
- * Extension for [RestOperations.getForEntity] avoiding requiring the type parameter
- * thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.getForEntity] providing a `getForEntity<Foo>(...)`
+ * variant leveraging Kotlin reified type parameters. Like the original Java method, this
+ * extension is subject to type erasure. Use [exchange] if you need to retain actual
+ * generic type arguments.
  *
  * @author Sebastien Deleuze
  * @since 5.0.2
@@ -71,8 +79,10 @@ inline fun <reified T: Any> RestOperations.getForEntity(url: URI): ResponseEntit
 		getForEntity(url, T::class.java)
 
 /**
- * Extension for [RestOperations.getForEntity] avoiding requiring the type parameter
- * thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.getForEntity] providing a `getForEntity<Foo>(...)`
+ * variant leveraging Kotlin reified type parameters. Like the original Java method, this
+ * extension is subject to type erasure. Use [exchange] if you need to retain actual
+ * generic type arguments.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -83,8 +93,10 @@ inline fun <reified T: Any> RestOperations.getForEntity(url: String, vararg uriV
 		getForEntity(url, T::class.java, *uriVariables)
 
 /**
- * Extension for [RestOperations.getForEntity] avoiding requiring the type parameter
- * thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.getForEntity] providing a `getForEntity<Foo>(...)`
+ * variant leveraging Kotlin reified type parameters. Like the original Java method, this
+ * extension is subject to type erasure. Use [exchange] if you need to retain actual
+ * generic type arguments.
  *
  * @author Sebastien Deleuze
  * @since 5.0.2
@@ -94,8 +106,10 @@ inline fun <reified T: Any> RestOperations.getForEntity(url: String, uriVariable
 		getForEntity(url, T::class.java, uriVariables)
 
 /**
- * Extension for [RestOperations.patchForObject] avoiding specifying the type parameter
- * thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.patchForObject] providing a `patchForObject<Foo>(...)`
+ * variant leveraging Kotlin reified type parameters. Like the original Java method, this
+ * extension is subject to type erasure. Use [exchange] if you need to retain actual
+ * generic type arguments.
  *
  * @author Sebastien Deleuze
  * @since 5.0.2
@@ -105,8 +119,10 @@ inline fun <reified T: Any> RestOperations.patchForObject(url: String, request: 
 		patchForObject(url, request, T::class.java, *uriVariables)
 
 /**
- * Extension for [RestOperations.patchForObject] avoiding specifying the type parameter
- * thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.patchForObject] providing a `patchForObject<Foo>(...)`
+ * variant leveraging Kotlin reified type parameters. Like the original Java method, this
+ * extension is subject to type erasure. Use [exchange] if you need to retain actual
+ * generic type arguments.
  *
  * @author Sebastien Deleuze
  * @since 5.0.2
@@ -116,8 +132,10 @@ inline fun <reified T: Any> RestOperations.patchForObject(url: String, request: 
 		patchForObject(url, request, T::class.java, uriVariables)
 
 /**
- * Extension for [RestOperations.patchForObject] avoiding specifying the type parameter
- * thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.patchForObject] providing a `patchForObject<Foo>(...)`
+ * variant leveraging Kotlin reified type parameters. Like the original Java method, this
+ * extension is subject to type erasure. Use [exchange] if you need to retain actual
+ * generic type arguments.
  *
  * @author Sebastien Deleuze
  * @since 5.0.2
@@ -127,8 +145,10 @@ inline fun <reified T: Any> RestOperations.patchForObject(url: URI, request: Any
 		patchForObject(url, request, T::class.java)
 
 /**
- * Extension for [RestOperations.postForObject] avoiding specifying the type parameter
- * thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.postForObject] providing a `postForObject<Foo>(...)`
+ * variant leveraging Kotlin reified type parameters. Like the original Java method, this
+ * extension is subject to type erasure. Use [exchange] if you need to retain actual
+ * generic type arguments.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -139,8 +159,10 @@ inline fun <reified T: Any> RestOperations.postForObject(url: String, request: A
 		postForObject(url, request, T::class.java, *uriVariables)
 
 /**
- * Extension for [RestOperations.postForObject] avoiding specifying the type parameter
- * thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.postForObject] providing a `postForObject<Foo>(...)`
+ * variant leveraging Kotlin reified type parameters. Like the original Java method, this
+ * extension is subject to type erasure. Use [exchange] if you need to retain actual
+ * generic type arguments.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -151,8 +173,10 @@ inline fun <reified T: Any> RestOperations.postForObject(url: String, request: A
 		postForObject(url, request, T::class.java, uriVariables)
 
 /**
- * Extension for [RestOperations.postForObject] avoiding specifying the type parameter
- * thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.postForObject] providing a `postForObject<Foo>(...)`
+ * variant leveraging Kotlin reified type parameters. Like the original Java method, this
+ * extension is subject to type erasure. Use [exchange] if you need to retain actual
+ * generic type arguments.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -163,8 +187,10 @@ inline fun <reified T: Any> RestOperations.postForObject(url: URI, request: Any)
 		postForObject(url, request, T::class.java)
 
 /**
- * Extension for [RestOperations.postForEntity] avoiding specifying the type parameter
- * thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.postForEntity] providing a `postForEntity<Foo>(...)`
+ * variant leveraging Kotlin reified type parameters. Like the original Java method, this
+ * extension is subject to type erasure. Use [exchange] if you need to retain actual
+ * generic type arguments.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -176,8 +202,10 @@ inline fun <reified T: Any> RestOperations.postForEntity(url: String, request: A
 		postForEntity(url, request, T::class.java, *uriVariables)
 
 /**
- * Extension for [RestOperations.postForEntity] avoiding specifying the type parameter
- * thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.postForEntity] providing a `postForEntity<Foo>(...)`
+ * variant leveraging Kotlin reified type parameters. Like the original Java method, this
+ * extension is subject to type erasure. Use [exchange] if you need to retain actual
+ * generic type arguments.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -189,8 +217,10 @@ inline fun <reified T: Any> RestOperations.postForEntity(url: String, request: A
 		postForEntity(url, request, T::class.java, uriVariables)
 
 /**
- * Extension for [RestOperations.postForEntity] avoiding specifying the type parameter
- * thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.postForEntity] providing a `postForEntity<Foo>(...)`
+ * variant leveraging Kotlin reified type parameters. Like the original Java method, this
+ * extension is subject to type erasure. Use [exchange] if you need to retain actual
+ * generic type arguments.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -201,8 +231,9 @@ inline fun <reified T: Any> RestOperations.postForEntity(url: URI, request: Any)
 		postForEntity(url, request, T::class.java)
 
 /**
- * Extension for [RestOperations.exchange] avoiding specifying the type parameter
- * thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.exchange] providing an `exchange<Foo>(...)`
+ * variant leveraging Kotlin reified type parameters. This extension is not subject to
+ * type erasure and retains actual generic type arguments.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -214,8 +245,9 @@ inline fun <reified T: Any> RestOperations.exchange(url: String, method: HttpMet
 		exchange(url, method, requestEntity, object : ParameterizedTypeReference<T>() {}, *uriVariables)
 
 /**
- * Extension for [RestOperations.exchange] avoiding specifying the type parameter
- * thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.exchange] providing an `exchange<Foo>(...)`
+ * variant leveraging Kotlin reified type parameters. This extension is not subject to
+ * type erasure and retains actual generic type arguments.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -227,8 +259,9 @@ inline fun <reified T: Any> RestOperations.exchange(url: String, method: HttpMet
 		exchange(url, method, requestEntity, object : ParameterizedTypeReference<T>() {}, uriVariables)
 
 /**
- * Extension for [RestOperations.exchange] avoiding specifying the type parameter
- * thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.exchange] providing an `exchange<Foo>(...)`
+ * variant leveraging Kotlin reified type parameters. This extension is not subject to
+ * type erasure and retains actual generic type arguments.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -240,8 +273,9 @@ inline fun <reified T: Any> RestOperations.exchange(url: URI, method: HttpMethod
 		exchange(url, method, requestEntity, object : ParameterizedTypeReference<T>() {})
 
 /**
- * Extension for [RestOperations.exchange] avoiding specifying the type parameter
- * thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.exchange] providing an `exchange<Foo>(...)`
+ * variant leveraging Kotlin reified type parameters. This extension is not subject to
+ * type erasure and retains actual generic type arguments.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze

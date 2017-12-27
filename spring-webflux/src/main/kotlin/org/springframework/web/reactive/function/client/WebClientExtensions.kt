@@ -25,7 +25,8 @@ import reactor.core.publisher.Mono
 
 /**
  * Extension for [WebClient.RequestBodySpec.body] providing a `body<Foo>()` variant
- * leveraging Kotlin reified type parameters.
+ * leveraging Kotlin reified type parameters. This extension is not subject to type
+ * erasure and retains actual generic type arguments.
  *
  * @author Sebastien Deleuze
  * @since 5.0
@@ -36,7 +37,8 @@ inline fun <reified T : Any, S : Publisher<T>> RequestBodySpec.body(publisher: S
 
 /**
  * Extension for [WebClient.ResponseSpec.bodyToMono] providing a `bodyToMono<Foo>()` variant
- * leveraging Kotlin reified type parameters.
+ * leveraging Kotlin reified type parameters. This extension is not subject to type
+ * erasure and retains actual generic type arguments.
  *
  * @author Sebastien Deleuze
  * @since 5.0
@@ -47,7 +49,8 @@ inline fun <reified T : Any> WebClient.ResponseSpec.bodyToMono(): Mono<T> =
 
 /**
  * Extension for [WebClient.ResponseSpec.bodyToFlux] providing a `bodyToFlux<Foo>()` variant
- * leveraging Kotlin reified type parameters.
+ * leveraging Kotlin reified type parameters. This extension is not subject to type
+ * erasure and retains actual generic type arguments.
  *
  * @author Sebastien Deleuze
  * @since 5.0
