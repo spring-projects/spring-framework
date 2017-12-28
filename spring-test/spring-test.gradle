@@ -61,7 +61,7 @@ dependencies {
 	optional("io.projectreactor:reactor-test")
 	testCompile(project(":spring-context-support"))
 	testCompile(project(":spring-oxm"))
-	testCompile("javax.cache:cache-api:1.0.0")
+	testCompile("javax.cache:cache-api:1.1.0")
 	testCompile("javax.ejb:javax.ejb-api:3.2")
 	testCompile("javax.interceptor:javax.interceptor-api:1.2.1")
 	testCompile("javax.mail:javax.mail-api:1.6.0")

@@ -8,8 +8,8 @@ dependencies {
 	optional(project(":spring-tx"))  // for Quartz support
 	optional("javax.activation:activation:1.1.1")
 	optional("javax.mail:javax.mail-api:1.6.0")
-	optional("javax.cache:cache-api:1.0.0")
-	optional("com.github.ben-manes.caffeine:caffeine:2.6.0")
+	optional("javax.cache:cache-api:1.1.0")
+	optional("com.github.ben-manes.caffeine:caffeine:2.6.1")
 	optional("net.sf.ehcache:ehcache:2.10.4")
 	optional("org.quartz-scheduler:quartz:2.3.0")
 	optional("org.codehaus.fabric3.api:commonj:1.1.0")
