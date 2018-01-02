@@ -22,11 +22,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import javax.sql.DataSource;
 
 import org.junit.Before;
@@ -61,6 +57,11 @@ public class NamedParameterJdbcTemplateTests {
 		"update seat_status set booking_id = null where performance_id = :perfId and price_band_id = :priceId";
 	private static final String UPDATE_NAMED_PARAMETERS_PARSED =
 		"update seat_status set booking_id = null where performance_id = ? and price_band_id = ?";
+
+	private static final String UPDATE_ARRAY_PARAMETERS =
+			"update customer set type = array[:typeIds] where id = :id";
+	private static final String UPDATE_ARRAY_PARAMETERS_PARSED =
+			"update customer set type = array[?, ?, ?] where id = ?";
 
 	private static final String[] COLUMN_NAMES = new String[] {"id", "forename"};
 
@@ -127,6 +128,31 @@ public class NamedParameterJdbcTemplateTests {
 		verify(connection).prepareStatement(UPDATE_NAMED_PARAMETERS_PARSED);
 		verify(preparedStatement).setObject(1, 1);
 		verify(preparedStatement).setObject(2, 1);
+		verify(preparedStatement).close();
+		verify(connection).close();
+	}
+
+	@Test
+	public void testExecuteArray() throws SQLException {
+		given(preparedStatement.executeUpdate()).willReturn(1);
+
+		List<Integer> typeIds = Arrays.asList(1, 2, 3);
+
+		params.put("typeIds", typeIds);
+		params.put("id", 1);
+		Object result = namedParameterTemplate.execute(UPDATE_ARRAY_PARAMETERS, params,
+				(PreparedStatementCallback<Object>) ps -> {
+					assertEquals(preparedStatement, ps);
+					ps.executeUpdate();
+					return "result";
+				});
+
+		assertEquals("result", result);
+		verify(connection).prepareStatement(UPDATE_ARRAY_PARAMETERS_PARSED);
+		verify(preparedStatement).setObject(1, 1);
+		verify(preparedStatement).setObject(2, 2);
+		verify(preparedStatement).setObject(3, 3);
+		verify(preparedStatement).setObject(4, 1);
 		verify(preparedStatement).close();
 		verify(connection).close();
 	}
