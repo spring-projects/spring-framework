@@ -83,6 +83,24 @@ public class JsonPathAssertions {
 	}
 
 	/**
+	 * Applies {@link JsonPathExpectationsHelper#hasJsonPath}.
+	 * @since 5.0.3
+	 */
+	public WebTestClient.BodyContentSpec hasJsonPath() {
+		this.pathHelper.hasJsonPath(this.content);
+		return this.bodySpec;
+	}
+
+	/**
+	 * Applies {@link JsonPathExpectationsHelper#doesNotHaveJsonPath}.
+	 * @since 5.0.3
+	 */
+	public WebTestClient.BodyContentSpec doesNotHaveJsonPath() {
+		this.pathHelper.doesNotHaveJsonPath(this.content);
+		return this.bodySpec;
+	}
+
+	/**
 	 * Applies {@link JsonPathExpectationsHelper#assertValueIsBoolean(String)}.
 	 */
 	public WebTestClient.BodyContentSpec isBoolean() {

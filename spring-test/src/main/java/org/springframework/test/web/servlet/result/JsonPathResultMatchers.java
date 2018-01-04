@@ -98,7 +98,8 @@ public class JsonPathResultMatchers {
 
 	/**
 	 * Evaluate the JSON path expression against the response content and
-	 * assert that a non-null value exists at the given path.
+	 * assert that a non-null value, possibly an empty array or map, exists at
+	 * the given path.
 	 * <p>If the JSON path expression is not {@linkplain JsonPath#isDefinite
 	 * definite}, this method asserts that the value at the given path is not
 	 * <em>empty</em>.
@@ -112,7 +113,7 @@ public class JsonPathResultMatchers {
 
 	/**
 	 * Evaluate the JSON path expression against the response content and
-	 * assert that a value does not exist at the given path.
+	 * assert that a non-null value does not exist at the given path.
 	 * <p>If the JSON path expression is not {@linkplain JsonPath#isDefinite
 	 * definite}, this method asserts that the value at the given path is
 	 * <em>empty</em>.
@@ -155,6 +156,41 @@ public class JsonPathResultMatchers {
 		return result -> {
 			String content = getContent(result);
 			jsonPathHelper.assertValueIsNotEmpty(content);
+		};
+	}
+
+	/**
+	 * Evaluate the JSON path expression against the response content
+	 * and assert that a value, possibly {@code null}, exists.
+	 * <p>If the JSON path expression is not
+	 * {@linkplain JsonPath#isDefinite() definite}, this method asserts
+	 * that the list of values at the given path is not <em>empty</em>.
+	 * @since 5.0.3
+	 * @see #exists()
+	 * @see #isNotEmpty()
+	 */
+	public ResultMatcher hasJsonPath() {
+		return result -> {
+			String content = getContent(result);
+			jsonPathHelper.hasJsonPath(content);
+		};
+	}
+
+	/**
+	 * Evaluate the JSON path expression against the supplied {@code content}
+	 * and assert that a value, including {@code null} values, does not exist
+	 * at the given path.
+	 * <p>If the JSON path expression is not
+	 * {@linkplain JsonPath#isDefinite() definite}, this method asserts
+	 * that the list of values at the given path is <em>empty</em>.
+	 * @since 5.0.3
+	 * @see #doesNotExist()
+	 * @see #isEmpty()
+	 */
+	public ResultMatcher doesNotHaveJsonPath() {
+		return result -> {
+			String content = getContent(result);
+			jsonPathHelper.doesNotHaveJsonPath(content);
 		};
 	}
 

@@ -173,10 +173,11 @@ public class JsonPathExpectationsHelper {
 
 	/**
 	 * Evaluate the JSON path expression against the supplied {@code content}
-	 * and assert that a non-null value exists at the given path.
-	 * <p>If the JSON path expression is not
+	 * and assert that a non-null value, possibly an empty array or map, exists
+	 * at the given path.
+	 * <p>Note that if the JSON path expression is not
 	 * {@linkplain JsonPath#isDefinite() definite}, this method asserts
-	 * that the value at the given path is not <em>empty</em>.
+	 * that the list of values at the given path is not <em>empty</em>.
 	 * @param content the JSON content
 	 */
 	public void exists(String content) {
@@ -185,10 +186,10 @@ public class JsonPathExpectationsHelper {
 
 	/**
 	 * Evaluate the JSON path expression against the supplied {@code content}
-	 * and assert that a value does not exist at the given path.
-	 * <p>If the JSON path expression is not
+	 * and assert that a non-null value does not exist at the given path.
+	 * <p>Note that if the JSON path expression is not
 	 * {@linkplain JsonPath#isDefinite() definite}, this method asserts
-	 * that the value at the given path is <em>empty</em>.
+	 * that the list of values at the given path is <em>empty</em>.
 	 * @param content the JSON content
 	 */
 	public void doesNotExist(String content) {
@@ -230,6 +231,48 @@ public class JsonPathExpectationsHelper {
 	public void assertValueIsNotEmpty(String content) {
 		Object value = evaluateJsonPath(content);
 		assertTrue(failureReason("a non-empty value", value), !ObjectUtils.isEmpty(value));
+	}
+
+	/**
+	 * Evaluate the JSON path expression against the supplied {@code content}
+	 * and assert that a value, possibly {@code null}, exists.
+	 * <p>If the JSON path expression is not
+	 * {@linkplain JsonPath#isDefinite() definite}, this method asserts
+	 * that the list of values at the given path is not <em>empty</em>.
+	 * @param content the JSON content
+	 * @since 5.0.3
+	 */
+	public void hasJsonPath(String content) {
+		Object value = evaluateJsonPath(content);
+		if (pathIsIndefinite() && value instanceof List) {
+			assertTrue("No values for JSON path \"" + this.expression + "\"", !((List<?>) value).isEmpty());
+		}
+	}
+
+	/**
+	 * Evaluate the JSON path expression against the supplied {@code content}
+	 * and assert that a value, including {@code null} values, does not exist
+	 * at the given path.
+	 * <p>If the JSON path expression is not
+	 * {@linkplain JsonPath#isDefinite() definite}, this method asserts
+	 * that the list of values at the given path is <em>empty</em>.
+	 * @param content the JSON content
+	 * @since 5.0.3
+	 */
+	public void doesNotHaveJsonPath(String content) {
+		Object value;
+		try {
+			value = evaluateJsonPath(content);
+		}
+		catch (AssertionError ex) {
+			return;
+		}
+		if (pathIsIndefinite() && value instanceof List) {
+			assertTrue(failureReason("no values", value), ((List<?>) value).isEmpty());
+		}
+		else {
+			fail(failureReason("no value", value));
+		}
 	}
 
 	private String failureReason(String expectedDescription, @Nullable Object value) {
