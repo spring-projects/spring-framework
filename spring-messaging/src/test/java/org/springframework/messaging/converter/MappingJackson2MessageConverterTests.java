@@ -19,8 +19,10 @@ package org.springframework.messaging.converter;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -120,6 +122,20 @@ public class MappingJackson2MessageConverterTests {
 		assertEquals("string", myBean.getString());
 	}
 
+	@Test // SPR-16252
+	public void fromMessageToList() throws Exception {
+		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
+		String payload = "[1, 2, 3, 4, 5, 6, 7, 8, 9]";
+		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
+
+		Method method = getClass().getDeclaredMethod("handleList", List.class);
+		MethodParameter param = new MethodParameter(method, 0);
+		Object actual = converter.fromMessage(message, List.class, param);
+
+		assertNotNull(actual);
+		assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L), actual);
+	}
+
 	@Test
 	public void toMessage() throws Exception {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
@@ -209,8 +225,9 @@ public class MappingJackson2MessageConverterTests {
 		return bean;
 	}
 
-	public void jsonViewPayload(@JsonView(MyJacksonView2.class) JacksonViewBean payload) {
-	}
+	public void jsonViewPayload(@JsonView(MyJacksonView2.class) JacksonViewBean payload) {}
+
+	void handleList(List<Long> payload) {}
 
 
 	public static class MyBean {

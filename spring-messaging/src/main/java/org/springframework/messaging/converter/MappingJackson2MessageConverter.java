@@ -20,7 +20,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
@@ -35,8 +37,10 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
@@ -202,7 +206,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 
 	@Override
 	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, Object conversionHint) {
-		JavaType javaType = this.objectMapper.constructType(targetClass);
+		JavaType javaType = getJavaType(targetClass, conversionHint);
 		Object payload = message.getPayload();
 		Class<?> view = getSerializationView(conversionHint);
 		// Note: in the view case, calling withType instead of forType for compatibility with Jackson <2.5
@@ -227,6 +231,81 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 		catch (IOException ex) {
 			throw new MessageConversionException(message, "Could not read JSON: " + ex.getMessage(), ex);
 		}
+	}
+
+	private JavaType getJavaType(Class<?> targetClass, Object conversionHint) {
+		if (conversionHint instanceof MethodParameter) {
+			MethodParameter param = (MethodParameter) conversionHint;
+			param = param.nestedIfOptional();
+			Type genericParameterType = param.getNestedGenericParameterType();
+			Class<?> contextClass = param.getContainingClass();
+			Type type = getJavaType(genericParameterType, contextClass);
+			return this.objectMapper.getTypeFactory().constructType(type);
+		}
+		return this.objectMapper.constructType(targetClass);
+	}
+
+	private JavaType getJavaType(Type type, Class<?> contextClass) {
+		TypeFactory typeFactory = this.objectMapper.getTypeFactory();
+		if (contextClass != null) {
+			ResolvableType resolvedType = ResolvableType.forType(type);
+			if (type instanceof TypeVariable) {
+				ResolvableType resolvedTypeVariable = resolveVariable(
+						(TypeVariable<?>) type, ResolvableType.forClass(contextClass));
+				if (resolvedTypeVariable != ResolvableType.NONE) {
+					return typeFactory.constructType(resolvedTypeVariable.resolve());
+				}
+			}
+			else if (type instanceof ParameterizedType && resolvedType.hasUnresolvableGenerics()) {
+				ParameterizedType parameterizedType = (ParameterizedType) type;
+				Class<?>[] generics = new Class<?>[parameterizedType.getActualTypeArguments().length];
+				Type[] typeArguments = parameterizedType.getActualTypeArguments();
+				for (int i = 0; i < typeArguments.length; i++) {
+					Type typeArgument = typeArguments[i];
+					if (typeArgument instanceof TypeVariable) {
+						ResolvableType resolvedTypeArgument = resolveVariable(
+								(TypeVariable<?>) typeArgument, ResolvableType.forClass(contextClass));
+						if (resolvedTypeArgument != ResolvableType.NONE) {
+							generics[i] = resolvedTypeArgument.resolve();
+						}
+						else {
+							generics[i] = ResolvableType.forType(typeArgument).resolve();
+						}
+					}
+					else {
+						generics[i] = ResolvableType.forType(typeArgument).resolve();
+					}
+				}
+				return typeFactory.constructType(ResolvableType.
+						forClassWithGenerics(resolvedType.getRawClass(), generics).getType());
+			}
+		}
+		return typeFactory.constructType(type);
+	}
+
+	private ResolvableType resolveVariable(TypeVariable<?> typeVariable, ResolvableType contextType) {
+		ResolvableType resolvedType;
+		if (contextType.hasGenerics()) {
+			resolvedType = ResolvableType.forType(typeVariable, contextType);
+			if (resolvedType.resolve() != null) {
+				return resolvedType;
+			}
+		}
+
+		ResolvableType superType = contextType.getSuperType();
+		if (superType != ResolvableType.NONE) {
+			resolvedType = resolveVariable(typeVariable, superType);
+			if (resolvedType.resolve() != null) {
+				return resolvedType;
+			}
+		}
+		for (ResolvableType ifc : contextType.getInterfaces()) {
+			resolvedType = resolveVariable(typeVariable, ifc);
+			if (resolvedType.resolve() != null) {
+				return resolvedType;
+			}
+		}
+		return ResolvableType.NONE;
 	}
 
 	@Override
