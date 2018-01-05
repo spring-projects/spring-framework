@@ -457,6 +457,33 @@ To configure or customize the readers and writers to use applications will typic
 
 
 
+[[webflux-codecs-jackson-json]]
+==== Jackson JSON
+
+The decoder relies on Jackson's non-blocking, byte array parser to parse a stream of byte
+chunks into a `TokenBuffer` stream, which can then be turned into Objects with Jackson's
+`ObjectMapper`.
+
+The encoder processes a `Publisher<?>` as follows:
+
+* if the `Publisher` is a `Mono` (i.e. single value), the value is encoded to JSON.
+* if media type is `application/stream+json`, each value produced by the
+`Publisher` is encoded individually to JSON followed by a new line.
+* otherwise all items from the `Publisher` are gathered in with `Flux#collectToList()`
+and the resulting collection is encoded as a JSON array.
+
+As a special case to the above rules the `ServerSentEventHttpMessageWriter` feeds items
+emitted from its input `Publisher` individually into the `Jackson2JsonEncoder` as a
+`Mono<?>`.
+
+Note that both the Jackson JSON encoder and decoder explicitly back out of rendering
+elements of type `String`. Instead ``String``'s are treated as low level content, (i.e.
+serialized JSON) and are rendered as-is by the `CharSequenceEncoder`. If you want a
+`Flux<String>` rendered as a JSON array, you'll have to use `Flux#collectToList()` and
+provide a `Mono<List<String>>` instead.
+
+
+
 
 [[webflux-dispatcher-handler]]
 == DispatcherHandler
