@@ -24,6 +24,7 @@ import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -135,6 +136,17 @@ public interface ServerWebExchange {
 	 * {@link org.springframework.web.server.i18n.LocaleContextResolver}.
 	 */
 	LocaleContext getLocaleContext();
+
+	/**
+	 * Return the {@link ApplicationContext} associated with the web application,
+	 * if it was initialized with one via
+	 * {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext
+	 * WebHttpHandlerBuilder#applicationContext}.
+	 * @see org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext(ApplicationContext)
+	 * @since 5.0.3
+	 */
+	@Nullable
+	ApplicationContext getApplicationContext();
 
 	/**
 	 * Returns {@code true} if the one of the {@code checkNotModified} methods

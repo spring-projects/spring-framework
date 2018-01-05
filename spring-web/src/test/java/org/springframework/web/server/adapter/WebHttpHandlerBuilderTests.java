@@ -38,10 +38,11 @@ import org.springframework.web.server.WebHandler;
 
 import static java.time.Duration.ofMillis;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link WebHttpHandlerBuilder}.
- *
  * @author Rossen Stoyanchev
  */
 public class WebHttpHandlerBuilderTests {
@@ -53,6 +54,9 @@ public class WebHttpHandlerBuilderTests {
 		context.refresh();
 
 		HttpHandler httpHandler = WebHttpHandlerBuilder.applicationContext(context).build();
+
+		assertTrue(httpHandler instanceof HttpWebHandlerAdapter);
+		assertSame(context, ((HttpWebHandlerAdapter) httpHandler).getApplicationContext());
 
 		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();

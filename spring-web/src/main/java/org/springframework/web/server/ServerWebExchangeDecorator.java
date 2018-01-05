@@ -22,6 +22,7 @@ import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -89,6 +90,11 @@ public class ServerWebExchangeDecorator implements ServerWebExchange {
 	@Override
 	public LocaleContext getLocaleContext() {
 		return getDelegate().getLocaleContext();
+	}
+
+	@Override
+	public ApplicationContext getApplicationContext() {
+		return getDelegate().getApplicationContext();
 	}
 
 	@Override

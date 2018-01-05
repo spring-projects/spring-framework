@@ -92,6 +92,9 @@ public class WebHttpHandlerBuilder {
 	@Nullable
 	private LocaleContextResolver localeContextResolver;
 
+	@Nullable
+	private ApplicationContext applicationContext;
+
 
 	/**
 	 * Private constructor.
@@ -99,6 +102,15 @@ public class WebHttpHandlerBuilder {
 	private WebHttpHandlerBuilder(WebHandler webHandler) {
 		Assert.notNull(webHandler, "WebHandler must not be null");
 		this.webHandler = webHandler;
+	}
+
+	/**
+	 * Private constructor to use when initialized from an ApplicationContext.
+	 */
+	private WebHttpHandlerBuilder(WebHandler webHandler, ApplicationContext applicationContext) {
+		Assert.notNull(webHandler, "WebHandler must not be null");
+		this.webHandler = webHandler;
+		this.applicationContext = applicationContext;
 	}
 
 	/**
@@ -144,8 +156,9 @@ public class WebHttpHandlerBuilder {
 	 * @return the prepared builder
 	 */
 	public static WebHttpHandlerBuilder applicationContext(ApplicationContext context) {
+
 		WebHttpHandlerBuilder builder = new WebHttpHandlerBuilder(
-				context.getBean(WEB_HANDLER_BEAN_NAME, WebHandler.class));
+				context.getBean(WEB_HANDLER_BEAN_NAME, WebHandler.class), context);
 
 		// Autowire lists for @Bean + @Order
 
@@ -274,6 +287,9 @@ public class WebHttpHandlerBuilder {
 		}
 		if (this.localeContextResolver != null) {
 			adapted.setLocaleContextResolver(this.localeContextResolver);
+		}
+		if (this.applicationContext != null) {
+			adapted.setApplicationContext(this.applicationContext);
 		}
 
 		return adapted;

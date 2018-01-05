@@ -28,6 +28,7 @@ import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
@@ -90,6 +91,9 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 	private final Mono<MultiValueMap<String, Part>> multipartDataMono;
 
+	@Nullable
+	private final ApplicationContext applicationContext;
+
 	private volatile boolean notModified;
 
 	private Function<String, String> urlTransformer = url -> url;
@@ -98,6 +102,13 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	public DefaultServerWebExchange(ServerHttpRequest request, ServerHttpResponse response,
 			WebSessionManager sessionManager, ServerCodecConfigurer codecConfigurer,
 			LocaleContextResolver localeContextResolver) {
+
+		this(request, response, sessionManager, codecConfigurer, localeContextResolver, null);
+	}
+
+	DefaultServerWebExchange(ServerHttpRequest request, ServerHttpResponse response,
+			WebSessionManager sessionManager, ServerCodecConfigurer codecConfigurer,
+			LocaleContextResolver localeContextResolver, @Nullable ApplicationContext applicationContext) {
 
 		Assert.notNull(request, "'request' is required");
 		Assert.notNull(response, "'response' is required");
@@ -111,6 +122,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		this.localeContextResolver = localeContextResolver;
 		this.formDataMono = initFormData(request, codecConfigurer);
 		this.multipartDataMono = initMultipartData(request, codecConfigurer);
+		this.applicationContext = applicationContext;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -192,11 +204,6 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	}
 
 	@Override
-	public LocaleContext getLocaleContext() {
-		return this.localeContextResolver.resolveLocaleContext(this);
-	}
-
-	@Override
 	public Mono<MultiValueMap<String, String>> getFormData() {
 		return this.formDataMono;
 	}
@@ -204,6 +211,16 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	@Override
 	public Mono<MultiValueMap<String, Part>> getMultipartData() {
 		return this.multipartDataMono;
+	}
+
+	@Override
+	public LocaleContext getLocaleContext() {
+		return this.localeContextResolver.resolveLocaleContext(this);
+	}
+
+	@Override
+	public ApplicationContext getApplicationContext() {
+		return this.applicationContext;
 	}
 
 	@Override

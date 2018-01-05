@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.ServerCodecConfigurer;
@@ -90,6 +91,9 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	@Nullable
 	private LocaleContextResolver localeContextResolver;
 
+	@Nullable
+	private ApplicationContext applicationContext;
+
 
 	public HttpWebHandlerAdapter(WebHandler delegate) {
 		super(delegate);
@@ -127,6 +131,13 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	}
 
 	/**
+	 * Return the configured {@link ServerCodecConfigurer}.
+	 */
+	public ServerCodecConfigurer getCodecConfigurer() {
+		return (this.codecConfigurer != null ? this.codecConfigurer : ServerCodecConfigurer.create());
+	}
+
+	/**
 	 * Configure a custom {@link LocaleContextResolver}. The provided instance is set on
 	 * each created {@link DefaultServerWebExchange}.
 	 * <p>By default this is set to
@@ -138,18 +149,32 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	}
 
 	/**
-	 * Return the configured {@link ServerCodecConfigurer}.
-	 */
-	public ServerCodecConfigurer getCodecConfigurer() {
-		return (this.codecConfigurer != null ? this.codecConfigurer : ServerCodecConfigurer.create());
-	}
-
-	/**
 	 * Return the configured {@link LocaleContextResolver}.
 	 */
 	public LocaleContextResolver getLocaleContextResolver() {
 		return (this.localeContextResolver != null ?
 				this.localeContextResolver : new AcceptHeaderLocaleContextResolver());
+	}
+
+	/**
+	 * Configure the {@code ApplicationContext} associated with the web application,
+	 * if it was initialized with one via
+	 * {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext
+	 * WebHttpHandlerBuilder#applicationContext}.
+	 * @param applicationContext the context
+	 * @since 5.0.3
+	 */
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
+
+	/**
+	 * Return the configured {@code ApplicationContext}, if any.
+	 * @since 5.0.3
+	 */
+	@Nullable
+	public ApplicationContext getApplicationContext() {
+		return this.applicationContext;
 	}
 
 
@@ -163,7 +188,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	protected ServerWebExchange createExchange(ServerHttpRequest request, ServerHttpResponse response) {
 		return new DefaultServerWebExchange(request, response, this.sessionManager,
-				getCodecConfigurer(), getLocaleContextResolver());
+				getCodecConfigurer(), getLocaleContextResolver(), this.applicationContext);
 	}
 
 	private Mono<Void> handleFailure(ServerHttpResponse response, Throwable ex) {
