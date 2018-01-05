@@ -479,7 +479,9 @@ public abstract class BodyInserters {
 		public MultipartInserter with(MultiValueMap<String, Object> values) {
 			Assert.notNull(values, "'values' must not be null");
 			for (Map.Entry<String, List<Object>> entry : values.entrySet()) {
-				this.builder.part(entry.getKey(), entry.getValue());
+				for (Object value : entry.getValue()) {
+					this.builder.part(entry.getKey(), value);
+				}
 			}
 			return this;
 		}
