@@ -110,9 +110,10 @@ of RxJava or other reactive library. See <<webflux-reactive-libraries>> for more
 [[webflux-programming-models]]
 === Programming models
 
-The `spring-web` module contains the reactive foundation that underlies Spring WebFlux --
-HTTP abstractions, Reactive Streams server adapters, reactive codecs, and a
-core Web API whose role is comparable to the Servlet API but with non-blocking semantics.
+The `spring-web` module contains the reactive foundation that underlies Spring WebFlux
+including HTTP abstractions, Reactive Streams <<webflux-httphandler,adapters>> for supported
+servers, <<webflux-codecs,codecs>>, and a core <<webflux-web-handler-api>> comparable to
+the Servlet API but with non-blocking contracts.
 
 On that foundation Spring WebFlux provides a choice of two programming models:
 
@@ -425,31 +426,34 @@ to have the following detected:
 
 
 [[webflux-codecs]]
-=== Codecs
+=== HTTP Message Codecs
+[.small]#<<integration.adoc#rest-message-conversion,Same in Spring MVC>>#
 
-The `spring-web` module provides
+The `spring-web` module defines the
 {api-spring-framework}/http/codec/HttpMessageReader.html[HttpMessageReader] and
-{api-spring-framework}/http/codec/HttpMessageWriter.html[HttpMessageWriter]
-for encoding and decoding the HTTP request and response body with Reactive Streams.
-It builds on lower level contracts from `spring-core`:
+{api-spring-framework}/http/codec/HttpMessageWriter.html[HttpMessageWriter] contracts
+for encoding and decoding the body of HTTP requests and responses via Rective Streams
+``Publisher``'s. These contacts are used on the client side, e.g. in the `WebClient`,
+and on the server side, e.g. in annotated controllers and functional endpoints.
 
-* {api-spring-framework}/core/io/buffer/DataBuffer.html[DataBuffer] -- abstraction for
-byte buffers -- e.g. Netty `ByteBuf`, `java.nio.ByteBuffer`, see
-<<core#databuffers, Data Buffers and Codecs>>.
-* {api-spring-framework}/core/codec/Encoder.html[Encoder] -- serialize a stream of Objects
-to a stream of data buffers
-* {api-spring-framework}/core/codec/Decoder.html[Decoder] -- deserialize a stream of data
-buffers into a stream of Objects
+The `spring-core` module defines the
+{api-spring-framework}/core/codec/Encoder.html[Encoder] and
+{api-spring-framework}/core/codec/Decoder.html[Decoder] contracts that are independent of
+HTTP and rely on the {api-spring-framework}/core/io/buffer/DataBuffer.html[DataBuffer]
+contract that abstracts different byte buffer representations such as the Netty `ByteBuf`
+and `java.nio.ByteBuffer` (see <<core#databuffers, Data Buffers and Codecs>>).
+An `Encoder` can be wrapped with `EncoderHttpMessageWriter` to be used as an
+`HttpMessageWriter` while a `Decoder` can be wrapped with `DecoderHttpMessageReader` to
+be used as an `HttpMessageReader`.
 
-Basic `Encoder` and `Decoder` implementations exist in `spring-core` but `spring-web` adds
-more for JSON, XML, and other formats. You can wrap any `Encoder` and `Decoder` as a reader
-or writer with `EncoderHttpMessageWriter` and `DecoderHttpMessageReader`. There are some
-additional, web-only reader and writer implementations for server-sent events, form data,
-and more.
+The `spring-core` module contains basic `Encoder` and `Decoder` implementations for
+`byte[]`, `ByteBuffer`, `DataBuffer`, `Resource`, and `String`. The `spring-web` module
+adds ``Encoder``'s and ``Decoder``'s for Jackson JSON, Jackson Smile, and JAXB2.
+The `spring-web` module also contains some web-specific readers and writers for
+server-sent events, form data, and multipart requests.
 
-Finally, `ClientCodecConfigurer` and `ServerCodecConfigurer` can be used to initialize
-a list of readers and writers. They include support for classpath detection and a
-of defaults along with the ability to override or replace those defaults.
+To configure or customize the readers and writers to use applications will typically use
+`ClientCodecConfigurer` or `ServerCodecConfigurer`.
 
 
 

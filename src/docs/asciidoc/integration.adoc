@@ -1232,39 +1232,18 @@ to serialize only a subset of the object properties. For example:
 
 
 [[rest-message-conversion]]
-==== HTTP message conversion
+==== HTTP Message Converters
+[.small]#<<web-reactive.adoc#webflux-codecs,Same in Spring WebFlux>>#
 
-Objects passed to and returned from the methods `getForObject()`, `postForLocation()`,
-and `put()` are converted to HTTP requests and from HTTP responses by
-`HttpMessageConverters`. The `HttpMessageConverter` interface is shown below to give you
-a better feel for its functionality
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public interface HttpMessageConverter<T> {
-
-		// Indicate whether the given class and media type can be read by this converter.
-		boolean canRead(Class<?> clazz, MediaType mediaType);
-
-		// Indicate whether the given class and media type can be written by this converter.
-		boolean canWrite(Class<?> clazz, MediaType mediaType);
-
-		// Return the list of MediaType objects supported by this converter.
-		List<MediaType> getSupportedMediaTypes();
-
-		// Read an object of the given type from the given input message, and returns it.
-		T read(Class<T> clazz, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException;
-
-		// Write an given object to the given output message.
-		void write(T t, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException;
-
-	}
-----
+The `spring-web` module contains the `HttpMessageConverter` contract for reading and
+writing the body of HTTP requests and responses via `InputStream` and `OutputStream`.
+``HttpMessageConverter``'s are used on the client side, e.g. in the `RestTemplate`, and
+also on the server side, e.g. in Spring MVC REST controllers.
 
 Concrete implementations for the main media (mime) types are provided in the framework
 and are registered by default with the `RestTemplate` on the client-side and with
-`RequestMethodHandlerAdapter` on the server-side.
+`RequestMethodHandlerAdapter` on the server-side (see
+<<web.adoc#mvc-config-message-converters,Configuring Message Converters>>).
 
 The implementations of ``HttpMessageConverter``s are described in the following sections.
 For all converters a default media type is used but can be overridden by setting the

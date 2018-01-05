@@ -2274,7 +2274,8 @@ You could access the part named "meta-data" with a `@RequestParam("meta-data") S
 metadata` controller method argument. However, you would probably prefer to accept a
 strongly typed object initialized from the JSON formatted data in the body of the
 request part, very similar to the way `@RequestBody` converts the body of a
-non-multipart request to a target object with the help of an `HttpMessageConverter`.
+non-multipart request to a target object with the help of an
+<<integration.adoc#rest-message-conversion,HttpMessageConverter>>.
 
 You can use the `@RequestPart` annotation instead of the `@RequestParam` annotation for
 this purpose. It allows you to have the content of a specific multipart passed through
@@ -2314,7 +2315,8 @@ be bound to the value of the HTTP request body. For example:
 	}
 ----
 
-You convert the request body to the method argument by using an `HttpMessageConverter`.
+You convert the request body to the method argument by using an
+<<integration.adoc#rest-message-conversion,HttpMessageConverter>>.
 `HttpMessageConverter` is responsible for converting from the HTTP request message to an
 object and converting from an object to the HTTP response body. The
 `RequestMappingHandlerAdapter` supports the `@RequestBody` annotation with the following
@@ -2422,8 +2424,7 @@ The above example will result in the text `Hello World` being written to the HTT
 response stream.
 
 As with `@RequestBody`, Spring converts the returned object to a response body by using
-an `HttpMessageConverter`. For more information on these converters, see the previous
-section and <<integration.adoc#rest-message-conversion,Message Converters>>.
+an <<integration.adoc#rest-message-conversion,HttpMessageConverter>>.
 
 
 [[mvc-ann-responseentity]]
@@ -2443,7 +2444,8 @@ also allows setting response headers:
 	}
 ----
 
-As with `@ResponseBody`, Spring uses `HttpMessageConverter` to
+As with `@ResponseBody`, Spring uses
+<<integration.adoc#rest-message-conversion,HttpMessageConverter>> to
 convert from and to the request and response streams. For more information on these
 converters, see the previous section and <<integration.adoc#rest-message-conversion,
 Message Converters>>.
@@ -3353,7 +3355,7 @@ This is a technique related to "Long Polling" that is known as "HTTP Streaming".
 Spring MVC makes this possible through the `ResponseBodyEmitter` return value
 type which can be used to send multiple Objects, instead of one as is normally
 the case with `@ResponseBody`, where each Object sent is written to the
-response with an `HttpMessageConverter`.
+response with an <<integration.adoc#rest-message-conversion,HttpMessageConverter>>.
 
 Here is an example of that:
 
@@ -3412,11 +3414,11 @@ http://blog.pivotal.io/pivotal/products/websocket-architecture-in-spring-4-0[the
 === Streaming raw data
 
 `ResponseBodyEmitter` allows sending events by writing Objects to the
-response through an `HttpMessageConverter`. This is probably the most common
-case, for example when writing JSON data. However sometimes it is useful to
-bypass message conversion and write directly to the response `OutputStream`
-for example for a file download. This can be done with the help of the
-`StreamingResponseBody` return value type.
+response through an <<integration.adoc#rest-message-conversion,HttpMessageConverter>>.
+This is probably the most common case, for example when writing JSON data.
+However sometimes it is useful to bypass message conversion and write directly to the
+response `OutputStream` for example for a file download. This can be done with the help
+of the `StreamingResponseBody` return value type.
 
 Here is an example of that:
 
