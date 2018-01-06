@@ -324,21 +324,26 @@ class CglibAopProxy implements AopProxy, Serializable {
 		if (isStatic && isFrozen) {
 			Method[] methods = rootClass.getMethods();
 			Callback[] fixedCallbacks = new Callback[methods.length];
-			this.fixedInterceptorMap = new HashMap<>(methods.length);
+			this.fixedInterceptorMap = new HashMap<>();
 
-			// TODO: small memory optimization here (can skip creation for methods with no advice)
-			for (int x = 0; x < methods.length; x++) {
-				List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(methods[x], rootClass);
-				fixedCallbacks[x] = new FixedChainStaticTargetInterceptor(
+			int fixedCallbacksLength = 0;
+			for (Method method : methods) {
+				List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, rootClass);
+				// We can skip creation for methods with no advice.
+				if (chain.isEmpty()) {
+					continue;
+				}
+
+				fixedCallbacks[fixedCallbacksLength] = new FixedChainStaticTargetInterceptor(
 						chain, this.advised.getTargetSource().getTarget(), this.advised.getTargetClass());
-				this.fixedInterceptorMap.put(methods[x].toString(), x);
+				this.fixedInterceptorMap.put(method.toString(), fixedCallbacksLength++);
 			}
 
 			// Now copy both the callbacks from mainCallbacks
 			// and fixedCallbacks into the callbacks array.
-			callbacks = new Callback[mainCallbacks.length + fixedCallbacks.length];
+			callbacks = new Callback[mainCallbacks.length + fixedCallbacksLength];
 			System.arraycopy(mainCallbacks, 0, callbacks, 0, mainCallbacks.length);
-			System.arraycopy(fixedCallbacks, 0, callbacks, mainCallbacks.length, fixedCallbacks.length);
+			System.arraycopy(fixedCallbacks, 0, callbacks, mainCallbacks.length, fixedCallbacksLength);
 			this.fixedInterceptorOffset = mainCallbacks.length;
 		}
 		else {
