@@ -28,7 +28,7 @@ dependencies {
 	optional("javax.xml.bind:jaxb-api:2.3.0")
 	optional('org.webjars:webjars-locator:0.32-1')
 	optional("com.rometools:rome:1.9.0")
-	optional("com.lowagie:itext:2.1.7")
+	optional("com.github.librepdf:openpdf:1.0.5")
 	optional("org.apache.poi:poi-ooxml:3.17")
 	optional("org.freemarker:freemarker:${freemarkerVersion}")
 	optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
