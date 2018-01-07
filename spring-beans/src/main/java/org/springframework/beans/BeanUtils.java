@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -506,13 +506,14 @@ public abstract class BeanUtils {
 
 	/**
 	 * Check if the given type represents a "simple" value type:
-	 * a primitive, a String or other CharSequence, a Number, a Date,
+	 * a primitive, an enum, a String or other CharSequence, a Number, a Date,
 	 * a URI, a URL, a Locale or a Class.
 	 * @param clazz the type to check
 	 * @return whether the given type represents a "simple" value type
 	 */
 	public static boolean isSimpleValueType(Class<?> clazz) {
-		return (ClassUtils.isPrimitiveOrWrapper(clazz) || clazz.isEnum() ||
+		return (ClassUtils.isPrimitiveOrWrapper(clazz) ||
+				Enum.class.isAssignableFrom(clazz) ||
 				CharSequence.class.isAssignableFrom(clazz) ||
 				Number.class.isAssignableFrom(clazz) ||
 				Date.class.isAssignableFrom(clazz) ||
