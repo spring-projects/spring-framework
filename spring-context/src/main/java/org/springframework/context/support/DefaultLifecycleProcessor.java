@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -285,9 +285,9 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			if ((getBeanFactory().containsSingleton(beanNameToRegister) &&
 					(!isFactoryBean || matchesBeanType(Lifecycle.class, beanNameToCheck))) ||
 					matchesBeanType(SmartLifecycle.class, beanNameToCheck)) {
-				Lifecycle bean = getBeanFactory().getBean(beanNameToCheck, Lifecycle.class);
-				if (bean != this) {
-					beans.put(beanNameToRegister, bean);
+				Object bean = getBeanFactory().getBean(beanNameToCheck);
+				if (bean != this && bean instanceof Lifecycle) {
+					beans.put(beanNameToRegister, (Lifecycle) bean);
 				}
 			}
 		}
