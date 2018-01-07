@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.StandardOpenOption;
 
 import org.springframework.util.ResourceUtils;
@@ -41,6 +42,68 @@ import org.springframework.util.ResourceUtils;
  * @since 3.0
  */
 public abstract class AbstractFileResolvingResource extends AbstractResource {
+
+	@Override
+	public boolean exists() {
+		try {
+			URL url = getURL();
+			if (ResourceUtils.isFileURL(url)) {
+				// Proceed with file system resolution
+				return getFile().exists();
+			}
+			else {
+				// Try a URL connection content-length header
+				URLConnection con = url.openConnection();
+				customizeConnection(con);
+				HttpURLConnection httpCon =
+						(con instanceof HttpURLConnection ? (HttpURLConnection) con : null);
+				if (httpCon != null) {
+					int code = httpCon.getResponseCode();
+					if (code == HttpURLConnection.HTTP_OK) {
+						return true;
+					}
+					else if (code == HttpURLConnection.HTTP_NOT_FOUND) {
+						return false;
+					}
+				}
+				if (con.getContentLength() >= 0) {
+					return true;
+				}
+				if (httpCon != null) {
+					// no HTTP OK status, and no content-length header: give up
+					httpCon.disconnect();
+					return false;
+				}
+				else {
+					// Fall back to stream existence: can we open the stream?
+					InputStream is = getInputStream();
+					is.close();
+					return true;
+				}
+			}
+		}
+		catch (IOException ex) {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean isReadable() {
+		try {
+			URL url = getURL();
+			if (ResourceUtils.isFileURL(url)) {
+				// Proceed with file system resolution
+				File file = getFile();
+				return (file.canRead() && !file.isDirectory());
+			}
+			else {
+				return true;
+			}
+		}
+		catch (IOException ex) {
+			return false;
+		}
+	}
 
 	@Override
 	public boolean isFile() {
@@ -123,78 +186,17 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 	 * This implementation returns a FileChannel for the given URI-identified
 	 * resource, provided that it refers to a file in the file system.
 	 * @since 5.0
-	 * @see #getFile(URI)
+	 * @see #getFile()
 	 */
 	@Override
 	public ReadableByteChannel readableChannel() throws IOException {
-		if (isFile()) {
+		try {
+			// Try file system channel
 			return FileChannel.open(getFile().toPath(), StandardOpenOption.READ);
 		}
-		else {
+		catch (FileNotFoundException | NoSuchFileException ex) {
+			// Fall back to InputStream adaptation in superclass
 			return super.readableChannel();
-		}
-	}
-
-
-	@Override
-	public boolean exists() {
-		try {
-			URL url = getURL();
-			if (ResourceUtils.isFileURL(url)) {
-				// Proceed with file system resolution
-				return getFile().exists();
-			}
-			else {
-				// Try a URL connection content-length header
-				URLConnection con = url.openConnection();
-				customizeConnection(con);
-				HttpURLConnection httpCon =
-						(con instanceof HttpURLConnection ? (HttpURLConnection) con : null);
-				if (httpCon != null) {
-					int code = httpCon.getResponseCode();
-					if (code == HttpURLConnection.HTTP_OK) {
-						return true;
-					}
-					else if (code == HttpURLConnection.HTTP_NOT_FOUND) {
-						return false;
-					}
-				}
-				if (con.getContentLength() >= 0) {
-					return true;
-				}
-				if (httpCon != null) {
-					// no HTTP OK status, and no content-length header: give up
-					httpCon.disconnect();
-					return false;
-				}
-				else {
-					// Fall back to stream existence: can we open the stream?
-					InputStream is = getInputStream();
-					is.close();
-					return true;
-				}
-			}
-		}
-		catch (IOException ex) {
-			return false;
-		}
-	}
-
-	@Override
-	public boolean isReadable() {
-		try {
-			URL url = getURL();
-			if (ResourceUtils.isFileURL(url)) {
-				// Proceed with file system resolution
-				File file = getFile();
-				return (file.canRead() && !file.isDirectory());
-			}
-			else {
-				return true;
-			}
-		}
-		catch (IOException ex) {
-			return false;
 		}
 	}
 
@@ -230,7 +232,6 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 		customizeConnection(con);
 		return con.getLastModified();
 	}
-
 
 	/**
 	 * Customize the given {@link URLConnection}, obtained in the course of an

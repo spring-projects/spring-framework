@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.core.io;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,6 +27,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.StandardOpenOption;
 
 import org.springframework.util.Assert;
@@ -115,12 +117,17 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	}
 
 	/**
-	 * This implementation opens a FileInputStream for the underlying file.
+	 * This implementation opens a NIO file stream for the underlying file.
 	 * @see java.io.FileInputStream
 	 */
 	@Override
 	public InputStream getInputStream() throws IOException {
-		return Files.newInputStream(this.file.toPath());
+		try {
+			return Files.newInputStream(this.file.toPath());
+		}
+		catch (NoSuchFileException ex) {
+			throw new FileNotFoundException(ex.getMessage());
+		}
 	}
 
 	/**
@@ -183,7 +190,12 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 */
 	@Override
 	public ReadableByteChannel readableChannel() throws IOException {
-		return FileChannel.open(this.file.toPath(), StandardOpenOption.READ);
+		try {
+			return FileChannel.open(this.file.toPath(), StandardOpenOption.READ);
+		}
+		catch (NoSuchFileException ex) {
+			throw new FileNotFoundException(ex.getMessage());
+		}
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.net.URL;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -202,7 +203,12 @@ public class PathResource extends AbstractResource implements WritableResource {
 	 */
 	@Override
 	public ReadableByteChannel readableChannel() throws IOException {
-		return Files.newByteChannel(this.path, StandardOpenOption.READ);
+		try {
+			return Files.newByteChannel(this.path, StandardOpenOption.READ);
+		}
+		catch (NoSuchFileException ex) {
+			throw new FileNotFoundException(ex.getMessage());
+		}
 	}
 
 	/**
@@ -215,7 +221,7 @@ public class PathResource extends AbstractResource implements WritableResource {
 	}
 
 	/**
-	 * This implementation returns the underlying File's length.
+	 * This implementation returns the underlying file's length.
 	 */
 	@Override
 	public long contentLength() throws IOException {
