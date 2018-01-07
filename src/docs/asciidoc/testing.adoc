@@ -3142,15 +3142,14 @@ framework.
 ----
 	<beans>
 
-		<bean id="userService"
-				class="com.example.SimpleUserService"
-				c:loginAction-ref="loginAction" />
+		<bean id="userService" class="com.example.SimpleUserService"
+				c:loginAction-ref="loginAction"/>
 
 		<bean id="loginAction" class="com.example.LoginAction"
 				c:username="#{request.getParameter('user')}"
 				c:password="#{request.getParameter('pswd')}"
 				scope="request">
-			<aop:scoped-proxy />
+			<aop:scoped-proxy/>
 		</bean>
 
 	</beans>
@@ -3179,12 +3178,10 @@ inputs for the username and password.
 
 		@Test
 		public void requestScope() {
-
 			request.setParameter("user", "enigma");
 			request.setParameter("pswd", "$pr!ng");
 
 			LoginResults results = userService.loginUser();
-
 			// assert results
 		}
 	}
@@ -3203,15 +3200,13 @@ framework.
 ----
 	<beans>
 
-		<bean id="userService"
-				class="com.example.SimpleUserService"
+		<bean id="userService" class="com.example.SimpleUserService"
 				c:userPreferences-ref="userPreferences" />
 
-		<bean id="userPreferences"
-				class="com.example.UserPreferences"
+		<bean id="userPreferences" class="com.example.UserPreferences"
 				c:theme="#{session.getAttribute('theme')}"
 				scope="session">
-			<aop:scoped-proxy />
+			<aop:scoped-proxy/>
 		</bean>
 
 	</beans>
@@ -3239,11 +3234,9 @@ configured theme.
 
 		@Test
 		public void sessionScope() throws Exception {
-
 			session.setAttribute("theme", "blue");
 
 			Results results = userService.processUserPreferences();
-
 			// assert results
 		}
 	}

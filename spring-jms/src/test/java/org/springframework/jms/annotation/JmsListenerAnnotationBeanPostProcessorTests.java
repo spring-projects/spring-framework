@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.jms.config.JmsListenerEndpointRegistry;
 import org.springframework.jms.config.MessageListenerTestContainer;
 import org.springframework.jms.config.MethodJmsListenerEndpoint;
 import org.springframework.jms.listener.SimpleMessageListenerContainer;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -108,9 +109,9 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void sendToAnnotationFoundOnProxy() throws Exception {
+	public void sendToAnnotationFoundOnInterfaceProxy() throws Exception {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
-				Config.class, ProxyConfig.class, ProxyTestBean.class);
+				Config.class, ProxyConfig.class, InterfaceProxyTestBean.class);
 		try {
 			JmsListenerContainerTestFactory factory = context.getBean(JmsListenerContainerTestFactory.class);
 			assertEquals("one container should have been registered", 1, factory.getListenerContainers().size());
@@ -120,8 +121,34 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 			MethodJmsListenerEndpoint methodEndpoint = (MethodJmsListenerEndpoint) endpoint;
 			assertTrue(AopUtils.isJdkDynamicProxy(methodEndpoint.getBean()));
 			assertTrue(methodEndpoint.getBean() instanceof SimpleService);
-			assertEquals(SimpleService.class.getMethod("handleIt", String.class), methodEndpoint.getMethod());
-			assertEquals(ProxyTestBean.class.getMethod("handleIt", String.class), methodEndpoint.getMostSpecificMethod());
+			assertEquals(SimpleService.class.getMethod("handleIt", String.class, String.class), methodEndpoint.getMethod());
+			assertEquals(InterfaceProxyTestBean.class.getMethod("handleIt", String.class, String.class), methodEndpoint.getMostSpecificMethod());
+
+			Method m = ReflectionUtils.findMethod(endpoint.getClass(), "getDefaultResponseDestination");
+			ReflectionUtils.makeAccessible(m);
+			Object destination = ReflectionUtils.invokeMethod(m, endpoint);
+			assertEquals("SendTo annotation not found on proxy", "foobar", destination);
+		}
+		finally {
+			context.close();
+		}
+	}
+
+	@Test
+	public void sendToAnnotationFoundOnCglibProxy() throws Exception {
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
+				Config.class, ProxyConfig.class, ClassProxyTestBean.class);
+		try {
+			JmsListenerContainerTestFactory factory = context.getBean(JmsListenerContainerTestFactory.class);
+			assertEquals("one container should have been registered", 1, factory.getListenerContainers().size());
+
+			JmsListenerEndpoint endpoint = factory.getListenerContainers().get(0).getEndpoint();
+			assertEquals("Wrong endpoint type", MethodJmsListenerEndpoint.class, endpoint.getClass());
+			MethodJmsListenerEndpoint methodEndpoint = (MethodJmsListenerEndpoint) endpoint;
+			assertTrue(AopUtils.isCglibProxy(methodEndpoint.getBean()));
+			assertTrue(methodEndpoint.getBean() instanceof ClassProxyTestBean);
+			assertEquals(ClassProxyTestBean.class.getMethod("handleIt", String.class, String.class), methodEndpoint.getMethod());
+			assertEquals(ClassProxyTestBean.class.getMethod("handleIt", String.class, String.class), methodEndpoint.getMostSpecificMethod());
 
 			Method m = ReflectionUtils.findMethod(endpoint.getClass(), "getDefaultResponseDestination");
 			ReflectionUtils.makeAccessible(m);
@@ -204,18 +231,29 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 
 	interface SimpleService {
 
-		void handleIt(String body);
+		void handleIt(String value, String body);
 	}
 
 
 	@Component
-	static class ProxyTestBean implements SimpleService {
+	static class InterfaceProxyTestBean implements SimpleService {
 
 		@Override
 		@Transactional
 		@JmsListener(destination = "testQueue")
 		@SendTo("foobar")
-		public void handleIt(String body) {
+		public void handleIt(@Header String value, String body) {
+		}
+	}
+
+
+	@Component
+	static class ClassProxyTestBean {
+
+		@Transactional
+		@JmsListener(destination = "testQueue")
+		@SendTo("foobar")
+		public void handleIt(@Header String value, String body) {
 		}
 	}
 
@@ -224,7 +262,7 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 	static class InvalidProxyTestBean implements SimpleService {
 
 		@Override
-		public void handleIt(String body) {
+		public void handleIt(String value, String body) {
 		}
 
 		@Transactional

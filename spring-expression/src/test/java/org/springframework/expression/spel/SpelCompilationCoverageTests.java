@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -4988,7 +4988,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		}
 
 		@Override
-		public void generateCode(String propertyName, MethodVisitor mv,CodeFlow cf) {
+		public void generateCode(String propertyName, MethodVisitor mv, CodeFlow cf) {
 			if (method == null) {
 				try {
 					method = Payload2.class.getDeclaredMethod("getField", String.class);
@@ -5005,7 +5005,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 				mv.visitTypeInsn(CHECKCAST, memberDeclaringClassSlashedDescriptor);
 			}
 			mv.visitLdcInsn(propertyName);
-			mv.visitMethodInsn(INVOKEVIRTUAL, memberDeclaringClassSlashedDescriptor, method.getName(),CodeFlow.createSignatureDescriptor(method),false);
+			mv.visitMethodInsn(INVOKEVIRTUAL, memberDeclaringClassSlashedDescriptor, method.getName(),
+					CodeFlow.createSignatureDescriptor(method), false);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
@@ -150,6 +151,35 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertEquals(2, depBeans.length);
 		assertEquals("testBean", depBeans[0]);
 		assertEquals("nestedTestBean", depBeans[1]);
+	}
+
+	@Test
+	public void testExtendedResourceInjectionWithDestruction() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerResolvableDependency(BeanFactory.class, bf);
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(TypedExtendedResourceInjectionBean.class));
+		bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
+		NestedTestBean ntb = new NestedTestBean();
+		bf.registerSingleton("nestedTestBean", ntb);
+
+		TestBean tb = bf.getBean("testBean", TestBean.class);
+		TypedExtendedResourceInjectionBean bean = (TypedExtendedResourceInjectionBean) bf.getBean("annotatedBean");
+		assertSame(tb, bean.getTestBean());
+		assertSame(tb, bean.getTestBean2());
+		assertSame(tb, bean.getTestBean3());
+		assertSame(tb, bean.getTestBean4());
+		assertSame(ntb, bean.getNestedTestBean());
+		assertSame(bf, bean.getBeanFactory());
+
+		assertArrayEquals(new String[] {"testBean", "nestedTestBean"}, bf.getDependenciesForBean("annotatedBean"));
+		bf.destroySingleton("testBean");
+		assertFalse(bf.containsSingleton("testBean"));
+		assertFalse(bf.containsSingleton("annotatedBean"));
+		assertTrue(bean.destroyed);
+		assertSame(0, bf.getDependenciesForBean("annotatedBean").length);
 	}
 
 	@Test
@@ -1285,9 +1315,6 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(bf.getBean("dependencyBean"), bean.getTestBean());
 		bf.destroySingletons();
 	}
-
-	@Qualifier("testBean")
-	private void testBeanQualifierProvider() {}
 
 	@Test
 	public void testObjectFactorySerialization() throws Exception {
@@ -2494,6 +2521,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
+	@Qualifier("testBean")
+	private void testBeanQualifierProvider() {}
+
 	@Qualifier("integerRepo")
 	private Repository<?> integerRepositoryQualifierProvider;
 
@@ -2579,7 +2609,15 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
-	public static class TypedExtendedResourceInjectionBean extends NonPublicResourceInjectionBean<NestedTestBean> {
+	public static class TypedExtendedResourceInjectionBean extends NonPublicResourceInjectionBean<NestedTestBean>
+			implements DisposableBean {
+
+		public boolean destroyed = false;
+
+		@Override
+		public void destroy() {
+			this.destroyed = true;
+		}
 	}
 
 

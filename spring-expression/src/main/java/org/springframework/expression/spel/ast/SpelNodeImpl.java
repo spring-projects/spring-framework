@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.util.ObjectUtils;
  * format expression.
  *
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public abstract class SpelNodeImpl implements SpelNode, Opcodes {
@@ -46,7 +47,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	private static SpelNodeImpl[] NO_CHILDREN = new SpelNodeImpl[0];
 
 
-	protected int pos; // start = top 16bits, end = bottom 16bits
+	protected int pos;  // start = top 16bits, end = bottom 16bits
 
 	protected SpelNodeImpl[] children = SpelNodeImpl.NO_CHILDREN;
 
@@ -81,7 +82,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
 
 	/**
-     * @return true if the next child is one of the specified classes
+     * Return {@code true} if the next child is one of the specified classes.
      */
 	protected boolean nextChildIs(Class<?>... clazzes) {
 		if (this.parent != null) {
@@ -123,8 +124,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
 	@Override
 	public void setValue(ExpressionState expressionState, @Nullable Object newValue) throws EvaluationException {
-		throw new SpelEvaluationException(getStartPosition(),
-				SpelMessage.SETVALUE_NOT_SUPPORTED, getClass());
+		throw new SpelEvaluationException(getStartPosition(), SpelMessage.SETVALUE_NOT_SUPPORTED, getClass());
 	}
 
 	@Override
@@ -281,4 +281,5 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 		}
 		cf.exitCompilationScope();
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 
-import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
-import static org.springframework.test.util.AssertionErrors.fail;
+import static org.springframework.test.util.AssertionErrors.*;
 
 /**
  * Assertions on headers of the response.
@@ -125,10 +123,9 @@ public class HeaderAssertions {
 	 */
 	public WebTestClient.ResponseSpec contentTypeCompatibleWith(MediaType mediaType) {
 		MediaType actual = getHeaders().getContentType();
-		String message = getMessage("Content-Type") + "=[" + actual.toString() + "]"
-				+ " is not compatible with [" + mediaType.toString() + "]";
+		String message = getMessage("Content-Type") + "=[" + actual + "] is not compatible with [" + mediaType + "]";
 		this.exchangeResult.assertWithDiagnostics(() ->
-				assertTrue(message, actual.isCompatibleWith(mediaType)));
+				assertTrue(message, (actual != null && actual.isCompatibleWith(mediaType))));
 		return this.responseSpec;
 	}
 

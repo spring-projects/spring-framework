@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -458,8 +458,8 @@ public class ConstructorReference extends SpelNodeImpl {
 		mv.visitInsn(DUP);
 
 		// children[0] is the type of the constructor, don't want to include that in argument processing
-		SpelNodeImpl[] arguments = new SpelNodeImpl[children.length - 1];
-		System.arraycopy(children, 1, arguments, 0, children.length - 1);
+		SpelNodeImpl[] arguments = new SpelNodeImpl[this.children.length - 1];
+		System.arraycopy(this.children, 1, arguments, 0, this.children.length - 1);
 		generateCodeForArguments(mv, cf, constructor, arguments);	
 		mv.visitMethodInsn(INVOKESPECIAL, classDesc, "<init>", CodeFlow.createSignatureDescriptor(constructor), false);
 		cf.pushDescriptor(this.exitTypeDescriptor);
