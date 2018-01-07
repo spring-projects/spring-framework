@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -346,6 +346,7 @@ class TypeConverterDelegate {
 			// to be checked, hence we don't return it right away.
 			try {
 				Field enumField = requiredType.getField(trimmedValue);
+				ReflectionUtils.makeAccessible(enumField);
 				convertedValue = enumField.get(null);
 			}
 			catch (Throwable ex) {
