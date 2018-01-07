@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -2735,6 +2735,16 @@ public class DefaultListableBeanFactoryTests {
 		assertSame(Optional.empty(), bf.getBean(Optional.class));
 	}
 
+	@Test
+	public void testNonPublicEnum() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(NonPublicEnumHolder.class);
+		bd.getConstructorArgumentValues().addGenericArgumentValue("VALUE_1");
+		bf.registerBeanDefinition("holderBean", bd);
+		NonPublicEnumHolder holder = (NonPublicEnumHolder) bf.getBean("holderBean");
+		assertEquals(NonPublicEnum.VALUE_1, holder.getNonPublicEnum());
+	}
+
 	/**
 	 * Test that by-type bean lookup caching is working effectively by searching for a
 	 * bean of type B 10K times within a container having 1K additional beans of type A.
@@ -3259,6 +3269,26 @@ public class DefaultListableBeanFactoryTests {
 		@Override
 		public boolean isSingleton() {
 			return true;
+		}
+	}
+
+
+	enum NonPublicEnum {
+
+		VALUE_1, VALUE_2;
+	}
+
+
+	static class NonPublicEnumHolder {
+
+		final NonPublicEnum nonPublicEnum;
+
+		public NonPublicEnumHolder(NonPublicEnum nonPublicEnum) {
+			this.nonPublicEnum = nonPublicEnum;
+		}
+
+		public NonPublicEnum getNonPublicEnum() {
+			return nonPublicEnum;
 		}
 	}
 
