@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.ReflectionHelper;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -45,6 +46,7 @@ import org.springframework.util.ReflectionUtils;
  * (right now), so the names must be unique.
  *
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class FunctionReference extends SpelNodeImpl {
@@ -53,9 +55,7 @@ public class FunctionReference extends SpelNodeImpl {
 
 	// Captures the most recently used method for the function invocation *if* the method
 	// can safely be used for compilation (i.e. no argument conversion is going on)
-	private Method method;
-	
-	private boolean argumentConversionOccurred;
+	private volatile Method method;
 
 
 	public FunctionReference(String functionName, int pos, SpelNodeImpl... arguments) {
@@ -67,7 +67,7 @@ public class FunctionReference extends SpelNodeImpl {
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		TypedValue value = state.lookupVariable(this.name);
-		if (value == null) {
+		if (value == TypedValue.NULL) {
 			throw new SpelEvaluationException(getStartPosition(), SpelMessage.FUNCTION_NOT_DEFINED, this.name);
 		}
 
@@ -87,19 +87,18 @@ public class FunctionReference extends SpelNodeImpl {
 	}
 
 	/**
-	 * Execute a function represented as a java.lang.reflect.Method.
+	 * Execute a function represented as a {@code java.lang.reflect.Method}.
 	 * @param state the expression evaluation state
 	 * @param method the method to invoke
 	 * @return the return value of the invoked Java method
 	 * @throws EvaluationException if there is any problem invoking the method
 	 */
 	private TypedValue executeFunctionJLRMethod(ExpressionState state, Method method) throws EvaluationException {
-		this.method = null;
 		Object[] functionArgs = getArguments(state);
 
-		if (!method.isVarArgs() && method.getParameterTypes().length != functionArgs.length) {
+		if (!method.isVarArgs() && method.getParameterCount() != functionArgs.length) {
 			throw new SpelEvaluationException(SpelMessage.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION,
-					functionArgs.length, method.getParameterTypes().length);
+					functionArgs.length, method.getParameterCount());
 		}
 		// Only static methods can be called in this way
 		if (!Modifier.isStatic(method.getModifiers())) {
@@ -107,29 +106,34 @@ public class FunctionReference extends SpelNodeImpl {
 					SpelMessage.FUNCTION_MUST_BE_STATIC, ClassUtils.getQualifiedMethodName(method), this.name);
 		}
 
-		this.argumentConversionOccurred = false;
 		// Convert arguments if necessary and remap them for varargs if required
-		if (functionArgs != null) {
-			TypeConverter converter = state.getEvaluationContext().getTypeConverter();
-			this.argumentConversionOccurred = ReflectionHelper.convertAllArguments(converter, functionArgs, method);
-		}
+		TypeConverter converter = state.getEvaluationContext().getTypeConverter();
+		boolean argumentConversionOccurred = ReflectionHelper.convertAllArguments(converter, functionArgs, method);
 		if (method.isVarArgs()) {
 			functionArgs = ReflectionHelper.setupArgumentsForVarargsInvocation(
 					method.getParameterTypes(), functionArgs);
 		}
+		boolean compilable = false;
 
 		try {
 			ReflectionUtils.makeAccessible(method);
 			Object result = method.invoke(method.getClass(), functionArgs);
-			if (!argumentConversionOccurred) {
-				this.method = method;
-				this.exitTypeDescriptor = CodeFlow.toDescriptor(method.getReturnType());
-			}
+			compilable = !argumentConversionOccurred;
 			return new TypedValue(result, new TypeDescriptor(new MethodParameter(method, -1)).narrow(result));
 		}
 		catch (Exception ex) {
 			throw new SpelEvaluationException(getStartPosition(), ex, SpelMessage.EXCEPTION_DURING_FUNCTION_CALL,
 					this.name, ex.getMessage());
+		}
+		finally {
+			if (compilable) {
+				this.exitTypeDescriptor = CodeFlow.toDescriptor(method.getReturnType());
+				this.method = method;
+			}
+			else {
+				this.exitTypeDescriptor = null;
+				this.method = null;
+			}
 		}
 	}
 
@@ -162,12 +166,13 @@ public class FunctionReference extends SpelNodeImpl {
 	
 	@Override
 	public boolean isCompilable() {
-		if (this.method == null || this.argumentConversionOccurred) {
+		Method method = this.method;
+		if (method == null) {
 			return false;
 		}
-		int methodModifiers = this.method.getModifiers();
+		int methodModifiers = method.getModifiers();
 		if (!Modifier.isStatic(methodModifiers) || !Modifier.isPublic(methodModifiers) ||
-				!Modifier.isPublic(this.method.getDeclaringClass().getModifiers())) {
+				!Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
 			return false;
 		}
 		for (SpelNodeImpl child : this.children) {
@@ -179,11 +184,13 @@ public class FunctionReference extends SpelNodeImpl {
 	}
 	
 	@Override 
-	public void generateCode(MethodVisitor mv,CodeFlow cf) {
-		String classDesc = this.method.getDeclaringClass().getName().replace('.', '/');
-		generateCodeForArguments(mv, cf, this.method, this.children);
-		mv.visitMethodInsn(INVOKESTATIC, classDesc, this.method.getName(),
-				CodeFlow.createSignatureDescriptor(this.method), false);
+	public void generateCode(MethodVisitor mv, CodeFlow cf) {
+		Method method = this.method;
+		Assert.state(method != null, "No method handle");
+		String classDesc = method.getDeclaringClass().getName().replace('.', '/');
+		generateCodeForArguments(mv, cf, method, this.children);
+		mv.visitMethodInsn(INVOKESTATIC, classDesc, method.getName(),
+				CodeFlow.createSignatureDescriptor(method), false);
 		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
