@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -335,7 +335,10 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 				if (isCacheProducers() && (methodName.equals("createProducer") ||
 						methodName.equals("createSender") || methodName.equals("createPublisher"))) {
 					// Destination argument being null is ok for a producer
-					return getCachedProducer((Destination) args[0]);
+					Destination dest = (Destination) args[0];
+					if (!(dest instanceof TemporaryQueue || dest instanceof TemporaryTopic)) {
+						return getCachedProducer(dest);
+					}
 				}
 				else if (isCacheConsumers()) {
 					// let raw JMS invocation throw an exception if Destination (i.e. args[0]) is null
