@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -739,19 +739,22 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
 			if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
 				if (isFactoryBean(beanName)) {
-					final FactoryBean<?> factory = (FactoryBean<?>) getBean(FACTORY_BEAN_PREFIX + beanName);
-					boolean isEagerInit;
-					if (System.getSecurityManager() != null && factory instanceof SmartFactoryBean) {
-						isEagerInit = AccessController.doPrivileged((PrivilegedAction<Boolean>) () ->
-								((SmartFactoryBean<?>) factory).isEagerInit(),
-								getAccessControlContext());
-					}
-					else {
-						isEagerInit = (factory instanceof SmartFactoryBean &&
-								((SmartFactoryBean<?>) factory).isEagerInit());
-					}
-					if (isEagerInit) {
-						getBean(beanName);
+					Object bean = getBean(FACTORY_BEAN_PREFIX + beanName);
+					if (bean instanceof FactoryBean) {
+						final FactoryBean<?> factory = (FactoryBean<?>) bean;
+						boolean isEagerInit;
+						if (System.getSecurityManager() != null && factory instanceof SmartFactoryBean) {
+							isEagerInit = AccessController.doPrivileged((PrivilegedAction<Boolean>) () ->
+											((SmartFactoryBean<?>) factory).isEagerInit(),
+									getAccessControlContext());
+						}
+						else {
+							isEagerInit = (factory instanceof SmartFactoryBean &&
+									((SmartFactoryBean<?>) factory).isEagerInit());
+						}
+						if (isEagerInit) {
+							getBean(beanName);
+						}
 					}
 				}
 				else {
