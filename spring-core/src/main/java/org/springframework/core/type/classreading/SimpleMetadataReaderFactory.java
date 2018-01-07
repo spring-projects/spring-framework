@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.core.type.classreading;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.springframework.core.io.DefaultResourceLoader;
@@ -73,10 +74,13 @@ public class SimpleMetadataReaderFactory implements MetadataReaderFactory {
 
 	@Override
 	public MetadataReader getMetadataReader(String className) throws IOException {
-		String resourcePath = ResourceLoader.CLASSPATH_URL_PREFIX +
-				ClassUtils.convertClassNameToResourcePath(className) + ClassUtils.CLASS_FILE_SUFFIX;
-		Resource resource = this.resourceLoader.getResource(resourcePath);
-		if (!resource.exists()) {
+		try {
+			String resourcePath = ResourceLoader.CLASSPATH_URL_PREFIX +
+					ClassUtils.convertClassNameToResourcePath(className) + ClassUtils.CLASS_FILE_SUFFIX;
+			Resource resource = this.resourceLoader.getResource(resourcePath);
+			return getMetadataReader(resource);
+		}
+		catch (FileNotFoundException ex) {
 			// Maybe an inner class name using the dot name syntax? Need to use the dollar syntax here...
 			// ClassUtils.forName has an equivalent check for resolution into Class references later on.
 			int lastDotIndex = className.lastIndexOf('.');
@@ -87,11 +91,11 @@ public class SimpleMetadataReaderFactory implements MetadataReaderFactory {
 						ClassUtils.convertClassNameToResourcePath(innerClassName) + ClassUtils.CLASS_FILE_SUFFIX;
 				Resource innerClassResource = this.resourceLoader.getResource(innerClassResourcePath);
 				if (innerClassResource.exists()) {
-					resource = innerClassResource;
+					return getMetadataReader(innerClassResource);
 				}
 			}
+			throw ex;
 		}
-		return getMetadataReader(resource);
 	}
 
 	@Override
