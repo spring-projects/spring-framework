@@ -43,13 +43,13 @@ dependencies {
 	optional("org.apache.taglibs:taglibs-standard-jstlel:1.2.5") {
 		exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
 	}
-	optional("net.sourceforge.htmlunit:htmlunit:2.28") {
+	optional("net.sourceforge.htmlunit:htmlunit:2.29") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-	optional("org.seleniumhq.selenium:htmlunit-driver:2.28.2") {
+	optional("org.seleniumhq.selenium:htmlunit-driver:2.29.0") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-	optional("org.seleniumhq.selenium:selenium-java:3.7.1") {
+	optional("org.seleniumhq.selenium:selenium-java:3.8.1") {
 		exclude group: "commons-logging", module: "commons-logging"
 		exclude group: "io.netty", module: "netty"
 	}
