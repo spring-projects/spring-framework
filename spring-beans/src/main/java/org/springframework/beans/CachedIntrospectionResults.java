@@ -20,7 +20,10 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -38,6 +41,7 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -93,6 +97,8 @@ public class CachedIntrospectionResults {
 	 */
 	public static final String IGNORE_BEANINFO_PROPERTY_NAME = "spring.beaninfo.ignore";
 
+	private static final Set<Class<?>> IGNORED_INTERFACES = Collections.unmodifiableSet(
+			new HashSet<>(Arrays.asList(Serializable.class)));
 
 	private static final boolean shouldIntrospectorIgnoreBeaninfoClasses =
 			SpringProperties.getFlag(IGNORE_BEANINFO_PROPERTY_NAME);
@@ -266,13 +272,7 @@ public class CachedIntrospectionResults {
 				logger.trace("Getting BeanInfo for class [" + beanClass.getName() + "]");
 			}
 
-			BeanInfo beanInfo = null;
-			for (BeanInfoFactory beanInfoFactory : beanInfoFactories) {
-				beanInfo = beanInfoFactory.getBeanInfo(beanClass);
-				if (beanInfo != null) {
-					break;
-				}
-			}
+			BeanInfo beanInfo = getBeanInfoFromFactories(beanClass);
 			if (beanInfo == null) {
 				// If none of the factories supported the class, fall back to the default
 				beanInfo = (shouldIntrospectorIgnoreBeaninfoClasses ?
@@ -307,15 +307,20 @@ public class CachedIntrospectionResults {
 			// Explicitly check implemented interfaces for setter/getter methods as well,
 			// in particular for Java 8 default methods...
 			Class<?> clazz = beanClass;
-			while (clazz != null) {
+			while (clazz != null && !Object.class.equals(clazz)) {
 				Class<?>[] ifcs = clazz.getInterfaces();
 				for (Class<?> ifc : ifcs) {
-					BeanInfo ifcInfo = Introspector.getBeanInfo(ifc, Introspector.IGNORE_ALL_BEANINFO);
-					PropertyDescriptor[] ifcPds = ifcInfo.getPropertyDescriptors();
-					for (PropertyDescriptor pd : ifcPds) {
-						if (!this.propertyDescriptorCache.containsKey(pd.getName())) {
-							pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
-							this.propertyDescriptorCache.put(pd.getName(), pd);
+					if (! IGNORED_INTERFACES.contains(ifc)) {
+						BeanInfo ifcInfo = getBeanInfoFromFactories(ifc);
+						if (ifcInfo == null) {
+							ifcInfo = Introspector.getBeanInfo(ifc, Introspector.IGNORE_ALL_BEANINFO);
+						}
+						PropertyDescriptor[] ifcPds = ifcInfo.getPropertyDescriptors();
+						for (PropertyDescriptor pd : ifcPds) {
+							if (!this.propertyDescriptorCache.containsKey(pd.getName())) {
+								pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
+								this.propertyDescriptorCache.put(pd.getName(), pd);
+							}
 						}
 					}
 				}
@@ -327,6 +332,17 @@ public class CachedIntrospectionResults {
 		catch (IntrospectionException ex) {
 			throw new FatalBeanException("Failed to obtain BeanInfo for class [" + beanClass.getName() + "]", ex);
 		}
+	}
+
+	private BeanInfo getBeanInfoFromFactories(Class<?> beanClass)
+			throws IntrospectionException {
+		for (BeanInfoFactory beanInfoFactory : beanInfoFactories) {
+			BeanInfo beanInfo = beanInfoFactory.getBeanInfo(beanClass);
+			if (beanInfo != null) {
+				return beanInfo;
+			}
+		}
+		return null;
 	}
 
 	BeanInfo getBeanInfo() {
