@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -244,6 +244,27 @@ public class CachedIntrospectionResults {
 		return false;
 	}
 
+	/**
+	 * Retrieve a {@link BeanInfo} descriptor for the given target class.
+	 * @param beanClass the target class to introspect
+	 * @param ignoreBeaninfoClasses whether to apply {@link Introspector#IGNORE_ALL_BEANINFO} mode
+	 * @return the resulting {@code BeanInfo} descriptor (never {@code null})
+	 * @throws IntrospectionException from the underlying {@link Introspector}
+	 */
+	private static BeanInfo getBeanInfo(Class<?> beanClass, boolean ignoreBeaninfoClasses)
+			throws IntrospectionException {
+
+		for (BeanInfoFactory beanInfoFactory : beanInfoFactories) {
+			BeanInfo beanInfo = beanInfoFactory.getBeanInfo(beanClass);
+			if (beanInfo != null) {
+				return beanInfo;
+			}
+		}
+		return (ignoreBeaninfoClasses ?
+				Introspector.getBeanInfo(beanClass, Introspector.IGNORE_ALL_BEANINFO) :
+				Introspector.getBeanInfo(beanClass));
+	}
+
 
 	/** The BeanInfo object for the introspected bean class */
 	private final BeanInfo beanInfo;
@@ -265,21 +286,7 @@ public class CachedIntrospectionResults {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Getting BeanInfo for class [" + beanClass.getName() + "]");
 			}
-
-			BeanInfo beanInfo = null;
-			for (BeanInfoFactory beanInfoFactory : beanInfoFactories) {
-				beanInfo = beanInfoFactory.getBeanInfo(beanClass);
-				if (beanInfo != null) {
-					break;
-				}
-			}
-			if (beanInfo == null) {
-				// If none of the factories supported the class, fall back to the default
-				beanInfo = (shouldIntrospectorIgnoreBeaninfoClasses ?
-						Introspector.getBeanInfo(beanClass, Introspector.IGNORE_ALL_BEANINFO) :
-						Introspector.getBeanInfo(beanClass));
-			}
-			this.beanInfo = beanInfo;
+			this.beanInfo = getBeanInfo(beanClass, shouldIntrospectorIgnoreBeaninfoClasses);
 
 			if (logger.isTraceEnabled()) {
 				logger.trace("Caching PropertyDescriptors for class [" + beanClass.getName() + "]");
@@ -307,15 +314,17 @@ public class CachedIntrospectionResults {
 			// Explicitly check implemented interfaces for setter/getter methods as well,
 			// in particular for Java 8 default methods...
 			Class<?> clazz = beanClass;
-			while (clazz != null) {
+			while (clazz != null && clazz != Object.class) {
 				Class<?>[] ifcs = clazz.getInterfaces();
 				for (Class<?> ifc : ifcs) {
-					BeanInfo ifcInfo = Introspector.getBeanInfo(ifc, Introspector.IGNORE_ALL_BEANINFO);
-					PropertyDescriptor[] ifcPds = ifcInfo.getPropertyDescriptors();
-					for (PropertyDescriptor pd : ifcPds) {
-						if (!this.propertyDescriptorCache.containsKey(pd.getName())) {
-							pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
-							this.propertyDescriptorCache.put(pd.getName(), pd);
+					if (!ClassUtils.isJavaLanguageInterface(ifc)) {
+						BeanInfo ifcInfo = getBeanInfo(ifc, true);
+						PropertyDescriptor[] ifcPds = ifcInfo.getPropertyDescriptors();
+						for (PropertyDescriptor pd : ifcPds) {
+							if (!this.propertyDescriptorCache.containsKey(pd.getName())) {
+								pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
+								this.propertyDescriptorCache.put(pd.getName(), pd);
+							}
 						}
 					}
 				}
@@ -328,6 +337,7 @@ public class CachedIntrospectionResults {
 			throw new FatalBeanException("Failed to obtain BeanInfo for class [" + beanClass.getName() + "]", ex);
 		}
 	}
+
 
 	BeanInfo getBeanInfo() {
 		return this.beanInfo;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.util;
 
 import java.beans.Introspector;
+import java.io.Externalizable;
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -73,6 +75,13 @@ public abstract class ClassUtils {
 	/** The ".class" file suffix */
 	public static final String CLASS_FILE_SUFFIX = ".class";
 
+
+	/**
+	 * Common Java language interfaces which are supposed to be ignored
+	 * when searching for 'primary' user-level interfaces.
+	 */
+	private static final Set<Class<?>> javaLanguageInterfaces = new HashSet<>(
+			Arrays.asList(Serializable.class, Externalizable.class, Cloneable.class, Comparable.class));
 
 	/**
 	 * Map with primitive wrapper type as key and corresponding primitive
@@ -1216,6 +1225,19 @@ public abstract class ClassUtils {
 			// No interface class found...
 			return false;
 		}
+	}
+
+	/**
+	 * Determine whether the given interface is a common Java language interface:
+	 * {@link Serializable}, {@link Externalizable}, {@link Cloneable}, {@link Comparable}
+	 * - all of which can be ignored when looking for 'primary' user-level interfaces.
+	 * Common characteristics: no service-level operations, no bean property methods,
+	 * no default methods.
+	 * @param ifc the interface to check
+	 * @since 5.0.3
+	 */
+	public static boolean isJavaLanguageInterface(Class<?> ifc) {
+		return javaLanguageInterfaces.contains(ifc);
 	}
 
 	/**
