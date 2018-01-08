@@ -98,13 +98,12 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * An {@link AbstractHandlerMethodAdapter} that supports {@link HandlerMethod}s
- * with their method argument and return type signature, as defined via
- * {@code @RequestMapping}.
+ * Extension of {@link AbstractHandlerMethodAdapter} that supports
+ * {@link RequestMapping} annotated {@code HandlerMethod}s.
  *
  * <p>Support for custom argument and return value types can be added via
- * {@link #setCustomArgumentResolvers} and {@link #setCustomReturnValueHandlers}.
- * Or alternatively, to re-configure all argument and return value types,
+ * {@link #setCustomArgumentResolvers} and {@link #setCustomReturnValueHandlers},
+ * or alternatively, to re-configure all argument and return value types,
  * use {@link #setArgumentResolvers} and {@link #setReturnValueHandlers}.
  *
  * @author Rossen Stoyanchev
