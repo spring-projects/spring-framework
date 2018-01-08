@@ -3138,7 +3138,6 @@ framework.
 
 .Request-scoped bean configuration
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
 ----
 	<beans>
 
