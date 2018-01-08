@@ -65,10 +65,28 @@ public class InterceptorRegistration {
 	}
 
 	/**
+	 * List-based variant of {@link #addPathPatterns(String...)}.
+	 * @since 5.0.3
+	 */
+	public InterceptorRegistration addPathPatterns(List<String> patterns) {
+		this.includePatterns.addAll(patterns);
+		return this;
+	}
+
+	/**
 	 * Add URL patterns to which the registered interceptor should not apply to.
 	 */
 	public InterceptorRegistration excludePathPatterns(String... patterns) {
 		this.excludePatterns.addAll(Arrays.asList(patterns));
+		return this;
+	}
+
+	/**
+	 * List-based variant of {@link #excludePathPatterns(String...)}.
+	 * @since 5.0.3
+	 */
+	public InterceptorRegistration excludePathPatterns(List<String> patterns) {
+		this.excludePatterns.addAll(patterns);
 		return this;
 	}
 
