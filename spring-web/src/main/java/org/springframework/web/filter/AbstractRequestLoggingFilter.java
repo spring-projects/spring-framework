@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.ContentCachingRequestWrapper;
@@ -317,8 +318,12 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	}
 
 	/**
-	 * Extract the message payload.<p>Used by {@link #createMessage(HttpServletRequest, String, String)} in creating the payload portion of the message (only if {@link #isIncludePayload()} returns true)
+	 * Extracts the message payload portion of the message created by
+	 * {@link #createMessage(HttpServletRequest, String, String)} when
+	 * {@link #isIncludePayload()} returns true.
+	 * @since 5.0.3
 	 */
+	@Nullable
 	protected String getMessagePayload(HttpServletRequest request) {
 		ContentCachingRequestWrapper wrapper =
 				WebUtils.getNativeRequest(request, ContentCachingRequestWrapper.class);
@@ -333,7 +338,6 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 				catch (UnsupportedEncodingException ex) {
 					payload = "[unknown]";
 				}
-
 			}
 		}
 		return payload;
