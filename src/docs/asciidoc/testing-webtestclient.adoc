@@ -223,7 +223,7 @@ Or if you want to assert there is no response content, use this:
 			.body(personMono, Person.class)
 			.exchange()
 			.expectStatus().isCreated()
-			.expectBody().isEmpty;
+			.expectBody().isEmpty();
 ----
 
 
