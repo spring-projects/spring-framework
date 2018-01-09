@@ -47,7 +47,7 @@ public abstract class NamedParameterUtils {
 	 * indicating that a parameter name in a SQL String has ended.
 	 */
 	private static final char[] PARAMETER_SEPARATORS =
-			new char[] {'"', '\'', ':', '&', ',', ';', '(', ')', '|', '=', '+', '-', '*', '%', '/', '\\', '<', '>', '^'};
+			new char[] {'"', '\'', ':', '&', ',', ';', '(', ')', '|', '=', '+', '-', '*', '%', '/', '\\', '<', '>', '^', '[', ']'};
 
 	/**
 	 * Set of characters that qualify as comment or quotes starting characters.
