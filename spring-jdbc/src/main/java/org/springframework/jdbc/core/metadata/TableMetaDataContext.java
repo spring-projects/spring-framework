@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -206,8 +206,8 @@ public class TableMetaDataContext {
 	 */
 	public List<Object> matchInParameterValuesWithInsertColumns(SqlParameterSource parameterSource) {
 		List<Object> values = new ArrayList<>();
-		// for parameter source lookups we need to provide caseinsensitive lookup support since the
-		// database metadata is not necessarily providing case sensitive column names
+		// For parameter source lookups we need to provide case-insensitive lookup support since the
+		// database metadata is not necessarily providing case-sensitive column names
 		Map<String, String> caseInsensitiveParameterNames =
 				SqlParameterSourceUtils.extractCaseInsensitiveParameterNames(parameterSource);
 		for (String column : this.tableColumns) {
@@ -226,9 +226,8 @@ public class TableMetaDataContext {
 					}
 					else {
 						if (caseInsensitiveParameterNames.containsKey(lowerCaseName)) {
-							values.add(
-									SqlParameterSourceUtils.getTypedValue(parameterSource,
-											caseInsensitiveParameterNames.get(lowerCaseName)));
+							values.add(SqlParameterSourceUtils.getTypedValue(
+									parameterSource, caseInsensitiveParameterNames.get(lowerCaseName)));
 						}
 						else {
 							values.add(null);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,16 +102,13 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 	/** Cache to hold filename lists per Locale */
-	private final ConcurrentMap<String, Map<Locale, List<String>>> cachedFilenames =
-			new ConcurrentHashMap<>();
+	private final ConcurrentMap<String, Map<Locale, List<String>>> cachedFilenames = new ConcurrentHashMap<>();
 
 	/** Cache to hold already loaded properties per filename */
-	private final ConcurrentMap<String, PropertiesHolder> cachedProperties =
-			new ConcurrentHashMap<>();
+	private final ConcurrentMap<String, PropertiesHolder> cachedProperties = new ConcurrentHashMap<>();
 
 	/** Cache to hold merged loaded properties per locale */
-	private final ConcurrentMap<Locale, PropertiesHolder> cachedMergedProperties =
-			new ConcurrentHashMap<>();
+	private final ConcurrentMap<Locale, PropertiesHolder> cachedMergedProperties = new ConcurrentHashMap<>();
 
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,15 +56,15 @@ public class CallMetaDataContext {
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** name of procedure to call **/
+	/** Name of procedure to call **/
 	@Nullable
 	private String procedureName;
 
-	/** name of catalog for call **/
+	/** Name of catalog for call **/
 	@Nullable
 	private String catalogName;
 
-	/** name of schema for call **/
+	/** Name of schema for call **/
 	@Nullable
 	private String schemaName;
 
@@ -274,7 +274,8 @@ public class CallMetaDataContext {
 				return new SqlOutParameter(parameterName, provider.getRefCursorSqlType(), rowMapper);
 			}
 			else {
-				throw new InvalidDataAccessApiUsageException("Return of a ResultSet from a stored procedure is not supported.");
+				throw new InvalidDataAccessApiUsageException(
+						"Return of a ResultSet from a stored procedure is not supported.");
 			}
 		}
 	}
@@ -493,31 +494,37 @@ public class CallMetaDataContext {
 				}
 				if (parameterName != null) {
 					if (parameterSource.hasValue(parameterName)) {
-						matchedParameters.put(parameterName, SqlParameterSourceUtils.getTypedValue(parameterSource, parameterName));
+						matchedParameters.put(parameterName,
+								SqlParameterSourceUtils.getTypedValue(parameterSource, parameterName));
 					}
 					else {
 						String lowerCaseName = parameterName.toLowerCase();
 						if (parameterSource.hasValue(lowerCaseName)) {
-							matchedParameters.put(parameterName, SqlParameterSourceUtils.getTypedValue(parameterSource, lowerCaseName));
+							matchedParameters.put(parameterName,
+									SqlParameterSourceUtils.getTypedValue(parameterSource, lowerCaseName));
 						}
 						else {
 							String englishLowerCaseName = parameterName.toLowerCase(Locale.ENGLISH);
 							if (parameterSource.hasValue(englishLowerCaseName)) {
-								matchedParameters.put(parameterName, SqlParameterSourceUtils.getTypedValue(parameterSource, englishLowerCaseName));
+								matchedParameters.put(parameterName,
+										SqlParameterSourceUtils.getTypedValue(parameterSource, englishLowerCaseName));
 							}
 							else {
 								String propertyName = JdbcUtils.convertUnderscoreNameToPropertyName(parameterName);
 								if (parameterSource.hasValue(propertyName)) {
-									matchedParameters.put(parameterName, SqlParameterSourceUtils.getTypedValue(parameterSource, propertyName));
+									matchedParameters.put(parameterName,
+											SqlParameterSourceUtils.getTypedValue(parameterSource, propertyName));
 								}
 								else {
 									if (caseInsensitiveParameterNames.containsKey(lowerCaseName)) {
 										String sourceName = caseInsensitiveParameterNames.get(lowerCaseName);
-										matchedParameters.put(parameterName, SqlParameterSourceUtils.getTypedValue(parameterSource, sourceName));
+										matchedParameters.put(parameterName,
+												SqlParameterSourceUtils.getTypedValue(parameterSource, sourceName));
 									}
 									else {
-										logger.warn("Unable to locate the corresponding parameter value for '" + parameterName +
-												"' within the parameter values provided: " + caseInsensitiveParameterNames.values());
+										logger.warn("Unable to locate the corresponding parameter value for '" +
+												parameterName + "' within the parameter values provided: " +
+												caseInsensitiveParameterNames.values());
 									}
 								}
 							}
@@ -567,8 +574,8 @@ public class CallMetaDataContext {
 						value = ((SqlParameterValue)value).getValue();
 					}
 					if (value != null) {
-						logger.debug("Unable to locate the corresponding IN or IN-OUT parameter for \"" + parameterName +
-								"\" in the parameters used: " + callParameterNames.keySet());
+						logger.debug("Unable to locate the corresponding IN or IN-OUT parameter for \"" +
+								parameterName + "\" in the parameters used: " + callParameterNames.keySet());
 					}
 				}
 			}
@@ -669,12 +676,7 @@ public class CallMetaDataContext {
 	 * @since 4.2
 	 */
 	protected String createParameterBinding(SqlParameter parameter) {
-		if (isNamedBinding()) {
-			return parameter.getName() + " => ?";
-		}
-		else {
-			return "?";
-		}
+		return (isNamedBinding() ? parameter.getName() + " => ?" : "?");
 	}
 
 	private static String lowerCase(@Nullable String paramName) {
