@@ -16,10 +16,13 @@
 package org.springframework.web.server.adapter;
 
 import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
@@ -55,6 +58,9 @@ public abstract class AbstractReactiveWebInitializer implements WebApplicationIn
 		ApplicationContext applicationContext = createApplicationContext();
 		Assert.notNull(applicationContext, "createApplicationContext() must not return null.");
 
+		refreshApplicationContext(applicationContext);
+		registerCloseListener(servletContext, applicationContext);
+
 		HttpHandler httpHandler = WebHttpHandlerBuilder.applicationContext(applicationContext).build();
 		ServletHttpHandlerAdapter servlet = new ServletHttpHandlerAdapter(httpHandler);
 
@@ -82,16 +88,44 @@ public abstract class AbstractReactiveWebInitializer implements WebApplicationIn
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		Class<?>[] configClasses = getConfigClasses();
 		Assert.notEmpty(configClasses, "No Spring configuration provided.");
+		context.register(configClasses);
 		return context;
 	}
 
 	/**
-	 * Specify {@link org.springframework.context.annotation.Configuration @Configuration} and/or
-	 * {@link org.springframework.stereotype.Component @Component} classes that
-	 * make up the application configuration. The config classes are given to
-	 * {@linkplain #createApplicationContext()}.
+	 * Specify {@link org.springframework.context.annotation.Configuration @Configuration}
+	 * and/or {@link org.springframework.stereotype.Component @Component}
+	 * classes that make up the application configuration. The config classes
+	 * are given to {@linkplain #createApplicationContext()}.
 	 */
 	protected abstract Class<?>[] getConfigClasses();
+
+	/**
+	 * Refresh the given application context, if necessary.
+	 */
+	protected void refreshApplicationContext(ApplicationContext context) {
+		if (context instanceof ConfigurableApplicationContext) {
+			ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
+			if (!cac.isActive()) {
+				cac.refresh();
+			}
+		}
+	}
+
+	/**
+	 * Register a {@link ServletContextListener} that closes the given
+	 * application context when the servlet context is destroyed.
+	 * @param servletContext the servlet context to listen to
+	 * @param applicationContext the application context that is to be
+	 * closed when {@code servletContext} is destroyed
+	 */
+	protected void registerCloseListener(ServletContext servletContext, ApplicationContext applicationContext) {
+		if (applicationContext instanceof ConfigurableApplicationContext) {
+			ConfigurableApplicationContext cac = (ConfigurableApplicationContext) applicationContext;
+			ServletContextDestroyedListener listener = new ServletContextDestroyedListener(cac);
+			servletContext.addListener(listener);
+		}
+	}
 
 	/**
 	 * Return the Servlet mapping to use. Only the default Servlet mapping '/'
@@ -100,6 +134,25 @@ public abstract class AbstractReactiveWebInitializer implements WebApplicationIn
 	 */
 	protected String getServletMapping() {
 		return "/";
+	}
+
+
+	private static class ServletContextDestroyedListener implements ServletContextListener {
+
+		private final ConfigurableApplicationContext applicationContext;
+
+		public ServletContextDestroyedListener(ConfigurableApplicationContext applicationContext) {
+			this.applicationContext = applicationContext;
+		}
+
+		@Override
+		public void contextInitialized(ServletContextEvent sce) {
+		}
+
+		@Override
+		public void contextDestroyed(ServletContextEvent sce) {
+			this.applicationContext.close();
+		}
 	}
 
 }
