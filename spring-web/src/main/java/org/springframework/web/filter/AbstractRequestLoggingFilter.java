@@ -306,26 +306,37 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 		}
 
 		if (isIncludePayload()) {
-			ContentCachingRequestWrapper wrapper =
-					WebUtils.getNativeRequest(request, ContentCachingRequestWrapper.class);
-			if (wrapper != null) {
-				byte[] buf = wrapper.getContentAsByteArray();
-				if (buf.length > 0) {
-					int length = Math.min(buf.length, getMaxPayloadLength());
-					String payload;
-					try {
-						payload = new String(buf, 0, length, wrapper.getCharacterEncoding());
-					}
-					catch (UnsupportedEncodingException ex) {
-						payload = "[unknown]";
-					}
-					msg.append(";payload=").append(payload);
-				}
+			String payload = getMessagePayload(request);
+			if (payload != null) {
+				msg.append(";payload=").append(payload);
 			}
 		}
 
 		msg.append(suffix);
 		return msg.toString();
+	}
+
+	/**
+	 * Extract the message payload.<p>Used by {@link #createMessage(HttpServletRequest, String, String)} in creating the payload portion of the message (only if {@link #isIncludePayload()} returns true)
+	 */
+	protected String getMessagePayload(HttpServletRequest request) {
+		ContentCachingRequestWrapper wrapper =
+				WebUtils.getNativeRequest(request, ContentCachingRequestWrapper.class);
+		String payload = null;
+		if (wrapper != null) {
+			byte[] buf = wrapper.getContentAsByteArray();
+			if (buf.length > 0) {
+				int length = Math.min(buf.length, getMaxPayloadLength());
+				try {
+					payload = new String(buf, 0, length, wrapper.getCharacterEncoding());
+				}
+				catch (UnsupportedEncodingException ex) {
+					payload = "[unknown]";
+				}
+
+			}
+		}
+		return payload;
 	}
 
 
