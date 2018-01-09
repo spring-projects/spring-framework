@@ -64,20 +64,19 @@ public abstract class CorsUtils {
 		UriComponentsBuilder urlBuilder = UriComponentsBuilder.fromHttpRequest(request);
 		UriComponents actualUrl = urlBuilder.build();
 		String actualHost = actualUrl.getHost();
-		int actualPort = getPort(actualUrl);
+		int actualPort = getPort(actualUrl.getScheme(), actualUrl.getPort());
 		Assert.notNull(actualHost, "Actual request host must not be null");
 		Assert.isTrue(actualPort != -1, "Actual request port must not be undefined");
 		UriComponents originUrl = UriComponentsBuilder.fromOriginHeader(origin).build();
-		return (actualHost.equals(originUrl.getHost()) && actualPort == getPort(originUrl));
+		return (actualHost.equals(originUrl.getHost()) && actualPort == getPort(originUrl.getScheme(), originUrl.getPort()));
 	}
 
-	private static int getPort(UriComponents uri) {
-		int port = uri.getPort();
+	private static int getPort(String scheme, int port) {
 		if (port == -1) {
-			if ("http".equals(uri.getScheme()) || "ws".equals(uri.getScheme())) {
+			if ("http".equals(scheme) || "ws".equals(scheme)) {
 				port = 80;
 			}
-			else if ("https".equals(uri.getScheme()) || "wss".equals(uri.getScheme())) {
+			else if ("https".equals(scheme) || "wss".equals(scheme)) {
 				port = 443;
 			}
 		}

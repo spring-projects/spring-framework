@@ -168,7 +168,7 @@ public class WebUtilsTests {
 		if (port != -1) {
 			servletRequest.setServerPort(port);
 		}
-		request.getHeaders().set(HttpHeaders.ORIGIN, originHeader);
+		servletRequest.addHeader(HttpHeaders.ORIGIN, originHeader);
 		return WebUtils.isValidOrigin(request, allowed);
 	}
 
@@ -179,7 +179,7 @@ public class WebUtilsTests {
 		if (port != -1) {
 			servletRequest.setServerPort(port);
 		}
-		request.getHeaders().set(HttpHeaders.ORIGIN, originHeader);
+		servletRequest.addHeader(HttpHeaders.ORIGIN, originHeader);
 		return WebUtils.isSameOrigin(request);
 	}
 
@@ -191,15 +191,15 @@ public class WebUtilsTests {
 			servletRequest.setServerPort(port);
 		}
 		if (forwardedProto != null) {
-			request.getHeaders().set("X-Forwarded-Proto", forwardedProto);
+			servletRequest.addHeader("X-Forwarded-Proto", forwardedProto);
 		}
 		if (forwardedHost != null) {
-			request.getHeaders().set("X-Forwarded-Host", forwardedHost);
+			servletRequest.addHeader("X-Forwarded-Host", forwardedHost);
 		}
 		if (forwardedPort != -1) {
-			request.getHeaders().set("X-Forwarded-Port", String.valueOf(forwardedPort));
+			servletRequest.addHeader("X-Forwarded-Port", String.valueOf(forwardedPort));
 		}
-		request.getHeaders().set(HttpHeaders.ORIGIN, originHeader);
+		servletRequest.addHeader(HttpHeaders.ORIGIN, originHeader);
 		return WebUtils.isSameOrigin(request);
 	}
 
@@ -210,8 +210,8 @@ public class WebUtilsTests {
 		if (port != -1) {
 			servletRequest.setServerPort(port);
 		}
-		request.getHeaders().set("Forwarded", forwardedHeader);
-		request.getHeaders().set(HttpHeaders.ORIGIN, originHeader);
+		servletRequest.addHeader("Forwarded", forwardedHeader);
+		servletRequest.addHeader(HttpHeaders.ORIGIN, originHeader);
 		return WebUtils.isSameOrigin(request);
 	}
 

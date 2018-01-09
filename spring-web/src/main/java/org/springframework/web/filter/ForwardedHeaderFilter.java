@@ -118,10 +118,8 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 	@Override
 	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-		Enumeration<String> names = request.getHeaderNames();
-		while (names.hasMoreElements()) {
-			String name = names.nextElement();
-			if (FORWARDED_HEADER_NAMES.contains(name)) {
+		for (String headerName : FORWARDED_HEADER_NAMES) {
+			if (request.getHeader(headerName) != null) {
 				return false;
 			}
 		}

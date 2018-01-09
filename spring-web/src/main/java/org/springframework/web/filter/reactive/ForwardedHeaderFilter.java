@@ -17,8 +17,7 @@
 package org.springframework.web.filter.reactive;
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.Locale;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import reactor.core.publisher.Mono;
@@ -26,7 +25,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
-import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
@@ -47,8 +45,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public class ForwardedHeaderFilter implements WebFilter {
 
-	private static final Set<String> FORWARDED_HEADER_NAMES =
-			Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(5, Locale.ENGLISH));
+	private static final Set<String> FORWARDED_HEADER_NAMES = new LinkedHashSet<>(5);
 
 	static {
 		FORWARDED_HEADER_NAMES.add("Forwarded");
@@ -104,8 +101,13 @@ public class ForwardedHeaderFilter implements WebFilter {
 	}
 
 	private boolean shouldNotFilter(ServerHttpRequest request) {
-		return request.getHeaders().keySet().stream()
-				.noneMatch(FORWARDED_HEADER_NAMES::contains);
+		HttpHeaders headers = request.getHeaders();
+		for (String headerName : FORWARDED_HEADER_NAMES) {
+			if (headers.containsKey(headerName)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	@Nullable
