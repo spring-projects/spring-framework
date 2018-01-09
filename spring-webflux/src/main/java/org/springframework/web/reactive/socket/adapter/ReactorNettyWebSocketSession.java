@@ -70,9 +70,10 @@ public class ReactorNettyWebSocketSession
 	@Override
 	public Mono<Void> close(CloseStatus status) {
 		return Mono.error(new UnsupportedOperationException(
-				"Currently in Reactor Netty applications are expected to use the " +
-						"Cancellation returned from subscribing to the \"receive\"-side Flux " +
-						"in order to close the WebSocket session."));
+				"Reactor Netty does not support closing the session from anywhere. " +
+						"You will need to work with the Flux returned from receive() method, " +
+						"either subscribing to it and using the returned Disposable, " +
+						"or using an operator that cancels (e.g. take)."));
 	}
 
 
