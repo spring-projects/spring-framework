@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Map;
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link SqlParameterSource} implementation that holds a given Map of parameters.
@@ -161,6 +162,12 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 			throw new IllegalArgumentException("No value registered for key '" + paramName + "'");
 		}
 		return this.values.get(paramName);
+	}
+
+	@Override
+	@Nullable
+	public String[] getParameterNames() {
+		return StringUtils.toStringArray(this.values.keySet());
 	}
 
 }

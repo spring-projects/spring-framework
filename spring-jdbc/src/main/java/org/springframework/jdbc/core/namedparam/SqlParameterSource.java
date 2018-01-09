@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,9 @@ public interface SqlParameterSource {
 	 * or {@code TYPE_UNKNOWN} if not known
 	 * @see #TYPE_UNKNOWN
 	 */
-	int getSqlType(String paramName);
+	default int getSqlType(String paramName) {
+		return TYPE_UNKNOWN;
+	}
 
 	/**
 	 * Determine the type name for the specified named parameter.
@@ -82,6 +84,22 @@ public interface SqlParameterSource {
 	 * or {@code null} if not known
 	 */
 	@Nullable
-	String getTypeName(String paramName);
+	default String getTypeName(String paramName) {
+		return null;
+	}
+
+	/**
+	 * Extract all available parameter names if possible.
+	 * <p>This is an optional operation, primarily for use with
+	 * {@link org.springframework.jdbc.core.simple.SimpleJdbcInsert}
+	 * and {@link org.springframework.jdbc.core.simple.SimpleJdbcCall}.
+	 * @return the array of parameter names, or {@code null} if not determinable
+	 * @since 5.0.3
+	 * @see SqlParameterSourceUtils#extractCaseInsensitiveParameterNames
+	 */
+	@Nullable
+	default String[] getParameterNames() {
+		return null;
+	}
 
 }
