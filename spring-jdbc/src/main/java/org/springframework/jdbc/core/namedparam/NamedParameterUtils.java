@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,23 +43,32 @@ import org.springframework.util.Assert;
 public abstract class NamedParameterUtils {
 
 	/**
-	 * Set of characters that qualify as parameter separators,
-	 * indicating that a parameter name in a SQL String has ended.
-	 */
-	private static final char[] PARAMETER_SEPARATORS =
-			new char[] {'"', '\'', ':', '&', ',', ';', '(', ')', '|', '=', '+', '-', '*', '%', '/', '\\', '<', '>', '^'};
-
-	/**
 	 * Set of characters that qualify as comment or quotes starting characters.
 	 */
-	private static final String[] START_SKIP =
-			new String[] {"'", "\"", "--", "/*"};
+	private static final String[] START_SKIP = new String[] {"'", "\"", "--", "/*"};
 
 	/**
 	 * Set of characters that at are the corresponding comment or quotes ending characters.
 	 */
-	private static final String[] STOP_SKIP =
-			new String[] {"'", "\"", "\n", "*/"};
+	private static final String[] STOP_SKIP = new String[] {"'", "\"", "\n", "*/"};
+
+	/**
+	 * Set of characters that qualify as parameter separators,
+	 * indicating that a parameter name in a SQL String has ended.
+	 */
+	private static final String PARAMETER_SEPARATORS = "\"':&,;()[]|=+-*%/\\<>^";
+
+	/**
+	 * An index with separator flags per character code.
+	 * Technically only needed between 34 and 124 at this point.
+	 */
+	private static final boolean[] separatorIndex = new boolean[128];
+
+	static {
+		for (char c : PARAMETER_SEPARATORS.toCharArray()) {
+			separatorIndex[c] = true;
+		}
+	}
 
 
 	//-------------------------------------------------------------------------
@@ -233,7 +242,6 @@ public abstract class NamedParameterUtils {
 					// character sequence ending comment or quote not found
 					return statement.length;
 				}
-
 			}
 		}
 		return position;
@@ -384,15 +392,7 @@ public abstract class NamedParameterUtils {
 	 * that is, whether the given character qualifies as a separator.
 	 */
 	private static boolean isParameterSeparator(char c) {
-		if (Character.isWhitespace(c)) {
-			return true;
-		}
-		for (char separator : PARAMETER_SEPARATORS) {
-			if (c == separator) {
-				return true;
-			}
-		}
-		return false;
+		return (separatorIndex[c] || Character.isWhitespace(c));
 	}
 
 	/**
@@ -425,8 +425,8 @@ public abstract class NamedParameterUtils {
 		List<String> paramNames = parsedSql.getParameterNames();
 		List<SqlParameter> params = new LinkedList<>();
 		for (String paramName : paramNames) {
-			params.add(
-					new SqlParameter(paramName, paramSource.getSqlType(paramName), paramSource.getTypeName(paramName)));
+			params.add(new SqlParameter(
+					paramName, paramSource.getSqlType(paramName), paramSource.getTypeName(paramName)));
 		}
 		return params;
 	}

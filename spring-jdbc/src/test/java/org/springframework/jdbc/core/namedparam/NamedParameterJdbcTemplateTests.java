@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -47,32 +48,45 @@ import static org.mockito.BDDMockito.*;
  * @author Rick Evans
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Nikita Khateev
  */
 public class NamedParameterJdbcTemplateTests {
 
 	private static final String SELECT_NAMED_PARAMETERS =
-		"select id, forename from custmr where id = :id and country = :country";
+			"select id, forename from custmr where id = :id and country = :country";
 	private static final String SELECT_NAMED_PARAMETERS_PARSED =
-		"select id, forename from custmr where id = ? and country = ?";
+			"select id, forename from custmr where id = ? and country = ?";
 	private static final String SELECT_NO_PARAMETERS =
 			"select id, forename from custmr";
 
 	private static final String UPDATE_NAMED_PARAMETERS =
-		"update seat_status set booking_id = null where performance_id = :perfId and price_band_id = :priceId";
+			"update seat_status set booking_id = null where performance_id = :perfId and price_band_id = :priceId";
 	private static final String UPDATE_NAMED_PARAMETERS_PARSED =
-		"update seat_status set booking_id = null where performance_id = ? and price_band_id = ?";
+			"update seat_status set booking_id = null where performance_id = ? and price_band_id = ?";
+
+	private static final String UPDATE_ARRAY_PARAMETERS =
+			"update customer set type = array[:typeIds] where id = :id";
+	private static final String UPDATE_ARRAY_PARAMETERS_PARSED =
+			"update customer set type = array[?, ?, ?] where id = ?";
 
 	private static final String[] COLUMN_NAMES = new String[] {"id", "forename"};
+
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
 	private Connection connection;
+
 	private DataSource dataSource;
+
 	private PreparedStatement preparedStatement;
+
 	private ResultSet resultSet;
+
 	private DatabaseMetaData databaseMetaData;
+
 	private Map<String, Object> params = new HashMap<>();
+
 	private NamedParameterJdbcTemplate namedParameterTemplate;
 
 
@@ -127,6 +141,31 @@ public class NamedParameterJdbcTemplateTests {
 		verify(connection).prepareStatement(UPDATE_NAMED_PARAMETERS_PARSED);
 		verify(preparedStatement).setObject(1, 1);
 		verify(preparedStatement).setObject(2, 1);
+		verify(preparedStatement).close();
+		verify(connection).close();
+	}
+
+	@Test
+	public void testExecuteArray() throws SQLException {
+		given(preparedStatement.executeUpdate()).willReturn(1);
+
+		List<Integer> typeIds = Arrays.asList(1, 2, 3);
+
+		params.put("typeIds", typeIds);
+		params.put("id", 1);
+		Object result = namedParameterTemplate.execute(UPDATE_ARRAY_PARAMETERS, params,
+				(PreparedStatementCallback<Object>) ps -> {
+					assertEquals(preparedStatement, ps);
+					ps.executeUpdate();
+					return "result";
+				});
+
+		assertEquals("result", result);
+		verify(connection).prepareStatement(UPDATE_ARRAY_PARAMETERS_PARSED);
+		verify(preparedStatement).setObject(1, 1);
+		verify(preparedStatement).setObject(2, 2);
+		verify(preparedStatement).setObject(3, 3);
+		verify(preparedStatement).setObject(4, 1);
 		verify(preparedStatement).close();
 		verify(connection).close();
 	}
