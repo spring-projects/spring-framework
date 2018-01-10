@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,6 +32,7 @@ import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.util.stream.Collectors;
 
+import io.netty.buffer.ByteBuf;
 import org.junit.Test;
 import org.mockito.stubbing.Answer;
 import reactor.core.publisher.Flux;
@@ -38,6 +40,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -293,27 +296,50 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 
 		flux.subscribe(DataBufferUtils.releaseConsumer());
 
-		// AbstractDataBufferAllocatingTestCase.LeakDetector will assert the release of the buffers
+		assertReleased(foo);
+		assertReleased(bar);
+		assertReleased(baz);
+	}
+	
+	private static void assertReleased(DataBuffer dataBuffer) {
+		if (dataBuffer instanceof NettyDataBuffer) {
+			ByteBuf byteBuf = ((NettyDataBuffer) dataBuffer).getNativeBuffer();
+			assertEquals(0, byteBuf.refCnt());
+		}
+	}
+
+	@Test
+	public void writeAggregator() {
+		DataBuffer foo = stringBuffer("foo");
+		DataBuffer bar = stringBuffer("bar");
+		DataBuffer baz = stringBuffer("baz");
+		Flux<DataBuffer> flux = Flux.just(foo, bar, baz);
+
+		DataBuffer result =
+				flux.reduce(DataBufferUtils.writeAggregator()).block(Duration.ofSeconds(1));
+
+		assertEquals("foobarbaz", DataBufferTestUtils.dumpString(result, StandardCharsets.UTF_8));
+
+		release(result);
 	}
 
 	@Test
 	public void SPR16070() throws Exception {
 		ReadableByteChannel channel = mock(ReadableByteChannel.class);
 		when(channel.read(any()))
-				.thenAnswer(putByte(1))
-				.thenAnswer(putByte(2))
-				.thenAnswer(putByte(3))
+				.thenAnswer(putByte('a'))
+				.thenAnswer(putByte('b'))
+				.thenAnswer(putByte('c'))
 				.thenReturn(-1);
 
 		Flux<DataBuffer> read = DataBufferUtils.read(channel, this.bufferFactory, 1);
 
-		StepVerifier.create(
-				read.reduce(DataBuffer::write)
-						.map(this::dataBufferToBytes)
-						.map(this::encodeHexString)
-		)
-				.expectNext("010203")
-				.verifyComplete();
+		StepVerifier.create(read)
+				.consumeNextWith(stringConsumer("a"))
+				.consumeNextWith(stringConsumer("b"))
+				.consumeNextWith(stringConsumer("c"))
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
 
 	}
 
@@ -324,28 +350,6 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 			return 1;
 		};
 	}
-
-	private byte[] dataBufferToBytes(DataBuffer buffer) {
-		try {
-			int byteCount = buffer.readableByteCount();
-			byte[] bytes = new byte[byteCount];
-			buffer.read(bytes);
-			return bytes;
-		}
-		finally {
-			release(buffer);
-		}
-	}
-
-	private String encodeHexString(byte[] data) {
-		StringBuilder builder = new StringBuilder();
-		for (byte b : data) {
-			builder.append((0xF0 & b) >>> 4);
-			builder.append(0x0F & b);
-		}
-		return builder.toString();
-	}
-
 
 
 }

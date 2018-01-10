@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 
 import org.reactivestreams.Publisher;
@@ -54,6 +55,13 @@ import org.springframework.util.Assert;
 public abstract class DataBufferUtils {
 
 	private static final Consumer<DataBuffer> RELEASE_CONSUMER = DataBufferUtils::release;
+
+	private static final BinaryOperator<DataBuffer> WRITE_AGGREGATOR =
+			(dataBuffer1, dataBuffer2) -> {
+				DataBuffer result = dataBuffer1.write(dataBuffer2);
+				release(dataBuffer2);
+				return result;
+			};
 
 	//---------------------------------------------------------------------
 	// Reading
@@ -303,6 +311,10 @@ public abstract class DataBufferUtils {
 		}
 	}
 
+	//---------------------------------------------------------------------
+	// Various
+	//---------------------------------------------------------------------
+
 	/**
 	 * Relay buffers from the given {@link Publisher} until the total
 	 * {@linkplain DataBuffer#readableByteCount() byte count} reaches
@@ -334,10 +346,6 @@ public abstract class DataBufferUtils {
 					}
 				});
 	}
-
-	//---------------------------------------------------------------------
-	// Various
-	//---------------------------------------------------------------------
 
 	/**
 	 * Skip buffers from the given {@link Publisher} until the total
@@ -403,11 +411,27 @@ public abstract class DataBufferUtils {
 	}
 
 	/**
-	 * Returns a consumer that calls {@link #release(DataBuffer)} on all
+	 * Return a consumer that calls {@link #release(DataBuffer)} on all
 	 * passed data buffers.
 	 */
 	public static Consumer<DataBuffer> releaseConsumer() {
 		return RELEASE_CONSUMER;
+	}
+
+	/**
+	 * Return an aggregator function that can be used to {@linkplain Flux#reduce(BiFunction) reduce}
+	 * a {@code Flux} of data buffers into a single data buffer by writing all subsequent buffers
+	 * into the first buffer. All buffers except the first buffer are
+	 * {@linkplain #release(DataBuffer) released}.
+	 * <p>For example:
+	 * <pre class="code">
+	 * Flux&lt;DataBuffer&gt; flux = ...
+	 * Mono&lt;DataBuffer&gt; mono = flux.reduce(DataBufferUtils.writeAggregator());
+	 * </pre>
+	 * @see Flux#reduce(BiFunction)
+	 */
+	public static BinaryOperator<DataBuffer> writeAggregator() {
+		return WRITE_AGGREGATOR;
 	}
 
 
@@ -451,6 +475,7 @@ public abstract class DataBufferUtils {
 			return channel;
 		}
 	}
+
 
 	private static class AsynchronousFileChannelReadCompletionHandler
 			implements CompletionHandler<Integer, DataBuffer> {
@@ -503,6 +528,7 @@ public abstract class DataBufferUtils {
 			this.sink.error(exc);
 		}
 	}
+
 
 	private static class AsynchronousFileChannelWriteCompletionHandler
 			extends BaseSubscriber<DataBuffer>
