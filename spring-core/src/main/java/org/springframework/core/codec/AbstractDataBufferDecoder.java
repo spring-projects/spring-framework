@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 
@@ -63,7 +64,7 @@ public abstract class AbstractDataBufferDecoder<T> extends AbstractDecoder<T> {
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		return Flux.from(inputStream)
-				.reduce(DataBuffer::write)
+				.reduce(DataBufferUtils.writeAggregator())
 				.map(buffer -> decodeDataBuffer(buffer, elementType, mimeType, hints));
 	}
 
