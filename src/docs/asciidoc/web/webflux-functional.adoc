@@ -1,10 +1,10 @@
 [[webflux-fn]]
 = Functional Endpoints
 
-Spring WebFlux provides a lightweight, functional programming model where functions
-are used to route and handle requests and where contracts are designed for immutability.
-It is an alternative to the annotated-based programming model but runs on the same
-<<web-reactive.adoc#webflux-reactive-spring-web>> foundation
+Spring WebFlux includes a lightweight, functional programming model in which functions
+are used to route and handle requests and contracts are designed for immutability.
+It is an alternative to the annotated-based programming model but otherwise running on
+the same <<web-reactive.adoc#webflux-reactive-spring-web>> foundation
 
 
 
@@ -13,19 +13,19 @@ It is an alternative to the annotated-based programming model but runs on the sa
 == HandlerFunction
 
 Incoming HTTP requests are handled by a **`HandlerFunction`**, which is essentially a function that
-takes a `ServerRequest` and returns a `Mono<ServerResponse>`. The annotation counterpart to a
-handler function is an `@RequestMapping` method.
+takes a `ServerRequest` and returns a `Mono<ServerResponse>`. If you're familiar with the
+annotation-based programming model, a handler function is the equivalent of an
+`@RequestMapping` method.
 
 `ServerRequest` and `ServerResponse` are immutable interfaces that offer JDK-8 friendly access
 to the underlying HTTP messages with http://www.reactive-streams.org[Reactive Streams]
 non-blocking back pressure. The request exposes the body as Reactor `Flux` or `Mono`
-types; the response accepts any Reactive Streams `Publisher` as body (see
-<<web-reactive.adoc#webflux-reactive-libraries,Reactive Libraries>>).
-
+types; the response accepts any Reactive Streams `Publisher` as body. The rational for this
+is explained in <<web-reactive.adoc#webflux-reactive-libraries,Reactive Libraries>>.
 
 `ServerRequest` gives access to various HTTP request elements:
-the method, URI, query parameters, and -- through the separate `ServerRequest.Headers` interface
--- the headers. Access to the body is provided through the `body` methods. For instance, this is
+the method, URI, query parameters, and headers (via a separate `ServerRequest.Headers`
+interface. Access to the body is provided through the `body` methods. For instance, this is
 how to extract the request body into a `Mono<String>`:
 
  Mono<String> string = request.bodyToMono(String.class);
@@ -36,11 +36,11 @@ contains JSON, or JAXB if XML).
 
  Flux<Person> people = request.bodyToFlux(Person.class);
 
-The above -- `bodyToMono` and `bodyToFlux`, are, in fact, convenience methods that use the
+The `bodyToMono` and `bodyToFlux` used above are in fact convenience methods that use the
 generic `ServerRequest.body(BodyExtractor)` method. `BodyExtractor` is
 a functional strategy interface that allows you to write your own extraction logic, but common
 `BodyExtractor` instances can be found in the `BodyExtractors` utility class. So, the above
-examples can be replaced with:
+examples can also be written as follows:
 
  Mono<String> string = request.body(BodyExtractors.toMono(String.class);
  Flux<Person> people = request.body(BodyExtractors.toFlux(Person.class);
@@ -103,7 +103,7 @@ public class PersonHandler {
 	public Mono<ServerResponse> getPerson(ServerRequest request) { // <3>
 		int personId = Integer.valueOf(request.pathVariable("id"));
 		Mono<ServerResponse> notFound = ServerResponse.notFound().build();
-		Mono<Person> personMono = this.repository.getPerson(personId);
+		Mono<Person> personMono = repository.getPerson(personId);
 		return personMono
 				.flatMap(person -> ServerResponse.ok().contentType(APPLICATION_JSON).body(fromObject(person)))
 				.switchIfEmpty(notFound);
@@ -129,8 +129,9 @@ found. If it is not found, we use `switchIfEmpty(Mono<T>)` to return a 404 Not F
 
 Incoming requests are routed to handler functions with a **`RouterFunction`**, which is a function
 that takes a `ServerRequest`, and returns a `Mono<HandlerFunction>`. If a request matches a
-particular route, a handler function is returned; otherwise it returns an empty `Mono`. The
-`RouterFunction` has a similar purpose as the `@RequestMapping` annotation in `@Controller` classes.
+particular route, a handler function is returned, or otherwise an empty `Mono` is returned.
+`RouterFunction` has a similar purpose as the `@RequestMapping` annotation in the
+annotation-based programming model.
 
 Typically, you do not write router functions yourself, but rather use
 `RouterFunctions.route(RequestPredicate, HandlerFunction)` to
@@ -192,17 +193,71 @@ For instance, `RequestPredicates.GET(String)` is a composition of
 [[webflux-fn-running]]
 == Running a server
 
-How do you run a router function in an HTTP server? A simple option is to convert a
-router function to an `HttpHandler` via `RouterFunctions.toHttpHandler(RouterFunction)`.
-The `HttpHandler` can then be used with a number of servers adapters.
-See <<web-reactive.adoc#webflux-httphandler,HttpHandler>> for server-specific
-instructions.
+How do you run a router function in an HTTP server? A simple option is to convert a router
+function to an `HttpHandler` using one of the following:
 
-it is also possible to run with a
-<<web-reactive.adoc#webflux-dispatcher-handler,DispatcherHandler>> setup -- side by side
-with annotated controllers. The easiest way to do that is through the
-<<web-reactive.adoc#webflux-config>> which creates the necessary configuration to
-handle requests with router and handler functions.
+* `RouterFunctions.toHttpHandler(RouterFunction)`
+* `RouterFunctions.toHttpHandler(RouterFunction, HandlerStrategies)`
+
+The returned `HttpHandler` can then be used with a number of servers adapters by following
+<<web-reactive.adoc#webflux-httphandler,HttpHandler>> for server-specific instructions.
+
+A more advanced option is to run with a
+<<web-reactive.adoc#webflux-dispatcher-handler,DispatcherHandler>>-based setup through the
+<<web-reactive.adoc#webflux-config>> which uses Spring configuration to declare the
+components process requests. The WebFlux Java config declares the following components
+related to functional endpoints:
+
+* `RouterFunctionMapping` -- this detects one or more `RouterFunction<?>` beans in the
+Spring configuration, combines them via `RouterFunction.andOther`, and routes requests to
+the resulting, composed `RouterFunction`.
+* `HandlerFunctionAdapter` -- simple adapter to invoke a `HandlerFunction` selected to
+handle a request.
+* `ServerResponseResultHandler` -- invokes the `writeTo` method of the `ServerResponse`
+returned by the `HandlerFunction`.
+
+The above allows functional endpoints to fit within the `DispatcherHandler` request
+processing lifecycle, and potentially to run side by side with annotated controllers, if
+any are declared. This is also the mechanism used in the Spring Boot WebFlux starter.
+
+Below is example WebFlux Java config (see
+<<web-reactive.adoc#webflux-dispatcher-handler,DispatcherHandler>> for how to run):
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Configuration
+@EnableWebFlux
+public class WebConfig implements WebFluxConfigurer {
+
+	@Bean
+	public RouterFunction<?> routerFunctionA() {
+		// ...
+	}
+
+	@Bean
+	public RouterFunction<?> routerFunctionB() {
+		// ...
+	}
+
+	// ...
+
+	@Override
+	public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
+		// configure message conversion...
+	}
+
+	@Override
+	default void addCorsMappings(CorsRegistry registry) {
+		// configure CORS...
+	}
+
+	@Override
+	public void configureViewResolvers(ViewResolverRegistry registry) {
+		// configure view resolution for HTML rendering...
+	}
+}
+----
 
 
 
