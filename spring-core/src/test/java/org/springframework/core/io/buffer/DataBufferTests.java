@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,7 +303,7 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 
 		assertArrayEquals(new byte[]{'a', 'b', 'c', 'd'}, result);
 
-		release(buffer1);
+		release(buffer1, buffer2, buffer3);
 	}
 
 	@Test
@@ -457,6 +457,24 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 
 		assertArrayEquals(new byte[]{'b', 'c'}, result);
 
+
+		release(buffer);
+	}
+
+	@Test
+	public void spr16351() {
+		DataBuffer buffer = createDataBuffer(6);
+		byte[] bytes = {'a', 'b', 'c', 'd', 'e', 'f'};
+		buffer.write(bytes);
+		DataBuffer slice = buffer.slice(3, 3);
+		buffer.writePosition(3);
+		buffer.write(slice);
+
+		assertEquals(6, buffer.readableByteCount());
+		byte[] result = new byte[6];
+		buffer.read(result);
+
+		assertArrayEquals(bytes, result);
 
 		release(buffer);
 	}
