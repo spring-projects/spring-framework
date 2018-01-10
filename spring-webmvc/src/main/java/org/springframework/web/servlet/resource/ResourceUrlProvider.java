@@ -34,6 +34,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -217,6 +218,14 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 */
 	@Nullable
 	public final String getForLookupPath(String lookupPath) {
+
+		// Clean duplicate slashes or pathWithinPattern won't match lookupPath
+		String previous;
+		do {
+			previous = lookupPath;
+			lookupPath = StringUtils.replace(lookupPath, "//", "/");
+		} while (!lookupPath.equals(previous));
+
 		if (logger.isTraceEnabled()) {
 			logger.trace("Getting resource URL for lookup path \"" + lookupPath + "\"");
 		}

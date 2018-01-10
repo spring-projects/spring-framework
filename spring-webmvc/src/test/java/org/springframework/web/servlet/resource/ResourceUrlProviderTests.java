@@ -35,6 +35,9 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
 /**
@@ -134,6 +137,25 @@ public class ResourceUrlProviderTests {
 		ResourceUrlProvider urlProviderBean = context.getBean(ResourceUrlProvider.class);
 		assertThat(urlProviderBean.getHandlerMap(), Matchers.hasKey("/resources/**"));
 		assertFalse(urlProviderBean.isAutodetect());
+	}
+
+	@Test // SPR-16296
+	public void getForLookupPathShouldNotFailIfPathContainsDoubleSlashes() {
+		// given
+		ResourceResolver mockResourceResolver = mock(ResourceResolver.class);
+		when(mockResourceResolver.resolveUrlPath(any(), any(), any())).thenReturn("some-path");
+
+		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
+		handler.getResourceResolvers().add(mockResourceResolver);
+
+		ResourceUrlProvider provider = new ResourceUrlProvider();
+		provider.getHandlerMap().put("/some-pattern/**", handler);
+
+		// when
+		String lookupForPath = provider.getForLookupPath("/some-pattern/some-lib//some-resource");
+
+		// then
+		assertEquals("/some-pattern/some-path", lookupForPath);
 	}
 
 
