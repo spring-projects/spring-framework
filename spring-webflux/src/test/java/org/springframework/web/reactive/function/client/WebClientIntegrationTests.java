@@ -31,7 +31,6 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -348,7 +347,6 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test // SPR-16246
-	@Ignore
 	public void shouldSendLargeTextFile() throws Exception {
 		prepareResponse(response -> {});
 
