@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,6 +169,20 @@ class KotlinAutowiredTests {
 		assertEquals(tb, kb.testBean)
 	}
 
+	@Test  // SPR-16289
+	fun `Instantiation via secondary constructor when a default primary is defined`() {
+		val bf = DefaultListableBeanFactory()
+		val bpp = AutowiredAnnotationBeanPostProcessor()
+		bpp.setBeanFactory(bf)
+		bf.addBeanPostProcessor(bpp)
+		val bd = RootBeanDefinition(KotlinBeanWithPrimaryAndSecondaryConstructors::class.java)
+		bd.scope = RootBeanDefinition.SCOPE_PROTOTYPE
+		bf.registerBeanDefinition("bean", bd)
+
+		bf.getBean(KotlinBeanWithPrimaryAndSecondaryConstructors::class.java, "foo")
+		bf.getBean(KotlinBeanWithPrimaryAndSecondaryConstructors::class.java)
+	}
+
 	@Test(expected = BeanCreationException::class)  // SPR-16022
 	fun `No autowiring with primary and secondary non annotated constructors`() {
 		val bf = DefaultListableBeanFactory()
@@ -242,6 +256,11 @@ class KotlinAutowiredTests {
 	@Suppress("unused")
 	class KotlinBeanWithPrimaryAndDefaultConstructors(val testBean: TestBean) {
 		constructor() : this(TestBean())
+	}
+
+	@Suppress("unused", "UNUSED_PARAMETER")
+	class KotlinBeanWithPrimaryAndSecondaryConstructors() {
+		constructor(p: String) : this()
 	}
 
 	class KotlinBeanWithSecondaryConstructor(
