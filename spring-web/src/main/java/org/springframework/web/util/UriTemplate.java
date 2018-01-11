@@ -212,7 +212,7 @@ public class UriTemplate implements Serializable {
 						String variable = builder.toString();
 						int idx = variable.indexOf(':');
 						if (idx == -1) {
-							pattern.append("(.*)");
+							pattern.append("([^/]*)");
 							variableNames.add(variable);
 						}
 						else {
