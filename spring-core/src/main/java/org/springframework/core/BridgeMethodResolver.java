@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -196,7 +196,10 @@ public abstract class BridgeMethodResolver {
 				return method;
 			}
 			else {
-				return searchInterfaces(ifc.getInterfaces(), bridgeMethod);
+				method = searchInterfaces(ifc.getInterfaces(), bridgeMethod);
+				if (method != null) {
+					return method;
+				}
 			}
 		}
 		return null;
