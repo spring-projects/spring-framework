@@ -205,20 +205,21 @@ The returned `HttpHandler` can then be used with a number of servers adapters by
 A more advanced option is to run with a
 <<web-reactive.adoc#webflux-dispatcher-handler,DispatcherHandler>>-based setup through the
 <<web-reactive.adoc#webflux-config>> which uses Spring configuration to declare the
-components process requests. The WebFlux Java config declares the following components
-related to functional endpoints:
+components quired to process requests. The WebFlux Java config declares the following
+infrastructure components to support functional endpoints:
 
-* `RouterFunctionMapping` -- this detects one or more `RouterFunction<?>` beans in the
-Spring configuration, combines them via `RouterFunction.andOther`, and routes requests to
-the resulting, composed `RouterFunction`.
-* `HandlerFunctionAdapter` -- simple adapter to invoke a `HandlerFunction` selected to
-handle a request.
-* `ServerResponseResultHandler` -- invokes the `writeTo` method of the `ServerResponse`
-returned by the `HandlerFunction`.
+* `RouterFunctionMapping` -- detects one or more `RouterFunction<?>` beans in the Spring
+configuration, combines them via `RouterFunction.andOther`, and routes requests to the
+resulting composed `RouterFunction`.
+* `HandlerFunctionAdapter` -- simple adapter that allows the `DispatcherHandler` to invoke
+a `HandlerFunction` that was mapped to a request.
+* `ServerResponseResultHandler` -- handles the result from the invocation of a
+`HandlerFunction` by invoking the `writeTo` method of the `ServerResponse`.
 
-The above allows functional endpoints to fit within the `DispatcherHandler` request
-processing lifecycle, and potentially to run side by side with annotated controllers, if
-any are declared. This is also the mechanism used in the Spring Boot WebFlux starter.
+The above components allow functional endpoints to fit within the `DispatcherHandler` request
+processing lifecycle, and also potentially run side by side with annotated controllers, if
+any are declared. It is also how functional endpoints are enabled the Spring Boot WebFlux
+starter.
 
 Below is example WebFlux Java config (see
 <<web-reactive.adoc#webflux-dispatcher-handler,DispatcherHandler>> for how to run):

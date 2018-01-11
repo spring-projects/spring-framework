@@ -1098,13 +1098,16 @@ include::webflux-functional.adoc[leveloffset=+1]
 == WebFlux Java Config
 [.small]#<<web.adoc#mvc-config,Same in Spring MVC>>#
 
-The WebFlux Java config provides default configuration suitable for most applications along
-with a configuration API to customize it. For more advanced customizations, not available in
-the configuration API, see <<webflux-config-advanced-java>>.
+The WebFlux Java config declares components required to process requests with annotated
+controllers or functional endpoints, and it offers an API to customize the configuration.
+That means you do not need to understand the underlying beans created by the Java config
+but, if you want to, it's very easy to see them in `WebFluxConfigurationSupport` or read more
+what they are in <<webflux-special-bean-types>>.
 
-You do not need to understand the underlying beans created by the Java config, but it's
-easy to seem them in `WebFluxConfigurationSupport`, and if you want to learn more, see
-<<webflux-special-bean-types>>.
+For more advanced customizations, not available in the configuration API, it is also
+possible to gain full control over the configuration through the
+<<webflux-config-advanced-java>>.
+
 
 
 
