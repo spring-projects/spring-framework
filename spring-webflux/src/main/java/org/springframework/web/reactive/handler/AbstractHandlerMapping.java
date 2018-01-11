@@ -78,25 +78,37 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	}
 
 	/**
-	 * Whether to match to URLs irrespective of their case.
-	 * If enabled a method mapped to "/users" won't match to "/Users/".
-	 * <p>The default value is {@code false}.
+	 * Shortcut method for setting the same property on the underlying pattern
+	 * parser in use. For more details see:
+	 * <ul>
+	 * <li>{@link #getPathPatternParser()} -- the underlying pattern parser
+	 * <li>{@link PathPatternParser#setCaseSensitive(boolean)} -- the case
+	 * sensitive slash option, including its default value.
+	 * </ul>
+	 * <p><strong>Note:</strong> aside from
 	 */
 	public void setUseCaseSensitiveMatch(boolean caseSensitiveMatch) {
 		this.patternParser.setCaseSensitive(caseSensitiveMatch);
 	}
 
 	/**
-	 * Whether to match to URLs irrespective of the presence of a trailing slash.
-	 * If enabled a method mapped to "/users" also matches to "/users/".
-	 * <p>The default value is {@code true}.
+	 * Shortcut method for setting the same property on the underlying pattern
+	 * parser in use. For more details see:
+	 * <ul>
+	 * <li>{@link #getPathPatternParser()} -- the underlying pattern parser
+	 * <li>{@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)} --
+	 * the trailing slash option, including its default value.
+	 * </ul>
 	 */
 	public void setUseTrailingSlashMatch(boolean trailingSlashMatch) {
 		this.patternParser.setMatchOptionalTrailingSeparator(trailingSlashMatch);
 	}
 
 	/**
-	 * Return the {@link PathPatternParser} instance.
+	 * Return the {@link PathPatternParser} instance that is used for
+	 * {@link #setCorsConfigurations(Map) CORS configuration checks}.
+	 * Sub-classes can also use this pattern parser for their own request
+	 * mapping purposes.
 	 */
 	public PathPatternParser getPathPatternParser() {
 		return this.patternParser;
