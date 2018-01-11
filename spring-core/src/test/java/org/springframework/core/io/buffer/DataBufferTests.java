@@ -479,5 +479,18 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 		release(buffer);
 	}
 
+	@Test
+	public void composite() {
+		DataBuffer composite = this.bufferFactory.compose(Arrays.asList(stringBuffer("a"),
+				stringBuffer("b"), stringBuffer("c")));
+		assertEquals(3, composite.readableByteCount());
+		byte[] bytes = new byte[3];
+		composite.read(bytes);
+
+		assertArrayEquals(new byte[] {'a','b','c'}, bytes);
+
+		release(composite);
+	}
+
 
 }

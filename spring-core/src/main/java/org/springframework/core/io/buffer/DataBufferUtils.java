@@ -39,6 +39,7 @@ import org.reactivestreams.Subscription;
 import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Mono;
 import reactor.core.publisher.SynchronousSink;
 
 import org.springframework.core.io.Resource;
@@ -432,6 +433,27 @@ public abstract class DataBufferUtils {
 	 */
 	public static BinaryOperator<DataBuffer> writeAggregator() {
 		return WRITE_AGGREGATOR;
+	}
+
+	/**
+	 * Composes the buffers in the given {@link Publisher} into a single data buffer. Depending on
+	 * the {@code DataBuffer} implementation, the returned buffer may be a single buffer containing
+	 * all data of the provided buffers, or it may be a true composite that contains references to
+	 * the buffers.
+	 * @param publisher the data buffers that are to be composed
+	 * @return the composed data buffer
+	 */
+	public static Mono<DataBuffer> compose(Publisher<DataBuffer> publisher) {
+		Assert.notNull(publisher, "'publisher' must not be null");
+
+		Flux<DataBuffer> source = Flux.from(publisher);
+
+		return source.collectList()
+				.filter(dataBuffers -> !dataBuffers.isEmpty())
+				.map(dataBuffers -> {
+					DataBufferFactory bufferFactory = dataBuffers.get(0).factory();
+					return bufferFactory.compose(dataBuffers);
+				});
 	}
 
 

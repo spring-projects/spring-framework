@@ -351,5 +351,19 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		};
 	}
 
+	@Test
+	public void compose() {
+		DataBuffer foo = stringBuffer("foo");
+		DataBuffer bar = stringBuffer("bar");
+		DataBuffer baz = stringBuffer("baz");
+		Flux<DataBuffer> flux = Flux.just(foo, bar, baz);
+
+		DataBuffer result = DataBufferUtils.compose(flux).block(Duration.ofSeconds(5));
+
+		assertEquals("foobarbaz", DataBufferTestUtils.dumpString(result, StandardCharsets.UTF_8));
+
+		release(result);
+	}
+
 
 }
