@@ -196,7 +196,10 @@ public abstract class BridgeMethodResolver {
 				return method;
 			}
 			else {
-				return searchInterfaces(ifc.getInterfaces(), bridgeMethod);
+				Method parentIfcMethod = searchInterfaces(ifc.getInterfaces(), bridgeMethod);
+				if (parentIfcMethod != null) {
+					return parentIfcMethod;
+				}
 			}
 		}
 		return null;
