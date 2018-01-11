@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,13 @@ public class MultipartControllerTests {
 	}
 
 	@Test
+	public void multipartRequestWithSingleFileNotPresent() throws Exception {
+		standaloneSetup(new MultipartController()).build()
+				.perform(multipart("/multipartfile"))
+				.andExpect(status().isFound());
+	}
+
+	@Test
 	public void multipartRequestWithFileArray() throws Exception {
 		byte[] fileContent = "bar".getBytes(StandardCharsets.UTF_8);
 		MockMultipartFile filePart1 = new MockMultipartFile("file", "orig", null, fileContent);
@@ -88,6 +95,20 @@ public class MultipartControllerTests {
 	}
 
 	@Test
+	public void multipartRequestWithFileArrayNotPresent() throws Exception {
+		standaloneSetup(new MultipartController()).build()
+				.perform(multipart("/multipartfilearray"))
+				.andExpect(status().isFound());
+	}
+
+	@Test
+	public void multipartRequestWithFileArrayNoMultipart() throws Exception {
+		standaloneSetup(new MultipartController()).build()
+				.perform(post("/multipartfilearray"))
+				.andExpect(status().isFound());
+	}
+
+	@Test
 	public void multipartRequestWithFileList() throws Exception {
 		byte[] fileContent = "bar".getBytes(StandardCharsets.UTF_8);
 		MockMultipartFile filePart1 = new MockMultipartFile("file", "orig", null, fileContent);
@@ -101,6 +122,20 @@ public class MultipartControllerTests {
 				.andExpect(status().isFound())
 				.andExpect(model().attribute("fileContent", fileContent))
 				.andExpect(model().attribute("jsonContent", Collections.singletonMap("name", "yeeeah")));
+	}
+
+	@Test
+	public void multipartRequestWithFileListNotPresent() throws Exception {
+		standaloneSetup(new MultipartController()).build()
+				.perform(multipart("/multipartfilelist"))
+				.andExpect(status().isFound());
+	}
+
+	@Test
+	public void multipartRequestWithFileListNoMultipart() throws Exception {
+		standaloneSetup(new MultipartController()).build()
+				.perform(post("/multipartfilelist"))
+				.andExpect(status().isFound());
 	}
 
 	@Test
@@ -219,35 +254,47 @@ public class MultipartControllerTests {
 	private static class MultipartController {
 
 		@RequestMapping(value = "/multipartfile", method = RequestMethod.POST)
-		public String processMultipartFile(@RequestParam MultipartFile file,
-				@RequestPart Map<String, String> json, Model model) throws IOException {
+		public String processMultipartFile(@RequestParam(required = false) MultipartFile file,
+				@RequestPart(required = false) Map<String, String> json, Model model) throws IOException {
 
-			model.addAttribute("fileContent", file.getBytes());
-			model.addAttribute("jsonContent", json);
+			if (file != null) {
+				model.addAttribute("fileContent", file.getBytes());
+			}
+			if (json != null) {
+				model.addAttribute("jsonContent", json);
+			}
 
 			return "redirect:/index";
 		}
 
 		@RequestMapping(value = "/multipartfilearray", method = RequestMethod.POST)
-		public String processMultipartFileArray(@RequestParam MultipartFile[] file,
-				@RequestPart Map<String, String> json, Model model) throws IOException {
+		public String processMultipartFileArray(@RequestParam(required = false) MultipartFile[] file,
+				@RequestPart(required = false) Map<String, String> json, Model model) throws IOException {
 
-			byte[] content = file[0].getBytes();
-			Assert.assertArrayEquals(content, file[1].getBytes());
-			model.addAttribute("fileContent", content);
-			model.addAttribute("jsonContent", json);
+			if (file != null && file.length > 0) {
+				byte[] content = file[0].getBytes();
+				Assert.assertArrayEquals(content, file[1].getBytes());
+				model.addAttribute("fileContent", content);
+			}
+			if (json != null) {
+				model.addAttribute("jsonContent", json);
+			}
 
 			return "redirect:/index";
 		}
 
 		@RequestMapping(value = "/multipartfilelist", method = RequestMethod.POST)
-		public String processMultipartFileList(@RequestParam List<MultipartFile> file,
-				@RequestPart Map<String, String> json, Model model) throws IOException {
+		public String processMultipartFileList(@RequestParam(required = false) List<MultipartFile> file,
+				@RequestPart(required = false) Map<String, String> json, Model model) throws IOException {
 
-			byte[] content = file.get(0).getBytes();
-			Assert.assertArrayEquals(content, file.get(1).getBytes());
-			model.addAttribute("fileContent", content);
-			model.addAttribute("jsonContent", json);
+			if (file != null && !file.isEmpty()) {
+				byte[] content = file.get(0).getBytes();
+				Assert.assertArrayEquals(content, file.get(1).getBytes());
+				model.addAttribute("fileContent", content);
+			}
+			if (json != null) {
+				model.addAttribute("jsonContent", json);
+			}
 
 			return "redirect:/index";
 		}
