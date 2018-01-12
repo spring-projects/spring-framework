@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@
 
 package org.springframework.web.method.annotation;
 
-import java.util.ArrayList;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -38,6 +37,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * {@link BindingResult}.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class ErrorsMethodArgumentResolver implements HandlerMethodArgumentResolver {
@@ -58,18 +58,15 @@ public class ErrorsMethodArgumentResolver implements HandlerMethodArgumentResolv
 				"Errors/BindingResult argument only supported on regular handler methods");
 
 		ModelMap model = mavContainer.getModel();
-		if (model.size() > 0) {
-			int lastIndex = model.size()-1;
-			String lastKey = new ArrayList<>(model.keySet()).get(lastIndex);
-			if (lastKey.startsWith(BindingResult.MODEL_KEY_PREFIX)) {
-				return model.get(lastKey);
-			}
+		String lastKey = CollectionUtils.lastElement(model.keySet());
+		if (lastKey != null && lastKey.startsWith(BindingResult.MODEL_KEY_PREFIX)) {
+			return model.get(lastKey);
 		}
 
 		throw new IllegalStateException(
 				"An Errors/BindingResult argument is expected to be declared immediately after " +
-						"the model attribute, the @RequestBody or the @RequestPart arguments " +
-						"to which they apply: " + parameter.getMethod());
+				"the model attribute, the @RequestBody or the @RequestPart arguments " +
+				"to which they apply: " + parameter.getMethod());
 	}
 
 }

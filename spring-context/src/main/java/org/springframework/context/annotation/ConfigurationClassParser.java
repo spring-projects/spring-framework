@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -712,8 +712,7 @@ class ConfigurationClassParser {
 		@Override
 		@Nullable
 		public AnnotationMetadata getImportingClassFor(String importedClass) {
-			List<AnnotationMetadata> list = this.imports.get(importedClass);
-			return (!CollectionUtils.isEmpty(list) ? list.get(list.size() - 1) : null);
+			return CollectionUtils.lastElement(this.imports.get(importedClass));
 		}
 
 		@Override

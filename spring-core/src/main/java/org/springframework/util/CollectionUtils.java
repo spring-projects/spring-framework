@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedSet;
 
 import org.springframework.lang.Nullable;
 
@@ -310,6 +311,48 @@ public abstract class CollectionUtils {
 			}
 		}
 		return candidate;
+	}
+
+	/**
+	 * Retrieve the last element of the given Set, using {@link SortedSet#last()}
+	 * or otherwise iterating over all elements (assuming a linked set).
+	 * @param set the Set to check (may be {@code null} or empty)
+	 * @return the last element, or {@code null} if none
+	 * @since 5.0.3
+	 * @see SortedSet
+	 * @see LinkedHashMap#keySet()
+	 * @see java.util.LinkedHashSet
+	 */
+	@Nullable
+	public static <T> T lastElement(@Nullable Set<T> set) {
+		if (isEmpty(set)) {
+			return null;
+		}
+		if (set instanceof SortedSet) {
+			return ((SortedSet<T>) set).last();
+		}
+
+		// Full iteration necessary...
+		Iterator<T> it = set.iterator();
+		T last = null;
+		while (it.hasNext()) {
+			last = it.next();
+		}
+		return last;
+	}
+
+	/**
+	 * Retrieve the last element of the given List, accessing the highest index.
+	 * @param list the List to check (may be {@code null} or empty)
+	 * @return the last element, or {@code null} if none
+	 * @since 5.0.3
+	 */
+	@Nullable
+	public static <T> T lastElement(@Nullable List<T> list) {
+		if (isEmpty(list)) {
+			return null;
+		}
+		return list.get(list.size() - 1);
 	}
 
 	/**

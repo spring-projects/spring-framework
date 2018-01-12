@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import static org.junit.Assert.*;
  *
  * @author Rossen Stoyanchev
  */
-public class ErrorsMethodHandlerArgumentResolverTests {
+public class ErrorsMethodArgumentResolverTests {
 
 	private final ErrorsMethodArgumentResolver resolver = new ErrorsMethodArgumentResolver();
 
@@ -45,15 +45,17 @@ public class ErrorsMethodHandlerArgumentResolverTests {
 
 	private NativeWebRequest webRequest;
 
+
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		paramErrors = new MethodParameter(getClass().getDeclaredMethod("handle", Errors.class), 0);
 		bindingResult = new WebDataBinder(new Object(), "attr").getBindingResult();
 		webRequest = new ServletWebRequest(new MockHttpServletRequest());
 	}
 
+
 	@Test
-	public void supports() throws Exception {
+	public void supports() {
 		resolver.supportsParameter(paramErrors);
 	}
 
@@ -68,7 +70,6 @@ public class ErrorsMethodHandlerArgumentResolverTests {
 		mavContainer.addAllAttributes(bindingResult.getModel());
 
 		Object actual = resolver.resolveArgument(paramErrors, mavContainer, webRequest, null);
-
 		assertSame(actual, bindingResult);
 	}
 
@@ -85,6 +86,7 @@ public class ErrorsMethodHandlerArgumentResolverTests {
 	public void noBindingResult() throws Exception {
 		resolver.resolveArgument(paramErrors, new ModelAndViewContainer(), webRequest, null);
 	}
+
 
 	@SuppressWarnings("unused")
 	private void handle(Errors errors) {
