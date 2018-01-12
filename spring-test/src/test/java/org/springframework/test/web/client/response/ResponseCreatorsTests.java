@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class ResponseCreatorsTests {
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertTrue(response.getHeaders().isEmpty());
-		assertNull(response.getBody());
+		assertArrayEquals(new byte[0], FileCopyUtils.copyToByteArray(response.getBody()));
 	}
 
 	@Test
@@ -71,7 +71,7 @@ public class ResponseCreatorsTests {
 
 		assertEquals(HttpStatus.CREATED, response.getStatusCode());
 		assertEquals(location, response.getHeaders().getLocation());
-		assertNull(response.getBody());
+		assertArrayEquals(new byte[0], FileCopyUtils.copyToByteArray(response.getBody()));
 	}
 
 	@Test
@@ -81,7 +81,7 @@ public class ResponseCreatorsTests {
 
 		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
 		assertTrue(response.getHeaders().isEmpty());
-		assertNull(response.getBody());
+		assertArrayEquals(new byte[0], FileCopyUtils.copyToByteArray(response.getBody()));
 	}
 
 	@Test
@@ -91,7 +91,7 @@ public class ResponseCreatorsTests {
 
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertTrue(response.getHeaders().isEmpty());
-		assertNull(response.getBody());
+		assertArrayEquals(new byte[0], FileCopyUtils.copyToByteArray(response.getBody()));
 	}
 
 	@Test
@@ -101,7 +101,7 @@ public class ResponseCreatorsTests {
 
 		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 		assertTrue(response.getHeaders().isEmpty());
-		assertNull(response.getBody());
+		assertArrayEquals(new byte[0], FileCopyUtils.copyToByteArray(response.getBody()));
 	}
 
 	@Test
@@ -111,7 +111,7 @@ public class ResponseCreatorsTests {
 
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
 		assertTrue(response.getHeaders().isEmpty());
-		assertNull(response.getBody());
+		assertArrayEquals(new byte[0], FileCopyUtils.copyToByteArray(response.getBody()));
 	}
 
 	@Test
@@ -121,7 +121,7 @@ public class ResponseCreatorsTests {
 
 		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
 		assertTrue(response.getHeaders().isEmpty());
-		assertNull(response.getBody());
+		assertArrayEquals(new byte[0], FileCopyUtils.copyToByteArray(response.getBody()));
 	}
 
 }
