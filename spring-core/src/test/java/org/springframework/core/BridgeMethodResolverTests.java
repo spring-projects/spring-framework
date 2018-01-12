@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -807,9 +807,9 @@ public class BridgeMethodResolverTests {
 
 
 	@SuppressWarnings("unchecked")
-	public static class MessageBroadcasterImpl extends
-			GenericEventBroadcasterImpl<MessageEvent>
-					implements MessageBroadcaster {
+	public static class MessageBroadcasterImpl extends GenericEventBroadcasterImpl<MessageEvent>
+			implements Serializable,  // implement an unrelated interface first (SPR-16288)
+			MessageBroadcaster {
 
 		public MessageBroadcasterImpl() {
 			super(NewMessageEvent.class);
@@ -864,7 +864,7 @@ public class BridgeMethodResolverTests {
 
 	@SuppressWarnings("unchecked")
 	public static class SettableRepositoryRegistry<R extends SimpleGenericRepository<?>>
-					implements RepositoryRegistry {
+			implements RepositoryRegistry {
 
 		protected void injectInto(R rep) {
 		}
@@ -902,7 +902,7 @@ public class BridgeMethodResolverTests {
 
 
 	public static class GenericHibernateRepository<T, ID extends Serializable>
-					implements ConvenientGenericRepository<T, ID> {
+			implements ConvenientGenericRepository<T, ID> {
 
 		/**
 		 * @param c Mandatory. The domain class this repository is responsible for.
@@ -964,8 +964,8 @@ public class BridgeMethodResolverTests {
 	}
 
 
-	public static class HibernateRepositoryRegistry extends
-			SettableRepositoryRegistry<GenericHibernateRepository<?, ?>> {
+	public static class HibernateRepositoryRegistry
+			extends SettableRepositoryRegistry<GenericHibernateRepository<?, ?>> {
 
 		@Override
 		public void injectInto(GenericHibernateRepository<?, ?> rep) {
