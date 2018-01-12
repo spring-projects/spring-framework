@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,7 +128,7 @@ public class UriComponentsBuilderTests {
 		assertEquals("Invalid result URI", uri, result.toUri());
 	}
 
-	@Test // SPR-9317
+	@Test  // SPR-9317
 	public void fromUriEncodedQuery() throws URISyntaxException {
 		URI uri = new URI("http://www.example.org/?param=aGVsbG9Xb3JsZA%3D%3D");
 		String fromUri = UriComponentsBuilder.fromUri(uri).build().getQueryParams().get("param").get(0);
@@ -184,7 +184,7 @@ public class UriComponentsBuilderTests {
 		assertEquals("28", result.getFragment());
 	}
 
-	@Test // SPR-9832
+	@Test  // SPR-9832
 	public void fromUriStringQueryParamWithReservedCharInValue() throws URISyntaxException {
 		String uri = "http://www.google.com/ig/calculator?q=1USD=?EUR";
 		UriComponents result = UriComponentsBuilder.fromUriString(uri).build();
@@ -193,7 +193,7 @@ public class UriComponentsBuilderTests {
 		assertEquals("1USD=?EUR", result.getQueryParams().getFirst("q"));
 	}
 
-	@Test // SPR-14828
+	@Test  // SPR-14828
 	public void fromUriStringQueryParamEncodedAndContainingPlus() throws Exception {
 		String httpUrl = "http://localhost:8080/test/print?value=%EA%B0%80+%EB%82%98";
 		URI uri = UriComponentsBuilder.fromHttpUrl(httpUrl).build(true).toUri();
@@ -201,7 +201,7 @@ public class UriComponentsBuilderTests {
 		assertEquals(httpUrl, uri.toString());
 	}
 
-	@Test // SPR-10779
+	@Test  // SPR-10779
 	public void fromHttpUrlStringCaseInsesitiveScheme() {
 		assertEquals("http", UriComponentsBuilder.fromHttpUrl("HTTP://www.google.com").build().getScheme());
 		assertEquals("https", UriComponentsBuilder.fromHttpUrl("HTTPS://www.google.com").build().getScheme());
@@ -214,8 +214,8 @@ public class UriComponentsBuilderTests {
 		UriComponentsBuilder.fromHttpUrl("http://[1abc:2abc:3abc::5ABC:6abc:8080/resource").build().encode();
 	}
 
-	@Test // SPR-10539
-	public void fromUriStringIPv6Host() throws URISyntaxException {
+	@Test  // SPR-10539
+	public void fromUriStringIPv6Host() {
 		UriComponents result = UriComponentsBuilder
 				.fromUriString("http://[1abc:2abc:3abc::5ABC:6abc]:8080/resource").build().encode();
 		assertEquals("[1abc:2abc:3abc::5ABC:6abc]", result.getHost());
@@ -229,7 +229,7 @@ public class UriComponentsBuilderTests {
 		assertEquals("[::192.168.1.1]", resultIPv4compatible.getHost());
 	}
 
-	@Test // SPR-11970
+	@Test  // SPR-11970
 	public void fromUriStringNoPathWithReservedCharInQuery() {
 		UriComponents result = UriComponentsBuilder.fromUriString("http://example.com?foo=bar@baz").build();
 		assertTrue(StringUtils.isEmpty(result.getUserInfo()));
@@ -239,7 +239,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromHttpRequest() throws URISyntaxException {
+	public void fromHttpRequest() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setScheme("http");
 		request.setServerName("localhost");
@@ -255,7 +255,7 @@ public class UriComponentsBuilderTests {
 		assertEquals("a=1", result.getQuery());
 	}
 
-	@Test // SPR-12771
+	@Test  // SPR-12771
 	public void fromHttpRequestResetsPortBeforeSettingIt() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("X-Forwarded-Proto", "https");
@@ -275,7 +275,7 @@ public class UriComponentsBuilderTests {
 		assertEquals("/rest/mobile/users/1", result.getPath());
 	}
 
-	@Test //SPR-14761
+	@Test  // SPR-14761
 	public void fromHttpRequestWithForwardedIPv4Host() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setScheme("http");
@@ -290,7 +290,7 @@ public class UriComponentsBuilderTests {
 		assertEquals("http://192.168.0.1/mvc-showcase", result.toString());
 	}
 
-	@Test //SPR-14761
+	@Test  // SPR-14761
 	public void fromHttpRequestWithForwardedIPv6() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setScheme("http");
@@ -305,7 +305,7 @@ public class UriComponentsBuilderTests {
 		assertEquals("http://[1abc:2abc:3abc::5ABC:6abc]/mvc-showcase", result.toString());
 	}
 
-	@Test //SPR-14761
+	@Test  // SPR-14761
 	public void fromHttpRequestWithForwardedIPv6Host() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setScheme("http");
@@ -320,7 +320,7 @@ public class UriComponentsBuilderTests {
 		assertEquals("http://[1abc:2abc:3abc::5ABC:6abc]/mvc-showcase", result.toString());
 	}
 
-	@Test //SPR-14761
+	@Test  // SPR-14761
 	public void fromHttpRequestWithForwardedIPv6HostAndPort() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setScheme("http");
@@ -334,7 +334,6 @@ public class UriComponentsBuilderTests {
 
 		assertEquals("http://[1abc:2abc:3abc::5ABC:6abc]:8080/mvc-showcase", result.toString());
 	}
-
 
 	@Test
 	public void fromHttpRequestWithForwardedHost() {
@@ -351,7 +350,7 @@ public class UriComponentsBuilderTests {
 		assertEquals("http://anotherHost/mvc-showcase", result.toString());
 	}
 
-	@Test // SPR-10701
+	@Test  // SPR-10701
 	public void fromHttpRequestWithForwardedHostIncludingPort() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setScheme("http");
@@ -367,7 +366,7 @@ public class UriComponentsBuilderTests {
 		assertEquals(443, result.getPort());
 	}
 
-	@Test // SPR-11140
+	@Test  // SPR-11140
 	public void fromHttpRequestWithForwardedHostMultiValuedHeader() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setScheme("http");
@@ -382,7 +381,7 @@ public class UriComponentsBuilderTests {
 		assertEquals(-1, result.getPort());
 	}
 
-	@Test // SPR-11855
+	@Test  // SPR-11855
 	public void fromHttpRequestWithForwardedHostAndPort() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setScheme("http");
@@ -398,7 +397,7 @@ public class UriComponentsBuilderTests {
 		assertEquals(9090, result.getPort());
 	}
 
-	@Test // SPR-11872
+	@Test  // SPR-11872
 	public void fromHttpRequestWithForwardedHostWithDefaultPort() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setScheme("http");
@@ -413,7 +412,7 @@ public class UriComponentsBuilderTests {
 		assertEquals(-1, result.getPort());
 	}
 
-	@Test // SPR-16262
+	@Test  // SPR-16262
 	public void fromHttpRequestWithForwardedProtoWithDefaultPort() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setScheme("http");
@@ -447,7 +446,7 @@ public class UriComponentsBuilderTests {
 		assertEquals(-1, result.getPort());
 	}
 
-	@Test // SPR-12771
+	@Test  // SPR-12771
 	public void fromHttpRequestWithForwardedProtoAndDefaultPort() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setScheme("http");
@@ -464,7 +463,7 @@ public class UriComponentsBuilderTests {
 		assertEquals("https://84.198.58.199/mvc-showcase", result.toString());
 	}
 
-	@Test // SPR-12813
+	@Test  // SPR-12813
 	public void fromHttpRequestWithForwardedPortMultiValueHeader() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setScheme("http");
@@ -480,7 +479,7 @@ public class UriComponentsBuilderTests {
 		assertEquals("http://a.example.org/mvc-showcase", result.toString());
 	}
 
-	@Test // SPR-12816
+	@Test  // SPR-12816
 	public void fromHttpRequestWithForwardedProtoMultiValueHeader() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setScheme("http");
@@ -497,7 +496,7 @@ public class UriComponentsBuilderTests {
 		assertEquals("https://a.example.org/mvc-showcase", result.toString());
 	}
 
-	@Test // SPR-12742
+	@Test  // SPR-12742
 	public void fromHttpRequestWithTrailingSlash() throws Exception {
 		UriComponents before = UriComponentsBuilder.fromPath("/foo/").build();
 		UriComponents after = UriComponentsBuilder.newInstance().uriComponents(before).build();
@@ -567,7 +566,7 @@ public class UriComponentsBuilderTests {
 		assertEquals(Arrays.asList("foo", "bar"), result.getPathSegments());
 	}
 
-	@Test // SPR-12398
+	@Test  // SPR-12398
 	public void pathWithDuplicateSlashes() throws URISyntaxException {
 		UriComponents uriComponents = UriComponentsBuilder.fromPath("/foo/////////bar").build();
 		assertEquals("/foo/bar", uriComponents.getPath());
@@ -761,7 +760,7 @@ public class UriComponentsBuilderTests {
 		assertEquals("f2", result2.getFragment());
 	}
 
-	@Test // SPR-11856
+	@Test  // SPR-11856
 	public void fromHttpRequestForwardedHeader() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Forwarded", "proto=https; host=84.198.58.199");
@@ -900,4 +899,14 @@ public class UriComponentsBuilderTests {
 		assertEquals(-1, result.getPort());
 		assertEquals("https://example.com/rest/mobile/users/1", result.toUriString());
 	}
+
+	@Test  // SPR-16364
+	public void uriComponentsNotEqualAfterNormalization() {
+		UriComponents uri1 = UriComponentsBuilder.fromUriString("http://test.com").build().normalize();
+		UriComponents uri2 = UriComponentsBuilder.fromUriString("http://test.com/").build();
+		assertTrue(uri1.getPathSegments().isEmpty());
+		assertTrue(uri2.getPathSegments().isEmpty());
+		assertNotEquals(uri1, uri2);
+	}
+
 }
