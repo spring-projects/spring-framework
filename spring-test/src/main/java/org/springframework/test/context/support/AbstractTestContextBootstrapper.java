@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +28,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -110,9 +108,6 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				getCacheAwareContextLoaderDelegate());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public final List<TestExecutionListener> getTestExecutionListeners() {
 		Class<?> clazz = getBootstrapContext().getTestClass();
@@ -165,48 +160,36 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			}
 		}
 
+		Collection<Class<? extends TestExecutionListener>> classesToUse = classesList;
 		// Remove possible duplicates if we loaded default listeners.
 		if (usingDefaults) {
-			Set<Class<? extends TestExecutionListener>> classesSet = new HashSet<>();
-			classesSet.addAll(classesList);
-			classesList.clear();
-			classesList.addAll(classesSet);
+			classesToUse = new LinkedHashSet<>(classesList);
 		}
 
-		List<TestExecutionListener> listeners = instantiateListeners(classesList);
-
+		List<TestExecutionListener> listeners = instantiateListeners(classesToUse);
 		// Sort by Ordered/@Order if we loaded default listeners.
 		if (usingDefaults) {
 			AnnotationAwareOrderComparator.sort(listeners);
 		}
 
 		if (logger.isInfoEnabled()) {
-			logger.info(String.format("Using TestExecutionListeners: %s", listeners));
+			logger.info("Using TestExecutionListeners: " + listeners);
 		}
 		return listeners;
 	}
 
-	private List<TestExecutionListener> instantiateListeners(List<Class<? extends TestExecutionListener>> classesList) {
+	private List<TestExecutionListener> instantiateListeners(Collection<Class<? extends TestExecutionListener>> classesList) {
 		List<TestExecutionListener> listeners = new ArrayList<>(classesList.size());
 		for (Class<? extends TestExecutionListener> listenerClass : classesList) {
-			NoClassDefFoundError ncdfe = null;
 			try {
 				listeners.add(BeanUtils.instantiateClass(listenerClass));
 			}
 			catch (NoClassDefFoundError err) {
-				ncdfe = err;
-			}
-			catch (BeanInstantiationException ex) {
-				if (ex.getCause() instanceof NoClassDefFoundError) {
-					ncdfe = (NoClassDefFoundError) ex.getCause();
-				}
-			}
-			if (ncdfe != null) {
-				if (logger.isInfoEnabled()) {
-					logger.info(String.format("Could not instantiate TestExecutionListener [%s]. " +
+				if (logger.isDebugEnabled()) {
+					logger.debug(String.format("Could not instantiate TestExecutionListener [%s]. " +
 							"Specify custom listener classes or make the default listener classes " +
 							"(and their required dependencies) available. Offending class: [%s]",
-							listenerClass.getName(), ncdfe.getMessage()));
+							listenerClass.getName(), err.getMessage()));
 				}
 			}
 		}
