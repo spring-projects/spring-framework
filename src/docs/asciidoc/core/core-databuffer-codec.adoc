@@ -145,8 +145,12 @@ It contains methods for reading a `Flux` of `DataBuffer` objects from an `InputS
 `DataBufferUtils` also exposes `retain` and `release` methods that operate on plain `DataBuffer`
 instances (so that casting to a `PooledDataBuffer` is not required).
 
-
-
+Additionally, `DataBufferUtils` exposes `compose`, which merges a stream of data buffers into one.
+For instance, this method can be used to convert the entire HTTP body into a single buffer (and
+from that, a `String`, or `InputStream`).
+This is particularly useful when dealing with older, blocking APIs.
+Note, however, that this puts the entire body in memory, and therefore uses more memory than a pure
+streaming solution would.
 
 [codecs]
 == Codecs
