@@ -732,7 +732,7 @@ public class OwnerController {
 URI variables are automatically converted to the appropriate type or`TypeMismatchException`
 is raised. Simple types -- `int`, `long`, `Date`, are supported by default and you can
 register support for any other data type.
-// TODO: see <<webflux-ann-typeconversion>> and <<webflux-ann-webdatabinder>>.
+See <<webflux-ann-typeconversion>> and <<webflux-ann-initbinder>>.
 
 URI variables can be named explicitly -- e.g. `@PathVariable("customId")`, but you can
 leave that detail out if the names are the same and your code is compiled with debugging
@@ -962,13 +962,15 @@ Java 8+: `java.time.ZoneId`
 
 |`@RequestParam`
 |For access to Servlet request parameters. Parameter values are converted to the declared
-method argument type.
-// TODO: See <<webflux-ann-requestparam>>.
+method argument type. See <<webflux-ann-requestparam>>.
 
 |`@RequestHeader`
 |For access to request headers. Header values are converted to the declared method argument
-type.
-// TODO: See <<webflux-ann-requestheader>>.
+type. See <<webflux-ann-requestheader>>.
+
+|`@CookieValue`
+|For access to cookies. Cookies values are converted to the declared method argument
+type. See <<webflux-ann-cookievalue>>.
 
 |`@RequestBody`
 |For access to the HTTP request body. Body content is converted to the declared method
@@ -1085,6 +1087,200 @@ determined through a `RequestToViewNameTranslator`; the attribute name may be sp
 through a method-level `@ModelAttribute` or otherwise a name is selected based on the
 class name of the return type.
 |===
+
+
+[[webflux-ann-typeconversion]]
+==== Type Conversion
+[.small]#<<web.adoc#mvc-ann-typeconversion,Same in Spring MVC>>#
+
+Some annotated controller method arguments that represent String-based request input -- e.g.
+`@RequestParam`, `@RequestHeader`, `@PathVariable`, `@MatrixVariable`, and `@CookieValue`,
+may require type conversion if the argument is declared as something other than `String`.
+
+For such cases type conversion is automatically applied based on the configured converters.
+By default simple types such as `int`, `long`, `Date`, etc. are supported. Type conversion
+can be customized through a `WebDataBinder`, see <<mvc-ann-initbinder>>, or by registering
+`Formatters` with the `FormattingConversionService`, see
+<<core.adoc#format, Spring Field Formatting>>.
+
+
+[[webflux-ann-requestparam]]
+==== @RequestParam
+[.small]#<<web.adoc#mvc-ann-requestparam,Same in Spring MVC>>#
+
+Use the `@RequestParam` annotation to bind Servlet request parameters (i.e. query
+parameters or form data) to a method argument in a controller.
+
+The following code snippet shows the usage:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	@RequestMapping("/pets")
+	public class EditPetForm {
+
+		// ...
+
+		@GetMapping
+		public String setupForm(**@RequestParam("petId") int petId**, Model model) {
+			Pet pet = this.clinic.loadPet(petId);
+			model.addAttribute("pet", pet);
+			return "petForm";
+		}
+
+		// ...
+
+	}
+----
+
+Parameters using this annotation are required by default, but you can specify that a
+parameter is optional by setting ``@RequestParam``'s `required` flag to `false` or
+declare the argument with a `java.util.Optional` wrapper.
+
+Type conversion is applied automatically if the target method parameter type is not
+`String`. See <<mvc-ann-typeconversion>>.
+
+When an `@RequestParam` annotation is declared as `Map<String, String>` or
+`MultiValueMap<String, String>` argument, the map is populated with all request
+parameters.
+
+
+[[webflux-ann-requestheader]]
+==== @RequestHeader
+[.small]#<<web.adoc#mvc-ann-requestheader,Same in Spring MVC>>#
+
+Use the `@RequestHeader` annotation to bind a request header to a method argument in a
+controller.
+
+Given request with headers:
+
+[literal]
+[subs="verbatim,quotes"]
+----
+Host                    localhost:8080
+Accept                  text/html,application/xhtml+xml,application/xml;q=0.9
+Accept-Language         fr,en-gb;q=0.7,en;q=0.3
+Accept-Encoding         gzip,deflate
+Accept-Charset          ISO-8859-1,utf-8;q=0.7,*;q=0.7
+Keep-Alive              300
+----
+
+The following gets the value of the `Accept-Encoding` and `Keep-Alive` headers:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@GetMapping("/demo")
+	public void handle(
+			**@RequestHeader("Accept-Encoding")** String encoding,
+			**@RequestHeader("Keep-Alive")** long keepAlive) {
+		//...
+	}
+----
+
+Type conversion is applied automatically if the target method parameter type is not
+`String`. See <<mvc-ann-typeconversion>>.
+
+When an `@RequestHeader` annotation is used on a `Map<String, String>`,
+`MultiValueMap<String, String>`, or `HttpHeaders` argument, the map is populated
+with all header values.
+
+[TIP]
+====
+Built-in support is available for converting a comma-separated string into an
+array/collection of strings or other types known to the type conversion system. For
+example a method parameter annotated with `@RequestHeader("Accept")` may be of type
+`String` but also `String[]` or `List<String>`.
+====
+
+
+[[webflux-ann-cookievalue]]
+==== @CookieValue
+[.small]#<<web.adoc#mvc-ann-cookievalue,Same in Spring MVC>>#
+
+Use the `@CookieValue` annotation to bind the value of an HTTP cookie to a method argument
+in a controller.
+
+Given request with the following cookie:
+
+[literal]
+[subs="verbatim,quotes"]
+----
+JSESSIONID=415A4AC178C59DACE0B2C9CA727CDD84
+----
+
+The following code sample demonstrates how to get the cookie value:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@GetMapping("/demo")
+	public void handle(**@CookieValue("JSESSIONID")** String cookie) {
+		//...
+	}
+----
+
+Type conversion is applied automatically if the target method parameter type is not
+`String`. See <<mvc-ann-typeconversion>>.
+
+
+
+[[webflux-ann-initbinder]]
+=== Binder Methods
+[.small]#<<web.adoc#mvc-ann-initbinder,Same in Spring MVC>>#
+
+`@InitBinder` methods in an `@Controller` or `@ControllerAdvice` class can be used to
+customize type conversion for method arguments that represent String-based request values
+(e.g. request parameters, path variables, headers, cookies, and others). Type conversion
+also applies during data binding of request parameters onto `@ModelAttribute` arguments
+(i.e. command objects).
+
+`@InitBinder` methods can register controller-specific `java.bean.PropertyEditor`, or
+Spring `Converter` and `Formatter` components. In addition, the
+<<webflux-config-conversion,WebFlux Java config>> can be used to register `Converter` and
+`Formatter` types in a globally shared `FormattingConversionService`.
+
+`@InitBinder` methods support many of the same arguments that a `@RequestMapping` methods
+do, except for `@ModelAttribute` (command object) arguments. Typically they're are declared
+with a `WebDataBinder` argument, for registrations, and a `void` return value.
+Below is an example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	public class FormController {
+
+		**@InitBinder**
+		public void initBinder(WebDataBinder binder) {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			dateFormat.setLenient(false);
+			binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
+		}
+
+		// ...
+	}
+----
+
+Alternatively when using a `Formatter`-based setup through a shared
+`FormattingConversionService`, you could re-use the same approach and register
+controller-specific ``Formatter``'s:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	public class FormController {
+
+		**@InitBinder**
+		protected void initBinder(WebDataBinder binder) {
+			binder.addCustomFormatter(new DateFormatter("yyyy-MM-dd"));
+		}
+
+		// ...
+	}
+----
 
 
 

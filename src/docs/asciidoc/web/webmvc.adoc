@@ -1164,7 +1164,7 @@ public class OwnerController {
 URI variables are automatically converted to the appropriate type or`TypeMismatchException`
 is raised. Simple types -- `int`, `long`, `Date`, are supported by default and you can
 register support for any other data type.
-See <<mvc-ann-typeconversion>> and <<mvc-ann-webdatabinder>>.
+See <<mvc-ann-typeconversion>> and <<mvc-ann-initbinder>>.
 
 URI variables can be named explicitly -- e.g. `@PathVariable("customId")`, but you can
 leave that detail out if the names are the same and your code is compiled with debugging
@@ -1597,6 +1597,10 @@ method argument type. See <<mvc-ann-requestparam>>.
 |For access to request headers. Header values are converted to the declared method argument
 type. See <<mvc-ann-requestheader>>.
 
+|`@CookieValue`
+|For access to cookies. Cookies values are converted to the declared method argument
+type. See <<mvc-ann-cookievalue>>.
+
 |`@RequestBody`
 |For access to the HTTP request body. Body content is converted to the declared method
 argument type using ``HttpMessageConverter``s. See <<mvc-ann-requestbody>>.
@@ -1739,11 +1743,27 @@ class name of the return type.
 |===
 
 
+[[mvc-ann-typeconversion]]
+==== Type Conversion
+[.small]#<<web-reactive.adoc#webflux-ann-typeconversion,Same in Spring WebFlux>>#
+
+Some annotated controller method arguments that represent String-based request input -- e.g.
+`@RequestParam`, `@RequestHeader`, `@PathVariable`, `@MatrixVariable`, and `@CookieValue`,
+may require type conversion if the argument is declared as something other than `String`.
+
+For such cases type conversion is automatically applied based on the configured converters.
+By default simple types such as `int`, `long`, `Date`, etc. are supported. Type conversion
+can be customized through a `WebDataBinder`, see <<mvc-ann-initbinder>>, or by registering
+`Formatters` with the `FormattingConversionService`, see
+<<core.adoc#format, Spring Field Formatting>>.
+
+
 [[mvc-ann-requestparam]]
 ==== @RequestParam
+[.small]#<<web-reactive.adoc#webflux-ann-requestparam,Same in Spring WebFlux>>#
 
-Use the `@RequestParam` annotation to bind request parameters to a method parameter in
-your controller.
+Use the `@RequestParam` annotation to bind Servlet request parameters (i.e. query
+parameters or form data) to a method argument in a controller.
 
 The following code snippet shows the usage:
 
@@ -1752,13 +1772,12 @@ The following code snippet shows the usage:
 ----
 	@Controller
 	@RequestMapping("/pets")
-	@SessionAttributes("pet")
 	public class EditPetForm {
 
 		// ...
 
 		@GetMapping
-		public String setupForm(**@RequestParam("petId") int petId**, ModelMap model) {
+		public String setupForm(**@RequestParam("petId") int petId**, Model model) {
 			Pet pet = this.clinic.loadPet(petId);
 			model.addAttribute("pet", pet);
 			return "petForm";
@@ -1770,36 +1789,25 @@ The following code snippet shows the usage:
 ----
 
 Parameters using this annotation are required by default, but you can specify that a
-parameter is optional by setting ``@RequestParam``'s `required` attribute to `false`
-(e.g., `@RequestParam(name="id", required=false)`).
+parameter is optional by setting ``@RequestParam``'s `required` flag to `false` or
+declare the argument with a `java.util.Optional` wrapper.
 
 Type conversion is applied automatically if the target method parameter type is not
 `String`. See <<mvc-ann-typeconversion>>.
 
-When an `@RequestParam` annotation is used on a `Map<String, String>` or
+When an `@RequestParam` annotation is declared as `Map<String, String>` or
 `MultiValueMap<String, String>` argument, the map is populated with all request
 parameters.
 
 
-[[mvc-ann-typeconversion]]
-==== Type Conversion
-
-String-based values extracted from the request including request parameters, path
-variables, request headers, and cookie values may need to be converted to the target
-type of the method parameter or field (e.g., binding a request parameter to a field in
-an `@ModelAttribute` parameter) they're bound to. If the target type is not `String`,
-Spring automatically converts to the appropriate type. All simple types such as int,
-long, Date, etc. are supported. You can further customize the conversion process through
-a `WebDataBinder`, see <<mvc-ann-initbinder>>, or by registering `Formatters` with
-the `FormattingConversionService`, see <<core.adoc#format, Spring Field Formatting>>.
-
-
 [[mvc-ann-requestheader]]
 ==== @RequestHeader
+[.small]#<<web-reactive.adoc#webflux-ann-requestheader,Same in Spring WebFlux>>#
 
-The `@RequestHeader` annotation allows a method parameter to be bound to a request header.
+Use the `@RequestHeader` annotation to bind a request header to a method argument in a
+controller.
 
-Here is a sample request header:
+Given request with headers:
 
 [literal]
 [subs="verbatim,quotes"]
@@ -1812,21 +1820,21 @@ Accept-Charset          ISO-8859-1,utf-8;q=0.7,*;q=0.7
 Keep-Alive              300
 ----
 
-The following code sample demonstrates how to get the value of the `Accept-Encoding` and
-`Keep-Alive` headers:
+The following gets the value of the `Accept-Encoding` and `Keep-Alive` headers:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping("/displayHeaderInfo.do")
-	public void displayHeaderInfo(**@RequestHeader("Accept-Encoding")** String encoding,
+	@GetMapping("/demo")
+	public void handle(
+			**@RequestHeader("Accept-Encoding")** String encoding,
 			**@RequestHeader("Keep-Alive")** long keepAlive) {
 		//...
 	}
 ----
 
-Type conversion is applied automatically if the method parameter is not `String`. See
-<<mvc-ann-typeconversion>>.
+Type conversion is applied automatically if the target method parameter type is not
+`String`. See <<mvc-ann-typeconversion>>.
 
 When an `@RequestHeader` annotation is used on a `Map<String, String>`,
 `MultiValueMap<String, String>`, or `HttpHeaders` argument, the map is populated
@@ -1843,11 +1851,12 @@ example a method parameter annotated with `@RequestHeader("Accept")` may be of t
 
 [[mvc-ann-cookievalue]]
 ==== @CookieValue
+[.small]#<<web-reactive.adoc#webflux-ann-cookievalue,Same in Spring WebFlux>>#
 
-The `@CookieValue` annotation allows a method parameter to be bound to the value of an
-HTTP cookie.
+Use the `@CookieValue` annotation to bind the value of an HTTP cookie to a method argument
+in a controller.
 
-Let us consider that the following cookie has been received with an http request:
+Given request with the following cookie:
 
 [literal]
 [subs="verbatim,quotes"]
@@ -1855,13 +1864,13 @@ Let us consider that the following cookie has been received with an http request
 JSESSIONID=415A4AC178C59DACE0B2C9CA727CDD84
 ----
 
-The following code sample demonstrates how to get the value of the `JSESSIONID` cookie:
+The following code sample demonstrates how to get the cookie value:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping("/displayHeaderInfo.do")
-	public void displayHeaderInfo(**@CookieValue("JSESSIONID")** String cookie) {
+	@GetMapping("/demo")
+	public void handle(**@CookieValue("JSESSIONID")** String cookie) {
 		//...
 	}
 ----
@@ -1925,7 +1934,7 @@ name. Matching fields are populated after type conversion (from String to the ta
 field type) has been applied where necessary. Data binding and validation are covered in
 <<core.adoc#validation, Validation>>.
 Customizing the data binding process for a controller level is covered in
-<<mvc-ann-webdatabinder>>.
+<<mvc-ann-initbinder>>.
 
 As a result of data binding there may be errors such as missing required fields or type
 conversion errors. To check for such errors add a `BindingResult` argument immediately
@@ -2628,34 +2637,33 @@ conventions instead, much like for methods returning `void` -- see <<mvc-coc-r2v
 
 [[mvc-ann-initbinder]]
 === Binder Methods
+[.small]#<<web-reactive.adoc#webflux-ann-initbinder,Same in Spring WebFlux>>#
 
-To customize request parameter binding with PropertyEditors through Spring's
-`WebDataBinder`, you can use `@InitBinder`-annotated methods within your controller,
-`@InitBinder` methods within an `@ControllerAdvice` class, or provide a custom
-`WebBindingInitializer`. See the <<mvc-ann-controller-advice>> section for more details.
+`@InitBinder` methods in an `@Controller` or `@ControllerAdvice` class can be used to
+customize type conversion for method arguments that represent String-based request values
+(e.g. request parameters, path variables, headers, cookies, and others). Type conversion
+also applies during data binding of request parameters onto `@ModelAttribute` arguments
+(i.e. command objects).
 
-Annotating controller methods with `@InitBinder` allows you to configure web data
-binding directly within your controller class. `@InitBinder` identifies methods that
-initialize the `WebDataBinder` that will be used to populate command and form object
-arguments of annotated handler methods.
+`@InitBinder` methods can register controller-specific `java.bean.PropertyEditor`, or
+Spring `Converter` and `Formatter` components. In addition, the
+<<mvc-config-conversion,MVC config>> can be used to register `Converter` and `Formatter`
+types in a globally shared `FormattingConversionService`.
 
-Such init-binder methods support all arguments that `@RequestMapping` methods support,
-except for command/form objects and corresponding validation result objects. Init-binder
-methods must not have a return value. Thus, they are usually declared as `void`.
-Typical arguments include `WebDataBinder` in combination with `WebRequest` or
-`java.util.Locale`, allowing code to register context-specific editors.
 
-The following example demonstrates the use of `@InitBinder` to configure a
-`CustomDateEditor` for all `java.util.Date` form properties.
+`@InitBinder` methods support many of the same arguments that a `@RequestMapping` methods
+do, except for `@ModelAttribute` (command object) arguments. Typically they're are declared
+with a `WebDataBinder` argument, for registrations, and a `void` return value.
+Below is an example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	@Controller
-	public class MyFormController {
+	public class FormController {
 
 		**@InitBinder**
-		protected void initBinder(WebDataBinder binder) {
+		public void initBinder(WebDataBinder binder) {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			dateFormat.setLenient(false);
 			binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
@@ -2665,17 +2673,15 @@ The following example demonstrates the use of `@InitBinder` to configure a
 	}
 ----
 
-Alternatively, as of Spring 4.2, consider using `addCustomFormatter` to specify
-`Formatter` implementations instead of `PropertyEditor` instances. This is
-particularly useful if you happen to have a `Formatter`-based setup in a shared
-`FormattingConversionService` as well, with the same approach to be reused for
-controller-specific tweaking of the binding rules.
+Alternatively when using a `Formatter`-based setup through a shared
+`FormattingConversionService`, you could re-use the same approach and register
+controller-specific ``Formatter``'s:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	@Controller
-	public class MyFormController {
+	public class FormController {
 
 		**@InitBinder**
 		protected void initBinder(WebDataBinder binder) {
