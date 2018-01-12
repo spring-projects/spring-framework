@@ -806,7 +806,7 @@ public class BridgeMethodResolverTests {
 	}
 
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"serial", "unchecked"})
 	public static class MessageBroadcasterImpl extends GenericEventBroadcasterImpl<MessageEvent>
 			implements Serializable,  // implement an unrelated interface first (SPR-16288)
 			MessageBroadcaster {

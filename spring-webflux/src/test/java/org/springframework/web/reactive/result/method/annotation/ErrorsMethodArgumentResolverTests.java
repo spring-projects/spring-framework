@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,12 +36,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link ErrorsMethodArgumentResolver}.
+ *
  * @author Rossen Stoyanchev
  */
 public class ErrorsMethodArgumentResolverTests {
@@ -61,7 +60,7 @@ public class ErrorsMethodArgumentResolverTests {
 
 
 	@Test
-	public void supports() throws Exception {
+	public void supports() {
 		MethodParameter parameter = this.testMethod.arg(Errors.class);
 		assertTrue(this.resolver.supportsParameter(parameter));
 
@@ -76,8 +75,7 @@ public class ErrorsMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolve() throws Exception {
-
+	public void resolve() {
 		BindingResult bindingResult = createBindingResult(new Foo(), "foo");
 		this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "foo", bindingResult);
 
@@ -94,8 +92,7 @@ public class ErrorsMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveWithMono() throws Exception {
-
+	public void resolveWithMono() {
 		BindingResult bindingResult = createBindingResult(new Foo(), "foo");
 		MonoProcessor<BindingResult> monoProcessor = MonoProcessor.create();
 		monoProcessor.onNext(bindingResult);
@@ -109,9 +106,8 @@ public class ErrorsMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveWithMonoOnBindingResultAndModelAttribute() throws Exception {
-
-		this.expectedException.expectMessage("An @ModelAttribute and an Errors/BindingResult) arguments " +
+	public void resolveWithMonoOnBindingResultAndModelAttribute() {
+		this.expectedException.expectMessage("An @ModelAttribute and an Errors/BindingResult argument " +
 				"cannot both be declared with an async type wrapper.");
 
 		MethodParameter parameter = this.testMethod.arg(BindingResult.class);
@@ -119,9 +115,8 @@ public class ErrorsMethodArgumentResolverTests {
 				.block(Duration.ofMillis(5000));
 	}
 
-	@Test // SPR-16187
-	public void resolveWithBindingResultNotFound() throws Exception {
-
+	@Test  // SPR-16187
+	public void resolveWithBindingResultNotFound() {
 		this.expectedException.expectMessage("An Errors/BindingResult argument is expected " +
 				"immediately after the @ModelAttribute argument");
 
@@ -159,6 +154,7 @@ public class ErrorsMethodArgumentResolverTests {
 			@ModelAttribute Mono<Foo> fooMono,
 			BindingResult bindingResult,
 			Mono<Errors> errorsMono,
-			String string) {}
+			String string) {
+	}
 
 }
