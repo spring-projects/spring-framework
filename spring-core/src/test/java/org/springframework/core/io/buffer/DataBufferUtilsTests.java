@@ -309,21 +309,6 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 	}
 
 	@Test
-	public void writeAggregator() {
-		DataBuffer foo = stringBuffer("foo");
-		DataBuffer bar = stringBuffer("bar");
-		DataBuffer baz = stringBuffer("baz");
-		Flux<DataBuffer> flux = Flux.just(foo, bar, baz);
-
-		DataBuffer result =
-				flux.reduce(DataBufferUtils.writeAggregator()).block(Duration.ofSeconds(1));
-
-		assertEquals("foobarbaz", DataBufferTestUtils.dumpString(result, StandardCharsets.UTF_8));
-
-		release(result);
-	}
-
-	@Test
 	public void SPR16070() throws Exception {
 		ReadableByteChannel channel = mock(ReadableByteChannel.class);
 		when(channel.read(any()))

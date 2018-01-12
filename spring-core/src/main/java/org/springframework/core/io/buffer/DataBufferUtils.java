@@ -420,22 +420,6 @@ public abstract class DataBufferUtils {
 	}
 
 	/**
-	 * Return an aggregator function that can be used to {@linkplain Flux#reduce(BiFunction) reduce}
-	 * a {@code Flux} of data buffers into a single data buffer by writing all subsequent buffers
-	 * into the first buffer. All buffers except the first buffer are
-	 * {@linkplain #release(DataBuffer) released}.
-	 * <p>For example:
-	 * <pre class="code">
-	 * Flux&lt;DataBuffer&gt; flux = ...
-	 * Mono&lt;DataBuffer&gt; mono = flux.reduce(DataBufferUtils.writeAggregator());
-	 * </pre>
-	 * @see Flux#reduce(BiFunction)
-	 */
-	public static BinaryOperator<DataBuffer> writeAggregator() {
-		return WRITE_AGGREGATOR;
-	}
-
-	/**
 	 * Composes the buffers in the given {@link Publisher} into a single data buffer. Depending on
 	 * the {@code DataBuffer} implementation, the returned buffer may be a single buffer containing
 	 * all data of the provided buffers, or it may be a true composite that contains references to

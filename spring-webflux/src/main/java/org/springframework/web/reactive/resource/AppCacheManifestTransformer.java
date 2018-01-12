@@ -34,6 +34,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.SynchronousSink;
 
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.lang.Nullable;
@@ -109,8 +110,9 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 						return Mono.just(outputResource);
 					}
 					DataBufferFactory bufferFactory = exchange.getResponse().bufferFactory();
-					return DataBufferUtils.read(outputResource, bufferFactory, StreamUtils.BUFFER_SIZE)
-							.reduce(DataBufferUtils.writeAggregator())
+					Flux<DataBuffer> flux = DataBufferUtils
+							.read(outputResource, bufferFactory, StreamUtils.BUFFER_SIZE);
+					return DataBufferUtils.compose(flux)
 							.flatMap(dataBuffer -> {
 								CharBuffer charBuffer = DEFAULT_CHARSET.decode(dataBuffer.asByteBuffer());
 								DataBufferUtils.release(dataBuffer);

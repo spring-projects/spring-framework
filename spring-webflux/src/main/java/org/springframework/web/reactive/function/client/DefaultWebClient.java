@@ -457,8 +457,7 @@ class DefaultWebClient implements WebClient {
 
 		private static Mono<WebClientResponseException> createResponseException(ClientResponse response) {
 
-			return response.body(BodyExtractors.toDataBuffers())
-					.reduce(DataBufferUtils.writeAggregator())
+			return DataBufferUtils.compose(response.body(BodyExtractors.toDataBuffers()))
 					.map(dataBuffer -> {
 						byte[] bytes = new byte[dataBuffer.readableByteCount()];
 						dataBuffer.read(bytes);

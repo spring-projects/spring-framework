@@ -63,8 +63,7 @@ public abstract class AbstractDataBufferDecoder<T> extends AbstractDecoder<T> {
 	public Mono<T> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return Flux.from(inputStream)
-				.reduce(DataBufferUtils.writeAggregator())
+		return DataBufferUtils.compose(inputStream)
 				.map(buffer -> decodeDataBuffer(buffer, elementType, mimeType, hints));
 	}
 

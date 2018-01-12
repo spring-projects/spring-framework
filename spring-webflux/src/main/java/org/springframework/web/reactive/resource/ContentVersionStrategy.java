@@ -16,9 +16,11 @@
 
 package org.springframework.web.reactive.resource;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -42,8 +44,9 @@ public class ContentVersionStrategy extends AbstractFileNameVersionStrategy {
 
 	@Override
 	public Mono<String> getResourceVersion(Resource resource) {
-		return DataBufferUtils.read(resource, dataBufferFactory, StreamUtils.BUFFER_SIZE)
-				.reduce(DataBufferUtils.writeAggregator())
+		Flux<DataBuffer> flux =
+				DataBufferUtils.read(resource, dataBufferFactory, StreamUtils.BUFFER_SIZE);
+		return DataBufferUtils.compose(flux)
 				.map(buffer -> {
 					byte[] result = new byte[buffer.readableByteCount()];
 					buffer.read(result);

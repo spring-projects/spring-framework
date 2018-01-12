@@ -332,8 +332,7 @@ public class BodyInsertersTests {
 		Mono<Void> result = inserter.insert(request, this.context);
 		StepVerifier.create(result).expectComplete().verify();
 
-		StepVerifier.create(request.getBody()
-				.reduce(DataBufferUtils.writeAggregator()))
+		StepVerifier.create(DataBufferUtils.compose(request.getBody()))
 				.consumeNextWith(dataBuffer -> {
 					byte[] resultBytes = new byte[dataBuffer.readableByteCount()];
 					dataBuffer.read(resultBytes);

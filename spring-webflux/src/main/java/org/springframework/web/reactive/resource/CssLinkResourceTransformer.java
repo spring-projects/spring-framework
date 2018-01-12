@@ -33,6 +33,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.lang.Nullable;
@@ -86,8 +87,9 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 					}
 
 					DataBufferFactory bufferFactory = exchange.getResponse().bufferFactory();
-					return DataBufferUtils.read(ouptputResource, bufferFactory, StreamUtils.BUFFER_SIZE)
-							.reduce(DataBufferUtils.writeAggregator())
+					Flux<DataBuffer> flux = DataBufferUtils
+							.read(ouptputResource, bufferFactory, StreamUtils.BUFFER_SIZE);
+					return DataBufferUtils.compose(flux)
 							.flatMap(dataBuffer -> {
 								CharBuffer charBuffer = DEFAULT_CHARSET.decode(dataBuffer.asByteBuffer());
 								DataBufferUtils.release(dataBuffer);

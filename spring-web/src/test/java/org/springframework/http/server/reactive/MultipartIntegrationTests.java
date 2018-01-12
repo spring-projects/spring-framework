@@ -103,10 +103,7 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 			assertEquals("fooPart", part.name());
 			assertTrue(part instanceof FilePart);
 			assertEquals("foo.txt", ((FilePart) part).filename());
-			DataBuffer buffer = part
-					.content()
-					.reduce(DataBufferUtils.writeAggregator())
-					.block();
+			DataBuffer buffer = DataBufferUtils.compose(part.content()).block();
 			assertEquals(12, buffer.readableByteCount());
 			byte[] byteContent = new byte[12];
 			buffer.read(byteContent);
