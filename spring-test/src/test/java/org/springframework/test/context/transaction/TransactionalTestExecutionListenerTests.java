@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import org.mockito.BDDMockito;
-
+import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.Rollback;
@@ -76,7 +76,7 @@ public class TransactionalTestExecutionListenerTests {
 	private void assertBeforeTestMethodWithTransactionalTestMethod(Class<? extends Invocable> clazz, boolean invokedInTx)
 			throws Exception {
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		Invocable instance = clazz.newInstance();
+		Invocable instance = BeanUtils.instantiateClass(clazz);
 		given(testContext.getTestInstance()).willReturn(instance);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("transactionalTest"));
 
@@ -89,7 +89,7 @@ public class TransactionalTestExecutionListenerTests {
 	private void assertBeforeTestMethodWithNonTransactionalTestMethod(Class<? extends Invocable> clazz)
 			throws Exception {
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		Invocable instance = clazz.newInstance();
+		Invocable instance = BeanUtils.instantiateClass(clazz);
 		given(testContext.getTestInstance()).willReturn(instance);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("nonTransactionalTest"));
 
@@ -106,7 +106,7 @@ public class TransactionalTestExecutionListenerTests {
 
 	private void assertAfterTestMethodWithTransactionalTestMethod(Class<? extends Invocable> clazz) throws Exception {
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		Invocable instance = clazz.newInstance();
+		Invocable instance = BeanUtils.instantiateClass(clazz);
 		given(testContext.getTestInstance()).willReturn(instance);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("transactionalTest"));
 
@@ -122,7 +122,7 @@ public class TransactionalTestExecutionListenerTests {
 
 	private void assertAfterTestMethodWithNonTransactionalTestMethod(Class<? extends Invocable> clazz) throws Exception {
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		Invocable instance = clazz.newInstance();
+		Invocable instance = BeanUtils.instantiateClass(clazz);
 		given(testContext.getTestInstance()).willReturn(instance);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("nonTransactionalTest"));
 
@@ -159,7 +159,7 @@ public class TransactionalTestExecutionListenerTests {
 		Class<? extends Invocable> clazz = TransactionalDeclaredOnClassLocallyTestCase.class;
 
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		Invocable instance = clazz.newInstance();
+		Invocable instance = BeanUtils.instantiateClass(clazz);
 		given(testContext.getTestInstance()).willReturn(instance);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("transactionalTest"));
 
