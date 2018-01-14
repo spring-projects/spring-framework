@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.core;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -184,11 +185,15 @@ public class SqlParameter {
 	 * to a List of SqlParameter objects as used in this package.
 	 */
 	public static List<SqlParameter> sqlTypesToAnonymousParameterList(@Nullable int... types) {
-		List<SqlParameter> result = new LinkedList<>();
+		List<SqlParameter> result;
 		if (types != null) {
+			result = new ArrayList<>(types.length);
 			for (int type : types) {
 				result.add(new SqlParameter(type));
 			}
+		}
+		else {
+			result = new LinkedList<>();
 		}
 		return result;
 	}
