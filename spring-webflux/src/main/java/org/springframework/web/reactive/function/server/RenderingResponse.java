@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.util.MultiValueMap;
  * Rendering-specific subtype of {@link ServerResponse} that exposes model and template data.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 5.0
  */
 public interface RenderingResponse extends ServerResponse {
@@ -56,12 +57,8 @@ public interface RenderingResponse extends ServerResponse {
 	 * @return the created builder
 	 */
 	static Builder from(RenderingResponse other) {
-		Assert.notNull(other, "'other' must not be null");
-		DefaultRenderingResponseBuilder builder = new DefaultRenderingResponseBuilder(other.name());
-		builder.status(other.statusCode());
-		builder.headers(other.headers());
-		builder.modelAttributes(other.model());
-		return builder;
+		Assert.notNull(other, "Other RenderingResponse must not be null");
+		return new DefaultRenderingResponseBuilder(other);
 	}
 
 	/**
@@ -136,11 +133,19 @@ public interface RenderingResponse extends ServerResponse {
 		Builder headers(HttpHeaders headers);
 
 		/**
-		 * Set the status.
+		 * Set the HTTP status.
 		 * @param status the response status
 		 * @return this builder
 		 */
 		Builder status(HttpStatus status);
+
+		/**
+		 * Set the HTTP status.
+		 * @param status the response status
+		 * @return this builder
+		 * @since 5.0.3
+		 */
+		Builder status(int status);
 
 		/**
 		 * Add the given cookie to the response.

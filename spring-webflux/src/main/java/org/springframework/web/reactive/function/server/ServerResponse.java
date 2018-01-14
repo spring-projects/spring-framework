@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ import org.springframework.web.server.ServerWebExchange;
  * {@linkplain HandlerFilterFunction filter function}.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @author Sebastien Deleuze
  * @since 5.0
  */
@@ -91,17 +92,26 @@ public interface ServerResponse {
 	 */
 	static BodyBuilder from(ServerResponse other) {
 		Assert.notNull(other, "Other ServerResponse must not be null");
-		DefaultServerResponseBuilder builder = new DefaultServerResponseBuilder(other.statusCode());
-		return builder.headers(headers -> headers.addAll(other.headers()));
+		return new DefaultServerResponseBuilder(other);
 	}
 
 	/**
-	 * Create a builder with the given status.
+	 * Create a builder with the given HTTP status.
 	 * @param status the response status
 	 * @return the created builder
 	 */
 	static BodyBuilder status(HttpStatus status) {
 		Assert.notNull(status, "HttpStatus must not be null");
+		return new DefaultServerResponseBuilder(status);
+	}
+
+	/**
+	 * Create a builder with the given HTTP status.
+	 * @param status the response status
+	 * @return the created builder
+	 * @since 5.0.3
+	 */
+	static BodyBuilder status(int status) {
 		return new DefaultServerResponseBuilder(status);
 	}
 
@@ -449,6 +459,5 @@ public interface ServerResponse {
 		 */
 		List<ViewResolver> viewResolvers();
 	}
-
 
 }
