@@ -31,6 +31,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -145,6 +146,7 @@ public class NamedParameterJdbcTemplateTests {
 		verify(connection).close();
 	}
 
+	@Ignore("SPR-16340")
 	@Test
 	public void testExecuteArray() throws SQLException {
 		given(preparedStatement.executeUpdate()).willReturn(1);
