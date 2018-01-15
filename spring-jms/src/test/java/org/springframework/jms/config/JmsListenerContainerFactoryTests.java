@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,6 +148,21 @@ public class JmsListenerContainerFactoryTests {
 		DefaultMessageListenerContainer container = factory.createListenerContainer(endpoint);
 
 		assertSame(backOff, new DirectFieldAccessor(container).getPropertyValue("backOff"));
+	}
+
+	@Test
+	public void endpointConcurrencyTakesPrecedence() {
+		DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+		factory.setConcurrency("2-10");
+
+		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
+		MessageListener messageListener = new MessageListenerAdapter();
+		endpoint.setMessageListener(messageListener);
+		endpoint.setDestination("myQueue");
+		endpoint.setConcurrency("4-6");
+		DefaultMessageListenerContainer container = factory.createListenerContainer(endpoint);
+		assertEquals(4, container.getConcurrentConsumers());
+		assertEquals(6, container.getMaxConcurrentConsumers());
 	}
 
 
