@@ -1458,7 +1458,7 @@ In Java config:
 ----
 	@Configuration
 	@EnableWebSocketMessageBroker
-	public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
+	public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 		// ...
 
@@ -1611,7 +1611,7 @@ user and associate it with subsequent STOMP messages on the same session:
 ----
 	@Configuration
 	@EnableWebSocketMessageBroker
-	public class MyConfig extends AbstractWebSocketMessageBrokerConfigurer {
+	public class MyConfig implements WebSocketMessageBrokerConfigurer {
 
 		@Override
 		public void configureClientInboundChannel(ChannelRegistration registration) {
@@ -1634,7 +1634,7 @@ user and associate it with subsequent STOMP messages on the same session:
 Also note that when using Spring Security's authorization for messages, at present
 you will need to ensure that the authentication `ChannelInterceptor` config is ordered
 ahead of Spring Security's. This is best done by declaring the custom interceptor in
-its own sub-class of `AbstractWebSocketMessageBrokerConfigurer` marked with
+its own implementation of `WebSocketMessageBrokerConfigurer` marked with
 `@Order(Ordered.HIGHEST_PRECEDENCE + 99)`.
 
 
@@ -1811,7 +1811,7 @@ to intercept inbound messages:
 ----
 	@Configuration
 	@EnableWebSocketMessageBroker
-	public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
+	public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 		@Override
 		public void configureClientInboundChannel(ChannelRegistration registration) {
