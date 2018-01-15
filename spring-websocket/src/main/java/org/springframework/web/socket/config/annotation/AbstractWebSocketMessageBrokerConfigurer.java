@@ -34,8 +34,7 @@ import org.springframework.messaging.simp.config.MessageBrokerRegistry;
  * which has default methods, made possible by a Java 8 baseline.
  */
 @Deprecated
-public abstract class /*AbstractWebSocketMessageBrokerConfigurer*/ implements WebSocketMessageBrokerConfigurer {
-
+public abstract class AbstractWebSocketMessageBrokerConfigurer implements WebSocketMessageBrokerConfigurer {
 
 	@Override
 	public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
