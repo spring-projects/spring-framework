@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsException;
@@ -172,7 +173,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 	}
 
 	@Test  // SPR-12226 and SPR-12660
-	public void handleInfoOptionsWithOrigin() throws Exception {
+	public void handleInfoOptionsWithAllowedOrigin() throws Exception {
 		this.servletRequest.setServerName("mydomain2.com");
 		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain2.com");
 		this.servletRequest.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
@@ -191,10 +192,22 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		this.service.setAllowedOrigins(Arrays.asList("*"));
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		assertNotNull(this.service.getCorsConfiguration(this.servletRequest));
+	}
 
+	@Test  // SPR-16304
+	public void handleInfoOptionsWithForbiddenOrigin() throws Exception {
 		this.servletRequest.setServerName("mydomain3.com");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain2.com");
+		this.servletRequest.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.servletRequest.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "Last-Modified");
+		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.FORBIDDEN);
+		CorsConfiguration corsConfiguration = this.service.getCorsConfiguration(this.servletRequest);
+		assertTrue(corsConfiguration.getAllowedOrigins().isEmpty());
+
 		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.FORBIDDEN);
+		corsConfiguration = this.service.getCorsConfiguration(this.servletRequest);
+		assertEquals(Arrays.asList("http://mydomain1.com"), corsConfiguration.getAllowedOrigins());
 	}
 
 	@Test  // SPR-12283
