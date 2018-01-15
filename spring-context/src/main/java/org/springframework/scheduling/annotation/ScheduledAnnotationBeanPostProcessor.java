@@ -444,7 +444,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					}
 					catch (NumberFormatException ex) {
 						throw new IllegalArgumentException(
-								"Invalid fixedRateString value \"" + fixedRateString + "\" - cannot parse into integer");
+								"Invalid fixedRateString value \"" + fixedRateString + "\" - cannot parse into long");
 					}
 					tasks.add(this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, initialDelay)));
 				}
