@@ -1225,6 +1225,263 @@ Type conversion is applied automatically if the target method parameter type is 
 `String`. See <<mvc-ann-typeconversion>>.
 
 
+[[webflux-ann-modelattrib-method-args]]
+==== @ModelAttribute
+[.small]#<<web.adoc#mvc-ann-modelattrib-method-args,Same in Spring MVC>>#
+
+Use the `@ModelAttribute` annotation on a method argument to access an attribute from the
+model, or have it instantiated if not present. The model attribute is also overlaid with
+values query parameters for form fields whose names match to field names. This is
+referred to as data binding and it saves you from having to deal with parsing and
+converting individual query parameters and form fields. For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+	public String processSubmit(**@ModelAttribute Pet pet**) { }
+----
+
+The `Pet` instance above is resolved as follows:
+
+* From the model if already added via <<webflux-ann-modelattrib-methods>>.
+* From the HTTP session via <<webflux-ann-sessionattributes>>.
+* From the invocation of a default constructor.
+* From the invocation of a "primary constructor" with arguments matching to query
+parameters or form fields; argument names are determined via JavaBeans
+`@ConstructorProperties` or via runtime-retained parameter names in the bytecode.
+
+After the model attribute instance is obtained, data binding is applied. The
+`WebExchangeDataBinder` class matches names of query parameters and form fields to field
+names on the target Object. Matching fields are populated after type conversion is applied
+where necessary. For more on data binding (and validation) see
+<<core.adoc#validation, Validation>>. For more on customizing data binding see
+<<webflux-ann-initbinder>>.
+
+Data binding may result in errors. By default a `WebExchangeBindException` is raised but
+to check for such errors in the controller method, add a `BindingResult` argument
+immediately next to the `@ModelAttribute` as shown below:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+	public String processSubmit(**@ModelAttribute("pet") Pet pet**, BindingResult result) {
+		if (result.hasErrors()) {
+			return "petForm";
+		}
+		// ...
+	}
+----
+
+Validation can be applied automatically after data binding by adding the
+`javax.validation.Valid` annotation or Spring's `@Validated` annotation (also see
+<<core.adoc#validation-beanvalidation, Bean validation>> and
+<<core.adoc#validation, Spring validation>>). For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+	public String processSubmit(**@Valid @ModelAttribute("pet") Pet pet**, BindingResult result) {
+		if (result.hasErrors()) {
+			return "petForm";
+		}
+		// ...
+	}
+----
+
+Spring WebFlux, unlike Spring MVC, supports reactive types in the model, e.g.
+`Mono<Account>` or `io.reactivex.Single<Account>`. An `@ModelAttribute` argument can be
+declared with or without a reactive type wrapper, and it will be resolved accordingly,
+to the actual value if necessary. Note however that in order to use a `BindingResult`
+argument, you must declare the `@ModelAttribute` argument before it without a reactive
+type wrapper, as shown earlier. Alternatively, you can handle any errors through the
+reactive type:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+	public Mono<String> processSubmit(@Valid @ModelAttribute("pet") Mono<Pet> petMono) {
+		return petMono
+			.flatMap(pet -> {
+				// ...
+			})
+			.onErrorResume(ex -> {
+				// ...
+			});
+	}
+----
+
+
+[[webflux-ann-sessionattributes]]
+==== @SessionAttributes
+[.small]#<<web.adoc#mvc-ann-sessionattributes,Same in Spring MVC>>#
+
+`@SessionAttributes` is used to store model attributes in the `WebSession` between
+requests. It is a type-level annotation that declares session attributes used by a
+specific controller. This will typically list the names of model attributes or types of
+model attributes which should be transparently stored in the session for subsequent
+requests to access.
+
+For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	**@SessionAttributes("pet")**
+	public class EditPetForm {
+		// ...
+	}
+----
+
+On the first request when a model attribute with the name "pet" is added to the model,
+it is automatically promoted to and saved in the `WebSession`. It remains there until
+another controller method uses a `SessionStatus` method argument to clear the storage:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	**@SessionAttributes("pet")**
+	public class EditPetForm {
+
+		// ...
+
+		@PostMapping("/pets/{id}")
+		public String handle(Pet pet, BindingResult errors, SessionStatus status) {
+			if (errors.hasErrors) {
+				// ...
+			}
+				status.setComplete();
+				// ...
+			}
+		}
+	}
+----
+
+
+[[webflux-ann-sessionattribute]]
+==== @SessionAttribute
+[.small]#<<web.adoc#mvc-ann-sessionattribute,Same in Spring MVC>>#
+
+If you need access to pre-existing session attributes that are managed globally,
+i.e. outside the controller (e.g. by a filter), and may or may not be present
+use the `@SessionAttribute` annotation on a method parameter:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RequestMapping("/")
+	public String handle(**@SessionAttribute** User user) {
+		// ...
+	}
+----
+
+For use cases that require adding or removing session attributes consider injecting
+`WebSession` into the controller method.
+
+For temporary storage of model attributes in the session as part of a controller
+workflow consider using `SessionAttributes` as described in
+<<webflux-ann-sessionattributes>>.
+
+
+
+[[webflux-ann-modelattrib-methods]]
+=== Model Methods
+[.small]#<<web.adoc#mvc-ann-modelattrib-methods,Same in Spring MVC>>#
+
+The `@ModelAttribute` annotation can be used on `@RequestMapping`
+<<webflux-ann-modelattrib-method-args,method arguments>> to create or access an Object
+from the model and bind it to the request. `@ModelAttribute` can also be used as a
+method-level annotation on controller methods whose purpose is not to handle requests
+but to add commonly needed model attributes prior to request handling.
+
+A controller can have any number of `@ModelAttribute` methods. All such methods are
+invoked before `@RequestMapping` methods in the same controller. A `@ModelAttribute`
+method can also be shared across controllers via `@ControllerAdvice`. See the section on
+<<webflux-ann-controller-advice>> for more details.
+
+`@ModelAttribute` methods have flexible method signatures. They support many of the same
+arguments as `@RequestMapping` methods except for `@ModelAttribute` itself nor anything
+related to the request body.
+
+An example `@ModelAttribute` method:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@ModelAttribute
+	public void populateModel(@RequestParam String number, Model model) {
+		model.addAttribute(accountRepository.findAccount(number));
+		// add more ...
+	}
+----
+
+To add one attribute only:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@ModelAttribute
+	public Account addAccount(@RequestParam String number) {
+		return accountRepository.findAccount(number);
+	}
+----
+
+[NOTE]
+====
+When a name is not explicitly specified, a default name is chosen based on the Object
+type as explained in the Javadoc for
+{api-spring-framework}/core/Conventions.html[Conventions].
+You can always assign an explicit name by using the overloaded `addAttribute` method or
+through the name attribute on `@ModelAttribute` (for a return value).
+====
+
+Spring WebFlux, unlike Spring MVC, explicitly supports reactive types in the model,
+e.g. `Mono<Account>` or `io.reactivex.Single<Account>`. Such asynchronous model
+attributes may be transparently resolved (and the model updated) to their actual values
+at the time of `@RequestMapping` invocation, providing a `@ModelAttribute` argument is
+declared without a wrapper, for example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@ModelAttribute
+	public void addAccount(@RequestParam String number) {
+	    Mono<Account> accountMono = accountRepository.findAccount(number);
+	    model.addAttribute("account", accountMono);
+	}
+
+	@PostMapping("/accounts")
+	public String handle(@ModelAttribute Account account, BindingResult errors) {
+		// ...
+	}
+----
+
+In addition any model attributes that have a reactive type wrapper are resolved to their
+actual values (and the model updated) just prior to view rendering.
+
+`@ModelAttribute` can also be used as a method-level annotation on `@RequestMapping`
+methods in which case the return value of the `@RequestMapping` method is interpreted as a
+model attribute. This is typically not required, as it is the default behavior in HTML
+controllers, unless the return value is a `String` which would otherwise be interpreted
+as a view name. `@ModelAttribute` can also help to customize the model attribute name:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@GetMapping("/accounts/{id}")
+	@ModelAttribute("myAccount")
+	public Account handle() {
+		// ...
+		return account;
+	}
+----
+
+
 
 [[webflux-ann-initbinder]]
 === Binder Methods
@@ -1281,6 +1538,53 @@ controller-specific ``Formatter``'s:
 		// ...
 	}
 ----
+
+
+
+[[webflux-ann-controller-advice]]
+=== Controller Advice
+[.small]#<<web.adoc#mvc-ann-controller-advice,Same in Spring MVC>>#
+
+Typically `@ExceptionHandler`, `@InitBinder`, and `@ModelAttribute` methods apply within
+the `@Controller` class (or class hierarchy) they are declared in. If you want such
+methods to apply more globally, across controllers, you can declare them in a class
+marked with `@ControllerAdvice` or `@RestControllerAdvice`.
+
+`@ControllerAdvice` is marked with `@Component` which means such classes can be registered
+as Spring beans via <<core.adoc#beans-java-instantiating-container-scan,component scanning>>.
+`@RestControllerAdvice` is also a meta-annotation marked with both `@ControllerAdvice` and
+`@ResponseBody` which essentially means `@ExceptionHandler` methods are rendered to the
+response body via message conversion (vs view resolution/template rendering).
+
+On startup, the infrastructure classes for `@RequestMapping` and `@ExceptionHandler` methods
+detect Spring beans of type `@ControllerAdvice`, and then apply their methods at runtime.
+Global `@ExceptionHandler` methods (from an `@ControllerAdvice`) are applied *after* local
+ones (from the `@Controller`). By contrast global `@ModelAttribute` and `@InitBinder`
+methods are applied *before* local ones.
+
+By default `@ControllerAdvice` methods apply to every request, i.e. all controllers, but
+you can narrow that down to a subset of controllers via attributes on the annotation:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	// Target all Controllers annotated with @RestController
+	@ControllerAdvice(annotations = RestController.class)
+	public class ExampleAdvice1 {}
+
+	// Target all Controllers within specific packages
+	@ControllerAdvice("org.example.controllers")
+	public class ExampleAdvice2 {}
+
+	// Target all Controllers assignable to specific classes
+	@ControllerAdvice(assignableTypes = {ControllerInterface.class, AbstractController.class})
+	public class ExampleAdvice3 {}
+----
+
+Keep in mind the above selectors are evaluated at runtime and may negatively impact
+performance if used extensively. See the
+{api-spring-framework}/web/bind/annotation/ControllerAdvice.html[@ControllerAdvice]
+Javadoc for more details.
 
 
 

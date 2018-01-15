@@ -1881,16 +1881,13 @@ Type conversion is applied automatically if the target method parameter type is 
 
 [[mvc-ann-modelattrib-method-args]]
 ==== @ModelAttribute
+[.small]#<<web-reactive.adoc#webflux-ann-modelattrib-method-args,Same in Spring WebFlux>>#
 
-As explained in the previous section `@ModelAttribute` can be used on methods or on
-method arguments. This section explains its usage on method arguments.
-
-An `@ModelAttribute` on a method argument indicates the argument should be retrieved
-from the model. If not present in the model, the argument should be instantiated first
-and then added to the model. Once present in the model, the argument's fields should be
-populated from all request parameters that have matching names. This is known as data
-binding in Spring MVC, a very useful mechanism that saves you from having to parse each
-form field individually.
+Use the `@ModelAttribute` annotation on a method argument to access an attribute from the
+model, or have it instantiated if not present. The model attribute is also overlaid with
+values from HTTP Servlet request parameters whose names match to field names. This is
+referred to as data binding and it saves you from having to deal with parsing and
+converting individual query parameters and form fields. For example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1899,20 +1896,21 @@ form field individually.
 	public String processSubmit(**@ModelAttribute Pet pet**) { }
 ----
 
-Given the above example where can the Pet instance come from? There are several options:
+The `Pet` instance above is resolved as follows:
 
-* It may already be in the model due to use of `@SessionAttributes` -- see
-  <<mvc-ann-sessionattrib>>.
-* It may already be in the model due to an `@ModelAttribute` method in the same
-  controller -- as explained in the previous section.
-* It may be retrieved based on a URI template variable and type converter (explained in
-  more detail below).
-* It may be instantiated using its default constructor.
+* From the model if already added via <<mvc-ann-modelattrib-methods>>.
+* From the HTTP session via <<mvc-ann-sessionattributes>>.
+* From a URI path variable passed through a `Converter` (example below).
+* From the invocation of a default constructor.
+* From the invocation of a "primary constructor" with arguments matching to Servlet
+request parameters; argument names are determined via JavaBeans
+`@ConstructorProperties` or via runtime-retained parameter names in the bytecode.
 
-An `@ModelAttribute` method is a common way to retrieve an attribute from the
-database, which may optionally be stored between requests through the use of
-`@SessionAttributes`. In some cases it may be convenient to retrieve the attribute by
-using an URI template variable and a type converter. Here is an example:
+While it is common to use a <<mvc-ann-modelattrib-methods>> to populate the model with
+attributes, one other alternative is to rely on a `Converter<String, T>` in combination
+with a URI path variable convention. In the example below the model attribute name
+"account" matches the URI path variable "account" and the `Account` is loaded by passing
+the `String` account number through a registered `Converter<String, Account>`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1923,22 +1921,16 @@ using an URI template variable and a type converter. Here is an example:
 	}
 ----
 
-In this example the name of the model attribute (i.e. "account") matches the name of a
-URI template variable. If you register `Converter<String, Account>` that can turn the
-`String` account value into an `Account` instance, then the above example will work
-without the need for an `@ModelAttribute` method.
-
-The next step is data binding. The `WebDataBinder` class matches request parameter names
--- including query string parameters and form fields -- to model attribute fields by
-name. Matching fields are populated after type conversion (from String to the target
-field type) has been applied where necessary. Data binding and validation are covered in
-<<core.adoc#validation, Validation>>.
-Customizing the data binding process for a controller level is covered in
+After the model attribute instance is obtained, data binding is applied. The
+`WebDataBinder` class matches Servlet request parameter names (query parameters and form
+fields) to field names on the target Object. Matching fields are populated after type
+conversion is applied where necessary. For more on data binding (and validation) see
+<<core.adoc#validation, Validation>>. For more on customizing data binding see
 <<mvc-ann-initbinder>>.
 
-As a result of data binding there may be errors such as missing required fields or type
-conversion errors. To check for such errors add a `BindingResult` argument immediately
-following the `@ModelAttribute` argument:
+Data binding may result in errors. By default a `BindException` is raised but to check
+for such errors in the controller method, add a `BindingResult` argument immediately next
+to the `@ModelAttribute` as shown below:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1952,13 +1944,9 @@ following the `@ModelAttribute` argument:
 	}
 ----
 
-With a `BindingResult` you can check if errors were found in which case it's common to
-render the same form where the errors can be shown with the help of Spring's `<errors>`
-form tag.
-
-Note that in some cases it may be useful to gain access to an attribute in the
-model without data binding. For such cases you may inject the `Model` into the
-controller or alternatively use the `binding` flag on the annotation:
+In some cases you may want access to a model attribute without data binding. For such
+cases you can inject the `Model` into the controller and access it directly or
+alternatively set `@ModelAttribute(binding=false)` as shown below:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1980,26 +1968,10 @@ controller or alternatively use the `binding` flag on the annotation:
 	}
 ----
 
-In addition to data binding you can also invoke validation using your own custom
-validator passing the same `BindingResult` that was used to record data binding errors.
-That allows for data binding and validation errors to be accumulated in one place and
-subsequently reported back to the user:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
-	public String processSubmit(**@ModelAttribute("pet") Pet pet**, BindingResult result) {
-		new PetValidator().validate(pet, result);
-		if (result.hasErrors()) {
-			return "petForm";
-		}
-		// ...
-	}
-----
-
-Or you can have validation invoked automatically by adding the JSR-303 `@Valid`
-annotation:
+Validation can be applied automatically after data binding by adding the
+`javax.validation.Valid` annotation or Spring's `@Validated` annotation (also see
+<<core.adoc#validation-beanvalidation, Bean validation>> and
+<<core.adoc#validation, Spring validation>>). For example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -2012,9 +1984,6 @@ annotation:
 		// ...
 	}
 ----
-
-See <<core.adoc#validation-beanvalidation, Bean validation>> and
-<<core.adoc#validation, Spring validation>> for details on how to configure and use validation.
 
 
 [[mvc-multipart-forms]]
@@ -2098,29 +2067,56 @@ the method parameter:
 
 [[mvc-ann-sessionattributes]]
 ==== @SessionAttributes
+[.small]#<<web-reactive.adoc#webflux-ann-sessionattributes,Same in Spring WebFlux>>#
 
-`@SessionAttributes` is used to store model attributes in the HTTP session between
+`@SessionAttributes` is used to store model attributes in the HTTP Servlet session between
 requests. It is a type-level annotation that declares session attributes used by a
-specific handler. This will typically list the names of model attributes or types of
-model attributes which should be transparently stored in the session or some
-conversational storage, serving as form-backing beans between subsequent requests.
+specific controller. This will typically list the names of model attributes or types of
+model attributes which should be transparently stored in the session for subsequent
+requests to access.
 
-The following code snippet shows the usage of this annotation, specifying the model
-attribute name:
+For example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	@Controller
-	@RequestMapping("/editPet.do")
 	**@SessionAttributes("pet")**
 	public class EditPetForm {
 		// ...
 	}
 ----
 
+On the first request when a model attribute with the name "pet" is added to the model,
+it is automatically promoted to and saved in the HTTP Servlet session. It remains there
+until another controller method uses a `SessionStatus` method argument to clear the
+storage:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	**@SessionAttributes("pet")**
+	public class EditPetForm {
+
+		// ...
+
+		@PostMapping("/pets/{id}")
+		public String handle(Pet pet, BindingResult errors, SessionStatus status) {
+			if (errors.hasErrors) {
+				// ...
+			}
+				status.setComplete();
+				// ...
+			}
+		}
+	}
+----
+
+
 [[mvc-ann-sessionattribute]]
 ==== @SessionAttribute
+[.small]#<<web-reactive.adoc#webflux-ann-sessionattribute,Same in Spring WebFlux>>#
 
 If you need access to pre-existing session attributes that are managed globally,
 i.e. outside the controller (e.g. by a filter), and may or may not be present
@@ -2141,7 +2137,7 @@ For use cases that require adding or removing session attributes consider inject
 
 For temporary storage of model attributes in the session as part of a controller
 workflow consider using `SessionAttributes` as described in
-<<mvc-ann-sessionattrib>>.
+<<mvc-ann-sessionattributes>>.
 
 
 [[mvc-ann-requestattrib]]
@@ -2569,69 +2565,74 @@ customized through `jsonpParameterNames` property.
 
 [[mvc-ann-modelattrib-methods]]
 === Model Methods
+[.small]#<<web-reactive.adoc#webflux-ann-modelattrib-methods,Same in Spring WebFlux>>#
 
-The `@ModelAttribute` annotation can be used on methods or on method arguments. This
-section explains its usage on methods while the next section explains its usage on
-method arguments.
+The `@ModelAttribute` annotation can be used on `@RequestMapping`
+<<mvc-ann-modelattrib-method-args,method arguments>> to create or access an Object
+from the model and bind it to the request. `@ModelAttribute` can also be used as a
+method-level annotation on controller methods whose purpose is not to handle requests
+but to add commonly needed model attributes prior to request handling.
 
-An `@ModelAttribute` on a method indicates the purpose of that method is to add one or
-more model attributes. Such methods support the same argument types as `@RequestMapping`
-methods but cannot be mapped directly to requests. Instead `@ModelAttribute` methods in
-a controller are invoked before `@RequestMapping` methods, within the same controller. A
-couple of examples:
+A controller can have any number of `@ModelAttribute` methods. All such methods are
+invoked before `@RequestMapping` methods in the same controller. A `@ModelAttribute`
+method can also be shared across controllers via `@ControllerAdvice`. See the section on
+<<mvc-ann-controller-advice>> for more details.
+
+`@ModelAttribute` methods have flexible method signatures. They support many of the same
+arguments as `@RequestMapping` methods except for `@ModelAttribute` itself nor anything
+related to the request body.
+
+An example `@ModelAttribute` method:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	// Add one attribute
-	// The return value of the method is added to the model under the name "account"
-	// You can customize the name via @ModelAttribute("myAccount")
-
-	@ModelAttribute
-	public Account addAccount(@RequestParam String number) {
-		return accountManager.findAccount(number);
-	}
-
-	// Add multiple attributes
-
 	@ModelAttribute
 	public void populateModel(@RequestParam String number, Model model) {
-		model.addAttribute(accountManager.findAccount(number));
+		model.addAttribute(accountRepository.findAccount(number));
 		// add more ...
 	}
 ----
 
-`@ModelAttribute` methods are used to populate the model with commonly needed attributes
-for example to fill a drop-down with states or with pet types, or to retrieve a command
-object like Account in order to use it to represent the data on an HTML form. The latter
-case is further discussed in the next section.
+To add one attribute only:
 
-Note the two styles of `@ModelAttribute` methods. In the first, the method adds an
-attribute implicitly by returning it. In the second, the method accepts a `Model` and
-adds any number of model attributes to it. You can choose between the two styles
-depending on your needs.
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@ModelAttribute
+	public Account addAccount(@RequestParam String number) {
+		return accountRepository.findAccount(number);
+	}
+----
 
-A controller can have any number of `@ModelAttribute` methods. All such methods are
-invoked before `@RequestMapping` methods of the same controller.
-
-`@ModelAttribute` methods can also be defined in an ``@ControllerAdvice``-annotated class
-and such methods apply to many controllers. See the <<mvc-ann-controller-advice>> section
-for more details.
-
-[TIP]
+[NOTE]
 ====
-What happens when a model attribute name is not explicitly specified? In such cases a
-default name is assigned to the model attribute based on its type. For example if the
-method returns an object of type `Account`, the default name used is "account". You can
-change that through the value of the `@ModelAttribute` annotation. If adding attributes
-directly to the `Model`, use the appropriate overloaded `addAttribute(..)` method -
-i.e., with or without an attribute name.
+When a name is not explicitly specified, a default name is chosen based on the Object
+type as explained in the Javadoc for
+{api-spring-framework}/core/Conventions.html[Conventions].
+You can always assign an explicit name by using the overloaded `addAttribute` method or
+through the name attribute on `@ModelAttribute` (for a return value).
 ====
 
-The `@ModelAttribute` annotation can be used on `@RequestMapping` methods as well. In
-that case the return value of the `@RequestMapping` method is interpreted as a model
-attribute rather than as a view name. The view name is then derived based on view name
-conventions instead, much like for methods returning `void` -- see <<mvc-coc-r2vnt>>.
+`@ModelAttribute` can also be used as a method-level annotation on `@RequestMapping`
+methods in which case the return value of the `@RequestMapping` method is interpreted as a
+model attribute. This is typically not required, as it is the default behavior in HTML
+controllers, unless the return value is a `String` which would otherwise be interpreted
+as a view name (also see <<mvc-coc-r2vnt>>). `@ModelAttribute` can also help to customize
+the model attribute name:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@GetMapping("/accounts/{id}")
+	@ModelAttribute("myAccount")
+	public Account handle() {
+		// ...
+		return account;
+	}
+----
+
+
 
 
 
@@ -2696,40 +2697,48 @@ controller-specific ``Formatter``'s:
 
 [[mvc-ann-controller-advice]]
 === Controller Advice
+[.small]#<<web-reactive.adoc#webflux-ann-controller-advice,Same in Spring WebFlux>>#
 
-The `@ControllerAdvice` annotation is a component annotation allowing implementation
-classes to be auto-detected through classpath scanning. It is automatically enabled when
-using the MVC namespace or the MVC Java config.
+Typically `@ExceptionHandler`, `@InitBinder`, and `@ModelAttribute` methods apply within
+the `@Controller` class (or class hierarchy) they are declared in. If you want such
+methods to apply more globally, across controllers, you can declare them in a class
+marked with `@ControllerAdvice` or `@RestControllerAdvice`.
 
-Classes annotated with `@ControllerAdvice` can contain `@ExceptionHandler`,
-`@InitBinder`, and `@ModelAttribute` annotated methods, and these methods will apply to
-`@RequestMapping` methods across all controller hierarchies as opposed to the controller
-hierarchy within which they are declared.
+`@ControllerAdvice` is marked with `@Component` which means such classes can be registered
+as Spring beans via <<core.adoc#beans-java-instantiating-container-scan,component scanning>>.
+`@RestControllerAdvice` is also a meta-annotation marked with both `@ControllerAdvice` and
+`@ResponseBody` which essentially means `@ExceptionHandler` methods are rendered to the
+response body via message conversion (vs view resolution/template rendering).
 
-`@RestControllerAdvice` is an alternative where `@ExceptionHandler` methods
-assume `@ResponseBody` semantics by default.
+On startup, the infrastructure classes for `@RequestMapping` and `@ExceptionHandler` methods
+detect Spring beans of type `@ControllerAdvice`, and then apply their methods at runtime.
+Global `@ExceptionHandler` methods (from an `@ControllerAdvice`) are applied *after* local
+ones (from the `@Controller`). By contrast global `@ModelAttribute` and `@InitBinder`
+methods are applied *before* local ones.
 
-Both `@ControllerAdvice` and `@RestControllerAdvice` can target a subset of controllers:
+By default `@ControllerAdvice` methods apply to every request, i.e. all controllers, but
+you can narrow that down to a subset of controllers via attributes on the annotation:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	// Target all Controllers annotated with @RestController
 	@ControllerAdvice(annotations = RestController.class)
-	public class AnnotationAdvice {}
+	public class ExampleAdvice1 {}
 
 	// Target all Controllers within specific packages
 	@ControllerAdvice("org.example.controllers")
-	public class BasePackageAdvice {}
+	public class ExampleAdvice2 {}
 
 	// Target all Controllers assignable to specific classes
 	@ControllerAdvice(assignableTypes = {ControllerInterface.class, AbstractController.class})
-	public class AssignableTypesAdvice {}
+	public class ExampleAdvice3 {}
 ----
 
-See the
+Keep in mind the above selectors are evaluated at runtime and may negatively impact
+performance if used extensively. See the
 {api-spring-framework}/web/bind/annotation/ControllerAdvice.html[@ControllerAdvice]
-javadoc for more details.
+Javadoc for more details.
 
 
 
