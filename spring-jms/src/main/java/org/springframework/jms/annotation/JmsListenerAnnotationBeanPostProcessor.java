@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -219,7 +220,7 @@ public class JmsListenerAnnotationBeanPostProcessor
 	@Override
 	public Object postProcessAfterInitialization(final Object bean, String beanName) throws BeansException {
 		if (!this.nonAnnotatedClasses.contains(bean.getClass())) {
-			Class<?> targetClass = AopUtils.getTargetClass(bean);
+			Class<?> targetClass = AopProxyUtils.ultimateTargetClass(bean);
 			Map<Method, Set<JmsListener>> annotatedMethods = MethodIntrospector.selectMethods(targetClass,
 					(MethodIntrospector.MetadataLookup<Set<JmsListener>>) method -> {
 						Set<JmsListener> listenerMethods = AnnotatedElementUtils.getMergedRepeatableAnnotations(
