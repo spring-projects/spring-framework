@@ -859,6 +859,7 @@ request with a simple request parameter.
 
 [[mvc-multipart]]
 === Multipart resolver
+[.small]#<<web-reactive.adoc#webflux-multipart,Same in Spring WebFlux>>#
 
 `MultipartResolver` from the `org.springframework.web.multipart` package is a strategy
 for parsing multipart requests including file uploads. There is one implementation
@@ -1797,9 +1798,9 @@ The following code snippet shows the usage:
 	}
 ----
 
-Parameters using this annotation are required by default, but you can specify that a
-parameter is optional by setting ``@RequestParam``'s `required` flag to `false` or
-declare the argument with a `java.util.Optional` wrapper.
+Method parameters using this annotation are required by default, but you can specify that
+a method parameter is optional by setting ``@RequestParam``'s `required` flag to `false`
+or by declaring the argument with an `java.util.Optional` wrapper.
 
 Type conversion is applied automatically if the target method parameter type is not
 `String`. See <<mvc-ann-typeconversion>>.
@@ -2192,6 +2193,7 @@ Therefore the use of flash attributes is recommended mainly for redirect scenari
 
 [[mvc-multipart-forms]]
 ==== Multipart
+[.small]#<<web-reactive.adoc#webflux-multipart-forms,Same in Spring WebFlux>>#
 
 After a `MultipartResolver` has been <<mvc-multipart,enabled>>, the content of POST
 requests with "multipart/form-data" is parsed and accessible as regular request
@@ -2262,7 +2264,7 @@ public class FileUploadController {
 ----
 
 Multipart requests can also be submitted from non-browser clients in a RESTful service
-scenario with more types of content. For example a file along with JSON:
+scenario. For example a file along with JSON:
 
 [literal]
 [subs="verbatim,quotes"]
@@ -2293,12 +2295,10 @@ probably want it deserialized from JSON (similar to `@RequestBody`). Use the
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@PostMapping("/someUrl")
-	public String onSubmit(**@RequestPart("meta-data") MetaData metadata,
+	@PostMapping("/")
+	public String handle(**@RequestPart("meta-data") MetaData metadata,
 			@RequestPart("file-data") MultipartFile file**) {
-
 		// ...
-
 	}
 ----
 

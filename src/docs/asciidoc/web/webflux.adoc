@@ -372,56 +372,115 @@ This can be automated through the use of
 [[webflux-web-handler-api]]
 === WebHandler API
 
-`HttpHandler` is the basis for running on different servers. On that base the WebHandler
-API provides a slightly higher level processing chain of
-exception handlers
-({api-spring-framework}/web/server/WebExceptionHandler.html[WebExceptionHandler]), filters
-({api-spring-framework}/web/server/WebFilter.html[WebFilter]), and a target handler
-({api-spring-framework}/web/server/WebHandler.html[WebHandler]).
+`HttpHandler` is the lowest level contract for running on different HTTP servers.
+On top of that foundation, the WebHandler API provides a slightly higher level, but
+still general purpose, set of components that form a chain of
+{api-spring-framework}/web/server/WebExceptionHandler.html[WebExceptionHandler's],
+{api-spring-framework}/web/server/WebFilter.html[WebFilter's], and a
+{api-spring-framework}/web/server/WebHandler.html[WebHandler].
 
-All components work on `ServerWebExchange` -- a container for the HTTP request and
-response that also adds request attributes, session attributes, access to form data,
-multipart data, and more.
+All WebHandler API components take `ServerWebExchange` as input which goes beyond
+`ServerHttpRequest` and `ServerHttpResponse` to provide extra building blocks for
+use in web applications such as request attributes, session attributes, access to parsed
+form data, multipart data, and more.
 
-The processing chain can be put together with `WebHttpHandlerBuilder` which builds an
-`HttpHandler` that in turn can be run with a <<webflux-httphandler,server adapter>>.
-To use the builder either add components individually or point to an `ApplicationContext`
-to have the following detected:
+`WebHttpHandlerBuilder` is used to assemble a request processing chain. You can use
+methods on the builder to add components manually, or more likely have them detected from
+a Spring `ApplicationContext`, with the resulting `HttpHandler` ready to run via a
+<<webflux-httphandler,server adapter>>:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+ApplicationContext context = ...
+HttpHandler handler = WebHttpHandlerBuilder.applicationContext(context).build()
+----
+
+The table below lists the components that `WebHttpHandlerBuilder` detects:
 
 [cols="2,2,1,3", options="header"]
 |===
 |Bean name|Bean type|Count|Description
 
+|<any>
+|`WebExceptionHandler`
+|0..N
+|Exception handlers to apply after all ``WebFilter``'s and the target `WebHandler`.
+
+|<any>
+|`WebFilter`
+|0..N
+|Filters to invoke before and after the target `WebHandler`.
+
 |"webHandler"
-|WebHandler
+|`WebHandler`
 |1
-|Target handler after filters
-
-|<any>
-|WebFilter
-|0..N
-|Filters
-
-|<any>
-|WebExceptionHandler
-|0..N
-|Exception handlers after filter chain
+|The handler for the request.
 
 |"webSessionManager"
-|WebSessionManager
+|`WebSessionManager`
 |0..1
-|Custom session manager; `DefaultWebSessionManager` by default
+|The manager for ``WebSession``'s exposed through a method on `ServerWebExchange`.
+
+`DefaultWebSessionManager` by default.
 
 |"serverCodecConfigurer"
-|ServerCodecConfigurer
+|`ServerCodecConfigurer`
 |0..1
-|Custom form and multipart data decoders; `ServerCodecConfigurer.create()` by default
+|For access to ``HttpMessageReader``'s for parsing form data and multipart data that's
+then exposed through methods on `ServerWebExchange`.
+
+`ServerCodecConfigurer.create()` by default.
 
 |"localeContextResolver"
-|LocaleContextResolver
+|`LocaleContextResolver`
 |0..1
-|Custom resolver for `LocaleContext`; `AcceptHeaderLocaleContextResolver` by default
+|The resolver for `LocaleContext` exposed through a method on `ServerWebExchange`.
+
+`AcceptHeaderLocaleContextResolver` by default.
 |===
+
+
+[[webflux-form-data]]
+==== Form Reader
+
+`ServerWebExchange` exposes the following method for access to form data:
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+Mono<MultiValueMap<String, String>> getFormData();
+----
+
+The `DefaultServerWebExchange` uses the configured `HttpMessageReader` to parse form data
+("application/x-www-form-urlencoded") into a `MultiValueMap`. By default
+`FormHttpMessageReader` is configured for use via the `ServerCodecConfigurer` bean
+(see <<webflux-web-handler-api,Web Handler API>>).
+
+
+[[webflux-multipart]]
+==== Multipart Reader
+[.small]#<<web.adoc#mvc-multipart,Same in Spring MVC>>#
+
+`ServerWebExchange` exposes the following method for access to multipart data:
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+Mono<MultiValueMap<String, Part>> getMultipartData();
+----
+
+The `DefaultServerWebExchange` uses the configured
+`HttpMessageReader<MultiValueMap<String, Part>>` to parse "multipart/form-data" content
+into a `MultiValueMap`. At present
+https://github.com/synchronoss/nio-multipart[Synchronoss NIO Multipart] is the only 3rd
+party library supported, and the only library we know for non-blocking parsing of
+multipart requests. It is enabled through the `ServerCodecConfigurer` bean
+(see <<webflux-web-handler-api,Web Handler API>>).
+
+To parse multipart data in streaming fashion, use the `Flux<Part>` returned from an
+`HttpMessageReader<Part>` instead. For example in an annotated controller use of
+`@RequestPart` implies Map-like access to individual parts by name, and hence requires
+parsing multipart data in full. By contrast `@RequestBody` can be used to decode the
+content to `Flux<Part>` without collecting to a `MultiValueMap`.
 
 
 
@@ -987,7 +1046,7 @@ Supports reactive types.
 
 |`@RequestPart`
 |For access to a part in  a "multipart/form-data" request. Supports reactive types.
-// TODO: See <<webflux-multipart-forms-non-browsers>> and <<webflux-multipart>>.
+See <<webflux-multipart-forms>> and <<webflux-multipart>>.
 
 |`java.util.Map`, `org.springframework.ui.Model`, `org.springframework.ui.ModelMap`
 |For access to the model that is used in HTML controllers and exposed to templates as
@@ -1127,10 +1186,8 @@ can be customized through a `WebDataBinder`, see <<mvc-ann-initbinder>>, or by r
 ==== @RequestParam
 [.small]#<<web.adoc#mvc-ann-requestparam,Same in Spring MVC>>#
 
-Use the `@RequestParam` annotation to bind Servlet request parameters (i.e. query
-parameters or form data) to a method argument in a controller.
-
-The following code snippet shows the usage:
+Use the `@RequestParam` annotation to bind query parameters to a method argument in a
+controller. The following code snippet shows the usage:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1153,16 +1210,25 @@ The following code snippet shows the usage:
 	}
 ----
 
-Parameters using this annotation are required by default, but you can specify that a
-parameter is optional by setting ``@RequestParam``'s `required` flag to `false` or
-declare the argument with a `java.util.Optional` wrapper.
+[TIP]
+====
+Unlike the Servlet API "request paramater" concept that conflate query parameters, form
+data, and multiparts into one, in WebFlux each is accessed individually through the
+`ServerWebExchange`. While `@RequestParam` binds to query parameters only, you can
+use data binding to apply query paramerters, form data, and multiparts to a
+<<webflux-ann-modelattrib-method-args,command object>>.
+====
+
+Method parameters using using the `@RequestParam` annotation are required by default, but
+you can specify that a method parameter is optional by setting ``@RequestParam``'s
+`required` flag to `false` or by declaring the argument with an `java.util.Optional`
+wrapper.
 
 Type conversion is applied automatically if the target method parameter type is not
 `String`. See <<mvc-ann-typeconversion>>.
 
 When an `@RequestParam` annotation is declared as `Map<String, String>` or
-`MultiValueMap<String, String>` argument, the map is populated with all request
-parameters.
+`MultiValueMap<String, String>` argument, the map is populated with all query parameters.
 
 Note that use of `@RequestParam` is optional, e.g. to set its attributes.
 By default any argument that is a simple value type, as determined by
@@ -1435,6 +1501,87 @@ access pre-existing request attributes created earlier, e.g. by a `WebFilter`:
 	}
 ----
 
+
+[[webflux-multipart-forms]]
+==== Multipart
+[.small]#<<web.adoc#mvc-multipart-forms,Same in Spring MVC>>#
+
+As explained in <<webflux-multipart>>, `ServerWebExchange` provides access to multipart
+content. The best way to handle a file upload form (e.g. from a browser) in a controller
+is through data binding to a <<webflux-ann-modelattrib-method-args,command object>>:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+class MyForm {
+
+	private String name;
+
+	private MultipartFile file;
+
+	// ...
+
+}
+
+@Controller
+public class FileUploadController {
+
+	@PostMapping("/form")
+	public String handleFormUpload(MyForm form, BindingResult errors) {
+		// ...
+	}
+
+}
+----
+
+Multipart requests can also be submitted from non-browser clients in a RESTful service
+scenario. For example a file along with JSON:
+
+[literal]
+[subs="verbatim,quotes"]
+----
+POST /someUrl
+Content-Type: multipart/mixed
+
+--edt7Tfrdusa7r3lNQc79vXuhIIMlatb7PQg7Vp
+Content-Disposition: form-data; name="meta-data"
+Content-Type: application/json; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+{
+	"name": "value"
+}
+--edt7Tfrdusa7r3lNQc79vXuhIIMlatb7PQg7Vp
+Content-Disposition: form-data; name="file-data"; filename="file.properties"
+Content-Type: text/xml
+Content-Transfer-Encoding: 8bit
+... File Data ...
+----
+
+You can access the "meta-data" part with `@RequestPart` which would deserialize it from
+JSON (similar to `@RequestBody`) through one of the configured <<webflux-codecs>>:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@PostMapping("/")
+	public String handle(**@RequestPart("meta-data") MetaData metadata,
+			@RequestPart("file-data") FilePart file**) {
+		// ...
+	}
+----
+
+To access multipart data sequentially, in streaming fashion, use `@RequestBody` with
+`Flux<Part>` instead. For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@PostMapping("/")
+	public String handle(**@RequestBody Flux<Part> parts**) {
+		// ...
+	}
+----
 
 
 [[webflux-ann-modelattrib-methods]]
