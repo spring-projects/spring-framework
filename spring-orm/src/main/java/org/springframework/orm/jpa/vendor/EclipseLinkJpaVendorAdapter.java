@@ -81,6 +81,7 @@ public class EclipseLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		if (isShowSql()) {
 			jpaProperties.put(PersistenceUnitProperties.CATEGORY_LOGGING_LEVEL_ +
 					org.eclipse.persistence.logging.SessionLog.SQL, Level.FINE.toString());
+			jpaProperties.put(PersistenceUnitProperties.LOGGING_PARAMETERS, Boolean.TRUE.toString());
 		}
 
 		return jpaProperties;
