@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.orm.jpa.vendor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
-
 import javax.persistence.EntityManager;
 import javax.persistence.spi.PersistenceProvider;
 
@@ -31,7 +30,8 @@ import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Eclipse
- * Persistence Services (EclipseLink). Developed and tested against EclipseLink 2.4.
+ * Persistence Services (EclipseLink). Developed and tested against EclipseLink 2.7;
+ * backwards-compatible with EclipseLink 2.5 and 2.6 at runtime.
  *
  * <p>Exposes EclipseLink's persistence provider and EntityManager extension interface,
  * and adapts {@link AbstractJpaVendorAdapter}'s common configuration settings.
