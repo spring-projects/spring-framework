@@ -858,52 +858,40 @@ request with a simple request parameter.
 
 
 [[mvc-multipart]]
-=== Multipart requests
+=== Multipart resolver
 
-Spring has built-in support for multipart requests including file uploads.
-You enable this multipart support with pluggable `MultipartResolver` objects, defined in the
-`org.springframework.web.multipart` package. Spring provides one `MultipartResolver`
-implementation for use with http://jakarta.apache.org/commons/fileupload[__Commons
-FileUpload__] and another for use with Servlet 3.0 multipart request parsing.
+`MultipartResolver` from the `org.springframework.web.multipart` package is a strategy
+for parsing multipart requests including file uploads. There is one implementation
+based on http://jakarta.apache.org/commons/fileupload[__Commons FileUpload__] and another
+based on Servlet 3.0 multipart request parsing.
 
-By default, Spring does no multipart handling, because some developers want to handle
-multiparts themselves. You enable Spring multipart handling by adding a multipart
-resolver to the web application's context. Each request is inspected to see if it
-contains a multipart. If no multipart is found, the request continues as expected. If a
-multipart is found in the request, the `MultipartResolver` that has been declared in
-your context is used. After that, the multipart attribute in your request is treated
-like any other attribute.
+To enable multipart handling, you need declare a `MultipartResolver` bean in your
+`DispatcherServlet` Spring configuration with the name "multipartResolver".
+The `DispatcherServlet` detects it and applies it to incoming request. When a POST with
+content-type of "multipart/form-data" is received, the resolver parses the content and
+wraps the current `HttpServletRequest` as `MultipartHttpServletRequest` in order to
+provide access to resolved parts in addition to exposing them as request parameters.
 
 
 [[mvc-multipart-resolver-commons]]
-==== __Commons FileUpload__
+==== Apache FileUpload
 
-To use Apache Commons FileUpload, configure a bean of type `CommonsMultipartResolver` with
-the name `multipartResolver`. Of course you also need to have `commons-fileupload` as a
-dependency on your classpath.
-
-When the Spring `DispatcherServlet` detects a multipart request, it activates the
-resolver that has been declared in your context and hands over the request. The resolver
-then wraps the current `HttpServletRequest` into a `MultipartHttpServletRequest` that
-supports multipart file uploads. Using the `MultipartHttpServletRequest`, you can get
-information about the multiparts contained by this request and actually get access to
-the multipart files themselves in your controllers.
+To use Apache Commons FileUpload, simply configure a bean of type
+`CommonsMultipartResolver` with the name `multipartResolver`. Of course you also need to
+have `commons-fileupload` as a dependency on your classpath.
 
 
 [[mvc-multipart-resolver-standard]]
-==== __Servlet 3.0__
+==== Servlet 3.0
 
-In order to use Servlet 3.0 based multipart parsing, you need to mark the
-`DispatcherServlet` with a `"multipart-config"` section in `web.xml`, or with a
-`javax.servlet.MultipartConfigElement` in programmatic Servlet registration, or in case
-of a custom Servlet class possibly with a `javax.servlet.annotation.MultipartConfig`
-annotation on your Servlet class. Configuration settings such as maximum sizes or
-storage locations need to be applied at that Servlet registration level as Servlet 3.0
-does not allow for those settings to be done from the MultipartResolver.
+To use Servlet 3.0 multipart support, you need to register the `DispatcherServlet`
+accordingly. In programmatic Servlet registration, set a `MultipartConfigElement` on the
+Servlet registration. In `web.xml`, add a `"<multipart-config>"` section. Configuration
+settings such as maximum sizes or storage locations need to be applied at this level
+since Servlet 3.0 API does not make it possible for the `MultipartResolver` to do so.
 
-Once Servlet 3.0 multipart parsing has been enabled in one of the above mentioned ways
-you can add a bean of type `StandardServletMultipartResolver` and with the name
-`multipartResolver` to your Spring configuration.
+Once the Servlet 3.0 configuration is in place, simply add a bean of type
+`StandardServletMultipartResolver` with the name `multipartResolver`.
 
 
 
@@ -1593,6 +1581,9 @@ Java 8+: `java.time.ZoneId`
 |For access to Servlet request parameters. Parameter values are converted to the declared
 method argument type. See <<mvc-ann-requestparam>>.
 
+Note that use of `@RequestParam` is optional, e.g. to set its attributes.
+See "Any other argument" further below in this table.
+
 |`@RequestHeader`
 |For access to request headers. Header values are converted to the declared method argument
 type. See <<mvc-ann-requestheader>>.
@@ -1611,46 +1602,55 @@ See <<mvc-ann-httpentity>>.
 
 |`@RequestPart`
 |For access to a part in  a "multipart/form-data" request.
-See <<mvc-multipart-forms-non-browsers>> and <<mvc-multipart>>.
+See <<mvc-multipart-forms>>.
 
 |`java.util.Map`, `org.springframework.ui.Model`, `org.springframework.ui.ModelMap`
-|For access and updates of the implicit model that is exposed to the web view.
+|For access to the model that is used in HTML controllers and exposed to templates as
+part of view rendering.
 
 |`RedirectAttributes`
 |Specify attributes to use in case of a redirect -- i.e. to be appended to the query
 string, and/or flash attributes to be stored temporarily until the request after redirect.
 See <<mvc-redirecting-passing-data>> and <<mvc-flash-attributes>>.
 
-|Command or form object (with optional `@ModelAttribute`)
-|Command object whose properties to bind to request parameters -- via setters or directly to
-fields, with customizable type conversion, depending on `@InitBinder` methods and/or the
-HandlerAdapter configuration (see the `webBindingInitializer` property on
-`RequestMappingHandlerAdapter`).
+|`@ModelAttribute`
+|For access to an existing attribute in the model (instantiated if not present) with
+data binding and validation applied. See <<mvc-ann-modelattrib-method-args>> as well as
+<<mvc-ann-modelattrib-methods>> and <<mvc-ann-initbinder>>.
 
-Command objects along with their validation results are exposed as model attributes, by
-default using the command class name - e.g. model attribute "orderAddress" for a command
-object of type "some.package.OrderAddress". `@ModelAttribute` can be used to customize the
-model attribute name.
+Note that use of `@ModelAttribute` is optional, e.g. to set its attributes.
+See "Any other argument" further below in this table.
 
 |`Errors`, `BindingResult`
-|Validation results for the command/form object data binding; this argument must be
-declared immediately after the command/form object in the controller method signature.
+|For access to errors from the data binding and validation applied to a command object;
+this argument must be declared immediately after a command object (i.e.
+`@ModelAttribute` argument). If this is not declared in the controller method signature,
+errors result in a `BindException`. See <<mvc-ann-modelattrib-method-args>> for more
+details.
 
-|`SessionStatus`
+|`SessionStatus` + class-level `@SessionAttributes`
 |For marking form processing complete which triggers cleanup of session attributes
-declared through a class-level `@SessionAttributes` annotation.
+declared through a class-level `@SessionAttributes` annotation. See
+<<mvc-ann-sessionattributes>> for more details.
 
 |`UriComponentsBuilder`
 |For preparing a URL relative to the current request's host, port, scheme, context path, and
 the literal  part of the servlet mapping also taking into account `Forwarded` and
-`X-Forwarded-*` headers.
+`X-Forwarded-*` headers. See <<mvc-uri-building>>.
 
 |`@SessionAttribute`
 |For access to any session attribute; in contrast to model attributes stored in the session
-as a result of a class-level `@SessionAttributes` declaration.
+as a result of a class-level `@SessionAttributes` declaration. See
+<<mvc-ann-sessionattribute>> for more details.
 
 |`@RequestAttribute`
-|For access to request attributes.
+|For access to request attributes. See <<mvc-ann-requestattrib>> for more details.
+
+|Any other argument
+|If a method argument is not matched to any of the above, by default it is resolved as
+an `@RequestParam` if it is a simple type, as determined by
+{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty],
+or as an `@ModelAttribute` otherwise.
 |===
 
 
@@ -1690,6 +1690,13 @@ programmatically enrich the model by declaring a `Model` argument (see above).
 |`java.util.Map`, `org.springframework.ui.Model`
 |Attributes to be added to the implicit model with the view name implicitly determined
 through a `RequestToViewNameTranslator`.
+
+|`@ModelAttribute`
+|An attribute to be added to the model with the view name implicitly determined through
+a `RequestToViewNameTranslator`.
+
+Note that `@ModelAttribute` is optional. See "Any other return value" further below in
+this table.
 
 |`ModelAndView` object
 |The view and model attributes to use, and optionally a response status.
@@ -1735,11 +1742,13 @@ completion of each write.
 
 See <<mvc-ann-async-reactive-types>>.
 
-|Any other return type
-|A single model attribute to be added to the implicit model with the view name implicitly
-determined through a `RequestToViewNameTranslator`; the attribute name may be specified
-through a method-level `@ModelAttribute` or otherwise a name is selected based on the
-class name of the return type.
+|Any other return value
+|If a return value is not matched to any of the above, by default it is treated as a view
+name, if it is `String` or `void` (default view name selection via
+`RequestToViewNameTranslator` applies); or as a model attribute to be added to the model,
+unless it is a simple type, as determined by
+{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty]
+in which case it remains unresolved.
 |===
 
 
@@ -1798,6 +1807,12 @@ Type conversion is applied automatically if the target method parameter type is 
 When an `@RequestParam` annotation is declared as `Map<String, String>` or
 `MultiValueMap<String, String>` argument, the map is populated with all request
 parameters.
+
+Note that use of `@RequestParam` is optional, e.g. to set its attributes.
+By default any argument that is a simple value type, as determined by
+{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty],
+and is not resolved by any other argument resolver, is treated as if it was annotated
+with `@RequestParam`.
 
 
 [[mvc-ann-requestheader]]
@@ -1985,84 +2000,12 @@ Validation can be applied automatically after data binding by adding the
 	}
 ----
 
+Note that use of `@ModelAttribute` is optional, e.g. to set its attributes.
+By default any argument that is not a simple value type, as determined by
+{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty],
+and is not resolved by any other argument resolver, is treated as if it was annotated
+with `@ModelAttribute`.
 
-[[mvc-multipart-forms]]
-==== File upload
-
-After the `MultipartResolver` completes its job, the request is processed like any
-other. First, create a form with a file input that will allow the user to upload a form.
-The encoding attribute ( `enctype="multipart/form-data"`) lets the browser know how to
-encode the form as multipart request:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<html>
-		<head>
-			<title>Upload a file please</title>
-		</head>
-		<body>
-			<h1>Please upload a file</h1>
-			<form method="post" action="/form" enctype="multipart/form-data">
-				<input type="text" name="name"/>
-				<input type="file" name="file"/>
-				<input type="submit"/>
-			</form>
-		</body>
-	</html>
-----
-
-The next step is to create a controller that handles the file upload. This controller is
-very similar to a <<mvc-ann-controller,normal annotated `@Controller`>>, except that we
-use `MultipartHttpServletRequest` or `MultipartFile` in the method parameters:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	@Controller
-	public class FileUploadController {
-
-		@PostMapping("/form")
-		public String handleFormUpload(@RequestParam("name") String name,
-				@RequestParam("file") MultipartFile file) {
-
-			if (!file.isEmpty()) {
-				byte[] bytes = file.getBytes();
-				// store the bytes somewhere
-				return "redirect:uploadSuccess";
-			}
-
-			return "redirect:uploadFailure";
-		}
-
-	}
-----
-
-Note how the `@RequestParam` method parameters map to the input elements declared in the
-form. In this example, nothing is done with the `byte[]`, but in practice you can save
-it in a database, store it on the file system, and so on.
-
-When using Servlet 3.0 multipart parsing you can also use `javax.servlet.http.Part` for
-the method parameter:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	@Controller
-	public class FileUploadController {
-
-		@PostMapping("/form")
-		public String handleFormUpload(@RequestParam("name") String name,
-				@RequestParam("file") Part file) {
-
-			InputStream inputStream = file.getInputStream();
-			// store bytes from uploaded file somewhere
-
-			return "redirect:uploadSuccess";
-		}
-
-	}
-----
 
 
 [[mvc-ann-sessionattributes]]
@@ -2142,14 +2085,16 @@ workflow consider using `SessionAttributes` as described in
 
 [[mvc-ann-requestattrib]]
 ==== @RequestAttribute
+[.small]#<<web-reactive.adoc#webflux-ann-requestattrib,Same in Spring WebFlux>>#
 
 Similar to `@SessionAttribute` the `@RequestAttribute` annotation can be used to
-access pre-existing request attributes created by a filter or interceptor:
+access pre-existing request attributes created earlier, e.g. by a Servlet `Filter`
+or `HandlerInterceptor`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping("/")
+	@GetMapping("/")
 	public String handle(**@RequestAttribute** Client client) {
 		// ...
 	}
@@ -2245,14 +2190,79 @@ Therefore the use of flash attributes is recommended mainly for redirect scenari
 ****
 
 
-[[mvc-multipart-forms-non-browsers]]
-==== @RequestPart
+[[mvc-multipart-forms]]
+==== Multipart
+
+After a `MultipartResolver` has been <<mvc-multipart,enabled>>, the content of POST
+requests with "multipart/form-data" is parsed and accessible as regular request
+parameters. In the example below we access one regular form field and one uploaded
+file:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Controller
+public class FileUploadController {
+
+	@PostMapping("/form")
+	public String handleFormUpload(@RequestParam("name") String name,
+			@RequestParam("file") MultipartFile file) {
+
+		if (!file.isEmpty()) {
+			byte[] bytes = file.getBytes();
+			// store the bytes somewhere
+			return "redirect:uploadSuccess";
+		}
+
+		return "redirect:uploadFailure";
+	}
+
+}
+----
+
+[NOTE]
+====
+When using Servlet 3.0 multipart parsing you can also use `javax.servlet.http.Part` as
+a method argument instead of Spring's `MultipartFile`.
+====
+
+Multipart content can also be used as part of data binding to a
+<<mvc-ann-modelattrib-method-args,command object>>. For example the above form field
+and file could have been fields on a form object:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+class MyForm {
+
+	private String name;
+
+	private MultipartFile file;
+
+	// ...
+
+}
+
+@Controller
+public class FileUploadController {
+
+	@PostMapping("/form")
+	public String handleFormUpload(MyForm form, BindingResult errors) {
+
+		if (!form.getFile().isEmpty()) {
+			byte[] bytes = form.getFile().getBytes();
+			// store the bytes somewhere
+			return "redirect:uploadSuccess";
+		}
+
+		return "redirect:uploadFailure";
+	}
+
+}
+----
 
 Multipart requests can also be submitted from non-browser clients in a RESTful service
-scenario. All of the above examples and configuration apply here as well. However,
-unlike browsers that typically submit files and simple form fields, a programmatic
-client can also send more complex data of a specific content type -- for example a
-multipart request with a file and second part with JSON formatted data:
+scenario with more types of content. For example a file along with JSON:
 
 [literal]
 [subs="verbatim,quotes"]
@@ -2275,17 +2285,10 @@ Content-Transfer-Encoding: 8bit
 ... File Data ...
 ----
 
-You could access the part named "meta-data" with a `@RequestParam("meta-data") String
-metadata` controller method argument. However, you would probably prefer to accept a
-strongly typed object initialized from the JSON formatted data in the body of the
-request part, very similar to the way `@RequestBody` converts the body of a
-non-multipart request to a target object with the help of an
-<<integration.adoc#rest-message-conversion,HttpMessageConverter>>.
-
-You can use the `@RequestPart` annotation instead of the `@RequestParam` annotation for
-this purpose. It allows you to have the content of a specific multipart passed through
-an `HttpMessageConverter` taking into consideration the `'Content-Type'` header of the
-multipart:
+You can access the "meta-data" part with `@RequestParam` as a `String` but you'll
+probably want it deserialized from JSON (similar to `@RequestBody`). Use the
+`@RequestPart` annotation to access a multipart after converting it with an
+<<integration.adoc#rest-message-conversion,HttpMessageConverter>>:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -2298,11 +2301,6 @@ multipart:
 
 	}
 ----
-
-Notice how `MultipartFile` method arguments can be accessed with `@RequestParam` or with
-`@RequestPart` interchangeably. However, the `@RequestPart("meta-data") MetaData` method
-argument in this case is read as JSON content based on its `'Content-Type'` header and
-converted with the help of the `MappingJackson2HttpMessageConverter`.
 
 
 [[mvc-ann-requestbody]]

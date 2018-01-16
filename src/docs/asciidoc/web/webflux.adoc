@@ -964,6 +964,9 @@ Java 8+: `java.time.ZoneId`
 |For access to Servlet request parameters. Parameter values are converted to the declared
 method argument type. See <<webflux-ann-requestparam>>.
 
+Note that use of `@RequestParam` is optional, e.g. to set its attributes.
+See "Any other argument" further below in this table.
+
 |`@RequestHeader`
 |For access to request headers. Header values are converted to the declared method argument
 type. See <<webflux-ann-requestheader>>.
@@ -987,40 +990,48 @@ Supports reactive types.
 // TODO: See <<webflux-multipart-forms-non-browsers>> and <<webflux-multipart>>.
 
 |`java.util.Map`, `org.springframework.ui.Model`, `org.springframework.ui.ModelMap`
-|For access and updates of the implicit model that is exposed to the web view.
+|For access to the model that is used in HTML controllers and exposed to templates as
+part of view rendering.
 
-|Command or form object (with optional `@ModelAttribute`)
-|Command object whose properties to bind to request parameters -- via setters or directly to
-fields, with customizable type conversion, depending on `@InitBinder` methods and/or the
-HandlerAdapter configuration (see the `webBindingInitializer` property on
-`RequestMappingHandlerAdapter`).
+|`@ModelAttribute`
+|For access to an existing attribute in the model (instantiated if not present) with
+data binding and validation applied. See <<webflux-ann-modelattrib-method-args>> as well
+as <<webflux-ann-modelattrib-methods>> and <<webflux-ann-initbinder>>.
 
-Command objects along with their validation results are exposed as model attributes, by
-default using the command class name - e.g. model attribute "orderAddress" for a command
-object of type "some.package.OrderAddress". `@ModelAttribute` can be used to customize the
-model attribute name.
-
-Supports reactive types.
+Note that use of `@ModelAttribute` is optional, e.g. to set its attributes.
+See "Any other argument" further below in this table.
 
 |`Errors`, `BindingResult`
-|Validation results for the command/form object data binding; this argument must be
-declared immediately after the command/form object in the controller method signature.
+|For access to errors from the data binding and validation applied to a command object;
+this argument must be declared immediately after a command object (i.e.
+`@ModelAttribute` argument). If this is not declared in the controller method signature,
+errors result in a `BindException`. See <<webflux-ann-modelattrib-method-args>> for more
+details.
 
-|`SessionStatus`
+|`SessionStatus` + class-level `@SessionAttributes`
 |For marking form processing complete which triggers cleanup of session attributes
-declared through a class-level `@SessionAttributes` annotation.
+declared through a class-level `@SessionAttributes` annotation. See
+<<webflux-ann-sessionattributes>> for more details.
 
 |`UriComponentsBuilder`
 |For preparing a URL relative to the current request's host, port, scheme, context path, and
 the literal  part of the servlet mapping also taking into account `Forwarded` and
 `X-Forwarded-*` headers.
+// See <<webflux-uri-building>>.
 
 |`@SessionAttribute`
 |For access to any session attribute; in contrast to model attributes stored in the session
-as a result of a class-level `@SessionAttributes` declaration.
+as a result of a class-level `@SessionAttributes` declaration. See
+<<webflux-ann-sessionattribute>> for more details.
 
 |`@RequestAttribute`
-|For access to request attributes.
+|For access to request attributes. See <<webflux-ann-requestattrib>> for more details.
+
+|Any other argument
+|If a method argument is not matched to any of the above, by default it is resolved as
+an `@RequestParam` if it is a simple type, as determined by
+{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty],
+or as an `@ModelAttribute` otherwise.
 |===
 
 
@@ -1061,7 +1072,14 @@ programmatically enrich the model by declaring a `Model` argument (see above).
 
 |`java.util.Map`, `org.springframework.ui.Model`
 |Attributes to be added to the implicit model with the view name implicitly determined
-from the request path.
+based on the request path.
+
+|`@ModelAttribute`
+|An attribute to be added to the model with the view name implicitly determined based
+on the request path.
+
+Note that `@ModelAttribute` is optional. See "Any other return value" further below in
+this table.
 
 |`Rendering`
 |An API for model and view rendering scenarios.
@@ -1081,11 +1099,12 @@ REST controllers, or default view name selection for HTML controllers.
 to be written (however `text/event-stream` must be requested or declared in the mapping
 through the produces attribute).
 
-|Any other return type
-|A single model attribute to be added to the implicit model with the view name implicitly
-determined through a `RequestToViewNameTranslator`; the attribute name may be specified
-through a method-level `@ModelAttribute` or otherwise a name is selected based on the
-class name of the return type.
+|Any other return value
+|If a return value is not matched to any of the above, by default it is treated as a view
+name, if it is `String` or `void` (default view name selection applies); or as a model
+attribute to be added to the model, unless it is a simple type, as determined by
+{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty]
+in which case it remains unresolved.
 |===
 
 
@@ -1144,6 +1163,12 @@ Type conversion is applied automatically if the target method parameter type is 
 When an `@RequestParam` annotation is declared as `Map<String, String>` or
 `MultiValueMap<String, String>` argument, the map is populated with all request
 parameters.
+
+Note that use of `@RequestParam` is optional, e.g. to set its attributes.
+By default any argument that is a simple value type, as determined by
+{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty],
+and is not resolved by any other argument resolver, is treated as if it was annotated
+with `@RequestParam`.
 
 
 [[webflux-ann-requestheader]]
@@ -1231,7 +1256,7 @@ Type conversion is applied automatically if the target method parameter type is 
 
 Use the `@ModelAttribute` annotation on a method argument to access an attribute from the
 model, or have it instantiated if not present. The model attribute is also overlaid with
-values query parameters for form fields whose names match to field names. This is
+values of query parameters and form fields whose names match to field names. This is
 referred to as data binding and it saves you from having to deal with parsing and
 converting individual query parameters and form fields. For example:
 
@@ -1314,6 +1339,12 @@ reactive type:
 	}
 ----
 
+Note that use of `@ModelAttribute` is optional, e.g. to set its attributes.
+By default any argument that is not a simple value type, as determined by
+{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty],
+and is not resolved by any other argument resolver, is treated as if it was annotated
+with `@ModelAttribute`.
+
 
 [[webflux-ann-sessionattributes]]
 ==== @SessionAttributes
@@ -1374,7 +1405,7 @@ use the `@SessionAttribute` annotation on a method parameter:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping("/")
+	@GetMapping("/")
 	public String handle(**@SessionAttribute** User user) {
 		// ...
 	}
@@ -1386,6 +1417,23 @@ For use cases that require adding or removing session attributes consider inject
 For temporary storage of model attributes in the session as part of a controller
 workflow consider using `SessionAttributes` as described in
 <<webflux-ann-sessionattributes>>.
+
+
+[[webflux-ann-requestattrib]]
+==== @RequestAttribute
+[.small]#<<web.adoc#mvc-ann-requestattrib,Same in Spring MVC>>#
+
+Similar to `@SessionAttribute` the `@RequestAttribute` annotation can be used to
+access pre-existing request attributes created earlier, e.g. by a `WebFilter`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@GetMapping("/")
+	public String handle(**@RequestAttribute** Client client) {
+		// ...
+	}
+----
 
 
 
