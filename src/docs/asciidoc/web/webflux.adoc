@@ -1037,12 +1037,11 @@ type. See <<webflux-ann-cookievalue>>.
 |`@RequestBody`
 |For access to the HTTP request body. Body content is converted to the declared method
 argument type using ``HttpMessageReader``'s. Supports reactive types.
-// TODO: See <<webflux-ann-requestbody>>.
+<<webflux-ann-requestbody>>.
 
 |`HttpEntity<B>`
 |For access to request headers and body. The body is converted with ``HttpMessageReader``'s.
-Supports reactive types.
-// TODO: See <<webflux-ann-httpentity>>.
+Supports reactive types. See <<webflux-ann-httpentity>>.
 
 |`@RequestPart`
 |For access to a part in  a "multipart/form-data" request. Supports reactive types.
@@ -1061,11 +1060,10 @@ Note that use of `@ModelAttribute` is optional, e.g. to set its attributes.
 See "Any other argument" further below in this table.
 
 |`Errors`, `BindingResult`
-|For access to errors from the data binding and validation applied to a command object;
-this argument must be declared immediately after a command object (i.e.
-`@ModelAttribute` argument). If this is not declared in the controller method signature,
-errors result in a `BindException`. See <<webflux-ann-modelattrib-method-args>> for more
-details.
+|For access to errors from validation and data binding for a command object
+(i.e. `@ModelAttribute` argument), or errors from the validation of an `@RequestBody` or
+`@RequestPart` arguments; an `Errors`, or `BindingResult` argument must be declared
+immediately after the validated method argument.
 
 |`SessionStatus` + class-level `@SessionAttributes`
 |For marking form processing complete which triggers cleanup of session attributes
@@ -1108,12 +1106,12 @@ values.
 
 |`@ResponseBody`
 |The return value is encoded through ``HttpMessageWriter``s and written to the response.
-// TODO: See <<webflux-ann-responsebody>>.
+See <<webflux-ann-responsebody>>.
 
 |`HttpEntity<B>`, `ResponseEntity<B>`
 |The return value specifies the full response including HTTP headers and body be encoded
 through ``HttpMessageWriter``s and written to the response.
-// TODO: See <<webflux-ann-httpentity>>.
+See <<webflux-ann-responseentity>>.
 
 |`HttpHeaders`
 |For returning a response with headers and no body.
@@ -1582,6 +1580,200 @@ To access multipart data sequentially, in streaming fashion, use `@RequestBody` 
 		// ...
 	}
 ----
+
+`@RequestPart` can be used in combination with `javax.validation.Valid`, or Spring's
+`@Validated` annotation, which causes Standard Bean Validation to be applied.
+By default validation errors cause a `WebExchangeBindException` which is turned
+into a 400 (BAD_REQUEST) response. Alternatively validation errors can be handled locally
+within the controller through an `Errors` or `BindingResult` argument:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@PostMapping("/")
+public String handle(**@Valid** @RequestPart("meta-data") MetaData metadata,
+		**BindingResult result**) {
+	// ...
+}
+----
+
+
+[[webflux-ann-requestbody]]
+==== @RequestBody
+[.small]#<<web.adoc#mvc-ann-requestbody,Same in Spring MVC>>#
+
+Use the `@RequestBody` annotation to have the request body read and deserialized into an
+Object through an <<webflux-codecs,HttpMessageReader>>.
+Below is an example with an `@RequestBody` argument:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@PostMapping("/accounts")
+	public void handle(@RequestBody Account account) {
+		// ...
+	}
+----
+
+Unlike Spring MVC, in WebFlux the `@RequestBody` method argument supports reactive types
+and fully non-blocking reading and (client-to-server) streaming:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@PostMapping("/accounts")
+	public void handle(@RequestBody Mono<Account> account) {
+		// ...
+	}
+----
+
+You can use the <<webflux-config-message-codecs>> option of the <<webflux-config>> to
+configure or customize message readers.
+
+`@RequestBody` can be used in combination with `javax.validation.Valid`, or Spring's
+`@Validated` annotation, which causes Standard Bean Validation to be applied.
+By default validation errors cause a `WebExchangeBindException` which is turned
+into a 400 (BAD_REQUEST) response. Alternatively validation errors can be handled locally
+within the controller through an `Errors` or `BindingResult` argument:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@PostMapping("/accounts")
+	public void handle(@Valid @RequestBody Account account, BindingResult result) {
+		// ...
+	}
+----
+
+
+[[webflux-ann-httpentity]]
+==== HttpEntity
+[.small]#<<web.adoc#mvc-ann-httpentity,Same in Spring MVC>>#
+
+`HttpEntity` is more or less identical to using <<webflux-ann-requestbody>> but based on a
+container object that exposes request headers and body. Below is an example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@PostMapping("/accounts")
+	public void handle(HttpEntity<Account> entity) {
+		// ...
+	}
+----
+
+
+[[webflux-ann-responsebody]]
+==== @ResponseBody
+[.small]#<<web.adoc#mvc-ann-responsebody,Same in Spring MVC>>#
+
+Use the `@ResponseBody` annotation on a method to have the return serialized to the
+response body through an <<webflux-codecs,HttpMessageWriter>>. For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@GetMapping("/accounts/{id}")
+	@ResponseBody
+	public Account handle() {
+		// ...
+	}
+----
+
+`@ResponseBody` is also supported at the class level in which case it is inherited by
+all controller methods. This is the effect of `@RestController` which is nothing more
+than a meta-annotation marked with `@Controller` and `@ResponseBody`.
+
+`@ResponseBody` supports reactive types which means you can return Reactor or RxJava
+types and have the asynchronous values they produce rendered to the response.
+For additional details on JSON rendering see <<webflux-codecs-jackson-json>>.
+
+`@ResponseBody` methods can be combined with JSON serialization views.
+See <<mvc-ann-jackson>> for details.
+
+You can use the <<webflux-config-message-codecs>> option of the <<webflux-config>> to
+configure or customize message writing.
+
+
+[[webflux-ann-responseentity]]
+==== ResponseEntity
+[.small]#<<web.adoc#mvc-ann-responseentity,Same in Spring MVC>>#
+
+`ResponseEntity` is more or less identical to using <<webflux-ann-responsebody>> but based
+on a container object that specifies request headers and body. Below is an example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@PostMapping("/something")
+	public ResponseEntity<String> handle() {
+		// ...
+		URI location = ...
+		return new ResponseEntity.created(location).build();
+	}
+----
+
+
+[[webflux-ann-jackson]]
+==== Jackson JSON
+
+[[webflux-ann-jsonview]]
+===== Jackson serialization views
+[.small]#<<web.adoc#mvc-ann-jackson,Same in Spring MVC>>#
+
+Spring WebFlux provides built-in support for
+http://wiki.fasterxml.com/JacksonJsonViews[Jackson's Serialization Views]
+which allows rendering only a subset of all fields in an Object. To use it with
+`@ResponseBody` or `ResponseEntity` controller methods, use Jackson's
+`@JsonView` annotation to activate a serialization view class:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RestController
+	public class UserController {
+
+		@GetMapping("/user")
+		@JsonView(User.WithoutPasswordView.class)
+		public User getUser() {
+			return new User("eric", "7!jd#h23");
+		}
+	}
+
+	public class User {
+
+		public interface WithoutPasswordView {};
+		public interface WithPasswordView extends WithoutPasswordView {};
+
+		private String username;
+		private String password;
+
+		public User() {
+		}
+
+		public User(String username, String password) {
+			this.username = username;
+			this.password = password;
+		}
+
+		@JsonView(WithoutPasswordView.class)
+		public String getUsername() {
+			return this.username;
+		}
+
+		@JsonView(WithPasswordView.class)
+		public String getPassword() {
+			return this.password;
+		}
+	}
+----
+
+[NOTE]
+====
+`@JsonView` allows an array of view classes but you can only specify only one per
+controller method. Use a composite interface if you need to activate multiple views.
+====
+
 
 
 [[webflux-ann-modelattrib-methods]]

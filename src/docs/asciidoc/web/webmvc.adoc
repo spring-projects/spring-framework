@@ -1623,11 +1623,10 @@ Note that use of `@ModelAttribute` is optional, e.g. to set its attributes.
 See "Any other argument" further below in this table.
 
 |`Errors`, `BindingResult`
-|For access to errors from the data binding and validation applied to a command object;
-this argument must be declared immediately after a command object (i.e.
-`@ModelAttribute` argument). If this is not declared in the controller method signature,
-errors result in a `BindException`. See <<mvc-ann-modelattrib-method-args>> for more
-details.
+|For access to errors from validation and data binding for a command object
+(i.e. `@ModelAttribute` argument), or errors from the validation of an `@RequestBody` or
+`@RequestPart` arguments; an `Errors`, or `BindingResult` argument must be declared
+immediately after the validated method argument.
 
 |`SessionStatus` + class-level `@SessionAttributes`
 |For marking form processing complete which triggers cleanup of session attributes
@@ -1672,7 +1671,8 @@ response. See <<mvc-ann-responsebody>>.
 
 |`HttpEntity<B>`, `ResponseEntity<B>`
 |The return value specifies the full response including HTTP headers and body be converted
-through ``HttpMessageConverter``s and written to the response. See <<mvc-ann-httpentity>>.
+through ``HttpMessageConverter``s and written to the response.
+See <<mvc-ann-responseentity>>.
 
 |`HttpHeaders`
 |For returning a response with headers and no body.
@@ -2295,146 +2295,121 @@ probably want it deserialized from JSON (similar to `@RequestBody`). Use the
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@PostMapping("/")
-	public String handle(**@RequestPart("meta-data") MetaData metadata,
-			@RequestPart("file-data") MultipartFile file**) {
-		// ...
-	}
+@PostMapping("/")
+public String handle(**@RequestPart("meta-data") MetaData metadata,
+		@RequestPart("file-data") MultipartFile file**) {
+	// ...
+}
+----
+
+`@RequestPart` can be used in combination with `javax.validation.Valid`, or Spring's
+`@Validated` annotation, which causes Standard Bean Validation to be applied.
+By default validation errors cause a `MethodArgumentNotValidException` which is turned
+into a 400 (BAD_REQUEST) response. Alternatively validation errors can be handled locally
+within the controller through an `Errors` or `BindingResult` argument:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@PostMapping("/")
+public String handle(**@Valid** @RequestPart("meta-data") MetaData metadata,
+		**BindingResult result**) {
+	// ...
+}
 ----
 
 
 [[mvc-ann-requestbody]]
 ==== @RequestBody
+[.small]#<<web-reactive.adoc#webflux-ann-requestbody,Same in Spring WebFlux>>#
 
-The `@RequestBody` method parameter annotation indicates that a method parameter should
-be bound to the value of the HTTP request body. For example:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	@PutMapping("/something")
-	public void handle(@RequestBody String body, Writer writer) throws IOException {
-		writer.write(body);
-	}
-----
-
-You convert the request body to the method argument by using an
-<<integration.adoc#rest-message-conversion,HttpMessageConverter>>.
-`HttpMessageConverter` is responsible for converting from the HTTP request message to an
-object and converting from an object to the HTTP response body. The
-`RequestMappingHandlerAdapter` supports the `@RequestBody` annotation with the following
-default `HttpMessageConverters`:
-
-* `ByteArrayHttpMessageConverter` converts byte arrays
-* `StringHttpMessageConverter` converts strings
-* `FormHttpMessageConverter` converts form data to/from a `MultiValueMap<String, String>`
-* `SourceHttpMessageConverter` converts to/from a `javax.xml.transform.Source``
-
-For more information on these converters, see <<integration.adoc#rest-message-conversion,
-Message Converters>>. Also note that if using the MVC namespace or the MVC Java config,
-a wider range of message converters are registered by default, including default JSON
-and XML payload converters (if e.g. Jackson, Gson and/or JAXB2 are present at runtime).
-See <<mvc-config-enable>> for more information on MVC setup options.
-
-For a custom example, if you intend to read and write XML using the `spring-oxm` module,
-you need to configure the `MarshallingHttpMessageConverter` with a specific `Marshaller`
-implementation from the `org.springframework.oxm` package. The example below shows how to
-do that directly in your configuration but if your application is configured through the
-MVC namespace or the MVC Java config see <<mvc-config-enable>> instead.
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
-		<property name="messageConverters">
-			<list>
-				<ref bean="stringHttpMessageConverter"/>
-				<ref bean="marshallingHttpMessageConverter"/>
-			<list>
-		</property>
-	</bean>
-
-	<bean id="stringHttpMessageConverter"
-			class="org.springframework.http.converter.StringHttpMessageConverter"/>
-
-	<bean id="marshallingHttpMessageConverter"
-			class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
-		<constructor-arg ref="xstreamMarshaller"/>
-	</bean>
-
-	<bean id="xstreamMarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller"/>
-----
-
-An `@RequestBody` method parameter can be annotated with `@Valid`, in which case it will
-be validated using the configured `Validator` instance. When using the MVC namespace or
-the MVC Java config, a JSR-303 validator is configured automatically assuming a JSR-303
-implementation is available on the classpath.
-
-Just like with `@ModelAttribute` parameters, an `Errors` argument can be used to examine
-the errors. If such an argument is not declared, a `MethodArgumentNotValidException`
-will be raised. The exception is handled in the `DefaultHandlerExceptionResolver`, which
-sends a `400` error back to the client.
-
-[NOTE]
-====
-Also see <<mvc-config-enable>> for
-information on configuring message converters and a validator through the MVC namespace
-or the MVC Java config.
-====
-
-
-[[mvc-ann-httpentity]]
-==== HttpEntity
-
-`HttpEntity` is similar to `@RequestBody` but also with access to request headers:
+Use the `@RequestBody` annotation to have the request body read and deserialized into an
+Object through an <<integration.adoc#rest-message-conversion,HttpMessageConverter>>.
+Below is an example with an `@RequestBody` argument:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping("/something")
-	public ResponseEntity<String> handle(HttpEntity<byte[]> requestEntity) throws UnsupportedEncodingException {
-		String requestHeader = requestEntity.getHeaders().getFirst("MyRequestHeader");
-		byte[] requestBody = requestEntity.getBody();
+	@PostMapping("/accounts")
+	public void handle(@RequestBody Account account) {
 		// ...
 	}
 ----
 
-The above example gets the value of the `MyRequestHeader` request header, and reads the
-body as a byte array. As with `@RequestBody`, Spring uses `HttpMessageConverter` to
-convert from and to the request and response streams. For more information on these
-converters, see the previous section and <<integration.adoc#rest-message-conversion,
-Message Converters>>.
+You can use the <<mvc-config-message-converters>> option of the <<mvc-config>> to
+configure or customize message conversion.
 
-
-[[mvc-ann-responsebody]]
-==== @ResponseBody
-
-The `@ResponseBody` annotation is similar to `@RequestBody`. This annotation can be placed
-on a method and indicates that the return type should be written straight to the HTTP
-response body (and not placed in a Model, or interpreted as a view name). For example:
+`@RequestBody` can be used in combination with `javax.validation.Valid`, or Spring's
+`@Validated` annotation, which causes Standard Bean Validation to be applied.
+By default validation errors cause a `MethodArgumentNotValidException` which is turned
+into a 400 (BAD_REQUEST) response. Alternatively validation errors can be handled locally
+within the controller through an `Errors` or `BindingResult` argument:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@GetMapping("/something")
-	@ResponseBody
-	public String helloWorld() {
-		return "Hello World";
+	@PostMapping("/accounts")
+	public void handle(@Valid @RequestBody Account account, BindingResult result) {
+		// ...
 	}
 ----
 
-The above example will result in the text `Hello World` being written to the HTTP
-response stream.
 
-As with `@RequestBody`, Spring converts the returned object to a response body by using
-an <<integration.adoc#rest-message-conversion,HttpMessageConverter>>.
+[[mvc-ann-httpentity]]
+==== HttpEntity
+[.small]#<<web-reactive.adoc#webflux-ann-httpentity,Same in Spring WebFlux>>#
+
+`HttpEntity` is more or less identical to using <<mvc-ann-requestbody>> but based on a
+container object that exposes request headers and body. Below is an example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@PostMapping("/accounts")
+	public void handle(HttpEntity<Account> entity) {
+		// ...
+	}
+----
+
+
+[[mvc-ann-responsebody]]
+==== @ResponseBody
+[.small]#<<web-reactive.adoc#webflux-ann-responsebody,Same in Spring WebFlux>>#
+
+Use the `@ResponseBody` annotation on a method to have the return serialized to the
+response body through an
+<<integration.adoc#rest-message-conversion,HttpMessageConverter>>. For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@GetMapping("/accounts/{id}")
+	@ResponseBody
+	public Account handle() {
+		// ...
+	}
+----
+
+`@ResponseBody` is also supported at the class level in which case it is inherited by
+all controller methods. This is the effect of `@RestController` which is nothing more
+than a meta-annotation marked with `@Controller` and `@ResponseBody`.
+
+`@ResponseBody` may be used with reactive types.
+See <<mvc-ann-async>> and <<mvc-ann-async-reactive-types>> for more details.
+
+You can use the <<mvc-config-message-converters>> option of the <<mvc-config>> to
+configure or customize message conversion.
+
+`@ResponseBody` methods can be combined with JSON serialization views.
+See <<mvc-ann-jackson>> for details.
 
 
 [[mvc-ann-responseentity]]
 ==== ResponseEntity
+[.small]#<<web-reactive.adoc#webflux-ann-responseentity,Same in Spring WebFlux>>#
 
-The is similar to `@ResponseBody` but besides providing the response body, `ResponseEntity`
-also allows setting response headers:
+`ResponseEntity` is more or less identical to using <<mvc-ann-responsebody>> but based
+on a container object that specifies request headers and body. Below is an example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -2442,16 +2417,10 @@ also allows setting response headers:
 	@PostMapping("/something")
 	public ResponseEntity<String> handle() {
 		// ...
-		URI location = ... ;
+		URI location = ...
 		return new ResponseEntity.created(location).build();
 	}
 ----
-
-As with `@ResponseBody`, Spring uses
-<<integration.adoc#rest-message-conversion,HttpMessageConverter>> to
-convert from and to the request and response streams. For more information on these
-converters, see the previous section and <<integration.adoc#rest-message-conversion,
-Message Converters>>.
 
 
 [[mvc-ann-jackson]]
@@ -2459,14 +2428,13 @@ Message Converters>>.
 
 [[mvc-ann-jsonview]]
 ===== Jackson serialization views
+[.small]#<<web-reactive.adoc#webflux-ann-jsonview,Same in Spring WebFlux>>#
 
-It can sometimes be useful to filter contextually the object that will be serialized to the
-HTTP response body. In order to provide such capability, Spring MVC has built-in support for
-rendering with http://wiki.fasterxml.com/JacksonJsonViews[Jackson's Serialization Views].
-
-To use it with an `@ResponseBody` controller method or controller methods that return
-`ResponseEntity`, simply add the `@JsonView` annotation with a class argument specifying
-the view class or interface to be used:
+Spring MVC provides built-in support for
+http://wiki.fasterxml.com/JacksonJsonViews[Jackson's Serialization Views]
+which allows rendering only a subset of all fields in an Object. To use it with
+`@ResponseBody` or `ResponseEntity` controller methods, use Jackson's
+`@JsonView` annotation to activate a serialization view class:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -2511,10 +2479,8 @@ the view class or interface to be used:
 
 [NOTE]
 ====
-Note that despite `@JsonView` allowing for more than one class to
-be specified, the use on a controller method is only supported with
-exactly one class argument. Consider the use of a composite interface
-if you need to enable multiple views.
+`@JsonView` allows an array of view classes but you can only specify only one per
+controller method. Use a composite interface if you need to activate multiple views.
 ====
 
 For controllers relying on view resolution, simply add the serialization view class
