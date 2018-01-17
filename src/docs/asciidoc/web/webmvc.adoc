@@ -3545,20 +3545,18 @@ include::webmvc-cors.adoc[leveloffset=+1]
 
 [[mvc-web-security]]
 == Web Security
+[.small]#<<web-reactive.adoc#webflux-web-security,Same in Spring WebFlux>>#
 
-The http://projects.spring.io/spring-security/[Spring Security] project provides features
-to protect web applications from malicious exploits. Check out the reference documentation in the sections on
-{doc-spring-security}/htmlsingle/#csrf["CSRF protection"],
-{doc-spring-security}/htmlsingle/#headers["Security Response Headers"], and also
-{doc-spring-security}/htmlsingle/#mvc["Spring MVC Integration"].
-Note that using Spring Security to secure the application is not necessarily required for all features.
-For example CSRF protection can be added simply by adding the `CsrfFilter` and
-`CsrfRequestDataValueProcessor` to your configuration. See the
-https://github.com/spring-projects/spring-mvc-showcase/commit/361adc124c05a8187b84f25e8a57550bb7d9f8e4[Spring MVC Showcase]
-for an example.
+The http://projects.spring.io/spring-security/[Spring Security] project provides support
+for protecting web applications from malicious exploits. Check out the Spring Security
+reference documentation including:
 
-Another option is to use a framework dedicated to Web Security.
-http://hdiv.org/[HDIV] is one such framework and integrates with Spring MVC.
+* {doc-spring-security}/html5/#mvc[Spring MVC Security]
+* {doc-spring-security}/html5/#test-mockmvc[Spring MVC Test Support]
+* {doc-spring-security}/html5/#csrf[CSRF protection]
+* {doc-spring-security}/html5/#headers[Security Response Headers]
+
+http://hdiv.org/[HDIV] is another web security framework that integrates with Spring MVC.
 
 
 

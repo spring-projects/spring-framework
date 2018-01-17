@@ -1,5 +1,6 @@
 [[webflux]]
 = Spring WebFlux
+:doc-spring-security: {doc-root}/spring-security/site/docs/current/reference
 
 
 
@@ -2064,8 +2065,29 @@ include::webflux-functional.adoc[leveloffset=+1]
 
 
 
+include::webflux-cors.adoc[leveloffset=+1]
+
+
+
+
+[[webflux-web-security]]
+== Web Security
+[.small]#<<web.adoc#mvc-web-security,Same in Spring MVC>>#
+
+The http://projects.spring.io/spring-security/[Spring Security] project provides support
+for protecting web applications from malicious exploits. Check out the Spring Security
+reference documentation including:
+
+* {doc-spring-security}/html5/#jc-webflux[WebFlux Security]
+* {doc-spring-security}/html5/#test-webflux["WebFlux Testing Support"]
+* {doc-spring-security}/html5/#csrf[CSRF Protection]
+* {doc-spring-security}/html5/#headers[Security Response Headers]
+
+
+
+
 [[webflux-config]]
-== WebFlux Java Config
+== WebFlux Config
 [.small]#<<web.adoc#mvc-config,Same in Spring MVC>>#
 
 The WebFlux Java config declares components required to process requests with annotated
@@ -2453,7 +2475,6 @@ from the base class and you can still have any number of other ``WebMvcConfigure
 the classpath.
 
 
-include::webflux-cors.adoc[leveloffset=+1]
 
 
 [[webflux-http2]]
