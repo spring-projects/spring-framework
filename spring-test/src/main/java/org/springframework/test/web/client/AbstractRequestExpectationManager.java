@@ -79,13 +79,9 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 			if (this.requests.isEmpty()) {
 				afterExpectationsDeclared();
 			}
-			try {
-				return validateRequestInternal(request);
-			}
-			finally {
-				this.requests.add(request);
-			}
+			this.requests.add(request);
 		}
+		return validateRequestInternal(request);
 	}
 
 	/**
