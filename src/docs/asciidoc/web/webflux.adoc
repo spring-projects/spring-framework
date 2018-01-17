@@ -1013,11 +1013,10 @@ Java 8+: `java.time.ZoneId`
 
 |`@PathVariable`
 |For access to URI template variables.
-// TODO: See <<webflux-ann-requestmapping-uri-templates>>.
+See <<webflux-ann-requestmapping-uri-templates>>.
 
 |`@MatrixVariable`
-|For access to name-value pairs in URI path segments.
-// TODO: See <<webflux-ann-matrix-variables>>.
+|For access to name-value pairs in URI path segments. See <<webflux-ann-matrix-variables>>.
 
 |`@RequestParam`
 |For access to Servlet request parameters. Parameter values are converted to the declared
@@ -1178,6 +1177,90 @@ By default simple types such as `int`, `long`, `Date`, etc. are supported. Type 
 can be customized through a `WebDataBinder`, see <<mvc-ann-initbinder>>, or by registering
 `Formatters` with the `FormattingConversionService`, see
 <<core.adoc#format, Spring Field Formatting>>.
+
+
+[[webflux-ann-matrix-variables]]
+==== Matrix variables
+[.small]#<<web.adoc#mvc-ann-matrix-variables,Same in Spring MVC>>#
+
+http://tools.ietf.org/html/rfc3986#section-3.3[RFC 3986] discusses name-value pairs in
+path segments. In Spring WebFlux we refer to those as "matrix variables" based on an
+http://www.w3.org/DesignIssues/MatrixURIs.html["old post"] by Tim Berners-Lee but they
+can be also be referred to as URI path parameters.
+
+Matrix variables can appear in any path segment, each variable separated by semicolon and
+multiple values separated by comma, e.g. `"/cars;color=red,green;year=2012"`. Multiple
+values can also be specified through repeated variable names, e.g.
+`"color=red;color=green;color=blue"`.
+
+Unlike Spring MVC, in WebFlux the presence or absence of matrix variables in a URL does
+not affect request mappings. In other words you're not required to use a URI variable
+to mask variable content. That said if you want to access matrix variables from a
+controller method you need to add a URI variable to the path segment where matrix
+variables are expected. Below is an example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	// GET /pets/42;q=11;r=22
+
+	@GetMapping("/pets/{petId}")
+	public void findPet(@PathVariable String petId, @MatrixVariable int q) {
+
+		// petId == 42
+		// q == 11
+	}
+----
+
+Given that all path segments may contain matrix variables, sometimes you may need to
+disambiguate which path variable the matrix variable is expected to be in.
+For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	// GET /owners/42;q=11/pets/21;q=22
+
+	@GetMapping("/owners/{ownerId}/pets/{petId}")
+	public void findPet(
+			@MatrixVariable(name="q", pathVar="ownerId") int q1,
+			@MatrixVariable(name="q", pathVar="petId") int q2) {
+
+		// q1 == 11
+		// q2 == 22
+	}
+----
+
+A matrix variable may be defined as optional and a default value specified:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	// GET /pets/42
+
+	@GetMapping("/pets/{petId}")
+	public void findPet(@MatrixVariable(required=false, defaultValue="1") int q) {
+
+		// q == 1
+	}
+----
+
+To get all matrix variables, use a `MultiValueMap`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	// GET /owners/42;q=11;r=12/pets/21;q=22;s=23
+
+	@GetMapping("/owners/{ownerId}/pets/{petId}")
+	public void findPet(
+			@MatrixVariable MultiValueMap<String, String> matrixVars,
+			@MatrixVariable(pathVar="petId"") MultiValueMap<String, String> petMatrixVars) {
+
+		// matrixVars: ["q" : [11,22], "r" : 12, "s" : 23]
+		// petMatrixVars: ["q" : 22, "s" : 23]
+	}
+----
 
 
 [[webflux-ann-requestparam]]

@@ -1266,125 +1266,6 @@ recommendations related to RFD.
 
 
 
-[[mvc-ann-matrix-variables]]
-==== Matrix variables
-
-The URI specification http://tools.ietf.org/html/rfc3986#section-3.3[RFC 3986] defines
-the possibility of including name-value pairs within path segments. There is no specific
-term used in the spec. The general "URI path parameters" could be applied although the
-more unique http://www.w3.org/DesignIssues/MatrixURIs.html["Matrix URIs"], originating
-from an old post by Tim Berners-Lee, is also frequently used and fairly well known.
-Within Spring MVC these are referred to as matrix variables.
-
-Matrix variables can appear in any path segment, each matrix variable separated with a
-";" (semicolon). For example: `"/cars;color=red;year=2012"`. Multiple values may be
-either "," (comma) separated `"color=red,green,blue"` or the variable name may be
-repeated `"color=red;color=green;color=blue"`.
-
-If a URL is expected to contain matrix variables, the request mapping pattern must
-represent them with a URI template. This ensures the request can be matched correctly
-regardless of whether matrix variables are present or not and in what order they are
-provided.
-
-Below is an example of extracting the matrix variable "q":
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	// GET /pets/42;q=11;r=22
-
-	@GetMapping("/pets/{petId}")
-	public void findPet(@PathVariable String petId, @MatrixVariable int q) {
-
-		// petId == 42
-		// q == 11
-	}
-----
-
-Since all path segments may contain matrix variables, in some cases you need to be more
-specific to identify where the variable is expected to be:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	// GET /owners/42;q=11/pets/21;q=22
-
-	@GetMapping("/owners/{ownerId}/pets/{petId}")
-	public void findPet(
-			@MatrixVariable(name="q", pathVar="ownerId") int q1,
-			@MatrixVariable(name="q", pathVar="petId") int q2) {
-
-		// q1 == 11
-		// q2 == 22
-	}
-----
-
-A matrix variable may be defined as optional and a default value specified:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	// GET /pets/42
-
-	@GetMapping("/pets/{petId}")
-	public void findPet(@MatrixVariable(required=false, defaultValue="1") int q) {
-
-		// q == 1
-	}
-----
-
-All matrix variables may be obtained in a Map:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	// GET /owners/42;q=11;r=12/pets/21;q=22;s=23
-
-	@GetMapping("/owners/{ownerId}/pets/{petId}")
-	public void findPet(
-			@MatrixVariable MultiValueMap<String, String> matrixVars,
-			@MatrixVariable(pathVar="petId"") MultiValueMap<String, String> petMatrixVars) {
-
-		// matrixVars: ["q" : [11,22], "r" : 12, "s" : 23]
-		// petMatrixVars: ["q" : 22, "s" : 23]
-	}
-----
-
-Note that to enable the use of matrix variables, you must set the
-`removeSemicolonContent` property of `RequestMappingHandlerMapping` to `false`. By
-default it is set to `true`.
-
-[TIP]
-====
-The MVC Java config and the MVC namespace both provide options for enabling the use of
-matrix variables.
-
-If you are using Java config, The <<mvc-config-advanced-java, Advanced Customizations
-with MVC Java Config>> section describes how the `RequestMappingHandlerMapping` can
-be customized.
-
-In the MVC namespace, the `<mvc:annotation-driven>` element has an
-`enable-matrix-variables` attribute that should be set to `true`. By default it is set
-to `false`.
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<?xml version="1.0" encoding="UTF-8"?>
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:mvc="http://www.springframework.org/schema/mvc"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/mvc
-			http://www.springframework.org/schema/mvc/spring-mvc.xsd">
-
-		<mvc:annotation-driven enable-matrix-variables="true"/>
-
-	</beans>
-----
-====
 
 [[mvc-ann-requestmapping-consumes]]
 ==== Consumable media types
@@ -1766,6 +1647,94 @@ By default simple types such as `int`, `long`, `Date`, etc. are supported. Type 
 can be customized through a `WebDataBinder`, see <<mvc-ann-initbinder>>, or by registering
 `Formatters` with the `FormattingConversionService`, see
 <<core.adoc#format, Spring Field Formatting>>.
+
+
+[[mvc-ann-matrix-variables]]
+==== Matrix variables
+[.small]#<<web-reactive.adoc#webflux-ann-matrix-variables,Same in Spring WebFlux>>#
+
+http://tools.ietf.org/html/rfc3986#section-3.3[RFC 3986] discusses name-value pairs in
+path segments. In Spring MVC we refer to those as "matrix variables" based on an
+http://www.w3.org/DesignIssues/MatrixURIs.html["old post"] by Tim Berners-Lee but they
+can be also be referred to as URI path parameters.
+
+Matrix variables can appear in any path segment, each variable separated by semicolon and
+multiple values separated by comma, e.g. `"/cars;color=red,green;year=2012"`. Multiple
+values can also be specified through repeated variable names, e.g.
+`"color=red;color=green;color=blue"`.
+
+If a URL is expected to contain matrix variables, the request mapping for a controller
+method must use a URI variable to mask that variable content and ensure the request can
+be matched successfully independent of matrix variable order and presence.
+Below is an example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	// GET /pets/42;q=11;r=22
+
+	@GetMapping("/pets/{petId}")
+	public void findPet(@PathVariable String petId, @MatrixVariable int q) {
+
+		// petId == 42
+		// q == 11
+	}
+----
+
+Given that all path segments may contain matrix variables, sometimes you may need to
+disambiguate which path variable the matrix variable is expected to be in.
+For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	// GET /owners/42;q=11/pets/21;q=22
+
+	@GetMapping("/owners/{ownerId}/pets/{petId}")
+	public void findPet(
+			@MatrixVariable(name="q", pathVar="ownerId") int q1,
+			@MatrixVariable(name="q", pathVar="petId") int q2) {
+
+		// q1 == 11
+		// q2 == 22
+	}
+----
+
+A matrix variable may be defined as optional and a default value specified:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	// GET /pets/42
+
+	@GetMapping("/pets/{petId}")
+	public void findPet(@MatrixVariable(required=false, defaultValue="1") int q) {
+
+		// q == 1
+	}
+----
+
+To get all matrix variables, use a `MultiValueMap`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	// GET /owners/42;q=11;r=12/pets/21;q=22;s=23
+
+	@GetMapping("/owners/{ownerId}/pets/{petId}")
+	public void findPet(
+			@MatrixVariable MultiValueMap<String, String> matrixVars,
+			@MatrixVariable(pathVar="petId"") MultiValueMap<String, String> petMatrixVars) {
+
+		// matrixVars: ["q" : [11,22], "r" : 12, "s" : 23]
+		// petMatrixVars: ["q" : 22, "s" : 23]
+	}
+----
+
+Note that you need to enable the use of matrix variables. In the MVC Java config you need
+to set a `UrlPathHelper` with `removeSemicolonContent=false` via
+<<mvc-config-path-matching>>. In the MVC XML namespace, use
+`<mvc:annotation-driven enable-matrix-variables="true"/>`.
 
 
 [[mvc-ann-requestparam]]
