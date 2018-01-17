@@ -167,6 +167,9 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 		}
 
 
+		/**
+		 * Return a matching expectation, or {@code null} if none match.
+		 */
 		@Nullable
 		public RequestExpectation findExpectation(ClientHttpRequest request) throws IOException {
 			for (RequestExpectation expectation : this.expectations) {
@@ -175,7 +178,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 					return expectation;
 				}
 				catch (AssertionError error) {
-					// Ignore
+					// We're looking to find a match or return null..
 				}
 			}
 			return null;

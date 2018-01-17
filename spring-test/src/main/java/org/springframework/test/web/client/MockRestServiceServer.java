@@ -92,7 +92,7 @@ public class MockRestServiceServer {
 	}
 
 	/**
-	 * An alternative to {@link #expect(RequestMatcher)} with an indication how
+	 * An alternative to {@link #expect(RequestMatcher)} that also indicates how
 	 * many times the request is expected to be executed.
 	 * <p>When request expectations have an expected count greater than one, only
 	 * the first execution is expected to match the order of declaration. Subsequent
