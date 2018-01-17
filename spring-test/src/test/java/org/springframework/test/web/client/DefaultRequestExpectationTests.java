@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,26 +62,26 @@ public class DefaultRequestExpectationTests {
 	}
 
 	@Test
-	public void hasRemainingCount() throws Exception {
+	public void hasRemainingCount() {
 		RequestExpectation expectation = new DefaultRequestExpectation(twice(), requestTo("/foo"));
 		expectation.andRespond(withSuccess());
 
-		expectation.createResponse(createRequest(GET, "/foo"));
+		expectation.incrementAndValidate();
 		assertTrue(expectation.hasRemainingCount());
 
-		expectation.createResponse(createRequest(GET, "/foo"));
+		expectation.incrementAndValidate();
 		assertFalse(expectation.hasRemainingCount());
 	}
 
 	@Test
-	public void isSatisfied() throws Exception {
+	public void isSatisfied() {
 		RequestExpectation expectation = new DefaultRequestExpectation(twice(), requestTo("/foo"));
 		expectation.andRespond(withSuccess());
 
-		expectation.createResponse(createRequest(GET, "/foo"));
+		expectation.incrementAndValidate();
 		assertFalse(expectation.isSatisfied());
 
-		expectation.createResponse(createRequest(GET, "/foo"));
+		expectation.incrementAndValidate();
 		assertTrue(expectation.isSatisfied());
 	}
 
