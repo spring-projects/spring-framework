@@ -868,7 +868,7 @@ content type other than "text/plain".
 
 You can declare a shared consumes attribute at the class level. Unlike most other request
 mapping attributes however when used at the class level, a method-level consumes attribute
-will overrides rather than extend the class level declaration.
+overrides rather than extend the class level declaration.
 
 [TIP]
 ====
@@ -899,7 +899,7 @@ The media type can specify a character set. Negated expressions are supported --
 
 You can declare a shared produces attribute at the class level. Unlike most other request
 mapping attributes however when used at the class level, a method-level produces attribute
-will overrides rather than extend the class level declaration.
+overrides rather than extend the class level declaration.
 
 [TIP]
 ====
