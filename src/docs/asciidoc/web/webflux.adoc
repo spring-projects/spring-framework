@@ -994,7 +994,7 @@ request and session attributes, `checkNotModified` methods, and others.
 |Access to the HTTP request or response.
 
 |`WebSession`
-|Access to the session; this does not forcing the start of a new session unless attributes
+|Access to the session; this does not force the start of a new session unless attributes
 are added. Supports reactive types.
 
 |`java.security.Principal`
