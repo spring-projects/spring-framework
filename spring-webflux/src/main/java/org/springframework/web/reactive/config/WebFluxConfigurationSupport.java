@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -355,11 +355,8 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 					String name = "org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean";
 					clazz = ClassUtils.forName(name, getClass().getClassLoader());
 				}
-				catch (ClassNotFoundException ex) {
-					throw new BeanInitializationException("Could not find default validator class", ex);
-				}
-				catch (LinkageError ex) {
-					throw new BeanInitializationException("Could not load default validator class", ex);
+				catch (ClassNotFoundException | LinkageError ex) {
+					throw new BeanInitializationException("Failed to resolve default validator class", ex);
 				}
 				validator = (Validator) BeanUtils.instantiateClass(clazz);
 			}

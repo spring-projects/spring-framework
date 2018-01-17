@@ -298,11 +298,10 @@ public abstract class ClassUtils {
 			return forName(className, classLoader);
 		}
 		catch (ClassNotFoundException ex) {
-			throw new IllegalArgumentException("Cannot find class [" + className + "]", ex);
+			throw new IllegalArgumentException("Could not find class [" + className + "]", ex);
 		}
-		catch (LinkageError ex) {
-			throw new IllegalArgumentException(
-					"Error loading class [" + className + "]: problem with class file or dependent class.", ex);
+		catch (LinkageError err) {
+			throw new IllegalArgumentException("Unresolvable class definition for class [" + className + "]", err);
 		}
 	}
 

@@ -1379,8 +1379,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		catch (ClassNotFoundException ex) {
 			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), ex);
 		}
-		catch (LinkageError ex) {
-			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), ex);
+		catch (LinkageError err) {
+			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), err);
 		}
 	}
 

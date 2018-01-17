@@ -107,9 +107,10 @@ public abstract class BeanUtils {
 	 * @return the new instance
 	 * @throws BeanInstantiationException if the bean cannot be instantiated.
 	 * The cause may notably indicate a {@link NoSuchMethodException} if no
-	 * primary/default constructor was found - or an exception thrown from
-	 * the constructor invocation attempt, including a runtime-generated
-	 * {@link NoClassDefFoundError} in case of an unresolvable dependency.
+	 * primary/default constructor was found, a {@link NoClassDefFoundError}
+	 * or other {@link LinkageError} in case of an unresolvable class definition
+	 * (e.g. due to a missing dependency at runtime), or an exception thrown
+	 * from the constructor invocation itself.
 	 * @see Constructor#newInstance
 	 */
 	public static <T> T instantiateClass(Class<T> clazz) throws BeanInstantiationException {
@@ -124,6 +125,9 @@ public abstract class BeanUtils {
 		}
 		catch (NoSuchMethodException ex) {
 			throw new BeanInstantiationException(clazz, "No default constructor found", ex);
+		}
+		catch (LinkageError err) {
+			throw new BeanInstantiationException(clazz, "Unresolvable class definition", err);
 		}
 	}
 

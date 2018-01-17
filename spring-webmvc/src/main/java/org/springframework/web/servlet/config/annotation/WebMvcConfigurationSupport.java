@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -662,7 +662,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 					clazz = ClassUtils.forName(className, WebMvcConfigurationSupport.class.getClassLoader());
 				}
 				catch (ClassNotFoundException | LinkageError ex) {
-					throw new BeanInitializationException("Could not find default validator class", ex);
+					throw new BeanInitializationException("Failed to resolve default validator class", ex);
 				}
 				validator = (Validator) BeanUtils.instantiateClass(clazz);
 			}
