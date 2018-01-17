@@ -28,6 +28,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -178,18 +179,25 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		return listeners;
 	}
 
-	private List<TestExecutionListener> instantiateListeners(Collection<Class<? extends TestExecutionListener>> classesList) {
-		List<TestExecutionListener> listeners = new ArrayList<>(classesList.size());
-		for (Class<? extends TestExecutionListener> listenerClass : classesList) {
+	private List<TestExecutionListener> instantiateListeners(Collection<Class<? extends TestExecutionListener>> classes) {
+		List<TestExecutionListener> listeners = new ArrayList<>(classes.size());
+		for (Class<? extends TestExecutionListener> listenerClass : classes) {
 			try {
 				listeners.add(BeanUtils.instantiateClass(listenerClass));
 			}
-			catch (NoClassDefFoundError err) {
-				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("Could not instantiate TestExecutionListener [%s]. " +
-							"Specify custom listener classes or make the default listener classes " +
-							"(and their required dependencies) available. Offending class: [%s]",
-							listenerClass.getName(), err.getMessage()));
+			catch (BeanInstantiationException ex) {
+				if (ex.getCause() instanceof NoClassDefFoundError) {
+					// TestExecutionListener not applicable due to a missing dependency
+					if (logger.isDebugEnabled()) {
+						logger.debug(String.format(
+								"Skipping candidate TestExecutionListener [%s] due to a missing dependency. " +
+								"Specify custom listener classes or make the default listener classes " +
+								"and their required dependencies available. Offending class: [%s]",
+								listenerClass.getName(), ex.getCause().getMessage()));
+					}
+				}
+				else {
+					throw ex;
 				}
 			}
 		}
