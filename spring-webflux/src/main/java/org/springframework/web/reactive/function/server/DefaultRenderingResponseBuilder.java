@@ -35,7 +35,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -184,9 +183,7 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 		}
 
 		@Override
-		public Mono<Void> writeTo(ServerWebExchange exchange, Context context) {
-			ServerHttpResponse response = exchange.getResponse();
-			writeStatusAndHeaders(response);
+		protected Mono<Void> writeToInternal(ServerWebExchange exchange, Context context) {
 			MediaType responseContentType = exchange.getResponse().getHeaders().getContentType();
 			Locale locale = LocaleContextHolder.getLocale(exchange.getLocaleContext());
 			Stream<ViewResolver> viewResolverStream = context.viewResolvers().stream();

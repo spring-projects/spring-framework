@@ -17,8 +17,10 @@
 package org.springframework.web.reactive.function.server;
 
 import java.net.URI;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -278,6 +280,8 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 	static abstract class AbstractServerResponse implements ServerResponse {
 
+		private static final Set<HttpMethod> SAFE_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
+
 		final int statusCode;
 
 		private final HttpHeaders headers;
@@ -319,7 +323,21 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 			return this.cookies;
 		}
 
-		protected void writeStatusAndHeaders(ServerHttpResponse response) {
+		@Override
+		public final Mono<Void> writeTo(ServerWebExchange exchange, Context context) {
+			writeStatusAndHeaders(exchange.getResponse());
+
+			Instant lastModified = Instant.ofEpochMilli(headers().getLastModified());
+			HttpMethod httpMethod = exchange.getRequest().getMethod();
+			if (SAFE_METHODS.contains(httpMethod) && exchange.checkNotModified(headers().getETag(), lastModified)) {
+				return exchange.getResponse().setComplete();
+			}
+			else {
+				return writeToInternal(exchange, context);
+			}
+		}
+
+		private void writeStatusAndHeaders(ServerHttpResponse response) {
 			if (response instanceof AbstractServerHttpResponse) {
 				((AbstractServerHttpResponse) response).setStatusCodeValue(this.statusCode);
 			}
@@ -334,6 +352,8 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 			copy(this.headers, response.getHeaders());
 			copy(this.cookies, response.getCookies());
 		}
+
+		protected abstract Mono<Void> writeToInternal(ServerWebExchange exchange, Context context);
 
 		private static <K,V> void copy(MultiValueMap<K,V> src, MultiValueMap<K,V> dst) {
 			if (!src.isEmpty()) {
@@ -358,8 +378,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		}
 
 		@Override
-		public Mono<Void> writeTo(ServerWebExchange exchange, Context context) {
-			writeStatusAndHeaders(exchange.getResponse());
+		protected Mono<Void> writeToInternal(ServerWebExchange exchange, Context context) {
 			return this.writeFunction.apply(exchange, context);
 		}
 	}
@@ -381,10 +400,8 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		}
 
 		@Override
-		public Mono<Void> writeTo(ServerWebExchange exchange, Context context) {
-			ServerHttpResponse response = exchange.getResponse();
-			writeStatusAndHeaders(response);
-			return this.inserter.insert(response, new BodyInserter.Context() {
+		protected Mono<Void> writeToInternal(ServerWebExchange exchange, Context context) {
+			return this.inserter.insert(exchange.getResponse(), new BodyInserter.Context() {
 				@Override
 				public List<HttpMessageWriter<?>> messageWriters() {
 					return context.messageWriters();
