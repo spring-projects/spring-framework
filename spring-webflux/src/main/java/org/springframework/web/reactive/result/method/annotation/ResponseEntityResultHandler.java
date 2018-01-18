@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,9 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.time.Instant;
-import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 import reactor.core.publisher.Mono;
 
@@ -52,7 +53,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class ResponseEntityResultHandler extends AbstractMessageWriterResultHandler implements HandlerResultHandler {
 
-	private static final List<HttpMethod> SAFE_METHODS = Arrays.asList(HttpMethod.GET, HttpMethod.HEAD);
+	private static final Set<HttpMethod> SAFE_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
 
 
 	/**
