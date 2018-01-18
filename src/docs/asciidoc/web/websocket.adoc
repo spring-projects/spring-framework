@@ -1043,16 +1043,20 @@ check the STOMP page of the broker to understand what kind of STOMP destinations
 prefixes it supports.
 ====
 
-
-On the browser side, a client might connect as follows using
-https://github.com/jmesnil/stomp-websocket[stomp.js] and the
-https://github.com/sockjs/sockjs-client[sockjs-client]:
+To connect from a browser, for SockJS you can use the
+https://github.com/sockjs/sockjs-client[sockjs-client]. For STOMP many applications have
+used the https://github.com/jmesnil/stomp-websocket[jmesnil/stomp-websocket] library
+(also known as stomp.js) which is feature complete and has been used in production for
+years but is no longer maintained. At present the
+https://github.com/JSteunou/webstomp-client[JSteunou/webstomp-client] is the most
+actively maintained and evolving successor of that library and the example code below
+is based on it:
 
 [source,javascript,indent=0]
 [subs="verbatim,quotes"]
 ----
 	var socket = new SockJS("/spring-websocket-portfolio/portfolio");
-	var stompClient = Stomp.over(socket);
+	var stompClient = webstomp.over(socket);
 
 	stompClient.connect({}, function(frame) {
 	}
@@ -1074,6 +1078,13 @@ Note that the `stompClient` above does not need to specify `login` and `passcode
 Even if it did, they would be ignored, or rather overridden, on the server side. See the
 sections <<websocket-stomp-handle-broker-relay-configure>> and
 <<websocket-stomp-authentication>> for more information on authentication.
+
+For a more example code see:
+
+* https://spring.io/guides/gs/messaging-stomp-websocket/[Using WebSocket to build an
+interactive web application] getting started guide.
+* https://github.com/rstoyanchev/spring-websocket-portfolio[Stock Portfolio] sample
+application.
 
 
 
@@ -2140,8 +2151,9 @@ The WebSocket transport configuration shown above can also be used to configure 
 maximum allowed size for incoming STOMP messages. Although in theory a WebSocket
 message can be almost unlimited in size, in practice WebSocket servers impose
 limits -- for example, 8K on Tomcat and 64K on Jetty. For this reason STOMP clients
-such as stomp.js split larger STOMP messages at 16K boundaries and send them as
-multiple WebSocket messages thus requiring the server to buffer and re-assemble.
+such as the JavaScript https://github.com/JSteunou/webstomp-client[webstomp-client]
+and others split larger STOMP messages at 16K boundaries and send them as multiple
+WebSocket  messages thus requiring the server to buffer and re-assemble.
 
 Spring's STOMP over WebSocket support does this so applications can configure the
 maximum size for STOMP messages irrespective of WebSocket server specific message
