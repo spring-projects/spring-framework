@@ -1017,11 +1017,11 @@ Consider also customizing these server-side SockJS related properties (see Javad
 == STOMP
 
 The WebSocket protocol defines two types of messages, text and binary, but their
-content is undefined. It's expected that the client and server may agree on using
-a sub-protocol (i.e. a higher-level protocol) to define message semantics.
-While the use of a sub-protocol with WebSocket is completely optional either way
-client and server will need to agree on some kind of protocol to help interpret
-messages.
+content is undefined. The defines a mechanism for client and server to negotiate a
+sub-protocol -- i.e. a higher level messaging protocol, to use on top of WebSocket to
+define what kind of messages each can send, what is the format and content for each
+message, and so on. The use of a sub-protocol is optional but either way client and
+server will need to agree on some protocol that defines message content.
 
 
 
@@ -1118,29 +1118,34 @@ The above overview is intended to provide the most basic understanding of the
 STOMP protocol. It is recommended to review the protocol
 http://stomp.github.io/stomp-specification-1.2.html[specification] in full.
 
-The benefits of using STOMP as a WebSocket sub-protocol:
 
-* No need to invent a custom message format
-* Use existing https://github.com/jmesnil/stomp-websocket[stomp.js] client in the browser
-* Ability to route messages to based on destination
-* Option to use full-fledged message broker such as RabbitMQ, ActiveMQ, etc. for broadcasting
 
-Most importantly the use of STOMP (vs plain WebSocket) enables the Spring Framework
-to provide a programming model for application-level use in the same way that
-Spring MVC provides a programming model based on HTTP.
+[[websocket-stomp-benefits]]
+=== Benefits
+
+Use of STOMP as a sub-protocol enables the Spring Framework and Spring Security to
+provide a richer programming model vs using raw WebSockets. The same point can be
+made about how HTTP vs raw TCP and how it enables Spring MVC and other web frameworks
+to provide rich functionality. The following is a list of benefits:
+
+* No need to invent a custom messaging protocol and message format.
+* STOMP clients are available including a <<websocket-stomp-client,Java client>>
+in the Spring Framework.
+* Message brokers such as RabbitMQ, ActiveMQ, and others can be used (optionally) to
+manage subscriptions and broadcast messages.
+* Application logic can be organized in any number of ``@Controller``'s and messages
+routed to them based on the STOMP destination header vs handling raw WebSocket messages
+with a single `WebSocketHandler` for a given connection.
+* Use Spring Security to secure messages based on STOMP destinations and message types.
 
 
 
 [[websocket-stomp-enable]]
 === Enable STOMP
 
-The Spring Framework provides support for using STOMP over WebSocket through
-the +spring-messaging+ and +spring-websocket+ modules.
-Here is an example of exposing a STOMP WebSocket/SockJS endpoint at the URL path
-`/portfolio` where messages whose destination starts with "/app" are routed to
-message-handling methods (i.e. application work) and messages whose destinations
-start with "/topic" or "/queue" will be routed to the message broker (i.e.
-broadcasting to other connected clients):
+STOMP over WebSocket support is available in the `spring-messaging` and the
+`spring-websocket` modules. Once you have those dependencies, you can expose a STOMP
+endpoints, over WebSocket with <<websocket-fallback>>, as shown below:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1165,7 +1170,14 @@ broadcasting to other connected clients):
 	}
 ----
 
-and in XML:
+<1> `"/portfolio"` is the HTTP URL for the endpoint to which a WebSocket (or SockJS)
+client will need to connect to for the WebSocket handshake.
+<2> STOMP messages whose destination header begins with `"/app"` are routed to
+`@MessageMapping` methods in `@Controller` classes.
+<3> Use the built-in, message broker for subscriptions and broadcasting;
+Route messages whose destination header begins with "/topic" or "/queue" to the broker.
+
+The same configuration in XML:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes,attributes"]
@@ -1191,30 +1203,27 @@ and in XML:
 
 [NOTE]
 ====
-The "/app" prefix is arbitrary. You can pick any prefix. It's simply meant to differentiate
-messages to be routed to message-handling methods to do application work vs messages
-to be routed to the broker to broadcast to subscribed clients.
-
-The "/topic" and "/queue" prefixes depend on the broker in use. In the case of the simple,
-in-memory broker the prefixes do not have any special meaning; it's merely a convention
-that indicates how the destination is used (pub-sub targetting many subscribers or
-point-to-point messages typically targeting an individual recipient).
-In the case of using a dedicated broker, most brokers use "/topic" as
-a prefix for destinations with pub-sub semantics and "/queue" for destinations
-with point-to-point semantics. Check the STOMP page of the broker to see the destination
-semantics it supports.
+For the built-in, simple broker the "/topic" and "/queue" prefixes do not have any special
+meaning. They're merely a convention to differentiate between pub-sub vs point-to-point
+messaging (i.e. many subscribers vs one consumer). When using an external broker, please
+check the STOMP page of the broker to understand what kind of STOMP destinations and
+prefixes it supports.
 ====
 
-
-On the browser side, a client might connect as follows using
-https://github.com/jmesnil/stomp-websocket[stomp.js] and the
-https://github.com/sockjs/sockjs-client[sockjs-client]:
+To connect from a browser, for SockJS you can use the
+https://github.com/sockjs/sockjs-client[sockjs-client]. For STOMP many applications have
+used the https://github.com/jmesnil/stomp-websocket[jmesnil/stomp-websocket] library
+(also known as stomp.js) which is feature complete and has been used in production for
+years but is no longer maintained. At present the
+https://github.com/JSteunou/webstomp-client[JSteunou/webstomp-client] is the most
+actively maintained and evolving successor of that library and the example code below
+is based on it:
 
 [source,javascript,indent=0]
 [subs="verbatim,quotes"]
 ----
 	var socket = new SockJS("/spring-websocket-portfolio/portfolio");
-	var stompClient = Stomp.over(socket);
+	var stompClient = webstomp.over(socket);
 
 	stompClient.connect({}, function(frame) {
 	}
@@ -1237,65 +1246,76 @@ Even if it did, they would be ignored, or rather overridden, on the server side.
 sections <<websocket-stomp-handle-broker-relay-configure>> and
 <<websocket-stomp-authentication>> for more information on authentication.
 
+For a more example code see:
+
+* https://spring.io/guides/gs/messaging-stomp-websocket/[Using WebSocket to build an
+interactive web application] getting started guide.
+* https://github.com/rstoyanchev/spring-websocket-portfolio[Stock Portfolio] sample
+application.
+
 
 
 [[websocket-stomp-message-flow]]
 === Flow of Messages
 
-When a STOMP endpoint is configured, the Spring application acts as the STOMP broker
-to connected clients. This section provides a big picture overview of how messages flow
-within the application.
+Once a STOMP endpoint is exposed, the Spring application becomes a STOMP broker for
+connected clients. This section describes the flow of messages on the server side.
 
-The `spring-messaging` module provides the foundation for asynchronous message processing.
-It contains a number of abstractions that originated in the
-https://spring.io/spring-integration[Spring Integration] project and are intended
-for use as building blocks in messaging applications:
+The `spring-messaging` module contains foundational support for messaging applications
+that originated in https://spring.io/spring-integration[Spring Integration] and was
+later extracted and incorporated into the Spring Framework for broader use across many
+https://spring.io/projects[Spring projects] and application scenarios.
+Below is a list of a few of the available messaging abstractions:
 
 * {api-spring-framework}/messaging/Message.html[Message] --
-a message with headers and a payload.
+simple representation for a message including headers and payload.
 * {api-spring-framework}/messaging/MessageHandler.html[MessageHandler] --
-a contract for handling a message.
+contract for handling a message.
 * {api-spring-framework}/messaging/MessageChannel.html[MessageChannel] --
-a contract for sending a message enabling loose coupling between senders and receivers.
+contract for sending a message that enables loose coupling between producers and consumers.
 * {api-spring-framework}/messaging/SubscribableChannel.html[SubscribableChannel] --
-extends `MessageChannel` and sends messages to registered `MessageHandler` subscribers.
+`MessageChannel` with `MessageHandler` subscribers.
 * {api-spring-framework}/messaging/support/ExecutorSubscribableChannel.html[ExecutorSubscribableChannel] --
-a concrete implementation of `SubscribableChannel` that can deliver messages
-asynchronously via a thread pool.
+`SubscribableChannel` that uses an `Executor` for delivering messages.
 
-The `@EnableWebSocketMessageBroker` Java config and the `<websocket:message-broker>` XML config
-both assemble a concrete message flow. Below is a diagram of the part of the setup when using
-the simple, in-memory broker:
+Both the Java config (i.e. `@EnableWebSocketMessageBroker`) and the XML namespace config
+(i.e. `<websocket:message-broker>`) use the above components to assemble a message
+workflow. The diagram below shows the components used when the simple, built-in message
+broker is enabled:
 
 image::images/message-flow-simple-broker.png[width=640]
 
-The above setup that includes 3 message channels:
+There are 3 message channels in the above diagram:
 
-* `"clientInboundChannel"` for messages from WebSocket clients.
-* `"clientOutboundChannel"` for messages to WebSocket clients.
-* `"brokerChannel"` for messages to the broker from within the application.
+* `"clientInboundChannel"` -- for passing messages received from WebSocket clients.
+* `"clientOutboundChannel"` -- for sending server messages to WebSocket clients.
+* `"brokerChannel"` -- for sending messages to the message broker from within
+server-side, application code.
 
-The same three channels are also used with a dedicated broker except here a
-"broker relay" takes the place of the simple broker:
+The next diagram shows the components used when an external broker (e.g. RabbitMQ)
+is configured for managing subscriptions and broadcasting messages:
 
 image::images/message-flow-broker-relay.png[width=640]
 
-Messages on the `"clientInboundChannel"` can flow to annotated
-methods for application handling (e.g. a stock trade execution request) or can
-be forwarded to the broker (e.g. client subscribing for stock quotes).
-The STOMP destination is used for simple prefix-based routing. For example
-the "/app" prefix could route messages to annotated methods while the "/topic"
-and "/queue" prefixes could route messages to the broker.
+The main difference in the above diagram is the use of the "broker relay" for passing
+messages up to the external STOMP broker over TCP, and for passing messages down from the
+broker to subscribed clients.
 
-When a message-handling annotated method has a return type, its return
-value is sent as the payload of a Spring `Message` to the `"brokerChannel"`.
-The broker in turn broadcasts the message to clients. Sending a message
-to a destination can also be done from anywhere in the application with
-the help of a messaging template. For example, an HTTP POST handling method
-can broadcast a message to connected clients, or a service component may
-periodically broadcast stock quotes.
+When messages are received from a WebSocket connectin, they're decoded to STOMP frames,
+then turned into a Spring `Message` representation, and sent to the
+`"clientInboundChannel"` for further processing. For example STOMP messages whose
+destination header starts with `"/app"` may be routed to `@MessageMapping` methods in
+annotated controllers, while `"/topic"` and `"/queue"` messages may be routed directly
+to the message broker.
 
-Below is a simple example to illustrate the flow of messages:
+An annotated `@Controller` handling a STOMP message from a client may send a message to
+the message broker through the `"brokerChannel"`, and the broker will broadcast the
+message to matching subscribers through the `"clientOutboundChannel"`. The same
+controller can also do the same in response to HTTP requests, so a client may perform an
+HTTP POST and then an `@PostMapping` method can send a message to the message broker
+to broadcast to subscribed clients.
+
+Let's trace the flow through a simple example. Given the following server setup:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1329,18 +1349,22 @@ Below is a simple example to illustrate the flow of messages:
 
 ----
 
-The following explains the message flow for the above example:
-
-* WebSocket clients connect to the WebSocket endpoint at "/portfolio".
-* Subscriptions to "/topic/greeting" pass through the "clientInboundChannel"
-and are forwarded to the broker.
-* Greetings sent to "/app/greeting" pass through the "clientInboundChannel"
-and are forwarded to the `GreetingController`. The controller adds the current
-time, and the return value is passed through the "brokerChannel" as a message
-to "/topic/greeting" (destination is selected based on a convention but can be
-overridden via `@SendTo`).
-* The broker in turn broadcasts messages to subscribers, and they pass through
-the `"clientOutboundChannel"`.
+. Client connects to `"http://localhost:8080/portfolio"` and once a WebSocket connection
+is established, STOMP frames begin to flow on it.
+. Client sends SUBSCRIBE frame with destination header `"/topic/greeting"`. Once received
+and decoded, the message is sent to the `"clientInboundChannel"`, then routed to the
+message broker which stores the client subscription.
+. Client sends SEND frame to `"/app/greeting"`. The `"/app"` prefix helps to route it to
+annotated controllers. After the `"/app"` prefix is stripped, the remaining `"/greeting"`
+part of the destination is mapped to the `@MessageMapping` method in `GreetingController`.
+. The value returned from `GreetingController` is turned into a Spring `Message` with
+a payload based on the return value and a default destination header of
+`"/topic/greeting"` (derived from the input destination with `"/app"` replaced by
+`"/topic"`). The resulting message is sent to the "brokerChannel" and handled
+by the message broker.
+. The message broker finds all matching subscribers, and sends a MESSAGE frame to each
+through the `"clientOutboundChannel"` from where messages are encoded as STOMP frames
+and sent on the WebSocket connection.
 
 The next section provides more details on annotated methods including the
 kinds of arguments and return values supported.
