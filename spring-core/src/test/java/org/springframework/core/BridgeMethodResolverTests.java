@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -782,7 +782,7 @@ public class BridgeMethodResolverTests {
 	}
 
 
-	@SuppressWarnings({ "unused", "unchecked" })
+	@SuppressWarnings({"unused", "unchecked"})
 	public static abstract class GenericEventBroadcasterImpl<T extends Event>
 			extends GenericBroadcasterImpl implements EventBroadcaster {
 
@@ -847,10 +847,10 @@ public class BridgeMethodResolverTests {
 	}
 
 
-	@SuppressWarnings("unchecked")
-	public static class MessageBroadcasterImpl extends
-			GenericEventBroadcasterImpl<MessageEvent>
-			implements MessageBroadcaster {
+	@SuppressWarnings({"serial", "unchecked"})
+	public static class MessageBroadcasterImpl extends GenericEventBroadcasterImpl<MessageEvent>
+			implements Serializable,  // implement an unrelated interface first (SPR-16288)
+			MessageBroadcaster {
 
 		public MessageBroadcasterImpl() {
 			super(NewMessageEvent.class);
@@ -1005,8 +1005,8 @@ public class BridgeMethodResolverTests {
 	}
 
 
-	public static class HibernateRepositoryRegistry extends
-			SettableRepositoryRegistry<GenericHibernateRepository<?, ?>> {
+	public static class HibernateRepositoryRegistry
+			extends SettableRepositoryRegistry<GenericHibernateRepository<?, ?>> {
 
 		@Override
 		public void injectInto(GenericHibernateRepository<?, ?> rep) {
