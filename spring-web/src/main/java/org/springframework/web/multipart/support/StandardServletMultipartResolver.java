@@ -21,6 +21,7 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
@@ -67,11 +68,11 @@ public class StandardServletMultipartResolver implements MultipartResolver {
 	@Override
 	public boolean isMultipart(HttpServletRequest request) {
 		// Same check as in Commons FileUpload...
-		if (!"post".equals(request.getMethod().toLowerCase())) {
+		if (!"post".equalsIgnoreCase(request.getMethod())) {
 			return false;
 		}
 		String contentType = request.getContentType();
-		return (contentType != null && contentType.toLowerCase().startsWith("multipart/"));
+		return StringUtils.startsWithIgnoreCase(contentType, "multipart/");
 	}
 
 	@Override

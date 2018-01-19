@@ -481,24 +481,24 @@ public abstract class JdbcUtils {
 		StringBuilder result = new StringBuilder();
 		boolean nextIsUpper = false;
 		if (name != null && name.length() > 0) {
-			if (name.length() > 1 && name.substring(1, 2).equals("_")) {
-				result.append(name.substring(0, 1).toUpperCase());
+			if (name.length() > 1 && name.charAt(1) == '_') {
+				result.append(Character.toUpperCase(name.charAt(0)));
 			}
 			else {
-				result.append(name.substring(0, 1).toLowerCase());
+				result.append(Character.toLowerCase(name.charAt(0)));
 			}
 			for (int i = 1; i < name.length(); i++) {
-				String s = name.substring(i, i + 1);
-				if (s.equals("_")) {
+				char c = name.charAt(i);
+				if (c == '_') {
 					nextIsUpper = true;
 				}
 				else {
 					if (nextIsUpper) {
-						result.append(s.toUpperCase());
+						result.append(Character.toUpperCase(c));
 						nextIsUpper = false;
 					}
 					else {
-						result.append(s.toLowerCase());
+						result.append(Character.toLowerCase(c));
 					}
 				}
 			}
