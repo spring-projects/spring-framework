@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,9 +57,9 @@ class MessageBodyClientHttpResponseWrapper implements ClientHttpResponse {
 	 */
 	public boolean hasMessageBody() throws IOException {
 		try {
-			HttpStatus responseStatus = getStatusCode();
-			if (responseStatus.is1xxInformational() || responseStatus == HttpStatus.NO_CONTENT ||
-					responseStatus == HttpStatus.NOT_MODIFIED) {
+			HttpStatus status = getStatusCode();
+			if (status != null && status.is1xxInformational() || status == HttpStatus.NO_CONTENT ||
+					status == HttpStatus.NOT_MODIFIED) {
 				return false;
 			}
 		}
