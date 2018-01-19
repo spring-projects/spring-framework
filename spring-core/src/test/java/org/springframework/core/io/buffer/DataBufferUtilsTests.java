@@ -52,10 +52,11 @@ import static org.mockito.Mockito.*;
 public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
-	public void readReadableByteChannel() throws Exception {
+	public void readByteChannel() throws Exception {
 		URI uri = DataBufferUtilsTests.class.getResource("DataBufferUtilsTests.txt").toURI();
-		FileChannel channel = FileChannel.open(Paths.get(uri), StandardOpenOption.READ);
-		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.bufferFactory, 3);
+		Flux<DataBuffer> flux =
+				DataBufferUtils.readByteChannel(() -> FileChannel.open(Paths.get(uri), StandardOpenOption.READ),
+						this.bufferFactory, 3);
 
 		StepVerifier.create(flux)
 				.consumeNextWith(stringConsumer("foo"))
@@ -64,16 +65,14 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 				.consumeNextWith(stringConsumer("qux"))
 				.expectComplete()
 				.verify(Duration.ofSeconds(5));
-
-		assertFalse(channel.isOpen());
 	}
 
 	@Test
 	public void readAsynchronousFileChannel() throws Exception {
 		URI uri = DataBufferUtilsTests.class.getResource("DataBufferUtilsTests.txt").toURI();
-		AsynchronousFileChannel
-				channel = AsynchronousFileChannel.open(Paths.get(uri), StandardOpenOption.READ);
-		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.bufferFactory, 3);
+		Flux<DataBuffer> flux = DataBufferUtils.readAsynchronousFileChannel(
+				() -> AsynchronousFileChannel.open(Paths.get(uri), StandardOpenOption.READ),
+				this.bufferFactory, 3);
 
 		StepVerifier.create(flux)
 				.consumeNextWith(stringConsumer("foo"))
@@ -87,9 +86,9 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 	@Test
 	public void readAsynchronousFileChannelPosition() throws Exception {
 		URI uri = DataBufferUtilsTests.class.getResource("DataBufferUtilsTests.txt").toURI();
-		AsynchronousFileChannel
-				channel = AsynchronousFileChannel.open(Paths.get(uri), StandardOpenOption.READ);
-		Flux<DataBuffer> flux = DataBufferUtils.read(channel, 3, this.bufferFactory, 3);
+		Flux<DataBuffer> flux = DataBufferUtils.readAsynchronousFileChannel(
+				() -> AsynchronousFileChannel.open(Paths.get(uri), StandardOpenOption.READ),
+				3, this.bufferFactory, 3);
 
 		StepVerifier.create(flux)
 				.consumeNextWith(stringConsumer("bar"))
@@ -100,25 +99,11 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 	}
 
 	@Test
-	public void readUnalignedChannel() throws Exception {
-		URI uri = DataBufferUtilsTests.class.getResource("DataBufferUtilsTests.txt").toURI();
-		FileChannel channel = FileChannel.open(Paths.get(uri), StandardOpenOption.READ);
-		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.bufferFactory, 5);
-
-		StepVerifier.create(flux)
-				.consumeNextWith(stringConsumer("fooba"))
-				.consumeNextWith(stringConsumer("rbazq"))
-				.consumeNextWith(stringConsumer("ux"))
-				.expectComplete()
-				.verify(Duration.ofSeconds(5));
-
-		assertFalse(channel.isOpen());
-	}
-
-	@Test
 	public void readInputStream() throws Exception {
 		InputStream is = DataBufferUtilsTests.class.getResourceAsStream("DataBufferUtilsTests.txt");
-		Flux<DataBuffer> flux = DataBufferUtils.read(is, this.bufferFactory, 3);
+		Flux<DataBuffer> flux = DataBufferUtils.readInputStream(
+				() -> DataBufferUtilsTests.class.getResourceAsStream("DataBufferUtilsTests.txt"),
+				this.bufferFactory, 3);
 
 		StepVerifier.create(flux)
 				.consumeNextWith(stringConsumer("foo"))
@@ -317,7 +302,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 				.thenAnswer(putByte('c'))
 				.thenReturn(-1);
 
-		Flux<DataBuffer> read = DataBufferUtils.read(channel, this.bufferFactory, 1);
+		Flux<DataBuffer> read = DataBufferUtils.readByteChannel(() -> channel, this.bufferFactory, 1);
 
 		StepVerifier.create(read)
 				.consumeNextWith(stringConsumer("a"))

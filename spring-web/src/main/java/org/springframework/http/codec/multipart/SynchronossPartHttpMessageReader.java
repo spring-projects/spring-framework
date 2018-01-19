@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.http.codec.multipart;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
@@ -268,8 +267,8 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 
 		@Override
 		public Flux<DataBuffer> content() {
-			InputStream inputStream = this.storage.getInputStream();
-			return DataBufferUtils.read(inputStream, getBufferFactory(), 4096);
+			return DataBufferUtils.readInputStream(this.storage::getInputStream, getBufferFactory(),
+					4096);
 		}
 
 		protected StreamStorage getStorage() {
