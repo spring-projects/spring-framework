@@ -272,13 +272,10 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 		Mono<Void> partWritten = ((HttpMessageWriter<T>) writer.get())
 				.write(bodyPublisher, resolvableType, contentType, outputMessage, Collections.emptyMap());
 
-		// partWritten.subscribe() is required in order to make sure MultipartHttpOutputMessage#getBody()
-		// returns a non-null value (occurs with ResourceHttpMessageWriter that invokes
-		// ReactiveHttpOutputMessage.writeWith() only when at least one element has been requested).
-		partWritten.subscribe();
-
 		return Flux.concat(
-				Mono.just(generateBoundaryLine(boundary)), outputMessage.getBody(), Mono.just(generateNewLine()));
+				Mono.just(generateBoundaryLine(boundary)),
+				partWritten.thenMany(Flux.defer(outputMessage::getBody)),
+				Mono.just(generateNewLine()));
 	}
 
 
