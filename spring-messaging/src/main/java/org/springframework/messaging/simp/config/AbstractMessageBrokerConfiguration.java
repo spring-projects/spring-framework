@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.config;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -284,7 +285,18 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	@Bean
 	public AbstractBrokerMessageHandler simpleBrokerMessageHandler() {
 		SimpleBrokerMessageHandler handler = getBrokerRegistry().getSimpleBroker(brokerChannel());
-		return (handler != null ? handler : new NoOpBrokerMessageHandler());
+		if (handler == null) {
+			return new NoOpBrokerMessageHandler();
+		}
+		updateUserDestinationResolver(handler);
+		return handler;
+	}
+
+	private void updateUserDestinationResolver(AbstractBrokerMessageHandler handler) {
+		Collection<String> prefixes = handler.getDestinationPrefixes();
+		if (!prefixes.isEmpty() && !prefixes.iterator().next().startsWith("/")) {
+			((DefaultUserDestinationResolver) userDestinationResolver()).setRemoveLeadingSlash(true);
+		}
 	}
 
 	@Bean
@@ -303,6 +315,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 			subscriptions.put(destination, userRegistryMessageHandler());
 		}
 		handler.setSystemSubscriptions(subscriptions);
+		updateUserDestinationResolver(handler);
 		return handler;
 	}
 
@@ -387,7 +400,6 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (prefix != null) {
 			resolver.setUserDestinationPrefix(prefix);
 		}
-		resolver.setPathMatcher(getBrokerRegistry().getPathMatcher());
 		return resolver;
 	}
 

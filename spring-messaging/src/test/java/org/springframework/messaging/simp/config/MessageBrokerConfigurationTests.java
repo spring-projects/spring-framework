@@ -25,13 +25,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
-import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
@@ -44,7 +44,9 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry;
@@ -66,6 +68,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.PathMatcher;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean;
@@ -412,7 +415,7 @@ public class MessageBrokerConfigurationTests {
 
 		DefaultUserDestinationResolver resolver = context.getBean(DefaultUserDestinationResolver.class);
 		assertNotNull(resolver);
-		assertEquals(false, new DirectFieldAccessor(resolver).getPropertyValue("keepLeadingSlash"));
+		assertEquals(false, resolver.isRemoveLeadingSlash());
 	}
 
 	@Test
@@ -458,6 +461,67 @@ public class MessageBrokerConfigurationTests {
 		String name = "userRegistryMessageHandler";
 		MessageHandler messageHandler = context.getBean(name, MessageHandler.class);
 		assertNotEquals(UserRegistryMessageHandler.class, messageHandler.getClass());
+	}
+
+	@Test // SPR-16275
+	public void dotSeparatorWithBrokerSlashConvention() {
+		ApplicationContext context = loadConfig(DotSeparatorWithSlashBrokerConventionConfig.class);
+		testDotSeparator(context, true);
+	}
+
+	@Test // SPR-16275
+	public void dotSeparatorWithBrokerDotConvention() {
+		ApplicationContext context = loadConfig(DotSeparatorWithDotBrokerConventionConfig.class);
+		testDotSeparator(context, false);
+	}
+
+	private void testDotSeparator(ApplicationContext context, boolean expectLeadingSlash) {
+		MessageChannel inChannel = context.getBean("clientInboundChannel", MessageChannel.class);
+		TestChannel outChannel = context.getBean("clientOutboundChannel", TestChannel.class);
+		MessageChannel brokerChannel = context.getBean("brokerChannel", MessageChannel.class);
+
+
+		// 1. Subscribe to user destination
+
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
+		headers.setSessionId("sess1");
+		headers.setSubscriptionId("subs1");
+		headers.setDestination("/user/queue.q1");
+		Message<?> message = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
+		inChannel.send(message);
+
+		// 2. Send message to user via inboundChannel
+
+		headers = StompHeaderAccessor.create(StompCommand.SEND);
+		headers.setSessionId("sess1");
+		headers.setDestination("/user/sess1/queue.q1");
+		message = MessageBuilder.createMessage("123".getBytes(), headers.getMessageHeaders());
+		inChannel.send(message);
+
+		assertEquals(1, outChannel.messages.size());
+		Message<?> outputMessage = outChannel.messages.remove(0);
+		headers = StompHeaderAccessor.wrap(outputMessage);
+
+		assertEquals(SimpMessageType.MESSAGE, headers.getMessageType());
+		assertEquals(expectLeadingSlash ? "/queue.q1-usersess1" : "queue.q1-usersess1", headers.getDestination());
+		assertEquals("123", new String((byte[]) outputMessage.getPayload()));
+
+
+		// 3. Send message via broker channel
+
+		SimpMessagingTemplate template = new SimpMessagingTemplate(brokerChannel);
+		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create();
+		accessor.setSessionId("sess1");
+		template.convertAndSendToUser("sess1", "queue.q1", "456".getBytes(), accessor.getMessageHeaders());
+
+		assertEquals(1, outChannel.messages.size());
+		outputMessage = outChannel.messages.remove(0);
+		headers = StompHeaderAccessor.wrap(outputMessage);
+
+		assertEquals(SimpMessageType.MESSAGE, headers.getMessageType());
+		assertEquals(expectLeadingSlash ? "/queue.q1-usersess1" : "queue.q1-usersess1", headers.getDestination());
+		assertEquals("456", new String((byte[]) outputMessage.getPayload()));
+
 	}
 
 	private AnnotationConfigApplicationContext loadConfig(Class<?> configClass) {
@@ -571,6 +635,60 @@ public class MessageBrokerConfigurationTests {
 			registry.configureBrokerChannel().taskExecutor().corePoolSize(31).maxPoolSize(32).keepAliveSeconds(33).queueCapacity(34);
 			registry.setPathMatcher(new AntPathMatcher(".")).enableSimpleBroker("/topic", "/queue");
 			registry.setCacheLimit(8192);
+		}
+	}
+
+
+	@Configuration
+	static abstract class BaseDotSeparatorConfig extends BaseTestMessageBrokerConfig {
+
+		@Override
+		protected void configureMessageBroker(MessageBrokerRegistry registry) {
+			registry.setPathMatcher(new AntPathMatcher("."));
+		}
+
+		@Override
+		@Bean
+		public AbstractSubscribableChannel clientInboundChannel() {
+			// synchronous
+			return new ExecutorSubscribableChannel(null);
+		}
+
+		@Override
+		@Bean
+		public AbstractSubscribableChannel clientOutboundChannel() {
+			return new TestChannel();
+		}
+
+		@Override
+		@Bean
+		public AbstractSubscribableChannel brokerChannel() {
+			// synchronous
+			return new ExecutorSubscribableChannel(null);
+		}
+	}
+
+	@Configuration
+	static class DotSeparatorWithSlashBrokerConventionConfig extends BaseDotSeparatorConfig {
+
+		// RabbitMQ-style broker convention for STOMP destinations
+
+		@Override
+		protected void configureMessageBroker(MessageBrokerRegistry registry) {
+			super.configureMessageBroker(registry);
+			registry.enableSimpleBroker("/topic", "/queue");
+		}
+	}
+
+	@Configuration
+	static class DotSeparatorWithDotBrokerConventionConfig extends BaseDotSeparatorConfig {
+
+		// Artemis-style broker convention for STOMP destinations
+
+		@Override
+		protected void configureMessageBroker(MessageBrokerRegistry registry) {
+			super.configureMessageBroker(registry);
+			registry.enableSimpleBroker("topic.", "queue.");
 		}
 	}
 

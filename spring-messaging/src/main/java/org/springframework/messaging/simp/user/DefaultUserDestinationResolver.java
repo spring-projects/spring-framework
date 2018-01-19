@@ -58,7 +58,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 
 	private String prefix = "/user/";
 
-	private boolean keepLeadingSlash = true;
+	private boolean removeLeadingSlash = false;
 
 
 	/**
@@ -98,6 +98,29 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	}
 
 	/**
+	 * Use this property to indicate whether the leading slash from translated
+	 * user destinations should be removed or not. This depends on the
+	 * destination prefixes the message broker is configured with.
+	 * <p>By default this is set to {@code false}, i.e. "do not change the
+	 * target destination", although
+	 * {@link org.springframework.messaging.simp.config.AbstractMessageBrokerConfiguration
+	 * AbstractMessageBrokerConfiguration} may change that to {@code true} if
+	 * the configured destinations do not have a leading slash.
+	 * @param remove whether to remove the leading slash
+	 * @since 4.3.14
+	 */
+	public void setRemoveLeadingSlash(boolean remove) {
+		this.removeLeadingSlash = remove;
+	}
+
+	/**
+	 * Whether to remove the leading slash from target destinations.
+	 */
+	public boolean isRemoveLeadingSlash() {
+		return this.removeLeadingSlash;
+	}
+
+	/**
 	 * Provide the {@code PathMatcher} in use for working with destinations
 	 * which in turn helps to determine whether the leading slash should be
 	 * kept in actual destinations after removing the
@@ -110,11 +133,14 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	 * jms.queue.position-updates}.
 	 * @param pathMatcher the PathMatcher used to work with destinations
 	 * @since 4.3
+	 * @deprecated as of 4.3.14 this property is no longer used and is replaced
+	 * by {@link #setRemoveLeadingSlash(boolean)} that indicates more explicitly
+	 * whether to keep the leading slash which may or may not be the case
+	 * regardless of how the {@code PathMatcher} is configured.
 	 */
+	@Deprecated
 	public void setPathMatcher(PathMatcher pathMatcher) {
-		if (pathMatcher != null) {
-			this.keepLeadingSlash = pathMatcher.combine("1", "2").equals("1/2");
-		}
+		// Do nothing
 	}
 
 
@@ -166,7 +192,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		}
 		int prefixEnd = this.prefix.length() - 1;
 		String actualDestination = sourceDestination.substring(prefixEnd);
-		if (!this.keepLeadingSlash) {
+		if (isRemoveLeadingSlash()) {
 			actualDestination = actualDestination.substring(1);
 		}
 		Principal principal = SimpMessageHeaderAccessor.getUser(headers);
@@ -193,7 +219,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		else {
 			sessionIds = getSessionIdsByUser(userName, sessionId);
 		}
-		if (!this.keepLeadingSlash) {
+		if (isRemoveLeadingSlash()) {
 			actualDestination = actualDestination.substring(1);
 		}
 		return new ParseResult(sourceDestination, actualDestination, subscribeDestination,
