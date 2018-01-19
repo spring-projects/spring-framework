@@ -251,7 +251,6 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(headers);
 		String destination = SimpMessageHeaderAccessor.getDestination(headers);
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
-		Principal user = SimpMessageHeaderAccessor.getUser(headers);
 
 		updateSessionReadTime(sessionId);
 
@@ -267,6 +266,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			logMessage(message);
 			long[] clientHeartbeat = SimpMessageHeaderAccessor.getHeartbeat(headers);
 			long[] serverHeartbeat = getHeartbeatValue();
+			Principal user = SimpMessageHeaderAccessor.getUser(headers);
 			this.sessions.put(sessionId, new SessionInfo(sessionId, user, clientHeartbeat, serverHeartbeat));
 			SimpMessageHeaderAccessor connectAck = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
 			initHeaders(connectAck);
@@ -279,6 +279,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		}
 		else if (SimpMessageType.DISCONNECT.equals(messageType)) {
 			logMessage(message);
+			Principal user = SimpMessageHeaderAccessor.getUser(headers);
 			handleDisconnect(sessionId, user, message);
 		}
 		else if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
