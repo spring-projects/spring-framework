@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,10 +86,11 @@ final class HierarchicalUriComponents extends UriComponents {
 		this.userInfo = userInfo;
 		this.host = host;
 		this.port = port;
-		this.path = path != null ? path : NULL_PATH_COMPONENT;
+		this.path = (path != null ? path : NULL_PATH_COMPONENT);
 		this.queryParams = CollectionUtils.unmodifiableMultiValueMap(
 				queryParams != null ? queryParams : new LinkedMultiValueMap<String, String>(0));
 		this.encoded = encoded;
+
 		if (verify) {
 			verify();
 		}
@@ -668,7 +669,10 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public List<String> getPathSegments() {
-			String[] segments = StringUtils.tokenizeToStringArray(this.path, PATH_DELIMITER_STRING);
+			String[] segments = StringUtils.tokenizeToStringArray(getPath(), PATH_DELIMITER_STRING);
+			if (segments == null) {
+				return Collections.emptyList();
+			}
 			return Collections.unmodifiableList(Arrays.asList(segments));
 		}
 
@@ -680,7 +684,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public void verify() {
-			verifyUriComponent(this.path, Type.PATH);
+			verifyUriComponent(getPath(), Type.PATH);
 		}
 
 		@Override
@@ -697,12 +701,12 @@ final class HierarchicalUriComponents extends UriComponents {
 		@Override
 		public boolean equals(Object obj) {
 			return (this == obj || (obj instanceof FullPathComponent &&
-					getPath().equals(((FullPathComponent) obj).getPath())));
+					ObjectUtils.nullSafeEquals(getPath(), ((FullPathComponent) obj).getPath())));
 		}
 
 		@Override
 		public int hashCode() {
-			return getPath().hashCode();
+			return ObjectUtils.nullSafeHashCode(getPath());
 		}
 	}
 
