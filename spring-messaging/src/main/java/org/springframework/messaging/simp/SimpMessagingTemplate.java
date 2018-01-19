@@ -225,6 +225,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 		Assert.notNull(user, "User must not be null");
 		user = StringUtils.replace(user, "/", "%2F");
+		destination = destination.startsWith("/") ? destination : "/" + destination;
 		super.convertAndSend(this.destinationPrefix + user + destination, payload, headers, postProcessor);
 	}
 
