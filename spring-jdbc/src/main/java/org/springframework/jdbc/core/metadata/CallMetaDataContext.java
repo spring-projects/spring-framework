@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,43 +51,43 @@ import org.springframework.util.StringUtils;
  */
 public class CallMetaDataContext {
 
-	/** Logger available to subclasses */
+	// Logger available to subclasses
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** name of procedure to call **/
+	// Name of procedure to call
 	private String procedureName;
 
-	/** name of catalog for call **/
+	// Name of catalog for call
 	private String catalogName;
 
-	/** name of schema for call **/
+	// Name of schema for call
 	private String schemaName;
 
-	/** List of SqlParameter objects to be used in call execution */
+	// List of SqlParameter objects to be used in call execution
 	private List<SqlParameter> callParameters = new ArrayList<SqlParameter>();
 
-	/** Actual name to use for the return value in the output map */
+	// Actual name to use for the return value in the output map
 	private String actualFunctionReturnName;
 
-	/** Set of in parameter names to exclude use for any not listed */
+	// Set of in parameter names to exclude use for any not listed
 	private Set<String> limitedInParameterNames = new HashSet<String>();
 
-	/** List of SqlParameter names for out parameters */
+	// List of SqlParameter names for out parameters
 	private List<String> outParameterNames = new ArrayList<String>();
 
-	/** Indicates whether this is a procedure or a function **/
+	// Indicates whether this is a procedure or a function
 	private boolean function = false;
 
-	/** Indicates whether this procedure's return value should be included  **/
+	// Indicates whether this procedure's return value should be included
 	private boolean returnValueRequired = false;
 
-	/** Should we access call parameter meta data info or not */
+	// Should we access call parameter meta data info or not
 	private boolean accessCallParameterMetaData = true;
 
-	/** Should we bind parameter by name **/
+	// Should we bind parameter by name
 	private boolean namedBinding;
 
-	/** The provider of call meta data */
+	// The provider of call meta data
 	private CallMetaDataProvider metaDataProvider;
 
 

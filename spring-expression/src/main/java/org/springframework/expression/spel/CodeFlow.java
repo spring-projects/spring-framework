@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,10 +149,8 @@ public class CodeFlow implements Opcodes {
 	 * Return the descriptor for the item currently on top of the stack (in the current scope).
 	 */
 	public String lastDescriptor() {
-		if (this.compilationScopes.peek().isEmpty()) {
-			return null;
-		}
-		return this.compilationScopes.peek().get(this.compilationScopes.peek().size() - 1);
+		ArrayList<String> scopes = this.compilationScopes.peek();
+		return (!scopes.isEmpty() ? scopes.get(scopes.size() - 1) : null);
 	}
 
 	/**
@@ -161,7 +159,7 @@ public class CodeFlow implements Opcodes {
 	 * @param mv the visitor into which new instructions should be inserted
 	 */
 	public void unboxBooleanIfNecessary(MethodVisitor mv) {
-		if (lastDescriptor().equals("Ljava/lang/Boolean")) {
+		if ("Ljava/lang/Boolean".equals(lastDescriptor())) {
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z", false);
 		}
 	}

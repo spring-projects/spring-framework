@@ -70,9 +70,8 @@ public class FunctionReference extends SpelNodeImpl {
 		if (value == TypedValue.NULL) {
 			throw new SpelEvaluationException(getStartPosition(), SpelMessage.FUNCTION_NOT_DEFINED, this.name);
 		}
-
-		// Two possibilities: a lambda function or a Java static method registered as a function
 		if (!(value.getValue() instanceof Method)) {
+			// Two possibilities: a lambda function or a Java static method registered as a function
 			throw new SpelEvaluationException(
 					SpelMessage.FUNCTION_REFERENCE_CANNOT_BE_INVOKED, this.name, value.getClass());
 		}
@@ -96,11 +95,13 @@ public class FunctionReference extends SpelNodeImpl {
 	private TypedValue executeFunctionJLRMethod(ExpressionState state, Method method) throws EvaluationException {
 		Object[] functionArgs = getArguments(state);
 
-		if (!method.isVarArgs() && method.getParameterCount() != functionArgs.length) {
-			throw new SpelEvaluationException(SpelMessage.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION,
-					functionArgs.length, method.getParameterCount());
+		if (!method.isVarArgs()) {
+			int declaredParamCount = method.getParameterTypes().length;
+			if (declaredParamCount != functionArgs.length) {
+				throw new SpelEvaluationException(SpelMessage.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION,
+						functionArgs.length, declaredParamCount);
+			}
 		}
-		// Only static methods can be called in this way
 		if (!Modifier.isStatic(method.getModifiers())) {
 			throw new SpelEvaluationException(getStartPosition(),
 					SpelMessage.FUNCTION_MUST_BE_STATIC, ClassUtils.getQualifiedMethodName(method), this.name);

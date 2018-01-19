@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,13 +94,15 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 		if (this.mostSpecificMethod != null) {
 			return this.mostSpecificMethod;
 		}
-		else if (AopUtils.isAopProxy(this.bean)) {
-			Class<?> target = AopProxyUtils.ultimateTargetClass(this.bean);
-			return AopUtils.getMostSpecificMethod(getMethod(), target);
+		Method method = getMethod();
+		if (method != null) {
+			Object bean = getBean();
+			if (AopUtils.isAopProxy(bean)) {
+				Class<?> targetClass = AopProxyUtils.ultimateTargetClass(bean);
+				method = AopUtils.getMostSpecificMethod(method, targetClass);
+			}
 		}
-		else {
-			return getMethod();
-		}
+		return method;
 	}
 
 	/**

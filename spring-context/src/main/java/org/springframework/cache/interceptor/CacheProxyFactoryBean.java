@@ -22,7 +22,6 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.SmartInitializingSingleton;
-import org.springframework.cache.CacheManager;
 
 /**
  * Proxy factory bean for simplified declarative caching handling.
@@ -54,7 +53,7 @@ public class CacheProxyFactoryBean extends AbstractSingletonProxyFactoryBean
 
 
 	/**
-	 * Set the sources used to find cache operations.
+	 * Set one or more sources to find cache operations.
 	 * @see CacheInterceptor#setCacheOperationSources
 	 */
 	public void setCacheOperationSources(CacheOperationSource... cacheOperationSources) {
@@ -62,42 +61,9 @@ public class CacheProxyFactoryBean extends AbstractSingletonProxyFactoryBean
 	}
 
 	/**
-	 * Set the default {@link KeyGenerator} that this cache aspect should delegate to
-	 * if no specific key generator has been set for the operation.
-	 * <p>The default is a {@link SimpleKeyGenerator}.
-	 * @since 5.0.3
-	 * @see CacheInterceptor#setKeyGenerator
-	 */
-	public void setKeyGenerator(KeyGenerator keyGenerator) {
-		this.cacheInterceptor.setKeyGenerator(keyGenerator);
-	}
-
-	/**
-	 * Set the default {@link CacheResolver} that this cache aspect should delegate
-	 * to if no specific cache resolver has been set for the operation.
-	 * <p>The default resolver resolves the caches against their names and the
-	 * default cache manager.
-	 * @since 5.0.3
-	 * @see CacheInterceptor#setCacheResolver
-	 */
-	public void setCacheResolver(CacheResolver cacheResolver) {
-		this.cacheInterceptor.setCacheResolver(cacheResolver);
-	}
-
-	/**
-	 * Set the {@link CacheManager} to use to create a default {@link CacheResolver}.
-	 * Replace the current {@link CacheResolver}, if any.
-	 * @since 5.0.3
-	 * @see CacheInterceptor#setCacheManager
-	 */
-	public void setCacheManager(CacheManager cacheManager) {
-		this.cacheInterceptor.setCacheManager(cacheManager);
-	}
-
-	/**
-	 * Set a pointcut, i.e a bean that can cause conditional invocation
-	 * of the CacheInterceptor depending on method and attributes passed.
-	 * Note: Additional interceptors are always invoked.
+	 * Set a pointcut, i.e. a bean that triggers conditional invocation of the
+	 * {@link CacheInterceptor} depending on the method and attributes passed.
+	 * <p>Note: Additional interceptors are always invoked.
 	 * @see #setPreInterceptors
 	 * @see #setPostInterceptors
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,20 @@ public class BeanPropertySqlParameterSource extends AbstractSqlParameterSource {
 	}
 
 	/**
+	 * Derives a default SQL type from the corresponding property type.
+	 * @see org.springframework.jdbc.core.StatementCreatorUtils#javaTypeToSqlParameterType
+	 */
+	@Override
+	public int getSqlType(String paramName) {
+		int sqlType = super.getSqlType(paramName);
+		if (sqlType != TYPE_UNKNOWN) {
+			return sqlType;
+		}
+		Class<?> propType = this.beanWrapper.getPropertyType(paramName);
+		return StatementCreatorUtils.javaTypeToSqlParameterType(propType);
+	}
+
+	/**
 	 * Provide access to the property names of the wrapped bean.
 	 * Uses support provided in the {@link PropertyAccessor} interface.
 	 * @return an array containing all the known property names
@@ -87,20 +101,6 @@ public class BeanPropertySqlParameterSource extends AbstractSqlParameterSource {
 			this.propertyNames = names.toArray(new String[names.size()]);
 		}
 		return this.propertyNames;
-	}
-
-	/**
-	 * Derives a default SQL type from the corresponding property type.
-	 * @see org.springframework.jdbc.core.StatementCreatorUtils#javaTypeToSqlParameterType
-	 */
-	@Override
-	public int getSqlType(String paramName) {
-		int sqlType = super.getSqlType(paramName);
-		if (sqlType != TYPE_UNKNOWN) {
-			return sqlType;
-		}
-		Class<?> propType = this.beanWrapper.getPropertyType(paramName);
-		return StatementCreatorUtils.javaTypeToSqlParameterType(propType);
 	}
 
 }
