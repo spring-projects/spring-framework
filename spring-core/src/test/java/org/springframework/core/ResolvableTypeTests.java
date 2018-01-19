@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,11 +176,13 @@ public class ResolvableTypeTests {
 		ResolvableType type = ResolvableType.forField(field);
 		assertThat(type.getType(), equalTo(field.getGenericType()));
 		assertThat(type.resolve(), equalTo((Class) List.class));
+		assertThat(type.getSource(), sameInstance(field));
 
 		Field field2 = Fields.class.getDeclaredField("otherPrivateField");
 		ResolvableType type2 = ResolvableType.forField(field2);
 		assertThat(type2.getType(), equalTo(field2.getGenericType()));
 		assertThat(type2.resolve(), equalTo((Class) List.class));
+		assertThat(type2.getSource(), sameInstance(field2));
 
 		assertEquals(type, type2);
 		assertEquals(type.hashCode(), type2.hashCode());
