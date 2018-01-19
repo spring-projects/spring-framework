@@ -105,13 +105,14 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 			return this.mostSpecificMethod;
 		}
 		Method method = getMethod();
-		if (method != null && AopUtils.isAopProxy(this.bean)) {
-			Class<?> targetClass = AopProxyUtils.ultimateTargetClass(this.bean);
-			return AopUtils.getMostSpecificMethod(method, targetClass);
+		if (method != null) {
+			Object bean = getBean();
+			if (AopUtils.isAopProxy(bean)) {
+				Class<?> targetClass = AopProxyUtils.ultimateTargetClass(bean);
+				method = AopUtils.getMostSpecificMethod(method, targetClass);
+			}
 		}
-		else {
-			return method;
-		}
+		return method;
 	}
 
 	/**

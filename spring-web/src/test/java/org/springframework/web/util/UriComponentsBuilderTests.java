@@ -185,7 +185,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test  // SPR-9832
-	public void fromUriStringQueryParamWithReservedCharInValue() throws URISyntaxException {
+	public void fromUriStringQueryParamWithReservedCharInValue() {
 		String uri = "http://www.google.com/ig/calculator?q=1USD=?EUR";
 		UriComponents result = UriComponentsBuilder.fromUriString(uri).build();
 
@@ -194,7 +194,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test  // SPR-14828
-	public void fromUriStringQueryParamEncodedAndContainingPlus() throws Exception {
+	public void fromUriStringQueryParamEncodedAndContainingPlus() {
 		String httpUrl = "http://localhost:8080/test/print?value=%EA%B0%80+%EB%82%98";
 		URI uri = UriComponentsBuilder.fromHttpUrl(httpUrl).build(true).toUri();
 
@@ -207,10 +207,8 @@ public class UriComponentsBuilderTests {
 		assertEquals("https", UriComponentsBuilder.fromHttpUrl("HTTPS://www.google.com").build().getScheme());
 	}
 
-
-
-	@Test(expected = IllegalArgumentException.class) // SPR-10539
-	public void fromHttpUrlStringInvalidIPv6Host() throws URISyntaxException {
+	@Test(expected = IllegalArgumentException.class)  // SPR-10539
+	public void fromHttpUrlStringInvalidIPv6Host() {
 		UriComponentsBuilder.fromHttpUrl("http://[1abc:2abc:3abc::5ABC:6abc:8080/resource").build().encode();
 	}
 
@@ -256,7 +254,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test  // SPR-12771
-	public void fromHttpRequestResetsPortBeforeSettingIt() throws Exception {
+	public void fromHttpRequestResetsPortBeforeSettingIt() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("X-Forwarded-Proto", "https");
 		request.addHeader("X-Forwarded-Host", "84.198.58.199");
@@ -497,7 +495,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test  // SPR-12742
-	public void fromHttpRequestWithTrailingSlash() throws Exception {
+	public void fromHttpRequestWithTrailingSlash() {
 		UriComponents before = UriComponentsBuilder.fromPath("/foo/").build();
 		UriComponents after = UriComponentsBuilder.newInstance().uriComponents(before).build();
 		assertEquals("/foo/", after.getPath());
@@ -666,21 +664,21 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void queryParamWithValueWithEquals() throws Exception {
+	public void queryParamWithValueWithEquals() {
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/foo?bar=baz").build();
 		assertThat(uriComponents.toUriString(), equalTo("http://example.com/foo?bar=baz"));
 		assertThat(uriComponents.getQueryParams().get("bar").get(0), equalTo("baz"));
 	}
 
 	@Test
-	public void queryParamWithoutValueWithEquals() throws Exception {
+	public void queryParamWithoutValueWithEquals()  {
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/foo?bar=").build();
 		assertThat(uriComponents.toUriString(), equalTo("http://example.com/foo?bar="));
 		assertThat(uriComponents.getQueryParams().get("bar").get(0), equalTo(""));
 	}
 
 	@Test
-	public void queryParamWithoutValueWithoutEquals() throws Exception {
+	public void queryParamWithoutValueWithoutEquals() {
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/foo?bar").build();
 		assertThat(uriComponents.toUriString(), equalTo("http://example.com/foo?bar"));
 
@@ -689,7 +687,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void relativeUrls() throws Exception {
+	public void relativeUrls() {
 		String baseUrl = "http://example.com";
 		assertThat(UriComponentsBuilder.fromUriString(baseUrl + "/foo/../bar").build().toString(),
 				equalTo(baseUrl + "/foo/../bar"));
@@ -712,7 +710,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void emptySegments() throws Exception {
+	public void emptySegments() {
 		String baseUrl = "http://example.com/abc/";
 		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("/x/y/z").build().toString(),
 				equalTo("http://example.com/abc/x/y/z"));
@@ -761,7 +759,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test  // SPR-11856
-	public void fromHttpRequestForwardedHeader() throws Exception {
+	public void fromHttpRequestForwardedHeader()  {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Forwarded", "proto=https; host=84.198.58.199");
 		request.setScheme("http");
@@ -777,7 +775,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromHttpRequestForwardedHeaderQuoted() throws Exception {
+	public void fromHttpRequestForwardedHeaderQuoted()  {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Forwarded", "proto=\"https\"; host=\"84.198.58.199\"");
 		request.setScheme("http");
@@ -793,7 +791,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromHttpRequestMultipleForwardedHeader() throws Exception {
+	public void fromHttpRequestMultipleForwardedHeader()  {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Forwarded", "host=84.198.58.199;proto=https");
 		request.addHeader("Forwarded", "proto=ftp; host=1.2.3.4");
@@ -810,7 +808,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromHttpRequestMultipleForwardedHeaderComma() throws Exception {
+	public void fromHttpRequestMultipleForwardedHeaderComma()  {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Forwarded", "host=84.198.58.199 ;proto=https, proto=ftp; host=1.2.3.4");
 		request.setScheme("http");
@@ -826,7 +824,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromHttpRequestForwardedHeaderWithHostPortAndWithoutServerPort() throws Exception {
+	public void fromHttpRequestForwardedHeaderWithHostPortAndWithoutServerPort()  {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Forwarded", "proto=https; host=84.198.58.199:9090");
 		request.setScheme("http");
@@ -844,7 +842,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromHttpRequestForwardedHeaderWithHostPortAndServerPort() throws Exception {
+	public void fromHttpRequestForwardedHeaderWithHostPortAndServerPort()  {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Forwarded", "proto=https; host=84.198.58.199:9090");
 		request.setScheme("http");
@@ -863,7 +861,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromHttpRequestForwardedHeaderWithoutHostPortAndWithServerPort() throws Exception {
+	public void fromHttpRequestForwardedHeaderWithoutHostPortAndWithServerPort()  {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Forwarded", "proto=https; host=84.198.58.199");
 		request.setScheme("http");
@@ -882,7 +880,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test  // SPR-16262
-	public void fromHttpRequestForwardedHeaderWithProtoAndServerPort() throws Exception {
+	public void fromHttpRequestForwardedHeaderWithProtoAndServerPort()  {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Forwarded", "proto=https");
 		request.setScheme("http");

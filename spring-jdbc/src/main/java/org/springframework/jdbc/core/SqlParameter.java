@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,18 +36,18 @@ import org.springframework.util.Assert;
  */
 public class SqlParameter {
 
-	/** The name of the parameter, if any */
+	// The name of the parameter, if any
 	@Nullable
 	private String name;
 
-	/** SQL type constant from {@code java.sql.Types} */
+	// SQL type constant from {@code java.sql.Types}
 	private final int sqlType;
 
-	/** Used for types that are user-named like: STRUCT, DISTINCT, JAVA_OBJECT, named array types */
+	// Used for types that are user-named like: STRUCT, DISTINCT, JAVA_OBJECT, named array types
 	@Nullable
 	private String typeName;
 
-	/** The scale to apply in case of a NUMERIC or DECIMAL type, if any */
+	// The scale to apply in case of a NUMERIC or DECIMAL type, if any
 	@Nullable
 	private Integer scale;
 

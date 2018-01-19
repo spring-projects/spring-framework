@@ -54,7 +54,7 @@ public class CacheProxyFactoryBean extends AbstractSingletonProxyFactoryBean
 
 
 	/**
-	 * Set the sources used to find cache operations.
+	 * Set one or more sources to find cache operations.
 	 * @see CacheInterceptor#setCacheOperationSources
 	 */
 	public void setCacheOperationSources(CacheOperationSource... cacheOperationSources) {
@@ -95,9 +95,9 @@ public class CacheProxyFactoryBean extends AbstractSingletonProxyFactoryBean
 	}
 
 	/**
-	 * Set a pointcut, i.e a bean that can cause conditional invocation
-	 * of the CacheInterceptor depending on method and attributes passed.
-	 * Note: Additional interceptors are always invoked.
+	 * Set a pointcut, i.e. a bean that triggers conditional invocation of the
+	 * {@link CacheInterceptor} depending on the method and attributes passed.
+	 * <p>Note: Additional interceptors are always invoked.
 	 * @see #setPreInterceptors
 	 * @see #setPostInterceptors
 	 */

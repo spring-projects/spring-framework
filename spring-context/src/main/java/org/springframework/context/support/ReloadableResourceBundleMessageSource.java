@@ -85,7 +85,8 @@ import org.springframework.util.StringUtils;
  * @see ResourceBundleMessageSource
  * @see java.util.ResourceBundle
  */
-public class ReloadableResourceBundleMessageSource extends AbstractResourceBasedMessageSource implements ResourceLoaderAware {
+public class ReloadableResourceBundleMessageSource extends AbstractResourceBasedMessageSource
+		implements ResourceLoaderAware {
 
 	private static final String PROPERTIES_SUFFIX = ".properties";
 
@@ -101,13 +102,13 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
-	/** Cache to hold filename lists per Locale */
+	// Cache to hold filename lists per Locale
 	private final ConcurrentMap<String, Map<Locale, List<String>>> cachedFilenames = new ConcurrentHashMap<>();
 
-	/** Cache to hold already loaded properties per filename */
+	// Cache to hold already loaded properties per filename
 	private final ConcurrentMap<String, PropertiesHolder> cachedProperties = new ConcurrentHashMap<>();
 
-	/** Cache to hold merged loaded properties per locale */
+	// Cache to hold already loaded properties per filename
 	private final ConcurrentMap<Locale, PropertiesHolder> cachedMergedProperties = new ConcurrentHashMap<>();
 
 

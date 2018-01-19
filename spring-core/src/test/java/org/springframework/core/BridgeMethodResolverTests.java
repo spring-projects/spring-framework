@@ -741,7 +741,7 @@ public class BridgeMethodResolverTests {
 	}
 
 
-	@SuppressWarnings({ "unused", "unchecked" })
+	@SuppressWarnings({"unused", "unchecked"})
 	public static abstract class GenericEventBroadcasterImpl<T extends Event>
 			extends GenericBroadcasterImpl implements EventBroadcaster {
 

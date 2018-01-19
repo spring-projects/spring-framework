@@ -53,47 +53,47 @@ import org.springframework.util.StringUtils;
  */
 public class CallMetaDataContext {
 
-	/** Logger available to subclasses */
+	// Logger available to subclasses
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** Name of procedure to call **/
+	// Name of procedure to call
 	@Nullable
 	private String procedureName;
 
-	/** Name of catalog for call **/
+	// Name of catalog for call
 	@Nullable
 	private String catalogName;
 
-	/** Name of schema for call **/
+	// Name of schema for call
 	@Nullable
 	private String schemaName;
 
-	/** List of SqlParameter objects to be used in call execution */
+	// List of SqlParameter objects to be used in call execution
 	private List<SqlParameter> callParameters = new ArrayList<>();
 
-	/** Actual name to use for the return value in the output map */
+	// Actual name to use for the return value in the output map
 	@Nullable
 	private String actualFunctionReturnName;
 
-	/** Set of in parameter names to exclude use for any not listed */
+	// Set of in parameter names to exclude use for any not listed
 	private Set<String> limitedInParameterNames = new HashSet<>();
 
-	/** List of SqlParameter names for out parameters */
+	// List of SqlParameter names for out parameters
 	private List<String> outParameterNames = new ArrayList<>();
 
-	/** Indicates whether this is a procedure or a function **/
+	// Indicates whether this is a procedure or a function
 	private boolean function = false;
 
-	/** Indicates whether this procedure's return value should be included  **/
+	// Indicates whether this procedure's return value should be included
 	private boolean returnValueRequired = false;
 
-	/** Should we access call parameter meta data info or not */
+	// Should we access call parameter meta data info or not
 	private boolean accessCallParameterMetaData = true;
 
-	/** Should we bind parameter by name **/
+	// Should we bind parameter by name
 	private boolean namedBinding;
 
-	/** The provider of call meta data */
+	// The provider of call meta data
 	@Nullable
 	private CallMetaDataProvider metaDataProvider;
 
