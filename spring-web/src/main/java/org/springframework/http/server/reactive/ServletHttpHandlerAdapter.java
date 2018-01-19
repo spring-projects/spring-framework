@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,6 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.web.util.NestedServletException;
 
 /**
  * Adapt {@link HttpHandler} to an {@link HttpServlet} using Servlet Async
@@ -157,11 +156,9 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 	@Override
 	public void service(ServletRequest request, ServletResponse response) throws ServletException, IOException {
-
 		if (DispatcherType.ASYNC.equals(request.getDispatcherType())) {
 			Throwable ex = (Throwable) request.getAttribute(WRITE_ERROR_ATTRIBUTE_NAME);
-			Assert.notNull(ex, "Unexpected async dispatch");
-			throw new NestedServletException("Write publisher error", ex);
+			throw new ServletException("Write publisher error", ex);
 		}
 
 		// Start async before Read/WriteListener registration
@@ -230,7 +227,6 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		private final AtomicBoolean isCompleted;
 
-
 		public HandlerResultAsyncListener(AtomicBoolean isCompleted) {
 			this.isCompleted = isCompleted;
 		}
@@ -266,7 +262,6 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		private final AsyncContext asyncContext;
 
 		private final AtomicBoolean isCompleted;
-
 
 		public HandlerResultSubscriber(AsyncContext asyncContext, AtomicBoolean isCompleted) {
 			this.asyncContext = asyncContext;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,10 @@ package org.springframework.web.cors.reactive;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-
-;
 
 /**
  * Utility class for CORS reactive request handling based on the
@@ -71,7 +70,7 @@ public abstract class CorsUtils {
 		return (actualHost.equals(originUrl.getHost()) && actualPort == getPort(originUrl.getScheme(), originUrl.getPort()));
 	}
 
-	private static int getPort(String scheme, int port) {
+	private static int getPort(@Nullable String scheme, int port) {
 		if (port == -1) {
 			if ("http".equals(scheme) || "ws".equals(scheme)) {
 				port = 80;
