@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -82,17 +81,11 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	private BootstrapContext bootstrapContext;
 
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setBootstrapContext(BootstrapContext bootstrapContext) {
 		this.bootstrapContext = bootstrapContext;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public BootstrapContext getBootstrapContext() {
 		return this.bootstrapContext;
@@ -113,9 +106,6 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				getCacheAwareContextLoaderDelegate());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public final List<TestExecutionListener> getTestExecutionListeners() {
 		Class<?> clazz = getBootstrapContext().getTestClass();
@@ -168,28 +158,25 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			}
 		}
 
+		Collection<Class<? extends TestExecutionListener>> classesToUse = classesList;
 		// Remove possible duplicates if we loaded default listeners.
 		if (usingDefaults) {
-			Set<Class<? extends TestExecutionListener>> classesSet = new HashSet<Class<? extends TestExecutionListener>>();
-			classesSet.addAll(classesList);
-			classesList.clear();
-			classesList.addAll(classesSet);
+			classesToUse = new LinkedHashSet<Class<? extends TestExecutionListener>>(classesList);
 		}
 
-		List<TestExecutionListener> listeners = instantiateListeners(classesList);
-
+		List<TestExecutionListener> listeners = instantiateListeners(classesToUse);
 		// Sort by Ordered/@Order if we loaded default listeners.
 		if (usingDefaults) {
 			AnnotationAwareOrderComparator.sort(listeners);
 		}
 
 		if (logger.isInfoEnabled()) {
-			logger.info(String.format("Using TestExecutionListeners: %s", listeners));
+			logger.info("Using TestExecutionListeners: " + listeners);
 		}
 		return listeners;
 	}
 
-	private List<TestExecutionListener> instantiateListeners(List<Class<? extends TestExecutionListener>> classesList) {
+	private List<TestExecutionListener> instantiateListeners(Collection<Class<? extends TestExecutionListener>> classesList) {
 		List<TestExecutionListener> listeners = new ArrayList<TestExecutionListener>(classesList.size());
 		for (Class<? extends TestExecutionListener> listenerClass : classesList) {
 			NoClassDefFoundError ncdfe = null;
@@ -200,13 +187,14 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				ncdfe = err;
 			}
 			catch (BeanInstantiationException ex) {
-				if (ex.getCause() instanceof NoClassDefFoundError) {
-					ncdfe = (NoClassDefFoundError) ex.getCause();
+				if (!(ex.getCause() instanceof NoClassDefFoundError)) {
+					throw ex;
 				}
+				ncdfe = (NoClassDefFoundError) ex.getCause();
 			}
 			if (ncdfe != null) {
-				if (logger.isInfoEnabled()) {
-					logger.info(String.format("Could not instantiate TestExecutionListener [%s]. " +
+				if (logger.isDebugEnabled()) {
+					logger.debug(String.format("Could not instantiate TestExecutionListener [%s]. " +
 							"Specify custom listener classes or make the default listener classes " +
 							"(and their required dependencies) available. Offending class: [%s]",
 							listenerClass.getName(), ncdfe.getMessage()));
