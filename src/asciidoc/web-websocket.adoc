@@ -1645,10 +1645,10 @@ cloud-based STOMP service.
 [[websocket-stomp-destination-separator]]
 === Dot as Separator
 
-Although slash-separated path patterns are familiar to web developers, in messaging
-it is common to use a "." as the separator, for example in the names of topics, queues,
-exchanges, etc. Applications can also switch to using "." (dot) instead of "/" (slash)
-as the separator in `@MessageMapping` mappings by configuring a custom `AntPathMatcher`.
+When messages are routed to `@MessageMapping` methods, they're matched with
+`AntPathMatcher` and by default patterns are expected to use slash "/" as separator.
+This is a good convention in a web applications and similar to HTTP URLs. However if
+you are more used to messaging conventions, you can switch to using dot "." as separator.
 
 In Java config:
 
@@ -1657,20 +1657,20 @@ In Java config:
 ----
 	@Configuration
 	@EnableWebSocketMessageBroker
-	public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
+	public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 		// ...
 
 		@Override
 		public void configureMessageBroker(MessageBrokerRegistry registry) {
-			registry.enableStompBrokerRelay("/queue/", "/topic/");
+			registry.setPathMatcher(**new AntPathMatcher("."));**
+			registry.enableStompBrokerRelay("/queue", "/topic");
 			registry.setApplicationDestinationPrefixes("/app");
-			registry.setPathMatcher(new AntPathMatcher("."));
 		}
 	}
 ----
 
-In XML config:
+In XML:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes,attributes"]
@@ -1684,19 +1684,21 @@ In XML config:
 					http://www.springframework.org/schema/websocket
 					http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
-		<websocket:message-broker application-destination-prefix="/app" path-matcher="pathMatcher">
+		<websocket:message-broker application-destination-prefix="/app" path-matcher="**pathMatcher**">
 			<websocket:stomp-endpoint path="/stomp"/>
-			<websocket:simple-broker prefix="/topic, /queue"/>
+			<websocket:stomp-broker-relay prefix="/topic,/queue" />
 		</websocket:message-broker>
 
+		**
 		<bean id="pathMatcher" class="org.springframework.util.AntPathMatcher">
 			<constructor-arg index="0" value="."/>
 		</bean>
+		**
 
 	</beans>
 ----
 
-And below is a simple example to illustrate a controller with "." separator:
+After that a controller may use dot "." as separator in `@MessageMapping` methods:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1712,7 +1714,15 @@ And below is a simple example to illustrate a controller with "." separator:
 	}
 ----
 
-If the application prefix is set to "/app" then the foo method is effectively mapped to "/app/foo.bar.{baz}".
+The client can now send a message to `"/app/foo.bar.baz123"`.
+
+In the example above we did not change the prefixes on the "broker relay" because those
+depend entirely on the external message broker. Check the STOMP documentation pages of
+the broker you're using to see what conventions it supports for the destination header.
+
+The "simple broker" on the other hand does rely on the configured `PathMatcher` so if
+you switch the separator that will also apply to the broker and the way matches
+destinations from a message to patterns in subscriptions.
 
 
 
