@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -229,12 +229,13 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 	@SuppressWarnings("unchecked")
 	private <T> Flux<DataBuffer> encodePart(byte[] boundary, String name, T value) {
 		MultipartHttpOutputMessage outputMessage = new MultipartHttpOutputMessage(this.bufferFactory, getCharset());
+		HttpHeaders outputHeaders = outputMessage.getHeaders();
 
 		T body;
 		ResolvableType resolvableType = null;
 		if (value instanceof HttpEntity) {
 			HttpEntity<T> httpEntity = (HttpEntity<T>) value;
-			outputMessage.getHeaders().putAll(httpEntity.getHeaders());
+			outputHeaders.putAll(httpEntity.getHeaders());
 			body = httpEntity.getBody();
 			Assert.state(body != null, "MultipartHttpMessageWriter only supports HttpEntity with body");
 
@@ -247,24 +248,24 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 		else {
 			body = value;
 		}
-
 		if (resolvableType == null) {
 			resolvableType = ResolvableType.forClass(body.getClass());
 		}
 
-		if (body instanceof Resource) {
-			outputMessage.getHeaders().setContentDispositionFormData(name, ((Resource) body).getFilename());
-		}
-		else if (Resource.class.equals(resolvableType.getRawClass())) {
-			body = (T) Mono.from((Publisher<?>) body).doOnNext(o -> {
-				outputMessage.getHeaders().setContentDispositionFormData(name, ((Resource) o).getFilename());
-			});
-		}
-		else {
-			outputMessage.getHeaders().setContentDispositionFormData(name, null);
+		if (!outputHeaders.containsKey(HttpHeaders.CONTENT_DISPOSITION)) {
+			if (body instanceof Resource) {
+				outputHeaders.setContentDispositionFormData(name, ((Resource) body).getFilename());
+			}
+			else if (Resource.class.equals(resolvableType.getRawClass())) {
+				body = (T) Mono.from((Publisher<?>) body).doOnNext(o -> outputHeaders
+						.setContentDispositionFormData(name, ((Resource) o).getFilename()));
+			}
+			else {
+				outputHeaders.setContentDispositionFormData(name, null);
+			}
 		}
 
-		MediaType contentType = outputMessage.getHeaders().getContentType();
+		MediaType contentType = outputHeaders.getContentType();
 
 		final ResolvableType finalBodyType = resolvableType;
 		Optional<HttpMessageWriter<?>> writer = this.partWriters.stream()

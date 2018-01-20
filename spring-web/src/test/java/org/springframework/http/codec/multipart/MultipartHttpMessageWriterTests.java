@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,9 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -189,6 +192,42 @@ public class MultipartHttpMessageWriterTests {
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Map<String, Object> hints = Collections.emptyMap();
 		this.writer.write(result, null, MediaType.MULTIPART_FORM_DATA, response, hints).block();
+	}
+
+	@Test // SPR-16376
+	public void customContentDisposition() throws IOException {
+		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
+		Flux<DataBuffer> buffers = DataBufferUtils.read(logo, new DefaultDataBufferFactory(), 1024);
+		long contentLength = logo.contentLength();
+
+		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+		bodyBuilder.part("resource", logo)
+				.headers(h -> h.setContentDispositionFormData("resource", "spring.jpg"));
+		bodyBuilder.asyncPart("buffers", buffers, DataBuffer.class)
+				.headers(h -> {
+					h.setContentDispositionFormData("buffers", "buffers.jpg");
+					h.setContentType(MediaType.IMAGE_JPEG);
+					h.setContentLength(contentLength);
+				});
+
+		MultiValueMap<String, HttpEntity<?>> multipartData = bodyBuilder.build();
+
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		Map<String, Object> hints = Collections.emptyMap();
+		this.writer.write(Mono.just(multipartData), null, MediaType.MULTIPART_FORM_DATA, response, hints).block();
+
+		MultiValueMap<String, Part> requestParts = parse(response, hints);
+		assertEquals(2, requestParts.size());
+
+		Part part = requestParts.getFirst("resource");
+		assertTrue(part instanceof FilePart);
+		assertEquals("spring.jpg", ((FilePart) part).filename());
+		assertEquals(logo.getFile().length(), part.headers().getContentLength());
+
+		part = requestParts.getFirst("buffers");
+		assertTrue(part instanceof FilePart);
+		assertEquals("buffers.jpg", ((FilePart) part).filename());
+		assertEquals(logo.getFile().length(), part.headers().getContentLength());
 	}
 
 	private MultiValueMap<String, Part> parse(MockServerHttpResponse response, Map<String, Object> hints) {

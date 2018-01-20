@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.http.client;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.reactivestreams.Publisher;
 
@@ -187,6 +188,13 @@ public final class MultipartBodyBuilder {
 		 * @see HttpHeaders#add(String, String)
 		 */
 		PartBuilder header(String headerName, String... headerValues);
+
+		/**
+		 * Manipulate the part's headers with the given consumer.
+		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
+		 * @return this builder
+		 */
+		PartBuilder headers(Consumer<HttpHeaders> headersConsumer);
 	}
 
 
@@ -205,6 +213,13 @@ public final class MultipartBodyBuilder {
 		@Override
 		public PartBuilder header(String headerName, String... headerValues) {
 			this.headers.addAll(headerName, Arrays.asList(headerValues));
+			return this;
+		}
+
+		@Override
+		public PartBuilder headers(Consumer<HttpHeaders> headersConsumer) {
+			Assert.notNull(headersConsumer, "'headersConsumer' must not be null");
+			headersConsumer.accept(this.headers);
 			return this;
 		}
 
