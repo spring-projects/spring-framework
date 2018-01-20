@@ -170,9 +170,8 @@ public class MultipartHttpMessageWriterTests {
 
 		Part part = requestParts.getFirst("logo");
 		assertEquals("logo", part.name());
-// TODO: a Resource written as an async part doesn't have a file name in the contentDisposition
-//		assertTrue(part instanceof FilePart);
-//		assertEquals("logo.jpg", ((FilePart) part).filename());
+		assertTrue(part instanceof FilePart);
+		assertEquals("logo.jpg", ((FilePart) part).filename());
 		assertEquals(MediaType.IMAGE_JPEG, part.headers().getContentType());
 		assertEquals(logo.getFile().length(), part.headers().getContentLength());
 	}

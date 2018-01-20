@@ -252,8 +252,17 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 			resolvableType = ResolvableType.forClass(body.getClass());
 		}
 
-		String filename = (body instanceof Resource ? ((Resource) body).getFilename() : null);
-		outputMessage.getHeaders().setContentDispositionFormData(name, filename);
+		if (body instanceof Resource) {
+			outputMessage.getHeaders().setContentDispositionFormData(name, ((Resource) body).getFilename());
+		}
+		else if (Resource.class.equals(resolvableType.getRawClass())) {
+			body = (T) Mono.from((Publisher<?>) body).doOnNext(o -> {
+				outputMessage.getHeaders().setContentDispositionFormData(name, ((Resource) o).getFilename());
+			});
+		}
+		else {
+			outputMessage.getHeaders().setContentDispositionFormData(name, null);
+		}
 
 		MediaType contentType = outputMessage.getHeaders().getContentType();
 
