@@ -269,13 +269,18 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 		Publisher<T> bodyPublisher =
 				body instanceof Publisher ? (Publisher<T>) body : Mono.just(body);
 
-		Mono<Void> partWritten = ((HttpMessageWriter<T>) writer.get())
+		// The writer will call MultipartHttpOutputMessage#write which doesn't actually write
+		// but only stores the body Flux and returns Mono.empty().
+
+		Mono<Void> partContentReady = ((HttpMessageWriter<T>) writer.get())
 				.write(bodyPublisher, resolvableType, contentType, outputMessage, Collections.emptyMap());
 
-		return Flux.concat(
-				Mono.just(generateBoundaryLine(boundary)),
-				partWritten.thenMany(Flux.defer(outputMessage::getBody)),
-				Mono.just(generateNewLine()));
+		// After partContentReady, we can access the part content from MultipartHttpOutputMessage
+		// and use it for writing to the actual request body
+
+		Flux<DataBuffer> partContent = partContentReady.thenMany(Flux.defer(outputMessage::getBody));
+
+		return Flux.concat(Mono.just(generateBoundaryLine(boundary)), partContent, Mono.just(generateNewLine()));
 	}
 
 
@@ -353,7 +358,9 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 				return Mono.error(new IllegalStateException("Multiple calls to writeWith() not supported"));
 			}
 			this.body = Flux.just(generateHeaders()).concatWith(body);
-			return this.body.then();
+
+			// We don't actually want to write (just save the body Flux)
+			return Mono.empty();
 		}
 
 		private DataBuffer generateHeaders() {
@@ -387,8 +394,7 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 
 		@Override
 		public Mono<Void> setComplete() {
-			return (this.body != null ? this.body.then() :
-					Mono.error(new IllegalStateException("Body has not been written yet")));
+			return Mono.error(new UnsupportedOperationException());
 		}
 	}
 

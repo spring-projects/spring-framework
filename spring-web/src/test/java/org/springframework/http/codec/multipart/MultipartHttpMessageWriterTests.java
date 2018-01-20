@@ -16,6 +16,7 @@
 
 package org.springframework.http.codec.multipart;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.UnicastProcessor;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.StringDecoder;
@@ -146,9 +148,48 @@ public class MultipartHttpMessageWriterTests {
 				Collections.emptyMap()).block(Duration.ZERO);
 
 		assertEquals("foobarbaz", value);
+	}
 
+	@Test // SPR-16402
+	public void singleSubscriberWithResource() throws IOException {
+		UnicastProcessor<Resource> processor = UnicastProcessor.create();
+		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
+		Mono.just(logo).subscribe(processor);
 
+		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+		bodyBuilder.asyncPart("logo", processor, Resource.class);
 
+		Mono<MultiValueMap<String, HttpEntity<?>>> result = Mono.just(bodyBuilder.build());
+
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		Map<String, Object> hints = Collections.emptyMap();
+		this.writer.write(result, null, MediaType.MULTIPART_FORM_DATA, response, hints).block();
+
+		MultiValueMap<String, Part> requestParts = parse(response, hints);
+		assertEquals(1, requestParts.size());
+
+		Part part = requestParts.getFirst("logo");
+		assertEquals("logo", part.name());
+// TODO: a Resource written as an async part doesn't have a file name in the contentDisposition
+//		assertTrue(part instanceof FilePart);
+//		assertEquals("logo.jpg", ((FilePart) part).filename());
+		assertEquals(MediaType.IMAGE_JPEG, part.headers().getContentType());
+		assertEquals(logo.getFile().length(), part.headers().getContentLength());
+	}
+
+	@Test // SPR-16402
+	public void singleSubscriberWithStrings() {
+		UnicastProcessor<String> processor = UnicastProcessor.create();
+		Flux.just("foo", "bar", "baz").subscribe(processor);
+
+		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+		bodyBuilder.asyncPart("name", processor, String.class);
+
+		Mono<MultiValueMap<String, HttpEntity<?>>> result = Mono.just(bodyBuilder.build());
+
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		Map<String, Object> hints = Collections.emptyMap();
+		this.writer.write(result, null, MediaType.MULTIPART_FORM_DATA, response, hints).block();
 	}
 
 	private MultiValueMap<String, Part> parse(MockServerHttpResponse response, Map<String, Object> hints) {
