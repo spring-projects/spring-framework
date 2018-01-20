@@ -20,6 +20,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
 
+import com.codahale.metrics.MetricRegistry;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.Configurable;
@@ -79,6 +80,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 	private boolean bufferRequestBody = true;
 
+	private MetricRegistry metricRegistry;
 
 	/**
 	 * Create a new instance of the {@code HttpComponentsClientHttpRequestFactory}
@@ -200,6 +202,13 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		this.bufferRequestBody = bufferRequestBody;
 	}
 
+	public MetricRegistry getMetricRegistry() {
+		return this.metricRegistry;
+	}
+
+	public void setMetricRegistry(MetricRegistry metricRegistry) {
+		this.metricRegistry = metricRegistry;
+	}
 
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
@@ -226,10 +235,16 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		}
 
 		if (this.bufferRequestBody) {
-			return new HttpComponentsClientHttpRequest(getHttpClient(), httpRequest, context);
+			HttpComponentsClientHttpRequest httpComponentsClientHttpRequest =
+					new HttpComponentsClientHttpRequest(getHttpClient(), httpRequest, context);
+			httpComponentsClientHttpRequest.setMetricRegistry(this.metricRegistry);
+			return httpComponentsClientHttpRequest;
 		}
 		else {
-			return new HttpComponentsStreamingClientHttpRequest(getHttpClient(), httpRequest, context);
+			HttpComponentsStreamingClientHttpRequest httpComponentsStreamingClientHttpRequest =
+					new HttpComponentsStreamingClientHttpRequest(getHttpClient(), httpRequest, context);
+			httpComponentsStreamingClientHttpRequest.setMetricRegistry(this.metricRegistry);
+			return httpComponentsStreamingClientHttpRequest;
 		}
 	}
 

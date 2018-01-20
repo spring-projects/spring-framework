@@ -21,6 +21,7 @@ import java.net.URI;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLException;
 
+import com.codahale.metrics.MetricRegistry;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelConfig;
 import io.netty.channel.ChannelInitializer;
@@ -81,6 +82,7 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 
 	private volatile Bootstrap bootstrap;
 
+	private MetricRegistry metricRegistry;
 
 	/**
 	 * Create a new {@code Netty4ClientHttpRequestFactory} with a default
@@ -143,6 +145,13 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 		this.readTimeout = readTimeout;
 	}
 
+	public MetricRegistry getMetricRegistry() {
+		return this.metricRegistry;
+	}
+
+	public void setMetricRegistry(MetricRegistry metricRegistry) {
+		this.metricRegistry = metricRegistry;
+	}
 
 	@Override
 	public void afterPropertiesSet() {
@@ -172,7 +181,10 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	}
 
 	private Netty4ClientHttpRequest createRequestInternal(URI uri, HttpMethod httpMethod) {
-		return new Netty4ClientHttpRequest(getBootstrap(uri), uri, httpMethod);
+		Netty4ClientHttpRequest netty4ClientHttpRequest =
+				new Netty4ClientHttpRequest(getBootstrap(uri), uri, httpMethod);
+		netty4ClientHttpRequest.setMetricRegistry(this.metricRegistry);
+		return netty4ClientHttpRequest;
 	}
 
 	private Bootstrap getBootstrap(URI uri) {

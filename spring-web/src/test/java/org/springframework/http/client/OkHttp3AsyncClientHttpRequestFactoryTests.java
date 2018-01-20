@@ -16,6 +16,7 @@
 
 package org.springframework.http.client;
 
+import com.codahale.metrics.MetricRegistry;
 import org.junit.Test;
 
 import org.springframework.http.HttpMethod;
@@ -27,7 +28,9 @@ public class OkHttp3AsyncClientHttpRequestFactoryTests extends AbstractAsyncHttp
 
 	@Override
 	protected AsyncClientHttpRequestFactory createRequestFactory() {
-		return new OkHttp3ClientHttpRequestFactory();
+		OkHttp3ClientHttpRequestFactory okHttp3ClientHttpRequestFactory = new OkHttp3ClientHttpRequestFactory();
+		okHttp3ClientHttpRequestFactory.setMetricRegistry(new MetricRegistry());
+		return okHttp3ClientHttpRequestFactory;
 	}
 
 	@Override

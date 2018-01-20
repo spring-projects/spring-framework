@@ -16,6 +16,7 @@
 
 package org.springframework.http.client;
 
+import com.codahale.metrics.MetricRegistry;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import org.junit.AfterClass;
@@ -44,7 +45,10 @@ public class Netty4ClientHttpRequestFactoryTests extends AbstractHttpRequestFact
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {
-		return new Netty4ClientHttpRequestFactory(eventLoopGroup);
+		Netty4ClientHttpRequestFactory netty4ClientHttpRequestFactory =
+				new Netty4ClientHttpRequestFactory(eventLoopGroup);
+		netty4ClientHttpRequestFactory.setMetricRegistry(new MetricRegistry());
+		return netty4ClientHttpRequestFactory;
 	}
 
 	@Override

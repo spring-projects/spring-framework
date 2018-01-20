@@ -19,7 +19,11 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.codahale.metrics.MetricRegistry;
+
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MetricConstants;
+import org.springframework.http.MetricUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -35,6 +39,7 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
 	private boolean executed = false;
 
+	private MetricRegistry metricRegistry;
 
 	@Override
 	public final HttpHeaders getHeaders() {
@@ -49,10 +54,38 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
 	@Override
 	public final ClientHttpResponse execute() throws IOException {
-		assertNotExecuted();
-		ClientHttpResponse result = executeInternal(this.headers);
-		this.executed = true;
-		return result;
+		// TODO
+		// handle InterceptingClientHttpRequest
+		long prologue = System.currentTimeMillis();
+
+		MetricRegistry metricRegistry = this.getMetricRegistry();
+
+		MetricUtils.mark(metricRegistry, MetricConstants.REQUESTS_PER_SECOND, 1);
+
+		try {
+			assertNotExecuted();
+			ClientHttpResponse result = executeInternal(this.headers);
+			this.executed = true;
+
+			long epilogue = System.currentTimeMillis();
+
+			MetricUtils.mark(metricRegistry, MetricConstants.SUCCEEDED_REQUESTS_PER_SECOND, 1);
+			MetricUtils.update(metricRegistry, MetricConstants.RESPONSE_TIME, epilogue - prologue);
+
+			return result;
+		} catch (IOException e) {
+			MetricUtils.mark(metricRegistry, MetricConstants.FAILED_REQUESTS_PER_SECOND, 1);
+
+			throw e;
+		}
+	}
+
+	public MetricRegistry getMetricRegistry() {
+		return this.metricRegistry;
+	}
+
+	public void setMetricRegistry(MetricRegistry metricRegistry) {
+		this.metricRegistry = metricRegistry;
 	}
 
 	/**

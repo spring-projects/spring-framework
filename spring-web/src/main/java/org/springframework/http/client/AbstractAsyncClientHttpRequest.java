@@ -19,9 +19,15 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.codahale.metrics.MetricRegistry;
+
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MetricConstants;
+import org.springframework.http.MetricUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.SuccessCallback;
 
 /**
  * Abstract base for {@link AsyncClientHttpRequest} that makes sure that headers and body
@@ -36,6 +42,7 @@ abstract class AbstractAsyncClientHttpRequest implements AsyncClientHttpRequest 
 
 	private boolean executed = false;
 
+	private MetricRegistry metricRegistry;
 
 	@Override
 	public final HttpHeaders getHeaders() {
@@ -50,10 +57,46 @@ abstract class AbstractAsyncClientHttpRequest implements AsyncClientHttpRequest 
 
 	@Override
 	public ListenableFuture<ClientHttpResponse> executeAsync() throws IOException {
-		assertNotExecuted();
-		ListenableFuture<ClientHttpResponse> result = executeInternal(this.headers);
-		this.executed = true;
-		return result;
+		// TODO
+		// handle InterceptingAsyncClientHttpRequest
+		final long prologue = System.currentTimeMillis();
+
+		final MetricRegistry metricRegistry = this.getMetricRegistry();
+
+		MetricUtils.mark(metricRegistry, MetricConstants.REQUESTS_PER_SECOND, 1);
+
+		try {
+			assertNotExecuted();
+			ListenableFuture<ClientHttpResponse> result = executeInternal(this.headers);
+			result.addCallback(new SuccessCallback<ClientHttpResponse>() {
+				@Override
+				public void onSuccess(ClientHttpResponse result) {
+					long epilogue = System.currentTimeMillis();
+
+					MetricUtils.mark(metricRegistry, MetricConstants.SUCCEEDED_REQUESTS_PER_SECOND, 1);
+					MetricUtils.update(metricRegistry, MetricConstants.RESPONSE_TIME, epilogue - prologue);
+				}
+			}, new FailureCallback() {
+				@Override
+				public void onFailure(Throwable ex) {
+					MetricUtils.mark(metricRegistry, MetricConstants.FAILED_REQUESTS_PER_SECOND, 1);
+				}
+			});
+			this.executed = true;
+			return result;
+		} catch (IOException e) {
+			MetricUtils.mark(metricRegistry, MetricConstants.FAILED_REQUESTS_PER_SECOND, 1);
+
+			throw e;
+		}
+	}
+
+	public MetricRegistry getMetricRegistry() {
+		return this.metricRegistry;
+	}
+
+	public void setMetricRegistry(MetricRegistry metricRegistry) {
+		this.metricRegistry = metricRegistry;
 	}
 
 	/**

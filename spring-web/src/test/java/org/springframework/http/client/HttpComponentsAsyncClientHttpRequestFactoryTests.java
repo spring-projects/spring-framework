@@ -18,6 +18,7 @@ package org.springframework.http.client;
 
 import java.net.URI;
 
+import com.codahale.metrics.MetricRegistry;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
@@ -51,6 +52,7 @@ public class HttpComponentsAsyncClientHttpRequestFactoryTests extends AbstractAs
 	public void customHttpAsyncClientUsesItsDefault() throws Exception {
 		HttpComponentsAsyncClientHttpRequestFactory factory =
 				new HttpComponentsAsyncClientHttpRequestFactory();
+		factory.setMetricRegistry(new MetricRegistry());
 
 		URI uri = new URI(baseUrl + "/status/ok");
 		HttpComponentsAsyncClientHttpRequest request = (HttpComponentsAsyncClientHttpRequest)

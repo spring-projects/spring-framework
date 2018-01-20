@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import com.codahale.metrics.MetricRegistry;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -49,6 +50,7 @@ public class OkHttp3ClientHttpRequestFactory
 
 	private final boolean defaultClient;
 
+	private MetricRegistry metricRegistry;
 
 	/**
 	 * Create a factory with a default {@link OkHttpClient} instance.
@@ -102,15 +104,29 @@ public class OkHttp3ClientHttpRequestFactory
 				.build();
 	}
 
+	public MetricRegistry getMetricRegistry() {
+		return this.metricRegistry;
+	}
+
+	public void setMetricRegistry(MetricRegistry metricRegistry) {
+		this.metricRegistry = metricRegistry;
+	}
+
 
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) {
-		return new OkHttp3ClientHttpRequest(this.client, uri, httpMethod);
+		OkHttp3ClientHttpRequest okHttp3ClientHttpRequest =
+				new OkHttp3ClientHttpRequest(this.client, uri, httpMethod);
+		okHttp3ClientHttpRequest.setMetricRegistry(this.metricRegistry);
+		return okHttp3ClientHttpRequest;
 	}
 
 	@Override
 	public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) {
-		return new OkHttp3AsyncClientHttpRequest(this.client, uri, httpMethod);
+		OkHttp3AsyncClientHttpRequest okHttp3AsyncClientHttpRequest =
+				new OkHttp3AsyncClientHttpRequest(this.client, uri, httpMethod);
+		okHttp3AsyncClientHttpRequest.setMetricRegistry(this.metricRegistry);
+		return okHttp3AsyncClientHttpRequest;
 	}
 
 

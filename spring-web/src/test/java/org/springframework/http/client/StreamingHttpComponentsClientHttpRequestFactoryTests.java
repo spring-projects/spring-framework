@@ -16,6 +16,7 @@
 
 package org.springframework.http.client;
 
+import com.codahale.metrics.MetricRegistry;
 import org.junit.Test;
 
 import org.springframework.http.HttpMethod;
@@ -28,6 +29,7 @@ public class StreamingHttpComponentsClientHttpRequestFactoryTests
 		HttpComponentsClientHttpRequestFactory requestFactory =
 				new HttpComponentsClientHttpRequestFactory();
 		requestFactory.setBufferRequestBody(false);
+		requestFactory.setMetricRegistry(new MetricRegistry());
 		return requestFactory;
 	}
 
