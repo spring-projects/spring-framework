@@ -60,8 +60,7 @@ public class InterceptorRegistration {
 	 * Add URL patterns to which the registered interceptor should apply to.
 	 */
 	public InterceptorRegistration addPathPatterns(String... patterns) {
-		this.includePatterns.addAll(Arrays.asList(patterns));
-		return this;
+		return addPathPatterns(Arrays.asList(patterns));
 	}
 
 	/**
@@ -77,8 +76,7 @@ public class InterceptorRegistration {
 	 * Add URL patterns to which the registered interceptor should not apply to.
 	 */
 	public InterceptorRegistration excludePathPatterns(String... patterns) {
-		this.excludePatterns.addAll(Arrays.asList(patterns));
-		return this;
+		return excludePathPatterns(Arrays.asList(patterns));
 	}
 
 	/**
