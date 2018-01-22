@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
@@ -80,8 +79,8 @@ public class ServerWebExchangeArgumentResolver extends HandlerMethodArgumentReso
 	}
 
 	@Override
-	public Object resolveArgumentValue(MethodParameter methodParameter, BindingContext context,
-			ServerWebExchange exchange) {
+	public Object resolveArgumentValue(
+			MethodParameter methodParameter, BindingContext context, ServerWebExchange exchange) {
 
 		Class<?> paramType = methodParameter.getParameterType();
 		if (ServerWebExchange.class.isAssignableFrom(paramType)) {

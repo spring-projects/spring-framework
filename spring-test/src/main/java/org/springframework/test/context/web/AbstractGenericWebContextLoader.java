@@ -190,7 +190,6 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 		}
 		else {
 			ServletContext servletContext = null;
-
 			// Find the root WebApplicationContext
 			while (parent != null) {
 				if (parent instanceof WebApplicationContext && !(parent.getParent() instanceof WebApplicationContext)) {
@@ -199,7 +198,7 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 				}
 				parent = parent.getParent();
 			}
-			Assert.state(servletContext != null, "Failed to find Root WebApplicationContext in the context hierarchy");
+			Assert.state(servletContext != null, "Failed to find root WebApplicationContext in the context hierarchy");
 			context.setServletContext(servletContext);
 		}
 	}

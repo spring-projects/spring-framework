@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import org.springframework.core.MethodParameter;
@@ -32,7 +33,6 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class SessionStatusMethodArgumentResolver implements SyncHandlerMethodArgumentResolver {
 
-
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return SessionStatus.class == parameter.getParameterType();
@@ -40,8 +40,8 @@ public class SessionStatusMethodArgumentResolver implements SyncHandlerMethodArg
 
 	@Nullable
 	@Override
-	public Object resolveArgumentValue(MethodParameter parameter, BindingContext bindingContext,
-			ServerWebExchange exchange) {
+	public Object resolveArgumentValue(
+			MethodParameter parameter, BindingContext bindingContext, ServerWebExchange exchange) {
 
 		Assert.isInstanceOf(InitBinderBindingContext.class, bindingContext);
 		return ((InitBinderBindingContext) bindingContext).getSessionStatus();

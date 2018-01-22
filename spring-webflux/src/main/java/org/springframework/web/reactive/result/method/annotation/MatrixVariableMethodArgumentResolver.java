@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.ArrayList;
@@ -48,9 +49,8 @@ import org.springframework.web.server.ServerWebInputException;
  */
 public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueSyncArgumentResolver {
 
-
-	protected MatrixVariableMethodArgumentResolver(@Nullable ConfigurableBeanFactory factory,
-			ReactiveAdapterRegistry registry) {
+	public MatrixVariableMethodArgumentResolver(
+			@Nullable ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
 
 		super(factory, registry);
 	}
@@ -59,7 +59,7 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueSync
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return checkAnnotatedParamNoReactiveWrapper(parameter, MatrixVariable.class,
-				(annot, type) -> !Map.class.isAssignableFrom(type) || StringUtils.hasText(annot.name()));
+				(ann, type) -> !Map.class.isAssignableFrom(type) || StringUtils.hasText(ann.name()));
 	}
 
 
@@ -73,10 +73,8 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueSync
 	@Nullable
 	@Override
 	protected Object resolveNamedValue(String name, MethodParameter param, ServerWebExchange exchange) {
-
 		Map<String, MultiValueMap<String, String>> pathParameters =
 				exchange.getAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE);
-
 		if (CollectionUtils.isEmpty(pathParameters)) {
 			return null;
 		}

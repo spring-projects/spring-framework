@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,15 +38,14 @@ import org.springframework.web.server.ServerWebExchange;
 public abstract class AbstractNamedValueSyncArgumentResolver extends AbstractNamedValueArgumentResolver
 		implements SyncHandlerMethodArgumentResolver {
 
-
 	/**
 	 * @param factory a bean factory to use for resolving  ${...}
 	 * placeholder and #{...} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to have expressions
 	 * @param registry for checking reactive type wrappers
 	 */
-	protected AbstractNamedValueSyncArgumentResolver(@Nullable ConfigurableBeanFactory factory,
-			ReactiveAdapterRegistry registry) {
+	protected AbstractNamedValueSyncArgumentResolver(
+			@Nullable ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
 
 		super(factory, registry);
 	}
@@ -65,8 +64,8 @@ public abstract class AbstractNamedValueSyncArgumentResolver extends AbstractNam
 	}
 
 	@Override
-	public Object resolveArgumentValue(MethodParameter parameter, BindingContext context,
-			ServerWebExchange exchange) {
+	public Object resolveArgumentValue(
+			MethodParameter parameter, BindingContext context, ServerWebExchange exchange) {
 
 		// This won't block since resolveName below doesn't
 		return resolveArgument(parameter, context, exchange).block();

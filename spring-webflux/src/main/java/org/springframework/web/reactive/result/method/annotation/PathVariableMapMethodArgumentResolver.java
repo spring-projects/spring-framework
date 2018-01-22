@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,13 +53,13 @@ public class PathVariableMapMethodArgumentResolver extends HandlerMethodArgument
 	}
 
 	private boolean allVariables(PathVariable pathVariable, Class<?> type) {
-		return Map.class.isAssignableFrom(type) && !StringUtils.hasText(pathVariable.value());
+		return (Map.class.isAssignableFrom(type) && !StringUtils.hasText(pathVariable.value()));
 	}
 
 
 	@Override
-	public Object resolveArgumentValue(MethodParameter methodParameter, BindingContext context,
-			ServerWebExchange exchange) {
+	public Object resolveArgumentValue(
+			MethodParameter methodParameter, BindingContext context, ServerWebExchange exchange) {
 
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 		return exchange.getAttributeOrDefault(name, Collections.emptyMap());
