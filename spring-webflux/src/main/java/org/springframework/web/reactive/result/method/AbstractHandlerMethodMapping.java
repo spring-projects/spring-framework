@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -292,19 +292,17 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * If multiple matches are found, the best match is selected.
 	 * @param exchange the current exchange
 	 * @return the best-matching handler method, or {@code null} if no match
-	 * @see #handleMatch(T, HandlerMethod, ServerWebExchange)
-	 * @see #handleNoMatch(Set, ServerWebExchange)
+	 * @see #handleMatch
+	 * @see #handleNoMatch
 	 */
 	@Nullable
-	protected HandlerMethod lookupHandlerMethod(ServerWebExchange exchange)
-			throws Exception {
-
+	protected HandlerMethod lookupHandlerMethod(ServerWebExchange exchange) throws Exception {
 		List<Match> matches = new ArrayList<>();
 		addMatchingMappings(this.mappingRegistry.getMappings().keySet(), matches, exchange);
 
 		if (!matches.isEmpty()) {
 			Comparator<Match> comparator = new MatchComparator(getMappingComparator(exchange));
-			Collections.sort(matches, comparator);
+			matches.sort(comparator);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Found " + matches.size() + " matching mapping(s) for [" +
 						exchange.getRequest().getPath() + "] : " + matches);

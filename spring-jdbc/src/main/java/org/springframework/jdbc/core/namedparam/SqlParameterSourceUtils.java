@@ -42,7 +42,7 @@ public abstract class SqlParameterSourceUtils {
 	 * @return an array of {@link SqlParameterSource}
 	 * @see MapSqlParameterSource
 	 * @see BeanPropertySqlParameterSource
-	 * @see NamedParameterJdbcTemplate#batchUpdate(String, SqlParameterSource[]))
+	 * @see NamedParameterJdbcTemplate#batchUpdate(String, SqlParameterSource[])
 	 */
 	@SuppressWarnings("unchecked")
 	public static SqlParameterSource[] createBatch(Object... candidates) {
@@ -58,7 +58,7 @@ public abstract class SqlParameterSourceUtils {
 	 * @since 5.0.2
 	 * @see MapSqlParameterSource
 	 * @see BeanPropertySqlParameterSource
-	 * @see NamedParameterJdbcTemplate#batchUpdate(String, SqlParameterSource[]))
+	 * @see NamedParameterJdbcTemplate#batchUpdate(String, SqlParameterSource[])
 	 */
 	@SuppressWarnings("unchecked")
 	public static SqlParameterSource[] createBatch(Collection<?> candidates) {

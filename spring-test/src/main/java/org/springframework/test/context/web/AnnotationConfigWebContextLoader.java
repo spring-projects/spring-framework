@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,11 +59,10 @@ public class AnnotationConfigWebContextLoader extends AbstractGenericWebContextL
 	private static final Log logger = LogFactory.getLog(AnnotationConfigWebContextLoader.class);
 
 
-	// --- SmartContextLoader -----------------------------------------------
+	// SmartContextLoader
 
 	/**
 	 * Process <em>annotated classes</em> in the supplied {@link ContextConfigurationAttributes}.
-	 *
 	 * <p>If the <em>annotated classes</em> are {@code null} or empty and
 	 * {@link #isGenerateDefaultLocations()} returns {@code true}, this
 	 * {@code SmartContextLoader} will attempt to {@linkplain
@@ -72,7 +71,6 @@ public class AnnotationConfigWebContextLoader extends AbstractGenericWebContextL
 	 * {@linkplain ContextConfigurationAttributes#setClasses(Class[]) set} in the
 	 * supplied configuration attributes. Otherwise, properties in the supplied
 	 * configuration attributes will not be modified.
-	 *
 	 * @param configAttributes the context configuration attributes to process
 	 * @see org.springframework.test.context.SmartContextLoader#processContextConfiguration(ContextConfigurationAttributes)
 	 * @see #isGenerateDefaultLocations()
@@ -87,34 +85,31 @@ public class AnnotationConfigWebContextLoader extends AbstractGenericWebContextL
 
 	/**
 	 * Detect the default configuration classes for the supplied test class.
-	 *
 	 * <p>The default implementation simply delegates to
 	 * {@link AnnotationConfigContextLoaderUtils#detectDefaultConfigurationClasses(Class)}.
-	 *
 	 * @param declaringClass the test class that declared {@code @ContextConfiguration}
-	 * @return an array of default configuration classes, potentially empty but
-	 * never {@code null}
+	 * @return an array of default configuration classes, potentially empty but never {@code null}
 	 * @see AnnotationConfigContextLoaderUtils
 	 */
 	protected Class<?>[] detectDefaultConfigurationClasses(Class<?> declaringClass) {
 		return AnnotationConfigContextLoaderUtils.detectDefaultConfigurationClasses(declaringClass);
 	}
 
-	// --- AbstractContextLoader -----------------------------------------------
+
+	// AbstractContextLoader
 
 	/**
 	 * {@code AnnotationConfigWebContextLoader} should be used as a
 	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader},
 	 * not as a legacy {@link org.springframework.test.context.ContextLoader ContextLoader}.
 	 * Consequently, this method is not supported.
-	 *
+	 * @throws UnsupportedOperationException in this implementation
 	 * @see org.springframework.test.context.support.AbstractContextLoader#modifyLocations
-	 * @throws UnsupportedOperationException
 	 */
 	@Override
 	protected String[] modifyLocations(Class<?> clazz, String... locations) {
 		throw new UnsupportedOperationException(
-			"AnnotationConfigWebContextLoader does not support the modifyLocations(Class, String...) method");
+				"AnnotationConfigWebContextLoader does not support the modifyLocations(Class, String...) method");
 	}
 
 	/**
@@ -122,14 +117,13 @@ public class AnnotationConfigWebContextLoader extends AbstractGenericWebContextL
 	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader},
 	 * not as a legacy {@link org.springframework.test.context.ContextLoader ContextLoader}.
 	 * Consequently, this method is not supported.
-	 *
+	 * @throws UnsupportedOperationException in this implementation
 	 * @see org.springframework.test.context.support.AbstractContextLoader#generateDefaultLocations
-	 * @throws UnsupportedOperationException
 	 */
 	@Override
 	protected String[] generateDefaultLocations(Class<?> clazz) {
 		throw new UnsupportedOperationException(
-			"AnnotationConfigWebContextLoader does not support the generateDefaultLocations(Class) method");
+				"AnnotationConfigWebContextLoader does not support the generateDefaultLocations(Class) method");
 	}
 
 	/**
@@ -137,34 +131,32 @@ public class AnnotationConfigWebContextLoader extends AbstractGenericWebContextL
 	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader},
 	 * not as a legacy {@link org.springframework.test.context.ContextLoader ContextLoader}.
 	 * Consequently, this method is not supported.
-	 *
+	 * @throws UnsupportedOperationException in this implementation
 	 * @see org.springframework.test.context.support.AbstractContextLoader#getResourceSuffix
-	 * @throws UnsupportedOperationException
 	 */
 	@Override
 	protected String getResourceSuffix() {
 		throw new UnsupportedOperationException(
-			"AnnotationConfigWebContextLoader does not support the getResourceSuffix() method");
+				"AnnotationConfigWebContextLoader does not support the getResourceSuffix() method");
 	}
 
-	// --- AbstractGenericWebContextLoader -------------------------------------
+
+	// AbstractGenericWebContextLoader
 
 	/**
 	 * Register classes in the supplied {@linkplain GenericWebApplicationContext context}
 	 * from the classes in the supplied {@link WebMergedContextConfiguration}.
-	 *
 	 * <p>Each class must represent an <em>annotated class</em>. An
 	 * {@link AnnotatedBeanDefinitionReader} is used to register the appropriate
 	 * bean definitions.
-	 *
 	 * @param context the context in which the annotated classes should be registered
 	 * @param webMergedConfig the merged configuration from which the classes should be retrieved
-	 *
 	 * @see AbstractGenericWebContextLoader#loadBeanDefinitions
 	 */
 	@Override
-	protected void loadBeanDefinitions(GenericWebApplicationContext context,
-			WebMergedContextConfiguration webMergedConfig) {
+	protected void loadBeanDefinitions(
+			GenericWebApplicationContext context, WebMergedContextConfiguration webMergedConfig) {
+
 		Class<?>[] annotatedClasses = webMergedConfig.getClasses();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Registering annotated classes: " + ObjectUtils.nullSafeToString(annotatedClasses));
@@ -181,10 +173,10 @@ public class AnnotationConfigWebContextLoader extends AbstractGenericWebContextL
 	@Override
 	protected void validateMergedContextConfiguration(WebMergedContextConfiguration webMergedConfig) {
 		if (webMergedConfig.hasLocations()) {
-			String msg = String.format(
-				"Test class [%s] has been configured with @ContextConfiguration's 'locations' (or 'value') attribute %s, "
-						+ "but %s does not support resource locations.", webMergedConfig.getTestClass().getName(),
-				ObjectUtils.nullSafeToString(webMergedConfig.getLocations()), getClass().getSimpleName());
+			String msg = String.format("Test class [%s] has been configured with @ContextConfiguration's 'locations' " +
+							"(or 'value') attribute %s, but %s does not support resource locations.",
+					webMergedConfig.getTestClass().getName(),
+					ObjectUtils.nullSafeToString(webMergedConfig.getLocations()), getClass().getSimpleName());
 			logger.error(msg);
 			throw new IllegalStateException(msg);
 		}

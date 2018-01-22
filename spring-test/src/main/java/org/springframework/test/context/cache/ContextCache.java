@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public interface ContextCache {
 	String CONTEXT_CACHE_LOGGING_CATEGORY = "org.springframework.test.context.cache";
 
 	/**
-	 * The default maximum size of the context cache: {@value #DEFAULT_MAX_CONTEXT_CACHE_SIZE}.
+	 * The default maximum size of the context cache: {@value}.
 	 * @since 4.3
 	 * @see #MAX_CONTEXT_CACHE_SIZE_PROPERTY_NAME
 	 */

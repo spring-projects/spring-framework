@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,9 +142,8 @@ public class RedirectView extends AbstractUrlBasedView {
 	/**
 	 * Configure one or more hosts associated with the application.
 	 * All other hosts will be considered external hosts.
-	 * <p>In effect this provides a way turn off encoding via
-	 * {@link ServerHttpResponse#encodeUrl(String)} for URLs that have a
-	 * host and that host is not listed as a known host.
+	 * <p>In effect this provides a way turn off encoding for URLs that
+	 * have a host and that host is not listed as a known host.
 	 * <p>If not set (the default) all redirect URLs are encoded.
 	 * @param hosts one or more application hosts
 	 */
