@@ -67,7 +67,6 @@ public class LocalJaxWsServiceFactory {
 
 	/**
 	 * Set the WSDL document URL as a {@link Resource}.
-	 * @throws IOException
 	 * @since 3.2
 	 */
 	public void setWsdlDocumentResource(Resource wsdlDocumentResource) throws IOException {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,13 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * Resolves method arguments of type Map annotated with
- * {@link MatrixVariable @MatrixVariable} where the annotation does not
- * specify a name. If a name is specified then the argument will by resolved by the
- * {@link MatrixVariableMethodArgumentResolver} instead.
+ * Resolves arguments of type {@link Map} annotated with {@link MatrixVariable @MatrixVariable}
+ * where the annotation does not specify a name. In other words the purpose of this resolver
+ * is to provide access to multiple matrix variables, either all or associted with a specific
+ * path variable.
+ *
+ * <p>When a name is specified, an argument of type Map is considered to be a single attribute
+ * with a Map value, and is resolved by {@link MatrixVariableMethodArgumentResolver} instead.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
