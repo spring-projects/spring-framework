@@ -64,6 +64,7 @@ import static org.mockito.BDDMockito.*;
  *
  * @author Phillip Webb
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  */
 @SuppressWarnings("rawtypes")
 @RunWith(MockitoJUnitRunner.class)
@@ -259,6 +260,19 @@ public class ResolvableTypeTests {
 		this.thrown.expect(IllegalArgumentException.class);
 		this.thrown.expectMessage("MethodParameter must not be null");
 		ResolvableType.forMethodParameter(null);
+	}
+
+	@Test  // SPR-16210
+	public void forMethodParameterWithSameSignatureAndGenerics() throws Exception {
+		Method method = Methods.class.getMethod("list1");
+		MethodParameter methodParameter = MethodParameter.forExecutable(method, -1);
+		ResolvableType type = ResolvableType.forMethodParameter(methodParameter);
+		assertThat(((MethodParameter)type.getSource()).getMethod(), equalTo(method));
+
+		method = Methods.class.getMethod("list2");
+		methodParameter = MethodParameter.forExecutable(method, -1);
+		type = ResolvableType.forMethodParameter(methodParameter);
+		assertThat(((MethodParameter)type.getSource()).getMethod(), equalTo(method));
 	}
 
 	@Test
@@ -1439,6 +1453,10 @@ public class ResolvableTypeTests {
 		T typedReturn();
 
 		Set<?> wildcardSet();
+
+		List<String> list1();
+
+		List<String> list2();
 	}
 
 
