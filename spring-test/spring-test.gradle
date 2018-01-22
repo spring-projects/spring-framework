@@ -81,7 +81,7 @@ dependencies {
 		exclude group: "org.slf4j", module: "jcl-over-slf4j"
 	}
 	testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-	testCompile("org.apache.httpcomponents:httpclient:4.5.3") {
+	testCompile("org.apache.httpcomponents:httpclient:4.5.5") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
 	testCompile('io.projectreactor.ipc:reactor-netty')
