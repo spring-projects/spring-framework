@@ -87,7 +87,7 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 	 * <p>This implementation uses Netty's {@link CompositeByteBuf}.
 	 */
 	@Override
-	public DataBuffer compose(List<DataBuffer> dataBuffers) {
+	public DataBuffer join(List<? extends DataBuffer> dataBuffers) {
 		Assert.notNull(dataBuffers, "'dataBuffers' must not be null");
 		CompositeByteBuf composite = this.byteBufAllocator.compositeBuffer(dataBuffers.size());
 		for (DataBuffer dataBuffer : dataBuffers) {

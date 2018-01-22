@@ -507,23 +507,23 @@ public abstract class DataBufferUtils {
 	}
 
 	/**
-	 * Composes the buffers in the given {@link Publisher} into a single data buffer. Depending on
-	 * the {@code DataBuffer} implementation, the returned buffer may be a single buffer containing
-	 * all data of the provided buffers, or it may be a true composite that contains references to
-	 * the buffers.
-	 * @param publisher the data buffers that are to be composed
-	 * @return the composed data buffer
+	 * Return a new {@code DataBuffer} composed of the {@code dataBuffers} elements joined together.
+	 * Depending on the {@link DataBuffer} implementation, the returned buffer may be a single
+	 * buffer containing all data of the provided buffers, or it may be a true composite that
+	 * contains references to the buffers.
+	 * @param dataBuffers the data buffers that are to be composed
+	 * @return a buffer that is composed from the {@code dataBuffers} argument
+	 * @since 5.0.3
 	 */
-	public static Mono<DataBuffer> compose(Publisher<DataBuffer> publisher) {
-		Assert.notNull(publisher, "'publisher' must not be null");
+	public static Mono<DataBuffer> join(Publisher<? extends DataBuffer> dataBuffers) {
+		Assert.notNull(dataBuffers, "'dataBuffers' must not be null");
 
-		Flux<DataBuffer> source = Flux.from(publisher);
-
-		return source.collectList()
-				.filter(dataBuffers -> !dataBuffers.isEmpty())
-				.map(dataBuffers -> {
-					DataBufferFactory bufferFactory = dataBuffers.get(0).factory();
-					return bufferFactory.compose(dataBuffers);
+		return Flux.from(dataBuffers)
+				.collectList()
+				.filter(list -> !list.isEmpty())
+				.map(list -> {
+					DataBufferFactory bufferFactory = list.get(0).factory();
+					return bufferFactory.join(list);
 				});
 	}
 

@@ -96,7 +96,7 @@ public class FormHttpMessageReader implements HttpMessageReader<MultiValueMap<St
 		MediaType contentType = message.getHeaders().getContentType();
 		Charset charset = getMediaTypeCharset(contentType);
 
-		return DataBufferUtils.compose(message.getBody())
+		return DataBufferUtils.join(message.getBody())
 				.map(buffer -> {
 					CharBuffer charBuffer = charset.decode(buffer.asByteBuffer());
 					String body = charBuffer.toString();

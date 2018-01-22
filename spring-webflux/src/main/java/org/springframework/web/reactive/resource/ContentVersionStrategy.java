@@ -46,7 +46,7 @@ public class ContentVersionStrategy extends AbstractFileNameVersionStrategy {
 	public Mono<String> getResourceVersion(Resource resource) {
 		Flux<DataBuffer> flux =
 				DataBufferUtils.read(resource, dataBufferFactory, StreamUtils.BUFFER_SIZE);
-		return DataBufferUtils.compose(flux)
+		return DataBufferUtils.join(flux)
 				.map(buffer -> {
 					byte[] result = new byte[buffer.readableByteCount()];
 					buffer.read(result);

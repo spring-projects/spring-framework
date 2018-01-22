@@ -63,13 +63,15 @@ public interface DataBufferFactory {
 	DataBuffer wrap(byte[] bytes);
 
 	/**
-	 * Create a composite data buffer from the list of provided data buffers. Depending on the
-	 * implementation, the returned buffer may be a single buffer containing all data of the
-	 * provided buffers, or it may be a true composite that contains references to the buffers.
+	 * Return a new {@code DataBuffer} composed of the {@code dataBuffers} elements joined together.
+	 * Depending on the implementation, the returned buffer may be a single buffer containing all
+	 * data of the provided buffers, or it may be a true composite that contains references to the
+	 * buffers.
 	 * <p>Note that the given data buffers do <strong>not</strong> have to be released, as they are
 	 * released as part of the returned composite.
 	 * @param dataBuffers the data buffers to be composed
-	 * @return a buffer that composes {@code dataBuffers} into one
+	 * @return a buffer that is composed from the {@code dataBuffers} argument
+	 * @since 5.0.3
 	 */
-	DataBuffer compose(List<DataBuffer> dataBuffers);
+	DataBuffer join(List<? extends DataBuffer> dataBuffers);
 }

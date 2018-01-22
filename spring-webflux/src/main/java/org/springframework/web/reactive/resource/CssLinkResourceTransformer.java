@@ -89,7 +89,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 					DataBufferFactory bufferFactory = exchange.getResponse().bufferFactory();
 					Flux<DataBuffer> flux = DataBufferUtils
 							.read(ouptputResource, bufferFactory, StreamUtils.BUFFER_SIZE);
-					return DataBufferUtils.compose(flux)
+					return DataBufferUtils.join(flux)
 							.flatMap(dataBuffer -> {
 								CharBuffer charBuffer = DEFAULT_CHARSET.decode(dataBuffer.asByteBuffer());
 								DataBufferUtils.release(dataBuffer);

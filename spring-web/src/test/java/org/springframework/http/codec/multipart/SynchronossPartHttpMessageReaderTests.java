@@ -89,7 +89,7 @@ public class SynchronossPartHttpMessageReaderTests {
 		assertTrue(part instanceof FilePart);
 		assertEquals("fooPart", part.name());
 		assertEquals("foo.txt", ((FilePart) part).filename());
-		DataBuffer buffer = DataBufferUtils.compose(part.content()).block();
+		DataBuffer buffer = DataBufferUtils.join(part.content()).block();
 		assertEquals(12, buffer.readableByteCount());
 		byte[] byteContent = new byte[12];
 		buffer.read(byteContent);

@@ -480,8 +480,8 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 	}
 
 	@Test
-	public void composite() {
-		DataBuffer composite = this.bufferFactory.compose(Arrays.asList(stringBuffer("a"),
+	public void join() {
+		DataBuffer composite = this.bufferFactory.join(Arrays.asList(stringBuffer("a"),
 				stringBuffer("b"), stringBuffer("c")));
 		assertEquals(3, composite.readableByteCount());
 		byte[] bytes = new byte[3];

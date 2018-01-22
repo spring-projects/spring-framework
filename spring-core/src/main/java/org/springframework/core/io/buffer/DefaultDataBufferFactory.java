@@ -109,15 +109,18 @@ public class DefaultDataBufferFactory implements DataBufferFactory {
 	 * in {@code dataBuffers}.
 	 */
 	@Override
-	public DataBuffer compose(List<DataBuffer> dataBuffers) {
+	public DataBuffer join(List<? extends DataBuffer> dataBuffers) {
 		Assert.notEmpty(dataBuffers, "'dataBuffers' must not be empty");
 
 		int capacity = dataBuffers.stream()
 				.mapToInt(DataBuffer::readableByteCount)
 				.sum();
 		DefaultDataBuffer dataBuffer = allocateBuffer(capacity);
-		return dataBuffers.stream()
+		DataBuffer result = dataBuffers.stream()
+				.map(o -> (DataBuffer) o)
 				.reduce(dataBuffer, DataBuffer::write);
+		dataBuffers.forEach(DataBufferUtils::release);
+		return result;
 	}
 
 	@Override
