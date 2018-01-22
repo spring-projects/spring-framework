@@ -100,6 +100,15 @@ public class HeaderResultMatchers {
 	}
 
 	/**
+	 * Assert that the named response header does exist.
+	 * @since 4.3
+	 */
+	public ResultMatcher doesExist(final String name) {
+		return result -> assertTrue("Response should contain header '" + name + "'",
+									result.getResponse().containsHeader(name));
+	}
+
+	/**
 	 * Assert the primary value of the named response header as a {@code long}.
 	 * <p>The {@link ResultMatcher} returned by this method throws an
 	 * {@link AssertionError} if the response does not contain the specified
