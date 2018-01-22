@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,6 +168,10 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 
 		testTokenize(asList("12.", "34")
 			,singletonList("12.34"), true);
+
+		// SPR-16407
+		testTokenize(asList("[1", ",2,", "3]"),
+				asList("1", "2", "3"), true);
 	}
 
 	private void testTokenize(List<String> source, List<String> expected, boolean tokenizeArrayElements) {
@@ -175,7 +179,7 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 				.map(this::stringBuffer);
 
 		Flux<TokenBuffer> tokenBufferFlux =
-				Jackson2Tokenizer.tokenize(sourceFlux, jsonFactory, tokenizeArrayElements);
+				Jackson2Tokenizer.tokenize(sourceFlux, this.jsonFactory, tokenizeArrayElements);
 
 		Flux<String> result = tokenBufferFlux
 				.map(tokenBuffer -> {
