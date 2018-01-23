@@ -57,7 +57,7 @@ configure(allprojects) { project ->
 	ext.rxjavaVersion        = "1.3.4"
 	ext.rxjavaAdapterVersion = "1.2.1"
 	ext.rxjava2Version       = "2.1.8"
-	ext.slf4jVersion         = "1.7.25"
+	ext.slf4jVersion         = "1.7.25"	// spring-jcl + consistent 3rd party deps
 	ext.tiles3Version        = "3.0.8"
 	ext.tomcatVersion        = "8.5.27"
 	ext.undertowVersion      = "1.4.22.Final"
@@ -89,6 +89,15 @@ configure(allprojects) { project ->
 	configurations.all {
 		// Check for updates every build
 		resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+
+		// Consistent slf4j version (e.g. clashes between slf4j versions)
+		resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+			if (details.requested.group == 'org.slf4j') {
+				details.useVersion slf4jVersion
+			}
+		}
+
+		exclude group: "org.slf4j", module: "jcl-over-slf4j"
 	}
 
 	def commonCompilerArgs =
@@ -149,6 +158,8 @@ configure(allprojects) { project ->
 		testCompile("org.hamcrest:hamcrest-all:1.3")
 		testCompile("org.xmlunit:xmlunit-matchers:2.3.0")
 		testRuntime("org.apache.logging.log4j:log4j-core:${log4jVersion}")
+		testRuntime("org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}")
+		testRuntime("org.apache.logging.log4j:log4j-jul:${log4jVersion}")
         // JSR-305 only used for non-required meta-annotations
 		compileOnly("com.google.code.findbugs:jsr305:3.0.2")
 		testCompileOnly("com.google.code.findbugs:jsr305:3.0.2")
