@@ -149,10 +149,16 @@ define the `required` attribute.  That means `@RequestParam name: String?` will 
 as not required and conversely `@RequestParam name: String` as being required.
 This feature is also supported on the Spring Messaging `@Header` annotation.
 
-In a similar fashion, Spring bean injection with `@Autowired` or `@Inject` uses this information
-to determine if a bean is required or not. `@Autowired lateinit var foo: Foo` implies that a bean
-of type `Foo` must be registered in the application context while `@Autowired lateinit var foo: Foo?`
+In a similar fashion, Spring bean injection with `@Autowired`, `@Bean` or `@Inject` uses
+this information to determine if a bean is required or not.
+
+For example, `@Autowired lateinit var foo: Foo` implies that a bean
+of type `Foo` must be registered in the application context, while `@Autowired lateinit var foo: Foo?`
 won’t raise an error if such bean does not exist.
+
+Following the same principle, `@Bean fun baz(foo: Foo, bar: Bar?) = Baz(foo, bar)` implies
+that a bean of type `Foo` must be registered in the application context while a bean of
+type `Bar` may or may not exist. The same behavior applies to autowired constructor parameters.
 
 [NOTE]
 ====
