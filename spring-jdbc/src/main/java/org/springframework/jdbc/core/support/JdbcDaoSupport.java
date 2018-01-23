@@ -112,7 +112,7 @@ public abstract class JdbcDaoSupport extends DaoSupport {
 
 	@Override
 	protected void checkDaoConfig() {
-		if (this.jdbcTemplate == null) {
+		if (this.jdbcTemplate == null || this.jdbcTemplate.getDataSource() == null) {
 			throw new IllegalArgumentException("'dataSource' or 'jdbcTemplate' is required");
 		}
 	}
