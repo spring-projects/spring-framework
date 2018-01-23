@@ -3153,19 +3153,47 @@ or in a JSP:
 [[mvc-ann-async]]
 == Async Requests
 
+Spring MVC has an extensive integration with the Servlet 3.0 asynchronous request
+processing. <<mvc-ann-async-deferredresult>> and <<mvc-ann-async-callable>>
+provide basic support for producing return values asynchronously. Controllers can produce
+<<mvc-ann-async-http-streaming,response streams>> including
+<<mvc-ann-async-sse,SSE>> and <<mvc-ann-async-output-stream,raw data>>. Controllers can
+use reactive clients and return <<mvc-ann-async-reactive-types,reactive return types>>
+to Spring MVC for response handling.
 
 
-[[mvc-ann-async-processing]]
-=== Processing
 
-Spring MVC 3.2 introduced Servlet 3 based asynchronous request processing. Instead of
-returning a value, as usual, a controller method can now return a
-`java.util.concurrent.Callable` and produce the return value from a Spring MVC managed thread.
-Meanwhile the main Servlet container thread is exited and released and allowed to process other
-requests. Spring MVC invokes the `Callable` in a separate thread with the help of a
-`TaskExecutor` and when the `Callable` returns, the request is dispatched back to the
-Servlet container to resume processing using the value returned by the `Callable`. Here
-is an example of such a controller method:
+[[mvc-ann-async-deferredresult]]
+=== `DeferredResult`
+
+Once the asynchronous request processing feature is
+<<mvc-ann-async-configuration,enabled>> in the Servlet container, controller methods can
+wrap any supported controller method return value with `DeferredResult`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@GetMapping("/quotes")
+	@ResponseBody
+	public DeferredResult<String> quotes() {
+		DeferredResult<String> deferredResult = new DeferredResult<String>();
+		// Save the deferredResult somewhere..
+		return deferredResult;
+	}
+
+	// From some other thread...
+	deferredResult.setResult(data);
+----
+
+The controller can produce the return value asynchronously, from a different thread, for
+example in response to an external event (JMS message), a scheduled task, or other.
+
+
+
+[[mvc-ann-async-callable]]
+=== `Callable`
+
+A controller may also wrap any supported return value with `java.util.concurrent.Callable`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3183,30 +3211,15 @@ is an example of such a controller method:
 	}
 ----
 
-Another option is for the controller method to return an instance of `DeferredResult`. In this
-case the return value will also be produced from any thread, i.e. one that
-is not managed by Spring MVC. For example the result may be produced in response to some
-external event such as a JMS message, a scheduled task, and so on. Here is an example
-of such a controller method:
+The return value will then be obtained by executing the the given task through the
+<<mvc-ann-async-configuration-spring-mvc,configured>> `TaskExecutor`.
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	@RequestMapping("/quotes")
-	@ResponseBody
-	public DeferredResult<String> quotes() {
-		DeferredResult<String> deferredResult = new DeferredResult<String>();
-		// Save the deferredResult somewhere..
-		return deferredResult;
-	}
 
-	// In some other thread...
-	deferredResult.setResult(data);
-----
 
-This may be difficult to understand without any knowledge of the Servlet 3.0
-asynchronous request processing features. It would certainly help to read up
-on that. Here are a few basic facts about the underlying mechanism:
+[[mvc-ann-async-processing]]
+=== Processing
+
+Here is a very concise overview of Servlet asynchronous request processing:
 
 * A `ServletRequest` can be put in asynchronous mode by calling `request.startAsync()`.
   The main effect of doing so is that the Servlet, as well as any Filters, can exit but
@@ -3219,98 +3232,83 @@ on that. Here are a few basic facts about the underlying mechanism:
   be used to distinguish between processing the initial request, an async
   dispatch, a forward, and other dispatcher types.
 
-With the above in mind, the following is the sequence of events for async request
-processing with a `Callable`:
-
-* Controller returns a `Callable`.
-* Spring MVC starts asynchronous processing and submits the `Callable` to
-  a `TaskExecutor` for processing in a separate thread.
-* The `DispatcherServlet` and all Filter's exit the Servlet container thread
-  but the response remains open.
-* The `Callable` produces a result and Spring MVC dispatches the request back
-  to the Servlet container to resume processing.
-* The `DispatcherServlet` is invoked again and processing resumes with the
-  asynchronously produced result from the `Callable`.
-
-The sequence for `DeferredResult` is very similar except it's up to the
-application to produce the asynchronous result from any thread:
+`DeferredResult` processing:
 
 * Controller returns a `DeferredResult` and saves it in some in-memory
   queue or list where it can be accessed.
-* Spring MVC starts async processing.
-* The `DispatcherServlet` and all configured Filter's exit the request
+* Spring MVC calls `request.startAsync()`.
+* Meanwhile the `DispatcherServlet` and all configured Filter's exit the request
   processing thread but the response remains open.
 * The application sets the `DeferredResult` from some thread and Spring MVC
   dispatches the request back to the Servlet container.
 * The `DispatcherServlet` is invoked again and processing resumes with the
-  asynchronously produced result.
+  asynchronously produced return value.
 
-For further background on the motivation for async request processing and
-when or why to use it please read
-https://spring.io/blog/2012/05/07/spring-mvc-3-2-preview-introducing-servlet-3-async-support[this
-blog post series].
+`Callable` processing:
+
+* Controller returns a `Callable`.
+* Spring MVC calls `request.startAsync()` and submits the `Callable` to
+  a `TaskExecutor` for processing in a separate thread.
+* Meanwhile the `DispatcherServlet` and all Filter's exit the Servlet container thread
+  but the response remains open.
+* Eventually the `Callable` produces a result and Spring MVC dispatches the request back
+  to the Servlet container to complete processing.
+* The `DispatcherServlet` is invoked again and processing resumes with the
+  asynchronously produced return value from the `Callable`.
+
+For further background and context you can also read
+https://spring.io/blog/2012/05/07/spring-mvc-3-2-preview-introducing-servlet-3-async-support[the
+blog posts] that introduced asynchronous request processing support in Spring MVC 3.2.
 
 
 
 [[mvc-ann-async-exceptions]]
 === Exception handling
 
-What happens if a `Callable` returned from a controller method raises an
-Exception while being executed? The short answer is the same as what happens
-when a controller method raises an exception. It goes through the regular
-exception handling mechanism. The longer explanation is that when a `Callable`
-raises an Exception Spring MVC dispatches to the Servlet container with
-the `Exception` as the result and that leads to resume request processing
-with the `Exception` instead of a controller method return value.
-When using a `DeferredResult` you have a choice whether to call
-`setResult` or `setErrorResult` with an `Exception` instance.
+When using a `DeferredResult` you can choose whether to call `setResult` or
+`setErrorResult` with an exception. In both cases Spring MVC dispatches the request back
+to the Servlet container to complete processing. It is then treated either as if the
+controller method returned the given value, or as if it produced the given exception.
+The exception then goes through the regular exception handling mechanism, e.g. invoking
+`@ExceptionHandler` methods.
+
+When using `Callable`, similar processing logic follows. The main difference being that
+the result is returned from the `Callable` or an exception is raised by it.
 
 
 
 [[mvc-ann-async-interception]]
-=== Async interceptors
+=== Interception
 
-A `HandlerInterceptor` can also implement `AsyncHandlerInterceptor` in order
-to implement the `afterConcurrentHandlingStarted` callback, which is called
-instead of `postHandle` and `afterCompletion` when asynchronous processing
-starts.
+``HandlerInterceptor``'s can also be `AsyncHandlerInterceptor` in order to receive the
+`afterConcurrentHandlingStarted` callback on the initial request that starts asynchronous
+processing instead of `postHandle` and `afterCompletion`.
 
-A `HandlerInterceptor` can also register a `CallableProcessingInterceptor`
-or a `DeferredResultProcessingInterceptor` in order to integrate more
-deeply with the lifecycle of an asynchronous request and for example
-handle a timeout event. See the Javadoc of `AsyncHandlerInterceptor`
+``HandlerInterceptor``'s can also register a `CallableProcessingInterceptor`
+or a `DeferredResultProcessingInterceptor` in order to integrate more deeply with the
+lifecycle of an asynchronous request for example to handle a timeout event. See
+{api-spring-framework}/web/servlet/AsyncHandlerInterceptor.html[AsyncHandlerInterceptor]
 for more details.
 
-The `DeferredResult` type also provides methods such as `onTimeout(Runnable)`
-and `onCompletion(Runnable)`. See the Javadoc of `DeferredResult` for more
-details.
-
-When using a `Callable` you can wrap it with an instance of `WebAsyncTask`
-which also provides registration methods for timeout and completion.
+`DeferredResult` provides `onTimeout(Runnable)` and `onCompletion(Runnable)` callbacks.
+See the Javadoc of `DeferredResult` for more details. `Callable` can be substituted for
+`WebAsyncTask` that exposes additional methods for timeout and completion callbacks.
 
 
 
 [[mvc-ann-async-http-streaming]]
 === Streaming response
 
-A controller method can use `DeferredResult` and `Callable` to produce its
-return value asynchronously and that can be used to implement techniques such as
-http://spring.io/blog/2012/05/08/spring-mvc-3-2-preview-techniques-for-real-time-updates/[long polling]
-where the server can push an event to the client as soon as possible.
-
-What if you wanted to push multiple events on a single HTTP response?
-This is a technique related to "Long Polling" that is known as "HTTP Streaming".
-Spring MVC makes this possible through the `ResponseBodyEmitter` return value
-type which can be used to send multiple Objects, instead of one as is normally
-the case with `@ResponseBody`, where each Object sent is written to the
-response with an <<integration.adoc#rest-message-conversion,HttpMessageConverter>>.
-
-Here is an example of that:
+What if you wanted to push multiple events on a single HTTP response? The
+`ResponseBodyEmitter` return value can be used to stream multiple Objects, where each
+Object sent is serialized with an
+<<integration.adoc#rest-message-conversion,HttpMessageConverter>> and written to the
+response. For example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping("/events")
+	@GetMapping("/events")
 	public ResponseBodyEmitter handle() {
 		ResponseBodyEmitter emitter = new ResponseBodyEmitter();
 		// Save the emitter somewhere..
@@ -3327,53 +3325,58 @@ Here is an example of that:
 	emitter.complete();
 ----
 
-Note that `ResponseBodyEmitter` can also be used as the body in a
-`ResponseEntity` in order to customize the status and headers of
-the response.
+`ResponseBodyEmitter` can also be used as the body in a `ResponseEntity` allowing you to
+customize the status and headers of the response.
 
 
 
 [[mvc-ann-async-sse]]
 === Server-Sent Events
 
-`SseEmitter` is a subclass of `ResponseBodyEmitter` providing support for
-http://www.w3.org/TR/eventsource/[Server-Sent Events].
-Server-sent events is a just another variation on the same "HTTP Streaming"
-technique except events pushed from the server are formatted according to
-the W3C Server-Sent Events specification.
+`SseEmitter` is a sub-class of `ResponseBodyEmitter` that provides support for
+http://www.w3.org/TR/eventsource/[Server-Sent Events] where events sent from the server
+are formatted according to the W3C SSE specification. In order to produce an SSE
+stream from a controller simply return `SseEmitter`:
 
-Server-Sent Events can be used for their intended purpose, that is to push
-events from the server to clients. It is quite easy to do in Spring MVC and
-requires simply returning a value of type `SseEmitter`.
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@GetMapping(path="/events", produces=MediaType.TEXT_EVENT_STREAM_VALUE)
+	public SseEmitter handle() {
+		SseEmitter emitter = new SseEmitter();
+		// Save the emitter somewhere..
+		return emitter;
+	}
 
-Note however that Internet Explorer does not support Server-Sent Events and
-that for more advanced web application messaging scenarios such as online games,
-collaboration, financial applicatinos, and others it's better to consider
-Spring's WebSocket support that includes SockJS-style WebSocket emulation
-falling back to a very wide range of browsers (including Internet Explorer)
-and also higher-level messaging patterns for interacting with clients through
-a publish-subscribe model within a more messaging-centric architecture.
-For further background on this see
-http://blog.pivotal.io/pivotal/products/websocket-architecture-in-spring-4-0[the following blog post].
+	// In some other thread
+	emitter.send("Hello once");
+
+	// and again later on
+	emitter.send("Hello again");
+
+	// and done at some point
+	emitter.complete();
+----
+
+While SSE is the main option for streaming into browsers, note that Internet Explorer
+does not support Server-Sent Events. Consider using Spring's
+<<web.adoc#websocket,WebSocket messaging>> with
+<<web.adoc#websocket-fallback,SockJS fallback>> transports (including SSE) that target
+a wide range of browsers.
 
 
 
 [[mvc-ann-async-output-stream]]
 === Streaming raw data
 
-`ResponseBodyEmitter` allows sending events by writing Objects to the
-response through an <<integration.adoc#rest-message-conversion,HttpMessageConverter>>.
-This is probably the most common case, for example when writing JSON data.
-However sometimes it is useful to bypass message conversion and write directly to the
-response `OutputStream` for example for a file download. This can be done with the help
-of the `StreamingResponseBody` return value type.
-
-Here is an example of that:
+Sometimes it is useful to bypass message conversion and stream directly to the response
+`OutputStream` for example for a file download. Use the of the `StreamingResponseBody`
+return value type to do that:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping("/download")
+	@GetMapping("/download")
 	public StreamingResponseBody handle() {
 		return new StreamingResponseBody() {
 			@Override
@@ -3384,60 +3387,43 @@ Here is an example of that:
 	}
 ----
 
-Note that `StreamingResponseBody` can also be used as the body in a
-`ResponseEntity` in order to customize the status and headers of
-the response.
+`StreamingResponseBody` can be used as the body in a `ResponseEntity` allowing you to
+customize the status and headers of the response.
 
 
 
 [[mvc-ann-async-reactive-types]]
 === Reactive return values
 
-If using the reactive `WebClient` from `spring-webflux`, or another client, or
-a data store with reactive support, you can return reactive types directly from
-Spring MVC controller methods.
+Spring MVC supports use of reactive client libraries in a controller. This includes the
+`WebClient` from `spring-webflux` and others such as Spring Data reactive data
+repositories. In such scenarios it is convenient to be able to return reactive types
+from the controller method .
 
-Spring MVC adapts transparently to the reactive library in use with proper translation
-of cardinality -- i.e. how many values are expected. This is done with the help of the
+Reactive return values are handled as follows:
+
+* A single-value promise is adapted to and similar to using `DeferredResult`. Examples
+include `Mono` (Reactor) or `Single` (RxJava).
+* A multi-value stream, with a streaming media type such as `"application/stream+json"`
+or `"text/event-stream"`, is adapted to and similar to using `ResponseBodyEmitter` or
+`SseEmitter`. Examples include `Flux` (Reactor) or `Observable` (RxJava).
+Applications can also return `Flux<ServerSentEvent>` or `Observable<ServerSentEvent>`.
+* A multi-value stream, with any other media type (e.g. "application/json"), is adapted
+to and similar to using `DeferredResult<List<?>>`.
+
+[TIP]
+====
+Spring MVC supports Reactor and RxJava through the
 {api-spring-framework}/core/ReactiveAdapterRegistry.html[ReactiveAdapterRegistry] from
-`spring-core` which provides pluggable support for reactive and async types. The registry
-has built-in support for RxJava but others can be registered.
-
-Return values are handled as follows:
-
-* If the return type has single-value stream semantics such as Reactor `Mono` or
-RxJava `Single` it is adapted and equivalent to using `DeferredResult`.
-* If the return type has multi-value stream semantics such as Reactor `Flux` or
-RxJava `Observable` / `Flowable` and if the media type indicates streaming, e.g.
-"application/stream+json" or "text/event-stream", it is adapted and equivalent to
-using `ResponseBodyEmitter` or `SseEmitter`. You can also return
-`Flux<ServerSentEvent>` or `Observable<ServerSentEvent>`.
-* If the return type has multi-value stream semantics but the media type does not
-imply streaming, e.g. "application/json", it is adapted and equivalent to using
-`DeferredResult<List<?>>`, e.g. JSON array.
-
-Reactive libraries are detected and adapted to a Reactive Streams `Publisher`
-through Spring's pluggable `ReactiveAdapterRegistry` which by default supports
-Reactor 3, RxJava 2, and RxJava 1. Note that for RxJava 1 you will need to add
-https://github.com/ReactiveX/RxJavaReactiveStreams["io.reactivex:rxjava-reactive-streams"]
-to the classpath.
-
-A common assumption with reactive libraries is to not block the processing thread.
-The `WebClient` with Reactor Netty for example is based on event-loop style
-handling using a small, fixed number of threads and those must not be blocked
-when writing to the `ServletResponseOutputStream`. Reactive libraries have
-operators for that but Spring MVC automatically writes asynchronously so you
-don't need to use them. The underlying `TaskExecutor` for this must be configured
-through the MVC Java config and the MVC namespace as described in the following
-section which by default is a `SyncTaskExecutor` and hence not suitable for
-production use.
-
-[NOTE]
+`spring-core` which allows it to adapt from multiple reactive libraries.
 ====
-Unlike Spring MVC, Spring WebFlux is built on a non-blocking, reactive foundation
-and uses the Servlet 3.1 non-blocking I/O that's also based on event loop style
-processing and hence does not require a thread to absorb the effect of blocking.
-====
+
+When streaming to the response with a reactive type, Spring MVC performs (blocking)
+writes to the response through the
+through the <<mvc-ann-async-configuration-spring-mvc,configured>> MVC `TaskExecutor`.
+By default this is a `SyncTaskExecutor` and not suitable for production.
+https://jira.spring.io/browse/SPR-16203[SPR-16203] will provide better defaults.
+In the mean time please configure the executor through the MVC config.
 
 
 
