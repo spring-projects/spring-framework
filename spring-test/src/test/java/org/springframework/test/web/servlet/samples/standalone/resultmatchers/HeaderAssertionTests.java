@@ -159,7 +159,7 @@ public class HeaderAssertionTests {
 		this.mockMvc.perform(get("/persons/1")).andExpect(header().doesExist(LAST_MODIFIED));
 	}
 
-	@Test(expected = AssertionError.class)  // SPR-10771
+	@Test(expected = AssertionError.class)
 	public void doesExistFail() throws Exception {
 		this.mockMvc.perform(get("/persons/1")).andExpect(header().doesExist("X-Custom-Header"));
 	}
