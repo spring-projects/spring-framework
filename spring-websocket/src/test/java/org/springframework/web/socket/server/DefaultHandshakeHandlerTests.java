@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,19 +50,18 @@ public class DefaultHandshakeHandlerTests extends AbstractHttpRequestTests {
 
 
 	@Before
-	public void setup() throws Exception {
+	public void setup() {
+		super.setup();
+
 		MockitoAnnotations.initMocks(this);
 		this.handshakeHandler = new DefaultHandshakeHandler(this.upgradeStrategy);
 	}
 
 
 	@Test
-	public void supportedSubProtocols() throws Exception {
-
+	public void supportedSubProtocols() {
 		this.handshakeHandler.setSupportedProtocols("stomp", "mqtt");
-
 		given(this.upgradeStrategy.getSupportedVersions()).willReturn(new String[] {"13"});
-
 		this.servletRequest.setMethod("GET");
 
 		WebSocketHttpHeaders headers = new WebSocketHttpHeaders(this.request.getHeaders());
@@ -73,22 +72,20 @@ public class DefaultHandshakeHandlerTests extends AbstractHttpRequestTests {
 		headers.setSecWebSocketProtocol("STOMP");
 
 		WebSocketHandler handler = new TextWebSocketHandler();
-		Map<String, Object> attributes = Collections.<String, Object>emptyMap();
+		Map<String, Object> attributes = Collections.emptyMap();
 		this.handshakeHandler.doHandshake(this.request, this.response, handler, attributes);
 
-		verify(this.upgradeStrategy).upgrade(this.request, this.response,
-				"STOMP", Collections.<WebSocketExtension>emptyList(), null, handler, attributes);
+		verify(this.upgradeStrategy).upgrade(this.request, this.response, "STOMP",
+				Collections.emptyList(), null, handler, attributes);
 	}
 
-
 	@Test
-	public void supportedExtensions() throws Exception {
-
+	public void supportedExtensions() {
 		WebSocketExtension extension1 = new WebSocketExtension("ext1");
 		WebSocketExtension extension2 = new WebSocketExtension("ext2");
 
 		given(this.upgradeStrategy.getSupportedVersions()).willReturn(new String[] {"13"});
-		given(this.upgradeStrategy.getSupportedExtensions(this.request)).willReturn(Arrays.asList(extension1));
+		given(this.upgradeStrategy.getSupportedExtensions(this.request)).willReturn(Collections.singletonList(extension1));
 
 		this.servletRequest.setMethod("GET");
 
@@ -103,14 +100,13 @@ public class DefaultHandshakeHandlerTests extends AbstractHttpRequestTests {
 		Map<String, Object> attributes = Collections.<String, Object>emptyMap();
 		this.handshakeHandler.doHandshake(this.request, this.response, handler, attributes);
 
-		verify(this.upgradeStrategy).upgrade(this.request, this.response, null, Arrays.asList(extension1),
-				null, handler, attributes);
+		verify(this.upgradeStrategy).upgrade(this.request, this.response, null,
+				Collections.singletonList(extension1), null, handler, attributes);
 	}
 
 	@Test
-	public void subProtocolCapableHandler() throws Exception {
-
-		given(this.upgradeStrategy.getSupportedVersions()).willReturn(new String[]{"13"});
+	public void subProtocolCapableHandler() {
+		given(this.upgradeStrategy.getSupportedVersions()).willReturn(new String[] {"13"});
 
 		this.servletRequest.setMethod("GET");
 
@@ -125,14 +121,13 @@ public class DefaultHandshakeHandlerTests extends AbstractHttpRequestTests {
 		Map<String, Object> attributes = Collections.<String, Object>emptyMap();
 		this.handshakeHandler.doHandshake(this.request, this.response, handler, attributes);
 
-		verify(this.upgradeStrategy).upgrade(this.request, this.response,
-				"v11.stomp", Collections.<WebSocketExtension>emptyList(), null, handler, attributes);
+		verify(this.upgradeStrategy).upgrade(this.request, this.response, "v11.stomp",
+				Collections.emptyList(), null, handler, attributes);
 	}
 
 	@Test
-	public void subProtocolCapableHandlerNoMatch() throws Exception {
-
-		given(this.upgradeStrategy.getSupportedVersions()).willReturn(new String[]{"13"});
+	public void subProtocolCapableHandlerNoMatch() {
+		given(this.upgradeStrategy.getSupportedVersions()).willReturn(new String[] {"13"});
 
 		this.servletRequest.setMethod("GET");
 
@@ -147,8 +142,8 @@ public class DefaultHandshakeHandlerTests extends AbstractHttpRequestTests {
 		Map<String, Object> attributes = Collections.<String, Object>emptyMap();
 		this.handshakeHandler.doHandshake(this.request, this.response, handler, attributes);
 
-		verify(this.upgradeStrategy).upgrade(this.request, this.response,
-				null, Collections.<WebSocketExtension>emptyList(), null, handler, attributes);
+		verify(this.upgradeStrategy).upgrade(this.request, this.response, null,
+				Collections.emptyList(), null, handler, attributes);
 	}
 
 
@@ -156,8 +151,7 @@ public class DefaultHandshakeHandlerTests extends AbstractHttpRequestTests {
 
 		private final List<String> subProtocols;
 
-
-		private SubProtocolCapableHandler(String... subProtocols) {
+		public SubProtocolCapableHandler(String... subProtocols) {
 			this.subProtocols = Arrays.asList(subProtocols);
 		}
 
