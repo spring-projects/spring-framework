@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,8 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	private final HttpServletRequest servletRequest;
 
+	private URI uri;
+
 	private HttpHeaders headers;
 
 	private ServerHttpAsyncRequestControl asyncRequestControl;
@@ -88,17 +90,36 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	@Override
 	public URI getURI() {
-		try {
-			StringBuffer url = this.servletRequest.getRequestURL();
-			String query = this.servletRequest.getQueryString();
-			if (StringUtils.hasText(query)) {
-				url.append('?').append(query);
+		if (this.uri == null) {
+			String urlString = null;
+			boolean hasQuery = false;
+			try {
+				StringBuffer url = this.servletRequest.getRequestURL();
+				String query = this.servletRequest.getQueryString();
+				hasQuery = StringUtils.hasText(query);
+				if (hasQuery) {
+					url.append('?').append(query);
+				}
+				urlString = url.toString();
+				this.uri = new URI(urlString);
 			}
-			return new URI(url.toString());
+			catch (URISyntaxException ex) {
+				if (!hasQuery) {
+					throw new IllegalStateException(
+							"Could not resolve HttpServletRequest as URI: " + urlString, ex);
+				}
+				// Maybe a malformed query string... try plain request URL
+				try {
+					urlString = this.servletRequest.getRequestURL().toString();
+					this.uri = new URI(urlString);
+				}
+				catch (URISyntaxException ex2) {
+					throw new IllegalStateException(
+							"Could not resolve HttpServletRequest as URI: " + urlString, ex2);
+				}
+			}
 		}
-		catch (URISyntaxException ex) {
-			throw new IllegalStateException("Could not get HttpServletRequest URI: " + ex.getMessage(), ex);
-		}
+		return this.uri;
 	}
 
 	@Override
@@ -106,8 +127,8 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		if (this.headers == null) {
 			this.headers = new HttpHeaders();
 
-			for (Enumeration<?> headerNames = this.servletRequest.getHeaderNames(); headerNames.hasMoreElements();) {
-				String headerName = (String) headerNames.nextElement();
+			for (Enumeration<?> names = this.servletRequest.getHeaderNames(); names.hasMoreElements();) {
+				String headerName = (String) names.nextElement();
 				for (Enumeration<?> headerValues = this.servletRequest.getHeaders(headerName);
 						headerValues.hasMoreElements();) {
 					String headerValue = (String) headerValues.nextElement();
@@ -115,7 +136,8 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 				}
 			}
 
-			// HttpServletRequest exposes some headers as properties: we should include those if not already present
+			// HttpServletRequest exposes some headers as properties:
+			// we should include those if not already present
 			try {
 				MediaType contentType = this.headers.getContentType();
 				if (contentType == null) {
@@ -132,8 +154,8 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 						Map<String, String> params = new LinkedCaseInsensitiveMap<String>();
 						params.putAll(contentType.getParameters());
 						params.put("charset", charSet.toString());
-						MediaType newContentType = new MediaType(contentType.getType(), contentType.getSubtype(), params);
-						this.headers.setContentType(newContentType);
+						MediaType mediaType = new MediaType(contentType.getType(), contentType.getSubtype(), params);
+						this.headers.setContentType(mediaType);
 					}
 				}
 			}
@@ -181,7 +203,8 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	public ServerHttpAsyncRequestControl getAsyncRequestControl(ServerHttpResponse response) {
 		if (this.asyncRequestControl == null) {
 			if (!ServletServerHttpResponse.class.isInstance(response)) {
-				throw new IllegalArgumentException("Response must be a ServletServerHttpResponse: " + response.getClass());
+				throw new IllegalArgumentException(
+						"Response must be a ServletServerHttpResponse: " + response.getClass());
 			}
 			ServletServerHttpResponse servletServerResponse = (ServletServerHttpResponse) response;
 			this.asyncRequestControl = new ServletServerHttpAsyncRequestControl(this, servletServerResponse);

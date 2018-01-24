@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 
 	@Before
 	public void setup() {
-		super.setUp();
+		super.setup();
 		MockitoAnnotations.initMocks(this);
 
 		Map<String, Object> attributes = Collections.emptyMap();
@@ -96,6 +96,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 
 		this.service = new TransportHandlingSockJsService(this.taskScheduler, this.xhrHandler, this.xhrSendHandler);
 	}
+
 
 	@Test
 	public void defaultTransportHandlers() {

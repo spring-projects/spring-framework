@@ -52,8 +52,8 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 	@Override
 	@Before
-	public void setUp() {
-		super.setUp();
+	public void setup() {
+		super.setup();
 
 		this.webSocketHandler = mock(WebSocketHandler.class);
 		this.taskScheduler = mock(TaskScheduler.class);
