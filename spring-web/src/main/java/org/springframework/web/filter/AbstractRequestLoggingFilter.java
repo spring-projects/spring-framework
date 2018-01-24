@@ -327,20 +327,19 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	protected String getMessagePayload(HttpServletRequest request) {
 		ContentCachingRequestWrapper wrapper =
 				WebUtils.getNativeRequest(request, ContentCachingRequestWrapper.class);
-		String payload = null;
 		if (wrapper != null) {
 			byte[] buf = wrapper.getContentAsByteArray();
 			if (buf.length > 0) {
 				int length = Math.min(buf.length, getMaxPayloadLength());
 				try {
-					payload = new String(buf, 0, length, wrapper.getCharacterEncoding());
+					return new String(buf, 0, length, wrapper.getCharacterEncoding());
 				}
 				catch (UnsupportedEncodingException ex) {
-					payload = "[unknown]";
+					return "[unknown]";
 				}
 			}
 		}
-		return payload;
+		return null;
 	}
 
 
