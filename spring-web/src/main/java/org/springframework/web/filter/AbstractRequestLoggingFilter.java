@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -327,20 +327,19 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	protected String getMessagePayload(HttpServletRequest request) {
 		ContentCachingRequestWrapper wrapper =
 				WebUtils.getNativeRequest(request, ContentCachingRequestWrapper.class);
-		String payload = null;
 		if (wrapper != null) {
 			byte[] buf = wrapper.getContentAsByteArray();
 			if (buf.length > 0) {
 				int length = Math.min(buf.length, getMaxPayloadLength());
 				try {
-					payload = new String(buf, 0, length, wrapper.getCharacterEncoding());
+					return new String(buf, 0, length, wrapper.getCharacterEncoding());
 				}
 				catch (UnsupportedEncodingException ex) {
-					payload = "[unknown]";
+					return "[unknown]";
 				}
 			}
 		}
-		return payload;
+		return null;
 	}
 
 
