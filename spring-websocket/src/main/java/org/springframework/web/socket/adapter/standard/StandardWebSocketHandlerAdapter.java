@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,8 +141,8 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 			this.handler.afterConnectionClosed(this.wsSession, closeStatus);
 		}
 		catch (Throwable ex) {
-			if (logger.isErrorEnabled()) {
-				logger.error("Unhandled error for " + this.wsSession, ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Unhandled on-close exception for " + this.wsSession, ex);
 			}
 		}
 	}

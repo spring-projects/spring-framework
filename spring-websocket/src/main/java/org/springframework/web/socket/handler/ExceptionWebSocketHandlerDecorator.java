@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,8 +78,8 @@ public class ExceptionWebSocketHandlerDecorator extends WebSocketHandlerDecorato
 			getDelegate().afterConnectionClosed(session, closeStatus);
 		}
 		catch (Throwable ex) {
-			if (logger.isErrorEnabled()) {
-				logger.error("Unhandled error for " + this, ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Unhandled exception after connection closed for " + this, ex);
 			}
 		}
 	}
