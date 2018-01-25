@@ -17,6 +17,7 @@
 package org.springframework.scheduling.annotation;
 
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -362,9 +363,9 @@ public class ScheduledAnnotationBeanPostProcessor
 				}
 				if (StringUtils.hasLength(initialDelayString)) {
 					try {
-						initialDelay = Long.parseLong(initialDelayString);
+						initialDelay = parseDelayAsLong(initialDelayString);
 					}
-					catch (NumberFormatException ex) {
+					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
 								"Invalid initialDelayString value \"" + initialDelayString + "\" - cannot parse into long");
 					}
@@ -414,9 +415,9 @@ public class ScheduledAnnotationBeanPostProcessor
 					Assert.isTrue(!processedSchedule, errorMessage);
 					processedSchedule = true;
 					try {
-						fixedDelay = Long.parseLong(fixedDelayString);
+						fixedDelay = parseDelayAsLong(fixedDelayString);
 					}
-					catch (NumberFormatException ex) {
+					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
 								"Invalid fixedDelayString value \"" + fixedDelayString + "\" - cannot parse into long");
 					}
@@ -440,9 +441,9 @@ public class ScheduledAnnotationBeanPostProcessor
 					Assert.isTrue(!processedSchedule, errorMessage);
 					processedSchedule = true;
 					try {
-						fixedRate = Long.parseLong(fixedRateString);
+						fixedRate = parseDelayAsLong(fixedRateString);
 					}
-					catch (NumberFormatException ex) {
+					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
 								"Invalid fixedRateString value \"" + fixedRateString + "\" - cannot parse into long");
 					}
@@ -467,6 +468,17 @@ public class ScheduledAnnotationBeanPostProcessor
 			throw new IllegalStateException(
 					"Encountered invalid @Scheduled method '" + method.getName() + "': " + ex.getMessage());
 		}
+	}
+
+	private static long parseDelayAsLong(String value) throws RuntimeException {
+		if (value.length() > 1 && (isP(value.charAt(0)) || isP(value.charAt(1)))) {
+			return Duration.parse(value).toMillis();
+		}
+		return Long.parseLong(value);
+	}
+
+	private static boolean isP(char ch) {
+		return (ch == 'P' || ch == 'p');
 	}
 
 
