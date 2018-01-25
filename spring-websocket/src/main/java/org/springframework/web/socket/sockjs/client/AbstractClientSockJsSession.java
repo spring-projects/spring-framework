@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,7 +118,19 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 	 * request.
 	 */
 	Runnable getTimeoutTask() {
-		return () -> closeInternal(new CloseStatus(2007, "Transport timed out"));
+		return new Runnable() {
+			@Override
+			public void run() {
+				try {
+					closeInternal(new CloseStatus(2007, "Transport timed out"));
+				}
+				catch (Throwable ex) {
+					if (logger.isWarnEnabled()) {
+						logger.warn("Failed to close " + this + " after transport timeout", ex);
+					}
+				}
+			}
+		};
 	}
 
 	@Override
@@ -158,8 +170,10 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 	}
 
 	@Override
-	public final void close(CloseStatus status) {
-		Assert.isTrue(isUserSetStatus(status), "Invalid close status: " + status);
+	public final void close(CloseStatus status) throws IOException {
+		if (!isUserSetStatus(status)) {
+			throw new IllegalArgumentException("Invalid close status: " + status);
+		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Closing session with " +  status + " in " + this);
 		}
@@ -171,7 +185,18 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 				(status.getCode() >= 3000 && status.getCode() <= 4999)));
 	}
 
-	protected void closeInternal(CloseStatus status) {
+	private void silentClose(CloseStatus status) {
+		try {
+			closeInternal(status);
+		}
+		catch (Throwable ex) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Failed to close " + this, ex);
+			}
+		}
+	}
+
+	protected void closeInternal(CloseStatus status) throws IOException {
 		if (this.state == null) {
 			logger.warn("Ignoring close since connect() was never invoked");
 			return;
@@ -185,14 +210,7 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 
 		this.state = State.CLOSING;
 		this.closeStatus = status;
-		try {
-			disconnect(status);
-		}
-		catch (Throwable ex) {
-			if (logger.isErrorEnabled()) {
-				logger.error("Failed to close " + this, ex);
-			}
-		}
+		disconnect(status);
 	}
 
 	protected abstract void disconnect(CloseStatus status) throws IOException;
@@ -237,7 +255,7 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 				logger.debug("Open frame received in " + getId() + " but we're not connecting (current state " +
 						this.state + "). The server might have been restarted and lost track of the session.");
 			}
-			closeInternal(new CloseStatus(1006, "Server lost session"));
+			silentClose(new CloseStatus(1006, "Server lost session"));
 		}
 	}
 
@@ -259,7 +277,7 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 				if (logger.isErrorEnabled()) {
 					logger.error("Failed to decode data for SockJS \"message\" frame: " + frame + " in " + this, ex);
 				}
-				closeInternal(CloseStatus.BAD_DATA);
+				silentClose(CloseStatus.BAD_DATA);
 				return;
 			}
 		}
@@ -301,7 +319,7 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 				logger.error("Failed to decode data for " + frame + " in " + this, ex);
 			}
 		}
-		closeInternal(closeStatus);
+		silentClose(closeStatus);
 	}
 
 	public void handleTransportError(Throwable error) {
