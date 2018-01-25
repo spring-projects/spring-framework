@@ -116,7 +116,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 				this.uri = new URI(urlString);
 			}
 			catch (URISyntaxException ex) {
-				if (true || !hasQuery) {
+				if (!hasQuery) {
 					throw new IllegalStateException("Could not resolve HttpServletRequest as URI: " + urlString, ex);
 				}
 				// Maybe a malformed query string... try plain request URL
