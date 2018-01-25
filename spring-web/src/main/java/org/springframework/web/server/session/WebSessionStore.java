@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.server.session;
 
 import reactor.core.publisher.Mono;
@@ -61,4 +62,5 @@ public interface WebSessionStore {
 	 * @return the session with the updated last access time
 	 */
 	Mono<WebSession> updateLastAccessTime(WebSession webSession);
+
 }
