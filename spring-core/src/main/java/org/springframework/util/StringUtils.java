@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -750,23 +750,54 @@ public abstract class StringUtils {
 	/**
 	 * Parse the given {@code localeString} value into a {@link Locale}.
 	 * <p>This is the inverse operation of {@link Locale#toString Locale's toString}.
-	 * @param localeString the locale {@code String}, following {@code Locale's}
-	 * {@code toString()} format ("en", "en_UK", etc);
-	 * also accepts spaces as separators, as an alternative to underscores
+	 * @param localeValue the locale value: following either {@code Locale's}
+	 * {@code toString()} format ("en", "en_UK", etc), also accepting spaces as
+	 * separators (as an alternative to underscores), or BCP 47 (e.g. "en-UK")
+	 * as specified by {@link Locale#forLanguageTag} on Java 7+
+	 * @return a corresponding {@code Locale} instance, or {@code null} if none
+	 * @throws IllegalArgumentException in case of an invalid locale specification
+	 * @since 5.0.4
+	 * @see #parseLocaleString
+	 * @see Locale#forLanguageTag
+	 */
+	@Nullable
+	public static Locale parseLocale(String localeValue) {
+		String[] tokens = tokenizeLocaleSource(localeValue);
+		if (tokens.length == 1) {
+			return Locale.forLanguageTag(localeValue);
+		}
+		return parseLocaleTokens(localeValue, tokens);
+	}
+
+	/**
+	 * Parse the given {@code localeString} value into a {@link Locale}.
+	 * <p>This is the inverse operation of {@link Locale#toString Locale's toString}.
+	 * @param localeString the locale {@code String}: following {@code Locale's}
+	 * {@code toString()} format ("en", "en_UK", etc), also accepting spaces as
+	 * separators (as an alternative to underscores)
+	 * <p>Note: This variant does not accept the BCP 47 language tag format.
+	 * Please use {@link #parseLocale} for lenient parsing of both formats.
 	 * @return a corresponding {@code Locale} instance, or {@code null} if none
 	 * @throws IllegalArgumentException in case of an invalid locale specification
 	 */
 	@Nullable
 	public static Locale parseLocaleString(String localeString) {
-		String[] parts = tokenizeToStringArray(localeString, "_ ", false, false);
-		String language = (parts.length > 0 ? parts[0] : "");
-		String country = (parts.length > 1 ? parts[1] : "");
+		return parseLocaleTokens(localeString, tokenizeLocaleSource(localeString));
+	}
 
+	private static String[] tokenizeLocaleSource(String localeSource) {
+		return tokenizeToStringArray(localeSource, "_ ", false, false);
+	}
+
+	@Nullable
+	private static Locale parseLocaleTokens(String localeString, String[] tokens) {
+		String language = (tokens.length > 0 ? tokens[0] : "");
+		String country = (tokens.length > 1 ? tokens[1] : "");
 		validateLocalePart(language);
 		validateLocalePart(country);
 
 		String variant = "";
-		if (parts.length > 2) {
+		if (tokens.length > 2) {
 			// There is definitely a variant, and it is everything after the country
 			// code sans the separator between the country code and the variant.
 			int endIndexOfCountryCode = localeString.indexOf(country, language.length()) + country.length();
@@ -794,7 +825,9 @@ public abstract class StringUtils {
 	 * as used for the HTTP "Accept-Language" header.
 	 * @param locale the Locale to transform to a language tag
 	 * @return the RFC 3066 compliant language tag as {@code String}
+	 * @deprecated as of 5.0.4, in favor of {@link Locale#toLanguageTag()}
 	 */
+	@Deprecated
 	public static String toLanguageTag(Locale locale) {
 		return locale.getLanguage() + (hasText(locale.getCountry()) ? "-" + locale.getCountry() : "");
 	}
