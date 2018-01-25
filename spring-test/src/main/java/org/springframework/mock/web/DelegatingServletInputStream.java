@@ -87,4 +87,9 @@ public class DelegatingServletInputStream extends ServletInputStream {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public int available() throws IOException {
+		return this.sourceStream.available();
+	}
+
 }
