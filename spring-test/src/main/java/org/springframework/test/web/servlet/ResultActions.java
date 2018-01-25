@@ -53,6 +53,38 @@ public interface ResultActions {
 	ResultActions andExpect(ResultMatcher matcher) throws Exception;
 
 	/**
+	 * Perform a number of expectation.
+	 *
+	 * <h4>Example</h4>
+	 * <pre class="code">
+	 * static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*
+	 *
+	 * mockMvc.perform(get("/person/1"))
+	 *   .andExpect(
+	 *     status().isOk(),
+	 *     content().contentType(MediaType.APPLICATION_JSON),
+	 *     jsonPath("$.person.name").value("Jason")
+	 *   );
+	 *
+	 * mockMvc.perform(post("/form"))
+	 *   .andExpect(
+	 *     status().isOk(),
+	 *     redirectedUrl("/person/1"),
+	 *     model().size(1),
+	 *     model().attributeExists("person"),
+	 *     flash().attributeCount(1),
+	 *     flash().attribute("message", "success!")
+	 *   );
+	 * </pre>
+	 */
+	default ResultActions andExpect(ResultMatcher... matchers) throws Exception {
+		for (ResultMatcher matcher : matchers) {
+			this.andExpect(matcher);
+		}
+		return this;
+	}
+
+	/**
 	 * Perform a general action.
 	 *
 	 * <h4>Example</h4>
