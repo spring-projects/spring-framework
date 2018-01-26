@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Mark Norkin
  * @since 10.03.2003
  * @see DefaultMessageCodesResolver
  */
@@ -41,6 +42,9 @@ public class FieldError extends ObjectError {
 	private final Object rejectedValue;
 
 	private final boolean bindingFailure;
+
+	@Nullable
+	private final Exception cause;
 
 
 	/**
@@ -66,12 +70,29 @@ public class FieldError extends ObjectError {
 	 */
 	public FieldError(String objectName, String field, @Nullable Object rejectedValue, boolean bindingFailure,
 			@Nullable String[] codes, @Nullable Object[] arguments, @Nullable String defaultMessage) {
+		this(objectName, field, rejectedValue, bindingFailure, codes, arguments, defaultMessage, null);
+	}
 
+	/**
+	 * Create a new FieldError instance.
+	 * @param objectName the name of the affected object
+	 * @param field the affected field of the object
+	 * @param rejectedValue the rejected field value
+	 * @param bindingFailure whether this error represents a binding failure
+	 * (like a type mismatch); else, it is a validation failure
+	 * @param codes the codes to be used to resolve this message
+	 * @param arguments the array of arguments to be used to resolve this message
+	 * @param defaultMessage the default message to be used to resolve this message
+	 * @param cause the cause
+	 */
+	public FieldError(String objectName, String field, @Nullable Object rejectedValue, boolean bindingFailure,
+			@Nullable String[] codes, @Nullable Object[] arguments, @Nullable String defaultMessage, @Nullable Exception cause) {
 		super(objectName, codes, arguments, defaultMessage);
 		Assert.notNull(field, "Field must not be null");
 		this.field = field;
 		this.rejectedValue = rejectedValue;
 		this.bindingFailure = bindingFailure;
+		this.cause = cause;
 	}
 
 
@@ -98,6 +119,13 @@ public class FieldError extends ObjectError {
 		return this.bindingFailure;
 	}
 
+	/**
+	 * Return the cause of the field error
+	 */
+	@Nullable
+	public Exception getCause() {
+		return this.cause;
+	}
 
 	@Override
 	public String toString() {
@@ -117,7 +145,8 @@ public class FieldError extends ObjectError {
 		FieldError otherError = (FieldError) other;
 		return (getField().equals(otherError.getField()) &&
 				ObjectUtils.nullSafeEquals(getRejectedValue(), otherError.getRejectedValue()) &&
-				isBindingFailure() == otherError.isBindingFailure());
+				isBindingFailure() == otherError.isBindingFailure()) &&
+				ObjectUtils.nullSafeEquals(getCause(), otherError.getCause());
 	}
 
 	@Override
@@ -126,6 +155,7 @@ public class FieldError extends ObjectError {
 		hashCode = 29 * hashCode + getField().hashCode();
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getRejectedValue());
 		hashCode = 29 * hashCode + (isBindingFailure() ? 1 : 0);
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getCause());
 		return hashCode;
 	}
 
