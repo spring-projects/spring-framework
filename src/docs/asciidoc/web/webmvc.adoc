@@ -219,10 +219,11 @@ If an application context hierarchy is not required, applications may configure 
 [.small]#<<web-reactive.adoc#webflux-special-bean-types,Same in Spring WebFlux>>#
 
 The `DispatcherServlet` delegates to special beans to process requests and render the
-appropriate responses. By "special beans" we mean Spring-managed Object instances that
-implement one of the framework contracts listed in the table below.
-Spring MVC provides built-in implementations of these contracts but you can also
-customize, extend, or replace them.
+appropriate responses. By "special beans" we mean Spring-managed, Object instances that
+implement WebFlux framework contracts. Those usually come with built-in contracts but
+you can customize their properties, extend then, or replaced.
+
+The table below lists the special beans detected by the `DispatcherHandler`:
 
 [[mvc-webappctx-special-beans-tbl]]
 [cols="1,2", options="header"]
@@ -273,28 +274,29 @@ customize, extend, or replace them.
 
 
 [[mvc-servlet-config]]
-=== Framework Config
+=== Web MVC Config
 [.small]#<<web-reactive.adoc#webflux-framework-config,Same in Spring WebFlux>>#
 
-For each type of special bean, the `DispatcherServlet` checks for the `WebApplicationContext` first.
-If there are no matching bean types, it falls back on the default types listed in
+Applications can declare the infrastructure beans listed in <<mvc-special-bean-types>>
+that are required to process requests. The `DispatcherServlet` checks the
+`WebApplicationContext` for each special bean. If there are no matching bean types, it
+falls back on the default types listed in
 https://github.com/spring-projects/spring-framework/blob/master/spring-webmvc/src/main/resources/org/springframework/web/servlet/DispatcherServlet.properties[DispatcherServlet.properties].
 
-Applications can declare the special beans they wish to have. Most applications however
-will find a better starting point in the MVC Java config or the MVC XML namespace which
-provide a higher level configuration API that in turn make the necessary bean declarations.
-See <<mvc-config>> for more details.
+In most cases the <<mvc-config>> is the best starting point. It declares the required
+beans in either Java or XML, and provides a higher level configuration callback API to
+customize it.
 
 [NOTE]
 ====
 Spring Boot relies on the MVC Java config to configure Spring MVC and also
-provides many extra convenient options on top.
+provides many extra convenient options.
 ====
 
 
 
 [[mvc-container-config]]
-=== Container Config
+=== Servlet Config
 
 In a Servlet 3.0+ environment, you have the option of configuring the Servlet container
 programmatically as an alternative or in combination with a `web.xml` file. Below is an
@@ -506,6 +508,7 @@ declare it as an <<mvc-ann-controller-advice>> bean or configure it directly on
 
 [[mvc-viewresolver]]
 === View Resolution
+[.small]#<<web-reactive.adoc#webflux-viewresolution,Same in Spring WebFlux>>#
 
 Spring MVC defines the `ViewResolver` and `View` interfaces that enable you to render
 models in a browser without tying you to a specific view technology. `ViewResolver`
@@ -569,17 +572,18 @@ indicate the view could not be found. However in the case of JSPs, and
 perform a dispatch through `RequestDispatcher`. There an `InternalResourceViewResolver`
 must always be configured last in the order.
 
-See <<mvc-config-view-controller,View Controllers>> under <<mvc-config>> for details on
-how to configure view resolution. Also see<<mvc-view>> for more details on supported
-view technologies.
+See <<mvc-config-view-resolvers>> and <<mvc-config-view-controller,View Controllers>>
+under <<mvc-config>> for details on how to configure view resolution. Also see
+<<mvc-view>> for more details on supported view technologies.
 
 
 [[mvc-redirecting-redirect-prefix]]
 ==== Redirect
+[.small]#<<web-reactive.adoc#webflux-redirecting-redirect-prefix,Same in Spring WebFlux>>#
 
 The special `redirect:` prefix in a view name allows you to perform a redirect. The
-`UrlBasedViewResolver` (and subclasses) will recognize this as a special indication that a
-redirect is needed. The rest of the view name will be treated as the redirect URL.
+`UrlBasedViewResolver` (and sub-classes) recognize this as an instruction that a
+redirect is needed. The rest of the view name is the redirect URL.
 
 The net effect is the same as if the controller had returned a `RedirectView`, but now
 the controller itself can simply operate in terms of logical view names. A logical view
@@ -605,6 +609,7 @@ Servlet/JSP engine. Note that you may also chain multiple view resolvers, instea
 
 [[mvc-multiple-representations]]
 ==== Content negotiation
+[.small]#<<web-reactive.adoc#webflux-multiple-representations,Same in Spring WebFlux>>#
 
 {api-spring-framework}/web/servlet/view/ContentNegotiatingViewResolver.html[ContentNegotiatingViewResolver]
 does not resolve views itself but rather delegates
@@ -3481,7 +3486,7 @@ The async request processing feature must be enabled at the Servlet container le
 The MVC config also exposes several options for asynchronous requests.
 
 
-[[mvc-ann-async-configuration-spring-mvc]]
+[[mvc-ann-async-configuration-servlet3]]
 ==== Servlet container
 
 Filter and Servlet declarations have an `asyncSupported` that needs to be set to true
