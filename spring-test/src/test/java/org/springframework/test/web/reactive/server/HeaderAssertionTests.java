@@ -126,16 +126,16 @@ public class HeaderAssertionTests {
 	}
 
 	@Test
-	public void doesExist() {
+	public void exists() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
 		HeaderAssertions assertions = headerAssertions(headers);
 
 		// Success
-		assertions.doesExist("Content-Type");
+		assertions.exists("Content-Type");
 
 		try {
-			assertions.doesExist("Framework");
+			assertions.exists("Framework");
 			fail("Header should not exist");
 		}
 		catch (AssertionError error) {

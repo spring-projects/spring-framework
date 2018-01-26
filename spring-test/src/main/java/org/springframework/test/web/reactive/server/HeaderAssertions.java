@@ -77,7 +77,7 @@ public class HeaderAssertions {
 	 * Expect that the header with the given name is present.
 	 * @since 5.0.3
 	 */
-	public WebTestClient.ResponseSpec doesExist(String name) {
+	public WebTestClient.ResponseSpec exists(String name) {
 		if (!getHeaders().containsKey(name)) {
 			String message = getMessage(name) + " does not exist";
 			this.exchangeResult.assertWithDiagnostics(() -> fail(message));
