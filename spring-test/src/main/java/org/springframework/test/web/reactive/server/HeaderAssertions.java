@@ -32,6 +32,7 @@ import static org.springframework.test.util.AssertionErrors.*;
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Sam Brannen
  * @since 5.0
  * @see WebTestClient.ResponseSpec#expectHeader()
  */
@@ -69,6 +70,18 @@ public class HeaderAssertions {
 		boolean match = Pattern.compile(pattern).matcher(value).matches();
 		String message = getMessage(name) + "=[" + value + "] does not match [" + pattern + "]";
 		this.exchangeResult.assertWithDiagnostics(() -> assertTrue(message, match));
+		return this.responseSpec;
+	}
+
+	/**
+	 * Expect that the header with the given name is present.
+	 * @since 5.0.3
+	 */
+	public WebTestClient.ResponseSpec exists(String name) {
+		if (!getHeaders().containsKey(name)) {
+			String message = getMessage(name) + " does not exist";
+			this.exchangeResult.assertWithDiagnostics(() -> fail(message));
+		}
 		return this.responseSpec;
 	}
 

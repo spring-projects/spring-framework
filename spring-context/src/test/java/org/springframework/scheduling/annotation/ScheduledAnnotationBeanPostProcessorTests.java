@@ -425,12 +425,21 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void propertyPlaceholderWithFixedDelay() {
+	public void propertyPlaceholderWithFixedDelayInMillis() {
+		propertyPlaceholderWithFixedDelay(false);
+	}
+
+	@Test
+	public void propertyPlaceholderWithFixedDelayInDuration() {
+		propertyPlaceholderWithFixedDelay(true);
+	}
+
+	private void propertyPlaceholderWithFixedDelay(boolean durationFormat) {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition placeholderDefinition = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
 		Properties properties = new Properties();
-		properties.setProperty("fixedDelay", "5000");
-		properties.setProperty("initialDelay", "1000");
+		properties.setProperty("fixedDelay", (durationFormat ? "PT5S" : "5000"));
+		properties.setProperty("initialDelay", (durationFormat ? "PT1S" : "1000"));
 		placeholderDefinition.getPropertyValues().addPropertyValue("properties", properties);
 		BeanDefinition targetDefinition = new RootBeanDefinition(PropertyPlaceholderWithFixedDelayTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
@@ -457,12 +466,21 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void propertyPlaceholderWithFixedRate() {
+	public void propertyPlaceholderWithFixedRateInMillis() {
+		propertyPlaceholderWithFixedRate(false);
+	}
+
+	@Test
+	public void propertyPlaceholderWithFixedRateInDuration() {
+		propertyPlaceholderWithFixedRate(true);
+	}
+
+	private void propertyPlaceholderWithFixedRate(boolean durationFormat) {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition placeholderDefinition = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
 		Properties properties = new Properties();
-		properties.setProperty("fixedRate", "3000");
-		properties.setProperty("initialDelay", "1000");
+		properties.setProperty("fixedRate", (durationFormat ? "PT3S" : "3000"));
+		properties.setProperty("initialDelay", (durationFormat ? "PT1S" : "1000"));
 		placeholderDefinition.getPropertyValues().addPropertyValue("properties", properties);
 		BeanDefinition targetDefinition = new RootBeanDefinition(PropertyPlaceholderWithFixedRateTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);

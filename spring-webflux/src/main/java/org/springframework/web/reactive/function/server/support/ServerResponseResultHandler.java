@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public class ServerResponseResultHandler implements HandlerResultHandler, Initia
 
 	private List<ViewResolver> viewResolvers = Collections.emptyList();
 
-	private int order = LOWEST_PRECEDENCE;
+	private int order = 0;
 
 
 	/**
@@ -63,8 +63,8 @@ public class ServerResponseResultHandler implements HandlerResultHandler, Initia
 
 	/**
 	 * Set the order for this result handler relative to others.
-	 * <p>By default set to {@link Ordered#LOWEST_PRECEDENCE}, however see
-	 * Javadoc of sub-classes which may change this default.
+	 * <p>By default set to 0. It is generally safe to place it early in the
+	 * order as it looks for a concrete return type.
 	 * @param order the order
 	 */
 	public void setOrder(int order) {

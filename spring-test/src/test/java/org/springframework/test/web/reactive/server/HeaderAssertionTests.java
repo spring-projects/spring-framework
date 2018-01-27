@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import static org.mockito.Mockito.*;
  * Unit tests for {@link HeaderAssertions}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  */
 public class HeaderAssertionTests {
@@ -121,6 +122,26 @@ public class HeaderAssertionTests {
 			assertNotNull(cause);
 			assertEquals("Response header 'Content-Type'=[application/json;charset=UTF-8] " +
 					"does not match [.*ISO-8859-1.*]", cause.getMessage());
+		}
+	}
+
+	@Test
+	public void exists() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+		HeaderAssertions assertions = headerAssertions(headers);
+
+		// Success
+		assertions.exists("Content-Type");
+
+		try {
+			assertions.exists("Framework");
+			fail("Header should not exist");
+		}
+		catch (AssertionError error) {
+			Throwable cause = error.getCause();
+			assertNotNull(cause);
+			assertEquals("Response header 'Framework' does not exist", cause.getMessage());
 		}
 	}
 

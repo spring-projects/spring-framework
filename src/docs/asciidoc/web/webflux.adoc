@@ -397,6 +397,11 @@ ApplicationContext context = ...
 HttpHandler handler = WebHttpHandlerBuilder.applicationContext(context).build()
 ----
 
+
+
+[[webflux-web-handler-api-special-beans]]
+==== Special bean types
+
 The table below lists the components that `WebHttpHandlerBuilder` detects:
 
 [cols="2,2,1,3", options="header"]
@@ -443,7 +448,7 @@ then exposed through methods on `ServerWebExchange`.
 
 
 [[webflux-form-data]]
-==== Form Reader
+==== Form data
 
 `ServerWebExchange` exposes the following method for access to form data:
 [source,java,indent=0]
@@ -459,7 +464,7 @@ The `DefaultServerWebExchange` uses the configured `HttpMessageReader` to parse 
 
 
 [[webflux-multipart]]
-==== Multipart Reader
+==== Multipart data
 [.small]#<<web.adoc#mvc-multipart,Same in Spring MVC>>#
 
 `ServerWebExchange` exposes the following method for access to multipart data:
@@ -587,10 +592,13 @@ The resulting `HttpHandler` is ready for use with a
 [.small]#<<web.adoc#mvc-servlet-special-bean-types,Same in Spring MVC>>#
 
 The `DispatcherHandler` delegates to special beans to process requests and render the
-appropriate responses. By "special beans" we mean Spring-managed Object instances that
-implement one of the framework contracts listed in the table below.
-Spring WebFlux provides built-in implementations of these contracts but you can also
-customize, extend, or replace them.
+appropriate responses. By "special beans" we mean Spring-managed, Object instances that
+implement WebFlux framework contracts. Those usually come with built-in contracts but
+you can customize their properties, extend then, or replaced.
+
+The table below lists the special beans detected by the `DispatcherHandler`. Note that
+there are also some other beans detected at a lower level, see
+<<webflux-web-handler-api-special-beans>> in the Web Handler API.
 
 [[webflux-special-beans-table]]
 [cols="1,2", options="header"]
@@ -602,10 +610,10 @@ customize, extend, or replace them.
   which vary by `HandlerMapping` implementation -- annotated controllers, simple
   URL pattern mappings, etc.
 
-  The main `HandlerMapping` implementations are `RequestMappingHandlerMapping` based on
-  `@RequestMapping` annotated methods, `RouterFunctionMapping` based on functional
-  endpoint routes, and `SimpleUrlHandlerMapping` based on explicit registrations of URI
-  path patterns to handlers.
+  The main `HandlerMapping` implementations are `RequestMappingHandlerMapping` for
+  `@RequestMapping` annotated methods, `RouterFunctionMapping` for functional endpoint
+  routes, and `SimpleUrlHandlerMapping` for explicit registrations of URI path patterns
+  and ``WebHandler``'s.
 
 | HandlerAdapter
 | Help the `DispatcherHandler` to invoke a handler mapped to a request regardless of
@@ -615,25 +623,27 @@ customize, extend, or replace them.
 
 | HandlerResultHandler
 | Process the result from the handler invocation and finalize the response.
+See <<webflux-resulthandling>>.
 
-  The built-in `HandlerResultHandler` implementations are `ResponseEntityResultHandler`
-  supporting `ResponseEntity` return values, `ResponseBodyResultHandler`
-  supporting `@ResponseBody` methods, `ServerResponseResultHandler`
-  supporting the `ServerResponse` returned from functional endpoints, and
-  `ViewResolutionResultHandler` supporting rendering with a view and a model.
 |===
 
 
 
 [[webflux-framework-config]]
-=== Framework Config
+=== WebFlux Config
 [.small]#<<web.adoc#mvc-servlet-config,Same in Spring MVC>>#
 
-The `DispatcherHandler` detects the special beans it needs in the `ApplicationContext`.
-Applications can declare the special beans they wish to have. However most applications
-will find a better starting point in the WebFlux Java config which provide a higher level
-configuration API that in turn make the necessary bean declarations.
-See <<webflux-config>> for more details.
+Applications can declare the infrastructure beans listed under
+<<webflux-web-handler-api-special-beans,Web Handler API>> and
+<<webflux-special-bean-types,DispatcherHandler>> that are required to process requests.
+However in most cases the <<webflux-config>> is the best starting point. It declares the
+required beans and provides a higher level configuration callback API to customize it.
+
+[NOTE]
+====
+Spring Boot relies on the WebFlux config to configure Spring WebFlux and also provides
+many extra convenient options.
+====
 
 
 
@@ -648,6 +658,94 @@ The `DispatcherHandler` processes requests as follows:
 exposes the return value from the execution as `HandlerResult`.
 * The `HandlerResult` is given to an appropriate `HandlerResultHandler` to complete
 processing by writing to the response directly or using a view to render.
+
+
+
+[[webflux-resulthandling]]
+=== Result Handling
+
+When `DispatcherHandler` needs to process the return value from a handler, it finds a
+`HandlerResultHandler` that support it and invokes it. The available implementations are
+listed below with their default order (all are declared in the <<webflux-config>>):
+
+* `ResponseEntityResultHandler` -- handles `ResponseEntity` return values typically
+returned from annotated controllers. The order is set to 0 since it safely matches return
+values by type.
+* `ServerResponseResultHandler` -- supports `ServerResponse` return values typically
+returned from functional endpoints. The order is set to 0 since it safely matches return
+values by type.
+* `ResponseBodyResultHandler` -- handles return values from `@ResponseBody` methods or
+`@RestController` classes. The order is set to 100, i.e. after result handlers that
+check for a specific type.
+* `ViewResolutionResultHandler` -- performs the <<webflux-viewresolution>> algorithm for
+HTML template rendering. The order is set to `Ordered.LOWEST_PRECEDENCE` since it
+supports several specific types, e.g. `String`, `Map`, `Rendering`, and others, but will
+also treat any other Object as a model attribute. This is why it needs to be last in
+the order.
+
+
+
+[[webflux-viewresolution]]
+=== View Resolution
+[.small]#<<web.adoc#mvc-viewresolver,Same in Spring MVC>>#
+
+View resolution enables rendering to a browser with an HTML template and a model without
+tying you to a specific view technology. In Spring WebFlux, view resolution is
+supported through the `ViewResolutionResultHandler` that relies on a list of
+``ViewResolver``'s to map a String-based view name to a `View` to render the response
+with. The <<webflux-config-view-resolvers,WebFlux Config>> can be used to configure the
+view resolvers to use.
+
+The `HandlerResult` passed into `ViewResolutionResultHandler` contains the return value
+along with a map of attributes (i.e. the model) from the handler. The return value is
+then processed as one of the following:
+
+* `String`, `CharSequence` -- a logical view name to be resolved to a `View` through
+the list of configured ``ViewResolver``'s.
+* `void` or no value (e.g. model attribute returned) -- select default view name based on
+the request path minus the leading and trailing slash, and the resolved to a `View`.
+* `Model`, `Map` -- attributes to be added to the model.
+* {api-spring-framework}/web/reactive/result/view/Rendering.html[Rendering] -- API for
+view resolution scenarios; easiest to explore the options with code completion.
+* Other -- attribute to be added to the model; the name of the attribute is derived using
+Class name conventions, or from a handler method `@ModelAttribute` annotation if present.
+
+The model can contain asynchronous, reactive types (e.g. from Reactor, RxJava). Prior
+to rendering, `AbstractView` resolves such model attributes into their concrete values
+and updates the model. Single-value reactive types are resolved to a single
+value, or no value (if empty) while multi-value reactive types, e.g. `Flux<T>` are
+collected and resolved to `List<T>`.
+
+
+[[webflux-redirecting-redirect-prefix]]
+==== Redirect
+[.small]#<<web.adoc#mvc-redirecting-redirect-prefix,Same in Spring MVC>>#
+
+The special `redirect:` prefix in a view name allows you to perform a redirect. The
+`UrlBasedViewResolver` (and sub-classes) recognize this as an instruction that a
+redirect is needed. The rest of the view name is the redirect URL.
+
+The net effect is the same as if the controller had returned a `RedirectView` or
+`Rendering.redirectTo("abc").build()`, but now the controller itself can simply
+operate in terms of logical view names. A view name such as
+`redirect:/some/resource` is relative to the current application, while the view name
+`redirect:http://example.com/arbitrary/path` redirects to an absolute URL.
+
+
+[[webflux-multiple-representations]]
+==== Content negotiation
+[.small]#<<web.adoc#mvc-multiple-representations,Same in Spring MVC>>#
+
+`ViewResolutionResultHandler` supports content negotiation. It compares the request
+media type(s) with the media type(s) supported by each selected `View`. The first `View`
+that supports the requested media type(s) is used.
+
+In order to support media types such as JSON and XML, Spring WebFlux provides
+`HttpMessageWriterView` which is a special `View` that renders through an
+<<webflux-codecs,HttpMessageWriter>>. Typically you would configure these as default
+views through the <<webflux-config-view-resolvers,WebFlux Config>>. Default views are
+always selected and used if they match the requested media type.
+
 
 
 
@@ -1105,12 +1203,12 @@ generally supported for all return values.
 |Controller method return value|Description
 
 |`@ResponseBody`
-|The return value is encoded through ``HttpMessageWriter``s and written to the response.
+|The return value is encoded through ``HttpMessageWriter``'s and written to the response.
 See <<webflux-ann-responsebody>>.
 
 |`HttpEntity<B>`, `ResponseEntity<B>`
 |The return value specifies the full response including HTTP headers and body be encoded
-through ``HttpMessageWriter``s and written to the response.
+through ``HttpMessageWriter``'s and written to the response.
 See <<webflux-ann-responseentity>>.
 
 |`HttpHeaders`

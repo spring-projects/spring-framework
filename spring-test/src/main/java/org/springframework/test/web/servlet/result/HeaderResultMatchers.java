@@ -91,10 +91,10 @@ public class HeaderResultMatchers {
 	}
 
 	/**
-	 * Assert that the named response header does exist.
+	 * Assert that the named response header exists.
 	 * @since 5.0.3
 	 */
-	public ResultMatcher doesExist(final String name) {
+	public ResultMatcher exists(final String name) {
 		return result -> assertTrue("Response should contain header '" + name + "'",
 				result.getResponse().containsHeader(name));
 	}

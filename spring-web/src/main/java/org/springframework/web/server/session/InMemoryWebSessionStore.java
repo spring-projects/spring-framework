@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,9 +89,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 
 	@Override
 	public Mono<WebSession> retrieveSession(String id) {
-
 		Instant currentTime = Instant.now(this.clock);
-
 		if (!this.sessions.isEmpty() && !currentTime.isBefore(this.nextExpirationCheckTime)) {
 			checkExpiredSessions(currentTime);
 		}
@@ -159,12 +157,10 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 
 		private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
 
-
 		public InMemoryWebSession() {
 			this.creationTime = Instant.now(getClock());
 			this.lastAccessTime = this.creationTime;
 		}
-
 
 		@Override
 		public String getId() {
@@ -258,6 +254,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 			this.lastAccessTime = currentTime;
 		}
 	}
+
 
 	private enum State { NEW, STARTED, EXPIRED }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -273,6 +273,16 @@ public class DefaultConversionServiceTests {
 	@Test
 	public void testStringToLocale() {
 		assertEquals(Locale.ENGLISH, conversionService.convert("en", Locale.class));
+	}
+
+	@Test
+	public void testStringToLocaleWithCountry() {
+		assertEquals(Locale.US, conversionService.convert("en_US", Locale.class));
+	}
+
+	@Test
+	public void testStringToLocaleWithLanguageTag() {
+		assertEquals(Locale.US, conversionService.convert("en-US", Locale.class));
 	}
 
 	@Test
