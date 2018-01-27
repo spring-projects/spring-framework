@@ -16,6 +16,10 @@
 
 package org.springframework.web.util;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
+
 import java.io.Serializable;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -23,10 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.MultiValueMap;
+import java.util.stream.Stream;
 
 /**
  * Represents an immutable collection of URI components, mapping component type to
@@ -273,7 +274,8 @@ public abstract class UriComponents implements Serializable {
 		if (variableValue != null) {
 			String variableStringValue = variableValue.toString();
 			if (variableValue instanceof Collection) {
-				return variableStringValue.substring(1, variableStringValue.length() - 1);
+				Stream<String> stream = ((Collection) variableValue).stream().map(Object::toString);
+				return stream.reduce("", (result, e) -> result + e + ",");
 			}
 			return variableStringValue;
 		}
