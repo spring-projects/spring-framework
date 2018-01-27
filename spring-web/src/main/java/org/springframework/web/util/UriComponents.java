@@ -20,10 +20,7 @@ import java.io.Serializable;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -273,7 +270,14 @@ public abstract class UriComponents implements Serializable {
 	}
 
 	private static String getVariableValueAsString(@Nullable Object variableValue) {
-		return (variableValue != null ? variableValue.toString() : "");
+		if (variableValue != null) {
+			String variableStringValue = variableValue.toString();
+			if (variableValue instanceof Collection) {
+				return variableStringValue.substring(1, variableStringValue.length() - 1);
+			}
+			return variableStringValue;
+		}
+		return "";
 	}
 
 
