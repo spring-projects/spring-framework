@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,14 @@ import org.springframework.lang.Nullable;
  * e.g. containing Hibernate {@link org.hibernate.annotations.FilterDef} annotations,
  * along with Spring-driven entity scanning which requires no {@code persistence.xml}
  * ({@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean#setPackagesToScan}).
+ *
+ * <p><b>A note about {@code HibernateJpaVendorAdapter} vs native Hibernate settings:</b>
+ * Some settings on this adapter may conflict with native Hibernate configuration rules
+ * or custom Hibernate properties. For example, specify either {@link #setDatabase} or
+ * Hibernate's "hibernate.dialect_resolvers" property, not both. Also, be careful about
+ * Hibernate's connection release mode: This adapter prefers {@code ON_CLOSE} behavior,
+ * aligned with {@link HibernateJpaDialect#setPrepareConnection}, at least for non-JTA
+ * scenarios; you may override this through corresponding native Hibernate properties.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
