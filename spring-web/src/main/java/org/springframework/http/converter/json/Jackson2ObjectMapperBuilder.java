@@ -27,8 +27,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -91,6 +93,7 @@ import org.springframework.util.xml.StaxUtils;
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
  * @author Tadaya Tsuyukubo
+ * @author Eddú Meléndez
  * @since 4.1.1
  * @see #build()
  * @see #configure(ObjectMapper)
@@ -107,6 +110,8 @@ public class Jackson2ObjectMapperBuilder {
 	private final Map<Class<?>, JsonSerializer<?>> serializers = new LinkedHashMap<>();
 
 	private final Map<Class<?>, JsonDeserializer<?>> deserializers = new LinkedHashMap<>();
+
+	private final Map<PropertyAccessor, JsonAutoDetect.Visibility> visibilities = new HashMap<>();
 
 	private final Map<Object, Boolean> features = new HashMap<>();
 
@@ -448,6 +453,18 @@ public class Jackson2ObjectMapperBuilder {
 	}
 
 	/**
+	 * Specify visibility to limit what kind of properties are auto-detected.
+	 * @since 5.1
+	 * @see com.fasterxml.jackson.annotation.PropertyAccessor
+	 * @see com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility
+	 */
+	public Jackson2ObjectMapperBuilder visibility(PropertyAccessor accessor,
+			JsonAutoDetect.Visibility visibility) {
+		this.visibilities.put(accessor, visibility);
+		return this;
+	}
+
+	/**
 	 * Specify features to enable.
 	 * @see com.fasterxml.jackson.core.JsonParser.Feature
 	 * @see com.fasterxml.jackson.core.JsonGenerator.Feature
@@ -668,6 +685,8 @@ public class Jackson2ObjectMapperBuilder {
 			addDeserializers(module);
 			objectMapper.registerModule(module);
 		}
+
+		this.visibilities.forEach(objectMapper::setVisibility);
 
 		customizeDefaultFeatures(objectMapper);
 		this.features.forEach((feature, enabled) -> configureFeature(objectMapper, feature, enabled));
