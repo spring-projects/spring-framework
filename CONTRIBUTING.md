@@ -35,8 +35,13 @@ it helps us to make a decision.
 #### Create a Ticket
 
 Reporting an issue or making a feature request is a great way to contribute. Your feedback
-and the conversations that result from it provide a continuous flow of ideas. However,
-before you do that, please take the time to [research first](#Discuss).
+and the conversations that result from it provide a continuous flow of ideas. 
+
+Before you create a ticket, please take the time to [research first](#Discuss). 
+
+If creating a ticket after a discussion on StackOverflow, please provide a self-sufficient description in the ticket, independent of the details on StackOverview. We understand this is extra work but the issue tracker is an important place of record for design discussions and decisions that can often be referenced long after the fix version, for example to revisit decisions, to understand the origin of a feature, and so on.
+
+#### Ticket Lifecycle
 
 When an issue is first created, it may not be assigned and will not have a fix version.
 Within a day or two, the issue is assigned to a specific committer and the target
