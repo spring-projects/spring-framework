@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import org.springframework.util.MimeType;
  * @see Jackson2JsonDecoder
  */
 public class Jackson2JsonEncoder extends AbstractJackson2Encoder {
-	
+
 	@Nullable
 	private final PrettyPrinter ssePrettyPrinter;
 	
@@ -74,11 +74,6 @@ public class Jackson2JsonEncoder extends AbstractJackson2Encoder {
 				MediaType.TEXT_EVENT_STREAM.isCompatibleWith(mimeType) &&
 				writer.getConfig().isEnabled(SerializationFeature.INDENT_OUTPUT) ?
 				writer.with(this.ssePrettyPrinter) : writer);
-	}
-
-	@Override
-	public List<MimeType> getEncodableMimeTypes() {
-		return getMimeTypes();
 	}
 
 }

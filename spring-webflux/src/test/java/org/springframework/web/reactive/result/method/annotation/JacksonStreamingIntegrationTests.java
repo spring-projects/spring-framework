@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import reactor.test.StepVerifier;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,7 +42,7 @@ import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON_VALUE;
 /**
  * @author Sebastien Deleuze
  */
-public class JsonStreamingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+public class JacksonStreamingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private AnnotationConfigApplicationContext wac;
 
@@ -80,11 +81,26 @@ public class JsonStreamingIntegrationTests extends AbstractHttpHandlerIntegratio
 				.verify();
 	}
 
+	@Test
+	public void smileStreaming() throws Exception {
+		Flux<Person> result = this.webClient.get()
+				.uri("/stream")
+				.accept(new MediaType("application", "stream+x-jackson-smile"))
+				.exchange()
+				.flatMapMany(response -> response.bodyToFlux(Person.class));
+
+		StepVerifier.create(result)
+				.expectNext(new Person("foo 0"))
+				.expectNext(new Person("foo 1"))
+				.thenCancel()
+				.verify();
+	}
+
 	@RestController
 	@SuppressWarnings("unused")
-	static class JsonStreamingController {
+	static class JacksonStreamingController {
 
-		@RequestMapping(value = "/stream", produces = APPLICATION_STREAM_JSON_VALUE)
+		@RequestMapping(value = "/stream", produces = { APPLICATION_STREAM_JSON_VALUE, "application/stream+x-jackson-smile" })
 		Flux<Person> person() {
 			return Flux.interval(Duration.ofMillis(100)).map(l -> new Person("foo " + l));
 		}
@@ -97,8 +113,8 @@ public class JsonStreamingIntegrationTests extends AbstractHttpHandlerIntegratio
 	static class TestConfiguration {
 
 		@Bean
-		public JsonStreamingController jsonStreamingController() {
-			return new JsonStreamingController();
+		public JacksonStreamingController jsonStreamingController() {
+			return new JacksonStreamingController();
 		}
 	}
 

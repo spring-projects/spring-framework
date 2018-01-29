@@ -18,6 +18,7 @@ package org.springframework.http.codec.json;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -132,6 +133,13 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 
 		return getHints(actualType);
 	}
+
+	@Override
+	public List<MimeType> getDecodableMimeTypes() {
+		return getMimeTypes();
+	}
+
+	// Jackson2CodecSupport ...
 
 	@Override
 	protected <A extends Annotation> A getAnnotation(MethodParameter parameter, Class<A> annotType) {

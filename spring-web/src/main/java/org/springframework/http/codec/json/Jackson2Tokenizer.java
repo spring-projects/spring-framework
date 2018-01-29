@@ -125,7 +125,9 @@ class Jackson2Tokenizer {
 
 		while (true) {
 			JsonToken token = this.parser.nextToken();
-			if (token == null || token == JsonToken.NOT_AVAILABLE) {
+			// SPR-16151: Smile data format uses null to separate documents
+			if ((token == JsonToken.NOT_AVAILABLE) ||
+					(token == null && (token = this.parser.nextToken()) == null)) {
 				break;
 			}
 			updateDepth(token);

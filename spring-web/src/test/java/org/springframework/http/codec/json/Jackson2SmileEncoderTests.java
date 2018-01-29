@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import static org.springframework.http.MediaType.APPLICATION_XML;
 public class Jackson2SmileEncoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	private final static MimeType SMILE_MIME_TYPE = new MimeType("application", "x-jackson-smile");
+	private final static MimeType STREAM_SMILE_MIME_TYPE = new MimeType("application", "stream+x-jackson-smile");
 	
 	private final Jackson2SmileEncoder encoder = new Jackson2SmileEncoder();
 
@@ -57,6 +58,7 @@ public class Jackson2SmileEncoderTests extends AbstractDataBufferAllocatingTestC
 	public void canEncode() {
 		ResolvableType pojoType = ResolvableType.forClass(Pojo.class);
 		assertTrue(this.encoder.canEncode(pojoType, SMILE_MIME_TYPE));
+		assertTrue(this.encoder.canEncode(pojoType, STREAM_SMILE_MIME_TYPE));
 		assertTrue(this.encoder.canEncode(pojoType, null));
 
 		// SPR-15464
@@ -96,8 +98,7 @@ public class Jackson2SmileEncoderTests extends AbstractDataBufferAllocatingTestC
 				new Pojo("foofoofoo", "barbarbar")
 		);
 		ResolvableType type = ResolvableType.forClass(Pojo.class);
-		MediaType mediaType = new MediaType("application", "stream+x-jackson-smile");
-		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, mediaType, emptyMap());
+		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, STREAM_SMILE_MIME_TYPE, emptyMap());
 
 		ObjectMapper mapper = Jackson2ObjectMapperBuilder.smile().build();
 		StepVerifier.create(output)

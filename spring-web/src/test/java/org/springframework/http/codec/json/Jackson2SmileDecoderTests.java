@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON;
 
 /**
  * Unit tests for {@link Jackson2SmileDecoder}.
@@ -47,12 +48,14 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 public class Jackson2SmileDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	private final static MimeType SMILE_MIME_TYPE = new MimeType("application", "x-jackson-smile");
+	private final static MimeType STREAM_SMILE_MIME_TYPE = new MimeType("application", "stream+x-jackson-smile");
 
 	private final Jackson2SmileDecoder decoder = new Jackson2SmileDecoder();
 
 	@Test
 	public void canDecode() {
 		assertTrue(decoder.canDecode(forClass(Pojo.class), SMILE_MIME_TYPE));
+		assertTrue(decoder.canDecode(forClass(Pojo.class), STREAM_SMILE_MIME_TYPE));
 		assertTrue(decoder.canDecode(forClass(Pojo.class), null));
 
 		assertFalse(decoder.canDecode(forClass(String.class), null));
@@ -100,7 +103,7 @@ public class Jackson2SmileDecoderTests extends AbstractDataBufferAllocatingTestC
 	}
 
 	@Test
-	public void decodeToFlux() throws Exception {
+	public void decodeListToFlux() throws Exception {
 		ObjectMapper mapper = Jackson2ObjectMapperBuilder.smile().build();
 		List<Pojo> list = asList(new Pojo("f1", "b1"), new Pojo("f2", "b2"));
 		byte[] serializedList = mapper.writer().writeValueAsBytes(list);
@@ -108,6 +111,22 @@ public class Jackson2SmileDecoderTests extends AbstractDataBufferAllocatingTestC
 
 		ResolvableType elementType = forClass(Pojo.class);
 		Flux<Object> flux = decoder.decode(source, elementType, null, emptyMap());
+
+		StepVerifier.create(flux)
+				.expectNext(new Pojo("f1", "b1"))
+				.expectNext(new Pojo("f2", "b2"))
+				.verifyComplete();
+	}
+
+	@Test
+	public void decodeStreamToFlux() throws Exception {
+		ObjectMapper mapper = Jackson2ObjectMapperBuilder.smile().build();
+		List<Pojo> list = asList(new Pojo("f1", "b1"), new Pojo("f2", "b2"));
+		byte[] serializedList = mapper.writer().writeValueAsBytes(list);
+		Flux<DataBuffer> source = Flux.just(this.bufferFactory.wrap(serializedList));
+
+		ResolvableType elementType = forClass(Pojo.class);
+		Flux<Object> flux = decoder.decode(source, elementType, STREAM_SMILE_MIME_TYPE, emptyMap());
 
 		StepVerifier.create(flux)
 				.expectNext(new Pojo("f1", "b1"))

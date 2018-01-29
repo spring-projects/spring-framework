@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.http.codec.json;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,21 +40,18 @@ import org.springframework.util.MimeType;
  */
 public class Jackson2SmileDecoder extends AbstractJackson2Decoder {
 
-	private static final MimeType SMILE_MIME_TYPE = new MediaType("application", "x-jackson-smile");
+	private static final MimeType[] DEFAULT_SMILE_MIME_TYPES = new MimeType[] {
+					new MimeType("application", "x-jackson-smile", StandardCharsets.UTF_8),
+					new MimeType("application", "*+x-jackson-smile", StandardCharsets.UTF_8)};
 
 
 	public Jackson2SmileDecoder() {
-		this(Jackson2ObjectMapperBuilder.smile().build(), SMILE_MIME_TYPE);
+		this(Jackson2ObjectMapperBuilder.smile().build(), DEFAULT_SMILE_MIME_TYPES);
 	}
 
 	public Jackson2SmileDecoder(ObjectMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);
 		Assert.isAssignable(SmileFactory.class, mapper.getFactory().getClass());
-	}
-
-	@Override
-	public List<MimeType> getDecodableMimeTypes() {
-		return Collections.singletonList(SMILE_MIME_TYPE);
 	}
 
 }

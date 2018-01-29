@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,8 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 
 	protected final List<MediaType> streamingMediaTypes = new ArrayList<>(1);
 
+	protected boolean streamingLineSeparator = true;
+
 
 	/**
 	 * Constructor with a Jackson {@link ObjectMapper} to use.
@@ -104,7 +106,9 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 		else if (this.streamingMediaTypes.stream().anyMatch(mediaType -> mediaType.isCompatibleWith(mimeType))) {
 			return Flux.from(inputStream).map(value -> {
 				DataBuffer buffer = encodeValue(value, mimeType, bufferFactory, elementType, hints);
-				buffer.write(new byte[]{'\n'});
+				if (streamingLineSeparator) {
+					buffer.write(new byte[]{'\n'});
+				}
 				return buffer;
 			});
 		}
@@ -157,6 +161,11 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	// HttpMessageEncoder...
 
 	@Override
+	public List<MimeType> getEncodableMimeTypes() {
+		return getMimeTypes();
+	}
+
+	@Override
 	public List<MediaType> getStreamingMediaTypes() {
 		return Collections.unmodifiableList(this.streamingMediaTypes);
 	}
@@ -167,6 +176,8 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 
 		return (actualType != null ? getHints(actualType) : Collections.emptyMap());
 	}
+
+	// Jackson2CodecSupport ...
 
 	@Override
 	protected <A extends Annotation> A getAnnotation(MethodParameter parameter, Class<A> annotType) {
