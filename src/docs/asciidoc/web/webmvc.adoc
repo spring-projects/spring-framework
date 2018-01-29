@@ -3760,6 +3760,11 @@ https://tools.ietf.org/html/rfc7232#section-2.3[RFC 7232 Section 2.3].
 
 
 
+include::webmvc-view.adoc[leveloffset=+1]
+
+
+
+
 [[mvc-config]]
 == MVC Config
 [.small]#<<web-reactive.adoc#webflux-config,Same in Spring WebFlux>>#
@@ -4575,10 +4580,6 @@ hook of the Spring `ApplicationContext`:
 Note that `MyPostProcessor` needs to be declared as a bean either explicitly in XML or
 detected through a `<component scan/>` declaration.
 
-
-
-
-include::webmvc-view.adoc[leveloffset=+1]
 
 
 
