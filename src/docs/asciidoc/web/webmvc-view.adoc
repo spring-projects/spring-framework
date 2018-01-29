@@ -7,13 +7,10 @@
 [[mvc-view-introduction]]
 == Introduction
 
-One of the areas in which Spring excels is in the separation of view technologies from
-the rest of the MVC framework. For example, deciding to use Groovy Markup Templates
-or Thymeleaf in place of an existing JSP is primarily a matter of configuration.
-This chapter covers the major view technologies that work with Spring and touches
-briefly on how to add new ones. This chapter assumes you are already familiar with
-<<mvc-viewresolver>> which covers the basics of how views in general are coupled
-to the MVC framework.
+The use of view technologies in Spring MVC is pluggable, whether you decide to
+use Thymeleaf, Groovy Markup Templates, JSPs, or other, is primarily a matter of a
+configuration change. This chapter covers view technologies integrated with Spring MVC.
+We assume you are already familiar with <<mvc-viewresolver>>.
 
 
 
@@ -21,14 +18,18 @@ to the MVC framework.
 [[mvc-view-thymeleaf]]
 == Thymeleaf
 
-http://www.thymeleaf.org/[Thymeleaf] is a good example of a view technology fitting
-perfectly in the MVC framework. Support for this integration is not provided by
-the Spring team but by the Thymeleaf team itself.
+Thymeleaf is modern server-side Java template engine that emphasizes natural HTML
+templates that can be previewed in a browser by double-clicking, which is very
+helpful for independent work on UI templates, e.g. by designer, without the need for a
+running server. If you're looking to replace JSPs, Thymeleaf offers one of the most
+extensive set of features that will make such a transition easier. Thymeleaf is actively
+developed and maintained. For a more complete introduction see the
+http://www.thymeleaf.org/[Thymeleaf] project home page.
 
-Configuring Thymeleaf for Spring usually requires a few beans defined, like a
-`ServletContextTemplateResolver`, a `SpringTemplateEngine` and a `ThymeleafViewResolver`.
-Please refer to the http://www.thymeleaf.org/documentation.html[Thymeleaf+Spring]
-documentation section for more details.
+The Thymeleaf integration with Spring MVC is managed by the Thymeleaf project. The
+configuration involves a few bean declarations such as
+`ServletContextTemplateResolver`, `SpringTemplateEngine`, and `ThymeleafViewResolver`.
+See http://www.thymeleaf.org/documentation.html[Thymeleaf+Spring] for more details.
 
 
 
@@ -36,19 +37,22 @@ documentation section for more details.
 [[mvc-view-groovymarkup]]
 == Groovy Markup
 
-The http://groovy-lang.org/templating.html#_the_markuptemplateengine[Groovy Markup Template Engine]
-is another view technology, supported by Spring. This template engine is a template engine primarily
-aimed at generating XML-like markup (XML, XHTML, HTML5, ...​), but that can be used to generate any
-text based content.
+http://groovy-lang.org/templating.html#_the_markuptemplateengine[Groovy Markup Template Engine]
+is primarily aimed at generating XML-like markup (XML, XHTML, HTML5, etc) but that can
+be used to generate any text based content. The Spring Framework has a built-in
+integration for using Spring MVC with Groovy Markup.
 
-This requires Groovy 2.3.1+ on the classpath.
+[TIP]
+====
+The Groovy Markup Tempalte engine requires Groovy 2.3.1+.
+====
 
 
 
 [[mvc-view-groovymarkup-configuration]]
 === Configuration
 
-Configuring the Groovy Markup Template Engine is quite easy:
+To configure the Groovy Markup Template Engine:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -62,6 +66,8 @@ Configuring the Groovy Markup Template Engine is quite easy:
 			registry.groovy();
 		}
 
+		// Configure the Groovy Markup Template Engine...
+
 		@Bean
 		public GroovyMarkupConfigurer groovyMarkupConfigurer() {
 			GroovyMarkupConfigurer configurer = new GroovyMarkupConfigurer();
@@ -71,7 +77,7 @@ Configuring the Groovy Markup Template Engine is quite easy:
 	}
 ----
 
-The XML counterpart using the MVC namespace is:
+To configure the same in XML:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -82,6 +88,7 @@ The XML counterpart using the MVC namespace is:
 		<mvc:groovy/>
 	</mvc:view-resolvers>
 
+	<!-- Configure the Groovy Markup Template Engine... -->
 	<mvc:groovy-configurer resource-loader-path="/WEB-INF/"/>
 ----
 
@@ -90,8 +97,8 @@ The XML counterpart using the MVC namespace is:
 [[mvc-view-groovymarkup-example]]
 === Example
 
-Unlike traditional template engines, this one relies on a DSL that uses the builder syntax.
-Here is a sample template for an HTML page:
+Unlike traditional template engines, Groovy Markup relies on a DSL that uses a builder
+syntax. Here is a sample template for an HTML page:
 
 [source,groovy,indent=0]
 [subs="verbatim,quotes"]
@@ -114,53 +121,67 @@ Here is a sample template for an HTML page:
 [[mvc-view-freemarker]]
 == FreeMarker
 
-http://www.freemarker.org[FreeMarker] is a  templating language that can be used as a
-view technology within Spring MVC applications. For details on the template language,
-see the http://www.freemarker.org[FreeMarker] web site.
-
-
-
-[[mvc-view-freemarker-dependencies]]
-=== Dependencies
-
-Your web application will need to include `freemarker-2.x.jar` in order to work with
-FreeMarker. Typically this is included in the `WEB-INF/lib` folder where the jars are
-guaranteed to be found by a Java EE server and added to the classpath for your
-application. It is of course assumed that you already have the `spring-webmvc.jar` in
-your `'WEB-INF/lib'` directory too!
+http://www.freemarker.org[Apache FreeMarker] is a template engine for generating any
+kind of text output from HTML to email, and others. The Spring Framework has a built-in
+integration for using Spring MVC with FreeMarker templates.
 
 
 
 [[mvc-view-freemarker-contextconfig]]
 === Context configuration
 
-A suitable configuration is initialized by adding the relevant configurer bean
-definition to your `'{asterisk}-servlet.xml'` as shown below:
+To configure FreeMarker as a view technology:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class WebConfig implements WebMvcConfigurer {
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.freemarker();
+		}
+
+		// Configure FreeMarker...
+
+		@Bean
+		public FreeMarkerConfigurer freeMarkerConfigurer() {
+			FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
+			configurer.setTemplateLoaderPath("/WEB-INF/freemarker");
+			return configurer;
+		}
+	}
+----
+
+To configure the same in XML:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<!-- freemarker config -->
+	<mvc:annotation-driven/>
+
+	<mvc:view-resolvers>
+		<mvc:freemarker/>
+	</mvc:view-resolvers>
+
+	<!-- Configure FreeMarker... -->
+	<mvc:freemarker-configurer>
+		<mvc:template-loader-path location="/WEB-INF/freemarker"/>
+	</mvc:freemarker-configurer>
+----
+
+Or you can also declare the `FreeMarkerConfigurer` bean for full control over all
+properties:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
 	<bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
 		<property name="templateLoaderPath" value="/WEB-INF/freemarker/"/>
 	</bean>
-
-	<!--
-	View resolvers can also be configured with ResourceBundles or XML files. If you need
-	different view resolving based on Locale, you have to use the resource bundle resolver.
-	-->
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
-		<property name="cache" value="true"/>
-		<property name="prefix" value=""/>
-		<property name="suffix" value=".ftl"/>
-	</bean>
 ----
-
-[NOTE]
-====
-For non web-apps add a `FreeMarkerConfigurationFactoryBean` to your application context
-definition file.
-====
 
 
 
@@ -169,9 +190,8 @@ definition file.
 
 Your templates need to be stored in the directory specified by the `FreeMarkerConfigurer`
 shown above. If you use the view resolvers highlighted, then the logical view names
-relate to the template file names in similar fashion to `InternalResourceViewResolver`
-for JSP's. So if your controller returns a ModelAndView object containing a view name of
-"welcome" then the resolver will look for the `/WEB-INF/freemarker/welcome.ftl` template.
+relate to the template file names. So if your controller returns the view name "welcome"
+then the resolver will look for the `/WEB-INF/freemarker/welcome.ftl` template.
 
 
 [[mvc-views-freemarker]]
@@ -206,7 +226,7 @@ the `Configuration` object.
 [[mvc-view-freemarker-forms]]
 === Form handling
 
-Spring provides a tag library for use in JSP's that contains (amongst other things) a
+Spring provides a tag library for use in JSP's that contains, amongst others, a
 `<spring:bind/>` tag. This tag primarily enables forms to display values from form
 backing objects and to show the results of failed validations from a `Validator` in the
 web or business tier. Spring also has support for the same functionality in FreeMarker,
@@ -525,31 +545,19 @@ In similar fashion, HTML escaping can be specified per field:
 [[mvc-view-jsp]]
 == JSP & JSTL
 
-Spring provides a couple of out-of-the-box solutions for JSP and JSTL views. Using JSP
-or JSTL is done using a normal view resolver defined in the `WebApplicationContext`.
-Furthermore, of course you need to write some JSPs that will actually render the view.
-
-[NOTE]
-====
-Setting up your application to use JSTL is a common source of error, mainly caused by
-confusion over the different servlet spec., JSP and JSTL version numbers, what they mean
-and how to declare the taglibs correctly. The article
-http://www.mularien.com/blog/2008/04/24/how-to-reference-and-use-jstl-in-your-web-application/[How
-to Reference and Use JSTL in your Web Application] provides a useful guide to the common
-pitfalls and how to avoid them. Note that as of Spring 3.0, the minimum supported
-servlet version is 2.4 (JSP 2.0 and JSTL 1.1), which reduces the scope for confusion
-somewhat.
-====
+The Spring Framework has a built-in integration for using Spring MVC with JSP and JSTL.
 
 
 
 [[mvc-view-jsp-resolver]]
 === View resolvers
 
-Just as with any other view technology you're integrating with Spring, for JSPs you'll
-need a view resolver that will resolve your views. The most commonly used view resolvers
-when developing with JSPs are the `InternalResourceViewResolver` and the
-`ResourceBundleViewResolver`. Both are declared in the `WebApplicationContext`:
+When developing with JSPs you can declare a `InternalResourceViewResolver` or a
+`ResourceBundleViewResolver` bean.
+
+`ResourceBundleViewResolver` relies on a properties file to define the view names
+mapped to a class and a URL. With a `ResourceBundleViewResolver` you
+can mix different types of views using only one resolver. Here is an example:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -567,9 +575,9 @@ when developing with JSPs are the `InternalResourceViewResolver` and the
 	productList.url=/WEB-INF/jsp/productlist.jsp
 ----
 
-As you can see, the `ResourceBundleViewResolver` needs a properties file defining the
-view names mapped to 1) a class and 2) a URL. With a `ResourceBundleViewResolver` you
-can mix different types of views using only one resolver.
+`InternalResourceBundleViewResolver` can also be used for JSPs. As a best practice, we
+strongly encourage placing your JSP files in a directory under the `'WEB-INF'`
+directory so there can be no direct access by clients.
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -580,10 +588,6 @@ can mix different types of views using only one resolver.
 		<property name="suffix" value=".jsp"/>
 	</bean>
 ----
-
-The `InternalResourceBundleViewResolver` can be configured for using JSPs as described
-above. As a best practice, we strongly encourage placing your JSP files in a directory
-under the `'WEB-INF'` directory, so there can be no direct access by clients.
 
 
 
@@ -1375,12 +1379,10 @@ is the default type.
 [[mvc-view-script]]
 == Script views
 
-It is possible to integrate any templating library running on top of a JSR-223
-script engine in web applications using Spring. The following describes in a
-broad way how to do this. The script engine must implement both `ScriptEngine`
-and `Invocable` interfaces.
-
-It has been tested with:
+The Spring Framework has a built-in integration for using Spring MVC with any
+templating library that can runs on top of the https://www.jcp
+.org/en/jsr/detail?id=223[JSR-223] Java scripting engine. Below is a list of
+templating libraries we've tested on different script engines:
 
 * http://handlebarsjs.com/[Handlebars] running on http://openjdk.java.net/projects/nashorn/[Nashorn]
 * https://mustache.github.io/[Mustache] running on http://openjdk.java.net/projects/nashorn/[Nashorn]
@@ -1389,26 +1391,26 @@ It has been tested with:
 * http://www.stuartellis.eu/articles/erb/[ERB] running on http://jruby.org[JRuby]
 * https://docs.python.org/2/library/string.html#template-strings[String templates] running on http://www.jython.org/[Jython]
 
+[TIP]
+====
+The basic rule for a script engine is that it must implement the `ScriptEngine` and
+`Invocable` interfaces.
+====
+
 
 
 [[mvc-view-script-dependencies]]
 === Requirements
 
-To be able to use script templates integration, you need to have available in your classpath
-the script engine:
+You need to have the script engine on your classpath:
 
-* http://openjdk.java.net/projects/nashorn/[Nashorn] Javascript engine is provided builtin with Java 8+.
-   Using the latest update release available is highly recommended.
-* http://docs.oracle.com/javase/7/docs/technotes/guides/scripting/programmer_guide/#jsengine[Rhino]
-   Javascript engine is provided builtin with Java 6 and Java 7.
-   Please notice that using Rhino is not recommended since it does not
-   support running most template engines.
-* http://jruby.org[JRuby] dependency should be added in order to get Ruby support.
-* http://www.jython.org[Jython] dependency should be added in order to get Python support.
+* http://openjdk.java.net/projects/nashorn/[Nashorn] JavaScript engine is provided with
+Java 8+. Using the latest update release available is highly recommended.
+* http://jruby.org[JRuby] should be added as a dependency for Ruby support.
+* http://www.jython.org[Jython] should be added as a dependency for Python support.
 
-You should also need to add dependencies for your script based template engine. For example,
-for Javascript you can use http://www.webjars.org/[WebJars] to add Maven/Gradle dependencies
-in order to make your javascript libraries available in the classpath.
+You need to have the script templating library. One way to do that for Javascript is
+through http://www.webjars.org/[WebJars].
 
 
 
@@ -1417,11 +1419,11 @@ in order to make your javascript libraries available in the classpath.
 
 To be able to use script templates, you have to configure it in order to specify various parameters
 like the script engine to use, the script files to load and what function should be called to
-render the templates. This is done thanks to a `ScriptTemplateConfigurer` bean and optional script
-files.
+render the templates. This is done thanks to a
 
-For example, in order to render Mustache templates thanks to the Nashorn Javascript engine
-provided with Java 8+, you should declare the following configuration:
+Declare a `ScriptTemplateConfigurer` bean in order to specify the script engine to use,
+the script files to load, what function to call to render templates, and so on.
+Below is an exmaple with Mustache templates and the Nashorn JavaScript engine:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1447,7 +1449,7 @@ provided with Java 8+, you should declare the following configuration:
 	}
 ----
 
-The XML counterpart using MVC namespace is:
+The same in XML:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -1463,7 +1465,7 @@ The XML counterpart using MVC namespace is:
 	</mvc:script-template-configurer>
 ----
 
-The controller is exactly what you should expect:
+The controller would look no different:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1471,12 +1473,11 @@ The controller is exactly what you should expect:
 	@Controller
 	public class SampleController {
 
-		@RequestMapping
-		public ModelAndView test() {
-			ModelAndView mav  = new ModelAndView();
-			mav.addObject("title", "Sample title").addObject("body", "Sample body");
-			mav.setViewName("template.html");
-			return mav;
+		@GetMapping("/sample")
+		public String test(Model model) {
+			model.addObject("title", "Sample title");
+			model.addObject("body", "Sample body");
+			return "template";
 		}
 	}
 ----

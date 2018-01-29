@@ -691,34 +691,47 @@ the order.
 
 View resolution enables rendering to a browser with an HTML template and a model without
 tying you to a specific view technology. In Spring WebFlux, view resolution is
-supported through the `ViewResolutionResultHandler` that relies on a list of
-``ViewResolver``'s to map a String-based view name to a `View` to render the response
-with. The <<webflux-config-view-resolvers,WebFlux Config>> can be used to configure the
-view resolvers to use.
+supported through a dedicated <<webflux-resulthandling,HandlerResultHandler>> that uses
+``ViewResolver``'s to map a String, representing a logical view name, to a `View`
+instance. The `View` is then used to render the response.
+
+
+[[webflux-viewresolution-handling]]
+==== Handling
+[.small]#<<web.adoc#mvc-handling,Same in Spring MVC>>#
 
 The `HandlerResult` passed into `ViewResolutionResultHandler` contains the return value
-along with a map of attributes (i.e. the model) from the handler. The return value is
-then processed as one of the following:
+from the handler, and also the model that contains attributes added during request
+handling. The  return value is processed as one of the following:
 
 * `String`, `CharSequence` -- a logical view name to be resolved to a `View` through
 the list of configured ``ViewResolver``'s.
-* `void` or no value (e.g. model attribute returned) -- select default view name based on
-the request path minus the leading and trailing slash, and the resolved to a `View`.
-* `Model`, `Map` -- attributes to be added to the model.
+* `void` -- select a default view name based on the request path minus the leading and
+trailing slash, and resolve it to a `View`. The same also happens when a view name
+was not provided, e.g. model attribute was returned, or an async return value, e.g.
+`Mono` completed empty.
 * {api-spring-framework}/web/reactive/result/view/Rendering.html[Rendering] -- API for
-view resolution scenarios; easiest to explore the options with code completion.
-* Other -- attribute to be added to the model; the name of the attribute is derived using
-Class name conventions, or from a handler method `@ModelAttribute` annotation if present.
+view resolution scenarios; explore the options in your IDE with code completion.
+* `Model`, `Map` -- extra model attributes to be added to the model for the request.
+* Any other -- any other return value (except for simple types, as determined by
+{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty])
+is treated as a model attribute to be added to the model. The attribute name is derived
+from the Class name, using {api-spring-framework}/core/Conventions.html[Conventions],
+unless a handler method `@ModelAttribute` annotation is present.
 
 The model can contain asynchronous, reactive types (e.g. from Reactor, RxJava). Prior
-to rendering, `AbstractView` resolves such model attributes into their concrete values
+to rendering, `AbstractView` resolves such model attributes into concrete values
 and updates the model. Single-value reactive types are resolved to a single
 value, or no value (if empty) while multi-value reactive types, e.g. `Flux<T>` are
 collected and resolved to `List<T>`.
 
+To configure view resolution is as simple as adding a `ViewResolutionResultHandler` bean
+to your Spring configuration. <<webflux-config-view-resolvers,WebFlux Config>> provides a
+dedicated configuration API for view resolution.
+
 
 [[webflux-redirecting-redirect-prefix]]
-==== Redirect
+==== Redirecting
 [.small]#<<web.adoc#mvc-redirecting-redirect-prefix,Same in Spring MVC>>#
 
 The special `redirect:` prefix in a view name allows you to perform a redirect. The
@@ -2410,7 +2423,9 @@ To configure view resolution:
 	}
 ----
 
-Note that FreeMarker also requires configuration of the underlying view technology:
+The `ViewResolverRegistry` has shortcuts for view technologies that the Spring Framework
+integrates with. Here is an example with FreeMarker which also requires configuring the
+underlying FreeMarker view technology:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -2419,7 +2434,13 @@ Note that FreeMarker also requires configuration of the underlying view technolo
 	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
-		// ...
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.freeMarker();
+		}
+
+		// Configure Freemarker...
 
 		@Bean
 		public FreeMarkerConfigurer freeMarkerConfigurer() {
@@ -2427,9 +2448,52 @@ Note that FreeMarker also requires configuration of the underlying view technolo
 			configurer.setTemplateLoaderPath("classpath:/templates");
 			return configurer;
 		}
-
 	}
 ----
+
+You can also plug in any `ViewResolver` implementation:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			ViewResolver resolver = ... ;
+			registry.viewResolver(resolver);
+		}
+	}
+----
+
+To support <<webflux-multiple-representations>> and rendering other formats
+through view resolution, besides HTML, you can configure one or more default views based
+on the `HttpMessageWriterView` implementation which accepts any of the available
+<<webflux-codecs>> from `spring-web`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.freeMarker();
+
+			Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
+			registry.defaultViews(new HttpMessageWriterView(encoder));
+		}
+
+		// ...
+	}
+----
+
 
 
 

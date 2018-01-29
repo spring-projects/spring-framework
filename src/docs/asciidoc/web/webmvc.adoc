@@ -562,23 +562,30 @@ This table below provides more details on the `ViewResolver` hierarchy:
   request file name or `Accept` header. See <<mvc-multiple-representations>>.
 |===
 
-You chain view resolvers by configuring more than one resolver and, if necessary, by
+
+[[mvc-viewresolver-handling]]
+==== Handling
+[.small]#<<web-reactive.adoc#webflux-viewresolution-handling,Same in Spring WebFlux>>#
+
+You chain view resolvers by declaring more than one resolver beans and, if necessary, by
 setting the `order` property to specify ordering. Remember, the higher the order property,
 the later the view resolver is positioned in the chain.
 
-The contract of a view resolver specifies that a view resolver __can__ return null to
-indicate the view could not be found. However in the case of JSPs, and
-`InternalResourceViewResolver`, the only way to figure out if a JSP exists is to
-perform a dispatch through `RequestDispatcher`. There an `InternalResourceViewResolver`
-must always be configured last in the order.
+The contract of a `ViewResolver` specifies that it __can__ return null to indicate the
+view could not be found. However in the case of JSPs, and `InternalResourceViewResolver`,
+the only way to figure out if a JSP exists is to perform a dispatch through
+`RequestDispatcher`. Therefore an `InternalResourceViewResolver` must always be configured
+to be last in the overal order of view resolvers.
 
-See <<mvc-config-view-resolvers>> and <<mvc-config-view-controller,View Controllers>>
-under <<mvc-config>> for details on how to configure view resolution. Also see
-<<mvc-view>> for more details on supported view technologies.
+To configure view resolution is as simple as adding a `ViewResolver` beans to your Spring
+configuration. The <<mvc-config>> provides provides a dedicated configuration API for
+<<mvc-config-view-resolvers>> and also for adding logic-less
+<<mvc-config-view-controller,View Controllers>> which are useful for HTML template
+rendering without controller logic.
 
 
 [[mvc-redirecting-redirect-prefix]]
-==== Redirect
+==== Redirecting
 [.small]#<<web-reactive.adoc#webflux-redirecting-redirect-prefix,Same in Spring WebFlux>>#
 
 The special `redirect:` prefix in a view name allows you to perform a redirect. The
@@ -596,7 +603,7 @@ value takes precedence over the response status set by `RedirectView`.
 
 
 [[mvc-redirecting-forward-prefix]]
-==== Forward
+==== Forwarding
 
 It is also possible to use a special `forward:` prefix for view names that are
 ultimately resolved by `UrlBasedViewResolver` and subclasses. This creates an
