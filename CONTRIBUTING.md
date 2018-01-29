@@ -8,6 +8,7 @@ First off, thank you for taking the time to contribute! :+1: :tada:
 * [How to Contribute](#how-to-contribute)
   * [Discuss](#discuss)
   * [Create a Ticket](#create-a-ticket)
+  * [Ticket Lifecycle](#ticket-lifecycle)
   * [Submit a Pull Request](#submit-a-pull-request)
 * [Build from Source](#build-from-source)
 * [Source Code Style](#source-code-style)
