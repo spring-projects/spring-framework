@@ -1509,7 +1509,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			return getTypeForFactoryBean(factoryBean);
 		}
 		catch (BeanCreationException ex) {
-			if (ex instanceof BeanCurrentlyInCreationException) {
+			if (ex.contains(BeanCurrentlyInCreationException.class)) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Bean currently in creation on FactoryBean type check: " + ex);
 				}
