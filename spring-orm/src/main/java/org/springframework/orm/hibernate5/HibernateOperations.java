@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,37 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.lang.Nullable;
 
 /**
- * Interface that specifies a basic set of Hibernate operations,
- * implemented by {@link HibernateTemplate}. Not often used, but a useful
- * option to enhance testability, as it can easily be mocked or stubbed.
+ * Interface that specifies a common set of Hibernate operations as well as
+ * a general {@link #execute} method for Session-based lambda expressions.
+ * Implemented by {@link HibernateTemplate}. Not often used, but a useful option
+ * to enhance testability, as it can easily be mocked or stubbed.
  *
- * <p>Defines {@code HibernateTemplate}'s data access methods that
- * mirror various {@link org.hibernate.Session} methods. Users are
- * strongly encouraged to read the Hibernate {@code Session} javadocs
- * for details on the semantics of those methods.
+ * <p>Defines {@code HibernateTemplate}'s data access methods that mirror various
+ * {@link org.hibernate.Session} methods. Users are strongly encouraged to read the
+ * Hibernate {@code Session} javadocs for details on the semantics of those methods.
+ *
+ * <p><b>A deprecation note:</b> While {@link HibernateTemplate} and this operations
+ * interface are being kept around for backwards compatibility in terms of the data
+ * access implementation style in Spring applications, we strongly recommend the use
+ * of native {@link org.hibernate.Session} access code for non-trivial interactions.
+ * This in particular affects parameterized queries where - on Java 8+ - a custom
+ * {@link HibernateCallback} lambda code block with {@code createQuery} and several
+ * {@code setParameter} calls on the {@link org.hibernate.query.Query} interface
+ * is an elegant solution, to be executed via the general {@link #execute} method.
+ * All such operations which benefit from a lambda variant have been marked as
+ * {@code deprecated} on this interface.
+ *
+ * <p><b>A Hibernate compatibility note:</b> {@link HibernateTemplate} and the
+ * operations on this interface generally aim to be applicable across all Hibernate
+ * versions. In terms of binary compatibility, Spring ships a variant for each major
+ * generation of Hibernate (in the present case: Hibernate ORM 5.x). However, due to
+ * refactorings and removals in Hibernate ORM 5.3, some variants - in particular
+ * legacy positional parameters starting from index 0 - do not work anymore.
+ * All affected operations are marked as deprecated; please replace them with the
+ * general {@link #execute} method and custom lambda blocks creating the queries,
+ * ideally setting named parameters through {@link org.hibernate.query.Query}.
+ * <b>Please be aware that deprecated operations are known to work with Hibernate
+ * ORM 5.0-5.2 but may not work with Hibernate ORM 5.3 and higher anymore.</b>
  *
  * @author Juergen Hoeller
  * @since 4.2
@@ -561,116 +584,6 @@ public interface HibernateOperations {
 
 
 	//-------------------------------------------------------------------------
-	// Convenience finder methods for HQL strings
-	//-------------------------------------------------------------------------
-
-	/**
-	 * Execute an HQL query, binding a number of values to "?" parameters
-	 * in the query string.
-	 * @param queryString a query expressed in Hibernate's query language
-	 * @param values the values of the parameters
-	 * @return a {@link List} containing the results of the query execution
-	 * @throws DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#createQuery
-	 */
-	List<?> find(String queryString, Object... values) throws DataAccessException;
-
-	/**
-	 * Execute an HQL query, binding one value to a ":" named parameter
-	 * in the query string.
-	 * @param queryString a query expressed in Hibernate's query language
-	 * @param paramName the name of the parameter
-	 * @param value the value of the parameter
-	 * @return a {@link List} containing the results of the query execution
-	 * @throws DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#getNamedQuery(String)
-	 */
-	List<?> findByNamedParam(String queryString, String paramName, Object value) throws DataAccessException;
-
-	/**
-	 * Execute an HQL query, binding a number of values to ":" named
-	 * parameters in the query string.
-	 * @param queryString a query expressed in Hibernate's query language
-	 * @param paramNames the names of the parameters
-	 * @param values the values of the parameters
-	 * @return a {@link List} containing the results of the query execution
-	 * @throws DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#getNamedQuery(String)
-	 */
-	List<?> findByNamedParam(String queryString, String[] paramNames, Object[] values) throws DataAccessException;
-
-	/**
-	 * Execute an HQL query, binding the properties of the given bean to
-	 * <i>named</i> parameters in the query string.
-	 * @param queryString a query expressed in Hibernate's query language
-	 * @param valueBean the values of the parameters
-	 * @return a {@link List} containing the results of the query execution
-	 * @throws DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Query#setProperties
-	 * @see org.hibernate.Session#createQuery
-	 */
-	List<?> findByValueBean(String queryString, Object valueBean) throws DataAccessException;
-
-
-	//-------------------------------------------------------------------------
-	// Convenience finder methods for named queries
-	//-------------------------------------------------------------------------
-
-	/**
-	 * Execute a named query binding a number of values to "?" parameters
-	 * in the query string.
-	 * <p>A named query is defined in a Hibernate mapping file.
-	 * @param queryName the name of a Hibernate query in a mapping file
-	 * @param values the values of the parameters
-	 * @return a {@link List} containing the results of the query execution
-	 * @throws DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#getNamedQuery(String)
-	 */
-	List<?> findByNamedQuery(String queryName, Object... values) throws DataAccessException;
-
-	/**
-	 * Execute a named query, binding one value to a ":" named parameter
-	 * in the query string.
-	 * <p>A named query is defined in a Hibernate mapping file.
-	 * @param queryName the name of a Hibernate query in a mapping file
-	 * @param paramName the name of parameter
-	 * @param value the value of the parameter
-	 * @return a {@link List} containing the results of the query execution
-	 * @throws DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#getNamedQuery(String)
-	 */
-	List<?> findByNamedQueryAndNamedParam(String queryName, String paramName, Object value)
-			throws DataAccessException;
-
-	/**
-	 * Execute a named query, binding a number of values to ":" named
-	 * parameters in the query string.
-	 * <p>A named query is defined in a Hibernate mapping file.
-	 * @param queryName the name of a Hibernate query in a mapping file
-	 * @param paramNames the names of the parameters
-	 * @param values the values of the parameters
-	 * @return a {@link List} containing the results of the query execution
-	 * @throws DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#getNamedQuery(String)
-	 */
-	List<?> findByNamedQueryAndNamedParam(String queryName, String[] paramNames, Object[] values)
-			throws DataAccessException;
-
-	/**
-	 * Execute a named query, binding the properties of the given bean to
-	 * ":" named parameters in the query string.
-	 * <p>A named query is defined in a Hibernate mapping file.
-	 * @param queryName the name of a Hibernate query in a mapping file
-	 * @param valueBean the values of the parameters
-	 * @return a {@link List} containing the results of the query execution
-	 * @throws DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Query#setProperties
-	 * @see org.hibernate.Session#getNamedQuery(String)
-	 */
-	List<?> findByNamedQueryAndValueBean(String queryName, Object valueBean) throws DataAccessException;
-
-
-	//-------------------------------------------------------------------------
 	// Convenience finder methods for detached criteria
 	//-------------------------------------------------------------------------
 
@@ -759,6 +672,140 @@ public interface HibernateOperations {
 
 
 	//-------------------------------------------------------------------------
+	// Convenience finder methods for HQL strings
+	//-------------------------------------------------------------------------
+
+	/**
+	 * Execute an HQL query, binding a number of values to "?" parameters
+	 * in the query string.
+	 * @param queryString a query expressed in Hibernate's query language
+	 * @param values the values of the parameters
+	 * @return a {@link List} containing the results of the query execution
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see org.hibernate.Session#createQuery
+	 * @deprecated as of 5.0.4, in favor of a custom {@link HibernateCallback}
+	 * lambda code block passed to the general {@link #execute} method
+	 */
+	@Deprecated
+	List<?> find(String queryString, Object... values) throws DataAccessException;
+
+	/**
+	 * Execute an HQL query, binding one value to a ":" named parameter
+	 * in the query string.
+	 * @param queryString a query expressed in Hibernate's query language
+	 * @param paramName the name of the parameter
+	 * @param value the value of the parameter
+	 * @return a {@link List} containing the results of the query execution
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see org.hibernate.Session#getNamedQuery(String)
+	 * @deprecated as of 5.0.4, in favor of a custom {@link HibernateCallback}
+	 * lambda code block passed to the general {@link #execute} method
+	 */
+	@Deprecated
+	List<?> findByNamedParam(String queryString, String paramName, Object value) throws DataAccessException;
+
+	/**
+	 * Execute an HQL query, binding a number of values to ":" named
+	 * parameters in the query string.
+	 * @param queryString a query expressed in Hibernate's query language
+	 * @param paramNames the names of the parameters
+	 * @param values the values of the parameters
+	 * @return a {@link List} containing the results of the query execution
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see org.hibernate.Session#getNamedQuery(String)
+	 * @deprecated as of 5.0.4, in favor of a custom {@link HibernateCallback}
+	 * lambda code block passed to the general {@link #execute} method
+	 */
+	@Deprecated
+	List<?> findByNamedParam(String queryString, String[] paramNames, Object[] values) throws DataAccessException;
+
+	/**
+	 * Execute an HQL query, binding the properties of the given bean to
+	 * <i>named</i> parameters in the query string.
+	 * @param queryString a query expressed in Hibernate's query language
+	 * @param valueBean the values of the parameters
+	 * @return a {@link List} containing the results of the query execution
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see org.hibernate.Query#setProperties
+	 * @see org.hibernate.Session#createQuery
+	 * @deprecated as of 5.0.4, in favor of a custom {@link HibernateCallback}
+	 * lambda code block passed to the general {@link #execute} method
+	 */
+	@Deprecated
+	List<?> findByValueBean(String queryString, Object valueBean) throws DataAccessException;
+
+
+	//-------------------------------------------------------------------------
+	// Convenience finder methods for named queries
+	//-------------------------------------------------------------------------
+
+	/**
+	 * Execute a named query binding a number of values to "?" parameters
+	 * in the query string.
+	 * <p>A named query is defined in a Hibernate mapping file.
+	 * @param queryName the name of a Hibernate query in a mapping file
+	 * @param values the values of the parameters
+	 * @return a {@link List} containing the results of the query execution
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see org.hibernate.Session#getNamedQuery(String)
+	 * @deprecated as of 5.0.4, in favor of a custom {@link HibernateCallback}
+	 * lambda code block passed to the general {@link #execute} method
+	 */
+	@Deprecated
+	List<?> findByNamedQuery(String queryName, Object... values) throws DataAccessException;
+
+	/**
+	 * Execute a named query, binding one value to a ":" named parameter
+	 * in the query string.
+	 * <p>A named query is defined in a Hibernate mapping file.
+	 * @param queryName the name of a Hibernate query in a mapping file
+	 * @param paramName the name of parameter
+	 * @param value the value of the parameter
+	 * @return a {@link List} containing the results of the query execution
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see org.hibernate.Session#getNamedQuery(String)
+	 * @deprecated as of 5.0.4, in favor of a custom {@link HibernateCallback}
+	 * lambda code block passed to the general {@link #execute} method
+	 */
+	@Deprecated
+	List<?> findByNamedQueryAndNamedParam(String queryName, String paramName, Object value)
+			throws DataAccessException;
+
+	/**
+	 * Execute a named query, binding a number of values to ":" named
+	 * parameters in the query string.
+	 * <p>A named query is defined in a Hibernate mapping file.
+	 * @param queryName the name of a Hibernate query in a mapping file
+	 * @param paramNames the names of the parameters
+	 * @param values the values of the parameters
+	 * @return a {@link List} containing the results of the query execution
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see org.hibernate.Session#getNamedQuery(String)
+	 * @deprecated as of 5.0.4, in favor of a custom {@link HibernateCallback}
+	 * lambda code block passed to the general {@link #execute} method
+	 */
+	@Deprecated
+	List<?> findByNamedQueryAndNamedParam(String queryName, String[] paramNames, Object[] values)
+			throws DataAccessException;
+
+	/**
+	 * Execute a named query, binding the properties of the given bean to
+	 * ":" named parameters in the query string.
+	 * <p>A named query is defined in a Hibernate mapping file.
+	 * @param queryName the name of a Hibernate query in a mapping file
+	 * @param valueBean the values of the parameters
+	 * @return a {@link List} containing the results of the query execution
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see org.hibernate.Query#setProperties
+	 * @see org.hibernate.Session#getNamedQuery(String)
+	 * @deprecated as of 5.0.4, in favor of a custom {@link HibernateCallback}
+	 * lambda code block passed to the general {@link #execute} method
+	 */
+	@Deprecated
+	List<?> findByNamedQueryAndValueBean(String queryName, Object valueBean) throws DataAccessException;
+
+
+	//-------------------------------------------------------------------------
 	// Convenience query methods for iteration and bulk updates/deletes
 	//-------------------------------------------------------------------------
 
@@ -773,7 +820,10 @@ public interface HibernateOperations {
 	 * @throws DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#createQuery
 	 * @see org.hibernate.Query#iterate
+	 * @deprecated as of 5.0.4, in favor of a custom {@link HibernateCallback}
+	 * lambda code block passed to the general {@link #execute} method
 	 */
+	@Deprecated
 	Iterator<?> iterate(String queryString, Object... values) throws DataAccessException;
 
 	/**
@@ -783,7 +833,10 @@ public interface HibernateOperations {
 	 * @param it the {@code Iterator} to close
 	 * @throws DataAccessException if the {@code Iterator} could not be closed
 	 * @see org.hibernate.Hibernate#close
+	 * @deprecated as of 5.0.4, in favor of a custom {@link HibernateCallback}
+	 * lambda code block passed to the general {@link #execute} method
 	 */
+	@Deprecated
 	void closeIterator(Iterator<?> it) throws DataAccessException;
 
 	/**
@@ -795,7 +848,10 @@ public interface HibernateOperations {
 	 * @throws DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#createQuery
 	 * @see org.hibernate.Query#executeUpdate
+	 * @deprecated as of 5.0.4, in favor of a custom {@link HibernateCallback}
+	 * lambda code block passed to the general {@link #execute} method
 	 */
+	@Deprecated
 	int bulkUpdate(String queryString, Object... values) throws DataAccessException;
 
 }
