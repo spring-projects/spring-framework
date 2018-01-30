@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.http.server.reactive;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +33,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Package-private default implementation of {@link ServerHttpRequest.Builder}.
@@ -139,13 +139,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		if (this.uriPath == null) {
 			return this.uri;
 		}
-		try {
-			return new URI(this.uri.getScheme(), this.uri.getUserInfo(), uri.getHost(), uri.getPort(),
-					uriPath, uri.getQuery(), uri.getFragment());
-		}
-		catch (URISyntaxException ex) {
-			throw new IllegalStateException("Invalid URI path: \"" + this.uriPath + "\"");
-		}
+		return UriComponentsBuilder.fromUri(this.uri).replacePath(this.uriPath).build(true).toUri();
 	}
 
 	private static class DefaultServerHttpRequest extends AbstractServerHttpRequest {

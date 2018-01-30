@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link AbstractServerHttpRequest}.
@@ -85,26 +85,33 @@ public class ServerHttpRequestTests {
 		assertEquals(Collections.singletonList(null), params.get("a"));
 	}
 
+	@Test // SPR-16434
+	public void mutatePathWithEncodedQueryParams() throws Exception {
+		ServerHttpRequest request = createHttpRequest("/path?name=%E6%89%8E%E6%A0%B9")
+				.mutate().path("/mutatedPath").build();
+		assertEquals("/mutatedPath", request.getURI().getRawPath());
+		assertEquals("name=%E6%89%8E%E6%A0%B9", request.getURI().getRawQuery());
+	}
+
+
 	private ServerHttpRequest createHttpRequest(String path) throws Exception {
-		HttpServletRequest request = new MockHttpServletRequest("GET", path) {
-			@Override
-			public ServletInputStream getInputStream() {
-				return new TestServletInputStream();
-			}
-		};
+		HttpServletRequest request = createEmptyBodyHttpServletRequest(path);
 		AsyncContext asyncContext = new MockAsyncContext(request, new MockHttpServletResponse());
 		return new ServletServerHttpRequest(request, asyncContext, "", new DefaultDataBufferFactory(), 1024);
 	}
 
-	private static class TestServletInputStream extends DelegatingServletInputStream {
-
-		public TestServletInputStream() {
-			super(new ByteArrayInputStream(new byte[0]));
-		}
-
-		@Override
-		public void setReadListener(ReadListener readListener) {
-			// Ignore
-		}
+	private HttpServletRequest createEmptyBodyHttpServletRequest(String path) {
+		return new MockHttpServletRequest("GET", path) {
+				@Override
+				public ServletInputStream getInputStream() {
+					return new DelegatingServletInputStream(new ByteArrayInputStream(new byte[0])) {
+						@Override
+						public void setReadListener(ReadListener readListener) {
+							// Ignore
+						}
+					};
+				}
+			};
 	}
+
 }
