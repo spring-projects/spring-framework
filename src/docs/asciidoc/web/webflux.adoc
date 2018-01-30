@@ -729,6 +729,8 @@ To configure view resolution is as simple as adding a `ViewResolutionResultHandl
 to your Spring configuration. <<webflux-config-view-resolvers,WebFlux Config>> provides a
 dedicated configuration API for view resolution.
 
+See <<webflux-view>> for more on the view technologies integrated with Spring WebFlux.
+
 
 [[webflux-redirecting-redirect-prefix]]
 ==== Redirecting
@@ -2197,6 +2199,11 @@ reference documentation including:
 
 
 
+include::webflux-view.adoc[leveloffset=+1]
+
+
+
+
 [[webflux-config]]
 == WebFlux Config
 [.small]#<<web.adoc#mvc-config,Same in Spring MVC>>#
@@ -2493,6 +2500,8 @@ on the `HttpMessageWriterView` implementation which accepts any of the available
 		// ...
 	}
 ----
+
+See <<webflux-view>> for more on the view technologies integrated with Spring WebFlux.
 
 
 

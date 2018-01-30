@@ -1,11 +1,6 @@
 [[mvc-view]]
 = View Technologies
-
-
-
-
-[[mvc-view-introduction]]
-== Introduction
+[.small]#<<web-reactive.adoc#webflux-view,Same in Spring WebFlux>>#
 
 The use of view technologies in Spring MVC is pluggable, whether you decide to
 use Thymeleaf, Groovy Markup Templates, JSPs, or other, is primarily a matter of a
@@ -17,6 +12,7 @@ We assume you are already familiar with <<mvc-viewresolver>>.
 
 [[mvc-view-thymeleaf]]
 == Thymeleaf
+[.small]#<<web-reactive.adoc#webflux-view-thymeleaf,Same in Spring WebFlux>>#
 
 Thymeleaf is modern server-side Java template engine that emphasizes natural HTML
 templates that can be previewed in a browser by double-clicking, which is very
@@ -36,6 +32,7 @@ See http://www.thymeleaf.org/documentation.html[Thymeleaf+Spring] for more detai
 
 [[mvc-view-freemarker]]
 == FreeMarker
+[.small]#<<web-reactive.adoc#webflux-view-freemarker,Same in Spring WebFlux>>#
 
 http://www.freemarker.org[Apache FreeMarker] is a template engine for generating any
 kind of text output from HTML to email, and others. The Spring Framework has a built-in
@@ -44,7 +41,8 @@ integration for using Spring MVC with FreeMarker templates.
 
 
 [[mvc-view-freemarker-contextconfig]]
-=== Context configuration
+=== View config
+[.small]#<<web-reactive.adoc#webflux-view-freemarker-contextconfig,Same in Spring WebFlux>>#
 
 To configure FreeMarker as a view technology:
 
@@ -99,19 +97,14 @@ properties:
 	</bean>
 ----
 
-
-
-[[mvc-view-freemarker-createtemplates]]
-=== Creating templates
-
 Your templates need to be stored in the directory specified by the `FreeMarkerConfigurer`
-shown above. If you use the view resolvers highlighted, then the logical view names
-relate to the template file names. So if your controller returns the view name "welcome"
-then the resolver will look for the `/WEB-INF/freemarker/welcome.ftl` template.
+shown above. Given the above configuration if your controller returns the view name
+"welcome" then the resolver will look for the `/WEB-INF/freemarker/welcome.ftl` template.
 
 
 [[mvc-views-freemarker]]
-=== Advanced config
+=== FreeMarker config
+[.small]#<<web-reactive.adoc#webflux-views-freemarker,Same in Spring WebFlux>>#
 
 FreeMarker 'Settings' and 'SharedVariables' can be passed directly to the FreeMarker
 `Configuration` object managed by Spring by setting the appropriate bean properties on
@@ -544,29 +537,32 @@ syntax. Here is a sample template for an HTML page:
 
 [[mvc-view-script]]
 == Script Views
+[.small]#<<web-reactive.adoc#webflux-view-script,Same in Spring WebFlux>>#
 
 The Spring Framework has a built-in integration for using Spring MVC with any
-templating library that can runs on top of the https://www.jcp
-.org/en/jsr/detail?id=223[JSR-223] Java scripting engine. Below is a list of
-templating libraries we've tested on different script engines:
+templating library that can run on top of the
+https://www.jcp.org/en/jsr/detail?id=223[JSR-223] Java scripting engine. Below is a list
+of templating libraries we've tested on different script engines:
 
-* http://handlebarsjs.com/[Handlebars] running on http://openjdk.java.net/projects/nashorn/[Nashorn]
-* https://mustache.github.io/[Mustache] running on http://openjdk.java.net/projects/nashorn/[Nashorn]
-* http://facebook.github.io/react/[React] running on http://openjdk.java.net/projects/nashorn/[Nashorn]
-* http://www.embeddedjs.com/[EJS] running on http://openjdk.java.net/projects/nashorn/[Nashorn]
-* http://www.stuartellis.eu/articles/erb/[ERB] running on http://jruby.org[JRuby]
-* https://docs.python.org/2/library/string.html#template-strings[String templates] running on http://www.jython.org/[Jython]
+[horizontal]
+http://handlebarsjs.com/[Handlebars] :: http://openjdk.java.net/projects/nashorn/[Nashorn]
+https://mustache.github.io/[Mustache] :: http://openjdk.java.net/projects/nashorn/[Nashorn]
+http://facebook.github.io/react/[React] :: http://openjdk.java.net/projects/nashorn/[Nashorn]
+http://www.embeddedjs.com/[EJS] :: http://openjdk.java.net/projects/nashorn/[Nashorn]
+http://www.stuartellis.eu/articles/erb/[ERB] :: http://jruby.org[JRuby]
+https://docs.python.org/2/library/string.html#template-strings[String templates] :: http://www.jython.org/[Jython]
 
 [TIP]
 ====
-The basic rule for a script engine is that it must implement the `ScriptEngine` and
-`Invocable` interfaces.
+The basic rule for integrating any other script engine is that it must implement the
+`ScriptEngine` and `Invocable` interfaces.
 ====
 
 
 
 [[mvc-view-script-dependencies]]
 === Requirements
+[.small]#<<web-reactive.adoc#webflux-view-script-dependencies,Same in Spring WebFlux>>#
 
 You need to have the script engine on your classpath:
 
@@ -582,21 +578,18 @@ through http://www.webjars.org/[WebJars].
 
 [[mvc-view-script-integrate]]
 === Script templates
-
-To be able to use script templates, you have to configure it in order to specify various parameters
-like the script engine to use, the script files to load and what function should be called to
-render the templates. This is done thanks to a
+[.small]#<<web-reactive.adoc#webflux-script-integrate,Same in Spring WebFlux>>#
 
 Declare a `ScriptTemplateConfigurer` bean in order to specify the script engine to use,
 the script files to load, what function to call to render templates, and so on.
-Below is an exmaple with Mustache templates and the Nashorn JavaScript engine:
+Below is an example with Mustache templates and the Nashorn JavaScript engine:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebMvc
-	public class MustacheConfig implements WebMvcConfigurer {
+	public class WebConfig implements WebMvcConfigurer {
 
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
@@ -682,7 +675,7 @@ browser facilities not available in the server-side script engine.
 ----
 	@Configuration
 	@EnableWebMvc
-	public class MustacheConfig implements WebMvcConfigurer {
+	public class WebConfig implements WebMvcConfigurer {
 
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
@@ -731,9 +724,9 @@ template engine configuration for example).
 	}
 ----
 
-Check out Spring script templates unit tests
-(https://github.com/spring-projects/spring-framework/tree/master/spring-webmvc/src/test/java/org/springframework/web/servlet/view/script[java],
-https://github.com/spring-projects/spring-framework/tree/master/spring-webmvc/src/test/resources/org/springframework/web/servlet/view/script[resources])
+Check out the Spring Framework unit tests,
+https://github.com/spring-projects/spring-framework/tree/master/spring-webmvc/src/test/java/org/springframework/web/servlet/view/script[java], and
+https://github.com/spring-projects/spring-framework/tree/master/spring-webmvc/src/test/resources/org/springframework/web/servlet/view/script[resources],
 for more configuration examples.
 
 
@@ -2000,11 +1993,13 @@ document should appear listing each of the words in the model map.
 
 [[mvc-view-jackson]]
 == Jackson
+[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter,Same in Spring WebFlux>>#
 
 
 
 [[mvc-view-json-mapping]]
 === JSON
+[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter,Same in Spring WebFlux>>#
 
 The `MappingJackson2JsonView` uses the Jackson library's `ObjectMapper` to render the response
 content as JSON. By default, the entire contents of the model map (with the exception of
@@ -2027,6 +2022,7 @@ name(s) could be customized through the `jsonpParameterNames` property.
 
 [[mvc-view-xml-mapping]]
 === XML
+[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter,Same in Spring WebFlux>>#
 
 The `MappingJackson2XmlView` uses the
 https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML extension]'s `XmlMapper`
