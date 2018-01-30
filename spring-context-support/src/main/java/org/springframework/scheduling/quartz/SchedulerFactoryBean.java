@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,17 +94,13 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	public static final int DEFAULT_THREAD_COUNT = 10;
 
 
-	private static final ThreadLocal<ResourceLoader> configTimeResourceLoaderHolder =
-			new ThreadLocal<>();
+	private static final ThreadLocal<ResourceLoader> configTimeResourceLoaderHolder = new ThreadLocal<>();
 
-	private static final ThreadLocal<Executor> configTimeTaskExecutorHolder =
-			new ThreadLocal<>();
+	private static final ThreadLocal<Executor> configTimeTaskExecutorHolder = new ThreadLocal<>();
 
-	private static final ThreadLocal<DataSource> configTimeDataSourceHolder =
-			new ThreadLocal<>();
+	private static final ThreadLocal<DataSource> configTimeDataSourceHolder = new ThreadLocal<>();
 
-	private static final ThreadLocal<DataSource> configTimeNonTransactionalDataSourceHolder =
-			new ThreadLocal<>();
+	private static final ThreadLocal<DataSource> configTimeNonTransactionalDataSourceHolder = new ThreadLocal<>();
 
 
 	/**
@@ -167,6 +163,9 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	private Class<? extends SchedulerFactory> schedulerFactoryClass = StdSchedulerFactory.class;
 
 	@Nullable
+	private SchedulerFactory schedulerFactory;
+
+	@Nullable
 	private String schedulerName;
 
 	@Nullable
@@ -184,7 +183,6 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 
 	@Nullable
 	private DataSource nonTransactionalDataSource;
-
 
 	@Nullable
     private Map<String, ?> schedulerContextMap;
@@ -217,7 +215,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 
 
 	/**
-	 * Set the Quartz SchedulerFactory implementation to use.
+	 * Set the Quartz {@link SchedulerFactory} implementation to use.
 	 * <p>Default is {@link StdSchedulerFactory}, reading in the standard
 	 * {@code quartz.properties} from {@code quartz.jar}.
 	 * To use custom Quartz properties, specify the "configLocation"
@@ -228,6 +226,18 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 */
 	public void setSchedulerFactoryClass(Class<? extends SchedulerFactory> schedulerFactoryClass) {
 		this.schedulerFactoryClass = schedulerFactoryClass;
+	}
+
+	/**
+	 * Set an external Quartz {@link SchedulerFactory} instance to use.
+	 * <p>Default is an internal {@link StdSchedulerFactory} instance.
+	 * If this method is being called, it overrides any class specified
+	 * through {@link #setSchedulerFactoryClass}.
+	 * @since 5.0.4
+	 * @see #setSchedulerFactoryClass
+	 */
+	public void setSchedulerFactory(SchedulerFactory schedulerFactory) {
+		this.schedulerFactory = schedulerFactory;
 	}
 
 	/**
@@ -316,7 +326,6 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	public void setNonTransactionalDataSource(DataSource nonTransactionalDataSource) {
 		this.nonTransactionalDataSource = nonTransactionalDataSource;
 	}
-
 
 	/**
 	 * Register objects in the Scheduler context via a given Map.
@@ -470,8 +479,9 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 			this.resourceLoader = this.applicationContext;
 		}
 
-		// Create SchedulerFactory instance...
-		SchedulerFactory schedulerFactory = BeanUtils.instantiateClass(this.schedulerFactoryClass);
+		// Initialize the SchedulerFactory instance...
+		SchedulerFactory schedulerFactory = (this.schedulerFactory != null ? this.schedulerFactory :
+				BeanUtils.instantiateClass(this.schedulerFactoryClass));
 		initSchedulerFactory(schedulerFactory);
 
 		if (this.resourceLoader != null) {
