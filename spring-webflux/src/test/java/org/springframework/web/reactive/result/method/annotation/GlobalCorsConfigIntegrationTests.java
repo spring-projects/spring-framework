@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,8 +36,10 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.config.CorsRegistry;
 import org.springframework.web.reactive.config.WebFluxConfigurationSupport;
 
+import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 /**
@@ -102,11 +106,21 @@ public class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingInte
 	}
 
 	@Test
+	public void actualRequestWithAmbiguousMapping() throws Exception {
+		this.headers.add(HttpHeaders.ACCEPT, MediaType.TEXT_HTML_VALUE);
+		ResponseEntity<String> entity = performGet("/ambiguous", this.headers, String.class);
+		assertEquals(HttpStatus.OK, entity.getStatusCode());
+		assertEquals("*", entity.getHeaders().getAccessControlAllowOrigin());
+	}
+
+	@Test
 	public void preFlightRequestWithCorsEnabled() throws Exception {
 		this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		ResponseEntity<String> entity = performOptions("/cors", this.headers, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertEquals("*", entity.getHeaders().getAccessControlAllowOrigin());
+		assertThat(entity.getHeaders().getAccessControlAllowMethods(),
+				contains(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.POST));
 	}
 
 	@Test
@@ -133,6 +147,28 @@ public class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingInte
 		}
 	}
 
+	@Test
+	public void preFlightRequestWithCorsRestricted() throws Exception {
+		this.headers.set(HttpHeaders.ORIGIN, "http://foo");
+		this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		ResponseEntity<String> entity = performOptions("/cors-restricted", this.headers, String.class);
+		assertEquals(HttpStatus.OK, entity.getStatusCode());
+		assertEquals("http://foo", entity.getHeaders().getAccessControlAllowOrigin());
+		assertThat(entity.getHeaders().getAccessControlAllowMethods(), contains(HttpMethod.GET, HttpMethod.POST));
+	}
+
+	@Test
+	public void preFlightRequestWithAmbiguousMapping() throws Exception {
+		this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		ResponseEntity<String> entity = performOptions("/ambiguous", this.headers, String.class);
+		assertEquals(HttpStatus.OK, entity.getStatusCode());
+		assertEquals("http://localhost:9000", entity.getHeaders().getAccessControlAllowOrigin());
+		assertThat(entity.getHeaders().getAccessControlAllowMethods(), contains(HttpMethod.GET));
+		assertEquals(true, entity.getHeaders().getAccessControlAllowCredentials());
+		assertThat(entity.getHeaders().get(HttpHeaders.VARY), contains(HttpHeaders.ORIGIN,
+				HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS));
+	}
+
 
 	@Configuration
 	@ComponentScan(resourcePattern = "**/GlobalCorsConfigIntegrationTests*.class")
@@ -141,8 +177,12 @@ public class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingInte
 
 		@Override
 		protected void addCorsMappings(CorsRegistry registry) {
-			registry.addMapping("/cors-restricted").allowedOrigins("http://foo");
+			registry.addMapping("/cors-restricted")
+					.allowedOrigins("http://foo")
+					.allowedMethods("GET", "POST");
 			registry.addMapping("/cors");
+			registry.addMapping("/ambiguous")
+					.allowedMethods("GET", "POST");
 		}
 	}
 
@@ -162,6 +202,16 @@ public class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingInte
 		@GetMapping("/cors-restricted")
 		public String corsRestricted() {
 			return "corsRestricted";
+		}
+
+		@GetMapping(value = "/ambiguous", produces = MediaType.TEXT_PLAIN_VALUE)
+		public String ambiguous1() {
+			return "ambiguous";
+		}
+
+		@GetMapping(value = "/ambiguous", produces = MediaType.TEXT_HTML_VALUE)
+		public String ambiguous2() {
+			return "<p>ambiguous</p>";
 		}
 	}
 
