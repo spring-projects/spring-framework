@@ -816,10 +816,10 @@ your Java configuration:
 	}
 ----
 
-`@RestController` is a composed annotation that is itself annotated with
-`@Controller` and `@ResponseBody` indicating a controller whose every method inherits the type-level
-`@ResponseBody` annotation and therefore writes to the response body (vs model-and-vew
-rendering).
+`@RestController` is a <<core.adoc#beans-meta-annotations,composed annotation>> that is
+itself meta-annotated with `@Controller` and `@ResponseBody` indicating a controller whose
+every method inherits the type-level `@ResponseBody` annotation and therefore writes
+directly to the response body vs view resolution and rendering with an HTML template.
 
 
 
@@ -840,10 +840,12 @@ There are also HTTP method specific shortcut variants of `@RequestMapping`:
 - `@DeleteMapping`
 - `@PatchMapping`
 
-The shortcut variants are
-https://github.com/spring-projects/spring-framework/wiki/Spring-Annotation-Programming-Model#composed-annotations[composed annotations]
--- themselves annotated with `@RequestMapping`. They are commonly used at the method level.
-At the class level an `@RequestMapping` is more useful for expressing shared mappings.
+The above are <<webflux-ann-requestmapping-composed>> that are provided out of the box
+because arguably most controller methods should be mapped to a specific HTTP method vs
+using `@RequestMapping` which by default matches to all HTTP methods. At the same an
+`@RequestMapping` is still needed at the class level to express shared mappings.
+
+Below is an example with type and method level mappings:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
