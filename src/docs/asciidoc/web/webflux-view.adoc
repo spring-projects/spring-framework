@@ -131,6 +131,7 @@ http://facebook.github.io/react/[React] :: http://openjdk.java.net/projects/nash
 http://www.embeddedjs.com/[EJS] :: http://openjdk.java.net/projects/nashorn/[Nashorn]
 http://www.stuartellis.eu/articles/erb/[ERB] :: http://jruby.org[JRuby]
 https://docs.python.org/2/library/string.html#template-strings[String templates] :: http://www.jython.org/[Jython]
+https://github.com/sdeleuze/kotlin-script-templating[Kotlin Script templating] :: http://kotlinlang.org/[Kotlin]
 
 [TIP]
 ====
@@ -150,6 +151,10 @@ You need to have the script engine on your classpath:
 Java 8+. Using the latest update release available is highly recommended.
 * http://jruby.org[JRuby] should be added as a dependency for Ruby support.
 * http://www.jython.org[Jython] should be added as a dependency for Python support.
+* `org.jetbrains.kotlin:kotlin-script-util` dependency and a `META-INF/services/javax.script.ScriptEngineFactory`
+ file containing a `org.jetbrains.kotlin.script.jsr223.KotlinJsr223JvmLocalScriptEngineFactory`
+ line should be added for Kotlin script support, see
+ https://github.com/sdeleuze/kotlin-script-templating[this example] for more details.
 
 You need to have the script templating library. One way to do that for Javascript is
 through http://www.webjars.org/[WebJars].
@@ -192,7 +197,10 @@ The render function is called with the following parameters:
 
 * `String template`: the template content
 * `Map model`: the view model
-* `String url`: the template url (since 4.2.2)
+* `RenderingContext renderingContext`: the
+  {api-spring-framework}/web/servlet/view/script/RenderingContext.html[RenderingContext]
+  that gives access to the application context, the locale, the template loader and the
+  url (since 5.0)
 
 `Mustache.render()` is natively compatible with this signature, so you can call it directly.
 
