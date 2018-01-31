@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewResolver;
+import org.springframework.web.reactive.result.view.script.ScriptTemplateConfigurer;
+import org.springframework.web.reactive.result.view.script.ScriptTemplateViewResolver;
 
 /**
  * Assist with the configuration of a chain of {@link ViewResolver}'s supporting
@@ -42,6 +44,7 @@ import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewRes
  * JSON, XML, etc.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 public class ViewResolverRegistry {
@@ -75,6 +78,28 @@ public class ViewResolverRegistry {
 					"This bean may be given any name.");
 		}
 		FreeMarkerRegistration registration = new FreeMarkerRegistration();
+		UrlBasedViewResolver resolver = registration.getViewResolver();
+		if (this.applicationContext != null) {
+			resolver.setApplicationContext(this.applicationContext);
+		}
+		this.viewResolvers.add(resolver);
+		return registration;
+	}
+
+	/**
+	 * Register a script template view resolver with an empty default view name prefix and suffix.
+	 * <p><strong>Note</strong> that you must also configure script templating by
+	 * adding a {@link ScriptTemplateConfigurer} bean.
+	 * @since 5.0.4
+	 */
+	public UrlBasedViewResolverRegistration scriptTemplate() {
+		if (!checkBeanOfType(ScriptTemplateConfigurer.class)) {
+			throw new BeanInitializationException("In addition to a script template view resolver " +
+					"there must also be a single ScriptTemplateConfig bean in this web application context " +
+					"(or its parent): ScriptTemplateConfigurer is the usual implementation. " +
+					"This bean may be given any name.");
+		}
+		ScriptRegistration registration = new ScriptRegistration();
 		UrlBasedViewResolver resolver = registration.getViewResolver();
 		if (this.applicationContext != null) {
 			resolver.setApplicationContext(this.applicationContext);
@@ -147,6 +172,14 @@ public class ViewResolverRegistry {
 		public FreeMarkerRegistration() {
 			super(new FreeMarkerViewResolver());
 			getViewResolver().setSuffix(".ftl");
+		}
+	}
+
+	private static class ScriptRegistration extends UrlBasedViewResolverRegistration {
+
+		public ScriptRegistration() {
+			super(new ScriptTemplateViewResolver());
+			getViewResolver();
 		}
 	}
 
