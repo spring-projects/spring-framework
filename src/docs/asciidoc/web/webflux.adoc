@@ -1071,6 +1071,27 @@ supported HTTP methods for example by using the HTTP method specific variants --
 is not necessary in the common case.
 
 
+[[webflux-ann-requestmapping-composed]]
+==== Custom Annotations
+[.small]#<<web.adoc#mvc-ann-requestmapping-composed,Same in Spring MVC>>#
+
+Spring WebFlux supports the use of <<core.adoc#beans-meta-annotations,composed annotations>>
+for request mapping. Those are annotations that are themselves meta-annotated with
+`@RequestMapping` and composed to redeclare a subset (or all) of the `@RequestMapping`
+attributes with a narrower, more specific purpose.
+
+`@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`, and `@PatchMapping` are
+examples of composed annotations. They're provided out of the box because arguably most
+controller methods should be mapped to a specific HTTP method vs using `@RequestMapping`
+which by default matches to all HTTP methods. If you need an example of composed
+annotations, look at how those are declared.
+
+Spring WebFlux also supports custom request mapping attributes with custom request matching
+logic. This is a more advanced option that requires sub-classing
+`RequestMappingHandlerMapping` and overriding the `getCustomMethodCondition` method where
+you can check the custom attribute and return your own `RequestCondition`.
+
+
 
 [[webflux-ann-methods]]
 === Handler methods
