@@ -59,6 +59,7 @@ import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Default builder for {@link MockHttpServletRequest} required as input to perform
@@ -79,6 +80,8 @@ import org.springframework.web.util.UriUtils;
  */
 public class MockHttpServletRequestBuilder
 		implements ConfigurableSmartRequestBuilder<MockHttpServletRequestBuilder>, Mergeable {
+
+	private final UrlPathHelper urlPathHelper = new UrlPathHelper();
 
 	private final String method;
 
@@ -696,7 +699,7 @@ public class MockHttpServletRequestBuilder
 						"Invalid servlet path [" + this.servletPath + "] for request URI [" + requestUri + "]");
 			}
 			String extraPath = requestUri.substring(this.contextPath.length() + this.servletPath.length());
-			this.pathInfo = (StringUtils.hasText(extraPath) ? extraPath : null);
+			this.pathInfo = (StringUtils.hasText(extraPath) ? this.urlPathHelper.decodeRequestString(request, extraPath) : null);
 		}
 		request.setPathInfo(this.pathInfo);
 	}
