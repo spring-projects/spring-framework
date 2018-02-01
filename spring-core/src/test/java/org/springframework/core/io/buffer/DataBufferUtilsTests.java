@@ -335,5 +335,4 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		release(result);
 	}
 
-
 }

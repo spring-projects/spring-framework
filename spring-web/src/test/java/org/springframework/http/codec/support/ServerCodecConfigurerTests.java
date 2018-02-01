@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
+import static org.springframework.core.ResolvableType.forClass;
 
 /**
  * Unit tests for {@link ServerCodecConfigurer}.
@@ -143,7 +143,7 @@ public class ServerCodecConfigurerTests {
 				Flux.just(new DefaultDataBufferFactory().wrap("line1\nline2".getBytes(StandardCharsets.UTF_8))),
 				ResolvableType.forClass(String.class), MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap());
 
-		assertEquals(Arrays.asList("line1\n", "line2"), flux.collectList().block(Duration.ZERO));
+		assertEquals(Arrays.asList("line1", "line2"), flux.collectList().block(Duration.ZERO));
 	}
 
 	private void assertStringEncoder(Encoder<?> encoder, boolean textOnly) {

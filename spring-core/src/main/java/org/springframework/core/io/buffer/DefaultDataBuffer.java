@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,7 +148,7 @@ public class DefaultDataBuffer implements DataBuffer {
 	}
 
 	@Override
-	public DataBuffer readPosition(int readPosition) {
+	public DefaultDataBuffer readPosition(int readPosition) {
 		assertIndex(readPosition >= 0, "'readPosition' %d must be >= 0", readPosition);
 		assertIndex(readPosition <= this.writePosition, "'readPosition' %d must be <= %d",
 				readPosition, this.writePosition);
@@ -163,7 +163,7 @@ public class DefaultDataBuffer implements DataBuffer {
 	}
 
 	@Override
-	public DataBuffer writePosition(int writePosition) {
+	public DefaultDataBuffer writePosition(int writePosition) {
 		assertIndex(writePosition >= this.readPosition, "'writePosition' %d must be >= %d",
 				writePosition, this.readPosition);
 		assertIndex(writePosition <= this.capacity, "'writePosition' %d must be <= %d",
@@ -179,7 +179,7 @@ public class DefaultDataBuffer implements DataBuffer {
 	}
 
 	@Override
-	public DataBuffer capacity(int newCapacity) {
+	public DefaultDataBuffer capacity(int newCapacity) {
 		Assert.isTrue(newCapacity > 0,
 				String.format("'newCapacity' %d must be higher than 0", newCapacity));
 
@@ -220,6 +220,15 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	private static ByteBuffer allocate(int capacity, boolean direct) {
 		return direct ? ByteBuffer.allocateDirect(capacity) : ByteBuffer.allocate(capacity);
+	}
+
+	@Override
+	public byte getByte(int index) {
+		assertIndex(index >= 0, "index %d must be >= 0", index);
+		assertIndex(index <= this.writePosition - 1, "index %d must be <= %d",
+				index, this.writePosition - 1);
+
+		return this.byteBuffer.get(index);
 	}
 
 	@Override
@@ -286,7 +295,7 @@ public class DefaultDataBuffer implements DataBuffer {
 	}
 
 	@Override
-	public DataBuffer write(DataBuffer... buffers) {
+	public DefaultDataBuffer write(DataBuffer... buffers) {
 		if (!ObjectUtils.isEmpty(buffers)) {
 			ByteBuffer[] byteBuffers =
 					Arrays.stream(buffers).map(DataBuffer::asByteBuffer)
@@ -315,7 +324,7 @@ public class DefaultDataBuffer implements DataBuffer {
 	}
 
 	@Override
-	public DataBuffer slice(int index, int length) {
+	public DefaultDataBuffer slice(int index, int length) {
 		checkIndex(index, length);
 		int oldPosition = this.byteBuffer.position();
 		// Explicit access via Buffer base type for compatibility
@@ -488,7 +497,7 @@ public class DefaultDataBuffer implements DataBuffer {
 		}
 
 		@Override
-		public DataBuffer capacity(int newCapacity) {
+		public DefaultDataBuffer capacity(int newCapacity) {
 			throw new UnsupportedOperationException(
 					"Changing the capacity of a sliced buffer is not supported");
 		}

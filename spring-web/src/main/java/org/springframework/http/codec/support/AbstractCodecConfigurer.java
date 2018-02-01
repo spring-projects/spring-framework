@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -188,11 +188,9 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 			result.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
 			result.add(new DecoderHttpMessageReader<>(new DataBufferDecoder()));
 			result.add(new DecoderHttpMessageReader<>(new ResourceDecoder()));
-			result.add(new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly(splitTextOnNewLine())));
+			result.add(new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly()));
 			return result;
 		}
-
-		abstract boolean splitTextOnNewLine();
 
 		List<HttpMessageReader<?>> getObjectReaders() {
 			if (!this.registerDefaults) {
@@ -216,7 +214,7 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 				return Collections.emptyList();
 			}
 			List<HttpMessageReader<?>> result = new ArrayList<>();
-			result.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(splitTextOnNewLine())));
+			result.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
 			return result;
 		}
 

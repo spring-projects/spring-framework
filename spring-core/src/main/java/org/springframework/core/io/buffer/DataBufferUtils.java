@@ -515,7 +515,7 @@ public abstract class DataBufferUtils {
 	 * @return a buffer that is composed from the {@code dataBuffers} argument
 	 * @since 5.0.3
 	 */
-	public static Mono<DataBuffer> join(Publisher<? extends DataBuffer> dataBuffers) {
+	public static Mono<DataBuffer> join(Publisher<DataBuffer> dataBuffers) {
 		Assert.notNull(dataBuffers, "'dataBuffers' must not be null");
 
 		return Flux.from(dataBuffers)

@@ -140,7 +140,16 @@ public interface DataBuffer {
 	DataBuffer writePosition(int writePosition);
 
 	/**
-	 * Read a single byte from the current reading position of this data buffer.
+	 * Read a single byte at the given index from this data buffer.
+	 * @param index the index at which the byte will be read
+	 * @return the byte at the given index
+	 * @throws IndexOutOfBoundsException when {@code index} is out of bounds
+	 * @since 5.0.4
+	 */
+	byte getByte(int index);
+
+	/**
+	 * Read a single byte from the current reading position from this data buffer.
 	 * @return the byte at this buffer's current reading position
 	 */
 	byte read();

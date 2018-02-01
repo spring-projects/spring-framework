@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,11 +71,6 @@ public class DefaultClientCodecConfigurer extends AbstractCodecConfigurer implem
 		}
 
 		@Override
-		boolean splitTextOnNewLine() {
-			return false;
-		}
-
-		@Override
 		List<HttpMessageReader<?>> getObjectReaders() {
 			if (!shouldRegisterDefaults()) {
 				return Collections.emptyList();
@@ -110,8 +105,7 @@ public class DefaultClientCodecConfigurer extends AbstractCodecConfigurer implem
 			}
 			else {
 				DefaultCustomCodecs customCodecs = getCustomCodecs();
-				partWriters = new ArrayList<>();
-				partWriters.addAll(super.getTypedWriters());
+				partWriters = new ArrayList<>(super.getTypedWriters());
 				if (customCodecs != null) {
 					partWriters.addAll(customCodecs.getTypedWriters());
 				}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Sebastien Deleuze
@@ -121,7 +121,7 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 			if (path.endsWith("write-and-flush")) {
 				Flux<Publisher<DataBuffer>> responseBody = Flux
 						.interval(Duration.ofMillis(50))
-						.map(l -> toDataBuffer("data" + l, response.bufferFactory()))
+						.map(l -> toDataBuffer("data" + l + "\n", response.bufferFactory()))
 						.take(2)
 						.map(Flux::just);
 				responseBody = responseBody.concatWith(Flux.never());
@@ -131,14 +131,14 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 				Flux<DataBuffer> responseBody = Flux
 						.just("0123456789")
 						.repeat(20000)
-						.map(value -> toDataBuffer(value, response.bufferFactory()));
+						.map(value -> toDataBuffer(value + "\n", response.bufferFactory()));
 				return response.writeWith(responseBody);
 			}
 			else if (path.endsWith("write-and-never-complete")) {
 				Flux<DataBuffer> responseBody = Flux
 						.just("0123456789")
 						.repeat(20000)
-						.map(value -> toDataBuffer(value, response.bufferFactory()))
+						.map(value -> toDataBuffer(value + "\n", response.bufferFactory()))
 						.mergeWith(Flux.never());
 				return response.writeWith(responseBody);
 			}

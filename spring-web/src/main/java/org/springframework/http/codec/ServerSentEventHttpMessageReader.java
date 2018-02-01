@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.lang.Nullable;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.joining;
 
 /**
  * Reader that supports a stream of {@link ServerSentEvent}s and also plain
@@ -56,7 +56,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 
 	private static final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
-	private static final StringDecoder stringDecoder = StringDecoder.textPlainOnly(false);
+	private static final StringDecoder stringDecoder = StringDecoder.textPlainOnly();
 
 
 	@Nullable

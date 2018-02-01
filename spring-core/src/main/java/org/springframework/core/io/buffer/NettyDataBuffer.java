@@ -107,7 +107,7 @@ public class NettyDataBuffer implements PooledDataBuffer {
 	}
 
 	@Override
-	public DataBuffer readPosition(int readPosition) {
+	public NettyDataBuffer readPosition(int readPosition) {
 		this.byteBuf.readerIndex(readPosition);
 		return this;
 	}
@@ -118,9 +118,14 @@ public class NettyDataBuffer implements PooledDataBuffer {
 	}
 
 	@Override
-	public DataBuffer writePosition(int writePosition) {
+	public NettyDataBuffer writePosition(int writePosition) {
 		this.byteBuf.writerIndex(writePosition);
 		return this;
+	}
+
+	@Override
+	public byte getByte(int index) {
+		return this.byteBuf.getByte(index);
 	}
 
 	@Override
@@ -129,7 +134,7 @@ public class NettyDataBuffer implements PooledDataBuffer {
 	}
 
 	@Override
-	public DataBuffer capacity(int capacity) {
+	public NettyDataBuffer capacity(int capacity) {
 		this.byteBuf.capacity(capacity);
 		return this;
 	}
@@ -225,7 +230,7 @@ public class NettyDataBuffer implements PooledDataBuffer {
 	}
 
 	@Override
-	public DataBuffer slice(int index, int length) {
+	public NettyDataBuffer slice(int index, int length) {
 		ByteBuf slice = this.byteBuf.slice(index, length);
 		return new NettyDataBuffer(slice, this.dataBufferFactory);
 	}
