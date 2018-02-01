@@ -70,19 +70,18 @@ public abstract aspect AbstractAsyncExecutionAspect extends AsyncExecutionAspect
 			return proceed();
 		}
 
-		Callable<Object> task = new Callable<Object>() {
-			public Object call() throws Exception {
-				try {
-					Object result = proceed();
-					if (result instanceof Future) {
-						return ((Future<?>) result).get();
-					}
+		Callable<Object> task = () -> {
+			try {
+				Object result = proceed();
+				if (result instanceof Future) {
+					return ((Future<?>) result).get();
 				}
-				catch (Throwable ex) {
-					handleError(ex, methodSignature.getMethod(), thisJoinPoint.getArgs());
-				}
-				return null;
-			}};
+			}
+			catch (Throwable ex) {
+				handleError(ex, methodSignature.getMethod(), thisJoinPoint.getArgs());
+			}
+			return null;
+		};
 
 		return doSubmit(task, executor, methodSignature.getReturnType());
 	}
