@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,22 +60,84 @@ import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
  * <p>This exception resolver is enabled by default in the common Spring
  * {@link org.springframework.web.servlet.DispatcherServlet}.
  *
+ * <p>
+ * <table>
+ * <caption>Supported Exceptions</caption>
+ * <thead>
+ * <tr>
+ * <th class="colFirst">Exception</th>
+ * <th class="colLast">HTTP Status Code</th>
+ * </tr>
+ * </thead>
+ * <tbody>
+ * <tr class="altColor">
+ * <td><p>HttpRequestMethodNotSupportedException</p></td>
+ * <td><p>405 (SC_METHOD_NOT_ALLOWED)</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>HttpMediaTypeNotSupportedException</p></td>
+ * <td><p>415 (SC_UNSUPPORTED_MEDIA_TYPE)</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td><p>HttpMediaTypeNotAcceptableException</p></td>
+ * <td><p>406 (SC_NOT_ACCEPTABLE)</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>MissingPathVariableException</p></td>
+ * <td><p>500 (SC_INTERNAL_SERVER_ERROR)</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td><p>MissingServletRequestParameterException</p></td>
+ * <td><p>500 (SC_INTERNAL_SERVER_ERROR)</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>ServletRequestBindingException</p></td>
+ * <td><p>400 (SC_BAD_REQUEST)</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td><p>ConversionNotSupportedException</p></td>
+ * <td><p>500 (SC_INTERNAL_SERVER_ERROR)</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>TypeMismatchException</p></td>
+ * <td><p>400 (SC_BAD_REQUEST)</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td><p>HttpMessageNotReadableException</p></td>
+ * <td><p>400 (SC_BAD_REQUEST)</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>HttpMessageNotWritableException</p></td>
+ * <td><p>500 (SC_INTERNAL_SERVER_ERROR)</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td><p>MethodArgumentNotValidException</p></td>
+ * <td><p>400 (SC_BAD_REQUEST)</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>MissingServletRequestPartException</p></td>
+ * <td><p>400 (SC_BAD_REQUEST)</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td><p>BindException</p></td>
+ * <td><p>400 (SC_BAD_REQUEST)</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>NoHandlerFoundException</p></td>
+ * <td><p>400 (SC_NOT_FOUND)</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td><p>AsyncRequestTimeoutException</p></td>
+ * <td><p>503 (SC_SERVICE_UNAVAILABLE)</p></td>
+ * </tr>
+ * </tbody>
+ * </table>
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 3.0
  * @see org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
- * @see #handleHttpRequestMethodNotSupported
- * @see #handleHttpMediaTypeNotSupported
- * @see #handleMissingServletRequestParameter
- * @see #handleServletRequestBindingException
- * @see #handleTypeMismatch
- * @see #handleHttpMessageNotReadable
- * @see #handleHttpMessageNotWritable
- * @see #handleMethodArgumentNotValidException
- * @see #handleMissingServletRequestParameter
- * @see #handleMissingServletRequestPartException
- * @see #handleBindException
  */
 public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionResolver {
 

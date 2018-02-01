@@ -506,6 +506,109 @@ declare it as an <<mvc-ann-controller-advice>> bean or configure it directly on
 
 
 
+[[mvc-exceptionhandlers]]
+=== Exception Resolution
+
+If an exception occurs during the mapping or the invocation of a request handler (e.g. an
+`@Controller`), the `DispatcherServlet` delegates to a chain of `HandlerExceptionResolver`
+beans to try and resolve the exception and to provide alternative handling for it, which
+typically means preparing an error response whether an HTML error page, an error status,
+or both.
+
+The table below lists the available `HandlerExceptionResolver` implementations:
+
+[cols="1,2", options="header"]
+.HandlerExceptionResolver implementations
+|===
+| HandlerExceptionResolver| Description
+
+| `SimpleMappingExceptionResolver`
+| A mapping between exception class names and error view names. Useful for rendering
+error pages in a browser application.
+
+| {api-spring-framework}/web/servlet/mvc/support/DefaultHandlerExceptionResolver.html[DefaultHandlerExceptionResolver]
+| Resolves exceptions raised by Spring MVC and maps them to HTTP status codes.
+
+Also see alternative `ResponseEntityExceptionHandler` and <<mvc-ann-rest-exceptions>>.
+
+| `ResponseStatusExceptionResolver`
+| Resolves exceptions with the `@ResponseStatus` annotation and maps them to HTTP status
+codes based on the value in the annotation.
+
+| `ExceptionHandlerExceptionResolver`
+| Resolves exceptions by invoking an `@ExceptionHandler` method in an `@Controller` or an
+`@ControllerAdvice` class. See <<mvc-ann-exceptionhandler>>.
+|===
+
+
+[[mvc-excetionhandlers-handling]]
+==== Handling
+
+You chain exception resolvers by declaring more than one exception resolver beans and,
+if necessary, setting the `order` property to specify ordering. Remember, the higher the
+order property, the later the exception resolver is positioned in the chain.
+
+The contract of `HandlerExceptionResolver` specifies that it __can__ return:
+
+* `ModelAndView` that points to an error view.
+* Empty `ModelAndView` if the exception was handled within the resolver.
+* `null` if the exception remains unresolved, for subsequent resolvers to try; if the
+exception remains unresolved by any resolver, it is re-thrown and left to propagate to
+the Servlet container.
+
+To configure exception handling is as simple as adding `HandlerExceptionResolver` beans
+to your Spring configuration. The <<mvc-config>> automatically declares built-in
+resolvers for default Spring MVC exceptions, for `@ResponseStatus` annotated exceptions,
+and for support of `@ExceptionHandler` methods. You can customize that list or replace it.
+
+
+[[mvc-ann-customer-servlet-container-error-page]]
+==== Container error page
+
+If an exception remains unresolved by any `HandlerExceptionResolver` and is therefore
+left to propagate, or if the response status is set to an error status (i.e. 4xx, 5xx),
+Servlet containers may render a default error page in HTML. To customize the default
+error page of the container, you can declare an error page mapping in `web.xml`:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<error-page>
+		<location>/error</location>
+	</error-page>
+----
+
+Given the above, when an exception bubbles up, or the response has an error status, the
+Servlet container makes an ERROR dispatch within the container to the configured URL
+(e.g. "/error"). This is then processed by the `DispatcherServlet`, possibly mapping it
+to an `@Controller` which could be implemented to return an error view name with a model
+or to render a JSON response as shown below:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RestController
+	public class ErrorController {
+
+		@RequestMapping(path = "/error")
+		public Map<String, Object> handle(HttpServletRequest request) {
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("status", request.getAttribute("javax.servlet.error.status_code"));
+			map.put("reason", request.getAttribute("javax.servlet.error.message"));
+			return map;
+		}
+	}
+----
+
+[TIP]
+====
+The Servlet API does not provide a way to create error page mappings in Java. You can
+however use both an `WebApplicationInitializer` and a minimal `web.xml`.
+====
+
+
+
+
 [[mvc-viewresolver]]
 === View Resolution
 [.small]#<<web-reactive.adoc#webflux-viewresolution,Same in Spring WebFlux>>#
@@ -515,7 +618,7 @@ models in a browser without tying you to a specific view technology. `ViewResolv
 provides a mapping between view names and actual views. `View` addresses the preparation
 of data before handing over to a specific view technology.
 
-This table below provides more details on the `ViewResolver` hierarchy:
+The table below provides more details on the `ViewResolver` hierarchy:
 
 [[mvc-view-resolvers-tbl]]
 .ViewResolver implementations
@@ -575,9 +678,9 @@ The contract of a `ViewResolver` specifies that it __can__ return null to indica
 view could not be found. However in the case of JSPs, and `InternalResourceViewResolver`,
 the only way to figure out if a JSP exists is to perform a dispatch through
 `RequestDispatcher`. Therefore an `InternalResourceViewResolver` must always be configured
-to be last in the overal order of view resolvers.
+to be last in the overall order of view resolvers.
 
-To configure view resolution is as simple as adding a `ViewResolver` beans to your Spring
+To configure view resolution is as simple as adding `ViewResolver` beans to your Spring
 configuration. The <<mvc-config>> provides provides a dedicated configuration API for
 <<mvc-config-view-resolvers>> and also for adding logic-less
 <<mvc-config-view-controller,View Controllers>> which are useful for HTML template
@@ -2666,6 +2769,67 @@ controller-specific ``Formatter``'s:
 
 
 
+[[mvc-ann-exceptionhandler]]
+=== Exception Methods
+
+`@ExceptionHandler` methods in an `@Controller` can be used to handle exceptions during
+request handling from the same controller. An `@ExceptionHandler` can also be declared
+in an <<mvc-ann-controller-advice,@ControllerAdvice class>> to apply across controllers.
+Support for `@ExceptionHandler` methods in Spring MVC is provided through the
+<<mvc-exceptionhandlers,HandlerExceptionResolver>> mechanism.
+
+Below is an example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	public class SimpleController {
+
+		// ...
+
+		@ExceptionHandler(IOException.class)
+		public ResponseEntity<String> handle(IOException ex) {
+			// ...
+		}
+
+	}
+----
+
+The value of the `@ExceptionHandler` annotation can be set to an array of Exception types
+to match to. Or if the annotation value is not set, then the exception type declared in
+the method signature is used instead. `@ExceptionHandler` methods can declare other
+arguments too, e.g. the `HttpServletRequest`. The return value type can be a `String`,
+which is interpreted as a view name, a `ModelAndView` object, a `ResponseEntity`, or you
+can also add the `@ResponseBody` annotation.
+
+For `@ExceptionHandler` methods, a root exception match will be preferred to just
+matching a cause of the current exception, among the handler methods of a particular
+controller or advice bean. However, a cause match on a higher-priority `@ControllerAdvice`
+will still be preferred to a any match (whether root or cause level) on a lower-priority
+advice bean. As a consequence, when using a multi-advice arrangement, please declare your
+primary root exception mappings on a prioritized advice bean with a corresponding order!
+
+[[mvc-ann-rest-exceptions]]
+==== REST API exceptions
+
+A common requirement for REST services is to include error details in the body of the
+response. The Spring Framework does not automatically do this because the representation
+of error details in the response body is application specific. However a
+`@RestController` may use `@ExceptionHandler` methods with a `ResponseEntity` return
+value to set the status and the body of the response. Such methods may also be declared
+in `@ControllerAdvice` classes to apply them globally.
+
+Applications that implement global exception handling with error details in the response
+body should consider extending
+{api-spring-framework}/web/servlet/mvc/method/annotation/ResponseEntityExceptionHandler.html[ResponseEntityExceptionHandler]
+which provides handling for exceptions that Spring MVC raises along with hooks to
+customize the response body. To make use of this, create a sub-class of
+`ResponseEntityExceptionHandler`, annotate with `@ControllerAdvice`, override the
+necessary methods, and declare it as a Spring bean.
+
+
+
 [[mvc-ann-controller-advice]]
 === Controller Advice
 [.small]#<<web-reactive.adoc#webflux-ann-controller-advice,Same in Spring WebFlux>>#
@@ -2925,265 +3089,6 @@ The above example relies on the `mvcUrl` JSP function declared in the Spring tag
 (i.e. META-INF/spring.tld). For more advanced cases (e.g. a custom base URL as explained
 in the previous section), it is easy to define your own function, or use a custom tag file,
 in order to use a specific instance of `MvcUriComponentsBuilder` with a custom base URL.
-
-
-
-
-[[mvc-exceptionhandlers]]
-== Exception Handling
-
-
-
-[[mvc-exceptionhandlers-overview]]
-=== Overview
-
-Spring `HandlerExceptionResolver` implementations deal with unexpected exceptions that
-occur during controller execution. A `HandlerExceptionResolver` somewhat resembles the
-exception mappings you can define in the web application descriptor `web.xml`. However,
-they provide a more flexible way to do so. For example they provide information about
-which handler was executing when the exception was thrown. Furthermore, a programmatic
-way of handling exceptions gives you more options for responding appropriately before
-the request is forwarded to another URL (the same end result as when you use the Servlet
-specific exception mappings).
-
-Besides implementing the `HandlerExceptionResolver` interface, which is only a matter of
-implementing the `resolveException(Exception, Handler)` method and returning a
-`ModelAndView`, you may also use the provided `SimpleMappingExceptionResolver` or create
-`@ExceptionHandler` methods. The `SimpleMappingExceptionResolver` enables you to take
-the class name of any exception that might be thrown and map it to a view name. This is
-functionally equivalent to the exception mapping feature from the Servlet API, but it is
-also possible to implement more finely grained mappings of exceptions from different
-handlers. The `@ExceptionHandler` annotation on the other hand can be used on methods
-that should be invoked to handle an exception. Such methods may be defined locally
-within an `@Controller` or may apply to many `@Controller` classes when defined within an
-`@ControllerAdvice` class. The following sections explain this in more detail.
-
-
-
-[[mvc-ann-exceptionhandler]]
-=== @ExceptionHandler
-
-The `HandlerExceptionResolver` interface and the `SimpleMappingExceptionResolver`
-implementations allow you to map Exceptions to specific views declaratively along with
-some optional Java logic before forwarding to those views. However, in some cases,
-especially when relying on `@ResponseBody` methods rather than on view resolution, it
-may be more convenient to directly set the status of the response and optionally write
-error content to the body of the response.
-
-You can do that with `@ExceptionHandler` methods. When declared within a controller such
-methods apply to exceptions raised by `@RequestMapping` methods of that controller (or
-any of its subclasses). You can also declare an `@ExceptionHandler` method within an
-`@ControllerAdvice` class in which case it handles exceptions from `@RequestMapping`
-methods from many controllers. Below is an example of a controller-local
-`@ExceptionHandler` method:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	@Controller
-	public class SimpleController {
-
-		// @RequestMapping methods omitted ...
-
-		@ExceptionHandler(IOException.class)
-		public ResponseEntity<String> handleIOException(IOException ex) {
-			// prepare responseEntity
-			return responseEntity;
-		}
-
-	}
-----
-
-The `@ExceptionHandler` value can be set to an array of Exception types. If an exception
-is thrown that matches one of the types in the list, then the method annotated with the
-matching `@ExceptionHandler` will be invoked. If the annotation value is not set then
-the exception types listed as method arguments are used.
-
-[TIP]
-====
-For `@ExceptionHandler` methods, a root exception match will be preferred to just
-matching a cause of the current exception, among the handler methods of a particular
-controller or advice bean. However, a cause match on a higher-priority `@ControllerAdvice`
-will still be preferred to a any match (whether root or cause level) on a lower-priority
-advice bean. As a consequence, when using a multi-advice arrangement, please declare your
-primary root exception mappings on a prioritized advice bean with a corresponding order!
-====
-
-Much like standard controller methods annotated with a `@RequestMapping` annotation, the
-method arguments and return values of `@ExceptionHandler` methods can be flexible. For
-example, the `HttpServletRequest` can be accessed in Servlet environments. The return
-type can be a `String`, which is interpreted as a view name, a `ModelAndView` object,
-a `ResponseEntity`, or you can also add the `@ResponseBody` to have the method return
-value converted with message converters and written to the response stream.
-
-
-
-[[mvc-ann-rest-spring-mvc-exceptions]]
-=== Framework exceptions
-
-Spring MVC may raise a number of exceptions while processing a request. The
-`SimpleMappingExceptionResolver` can easily map any exception to a default error view as
-needed. However, when working with clients that interpret responses in an automated way
-you will want to set specific status code on the response. Depending on the exception
-raised the status code may indicate a client error (4xx) or a server error (5xx).
-
-The `DefaultHandlerExceptionResolver` translates Spring MVC exceptions to specific error
-status codes. It is registered by default with the MVC namespace, the MVC Java config,
-and also by the `DispatcherServlet` (i.e. when not using the MVC namespace or Java
-config). Listed below are some of the exceptions handled by this resolver and the
-corresponding status codes:
-
-|===
-| Exception| HTTP Status Code
-
-| `BindException`
-| 400 (Bad Request)
-
-| `ConversionNotSupportedException`
-| 500 (Internal Server Error)
-
-| `HttpMediaTypeNotAcceptableException`
-| 406 (Not Acceptable)
-
-| `HttpMediaTypeNotSupportedException`
-| 415 (Unsupported Media Type)
-
-| `HttpMessageNotReadableException`
-| 400 (Bad Request)
-
-| `HttpMessageNotWritableException`
-| 500 (Internal Server Error)
-
-| `HttpRequestMethodNotSupportedException`
-| 405 (Method Not Allowed)
-
-| `MethodArgumentNotValidException`
-| 400 (Bad Request)
-
-| `MissingPathVariableException`
-| 500 (Internal Server Error)
-
-| `MissingServletRequestParameterException`
-| 400 (Bad Request)
-
-| `MissingServletRequestPartException`
-| 400 (Bad Request)
-
-| `NoHandlerFoundException`
-| 404 (Not Found)
-
-| `NoSuchRequestHandlingMethodException`
-| 404 (Not Found)
-
-| `TypeMismatchException`
-| 400 (Bad Request)
-|===
-
-The `DefaultHandlerExceptionResolver` works transparently by setting the status of the
-response. However, it stops short of writing any error content to the body of the
-response while your application may need to add developer-friendly content to every
-error response for example when providing a REST API. You can prepare a `ModelAndView`
-and render error content through view resolution -- i.e. by configuring a
-`ContentNegotiatingViewResolver`, `MappingJackson2JsonView`, and so on. However, you may
-prefer to use `@ExceptionHandler` methods instead.
-
-If you prefer to write error content via `@ExceptionHandler` methods you can extend
-`ResponseEntityExceptionHandler` instead. This is a convenient base for
-`@ControllerAdvice` classes providing an `@ExceptionHandler` method to handle standard
-Spring MVC exceptions and return `ResponseEntity`. That allows you to customize the
-response and write error content with message converters. See the
-`ResponseEntityExceptionHandler` javadocs for more details.
-
-
-
-[[mvc-ann-rest-exceptions]]
-=== REST API exceptions
-
-An `@RestController` may use `@ExceptionHandler` methods that return a
-`ResponseEntity` to provide both a response status and error details in the body
-of the response. Such methods may also be added to `@ControllerAdvice`
-classes for exception handling across a subset or all controllers.
-
-A common requirement is to include error details in the body of the response.
-Spring does not automatically do this (although Spring Boot does) because the
-representation of error details in the response body is application specific.
-
-Applications that wish to implement a global exception handling strategy with
-error details in the response body should consider extending the abstract base
-class `ResponseEntityExceptionHandler` which provides handling for the exceptions
-that Spring MVC raises and provides hooks to customize the response body as
-well as to handle other exceptions. Simply declare the extension class as a
-Spring bean and annotate it with `@ControllerAdvice`. For more details see
-See `ResponseEntityExceptionHandler`.
-
-
-
-[[mvc-ann-annotated-exceptions]]
-=== Annotated Exception
-
-A business exception can be annotated with `@ResponseStatus`. When the exception is
-raised, the `ResponseStatusExceptionResolver` handles it by setting the status of the
-response accordingly. By default the `DispatcherServlet` registers the
-`ResponseStatusExceptionResolver` and it is available for use.
-
-
-
-[[mvc-ann-customer-servlet-container-error-page]]
-=== Container error page
-
-When the status of the response is set to an error status code and the body of the
-response is empty, Servlet containers commonly render an HTML formatted error page. To
-customize the default error page of the container, you can declare an `<error-page>`
-element in `web.xml`. Up until Servlet 3, that element had to be mapped to a specific
-status code or exception type. Starting with Servlet 3 an error page does not need to be
-mapped, which effectively means the specified location customizes the default Servlet
-container error page.
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<error-page>
-		<location>/error</location>
-	</error-page>
-----
-
-Note that the actual location for the error page can be a JSP page or some other URL
-within the container including one handled through an `@Controller` method:
-
-When writing error information, the status code and the error message set on the
-`HttpServletResponse` can be accessed through request attributes in a controller:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	@Controller
-	public class ErrorController {
-
-		@RequestMapping(path = "/error", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-		@ResponseBody
-		public Map<String, Object> handle(HttpServletRequest request) {
-
-			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("status", request.getAttribute("javax.servlet.error.status_code"));
-			map.put("reason", request.getAttribute("javax.servlet.error.message"));
-
-			return map;
-		}
-
-	}
-----
-
-or in a JSP:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<%@ page contentType="application/json" pageEncoding="UTF-8"%>
-	{
-		status:<%=request.getAttribute("javax.servlet.error.status_code") %>,
-		reason:<%=request.getAttribute("javax.servlet.error.message") %>
-	}
-----
 
 
 

@@ -59,7 +59,7 @@ import org.springframework.web.util.UriUtils;
  * <td><p>acceptCharset</p></td>
  * <td><p>false</p></td>
  * <td><p>true</p></td>
- * <td><p><p>Specifies the list of character encodings for input data that is accepted
+ * <td><p>Specifies the list of character encodings for input data that is accepted
  * by the server processing this form. The value is a space- and/or comma-delimited
  * list of charset values. The client must interpret this list as an exclusive-or
  * list, i.e., the server is able to accept any single character encoding per
@@ -69,7 +69,7 @@ import org.springframework.web.util.UriUtils;
  * <td><p>action</p></td>
  * <td><p>false</p></td>
  * <td><p>true</p></td>
- * <td><p><p>HTML Required Attribute</p></td>
+ * <td><p>HTML Required Attribute</p></td>
  * </tr>
  * <tr class="altColor">
  * <td><p>cssClass</p></td>
