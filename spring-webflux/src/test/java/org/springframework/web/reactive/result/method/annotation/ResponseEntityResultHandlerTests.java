@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -259,7 +259,7 @@ public class ResponseEntityResultHandlerTests {
 		assertConditionalResponse(exchange, HttpStatus.NOT_MODIFIED, null, etagValue, Instant.MIN);
 	}
 
-	@Test // SPR-14559
+	@Test  // SPR-14559
 	public void handleReturnValueEtagInvalidIfNoneMatch() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path").ifNoneMatch("unquoted"));
 
@@ -313,9 +313,8 @@ public class ResponseEntityResultHandlerTests {
 		assertConditionalResponse(exchange, HttpStatus.OK, "body", newEtag, oneMinAgo);
 	}
 
-	@Test // SPR-14877
+	@Test  // SPR-14877
 	public void handleMonoWithWildcardBodyType() throws Exception {
-
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path"));
 		exchange.getAttributes().put(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, Collections.singleton(APPLICATION_JSON));
 
@@ -328,9 +327,8 @@ public class ResponseEntityResultHandlerTests {
 		assertResponseBody(exchange, "body");
 	}
 
-	@Test // SPR-14877
+	@Test  // SPR-14877
 	public void handleMonoWithWildcardBodyTypeAndNullBody() throws Exception {
-
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path"));
 		exchange.getAttributes().put(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, Collections.singleton(APPLICATION_JSON));
 
@@ -345,7 +343,6 @@ public class ResponseEntityResultHandlerTests {
 
 
 	private void testHandle(Object returnValue, MethodParameter returnType) {
-
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path"));
 		HandlerResult result = handlerResult(returnValue, returnType);
 		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
