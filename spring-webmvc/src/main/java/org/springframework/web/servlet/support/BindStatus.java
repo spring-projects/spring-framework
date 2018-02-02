@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,8 +61,13 @@ public class BindStatus {
 	@Nullable
 	private final Errors errors;
 
+	private final String[] errorCodes;
+
 	@Nullable
-	private BindingResult bindingResult;
+	private String[] errorMessages;
+
+	@Nullable
+	private List<? extends ObjectError> objectErrors;
 
 	@Nullable
 	private Object value;
@@ -77,12 +82,7 @@ public class BindStatus {
 	private PropertyEditor editor;
 
 	@Nullable
-	private List<? extends ObjectError> objectErrors;
-
-	private String[] errorCodes = new String[0];
-
-	@Nullable
-	private String[] errorMessages;
+	private BindingResult bindingResult;
 
 
 	/**
@@ -141,7 +141,7 @@ public class BindStatus {
 			else {
 				this.objectErrors = this.errors.getGlobalErrors();
 			}
-			initErrorCodes(this.objectErrors);
+			this.errorCodes = initErrorCodes(this.objectErrors);
 		}
 
 		else {
@@ -171,12 +171,13 @@ public class BindStatus {
 	/**
 	 * Extract the error codes from the ObjectError list.
 	 */
-	private void initErrorCodes(List<? extends ObjectError> objectErrors) {
-		this.errorCodes = new String[objectErrors.size()];
+	private static String[] initErrorCodes(List<? extends ObjectError> objectErrors) {
+		String[] errorCodes = new String[objectErrors.size()];
 		for (int i = 0; i < objectErrors.size(); i++) {
 			ObjectError error = objectErrors.get(i);
-			this.errorCodes[i] = error.getCode();
+			errorCodes[i] = error.getCode();
 		}
+		return errorCodes;
 	}
 
 
