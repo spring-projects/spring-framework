@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,14 +62,15 @@ import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * Default builder for {@link MockHttpServletRequest} required as input to perform
- * requests in {@link MockMvc}.
+ * Default builder for {@link MockHttpServletRequest} required as input to
+ * perform requests in {@link MockMvc}.
  *
- * <p>Application tests will typically access this builder through the static factory
- * methods in {@link MockMvcRequestBuilders}.
+ * <p>Application tests will typically access this builder through the static
+ * factory methods in {@link MockMvcRequestBuilders}.
  *
- * <p>Although this class cannot be extended, additional ways to initialize the
- * {@code MockHttpServletRequest} can be plugged in via {@link #with(RequestPostProcessor)}.
+ * <p>This class is not open for extension. To apply custom initialization to
+ * the created {@code MockHttpServletRequest}, please use the
+ * {@link #with(RequestPostProcessor)} extension point.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -81,7 +82,8 @@ import org.springframework.web.util.UrlPathHelper;
 public class MockHttpServletRequestBuilder
 		implements ConfigurableSmartRequestBuilder<MockHttpServletRequestBuilder>, Mergeable {
 
-	private final UrlPathHelper urlPathHelper = new UrlPathHelper();
+	private static final UrlPathHelper urlPathHelper = new UrlPathHelper();
+
 
 	private final String method;
 
@@ -699,7 +701,8 @@ public class MockHttpServletRequestBuilder
 						"Invalid servlet path [" + this.servletPath + "] for request URI [" + requestUri + "]");
 			}
 			String extraPath = requestUri.substring(this.contextPath.length() + this.servletPath.length());
-			this.pathInfo = (StringUtils.hasText(extraPath) ? this.urlPathHelper.decodeRequestString(request, extraPath) : null);
+			this.pathInfo = (StringUtils.hasText(extraPath) ?
+					urlPathHelper.decodeRequestString(request, extraPath) : null);
 		}
 		request.setPathInfo(this.pathInfo);
 	}
@@ -714,7 +717,7 @@ public class MockHttpServletRequestBuilder
 	private MultiValueMap<String, String> parseFormData(final MediaType mediaType) {
 		HttpInputMessage message = new HttpInputMessage() {
 			@Override
-			public InputStream getBody() throws IOException {
+			public InputStream getBody() {
 				return (content != null ? new ByteArrayInputStream(content) : StreamUtils.emptyInput());
 			}
 			@Override

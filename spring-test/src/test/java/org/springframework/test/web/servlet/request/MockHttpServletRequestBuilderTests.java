@@ -164,7 +164,7 @@ public class MockHttpServletRequestBuilderTests {
 		assertNull(request.getPathInfo());
 	}
 
-	@Test
+	@Test // SPR-16453
 	public void pathInfoIsDecoded() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/travel/hotels 42");
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
