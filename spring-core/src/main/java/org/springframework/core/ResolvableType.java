@@ -1468,8 +1468,7 @@ public class ResolvableType implements Serializable {
 		@Nullable
 		public ResolvableType resolveVariable(TypeVariable<?> variable) {
 			for (int i = 0; i < this.variables.length; i++) {
-				if (ObjectUtils.nullSafeEquals(SerializableTypeWrapper.unwrap(this.variables[i]),
-						SerializableTypeWrapper.unwrap(variable))) {
+				if (ObjectUtils.nullSafeEquals(this.variables[i].getName(), variable.getName())) {
 					return this.generics[i];
 				}
 			}

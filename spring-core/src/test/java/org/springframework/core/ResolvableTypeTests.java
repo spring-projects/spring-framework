@@ -1337,6 +1337,14 @@ public class ResolvableTypeTests {
 		assertTrue(setClass.isAssignableFrom(fromReturnType));
 	}
 
+	@Test
+	public void testSpr16456() throws Exception {
+		ResolvableType genericType = ResolvableType.forField(
+				UnresolvedWithGenerics.class.getDeclaredField("set")).asCollection();
+		ResolvableType type = ResolvableType.forClassWithGenerics(ArrayList.class, genericType.getGeneric());
+		assertThat(type.resolveGeneric(), equalTo(Integer.class));
+	}
+
 
 	private ResolvableType testSerialization(ResolvableType type) throws Exception {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -1635,6 +1643,12 @@ public class ResolvableTypeTests {
 	public class BaseProvider<BT extends IBase<BT>> implements IProvider<IBase<BT>> {
 
 		public Collection<IBase<BT>> stuff;
+	}
+
+
+	public abstract class UnresolvedWithGenerics {
+
+		Set<Integer> set;
 	}
 
 }
