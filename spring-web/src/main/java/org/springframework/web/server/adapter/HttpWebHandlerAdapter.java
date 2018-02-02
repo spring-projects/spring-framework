@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -182,7 +182,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 		ServerWebExchange exchange = createExchange(request, response);
 		return getDelegate().handle(exchange)
-				.onErrorResume(ex -> handleFailure(response, ex))
+				.onErrorResume(ex -> handleFailure(request, response, ex))
 				.then(Mono.defer(response::setComplete));
 	}
 
@@ -191,7 +191,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 				getCodecConfigurer(), getLocaleContextResolver(), this.applicationContext);
 	}
 
-	private Mono<Void> handleFailure(ServerHttpResponse response, Throwable ex) {
+	private Mono<Void> handleFailure(ServerHttpRequest request, ServerHttpResponse response, Throwable ex) {
 		if (isDisconnectedClientError(ex)) {
 			if (disconnectedClientLogger.isTraceEnabled()) {
 				disconnectedClientLogger.trace("Looks like the client has gone away", ex);
@@ -204,7 +204,8 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 			return Mono.empty();
 		}
 		if (response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR)) {
-			logger.error("Failed to handle request", ex);
+			logger.error("Failed to handle request [" + request.getMethod() + " "
+					+ request.getURI() + "]", ex);
 			return Mono.empty();
 		}
 		// After the response is committed, propagate errors to the server..
