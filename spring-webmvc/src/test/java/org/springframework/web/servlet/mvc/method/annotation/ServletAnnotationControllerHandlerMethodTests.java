@@ -144,7 +144,9 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
+import org.springframework.web.servlet.view.AbstractView;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import static org.junit.Assert.*;
@@ -1837,7 +1839,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		request.addParameter("param1", "value1");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		assertTrue(response.getContentAsString().contains("field 'param2'"));
+		assertEquals("value1-null-null", response.getContentAsString());
 	}
 
 	@Test
@@ -1845,10 +1847,11 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		initServletWithControllers(ValidatedDataClassController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
+		request.addParameter("param1", "value1");
 		request.addParameter("param2", "x");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		assertTrue(response.getContentAsString().contains("field 'param2'"));
+		assertEquals("value1-x-null", response.getContentAsString());
 	}
 
 	@Test
@@ -1860,7 +1863,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		request.addParameter("param3", "3");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		assertTrue(response.getContentAsString().contains("field 'param1'"));
+		assertEquals("null-true-3", response.getContentAsString());
 	}
 
 	@Test
@@ -1881,10 +1884,11 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		initServletWithControllers(OptionalDataClassController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
+		request.addParameter("param1", "value1");
 		request.addParameter("param2", "x");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		assertTrue(response.getContentAsString().contains("field 'param2'"));
+		assertEquals("value1-x-null", response.getContentAsString());
 	}
 
 	@Test
@@ -3626,18 +3630,20 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@InitBinder
 		public void initBinder(WebDataBinder binder) {
+			binder.initDirectFieldAccess();
+			binder.setConversionService(new DefaultFormattingConversionService());
 			LocalValidatorFactoryBean vf = new LocalValidatorFactoryBean();
 			vf.afterPropertiesSet();
 			binder.setValidator(vf);
-			binder.setConversionService(new DefaultFormattingConversionService());
 		}
 
 		@RequestMapping("/bind")
-		public String handle(@Valid DataClass data, BindingResult result) {
+		public BindStatusView handle(@Valid DataClass data, BindingResult result) {
 			if (result.hasErrors()) {
-				return result.toString();
+				return new BindStatusView(result.getFieldValue("param1") + "-" +
+						result.getFieldValue("param2") + "-" + result.getFieldValue("param3"));
 			}
-			return data.param1 + "-" + data.param2 + "-" + data.param3;
+			return new BindStatusView(data.param1 + "-" + data.param2 + "-" + data.param3);
 		}
 	}
 
@@ -3649,9 +3655,30 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			if (result.hasErrors()) {
 				assertNotNull(optionalData);
 				assertFalse(optionalData.isPresent());
-				return result.toString();
+				return result.getFieldValue("param1") + "-" + result.getFieldValue("param2") + "-" +
+						result.getFieldValue("param3");
 			}
 			return optionalData.map(data -> data.param1 + "-" + data.param2 + "-" + data.param3).orElse("");
+		}
+	}
+
+	public static class BindStatusView extends AbstractView {
+
+		private final String content;
+
+		public BindStatusView(String content) {
+			this.content = content;
+		}
+
+		@Override
+		protected void renderMergedOutputModel(
+				Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+			RequestContext rc = new RequestContext(request, model);
+			rc.getBindStatus("dataClass");
+			rc.getBindStatus("dataClass.param1");
+			rc.getBindStatus("dataClass.param2");
+			rc.getBindStatus("dataClass.param3");
+			response.getWriter().write(this.content);
 		}
 	}
 

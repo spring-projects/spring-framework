@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -246,11 +246,6 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	}
 
 	@Override
-	public void addError(ObjectError error) {
-		this.bindingResult.addError(error);
-	}
-
-	@Override
 	public String[] resolveMessageCodes(String errorCode) {
 		return this.bindingResult.resolveMessageCodes(errorCode);
 	}
@@ -258,6 +253,16 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	@Override
 	public String[] resolveMessageCodes(String errorCode, String field) {
 		return this.bindingResult.resolveMessageCodes(errorCode, field);
+	}
+
+	@Override
+	public void addError(ObjectError error) {
+		this.bindingResult.addError(error);
+	}
+
+	@Override
+	public void recordFieldValue(String field, Class<?> type, Object value) {
+		this.bindingResult.recordFieldValue(field, type, value);
 	}
 
 	@Override

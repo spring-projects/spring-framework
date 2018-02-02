@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,10 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.validation.AbstractBindingResult;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
-import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -281,16 +281,23 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 				}
 			}
 			catch (TypeMismatchException ex) {
+				ex.initPropertyName(paramName);
+				binder.getBindingErrorProcessor().processPropertyAccessException(ex, binder.getBindingResult());
 				bindingFailure = true;
-				binder.getBindingResult().addError(new FieldError(
-						binder.getObjectName(), paramNames[i], ex.getValue(), true,
-						new String[] {ex.getErrorCode()}, null, ex.getLocalizedMessage()));
+				args[i] = value;
 			}
 		}
 
 		if (bindingFailure) {
+			if (binder.getBindingResult() instanceof AbstractBindingResult) {
+				AbstractBindingResult result = (AbstractBindingResult) binder.getBindingResult();
+				for (int i = 0; i < paramNames.length; i++) {
+					result.recordFieldValue(paramNames[i], paramTypes[i], args[i]);
+				}
+			}
 			throw new BindException(binder.getBindingResult());
 		}
+
 		return BeanUtils.instantiateClass(ctor, args);
 	}
 
