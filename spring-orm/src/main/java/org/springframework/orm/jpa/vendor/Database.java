@@ -53,6 +53,8 @@ public enum Database {
 
 	SQL_SERVER,
 
-	SYBASE
+	SYBASE,
+
+	HANA
 
 }

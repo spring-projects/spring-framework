@@ -23,7 +23,7 @@ import java.sql.Statement;
 import javax.sql.DataSource;
 
 import org.junit.Test;
-
+import org.springframework.jdbc.support.incrementer.HanaSequenceMaxValueIncrementer;
 import org.springframework.jdbc.support.incrementer.HsqlMaxValueIncrementer;
 import org.springframework.jdbc.support.incrementer.MySQLMaxValueIncrementer;
 import org.springframework.jdbc.support.incrementer.OracleSequenceMaxValueIncrementer;
@@ -166,6 +166,28 @@ public class DataFieldMaxValueIncrementerTests {
 		given(resultSet.getLong(1)).willReturn(10L, 12L);
 
 		OracleSequenceMaxValueIncrementer incrementer = new OracleSequenceMaxValueIncrementer();
+		incrementer.setDataSource(dataSource);
+		incrementer.setIncrementerName("myseq");
+		incrementer.setPaddingLength(2);
+		incrementer.afterPropertiesSet();
+
+		assertEquals(10, incrementer.nextLongValue());
+		assertEquals("12", incrementer.nextStringValue());
+
+		verify(resultSet, times(2)).close();
+		verify(statement, times(2)).close();
+		verify(connection, times(2)).close();
+	}
+
+	@Test
+	public void testHanaSequenceMaxValueIncrementer() throws SQLException {
+		given(dataSource.getConnection()).willReturn(connection);
+		given(connection.createStatement()).willReturn(statement);
+		given(statement.executeQuery("select myseq.nextval from dummy")).willReturn(resultSet);
+		given(resultSet.next()).willReturn(true);
+		given(resultSet.getLong(1)).willReturn(10L, 12L);
+
+		HanaSequenceMaxValueIncrementer incrementer = new HanaSequenceMaxValueIncrementer();
 		incrementer.setDataSource(dataSource);
 		incrementer.setIncrementerName("myseq");
 		incrementer.setPaddingLength(2);

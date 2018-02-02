@@ -252,7 +252,8 @@
 	<bean id="Hana" class="org.springframework.jdbc.support.SQLErrorCodes">
 		<property name="databaseProductNames">
 			<list>
-				<value>SAP DB</value>
+			    <value>SAP HANA</value>
+			    <value>SAP DB</value>
 				<value>HDB</value>
 			</list>
 		</property>
