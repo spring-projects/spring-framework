@@ -186,6 +186,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	@Override
 	public void resetConnection() {
 		this.active = false;
+
 		synchronized (this.cachedSessions) {
 			for (LinkedList<Session> sessionList : this.cachedSessions.values()) {
 				synchronized (sessionList) {
@@ -201,10 +202,11 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			}
 			this.cachedSessions.clear();
 		}
-		this.active = true;
 
 		// Now proceed with actual closing of the shared Connection...
 		super.resetConnection();
+
+		this.active = true;
 	}
 
 	/**
@@ -212,6 +214,10 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	 */
 	@Override
 	protected Session getSession(Connection con, Integer mode) throws JMSException {
+		if (!this.active) {
+			return null;
+		}
+
 		LinkedList<Session> sessionList;
 		synchronized (this.cachedSessions) {
 			sessionList = this.cachedSessions.get(mode);
