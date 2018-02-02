@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -322,7 +322,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		if (other == null) {
 			return false;
 		}
-		if (this.isWildcardType()) {
+		if (isWildcardType()) {
 			// */* includes anything
 			return true;
 		}
@@ -330,7 +330,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 			if (getSubtype().equals(other.getSubtype())) {
 				return true;
 			}
-			if (this.isWildcardSubtype()) {
+			if (isWildcardSubtype()) {
 				// wildcard with suffix, e.g. application/*+xml
 				int thisPlusIdx = getSubtype().indexOf('+');
 				if (thisPlusIdx == -1) {
@@ -373,22 +373,18 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 			if (getSubtype().equals(other.getSubtype())) {
 				return true;
 			}
-			// wildcard with suffix? e.g. application/*+xml
-			if (this.isWildcardSubtype() || other.isWildcardSubtype()) {
-
+			// Wildcard with suffix? e.g. application/*+xml
+			if (isWildcardSubtype() || other.isWildcardSubtype()) {
 				int thisPlusIdx = getSubtype().indexOf('+');
 				int otherPlusIdx = other.getSubtype().indexOf('+');
-
 				if (thisPlusIdx == -1 && otherPlusIdx == -1) {
 					return true;
 				}
 				else if (thisPlusIdx != -1 && otherPlusIdx != -1) {
 					String thisSubtypeNoSuffix = getSubtype().substring(0, thisPlusIdx);
 					String otherSubtypeNoSuffix = other.getSubtype().substring(0, otherPlusIdx);
-
 					String thisSubtypeSuffix = getSubtype().substring(thisPlusIdx + 1);
 					String otherSubtypeSuffix = other.getSubtype().substring(otherPlusIdx + 1);
-
 					if (thisSubtypeSuffix.equals(otherSubtypeSuffix) &&
 							(WILDCARD_TYPE.equals(thisSubtypeNoSuffix) || WILDCARD_TYPE.equals(otherSubtypeNoSuffix))) {
 						return true;
@@ -429,7 +425,6 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 			if (!other.parameters.containsKey(key)) {
 				return false;
 			}
-
 			if (PARAM_CHARSET.equals(key)) {
 				if (!ObjectUtils.nullSafeEquals(getCharset(), other.getCharset())) {
 					return false;
@@ -493,12 +488,14 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		if (comp != 0) {
 			return comp;
 		}
+
 		TreeSet<String> thisAttributes = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
 		thisAttributes.addAll(getParameters().keySet());
 		TreeSet<String> otherAttributes = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
 		otherAttributes.addAll(other.getParameters().keySet());
 		Iterator<String> thisAttributesIterator = thisAttributes.iterator();
 		Iterator<String> otherAttributesIterator = otherAttributes.iterator();
+
 		while (thisAttributesIterator.hasNext()) {
 			String thisAttribute = thisAttributesIterator.next();
 			String otherAttribute = otherAttributesIterator.next();
@@ -506,16 +503,35 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 			if (comp != 0) {
 				return comp;
 			}
-			String thisValue = getParameters().get(thisAttribute);
-			String otherValue = other.getParameters().get(otherAttribute);
-			if (otherValue == null) {
-				otherValue = "";
+			if (PARAM_CHARSET.equals(thisAttribute)) {
+				Charset thisCharset = getCharset();
+				Charset otherCharset = other.getCharset();
+				if (thisCharset != otherCharset) {
+					if (thisCharset == null) {
+						return -1;
+					}
+					if (otherCharset == null) {
+						return 1;
+					}
+					comp = thisCharset.compareTo(otherCharset);
+					if (comp != 0) {
+						return comp;
+					}
+				}
 			}
-			comp = thisValue.compareTo(otherValue);
-			if (comp != 0) {
-				return comp;
+			else {
+				String thisValue = getParameters().get(thisAttribute);
+				String otherValue = other.getParameters().get(otherAttribute);
+				if (otherValue == null) {
+					otherValue = "";
+				}
+				comp = thisValue.compareTo(otherValue);
+				if (comp != 0) {
+					return comp;
+				}
 			}
 		}
+
 		return 0;
 	}
 
@@ -541,26 +557,26 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 
 		@Override
 		public int compare(T mimeType1, T mimeType2) {
-			if (mimeType1.isWildcardType() && !mimeType2.isWildcardType()) { // */* < audio/*
+			if (mimeType1.isWildcardType() && !mimeType2.isWildcardType()) {  // */* < audio/*
 				return 1;
 			}
-			else if (mimeType2.isWildcardType() && !mimeType1.isWildcardType()) { // audio/* > */*
+			else if (mimeType2.isWildcardType() && !mimeType1.isWildcardType()) {  // audio/* > */*
 				return -1;
 			}
-			else if (!mimeType1.getType().equals(mimeType2.getType())) { // audio/basic == text/html
+			else if (!mimeType1.getType().equals(mimeType2.getType())) {  // audio/basic == text/html
 				return 0;
 			}
-			else { // mediaType1.getType().equals(mediaType2.getType())
-				if (mimeType1.isWildcardSubtype() && !mimeType2.isWildcardSubtype()) { // audio/* < audio/basic
+			else {  // mediaType1.getType().equals(mediaType2.getType())
+				if (mimeType1.isWildcardSubtype() && !mimeType2.isWildcardSubtype()) {  // audio/* < audio/basic
 					return 1;
 				}
-				else if (mimeType2.isWildcardSubtype() && !mimeType1.isWildcardSubtype()) { // audio/basic > audio/*
+				else if (mimeType2.isWildcardSubtype() && !mimeType1.isWildcardSubtype()) {  // audio/basic > audio/*
 					return -1;
 				}
-				else if (!mimeType1.getSubtype().equals(mimeType2.getSubtype())) { // audio/basic == audio/wave
+				else if (!mimeType1.getSubtype().equals(mimeType2.getSubtype())) {  // audio/basic == audio/wave
 					return 0;
 				}
-				else { // mediaType2.getSubtype().equals(mediaType2.getSubtype())
+				else {  // mediaType2.getSubtype().equals(mediaType2.getSubtype())
 					return compareParameters(mimeType1, mimeType2);
 				}
 			}
@@ -569,7 +585,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		protected int compareParameters(T mimeType1, T mimeType2) {
 			int paramsSize1 = mimeType1.getParameters().size();
 			int paramsSize2 = mimeType2.getParameters().size();
-			return (paramsSize2 < paramsSize1 ? -1 : (paramsSize2 == paramsSize1 ? 0 : 1)); // audio/basic;level=1 < audio/basic
+			return (paramsSize2 < paramsSize1 ? -1 : (paramsSize2 == paramsSize1 ? 0 : 1));  // audio/basic;level=1 < audio/basic
 		}
 	}
 
