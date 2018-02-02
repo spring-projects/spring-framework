@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.LocaleResolver;
 
 /**
@@ -113,13 +114,25 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 
 	private Locale findSupportedLocale(HttpServletRequest request) {
 		Enumeration<Locale> requestLocales = request.getLocales();
+		List<Locale> supported = getSupportedLocales();
+		Locale languageMatch = null;
 		while (requestLocales.hasMoreElements()) {
 			Locale locale = requestLocales.nextElement();
-			if (getSupportedLocales().contains(locale)) {
+			if (supported.contains(locale)) {
+				// Full match: typically language + country
 				return locale;
 			}
+			else if (languageMatch == null) {
+				// Let's try to find a language-only match as a fallback
+				for (Locale candidate : supported) {
+					if (!StringUtils.hasLength(candidate.getCountry()) &&
+							candidate.getLanguage().equals(locale.getLanguage())) {
+						languageMatch = candidate;
+					}
+				}
+			}
 		}
-		return null;
+		return languageMatch;
 	}
 
 	@Override
