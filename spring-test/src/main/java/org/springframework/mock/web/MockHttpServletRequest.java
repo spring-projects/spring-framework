@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -473,7 +473,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 					this.characterEncoding = mediaType.getCharset().name();
 				}
 			}
-			catch (Exception ex) {
+			catch (IllegalArgumentException ex) {
 				// Try to get charset value anyway
 				int charsetIndex = contentType.toLowerCase().indexOf(CHARSET_PREFIX);
 				if (charsetIndex != -1) {
@@ -985,15 +985,19 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public void addHeader(String name, Object value) {
 		if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name) &&
 				!this.headers.containsKey(HttpHeaders.CONTENT_TYPE)) {
-
 			setContentType(value.toString());
 		}
 		else if (HttpHeaders.ACCEPT_LANGUAGE.equalsIgnoreCase(name) &&
 				!this.headers.containsKey(HttpHeaders.ACCEPT_LANGUAGE)) {
-
-			HttpHeaders headers = new HttpHeaders();
-			headers.add(HttpHeaders.ACCEPT_LANGUAGE, value.toString());
-			setPreferredLocales(headers.getAcceptLanguageAsLocales());
+			try {
+				HttpHeaders headers = new HttpHeaders();
+				headers.add(HttpHeaders.ACCEPT_LANGUAGE, value.toString());
+				setPreferredLocales(headers.getAcceptLanguageAsLocales());
+			}
+			catch (IllegalArgumentException ex) {
+				// Invalid Accept-Language format -> store plain header instead
+				doAddHeaderValue(name, value, true);
+			}
 		}
 		else {
 			doAddHeaderValue(name, value, false);
