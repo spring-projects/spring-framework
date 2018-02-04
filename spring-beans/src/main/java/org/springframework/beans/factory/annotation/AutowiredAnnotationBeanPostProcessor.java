@@ -672,9 +672,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					if (!this.cached) {
 						if (arguments != null) {
 							Object[] cachedMethodArguments = new Object[paramTypes.length];
-							for (int i = 0; i < arguments.length; i++) {
-								cachedMethodArguments[i] = descriptors[i];
-							}
+							System.arraycopy(descriptors, 0, cachedMethodArguments, 0, arguments.length);
 							registerDependentBeans(beanName, autowiredBeans);
 							if (autowiredBeans.size() == paramTypes.length) {
 								Iterator<String> it = autowiredBeans.iterator();
