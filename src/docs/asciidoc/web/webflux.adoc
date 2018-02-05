@@ -522,20 +522,22 @@ To configure or customize the readers and writers to use applications will typic
 
 
 
-[[webflux-codecs-jackson-json]]
-==== Jackson JSON
+[[webflux-codecs-jackson]]
+==== Jackson
 
 The decoder relies on Jackson's non-blocking, byte array parser to parse a stream of byte
 chunks into a `TokenBuffer` stream, which can then be turned into Objects with Jackson's
-`ObjectMapper`.
+`ObjectMapper`. JSON and https://github.com/FasterXML/smile-format-specification[Smile]
+(binary JSON) data formats are currently supported.
 
 The encoder processes a `Publisher<?>` as follows:
 
-* if the `Publisher` is a `Mono` (i.e. single value), the value is encoded to JSON.
-* if media type is `application/stream+json`, each value produced by the
-`Publisher` is encoded individually to JSON followed by a new line.
+* if the `Publisher` is a `Mono` (i.e. single value), the value is encoded when available.
+* if media type is `application/stream+json` for JSON or `application/stream+x-jackson-smile`
+  for Smile, each value produced by the `Publisher` is encoded individually (and followed
+  by a new line in JSON).
 * otherwise all items from the `Publisher` are gathered in with `Flux#collectToList()`
-and the resulting collection is encoded as a JSON array.
+and the resulting collection is encoded as an array.
 
 As a special case to the above rules the `ServerSentEventHttpMessageWriter` feeds items
 emitted from its input `Publisher` individually into the `Jackson2JsonEncoder` as a
