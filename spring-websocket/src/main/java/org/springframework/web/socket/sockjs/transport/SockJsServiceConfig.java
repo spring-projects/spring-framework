@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public interface SockJsServiceConfig {
 
 	/**
 	 * The codec to use for encoding and decoding SockJS messages.
-	 * @exception IllegalStateException if no {@link SockJsMessageCodec} is available
+	 * @throws IllegalStateException if no {@link SockJsMessageCodec} is available
 	 */
 	SockJsMessageCodec getMessageCodec();
 
