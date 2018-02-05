@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,19 +86,30 @@ public @interface Transactional {
 	/**
 	 * The transaction isolation level.
 	 * <p>Defaults to {@link Isolation#DEFAULT}.
+	 * <p>Exclusively designed for use with {@link Propagation#REQUIRED} or
+	 * {@link Propagation#REQUIRES_NEW} since it only applies to newly started
+	 * transactions. Consider switching the "validateExistingTransactions" flag to
+	 * "true" on your transaction manager if you'd like isolation level declarations
+	 * to get rejected when participating in an existing transaction with a different
+	 * isolation level.
 	 * @see org.springframework.transaction.interceptor.TransactionAttribute#getIsolationLevel()
+	 * @see org.springframework.transaction.support.AbstractPlatformTransactionManager#setValidateExistingTransaction
 	 */
 	Isolation isolation() default Isolation.DEFAULT;
 
 	/**
 	 * The timeout for this transaction.
 	 * <p>Defaults to the default timeout of the underlying transaction system.
+	 * <p>Exclusively designed for use with {@link Propagation#REQUIRED} or
+	 * {@link Propagation#REQUIRES_NEW} since it only applies to newly started
+	 * transactions.
 	 * @see org.springframework.transaction.interceptor.TransactionAttribute#getTimeout()
 	 */
 	int timeout() default TransactionDefinition.TIMEOUT_DEFAULT;
 
 	/**
-	 * {@code true} if the transaction is read-only.
+	 * A boolean flag that can be set to {@code true} if the transaction is
+	 * effectively read-only, allowing for corresponding optimizations at runtime.
 	 * <p>Defaults to {@code false}.
 	 * <p>This just serves as a hint for the actual transaction subsystem;
 	 * it will <i>not necessarily</i> cause failure of write access attempts.
@@ -106,6 +117,7 @@ public @interface Transactional {
 	 * <i>not</i> throw an exception when asked for a read-only transaction
 	 * but rather silently ignore the hint.
 	 * @see org.springframework.transaction.interceptor.TransactionAttribute#isReadOnly()
+	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#isCurrentTransactionReadOnly()
 	 */
 	boolean readOnly() default false;
 
