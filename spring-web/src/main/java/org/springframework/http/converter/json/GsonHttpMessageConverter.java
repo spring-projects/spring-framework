@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 
@@ -182,12 +183,19 @@ public class GsonHttpMessageConverter extends AbstractGenericHttpMessageConverte
 			if (this.jsonPrefix != null) {
 				writer.append(this.jsonPrefix);
 			}
-			if (type != null) {
+
+			// In Gson, toJson with a type argument will exclusively use that given type,
+			// ignoring the actual type of the object... which might be more specific,
+			// e.g. a subclass of the specified type which includes additional fields.
+			// As a consequence, we're only passing in parameterized type declarations
+			// which might contain extra generics that the object instance doesn't retain.
+			if (type instanceof ParameterizedType) {
 				this.gson.toJson(o, type, writer);
 			}
 			else {
 				this.gson.toJson(o, writer);
 			}
+
 			writer.close();
 		}
 		catch (JsonIOException ex) {
