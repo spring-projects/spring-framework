@@ -195,9 +195,6 @@ execution.
 
 The `TransactionDefinition` interface specifies:
 
-* __Isolation__: The degree to which this transaction is isolated from the work of other
-  transactions. For example, can this transaction see uncommitted writes from other
-  transactions?
 * __Propagation__: Typically, all code executed within a transaction scope will run in
   that transaction. However, you have the option of specifying the behavior in the event
   that a transactional method is executed when a transaction context already exists. For
@@ -205,6 +202,9 @@ The `TransactionDefinition` interface specifies:
   the existing transaction can be suspended and a new transaction created. __Spring
   offers all of the transaction propagation options familiar from EJB CMT__. To read
   about the semantics of transaction propagation in Spring, see <<tx-propagation>>.
+* __Isolation__: The degree to which this transaction is isolated from the work of other
+  transactions. For example, can this transaction see uncommitted writes from other
+  transactions?
 * __Timeout__: How long this transaction runs before timing out and being rolled back
   automatically by the underlying transaction infrastructure.
 * __Read-only status__: A read-only transaction can be used when your code reads but
@@ -1021,17 +1021,17 @@ that are nested within `<tx:advice/>` and `<tx:attributes/>` tags are summarized
 | `isolation`
 | No
 | DEFAULT
-| Transaction isolation level.
+| Transaction isolation level. Only applicable to propagation REQUIRED or REQUIRES_NEW.
 
 | `timeout`
 | No
 | -1
-| Transaction timeout value (in seconds).
+| Transaction timeout (seconds). Only applicable to propagation REQUIRED or REQUIRES_NEW.
 
 | `read-only`
 | No
 | false
-| Is this transaction read-only?
+| Read/write vs. read-only transaction. Only applicable to REQUIRED or REQUIRES_NEW.
 
 | `rollback-for`
 | No
@@ -1155,7 +1155,6 @@ transactional behavior.
 
 [TIP]
 ====
-
 Spring recommends that you only annotate concrete classes (and methods of concrete
 classes) with the `@Transactional` annotation, as opposed to annotating interfaces. You
 certainly can place the `@Transactional` annotation on an interface (or an interface
@@ -1301,7 +1300,7 @@ annotation are summarized in the following table:
 
 | <<tx-multiple-tx-mgrs-with-attransactional,value>>
 | String
-|  Optional qualifier specifying the transaction manager to be used.
+| Optional qualifier specifying the transaction manager to be used.
 
 | <<tx-propagation,propagation>>
 | enum: `Propagation`
@@ -1309,15 +1308,15 @@ annotation are summarized in the following table:
 
 | `isolation`
 | enum: `Isolation`
-| Optional isolation level.
-
-| `readOnly`
-| boolean
-| Read/write vs. read-only transaction
+| Optional isolation level. Only applicable to propagation REQUIRED or REQUIRES_NEW.
 
 | `timeout`
 | int (in seconds granularity)
-| Transaction timeout.
+| Optional transaction timeout. Only applicable to propagation REQUIRED or REQUIRES_NEW.
+
+| `readOnly`
+| boolean
+| Read/write vs. read-only transaction. Only applicable to REQUIRED or REQUIRES_NEW.
 
 | `rollbackFor`
 | Array of `Class` objects, which must be derived from `Throwable.`
@@ -1451,11 +1450,28 @@ image::images/tx_prop_required.png[]
 
 PROPAGATION_REQUIRED
 
+`PROPAGATION_REQUIRED` enforces a physical transaction: either locally for the current
+scope if no transaction exists yet, or participating in an existing 'outer' transaction
+defined for a larger scope. This is a fine default in common call stack arrangements
+within the same thread, e.g. a service facade delegating to several repository methods
+where all the underlying resources have to participate in the service-level transaction.
+
+[NOTE]
+====
+By default, a participating transaction will join the characteristics of the outer scope,
+silently ignoring the local isolation level, timeout value or read-only flag (if any).
+Consider switching the "validateExistingTransactions" flag to "true" on your transaction
+manager if you'd like isolation level declarations to get rejected when participating in
+an existing transaction with a different isolation level. This non-lenient mode will also
+reject read-only mismatches, i.e. an inner read-write transaction trying to participate
+in a read-only outer scope.
+====
+
 When the propagation setting is `PROPAGATION_REQUIRED`, a __logical__ transaction scope
 is created for each method upon which the setting is applied. Each such logical
 transaction scope can determine rollback-only status individually, with an outer
-transaction scope being logically independent from the inner transaction scope. Of
-course, in case of standard `PROPAGATION_REQUIRED` behavior, all these scopes will be
+transaction scope being logically independent from the inner transaction scope.
+Of course, in case of standard `PROPAGATION_REQUIRED` behavior, all these scopes will be
 mapped to the same physical transaction. So a rollback-only marker set in the inner
 transaction scope does affect the outer transaction's chance to actually commit (as you
 would expect it to).
@@ -1477,11 +1493,14 @@ image::images/tx_prop_requires_new.png[]
 
 PROPAGATION_REQUIRES_NEW
 
-`PROPAGATION_REQUIRES_NEW`, in contrast to `PROPAGATION_REQUIRED`, uses a __completely__
-independent transaction for each affected transaction scope. In that case, the
-underlying physical transactions are different and hence can commit or roll back
+`PROPAGATION_REQUIRES_NEW`, in contrast to `PROPAGATION_REQUIRED`, always uses an
+__independent__ physical transaction for each affected transaction scope, never
+participating in an existing transaction for an outer scope. In such an arrangement,
+the underlying resource transactions are different and hence can commit or roll back
 independently, with an outer transaction not affected by an inner transaction's rollback
-status.
+status, and with an inner transaction's locks released immediately after its completion.
+Such an independent inner transaction may also declare its own isolation level, timeout
+and read-only settings, never inheriting an outer transaction's characteristics.
 
 [[tx-propagation-nested]]
 ===== Nested

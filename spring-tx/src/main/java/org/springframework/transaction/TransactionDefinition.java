@@ -205,21 +205,29 @@ public interface TransactionDefinition {
 
 	/**
 	 * Return the isolation level.
-	 * <p>Must return one of the {@code ISOLATION_XXX} constants
-	 * defined on {@link TransactionDefinition this interface}.
-	 * <p>Only makes sense in combination with {@link #PROPAGATION_REQUIRED}
-	 * or {@link #PROPAGATION_REQUIRES_NEW}.
+	 * <p>Must return one of the {@code ISOLATION_XXX} constants defined on
+	 * {@link TransactionDefinition this interface}. Those constants are designed
+	 * to match the values of the same constants on {@link java.sql.Connection}.
+	 * <p>Exclusively designed for use with {@link #PROPAGATION_REQUIRED} or
+	 * {@link #PROPAGATION_REQUIRES_NEW} since it only applies to newly started
+	 * transactions. Consider switching the "validateExistingTransactions" flag to
+	 * "true" on your transaction manager if you'd like isolation level declarations
+	 * to get rejected when participating in an existing transaction with a different
+	 * isolation level.
 	 * <p>Note that a transaction manager that does not support custom isolation levels
 	 * will throw an exception when given any other level than {@link #ISOLATION_DEFAULT}.
 	 * @return the isolation level
+	 * @see #ISOLATION_DEFAULT
+	 * @see org.springframework.transaction.support.AbstractPlatformTransactionManager#setValidateExistingTransaction
 	 */
 	int getIsolationLevel();
 
 	/**
 	 * Return the transaction timeout.
 	 * <p>Must return a number of seconds, or {@link #TIMEOUT_DEFAULT}.
-	 * <p>Only makes sense in combination with {@link #PROPAGATION_REQUIRED}
-	 * or {@link #PROPAGATION_REQUIRES_NEW}.
+	 * <p>Exclusively designed for use with {@link #PROPAGATION_REQUIRED} or
+	 * {@link #PROPAGATION_REQUIRES_NEW} since it only applies to newly started
+	 * transactions.
 	 * <p>Note that a transaction manager that does not support timeouts will throw
 	 * an exception when given any other timeout than {@link #TIMEOUT_DEFAULT}.
 	 * @return the transaction timeout
@@ -228,13 +236,12 @@ public interface TransactionDefinition {
 
 	/**
 	 * Return whether to optimize as a read-only transaction.
-	 * <p>The read-only flag applies to any transaction context, whether
-	 * backed by an actual resource transaction
-	 * ({@link #PROPAGATION_REQUIRED}/{@link #PROPAGATION_REQUIRES_NEW}) or
-	 * operating non-transactionally at the resource level
-	 * ({@link #PROPAGATION_SUPPORTS}). In the latter case, the flag will
-	 * only apply to managed resources within the application, such as a
-	 * Hibernate {@code Session}.
+	 * <p>The read-only flag applies to any transaction context, whether backed
+	 * by an actual resource transaction ({@link #PROPAGATION_REQUIRED}/
+	 * {@link #PROPAGATION_REQUIRES_NEW}) or operating non-transactionally at
+	 * the resource level ({@link #PROPAGATION_SUPPORTS}). In the latter case,
+	 * the flag will only apply to managed resources within the application,
+	 * such as a Hibernate {@code Session}.
 	 * <p>This just serves as a hint for the actual transaction subsystem;
 	 * it will <i>not necessarily</i> cause failure of write access attempts.
 	 * A transaction manager which cannot interpret the read-only hint will
