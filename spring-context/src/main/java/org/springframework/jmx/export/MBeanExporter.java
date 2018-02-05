@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -217,7 +217,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 
 	/**
 	 * Set the autodetection mode to use.
-	 * @exception IllegalArgumentException if the supplied value is not
+	 * @throws IllegalArgumentException if the supplied value is not
 	 * one of the {@code AUTODETECT_} constants
 	 * @see #setAutodetectModeName(String)
 	 * @see #AUTODETECT_ALL
@@ -234,7 +234,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 
 	/**
 	 * Set the autodetection mode to use by name.
-	 * @exception IllegalArgumentException if the supplied value is not resolvable
+	 * @throws IllegalArgumentException if the supplied value is not resolvable
 	 * to one of the {@code AUTODETECT_} constants or is {@code null}
 	 * @see #setAutodetectMode(int)
 	 * @see #AUTODETECT_ALL
@@ -505,7 +505,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	//---------------------------------------------------------------------
 
 	/**
-	 * Registers the defined beans with the {@link MBeanServer}.
+	 * Register the defined beans with the {@link MBeanServer}.
 	 * <p>Each bean is exposed to the {@code MBeanServer} via a
 	 * {@code ModelMBean}. The actual implemetation of the
 	 * {@code ModelMBean} interface used depends on the implementation of
@@ -565,7 +565,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	}
 
 	/**
-	 * Registers an individual bean with the {@link #setServer MBeanServer}.
+	 * Register an individual bean with the {@link #setServer MBeanServer}.
 	 * <p>This method is responsible for deciding <strong>how</strong> a bean
 	 * should be exposed to the {@code MBeanServer}. Specifically, if the
 	 * supplied {@code mapValue} is the name of a bean that is configured
@@ -632,7 +632,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	}
 
 	/**
-	 * Replaces any bean names used as keys in the {@code NotificationListener}
+	 * Replace any bean names used as keys in the {@code NotificationListener}
 	 * mappings with their corresponding {@code ObjectName} values.
 	 * @param beanName the name of the bean to be registered
 	 * @param objectName the {@code ObjectName} under which the bean will be registered
@@ -666,6 +666,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 				mbeanToExpose = adaptedBean;
 			}
 		}
+
 		if (mbeanToExpose != null) {
 			if (logger.isInfoEnabled()) {
 				logger.info("Located MBean '" + beanKey + "': registering with JMX server as MBean [" +
@@ -682,11 +683,12 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 			doRegister(mbean, objectName);
 			injectNotificationPublisherIfNecessary(bean, mbean, objectName);
 		}
+
 		return objectName;
 	}
 
 	/**
-	 * Registers beans that are configured for lazy initialization with the
+	 * Register beans that are configured for lazy initialization with the
 	 * {@code MBeanServer} indirectly through a proxy.
 	 * @param beanName the name of the bean in the {@code BeanFactory}
 	 * @param beanKey the key associated with this bean in the beans map
