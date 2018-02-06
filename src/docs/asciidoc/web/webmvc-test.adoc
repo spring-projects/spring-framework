@@ -2,54 +2,37 @@
 = Testing
 [.small]#<<web-reactive.adoc#webflux-test,Same in Spring WebFlux>>#
 
+This section summarizes the options available in `spring-test` for Spring MVC applications.
 
+**Servlet API Mocks**
 
+Mock implementations of Servlet API contracts for unit testing controllers, filters, and
+other web components. See <<testing.adoc#mock-objects-servlet,Servlet API>> mock objects
+for more details.
 
-[[testing-servlet-mocks]]
-== Servlet API Mocks
+**TestContext Framework**
 
-`spring-test` provides mock implementations of Servlet API contracts for unit testing
-controllers, filters, and other web components.
-See <<testing.adoc#mock-objects-servlet,Servlet API>> mock objects for more details.
-
-
-
-
-[[testing-testcontext]]
-== TestContext Framework
-
-`spring-test` provides support for loading Spring configuration in JUnit and TestNG tests
-including efficient caching of the loaded configuration across test methods and support for
-loading a `WebApplicationContext` with a `MockServletContext`.
+Support for loading Spring configuration in JUnit and TestNG tests including efficient
+caching of the loaded configuration across test methods and support for loading a
+`WebApplicationContext` with a `MockServletContext`.
 See <<testing.adoc#testcontext-framework,TestContext Framework>> for more details.
 
+**Spring MVC Test**
 
-
-
-[[testing-mockmvc]]
-== Spring MVC Test (MockMvc)
-
-`spring-test` provides a framework for testing annotated controllers through the
+A framework, also known as `MockMvc`, for testing annotated controllers through the
 `DispatcherServlet`, i.e. supporting annotations and complete with Spring MVC
-infrastructure, but without an HTTP server.
-See <<testing.adoc#spring-mvc-test-framework,Spring MVC Test>> for more details.
+infrastructure, but without an HTTP server. See
+<<testing.adoc#spring-mvc-test-framework,Spring MVC Test>> for more details.
 
-
-
-
-[[testing-resttemplate]]
-== Client-side REST
+**Client-side REST**
 
 `spring-test` provides a `MockRestServiceServer` that can be used as a mock server for
 testing client-side code that internally uses the `RestTemplate`.
 See <<testing.adoc#spring-mvc-test-client,Client REST Tests>> for more details.
 
+**WebTestClient**
 
-
-
-[[testing-webtestclient]]
-== WebTestClient
-
-`spring-test` provides a dedicated `WebTestClient` for end-to-end integration testing.
-`WebTestClient` can connect to any server over an HTTP connection. It is non-blocking,
-reactive client and well suited for testing asynchronous and streaming scenarios.
+`WebTestClient` was built for testing WebFlux applications but it can also be used for
+end-to-end integration testing, to any server, over an HTTP connection. It is a
+non-blocking, reactive client and well suited for testing asynchronous and streaming
+scenarios.
