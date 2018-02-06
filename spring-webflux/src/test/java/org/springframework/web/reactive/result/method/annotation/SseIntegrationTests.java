@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	}
 
 	@Test
-	public void sseAsString() throws Exception {
+	public void sseAsString() {
 		Flux<String> result = this.webClient.get()
 				.uri("/string")
 				.accept(TEXT_EVENT_STREAM)
@@ -86,7 +86,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	}
 
 	@Test
-	public void sseAsPerson() throws Exception {
+	public void sseAsPerson() {
 		Flux<Person> result = this.webClient.get()
 				.uri("/person")
 				.accept(TEXT_EVENT_STREAM)
@@ -101,13 +101,14 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	}
 
 	@Test
-	public void sseAsEvent() throws Exception {
+	public void sseAsEvent() {
 		ResolvableType type = forClassWithGenerics(ServerSentEvent.class, String.class);
 		Flux<ServerSentEvent<String>> result = this.webClient.get()
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
-				.flatMapMany(response -> response.body(toFlux(new ParameterizedTypeReference<ServerSentEvent<String>>() {})));
+				.flatMapMany(response -> response.body(
+						toFlux(new ParameterizedTypeReference<ServerSentEvent<String>>() {})));
 
 		StepVerifier.create(result)
 				.consumeNextWith( event -> {
@@ -129,12 +130,13 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	}
 
 	@Test
-	public void sseAsEventWithoutAcceptHeader() throws Exception {
+	public void sseAsEventWithoutAcceptHeader() {
 		Flux<ServerSentEvent<String>> result = this.webClient.get()
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
-				.flatMapMany(response -> response.body(toFlux(new ParameterizedTypeReference<ServerSentEvent<String>>() {})));
+				.flatMapMany(response -> response.body(
+						toFlux(new ParameterizedTypeReference<ServerSentEvent<String>>() {})));
 
 		StepVerifier.create(result)
 				.consumeNextWith( event -> {
@@ -155,29 +157,34 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.verify(Duration.ofSeconds(5L));
 	}
 
+
 	@RestController
 	@SuppressWarnings("unused")
 	static class SseController {
 
+		private static final Flux<Long> INTERVAL = interval(Duration.ofMillis(100), 50);
+
+
 		@RequestMapping("/sse/string")
 		Flux<String> string() {
-			return Flux.interval(Duration.ofMillis(100)).map(l -> "foo " + l);
+			return INTERVAL.map(l -> "foo " + l);
 		}
 
 		@RequestMapping("/sse/person")
 		Flux<Person> person() {
-			return Flux.interval(Duration.ofMillis(100)).map(l -> new Person("foo " + l));
+			return INTERVAL.map(l -> new Person("foo " + l));
 		}
 
 		@RequestMapping("/sse/event")
 		Flux<ServerSentEvent<String>> sse() {
-			return Flux.interval(Duration.ofMillis(100)).map(l -> ServerSentEvent.builder("foo")
+			return INTERVAL.map(l -> ServerSentEvent.builder("foo")
 					.id(Long.toString(l))
 					.comment("bar")
 					.build());
 		}
 
 	}
+
 
 	@Configuration
 	@EnableWebFlux
@@ -189,6 +196,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 			return new SseController();
 		}
 	}
+
 
 	@SuppressWarnings("unused")
 	private static class Person {
