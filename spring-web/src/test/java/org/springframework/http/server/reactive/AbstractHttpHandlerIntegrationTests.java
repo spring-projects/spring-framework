@@ -77,8 +77,8 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 
 
 	/**
-	 * Return an interval stream of with n number of ticks and buffer the
-	 * emissions to avoid back pressure failures (e.g. on slow CI server).
+	 * Return an interval stream of N number of ticks and buffer the emissions
+	 * to avoid back pressure failures (e.g. on slow CI server).
 	 *
 	 * <p>Use this method as follows:
 	 * <ul>
@@ -89,7 +89,7 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 	 * </ul>
 	 */
 	public static Flux<Long> interval(Duration period, int count) {
-		return Flux.interval(period).take(count).onBackpressureBuffer(2);
+		return Flux.interval(period).take(count).onBackpressureBuffer(count);
 	}
 
 }
