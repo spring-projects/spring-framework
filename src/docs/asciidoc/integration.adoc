@@ -2386,7 +2386,7 @@ configured locally as depicted in the following example.
 ----
 
 The specified `WorkManager` may also point to an environment-specific thread pool -
-typically through `SimpleTaskWorkManager's` "asyncTaskExecutor" property. Consider
+typically through ``SimpleTaskWorkManager``'s "asyncTaskExecutor" property. Consider
 defining a shared thread pool for all your `ResourceAdapter` instances if you happen to
 use multiple adapters.
 
