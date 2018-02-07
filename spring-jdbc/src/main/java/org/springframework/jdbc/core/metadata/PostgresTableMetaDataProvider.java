@@ -35,17 +35,49 @@ public class PostgresTableMetaDataProvider extends GenericTableMetaDataProvider 
 
 	@Override
 	public boolean isGetGeneratedKeysSimulated() {
+		boolean ret = false;
 		String version = getDatabaseVersion();
-		if (version != null && version.compareTo("8.2.0") >= 0) {
-			return true;
+
+		if (version != null) {
+			String[] versionParts = version.split(".");
+
+			int majorVersion = -1;
+			int minorVersion = -1;
+			
+			if (versionParts.length > 0) {
+				try {
+					majorVersion = Integer.valueOf(versionParts[0]);
+					if (majorVersion > 8) {
+						ret = true;
+					}
+					else if (majorVersion == 8) {
+						if (versionParts.length > 1) {
+							minorVersion = Integer.valueOf(versionParts[1]);
+							ret = (minorVersion >= 2);
+						}
+						else {
+							ret = false;
+						}
+					}
+					else {
+						ret = false;
+					}
+				}
+				catch (NumberFormatException e) {
+					if (logger.isWarnEnabled()) {
+						logger.warn("Invalid PostgreSQL version format: " + version);
+					}
+					ret = false;
+				}
+			}
 		}
 		else {
 			if (logger.isWarnEnabled()) {
 				logger.warn("PostgreSQL does not support getGeneratedKeys or INSERT ... RETURNING in version " +
 						version);
 			}
-			return false;
 		}
+		return ret;
 	}
 
 	@Override
