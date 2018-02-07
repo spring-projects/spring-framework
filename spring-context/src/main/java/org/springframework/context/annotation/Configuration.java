@@ -138,8 +138,8 @@ import org.springframework.stereotype.Component;
  *
  * Properties resolved through the {@code Environment} reside in one or more "property
  * source" objects, and {@code @Configuration} classes may contribute property sources to
- * the {@code Environment} object using
- * the {@link PropertySource @PropertySource} annotation:
+ * the {@code Environment} object using the {@link PropertySource @PropertySource}
+ * annotation:
  *
  * <pre class="code">
  * &#064;Configuration
