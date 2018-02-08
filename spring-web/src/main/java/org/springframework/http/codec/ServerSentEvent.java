@@ -51,7 +51,7 @@ public class ServerSentEvent<T> {
 	private final T data;
 
 
-    private ServerSentEvent(@Nullable String id, @Nullable String event, @Nullable Duration retry,
+    public ServerSentEvent(@Nullable String id, @Nullable String event, @Nullable Duration retry,
 			@Nullable String comment, @Nullable T data) {
 
         this.id = id;
