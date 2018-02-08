@@ -188,7 +188,7 @@ public class StringDecoder extends AbstractDataBufferDecoder<String> {
 	 * Joins the given list of buffers into a single buffer.
 	 */
 	private static Mono<DataBuffer> joinUntilEndFrame(List<DataBuffer> dataBuffers) {
-		if (dataBuffers.size() > 0) {
+		if (!dataBuffers.isEmpty()) {
 			int lastIdx = dataBuffers.size() - 1;
 			if (isEndFrame(dataBuffers.get(lastIdx))) {
 				dataBuffers.remove(lastIdx);

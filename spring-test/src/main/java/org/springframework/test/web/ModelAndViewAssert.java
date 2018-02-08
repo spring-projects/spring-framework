@@ -201,7 +201,7 @@ public abstract class ModelAndViewAssert {
 		tempSet.addAll(incorrectSet);
 		tempSet.removeAll(assertionSet);
 
-		if (tempSet.size() > 0) {
+		if (!tempSet.isEmpty()) {
 			sb.append("Set has too many elements:\n");
 			for (Object element : tempSet) {
 				sb.append('-');
@@ -214,7 +214,7 @@ public abstract class ModelAndViewAssert {
 		tempSet.addAll(assertionSet);
 		tempSet.removeAll(incorrectSet);
 
-		if (tempSet.size() > 0) {
+		if (!tempSet.isEmpty()) {
 			sb.append("Set is missing elements:\n");
 			for (Object element : tempSet) {
 				sb.append('-');

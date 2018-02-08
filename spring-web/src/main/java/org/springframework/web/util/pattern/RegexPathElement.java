@@ -136,7 +136,7 @@ class RegexPathElement extends PathElement {
 		if (matches) {
 			if (isNoMorePattern()) {
 				if (matchingContext.determineRemainingPath && 
-					((this.variableNames.size() == 0) ? true : textToMatch.length() > 0)) {
+					(this.variableNames.isEmpty() ? true : textToMatch.length() > 0)) {
 					matchingContext.remainingPathIndex = pathIndex + 1;
 					matches = true;
 				}

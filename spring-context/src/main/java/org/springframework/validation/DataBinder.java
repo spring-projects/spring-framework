@@ -568,7 +568,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	@Nullable
 	public Validator getValidator() {
-		return (this.validators.size() > 0 ? this.validators.get(0) : null);
+		return (!this.validators.isEmpty() ? this.validators.get(0) : null);
 	}
 
 	/**
