@@ -700,6 +700,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 						Thread.sleep(startupDelay * 1000);
 					}
 					catch (InterruptedException ex) {
+						Thread.currentThread().interrupt();
 						// simply proceed
 					}
 					if (logger.isInfoEnabled()) {

@@ -519,6 +519,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 				return this.nativeEntityManagerFactoryFuture.get();
 			}
 			catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
 				throw new IllegalStateException("Interrupted during initialization of native EntityManagerFactory: " +
 						ex.getMessage());
 			}

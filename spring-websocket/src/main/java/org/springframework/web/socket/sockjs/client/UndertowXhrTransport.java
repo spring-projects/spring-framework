@@ -300,6 +300,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 			throw new SockJsTransportFailureException("Failed to execute request to " + url, ex);
 		}
 		catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
 			throw new SockJsTransportFailureException("Interrupted while processing request to " + url, ex);
 		}
 	}
