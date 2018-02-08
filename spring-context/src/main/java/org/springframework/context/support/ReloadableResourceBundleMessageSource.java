@@ -461,9 +461,8 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * @throws IOException if properties loading failed
 	 */
 	protected Properties loadProperties(Resource resource, String filename) throws IOException {
-		InputStream is = resource.getInputStream();
 		Properties props = newProperties();
-		try {
+		try (InputStream is = resource.getInputStream()) {
 			String resourceFilename = resource.getFilename();
 			if (resourceFilename != null && resourceFilename.endsWith(XML_SUFFIX)) {
 				if (logger.isDebugEnabled()) {
@@ -493,9 +492,6 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 				}
 			}
 			return props;
-		}
-		finally {
-			is.close();
 		}
 	}
 
