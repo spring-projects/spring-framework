@@ -180,7 +180,7 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 		}
 		ClassLoader classLoader = getApplicationContext().getClassLoader();
 		Assert.state(classLoader != null, "No ClassLoader");
-		return (urls.size() > 0 ? new URLClassLoader(urls.toArray(new URL[urls.size()]), classLoader) : classLoader);
+		return (!urls.isEmpty() ? new URLClassLoader(urls.toArray(new URL[urls.size()]), classLoader) : classLoader);
 	}
 
 	/**

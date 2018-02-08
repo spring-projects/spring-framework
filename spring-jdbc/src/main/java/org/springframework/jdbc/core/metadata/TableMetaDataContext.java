@@ -184,7 +184,7 @@ public class TableMetaDataContext {
 		if (generatedKeyNames.length > 0) {
 			this.generatedKeyColumnsUsed = true;
 		}
-		if (declaredColumns.size() > 0) {
+		if (!declaredColumns.isEmpty()) {
 			return new ArrayList<>(declaredColumns);
 		}
 		Set<String> keys = new LinkedHashSet<>(generatedKeyNames.length);

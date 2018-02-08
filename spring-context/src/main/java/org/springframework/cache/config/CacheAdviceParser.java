@@ -72,7 +72,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 		CacheNamespaceHandler.parseKeyGenerator(element, builder.getBeanDefinition());
 
 		List<Element> cacheDefs = DomUtils.getChildElementsByTagName(element, DEFS_ELEMENT);
-		if (cacheDefs.size() >= 1) {
+		if (!cacheDefs.isEmpty()) {
 			// Using attributes source.
 			List<RootBeanDefinition> attributeSourceDefinitions = parseDefinitionsSources(cacheDefs, parserContext);
 			builder.addPropertyValue("cacheOperationSources", attributeSourceDefinitions);

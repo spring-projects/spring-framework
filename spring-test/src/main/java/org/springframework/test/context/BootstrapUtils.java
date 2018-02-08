@@ -151,7 +151,7 @@ abstract class BootstrapUtils {
 	@Nullable
 	private static Class<?> resolveExplicitTestContextBootstrapper(Class<?> testClass) {
 		Set<BootstrapWith> annotations = AnnotatedElementUtils.findAllMergedAnnotations(testClass, BootstrapWith.class);
-		if (annotations.size() < 1) {
+		if (annotations.isEmpty()) {
 			return null;
 		}
 		Assert.state(annotations.size() <= 1, () -> String.format(
