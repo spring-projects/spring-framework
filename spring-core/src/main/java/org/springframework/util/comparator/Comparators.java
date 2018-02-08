@@ -52,7 +52,7 @@ public abstract class Comparators {
 	 * @see NullSafeComparator#NullSafeComparator(boolean)
 	 */
 	public static <T> Comparator<T> nullsLow(Comparator<T> comparator) {
-		return new NullSafeComparator<T>(comparator, false);
+		return new NullSafeComparator<>(comparator, false);
 	}
 
 	/**
@@ -71,7 +71,7 @@ public abstract class Comparators {
 	 * @see NullSafeComparator#NullSafeComparator(boolean)
 	 */
 	public static <T> Comparator<T> nullsHigh(Comparator<T> comparator) {
-		return new NullSafeComparator<T>(comparator, false);
+		return new NullSafeComparator<>(comparator, false);
 	}
 
 }

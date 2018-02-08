@@ -97,7 +97,7 @@ public class CodeFlow implements Opcodes {
 	public CodeFlow(String className, ClassWriter classWriter) {
 		this.className = className;
 		this.classWriter = classWriter;
-		this.compilationScopes = new Stack<ArrayList<String>>();
+		this.compilationScopes = new Stack<>();
 		this.compilationScopes.add(new ArrayList<String>());
 	}
 
