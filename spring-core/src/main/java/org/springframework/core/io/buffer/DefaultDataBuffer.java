@@ -366,6 +366,11 @@ public class DefaultDataBuffer implements DataBuffer {
 	}
 
 	@Override
+	public InputStream asInputStream(boolean releaseOnClose) {
+		return new DefaultDataBufferInputStream();
+	}
+
+	@Override
 	public OutputStream asOutputStream() {
 		return new DefaultDataBufferOutputStream();
 	}

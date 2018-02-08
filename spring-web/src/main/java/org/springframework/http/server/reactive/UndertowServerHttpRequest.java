@@ -35,6 +35,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
@@ -210,8 +211,14 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 		@Override
 		public boolean release() {
-			this.pooledByteBuffer.close();
-			return this.pooledByteBuffer.isOpen();
+			boolean result;
+			try {
+				result = DataBufferUtils.release(this.dataBuffer);
+			}
+			finally {
+				this.pooledByteBuffer.close();
+			}
+			return result && this.pooledByteBuffer.isOpen();
 		}
 
 		@Override
@@ -336,6 +343,11 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		@Override
 		public InputStream asInputStream() {
 			return this.dataBuffer.asInputStream();
+		}
+
+		@Override
+		public InputStream asInputStream(boolean releaseOnClose) {
+			return this.dataBuffer.asInputStream(releaseOnClose);
 		}
 
 		@Override

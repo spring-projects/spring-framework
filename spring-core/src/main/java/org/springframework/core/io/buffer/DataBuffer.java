@@ -248,10 +248,24 @@ public interface DataBuffer {
 
 	/**
 	 * Expose this buffer's data as an {@link InputStream}. Both data and read position are
-	 * shared between the returned stream and this data buffer.
+	 * shared between the returned stream and this data buffer. The underlying buffer will
+	 * <strong>not</strong> be {@linkplain DataBufferUtils#release(DataBuffer) released} when the
+	 * input stream is {@linkplain InputStream#close() closed}.
 	 * @return this data buffer as an input stream
+	 * @see #asInputStream(boolean)
 	 */
 	InputStream asInputStream();
+
+	/**
+	 * Expose this buffer's data as an {@link InputStream}. Both data and read position are
+	 * shared between the returned stream and this data buffer.
+	 * @param releaseOnClose whether the underlying buffer will be
+	 * {@linkplain DataBufferUtils#release(DataBuffer) released} when the input stream is
+	 * {@linkplain InputStream#close() closed}.
+	 * @return this data buffer as an input stream
+	 * @since 5.0.4
+	 */
+	InputStream asInputStream(boolean releaseOnClose);
 
 	/**
 	 * Expose this buffer's data as an {@link OutputStream}. Both data and write position are
