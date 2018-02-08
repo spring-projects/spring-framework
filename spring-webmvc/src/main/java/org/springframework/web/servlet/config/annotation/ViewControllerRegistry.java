@@ -117,7 +117,7 @@ public class ViewControllerRegistry {
 			return null;
 		}
 
-		Map<String, Object> urlMap = new LinkedHashMap<String, Object>();
+		Map<String, Object> urlMap = new LinkedHashMap<>();
 		for (ViewControllerRegistration registration : this.registrations) {
 			urlMap.put(registration.getUrlPath(), registration.getViewController());
 		}
