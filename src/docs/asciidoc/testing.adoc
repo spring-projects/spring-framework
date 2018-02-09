@@ -4533,7 +4533,7 @@ properties:
 			mockMvc = standaloneSetup(new AccountController())
 				.defaultRequest(get("/")
 				.contextPath("/app").servletPath("/main")
-				.accept(MediaType.APPLICATION_JSON).build();
+				.accept(MediaType.APPLICATION_JSON)).build();
 		}
 ----
 
