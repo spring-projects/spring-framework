@@ -64,7 +64,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	/**
 	 * Specify the maximum time allotted in milliseconds for the shutdown of
 	 * any phase (group of SmartLifecycle beans with the same 'phase' value).
-	 * The default value is 30 seconds.
+	 * <p>The default value is 30 seconds.
 	 */
 	public void setTimeoutPerShutdownPhase(long timeoutPerShutdownPhase) {
 		this.timeoutPerShutdownPhase = timeoutPerShutdownPhase;
@@ -89,13 +89,12 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	// Lifecycle implementation
 
 	/**
-	 * Start all registered beans that implement Lifecycle and are
-	 * <i>not</i> already running. Any bean that implements SmartLifecycle
-	 * will be started within its 'phase', and all phases will be ordered
-	 * from lowest to highest value. All beans that do not implement
-	 * SmartLifecycle will be started in the default phase 0. A bean
-	 * declared as a dependency of another bean will be started before
-	 * the dependent bean regardless of the declared phase.
+	 * Start all registered beans that implement {@link Lifecycle} and are <i>not</i>
+	 * already running. Any bean that implements {@link SmartLifecycle} will be
+	 * started within its 'phase', and all phases will be ordered from lowest to
+	 * highest value. All beans that do not implement {@link SmartLifecycle} will be
+	 * started in the default phase 0. A bean declared as a dependency of another bean
+	 * will be started before the dependent bean regardless of the declared phase.
 	 */
 	@Override
 	public void start() {
@@ -104,13 +103,12 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	}
 
 	/**
-	 * Stop all registered beans that implement Lifecycle and <i>are</i>
-	 * currently running. Any bean that implements SmartLifecycle
-	 * will be stopped within its 'phase', and all phases will be ordered
-	 * from highest to lowest value. All beans that do not implement
-	 * SmartLifecycle will be stopped in the default phase 0. A bean
-	 * declared as dependent on another bean will be stopped before
-	 * the dependency bean regardless of the declared phase.
+	 * Stop all registered beans that implement {@link Lifecycle} and <i>are</i>
+	 * currently running. Any bean that implements {@link SmartLifecycle} will be
+	 * stopped within its 'phase', and all phases will be ordered from highest to
+	 * lowest value. All beans that do not implement {@link SmartLifecycle} will be
+	 * stopped in the default phase 0. A bean declared as dependent on another bean
+	 * will be stopped before the dependency bean regardless of the declared phase.
 	 */
 	@Override
 	public void stop() {
@@ -136,7 +134,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	}
 
 
-	// internal helpers
+	// Internal helpers
 
 	private void startBeans(boolean autoStartupOnly) {
 		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
@@ -206,7 +204,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		});
 		if (!phases.isEmpty()) {
 			List<Integer> keys = new ArrayList<>(phases.keySet());
-			Collections.sort(keys, Collections.reverseOrder());
+			keys.sort(Collections.reverseOrder());
 			for (Integer key : keys) {
 				phases.get(key).stop();
 			}
@@ -277,15 +275,15 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	protected Map<String, Lifecycle> getLifecycleBeans() {
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 		Map<String, Lifecycle> beans = new LinkedHashMap<>();
-		String[] beanNames = getBeanFactory().getBeanNamesForType(Lifecycle.class, false, false);
+		String[] beanNames = beanFactory.getBeanNamesForType(Lifecycle.class, false, false);
 		for (String beanName : beanNames) {
 			String beanNameToRegister = BeanFactoryUtils.transformedBeanName(beanName);
-			boolean isFactoryBean = getBeanFactory().isFactoryBean(beanNameToRegister);
+			boolean isFactoryBean = beanFactory.isFactoryBean(beanNameToRegister);
 			String beanNameToCheck = (isFactoryBean ? BeanFactory.FACTORY_BEAN_PREFIX + beanName : beanName);
-			if ((getBeanFactory().containsSingleton(beanNameToRegister) &&
-					(!isFactoryBean || matchesBeanType(Lifecycle.class, beanNameToCheck))) ||
-					matchesBeanType(SmartLifecycle.class, beanNameToCheck)) {
-				Object bean = getBeanFactory().getBean(beanNameToCheck);
+			if ((beanFactory.containsSingleton(beanNameToRegister) &&
+					(!isFactoryBean || matchesBeanType(Lifecycle.class, beanNameToCheck, beanFactory))) ||
+					matchesBeanType(SmartLifecycle.class, beanNameToCheck, beanFactory)) {
+				Object bean = beanFactory.getBean(beanNameToCheck);
 				if (bean != this && bean instanceof Lifecycle) {
 					beans.put(beanNameToRegister, (Lifecycle) bean);
 				}
@@ -294,8 +292,8 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		return beans;
 	}
 
-	private boolean matchesBeanType(Class<?> targetType, String beanName) {
-		Class<?> beanType = getBeanFactory().getType(beanName);
+	private boolean matchesBeanType(Class<?> targetType, String beanName, BeanFactory beanFactory) {
+		Class<?> beanType = beanFactory.getType(beanName);
 		return (beanType != null && targetType.isAssignableFrom(beanType));
 	}
 
@@ -412,7 +410,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		public int compareTo(LifecycleGroupMember other) {
 			int thisOrder = getPhase(this.bean);
 			int otherOrder = getPhase(other.bean);
-			return (thisOrder == otherOrder ? 0 : (thisOrder < otherOrder) ? -1 : 1);
+			return Integer.compare(thisOrder, otherOrder);
 		}
 	}
 
