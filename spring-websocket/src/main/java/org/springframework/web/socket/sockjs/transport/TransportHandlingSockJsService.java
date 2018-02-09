@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +68,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			"com.fasterxml.jackson.databind.ObjectMapper", TransportHandlingSockJsService.class.getClassLoader());
 
 
-	private final Map<TransportType, TransportHandler> handlers = new HashMap<>();
+	private final Map<TransportType, TransportHandler> handlers = new EnumMap<>(TransportType.class);
 
 	@Nullable
 	private SockJsMessageCodec messageCodec;
