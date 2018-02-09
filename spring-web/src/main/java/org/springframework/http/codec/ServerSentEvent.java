@@ -239,7 +239,7 @@ public class ServerSentEvent<T> {
 
         @Override
         public ServerSentEvent<T> build() {
-            return new ServerSentEvent<T>(this.id, this.event, this.retry, this.comment, this.data);
+            return new ServerSentEvent<>(this.id, this.event, this.retry, this.comment, this.data);
         }
     }
 

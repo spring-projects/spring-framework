@@ -46,7 +46,7 @@ public class ReactorNettyTcpStompClient extends StompClientSupport {
 	 * @param port the port
 	 */
 	public ReactorNettyTcpStompClient(String host, int port) {
-		this.tcpClient = new ReactorNettyTcpClient<byte[]>(host, port, new StompReactorNettyCodec());
+		this.tcpClient = new ReactorNettyTcpClient<>(host, port, new StompReactorNettyCodec());
 	}
 
 	/**

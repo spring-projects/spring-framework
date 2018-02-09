@@ -133,7 +133,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 				httpEntity = (HttpEntity<?>) returnValue;
 			}
 			else if (returnValue instanceof HttpHeaders) {
-				httpEntity = new ResponseEntity<Void>((HttpHeaders) returnValue, HttpStatus.OK);
+				httpEntity = new ResponseEntity<>((HttpHeaders) returnValue, HttpStatus.OK);
 			}
 			else {
 				throw new IllegalArgumentException(
