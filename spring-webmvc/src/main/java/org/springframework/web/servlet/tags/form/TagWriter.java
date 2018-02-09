@@ -191,7 +191,7 @@ public class TagWriter {
 	}
 
 	private boolean inTag() {
-		return this.tagState.size() > 0;
+		return !this.tagState.isEmpty();
 	}
 
 	private TagStateEntry currentState() {

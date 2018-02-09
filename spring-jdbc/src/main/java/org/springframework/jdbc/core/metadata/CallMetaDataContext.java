@@ -293,7 +293,7 @@ public class CallMetaDataContext {
 			if (this.outParameterNames.size() > 1) {
 				logger.warn("Accessing single output value when procedure has more than one output parameter");
 			}
-			return (this.outParameterNames.size() > 0 ? this.outParameterNames.get(0) : null);
+			return (!this.outParameterNames.isEmpty() ? this.outParameterNames.get(0) : null);
 		}
 	}
 
@@ -388,7 +388,7 @@ public class CallMetaDataContext {
 				SqlParameter param;
 				if (meta.getParameterType() == DatabaseMetaData.procedureColumnReturn) {
 					param = declaredParams.get(getFunctionReturnName());
-					if (param == null && getOutParameterNames().size() > 0) {
+					if (param == null && !getOutParameterNames().isEmpty()) {
 						param = declaredParams.get(getOutParameterNames().get(0).toLowerCase());
 					}
 					if (param == null) {

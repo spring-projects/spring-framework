@@ -40,7 +40,7 @@ class DatabasePopulatorConfigUtils {
 
 	public static void setDatabasePopulator(Element element, BeanDefinitionBuilder builder) {
 		List<Element> scripts = DomUtils.getChildElementsByTagName(element, "script");
-		if (scripts.size() > 0) {
+		if (!scripts.isEmpty()) {
 			builder.addPropertyValue("databasePopulator", createDatabasePopulator(element, scripts, "INIT"));
 			builder.addPropertyValue("databaseCleaner", createDatabasePopulator(element, scripts, "DESTROY"));
 		}
