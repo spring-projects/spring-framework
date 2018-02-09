@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.util.StringUtils;
  * This class can be extended to provide database specific behavior.
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @since 2.5
  */
 public class GenericCallMetaDataProvider implements CallMetaDataProvider {
@@ -342,6 +343,12 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 							"Unable to determine the correct call signature for '" + metaDataProcedureName +
 							"' - package name should be specified separately using '.withCatalogName(\"" +
 							packageName + "\")'");
+				}
+				else if ("Oracle".equals(databaseMetaData.getDatabaseProductName())) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Oracle JDBC driver did not return procedure/function/signature for '" +
+								metaDataProcedureName + "' - assuming a non-exposed synonym");
+					}
 				}
 				else {
 					throw new InvalidDataAccessApiUsageException(
