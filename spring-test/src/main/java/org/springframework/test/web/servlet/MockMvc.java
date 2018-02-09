@@ -65,7 +65,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  */
 public final class MockMvc {
 
-	static String MVC_RESULT_ATTRIBUTE = MockMvc.class.getName().concat(".MVC_RESULT_ATTRIBUTE");
+	static final String MVC_RESULT_ATTRIBUTE = MockMvc.class.getName().concat(".MVC_RESULT_ATTRIBUTE");
 
 	private final TestDispatcherServlet servlet;
 

@@ -47,24 +47,24 @@ public abstract class VfsUtils {
 	private static final String VFS3_PKG = "org.jboss.vfs.";
 	private static final String VFS_NAME = "VFS";
 
-	private static Method VFS_METHOD_GET_ROOT_URL;
-	private static Method VFS_METHOD_GET_ROOT_URI;
+	private static final Method VFS_METHOD_GET_ROOT_URL;
+	private static final Method VFS_METHOD_GET_ROOT_URI;
 
-	private static Method VIRTUAL_FILE_METHOD_EXISTS;
-	private static Method VIRTUAL_FILE_METHOD_GET_INPUT_STREAM;
-	private static Method VIRTUAL_FILE_METHOD_GET_SIZE;
-	private static Method VIRTUAL_FILE_METHOD_GET_LAST_MODIFIED;
-	private static Method VIRTUAL_FILE_METHOD_TO_URL;
-	private static Method VIRTUAL_FILE_METHOD_TO_URI;
-	private static Method VIRTUAL_FILE_METHOD_GET_NAME;
-	private static Method VIRTUAL_FILE_METHOD_GET_PATH_NAME;
-	private static Method VIRTUAL_FILE_METHOD_GET_CHILD;
+	private static final Method VIRTUAL_FILE_METHOD_EXISTS;
+	private static final Method VIRTUAL_FILE_METHOD_GET_INPUT_STREAM;
+	private static final Method VIRTUAL_FILE_METHOD_GET_SIZE;
+	private static final Method VIRTUAL_FILE_METHOD_GET_LAST_MODIFIED;
+	private static final Method VIRTUAL_FILE_METHOD_TO_URL;
+	private static final Method VIRTUAL_FILE_METHOD_TO_URI;
+	private static final Method VIRTUAL_FILE_METHOD_GET_NAME;
+	private static final Method VIRTUAL_FILE_METHOD_GET_PATH_NAME;
+	private static final Method VIRTUAL_FILE_METHOD_GET_CHILD;
 
-	protected static Class<?> VIRTUAL_FILE_VISITOR_INTERFACE;
-	protected static Method VIRTUAL_FILE_METHOD_VISIT;
+	protected static final Class<?> VIRTUAL_FILE_VISITOR_INTERFACE;
+	protected static final Method VIRTUAL_FILE_METHOD_VISIT;
 
-	private static Field VISITOR_ATTRIBUTES_FIELD_RECURSE;
-	private static Method GET_PHYSICAL_FILE;
+	private static final Field VISITOR_ATTRIBUTES_FIELD_RECURSE;
+	private static final Method GET_PHYSICAL_FILE;
 
 	static {
 		ClassLoader loader = VfsUtils.class.getClassLoader();

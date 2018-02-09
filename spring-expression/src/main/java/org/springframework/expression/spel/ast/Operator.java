@@ -238,9 +238,9 @@ public abstract class Operator extends SpelNodeImpl {
 	 */
 	protected static class DescriptorComparison {
 
-		static DescriptorComparison NOT_NUMBERS = new DescriptorComparison(false, false, ' ');
+		static final DescriptorComparison NOT_NUMBERS = new DescriptorComparison(false, false, ' ');
 
-		static DescriptorComparison INCOMPATIBLE_NUMBERS = new DescriptorComparison(true, false, ' ');
+		static final DescriptorComparison INCOMPATIBLE_NUMBERS = new DescriptorComparison(true, false, ' ');
 
 		final boolean areNumbers;  // Were the two compared descriptor both for numbers?
 

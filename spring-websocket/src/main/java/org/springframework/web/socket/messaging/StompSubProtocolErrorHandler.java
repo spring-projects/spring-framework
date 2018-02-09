@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  */
 public class StompSubProtocolErrorHandler implements SubProtocolErrorHandler<byte[]> {
 
-	private static byte[] EMPTY_PAYLOAD = new byte[0];
+	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
 
 	@Override
