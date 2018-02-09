@@ -26,7 +26,6 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.text.MessageFormat;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -370,11 +369,8 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 					if (encoding == null) {
 						encoding = "ISO-8859-1";
 					}
-					try {
-						return loadBundle(new InputStreamReader(stream, encoding));
-					}
-					finally {
-						stream.close();
+					try (InputStreamReader bundleReader = new InputStreamReader(stream, encoding)) {
+						return loadBundle(bundleReader);
 					}
 				}
 				else {
