@@ -43,7 +43,6 @@ import java.util.TreeSet;
 import java.util.concurrent.Callable;
 
 import org.hamcrest.Matchers;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -1338,7 +1337,6 @@ public class ResolvableTypeTests {
 		assertTrue(setClass.isAssignableFrom(fromReturnType));
 	}
 
-	@Ignore
 	@Test
 	public void testSpr16456() throws Exception {
 		ResolvableType genericType = ResolvableType.forField(
