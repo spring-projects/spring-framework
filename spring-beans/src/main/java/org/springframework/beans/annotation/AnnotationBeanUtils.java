@@ -65,16 +65,23 @@ public abstract class AnnotationBeanUtils {
 		Set<String> excluded = new HashSet<>(Arrays.asList(excludedProperties));
 		Method[] annotationProperties = ann.annotationType().getDeclaredMethods();
 		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(bean);
-		for (Method annotationProperty : annotationProperties) {
-			String propertyName = annotationProperty.getName();
-			if (!excluded.contains(propertyName) && bw.isWritableProperty(propertyName)) {
-				Object value = ReflectionUtils.invokeMethod(annotationProperty, ann);
-				if (valueResolver != null && value instanceof String) {
-					value = valueResolver.resolveStringValue((String) value);
-				}
-				bw.setPropertyValue(propertyName, value);
-			}
-		}
+		Arrays.stream(annotationProperties)
+				.filter(annotationProperty -> isNotExcluded(annotationProperty, excluded, bw))
+				.forEach(annotationProperty -> resolveValue(annotationProperty, ann, valueResolver, bw));
 	}
 
+	private static void resolveValue(Method annotationProperty, Annotation annotation,
+			@Nullable StringValueResolver valueResolver, BeanWrapper bw) {
+
+		Object value = ReflectionUtils.invokeMethod(annotationProperty, annotation);
+		if (valueResolver != null && value instanceof String) {
+			value = valueResolver.resolveStringValue((String) value);
+		}
+		bw.setPropertyValue(annotationProperty.getName(), value);
+	}
+
+	private static boolean isNotExcluded(Method annotationProperty, Set<String> excludedProperties, BeanWrapper wrapper) {
+		return !excludedProperties.contains(annotationProperty.getName())
+				&& wrapper.isWritableProperty(annotationProperty.getName());
+	}
 }
