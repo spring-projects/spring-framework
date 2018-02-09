@@ -24,6 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -249,7 +250,7 @@ public class ReactiveAdapterRegistry {
 			registry.registerReactiveType(
 					multiValue(io.reactivex.Flowable.class, io.reactivex.Flowable::empty),
 					source -> (io.reactivex.Flowable<?>) source,
-					source-> io.reactivex.Flowable.fromPublisher(source)
+					Flowable::fromPublisher
 			);
 			registry.registerReactiveType(
 					multiValue(io.reactivex.Observable.class, io.reactivex.Observable::empty),
