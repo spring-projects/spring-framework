@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,15 +142,18 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 						String nestedField = bindingResult.getNestedPath() + field;
 						if ("".equals(nestedField)) {
 							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode);
-							bindingResult.addError(new ObjectError(
-									errors.getObjectName(), errorCodes, errorArgs, violation.getMessage()));
+							ObjectError error = new ObjectError(
+									errors.getObjectName(), errorCodes, errorArgs, violation.getMessage());
+							error.initSource(violation);
+							bindingResult.addError(error);
 						}
 						else {
 							Object rejectedValue = getRejectedValue(field, violation, bindingResult);
 							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode, field);
-							bindingResult.addError(new FieldError(
-									errors.getObjectName(), nestedField, rejectedValue, false,
-									errorCodes, errorArgs, violation.getMessage()));
+							FieldError error = new FieldError(errors.getObjectName(), nestedField,
+									rejectedValue, false, errorCodes, errorArgs, violation.getMessage());
+							error.initSource(violation);
+							bindingResult.addError(error);
 						}
 					}
 					else {

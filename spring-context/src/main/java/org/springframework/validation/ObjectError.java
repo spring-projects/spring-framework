@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,9 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 
 	private final String objectName;
 
+	@Nullable
+	private Object source;
+
 
 	/**
 	 * Create a new instance of the ObjectError class.
@@ -70,11 +73,30 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 		return this.objectName;
 	}
 
-
-	@Override
-	public String toString() {
-		return "Error in object '" + this.objectName + "': " + resolvableToString();
+	/**
+	 * Initialize the source behind this error: possibly an {@link Exception}
+	 * (typically {@link org.springframework.beans.PropertyAccessException})
+	 * or a Bean Validation {@link javax.validation.ConstraintViolation}.
+	 * @param source the source object
+	 * @since 5.0.4
+	 */
+	public void initSource(Object source) {
+		Assert.state(this.source == null, "Source already initialized");
+		this.source = source;
 	}
+
+	/**
+	 * Return the source behind this error: possibly an {@link Exception}
+	 * (typically {@link org.springframework.beans.PropertyAccessException})
+	 * or a Bean Validation {@link javax.validation.ConstraintViolation}.
+	 * @return the source object, or {@code null} if none
+	 * @since 5.0.4
+	 */
+	@Nullable
+	public Object getSource() {
+		return this.source;
+	}
+
 
 	@Override
 	public boolean equals(@Nullable Object other) {
@@ -91,6 +113,11 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 	@Override
 	public int hashCode() {
 		return super.hashCode() * 29 + getObjectName().hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return "Error in object '" + this.objectName + "': " + resolvableToString();
 	}
 
 }
