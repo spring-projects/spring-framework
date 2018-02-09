@@ -45,7 +45,7 @@ import org.springframework.lang.Nullable;
 class InstantiationModelAwarePointcutAdvisorImpl
 		implements InstantiationModelAwarePointcutAdvisor, AspectJPrecedenceInformation, Serializable {
 
-	private static Advice EMPTY_ADVICE = new Advice() {};
+	private static final Advice EMPTY_ADVICE = new Advice() {};
 
 
 	private final AspectJExpressionPointcut declaredPointcut;

@@ -44,7 +44,7 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
-	private static SpelNodeImpl[] NO_CHILDREN = new SpelNodeImpl[0];
+	private static final SpelNodeImpl[] NO_CHILDREN = new SpelNodeImpl[0];
 
 
 	protected int pos;  // start = top 16bits, end = bottom 16bits

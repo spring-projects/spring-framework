@@ -55,7 +55,7 @@ import org.springframework.util.StringUtils;
  */
 public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> implements JmsHeaderMapper {
 
-	private static Set<Class<?>> SUPPORTED_PROPERTY_TYPES = new HashSet<>(Arrays.asList(new Class<?>[] {
+	private static final Set<Class<?>> SUPPORTED_PROPERTY_TYPES = new HashSet<>(Arrays.asList(new Class<?>[] {
 			Boolean.class, Byte.class, Double.class, Float.class, Integer.class, Long.class, Short.class, String.class}));
 
 
