@@ -274,7 +274,7 @@ configure(rootProject) {
 		testCompile("javax.servlet:javax.servlet-api:3.1.0")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-		testCompile("org.hibernate:hibernate-core:5.1.10.Final")
+		testCompile("org.hibernate:hibernate-core:5.1.12.Final")
 	}
 
 	artifacts {
