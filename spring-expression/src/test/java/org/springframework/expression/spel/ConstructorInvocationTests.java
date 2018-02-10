@@ -103,7 +103,7 @@ public class ConstructorInvocationTests extends AbstractExpressionTests {
 		eContext.setRootObject(new Tester());
 		eContext.setVariable("bar", 3);
 		Object o = expr.getValue(eContext);
-		assertEquals(o, 3);
+		assertEquals(3, o);
 		assertEquals(1, parser.parseExpression("counter").getValue(eContext));
 
 		// Now the expression has cached that throwException(int) is the right thing to

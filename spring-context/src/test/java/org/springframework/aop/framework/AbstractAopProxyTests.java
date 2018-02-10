@@ -1064,12 +1064,12 @@ public abstract class AbstractAopProxyTests {
 		pc.addAdvisor(dp);
 		pc.setTarget(tb);
 		ITestBean it = (ITestBean) createProxy(pc);
-		assertEquals(dp.count, 0);
+		assertEquals(0, dp.count);
 		it.getAge();
-		assertEquals(dp.count, 1);
+		assertEquals(1, dp.count);
 		it.setAge(11);
-		assertEquals(it.getAge(), 11);
-		assertEquals(dp.count, 2);
+		assertEquals(11, it.getAge());
+		assertEquals(2, dp.count);
 	}
 
 	@Test
@@ -1083,16 +1083,16 @@ public abstract class AbstractAopProxyTests {
 		this.mockTargetSource.setTarget(tb);
 		pc.setTargetSource(mockTargetSource);
 		ITestBean it = (ITestBean) createProxy(pc);
-		assertEquals(dp.count, 0);
+		assertEquals(0, dp.count);
 		it.getAge();
 		// Statically vetoed
 		assertEquals(0, dp.count);
 		it.setAge(11);
-		assertEquals(it.getAge(), 11);
-		assertEquals(dp.count, 1);
+		assertEquals(11, it.getAge());
+		assertEquals(1, dp.count);
 		// Applies statically but not dynamically
 		it.setName("joe");
-		assertEquals(dp.count, 1);
+		assertEquals(1, dp.count);
 	}
 
 	@Test

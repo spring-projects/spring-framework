@@ -518,7 +518,7 @@ public class BeanWrapperGenericsTests {
 		assertEquals("y", bw.getPropertyValue("data['x']"));
 
 		bw.setPropertyValue("data['message']", "it works!");
-		assertEquals(data.get("message"), "it works!");
+		assertEquals("it works!", data.get("message"));
 	}
 
 

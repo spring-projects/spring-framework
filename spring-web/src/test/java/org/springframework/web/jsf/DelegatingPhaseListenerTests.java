@@ -51,7 +51,7 @@ public class DelegatingPhaseListenerTests {
 		TestListener target = new TestListener();
 		beanFactory.addBean("testListener", target);
 
-		assertEquals(delPhaseListener.getPhaseId(), PhaseId.ANY_PHASE);
+		assertEquals(PhaseId.ANY_PHASE, delPhaseListener.getPhaseId());
 		PhaseEvent event = new PhaseEvent(facesContext, PhaseId.INVOKE_APPLICATION, new MockLifecycle());
 
 		delPhaseListener.beforePhase(event);
@@ -68,7 +68,7 @@ public class DelegatingPhaseListenerTests {
 		beanFactory.addBean("testListener1", target1);
 		beanFactory.addBean("testListener2", target2);
 
-		assertEquals(delPhaseListener.getPhaseId(), PhaseId.ANY_PHASE);
+		assertEquals(PhaseId.ANY_PHASE, delPhaseListener.getPhaseId());
 		PhaseEvent event = new PhaseEvent(facesContext, PhaseId.INVOKE_APPLICATION, new MockLifecycle());
 
 		delPhaseListener.beforePhase(event);

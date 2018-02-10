@@ -365,7 +365,7 @@ public class AnnotationMetadataTests {
 			assertArrayEquals(new String[] { Void.class.getName() }, (String[]) optionalArray[0].get("classArray"));
 			assertArrayEquals(new String[] { Void.class.getName() }, optionalArray[0].getStringArray("classArray"));
 
-			assertEquals(metadata.getAnnotationAttributes(DirectAnnotation.class.getName()).get("value"), "direct");
+			assertEquals("direct", metadata.getAnnotationAttributes(DirectAnnotation.class.getName()).get("value"));
 			allMeta = metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("value");
 			assertThat(new HashSet<>(allMeta), is(equalTo(new HashSet<Object>(Arrays.asList("direct", "meta")))));
 		}
