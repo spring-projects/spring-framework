@@ -143,6 +143,7 @@ class DefaultMvcResult implements MvcResult {
 					Thread.sleep(100);
 				}
 				catch (InterruptedException ex) {
+					Thread.currentThread().interrupt();
 					throw new IllegalStateException("Interrupted while waiting for " +
 							"async result to be set for handler [" + this.handler + "]", ex);
 				}

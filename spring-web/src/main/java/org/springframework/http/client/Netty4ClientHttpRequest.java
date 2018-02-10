@@ -93,6 +93,7 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 			return executeAsync().get();
 		}
 		catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
 			throw new IOException(ex.getMessage(), ex);
 		}
 		catch (ExecutionException ex) {

@@ -421,6 +421,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 				return this.sessionFactoryFuture.get();
 			}
 			catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
 				throw new IllegalStateException("Interrupted during initialization of Hibernate SessionFactory: " +
 						ex.getMessage());
 			}
