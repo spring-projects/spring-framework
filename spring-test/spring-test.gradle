@@ -36,7 +36,7 @@ dependencies {
 	optional("junit:junit:4.12")
 	optional("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
 	optional("org.apiguardian:apiguardian-api:1.0.0")  // for compiling against JUnit 5 without warnings
-	optional("org.testng:testng:6.13.1")
+	optional("org.testng:testng:6.14.2")
 	optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 	optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 	optional("org.hamcrest:hamcrest-core:1.3")
@@ -46,10 +46,10 @@ dependencies {
 	optional("net.sourceforge.htmlunit:htmlunit:2.29") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-	optional("org.seleniumhq.selenium:htmlunit-driver:2.29.0") {
+	optional("org.seleniumhq.selenium:htmlunit-driver:2.29.1") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-	optional("org.seleniumhq.selenium:selenium-java:3.8.1") {
+	optional("org.seleniumhq.selenium:selenium-java:3.9.1") {
 		exclude group: "commons-logging", module: "commons-logging"
 		exclude group: "io.netty", module: "netty"
 	}
