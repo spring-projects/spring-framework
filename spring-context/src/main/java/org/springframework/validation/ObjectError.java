@@ -38,7 +38,7 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 	private final String objectName;
 
 	@Nullable
-	private Object source;
+	private transient Object source;
 
 
 	/**
@@ -77,6 +77,8 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 	 * Initialize the source behind this error: possibly an {@link Exception}
 	 * (typically {@link org.springframework.beans.PropertyAccessException})
 	 * or a Bean Validation {@link javax.validation.ConstraintViolation}.
+	 * <p>Note that any such source object is being stored as transient:
+	 * that is, it won't be part of a serialized error representation.
 	 * @param source the source object
 	 * @since 5.0.4
 	 */
@@ -89,7 +91,8 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 	 * Return the source behind this error: possibly an {@link Exception}
 	 * (typically {@link org.springframework.beans.PropertyAccessException})
 	 * or a Bean Validation {@link javax.validation.ConstraintViolation}.
-	 * @return the source object, or {@code null} if none
+	 * @return the source object, or {@code null} if none available
+	 * (none specified or not available anymore after deserialization)
 	 * @since 5.0.4
 	 */
 	@Nullable
