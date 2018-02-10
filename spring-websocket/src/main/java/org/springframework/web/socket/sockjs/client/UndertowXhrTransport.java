@@ -54,6 +54,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.socket.CloseStatus;
@@ -276,7 +277,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 			try {
 				ClientRequest request = new ClientRequest().setMethod(method).setPath(url.getPath());
 				request.getRequestHeaders().add(HttpString.tryFromString(HttpHeaders.HOST), url.getHost());
-				if (body != null && !body.isEmpty()) {
+				if (StringUtils.hasLength(body)) {
 					HttpString headerName = HttpString.tryFromString(HttpHeaders.CONTENT_LENGTH);
 					request.getRequestHeaders().add(headerName, body.length());
 				}
