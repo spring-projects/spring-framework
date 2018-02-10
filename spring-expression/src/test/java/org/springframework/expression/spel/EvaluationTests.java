@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,30 +110,6 @@ public class EvaluationTests extends AbstractExpressionTests {
 
 		o = parser.parseExpression("wibble2.bar").getValue(ctx);
 	}
-
-
-	@SuppressWarnings("rawtypes")
-	static class TestClass {
-		public Foo wibble;
-		private Foo wibble2;
-		public Map map;
-		public Map<String, Integer> mapStringToInteger;
-		public List<String> list;
-		public List list2;
-		private Map map2;
-		private List<String> foo;
-
-		public Map getMap2() { return this.map2; }
-		public Foo getWibble2() { return this.wibble2; }
-		public List<String> getFoo() { return this.foo; }
-		public void setFoo(List<String> newfoo) { this.foo = newfoo; }
-	}
-
-	public static class Foo {
-		public Foo() {}
-		public String bar = "hello";
-	}
-
 
 	@Test
 	public void testElvis01() {
@@ -1477,6 +1453,32 @@ public class EvaluationTests extends AbstractExpressionTests {
 	}
 
 
+	@SuppressWarnings("rawtypes")
+	static class TestClass {
+
+		public Foo wibble;
+		private Foo wibble2;
+		public Map map;
+		public Map<String, Integer> mapStringToInteger;
+		public List<String> list;
+		public List list2;
+		private Map map2;
+		private List<String> foo;
+
+		public Map getMap2() { return this.map2; }
+		public Foo getWibble2() { return this.wibble2; }
+		public List<String> getFoo() { return this.foo; }
+		public void setFoo(List<String> newfoo) { this.foo = newfoo; }
+	}
+
+	public static class Foo {
+
+		public String bar = "hello";
+
+		public Foo() {}
+	}
+
+
 	static class MyBeanResolver implements BeanResolver {
 
 		@Override
@@ -1487,7 +1489,6 @@ public class EvaluationTests extends AbstractExpressionTests {
 			}
 			throw new AccessException("not heard of "+beanName);
 		}
-
 	}
 
 }

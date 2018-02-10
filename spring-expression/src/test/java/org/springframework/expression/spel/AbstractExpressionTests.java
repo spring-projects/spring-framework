@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,7 +142,7 @@ public abstract class AbstractExpressionTests {
 		else {
 			assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
 		}
-		assertNull("Type of the result was not as expected.  Expected '" + expectedClassOfResult +
+		assertTrue("Type of the result was not as expected.  Expected '" + expectedClassOfResult +
 				"' but result was of type '" + resultType + "'", expectedClassOfResult.equals(resultType));
 
 		boolean isWritable = expr.isWritable(eContext);
