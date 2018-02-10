@@ -193,7 +193,7 @@ public class BeanUtilsTests {
 		source.setFlag2(true);
 		InvalidProperty target = new InvalidProperty();
 		BeanUtils.copyProperties(source, target);
-		assertEquals(target.getName(), "name");
+		assertEquals("name", target.getName());
 		assertTrue(target.getFlag1());
 		assertTrue(target.getFlag2());
 	}

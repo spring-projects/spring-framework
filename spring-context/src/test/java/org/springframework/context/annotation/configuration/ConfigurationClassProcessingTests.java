@@ -154,7 +154,7 @@ public class ConfigurationClassProcessingTests {
 	public void simplestPossibleConfig() {
 		BeanFactory factory = initBeanFactory(SimplestPossibleConfig.class);
 		String stringBean = factory.getBean("stringBean", String.class);
-		assertEquals(stringBean, "foo");
+		assertEquals("foo", stringBean);
 	}
 
 	@Test
@@ -163,7 +163,7 @@ public class ConfigurationClassProcessingTests {
 		assertEquals(Object.class, factory.getType("stringBean"));
 		assertFalse(factory.isTypeMatch("stringBean", String.class));
 		String stringBean = factory.getBean("stringBean", String.class);
-		assertEquals(stringBean, "foo");
+		assertEquals("foo", stringBean);
 	}
 
 	@Test

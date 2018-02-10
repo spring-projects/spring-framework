@@ -194,7 +194,7 @@ public class StoredProcedureTests {
 		t.setExceptionTranslator(new SQLStateSQLExceptionTranslator());
 		StoredProcedureConfiguredViaJdbcTemplate sp = new StoredProcedureConfiguredViaJdbcTemplate(t);
 
-		assertEquals(sp.execute(11), 5);
+		assertEquals(5, sp.execute(11));
 		assertEquals(1, t.calls);
 
 		verify(callableStatement).setObject(1, 11, Types.INTEGER);
@@ -216,7 +216,7 @@ public class StoredProcedureTests {
 		JdbcTemplate t = new JdbcTemplate();
 		t.setDataSource(dataSource);
 		StoredProcedureConfiguredViaJdbcTemplate sp = new StoredProcedureConfiguredViaJdbcTemplate(t);
-		assertEquals(sp.execute(1106), 4);
+		assertEquals(4, sp.execute(1106));
 		verify(callableStatement).setObject(1, 1106, Types.INTEGER);
 		verify(callableStatement).registerOutParameter(2, Types.INTEGER);
 	}

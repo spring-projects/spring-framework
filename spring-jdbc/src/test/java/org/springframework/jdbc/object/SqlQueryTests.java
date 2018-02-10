@@ -615,7 +615,7 @@ public class SqlQueryTests  {
 		ids.add(2);
 		List<Customer> cust = query.findCustomers(ids);
 
-		assertEquals("We got two customers back", cust.size(), 2);
+		assertEquals("We got two customers back", 2, cust.size());
 		assertEquals("First customer id was assigned correctly", cust.get(0).getId(), 1);
 		assertEquals("First customer forename was assigned correctly", cust.get(0).getForename(), "rod");
 		assertEquals("Second customer id was assigned correctly", cust.get(1).getId(), 2);
@@ -664,7 +664,7 @@ public class SqlQueryTests  {
 		CustomerQuery query = new CustomerQuery(dataSource);
 		List<Customer> cust = query.findCustomers(1);
 
-		assertEquals("We got two customers back", cust.size(), 2);
+		assertEquals("We got two customers back", 2, cust.size());
 		assertEquals("First customer id was assigned correctly", cust.get(0).getId(), 1);
 		assertEquals("First customer forename was assigned correctly", cust.get(0).getForename(), "rod");
 		assertEquals("Second customer id was assigned correctly", cust.get(1).getId(), 2);

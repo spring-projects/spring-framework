@@ -70,7 +70,7 @@ public abstract class AbstractExpressionTests {
 			if (expectedValue == null) {
 				return;  // no point doing other checks
 			}
-			assertEquals("Expression returned null value, but expected '" + expectedValue + "'", expectedValue, null);
+			assertNull("Expression returned null value, but expected '" + expectedValue + "'", expectedValue);
 		}
 
 		Class<?> resultType = value.getClass();
@@ -100,7 +100,7 @@ public abstract class AbstractExpressionTests {
 			if (expectedValue == null) {
 				return;  // no point doing other checks
 			}
-			assertEquals("Expression returned null value, but expected '" + expectedValue + "'", expectedValue, null);
+			assertNull("Expression returned null value, but expected '" + expectedValue + "'", expectedValue);
 		}
 
 		Class<?> resultType = value.getClass();
@@ -132,7 +132,7 @@ public abstract class AbstractExpressionTests {
 			if (expectedValue == null) {
 				return;  // no point doing other checks
 			}
-			assertEquals("Expression returned null value, but expected '" + expectedValue + "'", expectedValue, null);
+			assertNull("Expression returned null value, but expected '" + expectedValue + "'", expectedValue);
 		}
 		Class<? extends Object> resultType = value.getClass();
 		if (expectedValue instanceof String) {
@@ -142,8 +142,8 @@ public abstract class AbstractExpressionTests {
 		else {
 			assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
 		}
-		assertEquals("Type of the result was not as expected.  Expected '" + expectedClassOfResult +
-				"' but result was of type '" + resultType + "'", expectedClassOfResult.equals(resultType), true);
+		assertNull("Type of the result was not as expected.  Expected '" + expectedClassOfResult +
+				"' but result was of type '" + resultType + "'", expectedClassOfResult.equals(resultType));
 
 		boolean isWritable = expr.isWritable(eContext);
 		if (isWritable != shouldBeWritable) {
