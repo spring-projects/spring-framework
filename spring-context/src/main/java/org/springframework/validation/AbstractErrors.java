@@ -17,11 +17,12 @@
 package org.springframework.validation;
 
 import java.io.Serializable;
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.EmptyStackException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
@@ -40,7 +41,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 
 	private String nestedPath = "";
 
-	private final Stack<String> nestedPathStack = new Stack<>();
+	private final Deque<String> nestedPathStack = new ArrayDeque<>();
 
 
 	@Override
