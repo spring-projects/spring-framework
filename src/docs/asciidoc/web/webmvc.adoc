@@ -2077,7 +2077,7 @@ alternatively set `@ModelAttribute(binding=false)` as shown below:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-@ModelAttribute
+	@ModelAttribute
 	public AccountForm setUpForm() {
 		return new AccountForm();
 	}
