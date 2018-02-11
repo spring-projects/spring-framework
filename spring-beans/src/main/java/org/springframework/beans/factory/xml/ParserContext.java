@@ -16,7 +16,8 @@
 
 package org.springframework.beans.factory.xml;
 
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -46,7 +47,7 @@ public final class ParserContext {
 	@Nullable
 	private BeanDefinition containingBeanDefinition;
 
-	private final Stack<ComponentDefinition> containingComponents = new Stack<>();
+	private final Deque<ComponentDefinition> containingComponents = new ArrayDeque<>();
 
 
 	public ParserContext(XmlReaderContext readerContext, BeanDefinitionParserDelegate delegate) {
@@ -96,7 +97,7 @@ public final class ParserContext {
 	@Nullable
 	public CompositeComponentDefinition getContainingComponent() {
 		return (!this.containingComponents.isEmpty() ?
-				(CompositeComponentDefinition) this.containingComponents.lastElement() : null);
+				(CompositeComponentDefinition) this.containingComponents.getLast() : null);
 	}
 
 	public void pushContainingComponent(CompositeComponentDefinition containingComponent) {

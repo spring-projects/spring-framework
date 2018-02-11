@@ -16,11 +16,12 @@
 
 package org.springframework.expression.spel.standard;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
 import java.util.regex.Pattern;
 
 import org.springframework.expression.ParseException;
@@ -93,7 +94,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	private final SpelParserConfiguration configuration;
 
 	// For rules that build nodes, they are stacked here for return
-	private final Stack<SpelNodeImpl> constructedNodes = new Stack<>();
+	private final Deque<SpelNodeImpl> constructedNodes = new ArrayDeque<>();
 
 	// The expression being parsed
 	private String expressionString = "";

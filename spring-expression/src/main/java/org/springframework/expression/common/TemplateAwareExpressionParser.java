@@ -16,9 +16,10 @@
 
 package org.springframework.expression.common;
 
+import java.util.ArrayDeque;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
+import java.util.Deque;
 
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -172,7 +173,7 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 		if (nextSuffix == -1) {
 			return -1; // the suffix is missing
 		}
-		Stack<Bracket> stack = new Stack<>();
+		Deque<Bracket> stack = new ArrayDeque<>();
 		while (pos < maxlen) {
 			if (isSuffixHere(expressionString, pos, suffix) && stack.isEmpty()) {
 				break;

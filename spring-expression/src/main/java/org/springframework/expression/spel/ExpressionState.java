@@ -16,11 +16,13 @@
 
 package org.springframework.expression.spel;
 
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
@@ -58,20 +60,20 @@ public class ExpressionState {
 	private final SpelParserConfiguration configuration;
 
 	@Nullable
-	private Stack<TypedValue> contextObjects;
+	private Deque<TypedValue> contextObjects;
 
 	@Nullable
-	private Stack<VariableScope> variableScopes;
+	private LinkedList<VariableScope> variableScopes;
 
 	// When entering a new scope there is a new base object which should be used
 	// for '#this' references (or to act as a target for unqualified references).
-	// This stack captures those objects at each nested scope level.
+	// This ArrayDeque captures those objects at each nested scope level.
 	// For example:
 	// #list1.?[#list2.contains(#this)]
 	// On entering the selection we enter a new scope, and #this is now the
 	// element from list1
 	@Nullable
-	private Stack<TypedValue> scopeRootObjects;
+	private ArrayDeque<TypedValue> scopeRootObjects;
 
 
 	public ExpressionState(EvaluationContext context) {
@@ -107,14 +109,14 @@ public class ExpressionState {
 
 	public void pushActiveContextObject(TypedValue obj) {
 		if (this.contextObjects == null) {
-			this.contextObjects = new Stack<>();
+			this.contextObjects = new ArrayDeque<>();
 		}
 		this.contextObjects.push(obj);
 	}
 
 	public void popActiveContextObject() {
 		if (this.contextObjects == null) {
-			this.contextObjects = new Stack<>();
+			this.contextObjects = new ArrayDeque<>();
 		}
 		this.contextObjects.pop();
 	}
@@ -205,18 +207,18 @@ public class ExpressionState {
 		return null;
 	}
 
-	private Stack<VariableScope> initVariableScopes() {
+	private LinkedList<VariableScope> initVariableScopes() {
 		if (this.variableScopes == null) {
-			this.variableScopes = new Stack<>();
+			this.variableScopes = new LinkedList<>();
 			// top level empty variable scope
 			this.variableScopes.add(new VariableScope());
 		}
 		return this.variableScopes;
 	}
 
-	private Stack<TypedValue> initScopeRootObjects() {
+	private ArrayDeque<TypedValue> initScopeRootObjects() {
 		if (this.scopeRootObjects == null) {
-			this.scopeRootObjects = new Stack<>();
+			this.scopeRootObjects = new ArrayDeque<>();
 		}
 		return this.scopeRootObjects;
 	}

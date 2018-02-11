@@ -18,9 +18,10 @@ package org.springframework.expression.spel;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
-import java.util.Stack;
 
 import org.springframework.asm.ClassWriter;
 import org.springframework.asm.MethodVisitor;
@@ -57,7 +58,7 @@ public class CodeFlow implements Opcodes {
 	 * sub-expressions like the expressions for the argument values in a method invocation
 	 * expression.
 	 */
-	private final Stack<ArrayList<String>> compilationScopes;
+	private final Deque<ArrayList<String>> compilationScopes;
 
 	/**
 	 * As SpEL ast nodes are called to generate code for the main evaluation method
@@ -97,7 +98,7 @@ public class CodeFlow implements Opcodes {
 	public CodeFlow(String className, ClassWriter classWriter) {
 		this.className = className;
 		this.classWriter = classWriter;
-		this.compilationScopes = new Stack<>();
+		this.compilationScopes = new ArrayDeque<>();
 		this.compilationScopes.add(new ArrayList<String>());
 	}
 
