@@ -100,7 +100,7 @@ dependencies {
 	optional("javax.transaction:javax.transaction-api:1.2")  // for @javax.transaction.Transactional support
 	testCompile(project(":spring-core"))  // for CodeStyleAspect
 	testCompile(project(":spring-test"))
-	testCompile("javax.mail:javax.mail-api:1.6.0")
+	testCompile("javax.mail:javax.mail-api:1.6.1")
 }
 
 eclipse.project {
