@@ -70,7 +70,7 @@ public class MimeTypeTests {
 	}
 
 	@Test
-	public void parseCharset() throws Exception {
+	public void parseCharset() {
 		String s = "text/html; charset=iso-8859-1";
 		MimeType mimeType = MimeType.valueOf(s);
 		assertEquals("Invalid type", "text", mimeType.getType());
@@ -106,7 +106,7 @@ public class MimeTypeTests {
 	}
 
 	@Test
-	public void includes() throws Exception {
+	public void includes() {
 		MimeType textPlain = MimeTypeUtils.TEXT_PLAIN;
 		assertTrue("Equal types is not inclusive", textPlain.includes(textPlain));
 		MimeType allText = new MimeType("text");
@@ -136,7 +136,7 @@ public class MimeTypeTests {
 	}
 
 	@Test
-	public void isCompatible() throws Exception {
+	public void isCompatible() {
 		MimeType textPlain = MimeTypeUtils.TEXT_PLAIN;
 		assertTrue("Equal types is not compatible", textPlain.isCompatibleWith(textPlain));
 		MimeType allText = new MimeType("text");
@@ -166,14 +166,14 @@ public class MimeTypeTests {
 	}
 
 	@Test
-	public void testToString() throws Exception {
+	public void testToString() {
 		MimeType mimeType = new MimeType("text", "plain");
 		String result = mimeType.toString();
 		assertEquals("Invalid toString() returned", "text/plain", result);
 	}
 
 	@Test
-	public void parseMimeType() throws Exception {
+	public void parseMimeType() {
 		String s = "audio/*";
 		MimeType mimeType = MimeTypeUtils.parseMimeType(s);
 		assertEquals("Invalid type", "audio", mimeType.getType());
@@ -206,7 +206,7 @@ public class MimeTypeTests {
 	}
 
 	@Test(expected = InvalidMimeTypeException.class)
-	public void parseMimeTypeMissingTypeAndSubtype() throws Exception {
+	public void parseMimeTypeMissingTypeAndSubtype() {
 		MimeTypeUtils.parseMimeType("     ;a=b");
 	}
 
@@ -235,19 +235,13 @@ public class MimeTypeTests {
 		MimeTypeUtils.parseMimeType("text/html; charset=foo-bar");
 	}
 
-	/**
-	 * SPR-8917
-	 */
-	@Test
+	@Test  // SPR-8917
 	public void parseMimeTypeQuotedParameterValue() {
 		MimeType mimeType = MimeTypeUtils.parseMimeType("audio/*;attr=\"v>alue\"");
 		assertEquals("\"v>alue\"", mimeType.getParameter("attr"));
 	}
 
-	/**
-	 * SPR-8917
-	 */
-	@Test
+	@Test  // SPR-8917
 	public void parseMimeTypeSingleQuotedParameterValue() {
 		MimeType mimeType = MimeTypeUtils.parseMimeType("audio/*;attr='v>alue'");
 		assertEquals("'v>alue'", mimeType.getParameter("attr"));
@@ -259,7 +253,7 @@ public class MimeTypeTests {
 	}
 
 	@Test
-	public void parseMimeTypes() throws Exception {
+	public void parseMimeTypes() {
 		String s = "text/plain, text/html, text/x-dvi, text/x-c";
 		List<MimeType> mimeTypes = MimeTypeUtils.parseMimeTypes(s);
 		assertNotNull("No mime types returned", mimeTypes);

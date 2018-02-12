@@ -310,7 +310,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		if (other == null) {
 			return false;
 		}
-		if (this.isWildcardType()) {
+		if (isWildcardType()) {
 			// */* includes anything
 			return true;
 		}
@@ -318,7 +318,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 			if (getSubtype().equals(other.getSubtype())) {
 				return true;
 			}
-			if (this.isWildcardSubtype()) {
+			if (isWildcardSubtype()) {
 				// Wildcard with suffix, e.g. application/*+xml
 				int thisPlusIdx = getSubtype().lastIndexOf('+');
 				if (thisPlusIdx == -1) {
@@ -362,7 +362,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 				return true;
 			}
 			// Wildcard with suffix? e.g. application/*+xml
-			if (this.isWildcardSubtype() || other.isWildcardSubtype()) {
+			if (isWildcardSubtype() || other.isWildcardSubtype()) {
 				int thisPlusIdx = getSubtype().lastIndexOf('+');
 				int otherPlusIdx = other.getSubtype().lastIndexOf('+');
 				if (thisPlusIdx == -1 && otherPlusIdx == -1) {
