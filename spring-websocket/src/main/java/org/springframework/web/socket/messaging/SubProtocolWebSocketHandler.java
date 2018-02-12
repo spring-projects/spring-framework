@@ -242,6 +242,7 @@ public class SubProtocolWebSocketHandler
 	@Override
 	public final void start() {
 		Assert.isTrue(this.defaultProtocolHandler != null || !this.protocolHandlers.isEmpty(), "No handlers");
+
 		synchronized (this.lifecycleMonitor) {
 			this.clientOutboundChannel.subscribe(this);
 			this.running = true;
@@ -253,14 +254,16 @@ public class SubProtocolWebSocketHandler
 		synchronized (this.lifecycleMonitor) {
 			this.running = false;
 			this.clientOutboundChannel.unsubscribe(this);
-			for (WebSocketSessionHolder holder : this.sessions.values()) {
-				try {
-					holder.getSession().close(CloseStatus.GOING_AWAY);
-				}
-				catch (Throwable ex) {
-					if (logger.isWarnEnabled()) {
-						logger.warn("Failed to close '" + holder.getSession() + "': " + ex);
-					}
+		}
+
+		// Proactively notify all active WebSocket sessions
+		for (WebSocketSessionHolder holder : this.sessions.values()) {
+			try {
+				holder.getSession().close(CloseStatus.GOING_AWAY);
+			}
+			catch (Throwable ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Failed to close '" + holder.getSession() + "': " + ex);
 				}
 			}
 		}
@@ -288,6 +291,7 @@ public class SubProtocolWebSocketHandler
 		if (!session.isOpen()) {
 			return;
 		}
+
 		this.stats.incrementSessionCount(session);
 		session = decorateSession(session);
 		this.sessions.put(session.getId(), new WebSocketSessionHolder(session));
