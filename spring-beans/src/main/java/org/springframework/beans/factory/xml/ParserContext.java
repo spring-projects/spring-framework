@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public final class ParserContext {
 	@Nullable
 	private BeanDefinition containingBeanDefinition;
 
-	private final Deque<ComponentDefinition> containingComponents = new ArrayDeque<>();
+	private final Deque<CompositeComponentDefinition> containingComponents = new ArrayDeque<>();
 
 
 	public ParserContext(XmlReaderContext readerContext, BeanDefinitionParserDelegate delegate) {
@@ -96,8 +96,7 @@ public final class ParserContext {
 
 	@Nullable
 	public CompositeComponentDefinition getContainingComponent() {
-		return (!this.containingComponents.isEmpty() ?
-				(CompositeComponentDefinition) this.containingComponents.getLast() : null);
+		return this.containingComponents.peek();
 	}
 
 	public void pushContainingComponent(CompositeComponentDefinition containingComponent) {
@@ -105,7 +104,7 @@ public final class ParserContext {
 	}
 
 	public CompositeComponentDefinition popContainingComponent() {
-		return (CompositeComponentDefinition) this.containingComponents.pop();
+		return this.containingComponents.pop();
 	}
 
 	public void popAndRegisterContainingComponent() {

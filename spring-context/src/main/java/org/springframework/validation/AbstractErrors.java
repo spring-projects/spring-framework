@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.EmptyStackException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
@@ -62,12 +62,12 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	}
 
 	@Override
-	public void popNestedPath() throws IllegalArgumentException {
+	public void popNestedPath() throws IllegalStateException {
 		try {
 			String formerNestedPath = this.nestedPathStack.pop();
 			doSetNestedPath(formerNestedPath);
 		}
-		catch (EmptyStackException ex) {
+		catch (NoSuchElementException ex) {
 			throw new IllegalStateException("Cannot pop nested path: no nested path on stack");
 		}
 	}

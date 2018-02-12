@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
@@ -49,6 +50,7 @@ import org.springframework.util.CollectionUtils;
  * nodes might need.
  *
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class ExpressionState {
@@ -118,7 +120,12 @@ public class ExpressionState {
 		if (this.contextObjects == null) {
 			this.contextObjects = new ArrayDeque<>();
 		}
-		this.contextObjects.pop();
+		try {
+			this.contextObjects.pop();
+		}
+		catch (NoSuchElementException ex) {
+			throw new IllegalStateException("Cannot pop active context object: stack is empty");
+		}
 	}
 
 	public TypedValue getRootContextObject() {
@@ -197,9 +204,7 @@ public class ExpressionState {
 
 	@Nullable
 	public Object lookupLocalVariable(String name) {
-		int scopeNumber = initVariableScopes().size() - 1;
-		for (int i = scopeNumber; i >= 0; i--) {
-			VariableScope scope = initVariableScopes().get(i);
+		for (VariableScope scope : initVariableScopes()) {
 			if (scope.definesVariable(name)) {
 				return scope.lookupVariable(name);
 			}
