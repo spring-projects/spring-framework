@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	/**
 	 * Specify the maximum time allotted in milliseconds for the shutdown of
 	 * any phase (group of SmartLifecycle beans with the same 'phase' value).
-	 * The default value is 30 seconds.
+	 * <p>The default value is 30 seconds.
 	 */
 	public void setTimeoutPerShutdownPhase(long timeoutPerShutdownPhase) {
 		this.timeoutPerShutdownPhase = timeoutPerShutdownPhase;
@@ -80,13 +80,12 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	// Lifecycle implementation
 
 	/**
-	 * Start all registered beans that implement Lifecycle and are
-	 * <i>not</i> already running. Any bean that implements SmartLifecycle
-	 * will be started within its 'phase', and all phases will be ordered
-	 * from lowest to highest value. All beans that do not implement
-	 * SmartLifecycle will be started in the default phase 0. A bean
-	 * declared as a dependency of another bean will be started before
-	 * the dependent bean regardless of the declared phase.
+	 * Start all registered beans that implement {@link Lifecycle} and are <i>not</i>
+	 * already running. Any bean that implements {@link SmartLifecycle} will be
+	 * started within its 'phase', and all phases will be ordered from lowest to
+	 * highest value. All beans that do not implement {@link SmartLifecycle} will be
+	 * started in the default phase 0. A bean declared as a dependency of another bean
+	 * will be started before the dependent bean regardless of the declared phase.
 	 */
 	@Override
 	public void start() {
@@ -95,13 +94,12 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	}
 
 	/**
-	 * Stop all registered beans that implement Lifecycle and <i>are</i>
-	 * currently running. Any bean that implements SmartLifecycle
-	 * will be stopped within its 'phase', and all phases will be ordered
-	 * from highest to lowest value. All beans that do not implement
-	 * SmartLifecycle will be stopped in the default phase 0. A bean
-	 * declared as dependent on another bean will be stopped before
-	 * the dependency bean regardless of the declared phase.
+	 * Stop all registered beans that implement {@link Lifecycle} and <i>are</i>
+	 * currently running. Any bean that implements {@link SmartLifecycle} will be
+	 * stopped within its 'phase', and all phases will be ordered from highest to
+	 * lowest value. All beans that do not implement {@link SmartLifecycle} will be
+	 * stopped in the default phase 0. A bean declared as dependent on another bean
+	 * will be stopped before the dependency bean regardless of the declared phase.
 	 */
 	@Override
 	public void stop() {
@@ -127,7 +125,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	}
 
 
-	// internal helpers
+	// Internal helpers
 
 	private void startBeans(boolean autoStartupOnly) {
 		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();

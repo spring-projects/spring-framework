@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,8 +80,7 @@ public interface BindingResult extends Errors {
 	 * Extract the raw field value for the given field.
 	 * Typically used for comparison purposes.
 	 * @param field the field to check
-	 * @return the current value of the field in its raw form,
-	 * or {@code null} if not known
+	 * @return the current value of the field in its raw form, or {@code null} if not known
 	 */
 	Object getRawFieldValue(String field);
 

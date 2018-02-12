@@ -94,7 +94,7 @@ public abstract class Pointcuts {
 	@SuppressWarnings("serial")
 	private static class SetterPointcut extends StaticMethodMatcherPointcut implements Serializable {
 
-		public static SetterPointcut INSTANCE = new SetterPointcut();
+		public static final SetterPointcut INSTANCE = new SetterPointcut();
 
 		@Override
 		public boolean matches(Method method, Class<?> targetClass) {
@@ -115,7 +115,7 @@ public abstract class Pointcuts {
 	@SuppressWarnings("serial")
 	private static class GetterPointcut extends StaticMethodMatcherPointcut implements Serializable {
 
-		public static GetterPointcut INSTANCE = new GetterPointcut();
+		public static final GetterPointcut INSTANCE = new GetterPointcut();
 
 		@Override
 		public boolean matches(Method method, Class<?> targetClass) {

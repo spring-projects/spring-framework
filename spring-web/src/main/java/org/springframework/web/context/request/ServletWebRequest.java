@@ -78,7 +78,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 			"EEE MMM dd HH:mm:ss yyyy"
 	};
 
-	private static TimeZone GMT = TimeZone.getTimeZone("GMT");
+	private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
 
 	/** Checking for Servlet 3.0+ HttpServletResponse.getHeader(String) */
 	private static final boolean servlet3Present =

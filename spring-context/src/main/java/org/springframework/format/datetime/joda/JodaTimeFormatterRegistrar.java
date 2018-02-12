@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.format.datetime.joda;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 import org.joda.time.DateTime;
@@ -73,7 +73,7 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 	/**
 	 * User defined formatters.
 	 */
-	private final Map<Type, DateTimeFormatter> formatters = new HashMap<Type, DateTimeFormatter>();
+	private final Map<Type, DateTimeFormatter> formatters = new EnumMap<Type, DateTimeFormatter>(Type.class);
 
 	/**
 	 * Factories used when specific formatters have not been specified.
@@ -82,7 +82,7 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 
 
 	public JodaTimeFormatterRegistrar() {
-		this.factories = new HashMap<Type, DateTimeFormatterFactory>();
+		this.factories = new EnumMap<Type, DateTimeFormatterFactory>(Type.class);
 		for (Type type : Type.values()) {
 			this.factories.put(type, new DateTimeFormatterFactory());
 		}

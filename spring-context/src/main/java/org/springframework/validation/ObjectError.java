@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,11 +69,6 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 
 
 	@Override
-	public String toString() {
-		return "Error in object '" + this.objectName + "': " + resolvableToString();
-	}
-
-	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -88,6 +83,11 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 	@Override
 	public int hashCode() {
 		return super.hashCode() * 29 + getObjectName().hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return "Error in object '" + this.objectName + "': " + resolvableToString();
 	}
 
 }

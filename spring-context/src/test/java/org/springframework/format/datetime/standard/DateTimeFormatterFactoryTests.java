@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,32 +51,32 @@ public class DateTimeFormatterFactoryTests {
 
 
 	@Test
-	public void createDateTimeFormatter() throws Exception {
+	public void createDateTimeFormatter() {
 		assertThat(factory.createDateTimeFormatter().toString(), is(equalTo(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).toString())));
 	}
 
 	@Test
-	public void createDateTimeFormatterWithPattern() throws Exception {
+	public void createDateTimeFormatterWithPattern() {
 		factory = new DateTimeFormatterFactory("yyyyMMddHHmmss");
 		DateTimeFormatter formatter = factory.createDateTimeFormatter();
 		assertThat(formatter.format(dateTime), is("20091021121000"));
 	}
 
 	@Test
-	public void createDateTimeFormatterWithNullFallback() throws Exception {
+	public void createDateTimeFormatterWithNullFallback() {
 		DateTimeFormatter formatter = factory.createDateTimeFormatter(null);
 		assertThat(formatter, is(nullValue()));
 	}
 
 	@Test
-	public void createDateTimeFormatterWithFallback() throws Exception {
+	public void createDateTimeFormatterWithFallback() {
 		DateTimeFormatter fallback = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG);
 		DateTimeFormatter formatter = factory.createDateTimeFormatter(fallback);
 		assertThat(formatter, is(sameInstance(fallback)));
 	}
 
 	@Test
-	public void createDateTimeFormatterInOrderOfPropertyPriority() throws Exception {
+	public void createDateTimeFormatterInOrderOfPropertyPriority() {
 		factory.setStylePattern("SS");
 		String value = applyLocale(factory.createDateTimeFormatter()).format(dateTime);
 		assertTrue(value.startsWith("10/21/09"));
@@ -90,7 +90,7 @@ public class DateTimeFormatterFactoryTests {
 	}
 
 	@Test
-	public void createDateTimeFormatterWithTimeZone() throws Exception {
+	public void createDateTimeFormatterWithTimeZone() {
 		factory.setPattern("yyyyMMddHHmmss Z");
 		factory.setTimeZone(TEST_TIMEZONE);
 		ZoneId dateTimeZone = TEST_TIMEZONE.toZoneId();
