@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Test fixture for {@link org.springframework.messaging.converter.MappingJackson2MessageConverter}.
+ * Test fixture for {@link MappingJackson2MessageConverter}.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
@@ -136,6 +136,20 @@ public class MappingJackson2MessageConverterTests {
 		assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L), actual);
 	}
 
+	@Test // SPR-16486
+	public void fromMessageToMessageWithPojo() throws Exception {
+		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
+		String payload = "{\"string\":\"foo\"}";
+		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
+
+		Method method = getClass().getDeclaredMethod("handleMessage", Message.class);
+		MethodParameter param = new MethodParameter(method, 0);
+		Object actual = converter.fromMessage(message, MyBean.class, param);
+
+		assertTrue(actual instanceof MyBean);
+		assertEquals("foo", ((MyBean) actual).getString());
+	}
+
 	@Test
 	public void toMessage() throws Exception {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
@@ -228,6 +242,8 @@ public class MappingJackson2MessageConverterTests {
 	public void jsonViewPayload(@JsonView(MyJacksonView2.class) JacksonViewBean payload) {}
 
 	void handleList(List<Long> payload) {}
+
+	void handleMessage(Message<MyBean> message) {}
 
 
 	public static class MyBean {
