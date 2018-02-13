@@ -16,7 +16,6 @@
 
 package org.springframework.messaging.converter;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -34,16 +33,8 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.MimeType;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for {@link MappingJackson2MessageConverter}.
@@ -82,7 +73,7 @@ public class MappingJackson2MessageConverterTests {
 	}
 
 	@Test
-	public void fromMessage() throws Exception {
+	public void fromMessage() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		String payload = "{" +
 				"\"bytes\":\"AQI=\"," +
@@ -103,7 +94,7 @@ public class MappingJackson2MessageConverterTests {
 	}
 
 	@Test
-	public void fromMessageUntyped() throws Exception {
+	public void fromMessageUntyped() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		String payload = "{\"bytes\":\"AQI=\",\"array\":[\"Foo\",\"Bar\"],"
 				+ "\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
@@ -120,7 +111,7 @@ public class MappingJackson2MessageConverterTests {
 	}
 
 	@Test(expected = MessageConversionException.class)
-	public void fromMessageInvalidJson() throws Exception {
+	public void fromMessageInvalidJson() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		String payload = "FooBar";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
@@ -128,7 +119,7 @@ public class MappingJackson2MessageConverterTests {
 	}
 
 	@Test
-	public void fromMessageValidJsonWithUnknownProperty() throws IOException {
+	public void fromMessageValidJsonWithUnknownProperty() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		String payload = "{\"string\":\"string\",\"unknownProperty\":\"value\"}";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
@@ -158,14 +149,14 @@ public class MappingJackson2MessageConverterTests {
 
 		Method method = getClass().getDeclaredMethod("handleMessage", Message.class);
 		MethodParameter param = new MethodParameter(method, 0);
-		Object actual = converter.fromMessage(message, Message.class, param);
+		Object actual = converter.fromMessage(message, MyBean.class, param);
 
 		assertTrue(actual instanceof MyBean);
 		assertEquals("foo", ((MyBean) actual).getString());
 	}
 
 	@Test
-	public void toMessage() throws Exception {
+	public void toMessage() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		MyBean payload = new MyBean();
 		payload.setString("Foo");
