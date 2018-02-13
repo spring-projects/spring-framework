@@ -48,7 +48,7 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 	 * @param defaultImpl the default implementation class
 	 */
 	public DeclareParentsAdvisor(Class<?> interfaceType, String typePattern, Class<?> defaultImpl) {
-		this(interfaceType, typePattern, defaultImpl,
+		this(interfaceType, typePattern,
 			 new DelegatePerTargetObjectIntroductionInterceptor(defaultImpl, interfaceType));
 	}
 
@@ -59,8 +59,7 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 	 * @param delegateRef the delegate implementation object
 	 */
 	public DeclareParentsAdvisor(Class<?> interfaceType, String typePattern, Object delegateRef) {
-		this(interfaceType, typePattern, delegateRef.getClass(),
-			 new DelegatingIntroductionInterceptor(delegateRef));
+		this(interfaceType, typePattern, new DelegatingIntroductionInterceptor(delegateRef));
 	}
 
 	/**
@@ -68,10 +67,9 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 	 * (cannot use method such as init() to share common code, due the use of final fields)
 	 * @param interfaceType static field defining the introduction
 	 * @param typePattern type pattern the introduction is restricted to
-	 * @param implementationClass implementation class
 	 * @param advice delegation advice
 	 */
-	private DeclareParentsAdvisor(Class<?> interfaceType, String typePattern, Class<?> implementationClass, Advice advice) {
+	private DeclareParentsAdvisor(Class<?> interfaceType, String typePattern, Advice advice) {
 		this.introducedInterface = interfaceType;
 		ClassFilter typePatternFilter = new TypePatternClassFilter(typePattern);
 

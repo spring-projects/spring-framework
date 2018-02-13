@@ -352,7 +352,7 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 //		assertEquals("hello",rpr.read(ctx, t, "property").getValue());
 //		assertEquals("hello",rpr.read(ctx, t, "property").getValue()); // cached accessor used
 
-		PropertyAccessor optA = rpr.createOptimalAccessor(ctx, t, "property");
+		PropertyAccessor optA = rpr.createOptimalAccessor(t, "property");
 		assertTrue(optA.canRead(ctx, t, "property"));
 		assertFalse(optA.canRead(ctx, t, "property2"));
 		try {
@@ -387,7 +387,7 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 			// success
 		}
 
-		optA = rpr.createOptimalAccessor(ctx, t, "field");
+		optA = rpr.createOptimalAccessor(t, "field");
 		assertTrue(optA.canRead(ctx, t, "field"));
 		assertFalse(optA.canRead(ctx, t, "field2"));
 		try {

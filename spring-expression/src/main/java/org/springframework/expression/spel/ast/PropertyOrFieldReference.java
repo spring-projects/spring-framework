@@ -194,7 +194,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 				if (accessor.canRead(evalContext, contextObject.getValue(), name)) {
 					if (accessor instanceof ReflectivePropertyAccessor) {
 						accessor = ((ReflectivePropertyAccessor) accessor).createOptimalAccessor(
-								evalContext, contextObject.getValue(), name);
+								contextObject.getValue(), name);
 					}
 					this.cachedReadAccessor = accessor;
 					return accessor.read(evalContext, contextObject.getValue(), name);

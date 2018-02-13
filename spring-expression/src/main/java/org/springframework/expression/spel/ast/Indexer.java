@@ -575,7 +575,7 @@ public class Indexer extends SpelNodeImpl {
 					if (accessor.canRead(this.evaluationContext, this.targetObject, this.name)) {
 						if (accessor instanceof ReflectivePropertyAccessor) {
 							accessor = ((ReflectivePropertyAccessor) accessor).createOptimalAccessor(
-									this.evaluationContext, this.targetObject, this.name);
+									this.targetObject, this.name);
 						}
 						Indexer.this.cachedReadAccessor = accessor;
 						Indexer.this.cachedReadName = this.name;

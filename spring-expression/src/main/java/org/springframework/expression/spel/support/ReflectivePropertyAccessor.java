@@ -458,7 +458,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 * This method will just return the ReflectivePropertyAccessor instance if it is unable to build
 	 * something more optimal.
 	 */
-	public PropertyAccessor createOptimalAccessor(EvaluationContext evalContext, @Nullable Object target, String name) {
+	public PropertyAccessor createOptimalAccessor(@Nullable Object target, String name) {
 		// Don't be clever for arrays or null target
 		if (target == null) {
 			return this;

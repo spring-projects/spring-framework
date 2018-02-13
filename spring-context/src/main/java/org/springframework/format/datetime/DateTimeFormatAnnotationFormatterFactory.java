@@ -58,15 +58,15 @@ public class DateTimeFormatAnnotationFormatterFactory  extends EmbeddedValueReso
 
 	@Override
 	public Printer<?> getPrinter(DateTimeFormat annotation, Class<?> fieldType) {
-		return getFormatter(annotation, fieldType);
+		return getFormatter(annotation);
 	}
 
 	@Override
 	public Parser<?> getParser(DateTimeFormat annotation, Class<?> fieldType) {
-		return getFormatter(annotation, fieldType);
+		return getFormatter(annotation);
 	}
 
-	protected Formatter<Date> getFormatter(DateTimeFormat annotation, Class<?> fieldType) {
+	protected Formatter<Date> getFormatter(DateTimeFormat annotation) {
 		DateFormatter formatter = new DateFormatter();
 		String style = resolveEmbeddedValue(annotation.style());
 		if (StringUtils.hasLength(style)) {
