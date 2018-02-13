@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,15 +200,13 @@ class DefaultPathContainer implements PathContainer {
 
 		private final MultiValueMap<String, String> parameters;
 
-
-		DefaultPathSegment(String value, String valueToMatch, MultiValueMap<String, String> params) {
+		public DefaultPathSegment(String value, String valueToMatch, MultiValueMap<String, String> params) {
 			Assert.isTrue(!value.contains("/"), () -> "Invalid path segment value: " + value);
 			this.value = value;
 			this.valueToMatch = valueToMatch;
 			this.valueToMatchAsChars = valueToMatch.toCharArray();
 			this.parameters = CollectionUtils.unmodifiableMultiValueMap(params);
 		}
-
 
 		@Override
 		public String value() {
@@ -230,7 +228,6 @@ class DefaultPathContainer implements PathContainer {
 			return this.parameters;
 		}
 
-
 		@Override
 		public boolean equals(@Nullable Object other) {
 			if (this == other) {
@@ -248,7 +245,8 @@ class DefaultPathContainer implements PathContainer {
 		}
 
 		public String toString() {
-			return "[value='" + this.value + "']"; }
+			return "[value='" + this.value + "']";
+		}
 	}
 
 }

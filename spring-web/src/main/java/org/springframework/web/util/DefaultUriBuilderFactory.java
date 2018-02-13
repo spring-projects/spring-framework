@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Default implementation of {@link UriBuilderFactory} providing options to
- * pre-configure all UriBuilder instances with common properties such as a base
- * URI, encoding mode, and default URI variables.
+ * pre-configure all {@link UriBuilder} instances with common properties
+ * such as a base URI, encoding mode, and default URI variables.
  *
  * <p>Uses {@link UriComponentsBuilder} for URI building.
  *
@@ -40,7 +40,7 @@ import org.springframework.util.ObjectUtils;
  */
 public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
-	public enum EncodingMode {URI_COMPONENT, VALUES_ONLY, NONE }
+	public enum EncodingMode {URI_COMPONENT, VALUES_ONLY, NONE}
 
 
 	private final UriComponentsBuilder baseUri;
@@ -78,7 +78,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 	 * {@code UriComponentsBuilder}.
 	 */
 	public DefaultUriBuilderFactory(UriComponentsBuilder baseUri) {
-		Assert.notNull(baseUri, "'baseUri' is required.");
+		Assert.notNull(baseUri, "'baseUri' is required");
 		this.baseUri = baseUri;
 	}
 
@@ -182,13 +182,11 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 		private final UriComponentsBuilder uriComponentsBuilder;
 
-
 		public DefaultUriBuilder(String uriTemplate) {
 			this.uriComponentsBuilder = initUriComponentsBuilder(uriTemplate);
 		}
 
 		private UriComponentsBuilder initUriComponentsBuilder(String uriTemplate) {
-
 			UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(uriTemplate);
 			UriComponents uriComponents = uriComponentsBuilder.build();
 
