@@ -112,7 +112,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
 
 		HandlerMethodArgumentResolver resolver = getArgumentResolver(parameter);
-		Assert.notNull(resolver, "Unknown parameter type [" + parameter.getParameterType().getName() + "]");
+		Assert.notNull(resolver, () -> "Unknown parameter type [" + parameter.getParameterType().getName() + "]");
 		return resolver.resolveArgument(parameter, message);
 	}
 

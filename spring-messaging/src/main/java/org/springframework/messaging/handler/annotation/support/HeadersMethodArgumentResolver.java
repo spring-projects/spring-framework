@@ -70,7 +70,7 @@ public class HeadersMethodArgumentResolver implements HandlerMethodArgumentResol
 			}
 			else {
 				Method method = ReflectionUtils.findMethod(paramType, "wrap", Message.class);
-				Assert.notNull(method, "Cannot create accessor of type " + paramType + " for message " +  message);
+				Assert.notNull(method, () -> "Cannot create accessor of type " + paramType + " for message " +  message);
 				return ReflectionUtils.invokeMethod(method, null, message);
 			}
 		}

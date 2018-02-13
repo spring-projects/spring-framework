@@ -580,7 +580,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		xmlReader.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
 		for (int i = 0; i < resources.length; i++) {
 			Assert.notNull(resources[i], "Resource is null");
-			Assert.isTrue(resources[i].exists(), "Resource " + resources[i] + " does not exist");
+			Assert.isTrue(resources[i].exists(), () -> "Resource " + resources[i] + " does not exist");
 			InputSource inputSource = SaxResourceUtils.createInputSource(resources[i]);
 			schemaSources[i] = new SAXSource(xmlReader, inputSource);
 		}
