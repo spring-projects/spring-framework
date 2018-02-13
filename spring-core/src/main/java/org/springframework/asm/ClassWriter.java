@@ -1699,7 +1699,7 @@ public class ClassWriter extends ClassVisitor {
      */
     private Item addType(final Item item) {
         ++typeCount;
-        Item result = new Item(typeCount, key);
+        Item result = new Item(typeCount, item);
         put(result);
         if (typeTable == null) {
             typeTable = new Item[16];
