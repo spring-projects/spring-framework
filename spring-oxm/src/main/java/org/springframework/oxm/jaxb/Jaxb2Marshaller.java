@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -579,10 +579,10 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		XMLReader xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
 		xmlReader.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
 		for (int i = 0; i < resources.length; i++) {
-			Resource currentResource = resources[i];
-			Assert.notNull(currentResource, "Resource is null");
-			Assert.isTrue(currentResource.exists(), () -> "Resource " + currentResource + " does not exist");
-			InputSource inputSource = SaxResourceUtils.createInputSource(currentResource);
+			Resource resource = resources[i];
+			Assert.notNull(resource, "Resource is null");
+			Assert.isTrue(resource.exists(), () -> "Resource " + resource + " does not exist");
+			InputSource inputSource = SaxResourceUtils.createInputSource(resource);
 			schemaSources[i] = new SAXSource(xmlReader, inputSource);
 		}
 		SchemaFactory schemaFactory = SchemaFactory.newInstance(schemaLanguage);
@@ -1060,12 +1060,12 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		}
 
 		@Override
-		public InputStream getInputStream() throws IOException {
+		public InputStream getInputStream() {
 			return new ByteArrayInputStream(this.data, this.offset, this.length);
 		}
 
 		@Override
-		public OutputStream getOutputStream() throws IOException {
+		public OutputStream getOutputStream() {
 			throw new UnsupportedOperationException();
 		}
 
@@ -1081,11 +1081,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	}
 
 
-	private static final EntityResolver NO_OP_ENTITY_RESOLVER = new EntityResolver() {
-		@Override
-		public InputSource resolveEntity(String publicId, String systemId) {
-			return new InputSource(new StringReader(""));
-		}
-	};
+	private static final EntityResolver NO_OP_ENTITY_RESOLVER =
+			(publicId, systemId) -> new InputSource(new StringReader(""));
 
 }
