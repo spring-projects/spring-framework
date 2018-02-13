@@ -1020,6 +1020,7 @@ definitions, annotated components (i.e., classes annotated with `@Component`,
 sources are then converted internally into instances of `BeanDefinition` and used to
 load an entire Spring IoC container instance.
 
+[[beans-constructor-vs-setter-injection]]
 .Constructor-based or setter-based DI?
 ****
 Since you can mix constructor-based and setter-based DI, it is a good rule of thumb to
