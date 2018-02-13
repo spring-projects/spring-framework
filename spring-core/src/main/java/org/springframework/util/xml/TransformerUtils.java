@@ -54,15 +54,15 @@ public abstract class TransformerUtils {
 	 * Enable indenting for the supplied {@link javax.xml.transform.Transformer}.
 	 * <p>If the underlying XSLT engine is Xalan, then the special output key {@code indent-amount}
 	 * will be also be set to a value of {@link #DEFAULT_INDENT_AMOUNT} characters.
-	 * @param transformer  the target transformer
-	 * @param indentAmount the size of the indent (2 characters, 3 characters, etc.)
+	 * @param transformer the target transformer
+	 * @param indentAmount the size of the indent (2 characters, 3 characters, etc)
 	 * @see javax.xml.transform.Transformer#setOutputProperty(String, String)
 	 * @see javax.xml.transform.OutputKeys#INDENT
 	 */
 	public static void enableIndenting(Transformer transformer, int indentAmount) {
 		Assert.notNull(transformer, "Transformer must not be null");
 		if (indentAmount < 0) {
-			throw new IllegalArgumentException("The indent amount cannot be less than zero : got " + indentAmount);
+			throw new IllegalArgumentException("Invalid indent amount (must not be less than zero): " + indentAmount);
 		}
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 		try {
