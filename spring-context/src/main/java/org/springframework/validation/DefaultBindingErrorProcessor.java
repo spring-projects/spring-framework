@@ -77,7 +77,7 @@ public class DefaultBindingErrorProcessor implements BindingErrorProcessor {
 		}
 		FieldError error = new FieldError(bindingResult.getObjectName(), field, rejectedValue, true,
 				codes, arguments, ex.getLocalizedMessage());
-		error.initSource(ex);
+		error.wrap(ex);
 		bindingResult.addError(error);
 	}
 

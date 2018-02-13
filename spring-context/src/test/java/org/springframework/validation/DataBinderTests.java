@@ -238,18 +238,25 @@ public class DataBinderTests {
 
 			assertTrue("Has age errors", br.hasFieldErrors("age"));
 			assertTrue("Correct number of age errors", br.getFieldErrorCount("age") == 1);
-			assertEquals("typeMismatch", binder.getBindingResult().getFieldError("age").getCode());
 			assertEquals("32x", binder.getBindingResult().getFieldValue("age"));
-			assertEquals("32x", binder.getBindingResult().getFieldError("age").getRejectedValue());
-			assertTrue(binder.getBindingResult().getFieldError("age").getSource() instanceof TypeMismatchException);
+			FieldError ageError = binder.getBindingResult().getFieldError("age");
+			assertNotNull(ageError);
+			assertEquals("typeMismatch", ageError.getCode());
+			assertEquals("32x", ageError.getRejectedValue());
+			assertTrue(ageError.contains(TypeMismatchException.class));
+			assertTrue(ageError.contains(NumberFormatException.class));
+			assertTrue(ageError.unwrap(NumberFormatException.class).getMessage().contains("32x"));
 			assertEquals(0, tb.getAge());
 
 			assertTrue("Has touchy errors", br.hasFieldErrors("touchy"));
 			assertTrue("Correct number of touchy errors", br.getFieldErrorCount("touchy") == 1);
-			assertEquals("methodInvocation", binder.getBindingResult().getFieldError("touchy").getCode());
 			assertEquals("m.y", binder.getBindingResult().getFieldValue("touchy"));
-			assertEquals("m.y", binder.getBindingResult().getFieldError("touchy").getRejectedValue());
-			assertTrue(binder.getBindingResult().getFieldError("touchy").getSource() instanceof MethodInvocationException);
+			FieldError touchyError = binder.getBindingResult().getFieldError("touchy");
+			assertNotNull(touchyError);
+			assertEquals("methodInvocation", touchyError.getCode());
+			assertEquals("m.y", touchyError.getRejectedValue());
+			assertTrue(touchyError.contains(MethodInvocationException.class));
+			assertTrue(touchyError.unwrap(MethodInvocationException.class).getCause().getMessage().contains("a ."));
 			assertNull(tb.getTouchy());
 
 			rod = new TestBean();
@@ -331,16 +338,20 @@ public class DataBinderTests {
 
 			assertTrue("Has age errors", br.hasFieldErrors("age"));
 			assertTrue("Correct number of age errors", br.getFieldErrorCount("age") == 1);
-			assertEquals("typeMismatch", binder.getBindingResult().getFieldError("age").getCode());
 			assertEquals("32x", binder.getBindingResult().getFieldValue("age"));
-			assertEquals("32x", binder.getBindingResult().getFieldError("age").getRejectedValue());
+			FieldError ageError = binder.getBindingResult().getFieldError("age");
+			assertNotNull(ageError);
+			assertEquals("typeMismatch", ageError.getCode());
+			assertEquals("32x", ageError.getRejectedValue());
 			assertEquals(0, tb.getAge());
 
 			assertTrue("Has touchy errors", br.hasFieldErrors("touchy"));
 			assertTrue("Correct number of touchy errors", br.getFieldErrorCount("touchy") == 1);
-			assertEquals("methodInvocation", binder.getBindingResult().getFieldError("touchy").getCode());
 			assertEquals("m.y", binder.getBindingResult().getFieldValue("touchy"));
-			assertEquals("m.y", binder.getBindingResult().getFieldError("touchy").getRejectedValue());
+			FieldError touchyError = binder.getBindingResult().getFieldError("touchy");
+			assertNotNull(touchyError);
+			assertEquals("methodInvocation", touchyError.getCode());
+			assertEquals("m.y", touchyError.getRejectedValue());
 			assertNull(tb.getTouchy());
 
 			assertTrue("Does not have spouse errors", !br.hasFieldErrors("spouse"));

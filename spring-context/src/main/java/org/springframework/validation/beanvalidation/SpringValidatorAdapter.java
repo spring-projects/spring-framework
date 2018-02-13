@@ -144,7 +144,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode);
 							ObjectError error = new ObjectError(
 									errors.getObjectName(), errorCodes, errorArgs, violation.getMessage());
-							error.initSource(violation);
+							error.wrap(violation);
 							bindingResult.addError(error);
 						}
 						else {
@@ -152,7 +152,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode, field);
 							FieldError error = new FieldError(errors.getObjectName(), nestedField,
 									rejectedValue, false, errorCodes, errorArgs, violation.getMessage());
-							error.initSource(violation);
+							error.wrap(violation);
 							bindingResult.addError(error);
 						}
 					}
