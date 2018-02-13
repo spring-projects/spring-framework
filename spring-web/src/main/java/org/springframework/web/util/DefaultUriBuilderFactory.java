@@ -40,7 +40,7 @@ import org.springframework.util.ObjectUtils;
  */
 public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
-	public enum EncodingMode {URI_COMPONENT, VALUES_ONLY, NONE };
+	public enum EncodingMode {URI_COMPONENT, VALUES_ONLY, NONE }
 
 
 	private final UriComponentsBuilder baseUri;

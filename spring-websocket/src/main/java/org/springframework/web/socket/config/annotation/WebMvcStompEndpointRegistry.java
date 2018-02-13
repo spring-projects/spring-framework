@@ -90,7 +90,7 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 		WebSocketHandler actual = WebSocketHandlerDecorator.unwrap(handler);
 		if (!(actual instanceof SubProtocolWebSocketHandler)) {
 			throw new IllegalArgumentException("No SubProtocolWebSocketHandler in " + handler);
-		};
+		}
 		return (SubProtocolWebSocketHandler) actual;
 	}
 

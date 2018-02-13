@@ -254,7 +254,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		public void onComplete(AsyncEvent event) {
 			// no-op
 		}
-	};
+	}
 
 
 	private class HandlerResultSubscriber implements Subscriber<Void> {

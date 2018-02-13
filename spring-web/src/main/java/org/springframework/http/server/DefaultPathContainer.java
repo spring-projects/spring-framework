@@ -194,8 +194,6 @@ class DefaultPathContainer implements PathContainer {
 
 		private final String value;
 
-		private final char[] valueAsChars;
-
 		private final String valueToMatch;
 
 		private final char[] valueToMatchAsChars;
@@ -206,7 +204,6 @@ class DefaultPathContainer implements PathContainer {
 		DefaultPathSegment(String value, String valueToMatch, MultiValueMap<String, String> params) {
 			Assert.isTrue(!value.contains("/"), () -> "Invalid path segment value: " + value);
 			this.value = value;
-			this.valueAsChars = value.toCharArray();
 			this.valueToMatch = valueToMatch;
 			this.valueToMatchAsChars = valueToMatch.toCharArray();
 			this.parameters = CollectionUtils.unmodifiableMultiValueMap(params);

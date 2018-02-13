@@ -16,11 +16,9 @@
 
 package org.springframework.web.reactive.result;
 
-import java.lang.reflect.Method;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.MethodParameter;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerResult;
@@ -36,20 +34,6 @@ import org.springframework.web.server.WebHandler;
  * @since 5.0
  */
 public class SimpleHandlerAdapter implements HandlerAdapter {
-
-	private static final MethodParameter RETURN_TYPE;
-
-	static {
-		try {
-			Method method = WebHandler.class.getMethod("handle", ServerWebExchange.class);
-			RETURN_TYPE = new MethodParameter(method, -1);
-		}
-		catch (NoSuchMethodException ex) {
-			throw new IllegalStateException(
-					"Failed to initialize the return type for WebHandler: " + ex.getMessage());
-		}
-	}
-
 
 	@Override
 	public boolean supports(Object handler) {
