@@ -31,7 +31,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 
 import org.reactivestreams.Publisher;
@@ -56,13 +55,6 @@ import org.springframework.util.Assert;
 public abstract class DataBufferUtils {
 
 	private static final Consumer<DataBuffer> RELEASE_CONSUMER = DataBufferUtils::release;
-
-	private static final BinaryOperator<DataBuffer> WRITE_AGGREGATOR =
-			(dataBuffer1, dataBuffer2) -> {
-				DataBuffer result = dataBuffer1.write(dataBuffer2);
-				release(dataBuffer2);
-				return result;
-			};
 
 	//---------------------------------------------------------------------
 	// Reading
