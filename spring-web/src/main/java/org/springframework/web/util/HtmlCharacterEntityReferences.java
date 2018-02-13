@@ -89,7 +89,7 @@ class HtmlCharacterEntityReferences {
 			String key = (String) keys.nextElement();
 			int referredChar = Integer.parseInt(key);
 			Assert.isTrue((referredChar < 1000 || (referredChar >= 8000 && referredChar < 10000)),
-					"Invalid reference to special HTML entity: " + referredChar);
+					() -> "Invalid reference to special HTML entity: " + referredChar);
 			int index = (referredChar < 1000 ? referredChar : referredChar - 7000);
 			String reference = entityReferences.getProperty(key);
 			this.characterToEntityReferenceMap[index] = REFERENCE_START + reference + REFERENCE_END;

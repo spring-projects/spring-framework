@@ -46,7 +46,7 @@ class CacheResolverAdapter implements CacheResolver {
 		}
 		CacheInvocationContext<?> cacheInvocationContext = (CacheInvocationContext<?>) context;
 		javax.cache.Cache<Object, Object> cache = target.resolveCache(cacheInvocationContext);
-		Assert.notNull(cache, "Cannot resolve cache for '" + context + "' using '" + target + "'");
+		Assert.notNull(cache, () -> "Cannot resolve cache for '" + context + "' using '" + target + "'");
 		return Collections.singleton(new JCacheCache(cache));
 	}
 
