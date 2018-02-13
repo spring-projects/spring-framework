@@ -580,8 +580,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		xmlReader.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
 		for (int i = 0; i < resources.length; i++) {
 			Resource resource = resources[i];
-			Assert.notNull(resource, "Resource is null");
-			Assert.isTrue(resource.exists(), () -> "Resource " + resource + " does not exist");
+			Assert.isTrue(resource != null && resource.exists(), () -> "Resource does not exist: " + resource);
 			InputSource inputSource = SaxResourceUtils.createInputSource(resource);
 			schemaSources[i] = new SAXSource(xmlReader, inputSource);
 		}
@@ -595,8 +594,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 
 	@Override
 	public boolean supports(Class<?> clazz) {
-		return ((this.supportJaxbElementClass && JAXBElement.class.isAssignableFrom(clazz)) ||
-				supportsInternal(clazz, this.checkForXmlRootElement));
+		return (this.supportJaxbElementClass && JAXBElement.class.isAssignableFrom(clazz)) ||
+				supportsInternal(clazz, this.checkForXmlRootElement);
 	}
 
 	@Override
