@@ -30,7 +30,6 @@ import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
-import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;

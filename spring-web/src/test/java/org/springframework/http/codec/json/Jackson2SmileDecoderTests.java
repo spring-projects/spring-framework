@@ -38,7 +38,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON;
 
 /**
  * Unit tests for {@link Jackson2SmileDecoder}.
