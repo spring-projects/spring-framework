@@ -1797,6 +1797,13 @@ the message getting redelivered. Alternatively, consider using 'CLIENT_ACKNOWLED
 which provides redelivery in case of an exception as well but does not use transacted
 Sessions and therefore does not include any other Session operations (such as sending
 response messages) in the transaction protocol.
+
+**The default 'AUTO_ACKNOWLEDGE' mode does not provide proper reliability guarantees.**
+Messages may get lost when listener execution fails (since the provider will automatically
+acknowledge each message after listener invocation, with no exceptions to be propagated to
+the provider) or when the listener container shuts down (this may be configured through
+the 'acceptMessagesWhileStopping' flag). Make sure to use transacted sessions in case of
+reliability needs, e.g. for reliable queue handling and durable topic subscriptions.
 ====
 
 [[jms-mdp-default]]
@@ -1834,6 +1841,13 @@ alternative: wrapping your entire processing with an XA transaction (through con
 your `DefaultMessageListenerContainer` with an `JtaTransactionManager`), covering the
 reception of the JMS message as well as the execution of the business logic in your
 message listener (including database operations etc).
+
+**The default 'AUTO_ACKNOWLEDGE' mode does not provide proper reliability guarantees.**
+Messages may get lost when listener execution fails (since the provider will automatically
+acknowledge each message before listener invocation) or when the listener container shuts
+down (this may be configured through the 'acceptMessagesWhileStopping' flag). Make sure
+to use transacted sessions in case of reliability needs, e.g. for reliable queue handling
+and durable topic subscriptions.
 ====
 
 
@@ -2065,7 +2079,6 @@ Below is a simple implementation of an MDP:
 				throw new IllegalArgumentException("Message must be of type TextMessage");
 			}
 		}
-
 	}
 ----
 
@@ -2108,7 +2121,6 @@ handling method with access to the JMS `Session` from which the `Message` was re
 	public interface SessionAwareMessageListener {
 
 		void onMessage(Message message, Session session) throws JMSException;
-
 	}
 ----
 
@@ -2153,7 +2165,6 @@ various `Message` types that they can receive and handle.
 		void handleMessage(byte[] message);
 
 		void handleMessage(Serializable message);
-
 	}
 ----
 
@@ -2200,7 +2211,6 @@ also how the `'receive(..)'` method is strongly typed to receive and respond onl
 	public interface TextMessageDelegate {
 
 		void receive(TextMessage message);
-
 	}
 ----
 
@@ -2242,7 +2252,6 @@ non-void value. Consider the interface and class:
 
 		// notice the return type...
 		String receive(TextMessage message);
-
 	}
 ----
 
@@ -2469,10 +2478,10 @@ your `@Configuration` classes.
 
 		@Bean
 		public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
-			DefaultJmsListenerContainerFactory factory =
-					new DefaultJmsListenerContainerFactory();
+			DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
 			factory.setConnectionFactory(connectionFactory());
 			factory.setDestinationResolver(destinationResolver());
+			factory.setSessionTransacted(true);
 			factory.setConcurrency("3-10");
 			return factory;
 		}
@@ -2501,6 +2510,7 @@ element.
 			class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
 		<property name="connectionFactory" ref="connectionFactory"/>
 		<property name="destinationResolver" ref="destinationResolver"/>
+		<property name="sessionTransacted" value="true"/>
 		<property name="concurrency" value="3-10"/>
 	</bean>
 ----
@@ -2696,8 +2706,7 @@ the time to live, you can configure the `JmsListenerContainerFactory` accordingl
 
 		@Bean
 		public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
-			DefaultJmsListenerContainerFactory factory =
-					new DefaultJmsListenerContainerFactory();
+			DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
 			factory.setConnectionFactory(connectionFactory());
 			QosSettings replyQosSettings = new ReplyQosSettings();
 			replyQosSettings.setPriority(2);
