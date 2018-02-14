@@ -342,7 +342,7 @@ This is recommended for applications that use Java-based Spring configuration:
 
 		@Override
 		protected Class<?>[] getServletConfigClasses() {
-			return new Class[] { MyWebConfig.class };
+			return new Class<?>[] { MyWebConfig.class };
 		}
 
 		@Override

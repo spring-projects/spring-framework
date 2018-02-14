@@ -41,13 +41,13 @@ public class TransactionAttributeSourceTests {
 	public void matchAlwaysTransactionAttributeSource() throws Exception {
 		MatchAlwaysTransactionAttributeSource tas = new MatchAlwaysTransactionAttributeSource();
 		TransactionAttribute ta = tas.getTransactionAttribute(
-				Object.class.getMethod("hashCode", (Class[]) null), null);
+				Object.class.getMethod("hashCode"), null);
 		assertNotNull(ta);
 		assertTrue(TransactionDefinition.PROPAGATION_REQUIRED == ta.getPropagationBehavior());
 
 		tas.setTransactionAttribute(new DefaultTransactionAttribute(TransactionDefinition.PROPAGATION_SUPPORTS));
 		ta = tas.getTransactionAttribute(
-				IOException.class.getMethod("getMessage", (Class[]) null), IOException.class);
+				IOException.class.getMethod("getMessage"), IOException.class);
 		assertNotNull(ta);
 		assertTrue(TransactionDefinition.PROPAGATION_SUPPORTS == ta.getPropagationBehavior());
 	}
@@ -60,7 +60,7 @@ public class TransactionAttributeSourceTests {
 		attributes.put("*ashCode", "PROPAGATION_REQUIRED");
 		tas.setProperties(attributes);
 		TransactionAttribute ta = tas.getTransactionAttribute(
-				Object.class.getMethod("hashCode", (Class[]) null), null);
+				Object.class.getMethod("hashCode"), null);
 		assertNotNull(ta);
 		assertEquals(TransactionDefinition.PROPAGATION_REQUIRED, ta.getPropagationBehavior());
 	}
@@ -73,7 +73,7 @@ public class TransactionAttributeSourceTests {
 		attributes.put("hashCod*", "PROPAGATION_REQUIRED");
 		tas.setProperties(attributes);
 		TransactionAttribute ta = tas.getTransactionAttribute(
-				Object.class.getMethod("hashCode", (Class[]) null), null);
+				Object.class.getMethod("hashCode"), null);
 		assertNotNull(ta);
 		assertEquals(TransactionDefinition.PROPAGATION_REQUIRED, ta.getPropagationBehavior());
 	}
@@ -87,7 +87,7 @@ public class TransactionAttributeSourceTests {
 		attributes.put("hashCode", "PROPAGATION_MANDATORY");
 		tas.setProperties(attributes);
 		TransactionAttribute ta = tas.getTransactionAttribute(
-				Object.class.getMethod("hashCode", (Class[]) null), null);
+				Object.class.getMethod("hashCode"), null);
 		assertNotNull(ta);
 		assertEquals(TransactionDefinition.PROPAGATION_MANDATORY, ta.getPropagationBehavior());
 	}
@@ -100,7 +100,7 @@ public class TransactionAttributeSourceTests {
 		attributes.put("", "PROPAGATION_MANDATORY");
 		tas.setProperties(attributes);
 		TransactionAttribute ta = tas.getTransactionAttribute(
-				Object.class.getMethod("hashCode", (Class[]) null), null);
+				Object.class.getMethod("hashCode"), null);
 		assertNull(ta);
 	}
 

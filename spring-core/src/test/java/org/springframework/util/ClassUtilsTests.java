@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -212,7 +212,7 @@ public class ClassUtilsTests {
 		assertNotNull(method);
 		assertEquals("size", method.getName());
 
-		method = ClassUtils.getMethodIfAvailable(Collection.class, "remove", new Class[] {Object.class});
+		method = ClassUtils.getMethodIfAvailable(Collection.class, "remove", Object.class);
 		assertNotNull(method);
 		assertEquals("remove", method.getName());
 
@@ -239,7 +239,7 @@ public class ClassUtilsTests {
 
 	@Test
 	public void testNoArgsStaticMethod() throws IllegalAccessException, InvocationTargetException {
-		Method method = ClassUtils.getStaticMethod(InnerClass.class, "staticMethod", (Class[]) null);
+		Method method = ClassUtils.getStaticMethod(InnerClass.class, "staticMethod");
 		method.invoke(null, (Object[]) null);
 		assertTrue("no argument method was not invoked.",
 				InnerClass.noArgCalled);
@@ -247,19 +247,16 @@ public class ClassUtilsTests {
 
 	@Test
 	public void testArgsStaticMethod() throws IllegalAccessException, InvocationTargetException {
-		Method method = ClassUtils.getStaticMethod(InnerClass.class, "argStaticMethod",
-				new Class[] {String.class});
-		method.invoke(null, new Object[] {"test"});
+		Method method = ClassUtils.getStaticMethod(InnerClass.class, "argStaticMethod", String.class);
+		method.invoke(null, "test");
 		assertTrue("argument method was not invoked.", InnerClass.argCalled);
 	}
 
 	@Test
 	public void testOverloadedStaticMethod() throws IllegalAccessException, InvocationTargetException {
-		Method method = ClassUtils.getStaticMethod(InnerClass.class, "staticMethod",
-				new Class[] {String.class});
-		method.invoke(null, new Object[] {"test"});
-		assertTrue("argument method was not invoked.",
-				InnerClass.overloadedCalled);
+		Method method = ClassUtils.getStaticMethod(InnerClass.class, "staticMethod", String.class);
+		method.invoke(null, "test");
+		assertTrue("argument method was not invoked.", InnerClass.overloadedCalled);
 	}
 
 	@Test
