@@ -17,6 +17,7 @@
 package org.springframework.http.codec.json;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
