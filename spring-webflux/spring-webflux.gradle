@@ -22,7 +22,7 @@ dependencies {
 	optional(project(":spring-context-support"))  // for FreeMarker support
 	optional("javax.servlet:javax.servlet-api:3.1.0")
 	optional("javax.websocket:javax.websocket-api:1.1")
-	optional("org.webjars:webjars-locator:0.32-1")
+	optional("org.webjars:webjars-locator-core:0.35")
 	optional("org.freemarker:freemarker:${freemarkerVersion}")
 	optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jackson2Version}")
