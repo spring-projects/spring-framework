@@ -51,8 +51,7 @@ public class Jackson2SmileEncoder extends AbstractJackson2Encoder {
 	public Jackson2SmileEncoder(ObjectMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);
 		Assert.isAssignable(SmileFactory.class, mapper.getFactory().getClass());
-		this.streamingMediaTypes.add(new MediaType("application", "stream+x-jackson-smile"));
-		this.streamingLineSeparator = false;
+		setStreamingMediaTypes(Collections.singletonList(new MediaType("application", "stream+x-jackson-smile")));
 	}
 
 }
