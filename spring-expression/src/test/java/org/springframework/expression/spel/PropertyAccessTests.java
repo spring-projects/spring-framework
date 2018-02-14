@@ -190,7 +190,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 
 		@Override
 		public Class<?>[] getSpecificTargetClasses() {
-			return new Class[] {String.class};
+			return new Class<?>[] {String.class};
 		}
 
 		@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 	@Rule
 	public final ExpectedException thrown = ExpectedException.none();
 
+
 	@Override
 	protected Object advised(Object target, PlatformTransactionManager ptm, TransactionAttributeSource[] tas) throws Exception {
 		TransactionInterceptor ti = new TransactionInterceptor();
@@ -74,6 +75,7 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 		pf.addAdvice(0, ti);
 		return pf.getProxy();
 	}
+
 
 	/**
 	 * A TransactionInterceptor should be serializable if its
@@ -108,7 +110,7 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 		tas2.setProperties(props);
 
 		TransactionInterceptor ti = new TransactionInterceptor();
-		ti.setTransactionAttributeSources(new TransactionAttributeSource[] {tas1, tas2});
+		ti.setTransactionAttributeSources(tas1, tas2);
 		PlatformTransactionManager ptm = new SerializableTransactionManager();
 		ti.setTransactionManager(ptm);
 		ti = (TransactionInterceptor) SerializationTestUtils.serializeAndDeserialize(ti);
@@ -254,8 +256,10 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 		verify(beanFactory, times(1)).getBean(PlatformTransactionManager.class);
 	}
 
+
 	private TransactionInterceptor createTransactionInterceptor(BeanFactory beanFactory,
 			String transactionManagerName, PlatformTransactionManager transactionManager) {
+
 		TransactionInterceptor ti = new TransactionInterceptor();
 		if (beanFactory != null) {
 			ti.setBeanFactory(beanFactory);
@@ -316,6 +320,6 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 		public void rollback(TransactionStatus status) throws TransactionException {
 			throw new UnsupportedOperationException();
 		}
-
 	}
+
 }

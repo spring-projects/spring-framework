@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -368,8 +368,7 @@ public abstract class JdbcUtils {
 					@Override
 					public Object processMetaData(DatabaseMetaData dbmd) throws SQLException, MetaDataAccessException {
 						try {
-							Method method = DatabaseMetaData.class.getMethod(metaDataMethodName, (Class[]) null);
-							return method.invoke(dbmd, (Object[]) null);
+							return DatabaseMetaData.class.getMethod(metaDataMethodName).invoke(dbmd);
 						}
 						catch (NoSuchMethodException ex) {
 							throw new MetaDataAccessException("No method named '" + metaDataMethodName +

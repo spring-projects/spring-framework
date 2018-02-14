@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,12 +36,12 @@ import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.extended.EncodedByteArrayConverter;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
 import com.thoughtworks.xstream.io.json.JsonWriter;
+import org.custommonkey.xmlunit.XMLAssert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -54,10 +54,7 @@ import org.xml.sax.ContentHandler;
 
 import org.springframework.util.xml.StaxUtils;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
 /**
@@ -71,15 +68,17 @@ public class XStreamMarshallerTests {
 
 	private Flight flight;
 
+
 	@Before
-	public void createMarshaller() throws Exception {
+	public void createMarshaller() {
 		marshaller = new XStreamMarshaller();
-		Map<String, String> aliases = new HashMap<String, String>();
+		Map<String, String> aliases = new HashMap<>();
 		aliases.put("flight", Flight.class.getName());
 		marshaller.setAliases(aliases);
 		flight = new Flight();
 		flight.setFlightNumber(42L);
 	}
+
 
 	@Test
 	public void marshalDOMResult() throws Exception {
@@ -95,7 +94,7 @@ public class XStreamMarshallerTests {
 		flightElement.appendChild(numberElement);
 		Text text = expected.createTextNode("42");
 		numberElement.appendChild(text);
-		assertXMLEqual("Marshaller writes invalid DOMResult", expected, document);
+		XMLAssert.assertXMLEqual("Marshaller writes invalid DOMResult", expected, document);
 	}
 
 	// see SWS-392
@@ -124,7 +123,7 @@ public class XStreamMarshallerTests {
 		eFlightElement.appendChild(eNumberElement);
 		Text text = expected.createTextNode("42");
 		eNumberElement.appendChild(text);
-		assertXMLEqual("Marshaller writes invalid DOMResult", expected, existent);
+		XMLAssert.assertXMLEqual("Marshaller writes invalid DOMResult", expected, existent);
 	}
 
 	@Test
@@ -132,7 +131,7 @@ public class XStreamMarshallerTests {
 		StringWriter writer = new StringWriter();
 		StreamResult result = new StreamResult(writer);
 		marshaller.marshal(flight, result);
-		assertXMLEqual("Marshaller writes invalid StreamResult", EXPECTED_STRING, writer.toString());
+		XMLAssert.assertXMLEqual("Marshaller writes invalid StreamResult", EXPECTED_STRING, writer.toString());
 	}
 
 	@Test
@@ -141,7 +140,7 @@ public class XStreamMarshallerTests {
 		StreamResult result = new StreamResult(os);
 		marshaller.marshal(flight, result);
 		String s = new String(os.toByteArray(), "UTF-8");
-		assertXMLEqual("Marshaller writes invalid StreamResult", EXPECTED_STRING, s);
+		XMLAssert.assertXMLEqual("Marshaller writes invalid StreamResult", EXPECTED_STRING, s);
 	}
 
 	@Test
@@ -166,7 +165,7 @@ public class XStreamMarshallerTests {
 		XMLStreamWriter streamWriter = outputFactory.createXMLStreamWriter(writer);
 		Result result = StaxUtils.createStaxResult(streamWriter);
 		marshaller.marshal(flight, result);
-		assertXMLEqual("Marshaller writes invalid StreamResult", EXPECTED_STRING, writer.toString());
+		XMLAssert.assertXMLEqual("Marshaller writes invalid StreamResult", EXPECTED_STRING, writer.toString());
 	}
 
 	@Test
@@ -176,16 +175,16 @@ public class XStreamMarshallerTests {
 		XMLEventWriter eventWriter = outputFactory.createXMLEventWriter(writer);
 		Result result = StaxUtils.createStaxResult(eventWriter);
 		marshaller.marshal(flight, result);
-		assertXMLEqual("Marshaller writes invalid StreamResult", EXPECTED_STRING, writer.toString());
+		XMLAssert.assertXMLEqual("Marshaller writes invalid StreamResult", EXPECTED_STRING, writer.toString());
 	}
 
 	@Test
 	public void converters() throws Exception {
-		marshaller.setConverters(new Converter[]{new EncodedByteArrayConverter()});
+		marshaller.setConverters(new EncodedByteArrayConverter());
 		byte[] buf = new byte[]{0x1, 0x2};
 		Writer writer = new StringWriter();
 		marshaller.marshal(buf, new StreamResult(writer));
-		assertXMLEqual("<byte-array>AQI=</byte-array>", writer.toString());
+		XMLAssert.assertXMLEqual("<byte-array>AQI=</byte-array>", writer.toString());
 		Reader reader = new StringReader(writer.toString());
 		byte[] bufResult = (byte[]) marshaller.unmarshal(new StreamSource(reader));
 		assertTrue("Invalid result", Arrays.equals(buf, bufResult));
@@ -193,11 +192,11 @@ public class XStreamMarshallerTests {
 
 	@Test
 	public void useAttributesFor() throws Exception {
-		marshaller.setUseAttributeForTypes(new Class[]{Long.TYPE});
+		marshaller.setUseAttributeForTypes(Long.TYPE);
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
 		String expected = "<flight flightNumber=\"42\" />";
-		assertXMLEqual("Marshaller does not use attributes", expected, writer.toString());
+		XMLAssert.assertXMLEqual("Marshaller does not use attributes", expected, writer.toString());
 	}
 
 	@Test
@@ -206,7 +205,7 @@ public class XStreamMarshallerTests {
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
 		String expected = "<flight flightNumber=\"42\" />";
-		assertXMLEqual("Marshaller does not use attributes", expected, writer.toString());
+		XMLAssert.assertXMLEqual("Marshaller does not use attributes", expected, writer.toString());
 	}
 
 	@Test
@@ -215,23 +214,22 @@ public class XStreamMarshallerTests {
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
 		String expected = "<flight flightNumber=\"42\" />";
-		assertXMLEqual("Marshaller does not use attributes", expected, writer.toString());
+		XMLAssert.assertXMLEqual("Marshaller does not use attributes", expected, writer.toString());
 	}
 
 	@Test
 	public void useAttributesForClassStringListMap() throws Exception {
-		marshaller
-				.setUseAttributeFor(Collections.singletonMap(Flight.class, Collections.singletonList("flightNumber")));
+		marshaller.setUseAttributeFor(Collections.singletonMap(Flight.class, Collections.singletonList("flightNumber")));
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
 		String expected = "<flight flightNumber=\"42\" />";
-		assertXMLEqual("Marshaller does not use attributes", expected, writer.toString());
+		XMLAssert.assertXMLEqual("Marshaller does not use attributes", expected, writer.toString());
 	}
 
 	@Test
 	@Ignore("Fails on JDK 8 build 108")
 	public void aliasesByTypeStringClassMap() throws Exception {
-		Map<String, Class<?>> aliases = new HashMap<String, Class<?>>();
+		Map<String, Class<?>> aliases = new HashMap<>();
 		aliases.put("flight", Flight.class);
 		FlightSubclass flight = new FlightSubclass();
 		flight.setFlightNumber(42);
@@ -239,13 +237,13 @@ public class XStreamMarshallerTests {
 
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
-		assertXMLEqual("Marshaller does not use attributes", EXPECTED_STRING, writer.toString());
+		XMLAssert.assertXMLEqual("Marshaller does not use attributes", EXPECTED_STRING, writer.toString());
 	}
 
 	@Test
 	@Ignore("Fails on JDK 8 build 108")
 	public void aliasesByTypeStringStringMap() throws Exception {
-		Map<String, String> aliases = new HashMap<String, String>();
+		Map<String, String> aliases = new HashMap<>();
 		aliases.put("flight", Flight.class.getName());
 		FlightSubclass flight = new FlightSubclass();
 		flight.setFlightNumber(42);
@@ -253,7 +251,7 @@ public class XStreamMarshallerTests {
 
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
-		assertXMLEqual("Marshaller does not use attributes", EXPECTED_STRING, writer.toString());
+		XMLAssert.assertXMLEqual("Marshaller does not use attributes", EXPECTED_STRING, writer.toString());
 	}
 
 	@Test
@@ -262,7 +260,7 @@ public class XStreamMarshallerTests {
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
 		String expected = "<flight><flightNo>42</flightNo></flight>";
-		assertXMLEqual("Marshaller does not use aliases", expected, writer.toString());
+		XMLAssert.assertXMLEqual("Marshaller does not use aliases", expected, writer.toString());
 	}
 
 	@Test
@@ -272,7 +270,7 @@ public class XStreamMarshallerTests {
 		marshaller.setOmittedFields(omittedFieldsMap);
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
-		assertXpathNotExists("/flight/flightNumber", writer.toString());
+		XMLAssert.assertXpathNotExists("/flight/flightNumber", writer.toString());
 	}
 
 	@Test
@@ -282,7 +280,7 @@ public class XStreamMarshallerTests {
 		flights.getFlights().add(flight);
 		flights.getStrings().add("42");
 
-		Map<String, Class<?>> aliases = new HashMap<String, Class<?>>();
+		Map<String, Class<?>> aliases = new HashMap<>();
 		aliases.put("flight", Flight.class);
 		aliases.put("flights", Flights.class);
 		marshaller.setAliases(aliases);
@@ -293,10 +291,10 @@ public class XStreamMarshallerTests {
 		Writer writer = new StringWriter();
 		marshaller.marshal(flights, new StreamResult(writer));
 		String result = writer.toString();
-		assertXpathNotExists("/flights/flights", result);
-		assertXpathExists("/flights/flight", result);
-		assertXpathNotExists("/flights/strings", result);
-		assertXpathExists("/flights/string", result);
+		XMLAssert.assertXpathNotExists("/flights/flights", result);
+		XMLAssert.assertXpathExists("/flights/flight", result);
+		XMLAssert.assertXpathNotExists("/flights/strings", result);
+		XMLAssert.assertXpathExists("/flights/string", result);
 	}
 
 	@Test
@@ -337,8 +335,7 @@ public class XStreamMarshallerTests {
 		flight.setFlightNumber(42);
 		marshaller.marshal(flight, result);
 		String expected = "<flight><number>42</number></flight>";
-		assertXMLEqual("Marshaller writes invalid StreamResult", expected, writer.toString());
+		XMLAssert.assertXMLEqual("Marshaller writes invalid StreamResult", expected, writer.toString());
 	}
-
 
 }

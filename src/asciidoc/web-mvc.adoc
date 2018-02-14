@@ -313,13 +313,13 @@ Note that we can achieve the same with java-based configurations:
 		@Override
 		protected Class<?>[] getRootConfigClasses() {
 			// GolfingAppConfig defines beans that would be in root-context.xml
-			return new Class[] { GolfingAppConfig.class };
+			return new Class<?>[] { GolfingAppConfig.class };
 		}
 
 		@Override
 		protected Class<?>[] getServletConfigClasses() {
 			// GolfingWebConfig defines beans that would be in golfing-servlet.xml
-			return new Class[] { GolfingWebConfig.class };
+			return new Class<?>[] { GolfingWebConfig.class };
 		}
 
 		@Override
@@ -4702,7 +4702,7 @@ This is recommended for applications that use Java-based Spring configuration:
 
 		@Override
 		protected Class<?>[] getServletConfigClasses() {
-			return new Class[] { MyWebConfig.class };
+			return new Class<?>[] { MyWebConfig.class };
 		}
 
 		@Override

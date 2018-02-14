@@ -86,7 +86,7 @@ public class ReflectionUtilsTests {
 		TestObject bean = new TestObject();
 		bean.setName(rob);
 
-		Method getName = TestObject.class.getMethod("getName", (Class[]) null);
+		Method getName = TestObject.class.getMethod("getName");
 		Method setName = TestObject.class.getMethod("setName", String.class);
 
 		Object name = ReflectionUtils.invokeMethod(getName, bean);

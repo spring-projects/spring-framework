@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @since 19.05.2003
  */
-public final class BeanUtilsTests {
+public class BeanUtilsTests {
 
 	@Test
 	public void testInstantiateClass() {
@@ -193,7 +193,7 @@ public final class BeanUtilsTests {
 		source.setFlag2(true);
 		InvalidProperty target = new InvalidProperty();
 		BeanUtils.copyProperties(source, target);
-		assertEquals(target.getName(), "name");
+		assertEquals("name", target.getName());
 		assertTrue(target.getFlag1());
 		assertTrue(target.getFlag2());
 	}
@@ -226,14 +226,14 @@ public final class BeanUtilsTests {
 
 	@Test
 	public void testResolveWithAndWithoutArgList() throws Exception {
-		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomethingElse", new Class[]{String.class, int.class});
+		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomethingElse", String.class, int.class);
 		assertSignatureEquals(desiredMethod, "doSomethingElse");
 		assertNull(BeanUtils.resolveSignature("doSomethingElse()", MethodSignatureBean.class));
 	}
 
 	@Test
 	public void testResolveTypedSignature() throws Exception {
-		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomethingElse", new Class[]{String.class, int.class});
+		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomethingElse", String.class, int.class);
 		assertSignatureEquals(desiredMethod, "doSomethingElse(java.lang.String, int)");
 	}
 
@@ -244,20 +244,20 @@ public final class BeanUtilsTests {
 		assertSignatureEquals(desiredMethod, "overloaded()");
 
 		// resolve with single arg
-		desiredMethod = MethodSignatureBean.class.getMethod("overloaded", new Class[]{String.class});
+		desiredMethod = MethodSignatureBean.class.getMethod("overloaded", String.class);
 		assertSignatureEquals(desiredMethod, "overloaded(java.lang.String)");
 
 		// resolve with two args
-		desiredMethod = MethodSignatureBean.class.getMethod("overloaded", new Class[]{String.class, BeanFactory.class});
+		desiredMethod = MethodSignatureBean.class.getMethod("overloaded", String.class, BeanFactory.class);
 		assertSignatureEquals(desiredMethod, "overloaded(java.lang.String, org.springframework.beans.factory.BeanFactory)");
 	}
 
 	@Test
 	public void testResolveSignatureWithArray() throws Exception {
-		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomethingWithAnArray", new Class[]{String[].class});
+		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomethingWithAnArray", String[].class);
 		assertSignatureEquals(desiredMethod, "doSomethingWithAnArray(java.lang.String[])");
 
-		desiredMethod = MethodSignatureBean.class.getMethod("doSomethingWithAMultiDimensionalArray", new Class[]{String[][].class});
+		desiredMethod = MethodSignatureBean.class.getMethod("doSomethingWithAMultiDimensionalArray", String[][].class);
 		assertSignatureEquals(desiredMethod, "doSomethingWithAMultiDimensionalArray(java.lang.String[][])");
 	}
 
@@ -442,6 +442,19 @@ public final class BeanUtilsTests {
 		@Override
 		public void setValue(String aValue) {
 			value = aValue;
+		}
+	}
+	
+	private static class BeanWithSingleNonDefaultConstructor {
+		
+		private final String name;
+
+		public BeanWithSingleNonDefaultConstructor(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
 		}
 	}
 

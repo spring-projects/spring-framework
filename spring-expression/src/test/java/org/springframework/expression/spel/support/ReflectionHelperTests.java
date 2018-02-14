@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,10 +117,10 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 		StandardTypeConverter tc = new StandardTypeConverter();
 
 		// Calling foo(String) with (String) is exact match
-		checkMatch(new Class[] {String.class}, new Class[] {String.class}, tc, ReflectionHelper.ArgumentsMatchKind.EXACT);
+		checkMatch(new Class<?>[] {String.class}, new Class<?>[] {String.class}, tc, ReflectionHelper.ArgumentsMatchKind.EXACT);
 
 		// Calling foo(String,Integer) with (String,Integer) is exact match
-		checkMatch(new Class[] {String.class, Integer.class}, new Class[] {String.class, Integer.class}, tc, ArgumentsMatchKind.EXACT);
+		checkMatch(new Class<?>[] {String.class, Integer.class}, new Class<?>[] {String.class, Integer.class}, tc, ArgumentsMatchKind.EXACT);
 	}
 
 	@Test
@@ -128,13 +128,13 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 		StandardTypeConverter tc = new StandardTypeConverter();
 
 		// Calling foo(List) with (ArrayList) is close match (no conversion required)
-		checkMatch(new Class[] {ArrayList.class}, new Class[] {List.class}, tc, ArgumentsMatchKind.CLOSE);
+		checkMatch(new Class<?>[] {ArrayList.class}, new Class<?>[] {List.class}, tc, ArgumentsMatchKind.CLOSE);
 
 		// Passing (Sub,String) on call to foo(Super,String) is close match
-		checkMatch(new Class[] {Sub.class, String.class}, new Class[] {Super.class, String.class}, tc, ArgumentsMatchKind.CLOSE);
+		checkMatch(new Class<?>[] {Sub.class, String.class}, new Class<?>[] {Super.class, String.class}, tc, ArgumentsMatchKind.CLOSE);
 
 		// Passing (String,Sub) on call to foo(String,Super) is close match
-		checkMatch(new Class[] {String.class, Sub.class}, new Class[] {String.class, Super.class}, tc, ArgumentsMatchKind.CLOSE);
+		checkMatch(new Class<?>[] {String.class, Sub.class}, new Class<?>[] {String.class, Super.class}, tc, ArgumentsMatchKind.CLOSE);
 	}
 
 	@Test
@@ -142,16 +142,16 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 		StandardTypeConverter tc = new StandardTypeConverter();
 
 		// Calling foo(String,int) with (String,Integer) requires boxing conversion of argument one
-		checkMatch(new Class[] {String.class, Integer.TYPE}, new Class[] {String.class,Integer.class},tc, ArgumentsMatchKind.CLOSE);
+		checkMatch(new Class<?>[] {String.class, Integer.TYPE}, new Class<?>[] {String.class,Integer.class},tc, ArgumentsMatchKind.CLOSE);
 
 		// Passing (int,String) on call to foo(Integer,String) requires boxing conversion of argument zero
-		checkMatch(new Class[] {Integer.TYPE, String.class}, new Class[] {Integer.class, String.class},tc, ArgumentsMatchKind.CLOSE);
+		checkMatch(new Class<?>[] {Integer.TYPE, String.class}, new Class<?>[] {Integer.class, String.class},tc, ArgumentsMatchKind.CLOSE);
 
 		// Passing (int,Sub) on call to foo(Integer,Super) requires boxing conversion of argument zero
-		checkMatch(new Class[] {Integer.TYPE, Sub.class}, new Class[] {Integer.class, Super.class}, tc, ArgumentsMatchKind.CLOSE);
+		checkMatch(new Class<?>[] {Integer.TYPE, Sub.class}, new Class<?>[] {Integer.class, Super.class}, tc, ArgumentsMatchKind.CLOSE);
 
 		// Passing (int,Sub,boolean) on call to foo(Integer,Super,Boolean) requires boxing conversion of arguments zero and two
-		// TODO checkMatch(new Class[] {Integer.TYPE, Sub.class, Boolean.TYPE}, new Class[] {Integer.class, Super.class, Boolean.class}, tc, ArgsMatchKind.REQUIRES_CONVERSION);
+		// TODO checkMatch(new Class<?>[] {Integer.TYPE, Sub.class, Boolean.TYPE}, new Class<?>[] {Integer.class, Super.class, Boolean.class}, tc, ArgsMatchKind.REQUIRES_CONVERSION);
 	}
 
 	@Test
@@ -159,7 +159,7 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 		StandardTypeConverter typeConverter = new StandardTypeConverter();
 
 		// Passing (Super,String) on call to foo(Sub,String) is not a match
-		checkMatch(new Class[] {Super.class,String.class}, new Class[] {Sub.class,String.class},typeConverter,null);
+		checkMatch(new Class<?>[] {Super.class,String.class}, new Class<?>[] {Sub.class,String.class},typeConverter,null);
 	}
 
 	@Test
@@ -169,49 +169,49 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 		Class<?> integerArrayClass = new Integer[0].getClass();
 
 		// Passing (String[]) on call to (String[]) is exact match
-		checkMatch2(new Class[] {stringArrayClass}, new Class[] {stringArrayClass}, tc, ArgumentsMatchKind.EXACT);
+		checkMatch2(new Class<?>[] {stringArrayClass}, new Class<?>[] {stringArrayClass}, tc, ArgumentsMatchKind.EXACT);
 
 		// Passing (Integer, String[]) on call to (Integer, String[]) is exact match
-		checkMatch2(new Class[] {Integer.class, stringArrayClass}, new Class[] {Integer.class, stringArrayClass}, tc, ArgumentsMatchKind.EXACT);
+		checkMatch2(new Class<?>[] {Integer.class, stringArrayClass}, new Class<?>[] {Integer.class, stringArrayClass}, tc, ArgumentsMatchKind.EXACT);
 
 		// Passing (String, Integer, String[]) on call to (String, String, String[]) is exact match
-		checkMatch2(new Class[] {String.class, Integer.class, stringArrayClass}, new Class[] {String.class,Integer.class, stringArrayClass}, tc, ArgumentsMatchKind.EXACT);
+		checkMatch2(new Class<?>[] {String.class, Integer.class, stringArrayClass}, new Class<?>[] {String.class,Integer.class, stringArrayClass}, tc, ArgumentsMatchKind.EXACT);
 
 		// Passing (Sub, String[]) on call to (Super, String[]) is exact match
-		checkMatch2(new Class[] {Sub.class, stringArrayClass}, new Class[] {Super.class,stringArrayClass}, tc, ArgumentsMatchKind.CLOSE);
+		checkMatch2(new Class<?>[] {Sub.class, stringArrayClass}, new Class<?>[] {Super.class,stringArrayClass}, tc, ArgumentsMatchKind.CLOSE);
 
 		// Passing (Integer, String[]) on call to (String, String[]) is exact match
-		checkMatch2(new Class[] {Integer.class, stringArrayClass}, new Class[] {String.class, stringArrayClass}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
+		checkMatch2(new Class<?>[] {Integer.class, stringArrayClass}, new Class<?>[] {String.class, stringArrayClass}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
 
 		// Passing (Integer, Sub, String[]) on call to (String, Super, String[]) is exact match
-		checkMatch2(new Class[] {Integer.class, Sub.class, String[].class}, new Class[] {String.class,Super .class, String[].class}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
+		checkMatch2(new Class<?>[] {Integer.class, Sub.class, String[].class}, new Class<?>[] {String.class,Super .class, String[].class}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
 
 		// Passing (String) on call to (String[]) is exact match
-		checkMatch2(new Class[] {String.class}, new Class[] {stringArrayClass}, tc, ArgumentsMatchKind.EXACT);
+		checkMatch2(new Class<?>[] {String.class}, new Class<?>[] {stringArrayClass}, tc, ArgumentsMatchKind.EXACT);
 
 		// Passing (Integer,String) on call to (Integer,String[]) is exact match
-		checkMatch2(new Class[] {Integer.class, String.class}, new Class[] {Integer.class, stringArrayClass}, tc, ArgumentsMatchKind.EXACT);
+		checkMatch2(new Class<?>[] {Integer.class, String.class}, new Class<?>[] {Integer.class, stringArrayClass}, tc, ArgumentsMatchKind.EXACT);
 
 		// Passing (String) on call to (Integer[]) is conversion match (String to Integer)
-		checkMatch2(new Class[] {String.class}, new Class[] {integerArrayClass}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
+		checkMatch2(new Class<?>[] {String.class}, new Class<?>[] {integerArrayClass}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
 
 		// Passing (Sub) on call to (Super[]) is close match
-		checkMatch2(new Class[] {Sub.class}, new Class[] {new Super[0].getClass()}, tc, ArgumentsMatchKind.CLOSE);
+		checkMatch2(new Class<?>[] {Sub.class}, new Class<?>[] {new Super[0].getClass()}, tc, ArgumentsMatchKind.CLOSE);
 
 		// Passing (Super) on call to (Sub[]) is not a match
-		checkMatch2(new Class[] {Super.class}, new Class[] {new Sub[0].getClass()}, tc, null);
+		checkMatch2(new Class<?>[] {Super.class}, new Class<?>[] {new Sub[0].getClass()}, tc, null);
 
-		checkMatch2(new Class[] {Unconvertable.class, String.class}, new Class[] {Sub.class, Super[].class}, tc, null);
+		checkMatch2(new Class<?>[] {Unconvertable.class, String.class}, new Class<?>[] {Sub.class, Super[].class}, tc, null);
 
-		checkMatch2(new Class[] {Integer.class, Integer.class, String.class}, new Class[] {String.class, String.class, Super[].class}, tc, null);
+		checkMatch2(new Class<?>[] {Integer.class, Integer.class, String.class}, new Class<?>[] {String.class, String.class, Super[].class}, tc, null);
 
-		checkMatch2(new Class[] {Unconvertable.class, String.class}, new Class[] {Sub.class, Super[].class}, tc, null);
+		checkMatch2(new Class<?>[] {Unconvertable.class, String.class}, new Class<?>[] {Sub.class, Super[].class}, tc, null);
 
-		checkMatch2(new Class[] {Integer.class, Integer.class, String.class}, new Class[] {String.class, String.class, Super[].class}, tc, null);
+		checkMatch2(new Class<?>[] {Integer.class, Integer.class, String.class}, new Class<?>[] {String.class, String.class, Super[].class}, tc, null);
 
-		checkMatch2(new Class[] {Integer.class, Integer.class, Sub.class}, new Class[] {String.class, String.class, Super[].class}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
+		checkMatch2(new Class<?>[] {Integer.class, Integer.class, Sub.class}, new Class<?>[] {String.class, String.class, Super[].class}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
 
-		checkMatch2(new Class[] {Integer.class, Integer.class, Integer.class}, new Class[] {Integer.class, String[].class}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
+		checkMatch2(new Class<?>[] {Integer.class, Integer.class, Integer.class}, new Class<?>[] {Integer.class, String[].class}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
 		// what happens on (Integer,String) passed to (Integer[]) ?
 	}
 
@@ -271,7 +271,8 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 
 	@Test
 	public void testSetupArguments() {
-		Object[] newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(new Class[] {new String[0].getClass()},"a","b","c");
+		Object[] newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(
+				new Class<?>[] {new String[0].getClass()},"a","b","c");
 
 		assertEquals(1, newArray.length);
 		Object firstParam = newArray[0];
