@@ -176,6 +176,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private byte[] content;
 
 	@Nullable
+	private ContentExtractMethod contentExtractMethod;
+
+	@Nullable
 	private String contentType;
 
 	private final Map<String, String[]> parameters = new LinkedHashMap<>(16);
@@ -492,6 +495,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public ServletInputStream getInputStream() {
+		demandContentExtractMethod(ContentExtractMethod.INPUT_STREAM);
+
 		if (this.content != null) {
 			return new DelegatingServletInputStream(new ByteArrayInputStream(this.content));
 		}
@@ -697,6 +702,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public BufferedReader getReader() throws UnsupportedEncodingException {
+		demandContentExtractMethod(ContentExtractMethod.READER);
+
 		if (this.content != null) {
 			InputStream sourceStream = new ByteArrayInputStream(this.content);
 			Reader sourceReader = (this.characterEncoding != null) ?
@@ -707,6 +714,17 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		else {
 			return EMPTY_BUFFERED_READER;
 		}
+	}
+
+	private void demandContentExtractMethod(ContentExtractMethod methodToDemand) {
+		if (this.contentExtractMethod != null && 
+				!this.contentExtractMethod.equals(methodToDemand)) {
+			throw new IllegalStateException(
+					"Cannot call " + methodToDemand.methodName + "()" + 
+					" after " + this.contentExtractMethod.methodName + "()" + 
+					" has already been called for the current request");
+		}
+		this.contentExtractMethod = methodToDemand;
 	}
 
 	public void setRemoteAddr(String remoteAddr) {
@@ -1343,6 +1361,17 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	@Override
 	public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) throws IOException, ServletException {
 		throw new UnsupportedOperationException();
+	}
+
+
+	private enum ContentExtractMethod {
+		READER("getReader"), INPUT_STREAM("getInputStream");
+
+		final String methodName;
+
+		ContentExtractMethod(String methodName) {
+			this.methodName = methodName;
+		}
 	}
 
 }
