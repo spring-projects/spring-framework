@@ -444,7 +444,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	 */
 	@Nullable
 	protected ServletInvocableHandlerMethod getExceptionHandlerMethod(@Nullable HandlerMethod handlerMethod, Exception exception) {
-		Class<?> handlerType = (handlerMethod != null ? handlerMethod.getBeanType() : null);
+		Class<?> handlerType = (handlerMethod != null ? handlerMethod.getMethod().getDeclaringClass() : null);
 
 		if (handlerMethod != null) {
 			ExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.get(handlerType);
