@@ -55,11 +55,9 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 	 * @param locales the supported locales
 	 * @since 4.3
 	 */
-	public void setSupportedLocales(@Nullable List<Locale> locales) {
+	public void setSupportedLocales(List<Locale> locales) {
 		this.supportedLocales.clear();
-		if (locales != null) {
-			this.supportedLocales.addAll(locales);
-		}
+		this.supportedLocales.addAll(locales);
 	}
 
 	/**

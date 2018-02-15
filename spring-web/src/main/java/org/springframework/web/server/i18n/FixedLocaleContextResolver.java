@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,11 @@ import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * {@link LocaleContextResolver} implementation that always returns
- * a fixed default locale and optionally time zone.
- * Default is the current JVM's default locale.
+ * {@link LocaleContextResolver} implementation that always returns a fixed locale
+ * and optionally time zone. Default is the current JVM's default locale.
  *
- * <p>Note: Does not support {@code setLocale(Context)}, as the fixed
- * locale and time zone cannot be changed.
+ * <p>Note: Does not support {@link #setLocaleContext}, as the fixed locale and
+ * time zone cannot be changed.
  *
  * @author Sebastien Deleuze
  * @since 5.0
@@ -70,6 +69,7 @@ public class FixedLocaleContextResolver implements LocaleContextResolver {
 		this.locale = locale;
 		this.timeZone = timeZone;
 	}
+
 
 	@Override
 	public LocaleContext resolveLocaleContext(ServerWebExchange exchange) {
