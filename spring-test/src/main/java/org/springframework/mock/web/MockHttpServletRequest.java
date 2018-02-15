@@ -176,6 +176,12 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private byte[] content;
 
 	@Nullable
+	private ServletInputStream inputStream;
+
+	@Nullable
+	private BufferedReader reader;
+
+	@Nullable
 	private String contentType;
 
 	private final Map<String, String[]> parameters = new LinkedHashMap<>(16);
@@ -492,12 +498,17 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public ServletInputStream getInputStream() {
+		if (this.inputStream != null) {
+			return this.inputStream;
+		}
+
 		if (this.content != null) {
-			return new DelegatingServletInputStream(new ByteArrayInputStream(this.content));
+			this.inputStream = new DelegatingServletInputStream(new ByteArrayInputStream(this.content));
 		}
 		else {
-			return EMPTY_SERVLET_INPUT_STREAM;
+			this.inputStream = EMPTY_SERVLET_INPUT_STREAM;
 		}
+		return this.inputStream;
 	}
 
 	/**
@@ -697,16 +708,21 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public BufferedReader getReader() throws UnsupportedEncodingException {
+		if (this.reader != null) {
+			return this.reader;
+		}
+
 		if (this.content != null) {
 			InputStream sourceStream = new ByteArrayInputStream(this.content);
 			Reader sourceReader = (this.characterEncoding != null) ?
 					new InputStreamReader(sourceStream, this.characterEncoding) :
 					new InputStreamReader(sourceStream);
-			return new BufferedReader(sourceReader);
+			this.reader = new BufferedReader(sourceReader);
 		}
 		else {
-			return EMPTY_BUFFERED_READER;
+			this.reader = EMPTY_BUFFERED_READER;
 		}
+		return this.reader;
 	}
 
 	public void setRemoteAddr(String remoteAddr) {

@@ -113,6 +113,24 @@ public class MockHttpServletRequestTests {
 	}
 
 	@Test
+	public void getReaderTwice() throws IOException {
+		byte[] bytes = "body".getBytes(Charset.defaultCharset());
+		request.setContent(bytes);
+		assertSame(
+				request.getReader(),
+				request.getReader());
+	}
+
+	@Test
+	public void getInputStreamTwice() throws IOException {
+		byte[] bytes = "body".getBytes(Charset.defaultCharset());
+		request.setContent(bytes);
+		assertSame(
+				request.getInputStream(),
+				request.getInputStream());
+	}
+
+	@Test
 	public void setContentType() {
 		String contentType = "test/plain";
 		request.setContentType(contentType);
