@@ -9,6 +9,9 @@ existing libraries written in Java.
 The Spring Framework provides first-class support for Kotlin that allows developers to write
 Kotlin applications almost as if the Spring Framework was a native Kotlin framework.
 
+Feel free to join the #spring channel of http://slack.kotlinlang.org/[Kotlin Slack] or ask
+a question with `spring` and `kotlin` tags on
+https://stackoverflow.com/questions/tagged/spring+kotlin[Stackoverflow] if you need support.
 
 
 
@@ -17,8 +20,8 @@ Kotlin applications almost as if the Spring Framework was a native Kotlin framew
 
 Spring Framework supports Kotlin 1.1+ and requires
 https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-stdlib[`kotlin-stdlib`]
-(or one of its https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-stdlib-jre7[`kotlin-stdlib-jre7`]
-/ https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-stdlib-jre8[`kotlin-stdlib-jre8`] variants)
+(or one of its variants like https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-stdlib-jre8[`kotlin-stdlib-jre8`]
+for Kotlin 1.1 or https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-stdlib-jdk8[`kotlin-stdlib-jdk8`] for Kotlin 1.2+)
 and https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-reflect[`kotlin-reflect`]
 to be present on the classpath. They are provided by default if one bootstraps a Kotlin project on
 https://start.spring.io/#!language=kotlin[start.spring.io].
@@ -94,7 +97,7 @@ via tooling-friendly annotations declared in the `org.springframework.lang` pack
 By default, types from Java APIs used in Kotlin are recognized as
 https://kotlinlang.org/docs/reference/java-interop.html#null-safety-and-platform-types[platform types]
 for which null-checks are relaxed.
-https://github.com/Kotlin/KEEP/blob/jsr-305/proposals/jsr-305-custom-nullability-qualifiers.md[Kotlin support for JSR 305 annotations]
+https://kotlinlang.org/docs/reference/java-interop.html#jsr-305-support[Kotlin support for JSR 305 annotations]
 + Spring nullability annotations provide null-safety for the whole Spring Framework API to Kotlin developers,
 with the advantage of dealing with `null` related issues at compile time.
 
@@ -106,15 +109,16 @@ Libraries like Reactor or Spring Data provide null-safe APIs leveraging this fea
 The JSR 305 checks can be configured by adding the `-Xjsr305` compiler flag with the following
 options: `-Xjsr305={strict|warn|ignore}`.
 
-For kotlin versions 1.1.50+, the default behavior is the same to `-Xjsr305=warn`.
-The `strict` value is required to have Spring Framework API full null-safety taken in account
-but should be considered experimental since Spring API nullability declaration could evolve
-even between minor releases and more checks may be added in the future).
+For kotlin versions 1.1+, the default behavior is the same to `-Xjsr305=warn`.
+The `strict` value is required to have Spring Framework API null-safety taken in account
+in Kotlin types inferred from Spring API but should be used with the knowledge that Spring
+API nullability declaration could evolve even between minor releases and more checks may
+be added in the future).
 
 [NOTE]
 ====
 Generic type arguments, varargs and array elements nullability are not supported yet,
-but should be in an upcoming release, see https://github.com/Kotlin/KEEP/issues/79[this dicussion]
+but should be in an upcoming release, see https://github.com/Kotlin/KEEP/issues/79[this discussion]
 for up-to-date information.
 ====
 
@@ -523,8 +527,8 @@ can be customised with configuration beans, like as follows:
 ====
 If Spring Boot is being used, then
 https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html#boot-features-external-config-typesafe-configuration-properties[`@ConfigurationProperties`]
-instead of `@Value` annotations can be used, but currently this only works with nullable `var`
-properties (which is far from ideal) since immutable classes initialized by
+instead of `@Value` annotations can be used, but currently this only works with `lateinit` or nullable `var`
+properties (the former is recommended) since immutable classes initialized by
 constructors are not yet supported.
 See these issues about https://github.com/spring-projects/spring-boot/issues/8762[`@ConfigurationProperties` binding for immutable POJOs]
 and https://github.com/spring-projects/spring-boot/issues/1254[`@ConfigurationProperties` binding on interfaces]
@@ -536,9 +540,10 @@ for more details.
 === Annotation array attributes
 
 Kotlin annotations are mostly similar to Java ones, but array attributes - which are
-extensively used in Spring - behave differently. As explained in https://kotlinlang.org/docs/reference/annotations.html[Kotlin documentation]
-unlike other attributes, the `value` attribute name can be omitted and when it is an array
-attribute it is specified as a `vararg` parameter.
+extensively used in Spring - behave differently. As explained in
+https://kotlinlang.org/docs/reference/annotations.html[Kotlin documentation]
+unlike other attributes, the `value` attribute name can be omitted and
+specified as a `vararg` parameter.
 
 To understand what that means, let's take `@RequestMapping`, which is one
 of the most widely used Spring annotations as an example. This Java annotation is declared as:
@@ -567,22 +572,18 @@ That's why one can write
 `@RequestMapping(value = "/foo", method = RequestMethod.GET)` or
 `@RequestMapping(path = "/foo", method = RequestMethod.GET)`.
 
-However, in Kotlin, one will have to write `@RequestMapping("/foo", method = arrayOf(RequestMethod.GET))`.
-The variant using `path` is not recommended as it need to be written
-`@RequestMapping(path = arrayOf("/foo"), method = arrayOf(RequestMethod.GET))`.
+However, in Kotlin 1.2+, one will have to write `@RequestMapping("/foo", method = [RequestMethod.GET])`
+or `@RequestMapping(path = ["/foo"], method = [RequestMethod.GET])` (square brackets need
+to be specified with named array attributes).
 
-A workaround for this specific `method` attribute (the most common one) is to
+An alternative for this specific `method` attribute (the most common one) is to
 use a shortcut annotation such as `@GetMapping` or `@PostMapping`, etc.
 
 [NOTE]
 ====
 Reminder: If the `@RequestMapping` `method` attribute is not specified,
-all HTTP methods will be matched, not only the `GET` methods.
+all HTTP methods will be matched, not only the `GET` one.
 ====
-
-Improving the syntax and consistency of Kotlin annotation array attributes is discussed in
-https://youtrack.jetbrains.com/issue/KT-11235[this Kotlin language design issue].
-
 
 
 === Testing
@@ -702,11 +703,12 @@ MVC and its annotation-based programming model is a perfectly valid and fully su
 
 
 
-[[kotlin-resources-started]]
+[[kotlin-resources]]
 == Resources
 
 * http://kotlinlang.org/docs/reference/[Kotlin language reference]
 * http://slack.kotlinlang.org/[Kotlin Slack] (with a dedicated #spring channel)
+* https://stackoverflow.com/questions/tagged/spring+kotlin[Stackoverflow with `spring` and `kotlin` tags]
 * https://try.kotlinlang.org/[Try Kotlin in your browser]
 * https://blog.jetbrains.com/kotlin/[Kotlin blog]
 * https://kotlin.link/[Awesome Kotlin]
@@ -729,6 +731,7 @@ MVC and its annotation-based programming model is a perfectly valid and fully su
 * https://github.com/sdeleuze/spring-kotlin-functional[spring-kotlin-functional]: standalone WebFlux + functional bean definition DSL
 * https://github.com/sdeleuze/spring-kotlin-fullstack[spring-kotlin-fullstack]: WebFlux Kotlin fullstack example with Kotlin2js for frontend instead of JavaScript or TypeScript
 * https://github.com/spring-petclinic/spring-petclinic-kotlin[spring-petclinic-kotlin]: Kotlin version of the Spring PetClinic Sample Application
+* https://github.com/sdeleuze/spring-kotlin-deepdive[spring-kotlin-deepdive]: a step by step migration for Boot 1.0 + Java to Boot 2.0 + Kotlin
 
 
 
@@ -752,26 +755,22 @@ Here is a list of pending issues related to Spring + Kotlin support.
 
 ==== Spring Boot
 
-* https://github.com/spring-projects/spring-boot/issues/5537[Improve Kotlin support]
 * https://github.com/spring-projects/spring-boot/issues/8762[Allow `@ConfigurationProperties` binding for immutable POJOs]
 * https://github.com/spring-projects/spring-boot/issues/1254[Allow `@ConfigurationProperties` binding on interfaces]
-* https://github.com/spring-projects/spring-boot/issues/8511[Provide support for Kotlin KClass parameter in `SpringApplication.run()`]
 * https://github.com/spring-projects/spring-boot/issues/8115[Expose the functional bean registration API via `SpringApplication`]
+* https://github.com/spring-projects/spring-boot/issues/10712[Add null-safety annotations on Spring Boot APIs]
+* https://github.com/spring-projects/spring-boot/issues/9486[Use Kotlin's bom to provide dependency management for Kotlin]
 
 
 ==== Kotlin
 
-* https://github.com/Kotlin/KEEP/issues/79[Better generics null-safety support]
 * https://youtrack.jetbrains.com/issue/KT-6380[Parent issue for Spring Framework support]
+* https://youtrack.jetbrains.com/issue/KT-5464[Kotlin requires type inference where Java doesn't]
+* https://github.com/Kotlin/KEEP/issues/79[Better generics null-safety support]
 * https://youtrack.jetbrains.com/issue/KT-20283[Smart cast regression with open classes]
 * https://youtrack.jetbrains.com/issue/KT-18833[JSR-223 application classpath not available when using Java 9]
-* https://youtrack.jetbrains.com/issue/KT-15667[Support "::foo" as a short-hand syntax for bound callable reference to "this::foo"]
-* https://youtrack.jetbrains.com/issue/KT-11235[Allow specifying array annotation attribute single value without arrayOf()]
-* https://youtrack.jetbrains.com/issue/KT-5464[Kotlin requires type inference where Java doesn't]
 * https://youtrack.jetbrains.com/issue/KT-14984[Impossible to pass not all SAM argument as function]
 * https://youtrack.jetbrains.com/issue/KT-19592[Apply JSR 305 meta-annotations to generic type parameters]
 * https://youtrack.jetbrains.com/issue/KT-18398[Provide a way for libraries to avoid mixing Kotlin 1.0 and 1.1 dependencies]
 * https://youtrack.jetbrains.com/issue/KT-15125[Support JSR 223 bindings directly via script variables]
-* https://youtrack.jetbrains.com/issue/KT-16780[Kotlin Runtime library warning with kotlin-script-util dependency]
-* https://youtrack.jetbrains.com/issue/KT-18765[Move incremental compilation message from Gradle's warning to info logging level]
 * https://youtrack.jetbrains.com/issue/KT-15467[Support all-open and no-arg compiler plugins in Kotlin Eclipse plugin]
