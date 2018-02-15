@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Map;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -625,7 +625,7 @@ public class FormTag extends AbstractHtmlElementTag {
 			try {
 				requestUri = UriUtils.encodePath(requestUri, encoding);
 			}
-			catch (UnsupportedEncodingException ex) {
+			catch (UnsupportedCharsetException ex) {
 				// shouldn't happen - if it does, proceed with requestUri as-is
 			}
 			ServletResponse response = this.pageContext.getResponse();
