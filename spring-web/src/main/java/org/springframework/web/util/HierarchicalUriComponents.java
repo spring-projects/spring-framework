@@ -374,10 +374,6 @@ final class HierarchicalUriComponents extends UriComponents {
 		return result;
 	}
 
-	/**
-	 * Normalize the path removing sequences like "path/..".
-	 * @see StringUtils#cleanPath(String)
-	 */
 	@Override
 	public UriComponents normalize() {
 		String normalizedPath = StringUtils.cleanPath(getPath());
@@ -388,9 +384,6 @@ final class HierarchicalUriComponents extends UriComponents {
 
 	// Other functionality
 
-	/**
-	 * Returns a URI String from this {@code UriComponents} instance.
-	 */
 	@Override
 	public String toUriString() {
 		StringBuilder uriBuilder = new StringBuilder();
@@ -431,9 +424,6 @@ final class HierarchicalUriComponents extends UriComponents {
 		return uriBuilder.toString();
 	}
 
-	/**
-	 * Returns a {@code URI} from this {@code UriComponents} instance.
-	 */
 	@Override
 	public URI toUri() {
 		try {
@@ -448,8 +438,7 @@ final class HierarchicalUriComponents extends UriComponents {
 						path = PATH_DELIMITER + path;
 					}
 				}
-				return new URI(getScheme(), getUserInfo(), getHost(), getPort(), path, getQuery(),
-						getFragment());
+				return new URI(getScheme(), getUserInfo(), getHost(), getPort(), path, getQuery(), getFragment());
 			}
 		}
 		catch (URISyntaxException ex) {
