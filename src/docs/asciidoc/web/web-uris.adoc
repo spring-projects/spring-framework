@@ -1,6 +1,7 @@
 
 [[web-uricomponents]]
 = UriComponents
+[.small]#Spring MVC and Spring WebFlux#
 
 `UriComponents` is comparable to `java.net.URI`. However it comes with a dedicated
 `UriComponentsBuilder` and supports URI template variables:
@@ -38,6 +39,7 @@ The above can be done as a single chain and with a shortcut:
 
 [[web-uribuilder]]
 = UriBuilder
+[.small]#Spring MVC and Spring WebFlux#
 
 <<web-uricomponents,UriComponentsBuilder>> is an implementation of `UriBuilder`. Together
 `UriBuilderFactory` and `UriBuilder` provide a pluggable mechanism for building a URI
@@ -100,6 +102,7 @@ An example of using the `DefaultUriBuilderFactory`:
 
 [[web-uri-encoding]]
 = URI Encoding
+[.small]#Spring MVC and Spring WebFlux#
 
 The default way of encoding URIs in `UriComponents` works as follows:
 

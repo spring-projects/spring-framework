@@ -2880,6 +2880,7 @@ Javadoc for more details.
 
 [[mvc-uri-building]]
 == URI Links
+[.small]#<<web-reactive.adoc#mvc-uri-building,Same in Spring WebFlux>>#
 
 This section describes various options available in the Spring Framework to prepare URIs.
 

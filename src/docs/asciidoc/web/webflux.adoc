@@ -2197,6 +2197,17 @@ Javadoc for more details.
 
 
 
+[[mvc-uri-building]]
+== URI Links
+[.small]#<<web.adoc#mvc-uri-building,Same in Spring MVC>>#
+
+This section describes various options available in the Spring Framework to prepare URIs.
+
+
+include::web-uris.adoc[leveloffset=+2]
+
+
+
 
 include::webflux-functional.adoc[leveloffset=+1]
 
