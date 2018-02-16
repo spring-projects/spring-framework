@@ -1139,12 +1139,9 @@ other method arguments.
 [[rest-resttemplate-uri]]
 ===== Working with the URI
 
-For each of the main HTTP methods, the `RestTemplate` provides variants that either take
-a String URI or `java.net.URI` as the first argument.
-
-The String URI variants accept template arguments as a String variable-length argument
-or as a `Map<String,String>`. They also assume the URL String is not encoded and needs
-to be encoded. For example the following:
+For each of the main HTTP methods, the `RestTemplate` provides two variants that take
+either a String URI template, or `java.net.URI` as the first argument. When using a
+String URI template, encoding is automatically applied:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1152,39 +1149,11 @@ to be encoded. For example the following:
 	restTemplate.getForObject("http://example.com/hotel list", String.class);
 ----
 
-will perform a GET on `http://example.com/hotel%20list`. That means if the input URL
-String is already encoded, it will be encoded twice -- i.e.
-`http://example.com/hotel%20list` will become `http://example.com/hotel%2520list`. If
-this is not the intended effect, use the `java.net.URI` method variant, which assumes
-the URL is already encoded is also generally useful if you want to reuse a single (fully
-expanded) `URI` multiple times.
+The resulting target URI is "http://example.com/hotel%20list". Alternatively you can
+provide an already prepared `java.net.URI` and that will be used as is.
+For more information on preparing URIs, or customizing how the `RestTemplate` expands
+URI templates, see <<web.adoc#mvc-uri-building,URI Links>> in the "Web Servlet" section.
 
-The `UriComponentsBuilder` class can be used to build and encode the `URI` including
-support for URI templates. For example you can start with a URL String:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	UriComponents uriComponents = UriComponentsBuilder.fromUriString(
-			"http://example.com/hotels/{hotel}/bookings/{booking}").build()
-			.expand("42", "21")
-			.encode();
-
-	URI uri = uriComponents.toUri();
-----
-
-Or specify each URI component individually:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	UriComponents uriComponents = UriComponentsBuilder.newInstance()
-			.scheme("http").host("example.com").path("/hotels/{hotel}/bookings/{booking}").build()
-			.expand("42", "21")
-			.encode();
-
-	URI uri = uriComponents.toUri();
-----
 
 [[rest-template-headers]]
 ===== Dealing with request and response headers

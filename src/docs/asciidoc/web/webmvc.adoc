@@ -2881,44 +2881,25 @@ Javadoc for more details.
 [[mvc-uri-building]]
 == URI Links
 
-Spring MVC provides a mechanism for building and encoding a URI using
-`UriComponentsBuilder` and `UriComponents`.
+This section describes various options available in the Spring Framework to prepare URIs.
 
-For example you can expand and encode a URI template string:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	UriComponents uriComponents = UriComponentsBuilder.fromUriString(
-			"http://example.com/hotels/{hotel}/bookings/{booking}").build();
 
-	URI uri = uriComponents.expand("42", "21").encode().toUri();
-----
+include::web-uris.adoc[leveloffset=+2]
 
-Note that `UriComponents` is immutable and the `expand()` and `encode()` operations
-return new instances if necessary.
 
-You can also expand and encode using individual URI components:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	UriComponents uriComponents = UriComponentsBuilder.newInstance()
-			.scheme("http").host("example.com").path("/hotels/{hotel}/bookings/{booking}").build()
-			.expand("42", "21")
-			.encode();
-----
+[[mvc-servleturicomponentsbuilder]]
+=== Servlet request relative
 
-In a Servlet environment the `ServletUriComponentsBuilder` subclass provides static
-factory methods to copy available URL information from a Servlet requests:
+You can use `ServletUriComponentsBuilder` to create URIs relative to the current request:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	HttpServletRequest request = ...
 
-	// Re-use host, scheme, port, path and query string
-	// Replace the "accountId" query param
+	// Re-uses host, scheme, port, path and query string...
 
 	ServletUriComponentsBuilder ucb = ServletUriComponentsBuilder.fromRequest(request)
 			.replaceQueryParam("accountId", "{id}").build()
@@ -2926,48 +2907,44 @@ factory methods to copy available URL information from a Servlet requests:
 			.encode();
 ----
 
-Alternatively, you may choose to copy a subset of the available information up to and
-including the context path:
+You can create URIs relative to the context path:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	// Re-use host, port and context path
-	// Append "/accounts" to the path
+	// Re-uses host, port and context path...
 
 	ServletUriComponentsBuilder ucb = ServletUriComponentsBuilder.fromContextPath(request)
 			.path("/accounts").build()
 ----
 
-Or in cases where the `DispatcherServlet` is mapped by name (e.g. `/main/{asterisk}`), you can
-also have the literal part of the servlet mapping included:
+You can create URIs relative to a Servlet (e.g. `/main/{asterisk}`):
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	// Re-use host, port, context path
-	// Append the literal part of the servlet mapping to the path
-	// Append "/accounts" to the path
+	// Re-uses host, port, context path, and Servlet prefix...
 
 	ServletUriComponentsBuilder ucb = ServletUriComponentsBuilder.fromServletMapping(request)
 			.path("/accounts").build()
 ----
 
-[TIP]
+[CAUTION]
 ====
-Both `ServletUriComponentsBuilder` and `MvcUriComponentsBuilder` detect, extract, and use
-information from the "Forwarded" header, or from "X-Forwarded-Host", "X-Forwarded-Port",
-and "X-Forwarded-Proto" if "Forwarded" is not present, so that the resulting links reflect
-the original request. Note that you can also use the
-<<filters-forwarded-headers,ForwardedHeaderFilter>> to the same once, globally.
+`ServletUriComponentsBuilder` detects and uses information from the "Forwarded",
+"X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers, so the resulting
+links reflect the original request. You need to ensure that your application is behind
+a trusted proxy which filters out such headers coming from outside. Also consider using
+the <<filters-forwarded-headers,ForwardedHeaderFilter>> which processes such headers once
+per request, and also provides an option to remove and ignore such headers.
 ====
 
 
 
 [[mvc-links-to-controllers]]
-=== Links to Controllers
+=== Links to controllers
 
-Spring MVC also provides a mechanism for building links to controller methods. For example, given:
+Spring MVC provides a mechanism to prepare links to controller methods. For example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3035,6 +3012,17 @@ with a base URL and then use the instance-based "withXxx" methods. For example:
 
 	URI uri = uriComponents.encode().toUri();
 ----
+
+[CAUTION]
+====
+`MvcUriComponentsBuilder` detects and uses information from the "Forwarded",
+"X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers, so the resulting
+links reflect the original request. You need to ensure that your application is behind
+a trusted proxy which filters out such headers coming from outside. Also consider using
+the <<filters-forwarded-headers,ForwardedHeaderFilter>> which processes such headers once
+per request, and also provides an option to remove and ignore such headers.
+====
+
 
 
 
