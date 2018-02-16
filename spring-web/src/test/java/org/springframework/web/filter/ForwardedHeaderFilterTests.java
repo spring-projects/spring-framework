@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -299,6 +299,17 @@ public class ForwardedHeaderFilterTests {
 
 		String redirectedUrl = sendRedirect("/foo/bar");
 		assertEquals("https://example.com/foo/bar", redirectedUrl);
+	}
+
+	@Test // SPR-16506
+	public void sendRedirectWithAbsolutePathQueryParamAndFragment() throws Exception {
+		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_HOST, "example.com");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
+		this.request.setQueryString("oldqp=1");
+
+		String redirectedUrl = sendRedirect("/foo/bar?newqp=2#fragment");
+		assertEquals("https://example.com/foo/bar?newqp=2#fragment", redirectedUrl);
 	}
 
 	@Test
