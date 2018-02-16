@@ -107,11 +107,11 @@ An example of using the `DefaultUriBuilderFactory`:
 The default way of encoding URIs in `UriComponents` works as follows:
 
 . URI variables are expanded.
-. URI components are encoded individually.
+. Each URI component (path, query, etc) is encoded individually.
 
-For each URI component, percent encoding is applied to all illegal characters, which
-includes non-US-ASCII characters, and other characters that are illegal within a given
-URI component type, as defined in RFC 3986.
+The rules for encoding are as follows: within a URI component, apply percent encoding to
+all illegal characters, including non-US-ASCII characters, and all other characters that
+are illegal within the URI component, as defined in RFC 3986.
 
 [TIP]
 ====
@@ -120,12 +120,13 @@ The encoding in `UriComponents` is comparable to the multi-argument constructor 
 section of its class-level Javadoc.
 ====
 
-This default encoding strategy *does not* encode all characters with reserved meaning,
-but rather only the ones that are illegal within a given URI component. If this is not
-what you expect you can use an alternative.
+The above default encoding strategy *does not* encode all characters with reserved
+meaning, but only the ones that are illegal within a given URI component. If this is not
+what you expect, you can use the alternative strategy described next.
 
-When using <<web-uribuilder,DefaultUriBuilderFactory>> you can switch to an alternative
-encoding strategy:
+When using <<web-uribuilder,DefaultUriBuilderFactory>> -- plugged into the `WebClient`,
+`RestTemplate`, or used directly, you can switch to an alternative encoding strategy as
+shown below:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -137,8 +138,8 @@ encoding strategy:
 	// ...
 ----
 
-The above encoding strategy applies `UriUtils.encode(String, Charset)` to each URI
-variable value prior to expanding it. Effectively it encodes all characters with reserved
-meaning, therefore ensuring that expanded URI variables do not have any impact on the
-structure or meaning of the URI.
+This alternative encoding strategy applies `UriUtils.encode(String, Charset)` to each URI
+variable value prior to expanding it, effectively encoding all non-US-ASCII characters,
+and *all* characters with reserved meaning in a URI, which ensures that the expanded URI
+variables do not have any impact on the structure or meaning of the URI.
 
