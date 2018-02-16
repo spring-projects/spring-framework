@@ -56,6 +56,11 @@ import org.springframework.util.StringUtils;
  */
 class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
+	private static final String X509_CERTIFICATE_ATTRIBUTE = "javax.servlet.request.X509Certificate";
+
+	private static final String SSL_SESSION_ID_ATTRIBUTE = "javax.servlet.request.ssl_session_id";
+
+
 	protected final Log logger = LogFactory.getLog(getClass());
 
 
@@ -178,8 +183,8 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 			return null;
 		}
 		return new DefaultSslInfo(
-				(String) request.getAttribute("javax.servlet.request.ssl_session_id"),
-				(X509Certificate[]) request.getAttribute("java.security.cert.X509Certificate"));
+				(String) request.getAttribute(SSL_SESSION_ID_ATTRIBUTE),
+				(X509Certificate[]) request.getAttribute(X509_CERTIFICATE_ATTRIBUTE));
 	}
 
 	@Override
