@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.Customer;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.util.StringUtils;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -763,9 +764,7 @@ public class SqlQueryTests  {
 		}
 
 		public String[] run() {
-			List<String> list = execute();
-			String[] results = list.toArray(new String[list.size()]);
-			return results;
+			return StringUtils.toStringArray(execute());
 		}
 	}
 

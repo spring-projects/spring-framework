@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,10 @@ import org.springframework.web.servlet.ModelAndView;
  * Also provides matching logic to test if the interceptor applies to a given request path.
  *
  * <p>A MappedInterceptor can be registered directly with any
- * {@link org.springframework.web.servlet.handler.AbstractHandlerMethodMapping
- * AbstractHandlerMethodMapping}. Furthermore, beans of type MappedInterceptor
- * are automatically detected by {@code AbstractHandlerMethodMapping} (including
- * ancestor ApplicationContext's) which effectively means the interceptor is
- * registered "globally" with all handler mappings.
+ * {@link org.springframework.web.servlet.handler.AbstractHandlerMethodMapping}.
+ * Furthermore, beans of type {@code MappedInterceptor} are automatically detected by
+ * {@code AbstractHandlerMethodMapping} (including ancestor ApplicationContext's) which
+ * effectively means the interceptor is registered "globally" with all handler mappings.
  *
  * @author Keith Donald
  * @author Rossen Stoyanchev
@@ -55,7 +54,7 @@ public final class MappedInterceptor implements HandlerInterceptor {
 
 	/**
 	 * Create a new MappedInterceptor instance.
-	 * @param includePatterns the path patterns to map with a {@code null} value matching to all paths
+	 * @param includePatterns the path patterns to map (empty for matching to all paths)
 	 * @param interceptor the HandlerInterceptor instance to map to the given patterns
 	 */
 	public MappedInterceptor(String[] includePatterns, HandlerInterceptor interceptor) {
@@ -64,8 +63,8 @@ public final class MappedInterceptor implements HandlerInterceptor {
 
 	/**
 	 * Create a new MappedInterceptor instance.
-	 * @param includePatterns the path patterns to map with a {@code null} value matching to all paths
-	 * @param excludePatterns the path patterns to exclude
+	 * @param includePatterns the path patterns to map (empty for matching to all paths)
+	 * @param excludePatterns the path patterns to exclude (empty for no specific excludes)
 	 * @param interceptor the HandlerInterceptor instance to map to the given patterns
 	 */
 	public MappedInterceptor(String[] includePatterns, String[] excludePatterns, HandlerInterceptor interceptor) {
@@ -132,8 +131,8 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 * @param pathMatcher a path matcher for path pattern matching
 	 */
 	public boolean matches(String lookupPath, PathMatcher pathMatcher) {
-		PathMatcher pathMatcherToUse = (this.pathMatcher != null) ? this.pathMatcher : pathMatcher;
-		if (this.excludePatterns != null) {
+		PathMatcher pathMatcherToUse = (this.pathMatcher != null ? this.pathMatcher : pathMatcher);
+		if (!ObjectUtils.isEmpty(this.excludePatterns)) {
 			for (String pattern : this.excludePatterns) {
 				if (pathMatcherToUse.match(pattern, lookupPath)) {
 					return false;
@@ -143,14 +142,12 @@ public final class MappedInterceptor implements HandlerInterceptor {
 		if (ObjectUtils.isEmpty(this.includePatterns)) {
 			return true;
 		}
-		else {
-			for (String pattern : this.includePatterns) {
-				if (pathMatcherToUse.match(pattern, lookupPath)) {
-					return true;
-				}
+		for (String pattern : this.includePatterns) {
+			if (pathMatcherToUse.match(pattern, lookupPath)) {
+				return true;
 			}
-			return false;
 		}
+		return false;
 	}
 
 	@Override

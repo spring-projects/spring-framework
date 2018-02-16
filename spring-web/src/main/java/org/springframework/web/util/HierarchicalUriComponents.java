@@ -773,7 +773,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
-			builder.pathSegment(getPathSegments().toArray(new String[getPathSegments().size()]));
+			builder.pathSegment(StringUtils.toStringArray(getPathSegments()));
 		}
 
 		@Override

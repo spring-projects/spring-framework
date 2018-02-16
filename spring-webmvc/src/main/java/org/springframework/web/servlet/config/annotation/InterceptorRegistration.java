@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 
@@ -88,8 +88,8 @@ public class InterceptorRegistration {
 			return this.interceptor;
 		}
 
-		String[] include = toArray(this.includePatterns);
-		String[] exclude = toArray(this.excludePatterns);
+		String[] include = StringUtils.toStringArray(this.includePatterns);
+		String[] exclude = StringUtils.toStringArray(this.excludePatterns);
 		MappedInterceptor mappedInterceptor = new MappedInterceptor(include, exclude, this.interceptor);
 
 		if (this.pathMatcher != null) {
@@ -97,10 +97,6 @@ public class InterceptorRegistration {
 		}
 
 		return mappedInterceptor;
-	}
-
-	private static String[] toArray(List<String> list) {
-		return (CollectionUtils.isEmpty(list) ? null : list.toArray(new String[list.size()]));
 	}
 
 }

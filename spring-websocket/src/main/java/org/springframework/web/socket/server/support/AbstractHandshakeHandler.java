@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -183,7 +183,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	 * Return the list of supported sub-protocols.
 	 */
 	public String[] getSupportedProtocols() {
-		return this.supportedProtocols.toArray(new String[this.supportedProtocols.size()]);
+		return StringUtils.toStringArray(this.supportedProtocols);
 	}
 
 	@Override
@@ -404,8 +404,8 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	 * @param attributes handshake attributes to pass to the WebSocket session
 	 * @return the user for the WebSocket session, or {@code null} if not available
 	 */
-	protected Principal determineUser(ServerHttpRequest request, WebSocketHandler wsHandler,
-			Map<String, Object> attributes) {
+	protected Principal determineUser(
+			ServerHttpRequest request, WebSocketHandler wsHandler, Map<String, Object> attributes) {
 
 		return request.getPrincipal();
 	}

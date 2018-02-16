@@ -25,6 +25,7 @@ import org.springframework.beans.NotReadablePropertyException;
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.jdbc.core.StatementCreatorUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link SqlParameterSource} implementation that obtains parameter values
@@ -98,7 +99,7 @@ public class BeanPropertySqlParameterSource extends AbstractSqlParameterSource {
 					names.add(pd.getName());
 				}
 			}
-			this.propertyNames = names.toArray(new String[names.size()]);
+			this.propertyNames = StringUtils.toStringArray(names);
 		}
 		return this.propertyNames;
 	}

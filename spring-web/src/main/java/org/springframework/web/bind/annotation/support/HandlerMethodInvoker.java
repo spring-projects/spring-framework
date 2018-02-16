@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -205,7 +206,7 @@ public class HandlerMethodInvoker {
 		Map<String, Object> model = (mavModel != null ? mavModel : implicitModel);
 		if (model != null) {
 			try {
-				String[] originalAttrNames = model.keySet().toArray(new String[model.size()]);
+				String[] originalAttrNames = StringUtils.toStringArray(model.keySet());
 				for (String attrName : originalAttrNames) {
 					Object attrValue = model.get(attrName);
 					boolean isSessionAttr = this.methodResolver.isSessionAttribute(
