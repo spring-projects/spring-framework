@@ -307,41 +307,41 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			this.request = request;
 		}
 
-@Override
-public void sendRedirect(String location) throws IOException {
+		@Override
+		public void sendRedirect(String location) throws IOException {
 
-	UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(location);
-	UriComponents uriComponents = builder.build();
+			UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(location);
+			UriComponents uriComponents = builder.build();
 
-	// Absolute location
-	if (uriComponents.getScheme() != null) {
-		super.sendRedirect(location);
-		return;
-	}
+			// Absolute location
+			if (uriComponents.getScheme() != null) {
+				super.sendRedirect(location);
+				return;
+			}
 
-	// Network-path reference
-	if (location.startsWith("//")) {
-		String scheme = this.request.getScheme();
-		super.sendRedirect(builder.scheme(scheme).toUriString());
-		return;
-	}
+			// Network-path reference
+			if (location.startsWith("//")) {
+				String scheme = this.request.getScheme();
+				super.sendRedirect(builder.scheme(scheme).toUriString());
+				return;
+			}
 
-	String path = uriComponents.getPath();
-	if (path != null) {
-		// Relative to Servlet container root or to current request
-		path = (path.startsWith(FOLDER_SEPARATOR) ? path :
-				StringUtils.applyRelativePath(this.request.getRequestURI(), path));
-	}
+			String path = uriComponents.getPath();
+			if (path != null) {
+				// Relative to Servlet container root or to current request
+				path = (path.startsWith(FOLDER_SEPARATOR) ? path :
+						StringUtils.applyRelativePath(this.request.getRequestURI(), path));
+			}
 
-	String result = UriComponentsBuilder
-			.fromHttpRequest(new ServletServerHttpRequest(this.request))
-			.replacePath(path)
-			.replaceQuery(uriComponents.getQuery())
-			.fragment(uriComponents.getFragment())
-			.build().normalize().toUriString();
+			String result = UriComponentsBuilder
+					.fromHttpRequest(new ServletServerHttpRequest(this.request))
+					.replacePath(path)
+					.replaceQuery(uriComponents.getQuery())
+					.fragment(uriComponents.getFragment())
+					.build().normalize().toUriString();
 
-	super.sendRedirect(result);
-}
+			super.sendRedirect(result);
+		}
 	}
 
 }
