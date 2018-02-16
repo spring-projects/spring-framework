@@ -28,7 +28,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestWrapper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.websocket.CloseReason;
 
 import org.glassfish.tyrus.core.TyrusUpgradeResponse;
 import org.glassfish.tyrus.core.Utils;
@@ -56,11 +55,7 @@ public class WebLogicRequestUpgradeStrategy extends AbstractTyrusRequestUpgradeS
 
 	private static final WebLogicServletWriterHelper servletWriterHelper = new WebLogicServletWriterHelper();
 
-	private static final Connection.CloseListener noOpCloseListener = new Connection.CloseListener() {
-		@Override
-		public void close(CloseReason reason) {
-		}
-	};
+	private static final Connection.CloseListener noOpCloseListener = reason -> { };
 
 
 	@Override
