@@ -1140,8 +1140,8 @@ other method arguments.
 ===== Working with the URI
 
 For each of the main HTTP methods, the `RestTemplate` provides two variants that take
-either a String URI template, or `java.net.URI` as the first argument. When using a
-String URI template, encoding is automatically applied:
+either a String URI template or `java.net.URI` as the first argument. When using a String
+URI template, encoding is automatically applied:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1150,9 +1150,9 @@ String URI template, encoding is automatically applied:
 ----
 
 The resulting target URI is "http://example.com/hotel%20list". Alternatively you can
-provide an already prepared `java.net.URI` and that will be used as is.
-For more information on preparing URIs, or customizing how the `RestTemplate` expands
-URI templates, see <<web.adoc#mvc-uri-building,URI Links>> in the "Web Servlet" section.
+provide an already prepared `java.net.URI` that will be used as is. For more information
+on preparing URIs or customizing how the `RestTemplate` expands URI templates, see
+<<web.adoc#mvc-uri-building,URI Links>> in the "Web Servlet" section.
 
 
 [[rest-template-headers]]

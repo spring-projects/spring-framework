@@ -3,7 +3,7 @@
 = UriComponents
 
 `UriComponents` is comparable to `java.net.URI`. However it comes with a dedicated
-`UriComponentsBuilder` and support URI template variables:
+`UriComponentsBuilder` and supports URI template variables:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -21,7 +21,7 @@
 <3> Build `UriComponents`.
 <4> Expand URI variables, encode, and obtain the `URI`.
 
-The above can be done as a single chain, and with a shortcut:
+The above can be done as a single chain and with a shortcut:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -36,8 +36,6 @@ The above can be done as a single chain, and with a shortcut:
 ----
 
 
-
-
 [[web-uribuilder]]
 = UriBuilder
 
@@ -46,10 +44,10 @@ The above can be done as a single chain, and with a shortcut:
 from a URI template, as well as a way to share common properties such as a base URI,
 encoding strategy, and others.
 
-Both the `RestTemplate` and the `WebClient` can be configured with a `UriBuilderFactory`,
+Both the `RestTemplate` and the `WebClient` can be configured with a `UriBuilderFactory`
 in order to customize how URIs are created from URI templates. The default implementation
-relies on `UriComponentsBuilder` internally and provides options to a common base URI,
-an alternative encoding mode strategy, and more.
+relies on `UriComponentsBuilder` internally and provides options to configure a common
+base URI, an alternative encoding mode strategy, and more.
 
 An example of configuring the `RestTemplate`:
 
@@ -100,8 +98,6 @@ An example of using the `DefaultUriBuilderFactory`:
 ----
 
 
-
-
 [[web-uri-encoding]]
 = URI Encoding
 
@@ -121,9 +117,9 @@ The encoding in `UriComponents` is comparable to the multi-argument constructor 
 section of its class-level Javadoc.
 ====
 
-This default way of encoding *does not* encode all characters with reserved meaning, but
-only the ones that are illegal within a given URI component. If this is not what you
-expect you can use an alternative.
+This default encoding strategy *does not* encode all characters with reserved meaning,
+but rather only the ones that are illegal within a given URI component. If this is not
+what you expect you can use an alternative.
 
 When using <<web-uribuilder,DefaultUriBuilderFactory>> you can switch to an alternative
 encoding strategy:
@@ -140,6 +136,6 @@ encoding strategy:
 
 The above encoding strategy applies `UriUtils.encode(String, Charset)` to each URI
 variable value prior to expanding it. Effectively it encodes all characters with reserved
-meaning, therefore ensuring that expanded URI variable do not have any impact on the
+meaning, therefore ensuring that expanded URI variables do not have any impact on the
 structure or meaning of the URI.
 
