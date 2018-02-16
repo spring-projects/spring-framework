@@ -101,13 +101,13 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	}
 
 	/**
-	 * Use this property to enable relative redirects as explained in and also
-	 * using the same response wrapper as {@link RelativeRedirectFilter} does.
-	 * Or if both filters are used, only one will wrap the response.
+	 * Use this property to enable relative redirects as explained in
+	 * {@link RelativeRedirectFilter}, and also using the same response wrapper
+	 * as that filter does, or if both are configured, only one will wrap.
 	 * <p>By default, if this property is set to false, in which case calls to
 	 * {@link HttpServletResponse#sendRedirect(String)} are overridden in order
-	 * to turn relative into absolute URLs since (which Servlet containers are
-	 * also required to do) also taking forwarded headers into consideration.
+	 * to turn relative into absolute URLs, also taking into account forwarded
+	 * headers.
 	 * @param relativeRedirects whether to use relative redirects
 	 * @since 4.3.10
 	 */
@@ -307,54 +307,41 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			this.request = request;
 		}
 
-		@Override
-		public void sendRedirect(String location) throws IOException {
-			UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(location);
+@Override
+public void sendRedirect(String location) throws IOException {
 
-			// Absolute location
-			if (builder.build().getScheme() != null) {
-				super.sendRedirect(location);
-				return;
-			}
+	UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(location);
+	UriComponents uriComponents = builder.build();
 
-			// Network-path reference
-			if (location.startsWith("//")) {
-				String scheme = this.request.getScheme();
-				super.sendRedirect(builder.scheme(scheme).toUriString());
-				return;
-			}
+	// Absolute location
+	if (uriComponents.getScheme() != null) {
+		super.sendRedirect(location);
+		return;
+	}
 
-			String fragment = null;
-			int fragmentIndex = location.indexOf('#');
-			if (fragmentIndex != -1) {
-				if (location.length() > fragmentIndex) {
-					fragment = location.substring(fragmentIndex + 1);
-				}
-				location = location.substring(0, fragmentIndex);
-			}
+	// Network-path reference
+	if (location.startsWith("//")) {
+		String scheme = this.request.getScheme();
+		super.sendRedirect(builder.scheme(scheme).toUriString());
+		return;
+	}
 
-			String query = null;
-			int queryIndex = location.indexOf('?');
-			if (queryIndex != -1) {
-				if (location.length() > queryIndex) {
-					query = location.substring(queryIndex + 1);
-				}
-				location = location.substring(0, queryIndex);
-			}
+	String path = uriComponents.getPath();
+	if (path != null) {
+		// Relative to Servlet container root or to current request
+		path = (path.startsWith(FOLDER_SEPARATOR) ? path :
+				StringUtils.applyRelativePath(this.request.getRequestURI(), path));
+	}
 
-			// Relative to Servlet container root or to current request
-			String path = (location.startsWith(FOLDER_SEPARATOR) ? location :
-					StringUtils.applyRelativePath(this.request.getRequestURI(), location));
+	String result = UriComponentsBuilder
+			.fromHttpRequest(new ServletServerHttpRequest(this.request))
+			.replacePath(path)
+			.replaceQuery(uriComponents.getQuery())
+			.fragment(uriComponents.getFragment())
+			.build().normalize().toUriString();
 
-			String result = UriComponentsBuilder
-					.fromHttpRequest(new ServletServerHttpRequest(this.request))
-					.replacePath(path)
-					.replaceQuery(query)
-					.fragment(fragment)
-					.build().normalize().toUriString();
-
-			super.sendRedirect(result);
-		}
+	super.sendRedirect(result);
+}
 	}
 
 }

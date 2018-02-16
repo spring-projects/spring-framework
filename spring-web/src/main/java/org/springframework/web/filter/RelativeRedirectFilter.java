@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,14 @@ import org.springframework.util.Assert;
 
 /**
  * Overrides {@link HttpServletResponse#sendRedirect(String)} and handles it by
- * setting the HTTP status and "Location" headers. This keeps the Servlet
- * container from re-writing relative redirect URLs and instead follows the
- * recommendation in <a href="https://tools.ietf.org/html/rfc7231#section-7.1.2">
- * RFC 7231 Section 7.1.2</a>.
+ * setting the HTTP status and "Location" headers, which keeps the Servlet
+ * container from re-writing relative redirect URLs into absolute ones.
+ * Servlet containers are required to do that but against the recommendation of
+ * <a href="https://tools.ietf.org/html/rfc7231#section-7.1.2"> RFC 7231 Section 7.1.2</a>,
+ * and furthermore not necessarily taking into account "X-Forwarded" headers.
  *
- * <p><strong>Note:</strong> While relative redirects are more efficient they
- * may not work with reverse proxies under some configurations.
+ * <p><strong>Note:</strong> While relative redirects are recommended in the
+ * RFC, under some configurations with reverse proxies they may not work.
  *
  * @author Rob Winch
  * @author Rossen Stoyanchev

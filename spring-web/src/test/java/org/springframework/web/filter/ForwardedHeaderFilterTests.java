@@ -433,18 +433,22 @@ public class ForwardedHeaderFilterTests {
 	}
 
 	private String sendRedirect(final String location) throws ServletException, IOException {
-		MockHttpServletResponse response = doWithFiltersAndGetResponse(this.filter, new OncePerRequestFilter() {
+		Filter filter = new OncePerRequestFilter() {
 			@Override
-			protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-					throws ServletException, IOException {
-				response.sendRedirect(location);
+			protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res,
+					FilterChain chain) throws IOException {
+
+				res.sendRedirect(location);
 			}
-		});
+		};
+		MockHttpServletResponse response = doWithFiltersAndGetResponse(this.filter, filter);
 		return response.getRedirectedUrl();
 	}
 
 	@SuppressWarnings("serial")
-	private MockHttpServletResponse doWithFiltersAndGetResponse(Filter... filters) throws ServletException, IOException {
+	private MockHttpServletResponse doWithFiltersAndGetResponse(Filter... filters)
+			throws ServletException, IOException {
+
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		FilterChain filterChain = new MockFilterChain(new HttpServlet() {}, filters);
 		filterChain.doFilter(request, response);
