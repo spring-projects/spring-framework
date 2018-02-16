@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -324,6 +324,24 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 				return;
 			}
 
+			String fragment = null;
+			int fragmentIndex = location.indexOf('#');
+			if (fragmentIndex != -1) {
+				if (location.length() > fragmentIndex) {
+					fragment = location.substring(fragmentIndex + 1);
+				}
+				location = location.substring(0, fragmentIndex);
+			}
+
+			String query = null;
+			int queryIndex = location.indexOf('?');
+			if (queryIndex != -1) {
+				if (location.length() > queryIndex) {
+					query = location.substring(queryIndex + 1);
+				}
+				location = location.substring(0, queryIndex);
+			}
+
 			// Relative to Servlet container root or to current request
 			String path = (location.startsWith(FOLDER_SEPARATOR) ? location :
 					StringUtils.applyRelativePath(this.request.getRequestURI(), location));
@@ -331,6 +349,8 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			String result = UriComponentsBuilder
 					.fromHttpRequest(new ServletServerHttpRequest(this.request))
 					.replacePath(path)
+					.replaceQuery(query)
+					.fragment(fragment)
 					.build().normalize().toUriString();
 
 			super.sendRedirect(result);
