@@ -99,12 +99,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 */
 	@Override
 	protected Comparator<RequestMappingInfo> getMappingComparator(final HttpServletRequest request) {
-		return new Comparator<RequestMappingInfo>() {
-			@Override
-			public int compare(RequestMappingInfo info1, RequestMappingInfo info2) {
-				return info1.compareTo(info2, request);
-			}
-		};
+		return (info1, info2) -> info1.compareTo(info2, request);
 	}
 
 	/**

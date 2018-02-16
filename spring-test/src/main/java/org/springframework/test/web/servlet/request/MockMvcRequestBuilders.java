@@ -18,7 +18,6 @@ package org.springframework.test.web.servlet.request;
 
 import java.net.URI;
 import javax.servlet.DispatcherType;
-import javax.servlet.ServletContext;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -269,15 +268,12 @@ public abstract class MockMvcRequestBuilders {
 		// There must be an async result before dispatching
 		mvcResult.getAsyncResult();
 
-		return new RequestBuilder() {
-			@Override
-			public MockHttpServletRequest buildRequest(ServletContext servletContext) {
-				MockHttpServletRequest request = mvcResult.getRequest();
-				request.setDispatcherType(DispatcherType.ASYNC);
-				request.setAsyncStarted(false);
-				return request;
-			}
-		};
+		return servletContext -> {
+            MockHttpServletRequest request = mvcResult.getRequest();
+            request.setDispatcherType(DispatcherType.ASYNC);
+            request.setAsyncStarted(false);
+            return request;
+        };
 	}
 
 }

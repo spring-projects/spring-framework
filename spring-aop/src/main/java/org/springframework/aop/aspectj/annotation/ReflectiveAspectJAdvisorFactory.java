@@ -306,13 +306,8 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	protected static class SyntheticInstantiationAdvisor extends DefaultPointcutAdvisor {
 
 		public SyntheticInstantiationAdvisor(final MetadataAwareAspectInstanceFactory aif) {
-			super(aif.getAspectMetadata().getPerClausePointcut(), new MethodBeforeAdvice() {
-				@Override
-				public void before(Method method, Object[] args, @Nullable Object target) {
-					// Simply instantiate the aspect
-					aif.getAspectInstance();
-				}
-			});
+			super(aif.getAspectMetadata().getPerClausePointcut(), (MethodBeforeAdvice)
+					(method, args, target) -> aif.getAspectInstance());// Simply instantiate the aspect
 		}
 	}
 
