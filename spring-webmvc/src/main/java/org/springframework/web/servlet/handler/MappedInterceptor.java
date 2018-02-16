@@ -76,7 +76,7 @@ public final class MappedInterceptor implements HandlerInterceptor {
 
 	/**
 	 * Create a new MappedInterceptor instance.
-	 * @param includePatterns the path patterns to map with a {@code null} value matching to all paths
+	 * @param includePatterns the path patterns to map (empty for matching to all paths)
 	 * @param interceptor the WebRequestInterceptor instance to map to the given patterns
 	 */
 	public MappedInterceptor(String[] includePatterns, WebRequestInterceptor interceptor) {
@@ -85,7 +85,8 @@ public final class MappedInterceptor implements HandlerInterceptor {
 
 	/**
 	 * Create a new MappedInterceptor instance.
-	 * @param includePatterns the path patterns to map with a {@code null} value matching to all paths
+	 * @param includePatterns the path patterns to map (empty for matching to all paths)
+	 * @param excludePatterns the path patterns to exclude (empty for no specific excludes)
 	 * @param interceptor the WebRequestInterceptor instance to map to the given patterns
 	 */
 	public MappedInterceptor(String[] includePatterns, String[] excludePatterns, WebRequestInterceptor interceptor) {
@@ -94,11 +95,11 @@ public final class MappedInterceptor implements HandlerInterceptor {
 
 
 	/**
-	 * Configure a PathMatcher to use with this MappedInterceptor instead of the
-	 * one passed by default to the {@link #matches(String, org.springframework.util.PathMatcher)}
-	 * method. This is an advanced property that is only required when using custom
-	 * PathMatcher implementations that support mapping metadata other than the
-	 * Ant-style path patterns supported by default.
+	 * Configure a PathMatcher to use with this MappedInterceptor instead of the one passed
+	 * by default to the {@link #matches(String, org.springframework.util.PathMatcher)} method.
+	 * <p>This is an advanced property that is only required when using custom PathMatcher
+	 * implementations that support mapping metadata other than the Ant-style path patterns
+	 * supported by default.
 	 */
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
@@ -119,14 +120,15 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	}
 
 	/**
-	 * The actual Interceptor reference.
+	 * The actual {@link HandlerInterceptor} reference.
 	 */
 	public HandlerInterceptor getInterceptor() {
 		return this.interceptor;
 	}
 
+
 	/**
-	 * Returns {@code true} if the interceptor applies to the given request path.
+	 * Determine a match for the given lookup path.
 	 * @param lookupPath the current request path
 	 * @param pathMatcher a path matcher for path pattern matching
 	 */
