@@ -540,7 +540,7 @@ class ConfigurationClassParser {
 			return;
 		}
 
-		Collections.sort(deferredImports, DEFERRED_IMPORT_COMPARATOR);
+		deferredImports.sort(DEFERRED_IMPORT_COMPARATOR);
 		for (DeferredImportSelectorHolder deferredImport : deferredImports) {
 			ConfigurationClass configClass = deferredImport.getConfigurationClass();
 			try {

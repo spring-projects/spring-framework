@@ -365,7 +365,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			if (logger.isInfoEnabled()) {
 				logger.info("Stopping beans in phase " + this.phase);
 			}
-			Collections.sort(this.members, Collections.reverseOrder());
+			this.members.sort(Collections.reverseOrder());
 			CountDownLatch latch = new CountDownLatch(this.smartMemberCount);
 			Set<String> countDownBeanNames = Collections.synchronizedSet(new LinkedHashSet<>());
 			for (LifecycleGroupMember member : this.members) {

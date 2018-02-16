@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -239,7 +239,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 		if (!matchingPatterns.isEmpty()) {
 			Comparator<String> patternComparator = getPathMatcher().getPatternComparator(lookupPath);
-			Collections.sort(matchingPatterns, patternComparator);
+			matchingPatterns.sort(patternComparator);
 			for (String pattern : matchingPatterns) {
 				String pathWithinMapping = getPathMatcher().extractPathWithinPattern(pattern, lookupPath);
 				String pathMapping = lookupPath.substring(0, lookupPath.indexOf(pathWithinMapping));

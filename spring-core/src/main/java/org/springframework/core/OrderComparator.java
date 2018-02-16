@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.core;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -43,7 +42,7 @@ import org.springframework.util.ObjectUtils;
  * @since 07.04.2003
  * @see Ordered
  * @see org.springframework.core.annotation.AnnotationAwareOrderComparator
- * @see java.util.Collections#sort(java.util.List, java.util.Comparator)
+ * @see java.util.List#sort(java.util.Comparator)
  * @see java.util.Arrays#sort(Object[], java.util.Comparator)
  */
 public class OrderComparator implements Comparator<Object> {
@@ -165,11 +164,11 @@ public class OrderComparator implements Comparator<Object> {
 	 * <p>Optimized to skip sorting for lists with size 0 or 1,
 	 * in order to avoid unnecessary array extraction.
 	 * @param list the List to sort
-	 * @see java.util.Collections#sort(java.util.List, java.util.Comparator)
+	 * @see java.util.List#sort(java.util.Comparator)
 	 */
 	public static void sort(List<?> list) {
 		if (list.size() > 1) {
-			Collections.sort(list, INSTANCE);
+			list.sort(INSTANCE);
 		}
 	}
 

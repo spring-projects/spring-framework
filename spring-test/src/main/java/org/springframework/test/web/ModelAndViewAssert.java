@@ -16,7 +16,6 @@
 
 package org.springframework.test.web;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -32,8 +31,8 @@ import static org.springframework.test.util.AssertionErrors.*;
  * A collection of assertions intended to simplify testing scenarios dealing
  * with Spring Web MVC {@link org.springframework.web.servlet.ModelAndView
  * ModelAndView} objects.
- * <p>
- * Intended for use with JUnit 4 and TestNG. All {@code assert*()} methods
+ *
+ * <p>Intended for use with JUnit 4 and TestNG. All {@code assert*()} methods
  * throw {@link AssertionError}s.
  *
  * @author Sam Brannen
@@ -78,11 +77,10 @@ public abstract class ModelAndViewAssert {
 	public static void assertCompareListModelAttribute(ModelAndView mav, String modelName, List expectedList) {
 		assertTrue("ModelAndView is null", mav != null);
 		List modelList = assertAndReturnModelAttributeOfType(mav, modelName, List.class);
-		assertTrue(
-			"Size of model list is '" + modelList.size() + "' while size of expected list is '" + expectedList.size()
-					+ "'", expectedList.size() == modelList.size());
+		assertTrue("Size of model list is '" + modelList.size() + "' while size of expected list is '" +
+				expectedList.size() + "'", expectedList.size() == modelList.size());
 		assertTrue("List in model under name '" + modelName + "' is not equal to the expected list.",
-			expectedList.equals(modelList));
+				expectedList.equals(modelList));
 	}
 
 	/**
@@ -155,28 +153,21 @@ public abstract class ModelAndViewAssert {
 	 * @param comparator the comparator to use (may be {@code null}). If not
 	 * specifying the comparator, both lists will be sorted not using any comparator.
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static void assertSortAndCompareListModelAttribute(
 			ModelAndView mav, String modelName, List expectedList, Comparator comparator) {
 
 		assertTrue("ModelAndView is null", mav != null);
 		List modelList = assertAndReturnModelAttributeOfType(mav, modelName, List.class);
 
-		assertTrue(
-			"Size of model list is '" + modelList.size() + "' while size of expected list is '" + expectedList.size()
-					+ "'", expectedList.size() == modelList.size());
+		assertTrue("Size of model list is '" + modelList.size() + "' while size of expected list is '" +
+				expectedList.size() + "'", expectedList.size() == modelList.size());
 
-		if (comparator != null) {
-			Collections.sort(modelList, comparator);
-			Collections.sort(expectedList, comparator);
-		}
-		else {
-			Collections.sort(modelList);
-			Collections.sort(expectedList);
-		}
+		modelList.sort(comparator);
+		expectedList.sort(comparator);
 
 		assertTrue("List in model under name '" + modelName + "' is not equal to the expected list.",
-			expectedList.equals(modelList));
+				expectedList.equals(modelList));
 	}
 
 	/**
@@ -190,15 +181,14 @@ public abstract class ModelAndViewAssert {
 			fail("ModelAndView is null");
 		}
 		assertTrue("View name is not equal to '" + expectedName + "' but was '" + mav.getViewName() + "'",
-			ObjectUtils.nullSafeEquals(expectedName, mav.getViewName()));
+				ObjectUtils.nullSafeEquals(expectedName, mav.getViewName()));
 	}
 
 
 	private static void appendNonMatchingSetsErrorMessage(
 			Set<String> assertionSet, Set<String> incorrectSet, StringBuilder sb) {
 
-		Set<String> tempSet = new HashSet<>();
-		tempSet.addAll(incorrectSet);
+		Set<String> tempSet = new HashSet<>(incorrectSet);
 		tempSet.removeAll(assertionSet);
 
 		if (!tempSet.isEmpty()) {
@@ -210,8 +200,7 @@ public abstract class ModelAndViewAssert {
 			}
 		}
 
-		tempSet = new HashSet<>();
-		tempSet.addAll(assertionSet);
+		tempSet = new HashSet<>(assertionSet);
 		tempSet.removeAll(incorrectSet);
 
 		if (!tempSet.isEmpty()) {
