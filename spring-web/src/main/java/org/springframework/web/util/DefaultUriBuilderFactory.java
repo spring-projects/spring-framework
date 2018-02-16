@@ -27,6 +27,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@code UriBuilderFactory} that relies on {@link UriComponentsBuilder} for
@@ -216,7 +217,6 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		private UriComponentsBuilder initUriComponentsBuilder(String uriTemplate) {
 			UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(uriTemplate);
 			UriComponents uriComponents = uriComponentsBuilder.build();
-
 			UriComponentsBuilder result = (uriComponents.getHost() == null ?
 					baseUri.cloneBuilder().uriComponents(uriComponents) : uriComponentsBuilder);
 
@@ -224,10 +224,8 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 				UriComponents uric = result.build();
 				String path = uric.getPath();
 				List<String> pathSegments = uric.getPathSegments();
-
 				result.replacePath(null);
-				result.pathSegment(pathSegments.toArray(new String[0]));
-
+				result.pathSegment(StringUtils.toStringArray(pathSegments));
 				if (path != null && path.endsWith("/")) {
 					result.path("/");
 				}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
@@ -110,7 +111,7 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 			this.registration.setTransportHandlerOverrides(handler);
 		}
 		if (!this.allowedOrigins.isEmpty()) {
-			this.registration.setAllowedOrigins(this.allowedOrigins.toArray(new String[this.allowedOrigins.size()]));
+			this.registration.setAllowedOrigins(StringUtils.toStringArray(this.allowedOrigins));
 		}
 		return this.registration;
 	}

@@ -551,7 +551,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				results.add(beanName);
 			}
 		}
-		return results.toArray(new String[results.size()]);
+		return StringUtils.toStringArray(results);
 	}
 
 	@Override

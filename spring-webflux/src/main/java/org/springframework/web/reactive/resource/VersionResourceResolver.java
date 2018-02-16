@@ -134,7 +134,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 				prefixedPatterns.add(versionPrefix + pattern);
 			}
 		}
-		return addVersionStrategy(new FixedVersionStrategy(version), prefixedPatterns.toArray(new String[0]));
+		return addVersionStrategy(new FixedVersionStrategy(version), StringUtils.toStringArray(prefixedPatterns));
 	}
 
 	/**

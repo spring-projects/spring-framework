@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.AdviceModeImportSelector;
 import org.springframework.context.annotation.AutoProxyRegistrar;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Selects which implementation of {@link AbstractCachingConfiguration} should be used
@@ -84,7 +85,7 @@ public class CachingConfigurationSelector extends AdviceModeImportSelector<Enabl
 		if (jsr107Present && jcacheImplPresent) {
 			result.add(PROXY_JCACHE_CONFIGURATION_CLASS);
 		}
-		return result.toArray(new String[result.size()]);
+		return StringUtils.toStringArray(result);
 	}
 
 	/**
@@ -97,7 +98,7 @@ public class CachingConfigurationSelector extends AdviceModeImportSelector<Enabl
 		if (jsr107Present && jcacheImplPresent) {
 			result.add(JCACHE_ASPECT_CONFIGURATION_CLASS_NAME);
 		}
-		return result.toArray(new String[result.size()]);
+		return StringUtils.toStringArray(result);
 	}
 
 }

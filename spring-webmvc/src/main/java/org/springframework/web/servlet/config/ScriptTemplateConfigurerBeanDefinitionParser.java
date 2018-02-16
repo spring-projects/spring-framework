@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
 /**
@@ -58,7 +59,7 @@ public class ScriptTemplateConfigurerBeanDefinitionParser extends AbstractSimple
 			for (Element childElement : childElements) {
 				locations.add(childElement.getAttribute("location"));
 			}
-			builder.addPropertyValue("scripts", locations.toArray(new String[locations.size()]));
+			builder.addPropertyValue("scripts", StringUtils.toStringArray(locations));
 		}
 		builder.addPropertyValue("engineName", element.getAttribute("engine-name"));
 		if (element.hasAttribute("render-object")) {
