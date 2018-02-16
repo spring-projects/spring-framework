@@ -1006,7 +1006,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 			if (!autowireCandidates.isEmpty()) {
-				candidateNames = autowireCandidates.toArray(new String[autowireCandidates.size()]);
+				candidateNames = StringUtils.toStringArray(autowireCandidates);
 			}
 		}
 
@@ -1017,8 +1017,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		else if (candidateNames.length > 1) {
 			Map<String, Object> candidates = new LinkedHashMap<>(candidateNames.length);
 			for (String beanName : candidateNames) {
-				if (containsSingleton(beanName)) {
-					candidates.put(beanName, getBean(beanName, requiredType, args));
+				if (containsSingleton(beanName) && args == null) {
+					Object beanInstance = getBean(beanName);
+					candidates.put(beanName, (beanInstance instanceof NullBean ? null : beanInstance));
 				}
 				else {
 					candidates.put(beanName, getType(beanName));
@@ -1030,7 +1031,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			if (candidateName != null) {
 				Object beanInstance = candidates.get(candidateName);
-				if (beanInstance instanceof Class) {
+				if (beanInstance == null || beanInstance instanceof Class) {
 					beanInstance = getBean(candidateName, requiredType, args);
 				}
 				return new NamedBeanHolder<>(candidateName, (T) beanInstance);
@@ -1413,22 +1414,24 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		for (Map.Entry<String, Object> entry : candidates.entrySet()) {
 			String candidateBeanName = entry.getKey();
 			Object beanInstance = entry.getValue();
-			Integer candidatePriority = getPriority(beanInstance);
-			if (candidatePriority != null) {
-				if (highestPriorityBeanName != null) {
-					if (candidatePriority.equals(highestPriority)) {
-						throw new NoUniqueBeanDefinitionException(requiredType, candidates.size(),
-								"Multiple beans found with the same priority ('" + highestPriority +
-								"') among candidates: " + candidates.keySet());
+			if (beanInstance != null) {
+				Integer candidatePriority = getPriority(beanInstance);
+				if (candidatePriority != null) {
+					if (highestPriorityBeanName != null) {
+						if (candidatePriority.equals(highestPriority)) {
+							throw new NoUniqueBeanDefinitionException(requiredType, candidates.size(),
+									"Multiple beans found with the same priority ('" + highestPriority +
+									"') among candidates: " + candidates.keySet());
+						}
+						else if (candidatePriority < highestPriority) {
+							highestPriorityBeanName = candidateBeanName;
+							highestPriority = candidatePriority;
+						}
 					}
-					else if (candidatePriority < highestPriority) {
+					else {
 						highestPriorityBeanName = candidateBeanName;
 						highestPriority = candidatePriority;
 					}
-				}
-				else {
-					highestPriorityBeanName = candidateBeanName;
-					highestPriority = candidatePriority;
 				}
 			}
 		}
