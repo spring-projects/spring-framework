@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -439,16 +439,16 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			Set<HttpMethod> result = new LinkedHashSet<HttpMethod>(declaredMethods.size());
 			if (declaredMethods.isEmpty()) {
 				for (HttpMethod method : HttpMethod.values()) {
-					if (!HttpMethod.TRACE.equals(method)) {
+					if (method != HttpMethod.TRACE) {
 						result.add(method);
 					}
 				}
 			}
 			else {
-				boolean hasHead = declaredMethods.contains("HEAD");
 				for (String method : declaredMethods) {
-					result.add(HttpMethod.valueOf(method));
-					if (!hasHead && "GET".equals(method)) {
+					HttpMethod httpMethod = HttpMethod.valueOf(method);
+					result.add(httpMethod);
+					if (httpMethod == HttpMethod.GET) {
 						result.add(HttpMethod.HEAD);
 					}
 				}

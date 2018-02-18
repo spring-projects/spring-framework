@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -250,7 +250,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		try {
 			HttpMethod supportedMethod = transportType.getHttpMethod();
 			if (supportedMethod != request.getMethod()) {
-				if (HttpMethod.OPTIONS == request.getMethod() && transportType.supportsCors()) {
+				if (request.getMethod() == HttpMethod.OPTIONS && transportType.supportsCors()) {
 					if (checkOrigin(request, response, HttpMethod.OPTIONS, supportedMethod)) {
 						response.setStatusCode(HttpStatus.NO_CONTENT);
 						addCacheHeaders(response);

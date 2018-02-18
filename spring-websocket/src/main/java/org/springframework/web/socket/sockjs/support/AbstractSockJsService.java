@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
@@ -515,7 +514,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	protected void sendMethodNotAllowed(ServerHttpResponse response, HttpMethod... httpMethods) {
 		logger.warn("Sending Method Not Allowed (405)");
 		response.setStatusCode(HttpStatus.METHOD_NOT_ALLOWED);
-		response.getHeaders().setAllow(new HashSet<HttpMethod>(Arrays.asList(httpMethods)));
+		response.getHeaders().setAllow(new LinkedHashSet<HttpMethod>(Arrays.asList(httpMethods)));
 	}
 
 
@@ -545,7 +544,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 		@Override
 		public void handle(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
-			if (HttpMethod.GET == request.getMethod()) {
+			if (request.getMethod() == HttpMethod.GET) {
 				addNoCacheHeaders(response);
 				if (checkOrigin(request, response)) {
 					response.getHeaders().setContentType(new MediaType("application", "json", UTF8_CHARSET));
@@ -555,14 +554,14 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 				}
 
 			}
-			else if (HttpMethod.OPTIONS == request.getMethod()) {
+			else if (request.getMethod() == HttpMethod.OPTIONS) {
 				if (checkOrigin(request, response)) {
 					addCacheHeaders(response);
 					response.setStatusCode(HttpStatus.NO_CONTENT);
 				}
 			}
 			else {
-				sendMethodNotAllowed(response, HttpMethod.OPTIONS, HttpMethod.GET);
+				sendMethodNotAllowed(response, HttpMethod.GET, HttpMethod.OPTIONS);
 			}
 		}
 	};
@@ -590,7 +589,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 		@Override
 		public void handle(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
-			if (!HttpMethod.GET.equals(request.getMethod())) {
+			if (request.getMethod() != HttpMethod.GET) {
 				sendMethodNotAllowed(response, HttpMethod.GET);
 				return;
 			}
