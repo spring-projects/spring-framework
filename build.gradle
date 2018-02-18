@@ -54,7 +54,7 @@ configure(allprojects) { project ->
 	ext.log4jVersion         = "2.10.0"
 	ext.nettyVersion         = "4.1.21.Final"
 	ext.reactorVersion       = "Bismuth-SR6"
-	ext.rxjavaVersion        = "1.3.5"
+	ext.rxjavaVersion        = "1.3.6"
 	ext.rxjavaAdapterVersion = "1.2.1"
 	ext.rxjava2Version       = "2.1.9"
 	ext.slf4jVersion         = "1.7.25"	 // spring-jcl + consistent 3rd party deps
