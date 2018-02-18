@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ public class HttpPutFormContentFilterTests {
 
 	private MockFilterChain filterChain;
 
+
 	@Before
 	public void setup() {
 		filter = new HttpPutFormContentFilter();
@@ -56,6 +57,7 @@ public class HttpPutFormContentFilterTests {
 		filterChain = new MockFilterChain();
 	}
 
+
 	@Test
 	public void wrapPutAndPatchOnly() throws Exception {
 		request.setContent("foo=bar".getBytes("ISO-8859-1"));
@@ -63,7 +65,7 @@ public class HttpPutFormContentFilterTests {
 			request.setMethod(method.name());
 			filterChain = new MockFilterChain();
 			filter.doFilter(request, response, filterChain);
-			if (method.equals(HttpMethod.PUT) || method.equals(HttpMethod.PATCH)) {
+			if (method == HttpMethod.PUT || method == HttpMethod.PATCH) {
 				assertNotSame("Should wrap HTTP method " + method, request, filterChain.getRequest());
 			}
 			else {
@@ -204,7 +206,7 @@ public class HttpPutFormContentFilterTests {
 		assertArrayEquals(new String[] {"value4"}, parameters.get("name4"));
 	}
 
-	@Test // SPR-15835
+	@Test  // SPR-15835
 	public void hiddenHttpMethodFilterFollowedByHttpPutFormContentFilter() throws Exception {
 		request.addParameter("_method", "PUT");
 		request.addParameter("hiddenField", "testHidden");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ import java.net.URISyntaxException;
 import java.util.function.BiFunction;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 import reactor.ipc.netty.http.server.HttpServerRequest;
 import reactor.ipc.netty.http.server.HttpServerResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
@@ -67,7 +67,7 @@ public class ReactorHttpHandlerAdapter
 			return Mono.empty();
 		}
 
-		if (HttpMethod.HEAD.equals(adaptedRequest.getMethod())) {
+		if (adaptedRequest.getMethod() == HttpMethod.HEAD) {
 			adaptedResponse = new HttpHeadResponseDecorator(adaptedResponse);
 		}
 

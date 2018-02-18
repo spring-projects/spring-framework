@@ -44,7 +44,7 @@ public abstract class CorsUtils {
 	 * Returns {@code true} if the request is a valid CORS pre-flight one.
 	 */
 	public static boolean isPreFlightRequest(ServerHttpRequest request) {
-		return (isCorsRequest(request) && HttpMethod.OPTIONS == request.getMethod() &&
+		return (request.getMethod() == HttpMethod.OPTIONS && isCorsRequest(request) &&
 				request.getHeaders().get(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD) != null);
 	}
 
@@ -53,7 +53,7 @@ public abstract class CorsUtils {
 	 * {@code Forwarded}, {@code X-Forwarded-Proto}, {@code X-Forwarded-Host} and
 	 * @code X-Forwarded-Port} headers.
 	 * @return {@code true} if the request is a same-origin one, {@code false} in case
-	 * of cross-origin request.
+	 * of a cross-origin request
 	 */
 	public static boolean isSameOrigin(ServerHttpRequest request) {
 		String origin = request.getHeaders().getOrigin();
@@ -67,7 +67,8 @@ public abstract class CorsUtils {
 		Assert.notNull(actualHost, "Actual request host must not be null");
 		Assert.isTrue(actualPort != -1, "Actual request port must not be undefined");
 		UriComponents originUrl = UriComponentsBuilder.fromOriginHeader(origin).build();
-		return (actualHost.equals(originUrl.getHost()) && actualPort == getPort(originUrl.getScheme(), originUrl.getPort()));
+		return (actualHost.equals(originUrl.getHost()) &&
+				actualPort == getPort(originUrl.getScheme(), originUrl.getPort()));
 	}
 
 	private static int getPort(@Nullable String scheme, int port) {
