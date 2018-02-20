@@ -16,6 +16,7 @@
 
 package org.springframework.http.server.reactive;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import javax.servlet.AsyncContext;
@@ -93,9 +94,10 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 					release = false;
 					return dataBuffer;
 				}
-				else {
-					return null;
+				else if (read == -1) {
+					throw new EOFException("All data read.");
 				}
+				return null;
 			}
 			finally {
 				if (release) {

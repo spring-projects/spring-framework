@@ -16,6 +16,7 @@
 
 package org.springframework.http.server.reactive;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -208,7 +209,9 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 			dataBuffer.write(this.buffer, 0, read);
 			return dataBuffer;
 		}
-
+		else if (read == -1) {
+			throw new EOFException("All data read.");
+		}
 		return null;
 	}
 
@@ -266,7 +269,12 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		@Nullable
 		protected DataBuffer read() throws IOException {
 			if (this.inputStream.isReady()) {
-				return readFromInputStream();
+				try {
+					return readFromInputStream();
+				}
+				catch (EOFException e) {
+					onAllDataRead();
+				}
 			}
 			return null;
 		}
