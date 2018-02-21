@@ -27,7 +27,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.async.ByteArrayFeeder;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
-import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.codec.DecodingException;
@@ -114,12 +113,15 @@ class Jackson2Tokenizer {
 		try {
 			return parseTokenBufferFlux();
 		}
+		catch (JsonProcessingException ex) {
+			return Flux.error(new DecodingException(
+					"JSON decoding error: " + ex.getOriginalMessage(), ex));
+		}
 		catch (IOException ex) {
 			return Flux.error(ex);
 		}
 	}
 
-	@NotNull
 	private Flux<TokenBuffer> parseTokenBufferFlux() throws IOException {
 		List<TokenBuffer> result = new ArrayList<>();
 

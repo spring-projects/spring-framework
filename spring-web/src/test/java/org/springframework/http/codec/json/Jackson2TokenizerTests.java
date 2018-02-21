@@ -32,11 +32,12 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
+import static java.util.Arrays.*;
+import static java.util.Collections.*;
 
 /**
  * @author Arjen Poutsma
@@ -173,6 +174,14 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 		testTokenize(asList("[1", ",2,", "3]"),
 				asList("1", "2", "3"), true);
 	}
+
+	@Test(expected = DecodingException.class) // SPR-16521
+	public void jsonEOFExceptionIsWrappedAsDecodingError() {
+		Flux<DataBuffer> source = Flux.just(stringBuffer("{\"status\": \"noClosingQuote}"));
+		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(source, this.jsonFactory, false);
+		tokens.blockLast();
+	}
+
 
 	private void testTokenize(List<String> source, List<String> expected, boolean tokenizeArrayElements) {
 		Flux<DataBuffer> sourceFlux = Flux.fromIterable(source)
