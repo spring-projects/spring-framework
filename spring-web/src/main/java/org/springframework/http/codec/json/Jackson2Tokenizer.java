@@ -68,8 +68,7 @@ class Jackson2Tokenizer {
 	}
 
 	/**
-	 * Tokenize the given {@link DataBuffer} flux into a {@link TokenBuffer} flux, given the
-	 * parameters.
+	 * Tokenize the given {@code Flux<DataBuffer>} into {@code Flux<TokenBuffer>}.
 	 * @param dataBuffers the source data buffers
 	 * @param jsonFactory the factory to use
 	 * @param tokenizeArrayElements if {@code true} and the "top level" JSON
@@ -79,10 +78,10 @@ class Jackson2Tokenizer {
 	 */
 	public static Flux<TokenBuffer> tokenize(Flux<DataBuffer> dataBuffers, JsonFactory jsonFactory,
 			boolean tokenizeArrayElements) {
+
 		try {
-			Jackson2Tokenizer tokenizer =
-					new Jackson2Tokenizer(jsonFactory.createNonBlockingByteArrayParser(),
-							tokenizeArrayElements);
+			JsonParser parser = jsonFactory.createNonBlockingByteArrayParser();
+			Jackson2Tokenizer tokenizer = new Jackson2Tokenizer(parser, tokenizeArrayElements);
 			return dataBuffers.flatMap(tokenizer::tokenize, Flux::error, tokenizer::endOfInput);
 		}
 		catch (IOException ex) {

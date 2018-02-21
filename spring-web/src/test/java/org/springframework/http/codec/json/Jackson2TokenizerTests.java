@@ -41,6 +41,7 @@ import static java.util.Collections.*;
 
 /**
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
 public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase {
 
@@ -48,10 +49,11 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 
 	private JsonFactory jsonFactory;
 
+
 	@Before
-	public void createParser() throws IOException {
-		jsonFactory = new JsonFactory();
-		this.objectMapper = new ObjectMapper(jsonFactory);
+	public void createParser() {
+		this.jsonFactory = new JsonFactory();
+		this.objectMapper = new ObjectMapper(this.jsonFactory);
 	}
 
 	@Test
@@ -66,41 +68,44 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 				singletonList("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"), false);
 
 		testTokenize(
-				singletonList("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"),
-				singletonList("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"), false);
+				singletonList("[" +
+						"{\"foo\": \"foofoo\", \"bar\": \"barbar\"}," +
+						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"),
+				singletonList("[" +
+						"{\"foo\": \"foofoo\", \"bar\": \"barbar\"}," +
+						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"), false);
 
 		testTokenize(
 				singletonList("[{\"foo\": \"bar\"},{\"foo\": \"baz\"}]"),
 				singletonList("[{\"foo\": \"bar\"},{\"foo\": \"baz\"}]"), false);
 
 		testTokenize(
-				asList("[{\"foo\": \"foofoo\", \"bar\"",
-						": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"),
-				singletonList("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"), false);
+				asList("[" +
+						"{\"foo\": \"foofoo\", \"bar\"", ": \"barbar\"}," +
+						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"),
+				singletonList("[" +
+						"{\"foo\": \"foofoo\", \"bar\": \"barbar\"}," +
+						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"), false);
 
 		testTokenize(
 				asList("[",
-						"{\"id\":1,\"name\":\"Robert\"}",
-						",",
-						"{\"id\":2,\"name\":\"Raide\"}",
-						",",
-						"{\"id\":3,\"name\":\"Ford\"}",
-						"]"),
-				singletonList("[{\"id\":1,\"name\":\"Robert\"},{\"id\":2,\"name\":\"Raide\"},{\"id\":3,\"name\":\"Ford\"}]"), false);
+						"{\"id\":1,\"name\":\"Robert\"}", ",",
+						"{\"id\":2,\"name\":\"Raide\"}", ",",
+						"{\"id\":3,\"name\":\"Ford\"}", "]"),
+				singletonList("[" +
+						"{\"id\":1,\"name\":\"Robert\"}," +
+						"{\"id\":2,\"name\":\"Raide\"}," +
+						"{\"id\":3,\"name\":\"Ford\"}]"), false);
 
 		// SPR-16166: top-level JSON values
-		testTokenize(asList("\"foo", "bar\"")
-			,singletonList("\"foobar\""), false);
+		testTokenize(asList("\"foo", "bar\""),singletonList("\"foobar\""), false);
 
-		testTokenize(asList("12", "34")
-			,singletonList("1234"), false);
+		testTokenize(asList("12", "34"),singletonList("1234"), false);
 
-		testTokenize(asList("12.", "34")
-			,singletonList("12.34"), false);
+		testTokenize(asList("12.", "34"),singletonList("12.34"), false);
 
 		// note that we do not test for null, true, or false, which are also valid top-level values,
 		// but are unsupported by JSONassert
-
 	}
 
 	@Test
@@ -110,19 +115,20 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 				singletonList("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"), true);
 
 		testTokenize(
-				asList("{\"foo\": \"foofoo\"",
-						", \"bar\": \"barbar\"}"),
+				asList("{\"foo\": \"foofoo\"", ", \"bar\": \"barbar\"}"),
 				singletonList("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"), true);
 
 		testTokenize(
-				singletonList("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"),
-				asList("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}",
+				singletonList("[" +
+						"{\"foo\": \"foofoo\", \"bar\": \"barbar\"}," +
+						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"),
+				asList(
+						"{\"foo\": \"foofoo\", \"bar\": \"barbar\"}",
 						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}"), true);
 
 		testTokenize(
 				singletonList("[{\"foo\": \"bar\"},{\"foo\": \"baz\"}]"),
-				asList("{\"foo\": \"bar\"}",
-						"{\"foo\": \"baz\"}"), true);
+				asList("{\"foo\": \"bar\"}", "{\"foo\": \"baz\"}"), true);
 
 		// SPR-15803: nested array
 		testTokenize(
@@ -134,8 +140,7 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 				asList(
 						"{\"id\":\"0\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}",
 						"{\"id\":\"1\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}",
-						"{\"id\":\"2\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}"),
-				true);
+						"{\"id\":\"2\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}"), true);
 
 		// SPR-15803: nested array, no top-level array
 		testTokenize(
@@ -143,9 +148,11 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 				singletonList("{\"speakerIds\":[\"tastapod\"],\"language\":\"ENGLISH\"}"), true);
 
 		testTokenize(
-				asList("[{\"foo\": \"foofoo\", \"bar\"",
-						": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"),
-				asList("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}",
+				asList("[" +
+						"{\"foo\": \"foofoo\", \"bar\"", ": \"barbar\"}," +
+						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"),
+				asList(
+						"{\"foo\": \"foofoo\", \"bar\": \"barbar\"}",
 						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}"), true);
 
 		testTokenize(
@@ -161,18 +168,14 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 						"{\"id\":3,\"name\":\"Ford\"}"), true);
 
 		// SPR-16166: top-level JSON values
-		testTokenize(asList("\"foo", "bar\"")
-			,singletonList("\"foobar\""), true);
+		testTokenize(asList("\"foo", "bar\""),singletonList("\"foobar\""), true);
 
-		testTokenize(asList("12", "34")
-			,singletonList("1234"), true);
+		testTokenize(asList("12", "34"),singletonList("1234"), true);
 
-		testTokenize(asList("12.", "34")
-			,singletonList("12.34"), true);
+		testTokenize(asList("12.", "34"),singletonList("12.34"), true);
 
 		// SPR-16407
-		testTokenize(asList("[1", ",2,", "3]"),
-				asList("1", "2", "3"), true);
+		testTokenize(asList("[1", ",2,", "3]"), asList("1", "2", "3"), true);
 	}
 
 	@Test(expected = DecodingException.class) // SPR-16521
@@ -184,11 +187,11 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 
 
 	private void testTokenize(List<String> source, List<String> expected, boolean tokenizeArrayElements) {
-		Flux<DataBuffer> sourceFlux = Flux.fromIterable(source)
-				.map(this::stringBuffer);
 
-		Flux<TokenBuffer> tokenBufferFlux =
-				Jackson2Tokenizer.tokenize(sourceFlux, this.jsonFactory, tokenizeArrayElements);
+		Flux<TokenBuffer> tokenBufferFlux = Jackson2Tokenizer.tokenize(
+				Flux.fromIterable(source).map(this::stringBuffer),
+				this.jsonFactory,
+				tokenizeArrayElements);
 
 		Flux<String> result = tokenBufferFlux
 				.map(tokenBuffer -> {
@@ -202,17 +205,16 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 				});
 
 		StepVerifier.FirstStep<String> builder = StepVerifier.create(result);
-		for (String s : expected) {
-			builder.assertNext(new JSONAssertConsumer(s));
-		}
+		expected.forEach(s -> builder.assertNext(new JSONAssertConsumer(s)));
 		builder.verifyComplete();
 	}
+
 
 	private static class JSONAssertConsumer implements Consumer<String> {
 
 		private final String expected;
 
-		public JSONAssertConsumer(String expected) {
+		JSONAssertConsumer(String expected) {
 			this.expected = expected;
 		}
 
@@ -226,6 +228,4 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 			}
 		}
 	}
-
-
 }
