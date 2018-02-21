@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,6 +143,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	 */
 	protected StandaloneMockMvcBuilder(Object... controllers) {
 		Assert.isTrue(!ObjectUtils.isEmpty(controllers), "At least one controller is required");
+		Assert.isTrue(checkInstances(controllers), "Controller instances are required");
 		this.controllers = Arrays.asList(controllers);
 	}
 
@@ -157,8 +158,13 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	 * @since 4.2
 	 */
 	public StandaloneMockMvcBuilder setControllerAdvice(Object... controllerAdvice) {
+		Assert.isTrue(checkInstances(controllerAdvice), "ControllerAdvice instances are required");
 		this.controllerAdvice = Arrays.asList(controllerAdvice);
 		return this;
+	}
+
+	private boolean checkInstances(Object[] objects) {
+		return Arrays.stream(objects).noneMatch(Class.class::isInstance);
 	}
 
 	/**

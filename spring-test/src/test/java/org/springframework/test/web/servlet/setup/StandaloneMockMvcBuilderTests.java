@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,6 +124,17 @@ public class StandaloneMockMvcBuilderTests {
 		JsonSerializer serializer = instantiator.serializerInstance(null, null, UnknownSerializer.class);
 		assertNotNull(serializer);
 	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void controllerIsAnObjectInstance() {
+		new StandaloneMockMvcBuilder(PersonController.class);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void controllerAdviceIsAnObjectInstance() {
+		new StandaloneMockMvcBuilder(new PersonController()).setControllerAdvice(PersonController.class);
+	}
+
 
 
 	@Controller

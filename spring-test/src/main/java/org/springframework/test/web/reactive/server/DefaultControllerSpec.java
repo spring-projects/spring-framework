@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,14 +56,19 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 
 	DefaultControllerSpec(Object... controllers) {
 		Assert.isTrue(!ObjectUtils.isEmpty(controllers), "At least one controller is required");
+		Assert.isTrue(checkInstances(controllers), "Controller instances are required");
 		this.controllers = Arrays.asList(controllers);
 	}
 
-
 	@Override
 	public DefaultControllerSpec controllerAdvice(Object... controllerAdvice) {
+		Assert.isTrue(checkInstances(controllerAdvice), "ControllerAdvice instances are required");
 		this.controllerAdvice.addAll(Arrays.asList(controllerAdvice));
 		return this;
+	}
+
+	private boolean checkInstances(Object[] objects) {
+		return Arrays.stream(objects).noneMatch(Class.class::isInstance);
 	}
 
 	@Override

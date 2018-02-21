@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import static org.junit.Assert.assertNotNull;
 public class DefaultControllerSpecTests {
 
 	@Test
-	public void controller() throws Exception {
+	public void controller() {
 		new DefaultControllerSpec(new MyController()).build()
 				.get().uri("/")
 				.exchange()
@@ -53,7 +53,7 @@ public class DefaultControllerSpecTests {
 	}
 
 	@Test
-	public void controllerAdvice() throws Exception {
+	public void controllerAdvice() {
 		new DefaultControllerSpec(new MyController())
 				.controllerAdvice(new MyControllerAdvice())
 				.build()
@@ -63,8 +63,18 @@ public class DefaultControllerSpecTests {
 				.expectBody(String.class).isEqualTo("Handled exception");
 	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void controllerIsAnObjectInstance() {
+		new DefaultControllerSpec(MyController.class);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void controllerAdviceIsAnObjectInstance() {
+		new DefaultControllerSpec(new MyController()).controllerAdvice(MyControllerAdvice.class);
+	}
+
 	@Test
-	public void configurerConsumers() throws Exception {
+	public void configurerConsumers() {
 
 		TestConsumer<ArgumentResolverConfigurer> argumentResolverConsumer = new TestConsumer<>();
 		TestConsumer<RequestedContentTypeResolverBuilder> contenTypeResolverConsumer = new TestConsumer<>();
