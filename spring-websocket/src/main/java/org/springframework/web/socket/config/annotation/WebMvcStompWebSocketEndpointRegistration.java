@@ -73,7 +73,6 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 
 	@Override
 	public StompWebSocketEndpointRegistration setHandshakeHandler(HandshakeHandler handshakeHandler) {
-		Assert.notNull(handshakeHandler, "'handshakeHandler' must not be null");
 		this.handshakeHandler = handshakeHandler;
 		return this;
 	}
@@ -113,7 +112,7 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 	}
 
 	protected HandshakeInterceptor[] getInterceptors() {
-		List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
+		List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>(this.interceptors.size() + 1);
 		interceptors.addAll(this.interceptors);
 		interceptors.add(new OriginHandshakeInterceptor(this.allowedOrigins));
 		return interceptors.toArray(new HandshakeInterceptor[interceptors.size()]);
@@ -124,7 +123,7 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 		if (this.registration != null) {
 			SockJsService sockJsService = this.registration.getSockJsService();
 			for (String path : this.paths) {
-				String pattern = path.endsWith("/") ? path + "**" : path + "/**";
+				String pattern = (path.endsWith("/") ? path + "**" : path + "/**");
 				SockJsHttpRequestHandler handler = new SockJsHttpRequestHandler(sockJsService, this.webSocketHandler);
 				mappings.add(handler, pattern);
 			}

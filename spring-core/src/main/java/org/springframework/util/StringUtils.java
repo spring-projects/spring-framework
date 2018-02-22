@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -824,13 +824,9 @@ public abstract class StringUtils {
 			return array1;
 		}
 
-		List<String> result = new ArrayList<String>();
+		Set<String> result = new LinkedHashSet<String>();
 		result.addAll(Arrays.asList(array1));
-		for (String str : array2) {
-			if (!result.contains(str)) {
-				result.add(str);
-			}
-		}
+		result.addAll(Arrays.asList(array2));
 		return toStringArray(result);
 	}
 
@@ -858,7 +854,6 @@ public abstract class StringUtils {
 		if (collection == null) {
 			return null;
 		}
-
 		return collection.toArray(new String[collection.size()]);
 	}
 
@@ -872,9 +867,7 @@ public abstract class StringUtils {
 		if (enumeration == null) {
 			return null;
 		}
-
-		List<String> list = Collections.list(enumeration);
-		return list.toArray(new String[list.size()]);
+		return toStringArray(Collections.list(enumeration));
 	}
 
 	/**
@@ -939,10 +932,9 @@ public abstract class StringUtils {
 
 	/**
 	 * Take an array of strings and split each element based on the given delimiter.
-	 * A {@code Properties} instance is then generated, with the left of the
-	 * delimiter providing the key, and the right of the delimiter providing the value.
-	 * <p>Will trim both the key and value before adding them to the
-	 * {@code Properties} instance.
+	 * A {@code Properties} instance is then generated, with the left of the delimiter
+	 * providing the key, and the right of the delimiter providing the value.
+	 * <p>Will trim both the key and value before adding them to the {@code Properties}.
 	 * @param array the array to process
 	 * @param delimiter to split each element using (typically the equals symbol)
 	 * @return a {@code Properties} instance representing the array contents,

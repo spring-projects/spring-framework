@@ -265,10 +265,8 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		if (target instanceof TopicSession) {
 			classes.add(TopicSession.class);
 		}
-		return (Session) Proxy.newProxyInstance(
-				SessionProxy.class.getClassLoader(),
-				classes.toArray(new Class<?>[classes.size()]),
-				new CachedSessionInvocationHandler(target, sessionList));
+		return (Session) Proxy.newProxyInstance(SessionProxy.class.getClassLoader(),
+				ClassUtils.toClassArray(classes), new CachedSessionInvocationHandler(target, sessionList));
 	}
 
 

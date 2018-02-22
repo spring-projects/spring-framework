@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -458,15 +458,18 @@ public abstract class AbstractJdbcInsert {
 						"Current database only supports retrieving the key for a single column. There are " +
 						getGeneratedKeyNames().length  + " columns specified: " + Arrays.asList(getGeneratedKeyNames()));
 			}
-			// This is a hack to be able to get the generated key from a database that doesn't support
-			// get generated keys feature. HSQL is one, PostgreSQL is another. Postgres uses a RETURNING
-			// clause while HSQL uses a second query that has to be executed with the same connection.
+
 			final String keyQuery = this.tableMetaDataContext.getSimulationQueryForGetGeneratedKey(
 					this.tableMetaDataContext.getTableName(), getGeneratedKeyNames()[0]);
 			Assert.notNull(keyQuery, "Query for simulating get generated keys can't be null");
+
+			// This is a hack to be able to get the generated key from a database that doesn't support
+			// get generated keys feature. HSQL is one, PostgreSQL is another. Postgres uses a RETURNING
+			// clause while HSQL uses a second query that has to be executed with the same connection.
+
 			if (keyQuery.toUpperCase().startsWith("RETURNING")) {
-				Long key = getJdbcTemplate().queryForObject(getInsertString() + " " + keyQuery,
-						values.toArray(new Object[values.size()]), Long.class);
+				Long key = getJdbcTemplate().queryForObject(
+						getInsertString() + " " + keyQuery, values.toArray(), Long.class);
 				Map<String, Object> keys = new HashMap<String, Object>(1);
 				keys.put(getGeneratedKeyNames()[0], key);
 				keyHolder.getKeyList().add(keys);
@@ -506,8 +509,8 @@ public abstract class AbstractJdbcInsert {
 					}
 				});
 			}
-			return keyHolder;
 		}
+
 		return keyHolder;
 	}
 

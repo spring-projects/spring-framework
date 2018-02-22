@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1064,11 +1064,12 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Copy the given Collection into a Class array.
-	 * The Collection must contain Class elements only.
-	 * @param collection the Collection to copy
-	 * @return the Class array ({@code null} if the passed-in
-	 * Collection was {@code null})
+	 * Copy the given {@code Collection} into a {@code Class} array.
+	 * <p>The {@code Collection} must contain {@code Class} elements only.
+	 * @param collection the {@code Collection} to copy
+	 * @return the {@code Class} array
+	 * @since 3.1
+	 * @see StringUtils#toStringArray
 	 */
 	public static Class<?>[] toClassArray(Collection<Class<?>> collection) {
 		if (collection == null) {
@@ -1109,8 +1110,7 @@ public abstract class ClassUtils {
 	 * @return all interfaces that the given object implements as an array
 	 */
 	public static Class<?>[] getAllInterfacesForClass(Class<?> clazz, ClassLoader classLoader) {
-		Set<Class<?>> ifcs = getAllInterfacesForClassAsSet(clazz, classLoader);
-		return ifcs.toArray(new Class<?>[ifcs.size()]);
+		return toClassArray(getAllInterfacesForClassAsSet(clazz, classLoader));
 	}
 
 	/**
@@ -1150,12 +1150,13 @@ public abstract class ClassUtils {
 			return Collections.<Class<?>>singleton(clazz);
 		}
 		Set<Class<?>> interfaces = new LinkedHashSet<Class<?>>();
-		while (clazz != null) {
-			Class<?>[] ifcs = clazz.getInterfaces();
+		Class<?> current = clazz;
+		while (current != null) {
+			Class<?>[] ifcs = current.getInterfaces();
 			for (Class<?> ifc : ifcs) {
 				interfaces.addAll(getAllInterfacesForClassAsSet(ifc, classLoader));
 			}
-			clazz = clazz.getSuperclass();
+			current = current.getSuperclass();
 		}
 		return interfaces;
 	}
