@@ -34,10 +34,10 @@ import org.springframework.util.Assert;
  * Adapt {@link HttpHandler} to the Reactor Netty channel handling function.
  *
  * @author Stephane Maldini
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ReactorHttpHandlerAdapter
-		implements BiFunction<HttpServerRequest, HttpServerResponse, Mono<Void>> {
+public class ReactorHttpHandlerAdapter implements BiFunction<HttpServerRequest, HttpServerResponse, Mono<Void>> {
 
 	private static final Log logger = LogFactory.getLog(ReactorHttpHandlerAdapter.class);
 
@@ -53,7 +53,6 @@ public class ReactorHttpHandlerAdapter
 
 	@Override
 	public Mono<Void> apply(HttpServerRequest request, HttpServerResponse response) {
-
 		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(response.alloc());
 		ServerHttpRequest adaptedRequest;
 		ServerHttpResponse adaptedResponse;
@@ -62,7 +61,9 @@ public class ReactorHttpHandlerAdapter
 			adaptedResponse = new ReactorServerHttpResponse(response, bufferFactory);
 		}
 		catch (URISyntaxException ex) {
-			logger.error("Invalid URL " + ex.getMessage(), ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Invalid URL for incoming request: " + ex.getMessage());
+			}
 			response.status(HttpResponseStatus.BAD_REQUEST);
 			return Mono.empty();
 		}
