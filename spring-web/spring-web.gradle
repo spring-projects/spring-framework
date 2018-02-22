@@ -85,5 +85,5 @@ dependencies {
 	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0")
 	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0")
 	testRuntime("javax.json:javax.json-api:1.1.2")
-	testRuntime("org.apache.johnzon:johnzon-jsonb:1.1.5")
+	testRuntime("org.apache.johnzon:johnzon-jsonb:1.1.6")
 }
