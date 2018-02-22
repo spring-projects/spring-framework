@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,7 +154,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 					String[] modeKeys = new String[0];
 					String[] params = new String[0];
 					if (typeMapping != null) {
-						params = StringUtils.mergeStringArrays(typeMapping.params(), params);
+						params = PortletAnnotationMappingUtils.mergeStringArrays(typeMapping.params(), params);
 					}
 					ActionMapping actionMapping = AnnotationUtils.findAnnotation(method, ActionMapping.class);
 					RenderMapping renderMapping = AnnotationUtils.findAnnotation(method, RenderMapping.class);
@@ -162,11 +162,11 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 					EventMapping eventMapping = AnnotationUtils.findAnnotation(method, EventMapping.class);
 					RequestMapping requestMapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
 					if (actionMapping != null) {
-						params = StringUtils.mergeStringArrays(params, actionMapping.params());
+						params = PortletAnnotationMappingUtils.mergeStringArrays(params, actionMapping.params());
 						predicate = new ActionMappingPredicate(actionMapping.name(), params);
 					}
 					else if (renderMapping != null) {
-						params = StringUtils.mergeStringArrays(params, renderMapping.params());
+						params = PortletAnnotationMappingUtils.mergeStringArrays(params, renderMapping.params());
 						predicate = new RenderMappingPredicate(renderMapping.windowState(), params);
 					}
 					else if (resourceMapping != null) {
@@ -183,7 +183,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 										Arrays.asList(modeKeys) + " versus " + Arrays.asList(typeMapping.value()));
 							}
 						}
-						params = StringUtils.mergeStringArrays(params, requestMapping.params());
+						params = PortletAnnotationMappingUtils.mergeStringArrays(params, requestMapping.params());
 						if (predicate == null) {
 							predicate = new MethodLevelMappingPredicate(params);
 						}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package org.springframework.web.portlet.mvc.annotation;
 
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import javax.portlet.ClientDataRequest;
@@ -24,6 +26,7 @@ import javax.portlet.PortletRequest;
 
 import org.springframework.http.MediaType;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.portlet.util.PortletUtils;
 
@@ -34,6 +37,29 @@ import org.springframework.web.portlet.util.PortletUtils;
  * @since 2.5.2
  */
 abstract class PortletAnnotationMappingUtils {
+
+	/**
+	 * Merge the given {@code String} arrays into one, with each element only included once.
+	 * <p>The order of elements in the original arrays is preserved (with the exception of
+	 * overlapping elements, which are only included on their first occurrence).
+	 * @param array1 the first array (can be {@code null})
+	 * @param array2 the second array (can be {@code null})
+	 * @return the new array ({@code null} if both given arrays were {@code null})
+	 * @since 4.3.15 (superseding {@link StringUtils#mergeStringArrays})
+	 */
+	public static String[] mergeStringArrays(String[] array1, String[] array2) {
+		if (ObjectUtils.isEmpty(array1)) {
+			return array2;
+		}
+		if (ObjectUtils.isEmpty(array2)) {
+			return array1;
+		}
+
+		Set<String> result = new LinkedHashSet<String>();
+		result.addAll(Arrays.asList(array1));
+		result.addAll(Arrays.asList(array2));
+		return StringUtils.toStringArray(result);
+	}
 
 	/**
 	 * Check whether the given portlet modes matches the specified type-level modes.
