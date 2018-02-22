@@ -397,12 +397,11 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	}
 
 	/**
-	 * Create a proxy of the given EntityManagerFactory. We do this to be able
-	 * to return transaction-aware proxies for application-managed
-	 * EntityManagers, and to introduce the NamedEntityManagerFactory interface
-	 * @param emf EntityManagerFactory as returned by the persistence provider,
+	 * Create a proxy for the given {@link EntityManagerFactory}. We do this to be able to
+	 * return a transaction-aware proxy for an application-managed {@link EntityManager}.
+	 * @param emf the EntityManagerFactory as returned by the persistence provider,
 	 * if initialized already
-	 * @return proxy entity manager
+	 * @return the EntityManagerFactory proxy
 	 */
 	protected EntityManagerFactory createEntityManagerFactoryProxy(@Nullable EntityManagerFactory emf) {
 		Set<Class<?>> ifcs = new LinkedHashSet<>();
@@ -617,9 +616,8 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 
 	/**
-	 * Dynamic proxy invocation handler proxying an EntityManagerFactory to
-	 * return a proxy EntityManager if necessary from createEntityManager()
-	 * methods.
+	 * Dynamic proxy invocation handler for an {@link EntityManagerFactory}, returning a
+	 * proxy {@link EntityManager} (if necessary) from {@code createEntityManager} methods.
 	 */
 	@SuppressWarnings("serial")
 	private static class ManagedEntityManagerFactoryInvocationHandler implements InvocationHandler, Serializable {

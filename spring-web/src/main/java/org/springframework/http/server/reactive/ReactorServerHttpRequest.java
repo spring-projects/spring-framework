@@ -55,13 +55,13 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 			throws URISyntaxException {
 
 		super(initUri(request), "", initHeaders(request));
-		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
+		Assert.notNull(bufferFactory, "DataBufferFactory must not be null");
 		this.request = request;
 		this.bufferFactory = bufferFactory;
 	}
 
 	private static URI initUri(HttpServerRequest request) throws URISyntaxException {
-		Assert.notNull(request, "'request' must not be null");
+		Assert.notNull(request, "HttpServerRequest must not be null");
 		return new URI(resolveBaseUrl(request).toString() + resolveRequestUri(request));
 	}
 
