@@ -815,7 +815,10 @@ public abstract class StringUtils {
 	 * @param array1 the first array (can be {@code null})
 	 * @param array2 the second array (can be {@code null})
 	 * @return the new array ({@code null} if both given arrays were {@code null})
+	 * @deprecated as of 4.3.15, in favor of manual merging via {@link LinkedHashSet}
+	 * (with every entry included at most once, even entries within the first array)
 	 */
+	@Deprecated
 	public static String[] mergeStringArrays(String[] array1, String[] array2) {
 		if (ObjectUtils.isEmpty(array1)) {
 			return array2;
@@ -824,9 +827,13 @@ public abstract class StringUtils {
 			return array1;
 		}
 
-		Set<String> result = new LinkedHashSet<String>();
+		List<String> result = new ArrayList<String>();
 		result.addAll(Arrays.asList(array1));
-		result.addAll(Arrays.asList(array2));
+		for (String str : array2) {
+			if (!result.contains(str)) {
+				result.add(str);
+			}
+		}
 		return toStringArray(result);
 	}
 
