@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -1496,15 +1495,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #isExcludedFromDependencyCheck
 	 */
 	protected PropertyDescriptor[] filterPropertyDescriptorsForDependencyCheck(BeanWrapper bw) {
-		List<PropertyDescriptor> pds =
-				new LinkedList<>(Arrays.asList(bw.getPropertyDescriptors()));
-		for (Iterator<PropertyDescriptor> it = pds.iterator(); it.hasNext();) {
-			PropertyDescriptor pd = it.next();
-			if (isExcludedFromDependencyCheck(pd)) {
-				it.remove();
-			}
-		}
-		return pds.toArray(new PropertyDescriptor[pds.size()]);
+		List<PropertyDescriptor> pds = new LinkedList<>(Arrays.asList(bw.getPropertyDescriptors()));
+		pds.removeIf(this::isExcludedFromDependencyCheck);
+		return pds.toArray(new PropertyDescriptor[0]);
 	}
 
 	/**

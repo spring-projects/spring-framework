@@ -383,8 +383,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 			notificationListeners.add(bean);
 		});
 
-		this.notificationListeners =
-				notificationListeners.toArray(new NotificationListenerBean[notificationListeners.size()]);
+		this.notificationListeners = notificationListeners.toArray(new NotificationListenerBean[0]);
 	}
 
 	@Override

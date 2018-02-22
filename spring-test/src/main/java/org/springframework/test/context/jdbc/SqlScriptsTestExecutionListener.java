@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,7 +185,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 				scriptResources.add(new ByteArrayResource(stmt.getBytes(), "from inlined SQL statement: " + stmt));
 			}
 		}
-		populator.setScripts(scriptResources.toArray(new Resource[scriptResources.size()]));
+		populator.setScripts(scriptResources.toArray(new Resource[0]));
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL scripts: " + ObjectUtils.nullSafeToString(scriptResources));
 		}

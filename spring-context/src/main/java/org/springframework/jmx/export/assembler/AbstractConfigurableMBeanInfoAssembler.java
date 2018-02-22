@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ public abstract class AbstractConfigurableMBeanInfoAssembler extends AbstractRef
 				ManagedNotification mn = (ManagedNotification) colValue;
 				result.add(JmxMetadataUtils.convertToModelMBeanNotificationInfo(mn));
 			}
-			return result.toArray(new ModelMBeanNotificationInfo[result.size()]);
+			return result.toArray(new ModelMBeanNotificationInfo[0]);
 		}
 		else {
 			throw new IllegalArgumentException(

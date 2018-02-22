@@ -62,8 +62,8 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 	private SockJsServiceRegistration registration;
 
 
-	public WebMvcStompWebSocketEndpointRegistration(String[] paths, WebSocketHandler webSocketHandler,
-			TaskScheduler sockJsTaskScheduler) {
+	public WebMvcStompWebSocketEndpointRegistration(
+			String[] paths, WebSocketHandler webSocketHandler, TaskScheduler sockJsTaskScheduler) {
 
 		Assert.notEmpty(paths, "No paths specified");
 		Assert.notNull(webSocketHandler, "WebSocketHandler must not be null");
@@ -76,7 +76,6 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 
 	@Override
 	public StompWebSocketEndpointRegistration setHandshakeHandler(HandshakeHandler handshakeHandler) {
-		Assert.notNull(handshakeHandler, "'handshakeHandler' must not be null");
 		this.handshakeHandler = handshakeHandler;
 		return this;
 	}
@@ -117,10 +116,10 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 	}
 
 	protected HandshakeInterceptor[] getInterceptors() {
-		List<HandshakeInterceptor> interceptors = new ArrayList<>();
+		List<HandshakeInterceptor> interceptors = new ArrayList<>(this.interceptors.size() + 1);
 		interceptors.addAll(this.interceptors);
 		interceptors.add(new OriginHandshakeInterceptor(this.allowedOrigins));
-		return interceptors.toArray(new HandshakeInterceptor[interceptors.size()]);
+		return interceptors.toArray(new HandshakeInterceptor[0]);
 	}
 
 	public final MultiValueMap<HttpRequestHandler, String> getMappings() {
@@ -128,7 +127,7 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 		if (this.registration != null) {
 			SockJsService sockJsService = this.registration.getSockJsService();
 			for (String path : this.paths) {
-				String pattern = path.endsWith("/") ? path + "**" : path + "/**";
+				String pattern = (path.endsWith("/") ? path + "**" : path + "/**");
 				SockJsHttpRequestHandler handler = new SockJsHttpRequestHandler(sockJsService, this.webSocketHandler);
 				mappings.add(handler, pattern);
 			}

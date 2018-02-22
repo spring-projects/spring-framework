@@ -945,7 +945,7 @@ public abstract class StringUtils {
 	 * @return the {@code String} array
 	 */
 	public static String[] toStringArray(Collection<String> collection) {
-		return collection.toArray(new String[collection.size()]);
+		return collection.toArray(new String[0]);
 	}
 
 	/**
@@ -955,8 +955,7 @@ public abstract class StringUtils {
 	 * @return the {@code String} array
 	 */
 	public static String[] toStringArray(Enumeration<String> enumeration) {
-		List<String> list = Collections.list(enumeration);
-		return list.toArray(new String[list.size()]);
+		return toStringArray(Collections.list(enumeration));
 	}
 
 	/**

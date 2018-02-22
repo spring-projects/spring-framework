@@ -213,7 +213,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 				logger.info("Registering annotated classes: [" +
 						StringUtils.collectionToCommaDelimitedString(this.annotatedClasses) + "]");
 			}
-			reader.register(this.annotatedClasses.toArray(new Class<?>[this.annotatedClasses.size()]));
+			reader.register(ClassUtils.toClassArray(this.annotatedClasses));
 		}
 
 		if (!this.basePackages.isEmpty()) {

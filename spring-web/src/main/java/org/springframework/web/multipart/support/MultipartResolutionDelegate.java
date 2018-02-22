@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ public abstract class MultipartResolutionDelegate {
 			}
 			if (multipartRequest != null) {
 				List<MultipartFile> multipartFiles = multipartRequest.getFiles(name);
-				return multipartFiles.toArray(new MultipartFile[multipartFiles.size()]);
+				return multipartFiles.toArray(new MultipartFile[0]);
 			}
 			else {
 				return null;
@@ -164,7 +164,7 @@ public abstract class MultipartResolutionDelegate {
 				result.add(part);
 			}
 		}
-		return result.toArray(new Part[result.size()]);
+		return result.toArray(new Part[0]);
 	}
 
 }

@@ -357,7 +357,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public Cookie[] getCookies() {
-		return this.cookies.toArray(new Cookie[this.cookies.size()]);
+		return this.cookies.toArray(new Cookie[0]);
 	}
 
 	@Nullable

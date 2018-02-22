@@ -1058,18 +1058,15 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Copy the given Collection into a Class array.
-	 * The Collection must contain Class elements only.
-	 * @param collection the Collection to copy
-	 * @return the Class array ({@code null} if the passed-in
-	 * Collection was {@code null})
+	 * Copy the given {@code Collection} into a {@code Class} array.
+	 * <p>The {@code Collection} must contain {@code Class} elements only.
+	 * @param collection the {@code Collection} to copy
+	 * @return the {@code Class} array
+	 * @since 3.1
+	 * @see StringUtils#toStringArray
 	 */
-	@Nullable
-	public static Class<?>[] toClassArray(@Nullable Collection<Class<?>> collection) {
-		if (collection == null) {
-			return null;
-		}
-		return collection.toArray(new Class<?>[collection.size()]);
+	public static Class<?>[] toClassArray(Collection<Class<?>> collection) {
+		return collection.toArray(new Class<?>[0]);
 	}
 
 	/**
@@ -1104,8 +1101,7 @@ public abstract class ClassUtils {
 	 * @return all interfaces that the given object implements as an array
 	 */
 	public static Class<?>[] getAllInterfacesForClass(Class<?> clazz, @Nullable ClassLoader classLoader) {
-		Set<Class<?>> ifcs = getAllInterfacesForClassAsSet(clazz, classLoader);
-		return ifcs.toArray(new Class<?>[ifcs.size()]);
+		return toClassArray(getAllInterfacesForClassAsSet(clazz, classLoader));
 	}
 
 	/**

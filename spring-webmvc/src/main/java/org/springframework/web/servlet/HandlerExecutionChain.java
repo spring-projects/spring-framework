@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ public class HandlerExecutionChain {
 	@Nullable
 	public HandlerInterceptor[] getInterceptors() {
 		if (this.interceptors == null && this.interceptorList != null) {
-			this.interceptors = this.interceptorList.toArray(new HandlerInterceptor[this.interceptorList.size()]);
+			this.interceptors = this.interceptorList.toArray(new HandlerInterceptor[0]);
 		}
 		return this.interceptors;
 	}

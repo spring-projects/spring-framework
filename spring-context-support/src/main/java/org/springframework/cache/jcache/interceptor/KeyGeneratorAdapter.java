@@ -104,15 +104,14 @@ class KeyGeneratorAdapter implements KeyGenerator {
 				parameters.add(value);
 			}
 		}
-		return keyGenerator.generate(context.getTarget(), context.getMethod(),
-				parameters.toArray(new Object[parameters.size()]));
-
+		return keyGenerator.generate(context.getTarget(), context.getMethod(), parameters.toArray());
 	}
 
 
 	@SuppressWarnings("unchecked")
-	private CacheKeyInvocationContext<?> createCacheKeyInvocationContext(Object target,
-			JCacheOperation<?> operation, Object[] params) {
+	private CacheKeyInvocationContext<?> createCacheKeyInvocationContext(
+			Object target, JCacheOperation<?> operation, Object[] params) {
+
 		AbstractJCacheKeyOperation<Annotation> keyCacheOperation = (AbstractJCacheKeyOperation<Annotation>) operation;
 		return new DefaultCacheKeyInvocationContext<>(keyCacheOperation, target, params);
 	}

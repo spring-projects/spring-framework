@@ -418,9 +418,8 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		}
 		ifcs.add(EntityManagerFactoryInfo.class);
 		try {
-			return (EntityManagerFactory) Proxy.newProxyInstance(
-					this.beanClassLoader, ifcs.toArray(new Class<?>[ifcs.size()]),
-					new ManagedEntityManagerFactoryInvocationHandler(this));
+			return (EntityManagerFactory) Proxy.newProxyInstance(this.beanClassLoader,
+					ClassUtils.toClassArray(ifcs), new ManagedEntityManagerFactoryInvocationHandler(this));
 		}
 		catch (IllegalArgumentException ex) {
 			if (entityManagerFactoryInterface != null) {

@@ -61,7 +61,7 @@ public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 
 	@Override
 	public Class<?>[] getInterfaces() {
-		return this.publishedInterfaces.toArray(new Class<?>[this.publishedInterfaces.size()]);
+		return ClassUtils.toClassArray(this.publishedInterfaces);
 	}
 
 	/**
