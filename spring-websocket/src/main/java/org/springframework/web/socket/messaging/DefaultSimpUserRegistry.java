@@ -101,11 +101,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 				name = ((DestinationUserNameProvider) user).getDestinationUserName();
 			}
 			synchronized (this.sessionLock) {
-				LocalSimpUser simpUser = this.users.get(name);
-				if (simpUser == null) {
-					simpUser = new LocalSimpUser(name);
-					this.users.put(name, simpUser);
-				}
+				LocalSimpUser simpUser = this.users.computeIfAbsent(name, LocalSimpUser::new);
 				LocalSimpSession session = new LocalSimpSession(sessionId, simpUser);
 				simpUser.addSession(session);
 				this.sessions.put(sessionId, session);

@@ -183,15 +183,17 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		Object singletonObject = this.singletonObjects.get(beanName);
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
 			synchronized (this.singletonObjects) {
-				singletonObject = this.earlySingletonObjects.get(beanName);
-				if (singletonObject == null && allowEarlyReference) {
-					ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
-					if (singletonFactory != null) {
-						singletonObject = singletonFactory.getObject();
-						this.earlySingletonObjects.put(beanName, singletonObject);
-						this.singletonFactories.remove(beanName);
+				singletonObject = this.earlySingletonObjects.computeIfAbsent(beanName, key -> {
+					Object value = null;
+					if (allowEarlyReference) {
+						ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
+						if (singletonFactory != null) {
+							this.singletonFactories.remove(beanName);
+							value = singletonFactory.getObject();
+						}
 					}
-				}
+					return value;
+				});
 			}
 		}
 		return singletonObject;
@@ -392,12 +394,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 		// No entry yet -> fully synchronized manipulation of the containedBeans Set
 		synchronized (this.containedBeanMap) {
-			containedBeans = this.containedBeanMap.get(containingBeanName);
-			if (containedBeans == null) {
-				containedBeans = new LinkedHashSet<>(8);
-				this.containedBeanMap.put(containingBeanName, containedBeans);
-			}
-			containedBeans.add(containedBeanName);
+			this.containedBeanMap.computeIfAbsent(containingBeanName, key -> new LinkedHashSet<>(8)).add(containingBeanName);
 		}
 		registerDependentBean(containedBeanName, containingBeanName);
 	}
@@ -418,20 +415,10 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 		// No entry yet -> fully synchronized manipulation of the dependentBeans Set
 		synchronized (this.dependentBeanMap) {
-			dependentBeans = this.dependentBeanMap.get(canonicalName);
-			if (dependentBeans == null) {
-				dependentBeans = new LinkedHashSet<>(8);
-				this.dependentBeanMap.put(canonicalName, dependentBeans);
-			}
-			dependentBeans.add(dependentBeanName);
+			this.dependentBeanMap.computeIfAbsent(canonicalName, key -> new LinkedHashSet<>(8)).add(dependentBeanName);
 		}
 		synchronized (this.dependenciesForBeanMap) {
-			Set<String> dependenciesForBean = this.dependenciesForBeanMap.get(dependentBeanName);
-			if (dependenciesForBean == null) {
-				dependenciesForBean = new LinkedHashSet<>(8);
-				this.dependenciesForBeanMap.put(dependentBeanName, dependenciesForBean);
-			}
-			dependenciesForBean.add(canonicalName);
+			this.containedBeanMap.computeIfAbsent(dependentBeanName, key -> new LinkedHashSet<>(8)).add(canonicalName);
 		}
 	}
 

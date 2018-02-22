@@ -143,12 +143,7 @@ public class DefaultContextCache implements ContextCache {
 		MergedContextConfiguration child = key;
 		MergedContextConfiguration parent = child.getParent();
 		while (parent != null) {
-			Set<MergedContextConfiguration> list = this.hierarchyMap.get(parent);
-			if (list == null) {
-				list = new HashSet<>();
-				this.hierarchyMap.put(parent, list);
-			}
-			list.add(child);
+			this.hierarchyMap.computeIfAbsent(parent, k -> new HashSet<>()).add(child);
 			child = parent;
 			parent = child.getParent();
 		}

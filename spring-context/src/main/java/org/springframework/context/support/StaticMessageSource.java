@@ -56,12 +56,7 @@ public class StaticMessageSource extends AbstractMessageSource {
 			return null;
 		}
 		synchronized (this.cachedMessageFormats) {
-			MessageFormat messageFormat = this.cachedMessageFormats.get(key);
-			if (messageFormat == null) {
-				messageFormat = createMessageFormat(msg, locale);
-				this.cachedMessageFormats.put(key, messageFormat);
-			}
-			return messageFormat;
+			return this.cachedMessageFormats.computeIfAbsent(key, k -> createMessageFormat(msg, locale));
 		}
 	}
 

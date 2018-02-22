@@ -805,17 +805,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 */
 	private SessionAttributesHandler getSessionAttributesHandler(HandlerMethod handlerMethod) {
 		Class<?> handlerType = handlerMethod.getBeanType();
-		SessionAttributesHandler sessionAttrHandler = this.sessionAttributesHandlerCache.get(handlerType);
-		if (sessionAttrHandler == null) {
-			synchronized (this.sessionAttributesHandlerCache) {
-				sessionAttrHandler = this.sessionAttributesHandlerCache.get(handlerType);
-				if (sessionAttrHandler == null) {
-					sessionAttrHandler = new SessionAttributesHandler(handlerType, sessionAttributeStore);
-					this.sessionAttributesHandlerCache.put(handlerType, sessionAttrHandler);
-				}
-			}
-		}
-		return sessionAttrHandler;
+		return this.sessionAttributesHandlerCache.computeIfAbsent(handlerType,
+				key -> new SessionAttributesHandler(key, sessionAttributeStore));
 	}
 
 	/**
@@ -892,11 +883,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	private ModelFactory getModelFactory(HandlerMethod handlerMethod, WebDataBinderFactory binderFactory) {
 		SessionAttributesHandler sessionAttrHandler = getSessionAttributesHandler(handlerMethod);
 		Class<?> handlerType = handlerMethod.getBeanType();
-		Set<Method> methods = this.modelAttributeCache.get(handlerType);
-		if (methods == null) {
-			methods = MethodIntrospector.selectMethods(handlerType, MODEL_ATTRIBUTE_METHODS);
-			this.modelAttributeCache.put(handlerType, methods);
-		}
+		Set<Method> methods = this.modelAttributeCache.computeIfAbsent(handlerType,
+				key -> MethodIntrospector.selectMethods(key, MODEL_ATTRIBUTE_METHODS));
 		List<InvocableHandlerMethod> attrMethods = new ArrayList<>();
 		// Global methods first
 		this.modelAttributeAdviceCache.forEach((clazz, methodSet) -> {
@@ -926,11 +914,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 	private WebDataBinderFactory getDataBinderFactory(HandlerMethod handlerMethod) throws Exception {
 		Class<?> handlerType = handlerMethod.getBeanType();
-		Set<Method> methods = this.initBinderCache.get(handlerType);
-		if (methods == null) {
-			methods = MethodIntrospector.selectMethods(handlerType, INIT_BINDER_METHODS);
-			this.initBinderCache.put(handlerType, methods);
-		}
+		Set<Method> methods = this.initBinderCache.computeIfAbsent(handlerType,
+				key -> MethodIntrospector.selectMethods(handlerType, INIT_BINDER_METHODS));
 		List<InvocableHandlerMethod> initBinderMethods = new ArrayList<>();
 		// Global methods first
 		this.initBinderAdviceCache.forEach((clazz, methodSet) -> {

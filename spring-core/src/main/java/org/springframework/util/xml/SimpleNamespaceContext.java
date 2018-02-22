@@ -123,12 +123,7 @@ public class SimpleNamespaceContext implements NamespaceContext {
 		}
 		else {
 			this.prefixToNamespaceUri.put(prefix, namespaceUri);
-			Set<String> prefixes = this.namespaceUriToPrefixes.get(namespaceUri);
-			if (prefixes == null) {
-				prefixes = new LinkedHashSet<>();
-				this.namespaceUriToPrefixes.put(namespaceUri, prefixes);
-			}
-			prefixes.add(prefix);
+			this.namespaceUriToPrefixes.computeIfAbsent(namespaceUri, key -> new LinkedHashSet<>()).add(prefix);
 		}
 	}
 
