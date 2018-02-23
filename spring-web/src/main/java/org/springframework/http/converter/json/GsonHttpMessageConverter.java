@@ -48,7 +48,7 @@ import org.springframework.util.Assert;
  * By default, it supports {@code application/json} and {@code application/*+json} with
  * {@code UTF-8} character set.
  *
- * <p>Tested against Gson 2.6; compatible with Gson 2.0 and higher.
+ * <p>Tested against Gson 2.8; compatible with Gson 2.0 and higher.
  *
  * @author Roy Clarkson
  * @since 4.1
@@ -196,7 +196,7 @@ public class GsonHttpMessageConverter extends AbstractGenericHttpMessageConverte
 				this.gson.toJson(o, writer);
 			}
 
-			writer.close();
+			writer.flush();
 		}
 		catch (JsonIOException ex) {
 			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
