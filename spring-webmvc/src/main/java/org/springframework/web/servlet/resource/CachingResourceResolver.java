@@ -99,6 +99,9 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 			if (encoding != null && encoding.contains("gzip")) {
 				key.append("+encoding=gzip");
 			}
+			if (encoding != null && encoding.contains("br")) {
+				key.append("+encoding=brotli");
+			}
 		}
 		return key.toString();
 	}
