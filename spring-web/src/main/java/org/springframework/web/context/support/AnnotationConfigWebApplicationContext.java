@@ -16,7 +16,7 @@
 
 package org.springframework.web.context.support;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -149,7 +149,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 */
 	public void register(Class<?>... annotatedClasses) {
 		Assert.notEmpty(annotatedClasses, "At least one annotated class must be specified");
-		this.annotatedClasses.addAll(Arrays.asList(annotatedClasses));
+		Collections.addAll(this.annotatedClasses, annotatedClasses);
 	}
 
 	/**
@@ -164,7 +164,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 */
 	public void scan(String... basePackages) {
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
-		this.basePackages.addAll(Arrays.asList(basePackages));
+		Collections.addAll(this.basePackages, basePackages);
 	}
 
 

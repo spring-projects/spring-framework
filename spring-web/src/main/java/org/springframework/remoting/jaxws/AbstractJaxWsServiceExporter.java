@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.remoting.jaxws;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -137,9 +137,9 @@ public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, 
 		Assert.state(this.beanFactory != null, "No BeanFactory set");
 
 		Set<String> beanNames = new LinkedHashSet<>(this.beanFactory.getBeanDefinitionCount());
-		beanNames.addAll(Arrays.asList(this.beanFactory.getBeanDefinitionNames()));
+		Collections.addAll(beanNames, this.beanFactory.getBeanDefinitionNames());
 		if (this.beanFactory instanceof ConfigurableBeanFactory) {
-			beanNames.addAll(Arrays.asList(((ConfigurableBeanFactory) this.beanFactory).getSingletonNames()));
+			Collections.addAll(beanNames, ((ConfigurableBeanFactory) this.beanFactory).getSingletonNames());
 		}
 
 		for (String beanName : beanNames) {

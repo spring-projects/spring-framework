@@ -17,7 +17,7 @@
 package org.springframework.jmx.export;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -321,7 +321,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 */
 	public void setExcludedBeans(String... excludedBeans) {
 		this.excludedBeans.clear();
-		this.excludedBeans.addAll(Arrays.asList(excludedBeans));
+		Collections.addAll(this.excludedBeans, excludedBeans);
 	}
 
 	/**
@@ -868,9 +868,9 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	private void autodetect(Map<String, Object> beans, AutodetectCallback callback) {
 		Assert.state(this.beanFactory != null, "No BeanFactory set");
 		Set<String> beanNames = new LinkedHashSet<>(this.beanFactory.getBeanDefinitionCount());
-		beanNames.addAll(Arrays.asList(this.beanFactory.getBeanDefinitionNames()));
+		Collections.addAll(beanNames, this.beanFactory.getBeanDefinitionNames());
 		if (this.beanFactory instanceof ConfigurableBeanFactory) {
-			beanNames.addAll(Arrays.asList(((ConfigurableBeanFactory) this.beanFactory).getSingletonNames()));
+			Collections.addAll(beanNames, ((ConfigurableBeanFactory) this.beanFactory).getSingletonNames());
 		}
 
 		for (String beanName : beanNames) {
