@@ -1202,7 +1202,7 @@ public class BeanDefinitionParserDelegate {
 			boolean hasKeyAttribute = entryEle.hasAttribute(KEY_ATTRIBUTE);
 			boolean hasKeyRefAttribute = entryEle.hasAttribute(KEY_REF_ATTRIBUTE);
 			if ((hasKeyAttribute && hasKeyRefAttribute) ||
-					((hasKeyAttribute || hasKeyRefAttribute)) && keyEle != null) {
+					(hasKeyAttribute || hasKeyRefAttribute) && keyEle != null) {
 				error("<entry> element is only allowed to contain either " +
 						"a 'key' attribute OR a 'key-ref' attribute OR a <key> sub-element", entryEle);
 			}
@@ -1231,7 +1231,7 @@ public class BeanDefinitionParserDelegate {
 			boolean hasValueRefAttribute = entryEle.hasAttribute(VALUE_REF_ATTRIBUTE);
 			boolean hasValueTypeAttribute = entryEle.hasAttribute(VALUE_TYPE_ATTRIBUTE);
 			if ((hasValueAttribute && hasValueRefAttribute) ||
-					((hasValueAttribute || hasValueRefAttribute)) && valueEle != null) {
+					(hasValueAttribute || hasValueRefAttribute) && valueEle != null) {
 				error("<entry> element is only allowed to contain either " +
 						"'value' attribute OR 'value-ref' attribute OR <value> sub-element", entryEle);
 			}
