@@ -365,7 +365,7 @@ public class ResolvableType implements Serializable {
 		if (this == NONE) {
 			return false;
 		}
-		return (((this.type instanceof Class && ((Class<?>) this.type).isArray())) ||
+		return ((this.type instanceof Class && ((Class<?>) this.type).isArray()) ||
 				this.type instanceof GenericArrayType || resolveType().isArray());
 	}
 
