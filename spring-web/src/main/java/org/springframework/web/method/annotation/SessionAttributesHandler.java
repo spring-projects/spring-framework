@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,9 +59,9 @@ public class SessionAttributesHandler {
 
 
 	/**
-	 * Create a new instance for a controller type. Session attribute names and
-	 * types are extracted from the {@code @SessionAttributes} annotation, if
-	 * present, on the given type.
+	 * Create a new session attributes handler. Session attribute names and types
+	 * are extracted from the {@code @SessionAttributes} annotation, if present,
+	 * on the given type.
 	 * @param handlerType the controller type
 	 * @param sessionAttributeStore used for session access
 	 */
@@ -69,14 +69,14 @@ public class SessionAttributesHandler {
 		Assert.notNull(sessionAttributeStore, "SessionAttributeStore may not be null");
 		this.sessionAttributeStore = sessionAttributeStore;
 
-		SessionAttributes annotation =
-				AnnotatedElementUtils.findMergedAnnotation(handlerType, SessionAttributes.class);
-		if (annotation != null) {
-			this.attributeNames.addAll(Arrays.asList(annotation.names()));
-			this.attributeTypes.addAll(Arrays.asList(annotation.types()));
+		SessionAttributes ann = AnnotatedElementUtils.findMergedAnnotation(handlerType, SessionAttributes.class);
+		if (ann != null) {
+			this.attributeNames.addAll(Arrays.asList(ann.names()));
+			this.attributeTypes.addAll(Arrays.asList(ann.types()));
 		}
 		this.knownAttributeNames.addAll(this.attributeNames);
 	}
+
 
 	/**
 	 * Whether the controller represented by this instance has declared any
