@@ -100,7 +100,7 @@ abstract class AbstractStaxHandler implements ContentHandler, LexicalHandler {
 	}
 
 	@Override
-	public final void characters(char ch[], int start, int length) throws SAXException {
+	public final void characters(char[] ch, int start, int length) throws SAXException {
 		try {
 			String data = new String(ch, start, length);
 			if (!this.inCData) {

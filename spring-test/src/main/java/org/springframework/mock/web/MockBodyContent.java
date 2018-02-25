@@ -123,7 +123,7 @@ public class MockBodyContent extends BodyContent {
 	}
 
 	@Override
-	public void write(char value[], int offset, int length) throws IOException {
+	public void write(char[] value, int offset, int length) throws IOException {
 		getEnclosingWriter().write(value, offset, length);
 	}
 

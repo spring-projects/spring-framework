@@ -855,11 +855,11 @@ class ConstructorResolver {
 	 */
 	private static class ArgumentsHolder {
 
-		public final Object rawArguments[];
+		public final Object[] rawArguments;
 
-		public final Object arguments[];
+		public final Object[] arguments;
 
-		public final Object preparedArguments[];
+		public final Object[] preparedArguments;
 
 		public boolean resolveNecessary = false;
 
