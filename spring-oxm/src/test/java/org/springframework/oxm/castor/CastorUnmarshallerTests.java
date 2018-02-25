@@ -25,13 +25,12 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.oxm.AbstractUnmarshallerTests;
 import org.springframework.oxm.MarshallingException;
-
-import org.xml.sax.InputSource;
-import org.xml.sax.XMLReader;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -41,6 +40,7 @@ import static org.junit.Assert.*;
  * @author Jakub Narloch
  * @author Sam Brannen
  */
+@Deprecated
 public class CastorUnmarshallerTests extends AbstractUnmarshallerTests<CastorMarshaller> {
 
 	/**
