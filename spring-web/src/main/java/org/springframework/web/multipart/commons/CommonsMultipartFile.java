@@ -101,9 +101,9 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 		}
 
 		// Check for Unix-style path
-		int unixSep = filename.lastIndexOf("/");
+		int unixSep = filename.lastIndexOf('/');
 		// Check for Windows-style path
-		int winSep = filename.lastIndexOf("\\");
+		int winSep = filename.lastIndexOf('\\');
 		// Cut off at latest possible point
 		int pos = (winSep > unixSep ? winSep : unixSep);
 		if (pos != -1)  {

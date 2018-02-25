@@ -151,11 +151,11 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 	private int getQueryIndex(String path) {
 		int suffixIndex = path.length();
-		int queryIndex = path.indexOf("?");
+		int queryIndex = path.indexOf('?');
 		if (queryIndex > 0) {
 			suffixIndex = queryIndex;
 		}
-		int hashIndex = path.indexOf("#");
+		int hashIndex = path.indexOf('#');
 		if (hashIndex > 0) {
 			suffixIndex = Math.min(suffixIndex, hashIndex);
 		}
