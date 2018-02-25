@@ -18,6 +18,7 @@ package org.springframework.http.server.reactive;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.util.StringUtils;
 
 /**
  * Package-private default implementation of {@link ServerHttpRequest.Builder}.
@@ -129,18 +130,48 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 	@Override
 	public ServerHttpRequest build() {
-		URI uriToUse = getUriToUse();
-		return new DefaultServerHttpRequest(uriToUse, this.contextPath, this.httpHeaders,
+		return new DefaultServerHttpRequest(getUriToUse(), this.contextPath, this.httpHeaders,
 				this.httpMethodValue, this.cookies, this.body, this.originalRequest);
-
 	}
 
 	private URI getUriToUse() {
 		if (this.uriPath == null) {
 			return this.uri;
 		}
-		return UriComponentsBuilder.fromUri(this.uri).replacePath(this.uriPath).build(true).toUri();
+
+		StringBuilder uriBuilder = new StringBuilder();
+		if (this.uri.getScheme() != null) {
+			uriBuilder.append(this.uri.getScheme()).append(':');
+		}
+		if (this.uri.getUserInfo() != null || this.uri.getHost() != null) {
+			uriBuilder.append("//");
+			if (this.uri.getUserInfo() != null) {
+				uriBuilder.append(this.uri.getUserInfo()).append('@');
+			}
+			if (this.uri.getHost() != null) {
+				uriBuilder.append(this.uri.getHost());
+			}
+			if (this.uri.getPort() != -1) {
+				uriBuilder.append(':').append(this.uri.getPort());
+			}
+		}
+		if (StringUtils.hasLength(this.uriPath)) {
+			uriBuilder.append(this.uriPath);
+		}
+		if (this.uri.getRawQuery() != null) {
+			uriBuilder.append('?').append(this.uri.getRawQuery());
+		}
+		if (this.uri.getFragment() != null) {
+			uriBuilder.append('#').append(this.uri.getFragment());
+		}
+		try {
+			return new URI(uriBuilder.toString());
+		}
+		catch (URISyntaxException ex) {
+			throw new IllegalStateException("Invalid URI path: \"" + this.uriPath + "\"", ex);
+		}
 	}
+
 
 	private static class DefaultServerHttpRequest extends AbstractServerHttpRequest {
 
@@ -158,7 +189,6 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 		private final ServerHttpRequest originalRequest;
 
-
 		public DefaultServerHttpRequest(URI uri, @Nullable String contextPath,
 				HttpHeaders headers, String methodValue, MultiValueMap<String, HttpCookie> cookies,
 				Flux<DataBuffer> body, ServerHttpRequest originalRequest) {
@@ -171,7 +201,6 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 			this.body = body;
 			this.originalRequest = originalRequest;
 		}
-
 
 		@Override
 		public String getMethodValue() {
