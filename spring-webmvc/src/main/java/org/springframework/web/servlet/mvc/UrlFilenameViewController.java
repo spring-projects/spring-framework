@@ -140,7 +140,7 @@ public class UrlFilenameViewController extends AbstractUrlViewController {
 	 */
 	protected String extractViewNameFromUrlPath(String uri) {
 		int start = (uri.charAt(0) == '/' ? 1 : 0);
-		int lastIndex = uri.lastIndexOf(".");
+		int lastIndex = uri.lastIndexOf('.');
 		int end = (lastIndex < 0 ? uri.length() : lastIndex);
 		return uri.substring(start, end);
 	}

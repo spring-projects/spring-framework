@@ -276,7 +276,7 @@ public class ContentDisposition {
 				}
 				else if (attribute.equals("filename*") ) {
 					filename = decodeHeaderFieldParam(value);
-					charset = Charset.forName(value.substring(0, value.indexOf("'")));
+					charset = Charset.forName(value.substring(0, value.indexOf('\'')));
 					Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
 							"Charset should be UTF-8 or ISO-8859-1");
 				}
@@ -362,8 +362,8 @@ public class ContentDisposition {
 	 */
 	private static String decodeHeaderFieldParam(String input) {
 		Assert.notNull(input, "Input String should not be null");
-		int firstQuoteIndex = input.indexOf("'");
-		int secondQuoteIndex = input.indexOf("'", firstQuoteIndex + 1);
+		int firstQuoteIndex = input.indexOf('\'');
+		int secondQuoteIndex = input.indexOf('\'', firstQuoteIndex + 1);
 		// US_ASCII
 		if (firstQuoteIndex == -1 || secondQuoteIndex == -1) {
 			return input;

@@ -1277,7 +1277,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 			// Let's only bother with DateTimeFormatter parsing for long enough values.
 
 			// See https://stackoverflow.com/questions/12626699/if-modified-since-http-header-passed-by-ie9-includes-length
-			int parametersIndex = headerValue.indexOf(";");
+			int parametersIndex = headerValue.indexOf(';');
 			if (parametersIndex != -1) {
 				headerValue = headerValue.substring(0, parametersIndex);
 			}

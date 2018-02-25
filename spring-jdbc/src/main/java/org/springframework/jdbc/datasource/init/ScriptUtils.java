@@ -210,7 +210,7 @@ public abstract class ScriptUtils {
 				}
 				else if (script.startsWith(commentPrefix, i)) {
 					// Skip over any content from the start of the comment to the EOL
-					int indexOfNextNewline = script.indexOf("\n", i);
+					int indexOfNextNewline = script.indexOf('\n', i);
 					if (indexOfNextNewline > i) {
 						i = indexOfNextNewline;
 						continue;
