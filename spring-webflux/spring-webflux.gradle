@@ -54,7 +54,7 @@ dependencies {
 	testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
 	testCompile("io.undertow:undertow-core:${undertowVersion}")
 	testCompile("com.fasterxml:aalto-xml:1.0.0")
-	testCompile("com.squareup.okhttp3:mockwebserver:3.9.1")
+	testCompile("com.squareup.okhttp3:mockwebserver:3.10.0")
 	testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
 	testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}")
 	testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
