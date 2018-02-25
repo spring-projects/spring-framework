@@ -325,7 +325,7 @@ class TypeConverterDelegate {
 
 		if (Enum.class == requiredType) {
 			// target type is declared as raw enum, treat the trimmed value as <enum.fqn>.FIELD_NAME
-			int index = trimmedValue.lastIndexOf(".");
+			int index = trimmedValue.lastIndexOf('.');
 			if (index > - 1) {
 				String enumType = trimmedValue.substring(0, index);
 				String fieldName = trimmedValue.substring(index + 1);

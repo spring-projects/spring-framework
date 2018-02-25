@@ -88,7 +88,7 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 				parserContext.getReaderContext().error("Attribute 'path' must not be empty", element);
 				return;
 			}
-			int dotIndex = path.indexOf(".");
+			int dotIndex = path.indexOf('.');
 			if (dotIndex == -1) {
 				parserContext.getReaderContext().error(
 						"Attribute 'path' must follow pattern 'beanName.propertyName'", element);

@@ -349,7 +349,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			Charset charset = null;
 			location = location.trim();
 			if (location.startsWith(URL_RESOURCE_CHARSET_PREFIX)) {
-				int endIndex = location.indexOf("]", URL_RESOURCE_CHARSET_PREFIX.length());
+				int endIndex = location.indexOf(']', URL_RESOURCE_CHARSET_PREFIX.length());
 				if (endIndex == -1) {
 					throw new IllegalArgumentException("Invalid charset syntax in location: " + location);
 				}

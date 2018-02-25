@@ -311,8 +311,8 @@ public abstract class BeanUtils {
 	public static Method resolveSignature(String signature, Class<?> clazz) {
 		Assert.hasText(signature, "'signature' must not be empty");
 		Assert.notNull(clazz, "Class must not be null");
-		int firstParen = signature.indexOf("(");
-		int lastParen = signature.indexOf(")");
+		int firstParen = signature.indexOf('(');
+		int lastParen = signature.indexOf(')');
 		if (firstParen > -1 && lastParen == -1) {
 			throw new IllegalArgumentException("Invalid method signature '" + signature +
 					"': expected closing ')' for args list");
