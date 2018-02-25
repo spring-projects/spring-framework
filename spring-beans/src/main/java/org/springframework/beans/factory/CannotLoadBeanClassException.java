@@ -46,7 +46,7 @@ public class CannotLoadBeanClassException extends FatalBeanException {
 	public CannotLoadBeanClassException(
 			String resourceDescription, String beanName, String beanClassName, ClassNotFoundException cause) {
 
-		super("Cannot find class [" + String.valueOf(beanClassName) + "] for bean with name '" + beanName + "'" +
+		super("Cannot find class [" + beanClassName + "] for bean with name '" + beanName + "'" +
 				(resourceDescription != null ? " defined in " + resourceDescription : ""), cause);
 		this.resourceDescription = resourceDescription;
 		this.beanName = beanName;
@@ -64,7 +64,7 @@ public class CannotLoadBeanClassException extends FatalBeanException {
 	public CannotLoadBeanClassException(
 			String resourceDescription, String beanName, String beanClassName, LinkageError cause) {
 
-		super("Error loading class [" + String.valueOf(beanClassName) + "] for bean with name '" + beanName + "'" +
+		super("Error loading class [" + beanClassName + "] for bean with name '" + beanName + "'" +
 				(resourceDescription != null ? " defined in " + resourceDescription : "") +
 				": problem with class file or dependent class", cause);
 		this.resourceDescription = resourceDescription;

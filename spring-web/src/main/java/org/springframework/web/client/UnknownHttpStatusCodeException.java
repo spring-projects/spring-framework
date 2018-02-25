@@ -44,7 +44,7 @@ public class UnknownHttpStatusCodeException extends RestClientResponseException 
 	public UnknownHttpStatusCodeException(int rawStatusCode, String statusText,
 			HttpHeaders responseHeaders, byte[] responseBody, Charset responseCharset) {
 
-		super("Unknown status code [" + String.valueOf(rawStatusCode) + "]" + " " + statusText,
+		super("Unknown status code [" + rawStatusCode + "]" + " " + statusText,
 				rawStatusCode, statusText, responseHeaders, responseBody, responseCharset);
 	}
 

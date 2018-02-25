@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,8 +104,8 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 
 	/**
-	 * Expose the classic Spring JdbcTemplate to allow invocation of
-	 * less commonly used methods.
+	 * Expose the classic Spring JdbcTemplate operations to allow invocation
+	 * of less commonly used methods.
 	 */
 	@Override
 	public JdbcOperations getJdbcOperations() {
@@ -329,12 +329,14 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 				getParsedSql(sql), batchArgs, getJdbcOperations());
 	}
 
+
 	/**
-	 * Build a PreparedStatementCreator based on the given SQL and named parameters.
-	 * <p>Note: Not used for the {@code update} variant with generated key handling.
-	 * @param sql SQL to execute
+	 * Build a {@link PreparedStatementCreator} based on the given SQL and named parameters.
+	 * <p>Note: Directly called from all {@code query} variants.
+	 * Not used for the {@code update} variant with generated key handling.
+	 * @param sql the SQL statement to execute
 	 * @param paramSource container of arguments to bind
-	 * @return the corresponding PreparedStatementCreator
+	 * @return the corresponding {@link PreparedStatementCreator}
 	 */
 	protected PreparedStatementCreator getPreparedStatementCreator(String sql, SqlParameterSource paramSource) {
 		ParsedSql parsedSql = getParsedSql(sql);
@@ -347,9 +349,8 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 	/**
 	 * Obtain a parsed representation of the given SQL statement.
-	 * <p>The default implementation uses an LRU cache with an upper limit
-	 * of 256 entries.
-	 * @param sql the original SQL
+	 * <p>The default implementation uses an LRU cache with an upper limit of 256 entries.
+	 * @param sql the original SQL statement
 	 * @return a representation of the parsed SQL statement
 	 */
 	protected ParsedSql getParsedSql(String sql) {
