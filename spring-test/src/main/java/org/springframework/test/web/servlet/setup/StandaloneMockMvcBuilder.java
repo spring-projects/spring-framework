@@ -37,7 +37,6 @@ import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.util.Assert;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 import org.springframework.util.StringValueResolver;
@@ -353,7 +352,6 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	 * @since 5.0
 	 */
 	public StandaloneMockMvcBuilder setCustomHandlerMapping(Supplier<RequestMappingHandlerMapping> factory) {
-		Assert.notNull(factory, "RequestMappingHandlerMapping supplier is required.");
 		this.handlerMappingFactory = factory;
 		return this;
 	}
