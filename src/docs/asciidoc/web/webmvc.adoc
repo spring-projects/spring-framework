@@ -151,12 +151,12 @@ Below is example configuration with a `WebApplicationContext` hierarchy:
 
 		@Override
 		protected Class<?>[] getRootConfigClasses() {
-			return new Class<?[] { RootConfig.class };
+			return new Class<?>[] { RootConfig.class };
 		}
 
 		@Override
 		protected Class<?>[] getServletConfigClasses() {
-			return new Class<?[] { App1Config.class };
+			return new Class<?>[] { App1Config.class };
 		}
 
 		@Override
@@ -221,7 +221,7 @@ If an application context hierarchy is not required, applications may configure 
 The `DispatcherServlet` delegates to special beans to process requests and render the
 appropriate responses. By "special beans" we mean Spring-managed, Object instances that
 implement WebFlux framework contracts. Those usually come with built-in contracts but
-you can customize their properties, extend then, or replaced.
+you can customize their properties, extend or replace them.
 
 The table below lists the special beans detected by the `DispatcherHandler`:
 
