@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,6 @@ import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 import org.springframework.util.StringValueResolver;
@@ -127,18 +125,16 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	 * @see MockMvcBuilders#standaloneSetup(Object...)
 	 */
 	protected StandaloneMockMvcBuilder(Object... controllers) {
-		Assert.isTrue(!ObjectUtils.isEmpty(controllers), "At least one controller is required");
 		this.controllers = controllers;
 	}
 
+
 	/**
-	 * Register one or more
-	 * {@link org.springframework.web.bind.annotation.ControllerAdvice
-	 * ControllerAdvice} instances to be used in tests.
-	 * <p>Normally {@code @ControllerAdvice} are auto-detected as long as they're
-	 * declared as Spring beans. However since the standalone setup does not load
-	 * any Spring configuration they need to be registered explicitly here
-	 * instead much like controllers.
+	 * Register one or more {@link org.springframework.web.bind.annotation.ControllerAdvice}
+	 * instances to be used in tests.
+	 * <p>Normally {@code @ControllerAdvice} are auto-detected as long as they're declared
+	 * as Spring beans. However since the standalone setup does not load any Spring config,
+	 * they need to be registered explicitly here instead much like controllers.
 	 * @since 4.2
 	 */
 	public StandaloneMockMvcBuilder setControllerAdvice(Object... controllerAdvice) {
@@ -531,7 +527,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 		}
 
 		@Override
-		public View resolveViewName(String viewName, Locale locale) throws Exception {
+		public View resolveViewName(String viewName, Locale locale) {
 			return this.view;
 		}
 	}
