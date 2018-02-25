@@ -57,7 +57,7 @@ public interface WebSocketSession {
 	DataBufferFactory bufferFactory();
 
 	/**
-	 * Get the flux of incoming messages.
+	 * Get access to the stream of incoming messages.
 	 */
 	Flux<WebSocketMessage> receive();
 
