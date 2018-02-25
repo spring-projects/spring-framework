@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 import javax.servlet.ServletContext;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.InitializingBean;
@@ -37,7 +38,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 import org.springframework.util.StringValueResolver;
@@ -142,29 +142,29 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	 * @see MockMvcBuilders#standaloneSetup(Object...)
 	 */
 	protected StandaloneMockMvcBuilder(Object... controllers) {
-		Assert.isTrue(!ObjectUtils.isEmpty(controllers), "At least one controller is required");
-		Assert.isTrue(checkInstances(controllers), "Controller instances are required");
-		this.controllers = Arrays.asList(controllers);
+		this.controllers = instantiateIfNecessary(controllers);
 	}
 
+	private static List<Object> instantiateIfNecessary(Object[] specified) {
+		List<Object> instances = new ArrayList<>(specified.length);
+		for (Object obj : specified) {
+			instances.add(obj instanceof Class ? BeanUtils.instantiateClass((Class<?>) obj) : obj);
+		}
+		return instances;
+	}
+
+
 	/**
-	 * Register one or more
-	 * {@link org.springframework.web.bind.annotation.ControllerAdvice
-	 * ControllerAdvice} instances to be used in tests.
-	 * <p>Normally {@code @ControllerAdvice} are auto-detected as long as they're
-	 * declared as Spring beans. However since the standalone setup does not load
-	 * any Spring configuration they need to be registered explicitly here
-	 * instead much like controllers.
+	 * Register one or more {@link org.springframework.web.bind.annotation.ControllerAdvice}
+	 * instances to be used in tests (specified {@code Class} will be turned into instance).
+	 * <p>Normally {@code @ControllerAdvice} are auto-detected as long as they're declared
+	 * as Spring beans. However since the standalone setup does not load any Spring config,
+	 * they need to be registered explicitly here instead much like controllers.
 	 * @since 4.2
 	 */
 	public StandaloneMockMvcBuilder setControllerAdvice(Object... controllerAdvice) {
-		Assert.isTrue(checkInstances(controllerAdvice), "ControllerAdvice instances are required");
-		this.controllerAdvice = Arrays.asList(controllerAdvice);
+		this.controllerAdvice = instantiateIfNecessary(controllerAdvice);
 		return this;
-	}
-
-	private boolean checkInstances(Object[] objects) {
-		return Arrays.stream(objects).noneMatch(Class.class::isInstance);
 	}
 
 	/**
@@ -405,7 +405,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private List<ViewResolver> initViewResolvers(WebApplicationContext wac) {
 		this.viewResolvers = (this.viewResolvers != null ? this.viewResolvers :
-				Collections.<ViewResolver>singletonList(new InternalResourceViewResolver()));
+				Collections.singletonList(new InternalResourceViewResolver()));
 		for (Object viewResolver : this.viewResolvers) {
 			if (viewResolver instanceof WebApplicationObjectSupport) {
 				((WebApplicationObjectSupport) viewResolver).setApplicationContext(wac);
@@ -546,7 +546,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 		@Override
 		@Nullable
-		public View resolveViewName(String viewName, Locale locale) throws Exception {
+		public View resolveViewName(String viewName, Locale locale) {
 			return this.view;
 		}
 	}

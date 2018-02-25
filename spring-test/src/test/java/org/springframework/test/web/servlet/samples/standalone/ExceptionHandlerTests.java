@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,6 @@
 
 package org.springframework.test.web.servlet.samples.standalone;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
-
 import org.junit.Test;
 
 import org.springframework.stereotype.Controller;
@@ -29,13 +25,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+
 /**
  * Exception handling via {@code @ExceptionHandler} method.
  *
  * @author Rossen Stoyanchev
  */
 public class ExceptionHandlerTests {
-
 
 	@Test
 	public void testExceptionHandlerMethod() throws Exception {
@@ -48,6 +47,14 @@ public class ExceptionHandlerTests {
 	@Test
 	public void testGlobalExceptionHandlerMethod() throws Exception {
 		standaloneSetup(new PersonController()).setControllerAdvice(new GlobalExceptionHandler()).build()
+				.perform(get("/person/Bonnie"))
+				.andExpect(status().isOk())
+				.andExpect(forwardedUrl("globalErrorView"));
+	}
+
+	@Test
+	public void testGlobalExceptionHandlerMethodUsingClassArgument() throws Exception {
+		standaloneSetup(PersonController.class).setControllerAdvice(GlobalExceptionHandler.class).build()
 				.perform(get("/person/Bonnie"))
 				.andExpect(status().isOk())
 				.andExpect(forwardedUrl("globalErrorView"));
@@ -73,6 +80,7 @@ public class ExceptionHandlerTests {
 			return "errorView";
 		}
 	}
+
 
 	@ControllerAdvice
 	private static class GlobalExceptionHandler {

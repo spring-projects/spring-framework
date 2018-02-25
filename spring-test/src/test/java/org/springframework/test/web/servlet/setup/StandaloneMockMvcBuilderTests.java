@@ -43,7 +43,7 @@ import static org.junit.Assert.*;
 /**
  * Tests for {@link StandaloneMockMvcBuilder}
  *
- * @author Rossen
+ * @author Rossen Stoyanchev
  * @author Rob Winch
  * @author Sebastien Deleuze
  */
@@ -87,8 +87,7 @@ public class StandaloneMockMvcBuilderTests {
 		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder(new PlaceholderController());
 		builder.addPlaceholderValue("sys.login.ajax", "/foo");
 		WebApplicationContext  wac = builder.initWebAppContext();
-		assertEquals(wac, WebApplicationContextUtils
-				.getRequiredWebApplicationContext(wac.getServletContext()));
+		assertEquals(wac, WebApplicationContextUtils.getRequiredWebApplicationContext(wac.getServletContext()));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -124,17 +123,6 @@ public class StandaloneMockMvcBuilderTests {
 		JsonSerializer serializer = instantiator.serializerInstance(null, null, UnknownSerializer.class);
 		assertNotNull(serializer);
 	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void controllerIsAnObjectInstance() {
-		new StandaloneMockMvcBuilder(PersonController.class);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void controllerAdviceIsAnObjectInstance() {
-		new StandaloneMockMvcBuilder(new PersonController()).setControllerAdvice(PersonController.class);
-	}
-
 
 
 	@Controller

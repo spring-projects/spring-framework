@@ -33,7 +33,7 @@ import org.springframework.web.reactive.config.PathMatchConfigurer;
 import org.springframework.web.reactive.config.ViewResolverRegistry;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link DefaultControllerSpec}.
@@ -63,19 +63,19 @@ public class DefaultControllerSpecTests {
 				.expectBody(String.class).isEqualTo("Handled exception");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void controllerIsAnObjectInstance() {
-		new DefaultControllerSpec(MyController.class);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void controllerAdviceIsAnObjectInstance() {
-		new DefaultControllerSpec(new MyController()).controllerAdvice(MyControllerAdvice.class);
+	@Test
+	public void controllerAdviceWithClassArgument() {
+		new DefaultControllerSpec(MyController.class)
+				.controllerAdvice(MyControllerAdvice.class)
+				.build()
+				.get().uri("/exception")
+				.exchange()
+				.expectStatus().isBadRequest()
+				.expectBody(String.class).isEqualTo("Handled exception");
 	}
 
 	@Test
 	public void configurerConsumers() {
-
 		TestConsumer<ArgumentResolverConfigurer> argumentResolverConsumer = new TestConsumer<>();
 		TestConsumer<RequestedContentTypeResolverBuilder> contenTypeResolverConsumer = new TestConsumer<>();
 		TestConsumer<CorsRegistry> corsRegistryConsumer = new TestConsumer<>();
@@ -104,6 +104,7 @@ public class DefaultControllerSpecTests {
 
 	}
 
+
 	@RestController
 	private static class MyController {
 
@@ -119,6 +120,7 @@ public class DefaultControllerSpecTests {
 
 	}
 
+
 	@ControllerAdvice
 	private static class MyControllerAdvice {
 
@@ -128,10 +130,10 @@ public class DefaultControllerSpecTests {
 		}
 	}
 
+
 	private static class TestConsumer<T> implements Consumer<T> {
 
 		private T value;
-
 
 		public T getValue() {
 			return this.value;
