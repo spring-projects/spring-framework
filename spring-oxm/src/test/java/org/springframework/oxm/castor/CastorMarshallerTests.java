@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,32 +20,25 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
 
 import org.custommonkey.xmlunit.NamespaceContext;
 import org.custommonkey.xmlunit.SimpleNamespaceContext;
+import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.custommonkey.xmlunit.XpathEngine;
-
 import org.junit.Test;
-
 import org.mockito.InOrder;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.oxm.AbstractMarshallerTests;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-
-import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
-
-import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -55,6 +48,7 @@ import static org.mockito.Mockito.*;
  * @author Jakub Narloch
  * @author Sam Brannen
  */
+@Deprecated
 public class CastorMarshallerTests extends AbstractMarshallerTests<CastorMarshaller> {
 
 	/**
@@ -163,14 +157,14 @@ public class CastorMarshallerTests extends AbstractMarshallerTests<CastorMarshal
 	public void suppressNamespacesTrue() throws Exception {
 		marshaller.setSuppressNamespaces(true);
 		String result = marshalFlights();
-		assertXMLEqual("Marshaller wrote invalid result", SUPPRESSED_NAMESPACE_EXPECTED_STRING, result);
+		XMLAssert.assertXMLEqual("Marshaller wrote invalid result", SUPPRESSED_NAMESPACE_EXPECTED_STRING, result);
 	}
 
 	@Test
 	public void suppressNamespacesFalse() throws Exception {
 		marshaller.setSuppressNamespaces(false);
 		String result = marshalFlights();
-		assertXMLEqual("Marshaller wrote invalid result", EXPECTED_STRING, result);
+		XMLAssert.assertXMLEqual("Marshaller wrote invalid result", EXPECTED_STRING, result);
 	}
 
 	@Test
@@ -179,7 +173,7 @@ public class CastorMarshallerTests extends AbstractMarshallerTests<CastorMarshal
 		marshaller.setSuppressXsiType(true);
 		marshaller.setRootElement("objects");
 		String result = marshal(Arrays.asList(castorObject));
-		assertXMLEqual("Marshaller wrote invalid result", SUPPRESSED_XSI_EXPECTED_STRING, result);
+		XMLAssert.assertXMLEqual("Marshaller wrote invalid result", SUPPRESSED_XSI_EXPECTED_STRING, result);
 	}
 
 	@Test
@@ -188,14 +182,14 @@ public class CastorMarshallerTests extends AbstractMarshallerTests<CastorMarshal
 		marshaller.setSuppressXsiType(false);
 		marshaller.setRootElement("objects");
 		String result = marshal(Arrays.asList(castorObject));
-		assertXMLEqual("Marshaller wrote invalid result", XSI_EXPECTED_STRING, result);
+		XMLAssert.assertXMLEqual("Marshaller wrote invalid result", XSI_EXPECTED_STRING, result);
 	}
 
 	@Test
 	public void marshalAsDocumentTrue() throws Exception {
 		marshaller.setMarshalAsDocument(true);
 		String result = marshalFlights();
-		assertXMLEqual("Marshaller wrote invalid result", DOCUMENT_EXPECTED_STRING, result);
+		XMLAssert.assertXMLEqual("Marshaller wrote invalid result", DOCUMENT_EXPECTED_STRING, result);
 		assertTrue("Result doesn't contain xml declaration.",
 				result.contains("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
 	}
@@ -204,7 +198,7 @@ public class CastorMarshallerTests extends AbstractMarshallerTests<CastorMarshal
 	public void marshalAsDocumentFalse() throws Exception {
 		marshaller.setMarshalAsDocument(true);
 		String result = marshalFlights();
-		assertXMLEqual("Marshaller wrote invalid result", EXPECTED_STRING, result);
+		XMLAssert.assertXMLEqual("Marshaller wrote invalid result", EXPECTED_STRING, result);
 		assertFalse("Result contains xml declaration.", result.matches("<\\?\\s*xml"));
 	}
 
@@ -212,7 +206,7 @@ public class CastorMarshallerTests extends AbstractMarshallerTests<CastorMarshal
 	public void rootElement() throws Exception {
 		marshaller.setRootElement("canceledFlights");
 		String result = marshalFlights();
-		assertXMLEqual("Marshaller wrote invalid result", ROOT_ELEMENT_EXPECTED_STRING, result);
+		XMLAssert.assertXMLEqual("Marshaller wrote invalid result", ROOT_ELEMENT_EXPECTED_STRING, result);
 	}
 
 	@Test
@@ -222,7 +216,7 @@ public class CastorMarshallerTests extends AbstractMarshallerTests<CastorMarshal
 		String result = marshalFlights();
 		assertXpathEvaluatesTo("The xsi:noNamespaceSchemaLocation hasn't been written or has invalid value.",
 				noNamespaceSchemaLocation, "/tns:flights/@xsi:noNamespaceSchemaLocation", result);
-		assertXMLEqual("Marshaller wrote invalid result", EXPECTED_STRING, result);
+		XMLAssert.assertXMLEqual("Marshaller wrote invalid result", EXPECTED_STRING, result);
 	}
 
 	@Test
@@ -232,7 +226,7 @@ public class CastorMarshallerTests extends AbstractMarshallerTests<CastorMarshal
 		String result = marshalFlights();
 		assertXpathEvaluatesTo("The xsi:noNamespaceSchemaLocation hasn't been written or has invalid value.",
 				schemaLocation, "/tns:flights/@xsi:schemaLocation", result);
-		assertXMLEqual("Marshaller wrote invalid result", EXPECTED_STRING, result);
+		XMLAssert.assertXMLEqual("Marshaller wrote invalid result", EXPECTED_STRING, result);
 	}
 
 	@Test
@@ -242,7 +236,7 @@ public class CastorMarshallerTests extends AbstractMarshallerTests<CastorMarshal
 		marshaller.setUseXSITypeAtRoot(true);
 		marshaller.setRootElement("objects");
 		String result = marshal(Arrays.asList(castorObject));
-		assertXMLEqual("Marshaller wrote invalid result", ROOT_WITH_XSI_EXPECTED_STRING, result);
+		XMLAssert.assertXMLEqual("Marshaller wrote invalid result", ROOT_WITH_XSI_EXPECTED_STRING, result);
 	}
 
 	@Test
@@ -252,7 +246,7 @@ public class CastorMarshallerTests extends AbstractMarshallerTests<CastorMarshal
 		marshaller.setUseXSITypeAtRoot(false);
 		marshaller.setRootElement("objects");
 		String result = marshal(Arrays.asList(castorObject));
-		assertXMLEqual("Marshaller wrote invalid result", ROOT_WITHOUT_XSI_EXPECTED_STRING, result);
+		XMLAssert.assertXMLEqual("Marshaller wrote invalid result", ROOT_WITHOUT_XSI_EXPECTED_STRING, result);
 	}
 
 
