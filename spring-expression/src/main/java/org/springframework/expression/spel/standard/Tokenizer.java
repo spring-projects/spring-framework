@@ -38,7 +38,7 @@ class Tokenizer {
 	private static final String[] ALTERNATIVE_OPERATOR_NAMES =
 			{"DIV", "EQ", "GE", "GT", "LE", "LT", "MOD", "NE", "NOT"};
 
-	private static final byte FLAGS[] = new byte[256];
+	private static final byte[] FLAGS = new byte[256];
 
 	private static final byte IS_DIGIT = 0x01;
 

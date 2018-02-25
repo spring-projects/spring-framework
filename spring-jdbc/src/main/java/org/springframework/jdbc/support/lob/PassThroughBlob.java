@@ -96,7 +96,7 @@ class PassThroughBlob implements Blob {
 	}
 
 	@Override
-	public long position(byte pattern[], long start) throws SQLException {
+	public long position(byte[] pattern, long start) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
