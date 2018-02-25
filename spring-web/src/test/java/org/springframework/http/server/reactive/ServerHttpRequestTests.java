@@ -42,7 +42,6 @@ import static org.junit.Assert.*;
  */
 public class ServerHttpRequestTests {
 
-
 	@Test
 	public void queryParamsNone() throws Exception {
 		MultiValueMap<String, String> params = createHttpRequest("/path").getQueryParams();
@@ -64,7 +63,7 @@ public class ServerHttpRequestTests {
 		assertEquals(Arrays.asList("1", "2"), params.get("a"));
 	}
 
-	@Test // SPR-15140
+	@Test  // SPR-15140
 	public void queryParamsWithEncodedValue() throws Exception {
 		MultiValueMap<String, String> params = createHttpRequest("/path?a=%20%2B+%C3%A0").getQueryParams();
 		assertEquals(1, params.size());
@@ -85,7 +84,7 @@ public class ServerHttpRequestTests {
 		assertEquals(Collections.singletonList(null), params.get("a"));
 	}
 
-	@Test // SPR-16434
+	@Test  // SPR-16434
 	public void mutatePathWithEncodedQueryParams() throws Exception {
 		ServerHttpRequest request = createHttpRequest("/path?name=%E6%89%8E%E6%A0%B9")
 				.mutate().path("/mutatedPath").build();
