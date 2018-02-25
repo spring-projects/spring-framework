@@ -169,7 +169,7 @@ public abstract class DigestUtils {
 	}
 
 	private static char[] encodeHex(byte[] bytes) {
-		char chars[] = new char[32];
+		char[] chars = new char[32];
 		for (int i = 0; i < chars.length; i = i + 2) {
 			byte b = bytes[i / 2];
 			chars[i] = HEX_CHARS[(b >>> 0x4) & 0xf];

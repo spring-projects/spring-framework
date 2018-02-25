@@ -167,7 +167,7 @@ public abstract class StreamUtils {
 		}
 
 		long bytesToCopy = end - start + 1;
-		byte buffer[] = new byte[StreamUtils.BUFFER_SIZE];
+		byte[] buffer = new byte[StreamUtils.BUFFER_SIZE];
 		while (bytesToCopy > 0) {
 			int bytesRead = in.read(buffer);
 			if (bytesRead == -1) {
