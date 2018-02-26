@@ -34,6 +34,7 @@ import java.util.Map;
 import org.springframework.core.SerializableTypeWrapper.FieldTypeProvider;
 import org.springframework.core.SerializableTypeWrapper.MethodParameterTypeProvider;
 import org.springframework.core.SerializableTypeWrapper.TypeProvider;
+import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -1452,6 +1453,23 @@ public class ResolvableType implements Serializable {
 		public SyntheticParameterizedType(Type rawType, Type[] typeArguments) {
 			this.rawType = rawType;
 			this.typeArguments = typeArguments;
+		}
+
+		@Override  // on Java 8
+		@UsesJava8
+		public String getTypeName() {
+			StringBuilder result = new StringBuilder(this.rawType.getTypeName());
+			if (this.typeArguments.length > 0) {
+				result.append('<');
+				for (int i = 0; i < this.typeArguments.length; i++) {
+					if (i > 0) {
+						result.append(", ");
+					}
+					result.append(this.typeArguments[i].getTypeName());
+				}
+				result.append('>');
+			}
+			return result.toString();
 		}
 
 		@Override
