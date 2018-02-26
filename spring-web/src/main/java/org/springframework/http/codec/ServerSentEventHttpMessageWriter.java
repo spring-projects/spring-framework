@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * {@code HttpMessageWriter} for {@code "text/event-stream"} responses.
@@ -48,7 +49,10 @@ import org.springframework.lang.Nullable;
  */
 public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Object> {
 
+	private static final MediaType DEFAULT_MEDIA_TYPE = new MediaType("text", "event-stream", StandardCharsets.UTF_8);
+
 	private static final List<MediaType> WRITABLE_MEDIA_TYPES = Collections.singletonList(MediaType.TEXT_EVENT_STREAM);
+
 
 	@Nullable
 	private final Encoder<?> encoder;
@@ -96,12 +100,15 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	public Mono<Void> write(Publisher<?> input, ResolvableType elementType, @Nullable MediaType mediaType,
 			ReactiveHttpOutputMessage message, Map<String, Object> hints) {
 
-		message.getHeaders().setContentType(MediaType.TEXT_EVENT_STREAM);
-		return message.writeAndFlushWith(encode(input, message.bufferFactory(), elementType, hints));
+		mediaType = (mediaType != null && mediaType.getCharset() != null ? mediaType : DEFAULT_MEDIA_TYPE);
+		DataBufferFactory bufferFactory = message.bufferFactory();
+
+		message.getHeaders().setContentType(mediaType);
+		return message.writeAndFlushWith(encode(input, elementType, mediaType, bufferFactory, hints));
 	}
 
-	private Flux<Publisher<DataBuffer>> encode(Publisher<?> input, DataBufferFactory factory,
-			ResolvableType elementType, Map<String, Object> hints) {
+	private Flux<Publisher<DataBuffer>> encode(Publisher<?> input, ResolvableType elementType,
+			MediaType mediaType, DataBufferFactory factory, Map<String, Object> hints) {
 
 		Class<?> elementClass = elementType.getRawClass();
 		ResolvableType valueType = (elementClass != null && ServerSentEvent.class.isAssignableFrom(elementClass) ?
@@ -134,9 +141,9 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 				sb.append("data:");
 			}
 
-			return Flux.concat(encodeText(sb, factory),
-					encodeData(data, valueType, factory, hints),
-					encodeText("\n", factory));
+			return Flux.concat(encodeText(sb, mediaType, factory),
+					encodeData(data, valueType, mediaType, factory, hints),
+					encodeText("\n", mediaType, factory));
 		});
 	}
 
@@ -149,7 +156,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 
 	@SuppressWarnings("unchecked")
 	private <T> Flux<DataBuffer> encodeData(@Nullable T data, ResolvableType valueType,
-			DataBufferFactory factory, Map<String, Object> hints) {
+			MediaType mediaType, DataBufferFactory factory, Map<String, Object> hints) {
 
 		if (data == null) {
 			return Flux.empty();
@@ -157,7 +164,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 
 		if (data instanceof String) {
 			String text = (String) data;
-			return Flux.from(encodeText(text.replaceAll("\\n", "\ndata:") + "\n", factory));
+			return Flux.from(encodeText(text.replaceAll("\\n", "\ndata:") + "\n", mediaType, factory));
 		}
 
 		if (this.encoder == null) {
@@ -165,12 +172,13 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 		}
 
 		return ((Encoder<T>) this.encoder)
-				.encode(Mono.just(data), factory, valueType, MediaType.TEXT_EVENT_STREAM, hints)
-				.concatWith(encodeText("\n", factory));
+				.encode(Mono.just(data), factory, valueType, mediaType, hints)
+				.concatWith(encodeText("\n", mediaType, factory));
 	}
 
-	private Mono<DataBuffer> encodeText(CharSequence text, DataBufferFactory bufferFactory) {
-		byte[] bytes = text.toString().getBytes(StandardCharsets.UTF_8);
+	private Mono<DataBuffer> encodeText(CharSequence text, MediaType mediaType, DataBufferFactory bufferFactory) {
+		Assert.notNull(mediaType.getCharset(), "Expected MediaType with charset");
+		byte[] bytes = text.toString().getBytes(mediaType.getCharset());
 		DataBuffer buffer = bufferFactory.allocateBuffer(bytes.length).write(bytes);
 		return Mono.just(buffer);
 	}
