@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,13 +42,15 @@ public class EhCacheCache implements Cache {
 
 	/**
 	 * Create an {@link EhCacheCache} instance.
-	 * @param ehcache backing Ehcache instance
+	 * @param ehcache the backing Ehcache instance
 	 */
 	public EhCacheCache(Ehcache ehcache) {
 		Assert.notNull(ehcache, "Ehcache must not be null");
 		Status status = ehcache.getStatus();
-		Assert.isTrue(Status.STATUS_ALIVE.equals(status),
-				"An 'alive' Ehcache is required - current cache is " + status.toString());
+		if (!Status.STATUS_ALIVE.equals(status)) {
+			throw new IllegalArgumentException(
+					"An 'alive' Ehcache is required - current cache is " + status.toString());
+		}
 		this.cache = ehcache;
 	}
 
@@ -81,7 +83,7 @@ public class EhCacheCache implements Cache {
 		else {
 			this.cache.acquireWriteLockOnKey(key);
 			try {
-				element = lookup(key); // One more attempt with the write lock
+				element = lookup(key);  // one more attempt with the write lock
 				if (element != null) {
 					return (T) element.getObjectValue();
 				}
@@ -115,7 +117,8 @@ public class EhCacheCache implements Cache {
 		Element element = this.cache.get(key);
 		Object value = (element != null ? element.getObjectValue() : null);
 		if (value != null && type != null && !type.isInstance(value)) {
-			throw new IllegalStateException("Cached value is not of required type [" + type.getName() + "]: " + value);
+			throw new IllegalStateException(
+					"Cached value is not of required type [" + type.getName() + "]: " + value);
 		}
 		return (T) value;
 	}
