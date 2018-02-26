@@ -143,10 +143,10 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		if (this.uri.getScheme() != null) {
 			uriBuilder.append(this.uri.getScheme()).append(':');
 		}
-		if (this.uri.getUserInfo() != null || this.uri.getHost() != null) {
+		if (this.uri.getRawUserInfo() != null || this.uri.getHost() != null) {
 			uriBuilder.append("//");
-			if (this.uri.getUserInfo() != null) {
-				uriBuilder.append(this.uri.getUserInfo()).append('@');
+			if (this.uri.getRawUserInfo() != null) {
+				uriBuilder.append(this.uri.getRawUserInfo()).append('@');
 			}
 			if (this.uri.getHost() != null) {
 				uriBuilder.append(this.uri.getHost());
@@ -161,8 +161,8 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		if (this.uri.getRawQuery() != null) {
 			uriBuilder.append('?').append(this.uri.getRawQuery());
 		}
-		if (this.uri.getFragment() != null) {
-			uriBuilder.append('#').append(this.uri.getFragment());
+		if (this.uri.getRawFragment() != null) {
+			uriBuilder.append('#').append(this.uri.getRawFragment());
 		}
 		try {
 			return new URI(uriBuilder.toString());
