@@ -111,7 +111,7 @@ public class ResponseEntityTests {
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentType(TEXT_EVENT_STREAM)
+				.expectHeader().contentTypeCompatibleWith(TEXT_EVENT_STREAM)
 				.returnResult(Person.class);
 
 		StepVerifier.create(result.getResponseBody())
