@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,10 +39,10 @@ public interface StompSession {
 
 	/**
 	 * When enabled, a receipt header is automatically added to future
-	 * {@code send} and {@code subscribe} operations on this session, which causes
-	 * the server to return a RECEIPT. An application can then use the
-	 * {@link StompSession.Receiptable
-	 * Receiptable} returned from the operation to track the receipt.
+	 * {@code send} and {@code subscribe} operations on this session, which
+	 * causes the server to return a RECEIPT. An application can then use
+	 * the {@link StompSession.Receiptable Receiptable} returned from the
+	 * operation to track the receipt.
 	 * <p>A receipt header can also be added manually through the overloaded
 	 * methods that accept {@code StompHeaders}.
 	 */
@@ -59,11 +59,11 @@ public interface StompSession {
 	Receiptable send(String destination, Object payload);
 
 	/**
-	 * An overloaded version of {@link #send(String, Object)} that accepts
-	 * full {@link StompHeaders} instead of a destination. The headers must
+	 * An overloaded version of {@link #send(String, Object)} with full
+	 * {@link StompHeaders} instead of just a destination. The headers must
 	 * contain a destination and may also have other headers such as
-	 * "content-type" or custom headers for the broker to propagate to subscribers,
-	 * or broker-specific, non-standard headers..
+	 * "content-type" or custom headers for the broker to propagate to
+	 * subscribers, or broker-specific, non-standard headers..
 	 * @param headers the message headers
 	 * @param payload the message payload
 	 * @return a Receiptable for tracking receipts
@@ -81,7 +81,7 @@ public interface StompSession {
 
 	/**
 	 * An overloaded version of {@link #subscribe(String, StompFrameHandler)}
-	 * that accepts full {@link StompHeaders} rather instead of a destination.
+	 * with full {@link StompHeaders} instead of just a destination.
 	 * @param headers the headers for the subscribe message frame
 	 * @param handler the handler for received messages
 	 * @return a handle to use to unsubscribe and/or track receipts
@@ -102,15 +102,12 @@ public interface StompSession {
 	Receiptable acknowledge(String messageId, boolean consumed);
 
 	/**
-	 * Send an acknowledgement whether a message was consumed or not resulting
-	 * in an ACK or NACK frame respectively.
-	 * <p><strong>Note:</strong> to use this when subscribing you must set the
-	 * {@link StompHeaders#setAck(String) ack} header to "client" or
-	 * "client-individual" in order ot use this.
-	 * @param headers the headers for the ACK or NACK frame
+	 * An overloaded version of {@link #acknowledge(String, boolean)} with
+	 * full {@link StompHeaders} instead of just a {@code messageId}.
+	 * @param headers the headers for the ACK or NACK message frame
 	 * @param consumed whether the message was consumed or not
 	 * @return a Receiptable for tracking receipts
-	 * @since 5.1
+	 * @since 5.0.5
 	 */
 	Receiptable acknowledge(StompHeaders headers, boolean consumed);
 
