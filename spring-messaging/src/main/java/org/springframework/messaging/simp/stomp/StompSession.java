@@ -102,6 +102,19 @@ public interface StompSession {
 	Receiptable acknowledge(String messageId, boolean consumed);
 
 	/**
+	 * Send an acknowledgement whether a message was consumed or not resulting
+	 * in an ACK or NACK frame respectively.
+	 * <p><strong>Note:</strong> to use this when subscribing you must set the
+	 * {@link StompHeaders#setAck(String) ack} header to "client" or
+	 * "client-individual" in order ot use this.
+	 * @param headers the headers for the ACK or NACK frame
+	 * @param consumed whether the message was consumed or not
+	 * @return a Receiptable for tracking receipts
+	 * @since 5.1
+	 */
+	Receiptable acknowledge(StompHeaders headers, boolean consumed);
+
+	/**
 	 * Disconnect the session by sending a DISCONNECT frame.
 	 */
 	void disconnect();
