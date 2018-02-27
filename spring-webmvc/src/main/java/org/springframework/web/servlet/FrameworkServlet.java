@@ -499,11 +499,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			this.webApplicationContext = initWebApplicationContext();
 			initFrameworkServlet();
 		}
-		catch (ServletException ex) {
-			this.logger.error("Context initialization failed", ex);
-			throw ex;
-		}
-		catch (RuntimeException ex) {
+		catch (ServletException | RuntimeException ex) {
 			this.logger.error("Context initialization failed", ex);
 			throw ex;
 		}

@@ -695,11 +695,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 					"Index of out of bounds in property path '" + propertyName + "'", ex);
 		}
-		catch (NumberFormatException ex) {
-			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
-					"Invalid index in property path '" + propertyName + "'", ex);
-		}
-		catch (TypeMismatchException ex) {
+		catch (NumberFormatException | TypeMismatchException ex) {
 			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 					"Invalid index in property path '" + propertyName + "'", ex);
 		}

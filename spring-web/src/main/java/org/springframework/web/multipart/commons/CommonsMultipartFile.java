@@ -175,11 +175,8 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 		catch (FileUploadException ex) {
 			throw new IllegalStateException(ex.getMessage(), ex);
 		}
-		catch (IllegalStateException ex) {
+		catch (IllegalStateException | IOException ex) {
 			// Pass through when coming from FileItem directly
-			throw ex;
-		}
-		catch (IOException ex) {
 			// From I/O operations within FileItem.write
 			throw ex;
 		}

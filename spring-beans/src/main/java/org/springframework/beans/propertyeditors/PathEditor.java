@@ -85,10 +85,8 @@ public class PathEditor extends PropertyEditorSupport {
 					return;
 				}
 			}
-			catch (URISyntaxException ex) {
+			catch (URISyntaxException | FileSystemNotFoundException ex) {
 				// Not a valid URI: Let's try as Spring resource location.
-			}
-			catch (FileSystemNotFoundException ex) {
 				// URI scheme not registered for NIO:
 				// Let's try URL protocol handlers via Spring's resource mechanism.
 			}
