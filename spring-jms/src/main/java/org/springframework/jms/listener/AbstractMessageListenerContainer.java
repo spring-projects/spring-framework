@@ -673,17 +673,9 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 		try {
 			invokeListener(session, message);
 		}
-		catch (JMSException ex) {
+		catch (JMSException | RuntimeException | Error ex) {
 			rollbackOnExceptionIfNecessary(session, ex);
 			throw ex;
-		}
-		catch (RuntimeException ex) {
-			rollbackOnExceptionIfNecessary(session, ex);
-			throw ex;
-		}
-		catch (Error err) {
-			rollbackOnExceptionIfNecessary(session, err);
-			throw err;
 		}
 		commitIfNecessary(session, message);
 	}

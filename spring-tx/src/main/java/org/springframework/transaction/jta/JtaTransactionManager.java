@@ -847,12 +847,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		try {
 			doJtaBegin(txObject, definition);
 		}
-		catch (NotSupportedException ex) {
-			// assume nested transaction not supported
-			throw new NestedTransactionNotSupportedException(
-					"JTA implementation does not support nested transactions", ex);
-		}
-		catch (UnsupportedOperationException ex) {
+		catch (NotSupportedException | UnsupportedOperationException ex) {
 			// assume nested transaction not supported
 			throw new NestedTransactionNotSupportedException(
 					"JTA implementation does not support nested transactions", ex);
