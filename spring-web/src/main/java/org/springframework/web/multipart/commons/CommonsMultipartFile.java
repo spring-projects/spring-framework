@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,8 +176,8 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 			throw new IllegalStateException(ex.getMessage(), ex);
 		}
 		catch (IllegalStateException | IOException ex) {
-			// Pass through when coming from FileItem directly
-			// From I/O operations within FileItem.write
+			// Pass through IllegalStateException when coming from FileItem directly,
+			// or propagate an exception from I/O operations within FileItem.write
 			throw ex;
 		}
 		catch (Exception ex) {

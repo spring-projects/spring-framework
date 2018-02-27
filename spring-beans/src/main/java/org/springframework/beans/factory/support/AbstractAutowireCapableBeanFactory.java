@@ -505,8 +505,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return beanInstance;
 		}
 		catch (BeanCreationException | ImplicitlyAppearedSingletonException ex) {
-			// A previously detected exception with proper bean creation context already...
-			// An IllegalStateException to be communicated up to DefaultSingletonBeanRegistry...
+			// A previously detected exception with proper bean creation context already,
+			// or illegal singleton state to be communicated up to DefaultSingletonBeanRegistry.
 			throw ex;
 		}
 		catch (Throwable ex) {

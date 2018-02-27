@@ -171,9 +171,10 @@ public interface StompSession {
 		 * Alternative to {@link #unsubscribe()} with additional custom headers
 		 * to send to the server.
 		 * <p><strong>Note:</strong> There is no need to set the subscription id.
+		 * @param headers the custom headers, if any
 		 * @since 5.0
 		 */
-		void unsubscribe(@Nullable StompHeaders stompHeaders);
+		void unsubscribe(@Nullable StompHeaders headers);
 	}
 
 }
