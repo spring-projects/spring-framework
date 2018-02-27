@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,13 +62,8 @@ public class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 			DataBufferFactory bufferFactory, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Charset charset;
-		if (mimeType != null && mimeType.getCharset() != null) {
-			charset = mimeType.getCharset();
-		}
-		else {
-			 charset = DEFAULT_CHARSET;
-		}
+		Charset charset = getCharset(mimeType);
+
 		return Flux.from(inputStream).map(charSequence -> {
 			CharBuffer charBuffer = CharBuffer.wrap(charSequence);
 			ByteBuffer byteBuffer = charset.encode(charBuffer);
@@ -76,6 +71,21 @@ public class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 		});
 	}
 
+	private Charset getCharset(@Nullable MimeType mimeType) {
+		Charset charset;
+		if (mimeType != null && mimeType.getCharset() != null) {
+			charset = mimeType.getCharset();
+		}
+		else {
+			 charset = DEFAULT_CHARSET;
+		}
+		return charset;
+	}
+
+	@Override
+	public Long getContentLength(CharSequence data, @Nullable MimeType mimeType) {
+		return (long) data.toString().getBytes(getCharset(mimeType)).length;
+	}
 
 	/**
 	 * Create a {@code CharSequenceEncoder} that supports only "text/plain".
