@@ -328,12 +328,19 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 			stompHeaders.setId(messageId);
 		}
 
-		String receiptId = checkOrAddReceipt(stompHeaders);
+		Receiptable receiptable = acknowledge(stompHeaders, consumed);
+
+		return receiptable;
+	}
+
+	@Override
+	public Receiptable acknowledge(StompHeaders headers, boolean consumed) {
+		String receiptId = checkOrAddReceipt(headers);
 		Receiptable receiptable = new ReceiptHandler(receiptId);
 
 		StompCommand command = (consumed ? StompCommand.ACK : StompCommand.NACK);
 		StompHeaderAccessor accessor = createHeaderAccessor(command);
-		accessor.addNativeHeaders(stompHeaders);
+		accessor.addNativeHeaders(headers);
 		Message<byte[]> message = createMessage(accessor, null);
 		execute(message);
 
