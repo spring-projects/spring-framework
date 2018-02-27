@@ -524,7 +524,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			Closure callable = (Closure) args[args.length - 1];
 			callable.setDelegate(this);
 			callable.setResolveStrategy(Closure.DELEGATE_FIRST);
-			callable.call(new Object[]{currentBeanDefinition});
+			callable.call(currentBeanDefinition);
 		}
 
 		GroovyBeanDefinitionWrapper beanDefinition = currentBeanDefinition;
