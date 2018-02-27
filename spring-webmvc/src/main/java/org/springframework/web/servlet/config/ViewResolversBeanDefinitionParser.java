@@ -174,7 +174,7 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 		beanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		MutablePropertyValues values = beanDef.getPropertyValues();
 
-		List<Element> elements = DomUtils.getChildElementsByTagName(resolverElement, new String[] {"default-views"});
+		List<Element> elements = DomUtils.getChildElementsByTagName(resolverElement, "default-views");
 		if (!elements.isEmpty()) {
 			ManagedList<Object> list = new ManagedList<>();
 			for (Element element : DomUtils.getChildElementsByTagName(elements.get(0), "bean", "ref")) {
