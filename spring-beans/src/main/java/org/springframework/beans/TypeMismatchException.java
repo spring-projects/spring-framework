@@ -48,7 +48,7 @@ public class TypeMismatchException extends PropertyAccessException {
 
 
 	/**
-	 * Create a new TypeMismatchException.
+	 * Create a new {@code TypeMismatchException}.
 	 * @param propertyChangeEvent the PropertyChangeEvent that resulted in the problem
 	 * @param requiredType the required target type
 	 */
@@ -57,7 +57,7 @@ public class TypeMismatchException extends PropertyAccessException {
 	}
 
 	/**
-	 * Create a new TypeMismatchException.
+	 * Create a new {@code TypeMismatchException}.
 	 * @param propertyChangeEvent the PropertyChangeEvent that resulted in the problem
 	 * @param requiredType the required target type (or {@code null} if not known)
 	 * @param cause the root cause (may be {@code null})
@@ -79,7 +79,7 @@ public class TypeMismatchException extends PropertyAccessException {
 	}
 
 	/**
-	 * Create a new TypeMismatchException without PropertyChangeEvent.
+	 * Create a new {@code TypeMismatchException} without a {@code PropertyChangeEvent}.
 	 * @param value the offending value that couldn't be converted (may be {@code null})
 	 * @param requiredType the required target type (or {@code null} if not known)
 	 * @see #initPropertyName
@@ -89,7 +89,7 @@ public class TypeMismatchException extends PropertyAccessException {
 	}
 
 	/**
-	 * Create a new TypeMismatchException without PropertyChangeEvent.
+	 * Create a new {@code TypeMismatchException} without a {@code PropertyChangeEvent}.
 	 * @param value the offending value that couldn't be converted (may be {@code null})
 	 * @param requiredType the required target type (or {@code null} if not known)
 	 * @param cause the root cause (may be {@code null})
@@ -120,8 +120,8 @@ public class TypeMismatchException extends PropertyAccessException {
 	/**
 	 * Return the name of the affected property, if available.
 	 */
-	@Nullable
 	@Override
+	@Nullable
 	public String getPropertyName() {
 		return this.propertyName;
 	}
