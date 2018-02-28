@@ -150,6 +150,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	/**
 	 * Whether the condition has any media type expressions.
 	 */
+	@Override
 	public boolean isEmpty() {
 		return this.expressions.isEmpty();
 	}

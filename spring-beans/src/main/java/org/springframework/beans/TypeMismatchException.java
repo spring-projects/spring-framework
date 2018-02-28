@@ -121,6 +121,7 @@ public class TypeMismatchException extends PropertyAccessException {
 	 * Return the name of the affected property, if available.
 	 */
 	@Nullable
+	@Override
 	public String getPropertyName() {
 		return this.propertyName;
 	}

@@ -161,7 +161,7 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 		return this;
 	}
 
-
+	@Override
 	public Object getProperty(String property) {
 		if (this.definitionWrapper.isReadableProperty(property)) {
 			return this.definitionWrapper.getPropertyValue(property);
@@ -172,6 +172,7 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 		return super.getProperty(property);
 	}
 
+	@Override
 	public void setProperty(String property, Object newValue) {
 		if (PARENT.equals(property)) {
 			setParent(newValue);

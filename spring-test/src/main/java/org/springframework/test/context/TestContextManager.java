@@ -96,6 +96,7 @@ public class TestContextManager {
 
 	private final ThreadLocal<TestContext> testContextHolder = new ThreadLocal<TestContext>() {
 
+		@Override
 		protected TestContext initialValue() {
 			return copyTestContext(TestContextManager.this.testContext);
 		}

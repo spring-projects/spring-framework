@@ -446,6 +446,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			super(servletContext, method, requestURI);
 		}
 
+		@Override
 		public HttpSession getSession(boolean create) {
 			HttpSession session = super.getSession(false);
 			if (session == null && create) {
@@ -462,10 +463,12 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			return session;
 		}
 
+		@Override
 		public HttpSession getSession() {
 			return super.getSession();
 		}
 
+		@Override
 		public void setSession(HttpSession session) {
 			super.setSession(session);
 		}
@@ -491,6 +494,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			this.request = request;
 		}
 
+		@Override
 		public void invalidate() {
 			super.invalidate();
 			synchronized (HtmlUnitRequestBuilder.this.sessions) {

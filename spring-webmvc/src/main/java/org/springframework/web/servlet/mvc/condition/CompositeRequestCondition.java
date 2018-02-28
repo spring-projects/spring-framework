@@ -71,6 +71,7 @@ public class CompositeRequestCondition extends AbstractRequestCondition<Composit
 	/**
 	 * Whether this instance contains 0 conditions or not.
 	 */
+	@Override
 	public boolean isEmpty() {
 		return ObjectUtils.isEmpty(this.requestConditions);
 	}
