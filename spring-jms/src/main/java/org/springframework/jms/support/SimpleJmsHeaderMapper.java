@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -205,7 +205,6 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 				logger.info("Failed to read JMSTimestamp property - skipping", ex);
 			}
 
-
 			Enumeration<?> jmsPropertyNames = jmsMessage.getPropertyNames();
 			if (jmsPropertyNames != null) {
 				while (jmsPropertyNames.hasMoreElements()) {
@@ -233,7 +232,8 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 
 	/**
 	 * Add the outbound prefix if necessary.
-	 * <p>Convert {@link MessageHeaders#CONTENT_TYPE} to content_type for JMS compliance.
+	 * <p>Convert {@link MessageHeaders#CONTENT_TYPE} to {@code content_type} for JMS compliance.
+	 * @see #CONTENT_TYPE_PROPERTY
 	 */
 	protected String fromHeaderName(String headerName) {
 		if (MessageHeaders.CONTENT_TYPE.equals(headerName)) {
@@ -244,7 +244,8 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 
 	/**
 	 * Add the inbound prefix if necessary.
-	 * <p>Convert content_type to {@link MessageHeaders#CONTENT_TYPE}.
+	 * <p>Convert the JMS-compliant {@code content_type} to {@link MessageHeaders#CONTENT_TYPE}.
+	 * @see #CONTENT_TYPE_PROPERTY
 	 */
 	protected String toHeaderName(String propertyName) {
 		if (CONTENT_TYPE_PROPERTY.equals(propertyName)) {
