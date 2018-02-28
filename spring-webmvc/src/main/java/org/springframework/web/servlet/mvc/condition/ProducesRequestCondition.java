@@ -53,7 +53,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	private static final ProducesRequestCondition EMPTY_CONDITION = new ProducesRequestCondition();
 
 
-	private final List<ProduceMediaTypeExpression> MEDIA_TYPE_ALL_LIST =
+	private static final List<ProduceMediaTypeExpression> MEDIA_TYPE_ALL_LIST =
 			Collections.singletonList(new ProduceMediaTypeExpression("*/*"));
 
 	private final List<ProduceMediaTypeExpression> expressions;
@@ -315,7 +315,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	/**
 	 * Parses and matches a single media type expression to a request's 'Accept' header.
 	 */
-	class ProduceMediaTypeExpression extends AbstractMediaTypeExpression {
+	static class ProduceMediaTypeExpression extends AbstractMediaTypeExpression {
 
 		ProduceMediaTypeExpression(MediaType mediaType, boolean negated) {
 			super(mediaType, negated);
