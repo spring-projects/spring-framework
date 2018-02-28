@@ -24,7 +24,7 @@ import org.aspectj.lang.reflect.PerClauseKind;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJProxyUtils;
-import org.springframework.aop.aspectj.SimpleAspectInstanceFactory;
+import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.ProxyCreatorSupport;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
@@ -169,8 +169,18 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 				// To be safe, check within full lock now...
 				instance = aspectCache.get(aspectClass);
 				if (instance == null) {
-					instance = new SimpleAspectInstanceFactory(aspectClass).getAspectInstance();
-					aspectCache.put(aspectClass, instance);
+					try {
+						instance = aspectClass.newInstance();
+						aspectCache.put(aspectClass, instance);
+					}
+					catch (InstantiationException ex) {
+						throw new AopConfigException(
+								"Unable to instantiate aspect class: " + aspectClass.getName(), ex);
+					}
+					catch (IllegalAccessException ex) {
+						throw new AopConfigException(
+								"Could not access aspect constructor: " + aspectClass.getName(), ex);
+					}
 				}
 			}
 		}
