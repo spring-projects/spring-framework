@@ -62,7 +62,8 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 			Arrays.sort(ctors, (c1, c2) -> {
 				int c1pl = c1.getParameterCount();
 				int c2pl = c2.getParameterCount();
-				return (c1pl < c2pl ? -1 : (c1pl > c2pl ? 1 : 0));
+				int compare = c1pl > c2pl ? 1 : 0;
+				return c1pl < c2pl ? -1 : compare;
 			});
 
 			Constructor<?> closeMatch = null;

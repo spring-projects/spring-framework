@@ -420,8 +420,8 @@ public class Type {
             char car = desc.charAt(c++);
             if (car == ')') {
                 car = desc.charAt(c);
-                return n << 2
-                        | (car == 'V' ? 0 : (car == 'D' || car == 'J' ? 2 : 1));
+                int carDJ = car == 'D' || car == 'J' ? 2 : 1;
+                return n << 2 | (car == 'V' ? 0 : carDJ);
             } else if (car == 'L') {
                 while (desc.charAt(c++) != ';') {
                 }

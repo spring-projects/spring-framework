@@ -65,7 +65,8 @@ abstract class AutowireUtils {
             }
             int c1pl = c1.getParameterCount();
             int c2pl = c2.getParameterCount();
-            return (c1pl < c2pl ? 1 : (c1pl > c2pl ? -1 : 0));
+            int cAlt = c1pl > c2pl ? -1 : 0;
+            return (c1pl < c2pl ? 1 : cAlt);
         });
 	}
 
@@ -85,7 +86,8 @@ abstract class AutowireUtils {
             }
             int c1pl = fm1.getParameterCount();
             int c2pl = fm2.getParameterCount();
-            return (c1pl < c2pl ? 1 : (c1pl > c2pl ? -1 : 0));
+            int cAlt = c1pl > c2pl ? -1 : 0;
+            return (c1pl < c2pl ? 1 : cAlt);
         });
 	}
 

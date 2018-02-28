@@ -151,7 +151,8 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 				return 0;
 			}
 			long diff = getDelay(TimeUnit.MILLISECONDS) - other.getDelay(TimeUnit.MILLISECONDS);
-			return (diff == 0 ? 0 : ((diff < 0)? -1 : 1));
+			int compare = (diff < 0) ? -1 : 1;
+			return diff == 0 ? 0 : compare;
 		}
 	}
 
