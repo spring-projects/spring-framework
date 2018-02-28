@@ -365,7 +365,7 @@ public class ResolvableType implements Serializable {
 		if (this == NONE) {
 			return false;
 		}
-		return (((this.type instanceof Class && ((Class<?>) this.type).isArray())) ||
+		return ((this.type instanceof Class && ((Class<?>) this.type).isArray()) ||
 				this.type instanceof GenericArrayType || resolveType().isArray());
 	}
 
@@ -1496,6 +1496,22 @@ public class ResolvableType implements Serializable {
 		}
 
 		@Override
+		public String getTypeName() {
+			StringBuilder result = new StringBuilder(this.rawType.getTypeName());
+			if (this.typeArguments.length > 0) {
+				result.append('<');
+				for (int i = 0; i < this.typeArguments.length; i++) {
+					if (i > 0) {
+						result.append(", ");
+					}
+					result.append(this.typeArguments[i].getTypeName());
+				}
+				result.append('>');
+			}
+			return result.toString();
+		}
+
+		@Override
 		@Nullable
 		public Type getOwnerType() {
 			return null;
@@ -1527,6 +1543,11 @@ public class ResolvableType implements Serializable {
 		@Override
 		public int hashCode() {
 			return (this.rawType.hashCode() * 31 + Arrays.hashCode(this.typeArguments));
+		}
+
+		@Override
+		public String toString() {
+			return getTypeName();
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -499,11 +499,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			this.webApplicationContext = initWebApplicationContext();
 			initFrameworkServlet();
 		}
-		catch (ServletException ex) {
-			this.logger.error("Context initialization failed", ex);
-			throw ex;
-		}
-		catch (RuntimeException ex) {
+		catch (ServletException | RuntimeException ex) {
 			this.logger.error("Context initialization failed", ex);
 			throw ex;
 		}
@@ -848,7 +844,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			throws ServletException, IOException {
 
 		HttpMethod httpMethod = HttpMethod.resolve(request.getMethod());
-		if (HttpMethod.PATCH == httpMethod || httpMethod == null) {
+		if (httpMethod == HttpMethod.PATCH || httpMethod == null) {
 			processRequest(request, response);
 		}
 		else {

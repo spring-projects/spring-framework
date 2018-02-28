@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -439,9 +439,6 @@ public abstract class AnnotationUtils {
 	private static <A extends Annotation> Set<A> getRepeatableAnnotations(AnnotatedElement annotatedElement,
 			Class<A> annotationType, @Nullable Class<? extends Annotation> containerAnnotationType, boolean declaredMode) {
 
-		Assert.notNull(annotatedElement, "AnnotatedElement must not be null");
-		Assert.notNull(annotationType, "Annotation type must not be null");
-
 		try {
 			if (annotatedElement instanceof Method) {
 				annotatedElement = BridgeMethodResolver.findBridgedMethod((Method) annotatedElement);
@@ -472,8 +469,6 @@ public abstract class AnnotationUtils {
 	 */
 	@Nullable
 	public static <A extends Annotation> A findAnnotation(AnnotatedElement annotatedElement, Class<A> annotationType) {
-		Assert.notNull(annotatedElement, "AnnotatedElement must not be null");
-
 		// Do NOT store result in the findAnnotationCache since doing so could break
 		// findAnnotation(Class, Class) and findAnnotation(Method, Class).
 		A ann = findAnnotation(annotatedElement, annotationType, new HashSet<>());
@@ -745,7 +740,6 @@ public abstract class AnnotationUtils {
 	 */
 	@Nullable
 	public static Class<?> findAnnotationDeclaringClass(Class<? extends Annotation> annotationType, @Nullable Class<?> clazz) {
-		Assert.notNull(annotationType, "Annotation type must not be null");
 		if (clazz == null || Object.class == clazz) {
 			return null;
 		}
@@ -781,7 +775,6 @@ public abstract class AnnotationUtils {
 	 */
 	@Nullable
 	public static Class<?> findAnnotationDeclaringClassForTypes(List<Class<? extends Annotation>> annotationTypes, @Nullable Class<?> clazz) {
-		Assert.notEmpty(annotationTypes, "List of annotation types must not be empty");
 		if (clazz == null || Object.class == clazz) {
 			return null;
 		}
@@ -812,8 +805,6 @@ public abstract class AnnotationUtils {
 	 * @see #isAnnotationInherited(Class, Class)
 	 */
 	public static boolean isAnnotationDeclaredLocally(Class<? extends Annotation> annotationType, Class<?> clazz) {
-		Assert.notNull(annotationType, "Annotation type must not be null");
-		Assert.notNull(clazz, "Class must not be null");
 		try {
 			return (clazz.getDeclaredAnnotation(annotationType) != null);
 		}
@@ -843,8 +834,6 @@ public abstract class AnnotationUtils {
 	 * @see #isAnnotationDeclaredLocally(Class, Class)
 	 */
 	public static boolean isAnnotationInherited(Class<? extends Annotation> annotationType, Class<?> clazz) {
-		Assert.notNull(annotationType, "Annotation type must not be null");
-		Assert.notNull(clazz, "Class must not be null");
 		return (clazz.isAnnotationPresent(annotationType) && !isAnnotationDeclaredLocally(annotationType, clazz));
 	}
 
@@ -1444,7 +1433,6 @@ public abstract class AnnotationUtils {
 
 	@SuppressWarnings("unchecked")
 	static <A extends Annotation> A synthesizeAnnotation(A annotation, @Nullable Object annotatedElement) {
-		Assert.notNull(annotation, "Annotation must not be null");
 		if (annotation instanceof SynthesizedAnnotation) {
 			return annotation;
 		}
@@ -1496,9 +1484,6 @@ public abstract class AnnotationUtils {
 	@SuppressWarnings("unchecked")
 	public static <A extends Annotation> A synthesizeAnnotation(Map<String, Object> attributes,
 			Class<A> annotationType, @Nullable AnnotatedElement annotatedElement) {
-
-		Assert.notNull(attributes, "'attributes' must not be null");
-		Assert.notNull(annotationType, "'annotationType' must not be null");
 
 		MapAnnotationAttributeExtractor attributeExtractor =
 				new MapAnnotationAttributeExtractor(attributes, annotationType, annotatedElement);
@@ -1574,7 +1559,6 @@ public abstract class AnnotationUtils {
 	@SuppressWarnings("unchecked")
 	@Nullable
 	static <A extends Annotation> A[] synthesizeAnnotationArray(@Nullable Map<String, Object>[] maps, Class<A> annotationType) {
-		Assert.notNull(annotationType, "'annotationType' must not be null");
 		if (maps == null) {
 			return null;
 		}
@@ -1703,7 +1687,6 @@ public abstract class AnnotationUtils {
 	 * @see #getAttributeOverrideName(Method, Class)
 	 */
 	static List<String> getAttributeAliasNames(Method attribute) {
-		Assert.notNull(attribute, "attribute must not be null");
 		AliasDescriptor descriptor = AliasDescriptor.from(attribute);
 		return (descriptor != null ? descriptor.getAttributeAliasNames() : Collections.<String> emptyList());
 	}
@@ -1726,13 +1709,9 @@ public abstract class AnnotationUtils {
 	 */
 	@Nullable
 	static String getAttributeOverrideName(Method attribute, @Nullable Class<? extends Annotation> metaAnnotationType) {
-		Assert.notNull(attribute, "attribute must not be null");
-		Assert.notNull(metaAnnotationType, "metaAnnotationType must not be null");
-		Assert.isTrue(Annotation.class != metaAnnotationType,
-				"metaAnnotationType must not be [java.lang.annotation.Annotation]");
-
 		AliasDescriptor descriptor = AliasDescriptor.from(attribute);
-		return (descriptor != null ? descriptor.getAttributeOverrideName(metaAnnotationType) : null);
+		return (descriptor != null && metaAnnotationType != null ?
+				descriptor.getAttributeOverrideName(metaAnnotationType) : null);
 	}
 
 	/**
@@ -2043,7 +2022,6 @@ public abstract class AnnotationUtils {
 		@SuppressWarnings("unchecked")
 		private AliasDescriptor(Method sourceAttribute, AliasFor aliasFor) {
 			Class<?> declaringClass = sourceAttribute.getDeclaringClass();
-			Assert.isTrue(declaringClass.isAnnotation(), "sourceAttribute must be from an annotation");
 
 			this.sourceAttribute = sourceAttribute;
 			this.sourceAnnotationType = (Class<? extends Annotation>) declaringClass;
@@ -2117,7 +2095,6 @@ public abstract class AnnotationUtils {
 		}
 
 		private void validateDefaultValueConfiguration(Method aliasedAttribute) {
-			Assert.notNull(aliasedAttribute, "aliasedAttribute must not be null");
 			Object defaultValue = this.sourceAttribute.getDefaultValue();
 			Object aliasedDefaultValue = aliasedAttribute.getDefaultValue();
 
@@ -2211,10 +2188,6 @@ public abstract class AnnotationUtils {
 
 		@Nullable
 		public String getAttributeOverrideName(Class<? extends Annotation> metaAnnotationType) {
-			Assert.notNull(metaAnnotationType, "metaAnnotationType must not be null");
-			Assert.isTrue(Annotation.class != metaAnnotationType,
-					"metaAnnotationType must not be [java.lang.annotation.Annotation]");
-
 			// Search the attribute override hierarchy, starting with the current attribute
 			for (AliasDescriptor desc = this; desc != null; desc = desc.getAttributeOverrideDescriptor()) {
 				if (desc.isOverrideFor(metaAnnotationType)) {

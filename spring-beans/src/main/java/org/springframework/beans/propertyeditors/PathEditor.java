@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,12 +85,10 @@ public class PathEditor extends PropertyEditorSupport {
 					return;
 				}
 			}
-			catch (URISyntaxException ex) {
-				// Not a valid URI: Let's try as Spring resource location.
-			}
-			catch (FileSystemNotFoundException ex) {
-				// URI scheme not registered for NIO:
-				// Let's try URL protocol handlers via Spring's resource mechanism.
+			catch (URISyntaxException | FileSystemNotFoundException ex) {
+				// Not a valid URI (let's try as Spring resource location),
+				// or a URI scheme not registered for NIO (let's try URL
+				// protocol handlers via Spring's resource mechanism).
 			}
 		}
 

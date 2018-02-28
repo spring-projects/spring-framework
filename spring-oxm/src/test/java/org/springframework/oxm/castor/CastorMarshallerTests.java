@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,10 @@
 
 package org.springframework.oxm.castor;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-import static org.xmlunit.matchers.CompareMatcher.*;
-
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
@@ -42,6 +37,10 @@ import org.xmlunit.xpath.JAXPXPathEngine;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.oxm.AbstractMarshallerTests;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+import static org.xmlunit.matchers.CompareMatcher.*;
+
 /**
  * Tests the {@link CastorMarshaller} class.
  *
@@ -49,6 +48,7 @@ import org.springframework.oxm.AbstractMarshallerTests;
  * @author Jakub Narloch
  * @author Sam Brannen
  */
+@Deprecated
 public class CastorMarshallerTests extends AbstractMarshallerTests<CastorMarshaller> {
 
 	/**

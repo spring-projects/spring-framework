@@ -135,7 +135,7 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 		List<HandshakeInterceptor> interceptors = new ArrayList<>(this.interceptors.size() + 1);
 		interceptors.addAll(this.interceptors);
 		interceptors.add(new OriginHandshakeInterceptor(this.allowedOrigins));
-		return interceptors.toArray(new HandshakeInterceptor[interceptors.size()]);
+		return interceptors.toArray(new HandshakeInterceptor[0]);
 	}
 
 	/**

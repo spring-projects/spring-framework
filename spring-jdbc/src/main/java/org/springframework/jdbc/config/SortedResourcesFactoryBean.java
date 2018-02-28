@@ -84,7 +84,7 @@ public class SortedResourcesFactoryBean extends AbstractFactoryBean<Resource[]> 
 			});
 			scripts.addAll(resources);
 		}
-		return scripts.toArray(new Resource[scripts.size()]);
+		return scripts.toArray(new Resource[0]);
 	}
 
 }

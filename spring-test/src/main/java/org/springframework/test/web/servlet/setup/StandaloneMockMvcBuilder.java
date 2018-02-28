@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 import javax.servlet.ServletContext;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.InitializingBean;
@@ -36,8 +37,6 @@ import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 import org.springframework.util.StringValueResolver;
@@ -142,22 +141,28 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	 * @see MockMvcBuilders#standaloneSetup(Object...)
 	 */
 	protected StandaloneMockMvcBuilder(Object... controllers) {
-		Assert.isTrue(!ObjectUtils.isEmpty(controllers), "At least one controller is required");
-		this.controllers = Arrays.asList(controllers);
+		this.controllers = instantiateIfNecessary(controllers);
 	}
 
+	private static List<Object> instantiateIfNecessary(Object[] specified) {
+		List<Object> instances = new ArrayList<>(specified.length);
+		for (Object obj : specified) {
+			instances.add(obj instanceof Class ? BeanUtils.instantiateClass((Class<?>) obj) : obj);
+		}
+		return instances;
+	}
+
+
 	/**
-	 * Register one or more
-	 * {@link org.springframework.web.bind.annotation.ControllerAdvice
-	 * ControllerAdvice} instances to be used in tests.
-	 * <p>Normally {@code @ControllerAdvice} are auto-detected as long as they're
-	 * declared as Spring beans. However since the standalone setup does not load
-	 * any Spring configuration they need to be registered explicitly here
-	 * instead much like controllers.
+	 * Register one or more {@link org.springframework.web.bind.annotation.ControllerAdvice}
+	 * instances to be used in tests (specified {@code Class} will be turned into instance).
+	 * <p>Normally {@code @ControllerAdvice} are auto-detected as long as they're declared
+	 * as Spring beans. However since the standalone setup does not load any Spring config,
+	 * they need to be registered explicitly here instead much like controllers.
 	 * @since 4.2
 	 */
 	public StandaloneMockMvcBuilder setControllerAdvice(Object... controllerAdvice) {
-		this.controllerAdvice = Arrays.asList(controllerAdvice);
+		this.controllerAdvice = instantiateIfNecessary(controllerAdvice);
 		return this;
 	}
 
@@ -347,7 +352,6 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	 * @since 5.0
 	 */
 	public StandaloneMockMvcBuilder setCustomHandlerMapping(Supplier<RequestMappingHandlerMapping> factory) {
-		Assert.notNull(factory, "RequestMappingHandlerMapping supplier is required.");
 		this.handlerMappingFactory = factory;
 		return this;
 	}
@@ -399,7 +403,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private List<ViewResolver> initViewResolvers(WebApplicationContext wac) {
 		this.viewResolvers = (this.viewResolvers != null ? this.viewResolvers :
-				Collections.<ViewResolver>singletonList(new InternalResourceViewResolver()));
+				Collections.singletonList(new InternalResourceViewResolver()));
 		for (Object viewResolver : this.viewResolvers) {
 			if (viewResolver instanceof WebApplicationObjectSupport) {
 				((WebApplicationObjectSupport) viewResolver).setApplicationContext(wac);
@@ -540,7 +544,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 		@Override
 		@Nullable
-		public View resolveViewName(String viewName, Locale locale) throws Exception {
+		public View resolveViewName(String viewName, Locale locale) {
 			return this.view;
 		}
 	}

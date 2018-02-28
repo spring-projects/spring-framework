@@ -74,10 +74,7 @@ abstract class AbstractMediaTypeExpression implements Comparable<AbstractMediaTy
 			boolean match = matchMediaType(exchange);
 			return (!this.isNegated == match);
 		}
-		catch (NotAcceptableStatusException ex) {
-			return false;
-		}
-		catch (UnsupportedMediaTypeStatusException ex) {
+		catch (NotAcceptableStatusException | UnsupportedMediaTypeStatusException ex) {
 			return false;
 		}
 	}

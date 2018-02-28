@@ -136,7 +136,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 			StringTokenizer st = new StringTokenizer(propString, ",");
 			while (st.hasMoreTokens()) {
 				String tok = st.nextToken();
-				int eqIdx = tok.indexOf("=");
+				int eqIdx = tok.indexOf('=');
 				if (eqIdx == -1) {
 					throw new IllegalArgumentException("Expected = in attributes CSV string '" + propString + "'");
 				}

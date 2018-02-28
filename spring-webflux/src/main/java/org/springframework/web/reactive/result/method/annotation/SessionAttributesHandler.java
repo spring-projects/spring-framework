@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,17 +45,16 @@ class SessionAttributesHandler {
 
 
 	/**
-	 * Create a new instance for a controller type. Session attribute names and
-	 * types are extracted from the {@code @SessionAttributes} annotation, if
-	 * present, on the given type.
+	 * Create a new session attributes handler. Session attribute names and types
+	 * are extracted from the {@code @SessionAttributes} annotation, if present,
+	 * on the given type.
 	 * @param handlerType the controller type
 	 */
 	public SessionAttributesHandler(Class<?> handlerType) {
-		SessionAttributes annotation =
-				AnnotatedElementUtils.findMergedAnnotation(handlerType, SessionAttributes.class);
-		if (annotation != null) {
-			this.attributeNames.addAll(Arrays.asList(annotation.names()));
-			this.attributeTypes.addAll(Arrays.asList(annotation.types()));
+		SessionAttributes ann = AnnotatedElementUtils.findMergedAnnotation(handlerType, SessionAttributes.class);
+		if (ann != null) {
+			Collections.addAll(this.attributeNames, ann.names());
+			Collections.addAll(this.attributeTypes, ann.types());
 		}
 		this.knownAttributeNames.addAll(this.attributeNames);
 	}

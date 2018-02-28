@@ -652,7 +652,7 @@ public class MockHttpServletRequestBuilder
 		}
 
 		if (!ObjectUtils.isEmpty(this.cookies)) {
-			request.setCookies(this.cookies.toArray(new Cookie[this.cookies.size()]));
+			request.setCookies(this.cookies.toArray(new Cookie[0]));
 		}
 		if (!ObjectUtils.isEmpty(this.locales)) {
 			request.setPreferredLocales(this.locales);

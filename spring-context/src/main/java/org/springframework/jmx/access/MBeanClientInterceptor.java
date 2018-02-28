@@ -365,10 +365,7 @@ public class MBeanClientInterceptor
 		try {
 			return doInvoke(invocation);
 		}
-		catch (MBeanConnectFailureException ex) {
-			return handleConnectFailure(invocation, ex);
-		}
-		catch (IOException ex) {
+		catch (MBeanConnectFailureException | IOException ex) {
 			return handleConnectFailure(invocation, ex);
 		}
 	}

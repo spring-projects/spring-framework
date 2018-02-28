@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import org.junit.After;
 import org.junit.Before;
@@ -359,11 +360,18 @@ public class DateTimeFormattingTests {
 	@Test
 	@SuppressWarnings("deprecation")
 	public void testBindInstantFromJavaUtilDate() {
-		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("instant", new Date(109, 9, 31, 12, 0));
-		binder.bind(propertyValues);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertTrue(binder.getBindingResult().getFieldValue("instant").toString().startsWith("2009-10-31"));
+		TimeZone defaultZone = TimeZone.getDefault();
+		TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
+		try {
+			MutablePropertyValues propertyValues = new MutablePropertyValues();
+			propertyValues.add("instant", new Date(109, 9, 31, 12, 0));
+			binder.bind(propertyValues);
+			assertEquals(0, binder.getBindingResult().getErrorCount());
+			assertTrue(binder.getBindingResult().getFieldValue("instant").toString().startsWith("2009-10-31"));
+		}
+		finally {
+			TimeZone.setDefault(defaultZone);
+		}
 	}
 
 	@Test

@@ -260,7 +260,7 @@ public class StompDecoder {
 	private String unescape(String inString) {
 		StringBuilder sb = new StringBuilder(inString.length());
 		int pos = 0;  // position in the old string
-		int index = inString.indexOf("\\");
+		int index = inString.indexOf('\\');
 
 		while (index >= 0) {
 			sb.append(inString.substring(pos, index));
@@ -285,7 +285,7 @@ public class StompDecoder {
 				throw new StompConversionException("Illegal escape sequence at index " + index + ": " + inString);
 			}
 			pos = index + 2;
-			index = inString.indexOf("\\", pos);
+			index = inString.indexOf('\\', pos);
 		}
 
 		sb.append(inString.substring(pos));

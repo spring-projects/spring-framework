@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	 * @param userRegistry the registry, never {@code null}
 	 */
 	public DefaultUserDestinationResolver(SimpUserRegistry userRegistry) {
-		Assert.notNull(userRegistry, "'userRegistry' must not be null");
+		Assert.notNull(userRegistry, "SimpUserRegistry must not be null");
 		this.userRegistry = userRegistry;
 	}
 
@@ -87,8 +87,8 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	 * @param prefix the prefix to use
 	 */
 	public void setUserDestinationPrefix(String prefix) {
-		Assert.hasText(prefix, "prefix must not be empty");
-		this.prefix = prefix.endsWith("/") ? prefix : prefix + "/";
+		Assert.hasText(prefix, "Prefix must not be empty");
+		this.prefix = (prefix.endsWith("/") ? prefix : prefix + "/");
 	}
 
 	/**
@@ -102,11 +102,11 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	 * Use this property to indicate whether the leading slash from translated
 	 * user destinations should be removed or not. This depends on the
 	 * destination prefixes the message broker is configured with.
-	 * <p>By default this is set to {@code false}, i.e. "do not change the
-	 * target destination", although
+	 * <p>By default this is set to {@code false}, i.e.
+	 * "do not change the target destination", although
 	 * {@link org.springframework.messaging.simp.config.AbstractMessageBrokerConfiguration
-	 * AbstractMessageBrokerConfiguration} may change that to {@code true} if
-	 * the configured destinations do not have a leading slash.
+	 * AbstractMessageBrokerConfiguration} may change that to {@code true}
+	 * if the configured destinations do not have a leading slash.
 	 * @param remove whether to remove the leading slash
 	 * @since 4.3.14
 	 */
@@ -116,6 +116,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 
 	/**
 	 * Whether to remove the leading slash from target destinations.
+	 * @since 4.3.14
 	 */
 	public boolean isRemoveLeadingSlash() {
 		return this.removeLeadingSlash;

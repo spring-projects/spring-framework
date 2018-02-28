@@ -303,12 +303,12 @@ class StubWebApplicationContext implements WebApplicationContext {
 	//---------------------------------------------------------------------
 
 	@Override
-	public String getMessage(String code, @Nullable Object args[], @Nullable String defaultMessage, Locale locale) {
+	public String getMessage(String code, @Nullable Object[] args, @Nullable String defaultMessage, Locale locale) {
 		return this.messageSource.getMessage(code, args, defaultMessage, locale);
 	}
 
 	@Override
-	public String getMessage(String code, @Nullable Object args[], Locale locale) throws NoSuchMessageException {
+	public String getMessage(String code, @Nullable Object[] args, Locale locale) throws NoSuchMessageException {
 		return this.messageSource.getMessage(code, args, locale);
 	}
 
