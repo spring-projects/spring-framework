@@ -645,9 +645,8 @@ public class ClassWriter extends ClassVisitor {
         key2 = new Item();
         key3 = new Item();
         key4 = new Item();
-        this.compute = (flags & COMPUTE_FRAMES) != 0 ? MethodWriter.FRAMES
-                : ((flags & COMPUTE_MAXS) != 0 ? MethodWriter.MAXS
-                        : MethodWriter.NOTHING);
+        int altCompute = (flags & COMPUTE_MAXS) != 0 ? MethodWriter.MAXS: MethodWriter.NOTHING;
+        this.compute = (flags & COMPUTE_FRAMES) != 0 ? MethodWriter.FRAMES: altCompute;
     }
 
     /**

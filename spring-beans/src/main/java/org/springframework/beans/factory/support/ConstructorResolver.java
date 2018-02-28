@@ -531,8 +531,8 @@ class ConstructorResolver {
 					valueHolders.addAll(resolvedValues.getIndexedArgumentValues().values());
 					valueHolders.addAll(resolvedValues.getGenericArgumentValues());
 					for (ValueHolder value : valueHolders) {
-						String argType = (value.getType() != null ? ClassUtils.getShortName(value.getType()) :
-								(value.getValue() != null ? value.getValue().getClass().getSimpleName() : "null"));
+						String altArg = value.getValue() != null ? value.getValue().getClass().getSimpleName() : "null";
+						String argType = (value.getType() != null ? ClassUtils.getShortName(value.getType()) : altArg);
 						argTypes.add(argType);
 					}
 				}

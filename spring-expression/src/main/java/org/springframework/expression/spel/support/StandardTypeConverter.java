@@ -69,9 +69,9 @@ public class StandardTypeConverter implements TypeConverter {
 			return this.conversionService.convert(value, sourceType, targetType);
 		}
 		catch (ConversionException ex) {
+			String altExpressionResult = value != null ? value.getClass().getName() : "null";
 			throw new SpelEvaluationException(ex, SpelMessage.TYPE_CONVERSION_ERROR,
-					(sourceType != null ? sourceType.toString() : (value != null ? value.getClass().getName() : "null")),
-					targetType.toString());
+					(sourceType != null ? sourceType.toString() : altExpressionResult), targetType.toString());
 		}
 	}
 
