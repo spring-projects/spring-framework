@@ -82,7 +82,7 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 				resolvers.add(context.getDelegate().parsePropertySubElement(resolverElement, null));
 				continue;
 			}
-			RootBeanDefinition resolverBeanDef = null;
+			RootBeanDefinition resolverBeanDef;
 			if ("jsp".equals(name)) {
 				resolverBeanDef = new RootBeanDefinition(InternalResourceViewResolver.class);
 				resolverBeanDef.getPropertyValues().add("prefix", "/WEB-INF/");
@@ -180,7 +180,7 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 		beanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		MutablePropertyValues values = beanDef.getPropertyValues();
 
-		List<Element> elements = DomUtils.getChildElementsByTagName(resolverElement, new String[] {"default-views"});
+		List<Element> elements = DomUtils.getChildElementsByTagName(resolverElement, "default-views");
 		if (!elements.isEmpty()) {
 			ManagedList<Object> list = new ManagedList<Object>();
 			for (Element element : DomUtils.getChildElementsByTagName(elements.get(0), "bean", "ref")) {

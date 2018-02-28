@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.aspectj.lang.reflect.PerClauseKind;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJProxyUtils;
-import org.springframework.aop.framework.AopConfigException;
+import org.springframework.aop.aspectj.SimpleAspectInstanceFactory;
 import org.springframework.aop.framework.ProxyCreatorSupport;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
@@ -168,19 +168,9 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 			synchronized (aspectCache) {
 				// To be safe, check within full lock now...
 				instance = aspectCache.get(aspectClass);
-				if (instance != null) {
-					return instance;
-				}
-				try {
-					instance = aspectClass.newInstance();
+				if (instance == null) {
+					instance = new SimpleAspectInstanceFactory(aspectClass).getAspectInstance();
 					aspectCache.put(aspectClass, instance);
-					return instance;
-				}
-				catch (InstantiationException ex) {
-					throw new AopConfigException("Unable to instantiate aspect class [" + aspectClass.getName() + "]", ex);
-				}
-				catch (IllegalAccessException ex) {
-					throw new AopConfigException("Cannot access aspect class [" + aspectClass.getName() + "]", ex);
 				}
 			}
 		}

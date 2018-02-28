@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,8 +76,8 @@ public class DirectFieldAccessor extends AbstractNestablePropertyAccessor {
 			Field field = ReflectionUtils.findField(getWrappedClass(), propertyName);
 			if (field != null) {
 				propertyHandler = new FieldPropertyHandler(field);
+				this.fieldMap.put(propertyName, propertyHandler);
 			}
-			this.fieldMap.put(propertyName, propertyHandler);
 		}
 		return propertyHandler;
 	}

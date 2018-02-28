@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -527,10 +527,10 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			Closure callable = (Closure) args[args.length - 1];
 			callable.setDelegate(this);
 			callable.setResolveStrategy(Closure.DELEGATE_FIRST);
-			callable.call(new Object[]{currentBeanDefinition});
+			callable.call(this.currentBeanDefinition);
 		}
 
-		GroovyBeanDefinitionWrapper beanDefinition = currentBeanDefinition;
+		GroovyBeanDefinitionWrapper beanDefinition = this.currentBeanDefinition;
 		this.currentBeanDefinition = null;
 		beanDefinition.getBeanDefinition().setAttribute(GroovyBeanDefinitionWrapper.class.getName(), beanDefinition);
 		getRegistry().registerBeanDefinition(beanName, beanDefinition.getBeanDefinition());
