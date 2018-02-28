@@ -128,6 +128,7 @@ public class JmsMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	 * @see JmsHeaders#TIMESTAMP
 	 */
 	@Nullable
+	@Override
 	public Long getTimestamp() {
 		return (Long) getHeader(JmsHeaders.TIMESTAMP);
 	}

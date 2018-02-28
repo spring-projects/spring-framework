@@ -112,7 +112,7 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 		return (start > 0 ? (System.currentTimeMillis() - start) : 0);
 	}
 
-
+	@Override
 	public void sendMessage(WebSocketMessage<?> message) throws IOException {
 		if (shouldNotSend()) {
 			return;
