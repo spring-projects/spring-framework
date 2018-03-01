@@ -79,6 +79,7 @@ public class HandlerMappingIntrospector
 	 * Constructor that detects the configured {@code HandlerMapping}s in the
 	 * given {@code ApplicationContext} or falls back on
 	 * "DispatcherServlet.properties" like the {@code DispatcherServlet}.
+	 * @deprecated
 	 */
 	@Deprecated
 	public HandlerMappingIntrospector(ApplicationContext context) {
