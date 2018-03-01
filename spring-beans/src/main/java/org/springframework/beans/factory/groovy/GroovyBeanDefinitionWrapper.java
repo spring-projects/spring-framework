@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,6 +162,7 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 	}
 
 
+	@Override
 	public Object getProperty(String property) {
 		if (this.definitionWrapper.isReadableProperty(property)) {
 			return this.definitionWrapper.getPropertyValue(property);
@@ -172,6 +173,7 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 		return super.getProperty(property);
 	}
 
+	@Override
 	public void setProperty(String property, Object newValue) {
 		if (PARENT.equals(property)) {
 			setParent(newValue);

@@ -86,6 +86,7 @@ public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrat
 		}
 	}
 
+	@Override
 	public ServerWebSocketContainer getContainer(HttpServletRequest request) {
 		return (ServerWebSocketContainer) super.getContainer(request);
 	}

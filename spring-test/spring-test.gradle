@@ -64,7 +64,7 @@ dependencies {
 	testCompile("javax.ejb:javax.ejb-api:3.2")
 	testCompile("javax.interceptor:javax.interceptor-api:1.2.1")
 	testCompile("javax.mail:javax.mail-api:1.6.1")
-	testCompile("org.hibernate:hibernate-core:5.2.13.Final")
+	testCompile("org.hibernate:hibernate-core:5.2.14.Final")
 	testCompile("org.hibernate:hibernate-validator:6.0.7.Final")
 	// Enable use of the JUnitPlatform Runner
 	testCompile("org.junit.platform:junit-platform-runner:${junitPlatformVersion}")
@@ -86,7 +86,7 @@ dependencies {
 	testRuntime("org.junit.platform:junit-platform-launcher:${junitPlatformVersion}")
 	testRuntime("org.junit.vintage:junit-vintage-engine:${junitVintageVersion}")
 	testCompile('de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1')
-	testRuntime("javax.annotation:javax.annotation-api:1.3.1")
+	testRuntime("javax.annotation:javax.annotation-api:1.3.2")
 	testRuntime("org.glassfish:javax.el:3.0.1-b08")
 	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0")
 	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0")

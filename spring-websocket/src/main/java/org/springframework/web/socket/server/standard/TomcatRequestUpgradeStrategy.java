@@ -81,6 +81,7 @@ public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrateg
 		}
 	}
 
+	@Override
 	public WsServerContainer getContainer(HttpServletRequest request) {
 		return (WsServerContainer) super.getContainer(request);
 	}

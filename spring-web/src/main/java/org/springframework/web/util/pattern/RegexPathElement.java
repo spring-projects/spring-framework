@@ -186,6 +186,7 @@ class RegexPathElement extends PathElement {
 		return (this.regex.length - varsLength - this.variableNames.size());
 	}
 
+	@Override
 	public int getCaptureCount() {
 		return this.variableNames.size();
 	}
