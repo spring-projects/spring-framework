@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,13 +91,14 @@ public class WebConnectionHtmlUnitDriver extends HtmlUnitDriver {
 	 * Return the current {@link WebClient}.
 	 * @since 4.3
 	 */
+	@Override
 	public WebClient getWebClient() {
 		return this.webClient;
 	}
 
 	/**
 	 * Set the {@link WebConnection} to be used with the {@link WebClient}.
-	 * @param webConnection the {@code WebConnection} to use (never {@code null})
+	 * @param webConnection the {@code WebConnection} to use
 	 */
 	public void setWebConnection(WebConnection webConnection) {
 		Assert.notNull(webConnection, "WebConnection must not be null");

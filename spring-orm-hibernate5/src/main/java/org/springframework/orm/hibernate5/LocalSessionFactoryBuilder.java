@@ -88,7 +88,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 			new AnnotationTypeFilter(Embeddable.class, false),
 			new AnnotationTypeFilter(MappedSuperclass.class, false)};
 
-	private final TypeFilter CONVERTER_TYPE_FILTER = new AnnotationTypeFilter(Converter.class, false);
+	private static final TypeFilter CONVERTER_TYPE_FILTER = new AnnotationTypeFilter(Converter.class, false);
 
 
 	private final ResourcePatternResolver resourcePatternResolver;

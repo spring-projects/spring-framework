@@ -235,6 +235,7 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 	 * <p>Convert {@link MessageHeaders#CONTENT_TYPE} to {@code content_type} for JMS compliance.
 	 * @see #CONTENT_TYPE_PROPERTY
 	 */
+	@Override
 	protected String fromHeaderName(String headerName) {
 		if (MessageHeaders.CONTENT_TYPE.equals(headerName)) {
 			return CONTENT_TYPE_PROPERTY;
@@ -247,6 +248,7 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 	 * <p>Convert the JMS-compliant {@code content_type} to {@link MessageHeaders#CONTENT_TYPE}.
 	 * @see #CONTENT_TYPE_PROPERTY
 	 */
+	@Override
 	protected String toHeaderName(String propertyName) {
 		if (CONTENT_TYPE_PROPERTY.equals(propertyName)) {
 			return MessageHeaders.CONTENT_TYPE;

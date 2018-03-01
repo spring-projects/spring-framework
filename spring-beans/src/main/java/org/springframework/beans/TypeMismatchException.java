@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public class TypeMismatchException extends PropertyAccessException {
 
 
 	/**
-	 * Create a new TypeMismatchException.
+	 * Create a new {@code TypeMismatchException}.
 	 * @param propertyChangeEvent the PropertyChangeEvent that resulted in the problem
 	 * @param requiredType the required target type
 	 */
@@ -50,7 +50,7 @@ public class TypeMismatchException extends PropertyAccessException {
 	}
 
 	/**
-	 * Create a new TypeMismatchException.
+	 * Create a new {@code TypeMismatchException}.
 	 * @param propertyChangeEvent the PropertyChangeEvent that resulted in the problem
 	 * @param requiredType the required target type (or {@code null} if not known)
 	 * @param cause the root cause (may be {@code null})
@@ -69,7 +69,7 @@ public class TypeMismatchException extends PropertyAccessException {
 	}
 
 	/**
-	 * Create a new TypeMismatchException without PropertyChangeEvent.
+	 * Create a new {@code TypeMismatchException} without a {@code PropertyChangeEvent}.
 	 * @param value the offending value that couldn't be converted (may be {@code null})
 	 * @param requiredType the required target type (or {@code null} if not known)
 	 */
@@ -78,7 +78,7 @@ public class TypeMismatchException extends PropertyAccessException {
 	}
 
 	/**
-	 * Create a new TypeMismatchException without PropertyChangeEvent.
+	 * Create a new {@code TypeMismatchException} without a {@code PropertyChangeEvent}.
 	 * @param value the offending value that couldn't be converted (may be {@code null})
 	 * @param requiredType the required target type (or {@code null} if not known)
 	 * @param cause the root cause (may be {@code null})

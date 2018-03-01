@@ -237,6 +237,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		}
 
 		Closure beans = new Closure(this) {
+			@Override
 			public Object call(Object[] args) {
 				invokeBeanDefiningClosure((Closure) args[0]);
 				return null;
@@ -818,14 +819,17 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 				return retVal;
 			}
 
+			@Override
 			public Object invokeMethod(String name, Object args) {
 				return InvokerHelper.invokeMethod(this.propertyValue, name, args);
 			}
 
+			@Override
 			public Object getProperty(String name) {
 				return InvokerHelper.getProperty(this.propertyValue, name);
 			}
 
+			@Override
 			public void setProperty(String name, Object value) {
 				InvokerHelper.setProperty(this.propertyValue, name, value);
 			}

@@ -489,6 +489,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 		 * Update the message digest with the remaining bytes in this stream.
 		 * @param messageDigest The message digest to update
 		 */
+		@Override
 		public void updateMessageDigest(MessageDigest messageDigest) {
 			updateMessageDigest(messageDigest, available());
 		}
@@ -499,6 +500,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 		 * @param messageDigest The message digest to update
 		 * @param len how many bytes to read from this stream and use to update the message digest
 		 */
+		@Override
 		public void updateMessageDigest(MessageDigest messageDigest, int len) {
 			if (this.currentBuffer == null) {
 				// This stream doesn't have any data in it...
