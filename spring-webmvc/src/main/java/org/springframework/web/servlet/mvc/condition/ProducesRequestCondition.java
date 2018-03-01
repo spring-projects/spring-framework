@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.servlet.mvc.condition;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -48,13 +47,13 @@ import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition.Hea
  */
 public final class ProducesRequestCondition extends AbstractRequestCondition<ProducesRequestCondition> {
 
-	private final static ProducesRequestCondition PRE_FLIGHT_MATCH = new ProducesRequestCondition();
+	private static final ProducesRequestCondition PRE_FLIGHT_MATCH = new ProducesRequestCondition();
 
 	private static final ProducesRequestCondition EMPTY_CONDITION = new ProducesRequestCondition();
 
-
 	private static final List<ProduceMediaTypeExpression> MEDIA_TYPE_ALL_LIST =
 			Collections.singletonList(new ProduceMediaTypeExpression("*/*"));
+
 
 	private final List<ProduceMediaTypeExpression> expressions;
 
@@ -194,6 +193,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 		if (isEmpty()) {
 			return this;
 		}
+
 		List<MediaType> acceptedMediaTypes;
 		try {
 			acceptedMediaTypes = getAcceptedMediaTypes(request);
@@ -201,13 +201,9 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 		catch (HttpMediaTypeException ex) {
 			return null;
 		}
-		Set<ProduceMediaTypeExpression> result = new LinkedHashSet<>(expressions);
-		for (Iterator<ProduceMediaTypeExpression> iterator = result.iterator(); iterator.hasNext();) {
-			ProduceMediaTypeExpression expression = iterator.next();
-			if (!expression.match(acceptedMediaTypes)) {
-				iterator.remove();
-			}
-		}
+
+		Set<ProduceMediaTypeExpression> result = new LinkedHashSet<>(this.expressions);
+		result.removeIf(expression -> !expression.match(acceptedMediaTypes));
 		if (!result.isEmpty()) {
 			return new ProducesRequestCondition(result, this.contentNegotiationManager);
 		}
