@@ -501,8 +501,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 		if (!response.isCommitted()) {
 			response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
 		}
-		else if (logger.isErrorEnabled()) {
-			logger.error("Async timeout for " + request.getMethod() + " [" + request.getRequestURI() + "]");
+		else if (logger.isDebugEnabled()) {
+			logger.debug("Async timeout for " + request.getMethod() + " [" + request.getRequestURI() + "]");
 		}
 		return new ModelAndView();
 	}
