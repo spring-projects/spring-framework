@@ -202,22 +202,6 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 	}
 
 	@Override
-	public boolean checkOrigin(String originHeaderValue) {
-		return super.checkOrigin(originHeaderValue);
-	}
-
-	@Override
-	public String getNegotiatedSubprotocol(List<String> supported, List<String> requested) {
-		return super.getNegotiatedSubprotocol(supported, requested);
-	}
-
-	@Override
-	public List<Extension> getNegotiatedExtensions(List<Extension> installed, List<Extension> requested) {
-		return super.getNegotiatedExtensions(installed, requested);
-	}
-
-
-	@Override
 	public String toString() {
 		return "ServerEndpointRegistration for path '" + getPath() + "': " + getEndpointClass();
 	}
