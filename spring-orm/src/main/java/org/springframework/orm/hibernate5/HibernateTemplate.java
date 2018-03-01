@@ -1131,7 +1131,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	 * @see #setCacheQueries
 	 * @see #setQueryCacheRegion
 	 */
-	@Deprecated
 	@SuppressWarnings({"rawtypes", "deprecation"})
 	protected void prepareQuery(org.hibernate.Query queryObject) {
 		if (isCacheQueries()) {
@@ -1232,7 +1231,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 				if (retVal instanceof org.hibernate.Query) {
 					prepareQuery(((org.hibernate.Query) retVal));
 				}
-				if (retVal instanceof Criteria) {
+				else if (retVal instanceof Criteria) {
 					prepareCriteria(((Criteria) retVal));
 				}
 
