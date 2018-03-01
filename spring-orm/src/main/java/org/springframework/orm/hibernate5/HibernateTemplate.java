@@ -1130,6 +1130,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	 * @param queryObject the Query object to prepare
 	 * @see #setCacheQueries
 	 * @see #setQueryCacheRegion
+	 * @deprecated
 	 */
 	@Deprecated
 	@SuppressWarnings({"rawtypes", "deprecation"})

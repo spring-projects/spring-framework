@@ -443,6 +443,7 @@ public abstract class MethodVisitor {
      *            the method's name.
      * @param desc
      *            the method's descriptor (see {@link Type Type}).
+	 * @deprecated
      */
     @Deprecated
     public void visitMethodInsn(int opcode, String owner, String name,

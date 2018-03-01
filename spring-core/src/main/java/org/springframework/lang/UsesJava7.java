@@ -28,6 +28,7 @@ import java.lang.annotation.Target;
  *
  * @author Stephane Nicoll
  * @since 4.1
+ * @deprecated
  */
 @Retention(RetentionPolicy.CLASS)
 @Target({ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.TYPE})
