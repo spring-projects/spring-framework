@@ -462,16 +462,6 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			}
 			return session;
 		}
-
-		@Override
-		public HttpSession getSession() {
-			return super.getSession();
-		}
-
-		@Override
-		public void setSession(HttpSession session) {
-			super.setSession(session);
-		}
 	}
 
 
