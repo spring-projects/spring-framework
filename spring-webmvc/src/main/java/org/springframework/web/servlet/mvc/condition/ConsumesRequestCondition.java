@@ -159,7 +159,7 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 * @param request the current request
 	 * @return the same instance if the condition contains no expressions;
 	 * or a new condition with matching expressions only;
-	 * or {@code null} if no expressions match.
+	 * or {@code null} if no expressions match
 	 */
 	@Override
 	public ConsumesRequestCondition getMatchingCondition(HttpServletRequest request) {
@@ -169,15 +169,17 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 		if (isEmpty()) {
 			return this;
 		}
+
 		MediaType contentType;
 		try {
-			contentType = StringUtils.hasLength(request.getContentType()) ?
+			contentType = (StringUtils.hasLength(request.getContentType()) ?
 					MediaType.parseMediaType(request.getContentType()) :
-					MediaType.APPLICATION_OCTET_STREAM;
+					MediaType.APPLICATION_OCTET_STREAM);
 		}
 		catch (InvalidMediaTypeException ex) {
 			return null;
 		}
+
 		Set<ConsumeMediaTypeExpression> result = new LinkedHashSet<ConsumeMediaTypeExpression>(this.expressions);
 		for (Iterator<ConsumeMediaTypeExpression> iterator = result.iterator(); iterator.hasNext();) {
 			ConsumeMediaTypeExpression expression = iterator.next();
@@ -185,7 +187,7 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 				iterator.remove();
 			}
 		}
-		return (result.isEmpty()) ? null : new ConsumesRequestCondition(result);
+		return (!result.isEmpty() ? new ConsumesRequestCondition(result) : null);
 	}
 
 	/**
