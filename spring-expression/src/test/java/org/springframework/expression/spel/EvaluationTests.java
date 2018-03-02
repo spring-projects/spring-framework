@@ -246,7 +246,7 @@ public class EvaluationTests extends AbstractExpressionTests {
 			fail();
 		}
 		catch (SpelParseException spe) {
-			assertEquals(spe.getMessageCode(), SpelMessage.UNEXPECTED_DATA_AFTER_DOT);
+			assertEquals(SpelMessage.UNEXPECTED_DATA_AFTER_DOT, spe.getMessageCode());
 			assertEquals("23", spe.getInserts()[0]);
 		}
 	}
