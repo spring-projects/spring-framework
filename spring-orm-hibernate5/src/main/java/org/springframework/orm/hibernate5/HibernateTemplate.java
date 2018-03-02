@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,12 +66,14 @@ import org.springframework.util.ReflectionUtils;
  * always be configured as bean in the application context, in the first case
  * given to the service directly, in the second case to the prepared template.
  *
- * <p><b>NOTE: Hibernate access code can also be coded in plain Hibernate style.
- * Hence, for newly started projects, consider adopting the standard Hibernate
- * style of coding data access objects instead, based on
- * {@link SessionFactory#getCurrentSession()}.
- * This HibernateTemplate primarily exists as a migration helper for Hibernate 3
- * based data access code, to benefit from bug fixes in Hibernate 5.x.</b>
+ * <p><b>NOTE: Hibernate access code can also be coded against the native Hibernate
+ * {@link Session}. Hence, for newly started projects, consider adopting the standard
+ * Hibernate style of coding against {@link SessionFactory#getCurrentSession()}.</b>
+ * Alternatively, use {@link #execute(HibernateCallback)} with Java 8 lambda code blocks
+ * against the callback-provided {@code Session} which results in elegant code as well,
+ * decoupled from the Hibernate Session lifecycle. The remaining operations on this
+ * HibernateTemplate primarily exist as a migration helper for older Hibernate 3.x/4.x
+ * data access code in existing applications.</b>
  *
  * @author Juergen Hoeller
  * @since 4.2
@@ -1169,6 +1171,34 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	}
 
 	/**
+	 * Prepare the given Criteria object, applying cache settings and/or
+	 * a transaction timeout.
+	 * @param criteria the Criteria object to prepare
+	 * @see #setCacheQueries
+	 * @see #setQueryCacheRegion
+	 */
+	protected void prepareCriteria(Criteria criteria) {
+		if (isCacheQueries()) {
+			criteria.setCacheable(true);
+			if (getQueryCacheRegion() != null) {
+				criteria.setCacheRegion(getQueryCacheRegion());
+			}
+		}
+		if (getFetchSize() > 0) {
+			criteria.setFetchSize(getFetchSize());
+		}
+		if (getMaxResults() > 0) {
+			criteria.setMaxResults(getMaxResults());
+		}
+
+		SessionHolder sessionHolder =
+				(SessionHolder) TransactionSynchronizationManager.getResource(getSessionFactory());
+		if (sessionHolder != null && sessionHolder.hasTimeout()) {
+			criteria.setTimeout(sessionHolder.getTimeToLiveInSeconds());
+		}
+	}
+
+	/**
 	 * Prepare the given Query object, applying cache settings and/or
 	 * a transaction timeout.
 	 * @param queryObject the Query object to prepare
@@ -1194,34 +1224,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 				(SessionHolder) TransactionSynchronizationManager.getResource(getSessionFactory());
 		if (sessionHolder != null && sessionHolder.hasTimeout()) {
 			queryObject.setTimeout(sessionHolder.getTimeToLiveInSeconds());
-		}
-	}
-
-	/**
-	 * Prepare the given Criteria object, applying cache settings and/or
-	 * a transaction timeout.
-	 * @param criteria the Criteria object to prepare
-	 * @see #setCacheQueries
-	 * @see #setQueryCacheRegion
-	 */
-	protected void prepareCriteria(Criteria criteria) {
-		if (isCacheQueries()) {
-			criteria.setCacheable(true);
-			if (getQueryCacheRegion() != null) {
-				criteria.setCacheRegion(getQueryCacheRegion());
-			}
-		}
-		if (getFetchSize() > 0) {
-			criteria.setFetchSize(getFetchSize());
-		}
-		if (getMaxResults() > 0) {
-			criteria.setMaxResults(getMaxResults());
-		}
-
-		SessionHolder sessionHolder =
-				(SessionHolder) TransactionSynchronizationManager.getResource(getSessionFactory());
-		if (sessionHolder != null && sessionHolder.hasTimeout()) {
-			criteria.setTimeout(sessionHolder.getTimeToLiveInSeconds());
 		}
 	}
 
@@ -1285,11 +1287,11 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 				// If return value is a Query or Criteria, apply transaction timeout.
 				// Applies to createQuery, getNamedQuery, createCriteria.
-				if (retVal instanceof org.hibernate.Query) {
-					prepareQuery(((org.hibernate.Query) retVal));
-				}
 				if (retVal instanceof Criteria) {
 					prepareCriteria(((Criteria) retVal));
+				}
+				else if (retVal instanceof org.hibernate.Query) {
+					prepareQuery(((org.hibernate.Query) retVal));
 				}
 
 				return retVal;

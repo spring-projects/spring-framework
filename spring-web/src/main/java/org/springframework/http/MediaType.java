@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,8 @@ import org.springframework.util.comparator.CompoundComparator;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  * @since 3.0
- * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.1.1">HTTP 1.1: Semantics and Content, section 3.1.1.1</a>
+ * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.1.1">
+ *     HTTP 1.1: Semantics and Content, section 3.1.1.1</a>
  */
 public class MediaType extends MimeType implements Serializable {
 
@@ -99,7 +100,7 @@ public class MediaType extends MimeType implements Serializable {
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_JSON_UTF8}.
 	 */
-	public final static String APPLICATION_JSON_UTF8_VALUE = APPLICATION_JSON_VALUE + ";charset=UTF-8";
+	public final static String APPLICATION_JSON_UTF8_VALUE = "application/json;charset=UTF-8";
 
 	/**
 	 * Public constant media type for {@code application/octet-stream}.
@@ -250,7 +251,6 @@ public class MediaType extends MimeType implements Serializable {
 	 */
 	public final static String TEXT_XML_VALUE = "text/xml";
 
-
 	private static final String PARAM_QUALITY_FACTOR = "q";
 
 
@@ -374,28 +374,6 @@ public class MediaType extends MimeType implements Serializable {
 	public double getQualityValue() {
 		String qualityFactory = getParameter(PARAM_QUALITY_FACTOR);
 		return (qualityFactory != null ? Double.parseDouble(unquote(qualityFactory)) : 1D);
-	}
-
-	/**
-	 * Indicate whether this {@code MediaType} includes the given media type.
-	 * <p>For instance, {@code text/*} includes {@code text/plain} and {@code text/html}, and {@code application/*+xml}
-	 * includes {@code application/soap+xml}, etc. This method is <b>not</b> symmetric.
-	 * @param other the reference media type with which to compare
-	 * @return {@code true} if this media type includes the given media type; {@code false} otherwise
-	 */
-	public boolean includes(MediaType other) {
-		return super.includes(other);
-	}
-
-	/**
-	 * Indicate whether this {@code MediaType} is compatible with the given media type.
-	 * <p>For instance, {@code text/*} is compatible with {@code text/plain}, {@code text/html}, and vice versa.
-	 * In effect, this method is similar to {@link #includes(MediaType)}, except that it <b>is</b> symmetric.
-	 * @param other the reference media type with which to compare
-	 * @return {@code true} if this media type is compatible with the given media type; {@code false} otherwise
-	 */
-	public boolean isCompatibleWith(MediaType other) {
-		return super.isCompatibleWith(other);
 	}
 
 	/**
@@ -624,7 +602,8 @@ public class MediaType extends MimeType implements Serializable {
 				else {
 					int paramsSize1 = mediaType1.getParameters().size();
 					int paramsSize2 = mediaType2.getParameters().size();
-					return (paramsSize2 < paramsSize1 ? -1 : (paramsSize2 == paramsSize1 ? 0 : 1)); // audio/basic;level=1 < audio/basic
+					// audio/basic;level=1 < audio/basic
+					return (paramsSize2 < paramsSize1 ? -1 : (paramsSize2 == paramsSize1 ? 0 : 1));
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.web.socket.handler.BeanCreatingHandlerProvider;
 
 /**
  * An implementation of {@link javax.websocket.server.ServerEndpointConfig} for use in
- * Spring applications. A {@link ServerEndpointRegistration} bean is detected by
+ * Spring-based applications. A {@link ServerEndpointRegistration} bean is detected by
  * {@link ServerEndpointExporter} and registered with a Java WebSocket runtime at startup.
  *
  * <p>Class constructors accept a singleton {@link javax.websocket.Endpoint} instance
@@ -44,10 +44,11 @@ import org.springframework.web.socket.handler.BeanCreatingHandlerProvider;
  * each client WebSocket connection.
  *
  * <p>This class also extends
- * {@link javax.websocket.server.ServerEndpointConfig.Configurator} to make it easier to
- * override methods for customizing the handshake process.
+ * {@link javax.websocket.server.ServerEndpointConfig.Configurator} to make it easier
+ * to override methods for customizing the handshake process.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0
  * @see ServerEndpointExporter
  */
@@ -56,34 +57,20 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 
 	private final String path;
 
-	private final BeanCreatingHandlerProvider<Endpoint> endpointProvider;
-
 	private final Endpoint endpoint;
 
-    private List<Class<? extends Encoder>> encoders = new ArrayList<Class<? extends Encoder>>();
+	private final BeanCreatingHandlerProvider<Endpoint> endpointProvider;
 
-    private List<Class<? extends Decoder>> decoders = new ArrayList<Class<? extends Decoder>>();
+	private List<String> subprotocols = new ArrayList<String>(0);
 
-	private List<String> protocols = new ArrayList<String>();
+	private List<Extension> extensions = new ArrayList<Extension>(0);
 
-	private List<Extension> extensions = new ArrayList<Extension>();
+	private List<Class<? extends Encoder>> encoders = new ArrayList<Class<? extends Encoder>>(0);
 
-	private final Map<String, Object> userProperties = new HashMap<String, Object>();
+	private List<Class<? extends Decoder>> decoders = new ArrayList<Class<? extends Decoder>>(0);
 
+	private final Map<String, Object> userProperties = new HashMap<String, Object>(4);
 
-	/**
-	 * Create a new {@link ServerEndpointRegistration} instance from an
-	 * {@code javax.websocket.Endpoint} class.
-	 * @param path the endpoint path
-	 * @param endpointClass the endpoint class
-	 */
-	public ServerEndpointRegistration(String path, Class<? extends Endpoint> endpointClass) {
-		Assert.hasText(path, "path must not be empty");
-		Assert.notNull(endpointClass, "endpointClass must not be null");
-		this.path = path;
-		this.endpointProvider = new BeanCreatingHandlerProvider<Endpoint>(endpointClass);
-		this.endpoint = null;
-	}
 
 	/**
 	 * Create a new {@link ServerEndpointRegistration} instance from an
@@ -92,13 +79,29 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 	 * @param endpoint the endpoint instance
 	 */
 	public ServerEndpointRegistration(String path, Endpoint endpoint) {
-		Assert.hasText(path, "path must not be empty");
-		Assert.notNull(endpoint, "endpoint must not be null");
+		Assert.hasText(path, "Path must not be empty");
+		Assert.notNull(endpoint, "Endpoint must not be null");
 		this.path = path;
-		this.endpointProvider = null;
 		this.endpoint = endpoint;
+		this.endpointProvider = null;
 	}
 
+	/**
+	 * Create a new {@link ServerEndpointRegistration} instance from an
+	 * {@code javax.websocket.Endpoint} class.
+	 * @param path the endpoint path
+	 * @param endpointClass the endpoint class
+	 */
+	public ServerEndpointRegistration(String path, Class<? extends Endpoint> endpointClass) {
+		Assert.hasText(path, "Path must not be empty");
+		Assert.notNull(endpointClass, "Endpoint Class must not be null");
+		this.path = path;
+		this.endpoint = null;
+		this.endpointProvider = new BeanCreatingHandlerProvider<Endpoint>(endpointClass);
+	}
+
+
+	// ServerEndpointConfig implementation
 
 	@Override
 	public String getPath() {
@@ -114,13 +117,13 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 		return (this.endpoint != null) ? this.endpoint : this.endpointProvider.getHandler();
 	}
 
-	public void setSubprotocols(List<String> protocols) {
-		this.protocols = protocols;
+	public void setSubprotocols(List<String> subprotocols) {
+		this.subprotocols = subprotocols;
 	}
 
 	@Override
 	public List<String> getSubprotocols() {
-		return this.protocols;
+		return this.subprotocols;
 	}
 
 	public void setExtensions(List<Extension> extensions) {
@@ -130,16 +133,6 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 	@Override
 	public List<Extension> getExtensions() {
 		return this.extensions;
-	}
-
-	public void setUserProperties(Map<String, Object> userProperties) {
-		this.userProperties.clear();
-		this.userProperties.putAll(userProperties);
-	}
-
-	@Override
-	public Map<String, Object> getUserProperties() {
-		return this.userProperties;
 	}
 
 	public void setEncoders(List<Class<? extends Encoder>> encoders) {
@@ -160,20 +153,23 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 		return this.decoders;
 	}
 
+	public void setUserProperties(Map<String, Object> userProperties) {
+		this.userProperties.clear();
+		this.userProperties.putAll(userProperties);
+	}
+
+	@Override
+	public Map<String, Object> getUserProperties() {
+		return this.userProperties;
+	}
+
 	@Override
 	public Configurator getConfigurator() {
 		return this;
 	}
 
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) {
-		if (this.endpointProvider != null) {
-			this.endpointProvider.setBeanFactory(beanFactory);
-		}
-	}
 
-
-	// Implementations of ServerEndpointConfig.Configurator
+	// ServerEndpointConfig.Configurator implementation
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -186,24 +182,19 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 		super.modifyHandshake(this, request, response);
 	}
 
-	@Override
-	public boolean checkOrigin(String originHeaderValue) {
-		return super.checkOrigin(originHeaderValue);
-	}
+
+	// Remaining methods
 
 	@Override
-	public String getNegotiatedSubprotocol(List<String> supported, List<String> requested) {
-		return super.getNegotiatedSubprotocol(supported, requested);
+	public void setBeanFactory(BeanFactory beanFactory) {
+		if (this.endpointProvider != null) {
+			this.endpointProvider.setBeanFactory(beanFactory);
+		}
 	}
-
-	@Override
-	public List<Extension> getNegotiatedExtensions(List<Extension> installed, List<Extension> requested) {
-		return super.getNegotiatedExtensions(installed, requested);
-	}
-
 
 	@Override
 	public String toString() {
 		return "ServerEndpointRegistration for path '" + getPath() + "': " + getEndpointClass();
 	}
+
 }
