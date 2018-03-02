@@ -43,7 +43,7 @@ configure(allprojects) { project ->
 
 	ext.aspectjVersion       = "1.8.13"
 	ext.freemarkerVersion    = "2.3.27-incubating"
-	ext.groovyVersion        = "2.4.13"
+	ext.groovyVersion        = "2.4.14"
 	ext.hsqldbVersion        = "2.4.0"
 	ext.jackson2Version      = "2.9.4"
 	ext.jettyVersion         = "9.4.8.v20171121"
@@ -60,7 +60,7 @@ configure(allprojects) { project ->
 	ext.slf4jVersion         = "1.7.25"	 // spring-jcl + consistent 3rd party deps
 	ext.tiles3Version        = "3.0.8"
 	ext.tomcatVersion        = "8.5.28"
-	ext.undertowVersion      = "1.4.22.Final"
+	ext.undertowVersion      = "1.4.23.Final"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
