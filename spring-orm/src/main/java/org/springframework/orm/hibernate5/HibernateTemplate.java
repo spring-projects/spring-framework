@@ -1176,7 +1176,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		}
 	}
 
-
 	@Deprecated
 	@SuppressWarnings({"rawtypes", "deprecation"})
 	private static org.hibernate.Query queryObject(@Nullable Object result) {
@@ -1228,11 +1227,11 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 				// If return value is a Query or Criteria, apply transaction timeout.
 				// Applies to createQuery, getNamedQuery, createCriteria.
-				if (retVal instanceof org.hibernate.Query) {
-					prepareQuery(((org.hibernate.Query) retVal));
-				}
-				else if (retVal instanceof Criteria) {
+				if (retVal instanceof Criteria) {
 					prepareCriteria(((Criteria) retVal));
+				}
+				else if (retVal instanceof org.hibernate.Query) {
+					prepareQuery(((org.hibernate.Query) retVal));
 				}
 
 				return retVal;
