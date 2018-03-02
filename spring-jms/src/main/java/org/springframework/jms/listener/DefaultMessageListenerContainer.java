@@ -560,25 +560,16 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		logger.debug("Waiting for shutdown of message listener invokers");
 		try {
 			synchronized (this.lifecycleMonitor) {
-				long receiveTimeout = getReceiveTimeout();
-				long waitStartTime = System.currentTimeMillis();
 				int waitCount = 0;
 				while (this.activeInvokerCount > 0) {
-					if (waitCount > 0 && !isAcceptMessagesWhileStopping() &&
-							System.currentTimeMillis() - waitStartTime >= receiveTimeout) {
-						// Unexpectedly some invokers are still active after the receive timeout period
-						// -> interrupt remaining receive attempts since we'd reject the messages anyway
-						for (AsyncMessageListenerInvoker scheduledInvoker : this.scheduledInvokers) {
-							scheduledInvoker.interruptIfNecessary();
-						}
-					}
 					if (logger.isDebugEnabled()) {
 						logger.debug("Still waiting for shutdown of " + this.activeInvokerCount +
 								" message listener invokers (iteration " + waitCount + ")");
 					}
 					// Wait for AsyncMessageListenerInvokers to deactivate themselves...
-					if (receiveTimeout > 0) {
-						this.lifecycleMonitor.wait(receiveTimeout);
+					long timeout = getReceiveTimeout();
+					if (timeout > 0) {
+						this.lifecycleMonitor.wait(timeout);
 					}
 					else {
 						this.lifecycleMonitor.wait();
@@ -1054,8 +1045,6 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 		private volatile boolean idle = true;
 
-		private volatile Thread currentReceiveThread;
-
 		@Override
 		public void run() {
 			synchronized (lifecycleMonitor) {
@@ -1175,16 +1164,10 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		}
 
 		private boolean invokeListener() throws JMSException {
-			this.currentReceiveThread = Thread.currentThread();
-			try {
-				initResourcesIfNecessary();
-				boolean messageReceived = receiveAndExecute(this, this.session, this.consumer);
-				this.lastMessageSucceeded = true;
-				return messageReceived;
-			}
-			finally {
-				this.currentReceiveThread = null;
-			}
+			initResourcesIfNecessary();
+			boolean messageReceived = receiveAndExecute(this, this.session, this.consumer);
+			this.lastMessageSucceeded = true;
+			return messageReceived;
 		}
 
 		private void decreaseActiveInvokerCount() {
@@ -1216,13 +1199,6 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		private void updateRecoveryMarker() {
 			synchronized (recoveryMonitor) {
 				this.lastRecoveryMarker = currentRecoveryMarker;
-			}
-		}
-
-		private void interruptIfNecessary() {
-			Thread currentReceiveThread = this.currentReceiveThread;
-			if (currentReceiveThread != null && !currentReceiveThread.isInterrupted()) {
-				currentReceiveThread.interrupt();
 			}
 		}
 
