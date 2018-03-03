@@ -16,7 +16,6 @@
 
 package org.springframework.web.util;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.LinkedHashMap;
