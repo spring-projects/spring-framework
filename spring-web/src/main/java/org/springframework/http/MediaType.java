@@ -35,8 +35,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.comparator.CompoundComparator;
 
 /**
- * A sub-class of {@link MimeType} that adds support for quality parameters as defined
- * in the HTTP specification.
+ * A subclass of {@link MimeType} that adds support for quality parameters
+ * as defined in the HTTP specification.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
@@ -367,18 +367,49 @@ public class MediaType extends MimeType implements Serializable {
 	}
 
 	/**
-	 * Return the quality value, as indicated by a {@code q} parameter, if any.
+	 * Return the quality factor, as indicated by a {@code q} parameter, if any.
 	 * Defaults to {@code 1.0}.
-	 * @return the quality factory
+	 * @return the quality factor as double value
 	 */
 	public double getQualityValue() {
-		String qualityFactory = getParameter(PARAM_QUALITY_FACTOR);
-		return (qualityFactory != null ? Double.parseDouble(unquote(qualityFactory)) : 1D);
+		String qualityFactor = getParameter(PARAM_QUALITY_FACTOR);
+		return (qualityFactor != null ? Double.parseDouble(unquote(qualityFactor)) : 1D);
 	}
 
 	/**
-	 * Return a replica of this instance with the quality value of the given MediaType.
-	 * @return the same instance if the given MediaType doesn't have a quality value, or a new one otherwise
+	 * Indicate whether this {@code MediaType} includes the given media type.
+	 * <p>For instance, {@code text/*} includes {@code text/plain} and {@code text/html},
+	 * and {@code application/*+xml} includes {@code application/soap+xml}, etc.
+	 * This method is <b>not</b> symmetric.
+	 * <p>Simply calls {@link #includes(MimeType)} but declared with a
+	 * {@code MediaType} parameter for binary backwards compatibility.
+	 * @param other the reference media type with which to compare
+	 * @return {@code true} if this media type includes the given media type;
+	 * {@code false} otherwise
+	 */
+	public boolean includes(MediaType other) {
+		return super.includes(other);
+	}
+
+	/**
+	 * Indicate whether this {@code MediaType} is compatible with the given media type.
+	 * <p>For instance, {@code text/*} is compatible with {@code text/plain},
+	 * {@code text/html}, and vice versa. In effect, this method is similar to
+	 * {@link #includes}, except that it <b>is</b> symmetric.
+	 * <p>Simply calls {@link #isCompatibleWith(MimeType)} but declared with a
+	 * {@code MediaType} parameter for binary backwards compatibility.
+	 * @param other the reference media type with which to compare
+	 * @return {@code true} if this media type is compatible with the given media type;
+	 * {@code false} otherwise
+	 */
+	public boolean isCompatibleWith(MediaType other) {
+		return super.isCompatibleWith(other);
+	}
+
+	/**
+	 * Return a replica of this instance with the quality value of the given {@code MediaType}.
+	 * @return the same instance if the given MediaType doesn't have a quality value,
+	 * or a new one otherwise
 	 */
 	public MediaType copyQualityValue(MediaType mediaType) {
 		if (!mediaType.getParameters().containsKey(PARAM_QUALITY_FACTOR)) {
@@ -391,7 +422,8 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Return a replica of this instance with its quality value removed.
-	 * @return the same instance if the media type doesn't contain a quality value, or a new one otherwise
+	 * @return the same instance if the media type doesn't contain a quality value,
+	 * or a new one otherwise
 	 */
 	public MediaType removeQualityValue() {
 		if (!getParameters().containsKey(PARAM_QUALITY_FACTOR)) {

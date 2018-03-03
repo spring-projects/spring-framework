@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public interface ObjectFactory<T> {
 	/**
 	 * Return an instance (possibly shared or independent)
 	 * of the object managed by this factory.
-	 * @return an instance of the bean (should never be {@code null})
+	 * @return the resulting instance
 	 * @throws BeansException in case of creation errors
 	 */
 	T getObject() throws BeansException;

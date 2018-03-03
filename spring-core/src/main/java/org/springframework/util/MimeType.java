@@ -29,15 +29,15 @@ import java.util.Map;
 import java.util.TreeSet;
 
 /**
- * Represents a MIME Type, as originally defined in RFC 2046 and subsequently used in
- * other Internet protocols including HTTP.
+ * Represents a MIME Type, as originally defined in RFC 2046 and subsequently
+ * used in other Internet protocols including HTTP.
  *
  * <p>This class, however, does not contain support for the q-parameters used
- * in HTTP content negotiation. Those can be found in the sub-class
+ * in HTTP content negotiation. Those can be found in the subclass
  * {@code org.springframework.http.MediaType} in the {@code spring-web} module.
  *
  * <p>Consists of a {@linkplain #getType() type} and a {@linkplain #getSubtype() subtype}.
- * Also has functionality to parse media types from a string using
+ * Also has functionality to parse MIME Type values from a {@code String} using
  * {@link #valueOf(String)}. For more parsing options see {@link MimeTypeUtils}.
  *
  * @author Arjen Poutsma
@@ -137,7 +137,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	/**
 	 * Copy-constructor that copies the type, subtype, parameters of the given {@code MimeType},
 	 * and allows to set the specified character set.
-	 * @param other the other media type
+	 * @param other the other MimeType
 	 * @param charset the character set
 	 * @throws IllegalArgumentException if any of the parameters contains illegal characters
 	 * @since 4.3
@@ -149,8 +149,8 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	/**
 	 * Copy-constructor that copies the type and subtype of the given {@code MimeType},
 	 * and allows for different parameter.
-	 * @param other the other media type
-	 * @param parameters the parameters, may be {@code null}
+	 * @param other the other MimeType
+	 * @param parameters the parameters (may be {@code null})
 	 * @throws IllegalArgumentException if any of the parameters contains illegal characters
 	 */
 	public MimeType(MimeType other, Map<String, String> parameters) {
@@ -161,7 +161,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * Create a new {@code MimeType} for the given type, subtype, and parameters.
 	 * @param type the primary type
 	 * @param subtype the subtype
-	 * @param parameters the parameters, may be {@code null}
+	 * @param parameters the parameters (may be {@code null})
 	 * @throws IllegalArgumentException if any of the parameters contains illegal characters
 	 */
 	public MimeType(String type, String subtype, Map<String, String> parameters) {
@@ -227,7 +227,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		if (s == null) {
 			return null;
 		}
-		return isQuotedString(s) ? s.substring(1, s.length() - 1) : s;
+		return (isQuotedString(s) ? s.substring(1, s.length() - 1) : s);
 	}
 
 	/**
@@ -249,9 +249,9 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	}
 
 	/**
-	 * Indicates whether this media type is concrete, i.e. whether neither the type
+	 * Indicates whether this MIME Type is concrete, i.e. whether neither the type
 	 * nor the subtype is a wildcard character <code>&#42;</code>.
-	 * @return whether this media type is concrete
+	 * @return whether this MIME Type is concrete
 	 */
 	public boolean isConcrete() {
 		return !isWildcardType() && !isWildcardSubtype();
@@ -310,12 +310,12 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	}
 
 	/**
-	 * Indicate whether this {@code MediaType} includes the given media type.
+	 * Indicate whether this MIME Type includes the given MIME Type.
 	 * <p>For instance, {@code text/*} includes {@code text/plain} and {@code text/html},
-	 * and {@code application/*+xml} includes {@code application/soap+xml}, etc. This
-	 * method is <b>not</b> symmetric.
-	 * @param other the reference media type with which to compare
-	 * @return {@code true} if this media type includes the given media type;
+	 * and {@code application/*+xml} includes {@code application/soap+xml}, etc.
+	 * This method is <b>not</b> symmetric.
+	 * @param other the reference MIME Type with which to compare
+	 * @return {@code true} if this MIME Type includes the given MIME Type;
 	 * {@code false} otherwise
 	 */
 	public boolean includes(MimeType other) {
@@ -331,8 +331,8 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 				return true;
 			}
 			if (isWildcardSubtype()) {
-				// wildcard with suffix, e.g. application/*+xml
-				int thisPlusIdx = getSubtype().indexOf('+');
+				// Wildcard with suffix, e.g. application/*+xml
+				int thisPlusIdx = getSubtype().lastIndexOf('+');
 				if (thisPlusIdx == -1) {
 					return true;
 				}
@@ -354,12 +354,12 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	}
 
 	/**
-	 * Indicate whether this {@code MediaType} is compatible with the given media type.
+	 * Indicate whether this MIME Type is compatible with the given MIME Type.
 	 * <p>For instance, {@code text/*} is compatible with {@code text/plain},
 	 * {@code text/html}, and vice versa. In effect, this method is similar to
 	 * {@link #includes}, except that it <b>is</b> symmetric.
-	 * @param other the reference media type with which to compare
-	 * @return {@code true} if this media type is compatible with the given media type;
+	 * @param other the reference MIME Type with which to compare
+	 * @return {@code true} if this MIME Type is compatible with the given MIME Type;
 	 * {@code false} otherwise
 	 */
 	public boolean isCompatibleWith(MimeType other) {
@@ -470,8 +470,8 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	}
 
 	/**
-	 * Compares this {@code MediaType} to another alphabetically.
-	 * @param other media type to compare to
+	 * Compares this MIME Type to another alphabetically.
+	 * @param other the MIME Type to compare to
 	 * @see MimeTypeUtils#sortBySpecificity(List)
 	 */
 	@Override
