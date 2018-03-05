@@ -165,8 +165,7 @@ strategy__. A transaction strategy is defined by the
 ----
 	public interface PlatformTransactionManager {
 
-		TransactionStatus getTransaction(
-				TransactionDefinition definition) throws TransactionException;
+		TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException;
 
 		void commit(TransactionStatus status) throws TransactionException;
 
@@ -200,9 +199,6 @@ execution.
 
 The `TransactionDefinition` interface specifies:
 
-* __Isolation__: The degree to which this transaction is isolated from the work of other
-  transactions. For example, can this transaction see uncommitted writes from other
-  transactions?
 * __Propagation__: Typically, all code executed within a transaction scope will run in
   that transaction. However, you have the option of specifying the behavior in the event
   that a transactional method is executed when a transaction context already exists. For
@@ -210,6 +206,9 @@ The `TransactionDefinition` interface specifies:
   the existing transaction can be suspended and a new transaction created. __Spring
   offers all of the transaction propagation options familiar from EJB CMT__. To read
   about the semantics of transaction propagation in Spring, see <<tx-propagation>>.
+* __Isolation__: The degree to which this transaction is isolated from the work of other
+  transactions. For example, can this transaction see uncommitted writes from other
+  transactions?
 * __Timeout__: How long this transaction runs before timing out and being rolled back
   automatically by the underlying transaction infrastructure.
 * __Read-only status__: A read-only transaction can be used when your code reads but
@@ -837,7 +836,7 @@ unhandled `InstrumentNotFoundException`.
 	</tx:advice>
 ----
 
-When the Spring Framework's transaction infrastructure catches an exception and is
+When the Spring Framework's transaction infrastructure catches an exception and it
 consults configured rollback rules to determine whether to mark the transaction for
 rollback, the __strongest__ matching rule wins. So in the case of the following
 configuration, any exception other than an `InstrumentNotFoundException` results in a
@@ -1028,17 +1027,17 @@ that are nested within `<tx:advice/>` and `<tx:attributes/>` tags are summarized
 | `isolation`
 | No
 | DEFAULT
-| Transaction isolation level.
+| Transaction isolation level. Only applicable to propagation REQUIRED or REQUIRES_NEW.
 
 | `timeout`
 | No
 | -1
-| Transaction timeout value (in seconds).
+| Transaction timeout (seconds). Only applicable to propagation REQUIRED or REQUIRES_NEW.
 
 | `read-only`
 | No
 | false
-| Is this transaction read-only?
+| Read/write vs. read-only transaction. Only applicable to REQUIRED or REQUIRES_NEW.
 
 | `rollback-for`
 | No
@@ -1162,7 +1161,6 @@ transactional behavior.
 
 [TIP]
 ====
-
 Spring recommends that you only annotate concrete classes (and methods of concrete
 classes) with the `@Transactional` annotation, as opposed to annotating interfaces. You
 certainly can place the `@Transactional` annotation on an interface (or an interface
@@ -1308,7 +1306,7 @@ annotation are summarized in the following table:
 
 | <<tx-multiple-tx-mgrs-with-attransactional,value>>
 | String
-|  Optional qualifier specifying the transaction manager to be used.
+| Optional qualifier specifying the transaction manager to be used.
 
 | <<tx-propagation,propagation>>
 | enum: `Propagation`
@@ -1316,15 +1314,15 @@ annotation are summarized in the following table:
 
 | `isolation`
 | enum: `Isolation`
-| Optional isolation level.
-
-| `readOnly`
-| boolean
-| Read/write vs. read-only transaction
+| Optional isolation level. Only applicable to propagation REQUIRED or REQUIRES_NEW.
 
 | `timeout`
 | int (in seconds granularity)
-| Transaction timeout.
+| Optional transaction timeout. Only applicable to propagation REQUIRED or REQUIRES_NEW.
+
+| `readOnly`
+| boolean
+| Read/write vs. read-only transaction. Only applicable to REQUIRED or REQUIRES_NEW.
 
 | `rollbackFor`
 | Array of `Class` objects, which must be derived from `Throwable.`
@@ -1461,8 +1459,8 @@ PROPAGATION_REQUIRED
 When the propagation setting is `PROPAGATION_REQUIRED`, a __logical__ transaction scope
 is created for each method upon which the setting is applied. Each such logical
 transaction scope can determine rollback-only status individually, with an outer
-transaction scope being logically independent from the inner transaction scope. Of
-course, in case of standard `PROPAGATION_REQUIRED` behavior, all these scopes will be
+transaction scope being logically independent from the inner transaction scope.
+Of course, in case of standard `PROPAGATION_REQUIRED` behavior, all these scopes will be
 mapped to the same physical transaction. So a rollback-only marker set in the inner
 transaction scope does affect the outer transaction's chance to actually commit (as you
 would expect it to).
@@ -1484,11 +1482,14 @@ image::images/tx_prop_requires_new.png[width=400]
 
 PROPAGATION_REQUIRES_NEW
 
-`PROPAGATION_REQUIRES_NEW`, in contrast to `PROPAGATION_REQUIRED`, uses a __completely__
-independent transaction for each affected transaction scope. In that case, the
-underlying physical transactions are different and hence can commit or roll back
+`PROPAGATION_REQUIRES_NEW`, in contrast to `PROPAGATION_REQUIRED`, always uses an
+__independent__ physical transaction for each affected transaction scope, never
+participating in an existing transaction for an outer scope. In such an arrangement,
+the underlying resource transactions are different and hence can commit or roll back
 independently, with an outer transaction not affected by an inner transaction's rollback
-status.
+status, and with an inner transaction's locks released immediately after its completion.
+Such an independent inner transaction may also declare its own isolation level, timeout
+and read-only settings, never inheriting an outer transaction's characteristics.
 
 [[tx-propagation-nested]]
 ===== Nested
@@ -1585,10 +1586,10 @@ is controlled through the `Ordered` interface. For full details on advice orderi
 		<!-- this is the aspect -->
 		<bean id="profiler" class="x.y.SimpleProfiler">
 			<!-- execute before the transactional advice (hence the lower order number) -->
-			<property name="order" __value="1"__/>
+			<property name="order" value="1"/>
 		</bean>
 
-		<tx:annotation-driven transaction-manager="txManager" __order="200"__/>
+		<tx:annotation-driven transaction-manager="txManager" order="200"/>
 
 		<aop:config>
 				<!-- this advice will execute around the transactional advice -->
@@ -1641,14 +1642,14 @@ declarative approach.
 		<!-- the profiling advice -->
 		<bean id="profiler" class="x.y.SimpleProfiler">
 			<!-- execute before the transactional advice (hence the lower order number) -->
-			__<property name="order" value="1__"/>
+			<property name="order" value="1"/>
 		</bean>
 
 		<aop:config>
 			<aop:pointcut id="entryPointMethod" expression="execution(* x.y..*Service.*(..))"/>
 			<!-- will execute after the profiling advice (c.f. the order attribute) -->
 
-			<aop:advisor advice-ref="txAdvice" pointcut-ref="entryPointMethod" __order="2__"/>
+			<aop:advisor advice-ref="txAdvice" pointcut-ref="entryPointMethod" order="2"/>
 			<!-- order value is higher than the profiling aspect -->
 
 			<aop:aspect id="profilingAspect" ref="profiler">
@@ -1721,7 +1722,7 @@ follows Java's rule that annotations on interfaces are __not inherited__.
 ====
 
 The `@Transactional` annotation on a class specifies the default transaction semantics
-for the execution of any method in the class.
+for the execution of any public method in the class.
 
 The `@Transactional` annotation on a method within the class overrides the default
 transaction semantics given by the class annotation (if present). Any method may be
@@ -1782,7 +1783,6 @@ a transaction. You then pass an instance of your custom `TransactionCallback` to
 
 		// use constructor-injection to supply the PlatformTransactionManager
 		public SimpleService(PlatformTransactionManager transactionManager) {
-			Assert.notNull(transactionManager, "The 'transactionManager' argument must not be null.");
 			this.transactionTemplate = new TransactionTemplate(transactionManager);
 		}
 
@@ -1849,7 +1849,6 @@ a specific `TransactionTemplate:`
 		private final TransactionTemplate transactionTemplate;
 
 		public SimpleService(PlatformTransactionManager transactionManager) {
-			Assert.notNull(transactionManager, "The 'transactionManager' argument must not be null.");
 			this.transactionTemplate = new TransactionTemplate(transactionManager);
 
 			// the transaction settings can be set here explicitly if so desired
@@ -1943,9 +1942,9 @@ Registering a regular event listener is done via the `@EventListener` annotation
 to bind it to the transaction use `@TransactionalEventListener`. When you do so, the listener
 will be bound to the commit phase of the transaction by default.
 
-Let's take an example to illustrate this concept. Assume that a component publish an order
+Let's take an example to illustrate this concept. Assume that a component publishes an order
 created event and we want to define a listener that should only handle that event once the
-transaction in which it has been published as committed successfully:
+transaction in which it has been published has committed successfully:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1960,8 +1959,8 @@ transaction in which it has been published as committed successfully:
 	}
 ----
 
-The `TransactionalEventListener` annotation exposes a `phase` attribute  that allows to customize
-to which phase of the transaction the listener should be bound to. The valid phases are `BEFORE_COMMIT`,
+The `TransactionalEventListener` annotation exposes a `phase` attribute  that allows us to customize
+which phase of the transaction the listener should be bound to. The valid phases are `BEFORE_COMMIT`,
 `AFTER_COMMIT` (default), `AFTER_ROLLBACK` and `AFTER_COMPLETION` that aggregates the transaction
 completion (be it a commit or a rollback).
 
@@ -2997,10 +2996,10 @@ An `update()` convenience method supports the retrieval of primary keys generate
 database. This support is part of the JDBC 3.0 standard; see Chapter 13.6 of the
 specification for details. The method takes a `PreparedStatementCreator` as its first
 argument, and this is the way the required insert statement is specified. The other
-argument is a `KeyHolder`, which contains the generated key on successful return from
-the update. There is not a standard single way to create an appropriate
-`PreparedStatement` (which explains why the method signature is the way it is). The
-following example works on Oracle but may not work on other platforms:
+argument is a `KeyHolder`, which contains the generated key on successful return from the
+update. There is not a standard single way to create an appropriate `PreparedStatement`
+(which explains why the method signature is the way it is). The following example works
+on Oracle but may not work on other platforms:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
