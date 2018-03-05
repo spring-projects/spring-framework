@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,6 +85,16 @@ public class ResourceUrlProviderTests {
 		url = "/resources/foo.css#hash";
 		resolvedUrl = this.urlProvider.getForRequestUrl(request, url);
 		assertEquals("/resources/foo.css#hash", resolvedUrl);
+	}
+
+	@Test // SPR-16526
+	public void getStaticResourceWithMissingContextPath() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setContextPath("/contextpath-longer-than-request-path");
+		request.setRequestURI("/contextpath-longer-than-request-path/style.css");
+		String url = "/resources/foo.css";
+		String resolvedUrl = this.urlProvider.getForRequestUrl(request, url);
+		assertNull(resolvedUrl);
 	}
 
 	@Test

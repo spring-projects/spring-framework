@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
@@ -182,6 +183,9 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		}
 		int prefixIndex = getLookupPathIndex(request);
 		int suffixIndex = getEndPathIndex(requestUrl);
+		if (prefixIndex >= suffixIndex) {
+			return null;
+		}
 		String prefix = requestUrl.substring(0, prefixIndex);
 		String suffix = requestUrl.substring(suffixIndex);
 		String lookupPath = requestUrl.substring(prefixIndex, suffixIndex);
@@ -199,11 +203,11 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	private int getEndPathIndex(String lookupPath) {
 		int suffixIndex = lookupPath.length();
 		int queryIndex = lookupPath.indexOf('?');
-		if(queryIndex > 0) {
+		if (queryIndex > 0) {
 			suffixIndex = queryIndex;
 		}
 		int hashIndex = lookupPath.indexOf('#');
-		if(hashIndex > 0) {
+		if (hashIndex > 0) {
 			suffixIndex = Math.min(suffixIndex, hashIndex);
 		}
 		return suffixIndex;
