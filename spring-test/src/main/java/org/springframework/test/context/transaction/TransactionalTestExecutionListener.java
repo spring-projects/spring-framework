@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -163,14 +163,12 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 */
 	@Override
 	public void beforeTestMethod(final TestContext testContext) throws Exception {
-		final Method testMethod = testContext.getTestMethod();
-		final Class<?> testClass = testContext.getTestClass();
-		Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null");
+		Method testMethod = testContext.getTestMethod();
+		Class<?> testClass = testContext.getTestClass();
+		Assert.notNull(testMethod, "Test method of supplied TestContext must not be null");
 
 		TransactionContext txContext = TransactionContextHolder.removeCurrentTransactionContext();
-		if (txContext != null) {
-			throw new IllegalStateException("Cannot start a new transaction without ending the existing transaction.");
-		}
+		Assert.state(txContext == null, "Cannot start new transaction without ending existing transaction");
 
 		PlatformTransactionManager tm = null;
 		TransactionAttribute transactionAttribute = this.attributeSource.getTransactionAttribute(testMethod, testClass);
@@ -180,8 +178,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 				transactionAttribute);
 
 			if (logger.isDebugEnabled()) {
-				logger.debug("Explicit transaction definition [" + transactionAttribute + "] found for test context " +
-						testContext);
+				logger.debug("Explicit transaction definition [" + transactionAttribute +
+						"] found for test context " + testContext);
 			}
 
 			if (transactionAttribute.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NOT_SUPPORTED) {
@@ -191,9 +189,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 			tm = getTransactionManager(testContext, transactionAttribute.getQualifier());
 
 			if (tm == null) {
-				throw new IllegalStateException(String.format(
-						"Failed to retrieve PlatformTransactionManager for @Transactional test for test context %s.",
-						testContext));
+				throw new IllegalStateException(
+						"Failed to retrieve PlatformTransactionManager for @Transactional test: " + testContext);
 			}
 		}
 
@@ -223,7 +220,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 			TransactionStatus transactionStatus = txContext.getTransactionStatus();
 			try {
 				// If the transaction is still active...
-				if ((transactionStatus != null) && !transactionStatus.isCompleted()) {
+				if (transactionStatus != null && !transactionStatus.isCompleted()) {
 					txContext.endTransaction();
 				}
 			}
@@ -380,15 +377,15 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 		TransactionConfigurationAttributes txConfigAttributes = retrieveConfigurationAttributes(testContext);
 
 		if (rollbackPresent && txConfigAttributes != defaultTxConfigAttributes) {
-			throw new IllegalStateException(String.format("Test class [%s] is annotated with both @Rollback "
-					+ "and @TransactionConfiguration, but only one is permitted.", testClass.getName()));
+			throw new IllegalStateException(String.format("Test class [%s] is annotated with both @Rollback " +
+					"and @TransactionConfiguration, but only one is permitted.", testClass.getName()));
 		}
 
 		if (rollbackPresent) {
 			boolean defaultRollback = rollback.value();
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Retrieved default @Rollback(%s) for test class [%s].", defaultRollback,
-					testClass.getName()));
+				logger.debug(String.format("Retrieved default @Rollback(%s) for test class [%s].",
+						defaultRollback, testClass.getName()));
 			}
 			return defaultRollback;
 		}

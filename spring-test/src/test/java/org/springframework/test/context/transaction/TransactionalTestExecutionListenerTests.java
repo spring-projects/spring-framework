@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.mockito.BDDMockito;
 
 import org.springframework.core.annotation.AliasFor;
@@ -53,7 +52,6 @@ public class TransactionalTestExecutionListenerTests {
 	private final PlatformTransactionManager tm = mock(PlatformTransactionManager.class);
 
 	private final TransactionalTestExecutionListener listener = new TransactionalTestExecutionListener() {
-
 		@Override
 		protected PlatformTransactionManager getTransactionManager(TestContext testContext, String qualifier) {
 			return tm;
@@ -66,110 +64,21 @@ public class TransactionalTestExecutionListenerTests {
 	public ExpectedException exception = ExpectedException.none();
 
 
-	private void assertBeforeTestMethod(Class<? extends Invocable> clazz) throws Exception {
-		assertBeforeTestMethodWithTransactionalTestMethod(clazz);
-		assertBeforeTestMethodWithNonTransactionalTestMethod(clazz);
-	}
-
-	private void assertBeforeTestMethodWithTransactionalTestMethod(Class<? extends Invocable> clazz) throws Exception {
-		assertBeforeTestMethodWithTransactionalTestMethod(clazz, true);
-	}
-
-	private void assertBeforeTestMethodWithTransactionalTestMethod(Class<? extends Invocable> clazz, boolean invokedInTx)
-			throws Exception {
-		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		Invocable instance = clazz.newInstance();
-		given(testContext.getTestInstance()).willReturn(instance);
-		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("transactionalTest"));
-
-		assertFalse("callback should not have been invoked", instance.invoked());
-		TransactionContextHolder.removeCurrentTransactionContext();
-		listener.beforeTestMethod(testContext);
-		assertEquals(invokedInTx, instance.invoked());
-	}
-
-	private void assertBeforeTestMethodWithNonTransactionalTestMethod(Class<? extends Invocable> clazz)
-			throws Exception {
-		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		Invocable instance = clazz.newInstance();
-		given(testContext.getTestInstance()).willReturn(instance);
-		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("nonTransactionalTest"));
-
-		assertFalse("callback should not have been invoked", instance.invoked());
-		TransactionContextHolder.removeCurrentTransactionContext();
-		listener.beforeTestMethod(testContext);
-		assertFalse("callback should not have been invoked", instance.invoked());
-	}
-
-	private void assertAfterTestMethod(Class<? extends Invocable> clazz) throws Exception {
-		assertAfterTestMethodWithTransactionalTestMethod(clazz);
-		assertAfterTestMethodWithNonTransactionalTestMethod(clazz);
-	}
-
-	private void assertAfterTestMethodWithTransactionalTestMethod(Class<? extends Invocable> clazz) throws Exception {
-		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		Invocable instance = clazz.newInstance();
-		given(testContext.getTestInstance()).willReturn(instance);
-		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("transactionalTest"));
-
-		given(tm.getTransaction(BDDMockito.any(TransactionDefinition.class))).willReturn(new SimpleTransactionStatus());
-
-		assertFalse("callback should not have been invoked", instance.invoked());
-		TransactionContextHolder.removeCurrentTransactionContext();
-		listener.beforeTestMethod(testContext);
-		assertFalse("callback should not have been invoked", instance.invoked());
-		listener.afterTestMethod(testContext);
-		assertTrue("callback should have been invoked", instance.invoked());
-	}
-
-	private void assertAfterTestMethodWithNonTransactionalTestMethod(Class<? extends Invocable> clazz) throws Exception {
-		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		Invocable instance = clazz.newInstance();
-		given(testContext.getTestInstance()).willReturn(instance);
-		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("nonTransactionalTest"));
-
-		assertFalse("callback should not have been invoked", instance.invoked());
-		TransactionContextHolder.removeCurrentTransactionContext();
-		listener.beforeTestMethod(testContext);
-		listener.afterTestMethod(testContext);
-		assertFalse("callback should not have been invoked", instance.invoked());
-	}
-
-	private void assertTransactionConfigurationAttributes(Class<?> clazz, String transactionManagerName,
-			boolean defaultRollback) {
-		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-
-		TransactionConfigurationAttributes attributes = listener.retrieveConfigurationAttributes(testContext);
-		assertNotNull(attributes);
-		assertEquals(transactionManagerName, attributes.getTransactionManagerName());
-		assertEquals(defaultRollback, attributes.isDefaultRollback());
-	}
-
-	private void assertIsRollback(Class<?> clazz, boolean rollback) throws NoSuchMethodException, Exception {
-		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("test"));
-		assertEquals(rollback, listener.isRollback(testContext));
-	}
-
 	@After
 	public void cleanUpThreadLocalStateForSubsequentTestClassesInSuite() {
 		TransactionContextHolder.removeCurrentTransactionContext();
 	}
 
-	/**
-	 * SPR-13895
-	 */
-	@Test
+
+	@Test  // SPR-13895
 	public void transactionalTestWithoutTransactionManager() throws Exception {
 		TransactionalTestExecutionListener listener = new TransactionalTestExecutionListener() {
-
 			protected PlatformTransactionManager getTransactionManager(TestContext testContext, String qualifier) {
 				return null;
 			}
 		};
 
 		Class<? extends Invocable> clazz = TransactionalDeclaredOnClassLocallyTestCase.class;
-
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 		Invocable instance = clazz.newInstance();
 		given(testContext.getTestInstance()).willReturn(instance);
@@ -184,7 +93,7 @@ public class TransactionalTestExecutionListenerTests {
 		}
 		catch (IllegalStateException e) {
 			assertTrue(e.getMessage().startsWith(
-				"Failed to retrieve PlatformTransactionManager for @Transactional test for test context"));
+					"Failed to retrieve PlatformTransactionManager for @Transactional test"));
 		}
 	}
 
@@ -203,7 +112,7 @@ public class TransactionalTestExecutionListenerTests {
 		// Note: not actually invoked within a transaction since the test class is
 		// annotated with @MetaTxWithOverride(propagation = NOT_SUPPORTED)
 		assertBeforeTestMethodWithTransactionalTestMethod(
-			TransactionalDeclaredOnClassViaMetaAnnotationWithOverrideTestCase.class, false);
+				TransactionalDeclaredOnClassViaMetaAnnotationWithOverrideTestCase.class, false);
 	}
 
 	@Test
@@ -211,7 +120,7 @@ public class TransactionalTestExecutionListenerTests {
 		// Note: not actually invoked within a transaction since the method is
 		// annotated with @MetaTxWithOverride(propagation = NOT_SUPPORTED)
 		assertBeforeTestMethodWithTransactionalTestMethod(
-			TransactionalDeclaredOnMethodViaMetaAnnotationWithOverrideTestCase.class, false);
+				TransactionalDeclaredOnMethodViaMetaAnnotationWithOverrideTestCase.class, false);
 		assertBeforeTestMethodWithNonTransactionalTestMethod(TransactionalDeclaredOnMethodViaMetaAnnotationWithOverrideTestCase.class);
 	}
 
@@ -315,8 +224,7 @@ public class TransactionalTestExecutionListenerTests {
 		// @TransactionConfiguration. So we actually expect "" as the qualifier here,
 		// relying on beforeTestMethod() to properly obtain the actual qualifier via the
 		// TransactionAttribute.
-		assertTransactionConfigurationAttributes(TransactionalViaMetaAnnotationWithExplicitQualifierTestCase.class, "",
-			true);
+		assertTransactionConfigurationAttributes(TransactionalViaMetaAnnotationWithExplicitQualifierTestCase.class, "", true);
 	}
 
 	@Test
@@ -375,11 +283,95 @@ public class TransactionalTestExecutionListenerTests {
 	}
 
 
-	// -------------------------------------------------------------------------
+	private void assertBeforeTestMethod(Class<? extends Invocable> clazz) throws Exception {
+		assertBeforeTestMethodWithTransactionalTestMethod(clazz);
+		assertBeforeTestMethodWithNonTransactionalTestMethod(clazz);
+	}
+
+	private void assertBeforeTestMethodWithTransactionalTestMethod(Class<? extends Invocable> clazz) throws Exception {
+		assertBeforeTestMethodWithTransactionalTestMethod(clazz, true);
+	}
+
+	private void assertBeforeTestMethodWithTransactionalTestMethod(Class<? extends Invocable> clazz, boolean invokedInTx)
+			throws Exception {
+
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
+		Invocable instance = clazz.newInstance();
+		given(testContext.getTestInstance()).willReturn(instance);
+		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("transactionalTest"));
+
+		assertFalse("callback should not have been invoked", instance.invoked());
+		TransactionContextHolder.removeCurrentTransactionContext();
+		listener.beforeTestMethod(testContext);
+		assertEquals(invokedInTx, instance.invoked());
+	}
+
+	private void assertBeforeTestMethodWithNonTransactionalTestMethod(Class<? extends Invocable> clazz) throws Exception {
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
+		Invocable instance = clazz.newInstance();
+		given(testContext.getTestInstance()).willReturn(instance);
+		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("nonTransactionalTest"));
+
+		assertFalse("callback should not have been invoked", instance.invoked());
+		TransactionContextHolder.removeCurrentTransactionContext();
+		listener.beforeTestMethod(testContext);
+		assertFalse("callback should not have been invoked", instance.invoked());
+	}
+
+	private void assertAfterTestMethod(Class<? extends Invocable> clazz) throws Exception {
+		assertAfterTestMethodWithTransactionalTestMethod(clazz);
+		assertAfterTestMethodWithNonTransactionalTestMethod(clazz);
+	}
+
+	private void assertAfterTestMethodWithTransactionalTestMethod(Class<? extends Invocable> clazz) throws Exception {
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
+		Invocable instance = clazz.newInstance();
+		given(testContext.getTestInstance()).willReturn(instance);
+		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("transactionalTest"));
+		given(tm.getTransaction(BDDMockito.any(TransactionDefinition.class))).willReturn(new SimpleTransactionStatus());
+
+		assertFalse("callback should not have been invoked", instance.invoked());
+		TransactionContextHolder.removeCurrentTransactionContext();
+		listener.beforeTestMethod(testContext);
+		assertFalse("callback should not have been invoked", instance.invoked());
+		listener.afterTestMethod(testContext);
+		assertTrue("callback should have been invoked", instance.invoked());
+	}
+
+	private void assertAfterTestMethodWithNonTransactionalTestMethod(Class<? extends Invocable> clazz) throws Exception {
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
+		Invocable instance = clazz.newInstance();
+		given(testContext.getTestInstance()).willReturn(instance);
+		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("nonTransactionalTest"));
+
+		assertFalse("callback should not have been invoked", instance.invoked());
+		TransactionContextHolder.removeCurrentTransactionContext();
+		listener.beforeTestMethod(testContext);
+		listener.afterTestMethod(testContext);
+		assertFalse("callback should not have been invoked", instance.invoked());
+	}
+
+	private void assertTransactionConfigurationAttributes(
+			Class<?> clazz, String transactionManagerName, boolean defaultRollback) {
+
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
+		TransactionConfigurationAttributes attributes = listener.retrieveConfigurationAttributes(testContext);
+
+		assertNotNull(attributes);
+		assertEquals(transactionManagerName, attributes.getTransactionManagerName());
+		assertEquals(defaultRollback, attributes.isDefaultRollback());
+	}
+
+	private void assertIsRollback(Class<?> clazz, boolean rollback) throws NoSuchMethodException, Exception {
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
+		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("test"));
+		assertEquals(rollback, listener.isRollback(testContext));
+	}
+
 
 	@Transactional
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface MetaTransactional {
+	private @interface MetaTransactional {
 	}
 
 	@Transactional
@@ -394,17 +386,17 @@ public class TransactionalTestExecutionListenerTests {
 
 	@BeforeTransaction
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface MetaBeforeTransaction {
+	private @interface MetaBeforeTransaction {
 	}
 
 	@AfterTransaction
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface MetaAfterTransaction {
+	private @interface MetaAfterTransaction {
 	}
 
 	@TransactionConfiguration
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface MetaTxConfig {
+	private @interface MetaTxConfig {
 
 		String transactionManager() default "metaTxMgr";
 	}
@@ -441,7 +433,6 @@ public class TransactionalTestExecutionListenerTests {
 		}
 
 		public void transactionalTest() {
-			/* no-op */
 		}
 	}
 
@@ -454,11 +445,9 @@ public class TransactionalTestExecutionListenerTests {
 
 		@Transactional
 		public void transactionalTest() {
-			/* no-op */
 		}
 
 		public void nonTransactionalTest() {
-			/* no-op */
 		}
 	}
 
@@ -471,7 +460,6 @@ public class TransactionalTestExecutionListenerTests {
 		}
 
 		public void transactionalTest() {
-			/* no-op */
 		}
 	}
 
@@ -484,11 +472,9 @@ public class TransactionalTestExecutionListenerTests {
 
 		@MetaTransactional
 		public void transactionalTest() {
-			/* no-op */
 		}
 
 		public void nonTransactionalTest() {
-			/* no-op */
 		}
 	}
 
@@ -501,7 +487,6 @@ public class TransactionalTestExecutionListenerTests {
 		}
 
 		public void transactionalTest() {
-			/* no-op */
 		}
 	}
 
@@ -514,11 +499,9 @@ public class TransactionalTestExecutionListenerTests {
 
 		@MetaTxWithOverride(propagation = NOT_SUPPORTED)
 		public void transactionalTest() {
-			/* no-op */
 		}
 
 		public void nonTransactionalTest() {
-			/* no-op */
 		}
 	}
 
@@ -531,11 +514,9 @@ public class TransactionalTestExecutionListenerTests {
 
 		@Transactional
 		public void transactionalTest() {
-			/* no-op */
 		}
 
 		public void nonTransactionalTest() {
-			/* no-op */
 		}
 	}
 
@@ -548,11 +529,9 @@ public class TransactionalTestExecutionListenerTests {
 
 		@Transactional
 		public void transactionalTest() {
-			/* no-op */
 		}
 
 		public void nonTransactionalTest() {
-			/* no-op */
 		}
 	}
 
@@ -565,11 +544,9 @@ public class TransactionalTestExecutionListenerTests {
 
 		@Transactional
 		public void transactionalTest() {
-			/* no-op */
 		}
 
 		public void nonTransactionalTest() {
-			/* no-op */
 		}
 	}
 
@@ -582,11 +559,9 @@ public class TransactionalTestExecutionListenerTests {
 
 		@Transactional
 		public void transactionalTest() {
-			/* no-op */
 		}
 
 		public void nonTransactionalTest() {
-			/* no-op */
 		}
 	}
 
@@ -611,11 +586,9 @@ public class TransactionalTestExecutionListenerTests {
 
 		@Transactional
 		public void transactionalTest() {
-			/* no-op */
 		}
 
 		public void nonTransactionalTest() {
-			/* no-op */
 		}
 	}
 
@@ -624,11 +597,9 @@ public class TransactionalTestExecutionListenerTests {
 
 		@Transactional
 		public void transactionalTest() {
-			/* no-op */
 		}
 
 		public void nonTransactionalTest() {
-			/* no-op */
 		}
 	}
 
