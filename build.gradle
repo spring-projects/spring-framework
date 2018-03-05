@@ -71,7 +71,7 @@ configure(allprojects) { project ->
 	ext.romeVersion          = "1.7.4"
 	ext.slf4jVersion         = "1.7.21"
 	ext.snakeyamlVersion     = "1.17"
-	ext.snifferVersion       = "1.15"
+	ext.snifferVersion       = "1.16"
 	ext.testngVersion        = "6.9.10"
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.7"
