@@ -488,7 +488,7 @@ public class Label {
      * flow graph to find all the blocks that are reachable from the current
      * block WITHOUT following any JSR target.
      *
-     * @param JSR
+     * @param jsr
      *            a JSR block that jumps to this subroutine. If this JSR is not
      *            null it is added to the successor of the RET blocks found in
      *            the subroutine.
@@ -497,7 +497,7 @@ public class Label {
      * @param nbSubroutines
      *            the total number of subroutines in the method.
      */
-    void visitSubroutine(final Label JSR, final long id, final int nbSubroutines) {
+    void visitSubroutine(final Label jsr, final long id, final int nbSubroutines) {
         // user managed stack of labels, to avoid using a recursive method
         // (recursivity can lead to stack overflow with very large methods)
         Label stack = this;
@@ -507,17 +507,17 @@ public class Label {
             stack = l.next;
             l.next = null;
 
-            if (JSR != null) {
+            if (jsr != null) {
                 if ((l.status & VISITED2) != 0) {
                     continue;
                 }
                 l.status |= VISITED2;
                 // adds JSR to the successors of l, if it is a RET block
                 if ((l.status & RET) != 0) {
-                    if (!l.inSameSubroutine(JSR)) {
+                    if (!l.inSameSubroutine(jsr)) {
                         Edge e = new Edge();
                         e.info = l.inputStackTop;
-                        e.successor = JSR.successors.successor;
+                        e.successor = jsr.successors.successor;
                         e.next = l.successors;
                         l.successors = e;
                     }

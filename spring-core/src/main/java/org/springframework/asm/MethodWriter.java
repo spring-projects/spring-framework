@@ -1628,10 +1628,10 @@ class MethodWriter extends MethodVisitor {
                 l = labels;
                 while (l != null) {
                     if ((l.status & Label.JSR) != 0) {
-                        Label L = labels;
-                        while (L != null) {
-                            L.status &= ~Label.VISITED2;
-                            L = L.successor;
+                        Label label = labels;
+                        while (label != null) {
+                            label.status &= ~Label.VISITED2;
+                            label = label.successor;
                         }
                         // the subroutine is defined by l's TARGET, not by l
                         Label subroutine = l.successors.next.successor;
