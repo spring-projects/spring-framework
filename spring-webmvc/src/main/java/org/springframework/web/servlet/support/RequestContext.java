@@ -91,7 +91,7 @@ public class RequestContext {
 	public static final String WEB_APPLICATION_CONTEXT_ATTRIBUTE = RequestContext.class.getName() + ".CONTEXT";
 
 
-	protected static final boolean jstlPresent = ClassUtils.isPresent(
+	protected static final boolean JSTL_PRESENT = ClassUtils.isPresent(
 			"javax.servlet.jsp.jstl.core.Config", RequestContext.class.getClassLoader());
 
 	private HttpServletRequest request;
@@ -326,7 +326,7 @@ public class RequestContext {
 	 * @see javax.servlet.http.HttpServletRequest#getLocale()
 	 */
 	protected Locale getFallbackLocale() {
-		if (jstlPresent) {
+		if (JSTL_PRESENT) {
 			Locale locale = JstlLocaleResolver.getJstlLocale(getRequest(), getServletContext());
 			if (locale != null) {
 				return locale;
@@ -343,7 +343,7 @@ public class RequestContext {
 	 */
 	@Nullable
 	protected TimeZone getFallbackTimeZone() {
-		if (jstlPresent) {
+		if (JSTL_PRESENT) {
 			TimeZone timeZone = JstlLocaleResolver.getJstlTimeZone(getRequest(), getServletContext());
 			if (timeZone != null) {
 				return timeZone;

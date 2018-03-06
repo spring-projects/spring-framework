@@ -72,7 +72,7 @@ public abstract class ReflectionTestUtils {
 
 	private static final Log logger = LogFactory.getLog(ReflectionTestUtils.class);
 
-	private static final boolean springAopPresent = ClassUtils.isPresent(
+	private static final boolean SPRING_AOP_PRESENT = ClassUtils.isPresent(
 			"org.springframework.aop.framework.Advised", ReflectionTestUtils.class.getClassLoader());
 
 
@@ -173,7 +173,7 @@ public abstract class ReflectionTestUtils {
 		Assert.isTrue(targetObject != null || targetClass != null,
 				"Either targetObject or targetClass for the field must be specified");
 
-		if (targetObject != null && springAopPresent) {
+		if (targetObject != null && SPRING_AOP_PRESENT) {
 			targetObject = AopTestUtils.getUltimateTargetObject(targetObject);
 		}
 		if (targetClass == null) {
@@ -258,7 +258,7 @@ public abstract class ReflectionTestUtils {
 		Assert.isTrue(targetObject != null || targetClass != null,
 			"Either targetObject or targetClass for the field must be specified");
 
-		if (targetObject != null && springAopPresent) {
+		if (targetObject != null && SPRING_AOP_PRESENT) {
 			targetObject = AopTestUtils.getUltimateTargetObject(targetObject);
 		}
 		if (targetClass == null) {

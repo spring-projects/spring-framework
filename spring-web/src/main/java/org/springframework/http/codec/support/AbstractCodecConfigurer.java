@@ -56,17 +56,17 @@ import org.springframework.util.ClassUtils;
  */
 abstract class AbstractCodecConfigurer implements CodecConfigurer {
 
-	static final boolean jackson2Present =
+	static final boolean JACKSON_2_PRESENT =
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
 					AbstractCodecConfigurer.class.getClassLoader()) &&
 					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
 							AbstractCodecConfigurer.class.getClassLoader());
 
-	private static final boolean jackson2SmilePresent =
+	private static final boolean JACKSON_2_SMILE_PRESENT =
 			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory",
 					AbstractCodecConfigurer.class.getClassLoader());
 
-	private static final boolean jaxb2Present =
+	private static final boolean JAXB_2_PRESENT =
 			ClassUtils.isPresent("javax.xml.bind.Binder", AbstractCodecConfigurer.class.getClassLoader());
 
 
@@ -197,13 +197,13 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 				return Collections.emptyList();
 			}
 			List<HttpMessageReader<?>> result = new ArrayList<>();
-			if (jackson2Present) {
+			if (JACKSON_2_PRESENT) {
 				result.add(new DecoderHttpMessageReader<>(getJackson2JsonDecoder()));
 			}
-			if (jackson2SmilePresent) {
+			if (JACKSON_2_SMILE_PRESENT) {
 				result.add(new DecoderHttpMessageReader<>(new Jackson2SmileDecoder()));
 			}
-			if (jaxb2Present) {
+			if (JAXB_2_PRESENT) {
 				result.add(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
 			}
 			return result;
@@ -238,13 +238,13 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 				return Collections.emptyList();
 			}
 			List<HttpMessageWriter<?>> result = new ArrayList<>();
-			if (jackson2Present) {
+			if (JACKSON_2_PRESENT) {
 				result.add(new EncoderHttpMessageWriter<>(getJackson2JsonEncoder()));
 			}
-			if (jackson2SmilePresent) {
+			if (JACKSON_2_SMILE_PRESENT) {
 				result.add(new EncoderHttpMessageWriter<>(new Jackson2SmileEncoder()));
 			}
-			if (jaxb2Present) {
+			if (JAXB_2_PRESENT) {
 				result.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
 			}
 			return result;

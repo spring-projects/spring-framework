@@ -126,7 +126,7 @@ import org.springframework.web.context.ServletContextAware;
  */
 public class TilesConfigurer implements ServletContextAware, InitializingBean, DisposableBean {
 
-	private static final boolean tilesElPresent =
+	private static final boolean TILES_EL_PRESENT =
 			ClassUtils.isPresent("org.apache.tiles.el.ELAttributeEvaluator", TilesConfigurer.class.getClassLoader());
 
 
@@ -383,7 +383,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 		protected AttributeEvaluatorFactory createAttributeEvaluatorFactory(ApplicationContext context,
 				LocaleResolver resolver) {
 			AttributeEvaluator evaluator;
-			if (tilesElPresent && JspFactory.getDefaultFactory() != null) {
+			if (TILES_EL_PRESENT && JspFactory.getDefaultFactory() != null) {
 				evaluator = new TilesElActivator().createEvaluator();
 			}
 			else {

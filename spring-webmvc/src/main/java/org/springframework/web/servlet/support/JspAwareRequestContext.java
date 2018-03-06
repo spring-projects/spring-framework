@@ -80,7 +80,7 @@ public class JspAwareRequestContext extends RequestContext {
 	 */
 	@Override
 	protected Locale getFallbackLocale() {
-		if (jstlPresent) {
+		if (JSTL_PRESENT) {
 			Locale locale = JstlPageLocaleResolver.getJstlLocale(getPageContext());
 			if (locale != null) {
 				return locale;
@@ -95,7 +95,7 @@ public class JspAwareRequestContext extends RequestContext {
 	 */
 	@Override
 	protected TimeZone getFallbackTimeZone() {
-		if (jstlPresent) {
+		if (JSTL_PRESENT) {
 			TimeZone timeZone = JstlPageLocaleResolver.getJstlTimeZone(getPageContext());
 			if (timeZone != null) {
 				return timeZone;

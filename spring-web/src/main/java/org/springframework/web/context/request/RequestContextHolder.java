@@ -44,7 +44,7 @@ import org.springframework.util.ClassUtils;
  */
 public abstract class RequestContextHolder  {
 
-	private static final boolean jsfPresent =
+	private static final boolean JSF_PRESENT =
 			ClassUtils.isPresent("javax.faces.context.FacesContext", RequestContextHolder.class.getClassLoader());
 
 	private static final ThreadLocal<RequestAttributes> requestAttributesHolder =
@@ -124,7 +124,7 @@ public abstract class RequestContextHolder  {
 	public static RequestAttributes currentRequestAttributes() throws IllegalStateException {
 		RequestAttributes attributes = getRequestAttributes();
 		if (attributes == null) {
-			if (jsfPresent) {
+			if (JSF_PRESENT) {
 				attributes = FacesRequestAttributesFactory.getFacesRequestAttributes();
 			}
 			if (attributes == null) {

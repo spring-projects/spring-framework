@@ -64,7 +64,7 @@ import org.springframework.web.socket.sockjs.support.AbstractSockJsService;
  */
 public class TransportHandlingSockJsService extends AbstractSockJsService implements SockJsServiceConfig, Lifecycle {
 
-	private static final boolean jackson2Present = ClassUtils.isPresent(
+	private static final boolean JACKSON_2_PRESENT = ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", TransportHandlingSockJsService.class.getClassLoader());
 
 
@@ -114,7 +114,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			}
 		}
 
-		if (jackson2Present) {
+		if (JACKSON_2_PRESENT) {
 			this.messageCodec = new Jackson2SockJsMessageCodec();
 		}
 	}

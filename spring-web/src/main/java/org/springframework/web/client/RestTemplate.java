@@ -129,33 +129,33 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			ClassUtils.isPresent("com.rometools.rome.feed.WireFeed",
 					RestTemplate.class.getClassLoader());
 
-	private static final boolean jaxb2Present =
+	private static final boolean JAXB_2_PRESENT =
 			ClassUtils.isPresent("javax.xml.bind.Binder",
 					RestTemplate.class.getClassLoader());
 
-	private static final boolean jackson2Present =
+	private static final boolean JACKSON_2_PRESENT =
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
 					RestTemplate.class.getClassLoader()) &&
 			ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
 					RestTemplate.class.getClassLoader());
 
-	private static final boolean jackson2XmlPresent =
+	private static final boolean JACKSON_2_XML_PRESENT =
 			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper",
 					RestTemplate.class.getClassLoader());
 
-	private static final boolean jackson2SmilePresent =
+	private static final boolean JACKSON_2_SMILE_PRESENT =
 			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory",
 					RestTemplate.class.getClassLoader());
 
-	private static final boolean jackson2CborPresent =
+	private static final boolean JACKSON_2_CBOR_PRESENT =
 			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory",
 					RestTemplate.class.getClassLoader());
 
-	private static final boolean gsonPresent =
+	private static final boolean GSON_PRESENT =
 			ClassUtils.isPresent("com.google.gson.Gson",
 					RestTemplate.class.getClassLoader());
 
-	private static final boolean jsonbPresent =
+	private static final boolean JSONB_PRESENT =
 			ClassUtils.isPresent("javax.json.bind.Jsonb",
 					RestTemplate.class.getClassLoader());
 
@@ -185,27 +185,27 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			this.messageConverters.add(new RssChannelHttpMessageConverter());
 		}
 
-		if (jackson2XmlPresent) {
+		if (JACKSON_2_XML_PRESENT) {
 			this.messageConverters.add(new MappingJackson2XmlHttpMessageConverter());
 		}
-		else if (jaxb2Present) {
+		else if (JAXB_2_PRESENT) {
 			this.messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
 		}
 
-		if (jackson2Present) {
+		if (JACKSON_2_PRESENT) {
 			this.messageConverters.add(new MappingJackson2HttpMessageConverter());
 		}
-		else if (gsonPresent) {
+		else if (GSON_PRESENT) {
 			this.messageConverters.add(new GsonHttpMessageConverter());
 		}
-		else if (jsonbPresent) {
+		else if (JSONB_PRESENT) {
 			this.messageConverters.add(new JsonbHttpMessageConverter());
 		}
 
-		if (jackson2SmilePresent) {
+		if (JACKSON_2_SMILE_PRESENT) {
 			this.messageConverters.add(new MappingJackson2SmileHttpMessageConverter());
 		}
-		if (jackson2CborPresent) {
+		if (JACKSON_2_CBOR_PRESENT) {
 			this.messageConverters.add(new MappingJackson2CborHttpMessageConverter());
 		}
 	}

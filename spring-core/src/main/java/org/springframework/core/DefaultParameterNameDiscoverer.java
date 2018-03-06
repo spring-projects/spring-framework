@@ -38,11 +38,11 @@ import org.springframework.util.ClassUtils;
  */
 public class DefaultParameterNameDiscoverer extends PrioritizedParameterNameDiscoverer {
 
-	private static final boolean kotlinPresent =
+	private static final boolean KOTLIN_PRESENT =
 			ClassUtils.isPresent("kotlin.Unit", DefaultParameterNameDiscoverer.class.getClassLoader());
 
 	public DefaultParameterNameDiscoverer() {
-		if (kotlinPresent) {
+		if (KOTLIN_PRESENT) {
 			addDiscoverer(new KotlinReflectionParameterNameDiscoverer());
 		}
 		addDiscoverer(new StandardReflectionParameterNameDiscoverer());

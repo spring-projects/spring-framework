@@ -94,7 +94,7 @@ public class CachedIntrospectionResults {
 	public static final String IGNORE_BEANINFO_PROPERTY_NAME = "spring.beaninfo.ignore";
 
 
-	private static final boolean shouldIntrospectorIgnoreBeaninfoClasses =
+	private static final boolean SHOULD_INTROSPECTOR_IGNORE_BEANINFO_CLASSES =
 			SpringProperties.getFlag(IGNORE_BEANINFO_PROPERTY_NAME);
 
 	/** Stores the BeanInfoFactory instances */
@@ -286,7 +286,7 @@ public class CachedIntrospectionResults {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Getting BeanInfo for class [" + beanClass.getName() + "]");
 			}
-			this.beanInfo = getBeanInfo(beanClass, shouldIntrospectorIgnoreBeaninfoClasses);
+			this.beanInfo = getBeanInfo(beanClass, SHOULD_INTROSPECTOR_IGNORE_BEANINFO_CLASSES);
 
 			if (logger.isTraceEnabled()) {
 				logger.trace("Caching PropertyDescriptors for class [" + beanClass.getName() + "]");

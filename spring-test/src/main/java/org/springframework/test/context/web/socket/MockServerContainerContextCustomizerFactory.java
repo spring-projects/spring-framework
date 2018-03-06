@@ -42,7 +42,7 @@ class MockServerContainerContextCustomizerFactory implements ContextCustomizerFa
 	private static final String MOCK_SERVER_CONTAINER_CONTEXT_CUSTOMIZER_CLASS_NAME =
 			"org.springframework.test.context.web.socket.MockServerContainerContextCustomizer";
 
-	private static final boolean webSocketPresent = ClassUtils.isPresent("javax.websocket.server.ServerContainer",
+	private static final boolean WEB_SOCKET_PRESENT = ClassUtils.isPresent("javax.websocket.server.ServerContainer",
 			MockServerContainerContextCustomizerFactory.class.getClassLoader());
 
 
@@ -51,7 +51,7 @@ class MockServerContainerContextCustomizerFactory implements ContextCustomizerFa
 	public ContextCustomizer createContextCustomizer(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributes) {
 
-		if (webSocketPresent && isAnnotatedWithWebAppConfiguration(testClass)) {
+		if (WEB_SOCKET_PRESENT && isAnnotatedWithWebAppConfiguration(testClass)) {
 			try {
 				Class<?> clazz = ClassUtils.forName(MOCK_SERVER_CONTAINER_CONTEXT_CUSTOMIZER_CLASS_NAME,
 						getClass().getClassLoader());

@@ -49,10 +49,10 @@ class MBeanServerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private static final String AGENT_ID_ATTRIBUTE = "agent-id";
 
 
-	private static final boolean weblogicPresent = ClassUtils.isPresent(
+	private static final boolean WEBLOGIC_PRESENT = ClassUtils.isPresent(
 			"weblogic.management.Helper", MBeanServerBeanDefinitionParser.class.getClassLoader());
 
-	private static final boolean webspherePresent = ClassUtils.isPresent(
+	private static final boolean WEBSPHERE_PRESENT = ClassUtils.isPresent(
 			"com.ibm.websphere.management.AdminServiceFactory", MBeanServerBeanDefinitionParser.class.getClassLoader());
 
 
@@ -85,12 +85,12 @@ class MBeanServerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	@Nullable
 	static AbstractBeanDefinition findServerForSpecialEnvironment() {
-		if (weblogicPresent) {
+		if (WEBLOGIC_PRESENT) {
 			RootBeanDefinition bd = new RootBeanDefinition(JndiObjectFactoryBean.class);
 			bd.getPropertyValues().add("jndiName", "java:comp/env/jmx/runtime");
 			return bd;
 		}
-		else if (webspherePresent) {
+		else if (WEBSPHERE_PRESENT) {
 			return new RootBeanDefinition(WebSphereMBeanServerFactoryBean.class);
 		}
 		else {

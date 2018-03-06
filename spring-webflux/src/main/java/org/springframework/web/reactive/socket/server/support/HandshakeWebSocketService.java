@@ -55,19 +55,19 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 	private static final String SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
 
 
-	private static final boolean tomcatPresent = ClassUtils.isPresent(
+	private static final boolean TOMCAT_PRESENT = ClassUtils.isPresent(
 			"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler",
 			HandshakeWebSocketService.class.getClassLoader());
 
-	private static final boolean jettyPresent = ClassUtils.isPresent(
+	private static final boolean JETTY_PRESENT = ClassUtils.isPresent(
 			"org.eclipse.jetty.websocket.server.WebSocketServerFactory",
 			HandshakeWebSocketService.class.getClassLoader());
 
-	private static final boolean undertowPresent = ClassUtils.isPresent(
+	private static final boolean UNDERTOW_PRESENT = ClassUtils.isPresent(
 			"io.undertow.websockets.WebSocketProtocolHandshakeHandler",
 			HandshakeWebSocketService.class.getClassLoader());
 
-	private static final boolean reactorNettyPresent = ClassUtils.isPresent(
+	private static final boolean REACTOR_NETTY_PRESENT = ClassUtils.isPresent(
 			"reactor.ipc.netty.http.server.HttpServerResponse",
 			HandshakeWebSocketService.class.getClassLoader());
 
@@ -99,16 +99,16 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
 	private static RequestUpgradeStrategy initUpgradeStrategy() {
 		String className;
-		if (tomcatPresent) {
+		if (TOMCAT_PRESENT) {
 			className = "TomcatRequestUpgradeStrategy";
 		}
-		else if (jettyPresent) {
+		else if (JETTY_PRESENT) {
 			className = "JettyRequestUpgradeStrategy";
 		}
-		else if (undertowPresent) {
+		else if (UNDERTOW_PRESENT) {
 			className = "UndertowRequestUpgradeStrategy";
 		}
-		else if (reactorNettyPresent) {
+		else if (REACTOR_NETTY_PRESENT) {
 			// As late as possible (Reactor Netty commonly used for WebClient)
 			className = "ReactorNettyRequestUpgradeStrategy";
 		}
