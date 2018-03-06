@@ -25,7 +25,6 @@ import javax.persistence.spi.PersistenceProvider;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.eclipse.persistence.config.TargetDatabase;
 import org.eclipse.persistence.jpa.JpaEntityManager;
-
 import org.springframework.lang.Nullable;
 
 /**
@@ -97,6 +96,7 @@ public class EclipseLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		switch (database) {
 			case DB2: return TargetDatabase.DB2;
 			case DERBY: return TargetDatabase.Derby;
+			case HANA: return TargetDatabase.HANA;
 			case HSQL: return TargetDatabase.HSQL;
 			case INFORMIX: return TargetDatabase.Informix;
 			case MYSQL: return TargetDatabase.MySQL4;

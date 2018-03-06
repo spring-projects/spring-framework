@@ -28,6 +28,7 @@ import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.dialect.DB2Dialect;
 import org.hibernate.dialect.DerbyTenSevenDialect;
 import org.hibernate.dialect.H2Dialect;
+import org.hibernate.dialect.HANAColumnStoreDialect;
 import org.hibernate.dialect.HSQLDialect;
 import org.hibernate.dialect.InformixDialect;
 import org.hibernate.dialect.MySQL5Dialect;
@@ -185,6 +186,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 			case DB2: return DB2Dialect.class;
 			case DERBY: return DerbyTenSevenDialect.class;
 			case H2: return H2Dialect.class;
+			case HANA: return HANAColumnStoreDialect.class;
 			case HSQL: return HSQLDialect.class;
 			case INFORMIX: return InformixDialect.class;
 			case MYSQL: return MySQL5Dialect.class;
