@@ -165,11 +165,11 @@ public abstract class PropertyMatches {
 		}
 
 		for (int i = 1; i <= s1.length(); i++) {
-			char s_i = s1.charAt(i - 1);
+			char sI = s1.charAt(i - 1);
 			for (int j = 1; j <= s2.length(); j++) {
 				int cost;
-				char t_j = s2.charAt(j - 1);
-				if (s_i == t_j) {
+				char tJ = s2.charAt(j - 1);
+				if (sI == tJ) {
 					cost = 0;
 				}
 				else {
