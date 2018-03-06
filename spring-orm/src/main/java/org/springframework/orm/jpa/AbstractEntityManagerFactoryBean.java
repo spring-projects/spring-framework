@@ -379,15 +379,37 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	}
 
 	private EntityManagerFactory buildNativeEntityManagerFactory() {
-		EntityManagerFactory emf = createNativeEntityManagerFactory();
+		EntityManagerFactory emf;
+		try {
+			emf = createNativeEntityManagerFactory();
+		}
+		catch (PersistenceException ex) {
+			if (ex.getClass() == PersistenceException.class) {
+				// Plain PersistenceException wrapper for underlying exception?
+				// Make sure the nested exception message is properly exposed,
+				// along the lines of Spring's NestedRuntimeException.getMessage()
+				Throwable cause = ex.getCause();
+				if (cause != null) {
+					String message = ex.getMessage();
+					String causeString = cause.toString();
+					if (!message.endsWith(causeString)) {
+						throw new PersistenceException(message + "; nested exception is " + causeString, cause);
+					}
+				}
+			}
+			throw ex;
+		}
+
 		if (emf == null) {
 			throw new IllegalStateException(
 					"JPA PersistenceProvider returned null EntityManagerFactory - check your JPA provider setup!");
 		}
+
 		JpaVendorAdapter jpaVendorAdapter = getJpaVendorAdapter();
 		if (jpaVendorAdapter != null) {
 			jpaVendorAdapter.postProcessEntityManagerFactory(emf);
 		}
+
 		if (logger.isInfoEnabled()) {
 			logger.info("Initialized JPA EntityManagerFactory for persistence unit '" + getPersistenceUnitName() + "'");
 		}
@@ -414,6 +436,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			ifcs.add(EntityManagerFactory.class);
 		}
 		ifcs.add(EntityManagerFactoryInfo.class);
+
 		try {
 			return (EntityManagerFactory) Proxy.newProxyInstance(this.beanClassLoader,
 					ClassUtils.toClassArray(ifcs), new ManagedEntityManagerFactoryInvocationHandler(this));
@@ -517,8 +540,13 @@ public abstract class AbstractEntityManagerFactoryBean implements
 				throw new IllegalStateException("Interrupted during initialization of native EntityManagerFactory", ex);
 			}
 			catch (ExecutionException ex) {
+				Throwable cause = ex.getCause();
+				if (cause instanceof PersistenceException) {
+					// Rethrow a provider configuration exception (possibly with a nested cause) directly
+					throw (PersistenceException) cause;
+				}
 				throw new IllegalStateException("Failed to asynchronously initialize native EntityManagerFactory: " +
-						ex.getMessage(), ex.getCause());
+						ex.getMessage(), cause);
 			}
 		}
 	}
