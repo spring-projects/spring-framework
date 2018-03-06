@@ -278,9 +278,50 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertEquals(200, response.getStatus());
-		assertEquals("test-42-;q=1;q=2-[1, 2]", response.getContentAsString());
+		// SPR-11897
+		assertEquals("test-42--[1, 2]", response.getContentAsString());
 	}
 
+	/*
+	 * See SPR-11897
+	 */
+	@Test
+	public void matrixVariableWithEquals() throws Exception {
+		initServletWithControllers(MatrixParameterController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/42;q=1;q=2");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals(200, response.getStatus());
+		assertEquals("test-42-[1, 2]", response.getContentAsString());
+		
+		request = new MockHttpServletRequest("GET", "/a=42;q=1;q=2");
+		response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals(200, response.getStatus());
+		assertEquals("test-a=42-[1, 2]", response.getContentAsString());
+	}
+	
+	/*
+	 * See SPR-11897
+	 */
+	@Test
+	public void matrixVariablesGetAll() throws Exception {
+		initServletWithControllers(MatrixAllParametersController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/42;q=1;q=2");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals(200, response.getStatus());
+		assertEquals("test-42-{q=[1, 2]}", response.getContentAsString());
+		
+		request = new MockHttpServletRequest("GET", "/a=42;q=1;q=2");
+		response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals(200, response.getStatus());
+		assertEquals("test-a=42-{a=[42], q=[1, 2]}", response.getContentAsString());
+	}
+	
 	/*
 	 * See SPR-6640
 	 */
@@ -501,6 +542,27 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 
 			assertEquals("Invalid path variable value", 42, root);
 			writer.write("test-" + root + "-" + paramString + "-" + q);
+		}
+	}
+
+	@Controller
+	public static class MatrixParameterController {
+
+		@RequestMapping("/{root}")
+		public void handle(@PathVariable("root") String root,
+				@MatrixVariable List<Integer> q, Writer writer) throws IOException {
+			writer.write("test-" + root + "-" + q);
+		}
+	}
+	
+	@Controller
+	public static class MatrixAllParametersController {
+
+		@RequestMapping("/{root}")
+		public void handle(@PathVariable("root") String root,
+				@MatrixVariable(pathVar="root") Map<String, String> rootMatrixVars, Writer writer) throws IOException {
+
+			writer.write("test-" + root + "-" + rootMatrixVars);
 		}
 	}
 
