@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -436,10 +437,15 @@ public abstract class StringUtils {
 			return inString;
 		}
 
+		HashSet<Character> hashCharsToDelete =new HashSet<>();		
+		for(int i=0;i<charsToDelete.length();i++) {
+			hashCharsToDelete.add(charsToDelete.charAt(i));
+		}
+		
 		StringBuilder sb = new StringBuilder(inString.length());
 		for (int i = 0; i < inString.length(); i++) {
 			char c = inString.charAt(i);
-			if (charsToDelete.indexOf(c) == -1) {
+			if (!hashCharsToDelete.contains(c)) {
 				sb.append(c);
 			}
 		}
