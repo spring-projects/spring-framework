@@ -638,7 +638,7 @@ public abstract class StringUtils {
 		// first path element. This is necessary to correctly parse paths like
 		// "file:core/../core/io/Resource.class", where the ".." should just
 		// strip the first "core" directory while keeping the "file:" prefix.
-		int prefixIndex = pathToUse.indexOf(":");
+		int prefixIndex = pathToUse.indexOf(':');
 		String prefix = "";
 		if (prefixIndex != -1) {
 			prefix = pathToUse.substring(0, prefixIndex + 1);
@@ -904,7 +904,10 @@ public abstract class StringUtils {
 	 * @param array1 the first array (can be {@code null})
 	 * @param array2 the second array (can be {@code null})
 	 * @return the new array ({@code null} if both given arrays were {@code null})
+	 * @deprecated as of 4.3.15, in favor of manual merging via {@link LinkedHashSet}
+	 * (with every entry included at most once, even entries within the first array)
 	 */
+	@Deprecated
 	@Nullable
 	public static String[] mergeStringArrays(@Nullable String[] array1, @Nullable String[] array2) {
 		if (ObjectUtils.isEmpty(array1)) {
@@ -945,7 +948,7 @@ public abstract class StringUtils {
 	 * @return the {@code String} array
 	 */
 	public static String[] toStringArray(Collection<String> collection) {
-		return collection.toArray(new String[collection.size()]);
+		return collection.toArray(new String[0]);
 	}
 
 	/**
@@ -955,8 +958,7 @@ public abstract class StringUtils {
 	 * @return the {@code String} array
 	 */
 	public static String[] toStringArray(Enumeration<String> enumeration) {
-		List<String> list = Collections.list(enumeration);
-		return list.toArray(new String[list.size()]);
+		return toStringArray(Collections.list(enumeration));
 	}
 
 	/**
@@ -1022,10 +1024,9 @@ public abstract class StringUtils {
 
 	/**
 	 * Take an array of strings and split each element based on the given delimiter.
-	 * A {@code Properties} instance is then generated, with the left of the
-	 * delimiter providing the key, and the right of the delimiter providing the value.
-	 * <p>Will trim both the key and value before adding them to the
-	 * {@code Properties} instance.
+	 * A {@code Properties} instance is then generated, with the left of the delimiter
+	 * providing the key, and the right of the delimiter providing the value.
+	 * <p>Will trim both the key and value before adding them to the {@code Properties}.
 	 * @param array the array to process
 	 * @param delimiter to split each element using (typically the equals symbol)
 	 * @return a {@code Properties} instance representing the array contents,

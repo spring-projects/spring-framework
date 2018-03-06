@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,8 @@ package org.springframework.web.servlet.tags.form;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
@@ -46,7 +47,7 @@ public class TagWriter {
 	/**
 	 * Stores {@link TagStateEntry tag state}. Stack model naturally supports tag nesting.
 	 */
-	private final Stack<TagStateEntry> tagState = new Stack<>();
+	private final Deque<TagStateEntry> tagState = new ArrayDeque<>();
 
 
 	/**
@@ -191,7 +192,7 @@ public class TagWriter {
 	}
 
 	private boolean inTag() {
-		return this.tagState.size() > 0;
+		return !this.tagState.isEmpty();
 	}
 
 	private TagStateEntry currentState() {

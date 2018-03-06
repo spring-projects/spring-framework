@@ -2197,6 +2197,17 @@ Javadoc for more details.
 
 
 
+[[mvc-uri-building]]
+== URI Links
+[.small]#<<web.adoc#mvc-uri-building,Same in Spring MVC>>#
+
+This section describes various options available in the Spring Framework to prepare URIs.
+
+
+include::web-uris.adoc[leveloffset=+2]
+
+
+
 
 include::webflux-functional.adoc[leveloffset=+1]
 
@@ -2598,8 +2609,8 @@ You can use `ResourceUrlProvider` to rewrite URLs and apply the full chain of re
 transformers -- e.g. to insert versions. The WebFlux config provides a `ResourceUrlProvider`
 so it can be injected into others.
 
-Unlike Spring MVC at present in WebFlux there is no way to transparely rewrite static
-resource URLs since the are no view technologies that can make use of a non-blocking chain
+Unlike Spring MVC at present in WebFlux there is no way to transparently rewrite static
+resource URLs since there are no view technologies that can make use of a non-blocking chain
 of resolvers and transformers (e.g. resources on Amazon S3). When serving only local
 resources the workaround is to use `ResourceUrlProvider` directly (e.g. through a custom
 tag) and block for 0 seconds.

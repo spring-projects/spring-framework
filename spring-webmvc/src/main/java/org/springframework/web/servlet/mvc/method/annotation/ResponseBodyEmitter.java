@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -190,6 +190,10 @@ public class ResponseBodyEmitter {
 	 * Complete request processing.
 	 * <p>A dispatch is made into the app server where Spring MVC completes
 	 * asynchronous request processing.
+	 * <p><strong>Note:</strong> you do not need to call this method after an
+	 * {@link IOException} from any of the {@code send} methods. The Servlet
+	 * container will generate an error notification that Spring MVC will process
+	 * and handle through the exception resolver mechanism and then complete.
 	 */
 	public synchronized void complete() {
 		this.complete = true;

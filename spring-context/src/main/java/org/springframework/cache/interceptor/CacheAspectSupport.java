@@ -347,9 +347,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				Object key = generateKey(context, CacheOperationExpressionEvaluator.NO_RESULT);
 				Cache cache = context.getCaches().iterator().next();
 				try {
-					return wrapCacheValue(method, cache.get(key, () -> {
-						return unwrapReturnValue(invokeOperation(invoker));
-					}));
+					return wrapCacheValue(method, cache.get(key, () -> unwrapReturnValue(invokeOperation(invoker))));
 				}
 				catch (Cache.ValueRetrievalException ex) {
 					// The invoker wraps any Throwable in a ThrowableWrapper instance so we

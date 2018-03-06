@@ -5,7 +5,7 @@ apply plugin: "groovy"
 dependencies {
 	compile(project(':spring-core'))
 	optional("javax.inject:javax.inject:1")
-	optional("org.yaml:snakeyaml:1.19")
+	optional("org.yaml:snakeyaml:1.20")
     optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")

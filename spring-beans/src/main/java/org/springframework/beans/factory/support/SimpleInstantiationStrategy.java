@@ -72,7 +72,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 					try {
 						if (System.getSecurityManager() != null) {
 							constructorToUse = AccessController.doPrivileged(
-									(PrivilegedExceptionAction<Constructor<?>>) () -> clazz.getDeclaredConstructor());
+									(PrivilegedExceptionAction<Constructor<?>>) clazz::getDeclaredConstructor);
 						}
 						else {
 							constructorToUse =	clazz.getDeclaredConstructor();

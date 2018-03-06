@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -355,7 +355,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			Charset charset = null;
 			location = location.trim();
 			if (location.startsWith(URL_RESOURCE_CHARSET_PREFIX)) {
-				int endIndex = location.indexOf("]", URL_RESOURCE_CHARSET_PREFIX.length());
+				int endIndex = location.indexOf(']', URL_RESOURCE_CHARSET_PREFIX.length());
 				if (endIndex == -1) {
 					throw new IllegalArgumentException("Invalid charset syntax in location: " + location);
 				}
@@ -387,7 +387,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			if (getResourceResolvers().get(i) instanceof PathResourceResolver) {
 				PathResourceResolver pathResolver = (PathResourceResolver) getResourceResolvers().get(i);
 				if (ObjectUtils.isEmpty(pathResolver.getAllowedLocations())) {
-					pathResolver.setAllowedLocations(getLocations().toArray(new Resource[getLocations().size()]));
+					pathResolver.setAllowedLocations(getLocations().toArray(new Resource[0]));
 				}
 				if (this.urlPathHelper != null) {
 					pathResolver.setLocationCharsets(this.locationCharsets);

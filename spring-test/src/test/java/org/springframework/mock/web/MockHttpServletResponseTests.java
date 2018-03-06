@@ -301,7 +301,7 @@ public class MockHttpServletResponseTests {
 	public void modifyStatusAfterSendError() throws IOException {
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		response.setStatus(HttpServletResponse.SC_OK);
-		assertEquals(response.getStatus(),HttpServletResponse.SC_NOT_FOUND);
+		assertEquals(HttpServletResponse.SC_NOT_FOUND, response.getStatus());
 	}
 
 	@Test  // SPR-10414
@@ -309,7 +309,7 @@ public class MockHttpServletResponseTests {
 	public void modifyStatusMessageAfterSendError() throws IOException {
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Server Error");
-		assertEquals(response.getStatus(),HttpServletResponse.SC_NOT_FOUND);
+		assertEquals(HttpServletResponse.SC_NOT_FOUND, response.getStatus());
 	}
 
 }

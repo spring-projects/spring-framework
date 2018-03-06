@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -70,6 +69,7 @@ public class CompositeRequestCondition extends AbstractRequestCondition<Composit
 	/**
 	 * Whether this instance contains 0 conditions or not.
 	 */
+	@Override
 	public boolean isEmpty() {
 		return ObjectUtils.isEmpty(this.requestConditions);
 	}

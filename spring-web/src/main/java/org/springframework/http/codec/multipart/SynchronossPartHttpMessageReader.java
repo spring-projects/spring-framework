@@ -23,6 +23,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.OpenOption;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.List;
@@ -279,6 +280,9 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 
 	private static class SynchronossFilePart extends DefaultSynchronossPart implements FilePart {
 
+		private static final OpenOption[] FILE_CHANNEL_OPTIONS = {
+				StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE };
+
 		private final String filename;
 
 		public SynchronossFilePart(
@@ -299,7 +303,7 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 			FileChannel output = null;
 			try {
 				input = Channels.newChannel(getStorage().getInputStream());
-				output = FileChannel.open(destination.toPath(), StandardOpenOption.WRITE);
+				output = FileChannel.open(destination.toPath(), FILE_CHANNEL_OPTIONS);
 				long size = (input instanceof FileChannel ? ((FileChannel) input).size() : Long.MAX_VALUE);
 				long totalWritten = 0;
 				while (totalWritten < size) {

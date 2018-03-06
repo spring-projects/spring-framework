@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -135,7 +134,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 				prefixedPatterns.add(versionPrefix + pattern);
 			}
 		}
-		return addVersionStrategy(new FixedVersionStrategy(version), prefixedPatterns.toArray(new String[0]));
+		return addVersionStrategy(new FixedVersionStrategy(version), StringUtils.toStringArray(prefixedPatterns));
 	}
 
 	/**
@@ -248,7 +247,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		}
 		if (!matchingPatterns.isEmpty()) {
 			Comparator<String> comparator = this.pathMatcher.getPatternComparator(path);
-			Collections.sort(matchingPatterns, comparator);
+			matchingPatterns.sort(comparator);
 			return this.versionStrategyMap.get(matchingPatterns.get(0));
 		}
 		return null;

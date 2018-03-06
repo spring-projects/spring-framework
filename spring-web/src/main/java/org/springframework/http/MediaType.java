@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * A sub-class of {@link MimeType} that adds support for quality parameters as defined
- * in the HTTP specification.
+ * A subclass of {@link MimeType} that adds support for quality parameters
+ * as defined in the HTTP specification.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
@@ -427,21 +427,25 @@ public class MediaType extends MimeType implements Serializable {
 	}
 
 	/**
-	 * Return the quality value, as indicated by a {@code q} parameter, if any.
+	 * Return the quality factor, as indicated by a {@code q} parameter, if any.
 	 * Defaults to {@code 1.0}.
-	 * @return the quality factory
+	 * @return the quality factor as double value
 	 */
 	public double getQualityValue() {
-		String qualityFactory = getParameter(PARAM_QUALITY_FACTOR);
-		return (qualityFactory != null ? Double.parseDouble(unquote(qualityFactory)) : 1D);
+		String qualityFactor = getParameter(PARAM_QUALITY_FACTOR);
+		return (qualityFactor != null ? Double.parseDouble(unquote(qualityFactor)) : 1D);
 	}
 
 	/**
 	 * Indicate whether this {@code MediaType} includes the given media type.
-	 * <p>For instance, {@code text/*} includes {@code text/plain} and {@code text/html}, and {@code application/*+xml}
-	 * includes {@code application/soap+xml}, etc. This method is <b>not</b> symmetric.
+	 * <p>For instance, {@code text/*} includes {@code text/plain} and {@code text/html},
+	 * and {@code application/*+xml} includes {@code application/soap+xml}, etc.
+	 * This method is <b>not</b> symmetric.
+	 * <p>Simply calls {@link #includes(MimeType)} but declared with a
+	 * {@code MediaType} parameter for binary backwards compatibility.
 	 * @param other the reference media type with which to compare
-	 * @return {@code true} if this media type includes the given media type; {@code false} otherwise
+	 * @return {@code true} if this media type includes the given media type;
+	 * {@code false} otherwise
 	 */
 	public boolean includes(@Nullable MediaType other) {
 		return super.includes(other);
@@ -449,18 +453,23 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Indicate whether this {@code MediaType} is compatible with the given media type.
-	 * <p>For instance, {@code text/*} is compatible with {@code text/plain}, {@code text/html}, and vice versa.
-	 * In effect, this method is similar to {@link #includes(MediaType)}, except that it <b>is</b> symmetric.
+	 * <p>For instance, {@code text/*} is compatible with {@code text/plain},
+	 * {@code text/html}, and vice versa. In effect, this method is similar to
+	 * {@link #includes}, except that it <b>is</b> symmetric.
+	 * <p>Simply calls {@link #isCompatibleWith(MimeType)} but declared with a
+	 * {@code MediaType} parameter for binary backwards compatibility.
 	 * @param other the reference media type with which to compare
-	 * @return {@code true} if this media type is compatible with the given media type; {@code false} otherwise
+	 * @return {@code true} if this media type is compatible with the given media type;
+	 * {@code false} otherwise
 	 */
 	public boolean isCompatibleWith(@Nullable MediaType other) {
 		return super.isCompatibleWith(other);
 	}
 
 	/**
-	 * Return a replica of this instance with the quality value of the given MediaType.
-	 * @return the same instance if the given MediaType doesn't have a quality value, or a new one otherwise
+	 * Return a replica of this instance with the quality value of the given {@code MediaType}.
+	 * @return the same instance if the given MediaType doesn't have a quality value,
+	 * or a new one otherwise
 	 */
 	public MediaType copyQualityValue(MediaType mediaType) {
 		if (!mediaType.getParameters().containsKey(PARAM_QUALITY_FACTOR)) {
@@ -473,7 +482,8 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Return a replica of this instance with its quality value removed.
-	 * @return the same instance if the media type doesn't contain a quality value, or a new one otherwise
+	 * @return the same instance if the media type doesn't contain a quality value,
+	 * or a new one otherwise
 	 */
 	public MediaType removeQualityValue() {
 		if (!getParameters().containsKey(PARAM_QUALITY_FACTOR)) {
@@ -622,7 +632,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static void sortBySpecificity(List<MediaType> mediaTypes) {
 		Assert.notNull(mediaTypes, "'mediaTypes' must not be null");
 		if (mediaTypes.size() > 1) {
-			Collections.sort(mediaTypes, SPECIFICITY_COMPARATOR);
+			mediaTypes.sort(SPECIFICITY_COMPARATOR);
 		}
 	}
 
@@ -649,7 +659,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static void sortByQualityValue(List<MediaType> mediaTypes) {
 		Assert.notNull(mediaTypes, "'mediaTypes' must not be null");
 		if (mediaTypes.size() > 1) {
-			Collections.sort(mediaTypes, QUALITY_VALUE_COMPARATOR);
+			mediaTypes.sort(QUALITY_VALUE_COMPARATOR);
 		}
 	}
 
@@ -662,8 +672,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static void sortBySpecificityAndQuality(List<MediaType> mediaTypes) {
 		Assert.notNull(mediaTypes, "'mediaTypes' must not be null");
 		if (mediaTypes.size() > 1) {
-			Collections.sort(mediaTypes,
-					MediaType.SPECIFICITY_COMPARATOR.thenComparing(MediaType.QUALITY_VALUE_COMPARATOR));
+			mediaTypes.sort(MediaType.SPECIFICITY_COMPARATOR.thenComparing(MediaType.QUALITY_VALUE_COMPARATOR));
 		}
 	}
 
@@ -678,30 +687,29 @@ public class MediaType extends MimeType implements Serializable {
 		if (qualityComparison != 0) {
 			return qualityComparison;  // audio/*;q=0.7 < audio/*;q=0.3
 		}
-		else if (mediaType1.isWildcardType() && !mediaType2.isWildcardType()) { // */* < audio/*
+		else if (mediaType1.isWildcardType() && !mediaType2.isWildcardType()) {  // */* < audio/*
 			return 1;
 		}
-		else if (mediaType2.isWildcardType() && !mediaType1.isWildcardType()) { // audio/* > */*
+		else if (mediaType2.isWildcardType() && !mediaType1.isWildcardType()) {  // audio/* > */*
 			return -1;
 		}
-		else if (!mediaType1.getType().equals(mediaType2.getType())) { // audio/basic == text/html
+		else if (!mediaType1.getType().equals(mediaType2.getType())) {  // audio/basic == text/html
 			return 0;
 		}
-		else { // mediaType1.getType().equals(mediaType2.getType())
-			if (mediaType1.isWildcardSubtype() && !mediaType2.isWildcardSubtype()) { // audio/* < audio/basic
+		else {  // mediaType1.getType().equals(mediaType2.getType())
+			if (mediaType1.isWildcardSubtype() && !mediaType2.isWildcardSubtype()) {  // audio/* < audio/basic
 				return 1;
 			}
-			else if (mediaType2.isWildcardSubtype() && !mediaType1.isWildcardSubtype()) { // audio/basic > audio/*
+			else if (mediaType2.isWildcardSubtype() && !mediaType1.isWildcardSubtype()) {  // audio/basic > audio/*
 				return -1;
 			}
-			else if (!mediaType1.getSubtype().equals(mediaType2.getSubtype())) { // audio/basic == audio/wave
+			else if (!mediaType1.getSubtype().equals(mediaType2.getSubtype())) {  // audio/basic == audio/wave
 				return 0;
 			}
 			else {
 				int paramsSize1 = mediaType1.getParameters().size();
 				int paramsSize2 = mediaType2.getParameters().size();
-				// audio/basic;level=1 < audio/basic
-				return (paramsSize2 < paramsSize1 ? -1 : (paramsSize2 == paramsSize1 ? 0 : 1));
+				return Integer.compare(paramsSize2, paramsSize1);  // audio/basic;level=1 < audio/basic
 			}
 		}
 	};

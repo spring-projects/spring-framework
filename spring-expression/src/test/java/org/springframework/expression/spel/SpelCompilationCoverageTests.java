@@ -4957,7 +4957,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		private Method method;
 
 		public Class<?>[] getSpecificTargetClasses() {
-			return new Class[] {Payload2.class};
+			return new Class<?>[] {Payload2.class};
 		}
 
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
@@ -5043,7 +5043,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		@Override
 		public Class<?>[] getSpecificTargetClasses() {
-			return new Class[] {Map.class};
+			return new Class<?>[] {Map.class};
 		}
 
 		@Override

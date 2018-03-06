@@ -298,18 +298,16 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	}
 
 	/**
-	 * Configure the {@link UriTemplateHandler} to use to expand URI templates.
-	 * By default the {@link DefaultUriBuilderFactory} is used which relies on
-	 * Spring's URI template support and exposes several useful properties that
-	 * customize its behavior for encoding and for pre-pending a common base URL.
-	 * An alternative implementation may be used to plug an external URI
-	 * template library.
-	 * <p><strong>Note:</strong> if switching from
+	 * Customize how URI templates are expanded into URI instances.
+	 * <p>By default {@link DefaultUriBuilderFactory} with default settings is
+	 * used. You can supply a {@code DefaultUriBuilderFactory} configured
+	 * differently, or an entirely different implementation, for example that
+	 * plugs in a 3rd party URI template library.
+	 * <p><strong>Note:</strong> in 5.0 the switch from
 	 * {@link org.springframework.web.util.DefaultUriTemplateHandler
-	 * DefaultUriTemplateHandler} (deprecated in 4.3) to
-	 * {@link DefaultUriBuilderFactory} keep in mind that the
-	 * {@link DefaultUriBuilderFactory} has a different default for the
-	 * {@code parsePath} property (from false to true).
+	 * DefaultUriTemplateHandler} (deprecated in 4.3), as the default to use, to
+	 * {@link DefaultUriBuilderFactory} brings in a different default for the
+	 * {@code parsePath} property (switching from false to true).
 	 * @param handler the URI template handler to use
 	 */
 	public void setUriTemplateHandler(UriTemplateHandler handler) {

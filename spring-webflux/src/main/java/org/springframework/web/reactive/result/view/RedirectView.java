@@ -268,7 +268,7 @@ public class RedirectView extends AbstractUrlBasedView {
 			return new StringBuilder(targetUrl);
 		}
 
-		int index = targetUrl.indexOf("#");
+		int index = targetUrl.indexOf('#');
 		String fragment = (index > -1 ? targetUrl.substring(index) : null);
 
 		StringBuilder result = new StringBuilder();

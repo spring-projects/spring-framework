@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.jdbc.config;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.FactoryBean;
@@ -75,7 +74,7 @@ public class SortedResourcesFactoryBean extends AbstractFactoryBean<Resource[]> 
 		for (String location : this.locations) {
 			List<Resource> resources = new ArrayList<>(
 					Arrays.asList(this.resourcePatternResolver.getResources(location)));
-			Collections.sort(resources, (r1, r2) -> {
+			resources.sort((r1, r2) -> {
 				try {
 					return r1.getURL().toString().compareTo(r2.getURL().toString());
 				}
@@ -83,11 +82,9 @@ public class SortedResourcesFactoryBean extends AbstractFactoryBean<Resource[]> 
 					return 0;
 				}
 			});
-			for (Resource resource : resources) {
-				scripts.add(resource);
-			}
+			scripts.addAll(resources);
 		}
-		return scripts.toArray(new Resource[scripts.size()]);
+		return scripts.toArray(new Resource[0]);
 	}
 
 }

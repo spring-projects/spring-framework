@@ -342,7 +342,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 										"default constructor to fall back to: " + candidates.get(0));
 							}
 						}
-						candidateConstructors = candidates.toArray(new Constructor<?>[candidates.size()]);
+						candidateConstructors = candidates.toArray(new Constructor<?>[0]);
 					}
 					else if (rawCandidates.length == 1 && rawCandidates[0].getParameterCount() > 0) {
 						candidateConstructors = new Constructor<?>[] {rawCandidates[0]};

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,10 @@ import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.junit.Assert.*;
-import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
-import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
-import static org.springframework.web.reactive.function.BodyInserters.fromServerSentEvents;
-import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+import static org.springframework.http.MediaType.*;
+import static org.springframework.web.reactive.function.BodyExtractors.*;
+import static org.springframework.web.reactive.function.BodyInserters.*;
+import static org.springframework.web.reactive.function.server.RouterFunctions.*;
 
 /**
  * @author Arjen Poutsma
@@ -59,7 +59,7 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 
 
 	@Test
-	public void sseAsString() throws Exception {
+	public void sseAsString() {
 		Flux<String> result = this.webClient.get()
 				.uri("/string")
 				.accept(TEXT_EVENT_STREAM)
@@ -74,7 +74,7 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 	}
 
 	@Test
-	public void sseAsPerson() throws Exception {
+	public void sseAsPerson() {
 		Flux<Person> result = this.webClient.get()
 				.uri("/person")
 				.accept(TEXT_EVENT_STREAM)
@@ -89,7 +89,7 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 	}
 
 	@Test
-	public void sseAsEvent() throws Exception {
+	public void sseAsEvent() {
 		Flux<ServerSentEvent<String>> result = this.webClient.get()
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
@@ -119,28 +119,25 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 
 	private static class SseHandler {
 
-		public Mono<ServerResponse> string(ServerRequest request) {
-			Flux<String> flux = Flux.interval(Duration.ofMillis(100)).map(l -> "foo " + l).take(2);
+		private static final Flux<Long> INTERVAL = interval(Duration.ofMillis(100), 2);
+
+
+		Mono<ServerResponse> string(ServerRequest request) {
 			return ServerResponse.ok()
 					.contentType(MediaType.TEXT_EVENT_STREAM)
-					.body(flux, String.class);
+					.body(INTERVAL.map(aLong -> "foo " + aLong), String.class);
 		}
 
-		public Mono<ServerResponse> person(ServerRequest request) {
-			Flux<Person> flux = Flux.interval(Duration.ofMillis(100))
-					.map(l -> new Person("foo " + l)).take(2);
+		Mono<ServerResponse> person(ServerRequest request) {
 			return ServerResponse.ok()
 					.contentType(MediaType.TEXT_EVENT_STREAM)
-					.body(flux, Person.class);
+					.body(INTERVAL.map(aLong -> new Person("foo " + aLong)), Person.class);
 		}
 
-		public Mono<ServerResponse> sse(ServerRequest request) {
-			Flux<ServerSentEvent<String>> flux = Flux.interval(Duration.ofMillis(100))
-					.map(l -> ServerSentEvent.<String>builder().data("foo")
-							.id(Long.toString(l))
-							.comment("bar")
-							.build()).take(2);
-			return ServerResponse.ok().body(fromServerSentEvents(flux));
+		Mono<ServerResponse> sse(ServerRequest request) {
+			Flux<ServerSentEvent<String>> body = INTERVAL
+					.map(aLong -> ServerSentEvent.builder("foo").id("" + aLong).comment("bar").build());
+			return ServerResponse.ok().body(fromServerSentEvents(body));
 		}
 	}
 

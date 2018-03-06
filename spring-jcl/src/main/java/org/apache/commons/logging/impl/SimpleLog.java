@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,14 @@ package org.apache.commons.logging.impl;
 
 /**
  * Originally a simple Commons Logging provider configured by system properties.
- * Deprecated in {@code spring-jcl}, effectively equivalent to {@link NoOpLog} now.
+ * Deprecated in {@code spring-jcl}, effectively equivalent to {@link NoOpLog}.
  *
  * <p>Instead of instantiating this directly, call {@code LogFactory#getLog(Class/String)}
  * which will fall back to {@code java.util.logging} if neither Log4j nor SLF4J are present.
  *
  * @author Juergen Hoeller (for the {@code spring-jcl} variant)
  * @since 5.0
+ * @deprecated in {@code spring-jcl} (effectively equivalent to {@link NoOpLog})
  */
 @Deprecated
 @SuppressWarnings("serial")

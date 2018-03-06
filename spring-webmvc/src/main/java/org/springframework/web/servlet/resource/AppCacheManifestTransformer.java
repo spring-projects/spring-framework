@@ -195,7 +195,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 		}
 
 		private static boolean hasScheme(String line) {
-			int index = line.indexOf(":");
+			int index = line.indexOf(':');
 			return (line.startsWith("//") || (index > 0 && !line.substring(0, index).contains("/")));
 		}
 

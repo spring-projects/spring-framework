@@ -357,7 +357,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public Cookie[] getCookies() {
-		return this.cookies.toArray(new Cookie[this.cookies.size()]);
+		return this.cookies.toArray(new Cookie[0]);
 	}
 
 	@Nullable
@@ -717,7 +717,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		}
 
 		@Override
-		public void write(char buf[], int off, int len) {
+		public void write(char[] buf, int off, int len) {
 			super.write(buf, off, len);
 			super.flush();
 			setCommittedIfBufferSizeExceeded();

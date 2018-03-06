@@ -251,6 +251,11 @@ public class NettyDataBuffer implements PooledDataBuffer {
 	}
 
 	@Override
+	public InputStream asInputStream(boolean releaseOnClose) {
+		return new ByteBufInputStream(this.byteBuf, releaseOnClose);
+	}
+
+	@Override
 	public OutputStream asOutputStream() {
 		return new ByteBufOutputStream(this.byteBuf);
 	}

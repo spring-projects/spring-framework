@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -301,6 +301,17 @@ public class ForwardedHeaderFilterTests {
 		assertEquals("https://example.com/foo/bar", redirectedUrl);
 	}
 
+	@Test // SPR-16506
+	public void sendRedirectWithAbsolutePathQueryParamAndFragment() throws Exception {
+		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_HOST, "example.com");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
+		this.request.setQueryString("oldqp=1");
+
+		String redirectedUrl = sendRedirect("/foo/bar?newqp=2#fragment");
+		assertEquals("https://example.com/foo/bar?newqp=2#fragment", redirectedUrl);
+	}
+
 	@Test
 	public void sendRedirectWithContextPath() throws Exception {
 		this.request.addHeader(X_FORWARDED_PROTO, "https");
@@ -422,18 +433,22 @@ public class ForwardedHeaderFilterTests {
 	}
 
 	private String sendRedirect(final String location) throws ServletException, IOException {
-		MockHttpServletResponse response = doWithFiltersAndGetResponse(this.filter, new OncePerRequestFilter() {
+		Filter filter = new OncePerRequestFilter() {
 			@Override
-			protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-					throws ServletException, IOException {
-				response.sendRedirect(location);
+			protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res,
+					FilterChain chain) throws IOException {
+
+				res.sendRedirect(location);
 			}
-		});
+		};
+		MockHttpServletResponse response = doWithFiltersAndGetResponse(this.filter, filter);
 		return response.getRedirectedUrl();
 	}
 
 	@SuppressWarnings("serial")
-	private MockHttpServletResponse doWithFiltersAndGetResponse(Filter... filters) throws ServletException, IOException {
+	private MockHttpServletResponse doWithFiltersAndGetResponse(Filter... filters)
+			throws ServletException, IOException {
+
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		FilterChain filterChain = new MockFilterChain(new HttpServlet() {}, filters);
 		filterChain.doFilter(request, response);

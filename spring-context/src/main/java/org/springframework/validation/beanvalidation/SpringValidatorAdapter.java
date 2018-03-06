@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 package org.springframework.validation.beanvalidation;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,6 +37,7 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
@@ -116,7 +117,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 				}
 			}
 			processConstraintViolations(
-					this.targetValidator.validate(target, groups.toArray(new Class<?>[groups.size()])), errors);
+					this.targetValidator.validate(target, ClassUtils.toClassArray(groups)), errors);
 		}
 	}
 
@@ -142,15 +143,18 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 						String nestedField = bindingResult.getNestedPath() + field;
 						if ("".equals(nestedField)) {
 							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode);
-							bindingResult.addError(new ObjectError(
-									errors.getObjectName(), errorCodes, errorArgs, violation.getMessage()));
+							ObjectError error = new ObjectError(
+									errors.getObjectName(), errorCodes, errorArgs, violation.getMessage());
+							error.wrap(violation);
+							bindingResult.addError(error);
 						}
 						else {
 							Object rejectedValue = getRejectedValue(field, violation, bindingResult);
 							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode, field);
-							bindingResult.addError(new FieldError(
-									errors.getObjectName(), nestedField, rejectedValue, false,
-									errorCodes, errorArgs, violation.getMessage()));
+							FieldError error = new FieldError(errors.getObjectName(), nestedField,
+									rejectedValue, false, errorCodes, errorArgs, violation.getMessage());
+							error.wrap(violation);
+							bindingResult.addError(error);
 						}
 					}
 					else {
@@ -238,7 +242,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	 * @see org.springframework.validation.DefaultBindingErrorProcessor#getArgumentsForBindError
 	 */
 	protected Object[] getArgumentsForConstraint(String objectName, String field, ConstraintDescriptor<?> descriptor) {
-		List<Object> arguments = new LinkedList<>();
+		List<Object> arguments = new ArrayList<>();
 		arguments.add(getResolvableField(objectName, field));
 		// Using a TreeMap for alphabetical ordering of attribute names
 		Map<String, Object> attributesToExpose = new TreeMap<>();
@@ -251,7 +255,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 			}
 		});
 		arguments.addAll(attributesToExpose.values());
-		return arguments.toArray(new Object[arguments.size()]);
+		return arguments.toArray();
 	}
 
 	/**

@@ -4438,7 +4438,7 @@ in all responses as follows:
 ----
 // static import of MockMvcBuilders.standaloneSetup
 
-MockMVc mockMvc = standaloneSetup(new MusicController())
+MockMvc mockMvc = standaloneSetup(new MusicController())
 		.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON))
 		.alwaysExpect(status().isOk())
 		.alwaysExpect(content().contentType("application/json;charset=UTF-8"))
@@ -4533,7 +4533,7 @@ properties:
 			mockMvc = standaloneSetup(new AccountController())
 				.defaultRequest(get("/")
 				.contextPath("/app").servletPath("/main")
-				.accept(MediaType.APPLICATION_JSON).build();
+				.accept(MediaType.APPLICATION_JSON)).build();
 		}
 ----
 

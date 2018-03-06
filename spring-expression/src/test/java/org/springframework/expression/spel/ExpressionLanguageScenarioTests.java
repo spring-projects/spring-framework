@@ -219,7 +219,7 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 			fail("Should not be allowed to set oranges to be blue !");
 		}
 		catch (SpelEvaluationException ee) {
-			assertEquals(ee.getMessageCode(), SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
+			assertEquals(SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL, ee.getMessageCode());
 		}
 	}
 
@@ -240,7 +240,7 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 			fail("Should not be allowed to set peas to be blue !");
 		}
 		catch (SpelEvaluationException ee) {
-			assertEquals(ee.getMessageCode(), SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
+			assertEquals(SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL, ee.getMessageCode());
 		}
 	}
 

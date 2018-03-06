@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -473,6 +473,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * a list of supported locales you can pass the returned list to
 	 * {@link Locale#filter(List, Collection)}.
 	 * @since 5.0
+	 * @throws IllegalArgumentException if the value cannot be converted to a language range
 	 */
 	public List<Locale.LanguageRange> getAcceptLanguage() {
 		String value = getFirst(ACCEPT_LANGUAGE);
@@ -494,6 +495,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * {@link java.util.Locale.LanguageRange} to a {@link Locale}.
 	 * @return the locales or an empty list
 	 * @since 5.0
+	 * @throws IllegalArgumentException if the value cannot be converted to a locale
 	 */
 	public List<Locale> getAcceptLanguageAsLocales() {
 		List<Locale.LanguageRange> ranges = getAcceptLanguage();
@@ -879,7 +881,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * by the {@code Date} header.
 	 * <p>The date is returned as the number of milliseconds since
 	 * January 1, 1970 GMT. Returns -1 when the date is unknown.
-	 * @throws IllegalArgumentException if the value can't be converted to a date
+	 * @throws IllegalArgumentException if the value cannot be converted to a date
 	 */
 	public long getDate() {
 		return getFirstDate(DATE);
@@ -1275,7 +1277,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 			// Let's only bother with DateTimeFormatter parsing for long enough values.
 
 			// See https://stackoverflow.com/questions/12626699/if-modified-since-http-header-passed-by-ie9-includes-length
-			int parametersIndex = headerValue.indexOf(";");
+			int parametersIndex = headerValue.indexOf(';');
 			if (parametersIndex != -1) {
 				headerValue = headerValue.substring(0, parametersIndex);
 			}

@@ -17,7 +17,7 @@
 package org.springframework.web.servlet.tags;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -334,7 +334,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 						qs.append(UriUtils.encodeQueryParam(param.getValue(), encoding));
 					}
 				}
-				catch (UnsupportedEncodingException ex) {
+				catch (UnsupportedCharsetException ex) {
 					throw new JspException(ex);
 				}
 			}
@@ -363,7 +363,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 				try {
 					uri = uri.replace(template, (value != null ? UriUtils.encodePath(value, encoding) : ""));
 				}
-				catch (UnsupportedEncodingException ex) {
+				catch (UnsupportedCharsetException ex) {
 					throw new JspException(ex);
 				}
 			}
@@ -376,7 +376,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 						uri = uri.replace(template,
 								(value != null ? UriUtils.encodePathSegment(param.getValue(), encoding) : ""));
 					}
-					catch (UnsupportedEncodingException ex) {
+					catch (UnsupportedCharsetException ex) {
 						throw new JspException(ex);
 					}
 				}

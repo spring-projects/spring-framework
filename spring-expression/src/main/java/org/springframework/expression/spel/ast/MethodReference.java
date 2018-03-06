@@ -321,7 +321,7 @@ public class MethodReference extends SpelNodeImpl {
 			Class<?> publicDeclaringClass = methodExecutor.getPublicDeclaringClass();
 			Assert.state(publicDeclaringClass != null, "No public declaring class");
 			classDesc = publicDeclaringClass.getName().replace('.', '/');
-		};
+		}
 
 		if (!isStaticMethod) {
 			if (descriptor == null || !descriptor.substring(1).equals(classDesc)) {

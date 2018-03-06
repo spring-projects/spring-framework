@@ -93,6 +93,7 @@ public class WebConnectionHtmlUnitDriver extends HtmlUnitDriver {
 	 * Return the current {@link WebClient}.
 	 * @since 4.3
 	 */
+	@Override
 	public WebClient getWebClient() {
 		Assert.state(this.webClient != null, "No WebClient set");
 		return this.webClient;

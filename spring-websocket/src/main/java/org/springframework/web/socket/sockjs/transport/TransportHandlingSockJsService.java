@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +68,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			"com.fasterxml.jackson.databind.ObjectMapper", TransportHandlingSockJsService.class.getClassLoader());
 
 
-	private final Map<TransportType, TransportHandler> handlers = new HashMap<>();
+	private final Map<TransportType, TransportHandler> handlers = new EnumMap<>(TransportType.class);
 
 	@Nullable
 	private SockJsMessageCodec messageCodec;
@@ -251,7 +252,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		try {
 			HttpMethod supportedMethod = transportType.getHttpMethod();
 			if (supportedMethod != request.getMethod()) {
-				if (HttpMethod.OPTIONS == request.getMethod() && transportType.supportsCors()) {
+				if (request.getMethod() == HttpMethod.OPTIONS && transportType.supportsCors()) {
 					if (checkOrigin(request, response, HttpMethod.OPTIONS, supportedMethod)) {
 						response.setStatusCode(HttpStatus.NO_CONTENT);
 						addCacheHeaders(response);

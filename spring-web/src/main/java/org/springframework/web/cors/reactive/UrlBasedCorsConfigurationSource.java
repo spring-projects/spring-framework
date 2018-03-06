@@ -54,7 +54,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	public void setCorsConfigurations(@Nullable Map<String, CorsConfiguration> corsConfigurations) {
 		this.corsConfigurations.clear();
 		if (corsConfigurations != null) {
-			corsConfigurations.forEach((path, config) -> registerCorsConfiguration(path, config));
+			corsConfigurations.forEach(this::registerCorsConfiguration);
 		}
 	}
 

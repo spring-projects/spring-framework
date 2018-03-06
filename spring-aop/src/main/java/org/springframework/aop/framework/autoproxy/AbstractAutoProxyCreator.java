@@ -554,7 +554,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 				advisors.add(this.advisorAdapterRegistry.wrap(next));
 			}
 		}
-		return advisors.toArray(new Advisor[advisors.size()]);
+		return advisors.toArray(new Advisor[0]);
 	}
 
 	/**

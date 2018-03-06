@@ -1,17 +1,17 @@
 [[webtestclient]]
 = WebTestClient
 
-`WebTestClient` is a non-blocking, reactive client for testing web servers. It uses
-the reactive <<web-reactive.adoc#webflux-webclient, WebClient>> internally to perform
-requests and provides a fluent API to verify responses. The `WebTestClient` can connect
-to any server over an HTTP connection. It can also bind directly to WebFlux applications
-with <<testing.adoc#mock-objects-web-reactive,mock request and response>> objects,
-without the need for an HTTP server.
+`WebTestClient` is a thin shell around <<web-reactive.adoc#webflux-webclient, WebClient>>,
+using it to perform requests and exposing a dedicated, fluent API for verifying responses.
+`WebTestClient` bind to a WebFlux application using a
+<<testing.adoc#mock-objects-web-reactive,mock request and response>>, or it can test any
+web server over an HTTP connection.
+
 
 [TIP]
 ====
-Kotlin users, please see <<languages.adoc#kotlin-webtestclient-issue,this section>> for
-important information on using the `WebTestClient` in Kotlin.
+Kotlin users, please see <<languages.adoc#kotlin-webtestclient-issue,this section>>
+related to use of the `WebTestClient`.
 ====
 
 
@@ -20,8 +20,8 @@ important information on using the `WebTestClient` in Kotlin.
 == Setup
 
 To create a `WebTestClient` you must choose one of several server setup options.
-Effectively you either configure a WebFlux application to bind to, or use absolute URLs
-to connect to a running server.
+Effectively you're either configuring the WebFlux application to bind to, or using
+a URL to connect to a running server.
 
 
 

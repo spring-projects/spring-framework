@@ -421,7 +421,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		String[] tokens = StringUtils.tokenizeToStringArray(this.pointcutExpression, " ");
 		for (int i = 0; i < tokens.length; i++) {
 			String toMatch = tokens[i];
-			int firstParenIndex = toMatch.indexOf("(");
+			int firstParenIndex = toMatch.indexOf('(');
 			if (firstParenIndex != -1) {
 				toMatch = toMatch.substring(0, firstParenIndex);
 			}
@@ -582,7 +582,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 			if (toMatch.startsWith("!")) {
 				toMatch = toMatch.substring(1);
 			}
-			int firstParenIndex = toMatch.indexOf("(");
+			int firstParenIndex = toMatch.indexOf('(');
 			if (firstParenIndex != -1) {
 				toMatch = toMatch.substring(0, firstParenIndex);
 			}

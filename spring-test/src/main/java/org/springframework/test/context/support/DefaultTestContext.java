@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.TestContext;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of the {@link TestContext} interface.
@@ -195,7 +196,7 @@ public class DefaultTestContext implements TestContext {
 	@Override
 	public String[] attributeNames() {
 		synchronized (this.attributes) {
-			return this.attributes.keySet().stream().toArray(String[]::new);
+			return StringUtils.toStringArray(this.attributes.keySet());
 		}
 	}
 

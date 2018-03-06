@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 	private final boolean includeSynonyms;
 
 	@Nullable
-	private String defaultSchema;
+	private final String defaultSchema;
 
 
 	/**
@@ -65,23 +65,27 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 
 		super(databaseMetaData);
 		this.includeSynonyms = includeSynonyms;
-
-		lookupDefaultSchema(databaseMetaData);
+		this.defaultSchema = lookupDefaultSchema(databaseMetaData);
 	}
 
 
 	/*
 	 * Oracle-based implementation for detecting the current schema.
 	 */
-	private void lookupDefaultSchema(DatabaseMetaData databaseMetaData) {
+	@Nullable
+	private static String lookupDefaultSchema(DatabaseMetaData databaseMetaData) {
 		try {
 			CallableStatement cstmt = null;
 			try {
-				cstmt = databaseMetaData.getConnection().prepareCall(
-						"{? = call sys_context('USERENV', 'CURRENT_SCHEMA')}");
+				Connection con = databaseMetaData.getConnection();
+				if (con == null) {
+					logger.debug("Cannot check default schema - no Connection from DatabaseMetaData");
+					return null;
+				}
+				cstmt = con.prepareCall("{? = call sys_context('USERENV', 'CURRENT_SCHEMA')}");
 				cstmt.registerOutParameter(1, Types.VARCHAR);
 				cstmt.execute();
-				this.defaultSchema = cstmt.getString(1);
+				return cstmt.getString(1);
 			}
 			finally {
 				if (cstmt != null) {
@@ -90,7 +94,8 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 			}
 		}
 		catch (SQLException ex) {
-			logger.debug("Encountered exception during default schema lookup", ex);
+			logger.debug("Exception encountered during default schema lookup", ex);
+			return null;
 		}
 	}
 
@@ -116,6 +121,12 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 		}
 
 		Connection con = databaseMetaData.getConnection();
+		if (con == null) {
+			logger.warn("Unable to include synonyms in table metadata lookup - no Connection from DatabaseMetaData");
+			super.initializeWithTableColumnMetaData(databaseMetaData, catalogName, schemaName, tableName);
+			return;
+		}
+
 		try {
 			Class<?> oracleConClass = con.getClass().getClassLoader().loadClass("oracle.jdbc.OracleConnection");
 			con = (Connection) con.unwrap(oracleConClass);
@@ -133,7 +144,7 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 		Boolean originalValueForIncludeSynonyms;
 
 		try {
-			Method getIncludeSynonyms = con.getClass().getMethod("getIncludeSynonyms", (Class[]) null);
+			Method getIncludeSynonyms = con.getClass().getMethod("getIncludeSynonyms");
 			ReflectionUtils.makeAccessible(getIncludeSynonyms);
 			originalValueForIncludeSynonyms = (Boolean) getIncludeSynonyms.invoke(con);
 

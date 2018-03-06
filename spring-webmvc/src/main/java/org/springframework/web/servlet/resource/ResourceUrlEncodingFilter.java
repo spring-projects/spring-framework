@@ -123,7 +123,7 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 		}
 
 		private int getQueryParamsIndex(String url) {
-			int index = url.indexOf("?");
+			int index = url.indexOf('?');
 			return (index > 0 ? index : url.length());
 		}
 	}

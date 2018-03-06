@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,6 +168,7 @@ public interface WebTestClient {
 	 * WebFlux application will be tested without an HTTP server using a mock
 	 * request and response.
 	 * @param controllers one or more controller instances to tests
+	 * (specified {@code Class} will be turned into instance)
 	 * @return chained API to customize server and client config; use
 	 * {@link MockServerSpec#configureClient()} to transition to client config
 	 */
@@ -290,9 +291,8 @@ public interface WebTestClient {
 	interface ControllerSpec extends MockServerSpec<ControllerSpec> {
 
 		/**
-		 * Register one or more
-		 * {@link org.springframework.web.bind.annotation.ControllerAdvice
-		 * ControllerAdvice} instances to be used in tests.
+		 * Register one or more {@link org.springframework.web.bind.annotation.ControllerAdvice}
+		 * instances to be used in tests (specified {@code Class} will be turned into instance).
 		 */
 		ControllerSpec controllerAdvice(Object... controllerAdvice);
 

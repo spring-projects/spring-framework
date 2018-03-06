@@ -89,7 +89,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		super(scheme, fragment);
 
-			this.userInfo = userInfo;
+		this.userInfo = userInfo;
 		this.host = host;
 		this.port = port;
 		this.path = (path != null ? path : NULL_PATH_COMPONENT);
@@ -166,10 +166,8 @@ final class HierarchicalUriComponents extends UriComponents {
 							queryBuilder.append('&');
 						}
 						queryBuilder.append(name);
-
 						if (value != null) {
-							queryBuilder.append('=');
-							queryBuilder.append(value.toString());
+							queryBuilder.append('=').append(value.toString());
 						}
 					}
 				}
@@ -211,8 +209,8 @@ final class HierarchicalUriComponents extends UriComponents {
 		String hostTo = (this.host != null ? encodeUriComponent(this.host, charset, getHostType()) : null);
 		PathComponent pathTo = this.path.encode(charset);
 		MultiValueMap<String, String> paramsTo = encodeQueryParams(charset);
-		return new HierarchicalUriComponents(schemeTo, fragmentTo, userInfoTo, hostTo, this.port,
-				pathTo, paramsTo, true, false);
+		return new HierarchicalUriComponents(
+				schemeTo, fragmentTo, userInfoTo, hostTo, this.port, pathTo, paramsTo, true, false);
 	}
 
 	private MultiValueMap<String, String> encodeQueryParams(Charset charset) {
@@ -355,8 +353,8 @@ final class HierarchicalUriComponents extends UriComponents {
 		PathComponent pathTo = this.path.expand(uriVariables);
 		MultiValueMap<String, String> paramsTo = expandQueryParams(uriVariables);
 
-		return new HierarchicalUriComponents(schemeTo, fragmentTo, userInfoTo, hostTo, portTo,
-				pathTo, paramsTo, false, false);
+		return new HierarchicalUriComponents(
+				schemeTo, fragmentTo, userInfoTo, hostTo, portTo, pathTo, paramsTo, false, false);
 	}
 
 	private MultiValueMap<String, String> expandQueryParams(UriTemplateVariables variables) {
@@ -374,10 +372,6 @@ final class HierarchicalUriComponents extends UriComponents {
 		return result;
 	}
 
-	/**
-	 * Normalize the path removing sequences like "path/..".
-	 * @see StringUtils#cleanPath(String)
-	 */
 	@Override
 	public UriComponents normalize() {
 		String normalizedPath = StringUtils.cleanPath(getPath());
@@ -388,28 +382,22 @@ final class HierarchicalUriComponents extends UriComponents {
 
 	// Other functionality
 
-	/**
-	 * Returns a URI String from this {@code UriComponents} instance.
-	 */
 	@Override
 	public String toUriString() {
 		StringBuilder uriBuilder = new StringBuilder();
 		if (getScheme() != null) {
-			uriBuilder.append(getScheme());
-			uriBuilder.append(':');
+			uriBuilder.append(getScheme()).append(':');
 		}
 		if (this.userInfo != null || this.host != null) {
 			uriBuilder.append("//");
 			if (this.userInfo != null) {
-				uriBuilder.append(this.userInfo);
-				uriBuilder.append('@');
+				uriBuilder.append(this.userInfo).append('@');
 			}
 			if (this.host != null) {
-				uriBuilder.append(host);
+				uriBuilder.append(this.host);
 			}
 			if (getPort() != -1) {
-				uriBuilder.append(':');
-				uriBuilder.append(port);
+				uriBuilder.append(':').append(this.port);
 			}
 		}
 		String path = getPath();
@@ -421,24 +409,19 @@ final class HierarchicalUriComponents extends UriComponents {
 		}
 		String query = getQuery();
 		if (query != null) {
-			uriBuilder.append('?');
-			uriBuilder.append(query);
+			uriBuilder.append('?').append(query);
 		}
 		if (getFragment() != null) {
-			uriBuilder.append('#');
-			uriBuilder.append(getFragment());
+			uriBuilder.append('#').append(getFragment());
 		}
 		return uriBuilder.toString();
 	}
 
-	/**
-	 * Returns a {@code URI} from this {@code UriComponents} instance.
-	 */
 	@Override
 	public URI toUri() {
 		try {
 			if (this.encoded) {
-				return new URI(toString());
+				return new URI(toUriString());
 			}
 			else {
 				String path = getPath();
@@ -448,8 +431,7 @@ final class HierarchicalUriComponents extends UriComponents {
 						path = PATH_DELIMITER + path;
 					}
 				}
-				return new URI(getScheme(), getUserInfo(), getHost(), getPort(), path, getQuery(),
-						getFragment());
+				return new URI(getScheme(), getUserInfo(), getHost(), getPort(), path, getQuery(), getFragment());
 			}
 		}
 		catch (URISyntaxException ex) {
@@ -803,7 +785,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
-			builder.pathSegment(getPathSegments().toArray(new String[getPathSegments().size()]));
+			builder.pathSegment(StringUtils.toStringArray(getPathSegments()));
 		}
 
 		@Override

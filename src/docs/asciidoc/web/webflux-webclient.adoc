@@ -1,25 +1,29 @@
 [[webflux-client]]
 = WebClient
 
-The `spring-webflux` module includes a non-blocking, reactive client for HTTP requests
-with Reactive Streams back pressure. It shares
-<<web-reactive.adoc#webflux-codecs,HTTP codecs>> and other infrastructure with the
+The `spring-webflux` module includes a reactive, non-blocking client for HTTP requests
+with a functional-style API client and Reactive Streams support. `WebClient` depends on a
+lower level HTTP client library to execute requests and that support is pluggable.
+
+`WebClient`
+uses the same <<web-reactive.adoc#webflux-codecs,codecs>> as WebFlux server applications do, and
+shares a common base package, some common APIs, and infrastructure with the
 server <<web-reactive.adoc#webflux-fn,functional web framework>>.
+The API exposes Reactor `Flux` and `Mono` types, also see
+<<web-reactive.adoc#webflux-reactive-libraries>>. By default it uses
+it uses https://github.com/reactor/reactor-netty[Reactor Netty] as the HTTP client
+library but others can be plugged in through a custom `ClientHttpConnector`.
 
-`WebClient` provides a higher level API over HTTP client libraries. By default
-it uses https://github.com/reactor/reactor-netty[Reactor Netty] but that is pluggable
-with a different `ClientHttpConnector`. The `WebClient` API returns Reactor `Flux` or
-`Mono` for output and accepts Reactive Streams `Publisher` as input (see
-<<web-reactive.adoc#webflux-reactive-libraries>>).
+By comparison to the <<integration.adoc#rest-resttemplate,RestTemplate>>, the
+`WebClient` is:
 
-[TIP]
-====
-By comparison to the
-<<integration.adoc#rest-resttemplate,RestTemplate>>, the `WebClient` offers a more
-functional and fluent API that taking full advantage of Java 8 lambdas. It supports both
-sync and async scenarios, including streaming, and brings the efficiency of
-non-blocking I/O.
-====
+* non-blocking, reactive, and supports higher concurrency with less hardware resources.
+* provides a functional API that takes advantage of Java 8 lambdas.
+* supports both synchronous and asynchronous scenarios.
+* supports streaming up or down from a server.
+
+For most concurrent scenarios, e.g. a sequence of possibly inter-dependent HTTP calls,
+or for making remote calls from the server-side, prefer using the `WebClient`.
 
 
 
@@ -336,3 +340,17 @@ You can also mutate an existing `WebClient` instance without affecting the origi
 			.filter(basicAuthentication("user", "pwd")
 			.build();
 ----
+
+
+
+
+[[webflux-client-testing]]
+== Testing
+
+To test code that uses the `WebClient`, you can use a mock web server such as the
+https://github.com/square/okhttp#mockwebserver[OkHttp MockWebServer]. To see example
+use, check
+https://github.com/spring-projects/spring-framework/blob/master/spring-webflux/src/test/java/org/springframework/web/reactive/function/client/WebClientIntegrationTests.java[WebClientIntegrationTests]
+in the Spring Framework tests, or the
+https://github.com/square/okhttp/tree/master/samples/static-server[static-server]
+sample in the OkHttp repository.

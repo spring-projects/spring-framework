@@ -65,8 +65,8 @@ class SimpleCommandLineArgsParser {
 				String optionName;
 				String optionValue = null;
 				if (optionText.contains("=")) {
-					optionName = optionText.substring(0, optionText.indexOf("="));
-					optionValue = optionText.substring(optionText.indexOf("=")+1, optionText.length());
+					optionName = optionText.substring(0, optionText.indexOf('='));
+					optionValue = optionText.substring(optionText.indexOf('=')+1, optionText.length());
 				}
 				else {
 					optionName = optionText;

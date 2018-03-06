@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ class TransactionContextHolder {
 			new NamedInheritableThreadLocal<>("Test Transaction Context");
 
 
-	static void setCurrentTransactionContext(@Nullable TransactionContext transactionContext) {
+	static void setCurrentTransactionContext(TransactionContext transactionContext) {
 		currentTransactionContext.set(transactionContext);
 	}
 
@@ -42,11 +42,9 @@ class TransactionContextHolder {
 
 	@Nullable
 	static TransactionContext removeCurrentTransactionContext() {
-		synchronized (currentTransactionContext) {
-			TransactionContext transactionContext = currentTransactionContext.get();
-			currentTransactionContext.remove();
-			return transactionContext;
-		}
+		TransactionContext transactionContext = currentTransactionContext.get();
+		currentTransactionContext.remove();
+		return transactionContext;
 	}
 
 }

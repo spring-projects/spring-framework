@@ -29,15 +29,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON;
-import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON_VALUE;
+import static org.springframework.http.MediaType.*;
 
 /**
  * @author Sebastien Deleuze
@@ -67,7 +66,7 @@ public class JacksonStreamingIntegrationTests extends AbstractHttpHandlerIntegra
 	}
 
 	@Test
-	public void jsonStreaming() throws Exception {
+	public void jsonStreaming() {
 		Flux<Person> result = this.webClient.get()
 				.uri("/stream")
 				.accept(APPLICATION_STREAM_JSON)
@@ -82,7 +81,7 @@ public class JacksonStreamingIntegrationTests extends AbstractHttpHandlerIntegra
 	}
 
 	@Test
-	public void smileStreaming() throws Exception {
+	public void smileStreaming() {
 		Flux<Person> result = this.webClient.get()
 				.uri("/stream")
 				.accept(new MediaType("application", "stream+x-jackson-smile"))
@@ -100,9 +99,10 @@ public class JacksonStreamingIntegrationTests extends AbstractHttpHandlerIntegra
 	@SuppressWarnings("unused")
 	static class JacksonStreamingController {
 
-		@RequestMapping(value = "/stream", produces = { APPLICATION_STREAM_JSON_VALUE, "application/stream+x-jackson-smile" })
+		@GetMapping(value = "/stream",
+				produces = { APPLICATION_STREAM_JSON_VALUE, "application/stream+x-jackson-smile" })
 		Flux<Person> person() {
-			return Flux.interval(Duration.ofMillis(100)).map(l -> new Person("foo " + l));
+			return interval(Duration.ofMillis(100), 50).map(l -> new Person("foo " + l));
 		}
 
 	}

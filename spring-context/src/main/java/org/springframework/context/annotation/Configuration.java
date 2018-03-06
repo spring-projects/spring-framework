@@ -120,7 +120,7 @@ import org.springframework.stereotype.Component;
  *
  * Externalized values may be looked up by injecting the Spring
  * {@link org.springframework.core.env.Environment} into a {@code @Configuration}
- * class the usual (e.g. using the {@code @Autowired} annotation):
+ * class as usual (e.g. using the {@code @Autowired} annotation):
  *
  * <pre class="code">
  * &#064;Configuration
@@ -138,8 +138,8 @@ import org.springframework.stereotype.Component;
  *
  * Properties resolved through the {@code Environment} reside in one or more "property
  * source" objects, and {@code @Configuration} classes may contribute property sources to
- * the {@code Environment} object using
- * the {@link org.springframework.core.env.PropertySources @PropertySources} annotation:
+ * the {@code Environment} object using the {@link PropertySource @PropertySource}
+ * annotation:
  *
  * <pre class="code">
  * &#064;Configuration

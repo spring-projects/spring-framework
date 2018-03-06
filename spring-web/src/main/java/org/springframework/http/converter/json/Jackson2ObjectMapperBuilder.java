@@ -98,6 +98,8 @@ import org.springframework.util.xml.StaxUtils;
  */
 public class Jackson2ObjectMapperBuilder {
 
+	private static volatile boolean kotlinWarningLogged = false;
+
 	private final Log logger = LogFactory.getLog(getClass());
 
 	private final Map<Class<?>, Class<?>> mixIns = new HashMap<>();
@@ -543,7 +545,7 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Set whether to let Jackson find available modules via the JDK ServiceLoader,
-	 * based on META-INF metadata in the classpath. Requires Jackson 2.2 or higher.
+	 * based on META-INF metadata in the classpath.
 	 * <p>If this mode is not set, Spring's Jackson2ObjectMapperBuilder itself
 	 * will try to find the JSR-310 and Joda-Time support modules on the classpath -
 	 * provided that Java 8 and Joda-Time themselves are available, respectively.
@@ -616,7 +618,6 @@ public class Jackson2ObjectMapperBuilder {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 
 		if (this.findModulesViaServiceLoader) {
-			// Jackson 2.2+
 			objectMapper.registerModules(ObjectMapper.findModules(this.moduleClassLoader));
 		}
 		else if (this.findWellKnownModules) {
@@ -624,10 +625,7 @@ public class Jackson2ObjectMapperBuilder {
 		}
 
 		if (this.modules != null) {
-			for (Module module : this.modules) {
-				// Using Jackson 2.0+ registerModule method, not Jackson 2.2+ registerModules
-				objectMapper.registerModule(module);
-			}
+			objectMapper.registerModules(this.modules);
 		}
 		if (this.moduleClasses != null) {
 			for (Class<? extends Module> module : this.moduleClasses) {
@@ -770,13 +768,15 @@ public class Jackson2ObjectMapperBuilder {
 		if (KotlinDetector.isKotlinPresent()) {
 			try {
 				Class<? extends Module> kotlinModule = (Class<? extends Module>)
-						ClassUtils.forName("com.fasterxml.jackson.module.kotlin.KotlinModule",
-								this.moduleClassLoader);
+						ClassUtils.forName("com.fasterxml.jackson.module.kotlin.KotlinModule", this.moduleClassLoader);
 				objectMapper.registerModule(BeanUtils.instantiateClass(kotlinModule));
 			}
 			catch (ClassNotFoundException ex) {
-				logger.warn("For Jackson Kotlin classes support please add " +
-						"\"com.fasterxml.jackson.module:jackson-module-kotlin\" to the classpath");
+				if (!kotlinWarningLogged) {
+					kotlinWarningLogged = true;
+					logger.warn("For Jackson Kotlin classes support please add " +
+							"\"com.fasterxml.jackson.module:jackson-module-kotlin\" to the classpath");
+				}
 			}
 		}
 	}

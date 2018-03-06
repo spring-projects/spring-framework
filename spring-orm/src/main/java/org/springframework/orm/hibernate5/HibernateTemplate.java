@@ -1131,7 +1131,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	 * @see #setCacheQueries
 	 * @see #setQueryCacheRegion
 	 */
-	@Deprecated
 	@SuppressWarnings({"rawtypes", "deprecation"})
 	protected void prepareQuery(org.hibernate.Query queryObject) {
 		if (isCacheQueries()) {
@@ -1176,7 +1175,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			queryObject.setParameter(paramName, value);
 		}
 	}
-
 
 	@Deprecated
 	@SuppressWarnings({"rawtypes", "deprecation"})
@@ -1229,11 +1227,11 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 				// If return value is a Query or Criteria, apply transaction timeout.
 				// Applies to createQuery, getNamedQuery, createCriteria.
-				if (retVal instanceof org.hibernate.Query) {
-					prepareQuery(((org.hibernate.Query) retVal));
-				}
 				if (retVal instanceof Criteria) {
 					prepareCriteria(((Criteria) retVal));
+				}
+				else if (retVal instanceof org.hibernate.Query) {
+					prepareQuery(((org.hibernate.Query) retVal));
 				}
 
 				return retVal;

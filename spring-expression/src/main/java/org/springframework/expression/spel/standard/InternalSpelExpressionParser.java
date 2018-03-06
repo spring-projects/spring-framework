@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 package org.springframework.expression.spel.standard;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
 import java.util.regex.Pattern;
 
 import org.springframework.expression.ParseException;
@@ -93,7 +94,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	private final SpelParserConfiguration configuration;
 
 	// For rules that build nodes, they are stacked here for return
-	private final Stack<SpelNodeImpl> constructedNodes = new Stack<>();
+	private final Deque<SpelNodeImpl> constructedNodes = new ArrayDeque<>();
 
 	// The expression being parsed
 	private String expressionString = "";
@@ -364,7 +365,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		}
 		return new CompoundExpression(toPos(start.getStartPosition(),
 				nodes.get(nodes.size() - 1).getEndPosition()),
-				nodes.toArray(new SpelNodeImpl[nodes.size()]));
+				nodes.toArray(new SpelNodeImpl[0]));
 	}
 
 	// node : ((DOT dottedNode) | (SAFE_NAVI dottedNode) | nonDottedNode)+;
@@ -442,7 +443,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		List<SpelNodeImpl> args = new ArrayList<>();
 		consumeArguments(args);
 		eatToken(TokenKind.RPAREN);
-		return args.toArray(new SpelNodeImpl[args.size()]);
+		return args.toArray(new SpelNodeImpl[0]);
 	}
 
 	private void eatConstructorArgs(List<SpelNodeImpl> accumulatedArguments) {
@@ -645,36 +646,33 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			// ',' - more expressions in this list
 			// ':' - this is a map!
 			if (peekToken(TokenKind.RCURLY)) {  // list with one item in it
-				List<SpelNodeImpl> listElements = new ArrayList<>();
-				listElements.add(firstExpression);
+				List<SpelNodeImpl> elements = new ArrayList<>();
+				elements.add(firstExpression);
 				closingCurly = eatToken(TokenKind.RCURLY);
-				expr = new InlineList(toPos(t.startPos, closingCurly.endPos),
-						listElements.toArray(new SpelNodeImpl[listElements.size()]));
+				expr = new InlineList(toPos(t.startPos, closingCurly.endPos), elements.toArray(new SpelNodeImpl[0]));
 			}
 			else if (peekToken(TokenKind.COMMA, true)) {  // multi-item list
-				List<SpelNodeImpl> listElements = new ArrayList<>();
-				listElements.add(firstExpression);
+				List<SpelNodeImpl> elements = new ArrayList<>();
+				elements.add(firstExpression);
 				do {
-					listElements.add(eatExpression());
+					elements.add(eatExpression());
 				}
 				while (peekToken(TokenKind.COMMA, true));
 				closingCurly = eatToken(TokenKind.RCURLY);
-				expr = new InlineList(toPos(t.startPos, closingCurly.endPos),
-						listElements.toArray(new SpelNodeImpl[listElements.size()]));
+				expr = new InlineList(toPos(t.startPos, closingCurly.endPos), elements.toArray(new SpelNodeImpl[0]));
 
 			}
 			else if (peekToken(TokenKind.COLON, true)) {  // map!
-				List<SpelNodeImpl> mapElements = new ArrayList<>();
-				mapElements.add(firstExpression);
-				mapElements.add(eatExpression());
+				List<SpelNodeImpl> elements = new ArrayList<>();
+				elements.add(firstExpression);
+				elements.add(eatExpression());
 				while (peekToken(TokenKind.COMMA, true)) {
-					mapElements.add(eatExpression());
+					elements.add(eatExpression());
 					eatToken(TokenKind.COLON);
-					mapElements.add(eatExpression());
+					elements.add(eatExpression());
 				}
 				closingCurly = eatToken(TokenKind.RCURLY);
-				expr = new InlineMap(toPos(t.startPos, closingCurly.endPos),
-						mapElements.toArray(new SpelNodeImpl[mapElements.size()]));
+				expr = new InlineMap(toPos(t.startPos, closingCurly.endPos), elements.toArray(new SpelNodeImpl[0]));
 			}
 			else {
 				throw internalException(t.startPos, SpelMessage.OOD);
@@ -742,10 +740,8 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			throw internalException(node.startPos, SpelMessage.NOT_EXPECTED_TOKEN,
 					"qualified ID", node.getKind().toString().toLowerCase());
 		}
-		int pos = toPos(qualifiedIdPieces.getFirst().getStartPosition(),
-				qualifiedIdPieces.getLast().getEndPosition());
-		return new QualifiedIdentifier(pos,
-				qualifiedIdPieces.toArray(new SpelNodeImpl[qualifiedIdPieces.size()]));
+		int pos = toPos(qualifiedIdPieces.getFirst().getStartPosition(), qualifiedIdPieces.getLast().getEndPosition());
+		return new QualifiedIdentifier(pos, qualifiedIdPieces.toArray(new SpelNodeImpl[0]));
 	}
 
 	private boolean isValidQualifiedId(@Nullable Token node) {
@@ -811,15 +807,13 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 					nodes.add(pop());
 				}
 				push(new ConstructorReference(toPos(newToken),
-						dimensions.toArray(new SpelNodeImpl[dimensions.size()]),
-						nodes.toArray(new SpelNodeImpl[nodes.size()])));
+						dimensions.toArray(new SpelNodeImpl[0]), nodes.toArray(new SpelNodeImpl[0])));
 			}
 			else {
 				// regular constructor invocation
 				eatConstructorArgs(nodes);
 				// TODO correct end position?
-				push(new ConstructorReference(toPos(newToken),
-						nodes.toArray(new SpelNodeImpl[nodes.size()])));
+				push(new ConstructorReference(toPos(newToken), nodes.toArray(new SpelNodeImpl[0])));
 			}
 			return true;
 		}

@@ -48,7 +48,7 @@ public class BatchSqlUpdate extends SqlUpdate {
 	/**
 	 * Default number of inserts to accumulate before commiting a batch (5000).
 	 */
-	public static int DEFAULT_BATCH_SIZE = 5000;
+	public static final int DEFAULT_BATCH_SIZE = 5000;
 
 
 	private int batchSize = DEFAULT_BATCH_SIZE;

@@ -156,11 +156,6 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 		this.beanFactory.setParentBeanFactory(getInternalParentBeanFactory());
 	}
 
-	@Override
-	public void setId(String id) {
-		super.setId(id);
-	}
-
 	/**
 	 * Set whether it should be allowed to override bean definitions by registering
 	 * a different definition with the same name, automatically replacing the former.

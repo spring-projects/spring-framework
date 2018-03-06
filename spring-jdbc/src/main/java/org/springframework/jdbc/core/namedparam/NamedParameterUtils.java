@@ -391,7 +391,7 @@ public abstract class NamedParameterUtils {
 	 * that is, whether the given character qualifies as a separator.
 	 */
 	private static boolean isParameterSeparator(char c) {
-		return (separatorIndex[c] || Character.isWhitespace(c));
+		return (c < 128 && separatorIndex[c]) || Character.isWhitespace(c);
 	}
 
 	/**

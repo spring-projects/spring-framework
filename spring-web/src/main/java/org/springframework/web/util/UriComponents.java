@@ -128,21 +128,23 @@ public abstract class UriComponents implements Serializable {
 
 
 	/**
-	 * Encode all URI components using their specific encoding rules, and returns the
-	 * result as a new {@code UriComponents} instance. This method uses UTF-8 to encode.
-	 * @return the encoded URI components
+	 * A variant of {@link #encode(Charset)} that uses "UTF-8" as the charset.
+	 * @return a new {@code UriComponents} instance with encoded values
 	 */
 	public final UriComponents encode() {
 		return encode(StandardCharsets.UTF_8);
 	}
 
 	/**
-	 * Encode all URI components using their specific encoding rules, and
-	 * returns the result as a new {@code UriComponents} instance.
+	 * Encode each URI component by percent encoding illegal characters, which
+	 * includes non-US-ASCII characters, and also characters that are otherwise
+	 * illegal within a given URI component type, as defined in RFC 3986. The
+	 * effect of this method, with regards to encoding, is comparable to using
+	 * the multi-argument constructor of {@link URI}.
 	 * @param charset the encoding of the values contained in this map
-	 * @return the encoded URI components
+	 * @return a new {@code UriComponents} instance with encoded values
 	 */
-	public abstract UriComponents encode(Charset charset) ;
+	public abstract UriComponents encode(Charset charset);
 
 	/**
 	 * Replace all URI template variables with the values from a given map.
@@ -187,23 +189,36 @@ public abstract class UriComponents implements Serializable {
 	abstract UriComponents expandInternal(UriTemplateVariables uriVariables);
 
 	/**
-	 * Normalize the path removing sequences like "path/..". Note that calling this method will
-	 * combine all path segments into a full path before doing the actual normalisation, i.e.
-	 * individual path segments will not be normalized individually.
+	 * Normalize the path removing sequences like "path/..". Note that
+	 * normalization is applied to the full path, and not to individual path
+	 * segments.
 	 * @see org.springframework.util.StringUtils#cleanPath(String)
 	 */
 	public abstract UriComponents normalize();
 
 	/**
-	 * Return a URI String from this {@code UriComponents} instance.
+	 * Concatenate all URI components to return the fully formed URI String.
+	 * <p>This method does nothing more than a simple concatenation based on
+	 * current values. That means it could produce different results if invoked
+	 * before vs after methods that can change individual values such as
+	 * {@code encode}, {@code expand}, or {@code normalize}.
 	 */
 	public abstract String toUriString();
 
 	/**
-	 * Return a {@code URI} from this {@code UriComponents} instance.
+	 * Create a {@link URI} from this instance as follows:
+	 * <p>If the current instance is {@link #encode() encoded}, form the full
+	 * URI String via {@link #toUriString()}, and then pass it to the single
+	 * argument {@link URI} constructor which preserves percent encoding.
+	 * <p>If not yet encoded, pass individual URI component values to the
+	 * multi-argument {@link URI} constructor which quotes illegal characters
+	 * that cannot appear in their respective URI component.
 	 */
 	public abstract URI toUri();
 
+	/**
+	 * A simple pass-through to {@link #toUriString()}.
+	 */
 	@Override
 	public final String toString() {
 		return toUriString();

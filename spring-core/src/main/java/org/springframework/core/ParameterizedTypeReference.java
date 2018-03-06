@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,14 @@ import org.springframework.util.Assert;
 /**
  * The purpose of this class is to enable capturing and passing a generic
  * {@link Type}. In order to capture the generic type and retain it at runtime,
- * you need to create a subclass as follows:
+ * you need to create a subclass (ideally as anonymous inline class) as follows:
  *
  * <pre class="code">
  * ParameterizedTypeReference&lt;List&lt;String&gt;&gt; typeRef = new ParameterizedTypeReference&lt;List&lt;String&gt;&gt;() {};
  * </pre>
  *
- * <p>The resulting {@code typeReference} instance can then be used to obtain a
- * {@link Type} instance that carries parameterized type information.
+ * <p>The resulting {@code typeRef} instance can then be used to obtain a {@link Type}
+ * instance that carries the captured parameterized type information at runtime.
  * For more information on "super type tokens" see the link to Neal Gafter's blog post.
  *
  * @author Arjen Poutsma
@@ -49,8 +49,9 @@ public abstract class ParameterizedTypeReference<T> {
 		Type type = parameterizedTypeReferenceSubclass.getGenericSuperclass();
 		Assert.isInstanceOf(ParameterizedType.class, type, "Type must be a parameterized type");
 		ParameterizedType parameterizedType = (ParameterizedType) type;
-		Assert.isTrue(parameterizedType.getActualTypeArguments().length == 1, "Number of type arguments must be 1");
-		this.type = parameterizedType.getActualTypeArguments()[0];
+		Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+		Assert.isTrue(actualTypeArguments.length == 1, "Number of type arguments must be 1");
+		this.type = actualTypeArguments[0];
 	}
 
 	private ParameterizedTypeReference(Type type) {

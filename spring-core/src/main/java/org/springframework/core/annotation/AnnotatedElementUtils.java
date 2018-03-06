@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import java.util.Set;
 
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -154,9 +153,6 @@ public class AnnotatedElementUtils {
 	 * @see #hasMetaAnnotationTypes
 	 */
 	public static Set<String> getMetaAnnotationTypes(AnnotatedElement element, Class<? extends Annotation> annotationType) {
-		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.notNull(annotationType, "'annotationType' must not be null");
-
 		return getMetaAnnotationTypes(element, element.getAnnotation(annotationType));
 	}
 
@@ -175,9 +171,6 @@ public class AnnotatedElementUtils {
 	 * @see #hasMetaAnnotationTypes
 	 */
 	public static Set<String> getMetaAnnotationTypes(AnnotatedElement element, String annotationName) {
-		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.hasLength(annotationName, "'annotationName' must not be null or empty");
-
 		return getMetaAnnotationTypes(element, AnnotationUtils.getAnnotation(element, annotationName));
 	}
 
@@ -217,9 +210,6 @@ public class AnnotatedElementUtils {
 	 * @see #getMetaAnnotationTypes
 	 */
 	public static boolean hasMetaAnnotationTypes(AnnotatedElement element, Class<? extends Annotation> annotationType) {
-		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.notNull(annotationType, "'annotationType' must not be null");
-
 		return hasMetaAnnotationTypes(element, annotationType, null);
 	}
 
@@ -236,9 +226,6 @@ public class AnnotatedElementUtils {
 	 * @see #getMetaAnnotationTypes
 	 */
 	public static boolean hasMetaAnnotationTypes(AnnotatedElement element, String annotationName) {
-		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.hasLength(annotationName, "'annotationName' must not be null or empty");
-
 		return hasMetaAnnotationTypes(element, null, annotationName);
 	}
 
@@ -271,14 +258,10 @@ public class AnnotatedElementUtils {
 	 * @see #hasAnnotation(AnnotatedElement, Class)
 	 */
 	public static boolean isAnnotated(AnnotatedElement element, Class<? extends Annotation> annotationType) {
-		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.notNull(annotationType, "'annotationType' must not be null");
-
 		// Shortcut: directly present on the element, with no processing needed?
 		if (element.isAnnotationPresent(annotationType)) {
 			return true;
 		}
-
 		return Boolean.TRUE.equals(searchWithGetSemantics(element, annotationType, null, alwaysTrueAnnotationProcessor));
 	}
 
@@ -295,9 +278,6 @@ public class AnnotatedElementUtils {
 	 * @return {@code true} if a matching annotation is present
 	 */
 	public static boolean isAnnotated(AnnotatedElement element, String annotationName) {
-		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.hasLength(annotationName, "'annotationName' must not be null or empty");
-
 		return Boolean.TRUE.equals(searchWithGetSemantics(element, null, annotationName, alwaysTrueAnnotationProcessor));
 	}
 
@@ -322,7 +302,6 @@ public class AnnotatedElementUtils {
 	public static AnnotationAttributes getMergedAnnotationAttributes(
 			AnnotatedElement element, Class<? extends Annotation> annotationType) {
 
-		Assert.notNull(annotationType, "'annotationType' must not be null");
 		AnnotationAttributes attributes = searchWithGetSemantics(element, annotationType, null,
 				new MergedAnnotationAttributesProcessor());
 		AnnotationUtils.postProcessAnnotationAttributes(element, attributes, false, false);
@@ -382,7 +361,6 @@ public class AnnotatedElementUtils {
 	public static AnnotationAttributes getMergedAnnotationAttributes(AnnotatedElement element,
 			String annotationName, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
-		Assert.hasLength(annotationName, "'annotationName' must not be null or empty");
 		AnnotationAttributes attributes = searchWithGetSemantics(element, null, annotationName,
 				new MergedAnnotationAttributesProcessor(classValuesAsString, nestedAnnotationsAsMap));
 		AnnotationUtils.postProcessAnnotationAttributes(element, attributes, classValuesAsString, nestedAnnotationsAsMap);
@@ -409,8 +387,6 @@ public class AnnotatedElementUtils {
 	 */
 	@Nullable
 	public static <A extends Annotation> A getMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
-		Assert.notNull(annotationType, "'annotationType' must not be null");
-
 		// Shortcut: directly present on the element, with no merging needed?
 		if (!(element instanceof Class)) {
 			// Do not use this shortcut against a Class: Inherited annotations
@@ -446,12 +422,7 @@ public class AnnotatedElementUtils {
 	 * @see #getAllAnnotationAttributes(AnnotatedElement, String)
 	 * @see #findAllMergedAnnotations(AnnotatedElement, Class)
 	 */
-	public static <A extends Annotation> Set<A> getAllMergedAnnotations(AnnotatedElement element,
-			Class<A> annotationType) {
-
-		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.notNull(annotationType, "'annotationType' must not be null");
-
+	public static <A extends Annotation> Set<A> getAllMergedAnnotations(AnnotatedElement element, Class<A> annotationType) {
 		MergedAnnotationAttributesProcessor processor = new MergedAnnotationAttributesProcessor(false, false, true);
 		searchWithGetSemantics(element, annotationType, null, processor);
 		return postProcessAndSynthesizeAggregatedResults(element, annotationType, processor.getAggregatedResults());
@@ -515,9 +486,6 @@ public class AnnotatedElementUtils {
 	 */
 	public static <A extends Annotation> Set<A> getMergedRepeatableAnnotations(AnnotatedElement element,
 			Class<A> annotationType, @Nullable Class<? extends Annotation> containerType) {
-
-		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.notNull(annotationType, "'annotationType' must not be null");
 
 		if (containerType == null) {
 			containerType = resolveContainerType(annotationType);
@@ -603,14 +571,10 @@ public class AnnotatedElementUtils {
 	 * @see #isAnnotated(AnnotatedElement, Class)
 	 */
 	public static boolean hasAnnotation(AnnotatedElement element, Class<? extends Annotation> annotationType) {
-		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.notNull(annotationType, "'annotationType' must not be null");
-
 		// Shortcut: directly present on the element, with no processing needed?
 		if (element.isAnnotationPresent(annotationType)) {
 			return true;
 		}
-
 		return Boolean.TRUE.equals(searchWithFindSemantics(element, annotationType, null, alwaysTrueAnnotationProcessor));
 	}
 
@@ -710,8 +674,6 @@ public class AnnotatedElementUtils {
 	 */
 	@Nullable
 	public static <A extends Annotation> A findMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
-		Assert.notNull(annotationType, "'annotationType' must not be null");
-
 		// Shortcut: directly present on the element, with no merging needed?
 		if (!(element instanceof Class)) {
 			// Do not use this shortcut against a Class: Inherited annotations
@@ -746,12 +708,7 @@ public class AnnotatedElementUtils {
 	 * @see #findMergedAnnotation(AnnotatedElement, Class)
 	 * @see #getAllMergedAnnotations(AnnotatedElement, Class)
 	 */
-	public static <A extends Annotation> Set<A> findAllMergedAnnotations(AnnotatedElement element,
-			Class<A> annotationType) {
-
-		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.notNull(annotationType, "'annotationType' must not be null");
-
+	public static <A extends Annotation> Set<A> findAllMergedAnnotations(AnnotatedElement element, Class<A> annotationType) {
 		MergedAnnotationAttributesProcessor processor = new MergedAnnotationAttributesProcessor(false, false, true);
 		searchWithFindSemantics(element, annotationType, null, processor);
 		return postProcessAndSynthesizeAggregatedResults(element, annotationType, processor.getAggregatedResults());
@@ -815,9 +772,6 @@ public class AnnotatedElementUtils {
 	 */
 	public static <A extends Annotation> Set<A> findMergedRepeatableAnnotations(AnnotatedElement element,
 			Class<A> annotationType, @Nullable Class<? extends Annotation> containerType) {
-
-		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.notNull(annotationType, "'annotationType' must not be null");
 
 		if (containerType == null) {
 			containerType = resolveContainerType(annotationType);
@@ -901,8 +855,6 @@ public class AnnotatedElementUtils {
 			@Nullable Class<? extends Annotation> annotationType, @Nullable String annotationName,
 			@Nullable Class<? extends Annotation> containerType, Processor<T> processor,
 			Set<AnnotatedElement> visited, int metaDepth) {
-
-		Assert.notNull(element, "AnnotatedElement must not be null");
 
 		if (visited.add(element)) {
 			try {
@@ -1095,8 +1047,6 @@ public class AnnotatedElementUtils {
 			@Nullable Class<? extends Annotation> annotationType, @Nullable String annotationName,
 			@Nullable Class<? extends Annotation> containerType, Processor<T> processor,
 			Set<AnnotatedElement> visited, int metaDepth) {
-
-		Assert.notNull(element, "AnnotatedElement must not be null");
 
 		if (visited.add(element)) {
 			try {

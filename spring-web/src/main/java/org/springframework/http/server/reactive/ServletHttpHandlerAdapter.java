@@ -168,7 +168,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		ServerHttpRequest httpRequest = createRequest(((HttpServletRequest) request), asyncContext);
 		ServerHttpResponse httpResponse = createResponse(((HttpServletResponse) response), asyncContext);
 
-		if (HttpMethod.HEAD.equals(httpRequest.getMethod())) {
+		if (httpRequest.getMethod() == HttpMethod.HEAD) {
 			httpResponse = new HttpHeadResponseDecorator(httpResponse);
 		}
 
@@ -254,7 +254,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		public void onComplete(AsyncEvent event) {
 			// no-op
 		}
-	};
+	}
 
 
 	private class HandlerResultSubscriber implements Subscriber<Void> {

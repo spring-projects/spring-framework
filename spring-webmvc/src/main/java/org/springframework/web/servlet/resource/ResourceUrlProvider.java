@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
@@ -177,6 +178,9 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		}
 		int prefixIndex = getLookupPathIndex(request);
 		int suffixIndex = getEndPathIndex(requestUrl);
+		if (prefixIndex >= suffixIndex) {
+			return null;
+		}
 		String prefix = requestUrl.substring(0, prefixIndex);
 		String suffix = requestUrl.substring(suffixIndex);
 		String lookupPath = requestUrl.substring(prefixIndex, suffixIndex);
@@ -193,12 +197,12 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 	private int getEndPathIndex(String lookupPath) {
 		int suffixIndex = lookupPath.length();
-		int queryIndex = lookupPath.indexOf("?");
-		if(queryIndex > 0) {
+		int queryIndex = lookupPath.indexOf('?');
+		if (queryIndex > 0) {
 			suffixIndex = queryIndex;
 		}
-		int hashIndex = lookupPath.indexOf("#");
-		if(hashIndex > 0) {
+		int hashIndex = lookupPath.indexOf('#');
+		if (hashIndex > 0) {
 			suffixIndex = Math.min(suffixIndex, hashIndex);
 		}
 		return suffixIndex;
@@ -239,7 +243,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 		if (!matchingPatterns.isEmpty()) {
 			Comparator<String> patternComparator = getPathMatcher().getPatternComparator(lookupPath);
-			Collections.sort(matchingPatterns, patternComparator);
+			matchingPatterns.sort(patternComparator);
 			for (String pattern : matchingPatterns) {
 				String pathWithinMapping = getPathMatcher().extractPathWithinPattern(pattern, lookupPath);
 				String pathMapping = lookupPath.substring(0, lookupPath.indexOf(pathWithinMapping));

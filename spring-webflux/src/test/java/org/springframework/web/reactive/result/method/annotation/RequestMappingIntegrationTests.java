@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.time.Duration;
 
 import org.junit.Test;
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -30,9 +29,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 /**
  * Integration tests with {@code @RequestMapping} handler methods.
@@ -56,7 +53,7 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 
 
 	@Test
-	public void httpHead() throws Exception {
+	public void httpHead() {
 		String url = "http://localhost:" + this.port + "/text";
 		HttpHeaders headers = getRestTemplate().headForHeaders(url);
 		String contentType = headers.getFirst("Content-Type");
@@ -89,7 +86,7 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 
 		@GetMapping("/stream")
 		public Publisher<Long> stream() {
-			return Flux.interval(Duration.ofMillis(50)).take(5);
+			return interval(Duration.ofMillis(50), 5);
 		}
 	}
 

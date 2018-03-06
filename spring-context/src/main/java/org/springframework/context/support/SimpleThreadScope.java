@@ -26,7 +26,6 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * A simple thread-backed {@link Scope} implementation.

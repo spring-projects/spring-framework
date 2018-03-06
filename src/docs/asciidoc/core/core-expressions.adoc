@@ -1089,7 +1089,7 @@ expression string.
 	StandardEvaluationContext context = new StandardEvaluationContext();
 
 	context.registerFunction("reverseString",
-		StringUtils.class.getDeclaredMethod("reverseString", new Class[] { String.class }));
+		StringUtils.class.getDeclaredMethod("reverseString", String.class));
 
 	String helloWorldReversed = parser.parseExpression(
 		"#reverseString('hello')").getValue(context, String.class);

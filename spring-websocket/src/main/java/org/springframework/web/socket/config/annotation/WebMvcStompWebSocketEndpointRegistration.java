@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
@@ -61,8 +62,8 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 	private SockJsServiceRegistration registration;
 
 
-	public WebMvcStompWebSocketEndpointRegistration(String[] paths, WebSocketHandler webSocketHandler,
-			TaskScheduler sockJsTaskScheduler) {
+	public WebMvcStompWebSocketEndpointRegistration(
+			String[] paths, WebSocketHandler webSocketHandler, TaskScheduler sockJsTaskScheduler) {
 
 		Assert.notEmpty(paths, "No paths specified");
 		Assert.notNull(webSocketHandler, "WebSocketHandler must not be null");
@@ -75,7 +76,6 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 
 	@Override
 	public StompWebSocketEndpointRegistration setHandshakeHandler(HandshakeHandler handshakeHandler) {
-		Assert.notNull(handshakeHandler, "'handshakeHandler' must not be null");
 		this.handshakeHandler = handshakeHandler;
 		return this;
 	}
@@ -110,16 +110,16 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 			this.registration.setTransportHandlerOverrides(handler);
 		}
 		if (!this.allowedOrigins.isEmpty()) {
-			this.registration.setAllowedOrigins(this.allowedOrigins.toArray(new String[this.allowedOrigins.size()]));
+			this.registration.setAllowedOrigins(StringUtils.toStringArray(this.allowedOrigins));
 		}
 		return this.registration;
 	}
 
 	protected HandshakeInterceptor[] getInterceptors() {
-		List<HandshakeInterceptor> interceptors = new ArrayList<>();
+		List<HandshakeInterceptor> interceptors = new ArrayList<>(this.interceptors.size() + 1);
 		interceptors.addAll(this.interceptors);
 		interceptors.add(new OriginHandshakeInterceptor(this.allowedOrigins));
-		return interceptors.toArray(new HandshakeInterceptor[interceptors.size()]);
+		return interceptors.toArray(new HandshakeInterceptor[0]);
 	}
 
 	public final MultiValueMap<HttpRequestHandler, String> getMappings() {
@@ -127,7 +127,7 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 		if (this.registration != null) {
 			SockJsService sockJsService = this.registration.getSockJsService();
 			for (String path : this.paths) {
-				String pattern = path.endsWith("/") ? path + "**" : path + "/**";
+				String pattern = (path.endsWith("/") ? path + "**" : path + "/**");
 				SockJsHttpRequestHandler handler = new SockJsHttpRequestHandler(sockJsService, this.webSocketHandler);
 				mappings.add(handler, pattern);
 			}

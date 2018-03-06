@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -137,7 +138,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 							return 0;
 						}
 					}
-					return (m1pl < m2pl ? -1 : (m1pl > m2pl ? 1 : 0));
+					return Integer.compare(m1pl, m2pl);
 				});
 			}
 
@@ -228,14 +229,14 @@ public class ReflectiveMethodResolver implements MethodResolver {
 				}
 			}
 			// Also expose methods from java.lang.Class itself
-			result.addAll(Arrays.asList(getMethods(Class.class)));
+			Collections.addAll(result, getMethods(Class.class));
 			return result;
 		}
 		else if (Proxy.isProxyClass(type)) {
 			Set<Method> result = new LinkedHashSet<>();
 			// Expose interface methods (not proxy-declared overrides) for proper vararg introspection
 			for (Class<?> ifc : type.getInterfaces()) {
-				result.addAll(Arrays.asList(getMethods(ifc)));
+				Collections.addAll(result, getMethods(ifc));
 			}
 			return result;
 		}

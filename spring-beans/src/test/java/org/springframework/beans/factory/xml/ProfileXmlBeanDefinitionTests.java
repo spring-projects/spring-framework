@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ public class ProfileXmlBeanDefinitionTests {
 	private static final String NOT_DEV_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-notDevProfile.xml";
 	private static final String ALL_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-noProfile.xml";
 	private static final String MULTI_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-multiProfile.xml";
+	private static final String MULTI_NEGATED_XML = "ProfileXmlBeanDefinitionTests-multiProfileNegated.xml";
 	private static final String MULTI_NOT_DEV_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-multiProfileNotDev.xml";
 	private static final String MULTI_ELIGIBLE_SPACE_DELIMITED_XML = "ProfileXmlBeanDefinitionTests-spaceDelimitedProfile.xml";
 	private static final String UNKNOWN_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-unknownProfile.xml";
@@ -93,6 +94,12 @@ public class ProfileXmlBeanDefinitionTests {
 		assertThat(beanFactoryFor(MULTI_ELIGIBLE_XML, DEV_ACTIVE), containsTargetBean());
 		assertThat(beanFactoryFor(MULTI_ELIGIBLE_XML, PROD_ACTIVE), containsTargetBean());
 		assertThat(beanFactoryFor(MULTI_ELIGIBLE_XML, MULTI_ACTIVE), containsTargetBean());
+
+		assertThat(beanFactoryFor(MULTI_NEGATED_XML, NONE_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(MULTI_NEGATED_XML, UNKNOWN_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(MULTI_NEGATED_XML, DEV_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(MULTI_NEGATED_XML, PROD_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(MULTI_NEGATED_XML, MULTI_ACTIVE), not(containsTargetBean()));
 
 		assertThat(beanFactoryFor(MULTI_NOT_DEV_ELIGIBLE_XML, NONE_ACTIVE), containsTargetBean());
 		assertThat(beanFactoryFor(MULTI_NOT_DEV_ELIGIBLE_XML, UNKNOWN_ACTIVE), containsTargetBean());

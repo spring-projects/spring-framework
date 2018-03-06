@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import javax.servlet.http.HttpSessionBindingListener;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpSession} interface.
@@ -168,7 +169,7 @@ public class MockHttpSession implements HttpSession {
 	@Override
 	public String[] getValueNames() {
 		assertIsValid();
-		return this.attributes.keySet().toArray(new String[this.attributes.size()]);
+		return StringUtils.toStringArray(this.attributes.keySet());
 	}
 
 	@Override

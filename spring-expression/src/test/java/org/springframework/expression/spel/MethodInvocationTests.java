@@ -98,7 +98,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 		eContext.setVariable("bar", 3);
 		Object o = expr.getValue(eContext);
-		assertEquals(o, 3);
+		assertEquals(3, o);
 		assertEquals(1, parser.parseExpression("counter").getValue(eContext));
 
 		// Now the expression has cached that throwException(int) is the right thing to call
@@ -294,7 +294,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 	public void testMethodOfClass() throws Exception {
 		Expression expression = parser.parseExpression("getName()");
 		Object value = expression.getValue(new StandardEvaluationContext(String.class));
-		assertEquals(value, "java.lang.String");
+		assertEquals("java.lang.String", value);
 	}
 
 	@Test

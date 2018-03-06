@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@
 
 package org.springframework.http.codec;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -34,9 +37,8 @@ import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.core.ResolvableType.forClass;
+import static org.junit.Assert.*;
+import static org.springframework.core.ResolvableType.*;
 
 /**
  * Unit tests for {@link ServerSentEventHttpMessageWriter}.
@@ -45,7 +47,8 @@ import static org.springframework.core.ResolvableType.forClass;
  */
 public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocatingTestCase {
 
-	public static final Map<String, Object> HINTS = Collections.emptyMap();
+	private static final Map<String, Object> HINTS = Collections.emptyMap();
+
 
 	private ServerSentEventHttpMessageWriter messageWriter =
 			new ServerSentEventHttpMessageWriter(new Jackson2JsonEncoder());
@@ -105,6 +108,18 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				.verify();
 	}
 
+	@Test // SPR-16516
+	public void writeStringWithCustomCharset() {
+		Flux<String> source = Flux.just("\u00A3");
+		Charset charset = StandardCharsets.ISO_8859_1;
+		MediaType mediaType = new MediaType("text", "event-stream", charset);
+		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
+		testWrite(source, mediaType, outputMessage, String.class);
+
+		assertEquals(mediaType, outputMessage.getHeaders().getContentType());
+		StepVerifier.create(outputMessage.getBodyAsString()).expectNext("data:\u00A3\n\n").verifyComplete();
+	}
+
 	@Test
 	public void writePojo() {
 		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));
@@ -139,9 +154,32 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				.verify();
 	}
 
-	private <T> void testWrite(Publisher<T> source, MockServerHttpResponse outputMessage, Class<T> clazz) {
-		this.messageWriter.write(source, forClass(clazz),
-				MediaType.TEXT_EVENT_STREAM, outputMessage, HINTS).block(Duration.ofMillis(5000));
+	@Ignore
+	@Test // SPR-16516, SPR-16539
+	public void writePojoWithCustomEncoding() {
+		Flux<Pojo> source = Flux.just(new Pojo("foo\u00A3", "bar\u00A3"));
+		Charset charset = StandardCharsets.ISO_8859_1;
+		MediaType mediaType = new MediaType("text", "event-stream", charset);
+		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
+		testWrite(source, mediaType, outputMessage, Pojo.class);
+
+		assertEquals(mediaType, outputMessage.getHeaders().getContentType());
+		StepVerifier.create(outputMessage.getBodyAsString())
+				.expectNext("data:{\"foo\":\"foo\u00A3\",\"bar\":\"bar\u00A3\"}\n\n")
+				.expectComplete()
+				.verify();
+	}
+
+
+	private <T> void testWrite(Publisher<T> source, MockServerHttpResponse response, Class<T> clazz) {
+		testWrite(source, MediaType.TEXT_EVENT_STREAM, response, clazz);
+	}
+
+	private <T> void testWrite(Publisher<T> source, MediaType mediaType, MockServerHttpResponse response,
+			Class<T> clazz) {
+
+		this.messageWriter.write(source, forClass(clazz), mediaType, response, HINTS)
+				.block(Duration.ofMillis(5000));
 	}
 
 }

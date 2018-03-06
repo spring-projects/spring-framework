@@ -453,7 +453,7 @@ public abstract class AbstractMethodMessageHandler<T>
 			return;
 		}
 		Comparator<Match> comparator = new MatchComparator(getMappingComparator(message));
-		Collections.sort(matches, comparator);
+		matches.sort(comparator);
 
 		if (logger.isTraceEnabled()) {
 			logger.trace("Found " + matches.size() + " handler methods: " + matches);

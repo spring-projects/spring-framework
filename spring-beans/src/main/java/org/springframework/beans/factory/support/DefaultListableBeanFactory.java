@@ -30,7 +30,6 @@ import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -415,7 +414,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 					// Only check bean definition if it is complete.
 					if (!mbd.isAbstract() && (allowEagerInit ||
-							((mbd.hasBeanClass() || !mbd.isLazyInit() || isAllowEagerClassLoading())) &&
+							(mbd.hasBeanClass() || !mbd.isLazyInit() || isAllowEagerClassLoading()) &&
 									!requiresEagerInitForType(mbd.getFactoryBeanName()))) {
 						// In case of FactoryBean, match object created by FactoryBean.
 						boolean isFactoryBean = isFactoryBean(beanName, mbd);
@@ -552,7 +551,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				results.add(beanName);
 			}
 		}
-		return results.toArray(new String[results.size()]);
+		return StringUtils.toStringArray(results);
 	}
 
 	@Override
@@ -744,8 +743,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						final FactoryBean<?> factory = (FactoryBean<?>) bean;
 						boolean isEagerInit;
 						if (System.getSecurityManager() != null && factory instanceof SmartFactoryBean) {
-							isEagerInit = AccessController.doPrivileged((PrivilegedAction<Boolean>) () ->
-											((SmartFactoryBean<?>) factory).isEagerInit(),
+							isEagerInit = AccessController.doPrivileged((PrivilegedAction<Boolean>)
+											((SmartFactoryBean<?>) factory)::isEagerInit,
 									getAccessControlContext());
 						}
 						else {
@@ -1007,7 +1006,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 			if (!autowireCandidates.isEmpty()) {
-				candidateNames = autowireCandidates.toArray(new String[autowireCandidates.size()]);
+				candidateNames = StringUtils.toStringArray(autowireCandidates);
 			}
 		}
 
@@ -1018,8 +1017,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		else if (candidateNames.length > 1) {
 			Map<String, Object> candidates = new LinkedHashMap<>(candidateNames.length);
 			for (String beanName : candidateNames) {
-				if (containsSingleton(beanName)) {
-					candidates.put(beanName, getBean(beanName, requiredType, args));
+				if (containsSingleton(beanName) && args == null) {
+					Object beanInstance = getBean(beanName);
+					candidates.put(beanName, (beanInstance instanceof NullBean ? null : beanInstance));
 				}
 				else {
 					candidates.put(beanName, getType(beanName));
@@ -1031,7 +1031,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			if (candidateName != null) {
 				Object beanInstance = candidates.get(candidateName);
-				if (beanInstance instanceof Class) {
+				if (beanInstance == null || beanInstance instanceof Class) {
 					beanInstance = getBean(candidateName, requiredType, args);
 				}
 				return new NamedBeanHolder<>(candidateName, (T) beanInstance);
@@ -1201,7 +1201,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
 			Object result = converter.convertIfNecessary(matchingBeans.values(), type);
 			if (getDependencyComparator() != null && result instanceof List) {
-				Collections.sort((List<?>) result, adaptDependencyComparator(matchingBeans));
+				((List<?>) result).sort(adaptDependencyComparator(matchingBeans));
 			}
 			return result;
 		}
@@ -1414,22 +1414,24 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		for (Map.Entry<String, Object> entry : candidates.entrySet()) {
 			String candidateBeanName = entry.getKey();
 			Object beanInstance = entry.getValue();
-			Integer candidatePriority = getPriority(beanInstance);
-			if (candidatePriority != null) {
-				if (highestPriorityBeanName != null) {
-					if (candidatePriority.equals(highestPriority)) {
-						throw new NoUniqueBeanDefinitionException(requiredType, candidates.size(),
-								"Multiple beans found with the same priority ('" + highestPriority +
-								"') among candidates: " + candidates.keySet());
+			if (beanInstance != null) {
+				Integer candidatePriority = getPriority(beanInstance);
+				if (candidatePriority != null) {
+					if (highestPriorityBeanName != null) {
+						if (candidatePriority.equals(highestPriority)) {
+							throw new NoUniqueBeanDefinitionException(requiredType, candidates.size(),
+									"Multiple beans found with the same priority ('" + highestPriority +
+									"') among candidates: " + candidates.keySet());
+						}
+						else if (candidatePriority < highestPriority) {
+							highestPriorityBeanName = candidateBeanName;
+							highestPriority = candidatePriority;
+						}
 					}
-					else if (candidatePriority < highestPriority) {
+					else {
 						highestPriorityBeanName = candidateBeanName;
 						highestPriority = candidatePriority;
 					}
-				}
-				else {
-					highestPriorityBeanName = candidateBeanName;
-					highestPriority = candidatePriority;
 				}
 			}
 		}
@@ -1778,7 +1780,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (targetType != null && targetType != obj.getClass()) {
 				sources.add(targetType);
 			}
-			return sources.toArray(new Object[sources.size()]);
+			return sources.toArray();
 		}
 
 		@Nullable

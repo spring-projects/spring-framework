@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,42 @@ import static org.junit.Assert.*;
 @DirtiesContext
 public class PrimaryTransactionManagerTests {
 
+	private JdbcTemplate jdbcTemplate;
+
+
+	@Autowired
+	public void setDataSource(DataSource dataSource1) {
+		this.jdbcTemplate = new JdbcTemplate(dataSource1);
+	}
+
+
+	@BeforeTransaction
+	public void beforeTransaction() {
+		assertNumUsers(0);
+	}
+
+	@AfterTransaction
+	public void afterTransaction() {
+		assertNumUsers(0);
+	}
+
+	@Test
+	@Transactional
+	public void transactionalTest() {
+		TransactionTestUtils.assertInTransaction(true);
+
+		ClassPathResource resource = new ClassPathResource("/org/springframework/test/context/jdbc/data.sql");
+		new ResourceDatabasePopulator(resource).execute(jdbcTemplate.getDataSource());
+
+		assertNumUsers(1);
+	}
+
+	private void assertNumUsers(int expected) {
+		assertEquals("Number of rows in the 'user' table", expected,
+				JdbcTestUtils.countRowsInTable(this.jdbcTemplate, "user"));
+	}
+
+
 	@Configuration
 	static class Config {
 
@@ -69,54 +105,16 @@ public class PrimaryTransactionManagerTests {
 
 		@Bean
 		public DataSource dataSource1() {
-			// @formatter:off
 			return new EmbeddedDatabaseBuilder()
 					.generateUniqueName(true)
 					.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql")
 					.build();
-			// @formatter:on
 		}
 
 		@Bean
 		public DataSource dataSource2() {
 			return new EmbeddedDatabaseBuilder().generateUniqueName(true).build();
 		}
-
-	}
-
-
-	private JdbcTemplate jdbcTemplate;
-
-
-	@Autowired
-	public void setDataSource(DataSource dataSource1) {
-		this.jdbcTemplate = new JdbcTemplate(dataSource1);
-	}
-
-	@BeforeTransaction
-	public void beforeTransaction() {
-		assertNumUsers(0);
-	}
-
-	@Test
-	@Transactional
-	public void transactionalTest() {
-		TransactionTestUtils.assertInTransaction(true);
-
-		ClassPathResource resource = new ClassPathResource("/org/springframework/test/context/jdbc/data.sql");
-		new ResourceDatabasePopulator(resource).execute(jdbcTemplate.getDataSource());
-
-		assertNumUsers(1);
-	}
-
-	@AfterTransaction
-	public void afterTransaction() {
-		assertNumUsers(0);
-	}
-
-	private void assertNumUsers(int expected) {
-		assertEquals("Number of rows in the 'user' table.", expected,
-			JdbcTestUtils.countRowsInTable(this.jdbcTemplate, "user"));
 	}
 
 }

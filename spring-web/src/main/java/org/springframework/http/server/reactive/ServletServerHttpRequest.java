@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -55,6 +56,13 @@ import org.springframework.util.StringUtils;
  * @since 5.0
  */
 class ServletServerHttpRequest extends AbstractServerHttpRequest {
+
+	private static final String X509_CERTIFICATE_ATTRIBUTE = "javax.servlet.request.X509Certificate";
+
+	private static final String SSL_SESSION_ID_ATTRIBUTE = "javax.servlet.request.ssl_session_id";
+
+	static final DataBuffer EOF_BUFFER = new DefaultDataBufferFactory().allocateBuffer(0);
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -178,8 +186,8 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 			return null;
 		}
 		return new DefaultSslInfo(
-				(String) request.getAttribute("javax.servlet.request.ssl_session_id"),
-				(X509Certificate[]) request.getAttribute("java.security.cert.X509Certificate"));
+				(String) request.getAttribute(SSL_SESSION_ID_ATTRIBUTE),
+				(X509Certificate[]) request.getAttribute(X509_CERTIFICATE_ATTRIBUTE));
 	}
 
 	@Override
@@ -192,7 +200,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	 * Invoked only when {@link ServletInputStream#isReady()} returns "true".
 	 */
 	@Nullable
-	protected DataBuffer readFromInputStream() throws IOException {
+	DataBuffer readFromInputStream() throws IOException {
 		int read = this.request.getInputStream().read(this.buffer);
 		if (logger.isTraceEnabled()) {
 			logger.trace("InputStream read returned " + read + (read != -1 ? " bytes" : ""));
@@ -202,6 +210,9 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 			DataBuffer dataBuffer = this.bufferFactory.allocateBuffer(read);
 			dataBuffer.write(this.buffer, 0, read);
 			return dataBuffer;
+		}
+		else if (read == -1) {
+			return EOF_BUFFER;
 		}
 
 		return null;
@@ -261,7 +272,14 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		@Nullable
 		protected DataBuffer read() throws IOException {
 			if (this.inputStream.isReady()) {
-				return readFromInputStream();
+				DataBuffer dataBuffer = readFromInputStream();
+				if (dataBuffer != EOF_BUFFER) {
+					return dataBuffer;
+				}
+				else {
+					// No need to wait for container callback...
+					onAllDataRead();
+				}
 			}
 			return null;
 		}

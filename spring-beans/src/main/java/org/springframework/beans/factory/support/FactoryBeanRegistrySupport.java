@@ -57,8 +57,8 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	protected Class<?> getTypeForFactoryBean(final FactoryBean<?> factoryBean) {
 		try {
 			if (System.getSecurityManager() != null) {
-				return AccessController.doPrivileged((PrivilegedAction<Class<?>>) () ->
-						factoryBean.getObjectType(), getAccessControlContext());
+				return AccessController.doPrivileged((PrivilegedAction<Class<?>>)
+						factoryBean::getObjectType, getAccessControlContext());
 			}
 			else {
 				return factoryBean.getObjectType();
@@ -151,8 +151,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 			if (System.getSecurityManager() != null) {
 				AccessControlContext acc = getAccessControlContext();
 				try {
-					object = AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () ->
-							factory.getObject(), acc);
+					object = AccessController.doPrivileged((PrivilegedExceptionAction<Object>) factory::getObject, acc);
 				}
 				catch (PrivilegedActionException pae) {
 					throw pae.getException();

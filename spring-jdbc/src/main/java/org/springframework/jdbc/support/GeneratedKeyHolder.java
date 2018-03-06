@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class GeneratedKeyHolder implements KeyHolder {
 	@Override
 	@Nullable
 	public Number getKey() throws InvalidDataAccessApiUsageException, DataRetrievalFailureException {
-		if (this.keyList.size() == 0) {
+		if (this.keyList.isEmpty()) {
 			return null;
 		}
 		if (this.keyList.size() > 1 || this.keyList.get(0).size() > 1) {
@@ -89,7 +89,7 @@ public class GeneratedKeyHolder implements KeyHolder {
 	@Override
 	@Nullable
 	public Map<String, Object> getKeys() throws InvalidDataAccessApiUsageException {
-		if (this.keyList.size() == 0) {
+		if (this.keyList.isEmpty()) {
 			return null;
 		}
 		if (this.keyList.size() > 1)

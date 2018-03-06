@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 package org.springframework.expression.common;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
 
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -127,7 +128,7 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 			}
 		}
 
-		return expressions.toArray(new Expression[expressions.size()]);
+		return expressions.toArray(new Expression[0]);
 	}
 
 	/**
@@ -172,7 +173,7 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 		if (nextSuffix == -1) {
 			return -1; // the suffix is missing
 		}
-		Stack<Bracket> stack = new Stack<>();
+		Deque<Bracket> stack = new ArrayDeque<>();
 		while (pos < maxlen) {
 			if (isSuffixHere(expressionString, pos, suffix) && stack.isEmpty()) {
 				break;

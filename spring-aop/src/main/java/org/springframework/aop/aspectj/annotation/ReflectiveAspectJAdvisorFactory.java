@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -155,7 +154,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 				methods.add(method);
 			}
 		});
-		Collections.sort(methods, METHOD_COMPARATOR);
+		methods.sort(METHOD_COMPARATOR);
 		return methods;
 	}
 
@@ -164,7 +163,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	 * for the given introduction field.
 	 * <p>Resulting Advisors will need to be evaluated for targets.
 	 * @param introductionField the field to introspect
-	 * @return {@code null} if not an Advisor
+	 * @return the Advisor instance, or {@code null} if not an Advisor
 	 */
 	@Nullable
 	private Advisor getDeclareParentsAdvisor(Field introductionField) {
@@ -293,6 +292,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 			springAdvice.setArgumentNamesFromStringArray(argNames);
 		}
 		springAdvice.calculateArgumentBindings();
+
 		return springAdvice;
 	}
 
@@ -306,13 +306,8 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	protected static class SyntheticInstantiationAdvisor extends DefaultPointcutAdvisor {
 
 		public SyntheticInstantiationAdvisor(final MetadataAwareAspectInstanceFactory aif) {
-			super(aif.getAspectMetadata().getPerClausePointcut(), new MethodBeforeAdvice() {
-				@Override
-				public void before(Method method, Object[] args, @Nullable Object target) {
-					// Simply instantiate the aspect
-					aif.getAspectInstance();
-				}
-			});
+			super(aif.getAspectMetadata().getPerClausePointcut(), (MethodBeforeAdvice)
+					(method, args, target) -> aif.getAspectInstance());
 		}
 	}
 

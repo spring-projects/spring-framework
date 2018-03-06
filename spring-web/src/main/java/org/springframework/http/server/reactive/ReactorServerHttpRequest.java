@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 
 /**
  * Adapt {@link ServerHttpRequest} to the Reactor {@link HttpServerRequest}.
@@ -56,13 +55,13 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 			throws URISyntaxException {
 
 		super(initUri(request), "", initHeaders(request));
-		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
+		Assert.notNull(bufferFactory, "DataBufferFactory must not be null");
 		this.request = request;
 		this.bufferFactory = bufferFactory;
 	}
 
 	private static URI initUri(HttpServerRequest request) throws URISyntaxException {
-		Assert.notNull(request, "'request' must not be null");
+		Assert.notNull(request, "HttpServerRequest must not be null");
 		return new URI(resolveBaseUrl(request).toString() + resolveRequestUri(request));
 	}
 

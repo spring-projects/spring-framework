@@ -19,14 +19,20 @@ package org.springframework.http.server.reactive.bootstrap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.http.server.reactive.ContextPathCompositeHandler;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.Assert;
+import org.springframework.util.StopWatch;
 
 /**
  * @author Rossen Stoyanchev
  */
 public abstract class AbstractHttpServer implements HttpServer {
+
+	protected Log logger = LogFactory.getLog(getClass().getName());
 
 	private String host = "0.0.0.0";
 
@@ -116,9 +122,15 @@ public abstract class AbstractHttpServer implements HttpServer {
 	public final void start() {
 		synchronized (this.lifecycleMonitor) {
 			if (!isRunning()) {
+				String serverName = getClass().getSimpleName();
+				logger.debug("Starting " + serverName + "...");
 				this.running = true;
 				try {
+					StopWatch stopWatch = new StopWatch();
+					stopWatch.start();
 					startInternal();
+					long millis = stopWatch.getTotalTimeMillis();
+					logger.debug("Server started on port " + getPort() + "(" + millis + " millis).");
 				}
 				catch (Throwable ex) {
 					throw new IllegalStateException(ex);
@@ -134,9 +146,14 @@ public abstract class AbstractHttpServer implements HttpServer {
 	public final void stop() {
 		synchronized (this.lifecycleMonitor) {
 			if (isRunning()) {
+				String serverName = getClass().getSimpleName();
+				logger.debug("Stopping " + serverName + "...");
 				this.running = false;
 				try {
+					StopWatch stopWatch = new StopWatch();
+					stopWatch.start();
 					stopInternal();
+					logger.debug("Server stopped (" + stopWatch.getTotalTimeMillis() + " millis).");
 				}
 				catch (Throwable ex) {
 					throw new IllegalStateException(ex);

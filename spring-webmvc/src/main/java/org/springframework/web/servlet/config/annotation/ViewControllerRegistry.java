@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,7 +117,7 @@ public class ViewControllerRegistry {
 			return null;
 		}
 
-		Map<String, Object> urlMap = new LinkedHashMap<String, Object>();
+		Map<String, Object> urlMap = new LinkedHashMap<>();
 		for (ViewControllerRegistration registration : this.registrations) {
 			urlMap.put(registration.getUrlPath(), registration.getViewController());
 		}

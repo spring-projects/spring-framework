@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ class DatabasePopulatorConfigUtils {
 
 	public static void setDatabasePopulator(Element element, BeanDefinitionBuilder builder) {
 		List<Element> scripts = DomUtils.getChildElementsByTagName(element, "script");
-		if (scripts.size() > 0) {
+		if (!scripts.isEmpty()) {
 			builder.addPropertyValue("databasePopulator", createDatabasePopulator(element, scripts, "INIT"));
 			builder.addPropertyValue("databaseCleaner", createDatabasePopulator(element, scripts, "DESTROY"));
 		}

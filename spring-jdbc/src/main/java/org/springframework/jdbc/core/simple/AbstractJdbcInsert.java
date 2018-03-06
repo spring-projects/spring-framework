@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -462,8 +462,8 @@ public abstract class AbstractJdbcInsert {
 			// clause while HSQL uses a second query that has to be executed with the same connection.
 
 			if (keyQuery.toUpperCase().startsWith("RETURNING")) {
-				Long key = getJdbcTemplate().queryForObject(getInsertString() + " " + keyQuery,
-						values.toArray(new Object[values.size()]), Long.class);
+				Long key = getJdbcTemplate().queryForObject(
+						getInsertString() + " " + keyQuery, values.toArray(), Long.class);
 				Map<String, Object> keys = new HashMap<>(1);
 				keys.put(getGeneratedKeyNames()[0], key);
 				keyHolder.getKeyList().add(keys);

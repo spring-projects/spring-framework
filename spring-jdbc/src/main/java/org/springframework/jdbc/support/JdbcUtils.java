@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.jdbc.support;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -356,8 +355,7 @@ public abstract class JdbcUtils {
 		return (T) extractDatabaseMetaData(dataSource,
 				dbmd -> {
 					try {
-						Method method = DatabaseMetaData.class.getMethod(metaDataMethodName, (Class[]) null);
-						return method.invoke(dbmd, (Object[]) null);
+						return DatabaseMetaData.class.getMethod(metaDataMethodName).invoke(dbmd);
 					}
 					catch (NoSuchMethodException ex) {
 						throw new MetaDataAccessException("No method named '" + metaDataMethodName +

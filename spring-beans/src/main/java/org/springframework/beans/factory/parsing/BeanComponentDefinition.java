@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,8 +83,8 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 				references.add((BeanReference) value);
 			}
 		}
-		this.innerBeanDefinitions = innerBeans.toArray(new BeanDefinition[innerBeans.size()]);
-		this.beanReferences = references.toArray(new BeanReference[references.size()]);
+		this.innerBeanDefinitions = innerBeans.toArray(new BeanDefinition[0]);
+		this.beanReferences = references.toArray(new BeanReference[0]);
 	}
 
 

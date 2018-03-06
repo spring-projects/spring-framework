@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import java.util.Set;
 import javax.validation.Constraint;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+import javax.validation.ConstraintViolation;
 import javax.validation.Payload;
 import javax.validation.Valid;
 import javax.validation.Validation;
@@ -48,6 +49,7 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.FieldError;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
@@ -93,8 +95,11 @@ public class SpringValidatorAdapterTests {
 
 		assertThat(errors.getFieldErrorCount("password"), is(1));
 		assertThat(errors.getFieldValue("password"), is("pass"));
-		assertThat(messageSource.getMessage(errors.getFieldError("password"), Locale.ENGLISH),
-				is("Size of Password is must be between 8 and 128"));
+		FieldError error = errors.getFieldError("password");
+		assertNotNull(error);
+		assertThat(messageSource.getMessage(error, Locale.ENGLISH), is("Size of Password is must be between 8 and 128"));
+		assertTrue(error.contains(ConstraintViolation.class));
+		assertThat(error.unwrap(ConstraintViolation.class).getPropertyPath().toString(), is("password"));
 	}
 
 	@Test  // SPR-13406
@@ -108,8 +113,11 @@ public class SpringValidatorAdapterTests {
 
 		assertThat(errors.getFieldErrorCount("password"), is(1));
 		assertThat(errors.getFieldValue("password"), is("password"));
-		assertThat(messageSource.getMessage(errors.getFieldError("password"), Locale.ENGLISH),
-				is("Password must be same value with Password(Confirm)"));
+		FieldError error = errors.getFieldError("password");
+		assertNotNull(error);
+		assertThat(messageSource.getMessage(error, Locale.ENGLISH), is("Password must be same value with Password(Confirm)"));
+		assertTrue(error.contains(ConstraintViolation.class));
+		assertThat(error.unwrap(ConstraintViolation.class).getPropertyPath().toString(), is("password"));
 	}
 
 	@Test  // SPR-13406
@@ -124,10 +132,16 @@ public class SpringValidatorAdapterTests {
 		assertThat(errors.getFieldErrorCount("email"), is(1));
 		assertThat(errors.getFieldValue("email"), is("test@example.com"));
 		assertThat(errors.getFieldErrorCount("confirmEmail"), is(1));
-		assertThat(messageSource.getMessage(errors.getFieldError("email"), Locale.ENGLISH),
-				is("email must be same value with confirmEmail"));
-		assertThat(messageSource.getMessage(errors.getFieldError("confirmEmail"), Locale.ENGLISH),
-				is("Email required"));
+		FieldError error1 = errors.getFieldError("email");
+		FieldError error2 = errors.getFieldError("confirmEmail");
+		assertNotNull(error1);
+		assertNotNull(error2);
+		assertThat(messageSource.getMessage(error1, Locale.ENGLISH), is("email must be same value with confirmEmail"));
+		assertThat(messageSource.getMessage(error2, Locale.ENGLISH), is("Email required"));
+		assertTrue(error1.contains(ConstraintViolation.class));
+		assertThat(error1.unwrap(ConstraintViolation.class).getPropertyPath().toString(), is("email"));
+		assertTrue(error2.contains(ConstraintViolation.class));
+		assertThat(error2.unwrap(ConstraintViolation.class).getPropertyPath().toString(), is("confirmEmail"));
 	}
 
 	@Test  // SPR-15123
@@ -144,10 +158,16 @@ public class SpringValidatorAdapterTests {
 		assertThat(errors.getFieldErrorCount("email"), is(1));
 		assertThat(errors.getFieldValue("email"), is("test@example.com"));
 		assertThat(errors.getFieldErrorCount("confirmEmail"), is(1));
-		assertThat(messageSource.getMessage(errors.getFieldError("email"), Locale.ENGLISH),
-				is("email must be same value with confirmEmail"));
-		assertThat(messageSource.getMessage(errors.getFieldError("confirmEmail"), Locale.ENGLISH),
-				is("Email required"));
+		FieldError error1 = errors.getFieldError("email");
+		FieldError error2 = errors.getFieldError("confirmEmail");
+		assertNotNull(error1);
+		assertNotNull(error2);
+		assertThat(messageSource.getMessage(error1, Locale.ENGLISH), is("email must be same value with confirmEmail"));
+		assertThat(messageSource.getMessage(error2, Locale.ENGLISH), is("Email required"));
+		assertTrue(error1.contains(ConstraintViolation.class));
+		assertThat(error1.unwrap(ConstraintViolation.class).getPropertyPath().toString(), is("email"));
+		assertTrue(error2.contains(ConstraintViolation.class));
+		assertThat(error2.unwrap(ConstraintViolation.class).getPropertyPath().toString(), is("confirmEmail"));
 	}
 
 	@Test  // SPR-16177

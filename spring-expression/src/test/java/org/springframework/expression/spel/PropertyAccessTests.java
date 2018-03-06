@@ -115,7 +115,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		ctx.addPropertyAccessor(new StringyPropertyAccessor());
 		Expression expr = parser.parseRaw("new String('hello').flibbles");
 		Integer i = expr.getValue(ctx, Integer.class);
-		assertEquals((int) i, 7);
+		assertEquals(7, (int) i);
 
 		// The reflection one will be used for other properties...
 		expr = parser.parseRaw("new String('hello').CASE_INSENSITIVE_ORDER");
@@ -125,7 +125,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		expr = parser.parseRaw("new String('hello').flibbles");
 		expr.setValue(ctx, 99);
 		i = expr.getValue(ctx, Integer.class);
-		assertEquals((int) i, 99);
+		assertEquals(99, (int) i);
 
 		// Cannot set it to a string value
 		try {
@@ -165,7 +165,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 	public void testAccessingPropertyOfClass() throws Exception {
 		Expression expression = parser.parseExpression("name");
 		Object value = expression.getValue(new StandardEvaluationContext(String.class));
-		assertEquals(value, "java.lang.String");
+		assertEquals("java.lang.String", value);
 	}
 
 	@Test
@@ -190,7 +190,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 
 		@Override
 		public Class<?>[] getSpecificTargetClasses() {
-			return new Class[] {String.class};
+			return new Class<?>[] {String.class};
 		}
 
 		@Override

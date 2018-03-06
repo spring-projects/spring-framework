@@ -431,74 +431,87 @@ public abstract class LogFactory {
 			super(logger);
 		}
 
+		@Override
 		public void fatal(Object message) {
 			error(message);
 		}
 
+		@Override
 		public void fatal(Object message, Throwable exception) {
 			error(message, exception);
 		}
 
+		@Override
 		public void error(Object message) {
 			if (message instanceof String || this.logger.isErrorEnabled()) {
 				this.logger.log(null, FQCN, LocationAwareLogger.ERROR_INT, String.valueOf(message), null, null);
 			}
 		}
 
+		@Override
 		public void error(Object message, Throwable exception) {
 			if (message instanceof String || this.logger.isErrorEnabled()) {
 				this.logger.log(null, FQCN, LocationAwareLogger.ERROR_INT, String.valueOf(message), null, exception);
 			}
 		}
 
+		@Override
 		public void warn(Object message) {
 			if (message instanceof String || this.logger.isWarnEnabled()) {
 				this.logger.log(null, FQCN, LocationAwareLogger.WARN_INT, String.valueOf(message), null, null);
 			}
 		}
 
+		@Override
 		public void warn(Object message, Throwable exception) {
 			if (message instanceof String || this.logger.isWarnEnabled()) {
 				this.logger.log(null, FQCN, LocationAwareLogger.WARN_INT, String.valueOf(message), null, exception);
 			}
 		}
 
+		@Override
 		public void info(Object message) {
 			if (message instanceof String || this.logger.isInfoEnabled()) {
 				this.logger.log(null, FQCN, LocationAwareLogger.INFO_INT, String.valueOf(message), null, null);
 			}
 		}
 
+		@Override
 		public void info(Object message, Throwable exception) {
 			if (message instanceof String || this.logger.isInfoEnabled()) {
 				this.logger.log(null, FQCN, LocationAwareLogger.INFO_INT, String.valueOf(message), null, exception);
 			}
 		}
 
+		@Override
 		public void debug(Object message) {
 			if (message instanceof String || this.logger.isDebugEnabled()) {
 				this.logger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, String.valueOf(message), null, null);
 			}
 		}
 
+		@Override
 		public void debug(Object message, Throwable exception) {
 			if (message instanceof String || this.logger.isDebugEnabled()) {
 				this.logger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, String.valueOf(message), null, exception);
 			}
 		}
 
+		@Override
 		public void trace(Object message) {
 			if (message instanceof String || this.logger.isTraceEnabled()) {
 				this.logger.log(null, FQCN, LocationAwareLogger.TRACE_INT, String.valueOf(message), null, null);
 			}
 		}
 
+		@Override
 		public void trace(Object message, Throwable exception) {
 			if (message instanceof String || this.logger.isTraceEnabled()) {
 				this.logger.log(null, FQCN, LocationAwareLogger.TRACE_INT, String.valueOf(message), null, exception);
 			}
 		}
 
+		@Override
 		protected Object readResolve() {
 			return Slf4jDelegate.createLocationAwareLog(this.name);
 		}
@@ -623,6 +636,7 @@ public abstract class LogFactory {
 			super(level, msg);
 		}
 
+		@Override
 		public String getSourceClassName() {
 			if (!this.resolved) {
 				resolve();
@@ -630,11 +644,13 @@ public abstract class LogFactory {
 			return super.getSourceClassName();
 		}
 
+		@Override
 		public void setSourceClassName(String sourceClassName) {
 			super.setSourceClassName(sourceClassName);
 			this.resolved = true;
 		}
 
+		@Override
 		public String getSourceMethodName() {
 			if (!this.resolved) {
 				resolve();
@@ -642,6 +658,7 @@ public abstract class LogFactory {
 			return super.getSourceMethodName();
 		}
 
+		@Override
 		public void setSourceMethodName(String sourceMethodName) {
 			super.setSourceMethodName(sourceMethodName);
 			this.resolved = true;

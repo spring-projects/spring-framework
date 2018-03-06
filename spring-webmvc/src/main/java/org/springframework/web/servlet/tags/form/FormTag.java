@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Map;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -28,6 +28,7 @@ import javax.servlet.jsp.PageContext;
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.core.Conventions;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
@@ -624,7 +625,7 @@ public class FormTag extends AbstractHtmlElementTag {
 			try {
 				requestUri = UriUtils.encodePath(requestUri, encoding);
 			}
-			catch (UnsupportedEncodingException ex) {
+			catch (UnsupportedCharsetException ex) {
 				// shouldn't happen - if it does, proceed with requestUri as-is
 			}
 			ServletResponse response = this.pageContext.getResponse();
@@ -666,7 +667,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	public int doEndTag() throws JspException {
 		RequestDataValueProcessor processor = getRequestContext().getRequestDataValueProcessor();
 		ServletRequest request = this.pageContext.getRequest();
-		if ((processor != null) && (request instanceof HttpServletRequest)) {
+		if (processor != null && request instanceof HttpServletRequest) {
 			writeHiddenFields(processor.getExtraHiddenFields((HttpServletRequest) request));
 		}
 		this.tagWriter.endTag();
@@ -677,7 +678,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * Writes the given values as hidden fields.
 	 */
 	private void writeHiddenFields(Map<String, String> hiddenFields) throws JspException {
-		if (hiddenFields != null) {
+		if (!CollectionUtils.isEmpty(hiddenFields)) {
 			this.tagWriter.appendValue("<div>\n");
 			for (String name : hiddenFields.keySet()) {
 				this.tagWriter.appendValue("<input type=\"hidden\" ");
@@ -694,6 +695,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	@Override
 	public void doFinally() {
 		super.doFinally();
+
 		this.pageContext.removeAttribute(MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		if (this.previousNestedPath != null) {
 			// Expose previous nestedPath value.

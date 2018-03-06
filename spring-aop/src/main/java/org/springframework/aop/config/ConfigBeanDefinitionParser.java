@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -253,8 +253,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			Element aspectElement, String aspectId, List<BeanDefinition> beanDefs,
 			List<BeanReference> beanRefs, ParserContext parserContext) {
 
-		BeanDefinition[] beanDefArray = beanDefs.toArray(new BeanDefinition[beanDefs.size()]);
-		BeanReference[] beanRefArray = beanRefs.toArray(new BeanReference[beanRefs.size()]);
+		BeanDefinition[] beanDefArray = beanDefs.toArray(new BeanDefinition[0]);
+		BeanReference[] beanRefArray = beanRefs.toArray(new BeanReference[0]);
 		Object source = parserContext.extractSource(aspectElement);
 		return new AspectComponentDefinition(aspectId, beanDefArray, beanRefArray, source);
 	}

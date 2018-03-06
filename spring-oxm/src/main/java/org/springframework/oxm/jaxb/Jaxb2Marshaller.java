@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -579,9 +579,9 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		XMLReader xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
 		xmlReader.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
 		for (int i = 0; i < resources.length; i++) {
-			Assert.notNull(resources[i], "Resource is null");
-			Assert.isTrue(resources[i].exists(), "Resource " + resources[i] + " does not exist");
-			InputSource inputSource = SaxResourceUtils.createInputSource(resources[i]);
+			Resource resource = resources[i];
+			Assert.isTrue(resource != null && resource.exists(), () -> "Resource does not exist: " + resource);
+			InputSource inputSource = SaxResourceUtils.createInputSource(resource);
 			schemaSources[i] = new SAXSource(xmlReader, inputSource);
 		}
 		SchemaFactory schemaFactory = SchemaFactory.newInstance(schemaLanguage);
@@ -594,8 +594,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 
 	@Override
 	public boolean supports(Class<?> clazz) {
-		return ((this.supportJaxbElementClass && JAXBElement.class.isAssignableFrom(clazz)) ||
-				supportsInternal(clazz, this.checkForXmlRootElement));
+		return (this.supportJaxbElementClass && JAXBElement.class.isAssignableFrom(clazz)) ||
+				supportsInternal(clazz, this.checkForXmlRootElement);
 	}
 
 	@Override
@@ -607,7 +607,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 				Type typeArgument = parameterizedType.getActualTypeArguments()[0];
 				if (typeArgument instanceof Class) {
 					Class<?> classArgument = (Class<?>) typeArgument;
-					return (((classArgument.isArray() && Byte.TYPE == classArgument.getComponentType())) ||
+					return ((classArgument.isArray() && Byte.TYPE == classArgument.getComponentType()) ||
 							isPrimitiveWrapper(classArgument) || isStandardClass(classArgument) ||
 							supportsInternal(classArgument, false));
 				}
@@ -1059,12 +1059,12 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		}
 
 		@Override
-		public InputStream getInputStream() throws IOException {
+		public InputStream getInputStream() {
 			return new ByteArrayInputStream(this.data, this.offset, this.length);
 		}
 
 		@Override
-		public OutputStream getOutputStream() throws IOException {
+		public OutputStream getOutputStream() {
 			throw new UnsupportedOperationException();
 		}
 
@@ -1080,11 +1080,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	}
 
 
-	private static final EntityResolver NO_OP_ENTITY_RESOLVER = new EntityResolver() {
-		@Override
-		public InputSource resolveEntity(String publicId, String systemId) {
-			return new InputSource(new StringReader(""));
-		}
-	};
+	private static final EntityResolver NO_OP_ENTITY_RESOLVER =
+			(publicId, systemId) -> new InputSource(new StringReader(""));
 
 }

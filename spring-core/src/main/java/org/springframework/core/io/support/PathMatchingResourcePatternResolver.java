@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -290,7 +290,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			// Generally only look for a pattern after a prefix here,
 			// and on Tomcat only after the "*/" separator for its "war:" protocol.
 			int prefixEnd = (locationPattern.startsWith("war:") ? locationPattern.indexOf("*/") + 1 :
-					locationPattern.indexOf(":") + 1);
+					locationPattern.indexOf(':') + 1);
 			if (getPathMatcher().isPattern(locationPattern.substring(prefixEnd))) {
 				// a file pattern
 				return findPathMatchingResources(locationPattern);
@@ -320,7 +320,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		if (logger.isDebugEnabled()) {
 			logger.debug("Resolved classpath location [" + location + "] to resources " + result);
 		}
-		return result.toArray(new Resource[result.size()]);
+		return result.toArray(new Resource[0]);
 	}
 
 	/**
@@ -515,7 +515,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		if (logger.isDebugEnabled()) {
 			logger.debug("Resolved location pattern [" + locationPattern + "] to resources " + result);
 		}
-		return result.toArray(new Resource[result.size()]);
+		return result.toArray(new Resource[0]);
 	}
 
 	/**
@@ -531,7 +531,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see #retrieveMatchingFiles
 	 */
 	protected String determineRootDir(String location) {
-		int prefixEnd = location.indexOf(":") + 1;
+		int prefixEnd = location.indexOf(':') + 1;
 		int rootDirEnd = location.length();
 		while (rootDirEnd > prefixEnd && getPathMatcher().isPattern(location.substring(prefixEnd, rootDirEnd))) {
 			rootDirEnd = location.lastIndexOf('/', rootDirEnd - 2) + 1;

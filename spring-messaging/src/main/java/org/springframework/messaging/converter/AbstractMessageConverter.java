@@ -139,7 +139,7 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 */
 	public void setSerializedPayloadClass(Class<?> payloadClass) {
 		Assert.isTrue(byte[].class == payloadClass || String.class == payloadClass,
-				"Payload class must be byte[] or String: " + payloadClass);
+				() -> "Payload class must be byte[] or String: " + payloadClass);
 		this.serializedPayloadClass = payloadClass;
 	}
 
