@@ -20,22 +20,20 @@ import javax.sql.DataSource;
 
 /**
  * {@link DataFieldMaxValueIncrementer} that retrieves the next value
- * of a given PostgreSQL sequence.
+ * of a given SAP HANA sequence.
  *
- * <p>Thanks to Tomislav Urban for the suggestion!
- *
+ * @author Jonathan Bregler
  * @author Juergen Hoeller
- * @deprecated in favor of the differently named {@link PostgresSequenceMaxValueIncrementer}
+ * @since 4.3.15
  */
-@Deprecated
-public class PostgreSQLSequenceMaxValueIncrementer extends PostgresSequenceMaxValueIncrementer {
+public class HanaSequenceMaxValueIncrementer extends AbstractSequenceMaxValueIncrementer {
 
 	/**
 	 * Default constructor for bean property style usage.
 	 * @see #setDataSource
 	 * @see #setIncrementerName
 	 */
-	public PostgreSQLSequenceMaxValueIncrementer() {
+	public HanaSequenceMaxValueIncrementer() {
 	}
 
 	/**
@@ -43,8 +41,14 @@ public class PostgreSQLSequenceMaxValueIncrementer extends PostgresSequenceMaxVa
 	 * @param dataSource the DataSource to use
 	 * @param incrementerName the name of the sequence/table to use
 	 */
-	public PostgreSQLSequenceMaxValueIncrementer(DataSource dataSource, String incrementerName) {
+	public HanaSequenceMaxValueIncrementer(DataSource dataSource, String incrementerName) {
 		super(dataSource, incrementerName);
+	}
+
+
+	@Override
+	protected String getSequenceQuery() {
+		return "select " + getIncrementerName() + ".nextval from dummy";
 	}
 
 }

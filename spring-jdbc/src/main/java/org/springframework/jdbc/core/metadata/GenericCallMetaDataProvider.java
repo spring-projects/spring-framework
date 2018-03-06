@@ -33,7 +33,7 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.util.StringUtils;
 
 /**
- * Generic implementation for the {@link CallMetaDataProvider} interface.
+ * A generic implementation of the {@link CallMetaDataProvider} interface.
  * This class can be extended to provide database specific behavior.
  *
  * @author Thomas Risberg

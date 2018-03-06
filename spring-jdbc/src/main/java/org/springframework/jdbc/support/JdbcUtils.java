@@ -17,7 +17,6 @@
 package org.springframework.jdbc.support;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -420,9 +419,10 @@ public abstract class JdbcUtils {
 	}
 
 	/**
-	 * Extract a common name for the database in use even if various drivers/platforms provide varying names.
+	 * Extract a common name for the target database in use even if
+	 * various drivers/platforms provide varying names at runtime.
 	 * @param source the name as provided in database metadata
-	 * @return the common name to be used
+	 * @return the common name to be used (e.g. "DB2" or "Sybase")
 	 */
 	public static String commonDatabaseName(String source) {
 		String name = source;
@@ -444,10 +444,10 @@ public abstract class JdbcUtils {
 	 * @return whether the type is numeric
 	 */
 	public static boolean isNumeric(int sqlType) {
-		return Types.BIT == sqlType || Types.BIGINT == sqlType || Types.DECIMAL == sqlType ||
+		return (Types.BIT == sqlType || Types.BIGINT == sqlType || Types.DECIMAL == sqlType ||
 				Types.DOUBLE == sqlType || Types.FLOAT == sqlType || Types.INTEGER == sqlType ||
 				Types.NUMERIC == sqlType || Types.REAL == sqlType || Types.SMALLINT == sqlType ||
-				Types.TINYINT == sqlType;
+				Types.TINYINT == sqlType);
 	}
 
 	/**

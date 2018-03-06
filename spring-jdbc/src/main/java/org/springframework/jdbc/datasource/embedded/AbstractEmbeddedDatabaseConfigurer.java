@@ -24,7 +24,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Base class for {@link EmbeddedDatabaseConfigurer} implementations providing common shutdown behavior.
+ * Base class for {@link EmbeddedDatabaseConfigurer} implementations
+ * providing common shutdown behavior through a "SHUTDOWN" statement.
  *
  * @author Oliver Gierke
  * @author Juergen Hoeller

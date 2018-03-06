@@ -20,22 +20,22 @@ import javax.sql.DataSource;
 
 /**
  * {@link DataFieldMaxValueIncrementer} that retrieves the next value
- * of a given PostgreSQL sequence.
+ * of a given sequence on DB2 LUW (for Linux, Unix and Windows).
  *
- * <p>Thanks to Tomislav Urban for the suggestion!
+ * <p>Thanks to Mark MacMahon for the suggestion!
  *
  * @author Juergen Hoeller
- * @deprecated in favor of the differently named {@link PostgresSequenceMaxValueIncrementer}
+ * @since 4.3.15
+ * @see Db2MainframeMaxValueIncrementer
  */
-@Deprecated
-public class PostgreSQLSequenceMaxValueIncrementer extends PostgresSequenceMaxValueIncrementer {
+public class Db2LuwMaxValueIncrementer extends AbstractSequenceMaxValueIncrementer {
 
 	/**
 	 * Default constructor for bean property style usage.
 	 * @see #setDataSource
 	 * @see #setIncrementerName
 	 */
-	public PostgreSQLSequenceMaxValueIncrementer() {
+	public Db2LuwMaxValueIncrementer() {
 	}
 
 	/**
@@ -43,8 +43,14 @@ public class PostgreSQLSequenceMaxValueIncrementer extends PostgresSequenceMaxVa
 	 * @param dataSource the DataSource to use
 	 * @param incrementerName the name of the sequence/table to use
 	 */
-	public PostgreSQLSequenceMaxValueIncrementer(DataSource dataSource, String incrementerName) {
+	public Db2LuwMaxValueIncrementer(DataSource dataSource, String incrementerName) {
 		super(dataSource, incrementerName);
+	}
+
+
+	@Override
+	protected String getSequenceQuery() {
+		return "values nextval for " + getIncrementerName();
 	}
 
 }
