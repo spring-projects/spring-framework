@@ -36,7 +36,7 @@ import org.springframework.web.util.HtmlUtils;
  * @author Juergen Hoeller
  * @since 2.0
  */
-abstract class ValueFormatter {
+public abstract class ValueFormatter {
 
 	/**
 	 * Build the display value of the supplied {@code Object}, HTML escaped

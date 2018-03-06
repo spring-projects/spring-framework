@@ -17,6 +17,7 @@
  *
  * @author Darren Davison
  * @author Juergen Hoeller
+ * @author Sascha Woo
  * @since 1.1
  -->
 
@@ -24,14 +25,30 @@
  * message
  *
  * Macro to translate a message code into a message.
+ *
+ * @param code the code of the message
+ * @param args arguments for the message (optional)
+ * @param text the string to return if the lookup fails
  -->
-<#macro message code>${springMacroRequestContext.getMessage(code)}</#macro>
+<#macro message code args=[] text="">
+    <#if args?has_content && text?has_content>
+        ${springMacroRequestContext.getMessage(code, args, text)}
+    <#elseif args?has_content && !text?has_content>
+        ${springMacroRequestContext.getMessage(code, args)}
+    <#elseif !args?has_content && text?has_content>
+        ${springMacroRequestContext.getMessage(code, text)}
+    <#else>
+        ${springMacroRequestContext.getMessage(code)}
+    </#if>
+</#macro>
 
 <#--
  * messageText
  *
  * Macro to translate a message code into a message,
  * using the given default text if no message found.
+ *
+ * @Deprecated use <@spring.message code args text /> instead
  -->
 <#macro messageText code, text>${springMacroRequestContext.getMessage(code, text)}</#macro>
 
@@ -39,6 +56,8 @@
  * messageArgs
  *
  * Macro to translate a message code with arguments into a message.
+ *
+ * @Deprecated use <@spring.message code args text /> instead
  -->
 <#macro messageArgs code, args>${springMacroRequestContext.getMessage(code, args)}</#macro>
 
@@ -47,6 +66,8 @@
  *
  * Macro to translate a message code with arguments into a message,
  * using the given default text if no message found.
+ *
+ * @Deprecated use <@spring.message code args text /> instead
  -->
 <#macro messageArgsText code, args, text>${springMacroRequestContext.getMessage(code, args, text)}</#macro>
 
@@ -54,14 +75,29 @@
  * theme
  *
  * Macro to translate a theme message code into a message.
+ *
+ * @param code the code of the message
+ * @param args arguments for the message (optional)
+ * @param text the string to return if the lookup fails
  -->
-<#macro theme code>${springMacroRequestContext.getThemeMessage(code)}</#macro>
+<#macro theme code args=[] text="">
+    <#if args?has_content && text?has_content>
+        ${springMacroRequestContext.getThemeMessage(code, args, text)}
+    <#elseif args?has_content && !text?has_content>
+        ${springMacroRequestContext.getThemeMessage(code, args)}
+    <#elseif !args?has_content && text?has_content>
+        ${springMacroRequestContext.getThemeMessage(code, text)}
+    <#else>
+        ${springMacroRequestContext.getThemeMessage(code)}
+    </#if>
+</#macro>
 
 <#--
  * themeText
  *
  * Macro to translate a theme message code into a message,
  * using the given default text if no message found.
+ * @Deprecated use <@spring.theme code args text /> instead
  -->
 <#macro themeText code, text>${springMacroRequestContext.getThemeMessage(code, text)}</#macro>
 
@@ -69,6 +105,8 @@
  * themeArgs
  *
  * Macro to translate a theme message code with arguments into a message.
+ *
+ * @Deprecated use <@spring.theme code args text /> instead
  -->
 <#macro themeArgs code, args>${springMacroRequestContext.getThemeMessage(code, args)}</#macro>
 
@@ -77,16 +115,28 @@
  *
  * Macro to translate a theme message code with arguments into a message,
  * using the given default text if no message found.
+ *
+ * @Deprecated use <@spring.theme code args text /> instead
  -->
 <#macro themeArgsText code, args, text>${springMacroRequestContext.getThemeMessage(code, args, text)}</#macro>
 
 <#--
  * url
  *
- * Takes a relative URL and makes it absolute from the server root by
- * adding the context root for the web application.
+ * Function to output a context-aware URL for the given relative URL with optional placeholders (named keys with braces {}).
+ * For example, send in a relative URL foo/{bar}?spam={spam} and a parameter map
+ * {@code {bar=baz,spam=nuts}} and the result will be [contextpath]/foo/baz?spam=nuts.
+ *
+ * @param relativeUrl the relative url
+ * @param params a map of parameters to insert as placeholders in the url
  -->
-<#macro url relativeUrl extra...><#if extra?? && extra?size!=0>${springMacroRequestContext.getContextUrl(relativeUrl,extra)}<#else>${springMacroRequestContext.getContextUrl(relativeUrl)}</#if></#macro>
+<#macro url relativeUrl params={}>
+    <#if params?? && params?size != 0>
+        <#return springMacroRequestContext.getContextUrl(relativeUrl, params) />
+    <#else>
+        <#return springMacroRequestContext.getContextUrl(relativeUrl) />
+    </#if>
+</#macro>
 
 <#--
  * bind
@@ -106,279 +156,55 @@
  * each time this macro is referenced (assuming you import this library in
  * your templates with the namespace 'spring'):
  *
- *   spring.status : a BindStatus instance holding the command object name,
- *   expression, value, and error messages and codes for the path supplied
- *
- * @param path : the path (string value) of the value required to bind to.
+ * @param path the path (string value) of the value required to bind to.
  *   Spring defaults to a command name of "command" but this can be overridden
  *   by user config.
+ * @param htmlEscape set HTML escaping for this tag, as boolean value.
+ *   Overrides the default HTML escaping setting for the current page.
  -->
-<#macro bind path>
-    <#if htmlEscape?exists>
-        <#assign status = springMacroRequestContext.getBindStatus(path, htmlEscape)>
+<#macro bind path htmlEscape="">
+    <#if htmlEscape?is_boolean>
+        <#assign status = springMacroRequestContext.getBindStatus(path, htmlEscape) />
     <#else>
-        <#assign status = springMacroRequestContext.getBindStatus(path)>
+        <#assign status = springMacroRequestContext.getBindStatus(path) />
     </#if>
-    <#-- assign a temporary value, forcing a string representation for any
-    kind of variable. This temp value is only used in this macro lib -->
-    <#if status.value?exists && status.value?is_boolean>
-        <#assign stringStatusValue=status.value?string>
+    <#nested>
+    <#assign status = "" />
+</#macro>
+
+<#--
+ * hasBindErrors
+ *
+ * The hasBindErrors marco provides you with support for
+ * binding the errors for an object. If they are available, an
+ * Errors object gets bound in the page scope, which you can inspect.
+ * Basically it's a bit like the bind macro, but this tag does not feature
+ * the status object, it just binds all the errors for the object and its properties.
+ * 
+ * @param name the name of the bean in the request, that needs to be inspected for errors.
+ *   If errors are available for this bean, they will be bound under the errors key.
+ * @param htmlEscape set HTML escaping for this tag, as boolean value.
+ *   Overrides the default HTML escaping setting for the current page. 
+-->
+<#macro hasBindErrors name htmlEscape="">
+    <#if htmlEscape?is_boolean>
+        <#local errors = springMacroRequestContext.getErrors(name, htmlEscape) />
     <#else>
-        <#assign stringStatusValue=status.value?default("")>
+        <#local errors = springMacroRequestContext.getErrors(name) />
+    </#if>
+    <#if errors?? && errors.hasErrors()>
+        <#nested errors />
     </#if>
 </#macro>
 
-<#--
- * bindEscaped
+<#-- 
+ * htmlEscape
  *
- * Similar to spring:bind, but takes an explicit HTML escape flag rather
- * than relying on the default HTML escape setting.
- -->
-<#macro bindEscaped path, htmlEscape>
-    <#assign status = springMacroRequestContext.getBindStatus(path, htmlEscape)>
-    <#-- assign a temporary value, forcing a string representation for any
-    kind of variable. This temp value is only used in this macro lib -->
-    <#if status.value?exists && status.value?is_boolean>
-        <#assign stringStatusValue=status.value?string>
-    <#else>
-        <#assign stringStatusValue=status.value?default("")>
-    </#if>
-</#macro>
-
-<#--
- * formInput
+ * Sets default HTML escape value for the current page.
+ * Overrides a "defaultHtmlEscape" context-param in web.xml, if any.
  *
- * Display a form input field of type 'text' and bind it to an attribute
- * of a command or bean.
- *
- * @param path the name of the field to bind to
- * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
- -->
-<#macro formInput path attributes="" fieldType="text">
-    <@bind path/>
-    <input type="${fieldType}" id="${status.expression?replace('[','')?replace(']','')}" name="${status.expression}" value="<#if fieldType!="password">${stringStatusValue}</#if>" ${attributes?no_esc}<@closeTag/>
-</#macro>
-
-<#--
- * formPasswordInput
- *
- * Display a form input field of type 'password' and bind it to an attribute
- * of a command or bean. No value will ever be displayed. This functionality
- * can also be obtained by calling the formInput macro with a 'type' parameter
- * of 'password'.
- *
- * @param path the name of the field to bind to
- * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
- -->
-<#macro formPasswordInput path attributes="">
-    <@formInput path, attributes, "password"/>
-</#macro>
-
-<#--
- * formHiddenInput
- *
- * Generate a form input field of type 'hidden' and bind it to an attribute
- * of a command or bean. This functionality can also be obtained by calling
- * the formInput macro with a 'type' parameter of 'hidden'.
- *
- * @param path the name of the field to bind to
- * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
- -->
-<#macro formHiddenInput path attributes="">
-    <@formInput path, attributes, "hidden"/>
-</#macro>
-
-<#--
- * formTextarea
- *
- * Display a text area and bind it to an attribute of a command or bean.
- *
- * @param path the name of the field to bind to
- * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
- -->
-<#macro formTextarea path attributes="">
-    <@bind path/>
-    <textarea id="${status.expression?replace('[','')?replace(']','')}" name="${status.expression}" ${attributes?no_esc}>
-${stringStatusValue}</textarea>
-</#macro>
-
-<#--
- * formSingleSelect
- *
- * Show a selectbox (dropdown) input element allowing a single value to be chosen
- * from a list of options.
- *
- * @param path the name of the field to bind to
- * @param options a map (value=label) of all the available options
- * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
--->
-<#macro formSingleSelect path options attributes="">
-    <@bind path/>
-    <select id="${status.expression?replace('[','')?replace(']','')}" name="${status.expression}" ${attributes?no_esc}>
-        <#if options?is_hash>
-            <#list options?keys as value>
-            <option value="${value}"<@checkSelected value/>>${options[value]}</option>
-            </#list>
-        <#else> 
-            <#list options as value>
-            <option value="${value}"<@checkSelected value/>>${value}</option>
-            </#list>
-        </#if>
-    </select>
-</#macro>
-
-<#--
- * formMultiSelect
- *
- * Show a listbox of options allowing the user to make 0 or more choices from
- * the list of options.
- *
- * @param path the name of the field to bind to
- * @param options a map (value=label) of all the available options
- * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
--->
-<#macro formMultiSelect path options attributes="">
-    <@bind path/>
-    <select multiple="multiple" id="${status.expression?replace('[','')?replace(']','')}" name="${status.expression}" ${attributes?no_esc}>
-        <#list options?keys as value>
-        <#assign isSelected = contains(status.actualValue?default([""]), value)>
-        <option value="${value}"<#if isSelected> selected="selected"</#if>>${options[value]}</option>
-        </#list>
-    </select>
-</#macro>
-
-<#--
- * formRadioButtons
- *
- * Show radio buttons.
- *
- * @param path the name of the field to bind to
- * @param options a map (value=label) of all the available options
- * @param separator the html tag or other character list that should be used to
- *    separate each option. Typically '&nbsp;' or '<br>'
- * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
--->
-<#macro formRadioButtons path options separator attributes="">
-    <@bind path/>
-    <#list options?keys as value>
-    <#assign id="${status.expression?replace('[','')?replace(']','')}${value_index}">
-    <input type="radio" id="${id}" name="${status.expression}" value="${value}"<#if stringStatusValue == value> checked="checked"</#if> ${attributes?no_esc}<@closeTag/>
-    <label for="${id}">${options[value]}</label>${separator}
-    </#list>
-</#macro>
-
-<#--
- * formCheckboxes
- *
- * Show checkboxes.
- *
- * @param path the name of the field to bind to
- * @param options a map (value=label) of all the available options
- * @param separator the html tag or other character list that should be used to
- *    separate each option. Typically '&nbsp;' or '<br>'
- * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
--->
-<#macro formCheckboxes path options separator attributes="">
-    <@bind path/>
-    <#list options?keys as value>
-    <#assign id="${status.expression?replace('[','')?replace(']','')}${value_index}">
-    <#assign isSelected = contains(status.actualValue?default([""]), value)>
-    <input type="checkbox" id="${id}" name="${status.expression}" value="${value}"<#if isSelected> checked="checked"</#if> ${attributes?no_esc}<@closeTag/>
-    <label for="${id}">${options[value]}</label>${separator}
-    </#list>
-    <input type="hidden" name="_${status.expression}" value="on"/>
-</#macro>
-
-<#--
- * formCheckbox
- *
- * Show a single checkbox.
- *
- * @param path the name of the field to bind to
- * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
--->
-<#macro formCheckbox path attributes="">
-	<@bind path />
-    <#assign id="${status.expression?replace('[','')?replace(']','')}">
-    <#assign isSelected = status.value?? && status.value?string=="true">
-	<input type="hidden" name="_${status.expression}" value="on"/>
-	<input type="checkbox" id="${id}" name="${status.expression}"<#if isSelected> checked="checked"</#if> ${attributes?no_esc}/>
-</#macro>
-
-<#--
- * showErrors
- *
- * Show validation errors for the currently bound field, with
- * optional style attributes.
- *
- * @param separator the html tag or other character list that should be used to
- *    separate each option. Typically '<br>'.
- * @param classOrStyle either the name of a CSS class element (which is defined in
- *    the template or an external CSS file) or an inline style. If the value passed in here
- *    contains a colon (:) then a 'style=' attribute will be used, else a 'class=' attribute
- *    will be used.
--->
-<#macro showErrors separator classOrStyle="">
-    <#list status.errorMessages as error>
-    <#if classOrStyle == "">
-        <b>${error}</b>
-    <#else>
-        <#if classOrStyle?index_of(":") == -1><#assign attr="class"><#else><#assign attr="style"></#if>
-        <span ${attr}="${classOrStyle}">${error}</span>
-    </#if>
-    <#if error_has_next>${separator}</#if>
-    </#list>
-</#macro>
-
-<#--
- * checkSelected
- *
- * Check a value in a list to see if it is the currently selected value.
- * If so, add the 'selected="selected"' text to the output.
- * Handles values of numeric and string types.
- * This function is used internally but can be accessed by user code if required.
- *
- * @param value the current value in a list iteration
--->
-<#macro checkSelected value>
-    <#if stringStatusValue?is_number && stringStatusValue == value?number>selected="selected"</#if>
-    <#if stringStatusValue?is_string && stringStatusValue == value>selected="selected"</#if>
-</#macro>
-
-<#--
- * contains
- *
- * Macro to return true if the list contains the scalar, false if not.
- * Surprisingly not a FreeMarker builtin.
- * This function is used internally but can be accessed by user code if required.
- *
- * @param list the list to search for the item
- * @param item the item to search for in the list
- * @return true if item is found in the list, false otherwise
--->
-<#function contains list item>
-    <#list list as nextInList>
-    <#if nextInList == item><#return true></#if>
-    </#list>
-    <#return false>
-</#function>
-
-<#--
- * closeTag
- *
- * Simple macro to close an HTML tag that has no body with '>' or '/>',
- * depending on the value of a 'xhtmlCompliant' variable in the namespace
- * of this library.
--->
-<#macro closeTag>
-    <#if xhtmlCompliant?exists && xhtmlCompliant>/><#else>></#if>
+ * @param defaultHtmlEscape set the default value for HTML escaping, to be put into the current PageContext.
+  -->
+<#macro htmlEscape defaultHtmlEscape>
+    ${springMacroRequestContext.setDefaultHtmlEscape(defaultHtmlEscape)}
 </#macro>
