@@ -85,7 +85,7 @@ public class DefaultClientCodecConfigurer extends AbstractCodecConfigurer implem
 			if (this.sseDecoder != null) {
 				return this.sseDecoder;
 			}
-			return (jackson2Present ? getJackson2JsonDecoder() : null);
+			return (JACKSON_2_PRESENT ? getJackson2JsonDecoder() : null);
 		}
 
 		@Override

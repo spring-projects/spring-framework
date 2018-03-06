@@ -50,10 +50,10 @@ public class CachingConfigurationSelector extends AdviceModeImportSelector<Enabl
 			"org.springframework.cache.aspectj.AspectJJCacheConfiguration";
 
 
-	private static final boolean jsr107Present = ClassUtils.isPresent(
+	private static final boolean JSR_107_PRESENT = ClassUtils.isPresent(
 			"javax.cache.Cache", CachingConfigurationSelector.class.getClassLoader());
 
-	private static final boolean jcacheImplPresent = ClassUtils.isPresent(
+	private static final boolean JCACHE_IMPL_PRESENT = ClassUtils.isPresent(
 			PROXY_JCACHE_CONFIGURATION_CLASS, CachingConfigurationSelector.class.getClassLoader());
 
 
@@ -82,7 +82,7 @@ public class CachingConfigurationSelector extends AdviceModeImportSelector<Enabl
 		List<String> result = new ArrayList<>();
 		result.add(AutoProxyRegistrar.class.getName());
 		result.add(ProxyCachingConfiguration.class.getName());
-		if (jsr107Present && jcacheImplPresent) {
+		if (JSR_107_PRESENT && JCACHE_IMPL_PRESENT) {
 			result.add(PROXY_JCACHE_CONFIGURATION_CLASS);
 		}
 		return StringUtils.toStringArray(result);
@@ -95,7 +95,7 @@ public class CachingConfigurationSelector extends AdviceModeImportSelector<Enabl
 	private String[] getAspectJImports() {
 		List<String> result = new ArrayList<>();
 		result.add(CACHE_ASPECT_CONFIGURATION_CLASS_NAME);
-		if (jsr107Present && jcacheImplPresent) {
+		if (JSR_107_PRESENT && JCACHE_IMPL_PRESENT) {
 			result.add(JCACHE_ASPECT_CONFIGURATION_CLASS_NAME);
 		}
 		return StringUtils.toStringArray(result);

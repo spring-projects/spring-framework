@@ -38,7 +38,7 @@ public class DelegatingSmartContextLoader extends AbstractDelegatingSmartContext
 
 	private static final String GROOVY_XML_CONTEXT_LOADER_CLASS_NAME = "org.springframework.test.context.support.GenericGroovyXmlContextLoader";
 
-	private static final boolean groovyPresent = ClassUtils.isPresent("groovy.lang.Closure",
+	private static final boolean GROOVY_PRESENT = ClassUtils.isPresent("groovy.lang.Closure",
 		DelegatingSmartContextLoader.class.getClassLoader())
 			&& ClassUtils.isPresent(GROOVY_XML_CONTEXT_LOADER_CLASS_NAME,
 				DelegatingSmartContextLoader.class.getClassLoader());
@@ -48,7 +48,7 @@ public class DelegatingSmartContextLoader extends AbstractDelegatingSmartContext
 
 
 	public DelegatingSmartContextLoader() {
-		if (groovyPresent) {
+		if (GROOVY_PRESENT) {
 			try {
 				Class<?> loaderClass = ClassUtils.forName(GROOVY_XML_CONTEXT_LOADER_CLASS_NAME,
 					DelegatingSmartContextLoader.class.getClassLoader());

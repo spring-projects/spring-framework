@@ -55,10 +55,10 @@ import org.springframework.util.ClassUtils;
 public class AnnotationTransactionAttributeSource extends AbstractFallbackTransactionAttributeSource
 		implements Serializable {
 
-	private static final boolean jta12Present = ClassUtils.isPresent(
+	private static final boolean JTA_12_PRESENT = ClassUtils.isPresent(
 			"javax.transaction.Transactional", AnnotationTransactionAttributeSource.class.getClassLoader());
 
-	private static final boolean ejb3Present = ClassUtils.isPresent(
+	private static final boolean EJB_3_PRESENT = ClassUtils.isPresent(
 			"javax.ejb.TransactionAttribute", AnnotationTransactionAttributeSource.class.getClassLoader());
 
 	private final boolean publicMethodsOnly;
@@ -88,10 +88,10 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 		this.publicMethodsOnly = publicMethodsOnly;
 		this.annotationParsers = new LinkedHashSet<>(2);
 		this.annotationParsers.add(new SpringTransactionAnnotationParser());
-		if (jta12Present) {
+		if (JTA_12_PRESENT) {
 			this.annotationParsers.add(new JtaTransactionAnnotationParser());
 		}
-		if (ejb3Present) {
+		if (EJB_3_PRESENT) {
 			this.annotationParsers.add(new Ejb3TransactionAnnotationParser());
 		}
 	}

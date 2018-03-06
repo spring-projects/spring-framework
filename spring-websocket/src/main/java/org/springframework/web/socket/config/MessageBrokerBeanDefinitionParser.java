@@ -111,10 +111,10 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final int DEFAULT_MAPPING_ORDER = 1;
 
-	private static final boolean jackson2Present = ClassUtils.isPresent(
+	private static final boolean JACKSON_2_PRESENT = ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", MessageBrokerBeanDefinitionParser.class.getClassLoader());
 
-	private static final boolean javaxValidationPresent =
+	private static final boolean JAVAX_VALIDATION_PRESENT =
 			ClassUtils.isPresent("javax.validation.Validator", MessageBrokerBeanDefinitionParser.class.getClassLoader());
 
 
@@ -473,7 +473,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			converters.setSource(source);
 			converters.add(new RootBeanDefinition(StringMessageConverter.class));
 			converters.add(new RootBeanDefinition(ByteArrayMessageConverter.class));
-			if (jackson2Present) {
+			if (JACKSON_2_PRESENT) {
 				RootBeanDefinition jacksonConverterDef = new RootBeanDefinition(MappingJackson2MessageConverter.class);
 				RootBeanDefinition resolverDef = new RootBeanDefinition(DefaultContentTypeResolver.class);
 				resolverDef.getPropertyValues().add("defaultMimeType", MimeTypeUtils.APPLICATION_JSON);
@@ -556,7 +556,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		if (messageBrokerElement.hasAttribute("validator")) {
 			return new RuntimeBeanReference(messageBrokerElement.getAttribute("validator"));
 		}
-		else if (javaxValidationPresent) {
+		else if (JAVAX_VALIDATION_PRESENT) {
 			RootBeanDefinition validatorDef = new RootBeanDefinition(
 					"org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean");
 			validatorDef.setSource(source);

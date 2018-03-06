@@ -38,7 +38,7 @@ public class WebDelegatingSmartContextLoader extends AbstractDelegatingSmartCont
 
 	private static final String GROOVY_XML_WEB_CONTEXT_LOADER_CLASS_NAME = "org.springframework.test.context.web.GenericGroovyXmlWebContextLoader";
 
-	private static final boolean groovyPresent = ClassUtils.isPresent("groovy.lang.Closure",
+	private static final boolean GROOVY_PRESENT = ClassUtils.isPresent("groovy.lang.Closure",
 		WebDelegatingSmartContextLoader.class.getClassLoader())
 			&& ClassUtils.isPresent(GROOVY_XML_WEB_CONTEXT_LOADER_CLASS_NAME,
 				WebDelegatingSmartContextLoader.class.getClassLoader());
@@ -48,7 +48,7 @@ public class WebDelegatingSmartContextLoader extends AbstractDelegatingSmartCont
 
 
 	public WebDelegatingSmartContextLoader() {
-		if (groovyPresent) {
+		if (GROOVY_PRESENT) {
 			try {
 				Class<?> loaderClass = ClassUtils.forName(GROOVY_XML_WEB_CONTEXT_LOADER_CLASS_NAME,
 					WebDelegatingSmartContextLoader.class.getClassLoader());

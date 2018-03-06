@@ -50,7 +50,7 @@ public class JndiLocatorDelegate extends JndiLocatorSupport {
 	public static final String IGNORE_JNDI_PROPERTY_NAME = "spring.jndi.ignore";
 
 
-	private static final boolean shouldIgnoreDefaultJndiEnvironment =
+	private static final boolean SHOULD_IGNORE_DEFAULT_JNDI_ENVIRONMENT =
 			SpringProperties.getFlag(IGNORE_JNDI_PROPERTY_NAME);
 
 
@@ -83,7 +83,7 @@ public class JndiLocatorDelegate extends JndiLocatorSupport {
 	 * {@code false} if not
 	 */
 	public static boolean isDefaultJndiEnvironmentAvailable() {
-		if (shouldIgnoreDefaultJndiEnvironment) {
+		if (SHOULD_IGNORE_DEFAULT_JNDI_ENVIRONMENT) {
 			return false;
 		}
 		try {

@@ -44,10 +44,10 @@ public class JtaTransactionManagerFactoryBean implements FactoryBean<JtaTransact
 			"org.springframework.transaction.jta.JtaTransactionManager";
 
 
-	private static final boolean weblogicPresent = ClassUtils.isPresent(
+	private static final boolean WEBLOGIC_PRESENT = ClassUtils.isPresent(
 			"weblogic.transaction.UserTransaction", JtaTransactionManagerFactoryBean.class.getClassLoader());
 
-	private static final boolean webspherePresent = ClassUtils.isPresent(
+	private static final boolean WEBSPHERE_PRESENT = ClassUtils.isPresent(
 			"com.ibm.wsspi.uow.UOWManager", JtaTransactionManagerFactoryBean.class.getClassLoader());
 
 
@@ -87,10 +87,10 @@ public class JtaTransactionManagerFactoryBean implements FactoryBean<JtaTransact
 
 
 	static String resolveJtaTransactionManagerClassName() {
-		if (weblogicPresent) {
+		if (WEBLOGIC_PRESENT) {
 			return WEBLOGIC_JTA_TRANSACTION_MANAGER_CLASS_NAME;
 		}
-		else if (webspherePresent) {
+		else if (WEBSPHERE_PRESENT) {
 			return WEBSPHERE_TRANSACTION_MANAGER_CLASS_NAME;
 		}
 		else {

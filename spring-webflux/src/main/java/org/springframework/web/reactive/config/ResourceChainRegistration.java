@@ -43,7 +43,7 @@ public class ResourceChainRegistration {
 
 	private static final String DEFAULT_CACHE_NAME = "spring-resource-chain-cache";
 
-	private static final boolean isWebJarsAssetLocatorPresent = ClassUtils.isPresent(
+	private static final boolean IS_WEB_JARS_ASSET_LOCATOR_PRESENT = ClassUtils.isPresent(
 			"org.webjars.WebJarAssetLocator", ResourceChainRegistration.class.getClassLoader());
 
 
@@ -110,7 +110,7 @@ public class ResourceChainRegistration {
 	protected List<ResourceResolver> getResourceResolvers() {
 		if (!this.hasPathResolver) {
 			List<ResourceResolver> result = new ArrayList<>(this.resolvers);
-			if (isWebJarsAssetLocatorPresent && !this.hasWebjarsResolver) {
+			if (IS_WEB_JARS_ASSET_LOCATOR_PRESENT && !this.hasWebjarsResolver) {
 				result.add(new WebJarsResourceResolver());
 			}
 			result.add(new PathResourceResolver());

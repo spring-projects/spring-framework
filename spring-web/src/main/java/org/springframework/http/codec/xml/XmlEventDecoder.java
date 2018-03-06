@@ -80,10 +80,10 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
 	private static final XMLInputFactory inputFactory = StaxUtils.createDefensiveInputFactory();
 
-	private static final boolean aaltoPresent = ClassUtils.isPresent(
+	private static final boolean AALTO_PRESENT = ClassUtils.isPresent(
 			"com.fasterxml.aalto.AsyncXMLStreamReader", XmlEventDecoder.class.getClassLoader());
 
-	boolean useAalto = aaltoPresent;
+	boolean useAalto = AALTO_PRESENT;
 
 
 	public XmlEventDecoder() {

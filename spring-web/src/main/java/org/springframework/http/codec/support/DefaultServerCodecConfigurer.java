@@ -38,7 +38,7 @@ import org.springframework.util.ClassUtils;
  */
 public class DefaultServerCodecConfigurer extends AbstractCodecConfigurer implements ServerCodecConfigurer {
 
-	static final boolean synchronossMultipartPresent =
+	static final boolean SYNCHRONOSS_MULTIPART_PRESENT =
 			ClassUtils.isPresent("org.synchronoss.cloud.nio.multipart.NioMultipartParser",
 					DefaultServerCodecConfigurer.class.getClassLoader());
 
@@ -73,7 +73,7 @@ public class DefaultServerCodecConfigurer extends AbstractCodecConfigurer implem
 			}
 			List<HttpMessageReader<?>> result = super.getTypedReaders();
 			result.add(new FormHttpMessageReader());
-			if (synchronossMultipartPresent) {
+			if (SYNCHRONOSS_MULTIPART_PRESENT) {
 				SynchronossPartHttpMessageReader partReader = new SynchronossPartHttpMessageReader();
 				result.add(partReader);
 				result.add(new MultipartHttpMessageReader(partReader));
@@ -96,7 +96,7 @@ public class DefaultServerCodecConfigurer extends AbstractCodecConfigurer implem
 			if (this.sseEncoder != null) {
 				return this.sseEncoder;
 			}
-			return jackson2Present ? getJackson2JsonEncoder() : null;
+			return JACKSON_2_PRESENT ? getJackson2JsonEncoder() : null;
 		}
 	}
 

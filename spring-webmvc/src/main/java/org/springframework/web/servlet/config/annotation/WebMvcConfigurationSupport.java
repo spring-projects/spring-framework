@@ -178,33 +178,33 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			ClassUtils.isPresent("com.rometools.rome.feed.WireFeed",
 					WebMvcConfigurationSupport.class.getClassLoader());
 
-	private static final boolean jaxb2Present =
+	private static final boolean JAXB_2_PRESENT =
 			ClassUtils.isPresent("javax.xml.bind.Binder",
 					WebMvcConfigurationSupport.class.getClassLoader());
 
-	private static final boolean jackson2Present =
+	private static final boolean JACKSON_2_PRESENT =
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
 					WebMvcConfigurationSupport.class.getClassLoader()) &&
 			ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
 					WebMvcConfigurationSupport.class.getClassLoader());
 
-	private static final boolean jackson2XmlPresent =
+	private static final boolean JACKSON_2_XML_PRESENT =
 			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper",
 					WebMvcConfigurationSupport.class.getClassLoader());
 
-	private static final boolean jackson2SmilePresent =
+	private static final boolean JACKSON_2_SMILE_PRESENT =
 			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory",
 					WebMvcConfigurationSupport.class.getClassLoader());
 
-	private static final boolean jackson2CborPresent =
+	private static final boolean JACKSON_2_CBOR_PRESENT =
 			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory",
 					WebMvcConfigurationSupport.class.getClassLoader());
 
-	private static final boolean gsonPresent =
+	private static final boolean GSON_PRESENT =
 			ClassUtils.isPresent("com.google.gson.Gson",
 					WebMvcConfigurationSupport.class.getClassLoader());
 
-	private static final boolean jsonbPresent =
+	private static final boolean JSONB_PRESENT =
 			ClassUtils.isPresent("javax.json.bind.Jsonb",
 					WebMvcConfigurationSupport.class.getClassLoader());
 
@@ -413,16 +413,16 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			map.put("atom", MediaType.APPLICATION_ATOM_XML);
 			map.put("rss", MediaType.APPLICATION_RSS_XML);
 		}
-		if (jaxb2Present || jackson2XmlPresent) {
+		if (JAXB_2_PRESENT || JACKSON_2_XML_PRESENT) {
 			map.put("xml", MediaType.APPLICATION_XML);
 		}
-		if (jackson2Present || gsonPresent || jsonbPresent) {
+		if (JACKSON_2_PRESENT || GSON_PRESENT || JSONB_PRESENT) {
 			map.put("json", MediaType.APPLICATION_JSON);
 		}
-		if (jackson2SmilePresent) {
+		if (JACKSON_2_SMILE_PRESENT) {
 			map.put("smile", MediaType.valueOf("application/x-jackson-smile"));
 		}
-		if (jackson2CborPresent) {
+		if (JACKSON_2_CBOR_PRESENT) {
 			map.put("cbor", MediaType.valueOf("application/cbor"));
 		}
 		return map;
@@ -567,7 +567,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		adapter.setCustomArgumentResolvers(getArgumentResolvers());
 		adapter.setCustomReturnValueHandlers(getReturnValueHandlers());
 
-		if (jackson2Present) {
+		if (JACKSON_2_PRESENT) {
 			adapter.setRequestBodyAdvice(Collections.singletonList(new JsonViewRequestBodyAdvice()));
 			adapter.setResponseBodyAdvice(Collections.singletonList(new JsonViewResponseBodyAdvice()));
 		}
@@ -805,39 +805,39 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			messageConverters.add(new RssChannelHttpMessageConverter());
 		}
 
-		if (jackson2XmlPresent) {
+		if (JACKSON_2_XML_PRESENT) {
 			Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.xml();
 			if (this.applicationContext != null) {
 				builder.applicationContext(this.applicationContext);
 			}
 			messageConverters.add(new MappingJackson2XmlHttpMessageConverter(builder.build()));
 		}
-		else if (jaxb2Present) {
+		else if (JAXB_2_PRESENT) {
 			messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
 		}
 
-		if (jackson2Present) {
+		if (JACKSON_2_PRESENT) {
 			Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.json();
 			if (this.applicationContext != null) {
 				builder.applicationContext(this.applicationContext);
 			}
 			messageConverters.add(new MappingJackson2HttpMessageConverter(builder.build()));
 		}
-		else if (gsonPresent) {
+		else if (GSON_PRESENT) {
 			messageConverters.add(new GsonHttpMessageConverter());
 		}
-		else if (jsonbPresent) {
+		else if (JSONB_PRESENT) {
 			messageConverters.add(new JsonbHttpMessageConverter());
 		}
 
-		if (jackson2SmilePresent) {
+		if (JACKSON_2_SMILE_PRESENT) {
 			Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.smile();
 			if (this.applicationContext != null) {
 				builder.applicationContext(this.applicationContext);
 			}
 			messageConverters.add(new MappingJackson2SmileHttpMessageConverter(builder.build()));
 		}
-		if (jackson2CborPresent) {
+		if (JACKSON_2_CBOR_PRESENT) {
 			Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.cbor();
 			if (this.applicationContext != null) {
 				builder.applicationContext(this.applicationContext);
@@ -940,7 +940,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		exceptionHandlerResolver.setMessageConverters(getMessageConverters());
 		exceptionHandlerResolver.setCustomArgumentResolvers(getArgumentResolvers());
 		exceptionHandlerResolver.setCustomReturnValueHandlers(getReturnValueHandlers());
-		if (jackson2Present) {
+		if (JACKSON_2_PRESENT) {
 			exceptionHandlerResolver.setResponseBodyAdvice(
 					Collections.singletonList(new JsonViewResponseBodyAdvice()));
 		}

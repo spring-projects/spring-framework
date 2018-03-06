@@ -59,7 +59,7 @@ public class CandidateComponentsIndexLoader {
 	public static final String IGNORE_INDEX = "spring.index.ignore";
 
 
-	private static final boolean shouldIgnoreIndex = SpringProperties.getFlag(IGNORE_INDEX);
+	private static final boolean SHOULD_IGNORE_INDEX = SpringProperties.getFlag(IGNORE_INDEX);
 
 	private static final Log logger = LogFactory.getLog(CandidateComponentsIndexLoader.class);
 
@@ -87,7 +87,7 @@ public class CandidateComponentsIndexLoader {
 
 	@Nullable
 	private static CandidateComponentsIndex doLoadIndex(ClassLoader classLoader) {
-		if (shouldIgnoreIndex) {
+		if (SHOULD_IGNORE_INDEX) {
 			return null;
 		}
 

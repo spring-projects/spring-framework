@@ -47,10 +47,10 @@ import org.springframework.util.StringValueResolver;
  */
 public class DefaultFormattingConversionService extends FormattingConversionService {
 
-	private static final boolean jsr354Present = ClassUtils.isPresent(
+	private static final boolean JSR_354_PRESENT = ClassUtils.isPresent(
 			"javax.money.MonetaryAmount", DefaultFormattingConversionService.class.getClassLoader());
 
-	private static final boolean jodaTimePresent = ClassUtils.isPresent(
+	private static final boolean JODA_TIME_PRESENT = ClassUtils.isPresent(
 			"org.joda.time.LocalDate", DefaultFormattingConversionService.class.getClassLoader());
 
 
@@ -107,7 +107,7 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 		formatterRegistry.addFormatterForFieldAnnotation(new NumberFormatAnnotationFormatterFactory());
 
 		// Default handling of monetary values
-		if (jsr354Present) {
+		if (JSR_354_PRESENT) {
 			formatterRegistry.addFormatter(new CurrencyUnitFormatter());
 			formatterRegistry.addFormatter(new MonetaryAmountFormatter());
 			formatterRegistry.addFormatterForFieldAnnotation(new Jsr354NumberFormatAnnotationFormatterFactory());
@@ -118,7 +118,7 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 		// just handling JSR-310 specific date and time types
 		new DateTimeFormatterRegistrar().registerFormatters(formatterRegistry);
 
-		if (jodaTimePresent) {
+		if (JODA_TIME_PRESENT) {
 			// handles Joda-specific types as well as Date, Calendar, Long
 			new JodaTimeFormatterRegistrar().registerFormatters(formatterRegistry);
 		}

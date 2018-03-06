@@ -71,22 +71,22 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
  */
 public abstract class AbstractHandshakeHandler implements HandshakeHandler, Lifecycle {
 
-	private static final boolean jettyWsPresent = ClassUtils.isPresent(
+	private static final boolean JETTY_WS_PRESENT = ClassUtils.isPresent(
 			"org.eclipse.jetty.websocket.server.WebSocketServerFactory", AbstractHandshakeHandler.class.getClassLoader());
 
-	private static final boolean tomcatWsPresent = ClassUtils.isPresent(
+	private static final boolean TOMCAT_WS_PRESENT = ClassUtils.isPresent(
 			"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", AbstractHandshakeHandler.class.getClassLoader());
 
-	private static final boolean undertowWsPresent = ClassUtils.isPresent(
+	private static final boolean UNDERTOW_WS_PRESENT = ClassUtils.isPresent(
 			"io.undertow.websockets.jsr.ServerWebSocketContainer", AbstractHandshakeHandler.class.getClassLoader());
 
-	private static final boolean glassfishWsPresent = ClassUtils.isPresent(
+	private static final boolean GLASSFISH_WS_PRESENT = ClassUtils.isPresent(
 			"org.glassfish.tyrus.servlet.TyrusHttpUpgradeHandler", AbstractHandshakeHandler.class.getClassLoader());
 
-	private static final boolean weblogicWsPresent = ClassUtils.isPresent(
+	private static final boolean WEBLOGIC_WS_PRESENT = ClassUtils.isPresent(
 			"weblogic.websocket.tyrus.TyrusServletWriter", AbstractHandshakeHandler.class.getClassLoader());
 
-	private static final boolean websphereWsPresent = ClassUtils.isPresent(
+	private static final boolean WEBSPHERE_WS_PRESENT = ClassUtils.isPresent(
 			"com.ibm.websphere.wsoc.WsWsocServerContainer", AbstractHandshakeHandler.class.getClassLoader());
 
 
@@ -120,22 +120,22 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 
 	private static RequestUpgradeStrategy initRequestUpgradeStrategy() {
 		String className;
-		if (tomcatWsPresent) {
+		if (TOMCAT_WS_PRESENT) {
 			className = "org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy";
 		}
-		else if (jettyWsPresent) {
+		else if (JETTY_WS_PRESENT) {
 			className = "org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy";
 		}
-		else if (undertowWsPresent) {
+		else if (UNDERTOW_WS_PRESENT) {
 			className = "org.springframework.web.socket.server.standard.UndertowRequestUpgradeStrategy";
 		}
-		else if (glassfishWsPresent) {
+		else if (GLASSFISH_WS_PRESENT) {
 			className = "org.springframework.web.socket.server.standard.GlassFishRequestUpgradeStrategy";
 		}
-		else if (weblogicWsPresent) {
+		else if (WEBLOGIC_WS_PRESENT) {
 			className = "org.springframework.web.socket.server.standard.WebLogicRequestUpgradeStrategy";
 		}
-		else if (websphereWsPresent) {
+		else if (WEBSPHERE_WS_PRESENT) {
 			className = "org.springframework.web.socket.server.standard.WebSphereRequestUpgradeStrategy";
 		}
 		else {
