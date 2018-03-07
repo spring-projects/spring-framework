@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
@@ -166,7 +165,7 @@ public abstract class MockRestRequestMatchers {
 		List<String> values = map.get(name);
 
 		String message = "Expected " + valueType + " <" + name + ">";
-		assertNotNull(message, values);
+		assertTrue(message + " to exist but was null", values != null);
 
 		assertTrue(message + " to have at least <" + count + "> values but found " + values,
 				count <= values.size());
