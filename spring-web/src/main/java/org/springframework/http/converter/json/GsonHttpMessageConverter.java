@@ -70,18 +70,18 @@ public class GsonHttpMessageConverter extends AbstractGenericHttpMessageConverte
 	 */
 	public GsonHttpMessageConverter() {
 		super(MediaType.APPLICATION_JSON, new MediaType("application", "*+json"));
-		this.setDefaultCharset(DEFAULT_CHARSET);
+		setDefaultCharset(DEFAULT_CHARSET);
 	}
 
 
 	/**
 	 * Set the {@code Gson} instance to use.
-	 * If not set, a default {@link Gson#Gson() Gson} instance is used.
+	 * If not set, a default {@link Gson#Gson() Gson} instance will be used.
 	 * <p>Setting a custom-configured {@code Gson} is one way to take further
 	 * control of the JSON serialization process.
 	 */
 	public void setGson(Gson gson) {
-		Assert.notNull(gson, "'gson' is required");
+		Assert.notNull(gson, "A Gson instance is required");
 		this.gson = gson;
 	}
 
