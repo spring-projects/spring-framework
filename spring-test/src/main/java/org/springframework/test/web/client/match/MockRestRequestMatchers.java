@@ -45,6 +45,7 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
  *
  * @author Craig Walls
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 3.2
  */
 public abstract class MockRestRequestMatchers {
@@ -132,7 +133,7 @@ public abstract class MockRestRequestMatchers {
 			MultiValueMap<String, String> params = getQueryParams(request);
 			assertValueCount("query param", name, params, expectedValues.length);
 			for (int i = 0 ; i < expectedValues.length; i++) {
-				assertEquals("Query param + [" + name + "]", expectedValues[i], params.get(name).get(i));
+				assertEquals("Query param [" + name + "]", expectedValues[i], params.get(name).get(i));
 			}
 		};
 	}
@@ -163,7 +164,7 @@ public abstract class MockRestRequestMatchers {
 			List<String> headerValues = request.getHeaders().get(name);
 			Assert.state(headerValues != null, "No header values");
 			for (int i = 0; i < matchers.length; i++) {
-				assertThat("Request header[" + name + "]", headerValues.get(i), matchers[i]);
+				assertThat("Request header [" + name + "]", headerValues.get(i), matchers[i]);
 			}
 		};
 	}
@@ -177,7 +178,7 @@ public abstract class MockRestRequestMatchers {
 			List<String> headerValues = request.getHeaders().get(name);
 			Assert.state(headerValues != null, "No header values");
 			for (int i = 0; i < expectedValues.length; i++) {
-				assertEquals("Request header  [" + name + "]",
+				assertEquals("Request header [" + name + "]",
 						expectedValues[i], headerValues.get(i));
 			}
 		};
