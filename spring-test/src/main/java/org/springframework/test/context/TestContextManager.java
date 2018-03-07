@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -94,8 +95,15 @@ public class TestContextManager {
 
 	private final TestContext testContext;
 
-	private final ThreadLocal<TestContext> testContextHolder =
-			ThreadLocal.withInitial(() -> copyTestContext(TestContextManager.this.testContext));
+	private final ThreadLocal<TestContext> testContextHolder = ThreadLocal.withInitial(
+			// Implemented as an anonymous inner class instead of a lambda expression due to a bug
+			// in Eclipse IDE: "The blank final field testContext may not have been initialized"
+			new Supplier<TestContext>() {
+				@Override
+				public TestContext get() {
+					return copyTestContext(TestContextManager.this.testContext);
+				}
+			});
 
 	private final List<TestExecutionListener> testExecutionListeners = new ArrayList<>();
 
