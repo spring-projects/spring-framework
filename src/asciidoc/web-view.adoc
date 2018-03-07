@@ -2066,7 +2066,15 @@ server with the correct content type to (hopefully) enable the client PC to run 
 spreadsheet or PDF viewer application in response.
 
 In order to use Excel views, you need to add the Apache POI library to your classpath,
-and for PDF generation, the common iText 2.1.7 or its fork OpenPDF (e.g. OpenPDF 1.0.4).
+and for PDF generation preferably the OpenPDF library.
+
+[NOTE]
+====
+Use the latest versions of the underlying document generation libraries if possible.
+In particular, we strongly recommend OpenPDF (e.g. OpenPDF 1.0.5) instead of the
+outdated original iText 2.1.7 since it is actively maintained and fixes an important
+vulnerability for untrusted PDF content.
+====
 
 
 
