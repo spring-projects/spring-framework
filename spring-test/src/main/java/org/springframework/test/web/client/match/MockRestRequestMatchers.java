@@ -32,7 +32,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
@@ -148,7 +147,7 @@ public abstract class MockRestRequestMatchers {
 		List<String> values = map.get(name);
 
 		String message = "Expected " + valueType + " <" + name + ">";
-		assertNotNull(message, values);
+		Assert.notNull(values, message);
 
 		assertTrue(message + " to have at least <" + count + "> values but found " + values,
 				count <= values.size());
