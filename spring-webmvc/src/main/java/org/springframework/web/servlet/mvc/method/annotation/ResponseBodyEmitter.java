@@ -79,6 +79,13 @@ public class ResponseBodyEmitter {
 	@Nullable
 	private Throwable failure;
 
+	/**
+	 * After an IOException on send, the servlet container will provide an onError
+	 * callback that we'll handle as completeWithError (on container thread).
+	 * We use this flag to ignore competing attempts to completeWithError by
+	 * the application via try-catch. */
+	private boolean sendFailed;
+
 	private final DefaultCallback timeoutCallback = new DefaultCallback();
 
 	private final ErrorCallback errorCallback = new ErrorCallback();
@@ -182,9 +189,11 @@ public class ResponseBodyEmitter {
 				this.handler.send(object, mediaType);
 			}
 			catch (IOException ex) {
+				this.sendFailed = true;
 				throw ex;
 			}
 			catch (Throwable ex) {
+				this.sendFailed = true;
 				throw new IllegalStateException("Failed to send " + object, ex);
 			}
 		}
@@ -202,6 +211,10 @@ public class ResponseBodyEmitter {
 	 * related events such as an error while {@link #send(Object) sending}.
 	 */
 	public synchronized void complete() {
+		// Ignore, after send failure
+		if (this.sendFailed) {
+			return;
+		}
 		this.complete = true;
 		if (this.handler != null) {
 			this.handler.complete();
@@ -220,6 +233,10 @@ public class ResponseBodyEmitter {
 	 * {@link #send(Object) sending}.
 	 */
 	public synchronized void completeWithError(Throwable ex) {
+		// Ignore, after send failure
+		if (this.sendFailed) {
+			return;
+		}
 		this.complete = true;
 		this.failure = ex;
 		if (this.handler != null) {
