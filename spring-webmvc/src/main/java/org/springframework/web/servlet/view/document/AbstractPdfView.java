@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,9 +35,11 @@ import org.springframework.web.servlet.view.AbstractView;
  * not in a template.
  *
  * <p>This view implementation uses Bruno Lowagie's
- * <a href="http://www.lowagie.com/iText">iText</a> package.
- * Known to work with iText 2.1.7 as well as its fork
+ * <a href="http://www.lowagie.com/iText">iText</a> API.
+ * Known to work with the original iText 2.1.7 as well as its fork
  * <a href="https://github.com/LibrePDF/OpenPDF">OpenPDF</a>.
+ * <b>We strongly recommend OpenPDF since it is actively maintained
+ * and fixes an important vulnerability for untrusted PDF content.</b>
  *
  * <p>Note: Internet Explorer requires a ".pdf" extension, as it doesn't
  * always respect the declared content type.
