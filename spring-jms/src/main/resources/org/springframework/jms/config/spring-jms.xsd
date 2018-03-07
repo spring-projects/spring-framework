@@ -20,12 +20,12 @@
 	<xsd:element name="annotation-driven">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	Enables the detection of @JmsListener annotation on any Spring-managed object. If
-	present, a message listener container will be created to receive the relevant
+	Enables the detection of @JmsListener annotation on any Spring-managed object.
+	If present, a message listener container will be created to receive the relevant
 	messages and invoke the annotated method accordingly.
 
-	See Javadoc for the org.springframework.jms.annotation.EnableJms annotation for
-	information	on code-based alternatives to this XML element.
+	See org.springframework.jms.annotation.EnableJms javadoc for information on
+	code-based alternatives to this XML element.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
@@ -68,7 +68,7 @@
 	processor. By default, DefaultMessageHandlerMethodFactory is used and it can be configured
 	further to support additional method arguments or to customize conversion and validation
 	support. See org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory
-	Javadoc for more details.
+	javadoc for more details.
 					]]></xsd:documentation>
 					<xsd:appinfo>
 						<tool:annotation kind="ref">
@@ -77,8 +77,6 @@
 					</xsd:appinfo>
 				</xsd:annotation>
 			</xsd:attribute>
-
-
 		</xsd:complexType>
 	</xsd:element>
 
@@ -378,14 +376,13 @@
 	<xsd:element name="jca-listener-container">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	Each listener child element will be hosted by a container whose configuration
-	is determined by this parent element. This variant builds standard JCA-based
-	listener containers, operating against a specified JCA ResourceAdapter
-	(which needs to be provided by the JMS message broker, e.g. ActiveMQ). When
-	a factory-id attribute is present, the configuration defined by this element is
-	exposed as a org.springframework.jms.config.JmsListenerContainerFactory. It is
-	therefore possible to only define this element without any child to just expose
-	a container factory.
+	Each listener child element will be hosted by a container whose configuration is
+	determined by this parent element. This variant builds standard JCA-based listener
+	containers, operating against a specified JCA ResourceAdapter (which needs to be
+	provided by the JMS message broker, e.g. ActiveMQ). When a factory-id attribute is
+	present, the configuration defined by this element is exposed as a bean of type
+	org.springframework.jms.config.JmsListenerContainerFactory. It is therefore possible
+	to only define this element without any child to just expose a container factory.
 			]]></xsd:documentation>
 			<xsd:appinfo>
 				<tool:annotation>
@@ -400,7 +397,8 @@
 			<xsd:attribute name="factory-id" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	Expose the settings defined by this element as a org.springframework.jms.config.JmsListenerContainerFactory
+	Expose the settings defined by this element as a bean of type
+	org.springframework.jms.config.JmsListenerContainerFactory
 	so that they can be reused with other endpoints.
 				]]></xsd:documentation>
 				</xsd:annotation>
@@ -478,8 +476,8 @@
 			<xsd:attribute name="response-destination-type" default="queue">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	The JMS destination type for responses: "queue", "topic". Default
-	is the value of the "destination-type" attribute.
+	The JMS destination type for responses: "queue", "topic".
+	Default is the value of the "destination-type" attribute.
 					]]></xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>
