@@ -67,7 +67,7 @@ public abstract class MockRestRequestMatchers {
 	}
 
 	/**
-	 * Assert the request URI string with the given matcher.
+	 * Assert the request URI string with the given Hamcrest matcher.
 	 * @param matcher String matcher for the expected URI
 	 * @return the request matcher
 	 */
@@ -111,7 +111,7 @@ public abstract class MockRestRequestMatchers {
 	}
 
 	/**
-	 * Assert request query parameter values with the given Hamcrest matcher.
+	 * Assert request query parameter values with the given Hamcrest matcher(s).
 	 */
 	@SafeVarargs
 	public static RequestMatcher queryParam(final String name, final Matcher<? super String>... matchers) {
@@ -154,7 +154,7 @@ public abstract class MockRestRequestMatchers {
 	}
 
 	/**
-	 * Assert request header values with the given Hamcrest matcher.
+	 * Assert request header values with the given Hamcrest matcher(s).
 	 */
 	@SafeVarargs
 	public static RequestMatcher header(final String name, final Matcher<? super String>... matchers) {
@@ -164,7 +164,6 @@ public abstract class MockRestRequestMatchers {
 			Assert.state(headerValues != null, "No header values");
 			for (int i = 0; i < matchers.length; i++) {
 				assertThat("Request header[" + name + "]", headerValues.get(i), matchers[i]);
-
 			}
 		};
 	}
@@ -180,7 +179,6 @@ public abstract class MockRestRequestMatchers {
 			for (int i = 0; i < expectedValues.length; i++) {
 				assertEquals("Request header  [" + name + "]",
 						expectedValues[i], headerValues.get(i));
-
 			}
 		};
 	}
