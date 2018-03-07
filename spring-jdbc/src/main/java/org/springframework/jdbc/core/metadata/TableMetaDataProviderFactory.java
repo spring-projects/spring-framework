@@ -38,7 +38,7 @@ public class TableMetaDataProviderFactory {
 
 
 	/**
-	 * Create a TableMetaDataProvider based on the database metadata.
+	 * Create a {@link TableMetaDataProvider} based on the database metadata.
 	 * @param dataSource used to retrieve metadata
 	 * @param context the class that holds configuration and metadata
 	 * @return instance of the TableMetaDataProvider implementation to be used

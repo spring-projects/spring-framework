@@ -60,12 +60,12 @@ public class CallMetaDataProviderFactory {
 
 
 	/**
-	 * Create a CallMetaDataProvider based on the database metadata
+	 * Create a {@link CallMetaDataProvider} based on the database metadata
 	 * @param dataSource used to retrieve metadata
 	 * @param context the class that holds configuration and metadata
 	 * @return instance of the CallMetaDataProvider implementation to be used
 	 */
-	static public CallMetaDataProvider createMetaDataProvider(DataSource dataSource, final CallMetaDataContext context) {
+	public static CallMetaDataProvider createMetaDataProvider(DataSource dataSource, final CallMetaDataContext context) {
 		try {
 			return (CallMetaDataProvider) JdbcUtils.extractDatabaseMetaData(dataSource, databaseMetaData -> {
 				String databaseProductName = JdbcUtils.commonDatabaseName(databaseMetaData.getDatabaseProductName());
