@@ -150,12 +150,10 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			HttpServletRequest request, Map<String, String> uriVariables) {
 
 		Map<String, MultiValueMap<String, String>> result = new LinkedHashMap<>();
-		for (Entry<String, String> uriVar : uriVariables.entrySet()) {
-			String uriVarValue = uriVar.getValue();
-
+		uriVariables.forEach((uriVarKey, uriVarValue) -> {
 			int equalsIndex = uriVarValue.indexOf('=');
 			if (equalsIndex == -1) {
-				continue;
+				return;
 			}
 
 			String matrixVariables;
@@ -166,12 +164,12 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			}
 			else {
 				matrixVariables = uriVarValue.substring(semicolonIndex + 1);
-				uriVariables.put(uriVar.getKey(), uriVarValue.substring(0, semicolonIndex));
+				uriVariables.put(uriVarKey, uriVarValue.substring(0, semicolonIndex));
 			}
 
 			MultiValueMap<String, String> vars = WebUtils.parseMatrixVariables(matrixVariables);
-			result.put(uriVar.getKey(), getUrlPathHelper().decodeMatrixVariables(request, vars));
-		}
+			result.put(uriVarKey, getUrlPathHelper().decodeMatrixVariables(request, vars));
+		});
 		return result;
 	}
 
