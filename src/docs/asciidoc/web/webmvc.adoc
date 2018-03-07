@@ -3234,39 +3234,36 @@ See the Javadoc of `DeferredResult` for more details. `Callable` can be substitu
 [[mvc-ann-async-vs-webflux]]
 ==== Compared to WebFlux
 
-The Servlet API was originally built for sequential processing, i.e. making a single pass
-through the Filter-Servlet chain. The asynchronous request processing feature added in
-Servlet 3.0 allows applications to exit the Filter-Servlet chain but leave the response
-open, therefore breaking this thread-per-request model.
+The Servlet API was originally built for making a single pass through the Filter-Servlet
+chain. Asynchronous request processing, added in Servlet 3.0, allows applications to exit
+the Filter-Servlet chain but leave the response open for further processing. The Spring MVC
+async support is built around that mechanism. When a controller returns a `DeferredResult`,
+the Filter-Servlet chain is exited and the Servlet container thread is released. Later when
+the `DeferredResult` is set, an ASYNC dispatch (to the same URL) is made during which the
+controller is mapped again but rather than invoking it, the `DeferredResult` value is used
+(as if the controller returned it) to resume processing.
 
-Spring MVC async support is built around that model. When a controller returns a
-`DeferredResult`, the Filter-Servlet chain is exited and the Servlet container thread is
-released. Later when the `DeferredResult` is set, an ASYNC dispatch (to the same URL) is
-made during which the controller is mapped again but not invoked. Instead the
-`DeferredResult` value is used to resume processing.
+By contrast Spring WebFlux is neither built on the Servlet API, nor does it need such an
+asynchronous request processing feature because it is asynchronous by design. Asynchronous
+handling is built into all framework contracts and is intrinsically supported through ::
+stages of request processing.
 
-Spring WebFlux is not aware of the Servlet API nor does it such an asynchronous request
-processing feature because it is asynchronous by design. It processes each request in
-stages (continuations) rather than making a single pass through the callstack on a single
-thread. That means asynchronous handling is built into all framework contracts and is
-therefore intrinsically supported at all stages of request processing.
-
-Essentially both Spring MVC and Spring WebFlux support asynchronous and
-<<mvc-ann-async-reactive-types>> for return values from controller methods. Spring MVC
-even supports streaming, including reactive back pressure, however individual writes to
-the response remain blocking (performed in a separate thread) and that is one major
-difference with WebFlux which relies on non-blocking I/O.
+From a programming model perspective, both Spring MVC and Spring WebFlux support
+asynchronous and <<mvc-ann-async-reactive-types>> as return values in controller methods.
+Spring MVC even supports streaming, including reactive back pressure. However individual
+writes to the response remain blocking (and performed on a separate thread) unlike WebFlux
+that relies on non-blocking I/O and does not need an extra thread for each write.
 
 Another fundamental difference is that Spring MVC does not support asynchronous or
 reactive types in controller method arguments, e.g. `@RequestBody`, `@RequestPart`, and
 others, nor does it have any explicit support for asynchronous and reactive types as
-model attributes, all of which Spring WebFlux does support.
+model attributes. Spring WebFlux does support all that.
 
 
 
 [[mvc-ann-async-http-streaming]]
 === HTTP Streaming
-[.small]#<<mvc-ann-async-vs-webflux,Compared to WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-codecs-streaming,Same in Spring WebFlux>>#
 
 `DeferredResult` and `Callable` can be used for a single asynchronous return value.
 What if you want to produce multiple asynchronous values and have those written to the
@@ -3377,7 +3374,7 @@ customize the status and headers of the response.
 
 [[mvc-ann-async-reactive-types]]
 === Reactive types
-[.small]#<<mvc-ann-async-vs-webflux,Compared to WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-codecs-streaming,Same in Spring WebFlux>>#
 
 Spring MVC supports use of reactive client libraries in a controller. This includes the
 `WebClient` from `spring-webflux` and others such as Spring Data reactive data
@@ -3402,12 +3399,31 @@ Spring MVC supports Reactor and RxJava through the
 `spring-core` which allows it to adapt from multiple reactive libraries.
 ====
 
-When streaming to the response with a reactive type, Spring MVC performs (blocking)
-writes to the response through the
-through the <<mvc-ann-async-configuration-spring-mvc,configured>> MVC `TaskExecutor`.
-By default this is a `SyncTaskExecutor` and not suitable for production.
-https://jira.spring.io/browse/SPR-16203[SPR-16203] will provide better defaults.
-In the mean time please configure the executor through the MVC config.
+When streaming to the response via reactive types, Spring MVC supports reactive back
+pressure, but still needs to use blocking I/O to perform actual writes. This is done
+through the <<mvc-ann-async-configuration-spring-mvc,configured>> MVC `TaskExecutor` on
+a separate thread in order to avoid blocking the upstream source (e.g. a `Flux` returned
+from the `WebClient`). By default a `SyncTaskExecutor` is used which is not suitable for
+production. https://jira.spring.io/browse/SPR-16203[SPR-16203] will provide better
+defaults in Spring Framework 5.1. In the mean time please configure the executor through
+the <<mvc-ann-async-configuration-spring-mvc,MVC config>>.
+
+
+
+[[mvc-ann-async-disconnects]]
+=== Disconnects
+[.small]#<<web-reactive.adoc#webflux-codecs-streaming,Same in Spring WebFlux>>#
+
+The Servlet API does not provide any notification when a remote client goes away.
+Therefore while streaming to the response, whether via <<mvc-ann-async-sse,SseEmitter>> or
+<<mvc-ann-async-reactive-types,reactive types>, it is important to send data periodically,
+since the write would fail if the client has disconnected. The send could take the form
+of an empty (comment-only) SSE event, or any other data that the other side would have to
+to interpret as a heartbeat and ignore.
+
+Alternatively consider using web messaging solutions such as
+<<websocket-stomp,STOMP over WebSocket>> or WebSocket with <<websocket-fallback,SockJS>>
+that have a built-in heartbeat mechanism.
 
 
 

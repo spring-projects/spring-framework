@@ -521,7 +521,6 @@ To configure or customize the readers and writers to use applications will typic
 `ClientCodecConfigurer` or `ServerCodecConfigurer`.
 
 
-
 [[webflux-codecs-jackson]]
 ==== Jackson
 
@@ -548,6 +547,24 @@ elements of type `String`. Instead ``String``'s are treated as low level content
 serialized JSON) and are rendered as-is by the `CharSequenceEncoder`. If you want a
 `Flux<String>` rendered as a JSON array, you'll have to use `Flux#collectToList()` and
 provide a `Mono<List<String>>` instead.
+
+
+[[webflux-codecs-streaming]]
+==== HTTP Streaming
+[.small]#<<web.adoc#mvc-ann-async-http-streaming,Same in Spring MVC>>#
+
+When a multi-value, reactive type such as `Flux` is used for response rendering, it may
+be collected to a `List` and rendered as a whole (e.g. JSON array), or it may be treated
+as an infinite stream with each item flushed immediately. The determination for which is
+which is made based on content negotiation and the selected media type which may imply a
+streaming format (e.g. "text/event-stream", "application/stream+json"), or not
+(e.g. "application/json").
+
+When streaming to the HTTP response, regardless of the media type (e.g. text/event-stream,
+application/stream+json), it is important to send data periodically, since the write would
+fail if the client has disconnected. The send could take the form of an empty
+(comment-only) SSE event, or any other data that the other side would have to interpret as
+a heartbeat and ignore.
 
 
 
@@ -1908,10 +1925,11 @@ than a meta-annotation marked with `@Controller` and `@ResponseBody`.
 
 `@ResponseBody` supports reactive types which means you can return Reactor or RxJava
 types and have the asynchronous values they produce rendered to the response.
-For additional details on JSON rendering see <<webflux-codecs-jackson-json>>.
+For additional details, see <<webflux-codecs-streaming>> and
+<<webflux-codecs-jackson,JSON rendering>>.
 
 `@ResponseBody` methods can be combined with JSON serialization views.
-See <<mvc-ann-jackson>> for details.
+See <<webflux-ann-jackson>> for details.
 
 You can use the <<webflux-config-message-codecs>> option of the <<webflux-config>> to
 configure or customize message writing.
