@@ -3304,6 +3304,13 @@ response. For example:
 `ResponseBodyEmitter` can also be used as the body in a `ResponseEntity` allowing you to
 customize the status and headers of the response.
 
+When an `emitter` throws an `IOException` (e.g. if the remote client went away) applications
+are not responsible for cleaning up the connection, and should not invoke `emitter.complete`
+or `emitter.completeWithError`. Instead the servlet container automatically initiates an
+`AsyncListener` error notification in which Spring MVC makes a `completeWithError` call,
+which in turn performs one a final ASYNC dispatch to the application during which Spring MVC
+invokes the configured exception resolvers and completes the request.
+
 
 [[mvc-ann-async-sse]]
 ==== SSE
@@ -3338,6 +3345,8 @@ does not support Server-Sent Events. Consider using Spring's
 <<web.adoc#websocket,WebSocket messaging>> with
 <<web.adoc#websocket-fallback,SockJS fallback>> transports (including SSE) that target
 a wide range of browsers.
+
+Also see <<mvc-ann-async-objects,previous section>> for notes on exception handling.
 
 
 [[mvc-ann-async-output-stream]]
