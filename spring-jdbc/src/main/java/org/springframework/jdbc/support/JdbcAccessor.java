@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public abstract class JdbcAccessor implements InitializingBean {
 	private DataSource dataSource;
 
 	@Nullable
-	private SQLExceptionTranslator exceptionTranslator;
+	private volatile SQLExceptionTranslator exceptionTranslator;
 
 	private boolean lazyInit = true;
 
@@ -109,17 +109,25 @@ public abstract class JdbcAccessor implements InitializingBean {
 	 * {@link SQLStateSQLExceptionTranslator} in case of no DataSource.
 	 * @see #getDataSource()
 	 */
-	public synchronized SQLExceptionTranslator getExceptionTranslator() {
-		if (this.exceptionTranslator == null) {
-			DataSource dataSource = getDataSource();
-			if (dataSource != null) {
-				this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dataSource);
-			}
-			else {
-				this.exceptionTranslator = new SQLStateSQLExceptionTranslator();
-			}
+	public SQLExceptionTranslator getExceptionTranslator() {
+		SQLExceptionTranslator exceptionTranslator = this.exceptionTranslator;
+		if (exceptionTranslator != null) {
+			return exceptionTranslator;
 		}
-		return this.exceptionTranslator;
+		synchronized (this) {
+			exceptionTranslator = this.exceptionTranslator;
+			if (exceptionTranslator == null) {
+				DataSource dataSource = getDataSource();
+				if (dataSource != null) {
+					exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dataSource);
+				}
+				else {
+					exceptionTranslator = new SQLStateSQLExceptionTranslator();
+				}
+				this.exceptionTranslator = exceptionTranslator;
+			}
+			return exceptionTranslator;
+		}
 	}
 
 	/**
