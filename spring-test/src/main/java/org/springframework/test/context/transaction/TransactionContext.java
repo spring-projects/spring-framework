@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.test.context.transaction;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,7 +55,7 @@ class TransactionContext {
 	@Nullable
 	private TransactionStatus transactionStatus;
 
-	private volatile int transactionsStarted = 0;
+	private final AtomicInteger transactionsStarted = new AtomicInteger(0);
 
 
 	TransactionContext(TestContext testContext, PlatformTransactionManager transactionManager,
@@ -82,8 +84,8 @@ class TransactionContext {
 	}
 
 	void setFlaggedForRollback(boolean flaggedForRollback) {
-		Assert.state(this.transactionStatus != null, () -> String.format(
-				"Failed to set rollback flag for test context %s: transaction does not exist.", this.testContext));
+		Assert.state(this.transactionStatus != null, () ->
+				"Failed to set rollback flag - transaction does not exist: " + this.testContext);
 		this.flaggedForRollback = flaggedForRollback;
 	}
 
@@ -95,16 +97,16 @@ class TransactionContext {
 	 */
 	void startTransaction() {
 		Assert.state(this.transactionStatus == null,
-				"Cannot start a new transaction without ending the existing transaction first.");
+				"Cannot start a new transaction without ending the existing transaction first");
 
 		this.flaggedForRollback = this.defaultRollback;
 		this.transactionStatus = this.transactionManager.getTransaction(this.transactionDefinition);
-		++this.transactionsStarted;
+		int transactionsStarted = this.transactionsStarted.incrementAndGet();
 
 		if (logger.isInfoEnabled()) {
 			logger.info(String.format(
 					"Began transaction (%s) for test context %s; transaction manager [%s]; rollback [%s]",
-					this.transactionsStarted, this.testContext, this.transactionManager, flaggedForRollback));
+					transactionsStarted, this.testContext, this.transactionManager, flaggedForRollback));
 		}
 	}
 
@@ -118,8 +120,8 @@ class TransactionContext {
 					"Ending transaction for test context %s; transaction status [%s]; rollback [%s]",
 					this.testContext, this.transactionStatus, this.flaggedForRollback));
 		}
-		Assert.state(this.transactionStatus != null, () -> String.format(
-				"Failed to end transaction for test context %s: transaction does not exist.", this.testContext));
+		Assert.state(this.transactionStatus != null,
+				() -> "Failed to end transaction - transaction does not exist: " + this.testContext);
 
 		try {
 			if (this.flaggedForRollback) {
@@ -134,8 +136,8 @@ class TransactionContext {
 		}
 
 		if (logger.isInfoEnabled()) {
-			logger.info(String.format("%s transaction for test context %s.",
-					(this.flaggedForRollback ? "Rolled back" : "Committed"), this.testContext));
+			logger.info((this.flaggedForRollback ? "Rolled back" : "Committed") +
+					" transaction for test: " + this.testContext);
 		}
 	}
 

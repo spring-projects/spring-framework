@@ -24,7 +24,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -182,11 +181,10 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 * but not by consumable/producible media types
 	 */
 	@Override
-	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> infos, String lookupPath,
-			HttpServletRequest request) throws ServletException {
+	protected HandlerMethod handleNoMatch(
+			Set<RequestMappingInfo> infos, String lookupPath, HttpServletRequest request) throws ServletException {
 
 		PartialMatchHelper helper = new PartialMatchHelper(infos, request);
-
 		if (helper.isEmpty()) {
 			return null;
 		}

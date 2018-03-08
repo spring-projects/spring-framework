@@ -38,7 +38,7 @@ public class TableMetaDataProviderFactory {
 
 
 	/**
-	 * Create a TableMetaDataProvider based on the database metadata.
+	 * Create a {@link TableMetaDataProvider} based on the database metadata.
 	 * @param dataSource used to retrieve metadata
 	 * @param context the class that holds configuration and metadata
 	 * @return instance of the TableMetaDataProvider implementation to be used
@@ -50,12 +50,10 @@ public class TableMetaDataProviderFactory {
 						JdbcUtils.commonDatabaseName(databaseMetaData.getDatabaseProductName());
 				boolean accessTableColumnMetaData = context.isAccessTableColumnMetaData();
 				TableMetaDataProvider provider;
+
 				if ("Oracle".equals(databaseProductName)) {
-					provider = new OracleTableMetaDataProvider(databaseMetaData,
-							context.isOverrideIncludeSynonymsDefault());
-				}
-				else if ("HSQL Database Engine".equals(databaseProductName)) {
-					provider = new HsqlTableMetaDataProvider(databaseMetaData);
+					provider = new OracleTableMetaDataProvider(
+							databaseMetaData, context.isOverrideIncludeSynonymsDefault());
 				}
 				else if ("PostgreSQL".equals(databaseProductName)) {
 					provider = new PostgresTableMetaDataProvider(databaseMetaData);
@@ -63,9 +61,13 @@ public class TableMetaDataProviderFactory {
 				else if ("Apache Derby".equals(databaseProductName)) {
 					provider = new DerbyTableMetaDataProvider(databaseMetaData);
 				}
+				else if ("HSQL Database Engine".equals(databaseProductName)) {
+					provider = new HsqlTableMetaDataProvider(databaseMetaData);
+				}
 				else {
 					provider = new GenericTableMetaDataProvider(databaseMetaData);
 				}
+
 				if (logger.isDebugEnabled()) {
 					logger.debug("Using " + provider.getClass().getSimpleName());
 				}

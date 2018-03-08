@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.DateTimeException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -37,13 +38,8 @@ import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import static java.time.format.DateTimeFormatter.*;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link org.springframework.http.HttpHeaders}.
@@ -51,6 +47,7 @@ import static org.junit.Assert.assertTrue;
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Brian Clozel
+ * @author Juergen Hoeller
  */
 public class HttpHeadersTests {
 
@@ -284,13 +281,26 @@ public class HttpHeadersTests {
 	}
 
 	@Test
-	public void expires() {
+	public void expiresLong() {
 		Calendar calendar = new GregorianCalendar(2008, 11, 18, 11, 20);
 		calendar.setTimeZone(TimeZone.getTimeZone("CET"));
 		long date = calendar.getTimeInMillis();
 		headers.setExpires(date);
 		assertEquals("Invalid Expires header", date, headers.getExpires());
 		assertEquals("Invalid Expires header", "Thu, 18 Dec 2008 10:20:00 GMT", headers.getFirst("expires"));
+	}
+
+	@Test
+	public void expiresZonedDateTime() {
+		ZonedDateTime zonedDateTime = ZonedDateTime.of(2008, 12, 18, 10, 20, 0, 0, ZoneId.of("GMT"));
+		headers.setExpires(zonedDateTime);
+		assertEquals("Invalid Expires header", zonedDateTime.toInstant().toEpochMilli(), headers.getExpires());
+		assertEquals("Invalid Expires header", "Thu, 18 Dec 2008 10:20:00 GMT", headers.getFirst("expires"));
+	}
+
+	@Test(expected = DateTimeException.class)  // SPR-16560
+	public void expiresLargeDate() {
+		headers.setExpires(Long.MAX_VALUE);
 	}
 
 	@Test  // SPR-10648 (example is from INT-3063)
@@ -332,9 +342,15 @@ public class HttpHeadersTests {
 
 	@Test
 	public void cacheControl() {
-		String cacheControl = "no-cache";
-		headers.setCacheControl(cacheControl);
-		assertEquals("Invalid Cache-Control header", cacheControl, headers.getCacheControl());
+		headers.setCacheControl("no-cache");
+		assertEquals("Invalid Cache-Control header", "no-cache", headers.getCacheControl());
+		assertEquals("Invalid Cache-Control header", "no-cache", headers.getFirst("cache-control"));
+	}
+
+	@Test
+	public void cacheControlBuilder() {
+		headers.setCacheControl(CacheControl.noCache());
+		assertEquals("Invalid Cache-Control header", "no-cache", headers.getCacheControl());
 		assertEquals("Invalid Cache-Control header", "no-cache", headers.getFirst("cache-control"));
 	}
 

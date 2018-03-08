@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@
 
 package org.springframework.core.codec;
 
+import java.io.IOException;
 import java.util.Map;
+import java.util.OptionalLong;
 
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -66,6 +69,19 @@ public class ResourceEncoder extends AbstractSingleValueEncoder<Resource> {
 			ResolvableType type, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		return DataBufferUtils.read(resource, dataBufferFactory, this.bufferSize);
+	}
+
+	@Override
+	public Long getContentLength(Resource resource, @Nullable MimeType mimeType) {
+		// Don't consume InputStream...
+		if (InputStreamResource.class != resource.getClass()) {
+			try {
+				return resource.contentLength();
+			}
+			catch (IOException ignored) {
+			}
+		}
+		return null;
 	}
 
 }

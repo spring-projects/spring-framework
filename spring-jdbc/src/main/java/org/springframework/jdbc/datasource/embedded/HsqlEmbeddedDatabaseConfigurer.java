@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * {@link EmbeddedDatabaseConfigurer} for an HSQL embedded database instance.
+ *
  * <p>Call {@link #getInstance()} to get the singleton instance of this class.
  *
  * @author Keith Donald
@@ -39,7 +40,7 @@ final class HsqlEmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfi
 
 	/**
 	 * Get the singleton {@link HsqlEmbeddedDatabaseConfigurer} instance.
-	 * @return the configurer
+	 * @return the configurer instance
 	 * @throws ClassNotFoundException if HSQL is not on the classpath
 	 */
 	@SuppressWarnings("unchecked")

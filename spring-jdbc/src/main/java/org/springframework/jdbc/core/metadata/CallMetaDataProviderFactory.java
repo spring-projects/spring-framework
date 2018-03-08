@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,14 +60,14 @@ public class CallMetaDataProviderFactory {
 
 
 	/**
-	 * Create a CallMetaDataProvider based on the database metadata
+	 * Create a {@link CallMetaDataProvider} based on the database metadata
 	 * @param dataSource used to retrieve metadata
 	 * @param context the class that holds configuration and metadata
 	 * @return instance of the CallMetaDataProvider implementation to be used
 	 */
-	static public CallMetaDataProvider createMetaDataProvider(DataSource dataSource, final CallMetaDataContext context) {
+	public static CallMetaDataProvider createMetaDataProvider(DataSource dataSource, final CallMetaDataContext context) {
 		try {
-			CallMetaDataProvider result = (CallMetaDataProvider) JdbcUtils.extractDatabaseMetaData(dataSource, databaseMetaData -> {
+			return (CallMetaDataProvider) JdbcUtils.extractDatabaseMetaData(dataSource, databaseMetaData -> {
 				String databaseProductName = JdbcUtils.commonDatabaseName(databaseMetaData.getDatabaseProductName());
 				boolean accessProcedureColumnMetaData = context.isAccessCallParameterMetaData();
 				if (context.isFunction()) {
@@ -94,31 +94,33 @@ public class CallMetaDataProviderFactory {
 						}
 					}
 				}
+
 				CallMetaDataProvider provider;
 				if ("Oracle".equals(databaseProductName)) {
 					provider = new OracleCallMetaDataProvider(databaseMetaData);
 				}
-				else if ("DB2".equals(databaseProductName)) {
-					provider = new Db2CallMetaDataProvider((databaseMetaData));
+				else if ("PostgreSQL".equals(databaseProductName)) {
+					provider = new PostgresCallMetaDataProvider((databaseMetaData));
 				}
 				else if ("Apache Derby".equals(databaseProductName)) {
 					provider = new DerbyCallMetaDataProvider((databaseMetaData));
 				}
-				else if ("PostgreSQL".equals(databaseProductName)) {
-					provider = new PostgresCallMetaDataProvider((databaseMetaData));
-				}
-				else if ("Sybase".equals(databaseProductName)) {
-					provider = new SybaseCallMetaDataProvider((databaseMetaData));
-				}
-				else if ("Microsoft SQL Server".equals(databaseProductName)) {
-					provider = new SqlServerCallMetaDataProvider((databaseMetaData));
+				else if ("DB2".equals(databaseProductName)) {
+					provider = new Db2CallMetaDataProvider((databaseMetaData));
 				}
 				else if ("HDB".equals(databaseProductName)) {
 					provider = new HanaCallMetaDataProvider((databaseMetaData));
 				}
+				else if ("Microsoft SQL Server".equals(databaseProductName)) {
+					provider = new SqlServerCallMetaDataProvider((databaseMetaData));
+				}
+				else if ("Sybase".equals(databaseProductName)) {
+					provider = new SybaseCallMetaDataProvider((databaseMetaData));
+				}
 				else {
 					provider = new GenericCallMetaDataProvider(databaseMetaData);
 				}
+
 				if (logger.isDebugEnabled()) {
 					logger.debug("Using " + provider.getClass().getName());
 				}
@@ -129,7 +131,6 @@ public class CallMetaDataProviderFactory {
 				}
 				return provider;
 			});
-			return result;
 		}
 		catch (MetaDataAccessException ex) {
 			throw new DataAccessResourceFailureException("Error retrieving database metadata", ex);

@@ -1577,7 +1577,7 @@ is controlled through the `Ordered` interface. For full details on advice orderi
 ----
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -1597,10 +1597,10 @@ is controlled through the `Ordered` interface. For full details on advice orderi
 		<!-- this is the aspect -->
 		<bean id="profiler" class="x.y.SimpleProfiler">
 			<!-- execute before the transactional advice (hence the lower order number) -->
-			<property name="order" __value="1"__/>
+			<property name="order" value="1"/>
 		</bean>
 
-		<tx:annotation-driven transaction-manager="txManager" __order="200"__/>
+		<tx:annotation-driven transaction-manager="txManager" order="200"/>
 
 		<aop:config>
 				<!-- this advice will execute around the transactional advice -->
@@ -1633,7 +1633,7 @@ The following example effects the same setup as above, but uses the purely XML
 declarative approach.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -1653,14 +1653,14 @@ declarative approach.
 		<!-- the profiling advice -->
 		<bean id="profiler" class="x.y.SimpleProfiler">
 			<!-- execute before the transactional advice (hence the lower order number) -->
-			__<property name="order" value="1__"/>
+			<property name="order" value="1"/>
 		</bean>
 
 		<aop:config>
 			<aop:pointcut id="entryPointMethod" expression="execution(* x.y..*Service.*(..))"/>
 			<!-- will execute after the profiling advice (c.f. the order attribute) -->
 
-			<aop:advisor advice-ref="txAdvice" pointcut-ref="entryPointMethod" __order="2__"/>
+			<aop:advisor advice-ref="txAdvice" pointcut-ref="entryPointMethod" order="2"/>
 			<!-- order value is higher than the profiling aspect -->
 
 			<aop:aspect id="profilingAspect" ref="profiler">
@@ -1733,7 +1733,7 @@ follows Java's rule that annotations on interfaces are __not inherited__.
 ====
 
 The `@Transactional` annotation on a class specifies the default transaction semantics
-for the execution of any method in the class.
+for the execution of any public method in the class.
 
 The `@Transactional` annotation on a method within the class overrides the default
 transaction semantics given by the class annotation (if present). Any method may be
@@ -1794,7 +1794,6 @@ a transaction. You then pass an instance of your custom `TransactionCallback` to
 
 		// use constructor-injection to supply the PlatformTransactionManager
 		public SimpleService(PlatformTransactionManager transactionManager) {
-			Assert.notNull(transactionManager, "The 'transactionManager' argument must not be null.");
 			this.transactionTemplate = new TransactionTemplate(transactionManager);
 		}
 
@@ -1861,7 +1860,6 @@ a specific `TransactionTemplate:`
 		private final TransactionTemplate transactionTemplate;
 
 		public SimpleService(PlatformTransactionManager transactionManager) {
-			Assert.notNull(transactionManager, "The 'transactionManager' argument must not be null.");
 			this.transactionTemplate = new TransactionTemplate(transactionManager);
 
 			// the transaction settings can be set here explicitly if so desired

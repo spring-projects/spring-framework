@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,9 @@ import javax.sql.DataSource;
  * is rolled back, the unused values will never be served. The maximum hole size in
  * numbering is consequently the value of cacheSize.
  *
- * <b>HINT:</b> Since Sybase supports the JDBC 3.0 {@code getGeneratedKeys} method,
- * it is recommended to use IDENTITY columns directly in the tables and then using a
- * {@link org.springframework.jdbc.core.simple.SimpleJdbcInsert} or utilizing
+ * <b>HINT:</b> Since Sybase Adaptive Server supports the JDBC 3.0 {@code getGeneratedKeys}
+ * method, it is recommended to use IDENTITY columns directly in the tables and then
+ * using a {@link org.springframework.jdbc.core.simple.SimpleJdbcInsert} or utilizing
  * a {@link org.springframework.jdbc.support.KeyHolder} when calling the with the
  * {@code update(PreparedStatementCreator psc, KeyHolder generatedKeyHolder)}
  * method of the {@link org.springframework.jdbc.core.JdbcTemplate}.

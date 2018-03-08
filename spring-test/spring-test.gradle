@@ -48,7 +48,7 @@ dependencies {
 	optional("org.seleniumhq.selenium:htmlunit-driver:2.29.2") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-	optional("org.seleniumhq.selenium:selenium-java:3.9.1") {
+	optional("org.seleniumhq.selenium:selenium-java:3.10.0") {
 		exclude group: "commons-logging", module: "commons-logging"
 		exclude group: "io.netty", module: "netty"
 	}
@@ -66,7 +66,7 @@ dependencies {
 	testCompile("javax.mail:javax.mail-api:1.6.1")
 	testCompile("org.hibernate:hibernate-core:5.2.14.Final")
 	testCompile("org.hibernate:hibernate-validator:6.0.7.Final")
-	// Enable use of the JUnitPlatform Runner
+	// Enable use of the JUnit Platform Runner
 	testCompile("org.junit.platform:junit-platform-runner:${junitPlatformVersion}")
 	testCompile("org.junit.jupiter:junit-jupiter-params:${junitJupiterVersion}")
 	testCompile("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")

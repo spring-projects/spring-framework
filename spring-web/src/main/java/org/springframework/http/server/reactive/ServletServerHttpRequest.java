@@ -263,7 +263,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 		@Override
 		protected void checkOnDataAvailable() {
-			if (!this.inputStream.isFinished() && this.inputStream.isReady()) {
+			if (this.inputStream.isReady() && !this.inputStream.isFinished()) {
 				onDataAvailable();
 			}
 		}

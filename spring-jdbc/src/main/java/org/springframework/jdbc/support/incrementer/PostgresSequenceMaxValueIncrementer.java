@@ -25,17 +25,16 @@ import javax.sql.DataSource;
  * <p>Thanks to Tomislav Urban for the suggestion!
  *
  * @author Juergen Hoeller
- * @deprecated in favor of the differently named {@link PostgresSequenceMaxValueIncrementer}
+ * @since 4.3.15
  */
-@Deprecated
-public class PostgreSQLSequenceMaxValueIncrementer extends PostgresSequenceMaxValueIncrementer {
+public class PostgresSequenceMaxValueIncrementer extends AbstractSequenceMaxValueIncrementer {
 
 	/**
 	 * Default constructor for bean property style usage.
 	 * @see #setDataSource
 	 * @see #setIncrementerName
 	 */
-	public PostgreSQLSequenceMaxValueIncrementer() {
+	public PostgresSequenceMaxValueIncrementer() {
 	}
 
 	/**
@@ -43,8 +42,14 @@ public class PostgreSQLSequenceMaxValueIncrementer extends PostgresSequenceMaxVa
 	 * @param dataSource the DataSource to use
 	 * @param incrementerName the name of the sequence/table to use
 	 */
-	public PostgreSQLSequenceMaxValueIncrementer(DataSource dataSource, String incrementerName) {
+	public PostgresSequenceMaxValueIncrementer(DataSource dataSource, String incrementerName) {
 		super(dataSource, incrementerName);
+	}
+
+
+	@Override
+	protected String getSequenceQuery() {
+		return "select nextval('" + getIncrementerName() + "')";
 	}
 
 }
