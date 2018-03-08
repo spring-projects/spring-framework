@@ -170,11 +170,9 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 			delegateProcessing(getXmlLoader(), configAttributes);
 			boolean xmlLoaderDetectedDefaults = configAttributes.hasLocations();
 
-			if (xmlLoaderDetectedDefaults) {
-				if (logger.isInfoEnabled()) {
-					logger.info(String.format("%s detected default locations for context configuration %s.",
-							name(getXmlLoader()), configAttributes));
-				}
+			if (xmlLoaderDetectedDefaults && logger.isInfoEnabled()) {
+				logger.info(String.format("%s detected default locations for context configuration %s.",
+						name(getXmlLoader()), configAttributes));
 			}
 
 			Assert.state(!configAttributes.hasClasses(), () -> String.format(
@@ -184,11 +182,9 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 			// Now let the annotation config loader process the configuration.
 			delegateProcessing(getAnnotationConfigLoader(), configAttributes);
 
-			if (configAttributes.hasClasses()) {
-				if (logger.isInfoEnabled()) {
-					logger.info(String.format("%s detected default configuration classes for context configuration %s.",
-							name(getAnnotationConfigLoader()), configAttributes));
-				}
+			if (configAttributes.hasClasses() && logger.isInfoEnabled()) {
+				logger.info(String.format("%s detected default configuration classes for context configuration %s.",
+						name(getAnnotationConfigLoader()), configAttributes));
 			}
 
 			Assert.state(xmlLoaderDetectedDefaults || !configAttributes.hasLocations(), () -> String.format(

@@ -118,12 +118,11 @@ public class ViewResolverRegistry {
 		this.order = (this.order != null ? this.order : Ordered.HIGHEST_PRECEDENCE);
 
 		if (this.contentNegotiatingResolver != null) {
-			if (!ObjectUtils.isEmpty(defaultViews)) {
-				if (!CollectionUtils.isEmpty(this.contentNegotiatingResolver.getDefaultViews())) {
-					List<View> views = new ArrayList<>(this.contentNegotiatingResolver.getDefaultViews());
-					views.addAll(Arrays.asList(defaultViews));
-					this.contentNegotiatingResolver.setDefaultViews(views);
-				}
+			if (!ObjectUtils.isEmpty(defaultViews) &&
+					!CollectionUtils.isEmpty(this.contentNegotiatingResolver.getDefaultViews())) {
+				List<View> views = new ArrayList<>(this.contentNegotiatingResolver.getDefaultViews());
+				views.addAll(Arrays.asList(defaultViews));
+				this.contentNegotiatingResolver.setDefaultViews(views);
 			}
 		}
 		else {

@@ -310,14 +310,12 @@ public class ResolvableType implements Serializable {
 					ourResolved = resolved.resolve();
 				}
 			}
-			if (ourResolved == null) {
+			if (ourResolved == null && other.variableResolver != null) {
 				// Try variable resolution against target type
-				if (other.variableResolver != null) {
-					ResolvableType resolved = other.variableResolver.resolveVariable(variable);
-					if (resolved != null) {
-						ourResolved = resolved.resolve();
-						checkGenerics = false;
-					}
+				ResolvableType resolved = other.variableResolver.resolveVariable(variable);
+				if (resolved != null) {
+					ourResolved = resolved.resolve();
+					checkGenerics = false;
 				}
 			}
 			if (ourResolved == null) {
@@ -525,10 +523,8 @@ public class ResolvableType implements Serializable {
 		Class<?> resolved = resolve();
 		if (resolved != null) {
 			for (Type genericInterface : resolved.getGenericInterfaces()) {
-				if (genericInterface instanceof Class) {
-					if (forClass((Class<?>) genericInterface).hasGenerics()) {
-						return true;
-					}
+				if (genericInterface instanceof Class && forClass((Class<?>) genericInterface).hasGenerics()) {
+					return true;
 				}
 			}
 			return getSuperType().hasUnresolvableGenerics();

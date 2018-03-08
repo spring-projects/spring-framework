@@ -362,10 +362,9 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		}
 		for (ResolvableType declaredEventType : this.declaredEventTypes) {
 			Class<?> eventClass = declaredEventType.getRawClass();
-			if ((eventClass == null || !ApplicationEvent.class.isAssignableFrom(eventClass)) && payloadType != null) {
-				if (declaredEventType.isAssignableFrom(payloadType)) {
-					return declaredEventType;
-				}
+			if ((eventClass == null || !ApplicationEvent.class.isAssignableFrom(eventClass)) && payloadType != null &&
+					declaredEventType.isAssignableFrom(payloadType)) {
+				return declaredEventType;
 			}
 			if (declaredEventType.getRawClass().isInstance(event)) {
 				return declaredEventType;

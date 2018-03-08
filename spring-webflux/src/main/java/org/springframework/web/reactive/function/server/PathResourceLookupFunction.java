@@ -147,10 +147,8 @@ class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resourc
 			return false;
 		}
 
-		if (resourcePath.contains("%")) {
-			if (StringUtils.uriDecode(resourcePath, StandardCharsets.UTF_8).contains("../")) {
-				return false;
-			}
+		if (resourcePath.contains("%") && StringUtils.uriDecode(resourcePath, StandardCharsets.UTF_8).contains("../")) {
+			return false;
 		}
 		return true;
 	}

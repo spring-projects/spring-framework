@@ -75,11 +75,9 @@ public class AspectJWeaverMessageHandler implements IMessageHandler {
 				return true;
 			}
 		}
-		else if (messageKind == IMessage.ABORT) {
-			if (logger.isFatalEnabled()) {
-				logger.fatal(makeMessageFor(message));
-				return true;
-			}
+		else if (messageKind == IMessage.ABORT && logger.isFatalEnabled()) {
+			logger.fatal(makeMessageFor(message));
+			return true;
 		}
 		return false;
 	}

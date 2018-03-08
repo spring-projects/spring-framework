@@ -325,11 +325,10 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 		private boolean rollbackOnly;
 
 		public TransactionDelegate(@Nullable XAResource xaResource) {
-			if (xaResource == null) {
-				if (transactionFactory != null && !transactionFactory.supportsResourceAdapterManagedTransactions()) {
-					throw new IllegalStateException("ResourceAdapter-provided XAResource is required for " +
-							"transaction management. Check your ResourceAdapter's configuration.");
-				}
+			if (xaResource == null &&
+					transactionFactory != null && !transactionFactory.supportsResourceAdapterManagedTransactions()) {
+				throw new IllegalStateException("ResourceAdapter-provided XAResource is required for " +
+						"transaction management. Check your ResourceAdapter's configuration.");
 			}
 			this.xaResource = xaResource;
 		}

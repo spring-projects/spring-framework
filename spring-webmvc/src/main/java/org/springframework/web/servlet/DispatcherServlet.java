@@ -925,11 +925,9 @@ public class DispatcherServlet extends FrameworkServlet {
 			doDispatch(request, response);
 		}
 		finally {
-			if (!WebAsyncUtils.getAsyncManager(request).isConcurrentHandlingStarted()) {
+			if (!WebAsyncUtils.getAsyncManager(request).isConcurrentHandlingStarted() && attributesSnapshot != null) {
 				// Restore the original attribute snapshot, in case of an include.
-				if (attributesSnapshot != null) {
-					restoreAttributesAfterInclude(request, attributesSnapshot);
-				}
+				restoreAttributesAfterInclude(request, attributesSnapshot);
 			}
 		}
 	}

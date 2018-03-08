@@ -323,10 +323,8 @@ public class MethodReference extends SpelNodeImpl {
 			classDesc = publicDeclaringClass.getName().replace('.', '/');
 		}
 
-		if (!isStaticMethod) {
-			if (descriptor == null || !descriptor.substring(1).equals(classDesc)) {
-				CodeFlow.insertCheckCast(mv, "L" + classDesc);
-			}
+		if (!isStaticMethod && descriptor == null || !descriptor.substring(1).equals(classDesc)) {
+			CodeFlow.insertCheckCast(mv, "L" + classDesc);
 		}
 
 		generateCodeForArguments(mv, cf, method, this.children);

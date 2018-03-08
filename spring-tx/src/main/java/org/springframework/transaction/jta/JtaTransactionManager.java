@@ -541,10 +541,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			}
 		}
 
-		if (this.transactionSynchronizationRegistry != null) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Using JTA TransactionSynchronizationRegistry: " + this.transactionSynchronizationRegistry);
-			}
+		if (this.transactionSynchronizationRegistry != null && logger.isInfoEnabled()) {
+			logger.info("Using JTA TransactionSynchronizationRegistry: " + this.transactionSynchronizationRegistry);
 		}
 	}
 

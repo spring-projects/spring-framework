@@ -71,10 +71,9 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 	public void preHandle(WebRequest request) throws DataAccessException {
 		String participateAttributeName = getParticipateAttributeName();
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-		if (asyncManager.hasConcurrentResult()) {
-			if (applyEntityManagerBindingInterceptor(asyncManager, participateAttributeName)) {
-				return;
-			}
+		if (asyncManager.hasConcurrentResult() &&
+				applyEntityManagerBindingInterceptor(asyncManager, participateAttributeName)) {
+			return;
 		}
 
 		EntityManagerFactory emf = obtainEntityManagerFactory();

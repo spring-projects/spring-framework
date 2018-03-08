@@ -78,10 +78,8 @@ public class DestinationPatternsMessageCondition
 		boolean slashSeparator = pathMatcher.combine("a", "a").equals("a/a");
 		Set<String> result = new LinkedHashSet<>(patterns.size());
 		for (String pattern : patterns) {
-			if (slashSeparator) {
-				if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
-					pattern = "/" + pattern;
-				}
+			if (slashSeparator && StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
+				pattern = "/" + pattern;
 			}
 			result.add(pattern);
 		}

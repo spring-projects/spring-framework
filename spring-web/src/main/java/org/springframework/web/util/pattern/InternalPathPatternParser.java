@@ -157,10 +157,8 @@ class InternalPathPatternParser {
 					}
 				}
 				else if (ch == '*') {
-					if (this.insideVariableCapture) {
-						if (this.variableCaptureStart == pos - 1) {
-							this.isCaptureTheRestVariable = true;
-						}
+					if (this.insideVariableCapture && this.variableCaptureStart == pos - 1) {
+						this.isCaptureTheRestVariable = true;
 					}
 					this.wildcard = true;
 				}

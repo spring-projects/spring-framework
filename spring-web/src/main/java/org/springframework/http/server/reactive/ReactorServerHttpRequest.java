@@ -109,16 +109,14 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 			if (c == '/' || c == '?' || c == '#') {
 				break;
 			}
-			if (c == ':' && (i + 2 < uri.length())) {
-				if (uri.charAt(i + 1) == '/' && uri.charAt(i + 2) == '/') {
-					for (int j = i + 3; j < uri.length(); j++) {
-						c = uri.charAt(j);
-						if (c == '/' || c == '?' || c == '#') {
-							return uri.substring(j);
-						}
+			if (c == ':' && (i + 2 < uri.length()) && uri.charAt(i + 1) == '/' && uri.charAt(i + 2) == '/') {
+				for (int j = i + 3; j < uri.length(); j++) {
+					c = uri.charAt(j);
+					if (c == '/' || c == '?' || c == '#') {
+						return uri.substring(j);
 					}
-					return "";
 				}
+				return "";
 			}
 		}
 		return uri;

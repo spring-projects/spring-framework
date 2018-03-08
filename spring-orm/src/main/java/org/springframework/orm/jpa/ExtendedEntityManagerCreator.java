@@ -333,11 +333,9 @@ public abstract class ExtendedEntityManagerCreator {
 				doJoinTransaction(true);
 				return null;
 			}
-			else if (method.getName().equals("isJoinedToTransaction")) {
+			else if (method.getName().equals("isJoinedToTransaction") && !this.jta) {
 				// Handle JPA 2.1 isJoinedToTransaction method for the non-JTA case.
-				if (!this.jta) {
-					return TransactionSynchronizationManager.hasResource(this.target);
-				}
+				return TransactionSynchronizationManager.hasResource(this.target);
 			}
 
 			// Do automatic joining if required. Excludes toString, equals, hashCode calls.

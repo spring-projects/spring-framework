@@ -245,10 +245,9 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 					if (fieldDefaultPrefix != null) {
 						value = bindValues.get(fieldDefaultPrefix + paramName);
 					}
-					if (value == null && fieldMarkerPrefix != null) {
-						if (bindValues.get(fieldMarkerPrefix + paramName) != null) {
-							value = binder.getEmptyValue(paramType);
-						}
+					if (value == null && fieldMarkerPrefix != null &&
+							bindValues.get(fieldMarkerPrefix + paramName) != null) {
+						value = binder.getEmptyValue(paramType);
 					}
 				}
 				value = (value instanceof List ? ((List<?>) value).toArray() : value);

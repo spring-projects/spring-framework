@@ -203,11 +203,9 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 	 * @see org.xml.sax.ContentHandler#endPrefixMapping(String)
 	 */
 	protected void endPrefixMapping(String prefix) throws SAXException {
-		if (getContentHandler() != null) {
-			if (this.namespaces.containsKey(prefix)) {
-				getContentHandler().endPrefixMapping(prefix);
-				this.namespaces.remove(prefix);
-			}
+		if (getContentHandler() != null && this.namespaces.containsKey(prefix)) {
+			getContentHandler().endPrefixMapping(prefix);
+			this.namespaces.remove(prefix);
 		}
 	}
 

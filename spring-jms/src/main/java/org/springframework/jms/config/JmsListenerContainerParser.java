@@ -185,10 +185,8 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 		}
 
 		String prefetch = containerEle.getAttribute(PREFETCH_ATTRIBUTE);
-		if (StringUtils.hasText(prefetch)) {
-			if (!isSimpleContainer) {
-				properties.add("maxMessagesPerTask", prefetch);
-			}
+		if (StringUtils.hasText(prefetch) && !isSimpleContainer) {
+			properties.add("maxMessagesPerTask", prefetch);
 		}
 
 		String phase = containerEle.getAttribute(PHASE_ATTRIBUTE);
@@ -197,10 +195,8 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 		}
 
 		String receiveTimeout = containerEle.getAttribute(RECEIVE_TIMEOUT_ATTRIBUTE);
-		if (StringUtils.hasText(receiveTimeout)) {
-			if (!isSimpleContainer) {
-				properties.add("receiveTimeout", receiveTimeout);
-			}
+		if (StringUtils.hasText(receiveTimeout) && !isSimpleContainer) {
+			properties.add("receiveTimeout", receiveTimeout);
 		}
 
 		String backOffBeanName = containerEle.getAttribute(BACK_OFF_ATTRIBUTE);
@@ -211,10 +207,8 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 		}
 		else { // No need to consider this if back-off is set
 			String recoveryInterval = containerEle.getAttribute(RECOVERY_INTERVAL_ATTRIBUTE);
-			if (StringUtils.hasText(recoveryInterval)) {
-				if (!isSimpleContainer) {
-					properties.add("recoveryInterval", recoveryInterval);
-				}
+			if (StringUtils.hasText(recoveryInterval) && !isSimpleContainer) {
+				properties.add("recoveryInterval", recoveryInterval);
 			}
 		}
 

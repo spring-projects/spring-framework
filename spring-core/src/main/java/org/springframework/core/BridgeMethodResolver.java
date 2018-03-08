@@ -153,11 +153,10 @@ public abstract class BridgeMethodResolver {
 		for (int i = 0; i < candidateParameters.length; i++) {
 			ResolvableType genericParameter = ResolvableType.forMethodParameter(genericMethod, i, declaringClass);
 			Class<?> candidateParameter = candidateParameters[i];
-			if (candidateParameter.isArray()) {
+			if (candidateParameter.isArray() &&
+					!candidateParameter.getComponentType().equals(genericParameter.getComponentType().resolve(Object.class))) {
 				// An array type: compare the component type.
-				if (!candidateParameter.getComponentType().equals(genericParameter.getComponentType().resolve(Object.class))) {
-					return false;
-				}
+				return false;
 			}
 			// A non-array type: compare the type itself.
 			if (!candidateParameter.equals(genericParameter.resolve(Object.class))) {

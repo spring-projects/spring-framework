@@ -132,10 +132,8 @@ public final class MockMvc {
 	 * @see org.springframework.test.web.servlet.result.MockMvcResultMatchers
 	 */
 	public ResultActions perform(RequestBuilder requestBuilder) throws Exception {
-		if (this.defaultRequestBuilder != null) {
-			if (requestBuilder instanceof Mergeable) {
-				requestBuilder = (RequestBuilder) ((Mergeable) requestBuilder).merge(this.defaultRequestBuilder);
-			}
+		if (this.defaultRequestBuilder != null && requestBuilder instanceof Mergeable) {
+			requestBuilder = (RequestBuilder) ((Mergeable) requestBuilder).merge(this.defaultRequestBuilder);
 		}
 
 		MockHttpServletRequest request = requestBuilder.buildRequest(this.servletContext);

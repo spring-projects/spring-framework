@@ -59,11 +59,9 @@ public abstract class AbstractNumberFormatter implements Formatter<Number> {
 		if (position.getErrorIndex() != -1) {
 			throw new ParseException(text, position.getIndex());
 		}
-		if (!this.lenient) {
-			if (text.length() != position.getIndex()) {
-				// indicates a part of the string that was not parsed
-				throw new ParseException(text, position.getIndex());
-			}
+		if (!this.lenient && text.length() != position.getIndex()) {
+			// indicates a part of the string that was not parsed
+			throw new ParseException(text, position.getIndex());
 		}
 		return number;
 	}
