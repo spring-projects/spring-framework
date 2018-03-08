@@ -100,7 +100,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		List<SimpleUrlHandlerMapping> mappings = new ArrayList<>(beans.values());
 		AnnotationAwareOrderComparator.sort(mappings);
 
-		mappings.forEach(mapping -> {
+		mappings.forEach(mapping ->
 			mapping.getHandlerMap().forEach((pattern, handler) -> {
 				if (handler instanceof ResourceWebHandler) {
 					ResourceWebHandler resourceHandler = (ResourceWebHandler) handler;
@@ -111,8 +111,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 					}
 					this.handlerMap.put(pattern, resourceHandler);
 				}
-			});
-		});
+			}));
 	}
 
 
