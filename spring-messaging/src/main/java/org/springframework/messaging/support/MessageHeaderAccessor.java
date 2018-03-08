@@ -642,7 +642,7 @@ public class MessageHeaderAccessor {
 				return;
 			}
 
-			if (getId() == null) {
+			if (super.getId() == null) {
 				IdGenerator idGenerator = (MessageHeaderAccessor.this.idGenerator != null ?
 						MessageHeaderAccessor.this.idGenerator : MessageHeaders.getIdGenerator());
 				UUID id = idGenerator.generateId();
@@ -651,7 +651,7 @@ public class MessageHeaderAccessor {
 				}
 			}
 
-			if (getTimestamp() == null) {
+			if (super.getTimestamp() == null) {
 				if (MessageHeaderAccessor.this.enableTimestamp) {
 					getRawHeaders().put(TIMESTAMP, System.currentTimeMillis());
 				}

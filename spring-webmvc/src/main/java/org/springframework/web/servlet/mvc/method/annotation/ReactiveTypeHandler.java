@@ -338,10 +338,10 @@ class ReactiveTypeHandler {
 		protected void send(Object element) throws IOException {
 			if (element instanceof ServerSentEvent) {
 				ServerSentEvent<?> event = (ServerSentEvent<?>) element;
-				((SseEmitter) getEmitter()).send(adapt(event));
+				((SseEmitter) super.getEmitter()).send(adapt(event));
 			}
 			else {
-				getEmitter().send(element, MediaType.APPLICATION_JSON);
+				super.getEmitter().send(element, MediaType.APPLICATION_JSON);
 			}
 		}
 
@@ -380,8 +380,8 @@ class ReactiveTypeHandler {
 
 		@Override
 		protected void send(Object element) throws IOException {
-			getEmitter().send(element, MediaType.APPLICATION_JSON);
-			getEmitter().send("\n", MediaType.TEXT_PLAIN);
+			super.getEmitter().send(element, MediaType.APPLICATION_JSON);
+			super.getEmitter().send("\n", MediaType.TEXT_PLAIN);
 		}
 	}
 
@@ -394,7 +394,7 @@ class ReactiveTypeHandler {
 
 		@Override
 		protected void send(Object element) throws IOException {
-			getEmitter().send(element, MediaType.TEXT_PLAIN);
+			super.getEmitter().send(element, MediaType.TEXT_PLAIN);
 		}
 	}
 
