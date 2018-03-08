@@ -634,7 +634,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 										"property path '" + propertyName + "': returned null");
 					}
 				}
-				String indexedPropertyName = tokens.actualName;
+				StringBuilder indexedPropertyName = new StringBuilder(tokens.actualName);
 				// apply indexes and map keys
 				for (int i = 0; i < tokens.keys.length; i++) {
 					String key = tokens.keys[i];
@@ -645,13 +645,13 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 					}
 					else if (value.getClass().isArray()) {
 						int index = Integer.parseInt(key);
-						value = growArrayIfNecessary(value, index, indexedPropertyName);
+						value = growArrayIfNecessary(value, index, indexedPropertyName.toString());
 						value = Array.get(value, index);
 					}
 					else if (value instanceof List) {
 						int index = Integer.parseInt(key);
 						List<Object> list = (List<Object>) value;
-						growCollectionIfNecessary(list, index, indexedPropertyName, ph, i + 1);
+						growCollectionIfNecessary(list, index, indexedPropertyName.toString(), ph, i + 1);
 						value = list.get(index);
 					}
 					else if (value instanceof Set) {
@@ -686,7 +686,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 								"Property referenced in indexed property path '" + propertyName +
 										"' is neither an array nor a List nor a Set nor a Map; returned value was [" + value + "]");
 					}
-					indexedPropertyName += PROPERTY_KEY_PREFIX + key + PROPERTY_KEY_SUFFIX;
+					indexedPropertyName.append(PROPERTY_KEY_PREFIX).append(key).append(PROPERTY_KEY_SUFFIX);
 				}
 			}
 			return value;
