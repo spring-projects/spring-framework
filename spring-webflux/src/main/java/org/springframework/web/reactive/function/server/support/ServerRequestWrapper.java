@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,14 +40,14 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
-import org.springframework.web.reactive.function.server.HandlerFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriBuilder;
 
 /**
  * Implementation of the {@link ServerRequest} interface that can be subclassed
- * to adapt the request to a {@link HandlerFunction handler function}.
+ * to adapt the request in a
+ * {@link org.springframework.web.reactive.function.server.HandlerFilterFunction handler filter function}.
  * All methods default to calling through to the wrapped request.
  *
  * @author Arjen Poutsma
@@ -59,7 +59,7 @@ public class ServerRequestWrapper implements ServerRequest {
 
 
 	/**
-	 * Create a new {@code RequestWrapper} that wraps the given request.
+	 * Create a new {@code ServerRequestWrapper} that wraps the given request.
 	 * @param delegate the request to wrap
 	 */
 	public ServerRequestWrapper(ServerRequest delegate) {
@@ -187,12 +187,14 @@ public class ServerRequestWrapper implements ServerRequest {
 
 	/**
 	 * Implementation of the {@code Headers} interface that can be subclassed
-	 * to adapt the headers to a {@link HandlerFunction handler function}.
+	 * to adapt the headers in a
+	 * {@link org.springframework.web.reactive.function.server.HandlerFilterFunction handler filter function}.
 	 * All methods default to calling through to the wrapped headers.
 	 */
 	public static class HeadersWrapper implements ServerRequest.Headers {
 
 		private final Headers headers;
+
 
 		/**
 		 * Create a new {@code HeadersWrapper} that wraps the given request.
@@ -202,6 +204,7 @@ public class ServerRequestWrapper implements ServerRequest {
 			Assert.notNull(headers, "'headers' must not be null");
 			this.headers = headers;
 		}
+
 
 		@Override
 		public List<MediaType> accept() {

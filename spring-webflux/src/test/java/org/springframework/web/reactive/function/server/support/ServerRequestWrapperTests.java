@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,17 @@ import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyExtractor;
+import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.server.ServerRequest;
 
 import static org.junit.Assert.*;
@@ -126,6 +133,57 @@ public class ServerRequestWrapperTests {
 		when(mockRequest.pathVariables()).thenReturn(pathVariables);
 
 		assertSame(pathVariables, wrapper.pathVariables());
+	}
+
+	@Test
+	public void cookies() throws Exception {
+		MultiValueMap<String, HttpCookie> cookies = mock(MultiValueMap.class);
+		when(mockRequest.cookies()).thenReturn(cookies);
+
+		assertSame(cookies, wrapper.cookies());
+	}
+
+	@Test
+	public void bodyExtractor() throws Exception {
+		Mono<String> result = Mono.just("foo");
+		BodyExtractor<Mono<String>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(String.class);
+		when(mockRequest.body(extractor)).thenReturn(result);
+
+		assertSame(result, wrapper.body(extractor));
+	}
+
+	@Test
+	public void bodyToMonoClass() throws Exception {
+		Mono<String> result = Mono.just("foo");
+		when(mockRequest.bodyToMono(String.class)).thenReturn(result);
+
+		assertSame(result, wrapper.bodyToMono(String.class));
+	}
+
+	@Test
+	public void bodyToMonoParameterizedTypeReference() throws Exception {
+		Mono<String> result = Mono.just("foo");
+		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<String>() {};
+		when(mockRequest.bodyToMono(reference)).thenReturn(result);
+
+		assertSame(result, wrapper.bodyToMono(reference));
+	}
+
+	@Test
+	public void bodyToFluxClass() throws Exception {
+		Flux<String> result = Flux.just("foo");
+		when(mockRequest.bodyToFlux(String.class)).thenReturn(result);
+
+		assertSame(result, wrapper.bodyToFlux(String.class));
+	}
+
+	@Test
+	public void bodyToFluxParameterizedTypeReference() throws Exception {
+		Flux<String> result = Flux.just("foo");
+		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<String>() {};
+		when(mockRequest.bodyToFlux(reference)).thenReturn(result);
+
+		assertSame(result, wrapper.bodyToFlux(reference));
 	}
 
 }
