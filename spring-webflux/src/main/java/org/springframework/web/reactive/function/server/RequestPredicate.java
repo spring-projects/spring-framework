@@ -58,7 +58,7 @@ public interface RequestPredicate {
 	 * @return a predicate that represents the logical negation of this predicate
 	 */
 	default RequestPredicate negate() {
-		return (t) -> !test(t);
+		return t -> !test(t);
 	}
 
 	/**
