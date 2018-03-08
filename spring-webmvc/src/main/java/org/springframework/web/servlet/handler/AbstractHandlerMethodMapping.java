@@ -613,11 +613,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			newList.add(handlerMethod);
 			this.nameLookup.put(name, newList);
 
-			if (newList.size() > 1) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Mapping name clash for handlerMethods " + newList +
-							". Consider assigning explicit names.");
-				}
+			if (newList.size() > 1 && logger.isTraceEnabled()) {
+				logger.trace("Mapping name clash for handlerMethods " + newList +
+						". Consider assigning explicit names.");
 			}
 		}
 

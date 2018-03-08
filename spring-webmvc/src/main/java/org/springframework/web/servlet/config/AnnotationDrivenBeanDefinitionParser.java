@@ -482,10 +482,8 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	@Nullable
 	private RuntimeBeanReference getAsyncExecutor(Element element) {
 		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
-		if (asyncElement != null) {
-			if (asyncElement.hasAttribute("task-executor")) {
-				return new RuntimeBeanReference(asyncElement.getAttribute("task-executor"));
-			}
+		if (asyncElement != null && asyncElement.hasAttribute("task-executor")) {
+			return new RuntimeBeanReference(asyncElement.getAttribute("task-executor"));
 		}
 		return null;
 	}

@@ -94,10 +94,8 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 		else {
 			View view = mav.getView();
 			mavContainer.setView(view);
-			if (view instanceof SmartView) {
-				if (((SmartView) view).isRedirectView()) {
-					mavContainer.setRedirectModelScenario(true);
-				}
+			if (view instanceof SmartView && ((SmartView) view).isRedirectView()) {
+				mavContainer.setRedirectModelScenario(true);
 			}
 		}
 		mavContainer.setStatus(mav.getStatus());

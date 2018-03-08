@@ -78,12 +78,10 @@ public abstract class AnnotationConfigContextLoaderUtils {
 			}
 		}
 
-		if (configClasses.isEmpty()) {
-			if (logger.isInfoEnabled()) {
-				logger.info(String.format("Could not detect default configuration classes for test class [%s]: " +
-						"%s does not declare any static, non-private, non-final, nested classes " +
-						"annotated with @Configuration.", declaringClass.getName(), declaringClass.getSimpleName()));
-			}
+		if (configClasses.isEmpty() && logger.isInfoEnabled()) {
+			logger.info(String.format("Could not detect default configuration classes for test class [%s]: " +
+					"%s does not declare any static, non-private, non-final, nested classes " +
+					"annotated with @Configuration.", declaringClass.getName(), declaringClass.getSimpleName()));
 		}
 
 		return ClassUtils.toClassArray(configClasses);

@@ -196,12 +196,10 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		PathPattern pattern = getPathPatternParser().parse(urlPath);
 		if (this.handlerMap.containsKey(pattern)) {
 			Object existingHandler = this.handlerMap.get(pattern);
-			if (existingHandler != null) {
-				if (existingHandler != resolvedHandler) {
-					throw new IllegalStateException(
-							"Cannot map " + getHandlerDescription(handler) + " to [" + urlPath + "]: " +
-							"there is already " + getHandlerDescription(existingHandler) + " mapped.");
-				}
+			if (existingHandler != null && existingHandler != resolvedHandler) {
+				throw new IllegalStateException(
+						"Cannot map " + getHandlerDescription(handler) + " to [" + urlPath + "]: " +
+						"there is already " + getHandlerDescription(existingHandler) + " mapped.");
 			}
 		}
 

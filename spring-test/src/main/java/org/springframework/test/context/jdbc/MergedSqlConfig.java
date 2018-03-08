@@ -76,11 +76,10 @@ class MergedSqlConfig {
 		if (attributes != null) {
 			for (String key : attributes.keySet()) {
 				Object value = AnnotationUtils.getValue(localSqlConfig, key);
-				if (value != null) {
+				if (value != null &&
+						!value.equals("") && value != TransactionMode.DEFAULT && value != ErrorMode.DEFAULT) {
 					// Is the value explicit (i.e., not a 'default')?
-					if (!value.equals("") && value != TransactionMode.DEFAULT && value != ErrorMode.DEFAULT) {
-						attributes.put(key, value);
-					}
+					attributes.put(key, value);
 				}
 			}
 		}

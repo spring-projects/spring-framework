@@ -265,10 +265,9 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 				if (fieldDefaultPrefix != null) {
 					value = webRequest.getParameter(fieldDefaultPrefix + paramName);
 				}
-				if (value == null && fieldMarkerPrefix != null) {
-					if (webRequest.getParameter(fieldMarkerPrefix + paramName) != null) {
-						value = binder.getEmptyValue(paramType);
-					}
+				if (value == null && fieldMarkerPrefix != null &&
+						webRequest.getParameter(fieldMarkerPrefix + paramName) != null) {
+					value = binder.getEmptyValue(paramType);
 				}
 			}
 			try {

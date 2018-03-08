@@ -255,10 +255,9 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		if (this.pathMatcher.match(pattern, lookupPath)) {
 			return pattern;
 		}
-		if (this.useTrailingSlashMatch) {
-			if (!pattern.endsWith("/") && this.pathMatcher.match(pattern + "/", lookupPath)) {
-				return pattern +"/";
-			}
+		if (this.useTrailingSlashMatch &&
+				!pattern.endsWith("/") && this.pathMatcher.match(pattern + "/", lookupPath)) {
+			return pattern +"/";
 		}
 		return null;
 	}

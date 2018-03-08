@@ -380,10 +380,8 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	 */
 	@Override
 	protected boolean isValidDynamicAttribute(String localName, Object value) {
-		if ("type".equals(localName)) {
-			if ("checkbox".equals(value) || "radio".equals(value)) {
-				return false;
-			}
+		if ("type".equals(localName) && "checkbox".equals(value) || "radio".equals(value)) {
+			return false;
 		}
 		return true;
 	}

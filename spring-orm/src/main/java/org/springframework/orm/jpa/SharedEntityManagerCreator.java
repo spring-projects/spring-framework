@@ -279,14 +279,14 @@ public abstract class SharedEntityManagerCreator {
 				}
 				// Still perform unwrap call on target EntityManager.
 			}
-			else if (transactionRequiringMethods.contains(method.getName())) {
+			else if (transactionRequiringMethods.contains(method.getName()) &&
+					target == null || (!TransactionSynchronizationManager.isActualTransactionActive() &&
+					!target.getTransaction().isActive())) {
 				// We need a transactional target now, according to the JPA spec.
 				// Otherwise, the operation would get accepted but remain unflushed...
-				if (target == null || (!TransactionSynchronizationManager.isActualTransactionActive() &&
-						!target.getTransaction().isActive())) {
-					throw new TransactionRequiredException("No EntityManager with actual transaction available " +
-							"for current thread - cannot reliably process '" + method.getName() + "' call");
-				}
+
+				throw new TransactionRequiredException("No EntityManager with actual transaction available " +
+						"for current thread - cannot reliably process '" + method.getName() + "' call");
 			}
 
 			// Regular EntityManager operations.

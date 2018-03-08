@@ -287,10 +287,9 @@ public abstract class JdbcUtils {
 				obj = rs.getDate(index);
 			}
 		}
-		else if (obj instanceof java.sql.Date) {
-			if ("java.sql.Timestamp".equals(rs.getMetaData().getColumnClassName(index))) {
-				obj = rs.getTimestamp(index);
-			}
+		else if (obj instanceof java.sql.Date &&
+				"java.sql.Timestamp".equals(rs.getMetaData().getColumnClassName(index))) {
+			obj = rs.getTimestamp(index);
 		}
 		return obj;
 	}

@@ -109,10 +109,9 @@ public class JsonPathExpectationsHelper {
 			}
 			actualValue = actualValueList.get(0);
 		}
-		else if (actualValue != null && expectedValue != null) {
-			if (!actualValue.getClass().equals(expectedValue.getClass())) {
-				actualValue = evaluateJsonPath(content, expectedValue.getClass());
-			}
+		else if (actualValue != null && expectedValue != null &&
+				!actualValue.getClass().equals(expectedValue.getClass())) {
+			actualValue = evaluateJsonPath(content, expectedValue.getClass());
 		}
 		assertEquals("JSON path \"" + this.expression + "\"", expectedValue, actualValue);
 	}

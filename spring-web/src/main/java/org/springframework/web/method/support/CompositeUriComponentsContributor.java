@@ -105,10 +105,9 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 					return true;
 				}
 			}
-			else if (c instanceof HandlerMethodArgumentResolver) {
-				if (((HandlerMethodArgumentResolver) c).supportsParameter(parameter)) {
-					return false;
-				}
+			else if (c instanceof HandlerMethodArgumentResolver &&
+					((HandlerMethodArgumentResolver) c).supportsParameter(parameter)) {
+				return false;
 			}
 		}
 		return false;
@@ -126,10 +125,9 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 					break;
 				}
 			}
-			else if (contributor instanceof HandlerMethodArgumentResolver) {
-				if (((HandlerMethodArgumentResolver) contributor).supportsParameter(parameter)) {
-					break;
-				}
+			else if (contributor instanceof HandlerMethodArgumentResolver &&
+					((HandlerMethodArgumentResolver) contributor).supportsParameter(parameter)) {
+				break;
 			}
 		}
 	}

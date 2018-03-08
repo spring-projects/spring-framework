@@ -793,11 +793,9 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 					JmsUtils.commitIfNecessary(session);
 				}
 			}
-			else if (isClientAcknowledge(session)) {
+			else if (isClientAcknowledge(session) && message != null) {
 				// Manually acknowledge message, if any.
-				if (message != null) {
-					message.acknowledge();
-				}
+				message.acknowledge();
 			}
 			return message;
 		}

@@ -106,10 +106,9 @@ public abstract class EntityManagerFactoryUtils {
 					BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, EntityManagerFactory.class);
 			for (String candidateName : candidateNames) {
 				EntityManagerFactory emf = (EntityManagerFactory) beanFactory.getBean(candidateName);
-				if (emf instanceof EntityManagerFactoryInfo) {
-					if (unitName.equals(((EntityManagerFactoryInfo) emf).getPersistenceUnitName())) {
-						return emf;
-					}
+				if (emf instanceof EntityManagerFactoryInfo &&
+						unitName.equals(((EntityManagerFactoryInfo) emf).getPersistenceUnitName())) {
+					return emf;
 				}
 			}
 			// No matching persistence unit found - simply take the EntityManagerFactory

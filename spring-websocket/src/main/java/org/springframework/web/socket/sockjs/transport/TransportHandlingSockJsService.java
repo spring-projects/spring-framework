@@ -288,12 +288,10 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 				}
 			}
 			else {
-				if (session.getPrincipal() != null) {
-					if (!session.getPrincipal().equals(request.getPrincipal())) {
-						logger.debug("The user for the session does not match the user for the request.");
-						response.setStatusCode(HttpStatus.NOT_FOUND);
-						return;
-					}
+				if (session.getPrincipal() != null && !session.getPrincipal().equals(request.getPrincipal())) {
+					logger.debug("The user for the session does not match the user for the request.");
+					response.setStatusCode(HttpStatus.NOT_FOUND);
+					return;
 				}
 				if (!transportHandler.checkSessionType(session)) {
 					logger.debug("Session type does not match the transport type for the request.");
@@ -306,10 +304,8 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 				addNoCacheHeaders(response);
 			}
 
-			if (transportType.supportsCors()) {
-				if (!checkOrigin(request, response)) {
-					return;
-				}
+			if (transportType.supportsCors() && !checkOrigin(request, response)) {
+				return;
 			}
 
 

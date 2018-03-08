@@ -115,10 +115,9 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 		String participateAttributeName = getParticipateAttributeName();
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-		if (asyncManager.hasConcurrentResult()) {
-			if (applySessionBindingInterceptor(asyncManager, participateAttributeName)) {
-				return;
-			}
+		if (asyncManager.hasConcurrentResult() &&
+				applySessionBindingInterceptor(asyncManager, participateAttributeName)) {
+			return;
 		}
 
 		if (TransactionSynchronizationManager.hasResource(obtainSessionFactory())) {

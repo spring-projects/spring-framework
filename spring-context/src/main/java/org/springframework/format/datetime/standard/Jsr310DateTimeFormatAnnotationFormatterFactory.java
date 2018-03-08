@@ -81,10 +81,8 @@ public class Jsr310DateTimeFormatAnnotationFormatterFactory extends EmbeddedValu
 				formatter = DateTimeFormatter.ISO_LOCAL_TIME;
 			}
 		}
-		else if (formatter == DateTimeFormatter.ISO_DATE_TIME) {
-			if (isLocal(fieldType)) {
-				formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-			}
+		else if (formatter == DateTimeFormatter.ISO_DATE_TIME && isLocal(fieldType)) {
+			formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 		}
 
 		return new TemporalAccessorPrinter(formatter);

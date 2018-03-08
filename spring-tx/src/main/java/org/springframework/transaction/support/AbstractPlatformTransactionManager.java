@@ -484,11 +484,10 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 									"(unknown)"));
 				}
 			}
-			if (!definition.isReadOnly()) {
-				if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
-					throw new IllegalTransactionStateException("Participating transaction with definition [" +
-							definition + "] is not marked as read-only but existing transaction is");
-				}
+			if (!definition.isReadOnly() &&
+					TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
+				throw new IllegalTransactionStateException("Participating transaction with definition [" +
+						definition + "] is not marked as read-only but existing transaction is");
 			}
 		}
 		boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);

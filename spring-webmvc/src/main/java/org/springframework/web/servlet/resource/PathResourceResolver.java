@@ -255,14 +255,12 @@ public class PathResourceResolver extends AbstractResourceResolver {
 			return false;
 		}
 
-		if (resourcePath.contains("%")) {
+		if (resourcePath.contains("%") && URLDecoder.decode(resourcePath, "UTF-8").contains("../")) {
 			// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars...
-			if (URLDecoder.decode(resourcePath, "UTF-8").contains("../")) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Resolved resource path contains \"../\" after decoding: " + resourcePath);
-				}
-				return false;
+			if (logger.isTraceEnabled()) {
+				logger.trace("Resolved resource path contains \"../\" after decoding: " + resourcePath);
 			}
+			return false;
 		}
 
 		return true;

@@ -735,11 +735,9 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 			// Actually invoke the message listener...
 			listener.onMessage(message, sessionToUse);
 			// Clean up specially exposed Session, if any.
-			if (sessionToUse != session) {
-				if (sessionToUse.getTransacted() && isSessionLocallyTransacted(sessionToUse)) {
-					// Transacted session created by this container -> commit.
-					JmsUtils.commitIfNecessary(sessionToUse);
-				}
+			if (sessionToUse != session && sessionToUse.getTransacted() && isSessionLocallyTransacted(sessionToUse)) {
+				// Transacted session created by this container -> commit.
+				JmsUtils.commitIfNecessary(sessionToUse);
 			}
 		}
 		finally {

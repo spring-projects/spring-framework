@@ -56,10 +56,8 @@ public class ViewMethodReturnValueHandler implements HandlerMethodReturnValueHan
 		else if (returnValue instanceof View){
 			View view = (View) returnValue;
 			mavContainer.setView(view);
-			if (view instanceof SmartView) {
-				if (((SmartView) view).isRedirectView()) {
-					mavContainer.setRedirectModelScenario(true);
-				}
+			if (view instanceof SmartView && ((SmartView) view).isRedirectView()) {
+				mavContainer.setRedirectModelScenario(true);
 			}
 		}
 		else {

@@ -184,10 +184,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			if (getPathMatcher().match(registeredPattern, urlPath)) {
 				matchingPatterns.add(registeredPattern);
 			}
-			else if (useTrailingSlashMatch()) {
-				if (!registeredPattern.endsWith("/") && getPathMatcher().match(registeredPattern + "/", urlPath)) {
-					matchingPatterns.add(registeredPattern +"/");
-				}
+			else if (useTrailingSlashMatch() &&
+					!registeredPattern.endsWith("/") && getPathMatcher().match(registeredPattern + "/", urlPath)) {
+				matchingPatterns.add(registeredPattern +"/");
 			}
 		}
 
@@ -302,10 +301,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		if (getPathMatcher().match(pattern, lookupPath)) {
 			return new RequestMatchResult(pattern, lookupPath, getPathMatcher());
 		}
-		else if (useTrailingSlashMatch()) {
-			if (!pattern.endsWith("/") && getPathMatcher().match(pattern + "/", lookupPath)) {
-				return new RequestMatchResult(pattern + "/", lookupPath, getPathMatcher());
-			}
+		else if (useTrailingSlashMatch() &&
+				!pattern.endsWith("/") && getPathMatcher().match(pattern + "/", lookupPath)) {
+			return new RequestMatchResult(pattern + "/", lookupPath, getPathMatcher());
 		}
 		return null;
 	}
