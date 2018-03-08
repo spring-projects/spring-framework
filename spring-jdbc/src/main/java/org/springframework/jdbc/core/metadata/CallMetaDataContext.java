@@ -618,7 +618,7 @@ public class CallMetaDataContext {
 	public String createCallString() {
 		Assert.state(this.metaDataProvider != null, "No CallMetaDataProvider available");
 
-		String callString;
+		StringBuilder callString;
 		int parameterCount = 0;
 		String catalogNameToUse;
 		String schemaNameToUse;
@@ -637,33 +637,33 @@ public class CallMetaDataContext {
 
 		String procedureNameToUse = this.metaDataProvider.procedureNameToUse(getProcedureName());
 		if (isFunction() || isReturnValueRequired()) {
-			callString = "{? = call " +
-					(StringUtils.hasLength(catalogNameToUse) ? catalogNameToUse + "." : "") +
-					(StringUtils.hasLength(schemaNameToUse) ? schemaNameToUse + "." : "") +
-					procedureNameToUse + "(";
+			callString = new StringBuilder().append("{? = call ").
+					append(StringUtils.hasLength(catalogNameToUse) ? catalogNameToUse + "." : "").
+					append(StringUtils.hasLength(schemaNameToUse) ? schemaNameToUse + "." : "").
+					append(procedureNameToUse).append("(");
 			parameterCount = -1;
 		}
 		else {
-			callString = "{call " +
-					(StringUtils.hasLength(catalogNameToUse) ? catalogNameToUse + "." : "") +
-					(StringUtils.hasLength(schemaNameToUse) ? schemaNameToUse + "." : "") +
-					procedureNameToUse + "(";
+			callString = new StringBuilder().append("{call ").
+					append(StringUtils.hasLength(catalogNameToUse) ? catalogNameToUse + "." : "").
+					append(StringUtils.hasLength(schemaNameToUse) ? schemaNameToUse + "." : "").
+					append(procedureNameToUse).append("(");
 		}
 
 		for (SqlParameter parameter : this.callParameters) {
 			if (!(parameter.isResultsParameter())) {
 				if (parameterCount > 0) {
-					callString += ", ";
+					callString.append(", ");
 				}
 				if (parameterCount >= 0) {
-					callString += createParameterBinding(parameter);
+					callString.append(createParameterBinding(parameter));
 				}
 				parameterCount++;
 			}
 		}
-		callString += ")}";
+		callString.append(")}");
 
-		return callString;
+		return callString.toString();
 	}
 
 	/**
