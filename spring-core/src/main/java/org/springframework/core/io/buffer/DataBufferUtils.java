@@ -363,9 +363,8 @@ public abstract class DataBufferUtils {
 		Assert.isTrue(position >= 0, "'position' must be >= 0");
 
 		Flux<DataBuffer> flux = Flux.from(source);
-		return Flux.create(sink -> {
-			flux.subscribe(new AsynchronousFileChannelWriteCompletionHandler(sink, channel, position));
-		});
+		return Flux.create(sink ->
+				flux.subscribe(new AsynchronousFileChannelWriteCompletionHandler(sink, channel, position)));
 	}
 
 	private static void closeChannel(@Nullable Channel channel) {

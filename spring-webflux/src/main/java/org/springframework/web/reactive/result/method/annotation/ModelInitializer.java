@@ -92,14 +92,13 @@ class ModelInitializer {
 					bindingContext.getModel().mergeAttributes(attributes);
 					bindingContext.setSessionContext(sessionAttributesHandler, session);
 					return invokeModelAttributeMethods(bindingContext, modelMethods, exchange)
-							.doOnSuccess(aVoid -> {
+							.doOnSuccess(aVoid ->
 								findModelAttributes(handlerMethod, sessionAttributesHandler).forEach(name -> {
 									if (!bindingContext.getModel().containsAttribute(name)) {
 										Object value = session.getRequiredAttribute(name);
 										bindingContext.getModel().addAttribute(name, value);
 									}
-								});
-							});
+								}));
 				});
 	}
 
