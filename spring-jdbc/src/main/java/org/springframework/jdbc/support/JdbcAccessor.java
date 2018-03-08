@@ -98,7 +98,7 @@ public abstract class JdbcAccessor implements InitializingBean {
 	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
 	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
 	 */
-	public void setExceptionTranslator(SQLExceptionTranslator exceptionTranslator) {
+	public synchronized void setExceptionTranslator(SQLExceptionTranslator exceptionTranslator) {
 		this.exceptionTranslator = exceptionTranslator;
 	}
 
