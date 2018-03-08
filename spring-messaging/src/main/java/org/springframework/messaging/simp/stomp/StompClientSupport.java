@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.converter.MessageConverter;
@@ -48,7 +49,7 @@ public abstract class StompClientSupport {
 
 	private long[] defaultHeartbeat = new long[] {10000, 10000};
 
-	private long receiptTimeLimit = 15 * 1000;
+	private long receiptTimeLimit = TimeUnit.SECONDS.toMillis(15);
 
 
 	/**

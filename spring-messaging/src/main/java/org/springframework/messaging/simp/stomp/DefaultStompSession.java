@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
@@ -87,7 +88,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	@Nullable
 	private TaskScheduler taskScheduler;
 
-	private long receiptTimeLimit = 15 * 1000;
+	private long receiptTimeLimit = TimeUnit.SECONDS.toMillis(15);
 
 	private volatile boolean autoReceiptEnabled;
 
