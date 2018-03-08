@@ -31,9 +31,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.hamcrest.MatcherAssert.*;
+import static org.springframework.test.util.AssertionErrors.*;
 
 /**
  * Static factory methods for {@link RequestMatcher} classes. Typically used to
@@ -142,16 +141,17 @@ public abstract class MockRestRequestMatchers {
 		return UriComponentsBuilder.fromUri(request.getURI()).build().getQueryParams();
 	}
 
-	private static void assertValueCount(String valueType, final String name,
-			MultiValueMap<String, String> map, int count) {
+	private static void assertValueCount(
+			String valueType, final String name, MultiValueMap<String, String> map, int count) {
 
 		List<String> values = map.get(name);
-
 		String message = "Expected " + valueType + " <" + name + ">";
-		assertTrue(message + " to exist but was null", values != null);
-
-		assertTrue(message + " to have at least <" + count + "> values but found " + values,
-				count <= values.size());
+		if (values == null) {
+			fail(message + " to exist but was null");
+		}
+		if (count > values.size()) {
+			fail(message + " to have at least <" + count + "> values but found " + values);
+		}
 	}
 
 	/**
@@ -178,8 +178,7 @@ public abstract class MockRestRequestMatchers {
 			List<String> headerValues = request.getHeaders().get(name);
 			Assert.state(headerValues != null, "No header values");
 			for (int i = 0; i < expectedValues.length; i++) {
-				assertEquals("Request header [" + name + "]",
-						expectedValues[i], headerValues.get(i));
+				assertEquals("Request header [" + name + "]", expectedValues[i], headerValues.get(i));
 			}
 		};
 	}

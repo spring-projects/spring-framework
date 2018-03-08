@@ -48,7 +48,7 @@ public class MockRestRequestMatchersTests {
 		MockRestRequestMatchers.requestTo("http://foo.com/bar").match(this.request);
 	}
 
-	@Test // SPR-15819
+	@Test  // SPR-15819
 	public void requestToUriTemplate() throws Exception {
 		this.request.setURI(new URI("http://foo.com/bar"));
 

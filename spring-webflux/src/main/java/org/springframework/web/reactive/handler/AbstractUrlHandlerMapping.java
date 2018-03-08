@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,9 +112,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @see org.springframework.web.util.pattern.PathPattern
 	 */
 	@Nullable
-	protected Object lookupHandler(PathContainer lookupPath, ServerWebExchange exchange)
-			throws Exception {
-
+	protected Object lookupHandler(PathContainer lookupPath, ServerWebExchange exchange) throws Exception {
 		return this.handlerMap.entrySet().stream()
 				.filter(entry -> entry.getKey().matches(lookupPath))
 				.sorted((entry1, entry2) ->
@@ -167,9 +165,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @throws BeansException if the handler couldn't be registered
 	 * @throws IllegalStateException if there is a conflicting handler registered
 	 */
-	protected void registerHandler(String[] urlPaths, String beanName)
-			throws BeansException, IllegalStateException {
-
+	protected void registerHandler(String[] urlPaths, String beanName) throws BeansException, IllegalStateException {
 		Assert.notNull(urlPaths, "URL path array must not be null");
 		for (String urlPath : urlPaths) {
 			registerHandler(urlPath, beanName);
@@ -184,9 +180,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @throws BeansException if the handler couldn't be registered
 	 * @throws IllegalStateException if there is a conflicting handler registered
 	 */
-	protected void registerHandler(String urlPath, Object handler)
-			throws BeansException, IllegalStateException {
-
+	protected void registerHandler(String urlPath, Object handler) throws BeansException, IllegalStateException {
 		Assert.notNull(urlPath, "URL path must not be null");
 		Assert.notNull(handler, "Handler object must not be null");
 		Object resolvedHandler = handler;
@@ -196,12 +190,10 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		PathPattern pattern = getPathPatternParser().parse(urlPath);
 		if (this.handlerMap.containsKey(pattern)) {
 			Object existingHandler = this.handlerMap.get(pattern);
-			if (existingHandler != null) {
-				if (existingHandler != resolvedHandler) {
-					throw new IllegalStateException(
-							"Cannot map " + getHandlerDescription(handler) + " to [" + urlPath + "]: " +
-							"there is already " + getHandlerDescription(existingHandler) + " mapped.");
-				}
+			if (existingHandler != null && existingHandler != resolvedHandler) {
+				throw new IllegalStateException(
+						"Cannot map " + getHandlerDescription(handler) + " to [" + urlPath + "]: " +
+						"there is already " + getHandlerDescription(existingHandler) + " mapped.");
 			}
 		}
 
@@ -220,6 +212,12 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		}
 	}
 
+	private String getHandlerDescription(Object handler) {
+		return "handler " + (handler instanceof String ?
+				"'" + handler + "'" : "of type [" + handler.getClass() + "]");
+	}
+
+
 	private static String prependLeadingSlash(String pattern) {
 		if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
 			return "/" + pattern;
@@ -227,11 +225,6 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		else {
 			return pattern;
 		}
-	}
-
-	private String getHandlerDescription(Object handler) {
-		return "handler " + (handler instanceof String ?
-				"'" + handler + "'" : "of type [" + handler.getClass() + "]");
 	}
 
 }

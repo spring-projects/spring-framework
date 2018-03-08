@@ -58,6 +58,16 @@ public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 	}
 
 	@Override
+	public int getOrder() {
+		if (this.order != null) {
+			return this.order;
+		}
+		else {
+			return this.advice.getOrder();
+		}
+	}
+
+	@Override
 	public boolean isPerInstance() {
 		return true;
 	}
@@ -72,14 +82,13 @@ public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 		return this.pointcut;
 	}
 
-	@Override
-	public int getOrder() {
-		if (this.order != null) {
-			return this.order;
-		}
-		else {
-			return this.advice.getOrder();
-		}
+	/**
+	 * Return the name of the aspect (bean) in which the advice was declared.
+	 * @since 4.3.15
+	 * @see AbstractAspectJAdvice#getAspectName()
+	 */
+	public String getAspectName() {
+		return this.advice.getAspectName();
 	}
 
 

@@ -348,15 +348,13 @@ public class CallMetaDataContext {
 				declaredParams.put(paramNameToMatch, param);
 				if (param instanceof SqlOutParameter) {
 					outParamNames.add(paramName);
-					if (isFunction() && !metaDataParamNames.contains(paramNameToMatch)) {
-						if (!returnDeclared) {
-							if (logger.isDebugEnabled()) {
-								logger.debug("Using declared out parameter '" + paramName +
-										"' for function return value");
-							}
-							setFunctionReturnName(paramName);
-							returnDeclared = true;
+					if (isFunction() && !metaDataParamNames.contains(paramNameToMatch) && !returnDeclared) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Using declared out parameter '" + paramName +
+									"' for function return value");
 						}
+						setFunctionReturnName(paramName);
+						returnDeclared = true;
 					}
 				}
 			}
@@ -365,7 +363,6 @@ public class CallMetaDataContext {
 
 		List<SqlParameter> workParams = new ArrayList<>();
 		workParams.addAll(declaredReturnParams);
-
 		if (!provider.isProcedureColumnMetaDataUsed()) {
 			workParams.addAll(declaredParams.values());
 			return workParams;

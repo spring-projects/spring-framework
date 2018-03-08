@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -217,14 +217,13 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 				CustomSQLErrorCodesTranslation[] customTranslations = this.sqlErrorCodes.getCustomTranslations();
 				if (customTranslations != null) {
 					for (CustomSQLErrorCodesTranslation customTranslation : customTranslations) {
-						if (Arrays.binarySearch(customTranslation.getErrorCodes(), errorCode) >= 0) {
-							if (customTranslation.getExceptionClass() != null) {
-								DataAccessException customException = createCustomException(
-										task, sql, sqlEx, customTranslation.getExceptionClass());
-								if (customException != null) {
-									logTranslation(task, sql, sqlEx, true);
-									return customException;
-								}
+						if (Arrays.binarySearch(customTranslation.getErrorCodes(), errorCode) >= 0 &&
+								customTranslation.getExceptionClass() != null) {
+							DataAccessException customException = createCustomException(
+									task, sql, sqlEx, customTranslation.getExceptionClass());
+							if (customException != null) {
+								logTranslation(task, sql, sqlEx, true);
+								return customException;
 							}
 						}
 					}
@@ -321,35 +320,35 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	protected DataAccessException createCustomException(
 			String task, @Nullable String sql, SQLException sqlEx, Class<?> exceptionClass) {
 
-		// find appropriate constructor
+		// Find appropriate constructor for the given exception class
 		try {
 			int constructorType = 0;
 			Constructor<?>[] constructors = exceptionClass.getConstructors();
 			for (Constructor<?> constructor : constructors) {
 				Class<?>[] parameterTypes = constructor.getParameterTypes();
-				if (parameterTypes.length == 1 && String.class == parameterTypes[0]) {
-					if (constructorType < MESSAGE_ONLY_CONSTRUCTOR)
-						constructorType = MESSAGE_ONLY_CONSTRUCTOR;
+				if (parameterTypes.length == 1 && String.class == parameterTypes[0] &&
+						constructorType < MESSAGE_ONLY_CONSTRUCTOR) {
+					constructorType = MESSAGE_ONLY_CONSTRUCTOR;
 				}
 				if (parameterTypes.length == 2 && String.class == parameterTypes[0] &&
-						Throwable.class == parameterTypes[1]) {
-					if (constructorType < MESSAGE_THROWABLE_CONSTRUCTOR)
-						constructorType = MESSAGE_THROWABLE_CONSTRUCTOR;
+						Throwable.class == parameterTypes[1] &&
+						constructorType < MESSAGE_THROWABLE_CONSTRUCTOR) {
+					constructorType = MESSAGE_THROWABLE_CONSTRUCTOR;
 				}
 				if (parameterTypes.length == 2 && String.class == parameterTypes[0] &&
-						SQLException.class == parameterTypes[1]) {
-					if (constructorType < MESSAGE_SQLEX_CONSTRUCTOR)
-						constructorType = MESSAGE_SQLEX_CONSTRUCTOR;
+						SQLException.class == parameterTypes[1] &&
+						constructorType < MESSAGE_SQLEX_CONSTRUCTOR) {
+					constructorType = MESSAGE_SQLEX_CONSTRUCTOR;
 				}
 				if (parameterTypes.length == 3 && String.class == parameterTypes[0] &&
-						String.class == parameterTypes[1] && Throwable.class == parameterTypes[2]) {
-					if (constructorType < MESSAGE_SQL_THROWABLE_CONSTRUCTOR)
-						constructorType = MESSAGE_SQL_THROWABLE_CONSTRUCTOR;
+						String.class == parameterTypes[1] && Throwable.class == parameterTypes[2] &&
+						constructorType < MESSAGE_SQL_THROWABLE_CONSTRUCTOR) {
+					constructorType = MESSAGE_SQL_THROWABLE_CONSTRUCTOR;
 				}
 				if (parameterTypes.length == 3 && String.class == parameterTypes[0] &&
-						String.class == parameterTypes[1] && SQLException.class == parameterTypes[2]) {
-					if (constructorType < MESSAGE_SQL_SQLEX_CONSTRUCTOR)
-						constructorType = MESSAGE_SQL_SQLEX_CONSTRUCTOR;
+						String.class == parameterTypes[1] && SQLException.class == parameterTypes[2] &&
+						constructorType < MESSAGE_SQL_SQLEX_CONSTRUCTOR) {
+					constructorType = MESSAGE_SQL_SQLEX_CONSTRUCTOR;
 				}
 			}
 
