@@ -177,7 +177,7 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 	/**
 	 * Internal base class for {@link SqlXmlValue} implementations.
 	 */
-	private static abstract class AbstractJdbc4SqlXmlValue implements SqlXmlValue {
+	private abstract static class AbstractJdbc4SqlXmlValue implements SqlXmlValue {
 
 		@Nullable
 		private SQLXML xmlObject;

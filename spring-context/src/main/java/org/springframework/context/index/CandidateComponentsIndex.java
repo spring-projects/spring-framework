@@ -48,7 +48,7 @@ import org.springframework.util.MultiValueMap;
  */
 public class CandidateComponentsIndex {
 
-	private final static AntPathMatcher pathMatcher = new AntPathMatcher(".");
+	private static final AntPathMatcher pathMatcher = new AntPathMatcher(".");
 
 	private final MultiValueMap<String, Entry> index;
 

@@ -32,7 +32,7 @@ import org.springframework.expression.spel.SpelMessage;
  */
 public class BeanReference extends SpelNodeImpl {
 
-	private final static String FACTORY_BEAN_PREFIX = "&";
+	private static final String FACTORY_BEAN_PREFIX = "&";
 	
 	private final String beanName;
 

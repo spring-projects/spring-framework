@@ -42,25 +42,25 @@ public class TypePath {
      * A type path step that steps into the element type of an array type. See
      * {@link #getStep getStep}.
      */
-    public final static int ARRAY_ELEMENT = 0;
+    public static final int ARRAY_ELEMENT = 0;
 
     /**
      * A type path step that steps into the nested type of a class type. See
      * {@link #getStep getStep}.
      */
-    public final static int INNER_TYPE = 1;
+    public static final int INNER_TYPE = 1;
 
     /**
      * A type path step that steps into the bound of a wildcard type. See
      * {@link #getStep getStep}.
      */
-    public final static int WILDCARD_BOUND = 2;
+    public static final int WILDCARD_BOUND = 2;
 
     /**
      * A type path step that steps into a type argument of a generic type. See
      * {@link #getStep getStep}.
      */
-    public final static int TYPE_ARGUMENT = 3;
+    public static final int TYPE_ARGUMENT = 3;
 
     /**
      * The byte array where the path is stored, in Java class file format.

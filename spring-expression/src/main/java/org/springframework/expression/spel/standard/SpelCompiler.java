@@ -68,7 +68,7 @@ public class SpelCompiler implements Opcodes {
 
 	private static final Log logger = LogFactory.getLog(SpelCompiler.class);
 
-	private final static int CLASSES_DEFINED_LIMIT = 100;
+	private static final int CLASSES_DEFINED_LIMIT = 100;
 
 	// A compiler is created for each classloader, it manages a child class loader of that
 	// classloader and the child is used to load the compiled expressions.

@@ -296,7 +296,7 @@ public class SimpleNamingContext implements Context {
 	}
 
 
-	private static abstract class AbstractNamingEnumeration<T> implements NamingEnumeration<T> {
+	private abstract static class AbstractNamingEnumeration<T> implements NamingEnumeration<T> {
 
 		private Iterator<T> iterator;
 

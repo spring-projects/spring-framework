@@ -175,7 +175,7 @@ class RuntimeTestWalker {
 	}
 
 
-	private static abstract class InstanceOfResidueTestVisitor extends TestVisitorAdapter {
+	private abstract static class InstanceOfResidueTestVisitor extends TestVisitorAdapter {
 
 		private final Class<?> matchClass;
 

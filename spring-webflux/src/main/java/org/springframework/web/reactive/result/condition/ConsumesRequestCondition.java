@@ -44,7 +44,7 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  */
 public final class ConsumesRequestCondition extends AbstractRequestCondition<ConsumesRequestCondition> {
 
-	private final static ConsumesRequestCondition PRE_FLIGHT_MATCH = new ConsumesRequestCondition();
+	private static final ConsumesRequestCondition PRE_FLIGHT_MATCH = new ConsumesRequestCondition();
 
 
 	private final List<ConsumeMediaTypeExpression> expressions;
