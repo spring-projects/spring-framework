@@ -91,13 +91,13 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 				if (target == null) {
 					Class<?> type = getTargetClass();
 					if (Map.class == type) {
-						return Collections.EMPTY_MAP;
+						return Collections.emptyMap();
 					}
 					else if (List.class == type) {
-						return Collections.EMPTY_LIST;
+						return Collections.emptyList();
 					}
 					else if (Set.class == type || Collection.class == type) {
-						return Collections.EMPTY_SET;
+						return Collections.emptySet();
 					}
 					throw new NoSuchBeanDefinitionException(descriptor.getResolvableType(),
 							"Optional dependency not present for lazy injection point");
