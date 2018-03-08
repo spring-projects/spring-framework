@@ -282,7 +282,7 @@ public abstract class AbstractJdbcCall {
 	 * @throws org.springframework.dao.InvalidDataAccessApiUsageException if the object hasn't
 	 * been correctly initialized, for example if no DataSource has been provided
 	 */
-	public synchronized final void compile() throws InvalidDataAccessApiUsageException {
+	public final synchronized void compile() throws InvalidDataAccessApiUsageException {
 		if (!isCompiled()) {
 			if (getProcedureName() == null) {
 				throw new InvalidDataAccessApiUsageException("Procedure or Function name is required");

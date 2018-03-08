@@ -34,7 +34,7 @@ abstract class PathElement {
 
 	protected static final int CAPTURE_VARIABLE_WEIGHT = 1;
 
-	protected final static MultiValueMap<String,String> NO_PARAMETERS = new LinkedMultiValueMap<>();
+	protected static final MultiValueMap<String,String> NO_PARAMETERS = new LinkedMultiValueMap<>();
 
 	// Position in the pattern where this path element starts
 	protected final int pos;

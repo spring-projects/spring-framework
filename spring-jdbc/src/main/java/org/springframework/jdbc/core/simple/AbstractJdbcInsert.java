@@ -245,7 +245,7 @@ public abstract class AbstractJdbcInsert {
 	 * @throws InvalidDataAccessApiUsageException if the object hasn't been correctly initialized,
 	 * for example if no DataSource has been provided
 	 */
-	public synchronized final void compile() throws InvalidDataAccessApiUsageException {
+	public final synchronized void compile() throws InvalidDataAccessApiUsageException {
 		if (!isCompiled()) {
 			if (getTableName() == null) {
 				throw new InvalidDataAccessApiUsageException("Table name is required");

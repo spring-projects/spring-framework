@@ -136,7 +136,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 	}
 
 
-	protected static abstract class AbstractLinkParser implements LinkParser {
+	protected abstract static class AbstractLinkParser implements LinkParser {
 
 		/** Return the keyword to use to search for links, e.g. "@import", "url(" */
 		protected abstract String getKeyword();

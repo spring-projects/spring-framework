@@ -174,7 +174,7 @@ class ReactiveTypeHandler {
 	}
 
 
-	private static abstract class AbstractEmitterSubscriber implements Subscriber<Object>, Runnable {
+	private abstract static class AbstractEmitterSubscriber implements Subscriber<Object>, Runnable {
 
 		private final ResponseBodyEmitter emitter;
 

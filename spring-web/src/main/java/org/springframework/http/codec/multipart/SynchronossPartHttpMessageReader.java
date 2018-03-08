@@ -227,7 +227,7 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 	}
 
 
-	private static abstract class AbstractSynchronossPart implements Part {
+	private abstract static class AbstractSynchronossPart implements Part {
 
 		private final HttpHeaders headers;
 

@@ -77,7 +77,7 @@ public class DelegatingNavigationHandlerProxy extends NavigationHandler {
 	 * Default name of the target bean in the Spring application context:
 	 * "jsfNavigationHandler"
 	 */
-	public final static String DEFAULT_TARGET_BEAN_NAME = "jsfNavigationHandler";
+	public static final String DEFAULT_TARGET_BEAN_NAME = "jsfNavigationHandler";
 
 	@Nullable
 	private NavigationHandler originalNavigationHandler;
