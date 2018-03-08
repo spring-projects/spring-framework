@@ -154,18 +154,18 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 		}
 
 		public boolean setResultValue(@Nullable T value) {
-			set(value);
+			super.set(value);
 			return checkCompletingThread();
 		}
 
 		public boolean setExceptionResult(Throwable exception) {
-			setException(exception);
+			super.setException(exception);
 			return checkCompletingThread();
 		}
 
 		@Override
 		protected void done() {
-			if (!isCancelled()) {
+			if (!super.isCancelled()) {
 				// Implicitly invoked by set/setException: store current thread for
 				// determining whether the given result has actually triggered completion
 				// (since FutureTask.set/setException unfortunately don't expose that)

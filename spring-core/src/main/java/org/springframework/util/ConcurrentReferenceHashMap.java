@@ -1011,7 +1011,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		@Override
 		public void release() {
 			enqueue();
-			clear();
+			super.clear();
 		}
 	}
 
@@ -1048,7 +1048,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		@Override
 		public void release() {
 			enqueue();
-			clear();
+			super.clear();
 		}
 	}
 
