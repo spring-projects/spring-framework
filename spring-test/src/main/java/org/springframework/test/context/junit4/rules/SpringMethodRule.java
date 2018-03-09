@@ -150,8 +150,8 @@ public class SpringMethodRule implements MethodRule {
 		statement = withBeforeTestMethodCallbacks(statement, testMethod, testInstance, testContextManager);
 		statement = withAfterTestMethodCallbacks(statement, testMethod, testInstance, testContextManager);
 		statement = withTestInstancePreparation(statement, testInstance, testContextManager);
-		statement = withPotentialRepeat(statement, testMethod, testInstance);
-		statement = withPotentialTimeout(statement, testMethod, testInstance);
+		statement = withPotentialRepeat(statement, testMethod);
+		statement = withPotentialTimeout(statement, testMethod);
 		statement = withProfileValueCheck(statement, testMethod, testInstance);
 		return statement;
 	}
@@ -194,7 +194,7 @@ public class SpringMethodRule implements MethodRule {
 	 * annotation.
 	 * @see SpringRepeat
 	 */
-	private Statement withPotentialRepeat(Statement next, Method testMethod, Object testInstance) {
+	private Statement withPotentialRepeat(Statement next, Method testMethod) {
 		return new SpringRepeat(next, testMethod);
 	}
 
@@ -204,7 +204,7 @@ public class SpringMethodRule implements MethodRule {
 	 * annotation.
 	 * @see SpringFailOnTimeout
 	 */
-	private Statement withPotentialTimeout(Statement next, Method testMethod, Object testInstance) {
+	private Statement withPotentialTimeout(Statement next, Method testMethod) {
 		return new SpringFailOnTimeout(next, testMethod);
 	}
 

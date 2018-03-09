@@ -62,10 +62,10 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueSyncA
 
 	@Override
 	public boolean supportsParameter(MethodParameter param) {
-		return checkAnnotatedParamNoReactiveWrapper(param, RequestHeader.class, this::singleParam);
+		return checkAnnotatedParamNoReactiveWrapper(param, RequestHeader.class, (annotation, type) -> singleParam(type));
 	}
 
-	private boolean singleParam(RequestHeader annotation, Class<?> type) {
+	private boolean singleParam(Class<?> type) {
 		return !Map.class.isAssignableFrom(type);
 	}
 
