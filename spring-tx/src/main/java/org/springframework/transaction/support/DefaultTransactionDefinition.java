@@ -256,7 +256,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 */
 	@Override
 	public boolean equals(Object other) {
-		return (other instanceof TransactionDefinition && toString().equals(other.toString()));
+		return (this == other || (other instanceof TransactionDefinition && toString().equals(other.toString())));
 	}
 
 	/**
