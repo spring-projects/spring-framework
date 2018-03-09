@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Samples of tests with serialized JSON content.
+ * Samples of tests using {@link WebTestClient} with serialized JSON content.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  */
 public class JsonContentTests {
@@ -96,8 +97,8 @@ public class JsonContentTests {
 		}
 
 		@GetMapping("/persons/{name}")
-		Mono<Person> getPerson(@PathVariable String name) {
-			return Mono.just(new Person(name));
+		Person getPerson(@PathVariable String name) {
+			return new Person(name);
 		}
 
 		@PostMapping
