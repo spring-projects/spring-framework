@@ -245,11 +245,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			if (logger.isDebugEnabled()) {
 				logger.debug(methods.size() + " request handler methods found on " + userType + ": " + methods);
 			}
-			for (Map.Entry<Method, T> entry : methods.entrySet()) {
-				Method invocableMethod = AopUtils.selectInvocableMethod(entry.getKey(), userType);
-				T mapping = entry.getValue();
-				registerHandlerMethod(handler, invocableMethod, mapping);
-			}
+			methods.forEach((methodKey, methodMappingValue) -> {
+					Method invocableMethod = AopUtils.selectInvocableMethod(methodKey, userType);
+					registerHandlerMethod(handler, invocableMethod, methodMappingValue);
+			});
 		}
 	}
 
