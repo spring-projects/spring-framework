@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,6 +176,13 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 			logger.error("Application exception overridden by rollback exception", ex);
 			throw ex2;
 		}
+	}
+
+
+	@Override
+	public boolean equals(Object other) {
+		return (this == other || (super.equals(other) && (!(other instanceof TransactionTemplate) ||
+				getTransactionManager() == ((TransactionTemplate) other).getTransactionManager())));
 	}
 
 }
