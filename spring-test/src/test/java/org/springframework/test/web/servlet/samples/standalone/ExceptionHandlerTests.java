@@ -21,9 +21,8 @@ import org.junit.Test;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -64,7 +63,7 @@ public class ExceptionHandlerTests {
 	@Controller
 	private static class PersonController {
 
-		@RequestMapping(value="/person/{name}", method=RequestMethod.GET)
+		@GetMapping("/person/{name}")
 		public String show(@PathVariable String name) {
 			if (name.equals("Clyde")) {
 				throw new IllegalArgumentException("simulated exception");

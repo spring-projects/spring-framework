@@ -20,7 +20,6 @@ import java.net.URI;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +28,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -44,7 +44,7 @@ public class JsonContentTests {
 
 
 	@Test
-	public void jsonContent() throws Exception {
+	public void jsonContent() {
 		this.client.get().uri("/persons")
 				.accept(MediaType.APPLICATION_JSON_UTF8)
 				.exchange()
@@ -53,7 +53,7 @@ public class JsonContentTests {
 	}
 
 	@Test
-	public void jsonPathIsEqualTo() throws Exception {
+	public void jsonPathIsEqualTo() {
 		this.client.get().uri("/persons")
 				.accept(MediaType.APPLICATION_JSON_UTF8)
 				.exchange()
@@ -64,9 +64,8 @@ public class JsonContentTests {
 				.jsonPath("$[2].name").isEqualTo("John");
 	}
 
-	@Test
-	// See https://stackoverflow.com/questions/49149376/webtestclient-check-that-jsonpath-contains-sub-string
-	public void jsonPathContainsSubstringViaRegularExpression() throws Exception {
+	@Test // https://stackoverflow.com/questions/49149376/webtestclient-check-that-jsonpath-contains-sub-string
+	public void jsonPathContainsSubstringViaRegex() {
 		this.client.get().uri("/persons/John")
 				.accept(MediaType.APPLICATION_JSON_UTF8)
 				.exchange()
@@ -78,7 +77,7 @@ public class JsonContentTests {
 	}
 
 	@Test
-	public void postJsonContent() throws Exception {
+	public void postJsonContent() {
 		this.client.post().uri("/persons")
 				.contentType(MediaType.APPLICATION_JSON_UTF8)
 				.syncBody("{\"name\":\"John\"}")
@@ -89,14 +88,15 @@ public class JsonContentTests {
 
 
 	@RestController
+	@RequestMapping("/persons")
 	static class PersonController {
 
-		@GetMapping("/persons")
+		@GetMapping
 		Flux<Person> getPersons() {
 			return Flux.just(new Person("Jane"), new Person("Jason"), new Person("John"));
 		}
 
-		@GetMapping("/persons/{name}")
+		@GetMapping("/{name}")
 		Person getPerson(@PathVariable String name) {
 			return new Person(name);
 		}
