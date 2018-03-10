@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class XlsViewTests {
 			}
 		};
 
-		excelView.render(new HashMap<String, Object>(), request, response);
+		excelView.render(new HashMap<>(), request, response);
 
 		Workbook wb = new HSSFWorkbook(new ByteArrayInputStream(response.getContentAsByteArray()));
 		assertEquals("Test Sheet", wb.getSheetName(0));
@@ -85,7 +85,7 @@ public class XlsViewTests {
 			}
 		};
 
-		excelView.render(new HashMap<String, Object>(), request, response);
+		excelView.render(new HashMap<>(), request, response);
 
 		Workbook wb = new XSSFWorkbook(new ByteArrayInputStream(response.getContentAsByteArray()));
 		assertEquals("Test Sheet", wb.getSheetName(0));
@@ -108,7 +108,7 @@ public class XlsViewTests {
 			}
 		};
 
-		excelView.render(new HashMap<String, Object>(), request, response);
+		excelView.render(new HashMap<>(), request, response);
 
 		Workbook wb = new XSSFWorkbook(new ByteArrayInputStream(response.getContentAsByteArray()));
 		assertEquals("Test Sheet", wb.getSheetName(0));

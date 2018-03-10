@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,11 @@ import java.io.IOException;
 import java.net.URI;
 
 import org.springframework.http.HttpMethod;
-import org.springframework.http.client.AsyncClientHttpRequest;
-import org.springframework.http.client.AsyncClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.mock.http.client.MockAsyncClientHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.support.RestGatewaySupport;
 
@@ -65,6 +62,7 @@ import org.springframework.web.client.support.RestGatewaySupport;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
+@SuppressWarnings("deprecation")
 public class MockRestServiceServer {
 
 	private final RequestExpectationManager expectationManager;
@@ -83,11 +81,9 @@ public class MockRestServiceServer {
 	 * Set up an expectation for a single HTTP request. The returned
 	 * {@link ResponseActions} can be used to set up further expectations as
 	 * well as to define the response.
-	 *
 	 * <p>This method may be invoked any number times before starting to make
 	 * request through the underlying {@code RestTemplate} in order to set up
 	 * all expected requests.
-	 *
 	 * @param matcher request matcher
 	 * @return a representation of the expectation
 	 */
@@ -96,13 +92,11 @@ public class MockRestServiceServer {
 	}
 
 	/**
-	 * An alternative to {@link #expect(RequestMatcher)} with an indication how
+	 * An alternative to {@link #expect(RequestMatcher)} that also indicates how
 	 * many times the request is expected to be executed.
-	 *
 	 * <p>When request expectations have an expected count greater than one, only
 	 * the first execution is expected to match the order of declaration. Subsequent
 	 * request executions may be inserted anywhere thereafter.
-	 *
 	 * @param count the expected count
 	 * @param matcher request matcher
 	 * @return a representation of the expectation
@@ -121,6 +115,13 @@ public class MockRestServiceServer {
 		this.expectationManager.verify();
 	}
 
+	/**
+	 * Reset the internal state removing all expectations and recorded requests.
+	 */
+	public void reset() {
+		this.expectationManager.reset();
+	}
+
 
 	/**
 	 * Return a builder for a {@code MockRestServiceServer} that should be used
@@ -135,8 +136,11 @@ public class MockRestServiceServer {
 	 * Return a builder for a {@code MockRestServiceServer} that should be used
 	 * to reply to the given {@code AsyncRestTemplate}.
 	 * @since 4.3
+	 * @deprecated see deprecation notice on
+	 * {@link org.springframework.web.client.AsyncRestTemplate} itself
 	 */
-	public static MockRestServiceServerBuilder bindTo(AsyncRestTemplate asyncRestTemplate) {
+	@Deprecated
+	public static MockRestServiceServerBuilder bindTo(org.springframework.web.client.AsyncRestTemplate asyncRestTemplate) {
 		return new DefaultBuilder(asyncRestTemplate);
 	}
 
@@ -164,8 +168,11 @@ public class MockRestServiceServer {
 	 * A shortcut for {@code bindTo(asyncRestTemplate).build()}.
 	 * @param asyncRestTemplate the AsyncRestTemplate to set up for mock testing
 	 * @return the created mock server
+	 * @deprecated see deprecation notice on
+	 * {@link org.springframework.web.client.AsyncRestTemplate} itself
 	 */
-	public static MockRestServiceServer createServer(AsyncRestTemplate asyncRestTemplate) {
+	@Deprecated
+	public static MockRestServiceServer createServer(org.springframework.web.client.AsyncRestTemplate asyncRestTemplate) {
 		return bindTo(asyncRestTemplate).build();
 	}
 
@@ -179,74 +186,77 @@ public class MockRestServiceServer {
 	}
 
 
-
 	/**
 	 * Builder to create a {@code MockRestServiceServer}.
 	 */
 	public interface MockRestServiceServerBuilder {
 
 		/**
-		 * Allow expected requests to be executed in any order not necessarily
-		 * matching the order of declaration. This is a shortcut for:<br>
-		 * {@code builder.expectationManager(new UnorderedRequestExpectationManager)}
+		 * Whether to allow expected requests to be executed in any order not
+		 * necessarily matching the order of declaration.
+		 * <p>Effectively a shortcut for:<br>
+		 * {@code builder.build(new UnorderedRequestExpectationManager)}.
+		 * <p>By default this is set to {@code false}
+		 * @param ignoreExpectOrder whether to ignore the order of expectations
 		 */
-		MockRestServiceServerBuilder ignoreExpectOrder();
+		MockRestServiceServerBuilder ignoreExpectOrder(boolean ignoreExpectOrder);
 
 		/**
-		 * Configure a custom {@code RequestExpectationManager}.
-		 * <p>By default {@link SimpleRequestExpectationManager} is used. It is
-		 * also possible to switch to {@link UnorderedRequestExpectationManager}
-		 * by setting {@link #ignoreExpectOrder()}.
-		 */
-		MockRestServiceServerBuilder expectationManager(RequestExpectationManager manager);
-
-		/**
-		 * Build the {@code MockRestServiceServer} and setting up the underlying
+		 * Build the {@code MockRestServiceServer} and set up the underlying
 		 * {@code RestTemplate} or {@code AsyncRestTemplate} with a
 		 * {@link ClientHttpRequestFactory} that creates mock requests.
 		 */
 		MockRestServiceServer build();
 
+		/**
+		 * An overloaded build alternative that accepts a custom
+		 * {@link RequestExpectationManager}.
+		 */
+		MockRestServiceServer build(RequestExpectationManager manager);
 	}
+
 
 	private static class DefaultBuilder implements MockRestServiceServerBuilder {
 
+		@Nullable
 		private final RestTemplate restTemplate;
 
-		private final AsyncRestTemplate asyncRestTemplate;
+		@Nullable
+		private final org.springframework.web.client.AsyncRestTemplate asyncRestTemplate;
 
-		private RequestExpectationManager expectationManager = new SimpleRequestExpectationManager();
-
+		private boolean ignoreExpectOrder;
 
 		public DefaultBuilder(RestTemplate restTemplate) {
-			Assert.notNull(restTemplate, "'restTemplate' must not be null");
+			Assert.notNull(restTemplate, "RestTemplate must not be null");
 			this.restTemplate = restTemplate;
 			this.asyncRestTemplate = null;
 		}
 
-		public DefaultBuilder(AsyncRestTemplate asyncRestTemplate) {
-			Assert.notNull(asyncRestTemplate, "'asyncRestTemplate' must not be null");
+		public DefaultBuilder(org.springframework.web.client.AsyncRestTemplate asyncRestTemplate) {
+			Assert.notNull(asyncRestTemplate, "AsyncRestTemplate must not be null");
 			this.restTemplate = null;
 			this.asyncRestTemplate = asyncRestTemplate;
 		}
 
-
 		@Override
-		public MockRestServiceServerBuilder ignoreExpectOrder() {
-			expectationManager(new UnorderedRequestExpectationManager());
-			return this;
-		}
-
-		@Override
-		public MockRestServiceServerBuilder expectationManager(RequestExpectationManager manager) {
-			Assert.notNull(manager, "'manager' is required.");
-			this.expectationManager = manager;
+		public MockRestServiceServerBuilder ignoreExpectOrder(boolean ignoreExpectOrder) {
+			this.ignoreExpectOrder = ignoreExpectOrder;
 			return this;
 		}
 
 		@Override
 		public MockRestServiceServer build() {
-			MockRestServiceServer server = new MockRestServiceServer(this.expectationManager);
+			if (this.ignoreExpectOrder) {
+				return build(new UnorderedRequestExpectationManager());
+			}
+			else {
+				return build(new SimpleRequestExpectationManager());
+			}
+		}
+
+		@Override
+		public MockRestServiceServer build(RequestExpectationManager manager) {
+			MockRestServiceServer server = new MockRestServiceServer(manager);
 			MockClientHttpRequestFactory factory = server.new MockClientHttpRequestFactory();
 			if (this.restTemplate != null) {
 				this.restTemplate.setRequestFactory(factory);
@@ -263,7 +273,8 @@ public class MockRestServiceServer {
 	 * Mock ClientHttpRequestFactory that creates requests by iterating
 	 * over the list of expected {@link DefaultRequestExpectation}'s.
 	 */
-	private class MockClientHttpRequestFactory implements ClientHttpRequestFactory, AsyncClientHttpRequestFactory {
+	private class MockClientHttpRequestFactory implements ClientHttpRequestFactory,
+			org.springframework.http.client.AsyncClientHttpRequestFactory {
 
 		@Override
 		public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) {
@@ -271,15 +282,15 @@ public class MockRestServiceServer {
 		}
 
 		@Override
-		public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) {
+		public org.springframework.http.client.AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) {
 			return createRequestInternal(uri, httpMethod);
 		}
 
-		private MockAsyncClientHttpRequest createRequestInternal(URI uri, HttpMethod method) {
+		private org.springframework.mock.http.client.MockAsyncClientHttpRequest createRequestInternal(URI uri, HttpMethod method) {
 			Assert.notNull(uri, "'uri' must not be null");
 			Assert.notNull(method, "'httpMethod' must not be null");
 
-			return new MockAsyncClientHttpRequest(method, uri) {
+			return new org.springframework.mock.http.client.MockAsyncClientHttpRequest(method, uri) {
 
 				@Override
 				protected ClientHttpResponse executeInternal() throws IOException {

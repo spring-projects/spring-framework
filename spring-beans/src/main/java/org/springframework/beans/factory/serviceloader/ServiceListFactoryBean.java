@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public class ServiceListFactoryBean extends AbstractServiceLoaderBasedFactoryBea
 
 	@Override
 	protected Object getObjectToExpose(ServiceLoader<?> serviceLoader) {
-		List<Object> result = new LinkedList<Object>();
+		List<Object> result = new LinkedList<>();
 		for (Object loaderObject : serviceLoader) {
 			result.add(loaderObject);
 		}

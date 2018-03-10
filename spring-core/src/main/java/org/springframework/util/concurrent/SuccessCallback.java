@@ -16,12 +16,15 @@
 
 package org.springframework.util.concurrent;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Success callback for a {@link ListenableFuture}.
  *
  * @author Sebastien Deleuze
  * @since 4.1
  */
+@FunctionalInterface
 public interface SuccessCallback<T> {
 
 	/**
@@ -29,6 +32,6 @@ public interface SuccessCallback<T> {
 	 * <p>Note that Exceptions raised by this method are ignored.
 	 * @param result the result
 	 */
-	void onSuccess(T result);
+	void onSuccess(@Nullable T result);
 
 }

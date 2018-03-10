@@ -16,12 +16,14 @@
 
 package org.springframework.context.config;
 
+import java.io.FileNotFoundException;
 import java.util.Calendar;
 import java.util.Date;
 
 import org.junit.After;
 import org.junit.Test;
 
+import org.springframework.beans.FatalBeanException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
@@ -87,6 +89,54 @@ public class ContextNamespaceHandlerTests {
 		assertEquals("bar", applicationContext.getBean("foo"));
 		assertEquals("foo", applicationContext.getBean("bar"));
 		assertEquals("maps", applicationContext.getBean("spam"));
+	}
+
+	@Test
+	public void propertyPlaceholderLocationWithSystemPropertyForOneLocation() throws Exception {
+		System.setProperty("properties",
+				"classpath*:/org/springframework/context/config/test-*.properties");
+		try {
+			ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
+					"contextNamespaceHandlerTests-location-placeholder.xml", getClass());
+			assertEquals("bar", applicationContext.getBean("foo"));
+			assertEquals("foo", applicationContext.getBean("bar"));
+			assertEquals("maps", applicationContext.getBean("spam"));
+		}
+		finally {
+			System.clearProperty("properties");
+		}
+	}
+
+	@Test
+	public void propertyPlaceholderLocationWithSystemPropertyForMultipleLocations() throws Exception {
+		System.setProperty("properties",
+				"classpath*:/org/springframework/context/config/test-*.properties," +
+				"classpath*:/org/springframework/context/config/empty-*.properties," +
+				"classpath*:/org/springframework/context/config/missing-*.properties");
+		try {
+			ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
+					"contextNamespaceHandlerTests-location-placeholder.xml", getClass());
+			assertEquals("bar", applicationContext.getBean("foo"));
+			assertEquals("foo", applicationContext.getBean("bar"));
+			assertEquals("maps", applicationContext.getBean("spam"));
+		}
+		finally {
+			System.clearProperty("properties");
+		}
+	}
+
+	@Test
+	public void propertyPlaceholderLocationWithSystemPropertyMissing() throws Exception {
+		try {
+			ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
+					"contextNamespaceHandlerTests-location-placeholder.xml", getClass());
+			assertEquals("bar", applicationContext.getBean("foo"));
+			assertEquals("foo", applicationContext.getBean("bar"));
+			assertEquals("maps", applicationContext.getBean("spam"));
+		}
+		catch (FatalBeanException ex) {
+			assertTrue(ex.getRootCause() instanceof FileNotFoundException);
+		}
 	}
 
 	@Test

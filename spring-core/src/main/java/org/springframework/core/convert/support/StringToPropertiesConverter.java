@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.core.convert.support;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 import org.springframework.core.convert.converter.Converter;
@@ -35,7 +36,7 @@ final class StringToPropertiesConverter implements Converter<String, Properties>
 		try {
 			Properties props = new Properties();
 			// Must use the ISO-8859-1 encoding because Properties.load(stream) expects it.
-			props.load(new ByteArrayInputStream(source.getBytes("ISO-8859-1")));
+			props.load(new ByteArrayInputStream(source.getBytes(StandardCharsets.ISO_8859_1)));
 			return props;
 		}
 		catch (Exception ex) {

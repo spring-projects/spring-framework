@@ -28,7 +28,7 @@
 		class="org.springframework.beans.factory.xml.FactoryMethods"
 		factory-method="newInstance"
 		scope="prototype">
-		<constructor-arg index="0"><ref local="jenny"/></constructor-arg>
+		<constructor-arg index="0"><ref bean="jenny"/></constructor-arg>
 	</bean>
 
 </beans>

@@ -22,7 +22,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 import org.springframework.format.Formatter;
-import org.springframework.lang.UsesJava8;
 
 /**
  * {@link Formatter} implementation for a JSR-310 {@link java.time.Instant},
@@ -37,7 +36,6 @@ import org.springframework.lang.UsesJava8;
  * @see java.time.format.DateTimeFormatter#ISO_INSTANT
  * @see java.time.format.DateTimeFormatter#RFC_1123_DATE_TIME
  */
-@UsesJava8
 public class InstantFormatter implements Formatter<Instant> {
 
 	@Override

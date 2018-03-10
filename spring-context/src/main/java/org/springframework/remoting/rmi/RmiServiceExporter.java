@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.rmi.server.UnicastRemoteObject;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 
 /**
  * RMI exporter that exposes the specified service as RMI object with the specified name.
@@ -42,11 +43,11 @@ import org.springframework.beans.factory.InitializingBean;
  * extend {@code java.rmi.Remote} or throw {@code java.rmi.RemoteException}
  * on all methods, but in and out parameters have to be serializable.
  *
- * <p>The major advantage of RMI, compared to Hessian and Burlap, is serialization.
+ * <p>The major advantage of RMI, compared to Hessian, is serialization.
  * Effectively, any serializable Java object can be transported without hassle.
- * Hessian and Burlap have their own (de-)serialization mechanisms, but are
- * HTTP-based and thus much easier to setup than RMI. Alternatively, consider
- * Spring's HTTP invoker to combine Java serialization with HTTP-based transport.
+ * Hessian has its own (de-)serialization mechanisms, but is HTTP-based and thus
+ * much easier to setup than RMI. Alternatively, consider Spring's HTTP invoker
+ * to combine Java serialization with HTTP-based transport.
  *
  * <p>Note: RMI makes a best-effort attempt to obtain the fully qualified host name.
  * If one cannot be determined, it will fall back and use the IP address. Depending
@@ -63,7 +64,6 @@ import org.springframework.beans.factory.InitializingBean;
  * @see java.rmi.Remote
  * @see java.rmi.RemoteException
  * @see org.springframework.remoting.caucho.HessianServiceExporter
- * @see org.springframework.remoting.caucho.BurlapServiceExporter
  * @see org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter
  */
 public class RmiServiceExporter extends RmiBasedExporter implements InitializingBean, DisposableBean {
@@ -320,7 +320,7 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 	 * @throws RemoteException if the registry couldn't be located or created
 	 */
 	protected Registry getRegistry(String registryHost, int registryPort,
-			RMIClientSocketFactory clientSocketFactory, RMIServerSocketFactory serverSocketFactory)
+			@Nullable RMIClientSocketFactory clientSocketFactory, @Nullable RMIServerSocketFactory serverSocketFactory)
 			throws RemoteException {
 
 		if (registryHost != null) {
@@ -346,8 +346,8 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 	 * @return the RMI registry
 	 * @throws RemoteException if the registry couldn't be located or created
 	 */
-	protected Registry getRegistry(
-			int registryPort, RMIClientSocketFactory clientSocketFactory, RMIServerSocketFactory serverSocketFactory)
+	protected Registry getRegistry(int registryPort,
+			@Nullable RMIClientSocketFactory clientSocketFactory, @Nullable RMIServerSocketFactory serverSocketFactory)
 			throws RemoteException {
 
 		if (clientSocketFactory != null) {

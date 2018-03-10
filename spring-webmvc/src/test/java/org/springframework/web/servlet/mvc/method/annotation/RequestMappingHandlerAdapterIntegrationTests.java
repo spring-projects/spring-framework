@@ -47,6 +47,7 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockMultipartFile;
@@ -118,7 +119,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		ConfigurableWebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
 		bindingInitializer.setValidator(new StubValidator());
 
-		List<HandlerMethodArgumentResolver> customResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+		List<HandlerMethodArgumentResolver> customResolvers = new ArrayList<>();
 		customResolvers.add(new ServletWebArgumentResolverAdapter(new ColorArgumentResolver()));
 
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
@@ -172,7 +173,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		request.setContextPath("/contextPath");
 		request.setServletPath("/main");
 		System.setProperty("systemHeader", "systemHeaderValue");
-		Map<String, String> uriTemplateVars = new HashMap<String, String>();
+		Map<String, String> uriTemplateVars = new HashMap<>();
 		uriTemplateVars.put("pathvar", "pathvarValue");
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 		request.getSession().setAttribute("sessionAttribute", sessionAttribute);
@@ -443,7 +444,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		}
 
 		@Override
-		public void validate(Object target, Errors errors) {
+		public void validate(@Nullable Object target, Errors errors) {
 			errors.reject("error");
 		}
 	}

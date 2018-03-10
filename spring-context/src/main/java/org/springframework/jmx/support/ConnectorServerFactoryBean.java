@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.JmxException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -49,7 +50,6 @@ import org.springframework.util.CollectionUtils;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2
- * @see    FactoryBean
  * @see JMXConnectorServer
  * @see MBeanServer
  */
@@ -62,16 +62,19 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 
 	private String serviceUrl = DEFAULT_SERVICE_URL;
 
-	private Map<String, Object> environment = new HashMap<String, Object>();
+	private Map<String, Object> environment = new HashMap<>();
 
+	@Nullable
 	private MBeanServerForwarder forwarder;
 
+	@Nullable
 	private ObjectName objectName;
 
 	private boolean threaded = false;
 
 	private boolean daemon = false;
 
+	@Nullable
 	private JMXConnectorServer connectorServer;
 
 
@@ -86,7 +89,7 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 	 * Set the environment properties used to construct the {@code JMXConnectorServer}
 	 * as {@code java.util.Properties} (String key/value pairs).
 	 */
-	public void setEnvironment(Properties environment) {
+	public void setEnvironment(@Nullable Properties environment) {
 		CollectionUtils.mergePropertiesIntoMap(environment, this.environment);
 	}
 
@@ -94,7 +97,7 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 	 * Set the environment properties used to construct the {@code JMXConnector}
 	 * as a {@code Map} of String keys and arbitrary Object values.
 	 */
-	public void setEnvironmentMap(Map<String, ?> environment) {
+	public void setEnvironmentMap(@Nullable Map<String, ?> environment) {
 		if (environment != null) {
 			this.environment.putAll(environment);
 		}
@@ -138,7 +141,7 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 	 * the {@code JMXConnectorServer} will be started in a separate thread.
 	 * If the {@code daemon} flag is set to {@code true}, that thread will be
 	 * started as a daemon thread.
-	 * @throws JMException if a problem occured when registering the connector server
+	 * @throws JMException if a problem occurred when registering the connector server
 	 * with the {@code MBeanServer}
 	 * @throws IOException if there is a problem starting the connector server
 	 */
@@ -202,6 +205,7 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 
 
 	@Override
+	@Nullable
 	public JMXConnectorServer getObject() {
 		return this.connectorServer;
 	}
@@ -224,11 +228,13 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 	 */
 	@Override
 	public void destroy() throws IOException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Stopping JMX connector server: " + this.connectorServer);
-		}
 		try {
-			this.connectorServer.stop();
+			if (this.connectorServer != null) {
+				if (logger.isInfoEnabled()) {
+					logger.info("Stopping JMX connector server: " + this.connectorServer);
+				}
+				this.connectorServer.stop();
+			}
 		}
 		finally {
 			unregisterBeans();

@@ -1,0 +1,31 @@
+description = "Spring Context"
+
+apply plugin: "groovy"
+
+dependencies {
+	compile(project(":spring-aop"))
+	compile(project(":spring-beans"))
+	compile(project(':spring-core'))
+	compile(project(":spring-expression"))
+	optional(project(":spring-instrument"))
+	optional("javax.annotation:javax.annotation-api:1.3.2")
+	optional("javax.ejb:javax.ejb-api:3.2")
+	optional("javax.enterprise.concurrent:javax.enterprise.concurrent-api:1.0")
+	optional("javax.inject:javax.inject:1")
+	optional("javax.interceptor:javax.interceptor-api:1.2.1")
+	optional("javax.money:money-api:1.0.1")
+	optional("javax.validation:validation-api:1.1.0.Final")
+	optional("javax.xml.ws:jaxws-api:2.3.0")
+	optional("org.aspectj:aspectjweaver:${aspectjVersion}")
+	optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
+	optional("org.beanshell:bsh:2.0b5")
+	optional("joda-time:joda-time:2.9.9")
+	optional("org.hibernate:hibernate-validator:5.4.2.Final")
+	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+	testCompile("org.apache.commons:commons-pool2:2.5.0")
+	testCompile("javax.inject:javax.inject-tck:1")
+	testRuntime("javax.xml.bind:jaxb-api:2.3.0")
+	testRuntime("org.glassfish:javax.el:3.0.1-b08")
+	testRuntime("org.javamoney:moneta:1.1")
+}

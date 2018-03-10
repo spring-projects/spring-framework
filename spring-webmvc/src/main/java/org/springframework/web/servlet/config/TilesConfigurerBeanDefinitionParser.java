@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
 /**
@@ -54,11 +55,11 @@ public class TilesConfigurerBeanDefinitionParser extends AbstractSingleBeanDefin
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 		List<Element> childElements = DomUtils.getChildElementsByTagName(element, "definitions");
 		if (!childElements.isEmpty()) {
-			List<String> locations = new ArrayList<String>(childElements.size());
+			List<String> locations = new ArrayList<>(childElements.size());
 			for (Element childElement : childElements) {
 				locations.add(childElement.getAttribute("location"));
 			}
-			builder.addPropertyValue("definitions", locations.toArray(new String[locations.size()]));
+			builder.addPropertyValue("definitions", StringUtils.toStringArray(locations));
 		}
 		if (element.hasAttribute("check-refresh")) {
 			builder.addPropertyValue("checkRefresh", element.getAttribute("check-refresh"));

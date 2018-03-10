@@ -30,7 +30,7 @@ import static org.springframework.tests.TestResourceUtils.*;
  * @author Mark Fisher
  * @author Chris Beams
  */
-public final class AopNamespaceHandlerPointcutErrorTests {
+public class AopNamespaceHandlerPointcutErrorTests {
 
 	@Test
 	public void testDuplicatePointcutConfig() {

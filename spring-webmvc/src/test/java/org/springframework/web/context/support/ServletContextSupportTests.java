@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,7 @@ public class ServletContextSupportTests {
 	@Test
 	public void testServletContextAttributeExporter() {
 		TestBean tb = new TestBean();
-		Map<String, Object> attributes = new HashMap<String, Object>();
+		Map<String, Object> attributes = new HashMap<>();
 		attributes.put("attr1", "value1");
 		attributes.put("attr2", tb);
 
@@ -144,7 +144,7 @@ public class ServletContextSupportTests {
 
 	@Test
 	public void testServletContextResourcePatternResolver() throws IOException {
-		final Set<String> paths = new HashSet<String>();
+		final Set<String> paths = new HashSet<>();
 		paths.add("/WEB-INF/context1.xml");
 		paths.add("/WEB-INF/context2.xml");
 
@@ -160,7 +160,7 @@ public class ServletContextSupportTests {
 
 		ServletContextResourcePatternResolver rpr = new ServletContextResourcePatternResolver(sc);
 		Resource[] found = rpr.getResources("/WEB-INF/*.xml");
-		Set<String> foundPaths = new HashSet<String>();
+		Set<String> foundPaths = new HashSet<>();
 		for (Resource resource : found) {
 			foundPaths.add(((ServletContextResource) resource).getPath());
 		}
@@ -171,7 +171,7 @@ public class ServletContextSupportTests {
 
 	@Test
 	public void testServletContextResourcePatternResolverWithPatternPath() throws IOException {
-		final Set<String> dirs = new HashSet<String>();
+		final Set<String> dirs = new HashSet<>();
 		dirs.add("/WEB-INF/mydir1/");
 		dirs.add("/WEB-INF/mydir2/");
 
@@ -193,7 +193,7 @@ public class ServletContextSupportTests {
 
 		ServletContextResourcePatternResolver rpr = new ServletContextResourcePatternResolver(sc);
 		Resource[] found = rpr.getResources("/WEB-INF/*/*.xml");
-		Set<String> foundPaths = new HashSet<String>();
+		Set<String> foundPaths = new HashSet<>();
 		for (Resource resource : found) {
 			foundPaths.add(((ServletContextResource) resource).getPath());
 		}
@@ -204,11 +204,11 @@ public class ServletContextSupportTests {
 
 	@Test
 	public void testServletContextResourcePatternResolverWithUnboundedPatternPath() throws IOException {
-		final Set<String> dirs = new HashSet<String>();
+		final Set<String> dirs = new HashSet<>();
 		dirs.add("/WEB-INF/mydir1/");
 		dirs.add("/WEB-INF/mydir2/");
 
-		final Set<String> paths = new HashSet<String>();
+		final Set<String> paths = new HashSet<>();
 		paths.add("/WEB-INF/mydir2/context2.xml");
 		paths.add("/WEB-INF/mydir2/mydir3/");
 
@@ -233,7 +233,7 @@ public class ServletContextSupportTests {
 
 		ServletContextResourcePatternResolver rpr = new ServletContextResourcePatternResolver(sc);
 		Resource[] found = rpr.getResources("/WEB-INF/**/*.xml");
-		Set<String> foundPaths = new HashSet<String>();
+		Set<String> foundPaths = new HashSet<>();
 		for (Resource resource : found) {
 			foundPaths.add(((ServletContextResource) resource).getPath());
 		}
@@ -245,7 +245,7 @@ public class ServletContextSupportTests {
 
 	@Test
 	public void testServletContextResourcePatternResolverWithAbsolutePaths() throws IOException {
-		final Set<String> paths = new HashSet<String>();
+		final Set<String> paths = new HashSet<>();
 		paths.add("C:/webroot/WEB-INF/context1.xml");
 		paths.add("C:/webroot/WEB-INF/context2.xml");
 		paths.add("C:/webroot/someOtherDirThatDoesntContainPath");
@@ -262,7 +262,7 @@ public class ServletContextSupportTests {
 
 		ServletContextResourcePatternResolver rpr = new ServletContextResourcePatternResolver(sc);
 		Resource[] found = rpr.getResources("/WEB-INF/*.xml");
-		Set<String> foundPaths = new HashSet<String>();
+		Set<String> foundPaths = new HashSet<>();
 		for (Resource resource : found) {
 			foundPaths.add(((ServletContextResource) resource).getPath());
 		}

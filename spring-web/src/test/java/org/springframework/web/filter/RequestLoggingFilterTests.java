@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import org.junit.Test;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.util.ContentCachingRequestWrapper;
+import org.springframework.web.util.WebUtils;
 
 import static org.junit.Assert.*;
 
@@ -51,7 +53,6 @@ public class RequestLoggingFilterTests {
 		request.setQueryString("booking=42");
 
 		FilterChain filterChain = new NoOpFilterChain();
-
 		filter.doFilter(request, response, filterChain);
 
 		assertNotNull(filter.beforeRequestMessage);
@@ -169,6 +170,9 @@ public class RequestLoggingFilterTests {
 				((HttpServletResponse) filterResponse).setStatus(HttpServletResponse.SC_OK);
 				byte[] buf = FileCopyUtils.copyToByteArray(filterRequest.getInputStream());
 				assertArrayEquals(requestBody, buf);
+				ContentCachingRequestWrapper wrapper =
+						WebUtils.getNativeRequest(filterRequest, ContentCachingRequestWrapper.class);
+				assertArrayEquals("Hel".getBytes("UTF-8"), wrapper.getContentAsByteArray());
 			}
 		};
 

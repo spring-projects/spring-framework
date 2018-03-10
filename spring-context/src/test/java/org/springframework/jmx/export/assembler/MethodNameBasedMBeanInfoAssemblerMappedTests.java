@@ -47,7 +47,7 @@ public class MethodNameBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAss
 	public void testWithFallThrough() throws Exception {
 		MethodNameBasedMBeanInfoAssembler assembler =
 				getWithMapping("foobar", "add,myOperation,getName,setName,getAge");
-		assembler.setManagedMethods(new String[]{"getNickName", "setNickName"});
+		assembler.setManagedMethods("getNickName", "setNickName");
 
 		ModelMBeanInfo inf = assembler.getMBeanInfo(getBean(), getObjectName());
 		MBeanAttributeInfo attr = inf.getAttribute("NickName");

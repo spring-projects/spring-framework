@@ -28,9 +28,9 @@ import static org.mockito.BDDMockito.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class FailFastProblemReporterTests {
+public class FailFastProblemReporterTests {
 
-	@Test(expected=BeanDefinitionParsingException.class)
+	@Test(expected = BeanDefinitionParsingException.class)
 	public void testError() throws Exception {
 		FailFastProblemReporter reporter = new FailFastProblemReporter();
 		reporter.error(new Problem("VGER", new Location(new DescriptiveResource("here")),

@@ -27,7 +27,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.junit4.FailingBeforeAndAfterMethodsJUnitTests;
+import org.springframework.test.context.junit4.FailingBeforeAndAfterMethodsSpringRunnerTests;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,14 +35,14 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.junit.Assert.*;
 
 /**
- * This class is an extension of {@link FailingBeforeAndAfterMethodsJUnitTests}
+ * This class is an extension of {@link FailingBeforeAndAfterMethodsSpringRunnerTests}
  * that has been modified to use {@link SpringClassRule} and
  * {@link SpringMethodRule}.
  *
  * @author Sam Brannen
  * @since 4.2
  */
-public class FailingBeforeAndAfterMethodsSpringRuleTests extends FailingBeforeAndAfterMethodsJUnitTests {
+public class FailingBeforeAndAfterMethodsSpringRuleTests extends FailingBeforeAndAfterMethodsSpringRunnerTests {
 
 	@Parameters(name = "{0}")
 	public static Object[] testData() {
@@ -69,11 +69,10 @@ public class FailingBeforeAndAfterMethodsSpringRuleTests extends FailingBeforeAn
 	// All tests are in superclass.
 
 	@RunWith(JUnit4.class)
-	@TestExecutionListeners({})
 	public static abstract class BaseSpringRuleTestCase {
 
 		@ClassRule
-		public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+		public static final SpringClassRule springClassRule = new SpringClassRule();
 
 		@Rule
 		public final SpringMethodRule springMethodRule = new SpringMethodRule();
@@ -116,7 +115,7 @@ public class FailingBeforeAndAfterMethodsSpringRuleTests extends FailingBeforeAn
 	public static class FailingBeforeTransactionSpringRuleTestCase {
 
 		@ClassRule
-		public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+		public static final SpringClassRule springClassRule = new SpringClassRule();
 
 		@Rule
 		public final SpringMethodRule springMethodRule = new SpringMethodRule();
@@ -139,7 +138,7 @@ public class FailingBeforeAndAfterMethodsSpringRuleTests extends FailingBeforeAn
 	public static class FailingAfterTransactionSpringRuleTestCase {
 
 		@ClassRule
-		public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+		public static final SpringClassRule springClassRule = new SpringClassRule();
 
 		@Rule
 		public final SpringMethodRule springMethodRule = new SpringMethodRule();

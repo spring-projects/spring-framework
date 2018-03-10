@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,10 +50,10 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
-import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 import static org.junit.Assert.*;
@@ -104,19 +104,12 @@ public class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
-	public void noSuchRequestHandlingMethod() {
-		Exception ex = new NoSuchRequestHandlingMethodException("GET", TestController.class);
-		testException(ex);
-	}
-
-	@Test
 	public void httpRequestMethodNotSupported() {
 		List<String> supported = Arrays.asList("POST", "DELETE");
 		Exception ex = new HttpRequestMethodNotSupportedException("GET", supported);
 
 		ResponseEntity<Object> responseEntity = testException(ex);
 		assertEquals(EnumSet.of(HttpMethod.POST, HttpMethod.DELETE), responseEntity.getHeaders().getAllow());
-
 	}
 
 	@Test
@@ -203,6 +196,11 @@ public class ResponseEntityExceptionHandlerTests {
 		Exception ex = new NoHandlerFoundException(req.getMethod().toString(),
 				req.getServletRequest().getRequestURI(),req.getHeaders());
 		testException(ex);
+	}
+
+	@Test
+	public void asyncRequestTimeoutException() {
+		testException(new AsyncRequestTimeoutException());
 	}
 
 	@Test

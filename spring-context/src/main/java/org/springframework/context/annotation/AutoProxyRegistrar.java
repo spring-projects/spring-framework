@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,9 @@ public class AutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 		Set<String> annoTypes = importingClassMetadata.getAnnotationTypes();
 		for (String annoType : annoTypes) {
 			AnnotationAttributes candidate = AnnotationConfigUtils.attributesFor(importingClassMetadata, annoType);
+			if (candidate == null) {
+				continue;
+			}
 			Object mode = candidate.get("mode");
 			Object proxyTargetClass = candidate.get("proxyTargetClass");
 			if (mode != null && proxyTargetClass != null && AdviceMode.class == mode.getClass() &&
@@ -79,7 +82,7 @@ public class AutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 			logger.warn(String.format("%s was imported but no annotations were found " +
 					"having both 'mode' and 'proxyTargetClass' attributes of type " +
 					"AdviceMode and boolean respectively. This means that auto proxy " +
-					"creator registration and configuration may not have occured as " +
+					"creator registration and configuration may not have occurred as " +
 					"intended, and components may not be proxied as expected. Check to " +
 					"ensure that %s has been @Import'ed on the same class where these " +
 					"annotations are declared; otherwise remove the import of %s " +

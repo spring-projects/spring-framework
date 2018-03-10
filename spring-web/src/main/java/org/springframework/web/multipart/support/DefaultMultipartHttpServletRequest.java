@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,8 +46,10 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 
 	private static final String CONTENT_TYPE = "Content-Type";
 
+	@Nullable
 	private Map<String, String[]> multipartParameters;
 
+	@Nullable
 	private Map<String, String> multipartParameterContentTypes;
 
 
@@ -76,6 +79,7 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 
 
 	@Override
+	@Nullable
 	public String getParameter(String name) {
 		String[] values = getMultipartParameters().get(name);
 		if (values != null) {
@@ -100,7 +104,7 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 			return super.getParameterNames();
 		}
 
-		Set<String> paramNames = new LinkedHashSet<String>();
+		Set<String> paramNames = new LinkedHashSet<>();
 		Enumeration<String> paramEnum = super.getParameterNames();
 		while (paramEnum.hasMoreElements()) {
 			paramNames.add(paramEnum.nextElement());
@@ -116,7 +120,7 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 			return super.getParameterMap();
 		}
 
-		Map<String, String[]> paramMap = new LinkedHashMap<String, String[]>();
+		Map<String, String[]> paramMap = new LinkedHashMap<>();
 		paramMap.putAll(super.getParameterMap());
 		paramMap.putAll(multipartParameters);
 		return paramMap;

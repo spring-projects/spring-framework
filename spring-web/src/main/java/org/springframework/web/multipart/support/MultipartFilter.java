@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.multipart.support;
 
 import java.io.IOException;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -39,6 +40,10 @@ import org.springframework.web.multipart.MultipartResolver;
  * <p>If no MultipartResolver bean is found, this filter falls back to a default
  * MultipartResolver: {@link StandardServletMultipartResolver} for Servlet 3.0,
  * based on a multipart-config section in {@code web.xml}.
+ * Note however that at present the Servlet specification only defines how to
+ * enable multipart configuration on a Servlet and as a result multipart request
+ * processing is likely not possible in a Filter unless the Servlet container
+ * provides a workaround such as Tomcat's "allowCasualMultipartParsing" property.
  *
  * <p>MultipartResolver lookup is customizable: Override this filter's
  * {@code lookupMultipartResolver} method to use a custom MultipartResolver
@@ -142,7 +147,7 @@ public class MultipartFilter extends OncePerRequestFilter {
 	 * bean name is "filterMultipartResolver".
 	 * <p>This can be overridden to use a custom MultipartResolver instance,
 	 * for example if not using a Spring web application context.
-	 * @return the MultipartResolver instance, or {@code null} if none found
+	 * @return the MultipartResolver instance
 	 */
 	protected MultipartResolver lookupMultipartResolver() {
 		WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(getServletContext());

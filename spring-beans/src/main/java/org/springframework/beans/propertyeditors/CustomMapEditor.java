@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Property editor for Maps, converting any source Map
@@ -73,9 +77,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 	 */
 	@SuppressWarnings("rawtypes")
 	public CustomMapEditor(Class<? extends Map> mapType, boolean nullAsEmptyMap) {
-		if (mapType == null) {
-			throw new IllegalArgumentException("Map type is required");
-		}
+		Assert.notNull(mapType, "Map type is required");
 		if (!Map.class.isAssignableFrom(mapType)) {
 			throw new IllegalArgumentException(
 					"Map type [" + mapType.getName() + "] does not implement [java.util.Map]");
@@ -97,7 +99,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 	 * Convert the given value to a Map of the target type.
 	 */
 	@Override
-	public void setValue(Object value) {
+	public void setValue(@Nullable Object value) {
 		if (value == null && this.nullAsEmptyMap) {
 			super.setValue(createMap(this.mapType, 0));
 		}
@@ -109,9 +111,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 			// Convert Map elements.
 			Map<?, ?> source = (Map<?, ?>) value;
 			Map<Object, Object> target = createMap(this.mapType, source.size());
-			for (Map.Entry<?, ?> entry : source.entrySet()) {
-				target.put(convertKey(entry.getKey()), convertValue(entry.getValue()));
-			}
+			source.forEach((key, val) -> target.put(convertKey(key), convertValue(val)));
 			super.setValue(target);
 		}
 		else {
@@ -130,18 +130,18 @@ public class CustomMapEditor extends PropertyEditorSupport {
 	protected Map<Object, Object> createMap(Class<? extends Map> mapType, int initialCapacity) {
 		if (!mapType.isInterface()) {
 			try {
-				return mapType.newInstance();
+				return ReflectionUtils.accessibleConstructor(mapType).newInstance();
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				throw new IllegalArgumentException(
-						"Could not instantiate map class [" + mapType.getName() + "]: " + ex.getMessage());
+						"Could not instantiate map class: " + mapType.getName(), ex);
 			}
 		}
 		else if (SortedMap.class == mapType) {
-			return new TreeMap<Object, Object>();
+			return new TreeMap<>();
 		}
 		else {
-			return new LinkedHashMap<Object, Object>(initialCapacity);
+			return new LinkedHashMap<>(initialCapacity);
 		}
 	}
 
@@ -197,6 +197,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 	 * there is no appropriate text representation.
 	 */
 	@Override
+	@Nullable
 	public String getAsText() {
 		return null;
 	}

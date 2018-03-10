@@ -17,11 +17,13 @@
 package org.springframework.jca.cci.core;
 
 import java.sql.SQLException;
+
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionFactory;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.lang.Nullable;
 
 /**
  * Generic callback interface for code that operates on a CCI Connection.
@@ -40,6 +42,7 @@ import org.springframework.dao.DataAccessException;
  * @see CciTemplate#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record)
  * @see CciTemplate#execute(javax.resource.cci.InteractionSpec, RecordCreator, RecordExtractor)
  */
+@FunctionalInterface
 public interface ConnectionCallback<T> {
 
 	/**
@@ -69,6 +72,7 @@ public interface ConnectionCallback<T> {
 	 * @see javax.resource.cci.ConnectionFactory#getMetaData()
 	 * @see CciTemplate#execute(javax.resource.cci.InteractionSpec, RecordCreator, RecordExtractor)
 	 */
+	@Nullable
 	T doInConnection(Connection connection, ConnectionFactory connectionFactory)
 			throws ResourceException, SQLException, DataAccessException;
 

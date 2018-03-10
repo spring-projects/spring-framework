@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,14 +28,14 @@ public class InstanceFilterTests {
 
 	@Test
 	public void emptyFilterApplyMatchIfEmpty() {
-		InstanceFilter<String> filter = new InstanceFilter<String>(null, null, true);
+		InstanceFilter<String> filter = new InstanceFilter<>(null, null, true);
 		match(filter, "foo");
 		match(filter, "bar");
 	}
 
 	@Test
 	public void includesFilter() {
-		InstanceFilter<String> filter = new InstanceFilter<String>(
+		InstanceFilter<String> filter = new InstanceFilter<>(
 				asList("First", "Second"), null, true);
 		match(filter, "Second");
 		doNotMatch(filter, "foo");
@@ -43,7 +43,7 @@ public class InstanceFilterTests {
 
 	@Test
 	public void excludesFilter() {
-		InstanceFilter<String> filter = new InstanceFilter<String>(
+		InstanceFilter<String> filter = new InstanceFilter<>(
 				null, asList("First", "Second"), true);
 		doNotMatch(filter, "Second");
 		match(filter, "foo");
@@ -51,7 +51,7 @@ public class InstanceFilterTests {
 
 	@Test
 	public void includesAndExcludesFilters() {
-		InstanceFilter<String> filter = new InstanceFilter<String>(
+		InstanceFilter<String> filter = new InstanceFilter<>(
 				asList("foo", "Bar"), asList("First", "Second"), true);
 		doNotMatch(filter, "Second");
 		match(filter, "foo");
@@ -59,7 +59,7 @@ public class InstanceFilterTests {
 
 	@Test
 	public void includesAndExcludesFiltersConflict() {
-		InstanceFilter<String> filter = new InstanceFilter<String>(
+		InstanceFilter<String> filter = new InstanceFilter<>(
 				asList("First"), asList("First"), true);
 		doNotMatch(filter, "First");
 	}

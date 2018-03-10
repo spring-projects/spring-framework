@@ -24,7 +24,7 @@ package org.springframework.tests.sample.beans;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class FactoryMethods {
+public class FactoryMethods {
 
 	public static FactoryMethods nullInstance() {
 		return null;

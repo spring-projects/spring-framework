@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,6 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.core.annotation.AnnotationUtilsTests.ImplicitAliasesContextConfig;
-import org.springframework.core.annotation.AnnotationUtilsTests.RequestMethod;
-import org.springframework.core.annotation.AnnotationUtilsTests.WebMapping;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -51,7 +48,7 @@ public class MapAnnotationAttributeExtractorTests extends AbstractAliasAwareAnno
 
 	@Test
 	public void enrichAndValidateAttributesWithImplicitAliasesAndMinimalAttributes() {
-		Map<String, Object> attributes = new HashMap<String, Object>();
+		Map<String, Object> attributes = new HashMap<>();
 		Map<String, Object> expectedAttributes = new HashMap<String, Object>() {{
 			put("groovyScript", "");
 			put("xmlFile", "");
@@ -127,7 +124,7 @@ public class MapAnnotationAttributeExtractorTests extends AbstractAliasAwareAnno
 
 		// Declare aliases in an order that will cause enrichAndValidateAttributes() to
 		// fail unless it considers all aliases in the set of implicit aliases.
-		MultiValueMap<String, String> aliases = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> aliases = new LinkedMultiValueMap<>();
 		aliases.put("xmlFile", Arrays.asList("value", "groovyScript", "location1", "location2", "location3"));
 		aliases.put("groovyScript", Arrays.asList("value", "xmlFile", "location1", "location2", "location3"));
 		aliases.put("value", Arrays.asList("xmlFile", "groovyScript", "location1", "location2", "location3"));

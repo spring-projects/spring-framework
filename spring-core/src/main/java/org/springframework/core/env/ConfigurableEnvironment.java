@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,24 +35,24 @@ import java.util.Map;
  *
  * <h4>Example: adding a new property source with highest search priority</h4>
  * <pre class="code">
- *   ConfigurableEnvironment environment = new StandardEnvironment();
- *   MutablePropertySources propertySources = environment.getPropertySources();
- *   Map<String, String> myMap = new HashMap<String, String>();
- *   myMap.put("xyz", "myValue");
- *   propertySources.addFirst(new MapPropertySource("MY_MAP", myMap));
+ * ConfigurableEnvironment environment = new StandardEnvironment();
+ * MutablePropertySources propertySources = environment.getPropertySources();
+ * Map<String, String> myMap = new HashMap<String, String>();
+ * myMap.put("xyz", "myValue");
+ * propertySources.addFirst(new MapPropertySource("MY_MAP", myMap));
  * </pre>
  *
  * <h4>Example: removing the default system properties property source</h4>
  * <pre class="code">
- *   MutablePropertySources propertySources = environment.getPropertySources();
- *   propertySources.remove(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME)
+ * MutablePropertySources propertySources = environment.getPropertySources();
+ * propertySources.remove(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME)
  * </pre>
  *
  * <h4>Example: mocking the system environment for testing purposes</h4>
  * <pre class="code">
- *   MutablePropertySources propertySources = environment.getPropertySources();
- *   MockPropertySource mockEnvVars = new MockPropertySource().withProperty("xyz", "myValue");
- *   propertySources.replace(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, mockEnvVars);
+ * MutablePropertySources propertySources = environment.getPropertySources();
+ * MockPropertySource mockEnvVars = new MockPropertySource().withProperty("xyz", "myValue");
+ * propertySources.replace(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, mockEnvVars);
  * </pre>
  *
  * When an {@link Environment} is being used by an {@code ApplicationContext}, it is
@@ -63,7 +63,6 @@ import java.util.Map;
  * container bootstrap process, including use by {@linkplain
  * org.springframework.context.support.PropertySourcesPlaceholderConfigurer property
  * placeholder configurers}.
- *
  *
  * @author Chris Beams
  * @since 3.1
@@ -108,9 +107,9 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	 * be searched when resolving properties against this {@code Environment} object.
 	 * The various {@link MutablePropertySources} methods such as
 	 * {@link MutablePropertySources#addFirst addFirst},
-	 * {@link MutablePropertySources#addFirst addLast},
-	 * {@link MutablePropertySources#addFirst addBefore} and
-	 * {@link MutablePropertySources#addFirst addAfter} allow for fine-grained control
+	 * {@link MutablePropertySources#addLast addLast},
+	 * {@link MutablePropertySources#addBefore addBefore} and
+	 * {@link MutablePropertySources#addAfter addAfter} allow for fine-grained control
 	 * over property source ordering. This is useful, for example, in ensuring that
 	 * certain user-defined property sources have search precedence over default property
 	 * sources such as the set of system properties or the set of system environment

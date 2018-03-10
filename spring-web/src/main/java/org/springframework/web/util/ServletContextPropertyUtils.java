@@ -17,6 +17,7 @@ package org.springframework.web.util;
 
 import javax.servlet.ServletContext;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.SystemPropertyUtils;
 
@@ -72,13 +73,16 @@ public abstract class ServletContextPropertyUtils {
      * @see SystemPropertyUtils#resolvePlaceholders(String, boolean)
 	 * @throws IllegalArgumentException if there is an unresolvable placeholder and the flag is false
 	 */
-	public static String resolvePlaceholders(String text, ServletContext servletContext, boolean ignoreUnresolvablePlaceholders) {
+	public static String resolvePlaceholders(String text, ServletContext servletContext,
+			boolean ignoreUnresolvablePlaceholders) {
+
 		PropertyPlaceholderHelper helper = (ignoreUnresolvablePlaceholders ? nonStrictHelper : strictHelper);
 		return helper.replacePlaceholders(text, new ServletContextPlaceholderResolver(text, servletContext));
 	}
 
 
-	private static class ServletContextPlaceholderResolver implements PropertyPlaceholderHelper.PlaceholderResolver {
+	private static class ServletContextPlaceholderResolver
+			implements PropertyPlaceholderHelper.PlaceholderResolver {
 
         private final String text;
 
@@ -90,6 +94,7 @@ public abstract class ServletContextPropertyUtils {
         }
 
         @Override
+		@Nullable
 		public String resolvePlaceholder(String placeholderName) {
             try {
                 String propVal = this.servletContext.getInitParameter(placeholderName);

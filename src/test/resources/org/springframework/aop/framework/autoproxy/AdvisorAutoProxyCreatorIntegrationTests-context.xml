@@ -47,12 +47,12 @@
 	</bean>
 
 	<bean id="txInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor">
-		<property name="transactionManager"><ref local="txManager"/></property>
-		<property name="transactionAttributeSource"><ref local="tas"/></property>
+		<property name="transactionManager"><ref bean="txManager"/></property>
+		<property name="transactionAttributeSource"><ref bean="tas"/></property>
 	</bean>
 
 	<bean id="txAdvisor" class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor">
-		<property name="transactionInterceptor"><ref local="txInterceptor"/></property>
+		<property name="transactionInterceptor"><ref bean="txInterceptor"/></property>
 		<property name="order"><value>10</value></property>
 	</bean>
 
@@ -66,8 +66,8 @@
 			scope="prototype">
 		<property name="dependencies">
 			<list>
-				<ref local="singletonDependency"/>
-				<ref local="prototypeDependency"/>
+				<ref bean="singletonDependency"/>
+				<ref bean="prototypeDependency"/>
 			</list>
 		</property>
 	</bean>

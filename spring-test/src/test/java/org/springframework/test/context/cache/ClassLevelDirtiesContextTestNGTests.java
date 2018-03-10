@@ -36,6 +36,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.testng.TrackingTestNGTestListener;
 
+import org.testng.ITestNGListener;
 import org.testng.TestNG;
 
 import static org.junit.Assert.*;
@@ -142,7 +143,7 @@ public class ClassLevelDirtiesContextTestNGTests {
 
 		final TrackingTestNGTestListener listener = new TrackingTestNGTestListener();
 		final TestNG testNG = new TestNG();
-		testNG.addListener(listener);
+		testNG.addListener((ITestNGListener) listener);
 		testNG.setTestClasses(new Class<?>[] { testClass });
 		testNG.setVerbose(0);
 		testNG.run();

@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -94,12 +95,12 @@ public abstract class Pointcuts {
 	@SuppressWarnings("serial")
 	private static class SetterPointcut extends StaticMethodMatcherPointcut implements Serializable {
 
-		public static SetterPointcut INSTANCE = new SetterPointcut();
+		public static final SetterPointcut INSTANCE = new SetterPointcut();
 
 		@Override
-		public boolean matches(Method method, Class<?> targetClass) {
+		public boolean matches(Method method, @Nullable Class<?> targetClass) {
 			return (method.getName().startsWith("set") &&
-					method.getParameterTypes().length == 1 &&
+					method.getParameterCount() == 1 &&
 					method.getReturnType() == Void.TYPE);
 		}
 
@@ -115,12 +116,12 @@ public abstract class Pointcuts {
 	@SuppressWarnings("serial")
 	private static class GetterPointcut extends StaticMethodMatcherPointcut implements Serializable {
 
-		public static GetterPointcut INSTANCE = new GetterPointcut();
+		public static final GetterPointcut INSTANCE = new GetterPointcut();
 
 		@Override
-		public boolean matches(Method method, Class<?> targetClass) {
+		public boolean matches(Method method, @Nullable Class<?> targetClass) {
 			return (method.getName().startsWith("get") &&
-					method.getParameterTypes().length == 0);
+					method.getParameterCount() == 0);
 		}
 
 		private Object readResolve() {

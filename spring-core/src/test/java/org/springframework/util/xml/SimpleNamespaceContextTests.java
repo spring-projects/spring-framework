@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -179,7 +179,7 @@ public class SimpleNamespaceContextTests {
 
 
 	private Set<String> getItemSet(Iterator<String> iterator) {
-		Set<String> itemSet = new HashSet<String>();
+		Set<String> itemSet = new HashSet<>();
 		while (iterator.hasNext()) {
 			itemSet.add(iterator.next());
 		}
@@ -187,7 +187,7 @@ public class SimpleNamespaceContextTests {
 	}
 
 	private Set<String> makeSet(String... items) {
-		Set<String> itemSet = new HashSet<String>();
+		Set<String> itemSet = new HashSet<>();
 		for (String item : items) {
 			itemSet.add(item);
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -345,7 +345,7 @@ public class ProxyFactoryTests {
 	public void testInterfaceProxiesCanBeOrderedThroughAnnotations() {
 		Object proxy1 = new ProxyFactory(new A()).getProxy();
 		Object proxy2 = new ProxyFactory(new B()).getProxy();
-		List<Object> list = new ArrayList<Object>(2);
+		List<Object> list = new ArrayList<>(2);
 		list.add(proxy1);
 		list.add(proxy2);
 		AnnotationAwareOrderComparator.sort(list);
@@ -361,12 +361,22 @@ public class ProxyFactoryTests {
 		pf2.setProxyTargetClass(true);
 		Object proxy1 = pf1.getProxy();
 		Object proxy2 = pf2.getProxy();
-		List<Object> list = new ArrayList<Object>(2);
+		List<Object> list = new ArrayList<>(2);
 		list.add(proxy1);
 		list.add(proxy2);
 		AnnotationAwareOrderComparator.sort(list);
 		assertSame(proxy2, list.get(0));
 		assertSame(proxy1, list.get(1));
+	}
+
+	@Test
+	public void testInterceptorWithoutJoinpoint() {
+		final TestBean target = new TestBean("tb");
+		ITestBean proxy = ProxyFactory.getProxy(ITestBean.class, (MethodInterceptor) invocation -> {
+			assertNull(invocation.getThis());
+			return invocation.getMethod().invoke(target, invocation.getArguments());
+		});
+		assertEquals("tb", proxy.getName());
 	}
 
 

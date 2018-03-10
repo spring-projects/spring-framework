@@ -33,7 +33,7 @@ import static org.junit.Assert.*;
  * @author Ramnivas Laddad
  * @author Chris Beams
  */
-public final class TargetPointcutSelectionTests {
+public class TargetPointcutSelectionTests {
 
 	public TestInterface testImpl1;
 

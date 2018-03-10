@@ -81,7 +81,7 @@ public class ExpressionEvaluatorTests {
 		Object[] args = new Object[] { new Object(), new Object() };
 		Collection<ConcurrentMapCache> caches = Collections.singleton(new ConcurrentMapCache("test"));
 
-		EvaluationContext evalCtx = eval.createEvaluationContext(caches, method, args,
+		EvaluationContext evalCtx = this.eval.createEvaluationContext(caches, method, args,
 				target, target.getClass(), null);
 		Collection<CacheOperation> ops = getOps("multipleCaching");
 
@@ -89,8 +89,8 @@ public class ExpressionEvaluatorTests {
 
 		AnnotatedElementKey key = new AnnotatedElementKey(method, AnnotatedClass.class);
 
-		Object keyA = eval.key(it.next().getKey(), key, evalCtx);
-		Object keyB = eval.key(it.next().getKey(), key, evalCtx);
+		Object keyA = this.eval.key(it.next().getKey(), key, evalCtx);
+		Object keyB = this.eval.key(it.next().getKey(), key, evalCtx);
 
 		assertEquals(args[0], keyA);
 		assertEquals(args[1], keyB);
@@ -100,7 +100,7 @@ public class ExpressionEvaluatorTests {
 	public void withReturnValue() throws Exception {
 		EvaluationContext context = createEvaluationContext("theResult");
 		Object value = new SpelExpressionParser().parseExpression("#result").getValue(context);
-		assertThat(value, equalTo((Object) "theResult"));
+		assertThat(value, equalTo("theResult"));
 	}
 
 	@Test
@@ -151,7 +151,7 @@ public class ExpressionEvaluatorTests {
 				Object.class);
 		Object[] args = new Object[] { new Object(), new Object() };
 		Collection<ConcurrentMapCache> caches = Collections.singleton(new ConcurrentMapCache("test"));
-		return eval.createEvaluationContext(caches, method, args, target, target.getClass(), result, beanFactory);
+		return this.eval.createEvaluationContext(caches, method, args, target, target.getClass(), result, beanFactory);
 	}
 
 

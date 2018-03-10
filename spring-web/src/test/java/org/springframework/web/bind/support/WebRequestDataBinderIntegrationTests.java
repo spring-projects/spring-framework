@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,8 @@
 
 package org.springframework.web.bind.support;
 
-import java.io.IOException;
 import java.util.List;
 import javax.servlet.MultipartConfigElement;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,7 +28,6 @@ import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -67,7 +64,6 @@ public class WebRequestDataBinderIntegrationTests {
 
 	@BeforeClass
 	public static void startJettyServer() throws Exception {
-
 		// Let server pick its own random, available port.
 		jettyServer = new Server(0);
 
@@ -101,11 +97,10 @@ public class WebRequestDataBinderIntegrationTests {
 
 	@Test
 	public void partsBinding() {
-
 		PartsBean bean = new PartsBean();
 		partsServlet.setBean(bean);
 
-		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
+		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 		Resource firstPart = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
 		parts.add("firstPart", firstPart);
 		parts.add("secondPart", "secondValue");
@@ -118,11 +113,10 @@ public class WebRequestDataBinderIntegrationTests {
 
 	@Test
 	public void partListBinding() {
-
 		PartListBean bean = new PartListBean();
 		partListServlet.setBean(bean);
 
-		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
+		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 		parts.add("partList", "first value");
 		parts.add("partList", "second value");
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
@@ -141,14 +135,10 @@ public class WebRequestDataBinderIntegrationTests {
 		private T bean;
 
 		@Override
-		public void service(HttpServletRequest request, HttpServletResponse response) throws
-				ServletException, IOException {
-
+		public void service(HttpServletRequest request, HttpServletResponse response) {
 			WebRequestDataBinder binder = new WebRequestDataBinder(bean);
 			ServletWebRequest webRequest = new ServletWebRequest(request, response);
-
 			binder.bind(webRequest);
-
 			response.setStatus(HttpServletResponse.SC_OK);
 		}
 
@@ -156,6 +146,7 @@ public class WebRequestDataBinderIntegrationTests {
 			this.bean = bean;
 		}
 	}
+
 
 	private static class PartsBean {
 
@@ -182,9 +173,11 @@ public class WebRequestDataBinderIntegrationTests {
 		}
 	}
 
+
 	@SuppressWarnings("serial")
 	private static class PartsServlet extends AbstractStandardMultipartServlet<PartsBean> {
 	}
+
 
 	private static class PartListBean {
 
@@ -199,6 +192,7 @@ public class WebRequestDataBinderIntegrationTests {
 			this.partList = partList;
 		}
 	}
+
 
 	@SuppressWarnings("serial")
 	private static class PartListServlet extends AbstractStandardMultipartServlet<PartListBean> {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.tests;
 
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Rule;
@@ -32,54 +31,69 @@ import static org.junit.Assert.*;
  * Tests for {@link TestGroup}.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  */
 public class TestGroupTests {
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
+
 	@Test
-	public void parseNull() throws Exception {
-		assertThat(TestGroup.parse(null), equalTo(Collections.<TestGroup> emptySet()));
+	public void parseNull() {
+		assertThat(TestGroup.parse(null), equalTo(Collections.emptySet()));
 	}
 
 	@Test
-	public void parseEmptyString() throws Exception {
-		assertThat(TestGroup.parse(""), equalTo(Collections.<TestGroup> emptySet()));
+	public void parseEmptyString() {
+		assertThat(TestGroup.parse(""), equalTo(Collections.emptySet()));
 	}
 
 	@Test
-	public void parseWithSpaces() throws Exception {
-		assertThat(TestGroup.parse("PERFORMANCE,  PERFORMANCE"),
-				equalTo((Set<TestGroup>) EnumSet.of(TestGroup.PERFORMANCE)));
+	public void parseBlankString() {
+		assertThat(TestGroup.parse("     "), equalTo(Collections.emptySet()));
 	}
 
 	@Test
-	public void parseInMixedCase() throws Exception {
+	public void parseWithSpaces() {
+		assertThat(TestGroup.parse(" PERFORMANCE,  PERFORMANCE "),
+				equalTo(EnumSet.of(TestGroup.PERFORMANCE)));
+	}
+
+	@Test
+	public void parseInMixedCase() {
 		assertThat(TestGroup.parse("performance,  PERFormaNCE"),
-				equalTo((Set<TestGroup>) EnumSet.of(TestGroup.PERFORMANCE)));
+				equalTo(EnumSet.of(TestGroup.PERFORMANCE)));
 	}
 
 	@Test
-	public void parseMissing() throws Exception {
+	public void parseMissing() {
 		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("Unable to find test group 'missing' when parsing " +
 				"testGroups value: 'performance, missing'. Available groups include: " +
-				"[LONG_RUNNING,PERFORMANCE,JMXMP,CI,CUSTOM_COMPILATION]");
+				"[LONG_RUNNING,PERFORMANCE,JMXMP,CI]");
 		TestGroup.parse("performance, missing");
 	}
 
 	@Test
-	public void parseAll() throws Exception {
-		assertThat(TestGroup.parse("all"), equalTo((Set<TestGroup>)EnumSet.allOf(TestGroup.class)));
+	public void parseAll() {
+		assertThat(TestGroup.parse("all"), equalTo(EnumSet.allOf(TestGroup.class)));
 	}
 
 	@Test
-	public void parseAllExcept() throws Exception {
-		Set<TestGroup> expected = new HashSet<TestGroup>(EnumSet.allOf(TestGroup.class));
-		expected.remove(TestGroup.CUSTOM_COMPILATION);
+	public void parseAllExceptPerformance() {
+		Set<TestGroup> expected = EnumSet.allOf(TestGroup.class);
 		expected.remove(TestGroup.PERFORMANCE);
-		assertThat(TestGroup.parse("all-custom_compilation,performance"), equalTo(expected));
+		assertThat(TestGroup.parse("all-performance"), equalTo(expected));
+	}
+
+	@Test
+	public void parseAllExceptMissing() {
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("Unable to find test group 'missing' when parsing " +
+				"testGroups value: 'all-missing'. Available groups include: " +
+				"[LONG_RUNNING,PERFORMANCE,JMXMP,CI]");
+		TestGroup.parse("all-missing");
 	}
 
 }

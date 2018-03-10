@@ -80,7 +80,7 @@ public class EnableCachingIntegrationTests {
 	public void beanCondition() {
 		this.context = new AnnotationConfigApplicationContext(BeanConditionConfig.class);
 		Cache cache = getCache();
-		FooService service = context.getBean(FooService.class);
+		FooService service = this.context.getBean(FooService.class);
 
 		Object key = new Object();
 		service.getWithCondition(key);
@@ -133,13 +133,13 @@ public class EnableCachingIntegrationTests {
 		@Override
 		@Cacheable
 		public Object getSimple(Object key) {
-			return counter.getAndIncrement();
+			return this.counter.getAndIncrement();
 		}
 
 		@Override
 		@Cacheable(condition = "@bar.enabled")
 		public Object getWithCondition(Object key) {
-			return counter.getAndIncrement();
+			return this.counter.getAndIncrement();
 		}
 	}
 
@@ -161,7 +161,7 @@ public class EnableCachingIntegrationTests {
 			}
 
 			public boolean isEnabled() {
-				return enabled;
+				return this.enabled;
 			}
 		}
 	}

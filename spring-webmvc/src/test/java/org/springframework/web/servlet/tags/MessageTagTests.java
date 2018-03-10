@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,23 +77,6 @@ public class MessageTagTests extends AbstractTagTests {
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
 		assertEquals("Correct message", "test message", message.toString());
-	}
-
-	@Test
-	public void messageTagWithNullCode() throws JspException {
-		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
-		MessageTag tag = new MessageTag() {
-			@Override
-			protected void writeMessage(String msg) {
-				message.append(msg);
-			}
-		};
-		tag.setPageContext(pc);
-		tag.setCode(null);
-		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
-		assertEquals("Correct message", "null", message.toString());
 	}
 
 	@Test
@@ -386,7 +369,7 @@ public class MessageTagTests extends AbstractTagTests {
 	public void nullMessageSource() throws JspException {
 		PageContext pc = createPageContext();
 		ConfigurableWebApplicationContext ctx = (ConfigurableWebApplicationContext)
-				RequestContextUtils.getWebApplicationContext(pc.getRequest(), pc.getServletContext());
+				RequestContextUtils.findWebApplicationContext((HttpServletRequest) pc.getRequest(), pc.getServletContext());
 		ctx.close();
 
 		MessageTag tag = new MessageTag();

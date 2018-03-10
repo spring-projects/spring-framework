@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -74,7 +75,7 @@ import org.springframework.web.util.WebUtils;
  * <li>It can use any {@link HandlerMapping} implementation - pre-built or provided as part
  * of an application - to control the routing of requests to handler objects. Default is
  * {@link org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping} and
- * {@link org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping}.
+ * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping}.
  * HandlerMapping objects can be defined as beans in the servlet's application context,
  * implementing the HandlerMapping interface, overriding the default HandlerMapping if
  * present. HandlerMappings can be given any bean name (they are tested by type).
@@ -84,7 +85,7 @@ import org.springframework.web.util.WebUtils;
  * {@link org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter}, for Spring's
  * {@link org.springframework.web.HttpRequestHandler} and
  * {@link org.springframework.web.servlet.mvc.Controller} interfaces, respectively. A default
- * {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter}
+ * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter}
  * will be registered as well. HandlerAdapter objects can be added as beans in the
  * application context, overriding the default HandlerAdapters. Like HandlerMappings,
  * HandlerAdapters can be given any bean name (they are tested by type).
@@ -92,7 +93,7 @@ import org.springframework.web.util.WebUtils;
  * <li>The dispatcher's exception resolution strategy can be specified via a
  * {@link HandlerExceptionResolver}, for example mapping certain exceptions to error pages.
  * Default are
- * {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver},
+ * {@link org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver},
  * {@link org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver}, and
  * {@link org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver}.
  * These HandlerExceptionResolvers can be overridden through the application context.
@@ -131,7 +132,7 @@ import org.springframework.web.util.WebUtils;
  * {@code HandlerAdapter} (for method-level annotations) is present in the dispatcher.</b>
  * This is the case by default. However, if you are defining custom {@code HandlerMappings}
  * or {@code HandlerAdapters}, then you need to make sure that a corresponding custom
- * {@code DefaultAnnotationHandlerMapping} and/or {@code AnnotationMethodHandlerAdapter}
+ * {@code RequestMappingHandlerMapping} and/or {@code RequestMappingHandlerAdapter}
  * is defined as well - provided that you intend to use {@code @RequestMapping}.
  *
  * <p><b>A web application can define any number of DispatcherServlets.</b>
@@ -264,6 +265,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private static final String DEFAULT_STRATEGIES_PATH = "DispatcherServlet.properties";
 
+	/**
+	 * Common prefix that DispatcherServlet's default strategy attributes start with.
+	 */
+	private static final String DEFAULT_STRATEGIES_PREFIX = "org.springframework.web.servlet";
 
 	/** Additional logger to use when no mapped handler is found for a request. */
 	protected static final Log pageNotFoundLogger = LogFactory.getLog(PAGE_NOT_FOUND_LOG_CATEGORY);
@@ -279,7 +284,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			defaultStrategies = PropertiesLoaderUtils.loadProperties(resource);
 		}
 		catch (IOException ex) {
-			throw new IllegalStateException("Could not load 'DispatcherServlet.properties': " + ex.getMessage());
+			throw new IllegalStateException("Could not load '" + DEFAULT_STRATEGIES_PATH + "': " + ex.getMessage());
 		}
 	}
 
@@ -302,30 +307,39 @@ public class DispatcherServlet extends FrameworkServlet {
 	private boolean cleanupAfterInclude = true;
 
 	/** MultipartResolver used by this servlet */
+	@Nullable
 	private MultipartResolver multipartResolver;
 
 	/** LocaleResolver used by this servlet */
+	@Nullable
 	private LocaleResolver localeResolver;
 
 	/** ThemeResolver used by this servlet */
+	@Nullable
 	private ThemeResolver themeResolver;
 
 	/** List of HandlerMappings used by this servlet */
+	@Nullable
 	private List<HandlerMapping> handlerMappings;
 
 	/** List of HandlerAdapters used by this servlet */
+	@Nullable
 	private List<HandlerAdapter> handlerAdapters;
 
 	/** List of HandlerExceptionResolvers used by this servlet */
+	@Nullable
 	private List<HandlerExceptionResolver> handlerExceptionResolvers;
 
 	/** RequestToViewNameTranslator used by this servlet */
+	@Nullable
 	private RequestToViewNameTranslator viewNameTranslator;
 
 	/** FlashMapManager used by this servlet */
+	@Nullable
 	private FlashMapManager flashMapManager;
 
 	/** List of ViewResolvers used by this servlet */
+	@Nullable
 	private List<ViewResolver> viewResolvers;
 
 
@@ -571,7 +585,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			Map<String, HandlerMapping> matchingBeans =
 					BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerMapping.class, true, false);
 			if (!matchingBeans.isEmpty()) {
-				this.handlerMappings = new ArrayList<HandlerMapping>(matchingBeans.values());
+				this.handlerMappings = new ArrayList<>(matchingBeans.values());
 				// We keep HandlerMappings in sorted order.
 				AnnotationAwareOrderComparator.sort(this.handlerMappings);
 			}
@@ -609,7 +623,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			Map<String, HandlerAdapter> matchingBeans =
 					BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerAdapter.class, true, false);
 			if (!matchingBeans.isEmpty()) {
-				this.handlerAdapters = new ArrayList<HandlerAdapter>(matchingBeans.values());
+				this.handlerAdapters = new ArrayList<>(matchingBeans.values());
 				// We keep HandlerAdapters in sorted order.
 				AnnotationAwareOrderComparator.sort(this.handlerAdapters);
 			}
@@ -647,7 +661,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			Map<String, HandlerExceptionResolver> matchingBeans = BeanFactoryUtils
 					.beansOfTypeIncludingAncestors(context, HandlerExceptionResolver.class, true, false);
 			if (!matchingBeans.isEmpty()) {
-				this.handlerExceptionResolvers = new ArrayList<HandlerExceptionResolver>(matchingBeans.values());
+				this.handlerExceptionResolvers = new ArrayList<>(matchingBeans.values());
 				// We keep HandlerExceptionResolvers in sorted order.
 				AnnotationAwareOrderComparator.sort(this.handlerExceptionResolvers);
 			}
@@ -709,7 +723,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			Map<String, ViewResolver> matchingBeans =
 					BeanFactoryUtils.beansOfTypeIncludingAncestors(context, ViewResolver.class, true, false);
 			if (!matchingBeans.isEmpty()) {
-				this.viewResolvers = new ArrayList<ViewResolver>(matchingBeans.values());
+				this.viewResolvers = new ArrayList<>(matchingBeans.values());
 				// We keep ViewResolvers in sorted order.
 				AnnotationAwareOrderComparator.sort(this.viewResolvers);
 			}
@@ -763,13 +777,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @return the ThemeSource, if any
 	 * @see #getWebApplicationContext()
 	 */
+	@Nullable
 	public final ThemeSource getThemeSource() {
-		if (getWebApplicationContext() instanceof ThemeSource) {
-			return (ThemeSource) getWebApplicationContext();
-		}
-		else {
-			return null;
-		}
+		return (getWebApplicationContext() instanceof ThemeSource ? (ThemeSource) getWebApplicationContext() : null);
 	}
 
 	/**
@@ -777,8 +787,24 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @return the MultipartResolver used by this servlet, or {@code null} if none
 	 * (indicating that no multipart support is available)
 	 */
+	@Nullable
 	public final MultipartResolver getMultipartResolver() {
 		return this.multipartResolver;
+	}
+
+	/**
+	 * Return the configured {@link HandlerMapping} beans that were detected by
+	 * type in the {@link WebApplicationContext} or initialized based on the
+	 * default set of strategies from {@literal DispatcherServlet.properties}.
+	 * <p><strong>Note:</strong> This method may return {@code null} if invoked
+	 * prior to {@link #onRefresh(ApplicationContext)}.
+	 * @return an immutable list with the configured mappings, or {@code null}
+	 * if not initialized yet
+	 * @since 5.0
+	 */
+	@Nullable
+	public final List<HandlerMapping> getHandlerMappings() {
+		return (this.handlerMappings != null ? Collections.unmodifiableList(this.handlerMappings) : null);
 	}
 
 	/**
@@ -814,7 +840,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		String value = defaultStrategies.getProperty(key);
 		if (value != null) {
 			String[] classNames = StringUtils.commaDelimitedListToStringArray(value);
-			List<T> strategies = new ArrayList<T>(classNames.length);
+			List<T> strategies = new ArrayList<>(classNames.length);
 			for (String className : classNames) {
 				try {
 					Class<?> clazz = ClassUtils.forName(className, DispatcherServlet.class.getClassLoader());
@@ -824,18 +850,18 @@ public class DispatcherServlet extends FrameworkServlet {
 				catch (ClassNotFoundException ex) {
 					throw new BeanInitializationException(
 							"Could not find DispatcherServlet's default strategy class [" + className +
-									"] for interface [" + key + "]", ex);
+							"] for interface [" + key + "]", ex);
 				}
 				catch (LinkageError err) {
 					throw new BeanInitializationException(
-							"Error loading DispatcherServlet's default strategy class [" + className +
-									"] for interface [" + key + "]: problem with class file or dependent class", err);
+							"Unresolvable class definition for DispatcherServlet's default strategy class [" +
+							className + "] for interface [" + key + "]", err);
 				}
 			}
 			return strategies;
 		}
 		else {
-			return new LinkedList<T>();
+			return new LinkedList<>();
 		}
 	}
 
@@ -870,11 +896,11 @@ public class DispatcherServlet extends FrameworkServlet {
 		// to be able to restore the original attributes after the include.
 		Map<String, Object> attributesSnapshot = null;
 		if (WebUtils.isIncludeRequest(request)) {
-			attributesSnapshot = new HashMap<String, Object>();
+			attributesSnapshot = new HashMap<>();
 			Enumeration<?> attrNames = request.getAttributeNames();
 			while (attrNames.hasMoreElements()) {
 				String attrName = (String) attrNames.nextElement();
-				if (this.cleanupAfterInclude || attrName.startsWith("org.springframework.web.servlet")) {
+				if (this.cleanupAfterInclude || attrName.startsWith(DEFAULT_STRATEGIES_PREFIX)) {
 					attributesSnapshot.put(attrName, request.getAttribute(attrName));
 				}
 			}
@@ -886,12 +912,14 @@ public class DispatcherServlet extends FrameworkServlet {
 		request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
 		request.setAttribute(THEME_SOURCE_ATTRIBUTE, getThemeSource());
 
-		FlashMap inputFlashMap = this.flashMapManager.retrieveAndUpdate(request, response);
-		if (inputFlashMap != null) {
-			request.setAttribute(INPUT_FLASH_MAP_ATTRIBUTE, Collections.unmodifiableMap(inputFlashMap));
+		if (this.flashMapManager != null) {
+			FlashMap inputFlashMap = this.flashMapManager.retrieveAndUpdate(request, response);
+			if (inputFlashMap != null) {
+				request.setAttribute(INPUT_FLASH_MAP_ATTRIBUTE, Collections.unmodifiableMap(inputFlashMap));
+			}
+			request.setAttribute(OUTPUT_FLASH_MAP_ATTRIBUTE, new FlashMap());
+			request.setAttribute(FLASH_MAP_MANAGER_ATTRIBUTE, this.flashMapManager);
 		}
-		request.setAttribute(OUTPUT_FLASH_MAP_ATTRIBUTE, new FlashMap());
-		request.setAttribute(FLASH_MAP_MANAGER_ATTRIBUTE, this.flashMapManager);
 
 		try {
 			doDispatch(request, response);
@@ -934,7 +962,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 				// Determine handler for the current request.
 				mappedHandler = getHandler(processedRequest);
-				if (mappedHandler == null || mappedHandler.getHandler() == null) {
+				if (mappedHandler == null) {
 					noHandlerFound(processedRequest, response);
 					return;
 				}
@@ -972,7 +1000,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			catch (Exception ex) {
 				dispatchException = ex;
 			}
-			catch (Error err) {
+			catch (Throwable err) {
 				// As of 4.3, we're processing Errors thrown from handler methods as well,
 				// making them available for @ExceptionHandler methods and other scenarios.
 				dispatchException = new NestedServletException("Handler dispatch failed", err);
@@ -982,7 +1010,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		catch (Exception ex) {
 			triggerAfterCompletion(processedRequest, response, mappedHandler, ex);
 		}
-		catch (Error err) {
+		catch (Throwable err) {
 			triggerAfterCompletion(processedRequest, response, mappedHandler,
 					new NestedServletException("Handler processing failed", err));
 		}
@@ -1005,9 +1033,12 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Do we need view name translation?
 	 */
-	private void applyDefaultViewName(HttpServletRequest request, ModelAndView mv) throws Exception {
+	private void applyDefaultViewName(HttpServletRequest request, @Nullable ModelAndView mv) throws Exception {
 		if (mv != null && !mv.hasView()) {
-			mv.setViewName(getDefaultViewName(request));
+			String defaultViewName = getDefaultViewName(request);
+			if (defaultViewName != null) {
+				mv.setViewName(defaultViewName);
+			}
 		}
 	}
 
@@ -1016,7 +1047,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * either a ModelAndView or an Exception to be resolved to a ModelAndView.
 	 */
 	private void processDispatchResult(HttpServletRequest request, HttpServletResponse response,
-			HandlerExecutionChain mappedHandler, ModelAndView mv, Exception exception) throws Exception {
+			@Nullable HandlerExecutionChain mappedHandler, @Nullable ModelAndView mv,
+			@Nullable Exception exception) throws Exception {
 
 		boolean errorView = false;
 
@@ -1065,16 +1097,12 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	@Override
 	protected LocaleContext buildLocaleContext(final HttpServletRequest request) {
-		if (this.localeResolver instanceof LocaleContextResolver) {
-			return ((LocaleContextResolver) this.localeResolver).resolveLocaleContext(request);
+		LocaleResolver lr = this.localeResolver;
+		if (lr instanceof LocaleContextResolver) {
+			return ((LocaleContextResolver) lr).resolveLocaleContext(request);
 		}
 		else {
-			return new LocaleContext() {
-				@Override
-				public Locale getLocale() {
-					return localeResolver.resolveLocale(request);
-				}
-			};
+			return () -> (lr != null ? lr.resolveLocale(request) : request.getLocale());
 		}
 	}
 
@@ -1091,16 +1119,41 @@ public class DispatcherServlet extends FrameworkServlet {
 				logger.debug("Request is already a MultipartHttpServletRequest - if not in a forward, " +
 						"this typically results from an additional MultipartFilter in web.xml");
 			}
-			else if (request.getAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE) instanceof MultipartException) {
+			else if (hasMultipartException(request) ) {
 				logger.debug("Multipart resolution failed for current request before - " +
 						"skipping re-resolution for undisturbed error rendering");
 			}
 			else {
-				return this.multipartResolver.resolveMultipart(request);
+				try {
+					return this.multipartResolver.resolveMultipart(request);
+				}
+				catch (MultipartException ex) {
+					if (request.getAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE) != null) {
+						logger.debug("Multipart resolution failed for error dispatch", ex);
+						// Keep processing error dispatch with regular request handle below
+					}
+					else {
+						throw ex;
+					}
+				}
 			}
 		}
 		// If not returned before: return original request.
 		return request;
+	}
+
+	/**
+	 * Check "javax.servlet.error.exception" attribute for a multipart exception.
+	 */
+	private boolean hasMultipartException(HttpServletRequest request) {
+		Throwable error = (Throwable) request.getAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE);
+		while (error != null) {
+			if (error instanceof MultipartException) {
+				return true;
+			}
+			error = error.getCause();
+		}
+		return false;
 	}
 
 	/**
@@ -1109,10 +1162,12 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @see MultipartResolver#cleanupMultipart
 	 */
 	protected void cleanupMultipart(HttpServletRequest request) {
-		MultipartHttpServletRequest multipartRequest =
-				WebUtils.getNativeRequest(request, MultipartHttpServletRequest.class);
-		if (multipartRequest != null) {
-			this.multipartResolver.cleanupMultipart(multipartRequest);
+		if (this.multipartResolver != null) {
+			MultipartHttpServletRequest multipartRequest =
+					WebUtils.getNativeRequest(request, MultipartHttpServletRequest.class);
+			if (multipartRequest != null) {
+				this.multipartResolver.cleanupMultipart(multipartRequest);
+			}
 		}
 	}
 
@@ -1122,15 +1177,18 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param request current HTTP request
 	 * @return the HandlerExecutionChain, or {@code null} if no handler could be found
 	 */
+	@Nullable
 	protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
-		for (HandlerMapping hm : this.handlerMappings) {
-			if (logger.isTraceEnabled()) {
-				logger.trace(
-						"Testing handler map [" + hm + "] in DispatcherServlet with name '" + getServletName() + "'");
-			}
-			HandlerExecutionChain handler = hm.getHandler(request);
-			if (handler != null) {
-				return handler;
+		if (this.handlerMappings != null) {
+			for (HandlerMapping hm : this.handlerMappings) {
+				if (logger.isTraceEnabled()) {
+					logger.trace(
+							"Testing handler map [" + hm + "] in DispatcherServlet with name '" + getServletName() + "'");
+				}
+				HandlerExecutionChain handler = hm.getHandler(request);
+				if (handler != null) {
+					return handler;
+				}
 			}
 		}
 		return null;
@@ -1162,12 +1220,14 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @throws ServletException if no HandlerAdapter can be found for the handler. This is a fatal error.
 	 */
 	protected HandlerAdapter getHandlerAdapter(Object handler) throws ServletException {
-		for (HandlerAdapter ha : this.handlerAdapters) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Testing handler adapter [" + ha + "]");
-			}
-			if (ha.supports(handler)) {
-				return ha;
+		if (this.handlerAdapters != null) {
+			for (HandlerAdapter ha : this.handlerAdapters) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Testing handler adapter [" + ha + "]");
+				}
+				if (ha.supports(handler)) {
+					return ha;
+				}
 			}
 		}
 		throw new ServletException("No adapter for handler [" + handler +
@@ -1184,15 +1244,18 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @return a corresponding ModelAndView to forward to
 	 * @throws Exception if no error ModelAndView found
 	 */
+	@Nullable
 	protected ModelAndView processHandlerException(HttpServletRequest request, HttpServletResponse response,
-			Object handler, Exception ex) throws Exception {
+			@Nullable Object handler, Exception ex) throws Exception {
 
 		// Check registered HandlerExceptionResolvers...
 		ModelAndView exMv = null;
-		for (HandlerExceptionResolver handlerExceptionResolver : this.handlerExceptionResolvers) {
-			exMv = handlerExceptionResolver.resolveException(request, response, handler, ex);
-			if (exMv != null) {
-				break;
+		if (this.handlerExceptionResolvers != null) {
+			for (HandlerExceptionResolver handlerExceptionResolver : this.handlerExceptionResolvers) {
+				exMv = handlerExceptionResolver.resolveException(request, response, handler, ex);
+				if (exMv != null) {
+					break;
+				}
 			}
 		}
 		if (exMv != null) {
@@ -1202,7 +1265,10 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 			// We might still need view name translation for a plain error model...
 			if (!exMv.hasView()) {
-				exMv.setViewName(getDefaultViewName(request));
+				String defaultViewName = getDefaultViewName(request);
+				if (defaultViewName != null) {
+					exMv.setViewName(defaultViewName);
+				}
 			}
 			if (logger.isDebugEnabled()) {
 				logger.debug("Handler execution resulted in exception - forwarding to resolved error view: " + exMv, ex);
@@ -1225,13 +1291,15 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	protected void render(ModelAndView mv, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		// Determine locale for request and apply it to the response.
-		Locale locale = this.localeResolver.resolveLocale(request);
+		Locale locale =
+				(this.localeResolver != null ? this.localeResolver.resolveLocale(request) : request.getLocale());
 		response.setLocale(locale);
 
 		View view;
-		if (mv.isReference()) {
+		String viewName = mv.getViewName();
+		if (viewName != null) {
 			// We need to resolve the view name.
-			view = resolveViewName(mv.getViewName(), mv.getModelInternal(), locale, request);
+			view = resolveViewName(viewName, mv.getModelInternal(), locale, request);
 			if (view == null) {
 				throw new ServletException("Could not resolve view with name '" + mv.getViewName() +
 						"' in servlet with name '" + getServletName() + "'");
@@ -1271,8 +1339,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @return the view name (or {@code null} if no default found)
 	 * @throws Exception if view name translation failed
 	 */
+	@Nullable
 	protected String getDefaultViewName(HttpServletRequest request) throws Exception {
-		return this.viewNameTranslator.getViewName(request);
+		return (this.viewNameTranslator != null ? this.viewNameTranslator.getViewName(request) : null);
 	}
 
 	/**
@@ -1289,20 +1358,23 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * (typically in case of problems creating an actual View object)
 	 * @see ViewResolver#resolveViewName
 	 */
-	protected View resolveViewName(String viewName, Map<String, Object> model, Locale locale,
-			HttpServletRequest request) throws Exception {
+	@Nullable
+	protected View resolveViewName(String viewName, @Nullable Map<String, Object> model,
+			Locale locale, HttpServletRequest request) throws Exception {
 
-		for (ViewResolver viewResolver : this.viewResolvers) {
-			View view = viewResolver.resolveViewName(viewName, locale);
-			if (view != null) {
-				return view;
+		if (this.viewResolvers != null) {
+			for (ViewResolver viewResolver : this.viewResolvers) {
+				View view = viewResolver.resolveViewName(viewName, locale);
+				if (view != null) {
+					return view;
+				}
 			}
 		}
 		return null;
 	}
 
 	private void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse response,
-			HandlerExecutionChain mappedHandler, Exception ex) throws Exception {
+			@Nullable HandlerExecutionChain mappedHandler, Exception ex) throws Exception {
 
 		if (mappedHandler != null) {
 			mappedHandler.triggerAfterCompletion(request, response, ex);
@@ -1319,11 +1391,11 @@ public class DispatcherServlet extends FrameworkServlet {
 	private void restoreAttributesAfterInclude(HttpServletRequest request, Map<?,?> attributesSnapshot) {
 		// Need to copy into separate Collection here, to avoid side effects
 		// on the Enumeration when removing attributes.
-		Set<String> attrsToCheck = new HashSet<String>();
+		Set<String> attrsToCheck = new HashSet<>();
 		Enumeration<?> attrNames = request.getAttributeNames();
 		while (attrNames.hasMoreElements()) {
 			String attrName = (String) attrNames.nextElement();
-			if (this.cleanupAfterInclude || attrName.startsWith("org.springframework.web.servlet")) {
+			if (this.cleanupAfterInclude || attrName.startsWith(DEFAULT_STRATEGIES_PREFIX)) {
 				attrsToCheck.add(attrName);
 			}
 		}

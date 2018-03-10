@@ -45,7 +45,7 @@ public class WebTestContextBootstrapper extends DefaultTestContextBootstrapper {
 	 */
 	@Override
 	protected Class<? extends ContextLoader> getDefaultContextLoaderClass(Class<?> testClass) {
-		if (AnnotatedElementUtils.findMergedAnnotation(testClass, WebAppConfiguration.class) != null) {
+		if (AnnotatedElementUtils.hasAnnotation(testClass, WebAppConfiguration.class)) {
 			return WebDelegatingSmartContextLoader.class;
 		}
 		else {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import javax.servlet.jsp.tagext.TryCatchFinally;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.servlet.support.JspAwareRequestContext;
 import org.springframework.web.servlet.support.RequestContext;
 
@@ -60,6 +62,7 @@ public abstract class RequestContextAwareTag extends TagSupport implements TryCa
 	protected final Log logger = LogFactory.getLog(getClass());
 
 
+	@Nullable
 	private RequestContext requestContext;
 
 
@@ -79,11 +82,7 @@ public abstract class RequestContextAwareTag extends TagSupport implements TryCa
 			}
 			return doStartTagInternal();
 		}
-		catch (JspException ex) {
-			logger.error(ex.getMessage(), ex);
-			throw ex;
-		}
-		catch (RuntimeException ex) {
+		catch (JspException | RuntimeException ex) {
 			logger.error(ex.getMessage(), ex);
 			throw ex;
 		}
@@ -97,6 +96,7 @@ public abstract class RequestContextAwareTag extends TagSupport implements TryCa
 	 * Return the current RequestContext.
 	 */
 	protected final RequestContext getRequestContext() {
+		Assert.state(this.requestContext != null, "No current RequestContext");
 		return this.requestContext;
 	}
 

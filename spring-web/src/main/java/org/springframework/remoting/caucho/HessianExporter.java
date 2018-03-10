@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import com.caucho.hessian.server.HessianSkeleton;
 import org.apache.commons.logging.Log;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.support.RemoteExporter;
 import org.springframework.util.Assert;
 import org.springframework.util.CommonsLogWriter;
@@ -61,10 +62,13 @@ public class HessianExporter extends RemoteExporter implements InitializingBean 
 
 	private SerializerFactory serializerFactory = new SerializerFactory();
 
+	@Nullable
 	private HessianRemoteResolver remoteResolver;
 
+	@Nullable
 	private Log debugLogger;
 
+	@Nullable
 	private HessianSkeleton skeleton;
 
 
@@ -74,7 +78,7 @@ public class HessianExporter extends RemoteExporter implements InitializingBean 
 	 * of type {@code com.caucho.hessian.io.SerializerFactory},
 	 * with custom bean property values applied.
 	 */
-	public void setSerializerFactory(SerializerFactory serializerFactory) {
+	public void setSerializerFactory(@Nullable SerializerFactory serializerFactory) {
 		this.serializerFactory = (serializerFactory != null ? serializerFactory : new SerializerFactory());
 	}
 
@@ -154,15 +158,16 @@ public class HessianExporter extends RemoteExporter implements InitializingBean 
 			OutputStream osToUse = outputStream;
 
 			if (this.debugLogger != null && this.debugLogger.isDebugEnabled()) {
-				PrintWriter debugWriter = new PrintWriter(new CommonsLogWriter(this.debugLogger));
-				@SuppressWarnings("resource")
-				HessianDebugInputStream dis = new HessianDebugInputStream(inputStream, debugWriter);
-				@SuppressWarnings("resource")
-				HessianDebugOutputStream dos = new HessianDebugOutputStream(outputStream, debugWriter);
-				dis.startTop2();
-				dos.startTop2();
-				isToUse = dis;
-				osToUse = dos;
+				try (PrintWriter debugWriter = new PrintWriter(new CommonsLogWriter(this.debugLogger))){
+					@SuppressWarnings("resource")
+					HessianDebugInputStream dis = new HessianDebugInputStream(inputStream, debugWriter);
+					@SuppressWarnings("resource")
+					HessianDebugOutputStream dos = new HessianDebugOutputStream(outputStream, debugWriter);
+					dis.startTop2();
+					dos.startTop2();
+					isToUse = dis;
+					osToUse = dos;
+				}
 			}
 
 			if (!isToUse.markSupported()) {
@@ -182,7 +187,7 @@ public class HessianExporter extends RemoteExporter implements InitializingBean 
 				major = isToUse.read();
 				minor = isToUse.read();
 				if (major != 0x02) {
-					throw new IOException("Version " + major + "." + minor + " is not understood");
+					throw new IOException("Version " + major + '.' + minor + " is not understood");
 				}
 				in = new Hessian2Input(isToUse);
 				out = new Hessian2Output(osToUse);
@@ -211,10 +216,8 @@ public class HessianExporter extends RemoteExporter implements InitializingBean 
 				throw new IOException("Expected 'H'/'C' (Hessian 2.0) or 'c' (Hessian 1.0) in hessian input at " + code);
 			}
 
-			if (this.serializerFactory != null) {
-				in.setSerializerFactory(this.serializerFactory);
-				out.setSerializerFactory(this.serializerFactory);
-			}
+			in.setSerializerFactory(this.serializerFactory);
+			out.setSerializerFactory(this.serializerFactory);
 			if (this.remoteResolver != null) {
 				in.setRemoteResolver(this.remoteResolver);
 			}

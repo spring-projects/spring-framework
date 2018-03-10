@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public interface ConverterFactory<S, R> {
 	 * Get the converter to convert from S to target type T, where T is also an instance of R.
 	 * @param <T> the target type
 	 * @param targetType the target type to convert to
-	 * @return A converter from S to T
+	 * @return a converter from S to T
 	 */
 	<T extends R> Converter<S, T> getConverter(Class<T> targetType);
 

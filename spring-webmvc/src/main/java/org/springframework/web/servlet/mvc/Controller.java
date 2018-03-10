@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -106,6 +107,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @see org.springframework.web.context.ServletContextAware
  * @see org.springframework.web.context.support.WebApplicationObjectSupport
  */
+@FunctionalInterface
 public interface Controller {
 
 	/**
@@ -118,6 +120,7 @@ public interface Controller {
 	 * @return a ModelAndView to render, or {@code null} if handled directly
 	 * @throws Exception in case of errors
 	 */
+	@Nullable
 	ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception;
 
 }

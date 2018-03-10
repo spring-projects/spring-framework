@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link FactoryBean} for a JCache {@link javax.cache.CacheManager},
@@ -41,12 +42,16 @@ import org.springframework.beans.factory.InitializingBean;
 public class JCacheManagerFactoryBean
 		implements FactoryBean<CacheManager>, BeanClassLoaderAware, InitializingBean, DisposableBean {
 
+	@Nullable
 	private URI cacheManagerUri;
 
+	@Nullable
 	private Properties cacheManagerProperties;
 
+	@Nullable
 	private ClassLoader beanClassLoader;
 
+	@Nullable
 	private CacheManager cacheManager;
 
 
@@ -54,7 +59,7 @@ public class JCacheManagerFactoryBean
 	 * Specify the URI for the desired CacheManager.
 	 * Default is {@code null} (i.e. JCache's default).
 	 */
-	public void setCacheManagerUri(URI cacheManagerUri) {
+	public void setCacheManagerUri(@Nullable URI cacheManagerUri) {
 		this.cacheManagerUri = cacheManagerUri;
 	}
 
@@ -63,7 +68,7 @@ public class JCacheManagerFactoryBean
 	 * Default is {@code null} (i.e. no special properties to apply).
 	 * @see javax.cache.spi.CachingProvider#getCacheManager(URI, ClassLoader, Properties)
 	 */
-	public void setCacheManagerProperties(Properties cacheManagerProperties) {
+	public void setCacheManagerProperties(@Nullable Properties cacheManagerProperties) {
 		this.cacheManagerProperties = cacheManagerProperties;
 	}
 
@@ -80,6 +85,7 @@ public class JCacheManagerFactoryBean
 
 
 	@Override
+	@Nullable
 	public CacheManager getObject() {
 		return this.cacheManager;
 	}
@@ -97,7 +103,9 @@ public class JCacheManagerFactoryBean
 
 	@Override
 	public void destroy() {
-		this.cacheManager.close();
+		if (this.cacheManager != null) {
+			this.cacheManager.close();
+		}
 	}
 
 }

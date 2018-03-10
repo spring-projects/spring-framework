@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.support;
 
 import java.util.EnumSet;
+
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterRegistration;
@@ -27,6 +28,7 @@ import javax.servlet.ServletRegistration;
 
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.core.Conventions;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.AbstractContextLoaderInitializer;
@@ -38,17 +40,8 @@ import org.springframework.web.servlet.FrameworkServlet;
  * Base class for {@link org.springframework.web.WebApplicationInitializer}
  * implementations that register a {@link DispatcherServlet} in the servlet context.
  *
- * <p>Concrete implementations are required to implement
- * {@link #createServletApplicationContext()}, as well as {@link #getServletMappings()},
- * both of which get invoked from {@link #registerDispatcherServlet(ServletContext)}.
- * Further customization can be achieved by overriding
- * {@link #customizeRegistration(ServletRegistration.Dynamic)}.
- *
- * <p>Because this class extends from {@link AbstractContextLoaderInitializer}, concrete
- * implementations are also required to implement {@link #createRootApplicationContext()}
- * to set up a parent "<strong>root</strong>" application context. If a root context is
- * not desired, implementations can simply return {@code null} in the
- * {@code createRootApplicationContext()} implementation.
+ * <p>Most applications should consider extending the Spring Java config, sub-class
+ * {@link AbstractAnnotationConfigDispatcherServletInitializer}.
  *
  * @author Arjen Poutsma
  * @author Chris Beams
@@ -150,6 +143,7 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	 * @see DispatcherServlet#setContextInitializers
 	 * @see #getRootApplicationContextInitializers()
 	 */
+	@Nullable
 	protected ApplicationContextInitializer<?>[] getServletApplicationContextInitializers() {
 		return null;
 	}
@@ -166,6 +160,7 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	 * @return an array of filters or {@code null}
 	 * @see #registerServletFilter(ServletContext, Filter)
 	 */
+	@Nullable
 	protected Filter[] getServletFilters() {
 		return null;
 	}

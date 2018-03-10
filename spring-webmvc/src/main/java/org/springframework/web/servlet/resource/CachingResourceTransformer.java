@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,12 +43,16 @@ public class CachingResourceTransformer implements ResourceTransformer {
 	private final Cache cache;
 
 
-	public CachingResourceTransformer(CacheManager cacheManager, String cacheName) {
-		this(cacheManager.getCache(cacheName));
-	}
-
 	public CachingResourceTransformer(Cache cache) {
 		Assert.notNull(cache, "Cache is required");
+		this.cache = cache;
+	}
+
+	public CachingResourceTransformer(CacheManager cacheManager, String cacheName) {
+		Cache cache = cacheManager.getCache(cacheName);
+		if (cache == null) {
+			throw new IllegalArgumentException("Cache '" + cacheName + "' not found");
+		}
 		this.cache = cache;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.cache.interceptor;
 
 import org.springframework.cache.Cache;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -31,14 +32,15 @@ public abstract class AbstractCacheInvoker {
 
 	private CacheErrorHandler errorHandler;
 
+
+	protected AbstractCacheInvoker() {
+		this.errorHandler = new SimpleCacheErrorHandler();
+	}
+
 	protected AbstractCacheInvoker(CacheErrorHandler errorHandler) {
-		Assert.notNull("ErrorHandler must not be null");
 		this.errorHandler = errorHandler;
 	}
 
-	protected AbstractCacheInvoker() {
-		 this(new SimpleCacheErrorHandler());
-	}
 
 	/**
 	 * Set the {@link CacheErrorHandler} instance to use to handle errors
@@ -46,6 +48,7 @@ public abstract class AbstractCacheInvoker {
 	 * is used who throws any exception as is.
 	 */
 	public void setErrorHandler(CacheErrorHandler errorHandler) {
+		Assert.notNull(errorHandler, "CacheErrorHandler must not be null");
 		this.errorHandler = errorHandler;
 	}
 
@@ -56,6 +59,7 @@ public abstract class AbstractCacheInvoker {
 		return this.errorHandler;
 	}
 
+
 	/**
 	 * Execute {@link Cache#get(Object)} on the specified {@link Cache} and
 	 * invoke the error handler if an exception occurs. Return {@code null}
@@ -63,13 +67,14 @@ public abstract class AbstractCacheInvoker {
 	 * miss in case of error.
 	 * @see Cache#get(Object)
 	 */
+	@Nullable
 	protected Cache.ValueWrapper doGet(Cache cache, Object key) {
 		try {
 			return cache.get(key);
 		}
-		catch (RuntimeException e) {
-			getErrorHandler().handleCacheGetError(e, cache, key);
-			return null; // If the exception is handled, return a cache miss
+		catch (RuntimeException ex) {
+			getErrorHandler().handleCacheGetError(ex, cache, key);
+			return null;  // If the exception is handled, return a cache miss
 		}
 	}
 
@@ -77,12 +82,12 @@ public abstract class AbstractCacheInvoker {
 	 * Execute {@link Cache#put(Object, Object)} on the specified {@link Cache}
 	 * and invoke the error handler if an exception occurs.
 	 */
-	protected void doPut(Cache cache, Object key, Object result) {
+	protected void doPut(Cache cache, Object key, @Nullable Object result) {
 		try {
 			cache.put(key, result);
 		}
-		catch (RuntimeException e) {
-			getErrorHandler().handleCachePutError(e, cache, key, result);
+		catch (RuntimeException ex) {
+			getErrorHandler().handleCachePutError(ex, cache, key, result);
 		}
 	}
 
@@ -94,8 +99,8 @@ public abstract class AbstractCacheInvoker {
 		try {
 			cache.evict(key);
 		}
-		catch (RuntimeException e) {
-			getErrorHandler().handleCacheEvictError(e, cache, key);
+		catch (RuntimeException ex) {
+			getErrorHandler().handleCacheEvictError(ex, cache, key);
 		}
 	}
 
@@ -107,8 +112,8 @@ public abstract class AbstractCacheInvoker {
 		try {
 			cache.clear();
 		}
-		catch (RuntimeException e) {
-			getErrorHandler().handleCacheClearError(e, cache);
+		catch (RuntimeException ex) {
+			getErrorHandler().handleCacheClearError(ex, cache);
 		}
 	}
 

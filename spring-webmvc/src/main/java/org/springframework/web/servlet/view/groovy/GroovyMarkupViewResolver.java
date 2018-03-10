@@ -70,7 +70,7 @@ public class GroovyMarkupViewResolver extends AbstractTemplateViewResolver {
 	 */
 	@Override
 	protected Object getCacheKey(String viewName, Locale locale) {
-		return viewName + "_" + locale;
+		return viewName + '_' + locale;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,10 +51,8 @@ public class PathMatchingResourcePatternResolverTests {
 	private static final String[] TEST_CLASSES_IN_CORE_IO_SUPPORT =
 			new String[] {"PathMatchingResourcePatternResolverTests.class"};
 
-	private static final String[] CLASSES_IN_COMMONSLOGGING =
-			new String[] {"Log.class", "LogConfigurationException.class", "LogFactory.class",
-					"LogFactory$1.class", "LogFactory$2.class", "LogFactory$3.class", "LogFactory$4.class",
-					"LogFactory$5.class", "LogFactory$6.class", "LogSource.class"};
+	private static final String[] CLASSES_IN_REACTIVESTREAMS =
+			new String[] {"Processor.class", "Publisher.class", "Subscriber.class", "Subscription.class"};
 
 	private PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
@@ -74,9 +72,9 @@ public class PathMatchingResourcePatternResolverTests {
 
 	@Test
 	public void singleResourceInJar() throws IOException {
-		Resource[] resources = resolver.getResources("java/net/URL.class");
+		Resource[] resources = resolver.getResources("org/reactivestreams/Publisher.class");
 		assertEquals(1, resources.length);
-		assertProtocolAndFilenames(resources, "jar", "URL.class");
+		assertProtocolAndFilenames(resources, "jar", "Publisher.class");
 	}
 
 	@Ignore  // passes under Eclipse, fails under Ant
@@ -85,7 +83,7 @@ public class PathMatchingResourcePatternResolverTests {
 		Resource[] resources = resolver.getResources("classpath*:org/springframework/core/io/sup*/*.class");
 		// Have to exclude Clover-generated class files here,
 		// as we might be running as part of a Clover test run.
-		List<Resource> noCloverResources = new ArrayList<Resource>();
+		List<Resource> noCloverResources = new ArrayList<>();
 		for (Resource resource : resources) {
 			if (!resource.getFilename().contains("$__CLOVER_")) {
 				noCloverResources.add(resource);
@@ -98,14 +96,14 @@ public class PathMatchingResourcePatternResolverTests {
 
 	@Test
 	public void classpathWithPatternInJar() throws IOException {
-		Resource[] resources = resolver.getResources("classpath:org/apache/commons/logging/*.class");
-		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_COMMONSLOGGING);
+		Resource[] resources = resolver.getResources("classpath:org/reactivestreams/*.class");
+		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_REACTIVESTREAMS);
 	}
 
 	@Test
-	public void classpathStartWithPatternInJar() throws IOException {
-		Resource[] resources = resolver.getResources("classpath*:org/apache/commons/logging/*.class");
-		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_COMMONSLOGGING);
+	public void classpathStarWithPatternInJar() throws IOException {
+		Resource[] resources = resolver.getResources("classpath*:org/reactivestreams/*.class");
+		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_REACTIVESTREAMS);
 	}
 
 	@Test
@@ -145,8 +143,7 @@ public class PathMatchingResourcePatternResolverTests {
 		assertEquals("Correct number of files found", filenames.length, resources.length);
 		for (Resource resource : resources) {
 			String actualProtocol = resource.getURL().getProtocol();
-			// resources from rt.jar get retrieved as jrt images on JDK 9, so let's simply accept that as a match too
-			assertTrue(actualProtocol.equals(protocol) || ("jar".equals(protocol) && "jrt".equals(actualProtocol)));
+			assertEquals(protocol, actualProtocol);
 			assertFilenameIn(resource, filenames);
 		}
 	}
@@ -154,7 +151,7 @@ public class PathMatchingResourcePatternResolverTests {
 	private void assertFilenameIn(Resource resource, String... filenames) {
 		String filename = resource.getFilename();
 		assertTrue(resource + " does not have a filename that matches any of the specified names",
-			Arrays.stream(filenames).anyMatch(filename::endsWith));
+				Arrays.stream(filenames).anyMatch(filename::endsWith));
 	}
 
 }

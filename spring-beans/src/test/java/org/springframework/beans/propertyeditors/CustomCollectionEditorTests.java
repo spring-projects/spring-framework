@@ -30,20 +30,20 @@ import static org.junit.Assert.*;
  * @author Rick Evans
  * @author Chris Beams
  */
-public final class CustomCollectionEditorTests {
+public class CustomCollectionEditorTests {
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testCtorWithNullCollectionType() throws Exception {
 		new CustomCollectionEditor(null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	@SuppressWarnings("unchecked")
 	public void testCtorWithNonCollectionType() throws Exception {
 		new CustomCollectionEditor((Class) String.class);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWithCollectionTypeThatDoesNotExposeAPublicNoArgCtor() throws Exception {
 		CustomCollectionEditor editor = new CustomCollectionEditor(CollectionTypeWithNoNoArgCtor.class);
 		editor.setValue("1");

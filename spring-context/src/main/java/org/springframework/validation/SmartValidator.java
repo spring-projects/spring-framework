@@ -16,6 +16,8 @@
 
 package org.springframework.validation;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Extended variant of the {@link Validator} interface, adding support for
  * validation 'hints'.
@@ -42,6 +44,6 @@ public interface SmartValidator extends Validator {
 	 * @param validationHints one or more hint objects to be passed to the validation engine
 	 * @see ValidationUtils
 	 */
-	void validate(Object target, Errors errors, Object... validationHints);
+	void validate(@Nullable Object target, Errors errors, Object... validationHints);
 
 }

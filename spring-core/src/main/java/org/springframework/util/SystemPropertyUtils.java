@@ -16,6 +16,8 @@
 
 package org.springframework.util;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Helper class for resolving placeholders in texts. Usually applied to file paths.
  *
@@ -94,6 +96,7 @@ public abstract class SystemPropertyUtils {
 		}
 
 		@Override
+		@Nullable
 		public String resolvePlaceholder(String placeholderName) {
 			try {
 				String propVal = System.getProperty(placeholderName);

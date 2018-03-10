@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,18 +44,12 @@ public class DummyEnvironment implements Environment {
 	}
 
 	@Override
-	public <T> Class<T> getPropertyAsClass(String key, Class<T> targetType) {
-		return null;
-	}
-
-	@Override
 	public String getRequiredProperty(String key) throws IllegalStateException {
 		return null;
 	}
 
 	@Override
-	public <T> T getRequiredProperty(String key, Class<T> targetType)
-			throws IllegalStateException {
+	public <T> T getRequiredProperty(String key, Class<T> targetType) throws IllegalStateException {
 		return null;
 	}
 
@@ -65,8 +59,7 @@ public class DummyEnvironment implements Environment {
 	}
 
 	@Override
-	public String resolveRequiredPlaceholders(String text)
-			throws IllegalArgumentException {
+	public String resolveRequiredPlaceholders(String text) throws IllegalArgumentException {
 		return null;
 	}
 

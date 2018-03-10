@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.beans.factory.config;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link FactoryBean} which returns a value which is the result of a static or instance
@@ -69,7 +70,7 @@ import org.springframework.beans.factory.FactoryBeanNotInitializedException;
  * &lt;/bean>
  *
  * &lt;bean id="javaVersion" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
- *   &lt;property name="targetObject" value="sysProps"/>
+ *   &lt;property name="targetObject" ref="sysProps"/>
  *   &lt;property name="targetMethod" value="getProperty"/>
  *   &lt;property name="arguments" value="java.version"/>
  * &lt;/bean></pre>
@@ -87,6 +88,7 @@ public class MethodInvokingFactoryBean extends MethodInvokingBean implements Fac
 	private boolean initialized = false;
 
 	/** Method call result in the singleton case */
+	@Nullable
 	private Object singletonObject;
 
 
@@ -114,6 +116,7 @@ public class MethodInvokingFactoryBean extends MethodInvokingBean implements Fac
 	 * specified method on the fly.
 	 */
 	@Override
+	@Nullable
 	public Object getObject() throws Exception {
 		if (this.singleton) {
 			if (!this.initialized) {

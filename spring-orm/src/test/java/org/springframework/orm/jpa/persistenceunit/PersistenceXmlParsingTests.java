@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -182,7 +182,7 @@ public class PersistenceXmlParsingTests {
 
 		String resource = "/org/springframework/orm/jpa/persistence-complex.xml";
 		MapDataSourceLookup dataSourceLookup = new MapDataSourceLookup();
-		Map<String, DataSource> dataSources = new HashMap<String, DataSource>();
+		Map<String, DataSource> dataSources = new HashMap<>();
 		dataSources.put("jdbc/MyPartDB", ds);
 		dataSources.put("jdbc/MyDB", ds);
 		dataSourceLookup.setDataSources(dataSources);
@@ -282,28 +282,21 @@ public class PersistenceXmlParsingTests {
 
 	@Test
 	public void testPersistenceUnitRootUrl() throws Exception {
-		PersistenceUnitReader reader = new PersistenceUnitReader(
-				new PathMatchingResourcePatternResolver(), new JndiDataSourceLookup());
-
-		URL url = reader.determinePersistenceUnitRootUrl(new ClassPathResource(
-				"/org/springframework/orm/jpa/persistence-no-schema.xml"));
+		URL url = PersistenceUnitReader.determinePersistenceUnitRootUrl(new ClassPathResource("/org/springframework/orm/jpa/persistence-no-schema.xml"));
 		assertNull(url);
 
-		url = reader.determinePersistenceUnitRootUrl(new ClassPathResource("/org/springframework/orm/jpa/META-INF/persistence.xml"));
+		url = PersistenceUnitReader.determinePersistenceUnitRootUrl(new ClassPathResource("/org/springframework/orm/jpa/META-INF/persistence.xml"));
 		assertTrue("the containing folder should have been returned", url.toString().endsWith("/org/springframework/orm/jpa"));
 	}
 
 	@Test
 	public void testPersistenceUnitRootUrlWithJar() throws Exception {
-		PersistenceUnitReader reader = new PersistenceUnitReader(
-				new PathMatchingResourcePatternResolver(), new JndiDataSourceLookup());
-
 		ClassPathResource archive = new ClassPathResource("/org/springframework/orm/jpa/jpa-archive.jar");
 		String newRoot = "jar:" + archive.getURL().toExternalForm() + "!/META-INF/persist.xml";
 		Resource insideArchive = new UrlResource(newRoot);
 		// make sure the location actually exists
 		assertTrue(insideArchive.exists());
-		URL url = reader.determinePersistenceUnitRootUrl(insideArchive);
+		URL url = PersistenceUnitReader.determinePersistenceUnitRootUrl(insideArchive);
 		assertTrue("the archive location should have been returned", archive.getURL().sameFile(url));
 	}
 

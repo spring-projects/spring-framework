@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class MapToMapConverterTests {
 
 	@Test
 	public void scalarMap() throws Exception {
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		map.put("1", "9");
 		map.put("2", "37");
 		TypeDescriptor sourceType = TypeDescriptor.forObject(map);
@@ -79,7 +79,7 @@ public class MapToMapConverterTests {
 
 	@Test
 	public void scalarMapNotGenericTarget() throws Exception {
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		map.put("1", "9");
 		map.put("2", "37");
 
@@ -89,7 +89,7 @@ public class MapToMapConverterTests {
 
 	@Test
 	public void scalarMapNotGenericSourceField() throws Exception {
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		map.put("1", "9");
 		map.put("2", "37");
 		TypeDescriptor sourceType = new TypeDescriptor(getClass().getField("notGenericMapSource"));
@@ -114,7 +114,7 @@ public class MapToMapConverterTests {
 
 	@Test
 	public void collectionMap() throws Exception {
-		Map<String, List<String>> map = new HashMap<String, List<String>>();
+		Map<String, List<String>> map = new HashMap<>();
 		map.put("1", Arrays.asList("9", "12"));
 		map.put("2", Arrays.asList("37", "23"));
 		TypeDescriptor sourceType = TypeDescriptor.forObject(map);
@@ -140,7 +140,7 @@ public class MapToMapConverterTests {
 
 	@Test
 	public void collectionMapSourceTarget() throws Exception {
-		Map<String, List<String>> map = new HashMap<String, List<String>>();
+		Map<String, List<String>> map = new HashMap<>();
 		map.put("1", Arrays.asList("9", "12"));
 		map.put("2", Arrays.asList("37", "23"));
 		TypeDescriptor sourceType = new TypeDescriptor(getClass().getField("sourceCollectionMapTarget"));
@@ -167,7 +167,7 @@ public class MapToMapConverterTests {
 
 	@Test
 	public void collectionMapNotGenericTarget() throws Exception {
-		Map<String, List<String>> map = new HashMap<String, List<String>>();
+		Map<String, List<String>> map = new HashMap<>();
 		map.put("1", Arrays.asList("9", "12"));
 		map.put("2", Arrays.asList("37", "23"));
 
@@ -177,7 +177,7 @@ public class MapToMapConverterTests {
 
 	@Test
 	public void collectionMapNotGenericTargetCollectionToObjectInteraction() throws Exception {
-		Map<String, List<String>> map = new HashMap<String, List<String>>();
+		Map<String, List<String>> map = new HashMap<>();
 		map.put("1", Arrays.asList("9", "12"));
 		map.put("2", Arrays.asList("37", "23"));
 		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
@@ -189,7 +189,7 @@ public class MapToMapConverterTests {
 
 	@Test
 	public void emptyMap() throws Exception {
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		TypeDescriptor sourceType = TypeDescriptor.forObject(map);
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("emptyMapTarget"));
 
@@ -199,7 +199,7 @@ public class MapToMapConverterTests {
 
 	@Test
 	public void emptyMapNoTargetGenericInfo() throws Exception {
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 
 		assertTrue(conversionService.canConvert(Map.class, Map.class));
 		assertSame(map, conversionService.convert(map, Map.class));
@@ -207,7 +207,7 @@ public class MapToMapConverterTests {
 
 	@Test
 	public void emptyMapDifferentTargetImplType() throws Exception {
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		TypeDescriptor sourceType = TypeDescriptor.forObject(map);
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("emptyMapDifferentTarget"));
 
@@ -221,8 +221,8 @@ public class MapToMapConverterTests {
 	@Test
 	public void noDefaultConstructorCopyNotRequired() throws Exception {
 		// SPR-9284
-		NoDefaultConstructorMap<String, Integer> map = new NoDefaultConstructorMap<String,Integer>(
-				Collections.<String, Integer> singletonMap("1", 1));
+		NoDefaultConstructorMap<String, Integer> map = new NoDefaultConstructorMap<>(
+				Collections.<String, Integer>singletonMap("1", 1));
 		TypeDescriptor sourceType = TypeDescriptor.map(NoDefaultConstructorMap.class,
 				TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class));
 		TypeDescriptor targetType = TypeDescriptor.map(NoDefaultConstructorMap.class,
@@ -239,7 +239,7 @@ public class MapToMapConverterTests {
 	@SuppressWarnings("unchecked")
 	public void multiValueMapToMultiValueMap() throws Exception {
 		DefaultConversionService.addDefaultConverters(conversionService);
-		MultiValueMap<String, Integer> source = new LinkedMultiValueMap<String, Integer>();
+		MultiValueMap<String, Integer> source = new LinkedMultiValueMap<>();
 		source.put("a", Arrays.asList(1, 2, 3));
 		source.put("b", Arrays.asList(4, 5, 6));
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("multiValueMapTarget"));
@@ -254,7 +254,7 @@ public class MapToMapConverterTests {
 	@SuppressWarnings("unchecked")
 	public void mapToMultiValueMap() throws Exception {
 		DefaultConversionService.addDefaultConverters(conversionService);
-		Map<String, Integer> source = new HashMap<String, Integer>();
+		Map<String, Integer> source = new HashMap<>();
 		source.put("a", 1);
 		source.put("b", 2);
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("multiValueMapTarget"));
@@ -268,10 +268,10 @@ public class MapToMapConverterTests {
 	@Test
 	public void testStringToEnumMap() throws Exception {
 		conversionService.addConverterFactory(new StringToEnumConverterFactory());
-		Map<String, Integer> source = new HashMap<String, Integer>();
+		Map<String, Integer> source = new HashMap<>();
 		source.put("A", 1);
 		source.put("C", 2);
-		EnumMap<MyEnum, Integer> result = new EnumMap<MyEnum, Integer>(MyEnum.class);
+		EnumMap<MyEnum, Integer> result = new EnumMap<>(MyEnum.class);
 		result.put(MyEnum.A, 1);
 		result.put(MyEnum.C, 2);
 

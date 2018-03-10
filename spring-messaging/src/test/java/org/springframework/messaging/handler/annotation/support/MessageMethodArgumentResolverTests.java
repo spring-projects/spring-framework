@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.junit.rules.ExpectedException;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.support.ErrorMessage;
@@ -33,14 +34,13 @@ import org.springframework.messaging.support.GenericMessage;
 import org.springframework.messaging.support.MessageBuilder;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
- * Unit tests for
- * {@link org.springframework.messaging.handler.annotation.support.MessageMethodArgumentResolver}.
+ * Unit tests for {@link MessageMethodArgumentResolver}.
  *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  */
 public class MessageMethodArgumentResolverTests {
 
@@ -56,10 +56,8 @@ public class MessageMethodArgumentResolverTests {
 
 	@Before
 	public void setup() throws Exception {
-
 		this.method = MessageMethodArgumentResolverTests.class.getDeclaredMethod("handle",
-				Message.class, Message.class, Message.class, Message.class,
-				ErrorMessage.class);
+				Message.class, Message.class, Message.class, Message.class, ErrorMessage.class, Message.class);
 
 		this.converter = mock(MessageConverter.class);
 		this.resolver = new MessageMethodArgumentResolver(this.converter);
@@ -85,7 +83,7 @@ public class MessageMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveWithPayloadTypeSubClass() throws Exception {
+	public void resolveWithPayloadTypeSubclass() throws Exception {
 		Message<Integer> message = MessageBuilder.withPayload(123).build();
 		MethodParameter parameter = new MethodParameter(this.method, 2);
 
@@ -127,7 +125,7 @@ public class MessageMethodArgumentResolverTests {
 
 		assertTrue(this.resolver.supportsParameter(parameter));
 		thrown.expect(MessageConversionException.class);
-		thrown.expectMessage("the payload is empty");
+		thrown.expectMessage("payload is empty");
 		thrown.expectMessage(Integer.class.getName());
 		thrown.expectMessage(String.class.getName());
 		this.resolver.resolveArgument(parameter, message);
@@ -155,7 +153,7 @@ public class MessageMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveMessageSubClassMatch() throws Exception {
+	public void resolveMessageSubclassMatch() throws Exception {
 		ErrorMessage message = new ErrorMessage(new UnsupportedOperationException());
 		MethodParameter parameter = new MethodParameter(this.method, 4);
 
@@ -164,7 +162,7 @@ public class MessageMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveWithMessageSubClassAndPayloadWildcard() throws Exception {
+	public void resolveWithMessageSubclassAndPayloadWildcard() throws Exception {
 		ErrorMessage message = new ErrorMessage(new UnsupportedOperationException());
 		MethodParameter parameter = new MethodParameter(this.method, 0);
 
@@ -185,6 +183,60 @@ public class MessageMethodArgumentResolverTests {
 		assertSame(message, this.resolver.resolveArgument(parameter, message));
 	}
 
+	@Test
+	public void resolveWithPayloadTypeAsWildcardAndNoConverter() throws Exception {
+		this.resolver = new MessageMethodArgumentResolver();
+
+		Message<String> message = MessageBuilder.withPayload("test").build();
+		MethodParameter parameter = new MethodParameter(this.method, 0);
+
+		assertTrue(this.resolver.supportsParameter(parameter));
+		assertSame(message, this.resolver.resolveArgument(parameter, message));
+	}
+
+	@Test
+	public void resolveWithConversionNeededButNoConverter() throws Exception {
+		this.resolver = new MessageMethodArgumentResolver();
+
+		Message<String> message = MessageBuilder.withPayload("test").build();
+		MethodParameter parameter = new MethodParameter(this.method, 1);
+
+		assertTrue(this.resolver.supportsParameter(parameter));
+		thrown.expect(MessageConversionException.class);
+		thrown.expectMessage(Integer.class.getName());
+		thrown.expectMessage(String.class.getName());
+		this.resolver.resolveArgument(parameter, message);
+	}
+
+	@Test
+	public void resolveWithConversionEmptyPayloadButNoConverter() throws Exception {
+		this.resolver = new MessageMethodArgumentResolver();
+
+		Message<String> message = MessageBuilder.withPayload("").build();
+		MethodParameter parameter = new MethodParameter(this.method, 1);
+
+		assertTrue(this.resolver.supportsParameter(parameter));
+		thrown.expect(MessageConversionException.class);
+		thrown.expectMessage("payload is empty");
+		thrown.expectMessage(Integer.class.getName());
+		thrown.expectMessage(String.class.getName());
+		this.resolver.resolveArgument(parameter, message);
+	}
+
+	@Test // SPR-16486
+	public void resolveWithJacksonConverter() throws Exception {
+		Message<String> inMessage = MessageBuilder.withPayload("{\"foo\":\"bar\"}").build();
+		MethodParameter parameter = new MethodParameter(this.method, 5);
+
+		this.resolver = new MessageMethodArgumentResolver(new MappingJackson2MessageConverter());
+		Object actual = this.resolver.resolveArgument(parameter, inMessage);
+
+		assertTrue(actual instanceof Message);
+		Message<?> outMessage = (Message<?>) actual;
+		assertTrue(outMessage.getPayload() instanceof Foo);
+		assertEquals("bar", ((Foo) outMessage.getPayload()).getFoo());
+	}
+
 
 	@SuppressWarnings("unused")
 	private void handle(
@@ -192,7 +244,23 @@ public class MessageMethodArgumentResolverTests {
 			Message<Integer> integerPayload,
 			Message<Number> numberPayload,
 			Message<? extends Number> anyNumberPayload,
-			ErrorMessage subClass) {
+			ErrorMessage subClass,
+			Message<Foo> fooPayload) {
+	}
+
+
+	static class Foo {
+
+		private String foo;
+
+		public String getFoo() {
+			return foo;
+		}
+
+		public void setFoo(String foo) {
+			this.foo = foo;
+		}
+
 	}
 
 }

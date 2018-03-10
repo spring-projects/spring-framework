@@ -18,6 +18,7 @@ package org.springframework.scheduling.annotation;
 
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.AdviceModeImportSelector;
+import org.springframework.lang.Nullable;
 
 /**
  * Selects which implementation of {@link AbstractAsyncConfiguration} should be used based
@@ -39,6 +40,7 @@ public class AsyncConfigurationSelector extends AdviceModeImportSelector<EnableA
 	 * {@code PROXY} and {@code ASPECTJ} values of {@link EnableAsync#mode()}, respectively
 	 */
 	@Override
+	@Nullable
 	public String[] selectImports(AdviceMode adviceMode) {
 		switch (adviceMode) {
 			case PROXY:

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package org.springframework.core;
 
-import org.junit.Test;
-
 import java.util.Locale;
 import java.util.Set;
+
+import org.junit.Test;
 
 import static org.junit.Assert.*;
 
@@ -37,15 +37,15 @@ public class ConstantsTests {
 		assertEquals(A.class.getName(), c.getClassName());
 		assertEquals(9, c.getSize());
 
-		assertEquals(c.asNumber("DOG").intValue(), A.DOG);
-		assertEquals(c.asNumber("dog").intValue(), A.DOG);
-		assertEquals(c.asNumber("cat").intValue(), A.CAT);
+		assertEquals(A.DOG, c.asNumber("DOG").intValue());
+		assertEquals(A.DOG, c.asNumber("dog").intValue());
+		assertEquals(A.CAT, c.asNumber("cat").intValue());
 
 		try {
 			c.asNumber("bogus");
 			fail("Can't get bogus field");
 		}
-		catch (ConstantException expected) {
+		catch (Constants.ConstantException expected) {
 		}
 
 		assertTrue(c.asString("S1").equals(A.S1));
@@ -53,7 +53,7 @@ public class ConstantsTests {
 			c.asNumber("S1");
 			fail("Wrong type");
 		}
-		catch (ConstantException expected) {
+		catch (Constants.ConstantException expected) {
 		}
 	}
 
@@ -152,67 +152,67 @@ public class ConstantsTests {
 	public void toCode() {
 		Constants c = new Constants(A.class);
 
-		assertEquals(c.toCode(new Integer(0), ""), "DOG");
-		assertEquals(c.toCode(new Integer(0), "D"), "DOG");
-		assertEquals(c.toCode(new Integer(0), "DO"), "DOG");
-		assertEquals(c.toCode(new Integer(0), "DoG"), "DOG");
-		assertEquals(c.toCode(new Integer(0), null), "DOG");
-		assertEquals(c.toCode(new Integer(66), ""), "CAT");
-		assertEquals(c.toCode(new Integer(66), "C"), "CAT");
-		assertEquals(c.toCode(new Integer(66), "ca"), "CAT");
-		assertEquals(c.toCode(new Integer(66), "cAt"), "CAT");
-		assertEquals(c.toCode(new Integer(66), null), "CAT");
-		assertEquals(c.toCode("", ""), "S1");
-		assertEquals(c.toCode("", "s"), "S1");
-		assertEquals(c.toCode("", "s1"), "S1");
-		assertEquals(c.toCode("", null), "S1");
+		assertEquals("DOG", c.toCode(new Integer(0), ""));
+		assertEquals("DOG", c.toCode(new Integer(0), "D"));
+		assertEquals("DOG", c.toCode(new Integer(0), "DO"));
+		assertEquals("DOG", c.toCode(new Integer(0), "DoG"));
+		assertEquals("DOG", c.toCode(new Integer(0), null));
+		assertEquals("CAT", c.toCode(new Integer(66), ""));
+		assertEquals("CAT", c.toCode(new Integer(66), "C"));
+		assertEquals("CAT", c.toCode(new Integer(66), "ca"));
+		assertEquals("CAT", c.toCode(new Integer(66), "cAt"));
+		assertEquals("CAT", c.toCode(new Integer(66), null));
+		assertEquals("S1", c.toCode("", ""));
+		assertEquals("S1", c.toCode("", "s"));
+		assertEquals("S1", c.toCode("", "s1"));
+		assertEquals("S1", c.toCode("", null));
 		try {
 			c.toCode("bogus", "bogus");
 			fail("Should have thrown ConstantException");
 		}
-		catch (ConstantException expected) {
+		catch (Constants.ConstantException expected) {
 		}
 		try {
 			c.toCode("bogus", null);
 			fail("Should have thrown ConstantException");
 		}
-		catch (ConstantException expected) {
+		catch (Constants.ConstantException expected) {
 		}
 
-		assertEquals(c.toCodeForProperty(new Integer(1), "myProperty"), "MY_PROPERTY_NO");
-		assertEquals(c.toCodeForProperty(new Integer(2), "myProperty"), "MY_PROPERTY_YES");
+		assertEquals("MY_PROPERTY_NO", c.toCodeForProperty(new Integer(1), "myProperty"));
+		assertEquals("MY_PROPERTY_YES", c.toCodeForProperty(new Integer(2), "myProperty"));
 		try {
 			c.toCodeForProperty("bogus", "bogus");
 			fail("Should have thrown ConstantException");
 		}
-		catch (ConstantException expected) {
+		catch (Constants.ConstantException expected) {
 		}
 
-		assertEquals(c.toCodeForSuffix(new Integer(0), ""), "DOG");
-		assertEquals(c.toCodeForSuffix(new Integer(0), "G"), "DOG");
-		assertEquals(c.toCodeForSuffix(new Integer(0), "OG"), "DOG");
-		assertEquals(c.toCodeForSuffix(new Integer(0), "DoG"), "DOG");
-		assertEquals(c.toCodeForSuffix(new Integer(0), null), "DOG");
-		assertEquals(c.toCodeForSuffix(new Integer(66), ""), "CAT");
-		assertEquals(c.toCodeForSuffix(new Integer(66), "T"), "CAT");
-		assertEquals(c.toCodeForSuffix(new Integer(66), "at"), "CAT");
-		assertEquals(c.toCodeForSuffix(new Integer(66), "cAt"), "CAT");
-		assertEquals(c.toCodeForSuffix(new Integer(66), null), "CAT");
-		assertEquals(c.toCodeForSuffix("", ""), "S1");
-		assertEquals(c.toCodeForSuffix("", "1"), "S1");
-		assertEquals(c.toCodeForSuffix("", "s1"), "S1");
-		assertEquals(c.toCodeForSuffix("", null), "S1");
+		assertEquals("DOG", c.toCodeForSuffix(new Integer(0), ""));
+		assertEquals("DOG", c.toCodeForSuffix(new Integer(0), "G"));
+		assertEquals("DOG", c.toCodeForSuffix(new Integer(0), "OG"));
+		assertEquals("DOG", c.toCodeForSuffix(new Integer(0), "DoG"));
+		assertEquals("DOG", c.toCodeForSuffix(new Integer(0), null));
+		assertEquals("CAT", c.toCodeForSuffix(new Integer(66), ""));
+		assertEquals("CAT", c.toCodeForSuffix(new Integer(66), "T"));
+		assertEquals("CAT", c.toCodeForSuffix(new Integer(66), "at"));
+		assertEquals("CAT", c.toCodeForSuffix(new Integer(66), "cAt"));
+		assertEquals("CAT", c.toCodeForSuffix(new Integer(66), null));
+		assertEquals("S1", c.toCodeForSuffix("", ""));
+		assertEquals("S1", c.toCodeForSuffix("", "1"));
+		assertEquals("S1", c.toCodeForSuffix("", "s1"));
+		assertEquals("S1", c.toCodeForSuffix("", null));
 		try {
 			c.toCodeForSuffix("bogus", "bogus");
 			fail("Should have thrown ConstantException");
 		}
-		catch (ConstantException expected) {
+		catch (Constants.ConstantException expected) {
 		}
 		try {
 			c.toCodeForSuffix("bogus", null);
 			fail("Should have thrown ConstantException");
 		}
-		catch (ConstantException expected) {
+		catch (Constants.ConstantException expected) {
 		}
 	}
 

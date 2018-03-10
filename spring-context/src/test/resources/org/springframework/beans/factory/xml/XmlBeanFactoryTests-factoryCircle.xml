@@ -4,7 +4,7 @@
 <beans>
 
 	<bean id="singletonFactory"	class="org.springframework.tests.sample.beans.factory.DummyFactory">
-		<property name="otherTestBean"><ref local="singletonFactory"/></property>
+		<property name="otherTestBean"><ref bean="singletonFactory"/></property>
 	</bean>
 
 </beans>

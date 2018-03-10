@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,6 @@ import org.springframework.web.servlet.view.script.ScriptTemplateConfigurer;
 import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
-import org.springframework.web.servlet.view.velocity.VelocityConfigurer;
-import org.springframework.web.servlet.view.velocity.VelocityViewResolver;
 import org.springframework.web.servlet.view.xml.MarshallingView;
 
 import static org.junit.Assert.*;
@@ -56,16 +54,14 @@ public class ViewResolverRegistryTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		StaticWebApplicationContext context = new StaticWebApplicationContext();
 		context.registerSingleton("freeMarkerConfigurer", FreeMarkerConfigurer.class);
-		context.registerSingleton("velocityConfigurer", VelocityConfigurer.class);
 		context.registerSingleton("tilesConfigurer", TilesConfigurer.class);
 		context.registerSingleton("groovyMarkupConfigurer", GroovyMarkupConfigurer.class);
 		context.registerSingleton("scriptTemplateConfigurer", ScriptTemplateConfigurer.class);
-		this.registry = new ViewResolverRegistry();
-		this.registry.setApplicationContext(context);
-		this.registry.setContentNegotiationManager(new ContentNegotiationManager());
+
+		this.registry = new ViewResolverRegistry(new ContentNegotiationManager(), context);
 	}
 
 
@@ -79,7 +75,7 @@ public class ViewResolverRegistryTests {
 	@Test
 	public void hasRegistrations() {
 		assertFalse(this.registry.hasRegistrations());
-		this.registry.velocity();
+		this.registry.freeMarker();
 		assertTrue(this.registry.hasRegistrations());
 	}
 
@@ -139,20 +135,6 @@ public class ViewResolverRegistryTests {
 	public void tiles() {
 		this.registry.tiles();
 		checkAndGetResolver(TilesViewResolver.class);
-	}
-
-	@Test
-	public void velocity() {
-		this.registry.velocity().prefix("/").suffix(".vm").cache(true);
-		VelocityViewResolver resolver = checkAndGetResolver(VelocityViewResolver.class);
-		checkPropertyValues(resolver, "prefix", "/", "suffix", ".vm", "cacheLimit", 1024);
-	}
-
-	@Test
-	public void velocityDefaultValues() {
-		this.registry.velocity();
-		VelocityViewResolver resolver = checkAndGetResolver(VelocityViewResolver.class);
-		checkPropertyValues(resolver, "prefix", "", "suffix", ".vm");
 	}
 
 	@Test

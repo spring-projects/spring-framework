@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.junit.Assert.*;
@@ -31,9 +32,9 @@ import static org.junit.Assert.*;
  * @author Dave Syer
  * @author Chris Beams
  */
-public final class BeanNameAutoProxyCreatorInitTests {
+public class BeanNameAutoProxyCreatorInitTests {
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testIgnoreAdvisorThatIsCurrentlyCreation() {
 		ClassPathXmlApplicationContext ctx =
 			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
@@ -49,7 +50,7 @@ public final class BeanNameAutoProxyCreatorInitTests {
 class NullChecker implements MethodBeforeAdvice {
 
 	@Override
-	public void before(Method method, Object[] args, Object target) throws Throwable {
+	public void before(Method method, Object[] args, @Nullable Object target) throws Throwable {
 		check(args);
 	}
 

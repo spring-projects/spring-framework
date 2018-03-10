@@ -32,6 +32,7 @@ import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.stereotype.Controller;
@@ -121,7 +122,7 @@ public class HandlerMethodAnnotationDetectionTests {
 
 	class TestPointcut extends StaticMethodMatcherPointcut {
 		@Override
-		public boolean matches(Method method, Class<?> clazz) {
+		public boolean matches(Method method, @Nullable Class<?> clazz) {
 			return method.getName().equals("hashCode");
 		}
 	}
@@ -394,7 +395,8 @@ public class HandlerMethodAnnotationDetectionTests {
 		public abstract String handleException(Exception exception);
 	}
 
-	static class ParameterizedSubclassOverridesDefaultMappings extends GenericAbstractClassDeclaresDefaultMappings<String, Date, Date> {
+	static class ParameterizedSubclassOverridesDefaultMappings
+			extends GenericAbstractClassDeclaresDefaultMappings<String, Date, Date> {
 
 		@Override
 		public void initBinder(WebDataBinder dataBinder, @RequestParam("datePattern") String thePattern) {
@@ -527,7 +529,7 @@ public class HandlerMethodAnnotationDetectionTests {
 		private static StaticMethodMatcherPointcut getControllerPointcut() {
 			return new StaticMethodMatcherPointcut() {
 				@Override
-				public boolean matches(Method method, Class<?> targetClass) {
+				public boolean matches(Method method, @Nullable Class<?> targetClass) {
 					return ((AnnotationUtils.findAnnotation(targetClass, Controller.class) != null) ||
 							(AnnotationUtils.findAnnotation(targetClass, RequestMapping.class) != null));
 				}

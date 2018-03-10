@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 
 /**
  * SockJS transport types.
@@ -53,13 +54,14 @@ public enum TransportType {
 	private static final Map<String, TransportType> TRANSPORT_TYPES;
 
 	static {
-		Map<String, TransportType> transportTypes = new HashMap<String, TransportType>();
+		Map<String, TransportType> transportTypes = new HashMap<>();
 		for (TransportType type : values()) {
 			transportTypes.put(type.value, type);
 		}
 		TRANSPORT_TYPES = Collections.unmodifiableMap(transportTypes);
 	}
 
+	@Nullable
 	public static TransportType fromValue(String value) {
 		return TRANSPORT_TYPES.get(value);
 	}

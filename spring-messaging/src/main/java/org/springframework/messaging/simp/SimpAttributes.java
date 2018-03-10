@@ -21,6 +21,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
@@ -42,7 +43,8 @@ public class SimpAttributes {
 	public static final String SESSION_COMPLETED_NAME = SimpAttributes.class.getName() + ".COMPLETED";
 
 	/** Prefix for the name of session attributes used to store destruction callbacks. */
-	public static final String DESTRUCTION_CALLBACK_NAME_PREFIX = SimpAttributes.class.getName() + ".DESTRUCTION_CALLBACK.";
+	public static final String DESTRUCTION_CALLBACK_NAME_PREFIX =
+			SimpAttributes.class.getName() + ".DESTRUCTION_CALLBACK.";
 
 	private static final Log logger = LogFactory.getLog(SimpAttributes.class);
 
@@ -70,6 +72,7 @@ public class SimpAttributes {
 	 * @param name the name of the attribute
 	 * @return the current attribute value, or {@code null} if not found
 	 */
+	@Nullable
 	public Object getAttribute(String name) {
 		return this.attributes.get(name);
 	}

@@ -5,10 +5,10 @@
 
 	<bean id="jmxAdapter" class="org.springframework.jmx.export.MBeanExporter">
 		<property name="assembler">
-			<ref local="metadataAssembler"/>
+			<ref bean="metadataAssembler"/>
 		</property>
 		<property name="namingStrategy">
-			<ref local="namingStrategy"/>
+			<ref bean="namingStrategy"/>
 		</property>
 	</bean>
 
@@ -23,13 +23,13 @@
 
 	<bean id="metadataAssembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
 		<property name="attributeSource">
-			<ref local="attributeSource"/>
+			<ref bean="attributeSource"/>
 		</property>
 	</bean>
 
 	<bean id="namingStrategy" class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
 		<property name="attributeSource">
-			<ref local="attributeSource"/>
+			<ref bean="attributeSource"/>
 		</property>
 	</bean>
 

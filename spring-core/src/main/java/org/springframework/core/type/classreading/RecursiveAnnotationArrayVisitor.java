@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.List;
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.Type;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -34,11 +35,11 @@ class RecursiveAnnotationArrayVisitor extends AbstractRecursiveAnnotationVisitor
 
 	private final String attributeName;
 
-	private final List<AnnotationAttributes> allNestedAttributes = new ArrayList<AnnotationAttributes>();
+	private final List<AnnotationAttributes> allNestedAttributes = new ArrayList<>();
 
 
 	public RecursiveAnnotationArrayVisitor(
-			String attributeName, AnnotationAttributes attributes, ClassLoader classLoader) {
+			String attributeName, AnnotationAttributes attributes, @Nullable ClassLoader classLoader) {
 
 		super(classLoader, attributes);
 		this.attributeName = attributeName;
@@ -69,7 +70,7 @@ class RecursiveAnnotationArrayVisitor extends AbstractRecursiveAnnotationVisitor
 	@Override
 	public AnnotationVisitor visitAnnotation(String attributeName, String asmTypeDescriptor) {
 		String annotationType = Type.getType(asmTypeDescriptor).getClassName();
-		AnnotationAttributes nestedAttributes = new AnnotationAttributes();
+		AnnotationAttributes nestedAttributes = new AnnotationAttributes(annotationType, this.classLoader);
 		this.allNestedAttributes.add(nestedAttributes);
 		return new RecursiveAnnotationAttributesVisitor(annotationType, nestedAttributes, this.classLoader);
 	}
@@ -77,8 +78,7 @@ class RecursiveAnnotationArrayVisitor extends AbstractRecursiveAnnotationVisitor
 	@Override
 	public void visitEnd() {
 		if (!this.allNestedAttributes.isEmpty()) {
-			this.attributes.put(this.attributeName,
-					this.allNestedAttributes.toArray(new AnnotationAttributes[this.allNestedAttributes.size()]));
+			this.attributes.put(this.attributeName, this.allNestedAttributes.toArray(new AnnotationAttributes[0]));
 		}
 	}
 

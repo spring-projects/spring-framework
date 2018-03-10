@@ -36,7 +36,7 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @since 08.03.2004
  */
-public final class ConcurrentBeanWrapperTests {
+public class ConcurrentBeanWrapperTests {
 
 	private final Log logger = LogFactory.getLog(getClass());
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel;
 
 import org.springframework.expression.EvaluationException;
@@ -23,6 +24,7 @@ import org.springframework.expression.EvaluationException;
  * message. See {@link SpelMessage} for the list of all possible messages that can occur.
  *
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @since 3.0
  */
 @SuppressWarnings("serial")
@@ -34,62 +36,46 @@ public class SpelEvaluationException extends EvaluationException {
 
 
 	public SpelEvaluationException(SpelMessage message, Object... inserts) {
-		super(message.formatMessage(0, inserts)); // TODO poor position information, can the callers not really supply something?
+		super(message.formatMessage(inserts));
 		this.message = message;
 		this.inserts = inserts;
 	}
 
 	public SpelEvaluationException(int position, SpelMessage message, Object... inserts) {
-		super(position, message.formatMessage(position, inserts));
+		super(position, message.formatMessage(inserts));
 		this.message = message;
 		this.inserts = inserts;
 	}
 
-	public SpelEvaluationException(int position, Throwable cause,
-			SpelMessage message, Object... inserts) {
-		super(position,message.formatMessage(position,inserts),cause);
+	public SpelEvaluationException(int position, Throwable cause, SpelMessage message, Object... inserts) {
+		super(position, message.formatMessage(inserts),cause);
 		this.message = message;
 		this.inserts = inserts;
 	}
 
 	public SpelEvaluationException(Throwable cause, SpelMessage message, Object... inserts) {
-		super(message.formatMessage(0,inserts),cause);
+		super(message.formatMessage(inserts), cause);
 		this.message = message;
 		this.inserts = inserts;
 	}
 
 
 	/**
-	 * @return a formatted message with inserts applied
-	 */
-	@Override
-	public String getMessage() {
-		if (this.message != null) {
-			return this.message.formatMessage(this.position, this.inserts);
-		}
-		else {
-			return super.getMessage();
-		}
-	}
-
-	/**
-	 * @return the message code
-	 */
-	public SpelMessage getMessageCode() {
-		return this.message;
-	}
-
-	/**
 	 * Set the position in the related expression which gave rise to this exception.
-	 *
-	 * @param position the position in the expression that gave rise to the exception
 	 */
 	public void setPosition(int position) {
 		this.position = position;
 	}
 
 	/**
-	 * @return the message inserts
+	 * Return the message code.
+	 */
+	public SpelMessage getMessageCode() {
+		return this.message;
+	}
+
+	/**
+	 * Return the message inserts.
 	 */
 	public Object[] getInserts() {
 		return this.inserts;

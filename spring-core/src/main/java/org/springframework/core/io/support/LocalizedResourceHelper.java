@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Locale;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -62,7 +63,7 @@ public class LocalizedResourceHelper {
 	 * Set the separator to use inbetween file name parts.
 	 * Default is an underscore ("_").
 	 */
-	public void setSeparator(String separator) {
+	public void setSeparator(@Nullable String separator) {
 		this.separator = (separator != null ? separator : DEFAULT_SEPARATOR);
 	}
 
@@ -86,7 +87,7 @@ public class LocalizedResourceHelper {
 	 * @return the most specific localized resource found
 	 * @see java.util.ResourceBundle
 	 */
-	public Resource findLocalizedResource(String name, String extension, Locale locale) {
+	public Resource findLocalizedResource(String name, String extension, @Nullable Locale locale) {
 		Assert.notNull(name, "Name must not be null");
 		Assert.notNull(extension, "Extension must not be null");
 

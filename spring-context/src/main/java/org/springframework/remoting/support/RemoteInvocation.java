@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -150,7 +151,7 @@ public class RemoteInvocation implements Serializable {
 	 */
 	public void addAttribute(String key, Serializable value) throws IllegalStateException {
 		if (this.attributes == null) {
-			this.attributes = new HashMap<String, Serializable>();
+			this.attributes = new HashMap<>();
 		}
 		if (this.attributes.containsKey(key)) {
 			throw new IllegalStateException("There is already an attribute with key '" + key + "' bound");
@@ -165,6 +166,7 @@ public class RemoteInvocation implements Serializable {
 	 * @param key the attribute key
 	 * @return the attribute value, or {@code null} if not defined
 	 */
+	@Nullable
 	public Serializable getAttribute(String key) {
 		if (this.attributes == null) {
 			return null;
@@ -179,7 +181,7 @@ public class RemoteInvocation implements Serializable {
 	 * @see #addAttribute
 	 * @see #getAttribute
 	 */
-	public void setAttributes(Map<String, Serializable> attributes) {
+	public void setAttributes(@Nullable Map<String, Serializable> attributes) {
 		this.attributes = attributes;
 	}
 
@@ -190,6 +192,7 @@ public class RemoteInvocation implements Serializable {
 	 * @see #addAttribute
 	 * @see #getAttribute
 	 */
+	@Nullable
 	public Map<String, Serializable> getAttributes() {
 		return this.attributes;
 	}

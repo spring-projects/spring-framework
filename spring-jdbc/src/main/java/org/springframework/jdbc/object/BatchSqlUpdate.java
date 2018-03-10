@@ -48,16 +48,16 @@ public class BatchSqlUpdate extends SqlUpdate {
 	/**
 	 * Default number of inserts to accumulate before commiting a batch (5000).
 	 */
-	public static int DEFAULT_BATCH_SIZE = 5000;
+	public static final int DEFAULT_BATCH_SIZE = 5000;
 
 
 	private int batchSize = DEFAULT_BATCH_SIZE;
 
 	private boolean trackRowsAffected = true;
 
-	private final LinkedList<Object[]> parameterQueue = new LinkedList<Object[]>();
+	private final LinkedList<Object[]> parameterQueue = new LinkedList<>();
 
-	private final List<Integer> rowsAffected = new ArrayList<Integer>();
+	private final List<Integer> rowsAffected = new ArrayList<>();
 
 
 	/**
@@ -182,7 +182,7 @@ public class BatchSqlUpdate extends SqlUpdate {
 		}
 
 		int[] rowsAffected = getJdbcTemplate().batchUpdate(
-				getSql(),
+				resolveSql(),
 				new BatchPreparedStatementSetter() {
 					@Override
 					public int getBatchSize() {

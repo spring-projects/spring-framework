@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,7 @@ public class RedirectAttributesModelMapTests {
 
 	@Test
 	public void addAttributesMap() {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("person", new TestBean("Fred"));
 		map.put("age", 33);
 		this.redirectAttributes.addAllAttributes(map);
@@ -109,7 +109,7 @@ public class RedirectAttributesModelMapTests {
 
 	@Test
 	public void mergeAttributes() {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("person", new TestBean("Fred"));
 		map.put("age", 33);
 
@@ -129,7 +129,7 @@ public class RedirectAttributesModelMapTests {
 
 	@Test
 	public void putAll() {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("person", new TestBean("Fred"));
 		map.put("age", 33);
 		this.redirectAttributes.putAll(map);

@@ -4,7 +4,7 @@
 		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 				http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.5.xsd">
 
-	<lang:groovy id="bean" script-source="classpath:org/springframework/scripting/groovy/ScriptBean.groovy" autowire="byType" dependency-check="all">
+	<lang:groovy id="bean" script-source="classpath:org/springframework/scripting/groovy/ScriptBean.groovy" autowire="byType">
 		<lang:property name="name" value="Sophie Marceau"/>
 		<lang:property name="age" value="31"/>
 	</lang:groovy>
@@ -14,7 +14,7 @@
 		<lang:property name="age" value="31"/>
 	</lang:groovy>
 
-	<lang:groovy id="bean3" script-source="classpath:org/springframework/scripting/groovy/ScriptBean.groovy" dependency-check="objects" scope="prototype">
+	<lang:groovy id="bean3" script-source="classpath:org/springframework/scripting/groovy/ScriptBean.groovy" scope="prototype">
 		<lang:property name="name" value="Sophie Marceau"/>
 		<lang:property name="age" value="31"/>
 	</lang:groovy>

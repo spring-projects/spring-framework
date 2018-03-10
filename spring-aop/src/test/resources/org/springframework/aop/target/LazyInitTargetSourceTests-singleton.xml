@@ -13,7 +13,7 @@
 	<bean id="proxy" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="targetSource">
 			<bean class="org.springframework.aop.target.LazyInitTargetSource">
-				<property name="targetBeanName"><idref local="target"/></property>
+				<property name="targetBeanName"><idref bean="target"/></property>
 			</bean>
 		</property>
 	</bean>

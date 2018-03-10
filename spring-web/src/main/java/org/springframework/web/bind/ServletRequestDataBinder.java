@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.bind;
 import javax.servlet.ServletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.BindException;
 import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.util.WebUtils;
@@ -64,7 +65,7 @@ public class ServletRequestDataBinder extends WebDataBinder {
 	 * if the binder is just used to convert a plain parameter value)
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
-	public ServletRequestDataBinder(Object target) {
+	public ServletRequestDataBinder(@Nullable Object target) {
 		super(target);
 	}
 
@@ -74,7 +75,7 @@ public class ServletRequestDataBinder extends WebDataBinder {
 	 * if the binder is just used to convert a plain parameter value)
 	 * @param objectName the name of the target object
 	 */
-	public ServletRequestDataBinder(Object target, String objectName) {
+	public ServletRequestDataBinder(@Nullable Object target, String objectName) {
 		super(target, objectName);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.util.Map;
 
 import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
@@ -69,7 +70,7 @@ public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
 	 * @see org.springframework.util.LinkedCaseInsensitiveMap
 	 */
 	protected Map<String, Object> createColumnMap(int columnCount) {
-		return new LinkedCaseInsensitiveMap<Object>(columnCount);
+		return new LinkedCaseInsensitiveMap<>(columnCount);
 	}
 
 	/**
@@ -92,6 +93,7 @@ public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
 	 * @return the Object returned
 	 * @see org.springframework.jdbc.support.JdbcUtils#getResultSetValue
 	 */
+	@Nullable
 	protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
 		return JdbcUtils.getResultSetValue(rs, index);
 	}

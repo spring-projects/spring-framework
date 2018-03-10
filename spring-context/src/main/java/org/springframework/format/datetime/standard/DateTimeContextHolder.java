@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,19 +20,19 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 import org.springframework.core.NamedThreadLocal;
-import org.springframework.lang.UsesJava8;
+import org.springframework.lang.Nullable;
 
 /**
  * A holder for a thread-local user {@link DateTimeContext}.
  *
  * @author Juergen Hoeller
  * @since 4.0
+ * @see org.springframework.context.i18n.LocaleContextHolder
  */
-@UsesJava8
 public final class DateTimeContextHolder {
 
 	private static final ThreadLocal<DateTimeContext> dateTimeContextHolder =
-			new NamedThreadLocal<DateTimeContext>("DateTime Context");
+			new NamedThreadLocal<>("DateTimeContext");
 
 
 	/**
@@ -47,7 +47,7 @@ public final class DateTimeContextHolder {
 	 * @param dateTimeContext the current DateTimeContext,
 	 * or {@code null} to reset the thread-bound context
 	 */
-	public static void setDateTimeContext(DateTimeContext dateTimeContext) {
+	public static void setDateTimeContext(@Nullable DateTimeContext dateTimeContext) {
 		if (dateTimeContext == null) {
 			resetDateTimeContext();
 		}
@@ -60,6 +60,7 @@ public final class DateTimeContextHolder {
 	 * Return the DateTimeContext associated with the current thread, if any.
 	 * @return the current DateTimeContext, or {@code null} if none
 	 */
+	@Nullable
 	public static DateTimeContext getDateTimeContext() {
 		return dateTimeContextHolder.get();
 	}
@@ -72,7 +73,7 @@ public final class DateTimeContextHolder {
 	 * @param locale the current user locale (may be {@code null} if not known)
 	 * @return the user-specific DateTimeFormatter
 	 */
-	public static DateTimeFormatter getFormatter(DateTimeFormatter formatter, Locale locale) {
+	public static DateTimeFormatter getFormatter(DateTimeFormatter formatter, @Nullable Locale locale) {
 		DateTimeFormatter formatterToUse = (locale != null ? formatter.withLocale(locale) : formatter);
 		DateTimeContext context = getDateTimeContext();
 		return (context != null ? context.getFormatter(formatterToUse) : formatterToUse);

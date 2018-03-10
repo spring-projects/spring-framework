@@ -44,7 +44,7 @@ final class NumberToNumberConverterFactory implements ConverterFactory<Number, N
 
 	@Override
 	public <T extends Number> Converter<Number, T> getConverter(Class<T> targetType) {
-		return new NumberToNumber<T>(targetType);
+		return new NumberToNumber<>(targetType);
 	}
 
 	@Override
@@ -53,7 +53,7 @@ final class NumberToNumberConverterFactory implements ConverterFactory<Number, N
 	}
 
 
-	private final static class NumberToNumber<T extends Number> implements Converter<Number, T> {
+	private static final class NumberToNumber<T extends Number> implements Converter<Number, T> {
 
 		private final Class<T> targetType;
 

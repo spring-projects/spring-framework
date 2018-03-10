@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class XStreamUnmarshallerTests {
 	@Before
 	public void createUnmarshaller() throws Exception {
 		unmarshaller = new XStreamMarshaller();
-		Map<String, Class<?>> aliases = new HashMap<String, Class<?>>();
+		Map<String, Class<?>> aliases = new HashMap<>();
 		aliases.put("flight", Flight.class);
 		unmarshaller.setAliases(aliases);
 	}

@@ -28,6 +28,7 @@ import org.springframework.cache.interceptor.AbstractCacheInvoker;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -69,8 +70,9 @@ abstract class AbstractCacheInterceptor<O extends AbstractJCacheOperation<A>, A 
 	/**
 	 * Convert the collection of caches in a single expected element.
 	 * <p>Throw an {@link IllegalStateException} if the collection holds more than one element
-	 * @return the singe element or {@code null} if the collection is empty
+	 * @return the single element or {@code null} if the collection is empty
 	 */
+	@Nullable
 	static Cache extractFrom(Collection<? extends Cache> caches) {
 		if (CollectionUtils.isEmpty(caches)) {
 			return null;

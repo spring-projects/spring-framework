@@ -117,7 +117,7 @@ public class MappingJackson2MessageConverterTests {
 	public void toTextMessageWithMap() throws Exception {
 		converter.setTargetType(MessageType.TEXT);
 		TextMessage textMessageMock = mock(TextMessage.class);
-		Map<String, String> toBeMarshalled = new HashMap<String, String>();
+		Map<String, String> toBeMarshalled = new HashMap<>();
 		toBeMarshalled.put("foo", "bar");
 
 		given(sessionMock.createTextMessage(isA(String.class))).willReturn(textMessageMock);

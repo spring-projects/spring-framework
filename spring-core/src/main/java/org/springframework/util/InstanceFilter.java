@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.util;
 
 import java.util.Collection;
 import java.util.Collections;
+
+import org.springframework.lang.Nullable;
 
 /**
  * A simple instance filter that checks if a given instance match based on
@@ -51,11 +53,11 @@ public class InstanceFilter<T> {
 	 * @param matchIfEmpty the matching result if both the includes and the excludes
 	 * collections are empty
 	 */
-	public InstanceFilter(Collection<? extends T> includes,
-			Collection<? extends T> excludes, boolean matchIfEmpty) {
+	public InstanceFilter(@Nullable Collection<? extends T> includes,
+			@Nullable Collection<? extends T> excludes, boolean matchIfEmpty) {
 
-		this.includes = includes != null ? includes : Collections.<T>emptyList();
-		this.excludes = excludes != null ? excludes : Collections.<T>emptyList();
+		this.includes = (includes != null ? includes : Collections.emptyList());
+		this.excludes = (excludes != null ? excludes : Collections.emptyList());
 		this.matchIfEmpty = matchIfEmpty;
 	}
 
@@ -64,7 +66,7 @@ public class InstanceFilter<T> {
 	 * Determine if the specified {code instance} matches this filter.
 	 */
 	public boolean match(T instance) {
-		Assert.notNull(instance, "The instance to match is mandatory");
+		Assert.notNull(instance, "Instance to match must not be null");
 
 		boolean includesSet = !this.includes.isEmpty();
 		boolean excludesSet = !this.excludes.isEmpty();
@@ -74,11 +76,9 @@ public class InstanceFilter<T> {
 
 		boolean matchIncludes = match(instance, this.includes);
 		boolean matchExcludes = match(instance, this.excludes);
-
 		if (!includesSet) {
 			return !matchExcludes;
 		}
-
 		if (!excludesSet) {
 			return matchIncludes;
 		}

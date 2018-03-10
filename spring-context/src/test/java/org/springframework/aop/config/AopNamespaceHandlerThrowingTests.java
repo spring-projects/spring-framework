@@ -28,7 +28,7 @@ import static org.junit.Assert.*;
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public final class AopNamespaceHandlerThrowingTests {
+public class AopNamespaceHandlerThrowingTests {
 
 	@Test
 	public void testThrowingOnThrowingAdvice() {

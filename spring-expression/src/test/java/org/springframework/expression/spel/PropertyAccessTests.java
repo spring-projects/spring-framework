@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 package org.springframework.expression.spel;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -34,12 +36,11 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import static org.junit.Assert.*;
 
-///CLOVER:OFF
-
 /**
  * Tests accessing of properties.
  *
  * @author Andy Clement
+ * @author Juergen Hoeller
  */
 public class PropertyAccessTests extends AbstractExpressionTests {
 
@@ -114,7 +115,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		ctx.addPropertyAccessor(new StringyPropertyAccessor());
 		Expression expr = parser.parseRaw("new String('hello').flibbles");
 		Integer i = expr.getValue(ctx, Integer.class);
-		assertEquals((int) i, 7);
+		assertEquals(7, (int) i);
 
 		// The reflection one will be used for other properties...
 		expr = parser.parseRaw("new String('hello').CASE_INSENSITIVE_ORDER");
@@ -124,7 +125,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		expr = parser.parseRaw("new String('hello').flibbles");
 		expr.setValue(ctx, 99);
 		i = expr.getValue(ctx, Integer.class);
-		assertEquals((int) i, 99);
+		assertEquals(99, (int) i);
 
 		// Cannot set it to a string value
 		try {
@@ -150,7 +151,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		ctx.addPropertyAccessor(spa);
 		assertEquals(2,ctx.getPropertyAccessors().size());
 
-		List<PropertyAccessor> copy = new ArrayList<PropertyAccessor>();
+		List<PropertyAccessor> copy = new ArrayList<>();
 		copy.addAll(ctx.getPropertyAccessors());
 		assertTrue(ctx.removePropertyAccessor(spa));
 		assertFalse(ctx.removePropertyAccessor(spa));
@@ -164,7 +165,21 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 	public void testAccessingPropertyOfClass() throws Exception {
 		Expression expression = parser.parseExpression("name");
 		Object value = expression.getValue(new StandardEvaluationContext(String.class));
-		assertEquals(value, "java.lang.String");
+		assertEquals("java.lang.String", value);
+	}
+
+	@Test
+	public void shouldAlwaysUsePropertyAccessorFromEvaluationContext() {
+		SpelExpressionParser parser = new SpelExpressionParser();
+		Expression expression = parser.parseExpression("name");
+
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		context.addPropertyAccessor(new ConfigurablePropertyAccessor(Collections.singletonMap("name", "Ollie")));
+		assertEquals("Ollie", expression.getValue(context));
+
+		context = new StandardEvaluationContext();
+		context.addPropertyAccessor(new ConfigurablePropertyAccessor(Collections.singletonMap("name", "Jens")));
+		assertEquals("Jens", expression.getValue(context));
 	}
 
 
@@ -175,7 +190,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 
 		@Override
 		public Class<?>[] getSpecificTargetClasses() {
-			return new Class[] {String.class};
+			return new Class<?>[] {String.class};
 		}
 
 		@Override
@@ -213,6 +228,40 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 			catch (EvaluationException ex) {
 				throw new AccessException("Cannot set flibbles to an object of type '" + newValue.getClass() + "'");
 			}
+		}
+	}
+
+
+	private static class ConfigurablePropertyAccessor implements PropertyAccessor {
+
+		private final Map<String, Object> values;
+
+		public ConfigurablePropertyAccessor(Map<String, Object> values) {
+			this.values = values;
+		}
+
+		@Override
+		public Class<?>[] getSpecificTargetClasses() {
+			return null;
+		}
+
+		@Override
+		public boolean canRead(EvaluationContext context, Object target, String name) {
+			return true;
+		}
+
+		@Override
+		public TypedValue read(EvaluationContext context, Object target, String name) {
+			return new TypedValue(this.values.get(name));
+		}
+
+		@Override
+		public boolean canWrite(EvaluationContext context, Object target, String name) {
+			return false;
+		}
+
+		@Override
+		public void write(EvaluationContext context, Object target, String name, Object newValue) {
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.lang.Nullable;
 import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.MarshallingFailureException;
 import org.springframework.oxm.Unmarshaller;
@@ -47,8 +48,10 @@ import org.springframework.util.Assert;
  */
 public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConverter<Object> {
 
+	@Nullable
 	private Marshaller marshaller;
 
+	@Nullable
 	private Unmarshaller unmarshaller;
 
 
@@ -106,12 +109,12 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 
 
 	@Override
-	public boolean canRead(Class<?> clazz, MediaType mediaType) {
+	public boolean canRead(Class<?> clazz, @Nullable MediaType mediaType) {
 		return (canRead(mediaType) && this.unmarshaller != null && this.unmarshaller.supports(clazz));
 	}
 
 	@Override
-	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
 		return (canWrite(mediaType) && this.marshaller != null && this.marshaller.supports(clazz));
 	}
 

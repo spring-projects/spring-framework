@@ -30,6 +30,7 @@ import static org.junit.Assert.*;
  * Test utility to collect and assert events.
  *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  */
 @Component
 public class EventCollector {
@@ -73,7 +74,7 @@ public class EventCollector {
 	 */
 	public void assertEvent(String listenerId, Object... events) {
 		List<Object> actual = this.content.getOrDefault(listenerId, Collections.emptyList());
-		assertEquals("wrong number of events", events.length, actual.size());
+		assertEquals("Wrong number of events", events.length, actual.size());
 		for (int i = 0; i < events.length; i++) {
 			assertEquals("Wrong event at index " + i, events[i], actual.get(i));
 		}
@@ -97,8 +98,15 @@ public class EventCollector {
 		for (Map.Entry<String, List<Object>> entry : this.content.entrySet()) {
 			actual += entry.getValue().size();
 		}
-		assertEquals("Wrong number of total events (" + this.content.size() + ") " +
-				"registered listener(s)", number, actual);
+		assertEquals("Wrong number of total events (" + this.content.size() +
+				") registered listener(s)", number, actual);
+	}
+
+	/**
+	 * Clear the collected events, allowing for reuse of the collector.
+	 */
+	public void clear() {
+		this.content.clear();
 	}
 
 }

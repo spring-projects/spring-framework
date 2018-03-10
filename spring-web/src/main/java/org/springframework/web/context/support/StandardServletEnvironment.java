@@ -26,6 +26,7 @@ import org.springframework.core.env.PropertySource.StubPropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.jndi.JndiLocatorDelegate;
 import org.springframework.jndi.JndiPropertySource;
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.ConfigurableWebEnvironment;
 
 /**
@@ -90,7 +91,7 @@ public class StandardServletEnvironment extends StandardEnvironment implements C
 	}
 
 	@Override
-	public void initPropertySources(ServletContext servletContext, ServletConfig servletConfig) {
+	public void initPropertySources(@Nullable ServletContext servletContext, @Nullable ServletConfig servletConfig) {
 		WebApplicationContextUtils.initServletPropertySources(getPropertySources(), servletContext, servletConfig);
 	}
 

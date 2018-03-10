@@ -167,7 +167,7 @@ public class FastByteArrayOutputStreamTests {
 		this.os.write(this.helloBytes);
 		InputStream inputStream = this.os.getInputStream();
 		assertEquals(inputStream.read(), this.helloBytes[0]);
-		assertEquals(inputStream.skip(1), 1);
+		assertEquals(1, inputStream.skip(1));
 		assertEquals(inputStream.read(), this.helloBytes[2]);
 		assertEquals(this.helloBytes.length - 3, inputStream.available());
 	}

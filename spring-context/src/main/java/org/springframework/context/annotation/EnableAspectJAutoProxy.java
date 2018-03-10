@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,8 +77,8 @@ import java.lang.annotation.Target;
  *     // ...
  * }</pre>
  *
- * <p>Note that {@code @Aspect} beans may be component-scanned like any other. Simply
- * mark the aspect with both {@code @Aspect} and {@code @Component}:
+ * <p>Note that {@code @Aspect} beans may be component-scanned like any other.
+ * Simply mark the aspect with both {@code @Aspect} and {@code @Component}:
  *
  * <pre class="code">
  * package com.foo;
@@ -101,7 +101,18 @@ import java.lang.annotation.Target;
  *     // no explicit &#064Bean definitions required
  * }</pre>
  *
+ * <b>Note: {@code @EnableAspectJAutoProxy} applies to its local application context only,
+ * allowing for selective proxying of beans at different levels.</b> Please redeclare
+ * {@code @EnableAspectJAutoProxy} in each individual context, e.g. the common root web
+ * application context and any separate {@code DispatcherServlet} application contexts,
+ * if you need to apply its behavior at multiple levels.
+ *
+ * <p>This feature requires the presence of {@code aspectjweaver} on the classpath.
+ * While that dependency is optional for {@code spring-aop} in general, it is required
+ * for {@code @EnableAspectJAutoProxy} and its underlying facilities.
+ *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see org.aspectj.lang.annotation.Aspect
  */
@@ -116,5 +127,13 @@ public @interface EnableAspectJAutoProxy {
 	 * to standard Java interface-based proxies. The default is {@code false}.
 	 */
 	boolean proxyTargetClass() default false;
+
+	/**
+	 * Indicate that the proxy should be exposed by the AOP framework as a {@code ThreadLocal}
+	 * for retrieval via the {@link org.springframework.aop.framework.AopContext} class.
+	 * Off by default, i.e. no guarantees that {@code AopContext} access will work.
+	 * @since 4.3.1
+	 */
+	boolean exposeProxy() default false;
 
 }

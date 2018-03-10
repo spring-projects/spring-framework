@@ -30,7 +30,7 @@ import static org.springframework.tests.TestResourceUtils.*;
 /**
  * @author Stephane Nicoll
  */
-public final class CommonsPool2TargetSourceProxyTests {
+public class CommonsPool2TargetSourceProxyTests {
 
 	private static final Resource CONTEXT =
 		qualifiedResource(CommonsPool2TargetSourceProxyTests.class, "context.xml");

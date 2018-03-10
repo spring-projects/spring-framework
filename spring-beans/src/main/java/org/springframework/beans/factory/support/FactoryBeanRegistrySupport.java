@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
+import org.springframework.lang.Nullable;
 
 /**
  * Support base class for singleton registries which need to handle
@@ -43,7 +44,7 @@ import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanRegistry {
 
 	/** Cache of singleton objects created by FactoryBeans: FactoryBean name --> object */
-	private final Map<String, Object> factoryBeanObjectCache = new ConcurrentHashMap<String, Object>(16);
+	private final Map<String, Object> factoryBeanObjectCache = new ConcurrentHashMap<>(16);
 
 
 	/**
@@ -52,15 +53,12 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @return the FactoryBean's object type,
 	 * or {@code null} if the type cannot be determined yet
 	 */
+	@Nullable
 	protected Class<?> getTypeForFactoryBean(final FactoryBean<?> factoryBean) {
 		try {
 			if (System.getSecurityManager() != null) {
-				return AccessController.doPrivileged(new PrivilegedAction<Class<?>>() {
-					@Override
-					public Class<?> run() {
-						return factoryBean.getObjectType();
-					}
-				}, getAccessControlContext());
+				return AccessController.doPrivileged((PrivilegedAction<Class<?>>)
+						factoryBean::getObjectType, getAccessControlContext());
 			}
 			else {
 				return factoryBean.getObjectType();
@@ -81,9 +79,9 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @return the object obtained from the FactoryBean,
 	 * or {@code null} if not available
 	 */
+	@Nullable
 	protected Object getCachedObjectForFactoryBean(String beanName) {
-		Object object = this.factoryBeanObjectCache.get(beanName);
-		return (object != NULL_OBJECT ? object : null);
+		return this.factoryBeanObjectCache.get(beanName);
 	}
 
 	/**
@@ -108,7 +106,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 						object = alreadyThere;
 					}
 					else {
-						if (object != null && shouldPostProcess) {
+						if (shouldPostProcess) {
 							try {
 								object = postProcessObjectFromFactoryBean(object, beanName);
 							}
@@ -117,15 +115,15 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 										"Post-processing of FactoryBean's singleton object failed", ex);
 							}
 						}
-						this.factoryBeanObjectCache.put(beanName, (object != null ? object : NULL_OBJECT));
+						this.factoryBeanObjectCache.put(beanName, object);
 					}
 				}
-				return (object != NULL_OBJECT ? object : null);
+				return object;
 			}
 		}
 		else {
 			Object object = doGetObjectFromFactoryBean(factory, beanName);
-			if (object != null && shouldPostProcess) {
+			if (shouldPostProcess) {
 				try {
 					object = postProcessObjectFromFactoryBean(object, beanName);
 				}
@@ -153,12 +151,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 			if (System.getSecurityManager() != null) {
 				AccessControlContext acc = getAccessControlContext();
 				try {
-					object = AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-						@Override
-						public Object run() throws Exception {
-								return factory.getObject();
-							}
-						}, acc);
+					object = AccessController.doPrivileged((PrivilegedExceptionAction<Object>) factory::getObject, acc);
 				}
 				catch (PrivilegedActionException pae) {
 					throw pae.getException();
@@ -177,9 +170,12 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 
 		// Do not accept a null value for a FactoryBean that's not fully
 		// initialized yet: Many FactoryBeans just return null then.
-		if (object == null && isSingletonCurrentlyInCreation(beanName)) {
-			throw new BeanCurrentlyInCreationException(
-					beanName, "FactoryBean which is currently in creation returned null from getObject");
+		if (object == null) {
+			if (isSingletonCurrentlyInCreation(beanName)) {
+				throw new BeanCurrentlyInCreationException(
+						beanName, "FactoryBean which is currently in creation returned null from getObject");
+			}
+			object = new NullBean();
 		}
 		return object;
 	}
@@ -223,7 +219,16 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	}
 
 	/**
-	 * Returns the security context for this bean factory. If a security manager
+	 * Overridden to clear the FactoryBean object cache as well.
+	 */
+	@Override
+	public void destroySingletons() {
+		super.destroySingletons();
+		this.factoryBeanObjectCache.clear();
+	}
+
+	/**
+	 * Return the security context for this bean factory. If a security manager
 	 * is set, interaction with the user code will be executed using the privileged
 	 * of the security context returned by this method.
 	 * @see AccessController#getContext()

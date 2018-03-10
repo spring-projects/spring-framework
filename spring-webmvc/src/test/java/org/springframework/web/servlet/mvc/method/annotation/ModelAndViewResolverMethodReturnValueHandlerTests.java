@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,8 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 
 
 	@Before
-	public void setUp() {
-		mavResolvers = new ArrayList<ModelAndViewResolver>();
+	public void setup() {
+		mavResolvers = new ArrayList<>();
 		handler = new ModelAndViewResolverMethodReturnValueHandler(mavResolvers);
 		mavContainer = new ModelAndViewContainer();
 		request = new ServletWebRequest(new MockHttpServletRequest());
@@ -118,7 +118,7 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 
 	private static class TestModelAndViewResolver implements ModelAndViewResolver {
 
-		private Class<?> returnValueType;
+		private final Class<?> returnValueType;
 
 		public TestModelAndViewResolver(Class<?> returnValueType) {
 			this.returnValueType = returnValueType;
@@ -126,8 +126,9 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 
 		@Override
 		@SuppressWarnings("rawtypes")
-		public ModelAndView resolveModelAndView(Method method, Class handlerType, Object returnValue,
+		public ModelAndView resolveModelAndView(Method method, Class<?> handlerType, Object returnValue,
 				ExtendedModelMap model, NativeWebRequest request) {
+
 			if (returnValue != null && returnValue.getClass().equals(returnValueType)) {
 				return new ModelAndView("viewName", "modelAttrName", returnValue);
 			}

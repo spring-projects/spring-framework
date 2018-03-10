@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,14 @@
 
 package org.springframework.web.socket;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
+import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.servlet.api.DeploymentInfo;
@@ -23,25 +31,17 @@ import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.InstanceFactory;
 import io.undertow.servlet.api.InstanceHandle;
+import io.undertow.servlet.api.ServletInfo;
 import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
-
-import java.io.IOException;
-
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-
-import org.springframework.util.Assert;
-import org.springframework.util.SocketUtils;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.servlet.DispatcherServlet;
-
 import org.xnio.OptionMap;
 import org.xnio.Xnio;
 
-import static io.undertow.servlet.Servlets.*;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
+
+import static io.undertow.servlet.Servlets.defaultContainer;
+import static io.undertow.servlet.Servlets.deployment;
+import static io.undertow.servlet.Servlets.servlet;
 
 /**
  * Undertow-based {@link WebSocketTestServer}.
@@ -51,7 +51,7 @@ import static io.undertow.servlet.Servlets.*;
  */
 public class UndertowTestServer implements WebSocketTestServer {
 
-	private int port = -1;
+	private int port;
 
 	private Undertow server;
 
@@ -60,18 +60,11 @@ public class UndertowTestServer implements WebSocketTestServer {
 
 	@Override
 	public void setup() {
-		this.port = SocketUtils.findAvailableTcpPort();
-	}
-
-	@Override
-	public int getPort() {
-		return this.port;
 	}
 
 	@Override
 	@SuppressWarnings("deprecation")
 	public void deployConfig(WebApplicationContext wac, Filter... filters) {
-		Assert.state(this.port != -1, "setup() was never called");
 		DispatcherServletInstanceFactory servletFactory = new DispatcherServletInstanceFactory(wac);
 		// manually building WebSocketDeploymentInfo in order to avoid class cast exceptions
 		// with tomcat's implementation when using undertow 1.1.0+
@@ -84,15 +77,19 @@ public class UndertowTestServer implements WebSocketTestServer {
 			throw new IllegalStateException(ex);
 		}
 
+		ServletInfo servletInfo = servlet("DispatcherServlet", DispatcherServlet.class, servletFactory)
+				.addMapping("/").setAsyncSupported(true);
 		DeploymentInfo servletBuilder = deployment()
 				.setClassLoader(UndertowTestServer.class.getClassLoader())
 				.setDeploymentName("undertow-websocket-test")
 				.setContextPath("/")
-				.addServlet(servlet("DispatcherServlet", DispatcherServlet.class, servletFactory).addMapping("/").setAsyncSupported(true))
+				.addServlet(servletInfo)
 				.addServletContextAttribute(WebSocketDeploymentInfo.ATTRIBUTE_NAME, info);
 		for (final Filter filter : filters) {
 			String filterName = filter.getClass().getName();
-			servletBuilder.addFilter(new FilterInfo(filterName, filter.getClass(), new FilterInstanceFactory(filter)).setAsyncSupported(true));
+			FilterInstanceFactory filterFactory = new FilterInstanceFactory(filter);
+			FilterInfo filterInfo = new FilterInfo(filterName, filter.getClass(), filterFactory);
+			servletBuilder.addFilter(filterInfo.setAsyncSupported(true));
 			for (DispatcherType type : DispatcherType.values()) {
 				servletBuilder.addFilterUrlMapping(filterName, "/*", type);
 			}
@@ -101,16 +98,11 @@ public class UndertowTestServer implements WebSocketTestServer {
 			this.manager = defaultContainer().addDeployment(servletBuilder);
 			this.manager.deploy();
 			HttpHandler httpHandler = this.manager.start();
-			this.server = Undertow.builder().addHttpListener(this.port, "localhost").setHandler(httpHandler).build();
+			this.server = Undertow.builder().addHttpListener(0, "localhost").setHandler(httpHandler).build();
 		}
 		catch (ServletException ex) {
 			throw new IllegalStateException(ex);
 		}
-	}
-
-	@Override
-	public ServletContext getServletContext() {
-		return this.manager.getDeployment().getServletContext();
 	}
 
 	@Override
@@ -121,11 +113,24 @@ public class UndertowTestServer implements WebSocketTestServer {
 	@Override
 	public void start() throws Exception {
 		this.server.start();
+		Undertow.ListenerInfo info = this.server.getListenerInfo().get(0);
+		this.port = ((InetSocketAddress) info.getAddress()).getPort();
 	}
 
 	@Override
 	public void stop() throws Exception {
 		this.server.stop();
+		this.port = 0;
+	}
+
+	@Override
+	public int getPort() {
+		return this.port;
+	}
+
+	@Override
+	public ServletContext getServletContext() {
+		return this.manager.getDeployment().getServletContext();
 	}
 
 
@@ -150,6 +155,7 @@ public class UndertowTestServer implements WebSocketTestServer {
 			};
 		}
 	}
+
 
 	private static class FilterInstanceFactory implements InstanceFactory<Filter> {
 

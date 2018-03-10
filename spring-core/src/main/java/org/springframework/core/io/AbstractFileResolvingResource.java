@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,17 @@
 package org.springframework.core.io;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.StandardOpenOption;
 
 import org.springframework.util.ResourceUtils;
 
@@ -38,62 +43,16 @@ import org.springframework.util.ResourceUtils;
  */
 public abstract class AbstractFileResolvingResource extends AbstractResource {
 
-	/**
-	 * This implementation returns a File reference for the underlying class path
-	 * resource, provided that it refers to a file in the file system.
-	 * @see org.springframework.util.ResourceUtils#getFile(java.net.URL, String)
-	 */
-	@Override
-	public File getFile() throws IOException {
-		URL url = getURL();
-		if (url.getProtocol().startsWith(ResourceUtils.URL_PROTOCOL_VFS)) {
-			return VfsResourceDelegate.getResource(url).getFile();
-		}
-		return ResourceUtils.getFile(url, getDescription());
-	}
-
-	/**
-	 * This implementation determines the underlying File
-	 * (or jar file, in case of a resource in a jar/zip).
-	 */
-	@Override
-	protected File getFileForLastModifiedCheck() throws IOException {
-		URL url = getURL();
-		if (ResourceUtils.isJarURL(url)) {
-			URL actualUrl = ResourceUtils.extractArchiveURL(url);
-			if (actualUrl.getProtocol().startsWith(ResourceUtils.URL_PROTOCOL_VFS)) {
-				return VfsResourceDelegate.getResource(actualUrl).getFile();
-			}
-			return ResourceUtils.getFile(actualUrl, "Jar URL");
-		}
-		else {
-			return getFile();
-		}
-	}
-
-	/**
-	 * This implementation returns a File reference for the underlying class path
-	 * resource, provided that it refers to a file in the file system.
-	 * @see org.springframework.util.ResourceUtils#getFile(java.net.URI, String)
-	 */
-	protected File getFile(URI uri) throws IOException {
-		if (uri.getScheme().startsWith(ResourceUtils.URL_PROTOCOL_VFS)) {
-			return VfsResourceDelegate.getResource(uri).getFile();
-		}
-		return ResourceUtils.getFile(uri, getDescription());
-	}
-
-
 	@Override
 	public boolean exists() {
 		try {
 			URL url = getURL();
 			if (ResourceUtils.isFileURL(url)) {
-				// Proceed with file system resolution...
+				// Proceed with file system resolution
 				return getFile().exists();
 			}
 			else {
-				// Try a URL connection content-length header...
+				// Try a URL connection content-length header
 				URLConnection con = url.openConnection();
 				customizeConnection(con);
 				HttpURLConnection httpCon =
@@ -133,7 +92,7 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 		try {
 			URL url = getURL();
 			if (ResourceUtils.isFileURL(url)) {
-				// Proceed with file system resolution...
+				// Proceed with file system resolution
 				File file = getFile();
 				return (file.canRead() && !file.isDirectory());
 			}
@@ -147,14 +106,109 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 	}
 
 	@Override
+	public boolean isFile() {
+		try {
+			URL url = getURL();
+			if (url.getProtocol().startsWith(ResourceUtils.URL_PROTOCOL_VFS)) {
+				return VfsResourceDelegate.getResource(url).isFile();
+			}
+			return ResourceUtils.URL_PROTOCOL_FILE.equals(url.getProtocol());
+		}
+		catch (IOException ex) {
+			return false;
+		}
+	}
+
+	/**
+	 * This implementation returns a File reference for the underlying class path
+	 * resource, provided that it refers to a file in the file system.
+	 * @see org.springframework.util.ResourceUtils#getFile(java.net.URL, String)
+	 */
+	@Override
+	public File getFile() throws IOException {
+		URL url = getURL();
+		if (url.getProtocol().startsWith(ResourceUtils.URL_PROTOCOL_VFS)) {
+			return VfsResourceDelegate.getResource(url).getFile();
+		}
+		return ResourceUtils.getFile(url, getDescription());
+	}
+
+	/**
+	 * This implementation determines the underlying File
+	 * (or jar file, in case of a resource in a jar/zip).
+	 */
+	@Override
+	protected File getFileForLastModifiedCheck() throws IOException {
+		URL url = getURL();
+		if (ResourceUtils.isJarURL(url)) {
+			URL actualUrl = ResourceUtils.extractArchiveURL(url);
+			if (actualUrl.getProtocol().startsWith(ResourceUtils.URL_PROTOCOL_VFS)) {
+				return VfsResourceDelegate.getResource(actualUrl).getFile();
+			}
+			return ResourceUtils.getFile(actualUrl, "Jar URL");
+		}
+		else {
+			return getFile();
+		}
+	}
+
+	/**
+	 * This implementation returns a File reference for the given URI-identified
+	 * resource, provided that it refers to a file in the file system.
+	 * @since 5.0
+	 * @see #getFile(URI)
+	 */
+	protected boolean isFile(URI uri) {
+		try {
+			if (uri.getScheme().startsWith(ResourceUtils.URL_PROTOCOL_VFS)) {
+				return VfsResourceDelegate.getResource(uri).isFile();
+			}
+			return ResourceUtils.URL_PROTOCOL_FILE.equals(uri.getScheme());
+		}
+		catch (IOException ex) {
+			return false;
+		}
+	}
+
+	/**
+	 * This implementation returns a File reference for the given URI-identified
+	 * resource, provided that it refers to a file in the file system.
+	 * @see org.springframework.util.ResourceUtils#getFile(java.net.URI, String)
+	 */
+	protected File getFile(URI uri) throws IOException {
+		if (uri.getScheme().startsWith(ResourceUtils.URL_PROTOCOL_VFS)) {
+			return VfsResourceDelegate.getResource(uri).getFile();
+		}
+		return ResourceUtils.getFile(uri, getDescription());
+	}
+
+	/**
+	 * This implementation returns a FileChannel for the given URI-identified
+	 * resource, provided that it refers to a file in the file system.
+	 * @since 5.0
+	 * @see #getFile()
+	 */
+	@Override
+	public ReadableByteChannel readableChannel() throws IOException {
+		try {
+			// Try file system channel
+			return FileChannel.open(getFile().toPath(), StandardOpenOption.READ);
+		}
+		catch (FileNotFoundException | NoSuchFileException ex) {
+			// Fall back to InputStream adaptation in superclass
+			return super.readableChannel();
+		}
+	}
+
+	@Override
 	public long contentLength() throws IOException {
 		URL url = getURL();
 		if (ResourceUtils.isFileURL(url)) {
-			// Proceed with file system resolution...
+			// Proceed with file system resolution
 			return getFile().length();
 		}
 		else {
-			// Try a URL connection content-length header...
+			// Try a URL connection content-length header
 			URLConnection con = url.openConnection();
 			customizeConnection(con);
 			return con.getContentLength();
@@ -165,17 +219,19 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 	public long lastModified() throws IOException {
 		URL url = getURL();
 		if (ResourceUtils.isFileURL(url) || ResourceUtils.isJarURL(url)) {
-			// Proceed with file system resolution...
-			return super.lastModified();
+			// Proceed with file system resolution
+			try {
+				return super.lastModified();
+			}
+			catch (FileNotFoundException ex) {
+				// Defensively fall back to URL connection check instead
+			}
 		}
-		else {
-			// Try a URL connection last-modified header...
-			URLConnection con = url.openConnection();
-			customizeConnection(con);
-			return con.getLastModified();
-		}
+		// Try a URL connection last-modified header
+		URLConnection con = url.openConnection();
+		customizeConnection(con);
+		return con.getLastModified();
 	}
-
 
 	/**
 	 * Customize the given {@link URLConnection}, obtained in the course of an

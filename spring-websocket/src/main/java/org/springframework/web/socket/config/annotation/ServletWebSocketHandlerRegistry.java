@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpRequestHandler;
-import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
@@ -41,25 +41,36 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry {
 
-	private final List<ServletWebSocketHandlerRegistration> registrations =
-			new ArrayList<ServletWebSocketHandlerRegistration>();
+	private final List<ServletWebSocketHandlerRegistration> registrations = new ArrayList<>(4);
 
-	private TaskScheduler sockJsTaskScheduler;
+	@Nullable
+	private TaskScheduler scheduler;
 
 	private int order = 1;
 
+	@Nullable
 	private UrlPathHelper urlPathHelper;
 
 
-	public ServletWebSocketHandlerRegistry(ThreadPoolTaskScheduler sockJsTaskScheduler) {
-		this.sockJsTaskScheduler = sockJsTaskScheduler;
+	public ServletWebSocketHandlerRegistry() {
 	}
 
+	/**
+	 * Deprecated constructor with a TaskScheduler for SockJS use.
+	 * @deprecated as of 5.0 a TaskScheduler is not provided upfront, not until
+	 * it is obvious that it is needed, see {@link #requiresTaskScheduler()} and
+	 * {@link #setTaskScheduler}.
+	 */
+	@Deprecated
+	public ServletWebSocketHandlerRegistry(ThreadPoolTaskScheduler scheduler) {
+		this.scheduler = scheduler;
+	}
+
+
 	@Override
-	public WebSocketHandlerRegistration addHandler(WebSocketHandler webSocketHandler, String... paths) {
-		ServletWebSocketHandlerRegistration registration =
-				new ServletWebSocketHandlerRegistration(this.sockJsTaskScheduler);
-		registration.addHandler(webSocketHandler, paths);
+	public WebSocketHandlerRegistration addHandler(WebSocketHandler handler, String... paths) {
+		ServletWebSocketHandlerRegistration registration = new ServletWebSocketHandlerRegistration();
+		registration.addHandler(handler, paths);
 		this.registrations.add(registration);
 		return registration;
 	}
@@ -81,20 +92,40 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 	 * Set the UrlPathHelper to configure on the {@code SimpleUrlHandlerMapping}
 	 * used to map handshake requests.
 	 */
-	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+	public void setUrlPathHelper(@Nullable UrlPathHelper urlPathHelper) {
 		this.urlPathHelper = urlPathHelper;
 	}
 
+	@Nullable
 	public UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}
 
+
 	/**
-	 * Return a {@link HandlerMapping} with mapped {@link HttpRequestHandler}s.
+	 * Whether there are any endpoint SockJS registrations without a TaskScheduler.
+	 * This method should be invoked just before {@link #getHandlerMapping()} to
+	 * allow for registrations to be made first.
 	 */
+	protected boolean requiresTaskScheduler() {
+		return this.registrations.stream()
+				.anyMatch(r -> r.getSockJsServiceRegistration() != null &&
+						r.getSockJsServiceRegistration().getTaskScheduler() == null);
+	}
+
+	/**
+	 * Configure a TaskScheduler for SockJS endpoints. This should be configured
+	 * before calling {@link #getHandlerMapping()} after checking if
+	 * {@link #requiresTaskScheduler()} returns {@code true}.
+	 */
+	protected void setTaskScheduler(TaskScheduler scheduler) {
+		this.scheduler = scheduler;
+	}
+
 	public AbstractHandlerMapping getHandlerMapping() {
-		Map<String, Object> urlMap = new LinkedHashMap<String, Object>();
+		Map<String, Object> urlMap = new LinkedHashMap<>();
 		for (ServletWebSocketHandlerRegistration registration : this.registrations) {
+			updateTaskScheduler(registration);
 			MultiValueMap<HttpRequestHandler, String> mappings = registration.getMappings();
 			for (HttpRequestHandler httpHandler : mappings.keySet()) {
 				for (String pattern : mappings.get(httpHandler)) {
@@ -109,6 +140,13 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 			hm.setUrlPathHelper(this.urlPathHelper);
 		}
 		return hm;
+	}
+
+	private void updateTaskScheduler(ServletWebSocketHandlerRegistration registration) {
+		SockJsServiceRegistration sockJsRegistration = registration.getSockJsServiceRegistration();
+		if (sockJsRegistration != null && this.scheduler != null && sockJsRegistration.getTaskScheduler() == null) {
+			sockJsRegistration.setTaskScheduler(this.scheduler);
+		}
 	}
 
 }

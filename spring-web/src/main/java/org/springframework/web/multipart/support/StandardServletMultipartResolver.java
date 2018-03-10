@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
@@ -42,6 +43,9 @@ import org.springframework.web.multipart.MultipartResolver;
  *
  * @author Juergen Hoeller
  * @since 3.1
+ * @see #setResolveLazily
+ * @see HttpServletRequest#getParts()
+ * @see org.springframework.web.multipart.commons.CommonsMultipartResolver
  */
 public class StandardServletMultipartResolver implements MultipartResolver {
 
@@ -64,11 +68,11 @@ public class StandardServletMultipartResolver implements MultipartResolver {
 	@Override
 	public boolean isMultipart(HttpServletRequest request) {
 		// Same check as in Commons FileUpload...
-		if (!"post".equals(request.getMethod().toLowerCase())) {
+		if (!"post".equalsIgnoreCase(request.getMethod())) {
 			return false;
 		}
 		String contentType = request.getContentType();
-		return (contentType != null && contentType.toLowerCase().startsWith("multipart/"));
+		return StringUtils.startsWithIgnoreCase(contentType, "multipart/");
 	}
 
 	@Override
@@ -87,7 +91,7 @@ public class StandardServletMultipartResolver implements MultipartResolver {
 				}
 			}
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			LogFactory.getLog(getClass()).warn("Failed to perform cleanup of multipart items", ex);
 		}
 	}

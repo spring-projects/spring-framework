@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,8 @@ import org.springframework.context.annotation.Configuration;
 import static org.junit.Assert.*;
 
 /**
- * Integration tests for @EnableCaching and its related @Configuration classes.
+ * Integration tests for {@code @EnableCaching} and its related
+ * {@code @Configuration} classes.
  *
  * @author Chris Beams
  * @author Stephane Nicoll
@@ -54,17 +55,15 @@ public class EnableCachingTests extends AbstractCacheAnnotationTests {
 
 	@Test
 	public void testKeyStrategy() {
-		CacheInterceptor ci = ctx.getBean(CacheInterceptor.class);
-		assertSame(ctx.getBean("keyGenerator", KeyGenerator.class), ci.getKeyGenerator());
+		CacheInterceptor ci = this.ctx.getBean(CacheInterceptor.class);
+		assertSame(this.ctx.getBean("keyGenerator", KeyGenerator.class), ci.getKeyGenerator());
 	}
 
 	@Test
 	public void testCacheErrorHandler() {
-		CacheInterceptor ci = ctx.getBean(CacheInterceptor.class);
-		assertSame(ctx.getBean("errorHandler", CacheErrorHandler.class), ci.getErrorHandler());
+		CacheInterceptor ci = this.ctx.getBean(CacheInterceptor.class);
+		assertSame(this.ctx.getBean("errorHandler", CacheErrorHandler.class), ci.getErrorHandler());
 	}
-
-	// --- local tests -------
 
 	@Test
 	public void singleCacheManagerBean() throws Throwable {
@@ -91,7 +90,7 @@ public class EnableCachingTests extends AbstractCacheAnnotationTests {
 	public void multipleCacheManagerBeans_implementsCachingConfigurer() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(MultiCacheManagerConfigurer.class);
-		ctx.refresh(); // does not throw
+		ctx.refresh();  // does not throw an exception
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -124,22 +123,17 @@ public class EnableCachingTests extends AbstractCacheAnnotationTests {
 
 	@Test
 	public void emptyConfigSupport() {
-		ConfigurableApplicationContext context =
-				new AnnotationConfigApplicationContext(EmptyConfigSupportConfig.class);
-
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(EmptyConfigSupportConfig.class);
 		CacheInterceptor ci = context.getBean(CacheInterceptor.class);
 		assertNotNull(ci.getCacheResolver());
 		assertEquals(SimpleCacheResolver.class, ci.getCacheResolver().getClass());
-		assertSame(context.getBean(CacheManager.class),
-				((SimpleCacheResolver)ci.getCacheResolver()).getCacheManager());
+		assertSame(context.getBean(CacheManager.class), ((SimpleCacheResolver)ci.getCacheResolver()).getCacheManager());
 		context.close();
 	}
 
 	@Test
 	public void bothSetOnlyResolverIsUsed() {
-		ConfigurableApplicationContext context =
-				new AnnotationConfigApplicationContext(FullCachingConfig.class);
-
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(FullCachingConfig.class);
 		CacheInterceptor ci = context.getBean(CacheInterceptor.class);
 		assertSame(context.getBean("cacheResolver"), ci.getCacheResolver());
 		assertSame(context.getBean("keyGenerator"), ci.getKeyGenerator());

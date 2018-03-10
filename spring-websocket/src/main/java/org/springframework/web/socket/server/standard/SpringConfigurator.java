@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -55,7 +56,7 @@ public class SpringConfigurator extends Configurator {
 	private static final Log logger = LogFactory.getLog(SpringConfigurator.class);
 
 	private static final Map<String, Map<Class<?>, String>> cache =
-			new ConcurrentHashMap<String, Map<Class<?>, String>>();
+			new ConcurrentHashMap<>();
 
 
 	@SuppressWarnings("unchecked")
@@ -97,12 +98,13 @@ public class SpringConfigurator extends Configurator {
 		return wac.getAutowireCapableBeanFactory().createBean(endpointClass);
 	}
 
+	@Nullable
 	private String getBeanNameByType(WebApplicationContext wac, Class<?> endpointClass) {
 		String wacId = wac.getId();
 
 		Map<Class<?>, String> beanNamesByType = cache.get(wacId);
 		if (beanNamesByType == null) {
-			beanNamesByType = new ConcurrentHashMap<Class<?>, String>();
+			beanNamesByType = new ConcurrentHashMap<>();
 			cache.put(wacId, beanNamesByType);
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,6 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -54,6 +53,7 @@ import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -66,7 +66,13 @@ import org.springframework.util.StreamUtils;
  */
 public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMessageConverter<T> {
 
-	private static final Set<Class<?>> SUPPORTED_CLASSES = new HashSet<Class<?>>(5);
+	private static final EntityResolver NO_OP_ENTITY_RESOLVER =
+			(publicId, systemId) -> new InputSource(new StringReader(""));
+
+	private static final XMLResolver NO_OP_XML_RESOLVER =
+			(publicID, systemID, base, ns) -> StreamUtils.emptyInput();
+
+	private static final Set<Class<?>> SUPPORTED_CLASSES = new HashSet<>(8);
 
 	static {
 		SUPPORTED_CLASSES.add(DOMSource.class);
@@ -175,9 +181,8 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 		}
 		catch (NullPointerException ex) {
 			if (!isSupportDtd()) {
-				throw new HttpMessageNotReadableException("NPE while unmarshalling. " +
-						"This can happen on JDK 1.6 due to the presence of DTD " +
-						"declarations, which are disabled.", ex);
+				throw new HttpMessageNotReadableException("NPE while unmarshalling: " +
+						"This can happen due to the presence of DTD declarations which are disabled.", ex);
 			}
 			throw ex;
 		}
@@ -189,16 +194,17 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 		}
 	}
 
+	@SuppressWarnings("deprecation")  // on JDK 9
 	private SAXSource readSAXSource(InputStream body) throws IOException {
 		try {
-			XMLReader reader = XMLReaderFactory.createXMLReader();
-			reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
-			reader.setFeature("http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+			XMLReader xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
+			xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
+			xmlReader.setFeature("http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
 			if (!isProcessExternalEntities()) {
-				reader.setEntityResolver(NO_OP_ENTITY_RESOLVER);
+				xmlReader.setEntityResolver(NO_OP_ENTITY_RESOLVER);
 			}
 			byte[] bytes = StreamUtils.copyToByteArray(body);
-			return new SAXSource(reader, new InputSource(new ByteArrayInputStream(bytes)));
+			return new SAXSource(xmlReader, new InputSource(new ByteArrayInputStream(bytes)));
 		}
 		catch (SAXException ex) {
 			throw new HttpMessageNotReadableException("Could not parse document: " + ex.getMessage(), ex);
@@ -227,7 +233,8 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 	}
 
 	@Override
-	protected Long getContentLength(T t, MediaType contentType) {
+	@Nullable
+	protected Long getContentLength(T t, @Nullable MediaType contentType) {
 		if (t instanceof DOMSource) {
 			try {
 				CountingOutputStream os = new CountingOutputStream();
@@ -277,20 +284,5 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 			this.count += len;
 		}
 	}
-
-
-	private static final EntityResolver NO_OP_ENTITY_RESOLVER = new EntityResolver() {
-		@Override
-		public InputSource resolveEntity(String publicId, String systemId) {
-			return new InputSource(new StringReader(""));
-		}
-	};
-
-	private static final XMLResolver NO_OP_XML_RESOLVER = new XMLResolver() {
-		@Override
-		public Object resolveEntity(String publicID, String systemID, String base, String ns) {
-			return StreamUtils.emptyInput();
-		}
-	};
 
 }

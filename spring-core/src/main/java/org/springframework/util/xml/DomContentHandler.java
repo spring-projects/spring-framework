@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ class DomContentHandler implements ContentHandler {
 
 	private final Document document;
 
-	private final List<Element> elements = new ArrayList<Element>();
+	private final List<Element> elements = new ArrayList<>();
 
 	private final Node node;
 
@@ -94,7 +94,7 @@ class DomContentHandler implements ContentHandler {
 	}
 
 	@Override
-	public void characters(char ch[], int start, int length) throws SAXException {
+	public void characters(char[] ch, int start, int length) throws SAXException {
 		String data = new String(ch, start, length);
 		Node parent = getParent();
 		Node lastChild = parent.getLastChild();
@@ -139,7 +139,7 @@ class DomContentHandler implements ContentHandler {
 	}
 
 	@Override
-	public void ignorableWhitespace(char ch[], int start, int length) throws SAXException {
+	public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
 	}
 
 	@Override

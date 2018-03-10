@@ -17,8 +17,11 @@
 package org.springframework.web.cors;
 
 import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.lang.Nullable;
 
 /**
  * A strategy that takes a request and a {@link CorsConfiguration} and updates
@@ -44,7 +47,7 @@ public interface CorsProcessor {
 	 * @param response the current response
 	 * @return {@code false} if the request is rejected, {@code true} otherwise
 	 */
-	boolean processRequest(CorsConfiguration configuration, HttpServletRequest request,
+	boolean processRequest(@Nullable CorsConfiguration configuration, HttpServletRequest request,
 			HttpServletResponse response) throws IOException;
 
 }

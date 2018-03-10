@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -36,6 +37,7 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 
 	private final ApplicationListener<ApplicationEvent> delegate;
 
+	@Nullable
 	private final ResolvableType declaredEventType;
 
 
@@ -60,8 +62,8 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 	@SuppressWarnings("unchecked")
 	public boolean supportsEventType(ResolvableType eventType) {
 		if (this.delegate instanceof SmartApplicationListener) {
-			Class<? extends ApplicationEvent> eventClass = (Class<? extends ApplicationEvent>) eventType.getRawClass();
-			return ((SmartApplicationListener) this.delegate).supportsEventType(eventClass);
+			Class<? extends ApplicationEvent> eventClass = (Class<? extends ApplicationEvent>) eventType.resolve();
+			return (eventClass != null && ((SmartApplicationListener) this.delegate).supportsEventType(eventClass));
 		}
 		else {
 			return (this.declaredEventType == null || this.declaredEventType.isAssignableFrom(eventType));
@@ -70,17 +72,13 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 
 	@Override
 	public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
-		return supportsEventType(ResolvableType.forType(eventType));
+		return supportsEventType(ResolvableType.forClass(eventType));
 	}
 
 	@Override
-	public boolean supportsSourceType(Class<?> sourceType) {
-		if (this.delegate instanceof SmartApplicationListener) {
-			return ((SmartApplicationListener) this.delegate).supportsSourceType(sourceType);
-		}
-		else {
-			return true;
-		}
+	public boolean supportsSourceType(@Nullable Class<?> sourceType) {
+		return !(this.delegate instanceof SmartApplicationListener) ||
+				((SmartApplicationListener) this.delegate).supportsSourceType(sourceType);
 	}
 
 	@Override
@@ -88,20 +86,17 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 		return (this.delegate instanceof Ordered ? ((Ordered) this.delegate).getOrder() : Ordered.LOWEST_PRECEDENCE);
 	}
 
-
+	@Nullable
 	static ResolvableType resolveDeclaredEventType(Class<?> listenerType) {
 		ResolvableType resolvableType = ResolvableType.forClass(listenerType).as(ApplicationListener.class);
-		if (resolvableType == null || !resolvableType.hasGenerics()) {
-			return null;
-		}
-		return resolvableType.getGeneric();
+		return (resolvableType.hasGenerics() ? resolvableType.getGeneric() : null);
 	}
 
+	@Nullable
 	private static ResolvableType resolveDeclaredEventType(ApplicationListener<ApplicationEvent> listener) {
 		ResolvableType declaredEventType = resolveDeclaredEventType(listener.getClass());
 		if (declaredEventType == null || declaredEventType.isAssignableFrom(
 				ResolvableType.forClass(ApplicationEvent.class))) {
-
 			Class<?> targetClass = AopUtils.getTargetClass(listener);
 			if (targetClass != listener.getClass()) {
 				declaredEventType = resolveDeclaredEventType(targetClass);

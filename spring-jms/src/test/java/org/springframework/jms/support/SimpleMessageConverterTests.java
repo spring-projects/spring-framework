@@ -92,7 +92,7 @@ public class SimpleMessageConverterTests {
 		Session session = mock(Session.class);
 		MapMessage message = mock(MapMessage.class);
 
-		Map<String, String> content = new HashMap<String, String>(2);
+		Map<String, String> content = new HashMap<>(2);
 		content.put("key1", "value1");
 		content.put("key2", "value2");
 
@@ -159,7 +159,7 @@ public class SimpleMessageConverterTests {
 		Session session = mock(Session.class);
 		given(session.createMapMessage()).willReturn(message);
 
-		Map<Integer, String> content = new HashMap<Integer, String>(1);
+		Map<Integer, String> content = new HashMap<>(1);
 		content.put(1, "value1");
 
 		SimpleMessageConverter converter = new SimpleMessageConverter();
@@ -176,7 +176,7 @@ public class SimpleMessageConverterTests {
 		Session session = mock(Session.class);
 		given(session.createMapMessage()).willReturn(message);
 
-		Map<Object, String> content = new HashMap<Object, String>(1);
+		Map<Object, String> content = new HashMap<>(1);
 		content.put(null, "value1");
 
 		SimpleMessageConverter converter = new SimpleMessageConverter();

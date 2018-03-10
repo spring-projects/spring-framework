@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -74,7 +76,7 @@ public class CrossOriginTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		Properties props = new Properties();
 		props.setProperty("myOrigin", "http://example.com");
@@ -88,6 +90,7 @@ public class CrossOriginTests {
 		this.request.setMethod("GET");
 		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain.com/");
 	}
+
 
 	@Test
 	public void noAnnotationWithoutOrigin() throws Exception {
@@ -123,7 +126,7 @@ public class CrossOriginTests {
 		assertNotNull(config);
 		assertArrayEquals(new String[] {"GET"}, config.getAllowedMethods().toArray());
 		assertArrayEquals(new String[] {"*"}, config.getAllowedOrigins().toArray());
-		assertTrue(config.getAllowCredentials());
+		assertNull(config.getAllowCredentials());
 		assertArrayEquals(new String[] {"*"}, config.getAllowedHeaders().toArray());
 		assertTrue(CollectionUtils.isEmpty(config.getExposedHeaders()));
 		assertEquals(new Long(1800), config.getMaxAge());
@@ -152,7 +155,7 @@ public class CrossOriginTests {
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertNotNull(config);
 		assertEquals(Arrays.asList("http://example.com"), config.getAllowedOrigins());
-		assertTrue(config.getAllowCredentials());
+		assertNull(config.getAllowCredentials());
 	}
 
 	@Test
@@ -163,7 +166,7 @@ public class CrossOriginTests {
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertNotNull(config);
 		assertEquals(Arrays.asList("http://example.com"), config.getAllowedOrigins());
-		assertTrue(config.getAllowCredentials());
+		assertNull(config.getAllowCredentials());
 	}
 
 	@Test
@@ -240,7 +243,7 @@ public class CrossOriginTests {
 		assertNotNull(config);
 		assertArrayEquals(new String[] {"GET"}, config.getAllowedMethods().toArray());
 		assertArrayEquals(new String[] {"*"}, config.getAllowedOrigins().toArray());
-		assertTrue(config.getAllowCredentials());
+		assertNull(config.getAllowCredentials());
 		assertArrayEquals(new String[] {"*"}, config.getAllowedHeaders().toArray());
 		assertTrue(CollectionUtils.isEmpty(config.getExposedHeaders()));
 		assertEquals(new Long(1800), config.getMaxAge());
@@ -288,6 +291,7 @@ public class CrossOriginTests {
 		assertNull(this.handlerMapping.getHandler(request));
 	}
 
+
 	private CorsConfiguration getCorsConfiguration(HandlerExecutionChain chain, boolean isPreFlightRequest) {
 		if (isPreFlightRequest) {
 			Object handler = chain.getHandler();
@@ -313,48 +317,52 @@ public class CrossOriginTests {
 	@Controller
 	private static class MethodLevelController {
 
-		@RequestMapping(path = "/no", method = RequestMethod.GET)
+		@GetMapping("/no")
 		public void noAnnotation() {
 		}
 
-		@RequestMapping(path = "/no", method = RequestMethod.POST)
+		@PostMapping("/no")
 		public void noAnnotationPost() {
 		}
 
 		@CrossOrigin
-		@RequestMapping(path = "/default", method = RequestMethod.GET)
+		@GetMapping(path = "/default")
 		public void defaultAnnotation() {
 		}
 
 		@CrossOrigin
-		@RequestMapping(path = "/default", method = RequestMethod.GET, params = "q")
+		@GetMapping(path = "/default", params = "q")
 		public void defaultAnnotationWithParams() {
 		}
 
 		@CrossOrigin
-		@RequestMapping(path = "/ambiguous-header", method = RequestMethod.GET, headers = "header1=a")
+		@GetMapping(path = "/ambiguous-header", headers = "header1=a")
 		public void ambigousHeader1a() {
 		}
 
 		@CrossOrigin
-		@RequestMapping(path = "/ambiguous-header", method = RequestMethod.GET, headers = "header1=b")
+		@GetMapping(path = "/ambiguous-header", headers = "header1=b")
 		public void ambigousHeader1b() {
 		}
 
 		@CrossOrigin
-		@RequestMapping(path = "/ambiguous-produces", method = RequestMethod.GET, produces = "application/xml")
+		@GetMapping(path = "/ambiguous-produces", produces = "application/xml")
 		public String ambigousProducesXml() {
 			return "<a></a>";
 		}
 
 		@CrossOrigin
-		@RequestMapping(path = "/ambiguous-produces", method = RequestMethod.GET, produces = "application/json")
+		@GetMapping(path = "/ambiguous-produces", produces = "application/json")
 		public String ambigousProducesJson() {
 			return "{}";
 		}
 
-		@CrossOrigin(origins = { "http://site1.com", "http://site2.com" }, allowedHeaders = { "header1", "header2" },
-				exposedHeaders = { "header3", "header4" }, methods = RequestMethod.DELETE, maxAge = 123, allowCredentials = "false")
+		@CrossOrigin(origins = { "http://site1.com", "http://site2.com" },
+				allowedHeaders = { "header1", "header2" },
+				exposedHeaders = { "header3", "header4" },
+				methods = RequestMethod.DELETE,
+				maxAge = 123,
+				allowCredentials = "false")
 		@RequestMapping(path = "/customized", method = { RequestMethod.GET, RequestMethod.POST })
 		public void customized() {
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Miscellaneous utility methods for number conversion and parsing.
  * <p>Mainly for internal use within the framework; consider Apache's
@@ -47,7 +49,7 @@ public abstract class NumberUtils {
 	public static final Set<Class<?>> STANDARD_NUMBER_TYPES;
 
 	static {
-		Set<Class<?>> numberTypes = new HashSet<Class<?>>(8);
+		Set<Class<?>> numberTypes = new HashSet<>(8);
 		numberTypes.add(Byte.class);
 		numberTypes.add(Short.class);
 		numberTypes.add(Integer.class);
@@ -243,7 +245,9 @@ public abstract class NumberUtils {
 	 * @see #convertNumberToTargetClass
 	 * @see #parseNumber(String, Class)
 	 */
-	public static <T extends Number> T parseNumber(String text, Class<T> targetClass, NumberFormat numberFormat) {
+	public static <T extends Number> T parseNumber(
+			String text, Class<T> targetClass, @Nullable NumberFormat numberFormat) {
+
 		if (numberFormat != null) {
 			Assert.notNull(text, "Text must not be null");
 			Assert.notNull(targetClass, "Target class must not be null");

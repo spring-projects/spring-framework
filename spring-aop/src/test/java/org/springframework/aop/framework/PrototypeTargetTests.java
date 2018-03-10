@@ -32,7 +32,7 @@ import static org.springframework.tests.TestResourceUtils.*;
  * @author Chris Beams
  * @since 03.09.2004
  */
-public final class PrototypeTargetTests {
+public class PrototypeTargetTests {
 
 	private static final Resource CONTEXT = qualifiedResource(PrototypeTargetTests.class, "context.xml");
 

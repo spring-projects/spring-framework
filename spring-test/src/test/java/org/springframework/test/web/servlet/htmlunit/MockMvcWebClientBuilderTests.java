@@ -19,7 +19,9 @@ package org.springframework.test.web.servlet.htmlunit;
 import java.io.IOException;
 import java.net.URL;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
@@ -38,7 +40,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -103,11 +108,22 @@ public class MockMvcWebClientBuilderTests {
 		this.mockMvc = MockMvcBuilders.standaloneSetup(new CookieController()).build();
 		WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).build();
 
-		assertThat(getResponse(client, "http://localhost/").getContentAsString(), equalTo(""));
+		assertThat(getResponse(client, "http://localhost/").getContentAsString(), equalTo("NA"));
 		client.getCookieManager().addCookie(new Cookie("localhost", "cookie", "cookieManagerShared"));
 		assertThat(getResponse(client, "http://localhost/").getContentAsString(), equalTo("cookieManagerShared"));
 	}
 
+	@Test // SPR-14265
+	public void cookiesAreManaged() throws Exception {
+		this.mockMvc = MockMvcBuilders.standaloneSetup(new CookieController()).build();
+		WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).build();
+
+		assertThat(getResponse(client, "http://localhost/").getContentAsString(), equalTo("NA"));
+		assertThat(postResponse(client, "http://localhost/?cookie=foo").getContentAsString(), equalTo("Set"));
+		assertThat(getResponse(client, "http://localhost/").getContentAsString(), equalTo("foo"));
+		assertThat(deleteResponse(client, "http://localhost/").getContentAsString(), equalTo("Delete"));
+		assertThat(getResponse(client, "http://localhost/").getContentAsString(), equalTo("NA"));
+	}
 
 	private void assertMockMvcUsed(WebClient client, String url) throws Exception {
 		assertThat(getResponse(client, url).getContentAsString(), equalTo("mvc"));
@@ -118,7 +134,19 @@ public class MockMvcWebClientBuilderTests {
 	}
 
 	private WebResponse getResponse(WebClient client, String url) throws IOException {
-		return client.getWebConnection().getResponse(new WebRequest(new URL(url)));
+		return createResponse(client, new WebRequest(new URL(url)));
+	}
+
+	private WebResponse postResponse(WebClient client, String url) throws IOException {
+		return createResponse(client, new WebRequest(new URL(url), HttpMethod.POST));
+	}
+
+	private WebResponse deleteResponse(WebClient client, String url) throws IOException {
+		return createResponse(client, new WebRequest(new URL(url), HttpMethod.DELETE));
+	}
+
+	private WebResponse createResponse(WebClient client, WebRequest request) throws IOException {
+		return client.getWebConnection().getResponse(request);
 	}
 
 
@@ -139,9 +167,25 @@ public class MockMvcWebClientBuilderTests {
 	@RestController
 	static class CookieController {
 
+		static final String COOKIE_NAME = "cookie";
+
 		@RequestMapping(path = "/", produces = "text/plain")
-		String cookie(@CookieValue("cookie") String cookie) {
+		String cookie(@CookieValue(name = COOKIE_NAME, defaultValue = "NA") String cookie) {
 			return cookie;
+		}
+
+		@PostMapping(path = "/", produces = "text/plain")
+		String setCookie(@RequestParam String cookie, HttpServletResponse response) {
+			response.addCookie(new javax.servlet.http.Cookie(COOKIE_NAME, cookie));
+			return "Set";
+		}
+
+		@DeleteMapping(path = "/", produces = "text/plain")
+		String deleteCookie(HttpServletResponse response) {
+			javax.servlet.http.Cookie cookie = new javax.servlet.http.Cookie(COOKIE_NAME, "");
+			cookie.setMaxAge(0);
+			response.addCookie(cookie);
+			return "Delete";
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,6 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  * Examples of defining expectations on request content and content type.
  *
  * @author Rossen Stoyanchev
- *
  * @see JsonPathRequestMatchersIntegrationTests
  * @see XmlContentRequestMatchersIntegrationTests
  * @see XpathRequestMatchersIntegrationTests
@@ -50,9 +49,10 @@ public class ContentRequestMatchersIntegrationTests {
 
 	private RestTemplate restTemplate;
 
+
 	@Before
 	public void setup() {
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new StringHttpMessageConverter());
 		converters.add(new MappingJackson2HttpMessageConverter());
 
@@ -61,6 +61,7 @@ public class ContentRequestMatchersIntegrationTests {
 
 		this.mockServer = MockRestServiceServer.createServer(this.restTemplate);
 	}
+
 
 	@Test
 	public void contentType() throws Exception {

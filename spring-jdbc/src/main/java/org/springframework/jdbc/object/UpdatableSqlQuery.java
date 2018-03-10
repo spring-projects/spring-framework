@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.lang.Nullable;
 
 /**
  * Reusable RDBMS query in which concrete subclasses must implement
@@ -59,7 +60,7 @@ public abstract class UpdatableSqlQuery<T> extends SqlQuery<T> {
 	 * implementation of the {@code updateRow()} method.
 	 */
 	@Override
-	protected RowMapper<T> newRowMapper(Object[] parameters, Map<?, ?> context) {
+	protected RowMapper<T> newRowMapper(@Nullable Object[] parameters, @Nullable Map<?, ?> context) {
 		return new RowMapperImpl(context);
 	}
 
@@ -78,7 +79,7 @@ public abstract class UpdatableSqlQuery<T> extends SqlQuery<T> {
 	 * Subclasses can simply not catch SQLExceptions, relying on the
 	 * framework to clean up.
 	 */
-	protected abstract T updateRow(ResultSet rs, int rowNum, Map<?, ?> context) throws SQLException;
+	protected abstract T updateRow(ResultSet rs, int rowNum, @Nullable Map<?, ?> context) throws SQLException;
 
 
 	/**
@@ -87,9 +88,10 @@ public abstract class UpdatableSqlQuery<T> extends SqlQuery<T> {
 	 */
 	protected class RowMapperImpl implements RowMapper<T> {
 
+		@Nullable
 		private final Map<?, ?> context;
 
-		public RowMapperImpl(Map<?, ?> context) {
+		public RowMapperImpl(@Nullable Map<?, ?> context) {
 			this.context = context;
 		}
 

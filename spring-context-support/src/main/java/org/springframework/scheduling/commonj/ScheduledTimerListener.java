@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.scheduling.commonj;
 
 import commonj.timers.TimerListener;
+
+import org.springframework.lang.Nullable;
 
 /**
  * JavaBean that describes a scheduled TimerListener, consisting of
@@ -40,6 +42,7 @@ import commonj.timers.TimerListener;
  */
 public class ScheduledTimerListener {
 
+	@Nullable
 	private TimerListener timerListener;
 
 	private long delay = 0;
@@ -140,13 +143,14 @@ public class ScheduledTimerListener {
 	/**
 	 * Set the TimerListener to schedule.
 	 */
-	public void setTimerListener(TimerListener timerListener) {
+	public void setTimerListener(@Nullable TimerListener timerListener) {
 		this.timerListener = timerListener;
 	}
 
 	/**
 	 * Return the TimerListener to schedule.
 	 */
+	@Nullable
 	public TimerListener getTimerListener() {
 		return this.timerListener;
 	}

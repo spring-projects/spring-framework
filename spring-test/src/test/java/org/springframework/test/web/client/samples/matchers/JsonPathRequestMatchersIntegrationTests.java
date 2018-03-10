@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.test.web.client.samples.matchers;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.After;
 import org.junit.Test;
@@ -45,7 +46,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  */
 public class JsonPathRequestMatchersIntegrationTests {
 
-	private static final MultiValueMap<String, Person> people = new LinkedMultiValueMap<String, Person>();
+	private static final MultiValueMap<String, Person> people = new LinkedMultiValueMap<>();
 
 	static {
 		people.add("composers", new Person("Johann Sebastian Bach"));
@@ -56,7 +57,9 @@ public class JsonPathRequestMatchersIntegrationTests {
 		people.add("performers", new Person("Yehudi Menuhin"));
 	}
 
-	private final RestTemplate restTemplate = new RestTemplate(Arrays.asList(new MappingJackson2HttpMessageConverter()));
+
+	private final RestTemplate restTemplate =
+			new RestTemplate(Collections.singletonList(new MappingJackson2HttpMessageConverter()));
 
 	private final MockRestServiceServer mockServer = MockRestServiceServer.createServer(this.restTemplate);
 

@@ -33,15 +33,16 @@ package org.springframework.asm;
  * A visitor to visit a Java method. The methods of this class must be called in
  * the following order: ( <tt>visitParameter</tt> )* [
  * <tt>visitAnnotationDefault</tt> ] ( <tt>visitAnnotation</tt> |
- * <tt>visitTypeAnnotation</tt> | <tt>visitAttribute</tt> )* [
- * <tt>visitCode</tt> ( <tt>visitFrame</tt> | <tt>visit<i>X</i>Insn</tt> |
- * <tt>visitLabel</tt> | <tt>visitInsnAnnotation</tt> |
- * <tt>visitTryCatchBlock</tt> | <tt>visitTryCatchBlockAnnotation</tt> |
- * <tt>visitLocalVariable</tt> | <tt>visitLocalVariableAnnotation</tt> |
- * <tt>visitLineNumber</tt> )* <tt>visitMaxs</tt> ] <tt>visitEnd</tt>. In
- * addition, the <tt>visit<i>X</i>Insn</tt> and <tt>visitLabel</tt> methods must
- * be called in the sequential order of the bytecode instructions of the visited
- * code, <tt>visitInsnAnnotation</tt> must be called <i>after</i> the annotated
+ * <tt>visitParameterAnnotation</tt> <tt>visitTypeAnnotation</tt> |
+ * <tt>visitAttribute</tt> )* [ <tt>visitCode</tt> ( <tt>visitFrame</tt> |
+ * <tt>visit<i>X</i>Insn</tt> | <tt>visitLabel</tt> |
+ * <tt>visitInsnAnnotation</tt> | <tt>visitTryCatchBlock</tt> |
+ * <tt>visitTryCatchAnnotation</tt> | <tt>visitLocalVariable</tt> |
+ * <tt>visitLocalVariableAnnotation</tt> | <tt>visitLineNumber</tt> )*
+ * <tt>visitMaxs</tt> ] <tt>visitEnd</tt>. In addition, the
+ * <tt>visit<i>X</i>Insn</tt> and <tt>visitLabel</tt> methods must be called in
+ * the sequential order of the bytecode instructions of the visited code,
+ * <tt>visitInsnAnnotation</tt> must be called <i>after</i> the annotated
  * instruction, <tt>visitTryCatchBlock</tt> must be called <i>before</i> the
  * labels passed as arguments have been visited,
  * <tt>visitTryCatchBlockAnnotation</tt> must be called <i>after</i> the
@@ -56,7 +57,7 @@ public abstract class MethodVisitor {
 
     /**
      * The ASM API version implemented by this visitor. The value of this field
-     * must be one of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
+     * must be one of {@link Opcodes#ASM4}, {@link Opcodes#ASM5} or {@link Opcodes#ASM6}.
      */
     protected final int api;
 
@@ -71,7 +72,7 @@ public abstract class MethodVisitor {
      * 
      * @param api
      *            the ASM API version implemented by this visitor. Must be one
-     *            of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
+     *            of {@link Opcodes#ASM4}, {@link Opcodes#ASM5} or {@link Opcodes#ASM6}.
      */
     public MethodVisitor(final int api) {
         this(api, null);
@@ -82,13 +83,13 @@ public abstract class MethodVisitor {
      * 
      * @param api
      *            the ASM API version implemented by this visitor. Must be one
-     *            of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
+     *            of {@link Opcodes#ASM4}, {@link Opcodes#ASM5} or {@link Opcodes#ASM6}.
      * @param mv
      *            the method visitor to which this visitor must delegate method
      *            calls. May be null.
      */
     public MethodVisitor(final int api, final MethodVisitor mv) {
-        if (api != Opcodes.ASM4 && api != Opcodes.ASM5) {
+        if (api < Opcodes.ASM4 || api > Opcodes.ASM6) {
             throw new IllegalArgumentException();
         }
         this.api = api;

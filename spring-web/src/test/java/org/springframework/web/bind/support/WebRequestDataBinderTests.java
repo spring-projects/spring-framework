@@ -319,7 +319,7 @@ public class WebRequestDataBinderTests {
 		assertTrue("Doesn't contain tory", !pvs.contains("tory"));
 
 		PropertyValue[] pvArray = pvs.getPropertyValues();
-		Map<String, String> m = new HashMap<String, String>();
+		Map<String, String> m = new HashMap<>();
 		m.put("forname", "Tony");
 		m.put("surname", "Blair");
 		m.put("age", "50");

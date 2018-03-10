@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,13 +69,13 @@ public class IndexedTestBean {
 		TestBean tbX = new TestBean("nameX", 0);
 		TestBean tbY = new TestBean("nameY", 0);
 		this.array = new TestBean[] {tb0, tb1};
-		this.list = new ArrayList<Object>();
+		this.list = new ArrayList<>();
 		this.list.add(tb2);
 		this.list.add(tb3);
-		this.set = new TreeSet<Object>();
+		this.set = new TreeSet<>();
 		this.set.add(tb6);
 		this.set.add(tb7);
-		this.map = new HashMap<Object, Object>();
+		this.map = new HashMap<>();
 		this.map.put("key1", tb4);
 		this.map.put("key2", tb5);
 		this.map.put("key.3", tb5);

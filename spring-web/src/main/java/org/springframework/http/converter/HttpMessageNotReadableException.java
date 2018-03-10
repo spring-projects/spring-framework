@@ -16,6 +16,8 @@
 
 package org.springframework.http.converter;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Thrown by {@link HttpMessageConverter} implementations when the
  * {@link HttpMessageConverter#read} method fails.
@@ -39,7 +41,7 @@ public class HttpMessageNotReadableException extends HttpMessageConversionExcept
 	 * @param msg the detail message
 	 * @param cause the root cause (if any)
 	 */
-	public HttpMessageNotReadableException(String msg, Throwable cause) {
+	public HttpMessageNotReadableException(String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 

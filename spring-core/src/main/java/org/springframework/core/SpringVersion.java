@@ -16,6 +16,8 @@
 
 package org.springframework.core;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Class that exposes the Spring version. Fetches the
  * "Implementation-Version" manifest attribute from the jar file.
@@ -36,6 +38,7 @@ public class SpringVersion {
 	 * or {@code null} if it cannot be determined.
 	 * @see Package#getImplementationVersion()
 	 */
+	@Nullable
 	public static String getVersion() {
 		Package pkg = SpringVersion.class.getPackage();
 		return (pkg != null ? pkg.getImplementationVersion() : null);

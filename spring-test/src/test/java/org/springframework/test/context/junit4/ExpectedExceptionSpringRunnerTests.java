@@ -28,7 +28,7 @@ import org.springframework.test.context.TestExecutionListeners;
 import static org.springframework.test.context.junit4.JUnitTestingUtils.*;
 
 /**
- * Verifies proper handling of JUnit's {@link Test#expected() &#064;Test(expected=...)}
+ * Verifies proper handling of JUnit's {@link Test#expected() &#064;Test(expected = ...)}
  * support in conjunction with the {@link SpringRunner}.
  *
  * @author Sam Brannen
@@ -50,7 +50,7 @@ public class ExpectedExceptionSpringRunnerTests {
 		// Should Pass.
 		@Test(expected = IndexOutOfBoundsException.class)
 		public void verifyJUnitExpectedException() {
-			new ArrayList<Object>().get(1);
+			new ArrayList<>().get(1);
 		}
 	}
 

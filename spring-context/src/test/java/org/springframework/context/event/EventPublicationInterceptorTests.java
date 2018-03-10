@@ -49,14 +49,14 @@ public class EventPublicationInterceptorTests {
 		this.publisher = mock(ApplicationEventPublisher.class);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWithNoApplicationEventClassSupplied() throws Exception {
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
 		interceptor.setApplicationEventPublisher(this.publisher);
 		interceptor.afterPropertiesSet();
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWithNonApplicationEventClassSupplied() throws Exception {
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
 		interceptor.setApplicationEventPublisher(this.publisher);
@@ -64,7 +64,7 @@ public class EventPublicationInterceptorTests {
 		interceptor.afterPropertiesSet();
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWithAbstractStraightApplicationEventClassSupplied() throws Exception {
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
 		interceptor.setApplicationEventPublisher(this.publisher);
@@ -72,7 +72,7 @@ public class EventPublicationInterceptorTests {
 		interceptor.afterPropertiesSet();
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWithApplicationEventClassThatDoesntExposeAValidCtor() throws Exception {
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
 		interceptor.setApplicationEventPublisher(this.publisher);

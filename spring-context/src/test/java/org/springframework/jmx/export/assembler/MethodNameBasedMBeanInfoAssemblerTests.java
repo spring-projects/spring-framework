@@ -52,7 +52,7 @@ public class MethodNameBasedMBeanInfoAssemblerTests extends AbstractJmxAssembler
 	@Override
 	protected MBeanInfoAssembler getAssembler() {
 		MethodNameBasedMBeanInfoAssembler assembler = new MethodNameBasedMBeanInfoAssembler();
-		assembler.setManagedMethods(new String[] {"add", "myOperation", "getName", "setName", "getAge"});
+		assembler.setManagedMethods("add", "myOperation", "getName", "setName", "getAge");
 		return assembler;
 	}
 

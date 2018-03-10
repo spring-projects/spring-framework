@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.Rollback;
 
@@ -31,15 +30,16 @@ import static org.junit.Assert.*;
 import static org.springframework.test.transaction.TransactionTestUtils.*;
 
 /**
- * Extension of {@link DefaultRollbackFalseTransactionalTests} which
- * tests method-level <em>rollback override</em> behavior via the
+ * Extension of {@link DefaultRollbackFalseRollbackAnnotationTransactionalTests}
+ * which tests method-level <em>rollback override</em> behavior via the
  * {@link Rollback @Rollback} annotation.
  *
  * @author Sam Brannen
  * @since 2.5
  * @see Rollback
  */
-public class RollbackOverrideDefaultRollbackFalseTransactionalTests extends DefaultRollbackFalseTransactionalTests {
+public class RollbackOverrideDefaultRollbackFalseTransactionalTests
+		extends DefaultRollbackFalseRollbackAnnotationTransactionalTests {
 
 	private static int originalNumRows;
 
@@ -47,7 +47,6 @@ public class RollbackOverrideDefaultRollbackFalseTransactionalTests extends Defa
 
 
 	@Autowired
-	@Qualifier("dataSource2")
 	@Override
 	public void setDataSource(DataSource dataSource) {
 		jdbcTemplate = new JdbcTemplate(dataSource);

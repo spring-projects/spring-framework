@@ -105,6 +105,21 @@ public class ClassReader {
     public static final int EXPAND_FRAMES = 8;
 
     /**
+     * Flag to expand the ASM pseudo instructions into an equivalent sequence of
+     * standard bytecode instructions. When resolving a forward jump it may
+     * happen that the signed 2 bytes offset reserved for it is not sufficient
+     * to store the bytecode offset. In this case the jump instruction is
+     * replaced with a temporary ASM pseudo instruction using an unsigned 2
+     * bytes offset (see Label#resolve). This internal flag is used to re-read
+     * classes containing such instructions, in order to replace them with
+     * standard instructions. In addition, when this flag is used, GOTO_W and
+     * JSR_W are <i>not</i> converted into GOTO and JSR, to make sure that
+     * infinite loops where a GOTO_W is replaced with a GOTO in ClassReader and
+     * converted back to a GOTO_W in ClassWriter cannot occur.
+     */
+    static final int EXPAND_ASM_INSNS = 256;
+
+    /**
      * The class to be parsed. <i>The content of this array must not be
      * modified. This field is intended for {@link Attribute} sub classes, and
      * is normally not needed by class generators or adapters.</i>
@@ -207,6 +222,8 @@ public class ClassReader {
             // case ClassWriter.CLASS:
             // case ClassWriter.STR:
             // case ClassWriter.MTYPE
+            // case ClassWriter.PACKAGE:
+            // case ClassWriter.MODULE:
             default:
                 size = 3;
                 break;
@@ -350,7 +367,9 @@ public class ClassReader {
                 break;
             // case ClassWriter.STR:
             // case ClassWriter.CLASS:
-            // case ClassWriter.MTYPE
+            // case ClassWriter.MTYPE:
+            // case ClassWriter.MODULE:
+            // case ClassWriter.PACKAGE:
             default:
                 item.set(tag, readUTF8(index, buf), null, null);
                 break;
@@ -557,11 +576,14 @@ public class ClassReader {
         String enclosingOwner = null;
         String enclosingName = null;
         String enclosingDesc = null;
+        String moduleMainClass = null;
         int anns = 0;
         int ianns = 0;
         int tanns = 0;
         int itanns = 0;
         int innerClasses = 0;
+        int module = 0;
+        int packages = 0;
         Attribute attributes = null;
 
         u = getAttributes();
@@ -602,6 +624,12 @@ public class ClassReader {
             } else if (ANNOTATIONS
                     && "RuntimeInvisibleTypeAnnotations".equals(attrName)) {
                 itanns = u + 8;
+            } else if ("Module".equals(attrName)) {
+                module = u + 8;
+            } else if ("ModuleMainClass".equals(attrName)) {
+                moduleMainClass = readClass(u + 8, c);
+            } else if ("ModulePackages".equals(attrName)) {
+                packages = u + 10;
             } else if ("BootstrapMethods".equals(attrName)) {
                 int[] bootstrapMethods = new int[readUnsignedShort(u + 8)];
                 for (int j = 0, v = u + 10; j < bootstrapMethods.length; j++) {
@@ -628,6 +656,12 @@ public class ClassReader {
         if ((flags & SKIP_DEBUG) == 0
                 && (sourceFile != null || sourceDebug != null)) {
             classVisitor.visitSource(sourceFile, sourceDebug);
+        }
+
+        // visits the module info and associated attributes
+        if (module != 0) {
+            readModule(classVisitor, context, module,
+                    moduleMainClass, packages);
         }
 
         // visits the outer class
@@ -697,6 +731,120 @@ public class ClassReader {
 
         // visits the end of the class
         classVisitor.visitEnd();
+    }
+
+    /**
+     * Reads the module attribute and visit it.
+     *
+     * @param classVisitor
+     *           the current class visitor
+     * @param context
+     *           information about the class being parsed.
+     * @param u
+     *           start offset of the module attribute in the class file.
+     * @param mainClass
+     *           name of the main class of a module or null.
+     * @param packages
+     *           start offset of the concealed package attribute.
+     */
+    private void readModule(final ClassVisitor classVisitor,
+            final Context context, int u,
+            final String mainClass, int packages) {
+
+        char[] buffer = context.buffer;
+
+        // reads module name, flags and version
+        String name = readModule(u, buffer);
+        int flags = readUnsignedShort(u + 2);
+        String version = readUTF8(u + 4, buffer);
+        u += 6;
+
+        ModuleVisitor mv = classVisitor.visitModule(name, flags, version);
+        if (mv == null) {
+            return;
+        }
+
+        // module attributes (main class, packages)
+        if (mainClass != null) {
+            mv.visitMainClass(mainClass);
+        }
+
+        if (packages != 0) {
+            for (int i = readUnsignedShort(packages - 2); i > 0; --i) {
+                String packaze = readPackage(packages, buffer);
+                mv.visitPackage(packaze);
+                packages += 2;
+            }
+        }
+
+        // reads requires
+        u += 2;
+        for (int i = readUnsignedShort(u - 2); i > 0; --i) {
+            String module = readModule(u, buffer);
+            int access = readUnsignedShort(u + 2);
+            String requireVersion = readUTF8(u + 4, buffer);
+            mv.visitRequire(module, access, requireVersion);
+            u += 6;
+        }
+
+        // reads exports
+        u += 2;
+        for (int i = readUnsignedShort(u - 2); i > 0; --i) {
+            String export = readPackage(u, buffer);
+            int access = readUnsignedShort(u + 2);
+            int exportToCount = readUnsignedShort(u + 4);
+            u += 6;
+            String[] tos = null;
+            if (exportToCount != 0) {
+                tos = new String[exportToCount];
+                for (int j = 0; j < tos.length; ++j) {
+                    tos[j] = readModule(u, buffer);
+                    u += 2;
+                }
+            }
+            mv.visitExport(export, access, tos);
+        }
+
+        // reads opens
+        u += 2;
+        for (int i = readUnsignedShort(u - 2); i > 0; --i) {
+            String open = readPackage(u, buffer);
+            int access = readUnsignedShort(u + 2);
+            int openToCount = readUnsignedShort(u + 4);
+            u += 6;
+            String[] tos = null;
+            if (openToCount != 0) {
+                tos = new String[openToCount];
+                for (int j = 0; j < tos.length; ++j) {
+                    tos[j] = readModule(u, buffer);
+                    u += 2;
+                }
+            }
+            mv.visitOpen(open, access, tos);
+        }
+
+        // read uses
+        u += 2;
+        for (int i = readUnsignedShort(u - 2); i > 0; --i) {
+            mv.visitUse(readClass(u, buffer));
+            u += 2;
+        }
+
+        // read provides
+        u += 2;
+        for (int i = readUnsignedShort(u - 2); i > 0; --i) {
+            String service = readClass(u, buffer);
+            int provideWithCount = readUnsignedShort(u + 2);
+            u += 4;
+            String[] withs = new String[provideWithCount];
+            for (int j = 0; j < withs.length; ++j) {
+                withs[j] = readClass(u, buffer);
+                u += 2;
+            }
+            mv.visitProvide(service, withs);
+        }
+
+        mv.visitEnd();
     }
 
     /**
@@ -1062,7 +1210,12 @@ public class ClassReader {
                 readLabel(offset + readShort(u + 1), labels);
                 u += 3;
                 break;
+            case ClassWriter.ASM_LABEL_INSN:
+                readLabel(offset + readUnsignedShort(u + 1), labels);
+                u += 3;
+                break;
             case ClassWriter.LABELW_INSN:
+            case ClassWriter.ASM_LABELW_INSN:
                 readLabel(offset + readInt(u + 1), labels);
                 u += 5;
                 break;
@@ -1286,8 +1439,25 @@ public class ClassReader {
                 }
             }
         }
+        if ((context.flags & EXPAND_ASM_INSNS) != 0
+            && (context.flags & EXPAND_FRAMES) != 0) {
+            // Expanding the ASM pseudo instructions can introduce F_INSERT
+            // frames, even if the method does not currently have any frame.
+            // Also these inserted frames must be computed by simulating the
+            // effect of the bytecode instructions one by one, starting from the
+            // first one and the last existing frame (or the implicit first
+            // one). Finally, due to the way MethodWriter computes this (with
+            // the compute = INSERTED_FRAMES option), MethodWriter needs to know
+            // maxLocals before the first instruction is visited. For all these
+            // reasons we always visit the implicit first frame in this case
+            // (passing only maxLocals - the rest can be and is computed in
+            // MethodWriter).
+            mv.visitFrame(Opcodes.F_NEW, maxLocals, null, 0, null);
+        }
 
         // visits the instructions
+        int opcodeDelta = (context.flags & EXPAND_ASM_INSNS) == 0 ? -33 : 0;
+        boolean insertFrame = false;
         u = codeStart;
         while (u < codeEnd) {
             int offset = u - codeStart;
@@ -1320,6 +1490,9 @@ public class ClassReader {
                         mv.visitFrame(frame.mode, frame.localDiff, frame.local,
                                 frame.stackCount, frame.stack);
                     }
+                    // if there is already a frame for this offset, there is no
+                    // need to insert a new one.
+                    insertFrame = false;
                 }
                 if (frameCount > 0) {
                     stackMap = readFrame(stackMap, zip, unzip, frame);
@@ -1327,6 +1500,13 @@ public class ClassReader {
                 } else {
                     frame = null;
                 }
+            }
+            // inserts a frame for this offset, if requested by setting
+            // insertFrame to true during the previous iteration. The actual
+            // frame content will be computed in MethodWriter.
+            if (FRAMES && insertFrame) {
+                mv.visitFrame(ClassWriter.F_INSERT, 0, null, 0, null);
+                insertFrame = false;
             }
 
             // visits the instruction at this offset
@@ -1352,9 +1532,47 @@ public class ClassReader {
                 u += 3;
                 break;
             case ClassWriter.LABELW_INSN:
-                mv.visitJumpInsn(opcode - 33, labels[offset + readInt(u + 1)]);
+                mv.visitJumpInsn(opcode + opcodeDelta, labels[offset
+                        + readInt(u + 1)]);
                 u += 5;
                 break;
+            case ClassWriter.ASM_LABEL_INSN: {
+                // changes temporary opcodes 202 to 217 (inclusive), 218
+                // and 219 to IFEQ ... JSR (inclusive), IFNULL and
+                // IFNONNULL
+                opcode = opcode < 218 ? opcode - 49 : opcode - 20;
+                Label target = labels[offset + readUnsignedShort(u + 1)];
+                // replaces GOTO with GOTO_W, JSR with JSR_W and IFxxx
+                // <l> with IFNOTxxx <L> GOTO_W <l> L:..., where IFNOTxxx is
+                // the "opposite" opcode of IFxxx (i.e., IFNE for IFEQ)
+                // and where <L> designates the instruction just after
+                // the GOTO_W.
+                if (opcode == Opcodes.GOTO || opcode == Opcodes.JSR) {
+                    mv.visitJumpInsn(opcode + 33, target);
+                } else {
+                    opcode = opcode <= 166 ? ((opcode + 1) ^ 1) - 1
+                            : opcode ^ 1;
+                    Label endif = readLabel(offset + 3, labels);
+                    mv.visitJumpInsn(opcode, endif);
+                    mv.visitJumpInsn(200, target); // GOTO_W
+                    // endif designates the instruction just after GOTO_W,
+                    // and is visited as part of the next instruction. Since
+                    // it is a jump target, we need to insert a frame here.
+                    insertFrame = true;
+                }
+                u += 3;
+                break;
+            }
+            case ClassWriter.ASM_LABELW_INSN: {
+                // replaces the pseudo GOTO_W instruction with a real one.
+                mv.visitJumpInsn(200, labels[offset + readInt(u + 1)]);
+                // The instruction just after is a jump target (because pseudo
+                // GOTO_W are used in patterns IFNOTxxx <L> GOTO_W <l> L:...,
+                // see MethodWriter), so we need to insert a frame here.
+                insertFrame = true;
+                u += 5;
+                break;
+            }
             case ClassWriter.WIDE_INSN:
                 opcode = b[u + 1] & 0xFF;
                 if (opcode == Opcodes.IINC) {
@@ -1848,7 +2066,9 @@ public class ClassReader {
             v += 2;
             break;
         case 'Z': // pointer to CONSTANT_Boolean
-            av.visit(name, readInt(items[readUnsignedShort(v)]) == 0 ? Boolean.FALSE : Boolean.TRUE);
+            av.visit(name,
+                    readInt(items[readUnsignedShort(v)]) == 0 ? Boolean.FALSE
+                            : Boolean.TRUE);
             v += 2;
             break;
         case 'S': // pointer to CONSTANT_Short
@@ -2448,6 +2668,20 @@ public class ClassReader {
     }
 
     /**
+     * Read a stringish constant item (CONSTANT_Class, CONSTANT_String,
+     * CONSTANT_MethodType, CONSTANT_Module or CONSTANT_Package
+     * @param index
+     * @param buf
+     * @return
+     */
+    private String readStringish(final int index, final char[] buf) {
+        // computes the start index of the item in b
+        // and reads the CONSTANT_Utf8 item designated by
+        // the first two bytes of this item
+        return readUTF8(items[readUnsignedShort(index)], buf);
+    }
+
+    /**
      * Reads a class constant pool item in {@link #b b}. <i>This method is
      * intended for {@link Attribute} sub classes, and is normally not needed by
      * class generators or adapters.</i>
@@ -2461,10 +2695,41 @@ public class ClassReader {
      * @return the String corresponding to the specified class item.
      */
     public String readClass(final int index, final char[] buf) {
-        // computes the start index of the CONSTANT_Class item in b
-        // and reads the CONSTANT_Utf8 item designated by
-        // the first two bytes of this CONSTANT_Class item
-        return readUTF8(items[readUnsignedShort(index)], buf);
+        return readStringish(index, buf);
+    }
+
+    /**
+     * Reads a module constant pool item in {@link #b b}. <i>This method is
+     * intended for {@link Attribute} sub classes, and is normally not needed by
+     * class generators or adapters.</i>
+     *
+     * @param index
+     *            the start index of an unsigned short value in {@link #b b},
+     *            whose value is the index of a module constant pool item.
+     * @param buf
+     *            buffer to be used to read the item. This buffer must be
+     *            sufficiently large. It is not automatically resized.
+     * @return the String corresponding to the specified module item.
+     */
+    public String readModule(final int index, final char[] buf) {
+        return readStringish(index, buf);
+    }
+
+    /**
+     * Reads a module constant pool item in {@link #b b}. <i>This method is
+     * intended for {@link Attribute} sub classes, and is normally not needed by
+     * class generators or adapters.</i>
+     *
+     * @param index
+     *            the start index of an unsigned short value in {@link #b b},
+     *            whose value is the index of a module constant pool item.
+     * @param buf
+     *            buffer to be used to read the item. This buffer must be
+     *            sufficiently large. It is not automatically resized.
+     * @return the String corresponding to the specified module item.
+     */
+    public String readPackage(final int index, final char[] buf) {
+        return readStringish(index, buf);
     }
 
     /**

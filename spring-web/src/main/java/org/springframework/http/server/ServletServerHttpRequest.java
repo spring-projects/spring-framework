@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -37,7 +38,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
@@ -47,24 +50,31 @@ import org.springframework.util.StringUtils;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	protected static final String FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
 
-	protected static final String FORM_CHARSET = "UTF-8";
+	protected static final Charset FORM_CHARSET = StandardCharsets.UTF_8;
 
 
 	private final HttpServletRequest servletRequest;
 
+	@Nullable
+	private URI uri;
+
+	@Nullable
 	private HttpHeaders headers;
 
+	@Nullable
 	private ServerHttpAsyncRequestControl asyncRequestControl;
 
 
 	/**
-	 * Construct a new instance of the ServletServerHttpRequest based on the given {@link HttpServletRequest}.
+	 * Construct a new instance of the ServletServerHttpRequest based on the
+	 * given {@link HttpServletRequest}.
 	 * @param servletRequest the servlet request
 	 */
 	public ServletServerHttpRequest(HttpServletRequest servletRequest) {
@@ -81,57 +91,91 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
+	@Nullable
 	public HttpMethod getMethod() {
 		return HttpMethod.resolve(this.servletRequest.getMethod());
 	}
 
 	@Override
+	public String getMethodValue() {
+		return this.servletRequest.getMethod();
+	}
+
+	@Override
 	public URI getURI() {
-		try {
-			StringBuffer url = this.servletRequest.getRequestURL();
-			String query = this.servletRequest.getQueryString();
-			if (StringUtils.hasText(query)) {
-				url.append('?').append(query);
+		if (this.uri == null) {
+			String urlString = null;
+			boolean hasQuery = false;
+			try {
+				StringBuffer url = this.servletRequest.getRequestURL();
+				String query = this.servletRequest.getQueryString();
+				hasQuery = StringUtils.hasText(query);
+				if (hasQuery) {
+					url.append('?').append(query);
+				}
+				urlString = url.toString();
+				this.uri = new URI(urlString);
 			}
-			return new URI(url.toString());
+			catch (URISyntaxException ex) {
+				if (!hasQuery) {
+					throw new IllegalStateException(
+							"Could not resolve HttpServletRequest as URI: " + urlString, ex);
+				}
+				// Maybe a malformed query string... try plain request URL
+				try {
+					urlString = this.servletRequest.getRequestURL().toString();
+					this.uri = new URI(urlString);
+				}
+				catch (URISyntaxException ex2) {
+					throw new IllegalStateException(
+							"Could not resolve HttpServletRequest as URI: " + urlString, ex2);
+				}
+			}
 		}
-		catch (URISyntaxException ex) {
-			throw new IllegalStateException("Could not get HttpServletRequest URI: " + ex.getMessage(), ex);
-		}
+		return this.uri;
 	}
 
 	@Override
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
 			this.headers = new HttpHeaders();
-			for (Enumeration<?> headerNames = this.servletRequest.getHeaderNames(); headerNames.hasMoreElements();) {
-				String headerName = (String) headerNames.nextElement();
+
+			for (Enumeration<?> names = this.servletRequest.getHeaderNames(); names.hasMoreElements();) {
+				String headerName = (String) names.nextElement();
 				for (Enumeration<?> headerValues = this.servletRequest.getHeaders(headerName);
 						headerValues.hasMoreElements();) {
 					String headerValue = (String) headerValues.nextElement();
 					this.headers.add(headerName, headerValue);
 				}
 			}
-			// HttpServletRequest exposes some headers as properties: we should include those if not already present
-			MediaType contentType = this.headers.getContentType();
-			if (contentType == null) {
-				String requestContentType = this.servletRequest.getContentType();
-				if (StringUtils.hasLength(requestContentType)) {
-					contentType = MediaType.parseMediaType(requestContentType);
-					this.headers.setContentType(contentType);
+
+			// HttpServletRequest exposes some headers as properties:
+			// we should include those if not already present
+			try {
+				MediaType contentType = this.headers.getContentType();
+				if (contentType == null) {
+					String requestContentType = this.servletRequest.getContentType();
+					if (StringUtils.hasLength(requestContentType)) {
+						contentType = MediaType.parseMediaType(requestContentType);
+						this.headers.setContentType(contentType);
+					}
+				}
+				if (contentType != null && contentType.getCharset() == null) {
+					String requestEncoding = this.servletRequest.getCharacterEncoding();
+					if (StringUtils.hasLength(requestEncoding)) {
+						Charset charSet = Charset.forName(requestEncoding);
+						Map<String, String> params = new LinkedCaseInsensitiveMap<>();
+						params.putAll(contentType.getParameters());
+						params.put("charset", charSet.toString());
+						MediaType mediaType = new MediaType(contentType.getType(), contentType.getSubtype(), params);
+						this.headers.setContentType(mediaType);
+					}
 				}
 			}
-			if (contentType != null && contentType.getCharset() == null) {
-				String requestEncoding = this.servletRequest.getCharacterEncoding();
-				if (StringUtils.hasLength(requestEncoding)) {
-					Charset charSet = Charset.forName(requestEncoding);
-					Map<String, String> params = new LinkedCaseInsensitiveMap<String>();
-					params.putAll(contentType.getParameters());
-					params.put("charset", charSet.toString());
-					MediaType newContentType = new MediaType(contentType.getType(), contentType.getSubtype(), params);
-					this.headers.setContentType(newContentType);
-				}
+			catch (InvalidMediaTypeException ex) {
+				// Ignore: simply not exposing an invalid content type in HttpHeaders...
 			}
+
 			if (this.headers.getContentLength() < 0) {
 				int requestContentLength = this.servletRequest.getContentLength();
 				if (requestContentLength != -1) {
@@ -139,6 +183,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 				}
 			}
 		}
+
 		return this.headers;
 	}
 
@@ -170,7 +215,10 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	@Override
 	public ServerHttpAsyncRequestControl getAsyncRequestControl(ServerHttpResponse response) {
 		if (this.asyncRequestControl == null) {
-			Assert.isInstanceOf(ServletServerHttpResponse.class, response);
+			if (!ServletServerHttpResponse.class.isInstance(response)) {
+				throw new IllegalArgumentException(
+						"Response must be a ServletServerHttpResponse: " + response.getClass());
+			}
 			ServletServerHttpResponse servletServerResponse = (ServletServerHttpResponse) response;
 			this.asyncRequestControl = new ServletServerHttpAsyncRequestControl(this, servletServerResponse);
 		}
@@ -200,10 +248,10 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 			List<String> values = Arrays.asList(form.get(name));
 			for (Iterator<String> valueIterator = values.iterator(); valueIterator.hasNext();) {
 				String value = valueIterator.next();
-				writer.write(URLEncoder.encode(name, FORM_CHARSET));
+				writer.write(URLEncoder.encode(name, FORM_CHARSET.name()));
 				if (value != null) {
 					writer.write('=');
-					writer.write(URLEncoder.encode(value, FORM_CHARSET));
+					writer.write(URLEncoder.encode(value, FORM_CHARSET.name()));
 					if (valueIterator.hasNext()) {
 						writer.write('&');
 					}

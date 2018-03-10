@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodClassKey;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -46,12 +47,12 @@ public abstract class AbstractFallbackJCacheOperationSource implements JCacheOpe
 	 * Canonical value held in cache to indicate no caching attribute was
 	 * found for this method and we don't need to look again.
 	 */
-	private final static Object NULL_CACHING_ATTRIBUTE = new Object();
+	private static final Object NULL_CACHING_ATTRIBUTE = new Object();
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final Map<MethodClassKey, Object> cache = new ConcurrentHashMap<MethodClassKey, Object>(1024);
+	private final Map<MethodClassKey, Object> cache = new ConcurrentHashMap<>(1024);
 
 
 	@Override
@@ -77,6 +78,7 @@ public abstract class AbstractFallbackJCacheOperationSource implements JCacheOpe
 		}
 	}
 
+	@Nullable
 	private JCacheOperation<?> computeCacheOperation(Method method, Class<?> targetClass) {
 		// Don't allow no-public methods as required.
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
@@ -113,6 +115,7 @@ public abstract class AbstractFallbackJCacheOperationSource implements JCacheOpe
 	 * @return the cache operation associated with this method
 	 * (or {@code null} if none)
 	 */
+	@Nullable
 	protected abstract JCacheOperation<?> findCacheOperation(Method method, Class<?> targetType);
 
 	/**

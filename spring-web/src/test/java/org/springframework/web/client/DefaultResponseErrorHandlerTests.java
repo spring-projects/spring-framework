@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.client;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.http.HttpHeaders;
@@ -37,25 +36,20 @@ import static org.mockito.BDDMockito.*;
  */
 public class DefaultResponseErrorHandlerTests {
 
-	private DefaultResponseErrorHandler handler;
+	private final DefaultResponseErrorHandler handler = new DefaultResponseErrorHandler();
 
-	private ClientHttpResponse response;
+	private final ClientHttpResponse response = mock(ClientHttpResponse.class);
 
-	@Before
-	public void setUp() throws Exception {
-		handler = new DefaultResponseErrorHandler();
-		response = mock(ClientHttpResponse.class);
-	}
 
 	@Test
 	public void hasErrorTrue() throws Exception {
-		given(response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
+		given(response.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
 		assertTrue(handler.hasError(response));
 	}
 
 	@Test
 	public void hasErrorFalse() throws Exception {
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
+		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
 		assertFalse(handler.hasError(response));
 	}
 
@@ -64,7 +58,7 @@ public class DefaultResponseErrorHandlerTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
-		given(response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
+		given(response.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
 		given(response.getStatusText()).willReturn("Not Found");
 		given(response.getHeaders()).willReturn(headers);
 		given(response.getBody()).willReturn(new ByteArrayInputStream("Hello World".getBytes("UTF-8")));
@@ -73,8 +67,8 @@ public class DefaultResponseErrorHandlerTests {
 			handler.handleError(response);
 			fail("expected HttpClientErrorException");
 		}
-		catch (HttpClientErrorException e) {
-			assertSame(headers, e.getResponseHeaders());
+		catch (HttpClientErrorException ex) {
+			assertSame(headers, ex.getResponseHeaders());
 		}
 	}
 
@@ -83,7 +77,7 @@ public class DefaultResponseErrorHandlerTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
-		given(response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
+		given(response.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
 		given(response.getStatusText()).willReturn("Not Found");
 		given(response.getHeaders()).willReturn(headers);
 		given(response.getBody()).willThrow(new IOException());
@@ -96,25 +90,35 @@ public class DefaultResponseErrorHandlerTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
-		given(response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
+		given(response.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
 		given(response.getStatusText()).willReturn("Not Found");
 		given(response.getHeaders()).willReturn(headers);
 
 		handler.handleError(response);
 	}
 
-	// SPR-9406
-
-	@Test(expected=UnknownHttpStatusCodeException.class)
+	@Test(expected = UnknownHttpStatusCodeException.class)  // SPR-9406
 	public void unknownStatusCode() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
-		given(response.getStatusCode()).willThrow(new IllegalArgumentException("No matching constant for 999"));
 		given(response.getRawStatusCode()).willReturn(999);
 		given(response.getStatusText()).willReturn("Custom status code");
 		given(response.getHeaders()).willReturn(headers);
 
 		handler.handleError(response);
 	}
+
+	@Test  // SPR-16108
+	public void hasErrorForUnknownStatusCode() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.TEXT_PLAIN);
+
+		given(response.getRawStatusCode()).willReturn(999);
+		given(response.getStatusText()).willReturn("Custom status code");
+		given(response.getHeaders()).willReturn(headers);
+
+		assertFalse(handler.hasError(response));
+	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.http.converter;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Locale;
 
@@ -97,9 +97,8 @@ public class ObjectToStringHttpMessageConverterTests {
 
 	@Test
 	public void defaultCharsetModified() throws IOException {
-		Charset charset = Charset.forName("UTF-16");
 		ConversionService cs = new DefaultConversionService();
-		ObjectToStringHttpMessageConverter converter = new ObjectToStringHttpMessageConverter(cs, charset);
+		ObjectToStringHttpMessageConverter converter = new ObjectToStringHttpMessageConverter(cs, StandardCharsets.UTF_16);
 		converter.write((byte) 31, null, this.response);
 
 		assertEquals("UTF-16", this.servletResponse.getCharacterEncoding());
@@ -123,28 +122,21 @@ public class ObjectToStringHttpMessageConverterTests {
 	@Test
 	public void read() throws IOException {
 		MockHttpServletRequest request = new MockHttpServletRequest();
-
 		request.setContentType(MediaType.TEXT_PLAIN_VALUE);
 
 		Short shortValue = Short.valueOf((short) 781);
-
 		request.setContent(shortValue.toString().getBytes(
 				StringHttpMessageConverter.DEFAULT_CHARSET));
-
 		assertEquals(shortValue, this.converter.read(Short.class, new ServletServerHttpRequest(request)));
 
 		Float floatValue = Float.valueOf(123);
-
 		request.setCharacterEncoding("UTF-16");
 		request.setContent(floatValue.toString().getBytes("UTF-16"));
-
 		assertEquals(floatValue, this.converter.read(Float.class, new ServletServerHttpRequest(request)));
 
 		Long longValue = Long.valueOf(55819182821331L);
-
 		request.setCharacterEncoding("UTF-8");
 		request.setContent(longValue.toString().getBytes("UTF-8"));
-
 		assertEquals(longValue, this.converter.read(Long.class, new ServletServerHttpRequest(request)));
 	}
 
@@ -160,7 +152,7 @@ public class ObjectToStringHttpMessageConverterTests {
 
 	@Test
 	public void writeUtf16() throws IOException {
-		MediaType contentType = new MediaType("text", "plain", Charset.forName("UTF-16"));
+		MediaType contentType = new MediaType("text", "plain", StandardCharsets.UTF_16);
 		this.converter.write(Integer.valueOf(958), contentType, this.response);
 
 		assertEquals("UTF-16", this.servletResponse.getCharacterEncoding());

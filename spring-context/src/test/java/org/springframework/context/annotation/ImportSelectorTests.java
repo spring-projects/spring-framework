@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
@@ -54,7 +53,7 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings("resource")
 public class ImportSelectorTests {
 
-	static Map<Class<?>, String> importFrom = new HashMap<Class<?>, String>();
+	static Map<Class<?>, String> importFrom = new HashMap<>();
 
 
 	@BeforeClass
@@ -71,10 +70,10 @@ public class ImportSelectorTests {
 		context.refresh();
 		context.getBean(Config.class);
 		InOrder ordered = inOrder(beanFactory);
-		ordered.verify(beanFactory).registerBeanDefinition(eq("a"), (BeanDefinition) anyObject());
-		ordered.verify(beanFactory).registerBeanDefinition(eq("b"), (BeanDefinition) anyObject());
-		ordered.verify(beanFactory).registerBeanDefinition(eq("d"), (BeanDefinition) anyObject());
-		ordered.verify(beanFactory).registerBeanDefinition(eq("c"), (BeanDefinition) anyObject());
+		ordered.verify(beanFactory).registerBeanDefinition(eq("a"), any());
+		ordered.verify(beanFactory).registerBeanDefinition(eq("b"), any());
+		ordered.verify(beanFactory).registerBeanDefinition(eq("d"), any());
+		ordered.verify(beanFactory).registerBeanDefinition(eq("c"), any());
 	}
 
 	@Test

@@ -47,6 +47,7 @@ public interface Opcodes {
 
     int ASM4 = 4 << 16 | 0 << 8 | 0;
     int ASM5 = 5 << 16 | 0 << 8 | 0;
+    int ASM6 = 6 << 16 | 0 << 8 | 0;
 
     // versions
 
@@ -58,6 +59,7 @@ public interface Opcodes {
     int V1_6 = 0 << 16 | 50;
     int V1_7 = 0 << 16 | 51;
     int V1_8 = 0 << 16 | 52;
+    int V1_9 = 0 << 16 | 53;
 
     // access flags
 
@@ -68,18 +70,23 @@ public interface Opcodes {
     int ACC_FINAL = 0x0010; // class, field, method, parameter
     int ACC_SUPER = 0x0020; // class
     int ACC_SYNCHRONIZED = 0x0020; // method
+    int ACC_OPEN = 0x0020; // module
+    int ACC_TRANSITIVE = 0x0020; // module requires
     int ACC_VOLATILE = 0x0040; // field
     int ACC_BRIDGE = 0x0040; // method
+    int ACC_STATIC_PHASE = 0x0040; // module requires
     int ACC_VARARGS = 0x0080; // method
     int ACC_TRANSIENT = 0x0080; // field
     int ACC_NATIVE = 0x0100; // method
     int ACC_INTERFACE = 0x0200; // class
     int ACC_ABSTRACT = 0x0400; // class, method
     int ACC_STRICT = 0x0800; // method
-    int ACC_SYNTHETIC = 0x1000; // class, field, method, parameter
+    int ACC_SYNTHETIC = 0x1000; // class, field, method, parameter, module *
     int ACC_ANNOTATION = 0x2000; // class
     int ACC_ENUM = 0x4000; // class(?) field inner
-    int ACC_MANDATED = 0x8000; // parameter
+    int ACC_MANDATED = 0x8000; // parameter, module, module *
+    int ACC_MODULE = 0x8000; // class
+
 
     // ASM specific pseudo access flags
 
@@ -146,13 +153,17 @@ public interface Opcodes {
      */
     int F_SAME1 = 4;
 
-    Integer TOP = new Integer(0);
-    Integer INTEGER = new Integer(1);
-    Integer FLOAT = new Integer(2);
-    Integer DOUBLE = new Integer(3);
-    Integer LONG = new Integer(4);
-    Integer NULL = new Integer(5);
-    Integer UNINITIALIZED_THIS = new Integer(6);
+    // Do not try to change the following code to use auto-boxing,
+    // these values are compared by reference and not by value
+    // The constructor of Integer was deprecated in 9
+    // but we are stuck with it by backward compatibility
+    @SuppressWarnings("deprecation") Integer TOP = new Integer(0);
+    @SuppressWarnings("deprecation") Integer INTEGER = new Integer(1);
+    @SuppressWarnings("deprecation") Integer FLOAT = new Integer(2);
+    @SuppressWarnings("deprecation") Integer DOUBLE = new Integer(3);
+    @SuppressWarnings("deprecation") Integer LONG = new Integer(4);
+    @SuppressWarnings("deprecation") Integer NULL = new Integer(5);
+    @SuppressWarnings("deprecation") Integer UNINITIALIZED_THIS = new Integer(6);
 
     // opcodes // visit method (- = idem)
 

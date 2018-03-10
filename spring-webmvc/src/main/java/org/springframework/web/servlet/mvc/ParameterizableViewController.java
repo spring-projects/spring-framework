@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.support.RequestContextUtils;
@@ -37,8 +38,10 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  */
 public class ParameterizableViewController extends AbstractController {
 
+	@Nullable
 	private Object view;
 
+	@Nullable
 	private HttpStatus statusCode;
 
 	private boolean statusOnly;
@@ -54,7 +57,7 @@ public class ParameterizableViewController extends AbstractController {
 	 * DispatcherServlet via a ViewResolver. Will override any pre-existing
 	 * view name or View.
 	 */
-	public void setViewName(String viewName) {
+	public void setViewName(@Nullable String viewName) {
 		this.view = viewName;
 	}
 
@@ -62,6 +65,7 @@ public class ParameterizableViewController extends AbstractController {
 	 * Return the name of the view to delegate to, or {@code null} if using a
 	 * View instance.
 	 */
+	@Nullable
 	public String getViewName() {
 		return (this.view instanceof String ? (String) this.view : null);
 	}
@@ -80,6 +84,7 @@ public class ParameterizableViewController extends AbstractController {
 	 * to be resolved by the DispatcherServlet via a ViewResolver.
 	 * @since 4.1
 	 */
+	@Nullable
 	public View getView() {
 		return (this.view instanceof View ? (View) this.view : null);
 	}
@@ -95,7 +100,7 @@ public class ParameterizableViewController extends AbstractController {
 	 * fully handled within the controller.
 	 * @since 4.1
 	 */
-	public void setStatusCode(HttpStatus statusCode) {
+	public void setStatusCode(@Nullable HttpStatus statusCode) {
 		this.statusCode = statusCode;
 	}
 
@@ -103,6 +108,7 @@ public class ParameterizableViewController extends AbstractController {
 	 * Return the configured HTTP status code or {@code null}.
 	 * @since 4.1
 	 */
+	@Nullable
 	public HttpStatus getStatusCode() {
 		return this.statusCode;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,12 @@ import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionFactory;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Proxy for a target CCI {@link javax.resource.cci.ConnectionFactory}, adding
  * awareness of Spring-managed transactions. Similar to a transactional JNDI
- * ConnectionFactory as provided by a J2EE server.
+ * ConnectionFactory as provided by a Java EE server.
  *
  * <p>Data access code that should remain unaware of Spring's data access support
  * can work with this proxy to seamlessly participate in Spring-managed transactions.
@@ -47,7 +49,7 @@ import javax.resource.cci.ConnectionFactory;
  * Connection. If not within a transaction, normal ConnectionFactory behavior applies.
  *
  * <p>This proxy allows data access code to work with the plain JCA CCI API and still
- * participate in Spring-managed transactions, similar to CCI code in a J2EE/JTA
+ * participate in Spring-managed transactions, similar to CCI code in a Java EE/JTA
  * environment. However, if possible, use Spring's ConnectionFactoryUtils, CciTemplate or
  * CCI operation objects to get transaction participation even without a proxy for
  * the target ConnectionFactory, avoiding the need to define such a proxy in the first place.
@@ -91,8 +93,9 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 	 */
 	@Override
 	public Connection getConnection() throws ResourceException {
-		Connection con = ConnectionFactoryUtils.doGetConnection(getTargetConnectionFactory());
-		return getTransactionAwareConnectionProxy(con, getTargetConnectionFactory());
+		ConnectionFactory targetConnectionFactory = obtainTargetConnectionFactory();
+		Connection con = ConnectionFactoryUtils.doGetConnection(targetConnectionFactory);
+		return getTransactionAwareConnectionProxy(con, targetConnectionFactory);
 	}
 
 	/**
@@ -128,6 +131,7 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 		}
 
 		@Override
+		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on Connection interface coming in...
 

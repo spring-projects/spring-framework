@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.aop.target.SingletonTargetSource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -87,13 +88,13 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Interfaces to be implemented by the proxy. Held in List to keep the order
 	 * of registration, to create JDK proxy with specified order of interfaces.
 	 */
-	private List<Class<?>> interfaces = new ArrayList<Class<?>>();
+	private List<Class<?>> interfaces = new ArrayList<>();
 
 	/**
 	 * List of Advisors. If an Advice is added, it will be wrapped
 	 * in an Advisor before being added to this List.
 	 */
-	private List<Advisor> advisors = new LinkedList<Advisor>();
+	private List<Advisor> advisors = new LinkedList<>();
 
 	/**
 	 * Array updated on changes to the advisors list, which is easier
@@ -106,7 +107,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * No-arg constructor for use as a JavaBean.
 	 */
 	public AdvisedSupport() {
-		initMethodCache();
+		this.methodCache = new ConcurrentHashMap<>(32);
 	}
 
 	/**
@@ -116,13 +117,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	public AdvisedSupport(Class<?>... interfaces) {
 		this();
 		setInterfaces(interfaces);
-	}
-
-	/**
-	 * Initialize the method cache.
-	 */
-	private void initMethodCache() {
-		this.methodCache = new ConcurrentHashMap<MethodCacheKey, List<Object>>(32);
 	}
 
 
@@ -137,7 +131,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	@Override
-	public void setTargetSource(TargetSource targetSource) {
+	public void setTargetSource(@Nullable TargetSource targetSource) {
 		this.targetSource = (targetSource != null ? targetSource : EMPTY_TARGET_SOURCE);
 	}
 
@@ -234,7 +228,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	@Override
 	public Class<?>[] getProxiedInterfaces() {
-		return this.interfaces.toArray(new Class<?>[this.interfaces.size()]);
+		return ClassUtils.toClassArray(this.interfaces);
 	}
 
 	@Override
@@ -378,7 +372,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Bring the array up to date with the list.
 	 */
 	protected final void updateAdvisorArray() {
-		this.advisorArray = this.advisors.toArray(new Advisor[this.advisors.size()]);
+		this.advisorArray = this.advisors.toArray(new Advisor[0]);
 	}
 
 	/**
@@ -446,7 +440,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param advice the advice to check inclusion of
 	 * @return whether this advice instance is included
 	 */
-	public boolean adviceIncluded(Advice advice) {
+	public boolean adviceIncluded(@Nullable Advice advice) {
 		if (advice != null) {
 			for (Advisor advisor : this.advisors) {
 				if (advisor.getAdvice() == advice) {
@@ -462,7 +456,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param adviceClass the advice class to check
 	 * @return the count of the interceptors of this class or subclasses
 	 */
-	public int countAdvicesOfType(Class<?> adviceClass) {
+	public int countAdvicesOfType(@Nullable Class<?> adviceClass) {
 		int count = 0;
 		if (adviceClass != null) {
 			for (Advisor advisor : this.advisors) {
@@ -482,7 +476,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param targetClass the target class
 	 * @return List of MethodInterceptors (may also include InterceptorAndDynamicMethodMatchers)
 	 */
-	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Method method, Class<?> targetClass) {
+	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Method method, @Nullable Class<?> targetClass) {
 		MethodCacheKey cacheKey = new MethodCacheKey(method);
 		List<Object> cached = this.methodCache.get(cacheKey);
 		if (cached == null) {
@@ -506,7 +500,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param other the AdvisedSupport object to copy configuration from
 	 */
 	protected void copyConfigurationFrom(AdvisedSupport other) {
-		copyConfigurationFrom(other, other.targetSource, new ArrayList<Advisor>(other.advisors));
+		copyConfigurationFrom(other, other.targetSource, new ArrayList<>(other.advisors));
 	}
 
 	/**
@@ -520,7 +514,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		copyFrom(other);
 		this.targetSource = targetSource;
 		this.advisorChainFactory = other.advisorChainFactory;
-		this.interfaces = new ArrayList<Class<?>>(other.interfaces);
+		this.interfaces = new ArrayList<>(other.interfaces);
 		for (Advisor advisor : advisors) {
 			if (advisor instanceof IntroductionAdvisor) {
 				validateIntroductionAdvisor((IntroductionAdvisor) advisor);
@@ -557,7 +551,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		ois.defaultReadObject();
 
 		// Initialize transient fields.
-		initMethodCache();
+		this.methodCache = new ConcurrentHashMap<>(32);
 	}
 
 

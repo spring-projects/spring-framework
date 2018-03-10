@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 
 /**
  * JavaBean that allows for configuring a {@link java.util.concurrent.ThreadPoolExecutor}
@@ -68,6 +69,7 @@ public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
 
 	private boolean exposeUnconfigurableExecutor = false;
 
+	@Nullable
 	private ExecutorService exposedExecutor;
 
 
@@ -181,15 +183,16 @@ public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
 	 */
 	protected BlockingQueue<Runnable> createQueue(int queueCapacity) {
 		if (queueCapacity > 0) {
-			return new LinkedBlockingQueue<Runnable>(queueCapacity);
+			return new LinkedBlockingQueue<>(queueCapacity);
 		}
 		else {
-			return new SynchronousQueue<Runnable>();
+			return new SynchronousQueue<>();
 		}
 	}
 
 
 	@Override
+	@Nullable
 	public ExecutorService getObject() {
 		return this.exposedExecutor;
 	}

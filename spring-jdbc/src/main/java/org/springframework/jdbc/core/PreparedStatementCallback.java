@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.lang.Nullable;
 
 /**
  * Generic callback interface for code that operates on a PreparedStatement.
@@ -40,6 +41,7 @@ import org.springframework.dao.DataAccessException;
  * @see JdbcTemplate#execute(String, PreparedStatementCallback)
  * @see JdbcTemplate#execute(PreparedStatementCreator, PreparedStatementCallback)
  */
+@FunctionalInterface
 public interface PreparedStatementCallback<T> {
 
 	/**
@@ -71,6 +73,7 @@ public interface PreparedStatementCallback<T> {
 	 * @see JdbcTemplate#queryForObject(String, Object[], Class)
 	 * @see JdbcTemplate#queryForList(String, Object[])
 	 */
+	@Nullable
 	T doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException;
 
 }

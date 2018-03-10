@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.FixedContentNegotiationStrategy;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
@@ -89,7 +88,7 @@ public class ViewResolutionTests {
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 		marshaller.setClassesToBeBound(Person.class);
 
-		List<View> viewList = new ArrayList<View>();
+		List<View> viewList = new ArrayList<>();
 		viewList.add(new MappingJackson2JsonView());
 		viewList.add(new MarshallingView(marshaller));
 
@@ -136,7 +135,7 @@ public class ViewResolutionTests {
 	@Controller
 	private static class PersonController {
 
-		@RequestMapping(value="/person/{name}", method=RequestMethod.GET)
+		@GetMapping("/person/{name}")
 		public String show(@PathVariable String name, Model model) {
 			Person person = new Person(name);
 			model.addAttribute(person);

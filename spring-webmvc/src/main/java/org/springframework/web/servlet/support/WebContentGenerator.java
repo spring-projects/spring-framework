@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.util.ClassUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -80,22 +80,22 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 	protected static final String HEADER_CACHE_CONTROL = "Cache-Control";
 
-	/** Checking for Servlet 3.0+ HttpServletResponse.getHeaders(String) */
-	private static final boolean servlet3Present =
-			ClassUtils.hasMethod(HttpServletResponse.class, "getHeaders", String.class);
-
 
 	/** Set of supported HTTP methods */
+	@Nullable
 	private Set<String> supportedMethods;
 
+	@Nullable
 	private String allowHeader;
 
 	private boolean requireSession = false;
 
+	@Nullable
 	private CacheControl cacheControl;
 
 	private int cacheSeconds = -1;
 
+	@Nullable
 	private String[] varyByRequestHeaders;
 
 
@@ -129,7 +129,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 */
 	public WebContentGenerator(boolean restrictDefaultSupportedMethods) {
 		if (restrictDefaultSupportedMethods) {
-			this.supportedMethods = new LinkedHashSet<String>(4);
+			this.supportedMethods = new LinkedHashSet<>(4);
 			this.supportedMethods.add(METHOD_GET);
 			this.supportedMethods.add(METHOD_HEAD);
 			this.supportedMethods.add(METHOD_POST);
@@ -145,36 +145,15 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		setSupportedMethods(supportedMethods);
 	}
 
-	private void initAllowHeader() {
-		Collection<String> allowedMethods;
-		if (this.supportedMethods == null) {
-			allowedMethods = new ArrayList<String>(HttpMethod.values().length - 1);
-			for (HttpMethod method : HttpMethod.values()) {
-				if (!HttpMethod.TRACE.equals(method)) {
-					allowedMethods.add(method.name());
-				}
-			}
-		}
-		else if (this.supportedMethods.contains(HttpMethod.OPTIONS.name())) {
-			allowedMethods = this.supportedMethods;
-		}
-		else {
-			allowedMethods = new ArrayList<String>(this.supportedMethods);
-			allowedMethods.add(HttpMethod.OPTIONS.name());
-
-		}
-		this.allowHeader = StringUtils.collectionToCommaDelimitedString(allowedMethods);
-	}
-
 
 	/**
 	 * Set the HTTP methods that this content generator should support.
 	 * <p>Default is GET, HEAD and POST for simple form controller types;
 	 * unrestricted for general controllers and interceptors.
 	 */
-	public final void setSupportedMethods(String... methods) {
+	public final void setSupportedMethods(@Nullable String... methods) {
 		if (!ObjectUtils.isEmpty(methods)) {
-			this.supportedMethods = new LinkedHashSet<String>(Arrays.asList(methods));
+			this.supportedMethods = new LinkedHashSet<>(Arrays.asList(methods));
 		}
 		else {
 			this.supportedMethods = null;
@@ -185,19 +164,42 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	/**
 	 * Return the HTTP methods that this content generator supports.
 	 */
+	@Nullable
 	public final String[] getSupportedMethods() {
-		return StringUtils.toStringArray(this.supportedMethods);
+		return (this.supportedMethods != null ? StringUtils.toStringArray(this.supportedMethods) : null);
+	}
+
+	private void initAllowHeader() {
+		Collection<String> allowedMethods;
+		if (this.supportedMethods == null) {
+			allowedMethods = new ArrayList<>(HttpMethod.values().length - 1);
+			for (HttpMethod method : HttpMethod.values()) {
+				if (method != HttpMethod.TRACE) {
+					allowedMethods.add(method.name());
+				}
+			}
+		}
+		else if (this.supportedMethods.contains(HttpMethod.OPTIONS.name())) {
+			allowedMethods = this.supportedMethods;
+		}
+		else {
+			allowedMethods = new ArrayList<>(this.supportedMethods);
+			allowedMethods.add(HttpMethod.OPTIONS.name());
+
+		}
+		this.allowHeader = StringUtils.collectionToCommaDelimitedString(allowedMethods);
 	}
 
 	/**
-	 * Return the "Allow" header value to use in response to an HTTP OPTIONS
-	 * request based on the configured {@link #setSupportedMethods supported
-	 * methods} also automatically adding "OPTIONS" to the list even if not
-	 * present as a supported method. This means sub-classes don't have to
-	 * explicitly list "OPTIONS" as a supported method as long as HTTP OPTIONS
-	 * requests are handled before making a call to
-	 * {@link #checkRequest(HttpServletRequest)}.
+	 * Return the "Allow" header value to use in response to an HTTP OPTIONS request
+	 * based on the configured {@link #setSupportedMethods supported methods} also
+	 * automatically adding "OPTIONS" to the list even if not present as a supported
+	 * method. This means subclasses don't have to explicitly list "OPTIONS" as a
+	 * supported method as long as HTTP OPTIONS requests are handled before making a
+	 * call to {@link #checkRequest(HttpServletRequest)}.
+	 * @since 4.3
 	 */
+	@Nullable
 	protected String getAllowHeader() {
 		return this.allowHeader;
 	}
@@ -221,7 +223,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * the Cache-Control HTTP response header.
 	 * @since 4.2
 	 */
-	public final void setCacheControl(CacheControl cacheControl) {
+	public final void setCacheControl(@Nullable CacheControl cacheControl) {
 		this.cacheControl = cacheControl;
 	}
 
@@ -230,6 +232,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * that builds the Cache-Control HTTP response header.
 	 * @since 4.2
 	 */
+	@Nullable
 	public final CacheControl getCacheControl() {
 		return this.cacheControl;
 	}
@@ -263,19 +266,19 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * subject to content negotiation and variances based on the value of the
 	 * given request headers. The configured request header names are added only
 	 * if not already present in the response "Vary" header.
-	 * <p><strong>Note:</strong> This property is only supported on Servlet 3.0+
-	 * which allows checking existing response header values.
 	 * @param varyByRequestHeaders one or more request header names
 	 * @since 4.3
 	 */
-	public void setVaryByRequestHeaders(String... varyByRequestHeaders) {
+	public final void setVaryByRequestHeaders(@Nullable String... varyByRequestHeaders) {
 		this.varyByRequestHeaders = varyByRequestHeaders;
 	}
 
 	/**
 	 * Return the configured request header names for the "Vary" response header.
+	 * @since 4.3
 	 */
-	public String[] getVaryByRequestHeaders() {
+	@Nullable
+	public final String[] getVaryByRequestHeaders() {
 		return this.varyByRequestHeaders;
 	}
 
@@ -374,8 +377,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		// Check whether we should support the request method.
 		String method = request.getMethod();
 		if (this.supportedMethods != null && !this.supportedMethods.contains(method)) {
-			throw new HttpRequestMethodNotSupportedException(
-					method, StringUtils.toStringArray(this.supportedMethods));
+			throw new HttpRequestMethodNotSupportedException(method, this.supportedMethods);
 		}
 
 		// Check whether a session is required.
@@ -397,8 +399,8 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		else {
 			applyCacheSeconds(response, this.cacheSeconds);
 		}
-		if (servlet3Present && this.varyByRequestHeaders != null) {
-			for (String value : getVaryRequestHeadersToAdd(response)) {
+		if (this.varyByRequestHeaders != null) {
+			for (String value : getVaryRequestHeadersToAdd(response, this.varyByRequestHeaders)) {
 				response.addHeader("Vary", value);
 			}
 		}
@@ -593,18 +595,19 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		}
 	}
 
-	private Collection<String> getVaryRequestHeadersToAdd(HttpServletResponse response) {
+
+	private Collection<String> getVaryRequestHeadersToAdd(HttpServletResponse response, String[] varyByRequestHeaders) {
 		if (!response.containsHeader(HttpHeaders.VARY)) {
-			return Arrays.asList(getVaryByRequestHeaders());
+			return Arrays.asList(varyByRequestHeaders);
 		}
-		Collection<String> result = new ArrayList<String>(getVaryByRequestHeaders().length);
-		Collections.addAll(result, getVaryByRequestHeaders());
+		Collection<String> result = new ArrayList<>(varyByRequestHeaders.length);
+		Collections.addAll(result, varyByRequestHeaders);
 		for (String header : response.getHeaders(HttpHeaders.VARY)) {
 			for (String existing : StringUtils.tokenizeToStringArray(header, ",")) {
 				if ("*".equals(existing)) {
 					return Collections.emptyList();
 				}
-				for (String value : getVaryByRequestHeaders()) {
+				for (String value : varyByRequestHeaders) {
 					if (value.equalsIgnoreCase(existing)) {
 						result.remove(value);
 					}

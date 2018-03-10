@@ -37,7 +37,7 @@ import static org.junit.Assert.*;
  * @author Rob Harrop
  * @author Chris Beams
  */
-public final class AspectJNamespaceHandlerTests {
+public class AspectJNamespaceHandlerTests {
 
 	private ParserContext parserContext;
 

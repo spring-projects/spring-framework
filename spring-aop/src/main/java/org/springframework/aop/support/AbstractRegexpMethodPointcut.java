@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,9 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -128,9 +130,9 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	 * plus the name of the method.
 	 */
 	@Override
-	public boolean matches(Method method, Class<?> targetClass) {
-		return ((targetClass != null && matchesPattern(targetClass.getName() + "." + method.getName())) ||
-				matchesPattern(method.getDeclaringClass().getName() + "." + method.getName()));
+	public boolean matches(Method method, @Nullable Class<?> targetClass) {
+		return ((targetClass != null && matchesPattern(ClassUtils.getQualifiedMethodName(method, targetClass))) ||
+				matchesPattern(ClassUtils.getQualifiedMethodName(method)));
 	}
 
 	/**
