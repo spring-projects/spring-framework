@@ -88,24 +88,36 @@ and `Mono`. For more on that see
 === ServerRequest
 
 `ServerRequest` provides access to the HTTP method, URI, headers, and query parameters
-while access to the body is provided through the `body` methods. This is how to extract
-the request body to a `Mono<String>`:
+while access to the body is provided through the `body` methods.
+
+To extract the request body to a `Mono<String>`:
 
  Mono<String> string = request.bodyToMono(String.class);
 
-This is how to extract the body into a `Flux`, where `Person` is a class that can be
-deserialised, e.g. from JSON or XML:
+To extract the body to a `Flux<Person>`, where `Person` objects are decoded from some
+serialized form, such as JSON or XML:
 
  Flux<Person> people = request.bodyToFlux(Person.class);
 
-`bodyToMono` and `bodyToFlux` are convenience methods that use the generic
-`ServerRequest.body(BodyExtractor)` method. `BodyExtractor` is a functional strategy
-interface that you can use to write your own extraction logic, but common `BodyExtractor`
-instances can be obtained through the `BodyExtractors` utility class. The above examples
-can also be written as follows:
+The above are shortcuts that use the more general `ServerRequest.body(BodyExtractor)`
+which accepts the `BodyExtractor` functional, strategy interface. The utility class
+`BodyExtractors` provides access to a number of instances. For example, the above can
+also be written as follows:
 
- Mono<String> string = request.body(BodyExtractors.toMono(String.class);
- Flux<Person> people = request.body(BodyExtractors.toFlux(Person.class);
+ Mono<String> string = request.body(BodyExtractors.toMono(String.class));
+ Flux<Person> people = request.body(BodyExtractors.toFlux(Person.class));
+
+To access form data:
+
+ Mono<MultiValueMap<String, String> map = request.body(BodyExtractors.toFormData());
+
+To access multipart data as a map:
+
+ Mono<MultiValueMap<String, Part> map = request.body(BodyExtractors.toMultipartData());
+
+To access multiparts, one at a time, in streaming fashion:
+
+ Flux<Part> parts = request.body(BodyExtractos.toParts());
 
 
 
