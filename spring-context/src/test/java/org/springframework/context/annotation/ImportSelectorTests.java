@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
-import org.springframework.context.annotation.ImportBeanDefinitionRegistrarTests.SampleRegistrar;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
@@ -79,14 +78,14 @@ public class ImportSelectorTests {
 	@Test
 	public void invokeAwareMethodsInImportSelector() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AwareConfig.class);
-		assertThat(SampleRegistrar.beanFactory, is((BeanFactory) context.getBeanFactory()));
-		assertThat(SampleRegistrar.classLoader, is(context.getBeanFactory().getBeanClassLoader()));
-		assertThat(SampleRegistrar.resourceLoader, is(notNullValue()));
-		assertThat(SampleRegistrar.environment, is((Environment) context.getEnvironment()));
+		assertThat(SampleImportSelector.beanFactory, is(context.getBeanFactory()));
+		assertThat(SampleImportSelector.classLoader, is(context.getBeanFactory().getBeanClassLoader()));
+		assertThat(SampleImportSelector.resourceLoader, is(notNullValue()));
+		assertThat(SampleImportSelector.environment, is(context.getEnvironment()));
 	}
 
 	@Test
-	public void correctMetaDataOnIndirectImports() throws Exception {
+	public void correctMetaDataOnIndirectImports() {
 		new AnnotationConfigApplicationContext(IndirectConfig.class);
 		Matcher<String> isFromIndirect = equalTo(IndirectImport.class.getName());
 		assertThat(importFrom.get(ImportSelector1.class), isFromIndirect);
@@ -102,8 +101,8 @@ public class ImportSelectorTests {
 	}
 
 
-	static class SampleImportSelector implements ImportSelector, BeanClassLoaderAware, ResourceLoaderAware,
-			BeanFactoryAware, EnvironmentAware {
+	private static class SampleImportSelector implements ImportSelector,
+			BeanClassLoaderAware, ResourceLoaderAware, BeanFactoryAware, EnvironmentAware {
 
 		static ClassLoader classLoader;
 		static ResourceLoader resourceLoader;
@@ -112,22 +111,22 @@ public class ImportSelectorTests {
 
 		@Override
 		public void setBeanClassLoader(ClassLoader classLoader) {
-			SampleRegistrar.classLoader = classLoader;
+			SampleImportSelector.classLoader = classLoader;
 		}
 
 		@Override
 		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-			SampleRegistrar.beanFactory = beanFactory;
+			SampleImportSelector.beanFactory = beanFactory;
 		}
 
 		@Override
 		public void setResourceLoader(ResourceLoader resourceLoader) {
-			SampleRegistrar.resourceLoader = resourceLoader;
+			SampleImportSelector.resourceLoader = resourceLoader;
 		}
 
 		@Override
 		public void setEnvironment(Environment environment) {
-			SampleRegistrar.environment = environment;
+			SampleImportSelector.environment = environment;
 		}
 
 		@Override
@@ -145,8 +144,9 @@ public class ImportSelectorTests {
 
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
-	@Import({DeferredImportSelector1.class, DeferredImportSelector2.class, ImportSelector1.class, ImportSelector2.class})
-	public static @interface Sample {
+	@Import({DeferredImportSelector1.class, DeferredImportSelector2.class,
+			ImportSelector1.class, ImportSelector2.class})
+	public @interface Sample {
 	}
 
 
