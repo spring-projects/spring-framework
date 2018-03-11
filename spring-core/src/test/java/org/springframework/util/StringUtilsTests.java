@@ -305,7 +305,7 @@ public class StringUtilsTests {
 	public void testQuoteIfString() {
 		assertEquals("'myString'", StringUtils.quoteIfString("myString"));
 		assertEquals("''", StringUtils.quoteIfString(""));
-		assertEquals(new Integer(5), StringUtils.quoteIfString(5));
+		assertEquals(Integer.valueOf(5), StringUtils.quoteIfString(5));
 		assertNull(StringUtils.quoteIfString(null));
 	}
 

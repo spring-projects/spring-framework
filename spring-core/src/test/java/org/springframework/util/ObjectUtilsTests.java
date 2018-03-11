@@ -102,7 +102,7 @@ public class ObjectUtilsTests {
 		assertTrue(isEmpty(new Integer[0]));
 
 		assertFalse(isEmpty(new int[] { 42 }));
-		assertFalse(isEmpty(new Integer[] { new Integer(42) }));
+		assertFalse(isEmpty(new Integer[] { 42 }));
 	}
 
 	@Test
@@ -737,7 +737,7 @@ public class ObjectUtilsTests {
 
 	@Test
 	public void nullSafeToStringWithObjectArray() {
-		Object[] array = {"Han", new Long(43)};
+		Object[] array = {"Han", Long.valueOf(43)};
 		assertEquals("{Han, 43}", ObjectUtils.nullSafeToString(array));
 	}
 

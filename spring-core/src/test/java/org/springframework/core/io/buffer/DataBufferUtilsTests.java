@@ -16,7 +16,6 @@
 
 package org.springframework.core.io.buffer;
 
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -100,7 +99,6 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void readInputStream() throws Exception {
-		InputStream is = DataBufferUtilsTests.class.getResourceAsStream("DataBufferUtilsTests.txt");
 		Flux<DataBuffer> flux = DataBufferUtils.readInputStream(
 				() -> DataBufferUtilsTests.class.getResourceAsStream("DataBufferUtilsTests.txt"),
 				this.bufferFactory, 3);
