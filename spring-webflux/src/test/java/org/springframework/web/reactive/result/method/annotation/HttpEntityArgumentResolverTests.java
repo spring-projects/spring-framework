@@ -62,14 +62,14 @@ import static org.springframework.mock.http.server.reactive.test.MockServerHttpR
  */
 public class HttpEntityArgumentResolverTests {
 
-	private HttpEntityArgumentResolver resolver = createResolver();
+	private final HttpEntityArgumentResolver resolver = createResolver();
 
 	private final ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
 
 	private HttpEntityArgumentResolver createResolver() {
 		List<HttpMessageReader<?>> readers = new ArrayList<>();
-		readers.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
+		readers.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
 		return new HttpEntityArgumentResolver(readers, ReactiveAdapterRegistry.getSharedInstance());
 	}
 
