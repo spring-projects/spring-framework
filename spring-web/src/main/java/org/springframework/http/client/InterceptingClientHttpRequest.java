@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.http.client;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
+import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -80,7 +82,7 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 		}
 
 		@Override
-		public ClientHttpResponse execute(HttpRequest request, byte[] body) throws IOException {
+		public ClientHttpResponse execute(HttpRequest request, final byte[] body) throws IOException {
 			if (this.iterator.hasNext()) {
 				ClientHttpRequestInterceptor nextInterceptor = this.iterator.next();
 				return nextInterceptor.intercept(request, body, this);
@@ -94,7 +96,18 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 					}
 				}
 				if (body.length > 0) {
-					StreamUtils.copy(body, delegate.getBody());
+					if (delegate instanceof StreamingHttpOutputMessage) {
+						StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) delegate;
+						streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
+							@Override
+							public void writeTo(final OutputStream outputStream) throws IOException {
+								StreamUtils.copy(body, outputStream);
+							}
+						});
+					}
+					else {
+						StreamUtils.copy(body, delegate.getBody());
+					}
 				}
 				return delegate.execute();
 			}

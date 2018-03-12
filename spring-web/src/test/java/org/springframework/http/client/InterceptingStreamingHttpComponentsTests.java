@@ -21,15 +21,15 @@ import org.junit.Test;
 import org.springframework.http.HttpMethod;
 
 /**
- * @author Arjen Poutsma
+ * @author Juergen Hoeller
  */
-public class StreamingHttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
+public class InterceptingStreamingHttpComponentsTests extends AbstractHttpRequestFactoryTestCase {
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {
 		HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
 		requestFactory.setBufferRequestBody(false);
-		return requestFactory;
+		return new InterceptingClientHttpRequestFactory(requestFactory, null);
 	}
 
 	@Override
