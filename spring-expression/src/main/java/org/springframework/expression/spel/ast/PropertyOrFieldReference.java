@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.asm.Label;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -46,6 +47,8 @@ import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 public class PropertyOrFieldReference extends SpelNodeImpl {
 
 	private final boolean nullSafe;
+
+	private String originalPrimitiveExitTypeDescriptor = null;
 
 	private final String name;
 
@@ -83,7 +86,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		PropertyAccessor accessorToUse = this.cachedReadAccessor;
 		if (accessorToUse instanceof CompilablePropertyAccessor) {
 			CompilablePropertyAccessor accessor = (CompilablePropertyAccessor) accessorToUse;
-			this.exitTypeDescriptor = CodeFlow.toDescriptor(accessor.getPropertyType());
+			setExitTypeDescriptor(CodeFlow.toDescriptor(accessor.getPropertyType()));
 		}
 		return tv;
 	}
@@ -350,8 +353,40 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		if (!(accessorToUse instanceof CompilablePropertyAccessor)) {
 			throw new IllegalStateException("Property accessor is not compilable: " + accessorToUse);
 		}
+		Label skipIfNull = null;
+		if (nullSafe) {
+			mv.visitInsn(DUP);
+			skipIfNull = new Label();
+			Label continueLabel = new Label();
+			mv.visitJumpInsn(IFNONNULL,continueLabel);
+			CodeFlow.insertCheckCast(mv, this.exitTypeDescriptor);
+			mv.visitJumpInsn(GOTO, skipIfNull);
+			mv.visitLabel(continueLabel);
+		}
 		((CompilablePropertyAccessor) accessorToUse).generateCode(this.name, mv, cf);
 		cf.pushDescriptor(this.exitTypeDescriptor);
+		if (originalPrimitiveExitTypeDescriptor != null) {
+			// The output of the accessor is a primitive but from the block above it might be null,
+			// so to have a common stack element type at skipIfNull target it is necessary
+			// to box the primitive
+			CodeFlow.insertBoxIfNecessary(mv, originalPrimitiveExitTypeDescriptor);
+		}
+		if (skipIfNull != null) {
+			mv.visitLabel(skipIfNull);
+		}
+	}
+
+	void setExitTypeDescriptor(String descriptor) {
+		// If this property or field access would return a primitive - and yet
+		// it is also marked null safe - then the exit type descriptor must be
+		// promoted to the box type to allow a null value to be passed on
+		if (this.nullSafe && CodeFlow.isPrimitive(descriptor)) {
+			this.originalPrimitiveExitTypeDescriptor = descriptor;
+			this.exitTypeDescriptor = CodeFlow.toBoxedDescriptor(descriptor);
+		}
+		else {
+			this.exitTypeDescriptor = descriptor;
+		}
 	}
 
 
@@ -379,8 +414,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 					this.ref.getValueInternal(this.contextObject, this.evalContext, this.autoGrowNullReferences);
 			PropertyAccessor accessorToUse = this.ref.cachedReadAccessor;
 			if (accessorToUse instanceof CompilablePropertyAccessor) {
-				this.ref.exitTypeDescriptor =
-						CodeFlow.toDescriptor(((CompilablePropertyAccessor) accessorToUse).getPropertyType());
+				this.ref.setExitTypeDescriptor(CodeFlow.toDescriptor(((CompilablePropertyAccessor) accessorToUse).getPropertyType()));
 			}
 			return value;
 		}
