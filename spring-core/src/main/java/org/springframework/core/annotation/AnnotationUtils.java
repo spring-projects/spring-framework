@@ -899,6 +899,31 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
+	 * Check the declared attributes of the given annotation, in particular covering
+	 * Google App Engine's late arrival of {@code TypeNotPresentExceptionProxy} for
+	 * {@code Class} values (instead of early {@code Class.getAnnotations() failure}.
+	 * <p>This method not failing indicates that {@link #getAnnotationAttributes(Annotation)}
+	 * won't failure either (when attempted later on).
+	 * @param annotation the annotation to validate
+	 * @throws IllegalStateException if a declared {@code Class} attribute could not be read
+	 * @since 4.3.15
+	 * @see Class#getAnnotations()
+	 * @see #getAnnotationAttributes(Annotation)
+	 */
+	public static void validateAnnotation(Annotation annotation) {
+		for (Method method : getAttributeMethods(annotation.annotationType())) {
+			if (method.getReturnType() == Class.class) {
+				try {
+					method.invoke(annotation);
+				}
+				catch (Throwable ex) {
+					throw new IllegalStateException("Could not obtain annotation attribute value for " + method, ex);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Retrieve the given annotation's attributes as a {@link Map}, preserving all
 	 * attribute types.
 	 * <p>Equivalent to calling {@link #getAnnotationAttributes(Annotation, boolean, boolean)}
@@ -1835,13 +1860,13 @@ public abstract class AnnotationUtils {
 		if (element instanceof Class && Annotation.class.isAssignableFrom((Class<?>) element)) {
 			// Meta-annotation or (default) value lookup on an annotation type
 			if (loggerToUse.isDebugEnabled()) {
-				loggerToUse.debug("Failed to meta-introspect annotation [" + element + "]: " + ex);
+				loggerToUse.debug("Failed to meta-introspect annotation " + element + ": " + ex);
 			}
 		}
 		else {
 			// Direct annotation lookup on regular Class, Method, Field
 			if (loggerToUse.isInfoEnabled()) {
-				loggerToUse.info("Failed to introspect annotations on [" + element + "]: " + ex);
+				loggerToUse.info("Failed to introspect annotations on " + element + ": " + ex);
 			}
 		}
 	}
