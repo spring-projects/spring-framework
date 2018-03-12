@@ -912,7 +912,8 @@ public abstract class AnnotationUtils {
 	 */
 	public static void validateAnnotation(Annotation annotation) {
 		for (Method method : getAttributeMethods(annotation.annotationType())) {
-			if (method.getReturnType() == Class.class) {
+			Class<?> returnType = method.getReturnType();
+			if (returnType == Class.class || returnType == Class[].class) {
 				try {
 					method.invoke(annotation);
 				}
