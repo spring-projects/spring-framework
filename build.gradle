@@ -59,7 +59,7 @@ configure(allprojects) { project ->
 	ext.rxjava2Version       = "2.1.10"
 	ext.slf4jVersion         = "1.7.25"	 // spring-jcl + consistent 3rd party deps
 	ext.tiles3Version        = "3.0.8"
-	ext.tomcatVersion        = "8.5.28"
+	ext.tomcatVersion        = "8.5.29"
 	ext.undertowVersion      = "1.4.23.Final"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
