@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,14 +38,22 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Provides a default EvaluationContext implementation.
+ * A highly configurable {@link EvaluationContext} implementation.
  *
- * <p>To resolve properties/methods/fields this context uses a reflection mechanism.
+ * <p>This context uses standard implementations of all applicable strategies,
+ * based on reflection to resolve properties, methods and fields.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 3.0
+ * @see ReflectivePropertyAccessor
+ * @see ReflectiveConstructorResolver
+ * @see ReflectiveMethodResolver
+ * @see StandardTypeLocator
+ * @see StandardTypeConverter
+ * @see StandardTypeComparator
+ * @see StandardOperatorOverloader
  */
 public class StandardEvaluationContext implements EvaluationContext {
 
