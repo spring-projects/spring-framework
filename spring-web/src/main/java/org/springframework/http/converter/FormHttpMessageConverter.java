@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -319,12 +319,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 		if (outputMessage instanceof StreamingHttpOutputMessage) {
 			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
-			streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
-				@Override
-				public void writeTo(OutputStream outputStream) throws IOException {
-					StreamUtils.copy(bytes, outputStream);
-				}
-			});
+			streamingOutputMessage.setBody(outputStream -> StreamUtils.copy(bytes, outputStream));
 		}
 		else {
 			StreamUtils.copy(bytes, outputMessage.getBody());
@@ -347,12 +342,9 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 		if (outputMessage instanceof StreamingHttpOutputMessage) {
 			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
-			streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
-				@Override
-				public void writeTo(OutputStream outputStream) throws IOException {
-					writeParts(outputStream, parts, boundary);
-					writeEnd(outputStream, boundary);
-				}
+			streamingOutputMessage.setBody(outputStream -> {
+				writeParts(outputStream, parts, boundary);
+				writeEnd(outputStream, boundary);
 			});
 		}
 		else {

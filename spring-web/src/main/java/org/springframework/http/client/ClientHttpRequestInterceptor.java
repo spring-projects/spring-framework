@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import org.springframework.http.HttpRequest;
 
 /**
  * Intercepts client-side HTTP requests. Implementations of this interface can be
- * {@linkplain org.springframework.web.client.RestTemplate#setInterceptors(java.util.List)
- * registered} with the {@link org.springframework.web.client.RestTemplate RestTemplate},
+ * {@linkplain org.springframework.web.client.RestTemplate#setInterceptors registered}
+ * with the {@link org.springframework.web.client.RestTemplate RestTemplate},
  * as to modify the outgoing {@link ClientHttpRequest} and/or the incoming
  * {@link ClientHttpResponse}.
  *
@@ -40,7 +40,6 @@ public interface ClientHttpRequestInterceptor {
 	 * Intercept the given request, and return a response. The given
 	 * {@link ClientHttpRequestExecution} allows the interceptor to pass on the
 	 * request and response to the next entity in the chain.
-	 *
 	 * <p>A typical implementation of this method would follow the following pattern:
 	 * <ol>
 	 * <li>Examine the {@linkplain HttpRequest request} and body</li>
@@ -56,7 +55,6 @@ public interface ClientHttpRequestInterceptor {
 	 * </ul>
 	 * <li>Optionally wrap the response to filter HTTP attributes.</li>
 	 * </ol>
-	 *
 	 * @param request the request, containing method, URI, and headers
 	 * @param body the body of the request
 	 * @param execution the request execution
