@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -154,20 +153,18 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				.verify();
 	}
 
-	@Ignore
 	@Test // SPR-16516, SPR-16539
 	public void writePojoWithCustomEncoding() {
-		Flux<Pojo> source = Flux.just(new Pojo("foo\u00A3", "bar\u00A3"));
-		Charset charset = StandardCharsets.ISO_8859_1;
+		Flux<Pojo> source = Flux.just(new Pojo("foo\uD834\uDD1E", "bar\uD834\uDD1E"));
+		Charset charset = StandardCharsets.UTF_16LE;
 		MediaType mediaType = new MediaType("text", "event-stream", charset);
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
 		testWrite(source, mediaType, outputMessage, Pojo.class);
 
 		assertEquals(mediaType, outputMessage.getHeaders().getContentType());
 		StepVerifier.create(outputMessage.getBodyAsString())
-				.expectNext("data:{\"foo\":\"foo\u00A3\",\"bar\":\"bar\u00A3\"}\n\n")
-				.expectComplete()
-				.verify();
+				.expectNext("data:{\"foo\":\"foo\uD834\uDD1E\",\"bar\":\"bar\uD834\uDD1E\"}\n\n")
+				.verifyComplete();
 	}
 
 
