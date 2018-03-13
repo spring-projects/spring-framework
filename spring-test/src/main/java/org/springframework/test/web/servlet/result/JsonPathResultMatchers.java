@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,8 +80,10 @@ public class JsonPathResultMatchers {
 	/**
 	 * Evaluate the JSON path expression against the response content and
 	 * assert the resulting value with the given Hamcrest {@link Matcher}.
+	 * @see #value(Matcher, Class)
+	 * @see #value(Object)
 	 */
-	public <T> ResultMatcher value(final Matcher<T> matcher) {
+	public <T> ResultMatcher value(Matcher<T> matcher) {
 		return result -> {
 			String content = getContent(result);
 			jsonPathHelper.assertValue(content, matcher);
@@ -89,10 +91,29 @@ public class JsonPathResultMatchers {
 	}
 
 	/**
+	 * An overloaded variant of {@link #value(Matcher)} that also accepts a
+	 * target type for the resulting value that the matcher can work reliably
+	 * against.
+	 * <p>This can be useful for matching numbers reliably &mdash; for example,
+	 * to coerce an integer into a double.
+	 * @since 4.3.15
+	 * @see #value(Matcher)
+	 * @see #value(Object)
+	 */
+	public <T> ResultMatcher value(Matcher<T> matcher, Class<T> targetType) {
+		return result -> {
+			String content = getContent(result);
+			jsonPathHelper.assertValue(content, matcher, targetType);
+		};
+	}
+
+	/**
 	 * Evaluate the JSON path expression against the response content and
 	 * assert that the result is equal to the supplied value.
+	 * @see #value(Matcher)
+	 * @see #value(Matcher, Class)
 	 */
-	public ResultMatcher value(final Object expectedValue) {
+	public ResultMatcher value(Object expectedValue) {
 		return result -> jsonPathHelper.assertValue(getContent(result), expectedValue);
 	}
 
