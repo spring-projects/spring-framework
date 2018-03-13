@@ -101,7 +101,7 @@ public class JsonPathResultMatchers {
 	 * @see #value(Matcher)
 	 * @see #value(Object)
 	 */
-	public <T> ResultMatcher value(Matcher<T> matcher, Class<T> targetType) {
+	public <T> ResultMatcher value(final Matcher<T> matcher, final Class<T> targetType) {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
