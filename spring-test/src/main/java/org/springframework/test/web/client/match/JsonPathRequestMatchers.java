@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.test.web.client.RequestMatcher;
 /**
  * Factory for assertions on the request content using
  * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expressions.
+ *
  * <p>An instance of this class is typically accessed via
  * {@link MockRestRequestMatchers#jsonPath(String, Matcher)} or
  * {@link MockRestRequestMatchers#jsonPath(String, Object...)}.
@@ -70,10 +71,11 @@ public class JsonPathRequestMatchers {
 	}
 
 	/**
-	 * An overloaded variant of (@link {@link #value(Matcher)} that also
-	 * accepts a target type for the resulting value that the matcher can work
-	 * reliably against. This can be useful for matching numbers reliably for
-	 * example coercing an integer into a double.
+	 * An overloaded variant of {@link #value(Matcher)} that also accepts a
+	 * target type for the resulting value that the matcher can work reliably
+	 * against.
+	 * <p>This can be useful for matching numbers reliably &mdash; for example,
+	 * to coerce an integer into a double.
 	 * @since 4.3.3
 	 */
 	public <T> RequestMatcher value(final Matcher<T> matcher, final Class<T> targetType) {

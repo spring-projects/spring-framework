@@ -219,7 +219,7 @@ public abstract class MockRestRequestMatchers {
 	 * @param expression the JSON path optionally parameterized with arguments
 	 * @param args arguments to parameterize the JSON path expression with
 	 */
-	public static JsonPathRequestMatchers jsonPath(String expression, Object ... args) {
+	public static JsonPathRequestMatchers jsonPath(String expression, Object... args) {
 		return new JsonPathRequestMatchers(expression, args);
 	}
 
