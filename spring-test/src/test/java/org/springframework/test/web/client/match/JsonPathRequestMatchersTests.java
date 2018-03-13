@@ -18,8 +18,6 @@ package org.springframework.test.web.client.match;
 
 import java.io.IOException;
 
-import org.hamcrest.Matchers;
-
 import org.junit.Test;
 
 import org.springframework.mock.http.client.MockClientHttpRequest;
@@ -79,7 +77,7 @@ public class JsonPathRequestMatchersTests {
 
 	@Test // SPR-14498
 	public void valueWithMatcherAndNumberConversion() throws Exception {
-		new JsonPathRequestMatchers("$.num").value(Matchers.equalTo(5.0f), Float.class).match(request);
+		new JsonPathRequestMatchers("$.num").value(equalTo(5.0f), Float.class).match(request);
 	}
 
 	@Test(expected = AssertionError.class)
