@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -223,16 +223,25 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 	@Override
 	public V get(Object key) {
-		Reference<K, V> reference = getReference(key, Restructure.WHEN_NECESSARY);
-		Entry<K, V> entry = (reference != null ? reference.get() : null);
+		Entry<K, V> entry = getEntryIfAvailable(key);
 		return (entry != null ? entry.getValue() : null);
 	}
 
 	@Override
+	public V getOrDefault(Object key, V defaultValue) {
+		Entry<K, V> entry = getEntryIfAvailable(key);
+		return (entry != null ? entry.getValue() : defaultValue);
+	}
+
+	@Override
 	public boolean containsKey(Object key) {
-		Reference<K, V> reference = getReference(key, Restructure.WHEN_NECESSARY);
-		Entry<K, V> entry = (reference != null ? reference.get() : null);
+		Entry<K, V> entry = getEntryIfAvailable(key);
 		return (entry != null && ObjectUtils.nullSafeEquals(entry.getKey(), key));
+	}
+
+	private Entry<K, V> getEntryIfAvailable(Object key) {
+		Reference<K, V> reference = getReference(key, Restructure.WHEN_NECESSARY);
+		return (reference != null ? reference.get() : null);
 	}
 
 	/**
@@ -582,17 +591,18 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		}
 
 		private Reference<K, V> findInChain(Reference<K, V> reference, Object key, int hash) {
-			while (reference != null) {
-				if (reference.getHash() == hash) {
-					Entry<K, V> entry = reference.get();
+			Reference<K, V> currRef = reference;
+			while (currRef != null) {
+				if (currRef.getHash() == hash) {
+					Entry<K, V> entry = currRef.get();
 					if (entry != null) {
 						K entryKey = entry.getKey();
-						if (entryKey == key || entryKey.equals(key)) {
-							return reference;
+						if (ObjectUtils.nullSafeEquals(entryKey, key)) {
+							return currRef;
 						}
 					}
 				}
-				reference = reference.getNext();
+				currRef = currRef.getNext();
 			}
 			return null;
 		}
