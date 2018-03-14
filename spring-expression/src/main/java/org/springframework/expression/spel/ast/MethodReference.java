@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,8 @@ public class MethodReference extends SpelNodeImpl {
 
 	private final boolean nullSafe;
 
-	private String originalPrimitiveExitTypeDescriptor = null;
+	@Nullable
+	private String originalPrimitiveExitTypeDescriptor;
 
 	@Nullable
 	private volatile CachedMethodExecutor cachedExecutor;
@@ -311,11 +312,11 @@ public class MethodReference extends SpelNodeImpl {
 			// Nothing on the stack but something is needed
 			cf.loadTarget(mv);
 		}
-		if ((descriptor != null || !isStaticMethod) && nullSafe) {
+		if ((descriptor != null || !isStaticMethod) && this.nullSafe) {
 			mv.visitInsn(DUP);
 			skipIfNull = new Label();
 			Label continueLabel = new Label();
-			mv.visitJumpInsn(IFNONNULL,continueLabel);
+			mv.visitJumpInsn(IFNONNULL, continueLabel);
 			CodeFlow.insertCheckCast(mv, this.exitTypeDescriptor);
 			mv.visitJumpInsn(GOTO, skipIfNull);
 			mv.visitLabel(continueLabel);
@@ -329,7 +330,7 @@ public class MethodReference extends SpelNodeImpl {
 			CodeFlow.insertBoxIfNecessary(mv, descriptor.charAt(0));
 		}
 
-		String classDesc = null;
+		String classDesc;
 		if (Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
 			classDesc = method.getDeclaringClass().getName().replace('.', '/');
 		}
@@ -339,20 +340,19 @@ public class MethodReference extends SpelNodeImpl {
 			classDesc = publicDeclaringClass.getName().replace('.', '/');
 		}
 
-		if (!isStaticMethod) {
-			if (descriptor == null || !descriptor.substring(1).equals(classDesc)) {
-				CodeFlow.insertCheckCast(mv, "L" + classDesc);
-			}
+		if (!isStaticMethod && (descriptor == null || !descriptor.substring(1).equals(classDesc))) {
+			CodeFlow.insertCheckCast(mv, "L" + classDesc);
 		}
 
 		generateCodeForArguments(mv, cf, method, this.children);
 		mv.visitMethodInsn((isStaticMethod ? INVOKESTATIC : INVOKEVIRTUAL), classDesc, method.getName(),
 				CodeFlow.createSignatureDescriptor(method), method.getDeclaringClass().isInterface());
 		cf.pushDescriptor(this.exitTypeDescriptor);
-		if (originalPrimitiveExitTypeDescriptor != null) {
+
+		if (this.originalPrimitiveExitTypeDescriptor != null) {
 			// The output of the accessor will be a primitive but from the block above it might be null,
 			// so to have a 'common stack' element at skipIfNull target we need to box the primitive
-			CodeFlow.insertBoxIfNecessary(mv, originalPrimitiveExitTypeDescriptor);
+			CodeFlow.insertBoxIfNecessary(mv, this.originalPrimitiveExitTypeDescriptor);
 		}
 		if (skipIfNull != null) {
 			mv.visitLabel(skipIfNull);

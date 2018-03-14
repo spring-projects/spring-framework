@@ -57,7 +57,7 @@ import org.springframework.util.Assert;
  */
 public class StandardEvaluationContext implements EvaluationContext {
 
-	private TypedValue rootObject = TypedValue.NULL;
+	private TypedValue rootObject;
 
 	@Nullable
 	private volatile List<PropertyAccessor> propertyAccessors;
@@ -87,12 +87,20 @@ public class StandardEvaluationContext implements EvaluationContext {
 	private final Map<String, Object> variables = new HashMap<>();
 
 
+	/**
+	 * Create a {@code StandardEvaluationContext} with a null root object.
+	 */
 	public StandardEvaluationContext() {
-		setRootObject(null);
+		this.rootObject = TypedValue.NULL;
 	}
 
+	/**
+	 * Create a {@code StandardEvaluationContext} with the given root object.
+	 * @param rootObject the root object to use
+	 * @see #setRootObject
+	 */
 	public StandardEvaluationContext(Object rootObject) {
-		setRootObject(rootObject);
+		this.rootObject = new TypedValue(rootObject);
 	}
 
 
