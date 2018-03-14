@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,30 +53,29 @@ public abstract class AbstractServletHttpHandlerAdapterInitializer implements We
 	/**
 	 * Register a {@link ServletHttpHandlerAdapter} against the given servlet context.
 	 * <p>This method will create a {@code HttpHandler} using {@link #createHttpHandler()},
-	 * and use it to create a {@code ServletHttpHandlerAdapter} with the name returned by
-	 * {@link #getServletName()}, and mapping it to the patterns
-	 * returned from {@link #getServletMappings()}.
-	 * <p>Further customization can be achieved by overriding {@link
-	 * #customizeRegistration(ServletRegistration.Dynamic)} or
+	 * and use it to create a {@code ServletHttpHandlerAdapter} with the name returned
+	 * by {@link #getServletName()}, and mapping it to the patterns returned from
+	 * {@link #getServletMappings()}.
+	 * <p>Further customization can be achieved by overriding
+	 * {@link #customizeRegistration(ServletRegistration.Dynamic)} or
 	 * {@link #createServlet(HttpHandler)}.
-	 * @param servletContext the context to register the servlet against
+	 * @param servletContext the context to register the servlet with
 	 */
 	protected void registerHandlerAdapter(ServletContext servletContext) {
 		String servletName = getServletName();
-		Assert.hasLength(servletName, "getServletName() must not return empty or null");
+		Assert.hasLength(servletName, "getServletName() must not return null or empty");
 
 		HttpHandler httpHandler = createHttpHandler();
-		Assert.notNull(httpHandler, "createHttpHandler() did not return a HttpHandler" +
-				"for servlet [" + servletName + "]");
+		Assert.notNull(httpHandler, "createHttpHandler() must not return null");
 
 		ServletHttpHandlerAdapter servlet = createServlet(httpHandler);
-		Assert.notNull(servlet, "createHttpHandler() did not return a ServletHttpHandlerAdapter " +
-				"for servlet [" + servletName + "]");
+		Assert.notNull(servlet, "createServlet(HttpHandler) must not return null");
 
 		ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, servlet);
-		Assert.notNull(registration,
-				"Failed to register servlet with name '" + servletName + "'." +
-				"Check if there is another servlet registered under the same name.");
+		if (registration == null) {
+			throw new IllegalStateException("Failed to register servlet with name '" + servletName + "'. " +
+					"Check if there is another servlet registered under the same name.");
+		}
 
 		registration.setLoadOnStartup(1);
 		registration.addMapping(getServletMappings());
@@ -101,7 +100,7 @@ public abstract class AbstractServletHttpHandlerAdapterInitializer implements We
 
 	/**
 	 * Create a {@link ServletHttpHandlerAdapter}  with the specified .
-	 * <p>Default implementation returns a {@code ServletHttpHandlerAdapter}
+	 * <p>The default implementation returns a {@code ServletHttpHandlerAdapter}
 	 * with the provided {@code httpHandler}.
 	 */
 	protected ServletHttpHandlerAdapter createServlet(HttpHandler httpHandler) {
@@ -109,7 +108,7 @@ public abstract class AbstractServletHttpHandlerAdapterInitializer implements We
 	}
 
 	/**
-	 * Specify the servlet mapping(s) for the {@code ServletHttpHandlerAdapter} &mdash;
+	 * Specify the servlet mapping(s) for the {@code ServletHttpHandlerAdapter}:
 	 * for example {@code "/"}, {@code "/app"}, etc.
 	 * @see #registerHandlerAdapter(ServletContext)
 	 */
@@ -123,4 +122,5 @@ public abstract class AbstractServletHttpHandlerAdapterInitializer implements We
 	 */
 	protected void customizeRegistration(ServletRegistration.Dynamic registration) {
 	}
+
 }

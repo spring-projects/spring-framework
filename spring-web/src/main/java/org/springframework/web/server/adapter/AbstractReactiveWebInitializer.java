@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,10 +54,10 @@ public abstract class AbstractReactiveWebInitializer implements WebApplicationIn
 	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException {
 		String servletName = getServletName();
-		Assert.hasLength(servletName, "getServletName() must not return empty or null");
+		Assert.hasLength(servletName, "getServletName() must not return null or empty");
 
 		ApplicationContext applicationContext = createApplicationContext();
-		Assert.notNull(applicationContext, "createApplicationContext() must not return null.");
+		Assert.notNull(applicationContext, "createApplicationContext() must not return null");
 
 		refreshApplicationContext(applicationContext);
 		registerCloseListener(servletContext, applicationContext);
@@ -66,7 +66,10 @@ public abstract class AbstractReactiveWebInitializer implements WebApplicationIn
 		ServletHttpHandlerAdapter servlet = new ServletHttpHandlerAdapter(httpHandler);
 
 		ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, servlet);
-		Assert.notNull(registration, "Failed to register servlet '" + servletName + "'.");
+		if (registration == null) {
+			throw new IllegalStateException("Failed to register servlet with name '" + servletName + "'. " +
+					"Check if there is another servlet registered under the same name.");
+		}
 
 		registration.setLoadOnStartup(1);
 		registration.addMapping(getServletMapping());
@@ -88,7 +91,7 @@ public abstract class AbstractReactiveWebInitializer implements WebApplicationIn
 	protected ApplicationContext createApplicationContext() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		Class<?>[] configClasses = getConfigClasses();
-		Assert.notEmpty(configClasses, "No Spring configuration provided.");
+		Assert.notEmpty(configClasses, "No Spring configuration provided through getConfigClasses()");
 		context.register(configClasses);
 		return context;
 	}
