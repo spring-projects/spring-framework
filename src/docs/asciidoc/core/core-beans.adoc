@@ -8011,6 +8011,15 @@ be resolved to the corresponding value. If not, then "default/path" will be used
 as a default. If no default is specified and a property cannot be resolved, an
 `IllegalArgumentException` will be thrown.
 
+[NOTE]
+====
+The `@PropertySource` annotation is repeatable according to Java 8 conventions.
+However, all such `@PropertySource` annotations need to be declared at the same
+level: either directly on the configuration class or as meta-annotations within the
+same custom annotation. Mixing of direct annotations and meta-annotations is not
+recommended since direct annotations will effectively override meta-annotations.
+====
+
 
 
 === Placeholder resolution in statements
