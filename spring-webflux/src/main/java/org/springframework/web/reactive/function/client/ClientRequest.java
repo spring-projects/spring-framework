@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,11 +111,7 @@ public interface ClientRequest {
 	 */
 	static Builder from(ClientRequest other) {
 		Assert.notNull(other, "'other' must not be null");
-		return new DefaultClientRequestBuilder(other.method(), other.url())
-				.headers(headers -> headers.addAll(other.headers()))
-				.cookies(cookies -> cookies.addAll(other.cookies()))
-				.attributes(attributes -> attributes.putAll(other.attributes()))
-				.body(other.body());
+		return new DefaultClientRequestBuilder(other);
 	}
 
 	/**
@@ -123,8 +119,20 @@ public interface ClientRequest {
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param url the URL
 	 * @return the created builder
+	 * @deprecated in favor of {@link #create(HttpMethod, URI)}
 	 */
+	@Deprecated
 	static Builder method(HttpMethod method, URI url) {
+		return new DefaultClientRequestBuilder(method, url);
+	}
+
+	/**
+	 * Create a request builder with the given method and url.
+	 * @param method the HTTP method (GET, POST, etc)
+	 * @param url the URL
+	 * @return the created builder
+	 */
+	static Builder create(HttpMethod method, URI url) {
 		return new DefaultClientRequestBuilder(method, url);
 	}
 
@@ -235,8 +243,8 @@ public interface ClientRequest {
 		Builder attributes(Consumer<Map<String, Object>> attributesConsumer);
 
 		/**
-		 * Builds the request entity with no body.
-		 * @return the request entity
+		 * Builds the request.
+		 * @return the request
 		 */
 		ClientRequest build();
 	}

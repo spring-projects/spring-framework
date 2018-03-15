@@ -324,7 +324,7 @@ class DefaultWebClient implements WebClient {
 
 		private ClientRequest.Builder initRequestBuilder() {
 			URI uri = this.uri != null ? this.uri : uriBuilderFactory.expand("");
-			return ClientRequest.method(this.httpMethod, uri)
+			return ClientRequest.create(this.httpMethod, uri)
 					.headers(headers -> headers.addAll(initHeaders()))
 					.cookies(cookies -> cookies.addAll(initCookies()))
 					.attributes(attributes -> attributes.putAll(this.attributes));
