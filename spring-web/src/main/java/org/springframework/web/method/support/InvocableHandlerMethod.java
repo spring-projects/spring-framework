@@ -19,8 +19,15 @@ package org.springframework.web.method.support;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+import kotlin.reflect.KFunction;
+import kotlin.reflect.KParameter;
+import kotlin.reflect.jvm.ReflectJvmMapping;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.lang.Nullable;
@@ -55,6 +62,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
+	private static final Object KOTLIN_NOT_CHECKED = new Object();
+
+	// has type Object to avoid hard dependency on Kotlin, only ever holds KFunction instances
+	@Nullable
+	private Object kotlinFunction = KOTLIN_NOT_CHECKED;
 
 	/**
 	 * Create an instance from a {@code HandlerMethod}.
@@ -205,7 +217,13 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 */
 	protected Object doInvoke(Object... args) throws Exception {
 		ReflectionUtils.makeAccessible(getBridgedMethod());
+		if (kotlinFunction == KOTLIN_NOT_CHECKED) {
+			initKotlinFunction();
+		}
 		try {
+			if (kotlinFunction != null) {
+				return KotlinDelegate.doKotlinCall(this, kotlinFunction, args);
+			}
 			return getBridgedMethod().invoke(getBean(), args);
 		}
 		catch (IllegalArgumentException ex) {
@@ -229,6 +247,15 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				String text = getInvocationErrorMessage("Failed to invoke handler method", args);
 				throw new IllegalStateException(text, targetException);
 			}
+		}
+	}
+
+	private void initKotlinFunction() {
+		if (KotlinDetector.isKotlinPresent() && KotlinDetector.isKotlinType(getBeanType())) {
+			kotlinFunction = KotlinDelegate.initKotlinCache(this);
+		}
+		else {
+			kotlinFunction = null;
 		}
 	}
 
@@ -277,6 +304,44 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		sb.append("Controller [").append(getBeanType().getName()).append("]\n");
 		sb.append("Method [").append(getBridgedMethod().toGenericString()).append("]\n");
 		return sb.toString();
+	}
+
+	private static class KotlinDelegate {
+
+		@Nullable
+		public static Object initKotlinCache(InvocableHandlerMethod method) {
+			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method.getBridgedMethod());
+			// we only need to do the call via Kotlin reflection if we have at least one optional parameter
+			if (function != null && function.getParameters().stream().anyMatch(KParameter::isOptional)) {
+				return function;
+			}
+			else {
+				return null;
+			}
+		}
+
+		public static Object doKotlinCall(InvocableHandlerMethod method, Object kotlinFunction, Object[] args) {
+			KFunction<?> function = (KFunction<?>) kotlinFunction;
+			Map<KParameter, Object> argMap = new HashMap<>();
+			int index = 0;
+			for (KParameter parameter : function.getParameters()) {
+				switch (parameter.getKind()) {
+					case INSTANCE:
+						argMap.put(parameter, method.getBean());
+						break;
+					case VALUE:
+						if (!parameter.isOptional() || args[index] != null) {
+							argMap.put(parameter, args[index]);
+						}
+						index++;
+						break;
+					case EXTENSION_RECEIVER:
+					default:
+						throw new UnsupportedOperationException("Unsupported Kotlin function parameter type: " + parameter.getKind());
+				}
+			}
+			return function.callBy(argMap);
+		}
 	}
 
 }

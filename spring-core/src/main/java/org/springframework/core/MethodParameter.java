@@ -343,6 +343,14 @@ public class MethodParameter {
 	}
 
 	/**
+	 * Return whether this parameter declares a language-level default value,
+	 * such as a default parameter in Kotlin.
+	 */
+	public boolean hasDefaultValue() {
+		return KotlinDetector.isKotlinType(getContainingClass()) && KotlinDelegate.hasDefaultValue(this);
+	}
+
+	/**
 	 * Check whether this method parameter is annotated with any variant of a
 	 * {@code Nullable} annotation, e.g. {@code javax.annotation.Nullable} or
 	 * {@code edu.umd.cs.findbugs.annotations.Nullable}.
@@ -745,6 +753,28 @@ public class MethodParameter {
 	 */
 	private static class KotlinDelegate {
 
+		private static KParameter getKotlinParameter(KFunction<?> function, int index) {
+			List<KParameter> parameters = function.getParameters();
+			return parameters
+					.stream()
+					.filter(p -> KParameter.Kind.VALUE.equals(p.getKind()))
+					.collect(Collectors.toList())
+					.get(index);
+		}
+
+		@Nullable
+		private static KFunction<?> getKotlinFunction(@Nullable Method method, @Nullable Constructor<?> ctor) {
+			if (method != null) {
+				return ReflectJvmMapping.getKotlinFunction(method);
+			}
+			else if (ctor != null) {
+				return ReflectJvmMapping.getKotlinFunction(ctor);
+			}
+			else {
+				return null;
+			}
+		}
+
 		/**
 		 * Check whether the specified {@link MethodParameter} represents a nullable Kotlin type
 		 * or an optional parameter (with a default value in the Kotlin declaration).
@@ -758,24 +788,33 @@ public class MethodParameter {
 				return (function != null && function.getReturnType().isMarkedNullable());
 			}
 			else {
-				KFunction<?> function = null;
-				if (method != null) {
-					function = ReflectJvmMapping.getKotlinFunction(method);
-				}
-				else if (ctor != null) {
-					function = ReflectJvmMapping.getKotlinFunction(ctor);
-				}
+				KFunction<?> function = getKotlinFunction(method, ctor);
 				if (function != null) {
-					List<KParameter> parameters = function.getParameters();
-					KParameter parameter = parameters
-							.stream()
-							.filter(p -> KParameter.Kind.VALUE.equals(p.getKind()))
-							.collect(Collectors.toList())
-							.get(index);
+					KParameter parameter = getKotlinParameter(function, index);
 					return (parameter.getType().isMarkedNullable() || parameter.isOptional());
 				}
 			}
 			return false;
+		}
+
+		/**
+		 * Check whether the specified {@link MethodParameter} has a default value in it's Kotlin declaration.
+		 */
+		public static boolean hasDefaultValue(MethodParameter param) {
+			int index = param.getParameterIndex();
+			if (index == -1) { // default value does not make sense for return types
+				return false;
+			}
+			else {
+				KFunction<?> function = getKotlinFunction(param.getMethod(), param.getConstructor());
+				if (function != null) {
+					KParameter parameter = getKotlinParameter(function, index);
+					return parameter.isOptional();
+				}
+				else {
+					return false;
+				}
+			}
 		}
 	}
 

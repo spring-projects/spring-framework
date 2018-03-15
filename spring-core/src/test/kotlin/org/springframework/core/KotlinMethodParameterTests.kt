@@ -36,12 +36,18 @@ class KotlinMethodParameterTests {
 
 	lateinit var nonNullableMethod: Method
 
+	lateinit var withDefaultParameterMethod: Method
+
+	lateinit var withoutDefaultParameterMethod: Method
+
 
 	@Before
 	@Throws(NoSuchMethodException::class)
 	fun setup() {
 		nullableMethod = javaClass.getMethod("nullable", String::class.java)
 		nonNullableMethod = javaClass.getMethod("nonNullable", String::class.java)
+		withDefaultParameterMethod = javaClass.getMethod("withDefaultParameter", String::class.java)
+		withoutDefaultParameterMethod = javaClass.getMethod("withoutDefaultParameter", String::class.java)
 	}
 
 
@@ -57,11 +63,22 @@ class KotlinMethodParameterTests {
 		assertFalse(MethodParameter(nonNullableMethod, -1).isOptional())
 	}
 
+	@Test
+	fun `Method parameter default value`() {
+		assertTrue(MethodParameter(withDefaultParameterMethod, 0).hasDefaultValue())
+		assertFalse(MethodParameter(withoutDefaultParameterMethod, 0).hasDefaultValue())
+	}
 
 	@Suppress("unused", "unused_parameter")
 	fun nullable(p1: String?): Int? = 42
 
 	@Suppress("unused", "unused_parameter")
 	fun nonNullable(p1: String): Int = 42
+
+	@Suppress("unused", "unused_parameter")
+	fun withDefaultParameter(p1: String = "42") = 42
+
+	@Suppress("unused", "unused_parameter")
+	fun withoutDefaultParameter(p1: String) = 42
 
 }

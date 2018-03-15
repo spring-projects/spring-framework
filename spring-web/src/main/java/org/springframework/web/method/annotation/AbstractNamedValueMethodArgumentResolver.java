@@ -111,13 +111,15 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			else if (namedValueInfo.required && !nestedParameter.isOptional()) {
 				handleMissingValue(namedValueInfo.name, nestedParameter, webRequest);
 			}
-			arg = handleNullValue(namedValueInfo.name, arg, nestedParameter.getNestedParameterType());
+			arg = handleNullValue(namedValueInfo.name, arg, nestedParameter);
 		}
 		else if ("".equals(arg) && namedValueInfo.defaultValue != null) {
 			arg = resolveStringValue(namedValueInfo.defaultValue);
 		}
 
-		if (binderFactory != null) {
+		// if we have a resolved arg here (not null), we must convert in any case
+		// if we do not have a resolved arg here (null), only convert if we do not have a default value
+		if (binderFactory != null && (arg != null || !nestedParameter.hasDefaultValue())) {
 			WebDataBinder binder = binderFactory.createBinder(webRequest, null, namedValueInfo.name);
 			try {
 				arg = binder.convertIfNecessary(arg, parameter.getParameterType(), parameter);
@@ -235,12 +237,14 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * A {@code null} results in a {@code false} value for {@code boolean}s or an exception for other primitives.
 	 */
 	@Nullable
-	private Object handleNullValue(String name, @Nullable Object value, Class<?> paramType) {
+	private Object handleNullValue(String name, @Nullable Object value, MethodParameter param) {
+		Class<?> paramType = param.getNestedParameterType();
 		if (value == null) {
 			if (Boolean.TYPE.equals(paramType)) {
 				return Boolean.FALSE;
 			}
-			else if (paramType.isPrimitive()) {
+			// primitive parameters may only be null if they have a default value
+			else if (paramType.isPrimitive() && !param.hasDefaultValue()) {
 				throw new IllegalStateException("Optional " + paramType.getSimpleName() + " parameter '" + name +
 						"' is present but cannot be translated into a null value due to being declared as a " +
 						"primitive type. Consider declaring it as object wrapper for the corresponding primitive type.");

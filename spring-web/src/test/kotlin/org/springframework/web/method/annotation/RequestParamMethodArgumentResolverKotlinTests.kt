@@ -62,6 +62,8 @@ class RequestParamMethodArgumentResolverKotlinTests {
 	lateinit var nonNullableMultipartParamRequired: MethodParameter
 	lateinit var nonNullableMultipartParamNotRequired: MethodParameter
 
+	lateinit var defaultParam: MethodParameter
+
 
 	@Before
 	fun setup() {
@@ -75,7 +77,8 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		val method = ReflectionUtils.findMethod(javaClass, "handle", String::class.java,
 				String::class.java, String::class.java, String::class.java,
 				MultipartFile::class.java, MultipartFile::class.java,
-				MultipartFile::class.java, MultipartFile::class.java)!!
+				MultipartFile::class.java, MultipartFile::class.java,
+				String::class.java)!!
 
 		nullableParamRequired = SynthesizingMethodParameter(method, 0)
 		nullableParamNotRequired = SynthesizingMethodParameter(method, 1)
@@ -86,6 +89,8 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		nullableMultipartParamNotRequired = SynthesizingMethodParameter(method, 5)
 		nonNullableMultipartParamRequired = SynthesizingMethodParameter(method, 6)
 		nonNullableMultipartParamNotRequired = SynthesizingMethodParameter(method, 7)
+
+		defaultParam = SynthesizingMethodParameter(method, 8)
 	}
 
 	@Test
@@ -138,6 +143,18 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		resolver.resolveArgument(nonNullableParamNotRequired, null, webRequest, binderFactory) as String
 	}
 
+	@Test
+	fun resolveDefaultValueWithoutParameter() {
+		val result = resolver.resolveArgument(defaultParam, null, webRequest, binderFactory)
+		assertNull(result)
+	}
+
+	@Test
+	fun resolveDefaultValueWithParameter() {
+		request.addParameter("name", "123")
+		val result = resolver.resolveArgument(defaultParam, null, webRequest, binderFactory)
+		assertEquals("123", result)
+	}
 
 	@Test
 	fun resolveNullableRequiredWithMultipartParameter() {
@@ -215,7 +232,6 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		resolver.resolveArgument(nonNullableMultipartParamNotRequired, null, webRequest, binderFactory) as MultipartFile
 	}
 
-
 	@Suppress("unused_parameter")
 	fun handle(
 			@RequestParam("name") nullableParamRequired: String?,
@@ -226,7 +242,9 @@ class RequestParamMethodArgumentResolverKotlinTests {
 			@RequestParam("mfile") nullableMultipartParamRequired: MultipartFile?,
 			@RequestParam("mfile", required = false) nullableMultipartParamNotRequired: MultipartFile?,
 			@RequestParam("mfile") nonNullableMultipartParamRequired: MultipartFile,
-			@RequestParam("mfile", required = false) nonNullableMultipartParamNotRequired: MultipartFile) {
+			@RequestParam("mfile", required = false) nonNullableMultipartParamNotRequired: MultipartFile,
+
+			@RequestParam("name") paramDefaultValue: String = "42") {
 	}
 
 }
