@@ -78,7 +78,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 	private ScheduledFuture<?> sessionCleanupTask;
 
-	private boolean running;
+	private volatile boolean running;
 
 
 	/**

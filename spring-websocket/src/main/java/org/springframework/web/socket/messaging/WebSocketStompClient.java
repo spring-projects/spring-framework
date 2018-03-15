@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,16 +72,15 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 	private static final Log logger = LogFactory.getLog(WebSocketStompClient.class);
 
-
 	private final WebSocketClient webSocketClient;
 
 	private int inboundMessageSizeLimit = 64 * 1024;
 
 	private boolean autoStartup = true;
 
-	private boolean running = false;
-
 	private int phase = Integer.MAX_VALUE;
+
+	private volatile boolean running = false;
 
 
 	/**

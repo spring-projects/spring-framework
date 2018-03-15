@@ -102,9 +102,9 @@ public class SubProtocolWebSocketHandler
 
 	private final Stats stats = new Stats();
 
-	private final Object lifecycleMonitor = new Object();
-
 	private volatile boolean running = false;
+
+	private final Object lifecycleMonitor = new Object();
 
 
 	/**
@@ -279,9 +279,7 @@ public class SubProtocolWebSocketHandler
 
 	@Override
 	public final boolean isRunning() {
-		synchronized (this.lifecycleMonitor) {
-			return this.running;
-		}
+		return this.running;
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,8 +60,6 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 
 	private final org.eclipse.jetty.websocket.client.WebSocketClient client;
 
-	private final Object lifecycleMonitor = new Object();
-
 	private AsyncListenableTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
 
 
@@ -99,46 +97,32 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 		return this.taskExecutor;
 	}
 
-	@Override
-	public boolean isRunning() {
-		synchronized (this.lifecycleMonitor) {
-			return this.client.isStarted();
-		}
-	}
 
 	@Override
 	public void start() {
-		synchronized (this.lifecycleMonitor) {
-			if (!isRunning()) {
-				try {
-					if (logger.isInfoEnabled()) {
-						logger.info("Starting Jetty WebSocketClient");
-					}
-					this.client.start();
-				}
-				catch (Exception ex) {
-					throw new IllegalStateException("Failed to start Jetty client", ex);
-				}
-			}
+		try {
+			this.client.start();
+		}
+		catch (Exception ex) {
+			throw new IllegalStateException("Failed to start Jetty WebSocketClient", ex);
 		}
 	}
 
 	@Override
 	public void stop() {
-		synchronized (this.lifecycleMonitor) {
-			if (isRunning()) {
-				try {
-					if (logger.isInfoEnabled()) {
-						logger.info("Stopping Jetty WebSocketClient");
-					}
-					this.client.stop();
-				}
-				catch (Exception ex) {
-					logger.error("Error stopping Jetty WebSocketClient", ex);
-				}
-			}
+		try {
+			this.client.stop();
+		}
+		catch (Exception ex) {
+			logger.error("Failed to stop Jetty WebSocketClient", ex);
 		}
 	}
+
+	@Override
+	public boolean isRunning() {
+		return this.client.isStarted();
+	}
+
 
 	@Override
 	public ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
