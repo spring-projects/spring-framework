@@ -77,7 +77,7 @@ dependencies {
 	testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
 	testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}")
 	testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
-	testRuntime("org.jruby:jruby:9.1.15.0")
+	testRuntime("org.jruby:jruby:9.1.16.0")
 	testRuntime("org.python:jython-standalone:2.7.1")
 	testRuntime("org.webjars:underscorejs:1.8.3")
 	testRuntime("org.glassfish:javax.el:3.0.1-b08")

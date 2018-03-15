@@ -58,7 +58,7 @@ dependencies {
 	testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
 	testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}")
 	testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
-	testRuntime("org.jruby:jruby:9.1.14.0")
+	testRuntime("org.jruby:jruby:9.1.16.0")
 	testRuntime("org.python:jython-standalone:2.7.1")
 	testRuntime("org.synchronoss.cloud:nio-multipart-parser:1.1.0")
 	testRuntime("org.webjars:underscorejs:1.8.3")
