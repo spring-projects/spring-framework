@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public abstract class AbstractHttpServer implements HttpServer {
 
 	private Map<String, HttpHandler> handlerMap;
 
-	private boolean running;
+	private volatile boolean running;
 
 	private final Object lifecycleMonitor = new Object();
 
@@ -87,8 +87,8 @@ public abstract class AbstractHttpServer implements HttpServer {
 	}
 
 	protected HttpHandler resolveHttpHandler() {
-		return getHttpHandlerMap() != null ?
-				new ContextPathCompositeHandler(getHttpHandlerMap()) : getHttpHandler();
+		return (getHttpHandlerMap() != null ?
+				new ContextPathCompositeHandler(getHttpHandlerMap()) : getHttpHandler());
 	}
 
 
@@ -112,25 +112,22 @@ public abstract class AbstractHttpServer implements HttpServer {
 	// Lifecycle
 
 	@Override
-	public boolean isRunning() {
-		synchronized (this.lifecycleMonitor) {
-			return this.running;
-		}
-	}
-
-	@Override
 	public final void start() {
 		synchronized (this.lifecycleMonitor) {
 			if (!isRunning()) {
 				String serverName = getClass().getSimpleName();
-				logger.debug("Starting " + serverName + "...");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Starting " + serverName + "...");
+				}
 				this.running = true;
 				try {
 					StopWatch stopWatch = new StopWatch();
 					stopWatch.start();
 					startInternal();
 					long millis = stopWatch.getTotalTimeMillis();
-					logger.debug("Server started on port " + getPort() + "(" + millis + " millis).");
+					if (logger.isDebugEnabled()) {
+						logger.debug("Server started on port " + getPort() + "(" + millis + " millis).");
+					}
 				}
 				catch (Throwable ex) {
 					throw new IllegalStateException(ex);
@@ -166,6 +163,12 @@ public abstract class AbstractHttpServer implements HttpServer {
 	}
 
 	protected abstract void stopInternal() throws Exception;
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
+	}
+
 
 	private void reset() {
 		this.host = "0.0.0.0";

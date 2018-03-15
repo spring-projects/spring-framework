@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 			}
 		}
 		catch (Exception ex) {
-			throw new SockJsException("Failed to start " + this, ex);
+			throw new SockJsException("Failed to start JettyXhrTransport", ex);
 		}
 	}
 
@@ -98,7 +98,7 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 			}
 		}
 		catch (Exception ex) {
-			throw new SockJsException("Failed to stop " + this, ex);
+			throw new SockJsException("Failed to stop JettyXhrTransport", ex);
 		}
 	}
 
