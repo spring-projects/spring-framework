@@ -64,6 +64,18 @@ public class AcceptHeaderLocaleResolverTests {
 	}
 
 	@Test
+	public void resolvePreferredAgainstCountryIfPossible() {
+		this.resolver.setSupportedLocales(Arrays.asList(ENGLISH, UK));
+		assertEquals(UK, this.resolver.resolveLocale(request(GERMANY, US, UK)));
+	}
+
+	@Test
+	public void resolvePreferredAgainstLanguageWithMultipleSupportedLocales() {
+		this.resolver.setSupportedLocales(Arrays.asList(GERMAN, US));
+		assertEquals(GERMAN, this.resolver.resolveLocale(request(GERMANY, US, UK)));
+	}
+
+	@Test
 	public void resolvePreferredNotSupportedWithDefault() {
 		this.resolver.setSupportedLocales(Arrays.asList(US, JAPAN));
 		this.resolver.setDefaultLocale(Locale.JAPAN);

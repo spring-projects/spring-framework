@@ -100,23 +100,26 @@ public class AcceptHeaderLocaleContextResolver implements LocaleContextResolver 
 		if (CollectionUtils.isEmpty(requestLocales)) {
 			return this.defaultLocale;  // may be null
 		}
-		List<Locale> supported = getSupportedLocales();
-		if (supported.isEmpty()) {
+		List<Locale> supportedLocales = getSupportedLocales();
+		if (supportedLocales.isEmpty()) {
 			return requestLocales.get(0);  // never null
 		}
 
 		Locale languageMatch = null;
 		for (Locale locale : requestLocales) {
-			if (supported.contains(locale)) {
-				// Full match: typically language + country
-				return locale;
+			if (supportedLocales.contains(locale)) {
+				if (languageMatch == null || languageMatch.getLanguage().equals(locale.getLanguage())) {
+					// Full match: language + country, possibly narrowed from earlier language-only match
+					return locale;
+				}
 			}
 			else if (languageMatch == null) {
 				// Let's try to find a language-only match as a fallback
-				for (Locale candidate : supported) {
+				for (Locale candidate : supportedLocales) {
 					if (!StringUtils.hasLength(candidate.getCountry()) &&
 							candidate.getLanguage().equals(locale.getLanguage())) {
 						languageMatch = candidate;
+						break;
 					}
 				}
 			}
