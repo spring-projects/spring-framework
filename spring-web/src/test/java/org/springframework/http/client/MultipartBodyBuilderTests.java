@@ -26,6 +26,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.client.MultipartBodyBuilder.PublisherEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -80,15 +81,36 @@ public class MultipartBodyBuilderTests {
 		assertNotNull(resultEntity);
 		assertEquals(publisher, resultEntity.getBody());
 		assertEquals(ResolvableType.forClass(String.class),
-				((MultipartBodyBuilder.PublisherEntity<?,?>) resultEntity).getResolvableType());
+				((PublisherEntity<?,?>) resultEntity).getResolvableType());
 		assertEquals("qux", resultEntity.getHeaders().getFirst("baz"));
 
 		resultEntity = result.getFirst("publisherPtr");
 		assertNotNull(resultEntity);
 		assertEquals(publisher, resultEntity.getBody());
 		assertEquals(ResolvableType.forClass(String.class),
-				((MultipartBodyBuilder.PublisherEntity<?,?>) resultEntity).getResolvableType());
+				((PublisherEntity<?,?>) resultEntity).getResolvableType());
 		assertEquals("qux", resultEntity.getHeaders().getFirst("baz"));
+	}
+
+	@Test // SPR-16601
+	public void publisherEntityAcceptedAsInput() {
+
+		Publisher<String> publisher = Flux.just("foo", "bar", "baz");
+		MultipartBodyBuilder builder = new MultipartBodyBuilder();
+		builder.asyncPart("publisherClass", publisher, String.class).header("baz", "qux");
+		HttpEntity<?> entity = builder.build().getFirst("publisherClass");
+
+		assertNotNull(entity);
+		assertEquals(PublisherEntity.class, entity.getClass());
+
+		// Now build a new MultipartBodyBuilder, as BodyInserters.fromMultipartData would do...
+
+		builder = new MultipartBodyBuilder();
+		builder.part("publisherClass", entity);
+		entity = builder.build().getFirst("publisherClass");
+
+		assertNotNull(entity);
+		assertEquals(PublisherEntity.class, entity.getClass());
 	}
 
 }

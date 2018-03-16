@@ -91,6 +91,12 @@ public final class MultipartBodyBuilder {
 				"publisher(String, Publisher, ParameterizedTypeReference) for adding Publisher parts");
 		}
 
+		if (part instanceof PublisherEntity<?,?>) {
+			PublisherPartBuilder<?, ?> builder = new PublisherPartBuilder<>((PublisherEntity<?, ?>) part);
+			this.parts.add(name, builder);
+			return builder;
+		}
+
 		Object partBody;
 		HttpHeaders partHeaders = new HttpHeaders();
 
@@ -154,7 +160,7 @@ public final class MultipartBodyBuilder {
 		Assert.notNull(elementType1, "'typeReference' must not be null");
 
 		HttpHeaders headers = new HttpHeaders();
-		PublisherPartBuilder<T, P> builder = new PublisherPartBuilder<>(publisher, typeReference, headers);
+		PublisherPartBuilder<T, P> builder = new PublisherPartBuilder<>(headers, publisher, typeReference);
 		this.parts.add(name, builder);
 		return builder;
 	}
@@ -239,10 +245,16 @@ public final class MultipartBodyBuilder {
 			this.resolvableType = ResolvableType.forClass(elementClass);
 		}
 
-		public PublisherPartBuilder(P body, ParameterizedTypeReference<S> typeReference, HttpHeaders headers) {
+		public PublisherPartBuilder(HttpHeaders headers, P body, ParameterizedTypeReference<S> typeReference) {
 			super(headers, body);
 			this.resolvableType = ResolvableType.forType(typeReference);
 		}
+
+		public PublisherPartBuilder(PublisherEntity<S, P> other) {
+			super(other.getHeaders(), other.getBody());
+			this.resolvableType = other.getResolvableType();
+		}
+
 
 		@Override
 		@SuppressWarnings("unchecked")
