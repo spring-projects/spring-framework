@@ -217,7 +217,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 */
 	protected Object doInvoke(Object... args) throws Exception {
 		ReflectionUtils.makeAccessible(getBridgedMethod());
-		if (kotlinFunction == KOTLIN_NOT_CHECKED) {
+		if (KOTLIN_NOT_CHECKED.equals(kotlinFunction)) {
 			initKotlinFunction();
 		}
 		try {
