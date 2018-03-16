@@ -38,33 +38,36 @@ server. The `WebTestClient` can be used for end-to-end integration tests too.
 
 
 
+[[webflux-threading-model]]
+=== Threading model
+
+
+
+
+
 [[webflux-reactive-libraries]]
 == Reactive Libraries
 
-Reactor is a required dependency for the `spring-webflux` module and is used internally
-for composing logic and for Reactive Streams support. An easy rule to remember is that
-WebFlux APIs return `Flux` or `Mono` -- since that's what's used internally, and
-leniently accept any Reactive Streams `Publisher` implementation.
+`spring-webflux` depends on `reactor-core` and uses it internally to compose asynchronous
+logic and to provide Reactive Streams support. Generally WebFlux APIs return `Flux` or
+`Mono` -- since that's what's used internally, and leniently accept any Reactive Streams
+`Publisher` implementation as input. The use of `Flux` vs `Mono` is important because it
+helps to express cardinality -- e.g. whether a single or multiple async values are
+expected, and that can be essential for making decisions, for example when encoding or
+decoding HTTP messages.
 
-The use of `Flux` and `Mono` helps to express cardinality -- e.g.
-whether a single or multiple async values are expected. This is important for API design
-but also essential in some cases, e.g. when encoding an HTTP message.
+For annotated controllers, WebFlux transparently adapts to the reactive library chosen by
+the application. This is done with the help of the
+{api-spring-framework}/core/ReactiveAdapterRegistry.html[ReactiveAdapterRegistry] which
+provides pluggable support for reactive library and other asynchronous types. The registry
+has built-in support for RxJava and `CompletableFuture`, but others can be registered too.
 
-For annotated controllers, WebFlux adapts transparently to the reactive library in use
-with proper translation of cardinality. This is done with the help of the
-{api-spring-framework}/core/ReactiveAdapterRegistry.html[ReactiveAdapterRegistry] from
-`spring-core` which provides pluggable support for reactive and async types. The registry
-has built-in support for RxJava and `CompletableFuture` but others can be registered.
-
-For functional endpoints, the `WebClient`, and other functional APIs, the general rule
-of thumb for WebFlux APIs applies:
-
-* `Flux` or `Mono` as return values -- use them to compose logic or pass to any Reactive
-Streams library (both are `Publisher` implementations).
-* Reactive Streams `Publisher` for input -- if a `Publisher` from another reactive library
-is provided it can only be treated as a stream with unknown semantics (0..N). If the
-semantics are known -- e.g. `io.reactivex.Single`, you can use `Mono.from(Publisher)` and
-pass that in instead of the raw `Publisher`.
+For functional APIs such as <<webflux-fn>>, the `WebClient`, and others, the general rules
+for WebFlux APIs apply -- `Flux` and `Mono` as return values, and Reactive Streams
+`Publisher` as input. When a `Publisher`, whether custom or from another reactive library,
+is provided, it can only be treated as a stream with unknown semantics (0..N). If however
+the semantics are known, you can wrap it with `Flux` or `Mono.from(Publisher)` instead
+of passing the raw `Publisher`.
 
 [NOTE]
 ====
