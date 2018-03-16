@@ -37,6 +37,7 @@ import org.springframework.util.FileCopyUtils;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Denys Ivano
  * @since 3.0
  * @see RestTemplate#setErrorHandler
  */
@@ -46,13 +47,15 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * Delegates to {@link #hasError(HttpStatus)} with the response status code.
 	 */
 	@Override
-	public boolean hasError(ClientHttpResponse response) throws IOException {
+        public boolean hasError(ClientHttpResponse response) throws IOException {
+		HttpStatus statusCode;
 		try {
-			return hasError(getHttpStatusCode(response));
+			statusCode = response.getStatusCode();
 		}
-		catch (UnknownHttpStatusCodeException ex) {
+		catch (IllegalArgumentException ex) {
 			return false;
 		}
+		return hasError(statusCode);
 	}
 
 	/**
