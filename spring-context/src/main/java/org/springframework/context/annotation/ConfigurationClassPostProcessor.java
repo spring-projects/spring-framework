@@ -285,7 +285,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		configCandidates.sort((bd1, bd2) -> {
 			int i1 = ConfigurationClassUtils.getOrder(bd1.getBeanDefinition());
 			int i2 = ConfigurationClassUtils.getOrder(bd2.getBeanDefinition());
-			return (i1 < i2) ? -1 : (i1 > i2) ? 1 : 0;
+			return Integer.compare(i1, i2);
 		});
 
 		// Detect any custom bean name generation strategy supplied through the enclosing application context
