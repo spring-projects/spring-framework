@@ -17,6 +17,7 @@
 package org.springframework.expression.spel.support;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -38,15 +39,26 @@ import org.springframework.lang.Nullable;
 
 /**
  * A basic implementation of {@link EvaluationContext} that focuses on a subset
- * of essential SpEL features and configuration options, and relies on default
- * strategies otherwise.
+ * of essential SpEL features and configuration options.
  *
- * <p>In many cases, the full extent of the SpEL is not
+ * <p>In many cases, the full extent of the SpEL language is not
  * required and should be meaningfully restricted. Examples include but are not
  * limited to data binding expressions, property-based filters, and others. To
- * that effect, {@code SimpleEvaluationContext} supports only a subset of the
- * SpEL language syntax that excludes references to Java types, constructors,
- * and bean references.
+ * that effect, {@code SimpleEvaluationContext} is tailored to support only a
+ * subset of the SpEL language syntax, e.g. excluding references to Java types,
+ * constructors, and bean references.
+ *
+ * <p>When creating {@code SimpleEvaluationContext} you need to choose the level
+ * of support you need to deal with properties and methods in SpEL expressions.
+ * By default, {@link SimpleEvaluationContext#create()} enables only read access
+ * to properties via {@link DataBindingPropertyAccessor}. Alternatively, use
+ * {@link SimpleEvaluationContext#builder()} to configure the exact level of
+ * support needed, targeting one of, or some combination of the following:
+ * <ul>
+ * <li>Custom {@code PropertyAccessor} only (no reflection).</li>
+ * <li>Data binding properties for read-only access.</li>
+ * <li>Data binding properties for read and write.</li>
+ * </ul>
  *
  * <p>Note that {@code SimpleEvaluationContext} cannot be configured with a
  * default root object. Instead it is meant to be created once and used
@@ -56,6 +68,8 @@ import org.springframework.lang.Nullable;
  *
  * @author Rossen Stoyanchev
  * @since 4.3.15
+ * @see StandardEvaluationContext
+ * @see DataBindingPropertyAccessor
  */
 public class SimpleEvaluationContext implements EvaluationContext {
 
@@ -66,11 +80,9 @@ public class SimpleEvaluationContext implements EvaluationContext {
 
 	private final List<PropertyAccessor> propertyAccessors;
 
-	private final List<ConstructorResolver> constructorResolvers =
-			Collections.singletonList(new ReflectiveConstructorResolver());
+	private final List<ConstructorResolver> constructorResolvers = Collections.emptyList();
 
-	private final List<MethodResolver> methodResolvers =
-			Collections.singletonList(new ReflectiveMethodResolver());
+	private final List<MethodResolver> methodResolvers = Collections.emptyList();
 
 	private final TypeConverter typeConverter;
 
@@ -81,22 +93,9 @@ public class SimpleEvaluationContext implements EvaluationContext {
 	private final Map<String, Object> variables = new HashMap<>();
 
 
-	public SimpleEvaluationContext() {
-		this(null, null);
-	}
-
-	public SimpleEvaluationContext(@Nullable List<PropertyAccessor> accessors, @Nullable TypeConverter converter) {
-		this.propertyAccessors = initPropertyAccessors(accessors);
+	private SimpleEvaluationContext(List<PropertyAccessor> accessors, @Nullable TypeConverter converter) {
+		this.propertyAccessors = Collections.unmodifiableList(new ArrayList<>(accessors));
 		this.typeConverter = converter != null ? converter : new StandardTypeConverter();
-	}
-
-
-	private static List<PropertyAccessor> initPropertyAccessors(@Nullable List<PropertyAccessor> accessors) {
-		if (accessors == null) {
-			accessors = new ArrayList<>(5);
-			accessors.add(new ReflectivePropertyAccessor());
-		}
-		return accessors;
 	}
 
 
@@ -118,7 +117,8 @@ public class SimpleEvaluationContext implements EvaluationContext {
 	}
 
 	/**
-	 * Return a single {@link ReflectiveConstructorResolver}.
+	 * Return an empty list, always, since this context does not support the
+	 * use of type references.
 	 */
 	@Override
 	public List<ConstructorResolver> getConstructorResolvers() {
@@ -188,6 +188,78 @@ public class SimpleEvaluationContext implements EvaluationContext {
 	@Nullable
 	public Object lookupVariable(String name) {
 		return this.variables.get(name);
+	}
+
+
+	/**
+	 * Create a {@code SimpleEvaluationContext} with read-only access to
+	 * public properties via {@link DataBindingPropertyAccessor}.
+	 * <p>Effectively, a shortcut for:
+	 * <pre class="code">
+	 * SimpleEvaluationContext context = SimpleEvaluationContext.builder()
+	 *         .dataBindingPropertyAccessor(true)
+	 *         .build();
+	 * </pre>
+	 * @see #builder()
+	 */
+	public static SimpleEvaluationContext create() {
+		return new Builder().dataBindingPropertyAccessor(true).build();
+	}
+
+	/**
+	 * Return a builder to create a {@code SimpleEvaluationContext}.
+	 * @see #create()
+	 */
+	public static Builder builder() {
+		return new Builder();
+	}
+
+
+	/**
+	 * Builder for {@code SimpleEvaluationContext}.
+	 */
+	public static class Builder {
+
+		private final List<PropertyAccessor> propertyAccessors = new ArrayList<>();
+
+		@Nullable
+		private TypeConverter typeConverter;
+
+
+		/**
+		 * Enable access to public properties for data binding purposes.
+		 * <p>Effectively, a shortcut for
+		 * {@code propertyAccessor(new DataBindingPropertyAccessor(boolean))}.
+		 * @param readOnlyAccess whether to read-only access to properties,
+		 * {@code "true"}, or read and write, {@code "false"}.
+		 */
+		public Builder dataBindingPropertyAccessor(boolean readOnlyAccess) {
+			return propertyAccessor(readOnlyAccess ?
+					DataBindingPropertyAccessor.forReadOnlyAccess() :
+					DataBindingPropertyAccessor.forReadWriteAccess());
+		}
+
+		/**
+		 * Register a custom accessor for properties in expressions.
+		 * <p>By default, the builder does not enable property access.
+		 */
+		public Builder propertyAccessor(PropertyAccessor... accessors) {
+			this.propertyAccessors.addAll(Arrays.asList(accessors));
+			return this;
+		}
+
+		/**
+		 * Register a custom {@link TypeConverter}.
+		 * <p>By default {@link StandardTypeConverter} is used.
+		 */
+		public Builder typeConverter(TypeConverter converter) {
+			this.typeConverter = converter;
+			return this;
+		}
+
+		public SimpleEvaluationContext build() {
+			return new SimpleEvaluationContext(this.propertyAccessors, this.typeConverter);
+		}
 	}
 
 }

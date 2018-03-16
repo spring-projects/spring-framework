@@ -47,6 +47,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 3.0
+ * @see SimpleEvaluationContext
  * @see ReflectivePropertyAccessor
  * @see ReflectiveConstructorResolver
  * @see ReflectiveMethodResolver
