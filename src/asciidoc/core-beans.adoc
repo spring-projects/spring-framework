@@ -306,23 +306,23 @@ Typically, such configuration will live in a ".groovy" file with a structure as 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-    beans {
-        dataSource(BasicDataSource) {
-            driverClassName = "org.hsqldb.jdbcDriver"
-            url = "jdbc:hsqldb:mem:grailsDB"
-            username = "sa"
-            password = ""
-            settings = [mynew:"setting"]
-        }
-        sessionFactory(SessionFactory) {
-            dataSource = dataSource
-        }
-        myService(MyService) {
-            nestedBean = { AnotherBean bean ->
-                dataSource = dataSource
-            }
-        }
-    }
+	beans {
+		dataSource(BasicDataSource) {
+			driverClassName = "org.hsqldb.jdbcDriver"
+			url = "jdbc:hsqldb:mem:grailsDB"
+			username = "sa"
+			password = ""
+			settings = [mynew:"setting"]
+		}
+		sessionFactory(SessionFactory) {
+			dataSource = dataSource
+		}
+		myService(MyService) {
+			nestedBean = { AnotherBean bean ->
+				dataSource = dataSource
+			}
+		}
+	}
 ----
 
 This configuration style is largely equivalent to XML bean definitions and even
@@ -4469,17 +4469,17 @@ The same applies for typed collections:
 ====
 Your target beans can implement the `org.springframework.core.Ordered` interface or use
 the `@Order` or standard `@Priority` annotation if you want items in the array or list
-to be sorted into a specific order. Otherwise their order will follow the registration
+to be sorted in a specific order. Otherwise their order will follow the registration
 order of the corresponding target bean definitions in the container.
 
 The `@Order` annotation may be declared at target class level but also on `@Bean` methods,
 potentially being very individual per bean definition (in case of multiple definitions
-with the same bean class). `@Order` values may influence priorities at injection points
+with the same bean class). `@Order` values may influence priorities at injection points,
 but please be aware that they do not influence singleton startup order which is an
 orthogonal concern determined by dependency relationships and `@DependsOn` declarations.
 
 Note that the standard `javax.annotation.Priority` annotation is not available at the
-`@Bean` level since it cannot be declared on methods. Its semantics can be modelled
+`@Bean` level since it cannot be declared on methods. Its semantics can be modeled
 through `@Order` values in combination with `@Primary` on a single bean per type.
 ====
 
@@ -5731,10 +5731,10 @@ Spring stereotype annotation (`@Component`, `@Repository`, `@Service`, and
 `@Controller`) that contains a _name_ `value` will thereby provide that name to the
 corresponding bean definition.
 
-If such an annotation contains no _name_ `value` or for any other detected component (such
-as those discovered by custom filters), the default bean name generator returns the
-uncapitalized non-qualified class name. For example, if the following two components
-were detected, the names would be `myMovieLister` and `movieFinderImpl`:
+If such an annotation contains no _name_ `value` or for any other detected component
+(such as those discovered by custom filters), the default bean name generator returns
+the uncapitalized non-qualified class name. For example, if the following component
+classes were detected, the names would be `myMovieLister` and `movieFinderImpl`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -5793,8 +5793,8 @@ auto-generated names are adequate whenever the container is responsible for wiri
 
 As with Spring-managed components in general, the default and most common scope for
 autodetected components is `singleton`. However, sometimes you need a different scope
-which can be specified via the `@Scope` annotation. Simply provide the name of the scope
-within the annotation:
+which can be specified via the `@Scope` annotation. Simply provide the name of the
+scope within the annotation:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -5806,8 +5806,19 @@ within the annotation:
 	}
 ----
 
-For details on web-specific scopes, see <<beans-factory-scopes-other>>.
+[NOTE]
+====
+`@Scope` annotations are only introspected on the concrete bean class (for annotated
+components) or the factory method (for `@Bean` methods). In contrast to XML bean
+definitions, there is no notion of bean definition inheritance, and inheritance
+hierarchies at the class level are irrelevant for metadata purposes.
+====
 
+For details on web-specific scopes such as "request"/"session" in a Spring context,
+see <<beans-factory-scopes-other>>. Like the pre-built annotations for those scopes,
+you may also compose your own scoping annotations using Spring's meta-annotation
+approach: e.g. a custom annotation meta-annotated with `@Scope("prototype")`,
+possibly also declaring a custom scoped-proxy mode.
 
 [NOTE]
 ====
@@ -5832,8 +5843,7 @@ fully-qualified class name when configuring the scanner:
 [subs="verbatim,quotes"]
 ----
 	<beans>
-		<context:component-scan base-package="org.example"
-				scope-resolver="org.example.MyScopeResolver" />
+		<context:component-scan base-package="org.example" scope-resolver="org.example.MyScopeResolver"/>
 	</beans>
 ----
 
@@ -5857,8 +5867,7 @@ the following configuration will result in standard JDK dynamic proxies:
 [subs="verbatim,quotes"]
 ----
 	<beans>
-		<context:component-scan base-package="org.example"
-			scoped-proxy="interfaces" />
+		<context:component-scan base-package="org.example" scoped-proxy="interfaces"/>
 	</beans>
 ----
 
@@ -7975,6 +7984,15 @@ registered, e.g. system properties or environment variables, the placeholder wil
 be resolved to the corresponding value. If not, then "default/path" will be used
 as a default. If no default is specified and a property cannot be resolved, an
 `IllegalArgumentException` will be thrown.
+
+[NOTE]
+====
+The `@PropertySource` annotation is repeatable according to Java 8 conventions.
+However, all such `@PropertySource` annotations need to be declared at the same
+level: either directly on the configuration class or as meta-annotations within the
+same custom annotation. Mixing of direct annotations and meta-annotations is not
+recommended since direct annotations will effectively override meta-annotations.
+====
 
 
 
