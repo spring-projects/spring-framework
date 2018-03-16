@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,10 +99,7 @@ public class ServerHttpResponseTests {
 	public void beforeCommitWithComplete() throws Exception {
 		ResponseCookie cookie = ResponseCookie.from("ID", "123").build();
 		TestServerHttpResponse response = new TestServerHttpResponse();
-		response.beforeCommit(() -> {
-			response.getCookies().add(cookie.getName(), cookie);
-			return Mono.empty();
-		});
+		response.beforeCommit(() -> Mono.fromRunnable(() -> response.getCookies().add(cookie.getName(), cookie)));
 		response.writeWith(Flux.just(wrap("a"), wrap("b"), wrap("c"))).block();
 
 		assertTrue(response.statusCodeWritten);
