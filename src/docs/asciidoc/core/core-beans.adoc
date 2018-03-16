@@ -5710,10 +5710,10 @@ Spring stereotype annotation (`@Component`, `@Repository`, `@Service`, and
 `@Controller`) that contains a _name_ `value` will thereby provide that name to the
 corresponding bean definition.
 
-If such an annotation contains no _name_ `value` or for any other detected component (such
-as those discovered by custom filters), the default bean name generator returns the
-uncapitalized non-qualified class name. For example, if the following two components
-were detected, the names would be `myMovieLister` and `movieFinderImpl`:
+If such an annotation contains no _name_ `value` or for any other detected component
+(such as those discovered by custom filters), the default bean name generator returns
+the uncapitalized non-qualified class name. For example, if the following component
+classes were detected, the names would be `myMovieLister` and `movieFinderImpl`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -5772,8 +5772,8 @@ auto-generated names are adequate whenever the container is responsible for wiri
 
 As with Spring-managed components in general, the default and most common scope for
 autodetected components is `singleton`. However, sometimes you need a different scope
-which can be specified via the `@Scope` annotation. Simply provide the name of the scope
-within the annotation:
+which can be specified via the `@Scope` annotation. Simply provide the name of the
+scope within the annotation:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -5785,8 +5785,19 @@ within the annotation:
 	}
 ----
 
-For details on web-specific scopes, see <<beans-factory-scopes-other>>.
+[NOTE]
+====
+`@Scope` annotations are only introspected on the concrete bean class (for annotated
+components) or the factory method (for `@Bean` methods). In contrast to XML bean
+definitions, there is no notion of bean definition inheritance, and inheritance
+hierarchies at the class level are irrelevant for metadata purposes.
+====
 
+For details on web-specific scopes such as "request"/"session" in a Spring context,
+see <<beans-factory-scopes-other>>. Like the pre-built annotations for those scopes,
+you may also compose your own scoping annotations using Spring's meta-annotation
+approach: e.g. a custom annotation meta-annotated with `@Scope("prototype")`,
+possibly also declaring a custom scoped-proxy mode.
 
 [NOTE]
 ====
@@ -5811,8 +5822,7 @@ fully-qualified class name when configuring the scanner:
 [subs="verbatim,quotes"]
 ----
 	<beans>
-		<context:component-scan base-package="org.example"
-				scope-resolver="org.example.MyScopeResolver" />
+		<context:component-scan base-package="org.example" scope-resolver="org.example.MyScopeResolver"/>
 	</beans>
 ----
 
@@ -5836,8 +5846,7 @@ the following configuration will result in standard JDK dynamic proxies:
 [subs="verbatim,quotes"]
 ----
 	<beans>
-		<context:component-scan base-package="org.example"
-			scoped-proxy="interfaces" />
+		<context:component-scan base-package="org.example" scoped-proxy="interfaces"/>
 	</beans>
 ----
 
