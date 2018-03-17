@@ -1727,8 +1727,8 @@ parameters of the matching names:
 	}
 ----
 
-When combining pointcut sub-expressions, '&&' is awkward within an XML document, and so
-the keywords 'and', 'or' and 'not' can be used in place of '&&', '||' and '!'
+When combining pointcut sub-expressions, `&&` is awkward within an XML document, and so
+the keywords `and`, `or`, and `not` can be used in place of `&&`, `||`, and `!`
 respectively. For example, the previous pointcut may be better written as:
 
 [source,xml,indent=0]
