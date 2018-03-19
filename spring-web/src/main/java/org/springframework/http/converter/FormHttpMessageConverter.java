@@ -64,8 +64,10 @@ import org.springframework.util.StringUtils;
  *
  * <p>For example, the following snippet shows how to submit an HTML form:
  * <pre class="code">
- * RestTemplate template = new RestTemplate();  // FormHttpMessageConverter is configured by default
- * MultiValueMap&lt;String, String&gt; form = new LinkedMultiValueMap&lt;String, String&gt;();
+ * RestTemplate template = new RestTemplate();
+ * // AllEncompassingFormHttpMessageConverter is configured by default
+ *
+ * MultiValueMap&lt;String, String&gt; form = new LinkedMultiValueMap&lt;&gt;();
  * form.add("field 1", "value 1");
  * form.add("field 2", "value 2");
  * form.add("field 2", "value 3");
@@ -74,7 +76,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>The following snippet shows how to do a file upload:
  * <pre class="code">
- * MultiValueMap&lt;String, Object&gt; parts = new LinkedMultiValueMap&lt;String, Object&gt;();
+ * MultiValueMap&lt;String, Object&gt; parts = new LinkedMultiValueMap&lt;&gt;();
  * parts.add("field 1", "value 1");
  * parts.add("file", new ClassPathResource("myFile.jpg"));
  * template.postForLocation("http://example.com/myFileUpload", parts);
@@ -87,7 +89,8 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 3.0
- * @see MultiValueMap
+ * @see org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter
+ * @see org.springframework.util.MultiValueMap
  */
 public class FormHttpMessageConverter implements HttpMessageConverter<MultiValueMap<String, ?>> {
 
