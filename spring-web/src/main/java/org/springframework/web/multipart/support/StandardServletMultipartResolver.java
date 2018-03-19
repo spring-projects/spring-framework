@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,18 @@ import org.springframework.web.multipart.MultipartResolver;
  * on your servlet class. Configuration settings such as maximum sizes or
  * storage locations need to be applied at that servlet registration level;
  * Servlet 3.0 does not allow for them to be set at the MultipartResolver level.
+ *
+ * <pre class="code">
+ * public class AppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
+ *	// ...
+ *	&#064;Override
+ *	protected void customizeRegistration(ServletRegistration.Dynamic registration) {
+ *
+ *		// Optionally also set maxFileSize, maxRequestSize, fileSizeThreshold
+ *		registration.setMultipartConfig(new MultipartConfigElement("/tmp"));
+ *	}
+ * }
+ * </pre>
  *
  * @author Juergen Hoeller
  * @since 3.1

@@ -999,11 +999,27 @@ have `commons-fileupload` as a dependency on your classpath.
 [[mvc-multipart-resolver-standard]]
 ==== Servlet 3.0
 
-To use Servlet 3.0 multipart support, you need to register the `DispatcherServlet`
-accordingly. In programmatic Servlet registration, set a `MultipartConfigElement` on the
-Servlet registration. In `web.xml`, add a `"<multipart-config>"` section. Configuration
-settings such as maximum sizes or storage locations need to be applied at this level
-since Servlet 3.0 API does not make it possible for the `MultipartResolver` to do so.
+Servlet 3.0 multipart parsing needs to be enabled through Servlet container configuration:
+
+* in Java, set a `MultipartConfigElement` on the Servlet registration.
+* in `web.xml`, add a `"<multipart-config>"` section to the servlet declaration.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class AppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
+
+		// ...
+
+		@Override
+		protected void customizeRegistration(ServletRegistration.Dynamic registration) {
+
+			// Optionally also set maxFileSize, maxRequestSize, fileSizeThreshold
+			registration.setMultipartConfig(new MultipartConfigElement("/tmp"));
+		}
+
+	}
+----
 
 Once the Servlet 3.0 configuration is in place, simply add a bean of type
 `StandardServletMultipartResolver` with the name `multipartResolver`.
