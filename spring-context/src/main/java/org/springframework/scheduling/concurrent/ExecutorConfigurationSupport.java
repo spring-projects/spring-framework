@@ -17,6 +17,7 @@
 package org.springframework.scheduling.concurrent;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadFactory;
@@ -32,9 +33,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
 
 /**
- * Base class for classes that are setting up a
- * {@code java.util.concurrent.ExecutorService}
- * (typically a {@link java.util.concurrent.ThreadPoolExecutor}).
+ * Base class for setting up a {@link java.util.concurrent.ExecutorService}
+ * (typically a {@link java.util.concurrent.ThreadPoolExecutor} or
+ * {@link java.util.concurrent.ScheduledThreadPoolExecutor}).
  * Defines common configuration settings and common lifecycle handling.
  *
  * @author Juergen Hoeller
@@ -42,6 +43,7 @@ import org.springframework.lang.Nullable;
  * @see java.util.concurrent.ExecutorService
  * @see java.util.concurrent.Executors
  * @see java.util.concurrent.ThreadPoolExecutor
+ * @see java.util.concurrent.ScheduledThreadPoolExecutor
  */
 @SuppressWarnings("serial")
 public abstract class ExecutorConfigurationSupport extends CustomizableThreadFactory
@@ -221,14 +223,14 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	/**
 	 * Cancel the given remaining task which never commended execution,
 	 * as returned from {@link ExecutorService#shutdownNow()}.
-	 * @param task the task to cancel (potentially a {@link RunnableFuture})
+	 * @param task the task to cancel (typically a {@link RunnableFuture})
 	 * @since 5.0.5
 	 * @see #shutdown()
 	 * @see RunnableFuture#cancel(boolean)
 	 */
 	protected void cancelRemainingTask(Runnable task) {
-		if (task instanceof RunnableFuture) {
-			((RunnableFuture<?>) task).cancel(true);
+		if (task instanceof Future) {
+			((Future<?>) task).cancel(true);
 		}
 	}
 
