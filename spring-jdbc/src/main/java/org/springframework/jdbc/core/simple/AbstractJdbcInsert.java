@@ -50,8 +50,9 @@ import org.springframework.util.Assert;
 
 /**
  * Abstract class to provide base functionality for easy inserts
- * based on configuration options and database metadata.
- * This class provides the base SPI for {@link SimpleJdbcInsert}.
+ * based on configuration options and database meta-data.
+ *
+ * <p>This class provides the base SPI for {@link SimpleJdbcInsert}.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -65,7 +66,7 @@ public abstract class AbstractJdbcInsert {
 	/** Lower-level class used to execute SQL */
 	private final JdbcTemplate jdbcTemplate;
 
-	/** Context used to retrieve and manage database metadata */
+	/** Context used to retrieve and manage database meta-data */
 	private final TableMetaDataContext tableMetaDataContext = new TableMetaDataContext();
 
 	/** List of columns objects to be used in insert statement */
@@ -204,7 +205,7 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Specify whether the parameter metadata for the call should be used.
+	 * Specify whether the parameter meta-data for the call should be used.
 	 * The default is {@code true}.
 	 */
 	public void setAccessTableColumnMetaData(boolean accessTableColumnMetaData) {
@@ -239,7 +240,7 @@ public abstract class AbstractJdbcInsert {
 	//-------------------------------------------------------------------------
 
 	/**
-	 * Compile this JdbcInsert using provided parameters and meta data plus other settings.
+	 * Compile this JdbcInsert using provided parameters and meta-data plus other settings.
 	 * This finalizes the configuration for this object and subsequent attempts to compile are
 	 * ignored. This will be implicitly called the first time an un-compiled insert is executed.
 	 * @throws InvalidDataAccessApiUsageException if the object hasn't been correctly initialized,
@@ -315,7 +316,7 @@ public abstract class AbstractJdbcInsert {
 	protected void checkIfConfigurationModificationIsAllowed() {
 		if (isCompiled()) {
 			throw new InvalidDataAccessApiUsageException(
-					"Configuration can't be altered once the class has been compiled or used");
+					"Configuration cannot be altered once the class has been compiled or used");
 		}
 	}
 
@@ -453,9 +454,9 @@ public abstract class AbstractJdbcInsert {
 			}
 
 			Assert.state(getTableName() != null, "No table name set");
-			final String keyQuery = this.tableMetaDataContext.getSimulationQueryForGetGeneratedKey(
+			final String keyQuery = this.tableMetaDataContext.getSimpleQueryForGetGeneratedKey(
 					getTableName(), getGeneratedKeyNames()[0]);
-			Assert.state(keyQuery != null, "Query for simulating get generated keys can't be null");
+			Assert.state(keyQuery != null, "Query for simulating get generated keys must not be null");
 
 			// This is a hack to be able to get the generated key from a database that doesn't support
 			// get generated keys feature. HSQL is one, PostgreSQL is another. Postgres uses a RETURNING
@@ -602,7 +603,7 @@ public abstract class AbstractJdbcInsert {
 
 	/**
 	 * Match the provided in parameter values with registered parameters and parameters
-	 * defined via metadata processing.
+	 * defined via meta-data processing.
 	 * @param parameterSource the parameter values provided as a {@link SqlParameterSource}
 	 * @return Map with parameter names and values
 	 */
@@ -612,7 +613,7 @@ public abstract class AbstractJdbcInsert {
 
 	/**
 	 * Match the provided in parameter values with registered parameters and parameters
-	 * defined via metadata processing.
+	 * defined via meta-data processing.
 	 * @param args the parameter values provided in a Map
 	 * @return Map with parameter names and values
 	 */
