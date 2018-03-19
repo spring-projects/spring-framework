@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,13 @@
 
 package org.springframework.jdbc.core.metadata;
 
+import java.sql.DatabaseMetaData;
+
 /**
- * Holder of metadata for a specific parameter that is used for call processing.
+ * Holder of meta-data for a specific parameter that is used for call processing.
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @since 2.5
  * @see GenericCallMetaDataProvider
  */
@@ -39,7 +42,9 @@ public class CallParameterMetaData {
 	/**
 	 * Constructor taking all the properties.
 	 */
-	public CallParameterMetaData(String columnName, int columnType, int sqlType, String typeName, boolean nullable) {
+	public CallParameterMetaData(
+			String columnName, int columnType, int sqlType, String typeName, boolean nullable) {
+
 		this.parameterName = columnName;
 		this.parameterType = columnType;
 		this.sqlType = sqlType;
@@ -60,6 +65,17 @@ public class CallParameterMetaData {
 	 */
 	public int getParameterType() {
 		return this.parameterType;
+	}
+
+	/**
+	 * Determine whether the declared parameter qualifies as a 'return' parameter
+	 * for our purposes: type {@link DatabaseMetaData#procedureColumnReturn} or
+	 * {@link DatabaseMetaData#procedureColumnResult}.
+	 * @since 4.3.15
+	 */
+	public boolean isReturnParameter() {
+		return (this.parameterType == DatabaseMetaData.procedureColumnReturn ||
+				this.parameterType == DatabaseMetaData.procedureColumnResult);
 	}
 
 	/**
