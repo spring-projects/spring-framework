@@ -160,7 +160,8 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 	private boolean isStreamingMediaType(@Nullable MediaType contentType) {
 		return (contentType != null && this.encoder instanceof HttpMessageEncoder &&
 				((HttpMessageEncoder<?>) this.encoder).getStreamingMediaTypes().stream()
-						.anyMatch(contentType::isCompatibleWith));
+						.anyMatch(streamingMediaType -> contentType.isCompatibleWith(streamingMediaType) &&
+								contentType.getParameters().entrySet().containsAll(streamingMediaType.getParameters().keySet())));
 	}
 
 

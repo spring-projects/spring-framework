@@ -661,8 +661,8 @@ use in an application.
 
 The `spring-core` module has encoders and decoders for `byte[]`, `ByteBuffer`, `DataBuffer`,
 `Resource`, and `String`. The `spring-web` module adds encoders and decoders for Jackson
-JSON, Jackson Smile, JAXB2, along with other web-specific HTTP message readers and writers
-for form data, multipart requests, and server-sent events.
+JSON, Jackson Smile, JAXB2, Protocol Buffers, along with other web-specific HTTP message
+readers and writers for form data, multipart requests, and server-sent events.
 
 
 [[webflux-codecs-jackson]]

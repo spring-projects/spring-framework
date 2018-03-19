@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.google.protobuf.Message;
 import org.junit.Test;
 
 import org.springframework.context.ApplicationContext;
@@ -148,7 +149,7 @@ public class WebFluxConfigurationSupportTests {
 		assertNotNull(adapter);
 
 		List<HttpMessageReader<?>> readers = adapter.getMessageReaders();
-		assertEquals(12, readers.size());
+		assertEquals(13, readers.size());
 
 		ResolvableType multiValueMapType = forClassWithGenerics(MultiValueMap.class, String.class, String.class);
 
@@ -156,6 +157,7 @@ public class WebFluxConfigurationSupportTests {
 		assertHasMessageReader(readers, forClass(ByteBuffer.class), APPLICATION_OCTET_STREAM);
 		assertHasMessageReader(readers, forClass(String.class), TEXT_PLAIN);
 		assertHasMessageReader(readers, forClass(Resource.class), IMAGE_PNG);
+		assertHasMessageReader(readers, forClass(Message.class), new MediaType("application", "x-protobuf"));
 		assertHasMessageReader(readers, multiValueMapType, APPLICATION_FORM_URLENCODED);
 		assertHasMessageReader(readers, forClass(TestBean.class), APPLICATION_XML);
 		assertHasMessageReader(readers, forClass(TestBean.class), APPLICATION_JSON);
@@ -202,12 +204,13 @@ public class WebFluxConfigurationSupportTests {
 		assertEquals(0, handler.getOrder());
 
 		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
-		assertEquals(10, writers.size());
+		assertEquals(11, writers.size());
 
 		assertHasMessageWriter(writers, forClass(byte[].class), APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, forClass(ByteBuffer.class), APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, forClass(String.class), TEXT_PLAIN);
 		assertHasMessageWriter(writers, forClass(Resource.class), IMAGE_PNG);
+		assertHasMessageWriter(writers, forClass(Message.class), new MediaType("application", "x-protobuf"));
 		assertHasMessageWriter(writers, forClass(TestBean.class), APPLICATION_XML);
 		assertHasMessageWriter(writers, forClass(TestBean.class), APPLICATION_JSON);
 		assertHasMessageWriter(writers, forClass(TestBean.class), new MediaType("application", "x-jackson-smile"));
@@ -229,12 +232,13 @@ public class WebFluxConfigurationSupportTests {
 		assertEquals(100, handler.getOrder());
 
 		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
-		assertEquals(10, writers.size());
+		assertEquals(11, writers.size());
 
 		assertHasMessageWriter(writers, forClass(byte[].class), APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, forClass(ByteBuffer.class), APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, forClass(String.class), TEXT_PLAIN);
 		assertHasMessageWriter(writers, forClass(Resource.class), IMAGE_PNG);
+		assertHasMessageWriter(writers, forClass(Message.class), new MediaType("application", "x-protobuf"));
 		assertHasMessageWriter(writers, forClass(TestBean.class), APPLICATION_XML);
 		assertHasMessageWriter(writers, forClass(TestBean.class), APPLICATION_JSON);
 		assertHasMessageWriter(writers, forClass(TestBean.class), new MediaType("application", "x-jackson-smile"));
