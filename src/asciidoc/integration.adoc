@@ -1059,23 +1059,23 @@ exception processing the HTTP request, an exception of the type `RestClientExcep
 will be thrown; this behavior can be changed by plugging in another
 `ResponseErrorHandler` implementation into the `RestTemplate`.
 
-The `exchange` and `execute` methods are generalized versions of the more
-specific methods listed above them and can support additional combinations and methods,
-like HTTP PATCH. However, note that the underlying HTTP library must also support the
-desired combination. The JDK `HttpURLConnection` does not support the `PATCH` method, but
-Apache HttpComponents HttpClient version 4.2 or later does. They also enable
-`RestTemplate` to read an HTTP response to a generic type (e.g. `List<Account>`), using a
-`ParameterizedTypeReference`, a new class that enables capturing and passing generic
-type info.
+The `exchange` and `execute` methods are generalized versions of the more specific
+methods listed above them and can support additional combinations and methods,
+e.g. HTTP PATCH. However, note that the underlying HTTP library must also support the
+desired combination. The JDK `HttpURLConnection` does not support the `PATCH` method
+but Apache HttpComponents HttpClient version 4.2 or later does. They also enable
+`RestTemplate` to read an HTTP response to a generic type (e.g. `List<Account>`),
+using a `ParameterizedTypeReference`, a new class that enables capturing and passing
+generic type info.
 
 Objects passed to and returned from these methods are converted to and from HTTP
-messages by `HttpMessageConverter` instances. Converters for the main mime types are
-registered by default, but you can also write your own converter and register it via the
-`messageConverters()` bean property. The default converter instances registered with the
-template are `ByteArrayHttpMessageConverter`, `StringHttpMessageConverter`,
-`FormHttpMessageConverter` and `SourceHttpMessageConverter`. You can override these
-defaults using the `messageConverters()` bean property as would be required if using the
-`MarshallingHttpMessageConverter` or `MappingJackson2HttpMessageConverter`.
+messages by `HttpMessageConverter` implementations. Converters for the main MIME types
+are registered by default, but you can also override the defaults and register custom
+converters via the `messageConverters()` bean property. The default converters are
+`ByteArrayHttpMessageConverter`, `StringHttpMessageConverter`,
+`ResourceHttpMessageConverter`, `SourceHttpMessageConverter` as well as
+`AllEncompassingFormHttpMessageConverter` and a few provider-specific converters:
+e.g. `MappingJackson2HttpMessageConverter` when Jackson is present on the classpath.
 
 Each method takes URI template arguments in two forms, either as a `String`
 variable-length argument or a `Map<String,String>`. For example,
@@ -5778,9 +5778,8 @@ exception hierarchy.
 
 The `org.springframework.mail.javamail.JavaMailSender` interface adds specialized
 __JavaMail__ features such as MIME message support to the `MailSender` interface (from
-which it inherits). `JavaMailSender` also provides a callback interface for preparation
-of JavaMail MIME messages, called
-`org.springframework.mail.javamail.MimeMessagePreparator`
+which it inherits). `JavaMailSender` also provides a callback interface for preparing
+a 'MimeMessage', called `org.springframework.mail.javamail.MimeMessagePreparator`.
 
 
 
@@ -5903,23 +5902,17 @@ callback interface. Please note in this case that the `mailSender` property is o
 		}
 
 		public void placeOrder(final Order order) {
-
 			// Do the business calculations...
-
 			// Call the collaborators to persist the order...
 
 			MimeMessagePreparator preparator = new MimeMessagePreparator() {
-
 				public void prepare(MimeMessage mimeMessage) throws Exception {
-
 					mimeMessage.setRecipient(Message.RecipientType.TO,
 							new InternetAddress(order.getCustomer().getEmailAddress()));
 					mimeMessage.setFrom(new InternetAddress("mail@mycompany.com"));
-					mimeMessage.setText(
-							"Dear " + order.getCustomer().getFirstName() + " "
-								+ order.getCustomer().getLastName()
-								+ ", thank you for placing order. Your order number is "
-								+ order.getOrderNumber());
+					mimeMessage.setText("Dear " + order.getCustomer().getFirstName() + " " +
+							order.getCustomer().getLastName() + ", thanks for your order. " +
+							"Your order number is " + order.getOrderNumber() + ".");
 				}
 			};
 
@@ -6035,10 +6028,10 @@ along with an inline image.
 
 [WARNING]
 ====
-Inline resources are added to the mime message using the specified `Content-ID` (
-`identifier1234` in the above example). The order in which you are adding the text and
-the resource are __very__ important. Be sure to __first add the text__ and after that
-the resources. If you are doing it the other way around, it won't work!
+Inline resources are added to the `MimeMessage` using the specified `Content-ID`
+(`identifier1234` in the above example). The order in which you are adding the text
+and the resource are __very__ important. Be sure to __first add the text__ and after
+that the resources. If you are doing it the other way around, it won't work!
 ====
 
 
