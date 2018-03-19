@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.scheduling.concurrent;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -209,9 +210,25 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 				this.executor.shutdown();
 			}
 			else {
-				this.executor.shutdownNow();
+				for (Runnable remainingTask : this.executor.shutdownNow()) {
+					cancelRemainingTask(remainingTask);
+				}
 			}
 			awaitTerminationIfNecessary(this.executor);
+		}
+	}
+
+	/**
+	 * Cancel the given remaining task which never commended execution,
+	 * as returned from {@link ExecutorService#shutdownNow()}.
+	 * @param task the task to cancel (potentially a {@link RunnableFuture})
+	 * @since 5.0.5
+	 * @see #shutdown()
+	 * @see RunnableFuture#cancel(boolean)
+	 */
+	protected void cancelRemainingTask(Runnable task) {
+		if (task instanceof RunnableFuture) {
+			((RunnableFuture<?>) task).cancel(true);
 		}
 	}
 
