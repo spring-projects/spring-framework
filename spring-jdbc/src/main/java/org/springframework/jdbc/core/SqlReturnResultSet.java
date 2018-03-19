@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ package org.springframework.jdbc.core;
  * must be provided to handle any returned rows.
  *
  * <p>Returned {@link java.sql.ResultSet ResultSets} - like all stored procedure
- * parameters - <b>must</b> have names.
+ * parameters - must have names.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -57,13 +57,13 @@ public class SqlReturnResultSet extends ResultSetSupportingSqlParameter {
 		super(name, 0, mapper);
 	}
 
+
 	/**
-	 * Return whether this parameter is an implicit return parameter used during the
-	 * results preocessing of the CallableStatement.getMoreResults/getUpdateCount.
-	 * <p>This implementation always returns {@code true}.
+	 * This implementation always returns {@code true}.
 	 */
 	@Override
 	public boolean isResultsParameter() {
 		return true;
 	}
+
 }

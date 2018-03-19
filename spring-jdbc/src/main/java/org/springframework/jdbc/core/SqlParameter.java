@@ -172,7 +172,7 @@ public class SqlParameter {
 
 	/**
 	 * Return whether this parameter is an implicit return parameter used during the
-	 * results preocessing of the CallableStatement.getMoreResults/getUpdateCount.
+	 * results processing of {@code CallableStatement.getMoreResults/getUpdateCount}.
 	 * <p>This implementation always returns {@code false}.
 	 */
 	public boolean isResultsParameter() {

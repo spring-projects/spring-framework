@@ -60,9 +60,9 @@ public class CallMetaDataProviderFactory {
 
 
 	/**
-	 * Create a {@link CallMetaDataProvider} based on the database metadata
-	 * @param dataSource used to retrieve metadata
-	 * @param context the class that holds configuration and metadata
+	 * Create a {@link CallMetaDataProvider} based on the database meta-data
+	 * @param dataSource used to retrieve meta-data
+	 * @param context the class that holds configuration and meta-data
 	 * @return instance of the CallMetaDataProvider implementation to be used
 	 */
 	public static CallMetaDataProvider createMetaDataProvider(DataSource dataSource, final CallMetaDataContext context) {
@@ -133,7 +133,7 @@ public class CallMetaDataProviderFactory {
 			});
 		}
 		catch (MetaDataAccessException ex) {
-			throw new DataAccessResourceFailureException("Error retrieving database metadata", ex);
+			throw new DataAccessResourceFailureException("Error retrieving database meta-data", ex);
 		}
 	}
 

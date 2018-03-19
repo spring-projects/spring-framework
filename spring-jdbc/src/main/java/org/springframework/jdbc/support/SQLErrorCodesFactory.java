@@ -155,7 +155,7 @@ public class SQLErrorCodesFactory {
 
 	/**
 	 * Return the {@link SQLErrorCodes} instance for the given database.
-	 * <p>No need for a database metadata lookup.
+	 * <p>No need for a database meta-data lookup.
 	 * @param databaseName the database name (must not be {@code null})
 	 * @return the {@code SQLErrorCodes} instance for the given database
 	 * @throws IllegalArgumentException if the supplied database name is {@code null}

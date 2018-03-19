@@ -81,7 +81,7 @@ public abstract class JdbcAccessor implements InitializingBean {
 	/**
 	 * Specify the database product name for the DataSource that this accessor uses.
 	 * This allows to initialize a SQLErrorCodeSQLExceptionTranslator without
-	 * obtaining a Connection from the DataSource to get the metadata.
+	 * obtaining a Connection from the DataSource to get the meta-data.
 	 * @param dbName the database product name that identifies the error codes entry
 	 * @see SQLErrorCodeSQLExceptionTranslator#setDatabaseProductName
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()

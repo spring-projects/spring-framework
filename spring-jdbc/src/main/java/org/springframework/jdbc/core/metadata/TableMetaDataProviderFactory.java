@@ -38,9 +38,9 @@ public class TableMetaDataProviderFactory {
 
 
 	/**
-	 * Create a {@link TableMetaDataProvider} based on the database metadata.
-	 * @param dataSource used to retrieve metadata
-	 * @param context the class that holds configuration and metadata
+	 * Create a {@link TableMetaDataProvider} based on the database meta-data.
+	 * @param dataSource used to retrieve meta-data
+	 * @param context the class that holds configuration and meta-data
 	 * @return instance of the TableMetaDataProvider implementation to be used
 	 */
 	public static TableMetaDataProvider createMetaDataProvider(DataSource dataSource, TableMetaDataContext context) {
@@ -80,7 +80,7 @@ public class TableMetaDataProviderFactory {
 			});
 		}
 		catch (MetaDataAccessException ex) {
-			throw new DataAccessResourceFailureException("Error retrieving database metadata", ex);
+			throw new DataAccessResourceFailureException("Error retrieving database meta-data", ex);
 		}
 	}
 

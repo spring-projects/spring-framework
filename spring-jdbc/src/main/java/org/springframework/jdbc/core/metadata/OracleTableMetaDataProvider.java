@@ -29,7 +29,7 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Oracle-specific implementation of the {@link org.springframework.jdbc.core.metadata.TableMetaDataProvider}.
- * Supports a feature for including synonyms in the metadata lookup. Also supports lookup of current schema
+ * Supports a feature for including synonyms in the meta-data lookup. Also supports lookup of current schema
  * using the {@code sys_context}.
  *
  * <p>Thanks to Mike Youngstrom and Bruce Campbell for submitting the original suggestion for the Oracle
@@ -48,16 +48,16 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 
 
 	/**
-	 * Constructor used to initialize with provided database metadata.
-	 * @param databaseMetaData metadata to be used
+	 * Constructor used to initialize with provided database meta-data.
+	 * @param databaseMetaData meta-data to be used
 	 */
 	public OracleTableMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
 		this(databaseMetaData, false);
 	}
 
 	/**
-	 * Constructor used to initialize with provided database metadata.
-	 * @param databaseMetaData metadata to be used
+	 * Constructor used to initialize with provided database meta-data.
+	 * @param databaseMetaData meta-data to be used
 	 * @param includeSynonyms whether to include synonyms
 	 */
 	public OracleTableMetaDataProvider(DatabaseMetaData databaseMetaData, boolean includeSynonyms)
@@ -115,14 +115,14 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 			throws SQLException {
 
 		if (!this.includeSynonyms) {
-			logger.debug("Defaulting to no synonyms in table metadata lookup");
+			logger.debug("Defaulting to no synonyms in table meta-data lookup");
 			super.initializeWithTableColumnMetaData(databaseMetaData, catalogName, schemaName, tableName);
 			return;
 		}
 
 		Connection con = databaseMetaData.getConnection();
 		if (con == null) {
-			logger.warn("Unable to include synonyms in table metadata lookup - no Connection from DatabaseMetaData");
+			logger.warn("Unable to include synonyms in table meta-data lookup - no Connection from DatabaseMetaData");
 			super.initializeWithTableColumnMetaData(databaseMetaData, catalogName, schemaName, tableName);
 			return;
 		}
@@ -133,13 +133,13 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 		}
 		catch (ClassNotFoundException | SQLException ex) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Unable to include synonyms in table metadata lookup - no Oracle Connection: " + ex);
+				logger.warn("Unable to include synonyms in table meta-data lookup - no Oracle Connection: " + ex);
 			}
 			super.initializeWithTableColumnMetaData(databaseMetaData, catalogName, schemaName, tableName);
 			return;
 		}
 
-		logger.debug("Including synonyms in table metadata lookup");
+		logger.debug("Including synonyms in table meta-data lookup");
 		Method setIncludeSynonyms;
 		Boolean originalValueForIncludeSynonyms;
 
