@@ -1159,7 +1159,7 @@ on preparing URIs or customizing how the `RestTemplate` expands URI templates, s
 ===== Dealing with request and response headers
 
 Besides the methods described above, the `RestTemplate` also has the `exchange()`
-method, which can be used for arbitrary HTTP method execution based on the `HttpEntity`
+method, which can be used for arbitrary HTTP method execution based on the `RequestEntity`
 class.
 
 Perhaps most importantly, the `exchange()` method can be used to add request headers and
@@ -1168,13 +1168,14 @@ read response headers. For example:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	HttpHeaders requestHeaders = new HttpHeaders();
-	requestHeaders.set("MyRequestHeader", "MyValue");
-	HttpEntity<?> requestEntity = new HttpEntity(requestHeaders);
+	String uriTemplate = "http://example.com/hotels/{hotel}";
+	URI uri = UriComponentsBuilder.fromUriString(uriTemplate).build(42);
 
-	HttpEntity<String> response = template.exchange(
-			"http://example.com/hotels/{hotel}",
-			HttpMethod.GET, requestEntity, String.class, "42");
+	RequestEntity<Void> requestEntity = RequestEntity.get(uri)
+			.header(("MyRequestHeader", "MyValue")
+			.build();
+
+	ResponseEntity<String> response = template.exchange(requestEntity, String.class);
 
 	String responseHeader = response.getHeaders().getFirst("MyResponseHeader");
 	String body = response.getBody();
@@ -1195,8 +1196,11 @@ to serialize only a subset of the object properties. For example:
 ----
 	MappingJacksonValue value = new MappingJacksonValue(new User("eric", "7!jd#h23"));
 	value.setSerializationView(User.WithoutPasswordView.class);
-	HttpEntity<MappingJacksonValue> entity = new HttpEntity<MappingJacksonValue>(value);
-	String s = template.postForObject("http://example.com/user", entity, String.class);
+
+	RequestEntity<MappingJacksonValue> requestEntity =
+		RequestEntity.post(new URI("http://example.com/user")).body(value);
+
+	ResponseEntity<String> response = template.exchange(requestEntity, String.class);
 ----
 
 
