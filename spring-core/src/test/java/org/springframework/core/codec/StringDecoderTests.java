@@ -34,6 +34,7 @@ import org.springframework.util.MimeTypeUtils;
 import static org.junit.Assert.*;
 
 /**
+ * Unit tests for {@link StringDecoder}.
  * @author Sebastien Deleuze
  * @author Brian Clozel
  * @author Mark Paluch
@@ -45,16 +46,25 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void canDecode() {
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(String.class),
-				MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(String.class),
-				MimeTypeUtils.TEXT_HTML));
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(String.class),
-				MimeTypeUtils.APPLICATION_JSON));
-		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Integer.class),
-				MimeTypeUtils.TEXT_PLAIN));
-		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Object.class),
-				MimeTypeUtils.APPLICATION_JSON));
+
+		assertTrue(this.decoder.canDecode(
+				ResolvableType.forClass(String.class), MimeTypeUtils.TEXT_PLAIN));
+
+		assertTrue(this.decoder.canDecode(
+				ResolvableType.forClass(String.class), MimeTypeUtils.TEXT_HTML));
+
+		assertTrue(this.decoder.canDecode(
+				ResolvableType.forClass(String.class), MimeTypeUtils.APPLICATION_JSON));
+
+		assertTrue(this.decoder.canDecode(
+				ResolvableType.forClass(String.class), MimeTypeUtils.parseMimeType("text/plain;charset=utf-8")));
+
+
+		assertFalse(this.decoder.canDecode(
+				ResolvableType.forClass(Integer.class), MimeTypeUtils.TEXT_PLAIN));
+
+		assertFalse(this.decoder.canDecode(
+				ResolvableType.forClass(Object.class), MimeTypeUtils.APPLICATION_JSON));
 	}
 
 	@Test
