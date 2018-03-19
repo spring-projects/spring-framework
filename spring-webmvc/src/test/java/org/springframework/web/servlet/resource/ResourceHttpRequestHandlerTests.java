@@ -43,6 +43,7 @@ import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 import org.springframework.web.servlet.HandlerMapping;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link ResourceHttpRequestHandler}.
@@ -303,41 +304,84 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	@Test
-	public void invalidPath() throws Exception {
+	public void testInvalidPath() throws Exception {
+
+		// Use mock ResourceResolver: i.e. we're only testing upfront validations...
+
+		Resource resource = mock(Resource.class);
+		when(resource.getFilename()).thenThrow(new AssertionError("Resource should not be resolved"));
+		when(resource.getInputStream()).thenThrow(new AssertionError("Resource should not be resolved"));
+		ResourceResolver resolver = mock(ResourceResolver.class);
+		when(resolver.resolveResource(any(), any(), any(), any())).thenReturn(resource);
+
+		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
+		handler.setLocations(Collections.singletonList(new ClassPathResource("test/", getClass())));
+		handler.setResourceResolvers(Collections.singletonList(resolver));
+		handler.setServletContext(new TestServletContext());
+		handler.afterPropertiesSet();
+
+		testInvalidPath("../testsecret/secret.txt", handler);
+		testInvalidPath("test/../../testsecret/secret.txt", handler);
+		testInvalidPath(":/../../testsecret/secret.txt", handler);
+
+		Resource location = new UrlResource(getClass().getResource("./test/"));
+		this.handler.setLocations(Collections.singletonList(location));
+		Resource secretResource = new UrlResource(getClass().getResource("testsecret/secret.txt"));
+		String secretPath = secretResource.getURL().getPath();
+
+		testInvalidPath("file:" + secretPath, handler);
+		testInvalidPath("/file:" + secretPath, handler);
+		testInvalidPath("url:" + secretPath, handler);
+		testInvalidPath("/url:" + secretPath, handler);
+		testInvalidPath("/../.." + secretPath, handler);
+		testInvalidPath("/%2E%2E/testsecret/secret.txt", handler);
+		testInvalidPath("/%2E%2E/testsecret/secret.txt", handler);
+		testInvalidPath("%2F%2F%2E%2E%2F%2F%2E%2E" + secretPath, handler);
+	}
+
+	private void testInvalidPath(String requestPath, ResourceHttpRequestHandler handler) throws Exception {
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, requestPath);
+		this.response = new MockHttpServletResponse();
+		handler.handleRequest(this.request, this.response);
+		assertEquals(HttpStatus.NOT_FOUND.value(), this.response.getStatus());
+	}
+
+	@Test
+	public void resolvePathWithTraversal() throws Exception {
 		for (HttpMethod method : HttpMethod.values()) {
 			this.request = new MockHttpServletRequest("GET", "");
 			this.response = new MockHttpServletResponse();
-			testInvalidPath(method);
+			testResolvePathWithTraversal(method);
 		}
 	}
 
-	private void testInvalidPath(HttpMethod httpMethod) throws Exception {
+	private void testResolvePathWithTraversal(HttpMethod httpMethod) throws Exception {
 		this.request.setMethod(httpMethod.name());
 
 		Resource location = new ClassPathResource("test/", getClass());
 		this.handler.setLocations(Collections.singletonList(location));
 
-		testInvalidPath(location, "../testsecret/secret.txt");
-		testInvalidPath(location, "test/../../testsecret/secret.txt");
-		testInvalidPath(location, ":/../../testsecret/secret.txt");
+		testResolvePathWithTraversal(location, "../testsecret/secret.txt");
+		testResolvePathWithTraversal(location, "test/../../testsecret/secret.txt");
+		testResolvePathWithTraversal(location, ":/../../testsecret/secret.txt");
 
 		location = new UrlResource(getClass().getResource("./test/"));
 		this.handler.setLocations(Collections.singletonList(location));
 		Resource secretResource = new UrlResource(getClass().getResource("testsecret/secret.txt"));
 		String secretPath = secretResource.getURL().getPath();
 
-		testInvalidPath(location, "file:" + secretPath);
-		testInvalidPath(location, "/file:" + secretPath);
-		testInvalidPath(location, "url:" + secretPath);
-		testInvalidPath(location, "/url:" + secretPath);
-		testInvalidPath(location, "/" + secretPath);
-		testInvalidPath(location, "////../.." + secretPath);
-		testInvalidPath(location, "/%2E%2E/testsecret/secret.txt");
-		testInvalidPath(location, "/  " + secretPath);
-		testInvalidPath(location, "url:" + secretPath);
+		testResolvePathWithTraversal(location, "file:" + secretPath);
+		testResolvePathWithTraversal(location, "/file:" + secretPath);
+		testResolvePathWithTraversal(location, "url:" + secretPath);
+		testResolvePathWithTraversal(location, "/url:" + secretPath);
+		testResolvePathWithTraversal(location, "/" + secretPath);
+		testResolvePathWithTraversal(location, "////../.." + secretPath);
+		testResolvePathWithTraversal(location, "/%2E%2E/testsecret/secret.txt");
+		testResolvePathWithTraversal(location, "%2F%2F%2E%2E%2F%2Ftestsecret/secret.txt");
+		testResolvePathWithTraversal(location, "/  " + secretPath);
 	}
 
-	private void testInvalidPath(Resource location, String requestPath) throws Exception {
+	private void testResolvePathWithTraversal(Resource location, String requestPath) throws Exception {
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, requestPath);
 		this.response = new MockHttpServletResponse();
 		this.handler.handleRequest(this.request, this.response);
@@ -356,7 +400,8 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	@Test
-	public void processPath() throws Exception {
+	public void processPath() {
+		// Unchanged
 		assertSame("/foo/bar", this.handler.processPath("/foo/bar"));
 		assertSame("foo/bar", this.handler.processPath("foo/bar"));
 
@@ -382,10 +427,17 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals("/", this.handler.processPath("/"));
 		assertEquals("/", this.handler.processPath("///"));
 		assertEquals("/", this.handler.processPath("/ /   / "));
+		assertEquals("/", this.handler.processPath("\\/ \\/   \\/ "));
+
+		// duplicate slash or backslash
+		assertEquals("/foo/ /bar/baz/", this.handler.processPath("//foo/ /bar//baz//"));
+		assertEquals("/foo/ /bar/baz/", this.handler.processPath("\\\\foo\\ \\bar\\\\baz\\\\"));
+		assertEquals("foo/bar", this.handler.processPath("foo\\\\/\\////bar"));
+
 	}
 
 	@Test
-	public void initAllowedLocations() throws Exception {
+	public void initAllowedLocations() {
 		PathResourceResolver resolver = (PathResourceResolver) this.handler.getResourceResolvers().get(0);
 		Resource[] locations = resolver.getAllowedLocations();
 
