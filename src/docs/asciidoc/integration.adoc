@@ -2738,7 +2738,7 @@ describes all available attributes:
 .Attributes of the JMS <listener> element
 [cols="1,6"]
 |===
-| Attribute| Description
+| Attribute | Description
 
 | id
 | A bean name for the hosting listener container. If not specified, a bean name will be
@@ -2809,7 +2809,7 @@ choices and message redelivery scenarios.
 .Attributes of the JMS <listener-container> element
 [cols="1,6"]
 |===
-| Attribute| Description
+| Attribute | Description
 
 | container-type
 | The type of this listener container. Available options are: `default`, `simple`,
@@ -2931,7 +2931,7 @@ table:
 .Attributes of the JMS <jca-listener-container/> element
 [cols="1,6"]
 |===
-| Attribute| Description
+| Attribute | Description
 
 | factory-id
 | Exposes the settings defined by this element as a `JmsListenerContainerFactory`
@@ -3262,7 +3262,7 @@ these registration behaviors are summarized on the following table:
 .Registration Behaviors
 [cols="1,4"]
 |===
-| Registration behavior| Explanation
+| Registration behavior | Explanation
 
 | `REGISTRATION_FAIL_ON_EXISTING`
 | This is the default registration behavior. If an `MBean` instance has already been
@@ -3518,7 +3518,7 @@ metadata types:
 .Source-level metadata parameters
 [cols="1,3,1"]
 |===
-| Parameter| Description| Applies to
+| Parameter | Description | Applies to
 
 | `ObjectName`
 | Used by `MetadataNamingStrategy` to determine the `ObjectName` of a managed resource
@@ -4903,7 +4903,7 @@ corresponding methods called on the CCI `Interaction` interface:
 .Usage of Interaction execute methods
 [cols="3,1,3"]
 |===
-| CciTemplate method signature| CciTemplate outputRecordCreator property| execute method called on the CCI Interaction
+| CciTemplate method signature | CciTemplate outputRecordCreator property | execute method called on the CCI Interaction
 
 | Record execute(InteractionSpec, Record)
 | not set
@@ -5270,7 +5270,7 @@ The operation object approach uses records in the same manner as the `CciTemplat
 .Usage of Interaction execute methods
 [cols="3,1,3"]
 |===
-| MappingRecordOperation method signature| MappingRecordOperation outputRecordCreator property| execute method called on the CCI Interaction
+| MappingRecordOperation method signature | MappingRecordOperation outputRecordCreator property | execute method called on the CCI Interaction
 
 | Object execute(Object)
 | not set
@@ -7413,7 +7413,7 @@ javadoc for more details].
 .Cache annotation settings
 [cols="1,1,1,3"]
 |===
-| XML Attribute| Annotation Attribute| Default| Description
+| XML Attribute | Annotation Attribute | Default | Description
 
 | `cache-manager`
 | N/A (See `CachingConfigurer` javadocs)
@@ -7597,7 +7597,7 @@ counterpart:
 .Spring vs. JSR-107 caching annotations
 [cols="1,1,3"]
 |===
-| Spring| JSR-107| Remark
+| Spring | JSR-107 | Remark
 
 | `@Cacheable`
 | `@CacheResult`

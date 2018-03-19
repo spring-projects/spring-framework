@@ -214,9 +214,9 @@ parameter list that each takes.
 
 [[views-macros-defs-tbl]]
 .Table of macro definitions
-[cols="3,1,1"]
+[cols="3,1"]
 |===
-| macro| FTL definition
+| macro | FTL definition
 
 | **message** (output a string from a resource bundle based on the code parameter)
 | <@spring.message code/>
