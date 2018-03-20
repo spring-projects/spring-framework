@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import reactor.core.config.ReactorConfiguration;
 import reactor.core.support.NamedDaemonThreadFactory;
 import reactor.fn.Consumer;
 import reactor.fn.Function;
+import reactor.fn.Supplier;
 import reactor.fn.tuple.Tuple;
 import reactor.fn.tuple.Tuple2;
 import reactor.io.buffer.Buffer;
@@ -65,10 +66,10 @@ import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * An implementation of {@link org.springframework.messaging.tcp.TcpOperations}
- * based on the TCP client support of the Reactor project.
+ * based on the TCP client support of project Reactor.
  *
- * <p>This implementation wraps N (Reactor) clients for N {@link #connect} calls,
- * i.e. a separate (Reactor) client instance for each connection.
+ * <p>This implementation wraps N Reactor {@code TcpClient} instances created
+ * for N {@link #connect} calls, i.e. once instance per connection.
  *
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
@@ -100,13 +101,28 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 	 * relying on Netty threads. The number of Netty threads can be tweaked with
 	 * the {@code reactor.tcp.ioThreadCount} System property. The network I/O
 	 * threads will be shared amongst the active clients.
-	 * <p>Also see the constructor accepting a ready Reactor
-	 * {@link TcpClientSpec} {@link Function} factory.
+	 *
 	 * @param host the host to connect to
 	 * @param port the port to connect to
 	 * @param codec the codec to use for encoding and decoding the TCP stream
 	 */
 	public Reactor2TcpClient(final String host, final int port, final Codec<Buffer, Message<P>, Message<P>> codec) {
+		this(new FixedAddressSupplier(host, port), codec);
+	}
+
+	/**
+	 * A variant of {@link #Reactor2TcpClient(String, int, Codec)} that takes a
+	 * supplier of any number of addresses instead of just one host and port.
+	 * This can be used to {@link #connect(TcpConnectionHandler, ReconnectStrategy)
+	 * reconnect} to a different address after the current host becomes unavailable.
+	 *
+	 * @param addressSupplier supplier of addresses to use for connecting
+	 * @param codec the codec to use for encoding and decoding the TCP stream
+	 * @since 4.3.15
+	 */
+	public Reactor2TcpClient(final Supplier<InetSocketAddress> addressSupplier,
+			final Codec<Buffer, Message<P>, Message<P>> codec) {
+
 		// Reactor 2.0.5 requires NioEventLoopGroup vs 2.0.6+ requires EventLoopGroup
 		final NioEventLoopGroup nioEventLoopGroup = initEventLoopGroup();
 		this.eventLoopGroup = nioEventLoopGroup;
@@ -118,7 +134,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 				return spec
 						.env(environment)
 						.codec(codec)
-						.connect(host, port)
+						.connect(addressSupplier)
 						.options(createClientSocketOptions());
 			}
 
@@ -133,10 +149,13 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 	 * A constructor with a pre-configured {@link TcpClientSpec} {@link Function}
 	 * factory. This might be used to add SSL or specific network parameters to
 	 * the generated client configuration.
+	 *
 	 * <p><strong>NOTE:</strong> if the client is configured with a thread-creating
-	 * dispatcher, you are responsible for cleaning them, e.g. using
+	 * dispatcher, you are responsible for cleaning them, e.g. via
 	 * {@link reactor.core.Dispatcher#shutdown}.
-	 * @param tcpClientSpecFactory the TcpClientSpec {@link Function} to use for each client creation
+	 *
+	 * @param tcpClientSpecFactory the TcpClientSpec {@link Function} to use for
+	 * each client creation
 	 */
 	public Reactor2TcpClient(TcpClientFactory<Message<P>, Message<P>> tcpClientSpecFactory) {
 		Assert.notNull(tcpClientSpecFactory, "'tcpClientClientFactory' must not be null");
@@ -292,6 +311,21 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 			}
 		}
 		throw new IllegalStateException("No compatible Reactor version found");
+	}
+
+
+	private static class FixedAddressSupplier implements Supplier<InetSocketAddress> {
+
+		private final InetSocketAddress address;
+
+		FixedAddressSupplier(String host, int port) {
+			this.address = new InetSocketAddress(host, port);
+		}
+
+		@Override
+		public InetSocketAddress get() {
+			return this.address;
+		}
 	}
 
 

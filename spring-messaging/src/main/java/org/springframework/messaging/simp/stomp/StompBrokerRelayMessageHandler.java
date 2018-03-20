@@ -334,6 +334,9 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	/**
 	 * Configure a TCP client for managing TCP connections to the STOMP broker.
 	 * By default {@link Reactor2TcpClient} is used.
+	 * <p><strong>Note:</strong> when this property is used, any
+	 * {@link #setRelayHost(String) host} or {@link #setRelayPort(int) port}
+	 * specified are effectively ignored.
 	 */
 	public void setTcpClient(TcpOperations<byte[]> tcpClient) {
 		this.tcpClient = tcpClient;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.messaging.simp.config;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
+import org.springframework.messaging.tcp.TcpOperations;
+import org.springframework.messaging.tcp.reactor.Reactor2TcpClient;
 import org.springframework.util.Assert;
 
 /**
@@ -46,6 +48,8 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	private Long systemHeartbeatReceiveInterval;
 
 	private String virtualHost;
+
+	private TcpOperations<byte[]> tcpClient;
 
 	private boolean autoStartup = true;
 
@@ -161,6 +165,18 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	}
 
 	/**
+	 * Configure a TCP client for managing TCP connections to the STOMP broker.
+	 * By default {@link Reactor2TcpClient} is used.
+	 * <p><strong>Note:</strong> when this property is used, any
+	 * {@link #setRelayHost(String) host} or {@link #setRelayPort(int) port}
+	 * specified are effectively ignored.
+	 * @since 4.3.15
+	 */
+	public void setTcpClient(TcpOperations<byte[]> tcpClient) {
+		this.tcpClient = tcpClient;
+	}
+
+	/**
 	 * Configure whether the {@link StompBrokerRelayMessageHandler} should start
 	 * automatically when the Spring ApplicationContext is refreshed.
 	 * <p>The default setting is {@code true}.
@@ -230,6 +246,9 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 		}
 		if (this.virtualHost != null) {
 			handler.setVirtualHost(this.virtualHost);
+		}
+		if (this.tcpClient != null) {
+			handler.setTcpClient(this.tcpClient);
 		}
 
 		handler.setAutoStartup(this.autoStartup);

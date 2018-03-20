@@ -1615,8 +1615,8 @@ values ``guest``/``guest``.
 ====
 The STOMP broker relay always sets the `login` and `passcode` headers on every `CONNECT`
 frame that it forwards to the broker on behalf of clients. Therefore WebSocket clients
-need not set those headers; they will be ignored. As the following section explains,
-instead WebSocket clients should rely on HTTP authentication to protect the WebSocket
+need not set those headers; they will be ignored. As the <<websocket-stomp-authentication>>
+explains, instead WebSocket clients should rely on HTTP authentication to protect the WebSocket
 endpoint and establish the client identity.
 ====
 
@@ -1626,13 +1626,47 @@ and receiving heartbeats (10 seconds each by default). If connectivity to the br
 is lost, the broker relay will continue to try to reconnect, every 5 seconds,
 until it succeeds.
 
-[NOTE]
-====
-A Spring bean can implement `ApplicationListener<BrokerAvailabilityEvent>` in order
+Any Spring bean can implement `ApplicationListener<BrokerAvailabilityEvent>` in order
 to receive notifications when the "system" connection to the broker is lost and
 re-established. For example a Stock Quote service broadcasting stock quotes can
 stop trying to send messages when there is no active "system" connection.
-====
+
+By default, the STOMP broker relay always connects, and reconnects as needed if
+connectivity is lost, to the same host and port. If you wish to supply multiple addresses,
+on each attempt to connect, you can configure a supplier of addresses, instead of a
+fixed host and port. For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Configuration
+@EnableWebSocketMessageBroker
+public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
+
+	// ...
+
+	@Override
+	public void configureMessageBroker(MessageBrokerRegistry registry) {
+		registry.enableStompBrokerRelay("/queue/", "/topic/").setTcpClient(createTcpClient());
+		registry.setApplicationDestinationPrefixes("/app");
+	}
+
+	private Reactor2TcpClient<byte[]> createTcpClient() {
+
+		Supplier<InetSocketAddress> addressSupplier = new Supplier<InetSocketAddress>() {
+			@Override
+			public InetSocketAddress get() {
+				// Select address to connect to ...
+			}
+		};
+
+		StompDecoder decoder = new StompDecoder();
+		Reactor2StompCodec codec = new Reactor2StompCodec(new StompEncoder(), decoder);
+		return new Reactor2TcpClient<>(addressSupplier, codec);
+	}
+
+}
+----
 
 The STOMP broker relay can also be configured with a `virtualHost` property.
 The value of this property will be set as the `host` header of every `CONNECT` frame
