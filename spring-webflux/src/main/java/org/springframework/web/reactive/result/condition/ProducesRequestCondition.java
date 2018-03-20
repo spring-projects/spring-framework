@@ -47,7 +47,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public final class ProducesRequestCondition extends AbstractRequestCondition<ProducesRequestCondition> {
 
-	private final static ProducesRequestCondition PRE_FLIGHT_MATCH = new ProducesRequestCondition();
+	private static final ProducesRequestCondition PRE_FLIGHT_MATCH = new ProducesRequestCondition();
 
 
 	private final List<ProduceMediaTypeExpression> mediaTypeAllList =

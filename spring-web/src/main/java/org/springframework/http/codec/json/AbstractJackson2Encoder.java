@@ -19,12 +19,15 @@ package org.springframework.http.codec.json;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -109,16 +112,18 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
 		Assert.notNull(elementType, "'elementType' must not be null");
 
+		JsonEncoding encoding = getJsonEncoding(mimeType);
+
 		if (inputStream instanceof Mono) {
 			return Flux.from(inputStream).map(value ->
-					encodeValue(value, mimeType, bufferFactory, elementType, hints));
+					encodeValue(value, mimeType, bufferFactory, elementType, hints, encoding));
 		}
 
 		for (MediaType streamingMediaType : this.streamingMediaTypes) {
 			if (streamingMediaType.isCompatibleWith(mimeType)) {
 				byte[] separator = STREAM_SEPARATORS.getOrDefault(streamingMediaType, NEWLINE_SEPARATOR);
 				return Flux.from(inputStream).map(value -> {
-					DataBuffer buffer = encodeValue(value, mimeType, bufferFactory, elementType, hints);
+					DataBuffer buffer = encodeValue(value, mimeType, bufferFactory, elementType, hints, encoding);
 					if (separator != null) {
 						buffer.write(separator);
 					}
@@ -129,11 +134,11 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 
 		ResolvableType listType = ResolvableType.forClassWithGenerics(List.class, elementType);
 		return Flux.from(inputStream).collectList().map(list ->
-				encodeValue(list, mimeType, bufferFactory, listType, hints)).flux();
+				encodeValue(list, mimeType, bufferFactory, listType, hints, encoding)).flux();
 	}
 
 	private DataBuffer encodeValue(Object value, @Nullable MimeType mimeType, DataBufferFactory bufferFactory,
-			ResolvableType elementType, @Nullable Map<String, Object> hints) {
+			ResolvableType elementType, @Nullable Map<String, Object> hints, JsonEncoding encoding) {
 
 		JavaType javaType = getJavaType(elementType.getType(), null);
 		Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
@@ -148,8 +153,10 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 
 		DataBuffer buffer = bufferFactory.allocateBuffer();
 		OutputStream outputStream = buffer.asOutputStream();
+
 		try {
-			writer.writeValue(outputStream, value);
+			JsonGenerator generator = getObjectMapper().getFactory().createGenerator(outputStream, encoding);
+			writer.writeValue(generator, value);
 		}
 		catch (InvalidDefinitionException ex) {
 			throw new CodecException("Type definition error: " + ex.getType(), ex);
@@ -168,6 +175,24 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 			ResolvableType elementType, @Nullable Map<String, Object> hints) {
 
 		return writer;
+	}
+
+	/**
+	 * Determine the JSON encoding to use for the given mime type.
+	 * @param mimeType the mime type as requested by the caller
+	 * @return the JSON encoding to use (never {@code null})
+	 * @since 5.0.5
+	 */
+	protected JsonEncoding getJsonEncoding(@Nullable MimeType mimeType) {
+		if (mimeType != null && mimeType.getCharset() != null) {
+			Charset charset = mimeType.getCharset();
+			for (JsonEncoding encoding : JsonEncoding.values()) {
+				if (charset.name().equals(encoding.getJavaName())) {
+					return encoding;
+				}
+			}
+		}
+		return JsonEncoding.UTF8;
 	}
 
 

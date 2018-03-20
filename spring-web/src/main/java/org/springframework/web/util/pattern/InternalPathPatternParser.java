@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,10 +157,8 @@ class InternalPathPatternParser {
 					}
 				}
 				else if (ch == '*') {
-					if (this.insideVariableCapture) {
-						if (this.variableCaptureStart == pos - 1) {
-							this.isCaptureTheRestVariable = true;
-						}
+					if (this.insideVariableCapture && this.variableCaptureStart == this.pos - 1) {
+						this.isCaptureTheRestVariable = true;
 					}
 					this.wildcard = true;
 				}

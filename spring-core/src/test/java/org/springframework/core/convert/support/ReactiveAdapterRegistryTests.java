@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ public class ReactiveAdapterRegistryTests {
 		Publisher<Integer> source = Flowable.fromArray(1, 2, 3);
 		Object target = getAdapter(Mono.class).fromPublisher(source);
 		assertTrue(target instanceof Mono);
-		assertEquals(new Integer(1), ((Mono<Integer>) target).block(Duration.ofMillis(1000)));
+		assertEquals(Integer.valueOf(1), ((Mono<Integer>) target).block(Duration.ofMillis(1000)));
 	}
 
 	@Test
@@ -122,7 +122,7 @@ public class ReactiveAdapterRegistryTests {
 		Publisher<Integer> source = Flowable.fromArray(1, 2, 3);
 		Object target = getAdapter(CompletableFuture.class).fromPublisher(source);
 		assertTrue(target instanceof CompletableFuture);
-		assertEquals(new Integer(1), ((CompletableFuture<Integer>) target).get());
+		assertEquals(Integer.valueOf(1), ((CompletableFuture<Integer>) target).get());
 	}
 
 	@Test
@@ -139,7 +139,7 @@ public class ReactiveAdapterRegistryTests {
 		Publisher<Integer> source = Flowable.fromArray(1);
 		Object target = getAdapter(rx.Single.class).fromPublisher(source);
 		assertTrue(target instanceof rx.Single);
-		assertEquals(new Integer(1), ((rx.Single<Integer>) target).toBlocking().value());
+		assertEquals(Integer.valueOf(1), ((rx.Single<Integer>) target).toBlocking().value());
 	}
 
 	@Test
@@ -173,7 +173,7 @@ public class ReactiveAdapterRegistryTests {
 		Publisher<Integer> source = Flowable.fromArray(1);
 		Object target = getAdapter(io.reactivex.Single.class).fromPublisher(source);
 		assertTrue(target instanceof io.reactivex.Single);
-		assertEquals(new Integer(1), ((io.reactivex.Single<Integer>) target).blockingGet());
+		assertEquals(Integer.valueOf(1), ((io.reactivex.Single<Integer>) target).blockingGet());
 	}
 
 	@Test
@@ -198,7 +198,7 @@ public class ReactiveAdapterRegistryTests {
 		Object source = rx.Single.just(1);
 		Object target = getAdapter(rx.Single.class).toPublisher(source);
 		assertTrue("Expected Mono Publisher: " + target.getClass().getName(), target instanceof Mono);
-		assertEquals(new Integer(1), ((Mono<Integer>) target).block(Duration.ofMillis(1000)));
+		assertEquals(Integer.valueOf(1), ((Mono<Integer>) target).block(Duration.ofMillis(1000)));
 	}
 
 	@Test
@@ -232,7 +232,7 @@ public class ReactiveAdapterRegistryTests {
 		Object source = io.reactivex.Single.just(1);
 		Object target = getAdapter(io.reactivex.Single.class).toPublisher(source);
 		assertTrue("Expected Mono Publisher: " + target.getClass().getName(), target instanceof Mono);
-		assertEquals(new Integer(1), ((Mono<Integer>) target).block(Duration.ofMillis(1000)));
+		assertEquals(Integer.valueOf(1), ((Mono<Integer>) target).block(Duration.ofMillis(1000)));
 	}
 
 	@Test
@@ -249,7 +249,7 @@ public class ReactiveAdapterRegistryTests {
 		future.complete(1);
 		Object target = getAdapter(CompletableFuture.class).toPublisher(future);
 		assertTrue("Expected Mono Publisher: " + target.getClass().getName(), target instanceof Mono);
-		assertEquals(new Integer(1), ((Mono<Integer>) target).block(Duration.ofMillis(1000)));
+		assertEquals(Integer.valueOf(1), ((Mono<Integer>) target).block(Duration.ofMillis(1000)));
 	}
 
 

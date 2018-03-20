@@ -46,7 +46,7 @@ import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition.Hea
  */
 public final class ConsumesRequestCondition extends AbstractRequestCondition<ConsumesRequestCondition> {
 
-	private final static ConsumesRequestCondition PRE_FLIGHT_MATCH = new ConsumesRequestCondition();
+	private static final ConsumesRequestCondition PRE_FLIGHT_MATCH = new ConsumesRequestCondition();
 
 	private final List<ConsumeMediaTypeExpression> expressions;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,26 @@
 
 package org.springframework.web.reactive.function.client;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.function.Consumer;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpResponse;
+import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 
@@ -67,6 +73,11 @@ public interface ClientResponse {
 	 * Return cookies of this response.
 	 */
 	MultiValueMap<String, ResponseCookie> cookies();
+
+	/**
+	 * Return the strategies used to convert the body of this response.
+	 */
+	ExchangeStrategies strategies();
 
 	/**
 	 * Extract the body with the given {@code BodyExtractor}.
@@ -141,6 +152,66 @@ public interface ClientResponse {
 	<T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> typeReference);
 
 
+	// Static builder methods
+
+	/**
+	 * Create a builder with the status, headers, and cookies of the given response.
+	 * @param other the response to copy the status, headers, and cookies from
+	 * @return the created builder
+	 */
+	static Builder from(ClientResponse other) {
+		Assert.notNull(other, "'other' must not be null");
+		return new DefaultClientResponseBuilder(other);
+	}
+
+	/**
+	 * Create a response builder with the given status code and using default strategies for reading
+	 * the body.
+	 * @param statusCode the status code
+	 * @return the created builder
+	 */
+	static Builder create(HttpStatus statusCode) {
+		return create(statusCode, ExchangeStrategies.withDefaults());
+	}
+
+	/**
+	 * Create a response builder with the given status code and strategies for reading the body.
+	 * @param statusCode the status code
+	 * @param strategies the strategies
+	 * @return the created builder
+	 */
+	static Builder create(HttpStatus statusCode, ExchangeStrategies strategies) {
+		Assert.notNull(statusCode, "'statusCode' must not be null");
+		Assert.notNull(strategies, "'strategies' must not be null");
+		return new DefaultClientResponseBuilder(strategies)
+				.statusCode(statusCode);
+	}
+
+	/**
+	 * Create a response builder with the given status code and message body readers.
+	 * @param statusCode the status code
+	 * @param messageReaders the message readers
+	 * @return the created builder
+	 */
+	static Builder create(HttpStatus statusCode, List<HttpMessageReader<?>> messageReaders) {
+		Assert.notNull(statusCode, "'statusCode' must not be null");
+		Assert.notNull(messageReaders, "'messageReaders' must not be null");
+
+		return create(statusCode, new ExchangeStrategies() {
+			@Override
+			public List<HttpMessageReader<?>> messageReaders() {
+				return messageReaders;
+			}
+
+			@Override
+			public List<HttpMessageWriter<?>> messageWriters() {
+				// not used in the response
+				return Collections.emptyList();
+			}
+		});
+
+	}
+
 	/**
 	 * Represents the headers of the HTTP response.
 	 * @see ClientResponse#headers()
@@ -172,4 +243,80 @@ public interface ClientResponse {
 		HttpHeaders asHttpHeaders();
 	}
 
+	/**
+	 * Defines a builder for a response.
+	 */
+	interface Builder {
+
+		/**
+		 * Set the status code of the response.
+		 * @param statusCode the new status code.
+		 * @return this builder
+		 */
+		Builder statusCode(HttpStatus statusCode);
+
+		/**
+		 * Add the given header value(s) under the given name.
+		 * @param headerName  the header name
+		 * @param headerValues the header value(s)
+		 * @return this builder
+		 * @see HttpHeaders#add(String, String)
+		 */
+		Builder header(String headerName, String... headerValues);
+
+		/**
+		 * Manipulate this response's headers with the given consumer. The
+		 * headers provided to the consumer are "live", so that the consumer can be used to
+		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
+		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
+		 * {@link HttpHeaders} methods.
+		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
+		 * @return this builder
+		 */
+		Builder headers(Consumer<HttpHeaders> headersConsumer);
+
+		/**
+		 * Add a cookie with the given name and value(s).
+		 * @param name the cookie name
+		 * @param values the cookie value(s)
+		 * @return this builder
+		 */
+		Builder cookie(String name, String... values);
+
+		/**
+		 * Manipulate this response's cookies with the given consumer. The
+		 * map provided to the consumer is "live", so that the consumer can be used to
+		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing header values,
+		 * {@linkplain MultiValueMap#remove(Object) remove} values, or use any of the other
+		 * {@link MultiValueMap} methods.
+		 * @param cookiesConsumer a function that consumes the cookies map
+		 * @return this builder
+		 */
+		Builder cookies(Consumer<MultiValueMap<String, ResponseCookie>> cookiesConsumer);
+
+		/**
+		 * Sets the body of the response. Calling this methods will
+		 * {@linkplain org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer) release}
+		 * the existing body of the builder.
+		 * @param body the new body.
+		 * @return this builder
+		 */
+		Builder body(Flux<DataBuffer> body);
+
+		/**
+		 * Sets the body of the response to the UTF-8 encoded bytes of the given string.
+		 * Calling this methods will
+		 * {@linkplain org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer) release}
+		 * the existing body of the builder.
+		 * @param body the new body.
+		 * @return this builder
+		 */
+		Builder body(String body);
+
+		/**
+		 * Builds the response.
+		 * @return the response
+		 */
+		ClientResponse build();
+	}
 }

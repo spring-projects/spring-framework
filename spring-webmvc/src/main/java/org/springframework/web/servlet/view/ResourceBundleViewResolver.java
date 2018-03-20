@@ -64,7 +64,7 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 		implements Ordered, InitializingBean, DisposableBean {
 
 	/** The default basename if no other basename is supplied. */
-	public final static String DEFAULT_BASENAME = "views";
+	public static final String DEFAULT_BASENAME = "views";
 
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered

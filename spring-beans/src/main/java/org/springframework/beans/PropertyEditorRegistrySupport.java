@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -349,10 +349,9 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	public boolean hasCustomEditorForElement(@Nullable Class<?> elementType, @Nullable String propertyPath) {
 		if (propertyPath != null && this.customEditorsForPath != null) {
 			for (Map.Entry<String, CustomEditorHolder> entry : this.customEditorsForPath.entrySet()) {
-				if (PropertyAccessorUtils.matchesProperty(entry.getKey(), propertyPath)) {
-					if (entry.getValue().getPropertyEditor(elementType) != null) {
-						return true;
-					}
+				if (PropertyAccessorUtils.matchesProperty(entry.getKey(), propertyPath) &&
+						entry.getValue().getPropertyEditor(elementType) != null) {
+					return true;
 				}
 			}
 		}

@@ -36,13 +36,7 @@ syntax. In several places an Inventor and Inventor's Society class are used as t
 target objects for expression evaluation. These class declarations and the data used to
 populate them are listed at the end of the chapter.
 
-
-
-
-[[expressions-features]]
-== Feature overview
-
-The expression language supports the following functionality
+The expression language supports the following functionality:
 
 * Literal expressions
 * Boolean and relational operators
@@ -68,7 +62,7 @@ The expression language supports the following functionality
 
 
 [[expressions-evaluation]]
-== Expression evaluation using Spring's Expression interface
+== Evaluation
 
 This section introduces the simple use of SpEL interfaces and its expression language.
 The complete language reference can be found in the section
@@ -156,10 +150,9 @@ result type. An `EvaluationException` will be thrown if the value cannot be cast
 type `T` or converted using the registered type converter.
 
 The more common usage of SpEL is to provide an expression string that is evaluated
-against a specific object instance (called the root object). There are two options here
-and which to choose depends on whether the object against which the expression is being
-evaluated will be changing with each call to evaluate the expression. In the following
-example we retrieve the `name` property from an instance of the Inventor class.
+against a specific object instance (called the root object). The example shows
+how to retrieve the `name` property from an instance of the `Inventor` class or
+create a boolean condition:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -172,88 +165,38 @@ example we retrieve the `name` property from an instance of the Inventor class.
 	Inventor tesla = new Inventor("Nikola Tesla", c.getTime(), "Serbian");
 
 	ExpressionParser parser = new SpelExpressionParser();
-	Expression exp = parser.parseExpression("**name**");
 
-	EvaluationContext context = new StandardEvaluationContext(tesla);
-	String name = (String) exp.getValue(context);
-----
-
-In the last line, the value of the string variable `name` will be set to "Nikola Tesla".
-The class StandardEvaluationContext is where you can specify which object the "name"
-property will be evaluated against. This is the mechanism to use if the root object is
-unlikely to change, it can simply be set once in the evaluation context. If the root
-object is likely to change repeatedly, it can be supplied on each call to `getValue`, as
-this next example shows:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	/ Create and set a calendar
-	GregorianCalendar c = new GregorianCalendar();
-	c.set(1856, 7, 9);
-
-	// The constructor arguments are name, birthday, and nationality.
-	Inventor tesla = new Inventor("Nikola Tesla", c.getTime(), "Serbian");
-
-	ExpressionParser parser = new SpelExpressionParser();
 	Expression exp = parser.parseExpression("**name**");
 	String name = (String) exp.getValue(tesla);
-----
+	// name == "Nikola Tesla"
 
-In this case the inventor `tesla` has been supplied directly to `getValue` and the
-expression evaluation infrastructure creates and manages a default evaluation context
-internally - it did not require one to be supplied.
-
-The StandardEvaluationContext is relatively expensive to construct and during repeated
-usage it builds up cached state that enables subsequent expression evaluations to be
-performed more quickly. For this reason it is better to cache and reuse them where
-possible, rather than construct a new one for each expression evaluation.
-
-In some cases it can be desirable to use a configured evaluation context and yet still
-supply a different root object on each call to `getValue`. `getValue` allows both to be
-specified on the same call. In these situations the root object passed on the call is
-considered to override any (which maybe null) specified on the evaluation context.
-
-[NOTE]
-====
-In standalone usage of SpEL there is a need to create the parser, parse expressions and
-perhaps provide evaluation contexts and a root context object. However, more common
-usage is to provide only the SpEL expression string as part of a configuration file, for
-example for Spring bean or Spring Web Flow definitions. In this case, the parser,
-evaluation context, root object and any predefined variables are all set up implicitly,
-requiring the user to specify nothing other than the expressions.
-====
-
-As a final introductory example, the use of a boolean operator is shown using the
-Inventor object in the previous example.
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	Expression exp = parser.parseExpression("name == 'Nikola Tesla'");
-	boolean result = exp.getValue(context, Boolean.class); // evaluates to true
+	exp = parser.parseExpression("name == 'Nikola Tesla'");
+	boolean result = exp.getValue(tesla, Boolean.class);
+	// result == true
 ----
 
 
 
 [[expressions-evaluation-context]]
-=== The EvaluationContext interface
+=== `EvaluationContext`
 
 The interface `EvaluationContext` is used when evaluating an expression to resolve
 properties, methods, fields, and to help perform type conversion. The out-of-the-box
-implementation, `StandardEvaluationContext`, uses reflection to manipulate the object,
-caching `java.lang.reflect.Method`, `java.lang.reflect.Field`, and
-`java.lang.reflect.Constructor` instances for increased performance.
+implementations, `SimpleEvalutationContext` and `StandardEvaluationContext`, use
+reflection to manipulate the object, caching `java.lang.reflect.Method`,
+`java.lang.reflect.Field`, and `java.lang.reflect.Constructor` instances for increased
+performance.
 
-The `StandardEvaluationContext` is where you may specify the root object to evaluate
-against via the method `setRootObject()` or passing the root object into the
-constructor. You can also specify variables and functions that will be used in the
-expression using the methods `setVariable()` and `registerFunction()`. The use of
-variables and functions are described in the language reference sections
-<<expressions-ref-variables,Variables>> and <<expressions-ref-functions,Functions>>. The
-`StandardEvaluationContext` is also where you can register custom
-``ConstructorResolver``s, ``MethodResolver``s, and ``PropertyAccessor``s to extend how SpEL
-evaluates expressions. Please refer to the javadoc of these classes for more details.
+`SimpleEvaluationContext` exposes a subset of essential SpEL language features and
+configuration options. Certain categories of expressions, do not require the full extent
+of the SpEL language syntax and arguably should be meaningfully restricted. Examples
+include but are not limited to data binding expressions, property-based filters, and
+others. To effect, `SimpleEvaluationContext` supports a subset of the SpEL language syntax
+that excludes references to Java types, constructors, and bean references.
+
+`StandardEvaluationContext` exposes the full set of SpEL language features and
+configuration options. You may use it to specify a default root object, and to configure
+every available evaluation-related strategy.
 
 
 [[expressions-type-conversion]]
@@ -280,14 +223,14 @@ being placed in it. A simple example:
 	}
 
 	Simple simple = new Simple();
-
 	simple.booleanList.add(true);
 
-	StandardEvaluationContext simpleContext = new StandardEvaluationContext(simple);
+	SimpleEvaluationContext context = new SimpleEvaluationContext();
 
 	// false is passed in here as a string. SpEL and the conversion service will
 	// correctly recognize that it needs to be a Boolean and convert it
-	parser.parseExpression("booleanList[0]").setValue(simpleContext, "false");
+
+	parser.parseExpression("booleanList[0]").setValue(context, simple, "false");
 
 	// b will be false
 	Boolean b = simple.booleanList.get(0);
@@ -446,7 +389,7 @@ More and more types of expression will be compilable in the future.
 
 
 [[expressions-beandef]]
-== Expression support for defining bean definitions
+== Expressions in bean definitions
 
 SpEL expressions can be used with XML or annotation-based configuration metadata for
 defining ``BeanDefinition``s. In both cases the syntax to define the expression is of the
@@ -455,7 +398,7 @@ form `#{ <expression string> }`.
 
 
 [[expressions-beandef-xml-based]]
-=== XML based configuration
+=== XML configuration
 
 A property or constructor-arg value can be set using expressions as shown below.
 
@@ -504,7 +447,7 @@ You can also refer to other bean properties by name, for example.
 
 
 [[expressions-beandef-annotation-based]]
-=== Annotation-based configuration
+=== Annotation config
 
 The `@Value` annotation can be placed on fields, methods and method/constructor
 parameters to specify a default value.
@@ -659,25 +602,24 @@ arrays and lists are obtained using square bracket notation.
 [subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
+	SimpleEvaluationContext context = new SimpleEvaluationContext();
 
 	// Inventions Array
-	StandardEvaluationContext teslaContext = new StandardEvaluationContext(tesla);
 
 	// evaluates to "Induction motor"
 	String invention = parser.parseExpression("inventions[3]").getValue(
-			teslaContext, String.class);
+			context, tesla, String.class);
 
 	// Members List
-	StandardEvaluationContext societyContext = new StandardEvaluationContext(ieee);
 
 	// evaluates to "Nikola Tesla"
 	String name = parser.parseExpression("Members[0].Name").getValue(
-			societyContext, String.class);
+			context, ieee, String.class);
 
 	// List and Array navigation
 	// evaluates to "Wireless communication"
 	String invention = parser.parseExpression("Members[0].Inventions[6]").getValue(
-			societyContext, String.class);
+			context, ieee, String.class);
 ----
 
 The contents of maps are obtained by specifying the literal key value within the
@@ -943,14 +885,14 @@ done within a call to `setValue` but can also be done inside a call to `getValue
 [subs="verbatim,quotes"]
 ----
 	Inventor inventor = new Inventor();
-	StandardEvaluationContext inventorContext = new StandardEvaluationContext(inventor);
+	SimpleEvaluationContext context = new SimpleEvaluationContext();
 
-	parser.parseExpression("Name").setValue(inventorContext, "Alexander Seovic2");
+	parser.parseExpression("Name").setValue(context, inventor, "Alexander Seovic2");
 
 	// alternatively
 
 	String aleks = parser.parseExpression(
-			"Name = 'Alexandar Seovic'").getValue(inventorContext, String.class);
+			"Name = 'Alexandar Seovic'").getValue(context, inventor, String.class);
 ----
 
 
@@ -1005,16 +947,16 @@ used).
 === Variables
 
 Variables can be referenced in the expression using the syntax `#variableName`. Variables
-are set using the method setVariable on the `StandardEvaluationContext`.
+are set using the method setVariable on `EvaluationContext` implementations.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
-	StandardEvaluationContext context = new StandardEvaluationContext(tesla);
+	SimpleEvaluationContext context = new SimpleEvaluationContext();
 	context.setVariable("newName", "Mike Tesla");
 
-	parser.parseExpression("Name = #newName").getValue(context);
+	parser.parseExpression("Name = #newName").getValue(context, tesla);
 
 	System.out.println(tesla.getName()) // "Mike Tesla"
 ----
@@ -1037,7 +979,7 @@ an expression are evaluated, #root always refers to the root.
 
 	// create parser and set variable 'primes' as the array of integers
 	ExpressionParser parser = new SpelExpressionParser();
-	StandardEvaluationContext context = new StandardEvaluationContext();
+	SimpleEvaluationContext context = new SimpleEvaluationContext();
 	context.setVariable("primes",primes);
 
 	// all prime numbers > 10 from the list (using selection ?{...})
@@ -1052,17 +994,18 @@ an expression are evaluated, #root always refers to the root.
 === Functions
 
 You can extend SpEL by registering user defined functions that can be called within the
-expression string. The function is registered with the `StandardEvaluationContext` using
-the method.
+expression string. The function is registered through the `EvaluationContext`.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	public void registerFunction(String name, Method m)
+	Method method = ...;
+
+	SimpleEvaluationContext context = new SimpleEvaluationContext();
+	context.setVariable("myFunction", method);
 ----
 
-A reference to a Java Method provides the implementation of the function. For example, a
-utility method to reverse a string is shown below.
+For example, given a utility method to reverse a string is shown below:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1079,16 +1022,15 @@ utility method to reverse a string is shown below.
 	}
 ----
 
-This method is then registered with the evaluation context and can be used within an
-expression string.
+The above method can then be registered and used as follows:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
-	StandardEvaluationContext context = new StandardEvaluationContext();
+	SimpleEvaluationContext context = new SimpleEvaluationContext();
 
-	context.registerFunction("reverseString",
+	context.setVariable("reverseString",
 		StringUtils.class.getDeclaredMethod("reverseString", String.class));
 
 	String helloWorldReversed = parser.parseExpression(
@@ -1198,15 +1140,15 @@ Here is a more complex example.
 	ExpressionParser parser = new SpelExpressionParser();
 
 	Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
-	StandardEvaluationContext context = new StandardEvaluationContext(tesla);
+	SimpleEvaluationContext context = new SimpleEvaluationContext();
 
-	String name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, String.class);
+	String name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, tesla, String.class);
 
 	System.out.println(name); // Nikola Tesla
 
 	tesla.setName(null);
 
-	name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, String.class);
+	name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, tesla, String.class);
 
 	System.out.println(name); // Elvis Presley
 ----
@@ -1230,14 +1172,14 @@ safe navigation operator will simply return null instead of throwing an exceptio
 	Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
 	tesla.setPlaceOfBirth(new PlaceOfBirth("Smiljan"));
 
-	StandardEvaluationContext context = new StandardEvaluationContext(tesla);
+	SimpleEvaluationContext context = new SimpleEvaluationContext();
 
-	String city = parser.parseExpression("PlaceOfBirth?.City").getValue(context, String.class);
+	String city = parser.parseExpression("PlaceOfBirth?.City").getValue(context, tesla, String.class);
 	System.out.println(city); // Smiljan
 
 	tesla.setPlaceOfBirth(null);
 
-	city = parser.parseExpression("PlaceOfBirth?.City").getValue(context, String.class);
+	city = parser.parseExpression("PlaceOfBirth?.City").getValue(context, tesla, String.class);
 
 	System.out.println(city); // null - does not throw NullPointerException!!!
 ----

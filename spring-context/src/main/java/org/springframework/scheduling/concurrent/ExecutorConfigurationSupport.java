@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 package org.springframework.scheduling.concurrent;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -31,9 +33,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
 
 /**
- * Base class for classes that are setting up a
- * {@code java.util.concurrent.ExecutorService}
- * (typically a {@link java.util.concurrent.ThreadPoolExecutor}).
+ * Base class for setting up a {@link java.util.concurrent.ExecutorService}
+ * (typically a {@link java.util.concurrent.ThreadPoolExecutor} or
+ * {@link java.util.concurrent.ScheduledThreadPoolExecutor}).
  * Defines common configuration settings and common lifecycle handling.
  *
  * @author Juergen Hoeller
@@ -41,6 +43,7 @@ import org.springframework.lang.Nullable;
  * @see java.util.concurrent.ExecutorService
  * @see java.util.concurrent.Executors
  * @see java.util.concurrent.ThreadPoolExecutor
+ * @see java.util.concurrent.ScheduledThreadPoolExecutor
  */
 @SuppressWarnings("serial")
 public abstract class ExecutorConfigurationSupport extends CustomizableThreadFactory
@@ -209,9 +212,25 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 				this.executor.shutdown();
 			}
 			else {
-				this.executor.shutdownNow();
+				for (Runnable remainingTask : this.executor.shutdownNow()) {
+					cancelRemainingTask(remainingTask);
+				}
 			}
 			awaitTerminationIfNecessary(this.executor);
+		}
+	}
+
+	/**
+	 * Cancel the given remaining task which never commended execution,
+	 * as returned from {@link ExecutorService#shutdownNow()}.
+	 * @param task the task to cancel (typically a {@link RunnableFuture})
+	 * @since 5.0.5
+	 * @see #shutdown()
+	 * @see RunnableFuture#cancel(boolean)
+	 */
+	protected void cancelRemainingTask(Runnable task) {
+		if (task instanceof Future) {
+			((Future<?>) task).cancel(true);
 		}
 	}
 

@@ -191,7 +191,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	@Nullable
 	private transient ListableBeanFactory beanFactory;
 
-	private transient final Map<String, InjectionMetadata> injectionMetadataCache = new ConcurrentHashMap<>(256);
+	private final transient Map<String, InjectionMetadata> injectionMetadataCache = new ConcurrentHashMap<>(256);
 
 	private final Map<Object, EntityManager> extendedEntityManagersToClose = new ConcurrentHashMap<>(16);
 

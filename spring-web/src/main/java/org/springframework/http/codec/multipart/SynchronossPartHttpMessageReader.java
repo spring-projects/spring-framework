@@ -142,7 +142,7 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 				finally {
 					DataBufferUtils.release(buffer);
 				}
-			}, (ex) -> {
+			}, ex -> {
 				try {
 					listener.onError("Request body input error", ex);
 					parser.close();
@@ -227,7 +227,7 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 	}
 
 
-	private static abstract class AbstractSynchronossPart implements Part {
+	private abstract static class AbstractSynchronossPart implements Part {
 
 		private final HttpHeaders headers;
 

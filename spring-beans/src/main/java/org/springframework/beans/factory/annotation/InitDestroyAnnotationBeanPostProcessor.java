@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
 	@Nullable
-	private transient final Map<Class<?>, LifecycleMetadata> lifecycleMetadataCache = new ConcurrentHashMap<>(256);
+	private final transient Map<Class<?>, LifecycleMetadata> lifecycleMetadataCache = new ConcurrentHashMap<>(256);
 
 
 	/**
@@ -205,21 +205,17 @@ public class InitDestroyAnnotationBeanPostProcessor
 			final LinkedList<LifecycleElement> currDestroyMethods = new LinkedList<>();
 
 			ReflectionUtils.doWithLocalMethods(targetClass, method -> {
-				if (initAnnotationType != null) {
-					if (method.getAnnotation(initAnnotationType) != null) {
-						LifecycleElement element = new LifecycleElement(method);
-						currInitMethods.add(element);
-						if (debug) {
-							logger.debug("Found init method on class [" + clazz.getName() + "]: " + method);
-						}
+				if (initAnnotationType != null && method.isAnnotationPresent(initAnnotationType)) {
+					LifecycleElement element = new LifecycleElement(method);
+					currInitMethods.add(element);
+					if (debug) {
+						logger.debug("Found init method on class [" + clazz.getName() + "]: " + method);
 					}
 				}
-				if (destroyAnnotationType != null) {
-					if (method.getAnnotation(destroyAnnotationType) != null) {
-						currDestroyMethods.add(new LifecycleElement(method));
-						if (debug) {
-							logger.debug("Found destroy method on class [" + clazz.getName() + "]: " + method);
-						}
+				if (destroyAnnotationType != null && method.isAnnotationPresent(destroyAnnotationType)) {
+					currDestroyMethods.add(new LifecycleElement(method));
+					if (debug) {
+						logger.debug("Found destroy method on class [" + clazz.getName() + "]: " + method);
 					}
 				}
 			});

@@ -60,10 +60,9 @@ import org.springframework.util.MultiValueMap;
  * individual method for details on which search algorithm is used.
  *
  * <p><strong>Get semantics</strong> are limited to searching for annotations
- * that are either <em>present</em> on an {@code AnnotatedElement} (i.e.,
- * declared locally or {@linkplain java.lang.annotation.Inherited inherited})
- * or declared within the annotation hierarchy <em>above</em> the
- * {@code AnnotatedElement}.
+ * that are either <em>present</em> on an {@code AnnotatedElement} (i.e. declared
+ * locally or {@linkplain java.lang.annotation.Inherited inherited}) or declared
+ * within the annotation hierarchy <em>above</em> the {@code AnnotatedElement}.
  *
  * <p><strong>Find semantics</strong> are much more exhaustive, providing
  * <em>get semantics</em> plus support for the following:
@@ -77,14 +76,13 @@ import org.springframework.util.MultiValueMap;
  * </ul>
  *
  * <h3>Support for {@code @Inherited}</h3>
- * <p>Methods following <em>get semantics</em> will honor the contract of
- * Java's {@link java.lang.annotation.Inherited @Inherited} annotation except
- * that locally declared annotations (including custom composed annotations)
- * will be favored over inherited annotations. In contrast, methods following
- * <em>find semantics</em> will completely ignore the presence of
- * {@code @Inherited} since the <em>find</em> search algorithm manually
- * traverses type and method hierarchies and thereby implicitly supports
- * annotation inheritance without the need for {@code @Inherited}.
+ * <p>Methods following <em>get semantics</em> will honor the contract of Java's
+ * {@link java.lang.annotation.Inherited @Inherited} annotation except that locally
+ * declared annotations (including custom composed annotations) will be favored over
+ * inherited annotations. In contrast, methods following <em>find semantics</em>
+ * will completely ignore the presence of {@code @Inherited} since the <em>find</em>
+ * search algorithm manually traverses type and method hierarchies and thereby
+ * implicitly supports annotation inheritance without a need for {@code @Inherited}.
  *
  * @author Phillip Webb
  * @author Juergen Hoeller
@@ -794,7 +792,7 @@ public class AnnotatedElementUtils {
 	 * @param annotationName the fully qualified class name of the annotation
 	 * type to find (as an alternative to {@code annotationType})
 	 * @param processor the processor to delegate to
-	 * @return the result of the processor, potentially {@code null}
+	 * @return the result of the processor (potentially {@code null})
 	 */
 	@Nullable
 	private static <T> T searchWithGetSemantics(AnnotatedElement element,
@@ -815,7 +813,7 @@ public class AnnotatedElementUtils {
 	 * @param containerType the type of the container that holds repeatable
 	 * annotations, or {@code null} if the annotation is not repeatable
 	 * @param processor the processor to delegate to
-	 * @return the result of the processor, potentially {@code null}
+	 * @return the result of the processor (potentially {@code null})
 	 * @since 4.3
 	 */
 	@Nullable
@@ -848,7 +846,7 @@ public class AnnotatedElementUtils {
 	 * @param processor the processor to delegate to
 	 * @param visited the set of annotated elements that have already been visited
 	 * @param metaDepth the meta-depth of the annotation
-	 * @return the result of the processor, potentially {@code null}
+	 * @return the result of the processor (potentially {@code null})
 	 */
 	@Nullable
 	private static <T> T searchWithGetSemantics(AnnotatedElement element,
@@ -909,7 +907,7 @@ public class AnnotatedElementUtils {
 	 * @param processor the processor to delegate to
 	 * @param visited the set of annotated elements that have already been visited
 	 * @param metaDepth the meta-depth of the annotation
-	 * @return the result of the processor, potentially {@code null}
+	 * @return the result of the processor (potentially {@code null})
 	 * @since 4.2
 	 */
 	@Nullable
@@ -979,7 +977,7 @@ public class AnnotatedElementUtils {
 	 * @param annotationName the fully qualified class name of the annotation
 	 * type to find (as an alternative to {@code annotationType})
 	 * @param processor the processor to delegate to
-	 * @return the result of the processor, potentially {@code null}
+	 * @return the result of the processor (potentially {@code null})
 	 * @since 4.2
 	 */
 	@Nullable
@@ -1001,7 +999,7 @@ public class AnnotatedElementUtils {
 	 * @param containerType the type of the container that holds repeatable
 	 * annotations, or {@code null} if the annotation is not repeatable
 	 * @param processor the processor to delegate to
-	 * @return the result of the processor, potentially {@code null}
+	 * @return the result of the processor (potentially {@code null})
 	 * @since 4.3
 	 */
 	@Nullable
@@ -1039,7 +1037,7 @@ public class AnnotatedElementUtils {
 	 * @param processor the processor to delegate to
 	 * @param visited the set of annotated elements that have already been visited
 	 * @param metaDepth the meta-depth of the annotation
-	 * @return the result of the processor, potentially {@code null}
+	 * @return the result of the processor (potentially {@code null})
 	 * @since 4.2
 	 */
 	@Nullable

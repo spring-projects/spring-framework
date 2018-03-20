@@ -113,7 +113,7 @@ public class InjectionMetadata {
 	}
 
 
-	public static abstract class InjectedElement {
+	public abstract static class InjectedElement {
 
 		protected final Member member;
 

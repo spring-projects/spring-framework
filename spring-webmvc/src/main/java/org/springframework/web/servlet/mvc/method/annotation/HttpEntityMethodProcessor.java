@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,11 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -65,6 +68,8 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * @since 3.1
  */
 public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodProcessor {
+
+	private static final Set<HttpMethod> SAFE_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
 
 	/**
 	 * Basic constructor with converters only. Suitable for resolving
@@ -199,7 +204,8 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			int returnStatus = ((ResponseEntity<?>) responseEntity).getStatusCodeValue();
 			outputMessage.getServletResponse().setStatus(returnStatus);
 			if (returnStatus == 200) {
-				if (isResourceNotModified(inputMessage, outputMessage)) {
+				if (SAFE_METHODS.contains(inputMessage.getMethod())
+						&& isResourceNotModified(inputMessage, outputMessage)) {
 					// Ensure headers are flushed, no body should be written.
 					outputMessage.flush();
 					// Skip call to converters, as they may update the body.

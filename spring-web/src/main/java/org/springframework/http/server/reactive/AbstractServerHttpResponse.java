@@ -209,13 +209,13 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 			return Mono.empty();
 		}
 
-		this.commitActions.add(() -> {
-			applyStatusCode();
-			applyHeaders();
-			applyCookies();
-			this.state.set(State.COMMITTED);
-			return Mono.empty();
-		});
+		this.commitActions.add(() ->
+				Mono.fromRunnable(() -> {
+					applyStatusCode();
+					applyHeaders();
+					applyCookies();
+					this.state.set(State.COMMITTED);
+				}));
 
 		if (writeAction != null) {
 			this.commitActions.add(writeAction);
@@ -224,7 +224,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 		List<? extends Mono<Void>> actions = this.commitActions.stream()
 				.map(Supplier::get).collect(Collectors.toList());
 
-		return Flux.concat(actions).next();
+		return Flux.concat(actions).then();
 	}
 
 

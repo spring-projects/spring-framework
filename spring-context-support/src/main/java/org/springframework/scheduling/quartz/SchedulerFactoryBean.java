@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 
 import org.quartz.Scheduler;
@@ -697,7 +698,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 				@Override
 				public void run() {
 					try {
-						Thread.sleep(startupDelay * 1000);
+						Thread.sleep(TimeUnit.SECONDS.toMillis(startupDelay));
 					}
 					catch (InterruptedException ex) {
 						Thread.currentThread().interrupt();

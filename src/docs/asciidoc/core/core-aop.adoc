@@ -1630,7 +1630,7 @@ using the `ref` attribute:
 	</bean>
 ----
 
-The bean backing the aspect (" `aBean`" in this case) can of course be configured and
+The bean backing the aspect (`"aBean"` in this case) can of course be configured and
 dependency injected just like any other Spring bean.
 
 
@@ -1727,12 +1727,12 @@ parameters of the matching names:
 	}
 ----
 
-When combining pointcut sub-expressions, '&&' is awkward within an XML document, and so
-the keywords 'and', 'or' and 'not' can be used in place of '&&', '||' and '!'
+When combining pointcut sub-expressions, `&&` is awkward within an XML document, and so
+the keywords `and`, `or`, and `not` can be used in place of `&&`, `||`, and `!`
 respectively. For example, the previous pointcut may be better written as:
 
 [source,xml,indent=0]
-[subs="verbatim"]
+[subs="verbatim,quotes"]
 ----
 	<aop:config>
 

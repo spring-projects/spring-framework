@@ -127,7 +127,7 @@ public class DefaultClientResponseTests {
 		when(mockResponse.getBody()).thenReturn(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections
-				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
+				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
 		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders);
 
 		Mono<String> resultMono = defaultClientResponse.body(toMono(String.class));
@@ -148,7 +148,7 @@ public class DefaultClientResponseTests {
 		when(mockResponse.getBody()).thenReturn(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections
-				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
+				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
 		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders);
 
 		Mono<String> resultMono = defaultClientResponse.bodyToMono(String.class);
@@ -169,7 +169,7 @@ public class DefaultClientResponseTests {
 		when(mockResponse.getBody()).thenReturn(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections
-				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
+				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
 		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders);
 
 		Mono<String> resultMono =
@@ -192,7 +192,7 @@ public class DefaultClientResponseTests {
 		when(mockResponse.getBody()).thenReturn(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections
-				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
+				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
 		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders);
 
 		Flux<String> resultFlux = defaultClientResponse.bodyToFlux(String.class);
@@ -214,7 +214,7 @@ public class DefaultClientResponseTests {
 		when(mockResponse.getBody()).thenReturn(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections
-				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
+				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
 		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders);
 
 		Flux<String> resultFlux =
@@ -238,7 +238,7 @@ public class DefaultClientResponseTests {
 		when(mockResponse.getBody()).thenReturn(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections
-				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
+				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
 		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders);
 
 		ResponseEntity<String> result = defaultClientResponse.toEntity(String.class).block();
@@ -261,7 +261,7 @@ public class DefaultClientResponseTests {
 		when(mockResponse.getBody()).thenReturn(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections
-				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
+				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
 		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders);
 
 		ResponseEntity<String> result = defaultClientResponse.toEntity(
@@ -286,7 +286,7 @@ public class DefaultClientResponseTests {
 		when(mockResponse.getBody()).thenReturn(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections
-				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
+				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
 		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders);
 
 		ResponseEntity<List<String>> result = defaultClientResponse.toEntityList(String.class).block();
@@ -309,7 +309,7 @@ public class DefaultClientResponseTests {
 		when(mockResponse.getBody()).thenReturn(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections
-				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
+				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
 		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders);
 
 		ResponseEntity<List<String>> result = defaultClientResponse.toEntityList(
@@ -331,7 +331,7 @@ public class DefaultClientResponseTests {
 		when(mockResponse.getBody()).thenReturn(body.flux());
 
 		List<HttpMessageReader<?>> messageReaders = Collections
-				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
+				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
 		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders);
 
 		StepVerifier.create(defaultClientResponse.bodyToMono(Void.class))
@@ -356,7 +356,7 @@ public class DefaultClientResponseTests {
 		when(mockResponse.getBody()).thenReturn(body.flux());
 
 		List<HttpMessageReader<?>> messageReaders = Collections
-				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
+				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
 		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders);
 
 		StepVerifier.create(defaultClientResponse.bodyToMono(Void.class))

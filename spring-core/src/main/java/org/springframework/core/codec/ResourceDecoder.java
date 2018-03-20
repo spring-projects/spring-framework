@@ -51,9 +51,7 @@ public class ResourceDecoder extends AbstractDataBufferDecoder<Resource> {
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		Class<?> clazz = elementType.getRawClass();
-		return (clazz != null &&
-				(InputStreamResource.class == clazz || clazz.isAssignableFrom(ByteArrayResource.class)) &&
-				super.canDecode(elementType, mimeType));
+		return clazz != null && Resource.class.isAssignableFrom(clazz) && super.canDecode(elementType, mimeType);
 	}
 
 	@Override
@@ -77,7 +75,7 @@ public class ResourceDecoder extends AbstractDataBufferDecoder<Resource> {
 		if (InputStreamResource.class == clazz) {
 			return new InputStreamResource(new ByteArrayInputStream(bytes));
 		}
-		else if (clazz.isAssignableFrom(ByteArrayResource.class)) {
+		else if (Resource.class.isAssignableFrom(clazz)) {
 			return new ByteArrayResource(bytes);
 		}
 		else {

@@ -47,7 +47,7 @@ public abstract class AbstractFallbackJCacheOperationSource implements JCacheOpe
 	 * Canonical value held in cache to indicate no caching attribute was
 	 * found for this method and we don't need to look again.
 	 */
-	private final static Object NULL_CACHING_ATTRIBUTE = new Object();
+	private static final Object NULL_CACHING_ATTRIBUTE = new Object();
 
 
 	protected final Log logger = LogFactory.getLog(getClass());

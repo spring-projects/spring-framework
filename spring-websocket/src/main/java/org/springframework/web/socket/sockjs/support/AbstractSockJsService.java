@@ -87,9 +87,9 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 	private boolean sessionCookieNeeded = true;
 
-	private long heartbeatTime = 25 * 1000;
+	private long heartbeatTime = TimeUnit.SECONDS.toMillis(25);
 
-	private long disconnectDelay = 5 * 1000;
+	private long disconnectDelay = TimeUnit.SECONDS.toMillis(5 );
 
 	private int httpMessageCacheSize = 100;
 

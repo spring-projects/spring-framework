@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,6 +69,7 @@ public class URIEditor extends PropertyEditorSupport {
 	 * Create a new URIEditor, converting "classpath:" locations into
 	 * standard URIs (not trying to resolve them into physical resources).
 	 * @param encode indicates whether Strings will be encoded or not
+	 * @since 3.0
 	 */
 	public URIEditor(boolean encode) {
 		this.classLoader = null;
@@ -91,6 +92,7 @@ public class URIEditor extends PropertyEditorSupport {
 	 * @param classLoader the ClassLoader to use for resolving "classpath:" locations
 	 * (may be {@code null} to indicate the default ClassLoader)
 	 * @param encode indicates whether Strings will be encoded or not
+	 * @since 3.0
 	 */
 	public URIEditor(@Nullable ClassLoader classLoader, boolean encode) {
 		this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
@@ -103,17 +105,13 @@ public class URIEditor extends PropertyEditorSupport {
 		if (StringUtils.hasText(text)) {
 			String uri = text.trim();
 			if (this.classLoader != null && uri.startsWith(ResourceUtils.CLASSPATH_URL_PREFIX)) {
-				ClassPathResource resource =
-						new ClassPathResource(uri.substring(ResourceUtils.CLASSPATH_URL_PREFIX.length()), this.classLoader);
+				ClassPathResource resource = new ClassPathResource(
+						uri.substring(ResourceUtils.CLASSPATH_URL_PREFIX.length()), this.classLoader);
 				try {
-					String url = resource.getURL().toString();
-					setValue(createURI(url));
+					setValue(resource.getURI());
 				}
 				catch (IOException ex) {
 					throw new IllegalArgumentException("Could not retrieve URI for " + resource + ": " + ex.getMessage());
-				}
-				catch (URISyntaxException ex) {
-					throw new IllegalArgumentException("Invalid URI syntax: " + ex);
 				}
 			}
 			else {
@@ -131,9 +129,8 @@ public class URIEditor extends PropertyEditorSupport {
 	}
 
 	/**
-	 * Create a URI instance for the given (resolved) String value.
-	 * <p>The default implementation encodes the value into a RFC
-	 * 2396 compliant URI.
+	 * Create a URI instance for the given user-specified String value.
+	 * <p>The default implementation encodes the value into a RFC-2396 compliant URI.
 	 * @param value the value to convert into a URI instance
 	 * @return the URI instance
 	 * @throws java.net.URISyntaxException if URI conversion failed

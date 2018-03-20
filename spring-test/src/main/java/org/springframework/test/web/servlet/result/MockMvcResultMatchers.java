@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -186,7 +186,7 @@ public abstract class MockMvcResultMatchers {
 	 * @param expression the JSON path expression, optionally parameterized with arguments
 	 * @param args arguments to parameterize the JSON path expression with
 	 */
-	public static JsonPathResultMatchers jsonPath(String expression, Object ... args) {
+	public static JsonPathResultMatchers jsonPath(String expression, Object... args) {
 		return new JsonPathResultMatchers(expression, args);
 	}
 

@@ -18,7 +18,6 @@ package org.springframework.core.codec;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.OptionalLong;
 
 import reactor.core.publisher.Flux;
 

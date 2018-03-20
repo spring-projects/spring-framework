@@ -205,7 +205,7 @@ public abstract class ConvertingEncoderDecoderSupport<T, M> {
 	 * to Spring's conversion service. See {@link ConvertingEncoderDecoderSupport} for details.
 	 * @param <T> the type that this Encoder can convert to
 	 */
-	public static abstract class BinaryEncoder<T> extends ConvertingEncoderDecoderSupport<T, ByteBuffer>
+	public abstract static class BinaryEncoder<T> extends ConvertingEncoderDecoderSupport<T, ByteBuffer>
 			implements Encoder.Binary<T> {
 	}
 
@@ -215,7 +215,7 @@ public abstract class ConvertingEncoderDecoderSupport<T, M> {
 	 * to Spring's conversion service. See {@link ConvertingEncoderDecoderSupport} for details.
 	 * @param <T> the type that this Decoder can convert from
 	 */
-	public static abstract class BinaryDecoder<T> extends ConvertingEncoderDecoderSupport<T, ByteBuffer>
+	public abstract static class BinaryDecoder<T> extends ConvertingEncoderDecoderSupport<T, ByteBuffer>
 			implements Decoder.Binary<T> {
 	}
 
@@ -226,7 +226,7 @@ public abstract class ConvertingEncoderDecoderSupport<T, M> {
 	 * details.
 	 * @param <T> the type that this Encoder can convert to
 	 */
-	public static abstract class TextEncoder<T> extends ConvertingEncoderDecoderSupport<T, String>
+	public abstract static class TextEncoder<T> extends ConvertingEncoderDecoderSupport<T, String>
 			implements Encoder.Text<T> {
 	}
 
@@ -236,7 +236,7 @@ public abstract class ConvertingEncoderDecoderSupport<T, M> {
 	 * to Spring's conversion service. See {@link ConvertingEncoderDecoderSupport} for details.
 	 * @param <T> the type that this Decoder can convert from
 	 */
-	public static abstract class TextDecoder<T> extends ConvertingEncoderDecoderSupport<T, String>
+	public abstract static class TextDecoder<T> extends ConvertingEncoderDecoderSupport<T, String>
 			implements Decoder.Text<T> {
 	}
 

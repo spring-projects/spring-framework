@@ -303,7 +303,7 @@ public abstract class RouterFunctions {
 	}
 
 
-	private static abstract class AbstractRouterFunction<T extends ServerResponse> implements RouterFunction<T> {
+	private abstract static class AbstractRouterFunction<T extends ServerResponse> implements RouterFunction<T> {
 
 		@Override
 		public String toString() {
@@ -313,7 +313,7 @@ public abstract class RouterFunctions {
 		}
 	}
 
-	final static class SameComposedRouterFunction<T extends ServerResponse> extends AbstractRouterFunction<T> {
+	static final class SameComposedRouterFunction<T extends ServerResponse> extends AbstractRouterFunction<T> {
 
 		private final RouterFunction<T> first;
 
@@ -337,7 +337,7 @@ public abstract class RouterFunctions {
 		}
 	}
 
-	final static class DifferentComposedRouterFunction extends AbstractRouterFunction<ServerResponse> {
+	static final class DifferentComposedRouterFunction extends AbstractRouterFunction<ServerResponse> {
 
 		private final RouterFunction<?> first;
 
@@ -363,7 +363,7 @@ public abstract class RouterFunctions {
 
 	}
 
-	final static class FilteredRouterFunction<T extends ServerResponse, S extends ServerResponse>
+	static final class FilteredRouterFunction<T extends ServerResponse, S extends ServerResponse>
 			implements RouterFunction<S> {
 
 		private final RouterFunction<T> routerFunction;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,12 +71,12 @@ public class CollectionUtilsTests {
 	public void testMergePrimitiveArrayIntoCollection() {
 		int[] arr = new int[] {1, 2};
 		List<Comparable<?>> list = new LinkedList<>();
-		list.add(new Integer(3));
+		list.add(Integer.valueOf(3));
 
 		CollectionUtils.mergeArrayIntoCollection(arr, list);
-		assertEquals(new Integer(3), list.get(0));
-		assertEquals(new Integer(1), list.get(1));
-		assertEquals(new Integer(2), list.get(2));
+		assertEquals(Integer.valueOf(3), list.get(0));
+		assertEquals(Integer.valueOf(1), list.get(1));
+		assertEquals(Integer.valueOf(2), list.get(2));
 	}
 
 	@Test
@@ -85,7 +85,7 @@ public class CollectionUtilsTests {
 		defaults.setProperty("prop1", "value1");
 		Properties props = new Properties(defaults);
 		props.setProperty("prop2", "value2");
-		props.put("prop3", new Integer(3));
+		props.put("prop3", Integer.valueOf(3));
 
 		Map<String, String> map = new HashMap<>();
 		map.put("prop4", "value4");
@@ -93,7 +93,7 @@ public class CollectionUtilsTests {
 		CollectionUtils.mergePropertiesIntoMap(props, map);
 		assertEquals("value1", map.get("prop1"));
 		assertEquals("value2", map.get("prop2"));
-		assertEquals(new Integer(3), map.get("prop3"));
+		assertEquals(Integer.valueOf(3), map.get("prop3"));
 		assertEquals("value4", map.get("prop4"));
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,10 +135,6 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		return this.upgradeStrategy;
 	}
 
-	@Override
-	public boolean isRunning() {
-		return this.running;
-	}
 
 	@Override
 	public void start() {
@@ -166,6 +162,11 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		if (getUpgradeStrategy() instanceof Lifecycle) {
 			((Lifecycle) getUpgradeStrategy()).stop();
 		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
 	}
 
 

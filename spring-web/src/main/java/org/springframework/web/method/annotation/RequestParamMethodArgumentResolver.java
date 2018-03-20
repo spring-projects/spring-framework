@@ -220,10 +220,9 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 		Assert.state(name != null, "Unresolvable parameter name");
 
 		if (value == null) {
-			if (requestParam != null) {
-				if (!requestParam.required() || !requestParam.defaultValue().equals(ValueConstants.DEFAULT_NONE)) {
-					return;
-				}
+			if (requestParam != null &&
+					(!requestParam.required() || !requestParam.defaultValue().equals(ValueConstants.DEFAULT_NONE))) {
+				return;
 			}
 			builder.queryParam(name);
 		}

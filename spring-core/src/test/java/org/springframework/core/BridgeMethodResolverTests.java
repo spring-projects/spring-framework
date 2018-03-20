@@ -1297,13 +1297,9 @@ public class BridgeMethodResolverTests {
 	//-------------------
 
 	public static abstract class BaseEntity {
-
-		private String id;
 	}
 
 	public static class FooEntity extends BaseEntity {
-
-		private String name;
 	}
 
 	public static class BaseClass<T> {

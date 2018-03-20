@@ -56,7 +56,8 @@ public class DataBufferEncoder extends AbstractEncoder<DataBuffer> {
 	}
 
 	@Override
-	public Long getContentLength(DataBuffer dataBuffer, MimeType mimeType) {
+	public Long getContentLength(DataBuffer dataBuffer, @Nullable MimeType mimeType) {
 		return (long) dataBuffer.readableByteCount();
 	}
+
 }

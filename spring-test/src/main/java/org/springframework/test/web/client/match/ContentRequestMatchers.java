@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 
 import org.hamcrest.Matcher;
+import org.springframework.test.util.JsonExpectationsHelper;
 import org.w3c.dom.Node;
 
 import org.springframework.http.HttpHeaders;
@@ -49,6 +50,8 @@ public class ContentRequestMatchers {
 
 	private final XmlExpectationsHelper xmlHelper;
 
+	private final JsonExpectationsHelper jsonHelper;
+
 
 	/**
 	 * Class constructor, not for direct instantiation.
@@ -56,6 +59,7 @@ public class ContentRequestMatchers {
 	 */
 	protected ContentRequestMatchers() {
 		this.xmlHelper = new XmlExpectationsHelper();
+		this.jsonHelper = new JsonExpectationsHelper();
 	}
 
 
@@ -190,6 +194,46 @@ public class ContentRequestMatchers {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
 				xmlHelper.assertSource(request.getBodyAsString(), matcher);
+			}
+		};
+	}
+
+	/**
+	 * Parse the expected and actual strings as JSON and assert the two
+	 * are "similar" - i.e. they contain the same attribute-value pairs
+	 * regardless of formatting with a lenient checking (extensible, and non-strict array
+	 * ordering).
+	 * <p>Use of this matcher requires the <a
+	 * href="http://jsonassert.skyscreamer.org/">JSONassert<a/> library.
+	 * @param expectedJsonContent the expected JSON content
+	 * @since 5.0.5
+	 */
+	public RequestMatcher json(final String expectedJsonContent) {
+		return json(expectedJsonContent, false);
+	}
+
+	/**
+	 * Parse the request body and the given string as JSON and assert the two
+	 * are "similar" - i.e. they contain the same attribute-value pairs
+	 * regardless of formatting.
+	 * <p>Can compare in two modes, depending on {@code strict} parameter value:
+	 * <ul>
+	 *     <li>{@code true}: strict checking. Not extensible, and strict array ordering.</li>
+	 *     <li>{@code false}: lenient checking. Extensible, and non-strict array ordering.</li>
+	 * </ul>
+	 * <p>Use of this matcher requires the <a
+	 * href="http://jsonassert.skyscreamer.org/">JSONassert<a/> library.
+	 * @param expectedJsonContent the expected JSON content
+	 * @param strict enables strict checking
+	 * @since 5.0.5
+	 */
+	public RequestMatcher json(final String expectedJsonContent, final boolean strict) {
+		return request -> {
+			try {
+				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
+				jsonHelper.assertJsonEqual(expectedJsonContent, mockRequest.getBodyAsString(), strict);
+			} catch (Exception e) {
+				throw new AssertionError("Failed to parse expected or actual JSON request content", e);
 			}
 		};
 	}

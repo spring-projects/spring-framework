@@ -244,7 +244,7 @@ public class PreparedStatementCreatorFactory {
 			for (int i = 0; i < this.parameters.size(); i++) {
 				Object in = this.parameters.get(i);
 				SqlParameter declaredParameter;
-				// SqlParameterValue overrides declared parameter metadata, in particular for
+				// SqlParameterValue overrides declared parameter meta-data, in particular for
 				// independence from the declared parameter position in case of named parameters.
 				if (in instanceof SqlParameterValue) {
 					SqlParameterValue paramValue = (SqlParameterValue) in;

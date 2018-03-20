@@ -1014,23 +1014,23 @@ exception processing the HTTP request, an exception of the type `RestClientExcep
 will be thrown; this behavior can be changed by plugging in another
 `ResponseErrorHandler` implementation into the `RestTemplate`.
 
-The `exchange` and `execute` methods are generalized versions of the more
-specific methods listed above them and can support additional combinations and methods,
-like HTTP PATCH. However, note that the underlying HTTP library must also support the
-desired combination. The JDK `HttpURLConnection` does not support the `PATCH` method, but
-Apache HttpComponents HttpClient version 4.2 or later does. They also enable
-`RestTemplate` to read an HTTP response to a generic type (e.g. `List<Account>`), using a
-`ParameterizedTypeReference`, a new class that enables capturing and passing generic
-type info.
+The `exchange` and `execute` methods are generalized versions of the more specific
+methods listed above them and can support additional combinations and methods,
+e.g. HTTP PATCH. However, note that the underlying HTTP library must also support the
+desired combination. The JDK `HttpURLConnection` does not support the `PATCH` method
+but Apache HttpComponents HttpClient version 4.2 or later does. They also enable
+`RestTemplate` to read an HTTP response to a generic type (e.g. `List<Account>`),
+using a `ParameterizedTypeReference`, a new class that enables capturing and passing
+generic type info.
 
 Objects passed to and returned from these methods are converted to and from HTTP
-messages by `HttpMessageConverter` instances. Converters for the main mime types are
-registered by default, but you can also write your own converter and register it via the
-`messageConverters()` bean property. The default converter instances registered with the
-template are `ByteArrayHttpMessageConverter`, `StringHttpMessageConverter`,
-`FormHttpMessageConverter` and `SourceHttpMessageConverter`. You can override these
-defaults using the `messageConverters()` bean property as would be required if using the
-`MarshallingHttpMessageConverter` or `MappingJackson2HttpMessageConverter`.
+messages by `HttpMessageConverter` implementations. Converters for the main MIME types
+are registered by default, but you can also override the defaults and register custom
+converters via the `messageConverters()` bean property. The default converters are
+`ByteArrayHttpMessageConverter`, `StringHttpMessageConverter`,
+`ResourceHttpMessageConverter`, `SourceHttpMessageConverter` as well as
+`AllEncompassingFormHttpMessageConverter` and a few provider-specific converters:
+e.g. `MappingJackson2HttpMessageConverter` when Jackson is present on the classpath.
 
 Each method takes URI template arguments in two forms, either as a `String`
 variable-length argument or a `Map<String,String>`. For example,
@@ -1159,7 +1159,7 @@ on preparing URIs or customizing how the `RestTemplate` expands URI templates, s
 ===== Dealing with request and response headers
 
 Besides the methods described above, the `RestTemplate` also has the `exchange()`
-method, which can be used for arbitrary HTTP method execution based on the `HttpEntity`
+method, which can be used for arbitrary HTTP method execution based on the `RequestEntity`
 class.
 
 Perhaps most importantly, the `exchange()` method can be used to add request headers and
@@ -1168,13 +1168,14 @@ read response headers. For example:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	HttpHeaders requestHeaders = new HttpHeaders();
-	requestHeaders.set("MyRequestHeader", "MyValue");
-	HttpEntity<?> requestEntity = new HttpEntity(requestHeaders);
+	String uriTemplate = "http://example.com/hotels/{hotel}";
+	URI uri = UriComponentsBuilder.fromUriString(uriTemplate).build(42);
 
-	HttpEntity<String> response = template.exchange(
-			"http://example.com/hotels/{hotel}",
-			HttpMethod.GET, requestEntity, String.class, "42");
+	RequestEntity<Void> requestEntity = RequestEntity.get(uri)
+			.header(("MyRequestHeader", "MyValue")
+			.build();
+
+	ResponseEntity<String> response = template.exchange(requestEntity, String.class);
 
 	String responseHeader = response.getHeaders().getFirst("MyResponseHeader");
 	String body = response.getBody();
@@ -1195,8 +1196,11 @@ to serialize only a subset of the object properties. For example:
 ----
 	MappingJacksonValue value = new MappingJacksonValue(new User("eric", "7!jd#h23"));
 	value.setSerializationView(User.WithoutPasswordView.class);
-	HttpEntity<MappingJacksonValue> entity = new HttpEntity<MappingJacksonValue>(value);
-	String s = template.postForObject("http://example.com/user", entity, String.class);
+
+	RequestEntity<MappingJacksonValue> requestEntity =
+		RequestEntity.post(new URI("http://example.com/user")).body(value);
+
+	ResponseEntity<String> response = template.exchange(requestEntity, String.class);
 ----
 
 
@@ -1209,7 +1213,7 @@ writing the body of HTTP requests and responses via `InputStream` and `OutputStr
 ``HttpMessageConverter``'s are used on the client side, e.g. in the `RestTemplate`, and
 also on the server side, e.g. in Spring MVC REST controllers.
 
-Concrete implementations for the main media (mime) types are provided in the framework
+Concrete implementations for the main media (MIME) types are provided in the framework
 and are registered by default with the `RestTemplate` on the client-side and with
 `RequestMethodHandlerAdapter` on the server-side (see
 <<web.adoc#mvc-config-message-converters,Configuring Message Converters>>).
@@ -2738,7 +2742,7 @@ describes all available attributes:
 .Attributes of the JMS <listener> element
 [cols="1,6"]
 |===
-| Attribute| Description
+| Attribute | Description
 
 | id
 | A bean name for the hosting listener container. If not specified, a bean name will be
@@ -2809,7 +2813,7 @@ choices and message redelivery scenarios.
 .Attributes of the JMS <listener-container> element
 [cols="1,6"]
 |===
-| Attribute| Description
+| Attribute | Description
 
 | container-type
 | The type of this listener container. Available options are: `default`, `simple`,
@@ -2931,7 +2935,7 @@ table:
 .Attributes of the JMS <jca-listener-container/> element
 [cols="1,6"]
 |===
-| Attribute| Description
+| Attribute | Description
 
 | factory-id
 | Exposes the settings defined by this element as a `JmsListenerContainerFactory`
@@ -3262,7 +3266,7 @@ these registration behaviors are summarized on the following table:
 .Registration Behaviors
 [cols="1,4"]
 |===
-| Registration behavior| Explanation
+| Registration behavior | Explanation
 
 | `REGISTRATION_FAIL_ON_EXISTING`
 | This is the default registration behavior. If an `MBean` instance has already been
@@ -3518,7 +3522,7 @@ metadata types:
 .Source-level metadata parameters
 [cols="1,3,1"]
 |===
-| Parameter| Description| Applies to
+| Parameter | Description | Applies to
 
 | `ObjectName`
 | Used by `MetadataNamingStrategy` to determine the `ObjectName` of a managed resource
@@ -4903,7 +4907,7 @@ corresponding methods called on the CCI `Interaction` interface:
 .Usage of Interaction execute methods
 [cols="3,1,3"]
 |===
-| CciTemplate method signature| CciTemplate outputRecordCreator property| execute method called on the CCI Interaction
+| CciTemplate method signature | CciTemplate outputRecordCreator property | execute method called on the CCI Interaction
 
 | Record execute(InteractionSpec, Record)
 | not set
@@ -5270,7 +5274,7 @@ The operation object approach uses records in the same manner as the `CciTemplat
 .Usage of Interaction execute methods
 [cols="3,1,3"]
 |===
-| MappingRecordOperation method signature| MappingRecordOperation outputRecordCreator property| execute method called on the CCI Interaction
+| MappingRecordOperation method signature | MappingRecordOperation outputRecordCreator property | execute method called on the CCI Interaction
 
 | Object execute(Object)
 | not set
@@ -5597,9 +5601,8 @@ exception hierarchy.
 
 The `org.springframework.mail.javamail.JavaMailSender` interface adds specialized
 __JavaMail__ features such as MIME message support to the `MailSender` interface (from
-which it inherits). `JavaMailSender` also provides a callback interface for preparation
-of JavaMail MIME messages, called
-`org.springframework.mail.javamail.MimeMessagePreparator`
+which it inherits). `JavaMailSender` also provides a callback interface for preparing
+a 'MimeMessage', called `org.springframework.mail.javamail.MimeMessagePreparator`.
 
 
 
@@ -5722,23 +5725,17 @@ callback interface. Please note in this case that the `mailSender` property is o
 		}
 
 		public void placeOrder(final Order order) {
-
 			// Do the business calculations...
-
 			// Call the collaborators to persist the order...
 
 			MimeMessagePreparator preparator = new MimeMessagePreparator() {
-
 				public void prepare(MimeMessage mimeMessage) throws Exception {
-
 					mimeMessage.setRecipient(Message.RecipientType.TO,
 							new InternetAddress(order.getCustomer().getEmailAddress()));
 					mimeMessage.setFrom(new InternetAddress("mail@mycompany.com"));
-					mimeMessage.setText(
-							"Dear " + order.getCustomer().getFirstName() + " "
-								+ order.getCustomer().getLastName()
-								+ ", thank you for placing order. Your order number is "
-								+ order.getOrderNumber());
+					mimeMessage.setText("Dear " + order.getCustomer().getFirstName() + " " +
+							order.getCustomer().getLastName() + ", thanks for your order. " +
+							"Your order number is " + order.getOrderNumber() + ".");
 				}
 			};
 
@@ -5854,10 +5851,10 @@ along with an inline image.
 
 [WARNING]
 ====
-Inline resources are added to the mime message using the specified `Content-ID` (
-`identifier1234` in the above example). The order in which you are adding the text and
-the resource are __very__ important. Be sure to __first add the text__ and after that
-the resources. If you are doing it the other way around, it won't work!
+Inline resources are added to the `MimeMessage` using the specified `Content-ID`
+(`identifier1234` in the above example). The order in which you are adding the text
+and the resource are __very__ important. Be sure to __first add the text__ and after
+that the resources. If you are doing it the other way around, it won't work!
 ====
 
 
@@ -7413,7 +7410,7 @@ javadoc for more details].
 .Cache annotation settings
 [cols="1,1,1,3"]
 |===
-| XML Attribute| Annotation Attribute| Default| Description
+| XML Attribute | Annotation Attribute | Default | Description
 
 | `cache-manager`
 | N/A (See `CachingConfigurer` javadocs)
@@ -7597,7 +7594,7 @@ counterpart:
 .Spring vs. JSR-107 caching annotations
 [cols="1,1,3"]
 |===
-| Spring| JSR-107| Remark
+| Spring | JSR-107 | Remark
 
 | `@Cacheable`
 | `@CacheResult`

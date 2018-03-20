@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -224,6 +224,9 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	}
 
 
+	/**
+	 * Set the name of the aspect (bean) in which the advice was declared.
+	 */
 	public void setAspectName(String name) {
 		this.aspectName = name;
 	}
@@ -234,7 +237,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	}
 
 	/**
-	 * Sets the <b>declaration order</b> of this advice within the aspect
+	 * Set the declaration order of this advice within the aspect.
 	 */
 	public void setDeclarationOrder(int order) {
 		this.declarationOrder = order;
@@ -374,7 +377,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 * to which argument name. There are multiple strategies for determining
 	 * this binding, which are arranged in a ChainOfResponsibility.
 	 */
-	public synchronized final void calculateArgumentBindings() {
+	public final synchronized void calculateArgumentBindings() {
 		// The simple case... nothing to bind.
 		if (this.argumentsIntrospected || this.parameterTypes.length == 0) {
 			return;

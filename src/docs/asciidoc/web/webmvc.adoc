@@ -520,24 +520,23 @@ The table below lists the available `HandlerExceptionResolver` implementations:
 [cols="1,2", options="header"]
 .HandlerExceptionResolver implementations
 |===
-| HandlerExceptionResolver| Description
+| HandlerExceptionResolver | Description
 
 | `SimpleMappingExceptionResolver`
 | A mapping between exception class names and error view names. Useful for rendering
-error pages in a browser application.
+  error pages in a browser application.
 
 | {api-spring-framework}/web/servlet/mvc/support/DefaultHandlerExceptionResolver.html[DefaultHandlerExceptionResolver]
 | Resolves exceptions raised by Spring MVC and maps them to HTTP status codes.
-
-Also see alternative `ResponseEntityExceptionHandler` and <<mvc-ann-rest-exceptions>>.
+  Also see alternative `ResponseEntityExceptionHandler` and <<mvc-ann-rest-exceptions>>.
 
 | `ResponseStatusExceptionResolver`
 | Resolves exceptions with the `@ResponseStatus` annotation and maps them to HTTP status
-codes based on the value in the annotation.
+  codes based on the value in the annotation.
 
 | `ExceptionHandlerExceptionResolver`
 | Resolves exceptions by invoking an `@ExceptionHandler` method in an `@Controller` or an
-`@ControllerAdvice` class. See <<mvc-ann-exceptionhandler>>.
+  `@ControllerAdvice` class. See <<mvc-ann-exceptionhandler>>.
 |===
 
 
@@ -811,7 +810,7 @@ maximum age. Find below an example of defining a `CookieLocaleResolver`.
 .CookieLocaleResolver properties
 [cols="1,1,4"]
 |===
-| Property| Default| Description
+| Property | Default | Description
 
 | cookieName
 | classname + LOCALE
@@ -954,7 +953,7 @@ alter the request's theme. The following theme resolvers are provided by Spring:
 .ThemeResolver implementations
 [cols="1,4"]
 |===
-| Class| Description
+| Class | Description
 
 | `FixedThemeResolver`
 | Selects a fixed theme, set using the `defaultThemeName` property.
@@ -1000,11 +999,27 @@ have `commons-fileupload` as a dependency on your classpath.
 [[mvc-multipart-resolver-standard]]
 ==== Servlet 3.0
 
-To use Servlet 3.0 multipart support, you need to register the `DispatcherServlet`
-accordingly. In programmatic Servlet registration, set a `MultipartConfigElement` on the
-Servlet registration. In `web.xml`, add a `"<multipart-config>"` section. Configuration
-settings such as maximum sizes or storage locations need to be applied at this level
-since Servlet 3.0 API does not make it possible for the `MultipartResolver` to do so.
+Servlet 3.0 multipart parsing needs to be enabled through Servlet container configuration:
+
+* in Java, set a `MultipartConfigElement` on the Servlet registration.
+* in `web.xml`, add a `"<multipart-config>"` section to the servlet declaration.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class AppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
+
+		// ...
+
+		@Override
+		protected void customizeRegistration(ServletRegistration.Dynamic registration) {
+
+			// Optionally also set maxFileSize, maxRequestSize, fileSizeThreshold
+			registration.setMultipartConfig(new MultipartConfigElement("/tmp"));
+		}
+
+	}
+----
 
 Once the Servlet 3.0 configuration is in place, simply add a bean of type
 `StandardServletMultipartResolver` with the name `multipartResolver`.
@@ -1550,126 +1565,125 @@ etc, and is equivalent to `required=false`.
 
 [cols="1,2", options="header"]
 |===
-|Controller method argument|Description
+| Controller method argument | Description
 
-|`WebRequest`, `NativeWebRequest`
-|Generic access to request parameters, request & session attributes, without direct
-use of the Servlet API.
+| `WebRequest`, `NativeWebRequest`
+| Generic access to request parameters, request & session attributes, without direct
+  use of the Servlet API.
 
-|`javax.servlet.ServletRequest`, `javax.servlet.ServletResponse`
-|Choose any specific request or response type -- e.g. `ServletRequest`, `HttpServletRequest`,
-or Spring's `MultipartRequest`, `MultipartHttpServletRequest`.
+| `javax.servlet.ServletRequest`, `javax.servlet.ServletResponse`
+| Choose any specific request or response type -- e.g. `ServletRequest`, `HttpServletRequest`,
+  or Spring's `MultipartRequest`, `MultipartHttpServletRequest`.
 
-|`javax.servlet.http.HttpSession`
-|Enforces the presence of a session. As a consequence, such an argument is never `null`. +
-**Note:** Session access is not thread-safe. Consider setting the
-``RequestMappingHandlerAdapter``'s "synchronizeOnSession" flag to "true" if multiple
-requests are allowed to access a session concurrently.
+| `javax.servlet.http.HttpSession`
+| Enforces the presence of a session. As a consequence, such an argument is never `null`. +
+  **Note:** Session access is not thread-safe. Consider setting the
+  ``RequestMappingHandlerAdapter``'s "synchronizeOnSession" flag to "true" if multiple
+  requests are allowed to access a session concurrently.
 
-|`javax.servlet.http.PushBuilder`
-|Servlet 4.0 push builder API for programmatic HTTP/2 resource pushes.
- Note that per Servlet spec, the injected `PushBuilder` instance can be null if the client
- does not support that HTTP/2 feature.
+| `javax.servlet.http.PushBuilder`
+| Servlet 4.0 push builder API for programmatic HTTP/2 resource pushes.
+  Note that per Servlet spec, the injected `PushBuilder` instance can be null if the client
+  does not support that HTTP/2 feature.
 
-|`java.security.Principal`
-|Currently authenticated user; possibly a specific `Principal` implementation class if known.
+| `java.security.Principal`
+| Currently authenticated user; possibly a specific `Principal` implementation class if known.
 
-|`HttpMethod`
-|The HTTP method of the request.
+| `HttpMethod`
+| The HTTP method of the request.
 
-|`java.util.Locale`
-|The current request locale, determined by the most specific `LocaleResolver` available, in
-effect, the configured `LocaleResolver`/`LocaleContextResolver`.
+| `java.util.Locale`
+| The current request locale, determined by the most specific `LocaleResolver` available, in
+  effect, the configured `LocaleResolver`/`LocaleContextResolver`.
 
-|Java 6+: `java.util.TimeZone` +
-Java 8+: `java.time.ZoneId`
-|The time zone associated with the current request, as determined by a `LocaleContextResolver`.
+| `java.util.TimeZone` + `java.time.ZoneId`
+| The time zone associated with the current request, as determined by a `LocaleContextResolver`.
 
-|`java.io.InputStream`, `java.io.Reader`
-|For access to the raw request body as exposed by the Servlet API.
+| `java.io.InputStream`, `java.io.Reader`
+| For access to the raw request body as exposed by the Servlet API.
 
-|`java.io.OutputStream`, `java.io.Writer`
-|For access to the raw response body as exposed by the Servlet API.
+| `java.io.OutputStream`, `java.io.Writer`
+| For access to the raw response body as exposed by the Servlet API.
 
-|`@PathVariable`
-|For access to URI template variables. See <<mvc-ann-requestmapping-uri-templates>>.
+| `@PathVariable`
+| For access to URI template variables. See <<mvc-ann-requestmapping-uri-templates>>.
 
-|`@MatrixVariable`
-|For access to name-value pairs in URI path segments. See <<mvc-ann-matrix-variables>>.
+| `@MatrixVariable`
+| For access to name-value pairs in URI path segments. See <<mvc-ann-matrix-variables>>.
 
-|`@RequestParam`
-|For access to Servlet request parameters. Parameter values are converted to the declared
-method argument type. See <<mvc-ann-requestparam>>.
+| `@RequestParam`
+| For access to Servlet request parameters. Parameter values are converted to the declared
+  method argument type. See <<mvc-ann-requestparam>>.
 
-Note that use of `@RequestParam` is optional, e.g. to set its attributes.
-See "Any other argument" further below in this table.
+  Note that use of `@RequestParam` is optional, e.g. to set its attributes.
+  See "Any other argument" further below in this table.
 
-|`@RequestHeader`
-|For access to request headers. Header values are converted to the declared method argument
-type. See <<mvc-ann-requestheader>>.
+| `@RequestHeader`
+| For access to request headers. Header values are converted to the declared method argument
+  type. See <<mvc-ann-requestheader>>.
 
-|`@CookieValue`
-|For access to cookies. Cookies values are converted to the declared method argument
-type. See <<mvc-ann-cookievalue>>.
+| `@CookieValue`
+| For access to cookies. Cookies values are converted to the declared method argument
+  type. See <<mvc-ann-cookievalue>>.
 
-|`@RequestBody`
-|For access to the HTTP request body. Body content is converted to the declared method
-argument type using ``HttpMessageConverter``s. See <<mvc-ann-requestbody>>.
+| `@RequestBody`
+| For access to the HTTP request body. Body content is converted to the declared method
+  argument type using ``HttpMessageConverter``s. See <<mvc-ann-requestbody>>.
 
-|`HttpEntity<B>`
-|For access to request headers and body. The body is converted with ``HttpMessageConverter``s.
-See <<mvc-ann-httpentity>>.
+| `HttpEntity<B>`
+| For access to request headers and body. The body is converted with ``HttpMessageConverter``s.
+  See <<mvc-ann-httpentity>>.
 
-|`@RequestPart`
-|For access to a part in  a "multipart/form-data" request.
-See <<mvc-multipart-forms>>.
+| `@RequestPart`
+| For access to a part in  a "multipart/form-data" request.
+  See <<mvc-multipart-forms>>.
 
-|`java.util.Map`, `org.springframework.ui.Model`, `org.springframework.ui.ModelMap`
-|For access to the model that is used in HTML controllers and exposed to templates as
-part of view rendering.
+| `java.util.Map`, `org.springframework.ui.Model`, `org.springframework.ui.ModelMap`
+| For access to the model that is used in HTML controllers and exposed to templates as
+  part of view rendering.
 
-|`RedirectAttributes`
-|Specify attributes to use in case of a redirect -- i.e. to be appended to the query
-string, and/or flash attributes to be stored temporarily until the request after redirect.
-See <<mvc-redirecting-passing-data>> and <<mvc-flash-attributes>>.
+| `RedirectAttributes`
+| Specify attributes to use in case of a redirect -- i.e. to be appended to the query
+  string, and/or flash attributes to be stored temporarily until the request after redirect.
+  See <<mvc-redirecting-passing-data>> and <<mvc-flash-attributes>>.
 
-|`@ModelAttribute`
-|For access to an existing attribute in the model (instantiated if not present) with
-data binding and validation applied. See <<mvc-ann-modelattrib-method-args>> as well as
-<<mvc-ann-modelattrib-methods>> and <<mvc-ann-initbinder>>.
+| `@ModelAttribute`
+| For access to an existing attribute in the model (instantiated if not present) with
+  data binding and validation applied. See <<mvc-ann-modelattrib-method-args>> as well as
+  <<mvc-ann-modelattrib-methods>> and <<mvc-ann-initbinder>>.
 
-Note that use of `@ModelAttribute` is optional, e.g. to set its attributes.
-See "Any other argument" further below in this table.
+  Note that use of `@ModelAttribute` is optional, e.g. to set its attributes.
+  See "Any other argument" further below in this table.
 
-|`Errors`, `BindingResult`
-|For access to errors from validation and data binding for a command object
-(i.e. `@ModelAttribute` argument), or errors from the validation of an `@RequestBody` or
-`@RequestPart` arguments; an `Errors`, or `BindingResult` argument must be declared
-immediately after the validated method argument.
+| `Errors`, `BindingResult`
+| For access to errors from validation and data binding for a command object
+  (i.e. `@ModelAttribute` argument), or errors from the validation of an `@RequestBody` or
+  `@RequestPart` arguments; an `Errors`, or `BindingResult` argument must be declared
+  immediately after the validated method argument.
 
-|`SessionStatus` + class-level `@SessionAttributes`
-|For marking form processing complete which triggers cleanup of session attributes
-declared through a class-level `@SessionAttributes` annotation. See
-<<mvc-ann-sessionattributes>> for more details.
+| `SessionStatus` + class-level `@SessionAttributes`
+| For marking form processing complete which triggers cleanup of session attributes
+  declared through a class-level `@SessionAttributes` annotation. See
+  <<mvc-ann-sessionattributes>> for more details.
 
-|`UriComponentsBuilder`
-|For preparing a URL relative to the current request's host, port, scheme, context path, and
-the literal  part of the servlet mapping also taking into account `Forwarded` and
-`X-Forwarded-*` headers. See <<mvc-uri-building>>.
+| `UriComponentsBuilder`
+| For preparing a URL relative to the current request's host, port, scheme, context path, and
+  the literal  part of the servlet mapping also taking into account `Forwarded` and
+ `X-Forwarded-*` headers. See <<mvc-uri-building>>.
 
-|`@SessionAttribute`
-|For access to any session attribute; in contrast to model attributes stored in the session
-as a result of a class-level `@SessionAttributes` declaration. See
-<<mvc-ann-sessionattribute>> for more details.
+| `@SessionAttribute`
+| For access to any session attribute; in contrast to model attributes stored in the session
+  as a result of a class-level `@SessionAttributes` declaration. See
+  <<mvc-ann-sessionattribute>> for more details.
 
-|`@RequestAttribute`
-|For access to request attributes. See <<mvc-ann-requestattrib>> for more details.
+| `@RequestAttribute`
+| For access to request attributes. See <<mvc-ann-requestattrib>> for more details.
 
-|Any other argument
-|If a method argument is not matched to any of the above, by default it is resolved as
-an `@RequestParam` if it is a simple type, as determined by
-{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty],
-or as an `@ModelAttribute` otherwise.
+| Any other argument
+| If a method argument is not matched to any of the above, by default it is resolved as
+  an `@RequestParam` if it is a simple type, as determined by
+  {api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty],
+  or as an `@ModelAttribute` otherwise.
 |===
 
 
@@ -1682,96 +1696,96 @@ supported for all return values, see below for more details.
 
 [cols="1,2", options="header"]
 |===
-|Controller method return value|Description
+| Controller method return value | Description
 
-|`@ResponseBody`
-|The return value is converted through ``HttpMessageConverter``s and written to the
-response. See <<mvc-ann-responsebody>>.
+| `@ResponseBody`
+| The return value is converted through ``HttpMessageConverter``s and written to the
+  response. See <<mvc-ann-responsebody>>.
 
-|`HttpEntity<B>`, `ResponseEntity<B>`
-|The return value specifies the full response including HTTP headers and body be converted
-through ``HttpMessageConverter``s and written to the response.
-See <<mvc-ann-responseentity>>.
+| `HttpEntity<B>`, `ResponseEntity<B>`
+| The return value specifies the full response including HTTP headers and body be converted
+  through ``HttpMessageConverter``s and written to the response.
+  See <<mvc-ann-responseentity>>.
 
-|`HttpHeaders`
-|For returning a response with headers and no body.
+| `HttpHeaders`
+| For returning a response with headers and no body.
 
-|`String`
-|A view name to be resolved with ``ViewResolver``'s and used together with the implicit
-model -- determined through command objects and `@ModelAttribute` methods. The handler
-method may also programmatically enrich the model by declaring a `Model` argument (see
-above).
+| `String`
+| A view name to be resolved with ``ViewResolver``'s and used together with the implicit
+  model -- determined through command objects and `@ModelAttribute` methods. The handler
+  method may also programmatically enrich the model by declaring a `Model` argument
+  (see above).
 
-|`View`
-|A `View` instance to use for rendering together with the implicit model -- determined
-through command objects and `@ModelAttribute` methods. The handler method may also
-programmatically enrich the model by declaring a `Model` argument (see above).
+| `View`
+| A `View` instance to use for rendering together with the implicit model -- determined
+  through command objects and `@ModelAttribute` methods. The handler method may also
+  programmatically enrich the model by declaring a `Model` argument (see above).
 
-|`java.util.Map`, `org.springframework.ui.Model`
-|Attributes to be added to the implicit model with the view name implicitly determined
-through a `RequestToViewNameTranslator`.
+| `java.util.Map`, `org.springframework.ui.Model`
+| Attributes to be added to the implicit model with the view name implicitly determined
+  through a `RequestToViewNameTranslator`.
 
-|`@ModelAttribute`
-|An attribute to be added to the model with the view name implicitly determined through
-a `RequestToViewNameTranslator`.
+| `@ModelAttribute`
+| An attribute to be added to the model with the view name implicitly determined through
+  a `RequestToViewNameTranslator`.
 
-Note that `@ModelAttribute` is optional. See "Any other return value" further below in
-this table.
+  Note that `@ModelAttribute` is optional. See "Any other return value" further below in
+  this table.
 
-|`ModelAndView` object
-|The view and model attributes to use, and optionally a response status.
+| `ModelAndView` object
+| The view and model attributes to use, and optionally a response status.
 
-|`void`
-|A method with a `void` return type (or `null` return value) is considered to have fully
-handled the response if it also has a `ServletResponse`, or an `OutputStream` argument, or an
-`@ResponseStatus` annotation. The same is true also if the controller has made a positive
-ETag or lastModified timestamp check (see <<mvc-caching-etag-lastmodified>> for details).
+| `void`
+| A method with a `void` return type (or `null` return value) is considered to have fully
+  handled the response if it also has a `ServletResponse`, or an `OutputStream` argument, or
+  an `@ResponseStatus` annotation. The same is true also if the controller has made a positive
+  ETag or lastModified timestamp check (see <<mvc-caching-etag-lastmodified>> for details).
 
-If none of the above is true, a `void` return type may also indicate "no response body" for
-REST controllers, or default view name selection for HTML controllers.
+  If none of the above is true, a `void` return type may also indicate "no response body" for
+  REST controllers, or default view name selection for HTML controllers.
 
-|`DeferredResult<V>`
-|Produce any of the above return values asynchronously from any thread -- e.g. possibly as a
-result of some event or callback. See <<mvc-ann-async>> and
-<<mvc-ann-async-deferredresult>>.
+| `DeferredResult<V>`
+| Produce any of the above return values asynchronously from any thread -- e.g. possibly as a
+  result of some event or callback. See <<mvc-ann-async>> and
+  <<mvc-ann-async-deferredresult>>.
 
-|`Callable<V>`
-|Produce any of the above return values asynchronously in a Spring MVC managed thread.
-See <<mvc-ann-async>> and <<mvc-ann-async-callable>>.
+| `Callable<V>`
+| Produce any of the above return values asynchronously in a Spring MVC managed thread.
+  See <<mvc-ann-async>> and <<mvc-ann-async-callable>>.
 
-|`ListenableFuture<V>`,
-`java.util.concurrent.CompletionStage<V>`,
-`java.util.concurrent.CompletableFuture<V>`
-|Alternative to `DeferredResult` as a convenience for example when an underlying service
-returns one of those.
+| `ListenableFuture<V>`,
+  `java.util.concurrent.CompletionStage<V>`,
+  `java.util.concurrent.CompletableFuture<V>`
+| Alternative to `DeferredResult` as a convenience for example when an underlying service
+  returns one of those.
 
-|`ResponseBodyEmitter`, `SseEmitter`
-|Emit a stream of objects asynchronously to be written to the response with
-``HttpMessageConverter``'s; also supported as the body of a `ResponseEntity`.
-See <<mvc-ann-async>> and <<mvc-ann-async-http-streaming>>.
+| `ResponseBodyEmitter`, `SseEmitter`
+| Emit a stream of objects asynchronously to be written to the response with
+  ``HttpMessageConverter``'s; also supported as the body of a `ResponseEntity`.
+  See <<mvc-ann-async>> and <<mvc-ann-async-http-streaming>>.
 
-|`StreamingResponseBody`
-|Write to the response `OutputStream` asynchronously; also supported as the body of a
-`ResponseEntity`. See <<mvc-ann-async>> and <<mvc-ann-async-http-streaming>>.
+| `StreamingResponseBody`
+| Write to the response `OutputStream` asynchronously; also supported as the body of a
+  `ResponseEntity`. See <<mvc-ann-async>> and <<mvc-ann-async-http-streaming>>.
 
-|Reactive types -- Reactor, RxJava, or others via `ReactiveAdapterRegistry`
-|Alternative to ``DeferredResult` with multi-value streams (e.g. `Flux`, `Observable`)
-collected to a `List`.
+| Reactive types -- Reactor, RxJava, or others via `ReactiveAdapterRegistry`
+| Alternative to ``DeferredResult` with multi-value streams (e.g. `Flux`, `Observable`)
+  collected to a `List`.
 
-For streaming scenarios -- .e.g. `text/event-stream`, `application/json+stream`,
-`SseEmitter` and `ResponseBodyEmitter` are used instead, where `ServletOutputStream` blocking
-I/O is performed on a Spring MVC managed thread and back pressure applied against the
-completion of each write.
+  For streaming scenarios -- e.g. `text/event-stream`, `application/json+stream` --
+  `SseEmitter` and `ResponseBodyEmitter` are used instead, where `ServletOutputStream`
+  blocking I/O is performed on a Spring MVC managed thread and back pressure applied
+  against the completion of each write.
 
-See <<mvc-ann-async>> and <<mvc-ann-async-reactive-types>>.
+  See <<mvc-ann-async>> and <<mvc-ann-async-reactive-types>>.
 
-|Any other return value
-|If a return value is not matched to any of the above, by default it is treated as a view
-name, if it is `String` or `void` (default view name selection via
-`RequestToViewNameTranslator` applies); or as a model attribute to be added to the model,
-unless it is a simple type, as determined by
-{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty]
-in which case it remains unresolved.
+| Any other return value
+| If a return value is not matched to any of the above, by default it is treated as a view
+  name, if it is `String` or `void` (default view name selection via
+  `RequestToViewNameTranslator` applies); or as a model attribute to be added to the model,
+  unless it is a simple type, as determined by
+  {api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty]
+  in which case it remains unresolved.
 |===
 
 

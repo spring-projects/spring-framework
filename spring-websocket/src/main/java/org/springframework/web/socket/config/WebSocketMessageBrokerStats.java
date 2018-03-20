@@ -75,7 +75,7 @@ public class WebSocketMessageBrokerStats {
 	@Nullable
 	private ScheduledFuture<?> loggingTask;
 
-	private long loggingPeriod = 30 * 60 * 1000;
+	private long loggingPeriod = TimeUnit.MINUTES.toMillis(30);
 
 
 	public void setSubProtocolWebSocketHandler(SubProtocolWebSocketHandler webSocketHandler) {
@@ -114,7 +114,7 @@ public class WebSocketMessageBrokerStats {
 
 	public void setSockJsTaskScheduler(ThreadPoolTaskScheduler sockJsTaskScheduler) {
 		this.sockJsTaskScheduler = sockJsTaskScheduler.getScheduledThreadPoolExecutor();
-		this.loggingTask = initLoggingTask(60 * 1000);
+		this.loggingTask = initLoggingTask(TimeUnit.MINUTES.toMillis(1));
 	}
 
 	@Nullable

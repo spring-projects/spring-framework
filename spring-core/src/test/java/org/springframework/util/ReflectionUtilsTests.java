@@ -302,13 +302,13 @@ public class ReflectionUtilsTests {
 		class Parent {
 			@SuppressWarnings("unused")
 			public Number m1() {
-				return new Integer(42);
+				return Integer.valueOf(42);
 			}
 		}
 		class Leaf extends Parent {
 			@Override
 			public Integer m1() {
-				return new Integer(42);
+				return Integer.valueOf(42);
 			}
 		}
 		int m1MethodCount = 0;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -59,14 +58,8 @@ import static org.springframework.web.reactive.function.BodyExtractors.toMono;
  */
 public class DefaultServerRequestTests {
 
-	List<HttpMessageReader<?>> messageReaders;
-
-
-	@Before
-	public void createMocks() {
-		this.messageReaders = Collections.singletonList(
-				new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
-	}
+	private final List<HttpMessageReader<?>> messageReaders = Collections.singletonList(
+			new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
 
 
 	@Test
@@ -335,12 +328,12 @@ public class DefaultServerRequestTests {
 				.method(HttpMethod.GET, "http://example.com?foo=bar")
 				.headers(httpHeaders)
 				.body(body);
-		this.messageReaders = Collections.emptyList();
-		DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), messageReaders);
+		DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
 
 		Flux<String> resultFlux = request.bodyToFlux(String.class);
 		StepVerifier.create(resultFlux)
 				.expectError(UnsupportedMediaTypeStatusException.class)
 				.verify();
 	}
+
 }

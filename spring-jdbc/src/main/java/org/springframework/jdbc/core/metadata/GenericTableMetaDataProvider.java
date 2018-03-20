@@ -46,7 +46,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	/** Logger available to subclasses */
 	protected static final Log logger = LogFactory.getLog(TableMetaDataProvider.class);
 
-	/** indicator whether column metadata should be used */
+	/** indicator whether column meta-data should be used */
 	private boolean tableColumnMetaDataUsed = false;
 
 	/** the version of the database */
@@ -78,8 +78,8 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 
 	/**
-	 * Constructor used to initialize with provided database metadata.
-	 * @param databaseMetaData metadata to be used
+	 * Constructor used to initialize with provided database meta-data.
+	 * @param databaseMetaData meta-data to be used
 	 */
 	protected GenericTableMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
 		this.userName = databaseMetaData.getUserName();
@@ -305,7 +305,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	}
 
 	/**
-	 * Method supporting the metadata processing for a table.
+	 * Method supporting the meta-data processing for a table.
 	 */
 	private void locateTableAndProcessMetaData(DatabaseMetaData databaseMetaData,
 			@Nullable String catalogName, @Nullable String schemaName, @Nullable String tableName) {
@@ -330,7 +330,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		}
 		catch (SQLException ex) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Error while accessing table meta data results: " + ex.getMessage());
+				logger.warn("Error while accessing table meta-data results: " + ex.getMessage());
 			}
 		}
 		finally {
@@ -339,7 +339,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 		if (tableMeta.isEmpty()) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Unable to locate table meta data for '" + tableName + "': column names must be provided");
+				logger.warn("Unable to locate table meta-data for '" + tableName + "': column names must be provided");
 			}
 		}
 		else {
@@ -353,7 +353,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		if (schemaName != null) {
 			TableMetaData tmd = tableMeta.get(schemaName.toUpperCase());
 			if (tmd == null) {
-				throw new DataAccessResourceFailureException("Unable to locate table meta data for '" +
+				throw new DataAccessResourceFailureException("Unable to locate table meta-data for '" +
 						tableName + "' in the '" + schemaName + "' schema");
 			}
 			return tmd;
@@ -374,14 +374,14 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 			}
 			if (tmd == null) {
 				throw new DataAccessResourceFailureException(
-						"Unable to locate table meta data for '" + tableName + "' in the default schema");
+						"Unable to locate table meta-data for '" + tableName + "' in the default schema");
 			}
 			return tmd;
 		}
 	}
 
 	/**
-	 * Method supporting the metadata processing for a table's columns
+	 * Method supporting the meta-data processing for a table's columns
 	 */
 	private void processTableColumns(DatabaseMetaData databaseMetaData, TableMetaData tmd) {
 		ResultSet tableColumns = null;
@@ -389,7 +389,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		String metaDataSchemaName = metaDataSchemaNameToUse(tmd.getSchemaName());
 		String metaDataTableName = tableNameToUse(tmd.getTableName());
 		if (logger.isDebugEnabled()) {
-			logger.debug("Retrieving metadata for " + metaDataCatalogName + '/' +
+			logger.debug("Retrieving meta-data for " + metaDataCatalogName + '/' +
 					metaDataSchemaName + '/' + metaDataTableName);
 		}
 		try {
@@ -407,7 +407,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 					if ("NUMBER".equals(typeName) && decimalDigits == 0) {
 						dataType = Types.NUMERIC;
 						if (logger.isDebugEnabled()) {
-							logger.debug("Overriding metadata: " + columnName + " now NUMERIC instead of DECIMAL");
+							logger.debug("Overriding meta-data: " + columnName + " now NUMERIC instead of DECIMAL");
 						}
 					}
 				}
@@ -415,14 +415,14 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 				TableParameterMetaData meta = new TableParameterMetaData(columnName, dataType, nullable);
 				this.tableParameterMetaData.add(meta);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Retrieved metadata: " + meta.getParameterName() + " " +
+					logger.debug("Retrieved meta-data: " + meta.getParameterName() + " " +
 							meta.getSqlType() + " " + meta.isNullable());
 				}
 			}
 		}
 		catch (SQLException ex) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Error while retrieving metadata for table columns: " + ex.getMessage());
+				logger.warn("Error while retrieving meta-data for table columns: " + ex.getMessage());
 			}
 		}
 		finally {
@@ -432,7 +432,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 
 	/**
-	 * Inner class representing table meta data.
+	 * Inner class representing table meta-data.
 	 */
 	private static class TableMetaData {
 

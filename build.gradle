@@ -51,7 +51,7 @@ configure(allprojects) { project ->
 	ext.junitPlatformVersion = "1.0.3"
 	ext.junitVintageVersion  = "4.12.3"
 	ext.kotlinVersion        = "1.2.30"
-	ext.log4jVersion         = "2.10.0"
+	ext.log4jVersion         = "2.11.0"
 	ext.nettyVersion         = "4.1.22.Final"
 	ext.reactorVersion       = "Bismuth-SR7"
 	ext.rxjavaVersion        = "1.3.6"
@@ -59,7 +59,7 @@ configure(allprojects) { project ->
 	ext.rxjava2Version       = "2.1.10"
 	ext.slf4jVersion         = "1.7.25"	 // spring-jcl + consistent 3rd party deps
 	ext.tiles3Version        = "3.0.8"
-	ext.tomcatVersion        = "8.5.28"
+	ext.tomcatVersion        = "8.5.29"
 	ext.undertowVersion      = "1.4.23.Final"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"

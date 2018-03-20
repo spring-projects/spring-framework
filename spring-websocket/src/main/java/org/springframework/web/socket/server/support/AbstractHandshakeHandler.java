@@ -185,10 +185,6 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 		return StringUtils.toStringArray(this.supportedProtocols);
 	}
 
-	@Override
-	public boolean isRunning() {
-		return this.running;
-	}
 
 	@Override
 	public void start() {
@@ -216,6 +212,11 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 		if (this.requestUpgradeStrategy instanceof Lifecycle) {
 			((Lifecycle) this.requestUpgradeStrategy).stop();
 		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
 	}
 
 

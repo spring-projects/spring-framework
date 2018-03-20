@@ -42,7 +42,7 @@ import org.springframework.web.util.WebUtils;
  */
 public class CookieThemeResolver extends CookieGenerator implements ThemeResolver {
 
-	public final static String ORIGINAL_DEFAULT_THEME_NAME = "theme";
+	public static final String ORIGINAL_DEFAULT_THEME_NAME = "theme";
 
 	/**
 	 * Name of the request attribute that holds the theme name. Only used
