@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,9 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.SimplePropertyAccessor;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.testresources.Person;
 
 import static org.junit.Assert.*;
 
@@ -73,7 +75,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 	 * supplied resolver might be able to - so null shouldn't crash the reflection resolver.
 	 */
 	@Test
-	public void testAccessingOnNullObject() throws Exception {
+	public void testAccessingOnNullObject() {
 		SpelExpression expr = (SpelExpression)parser.parseExpression("madeup");
 		EvaluationContext context = new StandardEvaluationContext(null);
 		try {
@@ -105,7 +107,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 
 	@Test
 	// Adding a new property accessor just for a particular type
-	public void testAddingSpecificPropertyAccessor() throws Exception {
+	public void testAddingSpecificPropertyAccessor() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 
@@ -162,7 +164,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testAccessingPropertyOfClass() throws Exception {
+	public void testAccessingPropertyOfClass() {
 		Expression expression = parser.parseExpression("name");
 		Object value = expression.getValue(new StandardEvaluationContext(String.class));
 		assertEquals("java.lang.String", value);
@@ -180,6 +182,49 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		context = new StandardEvaluationContext();
 		context.addPropertyAccessor(new ConfigurablePropertyAccessor(Collections.singletonMap("name", "Jens")));
 		assertEquals("Jens", expression.getValue(context));
+	}
+
+	@Test
+	public void standardGetClassAccess() {
+		Expression expr = parser.parseExpression("'a'.class.getName()");
+		assertEquals(String.class.getName(), expr.getValue());
+	}
+
+	@Test(expected = SpelEvaluationException.class)
+	public void noGetClassAccess() {
+		Expression expr = parser.parseExpression("'a'.class.getName()");
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		context.setPropertyAccessors(Collections.singletonList(new SimplePropertyAccessor()));
+		expr.getValue(context);
+	}
+
+	@Test
+	public void propertyReadWrite() {
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		context.setPropertyAccessors(Collections.singletonList(new SimplePropertyAccessor()));
+
+		Expression expr = parser.parseExpression("name");
+		Person target = new Person("p1");
+		assertEquals("p1", expr.getValue(context, target));
+		target.setName("p2");
+		assertEquals("p2", expr.getValue(context, target));
+
+		parser.parseExpression("name='p3'").getValue(context, target);
+		assertEquals("p3", expr.getValue(context, target));
+	}
+
+	@Test(expected = SpelEvaluationException.class)
+	public void propertyReadOnly() {
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		context.setPropertyAccessors(Collections.singletonList(new SimplePropertyAccessor(false)));
+
+		Expression expr = parser.parseExpression("name");
+		Person target = new Person("p1");
+		assertEquals("p1", expr.getValue(context, target));
+		target.setName("p2");
+		assertEquals("p2", expr.getValue(context, target));
+
+		parser.parseExpression("name='p3'").getValue(context, target);
 	}
 
 
@@ -223,7 +268,8 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 				throw new RuntimeException("Assertion Failed! name should be flibbles");
 			}
 			try {
-				flibbles = (Integer) context.getTypeConverter().convertValue(newValue, TypeDescriptor.forObject(newValue), TypeDescriptor.valueOf(Integer.class));
+				flibbles = (Integer) context.getTypeConverter().convertValue(newValue,
+						TypeDescriptor.forObject(newValue), TypeDescriptor.valueOf(Integer.class));
 			}
 			catch (EvaluationException ex) {
 				throw new AccessException("Cannot set flibbles to an object of type '" + newValue.getClass() + "'");
