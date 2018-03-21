@@ -18,6 +18,7 @@ package org.springframework.web.server.handler;
 
 import java.time.Duration;
 
+import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -25,21 +26,31 @@ import reactor.test.StepVerifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link ResponseStatusExceptionHandler}.
+ *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  */
 public class ResponseStatusExceptionHandlerTests {
 
-	private final ResponseStatusExceptionHandler handler = new ResponseStatusExceptionHandler();
+	protected final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
-	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
+	protected ResponseStatusExceptionHandler handler;
+
+
+	@Before
+	public void setup() {
+		this.handler = createResponseStatusExceptionHandler();
+	}
+
+	protected ResponseStatusExceptionHandler createResponseStatusExceptionHandler() {
+		return new ResponseStatusExceptionHandler();
+	}
 
 
 	@Test
@@ -50,24 +61,10 @@ public class ResponseStatusExceptionHandlerTests {
 	}
 
 	@Test
-	public void handleAnnotatedException() {
-		Throwable ex = new CustomException();
-		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
-		assertEquals(HttpStatus.I_AM_A_TEAPOT, this.exchange.getResponse().getStatusCode());
-	}
-
-	@Test
 	public void handleNestedResponseStatusException() {
 		Throwable ex = new Exception(new ResponseStatusException(HttpStatus.BAD_REQUEST, ""));
 		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
 		assertEquals(HttpStatus.BAD_REQUEST, this.exchange.getResponse().getStatusCode());
-	}
-
-	@Test
-	public void handleNestedAnnotatedException() {
-		Throwable ex = new Exception(new CustomException());
-		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
-		assertEquals(HttpStatus.I_AM_A_TEAPOT, this.exchange.getResponse().getStatusCode());
 	}
 
 	@Test
@@ -77,18 +74,13 @@ public class ResponseStatusExceptionHandlerTests {
 		StepVerifier.create(mono).consumeErrorWith(actual -> assertSame(expected, actual)).verify();
 	}
 
-	@Test // SPR-16231
+	@Test  // SPR-16231
 	public void responseCommitted() {
 		Throwable ex = new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops");
 		this.exchange.getResponse().setStatusCode(HttpStatus.CREATED);
 		Mono<Void> mono = this.exchange.getResponse().setComplete()
 				.then(Mono.defer(() -> this.handler.handle(this.exchange, ex)));
 		StepVerifier.create(mono).consumeErrorWith(actual -> assertSame(ex, actual)).verify();
-	}
-
-
-	@ResponseStatus(HttpStatus.I_AM_A_TEAPOT)
-	private static class CustomException extends Exception {
 	}
 
 }
