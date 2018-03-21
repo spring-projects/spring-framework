@@ -18,13 +18,9 @@ package org.springframework.expression.spel.support;
 
 import java.lang.reflect.Method;
 
-import org.springframework.expression.AccessException;
-import org.springframework.expression.EvaluationContext;
-import org.springframework.lang.Nullable;
-
 /**
- * A simple {@link org.springframework.expression.PropertyAccessor} variant that
- * uses reflection to access properties for reading and possibly also writing.
+ * A {@link org.springframework.expression.PropertyAccessor} variant for data binding
+ * purposes, using reflection to access properties for reading and possibly writing.
  *
  * <p>A property can be accessed through a public getter method (when being read)
  * or a public setter method (when being written), and also as a public field.
@@ -35,52 +31,41 @@ import org.springframework.lang.Nullable;
  *
  * @author Juergen Hoeller
  * @since 4.3.15
+ * @see #forReadOnlyAccess()
+ * @see #forReadWriteAccess()
  * @see SimpleEvaluationContext
  * @see StandardEvaluationContext
  * @see ReflectivePropertyAccessor
  */
-public class SimplePropertyAccessor extends ReflectivePropertyAccessor {
-
-	private final boolean allowWrite;
-
-
-	/**
-	 * Create a new property accessor for reading as well writing.
-	 * @see #SimplePropertyAccessor(boolean)
-	 */
-	public SimplePropertyAccessor() {
-		this.allowWrite = true;
-	}
+public class DataBindingPropertyAccessor extends ReflectivePropertyAccessor {
 
 	/**
 	 * Create a new property accessor for reading and possibly also writing.
 	 * @param allowWrite whether to also allow for write operations
 	 * @see #canWrite
 	 */
-	public SimplePropertyAccessor(boolean allowWrite) {
-		this.allowWrite = allowWrite;
-	}
-
-
-	@Override
-	public boolean canWrite(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
-		return (this.allowWrite && super.canWrite(context, target, name));
-	}
-
-	@Override
-	public void write(EvaluationContext context, @Nullable Object target, String name, @Nullable Object newValue)
-			throws AccessException {
-
-		if (!this.allowWrite) {
-			throw new AccessException("PropertyAccessor for property '" + name +
-					"' on target [" + target + "] does not allow write operations");
-		}
-		super.write(context, target, name, newValue);
+	private DataBindingPropertyAccessor(boolean allowWrite) {
+		super(allowWrite);
 	}
 
 	@Override
 	protected boolean isCandidateForProperty(Method method) {
 		return (method.getDeclaringClass() != Object.class);
+	}
+
+
+	/**
+	 * Create a new data-binding property accessor for read-only access.
+	 */
+	public static DataBindingPropertyAccessor forReadOnlyAccess() {
+		return new DataBindingPropertyAccessor(false);
+	}
+
+	/**
+	 * Create a new data-binding property accessor for read-write access.
+	 */
+	public static DataBindingPropertyAccessor forReadWriteAccess() {
+		return new DataBindingPropertyAccessor(true);
 	}
 
 }

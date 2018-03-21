@@ -32,7 +32,7 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.SimplePropertyAccessor;
+import org.springframework.expression.spel.support.DataBindingPropertyAccessor;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.Person;
 
@@ -194,14 +194,14 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 	public void noGetClassAccess() {
 		Expression expr = parser.parseExpression("'a'.class.getName()");
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		context.setPropertyAccessors(Collections.singletonList(new SimplePropertyAccessor()));
+		context.setPropertyAccessors(Collections.singletonList(DataBindingPropertyAccessor.forReadWriteAccess()));
 		expr.getValue(context);
 	}
 
 	@Test
 	public void propertyReadWrite() {
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		context.setPropertyAccessors(Collections.singletonList(new SimplePropertyAccessor()));
+		context.setPropertyAccessors(Collections.singletonList(DataBindingPropertyAccessor.forReadWriteAccess()));
 
 		Expression expr = parser.parseExpression("name");
 		Person target = new Person("p1");
@@ -216,7 +216,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 	@Test(expected = SpelEvaluationException.class)
 	public void propertyReadOnly() {
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		context.setPropertyAccessors(Collections.singletonList(new SimplePropertyAccessor(false)));
+		context.setPropertyAccessors(Collections.singletonList(DataBindingPropertyAccessor.forReadOnlyAccess()));
 
 		Expression expr = parser.parseExpression("name");
 		Person target = new Person("p1");

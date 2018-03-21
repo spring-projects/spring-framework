@@ -46,7 +46,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * A powerful {@link PropertyAccessor} that uses reflection to access properties
- * for reading and writing.
+ * for reading and possibly also for writing.
  *
  * <p>A property can be accessed through a public getter method (when being read)
  * or a public setter method (when being written), and also as a public field.
@@ -57,7 +57,7 @@ import org.springframework.util.StringUtils;
  * @since 3.0
  * @see StandardEvaluationContext
  * @see SimpleEvaluationContext
- * @see SimplePropertyAccessor
+ * @see DataBindingPropertyAccessor
  */
 public class ReflectivePropertyAccessor implements PropertyAccessor {
 
@@ -73,6 +73,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	}
 
 
+	private final boolean allowWrite;
+
 	private final Map<PropertyCacheKey, InvokerPair> readerCache = new ConcurrentHashMap<>(64);
 
 	private final Map<PropertyCacheKey, Member> writerCache = new ConcurrentHashMap<>(64);
@@ -81,6 +83,25 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	@Nullable
 	private volatile InvokerPair lastReadInvokerPair;
+
+
+	/**
+	 * Create a new property accessor for reading as well writing.
+	 * @see #ReflectivePropertyAccessor(boolean)
+	 */
+	public ReflectivePropertyAccessor() {
+		this.allowWrite = true;
+	}
+
+	/**
+	 * Create a new property accessor for reading and possibly writing.
+	 * @param allowWrite whether to also allow for write operations
+	 * @since 4.3.15
+	 * @see #canWrite
+	 */
+	public ReflectivePropertyAccessor(boolean allowWrite) {
+		this.allowWrite = allowWrite;
+	}
 
 
 	/**
@@ -200,7 +221,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	@Override
 	public boolean canWrite(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
-		if (target == null) {
+		if (!this.allowWrite || target == null) {
 			return false;
 		}
 
@@ -234,6 +255,11 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	@Override
 	public void write(EvaluationContext context, @Nullable Object target, String name, @Nullable Object newValue)
 			throws AccessException {
+
+		if (!this.allowWrite) {
+			throw new AccessException("PropertyAccessor for property '" + name +
+					"' on target [" + target + "] does not allow write operations");
+		}
 
 		Assert.state(target != null, "Target must not be null");
 		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
@@ -477,14 +503,18 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	}
 
 	/**
-	 * Attempt to create an optimized property accessor tailored for a property of a particular name on
-	 * a particular class. The general ReflectivePropertyAccessor will always work but is not optimal
-	 * due to the need to lookup which reflective member (method/field) to use each time read() is called.
-	 * This method will just return the ReflectivePropertyAccessor instance if it is unable to build
-	 * something more optimal.
+	 * Attempt to create an optimized property accessor tailored for a property of a
+	 * particular name on a particular class. The general ReflectivePropertyAccessor
+	 * will always work but is not optimal due to the need to lookup which reflective
+	 * member (method/field) to use each time read() is called. This method will just
+	 * return the ReflectivePropertyAccessor instance if it is unable to build a more
+	 * optimal accessor.
+	 * <p>Note: An optimal accessor is currently only usable for read attempts.
+	 * Do not call this method if you need a read-write accessor.
+	 * @see OptimalPropertyAccessor
 	 */
 	public PropertyAccessor createOptimalAccessor(EvaluationContext context, @Nullable Object target, String name) {
-		// Don't be clever for arrays or null target
+		// Don't be clever for arrays or a null target...
 		if (target == null) {
 			return this;
 		}
@@ -506,7 +536,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 					this.readerCache.put(cacheKey, invocationTarget);
 				}
 			}
-			if (method != null) {
+			if (method != null && isCandidateForProperty(method)) {
 				return new OptimalPropertyAccessor(invocationTarget);
 			}
 		}
