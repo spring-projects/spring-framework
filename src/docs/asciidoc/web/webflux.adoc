@@ -1789,27 +1789,26 @@ Content-Transfer-Encoding: 8bit
 ... File Data ...
 ----
 
-You can access the "meta-data" part with `@RequestPart` which would deserialize it from
-JSON (similar to `@RequestBody`) through one of the configured <<webflux-codecs>>:
+You can access individual parts with `@RequestPart`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	@PostMapping("/")
-	public String handle(**@RequestPart("meta-data") MetaData metadata,
+	public String handle(**@RequestPart("meta-data") Part metadata,
 			@RequestPart("file-data") FilePart file**) {
 		// ...
 	}
 ----
 
-To access multipart data sequentially, in streaming fashion, use `@RequestBody` with
-`Flux<Part>` instead. For example:
+To deserialize the raw part content, for example to JSON (similar to `@RequestBody`),
+simply declare a concrete target Object, instead of `Part`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	@PostMapping("/")
-	public String handle(**@RequestBody Flux<Part> parts**) {
+	public String handle(**@RequestPart("meta-data") MetaData metadata**) {
 		// ...
 	}
 ----
@@ -1828,6 +1827,29 @@ public String handle(**@Valid** @RequestPart("meta-data") MetaData metadata,
 		**BindingResult result**) {
 	// ...
 }
+----
+
+To access all multipart data in as a `MultiValueMap` use `@RequestBody`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@PostMapping("/")
+	public String handle(**@RequestBody Mono<MultiValueMap<String, Part>> parts**) {
+		// ...
+	}
+----
+
+To access multipart data sequentially, in streaming fashion, use `@RequestBody` with
+`Flux<Part>` instead. For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@PostMapping("/")
+	public String handle(**@RequestBody Flux<Part> parts**) {
+		// ...
+	}
 ----
 
 
