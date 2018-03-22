@@ -181,22 +181,29 @@ create a boolean condition:
 === `EvaluationContext`
 
 The interface `EvaluationContext` is used when evaluating an expression to resolve
-properties, methods, fields, and to help perform type conversion. The out-of-the-box
-implementations, `SimpleEvalutationContext` and `StandardEvaluationContext`, use
-reflection to manipulate the object, caching `java.lang.reflect.Method`,
-`java.lang.reflect.Field`, and `java.lang.reflect.Constructor` instances for increased
-performance.
+properties, methods, fields, and to help perform type conversion. There are two
+out-of-the-box implementations.
 
-`SimpleEvaluationContext` exposes a subset of essential SpEL language features and
-configuration options. Certain categories of expressions, do not require the full extent
-of the SpEL language syntax and arguably should be meaningfully restricted. Examples
+* `SimpleEvaluationContext` -- exposes a subset of essential SpEL language features and
+configuration options, for categories of expressions that do not require the full extent
+of the SpEL language syntax and should be meaningfully restricted. Examples
 include but are not limited to data binding expressions, property-based filters, and
-others. To effect, `SimpleEvaluationContext` supports a subset of the SpEL language syntax
-that excludes references to Java types, constructors, and bean references.
+others.
 
-`StandardEvaluationContext` exposes the full set of SpEL language features and
+* `StandardEvaluationContext` -- exposes the full set of SpEL language features and
 configuration options. You may use it to specify a default root object, and to configure
 every available evaluation-related strategy.
+
+`SimpleEvaluationContext` is designed to support only a subset of the SpEL language syntax.
+It excludes Java type references, constructors, and bean references. It also requires
+explicit choosing the level of support for properties and methods in expressions.
+By default, the `create()` static factory method enables only read access to properties.
+You can also obtain a builder to configure the exact level of support needed, targeting
+one of, or some combination of the following:
+
+. Custom {@code PropertyAccessor} only (no reflection).
+. Data binding properties for read-only access.
+. Data binding properties for read and write.
 
 
 [[expressions-type-conversion]]
@@ -225,7 +232,7 @@ being placed in it. A simple example:
 	Simple simple = new Simple();
 	simple.booleanList.add(true);
 
-	SimpleEvaluationContext context = new SimpleEvaluationContext();
+	SimpleEvaluationContext context = SimpleEvaluationContext().create();
 
 	// false is passed in here as a string. SpEL and the conversion service will
 	// correctly recognize that it needs to be a Boolean and convert it
@@ -602,7 +609,7 @@ arrays and lists are obtained using square bracket notation.
 [subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
-	SimpleEvaluationContext context = new SimpleEvaluationContext();
+	SimpleEvaluationContext context = SimpleEvaluationContext.create();
 
 	// Inventions Array
 
@@ -885,7 +892,7 @@ done within a call to `setValue` but can also be done inside a call to `getValue
 [subs="verbatim,quotes"]
 ----
 	Inventor inventor = new Inventor();
-	SimpleEvaluationContext context = new SimpleEvaluationContext();
+	SimpleEvaluationContext context = SimpleEvaluationContext.create();
 
 	parser.parseExpression("Name").setValue(context, inventor, "Alexander Seovic2");
 
@@ -953,7 +960,7 @@ are set using the method setVariable on `EvaluationContext` implementations.
 [subs="verbatim,quotes"]
 ----
 	Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
-	SimpleEvaluationContext context = new SimpleEvaluationContext();
+	SimpleEvaluationContext context = SimpleEvaluationContext.create();
 	context.setVariable("newName", "Mike Tesla");
 
 	parser.parseExpression("Name = #newName").getValue(context, tesla);
@@ -979,7 +986,7 @@ an expression are evaluated, #root always refers to the root.
 
 	// create parser and set variable 'primes' as the array of integers
 	ExpressionParser parser = new SpelExpressionParser();
-	SimpleEvaluationContext context = new SimpleEvaluationContext();
+	SimpleEvaluationContext context = SimpleEvaluationContext.create();
 	context.setVariable("primes",primes);
 
 	// all prime numbers > 10 from the list (using selection ?{...})
@@ -1001,7 +1008,7 @@ expression string. The function is registered through the `EvaluationContext`.
 ----
 	Method method = ...;
 
-	SimpleEvaluationContext context = new SimpleEvaluationContext();
+	SimpleEvaluationContext context = SimpleEvaluationContext.create();
 	context.setVariable("myFunction", method);
 ----
 
@@ -1028,7 +1035,7 @@ The above method can then be registered and used as follows:
 [subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
-	SimpleEvaluationContext context = new SimpleEvaluationContext();
+	SimpleEvaluationContext context = SimpleEvaluationContext.create();
 
 	context.setVariable("reverseString",
 		StringUtils.class.getDeclaredMethod("reverseString", String.class));
@@ -1049,7 +1056,7 @@ lookup beans from an expression using the (@) symbol.
 [subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
-	StandardEvaluationContext context = new StandardEvaluationContext();
+	StandardEvaluationContext context = StandardEvaluationContext.create();
 	context.setBeanResolver(new MyBeanResolver());
 
 	// This will end up calling resolve(context,"foo") on MyBeanResolver during evaluation
@@ -1062,7 +1069,7 @@ To access a factory bean itself, the bean name should instead be prefixed with a
 [subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
-	StandardEvaluationContext context = new StandardEvaluationContext();
+	StandardEvaluationContext context = StandardEvaluationContext.create();
 	context.setBeanResolver(new MyBeanResolver());
 
 	// This will end up calling resolve(context,"&foo") on MyBeanResolver during evaluation
@@ -1140,7 +1147,7 @@ Here is a more complex example.
 	ExpressionParser parser = new SpelExpressionParser();
 
 	Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
-	SimpleEvaluationContext context = new SimpleEvaluationContext();
+	SimpleEvaluationContext context = SimpleEvaluationContext.create();
 
 	String name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, tesla, String.class);
 
@@ -1172,7 +1179,7 @@ safe navigation operator will simply return null instead of throwing an exceptio
 	Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
 	tesla.setPlaceOfBirth(new PlaceOfBirth("Smiljan"));
 
-	SimpleEvaluationContext context = new SimpleEvaluationContext();
+	SimpleEvaluationContext context = SimpleEvaluationContext.create();
 
 	String city = parser.parseExpression("PlaceOfBirth?.City").getValue(context, tesla, String.class);
 	System.out.println(city); // Smiljan
@@ -1240,6 +1247,7 @@ first or the last value. To obtain the first entry matching the selection the sy
 
 [[expressions-collection-projection]]
 === Collection Projection
+
 Projection allows a collection to drive the evaluation of a sub-expression and the
 result is a new collection. The syntax for projection is `![projectionExpression]`. Most
 easily understood by example, suppose we have a list of inventors but want the list of
@@ -1262,6 +1270,7 @@ expression against each map entry.
 
 [[expressions-templating]]
 === Expression templating
+
 Expression templates allow a mixing of literal text with one or more evaluation blocks.
 Each evaluation block is delimited with prefix and suffix characters that you can
 define, a common choice is to use `#{ }` as the delimiters. For example,
@@ -1307,6 +1316,7 @@ The definition of `TemplateParserContext` is shown below.
 
 [[expressions-example-classes]]
 == Classes used in the examples
+
 Inventor.java
 
 [source,java,indent=0]
