@@ -21,7 +21,6 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -150,24 +149,12 @@ public class CachedIntrospectionResults {
 	 * @param classLoader the ClassLoader to clear the cache for
 	 */
 	public static void clearClassLoader(@Nullable ClassLoader classLoader) {
-		for (Iterator<ClassLoader> it = acceptedClassLoaders.iterator(); it.hasNext();) {
-			ClassLoader registeredLoader = it.next();
-			if (isUnderneathClassLoader(registeredLoader, classLoader)) {
-				it.remove();
-			}
-		}
-		for (Iterator<Class<?>> it = strongClassCache.keySet().iterator(); it.hasNext();) {
-			Class<?> beanClass = it.next();
-			if (isUnderneathClassLoader(beanClass.getClassLoader(), classLoader)) {
-				it.remove();
-			}
-		}
-		for (Iterator<Class<?>> it = softClassCache.keySet().iterator(); it.hasNext();) {
-			Class<?> beanClass = it.next();
-			if (isUnderneathClassLoader(beanClass.getClassLoader(), classLoader)) {
-				it.remove();
-			}
-		}
+		acceptedClassLoaders.removeIf(registeredLoader ->
+				isUnderneathClassLoader(registeredLoader, classLoader));
+		strongClassCache.keySet().removeIf(beanClass ->
+				isUnderneathClassLoader(beanClass.getClassLoader(), classLoader));
+		softClassCache.keySet().removeIf(beanClass ->
+				isUnderneathClassLoader(beanClass.getClassLoader(), classLoader));
 	}
 
 	/**
