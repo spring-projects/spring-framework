@@ -64,10 +64,9 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 	/** Default maximum number of entries for the destination cache: 1024 */
 	public static final int DEFAULT_CACHE_LIMIT = 1024;
 
-	/** Static evaluation context to re-use */
-	private static SimpleEvaluationContext evaluationContext = SimpleEvaluationContext.builder()
-			.propertyAccessor(new SimpMessageHeaderPropertyAccessor()).build();
-
+	/** Static evaluation context to reuse */
+	private static EvaluationContext messageEvalContext =
+			SimpleEvaluationContext.forPropertyAccessors(new SimpMessageHeaderPropertyAccessor()).build();
 
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
@@ -213,7 +212,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 					continue;
 				}
 				try {
-					if (Boolean.TRUE.equals(expression.getValue(evaluationContext, message, Boolean.class))) {
+					if (Boolean.TRUE.equals(expression.getValue(messageEvalContext, message, Boolean.class))) {
 						result.add(sessionId, subId);
 					}
 				}

@@ -87,7 +87,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		}
 		assertFalse(expr.isWritable(context));
 		try {
-			expr.setValue(context,"abc");
+			expr.setValue(context, "abc");
 			fail("Should have failed - default property resolver cannot resolve on null");
 		}
 		catch (Exception ex) {
@@ -95,13 +95,13 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		}
 	}
 
-	private void checkException(Exception e, SpelMessage expectedMessage) {
-		if (e instanceof SpelEvaluationException) {
-			SpelMessage sm = ((SpelEvaluationException)e).getMessageCode();
-			assertEquals("Expected exception type did not occur",expectedMessage,sm);
+	private void checkException(Exception ex, SpelMessage expectedMessage) {
+		if (ex instanceof SpelEvaluationException) {
+			SpelMessage sm = ((SpelEvaluationException) ex).getMessageCode();
+			assertEquals("Expected exception type did not occur", expectedMessage, sm);
 		}
 		else {
-			fail("Should be a SpelException "+e);
+			fail("Should be a SpelException " + ex);
 		}
 	}
 
@@ -210,7 +210,12 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		assertEquals("p2", expr.getValue(context, target));
 
 		parser.parseExpression("name='p3'").getValue(context, target);
+		assertEquals("p3", target.getName());
 		assertEquals("p3", expr.getValue(context, target));
+
+		expr.setValue(context, target, "p4");
+		assertEquals("p4", target.getName());
+		assertEquals("p4", expr.getValue(context, target));
 	}
 
 	@Test(expected = SpelEvaluationException.class)

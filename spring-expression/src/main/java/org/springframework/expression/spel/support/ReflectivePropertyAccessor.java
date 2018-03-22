@@ -48,7 +48,7 @@ import org.springframework.util.StringUtils;
  * A powerful {@link PropertyAccessor} that uses reflection to access properties
  * for reading and possibly also for writing.
  *
- * <p>A property can be accessed through a public getter method (when being read)
+ * <p>A property can be referenced through a public getter method (when being read)
  * or a public setter method (when being written), and also as a public field.
  *
  * @author Andy Clement
@@ -409,7 +409,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		Method[] methods = getSortedClassMethods(clazz);
 		for (String methodSuffix : methodSuffixes) {
 			for (Method method : methods) {
-				if (isCandidateForProperty(method) && method.getName().equals(prefix + methodSuffix) &&
+				if (isCandidateForProperty(method, clazz) && method.getName().equals(prefix + methodSuffix) &&
 						method.getParameterCount() == numberOfParams &&
 						(!mustBeStatic || Modifier.isStatic(method.getModifiers())) &&
 						(requiredReturnTypes.isEmpty() || requiredReturnTypes.contains(method.getReturnType()))) {
@@ -425,9 +425,10 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 * <p>The default implementation considers any method as a candidate, even for
 	 * non-user-declared properties on the {@link Object} base class.
 	 * @param method the Method to evaluate
+	 * @param targetClass the concrete target class that is being introspected
 	 * @since 4.3.15
 	 */
-	protected boolean isCandidateForProperty(Method method) {
+	protected boolean isCandidateForProperty(Method method, Class<?> targetClass) {
 		return true;
 	}
 
@@ -518,25 +519,25 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		if (target == null) {
 			return this;
 		}
-		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
-		if (type.isArray()) {
+		Class<?> clazz = (target instanceof Class ? (Class<?>) target : target.getClass());
+		if (clazz.isArray()) {
 			return this;
 		}
 
-		PropertyCacheKey cacheKey = new PropertyCacheKey(type, name, target instanceof Class);
+		PropertyCacheKey cacheKey = new PropertyCacheKey(clazz, name, target instanceof Class);
 		InvokerPair invocationTarget = this.readerCache.get(cacheKey);
 
 		if (invocationTarget == null || invocationTarget.member instanceof Method) {
 			Method method = (Method) (invocationTarget != null ? invocationTarget.member : null);
 			if (method == null) {
-				method = findGetterForProperty(name, type, target);
+				method = findGetterForProperty(name, clazz, target);
 				if (method != null) {
 					invocationTarget = new InvokerPair(method, new TypeDescriptor(new MethodParameter(method, -1)));
 					ReflectionUtils.makeAccessible(method);
 					this.readerCache.put(cacheKey, invocationTarget);
 				}
 			}
-			if (method != null && isCandidateForProperty(method)) {
+			if (method != null) {
 				return new OptimalPropertyAccessor(invocationTarget);
 			}
 		}
@@ -544,7 +545,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		if (invocationTarget == null || invocationTarget.member instanceof Field) {
 			Field field = (invocationTarget != null ? (Field) invocationTarget.member : null);
 			if (field == null) {
-				field = findField(name, type, target instanceof Class);
+				field = findField(name, clazz, target instanceof Class);
 				if (field != null) {
 					invocationTarget = new InvokerPair(field, new TypeDescriptor(field));
 					ReflectionUtils.makeAccessible(field);

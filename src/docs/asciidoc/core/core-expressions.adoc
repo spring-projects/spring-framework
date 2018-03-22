@@ -186,9 +186,8 @@ out-of-the-box implementations.
 
 * `SimpleEvaluationContext` -- exposes a subset of essential SpEL language features and
 configuration options, for categories of expressions that do not require the full extent
-of the SpEL language syntax and should be meaningfully restricted. Examples
-include but are not limited to data binding expressions, property-based filters, and
-others.
+of the SpEL language syntax and should be meaningfully restricted. Examples include but
+are not limited to data binding expressions, property-based filters, and others.
 
 * `StandardEvaluationContext` -- exposes the full set of SpEL language features and
 configuration options. You may use it to specify a default root object, and to configure
@@ -201,9 +200,9 @@ By default, the `create()` static factory method enables only read access to pro
 You can also obtain a builder to configure the exact level of support needed, targeting
 one of, or some combination of the following:
 
-. Custom {@code PropertyAccessor} only (no reflection).
-. Data binding properties for read-only access.
-. Data binding properties for read and write.
+. Custom {@code PropertyAccessor} only (no reflection)
+. Data binding properties for read-only access
+. Data binding properties for read and write
 
 
 [[expressions-type-conversion]]
@@ -232,11 +231,10 @@ being placed in it. A simple example:
 	Simple simple = new Simple();
 	simple.booleanList.add(true);
 
-	SimpleEvaluationContext context = SimpleEvaluationContext().create();
+	EvaluationContext context = SimpleEvaluationContext().forReadOnlyDataBinding().build();
 
 	// false is passed in here as a string. SpEL and the conversion service will
 	// correctly recognize that it needs to be a Boolean and convert it
-
 	parser.parseExpression("booleanList[0]").setValue(context, simple, "false");
 
 	// b will be false
@@ -609,7 +607,7 @@ arrays and lists are obtained using square bracket notation.
 [subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
-	SimpleEvaluationContext context = SimpleEvaluationContext.create();
+	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
 
 	// Inventions Array
 
@@ -851,33 +849,33 @@ operators are demonstrated below.
 [subs="verbatim,quotes"]
 ----
 	// Addition
-	int two = parser.parseExpression("1 + 1").getValue(Integer.class); // 2
+	int two = parser.parseExpression("1 + 1").getValue(Integer.class);  // 2
 
 	String testString = parser.parseExpression(
-			"'test' + ' ' + 'string'").getValue(String.class); // 'test string'
+			"'test' + ' ' + 'string'").getValue(String.class);  // 'test string'
 
 	// Subtraction
-	int four = parser.parseExpression("1 - -3").getValue(Integer.class); // 4
+	int four = parser.parseExpression("1 - -3").getValue(Integer.class);  // 4
 
-	double d = parser.parseExpression("1000.00 - 1e4").getValue(Double.class); // -9000
+	double d = parser.parseExpression("1000.00 - 1e4").getValue(Double.class);  // -9000
 
 	// Multiplication
-	int six = parser.parseExpression("-2 * -3").getValue(Integer.class); // 6
+	int six = parser.parseExpression("-2 * -3").getValue(Integer.class);  // 6
 
-	double twentyFour = parser.parseExpression("2.0 * 3e0 * 4").getValue(Double.class); // 24.0
+	double twentyFour = parser.parseExpression("2.0 * 3e0 * 4").getValue(Double.class);  // 24.0
 
 	// Division
-	int minusTwo = parser.parseExpression("6 / -3").getValue(Integer.class); // -2
+	int minusTwo = parser.parseExpression("6 / -3").getValue(Integer.class);  // -2
 
-	double one = parser.parseExpression("8.0 / 4e0 / 2").getValue(Double.class); // 1.0
+	double one = parser.parseExpression("8.0 / 4e0 / 2").getValue(Double.class);  // 1.0
 
 	// Modulus
-	int three = parser.parseExpression("7 % 4").getValue(Integer.class); // 3
+	int three = parser.parseExpression("7 % 4").getValue(Integer.class);  // 3
 
-	int one = parser.parseExpression("8 / 5 % 2").getValue(Integer.class); // 1
+	int one = parser.parseExpression("8 / 5 % 2").getValue(Integer.class);  // 1
 
 	// Operator precedence
-	int minusTwentyOne = parser.parseExpression("1+2-3*8").getValue(Integer.class); // -21
+	int minusTwentyOne = parser.parseExpression("1+2-3*8").getValue(Integer.class);  // -21
 ----
 
 
@@ -892,14 +890,13 @@ done within a call to `setValue` but can also be done inside a call to `getValue
 [subs="verbatim,quotes"]
 ----
 	Inventor inventor = new Inventor();
-	SimpleEvaluationContext context = SimpleEvaluationContext.create();
+	EvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().build();
 
-	parser.parseExpression("Name").setValue(context, inventor, "Alexander Seovic2");
+	parser.parseExpression("Name").setValue(context, inventor, "Aleksandar Seovic");
 
 	// alternatively
-
 	String aleks = parser.parseExpression(
-			"Name = 'Alexandar Seovic'").getValue(context, inventor, String.class);
+			"Name = 'Aleksandar Seovic'").getValue(context, inventor, String.class);
 ----
 
 
@@ -960,12 +957,12 @@ are set using the method setVariable on `EvaluationContext` implementations.
 [subs="verbatim,quotes"]
 ----
 	Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
-	SimpleEvaluationContext context = SimpleEvaluationContext.create();
+
+	EvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().build();
 	context.setVariable("newName", "Mike Tesla");
 
 	parser.parseExpression("Name = #newName").getValue(context, tesla);
-
-	System.out.println(tesla.getName()) // "Mike Tesla"
+	System.out.println(tesla.getName())  // "Mike Tesla"
 ----
 
 
@@ -986,8 +983,8 @@ an expression are evaluated, #root always refers to the root.
 
 	// create parser and set variable 'primes' as the array of integers
 	ExpressionParser parser = new SpelExpressionParser();
-	SimpleEvaluationContext context = SimpleEvaluationContext.create();
-	context.setVariable("primes",primes);
+	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataAccess();
+	context.setVariable("primes", primes);
 
 	// all prime numbers > 10 from the list (using selection ?{...})
 	// evaluates to [11, 13, 17]
@@ -1008,7 +1005,7 @@ expression string. The function is registered through the `EvaluationContext`.
 ----
 	Method method = ...;
 
-	SimpleEvaluationContext context = SimpleEvaluationContext.create();
+	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
 	context.setVariable("myFunction", method);
 ----
 
@@ -1020,7 +1017,7 @@ For example, given a utility method to reverse a string is shown below:
 	public abstract class StringUtils {
 
 		public static String reverseString(String input) {
-			StringBuilder backwards = new StringBuilder();
+			StringBuilder backwards = new StringBuilder(input.length());
 			for (int i = 0; i < input.length(); i++)
 				backwards.append(input.charAt(input.length() - 1 - i));
 			}
@@ -1035,13 +1032,13 @@ The above method can then be registered and used as follows:
 [subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
-	SimpleEvaluationContext context = SimpleEvaluationContext.create();
 
+	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
 	context.setVariable("reverseString",
-		StringUtils.class.getDeclaredMethod("reverseString", String.class));
+			StringUtils.class.getDeclaredMethod("reverseString", String.class));
 
 	String helloWorldReversed = parser.parseExpression(
-		"#reverseString('hello')").getValue(context, String.class);
+			"#reverseString('hello')").getValue(context, String.class);
 ----
 
 
@@ -1056,7 +1053,7 @@ lookup beans from an expression using the (@) symbol.
 [subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
-	StandardEvaluationContext context = StandardEvaluationContext.create();
+	StandardEvaluationContext context = new StandardEvaluationContext();
 	context.setBeanResolver(new MyBeanResolver());
 
 	// This will end up calling resolve(context,"foo") on MyBeanResolver during evaluation
@@ -1069,7 +1066,7 @@ To access a factory bean itself, the bean name should instead be prefixed with a
 [subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
-	StandardEvaluationContext context = StandardEvaluationContext.create();
+	StandardEvaluationContext context = new StandardEvaluationContext();
 	context.setBeanResolver(new MyBeanResolver());
 
 	// This will end up calling resolve(context,"&foo") on MyBeanResolver during evaluation
@@ -1124,7 +1121,7 @@ example:
 [subs="verbatim,quotes"]
 ----
 	String name = "Elvis Presley";
-	String displayName = name != null ? name : "Unknown";
+	String displayName = (name != null ? name : "Unknown");
 ----
 
 Instead you can use the Elvis operator, named for the resemblance to Elvis' hair style.
@@ -1135,8 +1132,7 @@ Instead you can use the Elvis operator, named for the resemblance to Elvis' hair
 	ExpressionParser parser = new SpelExpressionParser();
 
 	String name = parser.parseExpression("name?:'Unknown'").getValue(String.class);
-
-	System.out.println(name); // 'Unknown'
+	System.out.println(name);  // 'Unknown'
 ----
 
 Here is a more complex example.
@@ -1145,19 +1141,15 @@ Here is a more complex example.
 [subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
+	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
 
 	Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
-	SimpleEvaluationContext context = SimpleEvaluationContext.create();
-
 	String name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, tesla, String.class);
-
-	System.out.println(name); // Nikola Tesla
+	System.out.println(name);  // Nikola Tesla
 
 	tesla.setName(null);
-
 	name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, tesla, String.class);
-
-	System.out.println(name); // Elvis Presley
+	System.out.println(name);  // Elvis Presley
 ----
 
 
@@ -1175,20 +1167,17 @@ safe navigation operator will simply return null instead of throwing an exceptio
 [subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
+	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
 
 	Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
 	tesla.setPlaceOfBirth(new PlaceOfBirth("Smiljan"));
 
-	SimpleEvaluationContext context = SimpleEvaluationContext.create();
-
 	String city = parser.parseExpression("PlaceOfBirth?.City").getValue(context, tesla, String.class);
-	System.out.println(city); // Smiljan
+	System.out.println(city);  // Smiljan
 
 	tesla.setPlaceOfBirth(null);
-
 	city = parser.parseExpression("PlaceOfBirth?.City").getValue(context, tesla, String.class);
-
-	System.out.println(city); // null - does not throw NullPointerException!!!
+	System.out.println(city);  // null - does not throw NullPointerException!!!
 ----
 
 [NOTE]
