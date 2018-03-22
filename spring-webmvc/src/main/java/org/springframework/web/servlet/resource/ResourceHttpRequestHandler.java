@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -507,6 +508,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			throw new IllegalStateException("Required request attribute '" +
 					HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE + "' is not set");
 		}
+
 		path = processPath(path);
 		if (!StringUtils.hasText(path) || isInvalidPath(path)) {
 			if (logger.isTraceEnabled()) {
@@ -514,25 +516,19 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			}
 			return null;
 		}
-		if (path.contains("%")) {
-			try {
-				// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars
-				if (isInvalidPath(URLDecoder.decode(path, "UTF-8"))) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Ignoring invalid resource path with escape sequences [" + path + "].");
-					}
-					return null;
-				}
+		if (isInvalidEncodedPath(path)) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Ignoring invalid resource path with escape sequences [" + path + "]");
 			}
-			catch (IllegalArgumentException ex) {
-				// ignore
-			}
+			return null;
 		}
+
 		ResourceResolverChain resolveChain = new DefaultResourceResolverChain(getResourceResolvers());
 		Resource resource = resolveChain.resolveResource(request, path, getLocations());
 		if (resource == null || getResourceTransformers().isEmpty()) {
 			return resource;
 		}
+
 		ResourceTransformerChain transformChain =
 				new DefaultResourceTransformerChain(resolveChain, getResourceTransformers());
 		resource = transformChain.transform(request, resource);
@@ -540,13 +536,47 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	}
 
 	/**
-	 * Process the given resource path to be used.
-	 * <p>The default implementation replaces any combination of leading '/' and
-	 * control characters (00-1F and 7F) with a single "/" or "". For example
-	 * {@code "  // /// ////  foo/bar"} becomes {@code "/foo/bar"}.
+	 * Process the given resource path.
+	 * <p>The default implementation replaces:
+	 * <ul>
+	 * <li>Backslash with forward slash.
+	 * <li>Duplicate occurrences of slash with a single slash.
+	 * <li>Any combination of leading slash and control characters (00-1F and 7F)
+	 * with a single "/" or "". For example {@code "  / // foo/bar"}
+	 * becomes {@code "/foo/bar"}.
+	 * </ul>
 	 * @since 3.2.12
 	 */
 	protected String processPath(String path) {
+		path = StringUtils.replace(path, "\\", "/");
+		path = cleanDuplicateSlashes(path);
+		return cleanLeadingSlash(path);
+	}
+
+	private String cleanDuplicateSlashes(String path) {
+		StringBuilder sb = null;
+		char prev = 0;
+		for (int i = 0; i < path.length(); i++) {
+			char curr = path.charAt(i);
+			try {
+				if ((curr == '/') && (prev == '/')) {
+					if (sb == null) {
+						sb = new StringBuilder(path.substring(0, i));
+					}
+					continue;
+				}
+				if (sb != null) {
+					sb.append(path.charAt(i));
+				}
+			}
+			finally {
+				prev = curr;
+			}
+		}
+		return sb != null ? sb.toString() : path;
+	}
+
+	private String cleanLeadingSlash(String path) {
 		boolean slash = false;
 		for (int i = 0; i < path.length(); i++) {
 			if (path.charAt(i) == '/') {
@@ -556,14 +586,42 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 				if (i == 0 || (i == 1 && slash)) {
 					return path;
 				}
-				path = slash ? "/" + path.substring(i) : path.substring(i);
+				path = (slash ? "/" + path.substring(i) : path.substring(i));
 				if (logger.isTraceEnabled()) {
-					logger.trace("Path after trimming leading '/' and control characters: " + path);
+					logger.trace("Path after trimming leading '/' and control characters: [" + path + "]");
 				}
 				return path;
 			}
 		}
 		return (slash ? "/" : "");
+	}
+
+	/**
+	 * Check whether the given path contains invalid escape sequences.
+	 * @param path the path to validate
+	 * @return {@code true} if the path is invalid, {@code false} otherwise
+	 */
+	private boolean isInvalidEncodedPath(String path) {
+		if (path.contains("%")) {
+			try {
+				// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars
+				String decodedPath = URLDecoder.decode(path, "UTF-8");
+				if (isInvalidPath(decodedPath)) {
+					return true;
+				}
+				decodedPath = processPath(decodedPath);
+				if (isInvalidPath(decodedPath)) {
+					return true;
+				}
+			}
+			catch (IllegalArgumentException ex) {
+				// Should never happen...
+			}
+			catch (UnsupportedEncodingException ex) {
+				// Should never happen...
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -580,32 +638,24 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * path starts predictably with a single '/' or does not have one.
 	 * @param path the path to validate
 	 * @return {@code true} if the path is invalid, {@code false} otherwise
+	 * @since 3.0.6
 	 */
 	protected boolean isInvalidPath(String path) {
-		if (logger.isTraceEnabled()) {
-			logger.trace("Applying \"invalid path\" checks to path: " + path);
-		}
 		if (path.contains("WEB-INF") || path.contains("META-INF")) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Path contains \"WEB-INF\" or \"META-INF\".");
-			}
+			logger.trace("Path contains \"WEB-INF\" or \"META-INF\".");
 			return true;
 		}
 		if (path.contains(":/")) {
 			String relativePath = (path.charAt(0) == '/' ? path.substring(1) : path);
 			if (ResourceUtils.isUrl(relativePath) || relativePath.startsWith("url:")) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Path represents URL or has \"url:\" prefix.");
-				}
+				logger.trace("Path represents URL or has \"url:\" prefix.");
 				return true;
 			}
 		}
 		if (path.contains("..")) {
 			path = StringUtils.cleanPath(path);
 			if (path.contains("../")) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Path contains \"../\" after call to StringUtils#cleanPath.");
-				}
+				logger.trace("Path contains \"../\" after call to StringUtils#cleanPath.");
 				return true;
 			}
 		}

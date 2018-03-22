@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -245,21 +245,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 			return true;
 		}
 		locationPath = (locationPath.endsWith("/") || locationPath.isEmpty() ? locationPath : locationPath + "/");
-		if (!resourcePath.startsWith(locationPath)) {
-			return false;
-		}
-
-		if (resourcePath.contains("%")) {
-			// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars...
-			if (URLDecoder.decode(resourcePath, "UTF-8").contains("../")) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Resolved resource path contains \"../\" after decoding: " + resourcePath);
-				}
-				return false;
-			}
-		}
-
-		return true;
+		return (resourcePath.startsWith(locationPath) && !isInvalidEncodedPath(resourcePath));
 	}
 
 	private String encodeIfNecessary(String path, HttpServletRequest request, Resource location) {
@@ -291,8 +277,30 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	}
 
 	private boolean shouldEncodeRelativePath(Resource location) {
-		return location instanceof UrlResource &&
-				this.urlPathHelper != null && this.urlPathHelper.isUrlDecode();
+		return (location instanceof UrlResource && this.urlPathHelper != null && this.urlPathHelper.isUrlDecode());
+	}
+
+	private boolean isInvalidEncodedPath(String resourcePath) {
+		if (resourcePath.contains("%")) {
+			// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars...
+			try {
+				String decodedPath = URLDecoder.decode(resourcePath, "UTF-8");
+				int separatorIndex = decodedPath.indexOf("..") + 2;
+				if (separatorIndex > 1 && separatorIndex < decodedPath.length()) {
+					char separator = decodedPath.charAt(separatorIndex);
+					if (separator == '/' || separator == '\\') {
+						if (logger.isTraceEnabled()) {
+							logger.trace("Resolved resource path contains \"../\" after decoding: " + resourcePath);
+						}
+					}
+					return true;
+				}
+			}
+			catch (UnsupportedEncodingException ex) {
+				// Should never happen...
+			}
+		}
+		return false;
 	}
 
 }
