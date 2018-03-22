@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -1338,12 +1337,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @since 4.2
 	 */
 	public void clearMetadataCache() {
-		Iterator<String> mergedBeans = this.mergedBeanDefinitions.keySet().iterator();
-		while (mergedBeans.hasNext()) {
-			if (!isBeanEligibleForMetadataCaching(mergedBeans.next())) {
-				mergedBeans.remove();
-			}
-		}
+		this.mergedBeanDefinitions.keySet().removeIf(bean -> !isBeanEligibleForMetadataCaching(bean));
 	}
 
 	/**
