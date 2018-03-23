@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -206,6 +207,20 @@ public class MockServerRequest implements ServerRequest {
 	@Override
 	public Mono<? extends Principal> principal() {
 		return Mono.justOrEmpty(this.principal);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Mono<MultiValueMap<String, String>> formData() {
+		Assert.state(this.body != null, "No body");
+		return (Mono<MultiValueMap<String, String>>) this.body;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Mono<MultiValueMap<String, Part>> multipartData() {
+		Assert.state(this.body != null, "No body");
+		return (Mono<MultiValueMap<String, Part>>) this.body;
 	}
 
 	public static Builder builder() {
