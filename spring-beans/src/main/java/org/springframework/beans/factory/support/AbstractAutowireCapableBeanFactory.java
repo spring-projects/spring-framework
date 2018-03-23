@@ -927,6 +927,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (bw != null) {
 				return (FactoryBean<?>) bw.getWrappedInstance();
 			}
+
+			Object beanInstance = getSingleton(beanName, false);
+                        if (beanInstance != null) {
+                            return (FactoryBean<?>) beanInstance;
+                        }
+
 			if (isSingletonCurrentlyInCreation(beanName) ||
 					(mbd.getFactoryBeanName() != null && isSingletonCurrentlyInCreation(mbd.getFactoryBeanName()))) {
 				return null;
