@@ -139,7 +139,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 			builder.loopResources(this.loopResources);
 
 			if (!builder.isPoolDisabled()) {
-				this.poolResources = PoolResources.fixed("tcp-client-pool");
+				this.poolResources = PoolResources.elastic("tcp-client-pool");
 				builder.poolResources(this.poolResources);
 			}
 		};
