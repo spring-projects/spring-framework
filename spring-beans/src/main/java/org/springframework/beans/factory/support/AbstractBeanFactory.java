@@ -300,7 +300,18 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 									"Circular depends-on relationship between '" + beanName + "' and '" + dep + "'");
 						}
 						registerDependentBean(dep, beanName);
-						getBean(dep);
+						try {
+							getBean(dep);
+						}catch(NoSuchBeanDefinitionException ex) {
+							Class dependentClass = null;
+							try {
+								dependentClass = Class.forName(mbd.getBeanClassName());
+							}
+							catch (ClassNotFoundException e) {} //swallow
+							finally {
+								throw new NoSuchBeanDefinitionException(dep, ResolvableType.forClass(dependentClass));
+							}
+						}
 					}
 				}
 
