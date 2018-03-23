@@ -39,7 +39,8 @@ import org.springframework.lang.Nullable;
 
 /**
  * A basic implementation of {@link EvaluationContext} that focuses on a subset
- * of essential SpEL features and configuration options.
+ * of essential SpEL features and customization options, targeting simple
+ * condition evaluation and in particular data binding scenarios.
  *
  * <p>In many cases, the full extent of the SpEL language is not required and
  * should be meaningfully restricted. Examples include but are not limited to
@@ -48,10 +49,11 @@ import org.springframework.lang.Nullable;
  * SpEL language syntax, e.g. excluding references to Java types, constructors,
  * and bean references.
  *
- * <p>When creating {@code SimpleEvaluationContext} you need to choose the level
- * of support you need to deal with properties and methods in SpEL expressions:
+ * <p>When creating a {@code SimpleEvaluationContext} you need to choose the
+ * level of support that you need for property access in SpEL expressions:
  * <ul>
- * <li>Custom {@code PropertyAccessor} only (no reflection)</li>
+ * <li>A custom {@code PropertyAccessor} (typically not reflection-based),
+ * potentially combined with a {@link DataBindingPropertyAccessor}</li>
  * <li>Data binding properties for read-only access</li>
  * <li>Data binding properties for read and write</li>
  * </ul>
@@ -68,11 +70,13 @@ import org.springframework.lang.Nullable;
  * {@link org.springframework.expression.Expression} with both an
  * {@code EvaluationContext} and a root object as arguments
  *
- * <p>For more flexibility, consider {@link StandardEvaluationContext} instead.
+ * <p>For more flexibility, in particular for internal configuration
+ * scenarios, consider using {@link StandardEvaluationContext} instead.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 4.3.15
+ * @see #forPropertyAccessors
  * @see #forReadOnlyDataBinding()
  * @see #forReadWriteDataBinding()
  * @see StandardEvaluationContext
@@ -195,12 +199,20 @@ public class SimpleEvaluationContext implements EvaluationContext {
 
 
 	/**
-	 * Create a {@code SimpleEvaluationContext} for the specified
-	 * {@link PropertyAccessor} delegates.
-	 * @see ReflectivePropertyAccessor
-	 * @see DataBindingPropertyAccessor
+	 * Create a {@code SimpleEvaluationContext} for the specified {@link PropertyAccessor}
+	 * delegates: typically a custom {@code PropertyAccessor} specific to a use case
+	 * (e.g. attribute resolution in a custom data structure), potentially combined with
+	 * a {@link DataBindingPropertyAccessor} if property dereferences are needed as well.
+	 * @see DataBindingPropertyAccessor#forReadOnlyAccess()
+	 * @see DataBindingPropertyAccessor#forReadWriteAccess()
 	 */
 	public static Builder forPropertyAccessors(PropertyAccessor... accessors) {
+		for (PropertyAccessor accessor : accessors) {
+			if (accessor.getClass() == ReflectivePropertyAccessor.class) {
+				throw new IllegalArgumentException("SimpleEvaluationContext is not designed for use with a plain " +
+						"ReflectivePropertyAccessor. Consider using DataBindingPropertyAccessor or a custom subclass.");
+			}
+		}
 		return new Builder(accessors);
 	}
 
@@ -208,6 +220,7 @@ public class SimpleEvaluationContext implements EvaluationContext {
 	 * Create a {@code SimpleEvaluationContext} for read-only access to
 	 * public properties via {@link DataBindingPropertyAccessor}.
 	 * @see DataBindingPropertyAccessor#forReadOnlyAccess()
+	 * @see #forPropertyAccessors
 	 */
 	public static Builder forReadOnlyDataBinding() {
 		return new Builder(DataBindingPropertyAccessor.forReadOnlyAccess());
@@ -216,7 +229,8 @@ public class SimpleEvaluationContext implements EvaluationContext {
 	/**
 	 * Create a {@code SimpleEvaluationContext} for read-write access to
 	 * public properties via {@link DataBindingPropertyAccessor}.
-	 * @see DataBindingPropertyAccessor#forReadOnlyAccess()
+	 * @see DataBindingPropertyAccessor#forReadWriteAccess()
+	 * @see #forPropertyAccessors
 	 */
 	public static Builder forReadWriteDataBinding() {
 		return new Builder(DataBindingPropertyAccessor.forReadWriteAccess());
@@ -240,8 +254,7 @@ public class SimpleEvaluationContext implements EvaluationContext {
 		/**
 		 * Register a custom {@link TypeConverter}.
 		 * <p>By default a {@link StandardTypeConverter} backed by a
-		 * {@link org.springframework.core.convert.support.DefaultConversionService}
-		 * is used.
+		 * {@link org.springframework.core.convert.support.DefaultConversionService} is used.
 		 * @see #withConversionService
 		 * @see StandardTypeConverter#StandardTypeConverter()
 		 */
@@ -253,8 +266,7 @@ public class SimpleEvaluationContext implements EvaluationContext {
 		/**
 		 * Register a custom {@link ConversionService}.
 		 * <p>By default a {@link StandardTypeConverter} backed by a
-		 * {@link org.springframework.core.convert.support.DefaultConversionService}
-		 * is used.
+		 * {@link org.springframework.core.convert.support.DefaultConversionService} is used.
 		 * @see #withTypeConverter
 		 * @see StandardTypeConverter#StandardTypeConverter(ConversionService)
 		 */
