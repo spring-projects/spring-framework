@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,11 +123,8 @@ public class SimpleNamespaceContext implements NamespaceContext {
 		}
 		else {
 			this.prefixToNamespaceUri.put(prefix, namespaceUri);
-			Set<String> prefixes = this.namespaceUriToPrefixes.get(namespaceUri);
-			if (prefixes == null) {
-				prefixes = new LinkedHashSet<>();
-				this.namespaceUriToPrefixes.put(namespaceUri, prefixes);
-			}
+			Set<String> prefixes =
+					this.namespaceUriToPrefixes.computeIfAbsent(namespaceUri, k -> new LinkedHashSet<>());
 			prefixes.add(prefix);
 		}
 	}

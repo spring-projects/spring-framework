@@ -26,6 +26,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -86,7 +88,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 	private volatile boolean active = true;
 
-	private final Map<Integer, LinkedList<Session>> cachedSessions = new HashMap<>();
+	private final ConcurrentMap<Integer, LinkedList<Session>> cachedSessions = new ConcurrentHashMap<>();
 
 
 	/**
@@ -208,14 +210,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			return null;
 		}
 
-		LinkedList<Session> sessionList;
-		synchronized (this.cachedSessions) {
-			sessionList = this.cachedSessions.get(mode);
-			if (sessionList == null) {
-				sessionList = new LinkedList<>();
-				this.cachedSessions.put(mode, sessionList);
-			}
-		}
+		LinkedList<Session> sessionList = this.cachedSessions.computeIfAbsent(mode, k -> new LinkedList<>());
 		Session session = null;
 		synchronized (sessionList) {
 			if (!sessionList.isEmpty()) {
