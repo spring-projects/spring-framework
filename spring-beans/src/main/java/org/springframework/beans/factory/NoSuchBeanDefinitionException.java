@@ -41,6 +41,9 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	@Nullable
 	private ResolvableType resolvableType;
 
+	@Nullable
+	private ResolvableType dependentBeanType;
+
 
 	/**
 	 * Create a new {@code NoSuchBeanDefinitionException}.
@@ -59,6 +62,12 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	public NoSuchBeanDefinitionException(String name, String message) {
 		super("No bean named '" + name + "' available: " + message);
 		this.beanName = name;
+	}
+
+	public NoSuchBeanDefinitionException(String name, ResolvableType dependentBeanType) {
+		super("'" + dependentBeanType + "' depends on a bean named '" + name + "' but it wasn't available");
+		this.beanName = name;
+		this.dependentBeanType = dependentBeanType;
 	}
 
 	/**
@@ -99,7 +108,6 @@ public class NoSuchBeanDefinitionException extends BeansException {
 		this.resolvableType = type;
 	}
 
-
 	/**
 	 * Return the name of the missing bean, if it was a lookup <em>by name</em> that failed.
 	 */
@@ -134,6 +142,11 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	 */
 	public int getNumberOfBeansFound() {
 		return 0;
+	}
+
+	@Nullable
+	public ResolvableType getDependentBeanType() {
+		return this.dependentBeanType;
 	}
 
 }
