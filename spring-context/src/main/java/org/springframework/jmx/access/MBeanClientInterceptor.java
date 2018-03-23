@@ -532,11 +532,7 @@ public class MBeanClientInterceptor
 
 		String[] signature;
 		synchronized (this.signatureCache) {
-			signature = this.signatureCache.get(method);
-			if (signature == null) {
-				signature = JmxUtils.getMethodSignature(method);
-				this.signatureCache.put(method, signature);
-			}
+			signature = this.signatureCache.computeIfAbsent(method, JmxUtils::getMethodSignature);
 		}
 
 		return this.serverToUse.invoke(this.objectName, method.getName(), args, signature);

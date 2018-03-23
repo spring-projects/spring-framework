@@ -261,12 +261,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 			Assert.state(this.engineName != null, "No engine name specified");
 			Object engineKey = (!ObjectUtils.isEmpty(this.scripts) ?
 					new EngineKey(this.engineName, this.scripts) : this.engineName);
-			ScriptEngine engine = engines.get(engineKey);
-			if (engine == null) {
-				engine = createEngineFromName(engineName);
-				engines.put(engineKey, engine);
-			}
-			return engine;
+			return engines.computeIfAbsent(engineKey, key -> createEngineFromName(engineName));
 		}
 		else {
 			// Simply return the configured ScriptEngine...

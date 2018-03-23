@@ -447,12 +447,8 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 */
 	protected ScriptSource getScriptSource(String beanName, String scriptSourceLocator) {
 		synchronized (this.scriptSourceCache) {
-			ScriptSource scriptSource = this.scriptSourceCache.get(beanName);
-			if (scriptSource == null) {
-				scriptSource = convertToScriptSource(beanName, scriptSourceLocator, this.resourceLoader);
-				this.scriptSourceCache.put(beanName, scriptSource);
-			}
-			return scriptSource;
+			return this.scriptSourceCache.computeIfAbsent(beanName,
+					key -> convertToScriptSource(beanName, scriptSourceLocator, this.resourceLoader));
 		}
 	}
 

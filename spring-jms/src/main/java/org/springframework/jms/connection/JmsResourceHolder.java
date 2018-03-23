@@ -139,12 +139,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 		if (!this.sessions.contains(session)) {
 			this.sessions.add(session);
 			if (connection != null) {
-				List<Session> sessions = this.sessionsPerConnection.get(connection);
-				if (sessions == null) {
-					sessions = new LinkedList<>();
-					this.sessionsPerConnection.put(connection, sessions);
-				}
-				sessions.add(session);
+				this.sessionsPerConnection.computeIfAbsent(connection, key -> new LinkedList<>()).add(session);
 			}
 		}
 	}

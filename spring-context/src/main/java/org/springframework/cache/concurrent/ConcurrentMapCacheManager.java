@@ -164,17 +164,7 @@ public class ConcurrentMapCacheManager implements CacheManager, BeanClassLoaderA
 	@Override
 	@Nullable
 	public Cache getCache(String name) {
-		Cache cache = this.cacheMap.get(name);
-		if (cache == null && this.dynamic) {
-			synchronized (this.cacheMap) {
-				cache = this.cacheMap.get(name);
-				if (cache == null) {
-					cache = createConcurrentMapCache(name);
-					this.cacheMap.put(name, cache);
-				}
-			}
-		}
-		return cache;
+		return this.cacheMap.computeIfAbsent(name, key -> (this.dynamic) ? createConcurrentMapCache(name) : null);
 	}
 
 	private void recreateCaches() {

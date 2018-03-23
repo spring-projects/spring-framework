@@ -578,11 +578,8 @@ public abstract class AbstractMethodMessageHandler<T>
 			logger.debug("Searching methods to handle " + exception.getClass().getSimpleName());
 		}
 		Class<?> beanType = handlerMethod.getBeanType();
-		AbstractExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.get(beanType);
-		if (resolver == null) {
-			resolver = createExceptionHandlerMethodResolverFor(beanType);
-			this.exceptionHandlerCache.put(beanType, resolver);
-		}
+		AbstractExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.computeIfAbsent(beanType,
+				this::createExceptionHandlerMethodResolverFor);
 		Method method = resolver.resolveMethod(exception);
 		if (method != null) {
 			return new InvocableHandlerMethod(handlerMethod.getBean(), method);

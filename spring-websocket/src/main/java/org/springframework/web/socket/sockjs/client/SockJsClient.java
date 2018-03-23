@@ -290,14 +290,12 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 
 	private ServerInfo getServerInfo(SockJsUrlInfo sockJsUrlInfo, @Nullable HttpHeaders headers) {
 		URI infoUrl = sockJsUrlInfo.getInfoUrl();
-		ServerInfo info = this.serverInfoCache.get(infoUrl);
-		if (info == null) {
+		ServerInfo info = this.serverInfoCache.computeIfAbsent(infoUrl, key -> {
 			long start = System.currentTimeMillis();
-			String response = this.infoReceiver.executeInfoRequest(infoUrl, headers);
+			String response = this.infoReceiver.executeInfoRequest(key, headers);
 			long infoRequestTime = System.currentTimeMillis() - start;
-			info = new ServerInfo(response, infoRequestTime);
-			this.serverInfoCache.put(infoUrl, info);
-		}
+			return new ServerInfo(response, infoRequestTime);
+		});
 		return info;
 	}
 

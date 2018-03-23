@@ -210,11 +210,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 		LinkedList<Session> sessionList;
 		synchronized (this.cachedSessions) {
-			sessionList = this.cachedSessions.get(mode);
-			if (sessionList == null) {
-				sessionList = new LinkedList<>();
-				this.cachedSessions.put(mode, sessionList);
-			}
+			sessionList = this.cachedSessions.computeIfAbsent(mode, key -> new LinkedList<>());
 		}
 		Session session = null;
 		synchronized (sessionList) {
