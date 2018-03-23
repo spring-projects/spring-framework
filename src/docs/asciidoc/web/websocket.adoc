@@ -1301,7 +1301,7 @@ subscription messages only.
 An `@SubscribeMapping` method is generally no different from any `@MessageMapping`
 method with respect to mapping and input arguments. For example you can combine it with a
 type-level `@MessageMapping` to express a shared destination prefix, and you can use the
-same <<websocket-stomp-message-mapping,method arguments>> as on any @MessageMapping` method.
+same <<websocket-stomp-message-mapping,method arguments>> as any @MessageMapping` method.
 
 The key difference with `@SubscribeMapping` is that the return value of the method is
 serialized as a payload and sent, not to the "brokerChannel" but to the
