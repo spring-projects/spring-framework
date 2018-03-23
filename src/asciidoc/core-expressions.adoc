@@ -201,7 +201,7 @@ By default, the `create()` static factory method enables only read access to pro
 You can also obtain a builder to configure the exact level of support needed, targeting
 one of, or some combination of the following:
 
-. Custom {@code PropertyAccessor} only (no reflection).
+. Custom `PropertyAccessor` only (no reflection).
 . Data binding properties for read-only access.
 . Data binding properties for read and write.
 

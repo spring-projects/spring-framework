@@ -1468,7 +1468,7 @@ subscription messages only.
 An `@SubscribeMapping` method is generally no different from any `@MessageMapping`
 method with respect to mapping and input arguments. For example you can combine it with a
 type-level `@MessageMapping` to express a shared destination prefix, and you can use the
-same <<websocket-stomp-message-mapping,method arguments>> as on any @MessageMapping` method.
+same <<websocket-stomp-message-mapping,method arguments>> as any @MessageMapping` method.
 
 The key difference with `@SubscribeMapping` is that the return value of the method is
 serialized as a payload and sent, not to the "brokerChannel" but to the
@@ -1506,7 +1506,8 @@ itself, or through a method argument if you want to get access to the exception 
 ----
 
 `@MessageExceptionHandler` methods support flexible method signatures and support the same
-method argument types and return values as <<websocket-stomp-message-mapping>> methods.
+method argument types and return values as
+<<websocket-stomp-message-mapping,@MessageMapping>> methods.
 
 Typically `@MessageExceptionHandler` methods apply within the `@Controller` class (or
 class hierarchy) they are declared in. If you want such methods to apply more globally,
