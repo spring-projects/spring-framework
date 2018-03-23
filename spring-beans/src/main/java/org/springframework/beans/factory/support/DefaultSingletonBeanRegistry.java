@@ -392,11 +392,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 		// No entry yet -> fully synchronized manipulation of the containedBeans Set
 		synchronized (this.containedBeanMap) {
-			containedBeans = this.containedBeanMap.get(containingBeanName);
-			if (containedBeans == null) {
-				containedBeans = new LinkedHashSet<>(8);
-				this.containedBeanMap.put(containingBeanName, containedBeans);
-			}
+			containedBeans = this.containedBeanMap.computeIfAbsent(containingBeanName, k -> new LinkedHashSet<>(8));
 			containedBeans.add(containedBeanName);
 		}
 		registerDependentBean(containedBeanName, containingBeanName);
@@ -418,19 +414,12 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 		// No entry yet -> fully synchronized manipulation of the dependentBeans Set
 		synchronized (this.dependentBeanMap) {
-			dependentBeans = this.dependentBeanMap.get(canonicalName);
-			if (dependentBeans == null) {
-				dependentBeans = new LinkedHashSet<>(8);
-				this.dependentBeanMap.put(canonicalName, dependentBeans);
-			}
+			dependentBeans = this.dependentBeanMap.computeIfAbsent(canonicalName, k -> new LinkedHashSet<>(8));
 			dependentBeans.add(dependentBeanName);
 		}
 		synchronized (this.dependenciesForBeanMap) {
-			Set<String> dependenciesForBean = this.dependenciesForBeanMap.get(dependentBeanName);
-			if (dependenciesForBean == null) {
-				dependenciesForBean = new LinkedHashSet<>(8);
-				this.dependenciesForBeanMap.put(dependentBeanName, dependenciesForBean);
-			}
+			Set<String> dependenciesForBean =
+					this.dependenciesForBeanMap.computeIfAbsent(dependentBeanName, k -> new LinkedHashSet<>(8));
 			dependenciesForBean.add(canonicalName);
 		}
 	}
@@ -525,6 +514,14 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		this.dependentBeanMap.clear();
 		this.dependenciesForBeanMap.clear();
 
+		clearSingletonCache();
+	}
+
+	/**
+	 * Clear all cached singleton instances in this registry.
+	 * @since 4.3.15
+	 */
+	protected void clearSingletonCache() {
 		synchronized (this.singletonObjects) {
 			this.singletonObjects.clear();
 			this.singletonFactories.clear();
