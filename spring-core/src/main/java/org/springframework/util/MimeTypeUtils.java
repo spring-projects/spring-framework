@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.util;
 
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -46,7 +47,7 @@ public abstract class MimeTypeUtils {
 					'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
 					'V', 'W', 'X', 'Y', 'Z'};
 
-	private static final Random RND = new Random();
+	private static final Random RND = new SecureRandom();
 
 	private static Charset US_ASCII = Charset.forName("US-ASCII");
 
