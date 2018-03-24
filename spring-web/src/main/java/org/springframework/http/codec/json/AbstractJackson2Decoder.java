@@ -76,7 +76,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Flux<TokenBuffer> tokens = tokenize(input, true);
-		return decodeInternal(tokens, elementType, mimeType, hints);
+		return decodeInternal(tokens, elementType, hints);
 	}
 
 	@Override
@@ -84,7 +84,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Flux<TokenBuffer> tokens = tokenize(input, false);
-		return decodeInternal(tokens, elementType, mimeType, hints).singleOrEmpty();
+		return decodeInternal(tokens, elementType, hints).singleOrEmpty();
 	}
 
 	private Flux<TokenBuffer> tokenize(Publisher<DataBuffer> input, boolean tokenizeArrayElements) {
@@ -94,7 +94,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	}
 
 	private Flux<Object> decodeInternal(Flux<TokenBuffer> tokens, ResolvableType elementType,
-			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+										@Nullable Map<String, Object> hints) {
 
 		Assert.notNull(tokens, "'tokens' must not be null");
 		Assert.notNull(elementType, "'elementType' must not be null");

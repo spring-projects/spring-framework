@@ -51,10 +51,10 @@ public class RequestHeaderMapMethodArgumentResolver extends HandlerMethodArgumen
 
 	@Override
 	public boolean supportsParameter(MethodParameter param) {
-		return checkAnnotatedParamNoReactiveWrapper(param, RequestHeader.class, this::allParams);
+		return checkAnnotatedParamNoReactiveWrapper(param, RequestHeader.class, (annotation, type) -> allParams(type));
 	}
 
-	private boolean allParams(RequestHeader annotation, Class<?> type) {
+	private boolean allParams(Class<?> type) {
 		return Map.class.isAssignableFrom(type);
 	}
 

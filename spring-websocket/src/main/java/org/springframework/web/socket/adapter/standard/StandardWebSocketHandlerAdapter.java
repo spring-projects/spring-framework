@@ -67,13 +67,13 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 			session.addMessageHandler(new MessageHandler.Partial<String>() {
 				@Override
 				public void onMessage(String message, boolean isLast) {
-					handleTextMessage(session, message, isLast);
+					handleTextMessage(message, isLast);
 				}
 			});
 			session.addMessageHandler(new MessageHandler.Partial<ByteBuffer>() {
 				@Override
 				public void onMessage(ByteBuffer message, boolean isLast) {
-					handleBinaryMessage(session, message, isLast);
+					handleBinaryMessage(message, isLast);
 				}
 			});
 		}
@@ -81,13 +81,13 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 			session.addMessageHandler(new MessageHandler.Whole<String>() {
 				@Override
 				public void onMessage(String message) {
-					handleTextMessage(session, message, true);
+					handleTextMessage(message, true);
 				}
 			});
 			session.addMessageHandler(new MessageHandler.Whole<ByteBuffer>() {
 				@Override
 				public void onMessage(ByteBuffer message) {
-					handleBinaryMessage(session, message, true);
+					handleBinaryMessage(message, true);
 				}
 			});
 		}
@@ -95,7 +95,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 		session.addMessageHandler(new MessageHandler.Whole<javax.websocket.PongMessage>() {
 			@Override
 			public void onMessage(javax.websocket.PongMessage message) {
-				handlePongMessage(session, message.getApplicationData());
+				handlePongMessage(message.getApplicationData());
 			}
 		});
 
@@ -107,7 +107,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 		}
 	}
 
-	private void handleTextMessage(javax.websocket.Session session, String payload, boolean isLast) {
+	private void handleTextMessage(String payload, boolean isLast) {
 		TextMessage textMessage = new TextMessage(payload, isLast);
 		try {
 			this.handler.handleMessage(this.wsSession, textMessage);
@@ -117,7 +117,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 		}
 	}
 
-	private void handleBinaryMessage(javax.websocket.Session session, ByteBuffer payload, boolean isLast) {
+	private void handleBinaryMessage(ByteBuffer payload, boolean isLast) {
 		BinaryMessage binaryMessage = new BinaryMessage(payload, isLast);
 		try {
 			this.handler.handleMessage(this.wsSession, binaryMessage);
@@ -127,7 +127,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 		}
 	}
 
-	private void handlePongMessage(javax.websocket.Session session, ByteBuffer payload) {
+	private void handlePongMessage(ByteBuffer payload) {
 		PongMessage pongMessage = new PongMessage(payload);
 		try {
 			this.handler.handleMessage(this.wsSession, pongMessage);
