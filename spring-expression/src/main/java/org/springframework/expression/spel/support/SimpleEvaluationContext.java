@@ -92,6 +92,8 @@ public class SimpleEvaluationContext implements EvaluationContext {
 
 	private final List<PropertyAccessor> propertyAccessors;
 
+	private final List<MethodResolver> methodResolvers;
+
 	private final TypeConverter typeConverter;
 
 	private final TypeComparator typeComparator = new StandardTypeComparator();
@@ -101,8 +103,11 @@ public class SimpleEvaluationContext implements EvaluationContext {
 	private final Map<String, Object> variables = new HashMap<>();
 
 
-	private SimpleEvaluationContext(List<PropertyAccessor> accessors, @Nullable TypeConverter converter) {
+	private SimpleEvaluationContext(List<PropertyAccessor> accessors, List<MethodResolver> resolvers,
+			@Nullable TypeConverter converter) {
+
 		this.propertyAccessors = accessors;
+		this.methodResolvers = resolvers;
 		this.typeConverter = (converter != null ? converter : new StandardTypeConverter());
 	}
 
@@ -119,6 +124,10 @@ public class SimpleEvaluationContext implements EvaluationContext {
 		return TypedValue.NULL;
 	}
 
+	/**
+	 * Return the specified {@link PropertyAccessor} delegates, if any.
+	 * @see #forPropertyAccessors
+	 */
 	@Override
 	public List<PropertyAccessor> getPropertyAccessors() {
 		return this.propertyAccessors;
@@ -134,16 +143,17 @@ public class SimpleEvaluationContext implements EvaluationContext {
 	}
 
 	/**
-	 * Return a single {@link ReflectiveMethodResolver}.
+	 * Return the specified {@link MethodResolver} delegates, if any.
+	 * @see Builder#withMethodResolvers
 	 */
 	@Override
 	public List<MethodResolver> getMethodResolvers() {
-		return Collections.emptyList();
+		return this.methodResolvers;
 	}
 
 	/**
-	 * {@code SimpleEvaluationContext} does not support use of bean references.
-	 * @return Always returns {@code null}
+	 * {@code SimpleEvaluationContext} does not support the use of bean references.
+	 * @return always {@code null}
 	 */
 	@Override
 	@Nullable
@@ -164,6 +174,8 @@ public class SimpleEvaluationContext implements EvaluationContext {
 	/**
 	 * The configured {@link TypeConverter}.
 	 * <p>By default this is {@link StandardTypeConverter}.
+	 * @see Builder#withTypeConverter
+	 * @see Builder#withConversionService
 	 */
 	@Override
 	public TypeConverter getTypeConverter() {
@@ -203,6 +215,7 @@ public class SimpleEvaluationContext implements EvaluationContext {
 	 * delegates: typically a custom {@code PropertyAccessor} specific to a use case
 	 * (e.g. attribute resolution in a custom data structure), potentially combined with
 	 * a {@link DataBindingPropertyAccessor} if property dereferences are needed as well.
+	 * @param accessors the accessor delegates to use
 	 * @see DataBindingPropertyAccessor#forReadOnlyAccess()
 	 * @see DataBindingPropertyAccessor#forReadWriteAccess()
 	 */
@@ -242,13 +255,46 @@ public class SimpleEvaluationContext implements EvaluationContext {
 	 */
 	public static class Builder {
 
-		private final List<PropertyAccessor> propertyAccessors;
+		private final List<PropertyAccessor> accessors;
+
+		private List<MethodResolver> resolvers = Collections.emptyList();
 
 		@Nullable
 		private TypeConverter typeConverter;
 
 		public Builder(PropertyAccessor... accessors) {
-			this.propertyAccessors = Arrays.asList(accessors);
+			this.accessors = Arrays.asList(accessors);
+		}
+
+		/**
+		 * Register the specified {@link MethodResolver} delegates for
+		 * a combination of property access and method resolution.
+		 * @param resolvers the resolver delegates to use
+		 * @see #withInstanceMethods()
+		 * @see SimpleEvaluationContext#forPropertyAccessors
+		 */
+		public Builder withMethodResolvers(MethodResolver... resolvers) {
+			for (MethodResolver resolver : resolvers) {
+				if (resolver.getClass() == ReflectiveMethodResolver.class) {
+					throw new IllegalArgumentException("SimpleEvaluationContext is not designed for use with a plain " +
+							"ReflectiveMethodResolver. Consider using DataBindingMethodResolver or a custom subclass.");
+				}
+			}
+			this.resolvers = Arrays.asList(resolvers);
+			return this;
+		}
+
+		/**
+		 * Register a {@link DataBindingMethodResolver} for instance method invocation purposes
+		 * (i.e. not supporting static methods) in addition to the specified property accessors,
+		 * typically in combination with a {@link DataBindingPropertyAccessor}.
+		 * @see #withMethodResolvers
+		 * @see SimpleEvaluationContext#forReadOnlyDataBinding()
+		 * @see SimpleEvaluationContext#forReadWriteDataBinding()
+		 */
+		public Builder withInstanceMethods() {
+			this.resolvers = Collections.singletonList(DataBindingMethodResolver.forInstanceMethodInvocation());
+			return this;
 		}
 
 		/**
@@ -276,7 +322,7 @@ public class SimpleEvaluationContext implements EvaluationContext {
 		}
 
 		public SimpleEvaluationContext build() {
-			return new SimpleEvaluationContext(this.propertyAccessors, this.typeConverter);
+			return new SimpleEvaluationContext(this.accessors, this.resolvers, this.typeConverter);
 		}
 	}
 

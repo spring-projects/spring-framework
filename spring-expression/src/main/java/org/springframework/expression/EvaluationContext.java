@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,11 @@ public interface EvaluationContext {
 	TypedValue getRootObject();
 
 	/**
+	 * Return a list of accessors that will be asked in turn to read/write a property.
+	 */
+	List<PropertyAccessor> getPropertyAccessors();
+
+	/**
 	 * Return a list of resolvers that will be asked in turn to locate a constructor.
 	 */
 	List<ConstructorResolver> getConstructorResolvers();
@@ -52,9 +57,10 @@ public interface EvaluationContext {
 	List<MethodResolver> getMethodResolvers();
 
 	/**
-	 * Return a list of accessors that will be asked in turn to read/write a property.
+	 * Return a bean resolver that can look up beans by name.
 	 */
-	List<PropertyAccessor> getPropertyAccessors();
+	@Nullable
+	BeanResolver getBeanResolver();
 
 	/**
 	 * Return a type locator that can be used to find types, either by short or
@@ -77,12 +83,6 @@ public interface EvaluationContext {
 	 * between more than the standard set of types.
 	 */
 	OperatorOverloader getOperatorOverloader();
-
-	/**
-	 * Return a bean resolver that can look up beans by name.
-	 */
-	@Nullable
-	BeanResolver getBeanResolver();
 
 	/**
 	 * Set a named variable within this evaluation context to a specified value.

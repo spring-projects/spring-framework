@@ -421,7 +421,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	}
 
 	/**
-	 * Determine whether the given {@code Method} is a candidate for property access.
+	 * Determine whether the given {@code Method} is a candidate for property access
+	 * on an instance of the given target class.
 	 * <p>The default implementation considers any method as a candidate, even for
 	 * non-user-declared properties on the {@link Object} base class.
 	 * @param method the Method to evaluate
