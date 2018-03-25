@@ -409,16 +409,16 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 			return false;
 		}
 
-		for (String key : this.parameters.keySet()) {
-			if (!other.parameters.containsKey(key)) {
+		for (Map.Entry<String, String> entry : this.parameters.entrySet()) {
+			if (!other.parameters.containsKey(entry.getKey())) {
 				return false;
 			}
-			if (PARAM_CHARSET.equals(key)) {
+			if (PARAM_CHARSET.equals(entry.getKey())) {
 				if (!ObjectUtils.nullSafeEquals(getCharset(), other.getCharset())) {
 					return false;
 				}
 			}
-			else if (!ObjectUtils.nullSafeEquals(this.parameters.get(key), other.parameters.get(key))) {
+			else if (!ObjectUtils.nullSafeEquals(entry.getValue(), other.parameters.get(entry.getKey()))) {
 				return false;
 			}
 		}

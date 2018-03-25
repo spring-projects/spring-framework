@@ -563,12 +563,12 @@ public class CallMetaDataContext {
 		}
 
 		Map<String, Object> matchedParameters = new HashMap<>(inParameters.size());
-		for (String parameterName : inParameters.keySet()) {
+		inParameters.forEach((parameterName, parameterValue) -> {
 			String parameterNameToMatch = provider.parameterNameToUse(parameterName);
 			String callParameterName = callParameterNames.get(lowerCase(parameterNameToMatch));
 			if (callParameterName == null) {
 				if (logger.isDebugEnabled()) {
-					Object value = inParameters.get(parameterName);
+					Object value = parameterValue;
 					if (value instanceof SqlParameterValue) {
 						value = ((SqlParameterValue)value).getValue();
 					}
@@ -579,9 +579,9 @@ public class CallMetaDataContext {
 				}
 			}
 			else {
-				matchedParameters.put(callParameterName, inParameters.get(parameterName));
+				matchedParameters.put(callParameterName, parameterValue);
 			}
-		}
+		});
 
 		if (matchedParameters.size() < callParameterNames.size()) {
 			for (String parameterName : callParameterNames.keySet()) {
