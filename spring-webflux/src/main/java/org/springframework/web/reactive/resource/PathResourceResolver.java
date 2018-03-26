@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.resource;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.List;
@@ -184,21 +185,21 @@ public class PathResourceResolver extends AbstractResourceResolver {
 			return true;
 		}
 		locationPath = (locationPath.endsWith("/") || locationPath.isEmpty() ? locationPath : locationPath + "/");
-		if (!resourcePath.startsWith(locationPath)) {
-			return false;
-		}
+		return (resourcePath.startsWith(locationPath) && !isInvalidEncodedPath(resourcePath));
+	}
 
+	private boolean isInvalidEncodedPath(String resourcePath) {
 		if (resourcePath.contains("%")) {
 			// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars...
-			if (URLDecoder.decode(resourcePath, "UTF-8").contains("../")) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Resolved resource path contains \"../\" after decoding: " + resourcePath);
-				}
-				return false;
+			try {
+				String decodedPath = URLDecoder.decode(resourcePath, "UTF-8");
+				return (decodedPath.contains("../") || decodedPath.contains("..\\"));
+			}
+			catch (UnsupportedEncodingException ex) {
+				// Should never happen...
 			}
 		}
-
-		return true;
+		return false;
 	}
 
 }

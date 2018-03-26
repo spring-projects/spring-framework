@@ -28,7 +28,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -314,9 +313,9 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	}
 
 	protected Mono<Resource> getResource(ServerWebExchange exchange) {
-
 		String name = HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE;
 		PathContainer pathWithinHandler = exchange.getRequiredAttribute(name);
+
 		String path = processPath(pathWithinHandler.value());
 		if (!StringUtils.hasText(path) || isInvalidPath(path)) {
 			if (logger.isTraceEnabled()) {
@@ -324,31 +323,11 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 			}
 			return Mono.empty();
 		}
-
-		if (path.contains("%")) {
-			try {
-				// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars
-				String decodedPath = URLDecoder.decode(path, "UTF-8");
-				if (isInvalidPath(decodedPath)) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Ignoring invalid resource path with escape sequences [" + path + "].");
-					}
-					return Mono.empty();
-				}
-				decodedPath = processPath(decodedPath);
-				if (isInvalidPath(decodedPath)) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Ignoring invalid resource path with escape sequences [" + path + "].");
-					}
-					return Mono.empty();
-				}
+		if (isInvalidEncodedPath(path)) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Ignoring invalid resource path with escape sequences [" + path + "]");
 			}
-			catch (IllegalArgumentException ex) {
-				// ignore
-			}
-			catch (UnsupportedEncodingException ex) {
-				return Mono.error(Exceptions.propagate(ex));
-			}
+			return Mono.empty();
 		}
 
 		ResourceResolverChain resolveChain = createResolverChain();
@@ -418,6 +397,31 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 			}
 		}
 		return (slash ? "/" : "");
+	}
+
+	/**
+	 * Check whether the given path contains invalid escape sequences.
+	 * @param path the path to validate
+	 * @return {@code true} if the path is invalid, {@code false} otherwise
+	 */
+	private boolean isInvalidEncodedPath(String path) {
+		if (path.contains("%")) {
+			try {
+				// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars
+				String decodedPath = URLDecoder.decode(path, "UTF-8");
+				if (isInvalidPath(decodedPath)) {
+					return true;
+				}
+				decodedPath = processPath(decodedPath);
+				if (isInvalidPath(decodedPath)) {
+					return true;
+				}
+			}
+			catch (IllegalArgumentException | UnsupportedEncodingException ex) {
+				// Should never happen...
+			}
+		}
+		return false;
 	}
 
 	/**
