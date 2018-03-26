@@ -23,9 +23,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.BeanResolver;
 import org.springframework.expression.ConstructorResolver;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.Expression;
 import org.springframework.expression.MethodResolver;
 import org.springframework.expression.OperatorOverloader;
 import org.springframework.expression.PropertyAccessor;
@@ -90,6 +92,8 @@ public class SimpleEvaluationContext implements EvaluationContext {
 	};
 
 
+	private final TypedValue rootObject;
+
 	private final List<PropertyAccessor> propertyAccessors;
 
 	private final List<MethodResolver> methodResolvers;
@@ -104,24 +108,21 @@ public class SimpleEvaluationContext implements EvaluationContext {
 
 
 	private SimpleEvaluationContext(List<PropertyAccessor> accessors, List<MethodResolver> resolvers,
-			@Nullable TypeConverter converter) {
+			@Nullable TypeConverter converter, @Nullable TypedValue rootObject) {
 
 		this.propertyAccessors = accessors;
 		this.methodResolvers = resolvers;
 		this.typeConverter = (converter != null ? converter : new StandardTypeConverter());
+		this.rootObject = (rootObject != null ? rootObject : TypedValue.NULL);
 	}
 
 
 	/**
-	 * {@code SimpleEvaluationContext} cannot be configured with a root object.
-	 * It is meant for repeated use with
-	 * {@link org.springframework.expression.Expression Expression} method
-	 * variants that accept both an {@code EvaluationContext} and a root object.
-	 * @return Always returns {@link TypedValue#NULL}.
+	 * Return the specified root object, if any.
 	 */
 	@Override
 	public TypedValue getRootObject() {
-		return TypedValue.NULL;
+		return this.rootObject;
 	}
 
 	/**
@@ -262,6 +263,9 @@ public class SimpleEvaluationContext implements EvaluationContext {
 		@Nullable
 		private TypeConverter typeConverter;
 
+		@Nullable
+		private TypedValue rootObject;
+
 		public Builder(PropertyAccessor... accessors) {
 			this.accessors = Arrays.asList(accessors);
 		}
@@ -297,6 +301,18 @@ public class SimpleEvaluationContext implements EvaluationContext {
 			return this;
 		}
 
+
+		/**
+		 * Register a custom {@link ConversionService}.
+		 * <p>By default a {@link StandardTypeConverter} backed by a
+		 * {@link org.springframework.core.convert.support.DefaultConversionService} is used.
+		 * @see #withTypeConverter
+		 * @see StandardTypeConverter#StandardTypeConverter(ConversionService)
+		 */
+		public Builder withConversionService(ConversionService conversionService) {
+			this.typeConverter = new StandardTypeConverter(conversionService);
+			return this;
+		}
 		/**
 		 * Register a custom {@link TypeConverter}.
 		 * <p>By default a {@link StandardTypeConverter} backed by a
@@ -310,19 +326,29 @@ public class SimpleEvaluationContext implements EvaluationContext {
 		}
 
 		/**
-		 * Register a custom {@link ConversionService}.
-		 * <p>By default a {@link StandardTypeConverter} backed by a
-		 * {@link org.springframework.core.convert.support.DefaultConversionService} is used.
-		 * @see #withTypeConverter
-		 * @see StandardTypeConverter#StandardTypeConverter(ConversionService)
+		 * Specify a default root object to resolve against.
+		 * <p>Default is none, expecting an object argument at evaluation time.
+		 * @see Expression#getValue(EvaluationContext)
+		 * @see Expression#getValue(EvaluationContext, Object)
 		 */
-		public Builder withConversionService(ConversionService conversionService) {
-			this.typeConverter = new StandardTypeConverter(conversionService);
+		public Builder withRootObject(Object rootObject) {
+			this.rootObject = new TypedValue(rootObject);
+			return this;
+		}
+
+		/**
+		 * Specify a typed root object to resolve against.
+		 * <p>Default is none, expecting an object argument at evaluation time.
+		 * @see Expression#getValue(EvaluationContext)
+		 * @see Expression#getValue(EvaluationContext, Object)
+		 */
+		public Builder withTypedRootObject(Object rootObject, TypeDescriptor typeDescriptor) {
+			this.rootObject = new TypedValue(rootObject, typeDescriptor);
 			return this;
 		}
 
 		public SimpleEvaluationContext build() {
-			return new SimpleEvaluationContext(this.accessors, this.resolvers, this.typeConverter);
+			return new SimpleEvaluationContext(this.accessors, this.resolvers, this.typeConverter, this.rootObject);
 		}
 	}
 

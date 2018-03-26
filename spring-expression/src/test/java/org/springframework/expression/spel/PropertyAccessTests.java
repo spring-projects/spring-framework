@@ -235,9 +235,28 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 	}
 
 	@Test
+	public void propertyReadWriteWithRootObject() {
+		Person target = new Person("p1");
+		EvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().withRootObject(target).build();
+		assertSame(target, context.getRootObject().getValue());
+
+		Expression expr = parser.parseExpression("name");
+		assertEquals("p1", expr.getValue(context, target));
+		target.setName("p2");
+		assertEquals("p2", expr.getValue(context, target));
+
+		parser.parseExpression("name='p3'").getValue(context, target);
+		assertEquals("p3", target.getName());
+		assertEquals("p3", expr.getValue(context, target));
+
+		expr.setValue(context, target, "p4");
+		assertEquals("p4", target.getName());
+		assertEquals("p4", expr.getValue(context, target));
+	}
+
+	@Test
 	public void propertyAccessWithoutMethodResolver() {
 		EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
-
 		Person target = new Person("p1");
 		try {
 			parser.parseExpression("name.substring(1)").getValue(context, target);
@@ -251,9 +270,19 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 	@Test
 	public void propertyAccessWithInstanceMethodResolver() {
 		EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().withInstanceMethods().build();
-
 		Person target = new Person("p1");
 		assertEquals("1", parser.parseExpression("name.substring(1)").getValue(context, target));
+	}
+
+	@Test
+	public void propertyAccessWithInstanceMethodResolverAndTypedRootObject() {
+		Person target = new Person("p1");
+		EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().
+				withInstanceMethods().withTypedRootObject(target, TypeDescriptor.valueOf(Object.class)).build();
+
+		assertEquals("1", parser.parseExpression("name.substring(1)").getValue(context, target));
+		assertSame(target, context.getRootObject().getValue());
+		assertSame(Object.class, context.getRootObject().getTypeDescriptor().getType());
 	}
 
 
