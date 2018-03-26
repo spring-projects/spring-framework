@@ -23,7 +23,9 @@ e.g. Spring MVC controllers with the reactive `WebClient`.
 
 
 [[webflux-new-framework]]
-=== Why a new web framework?
+=== Motivation
+
+Why was Spring WebFlux created?
 
 Part of the answer is the need for a non-blocking web stack to handle concurrency with a
 small number of threads and scale with less hardware resources. Servlet 3.1 did provide
@@ -44,9 +46,9 @@ WebFlux to offer functional web endpoints alongside with annotated controllers.
 
 
 [[webflux-why-reactive]]
-=== Reactive: what and why?
+=== Define "reactive"
 
-We touched on non-blocking and functional but why reactive and what do we mean?
+We touched on non-blocking and functional but what does reactive mean?
 
 The term "reactive" refers to programming models that are built around reacting to change --
 network component reacting to I/O events, UI controller reacting to mouse events, etc.
@@ -131,82 +133,86 @@ annotations and being called back.
 
 
 [[webflux-framework-choice]]
-=== Choosing a web framework
+=== Applicability
 
-Should you use Spring MVC or WebFlux? Let's cover a few different perspectives.
+Spring MVC or WebFlux?
 
-If you have a Spring MVC application that works fine, there is no need to change.
+A natural question to ask but one that sets up an unsound dichotomy. It's actually both
+working together to expand the range of available options. The two are designed for
+continuity and consistency with each other, they are available side by side, and feedback
+from each side benefits both sides. The diagram below shows how the two relate, what they
+have in common, and what each supports uniquely:
+
+image::images/spring-mvc-and-webflux-venn.png[]
+
+Below are some specific points to consider:
+
+* If you have a Spring MVC application that works fine, there is no need to change.
 Imperative programming is the easiest way to write, understand, and debug code.
 You have maximum choice of libraries since historically most are blocking.
 
-If you are already shopping for a non-blocking web stack, Spring WebFlux offers the same
+* If you are already shopping for a non-blocking web stack, Spring WebFlux offers the same
 execution model benefits as others in this space and also provides a choice of servers --
 Netty, Tomcat, Jetty, Undertow, Servlet 3.1+ containers, a choice of programming models --
 annotated controllers and functional web endpoints, and a choice of reactive libraries --
 Reactor, RxJava, or other.
 
-If you are interested in a lightweight, functional web framework for use with Java 8 lambdas
+* If you are interested in a lightweight, functional web framework for use with Java 8 lambdas
 or Kotlin then use the Spring WebFlux functional web endpoints. That can also be a good choice
 for smaller applications or microservices with less complex requirements that can benefit
 from greater transparency and control.
 
-In a microservice architecture you can have a mix of applications with either Spring MVC
+* In a microservice architecture you can have a mix of applications with either Spring MVC
 or Spring WebFlux controllers, or with Spring WebFlux functional endpoints. Having support
 for the same annotation-based programming model in both frameworks makes it easier to
 re-use knowledge while also selecting the right tool for the right job.
 
-A simple way to evaluate an application is to check its dependencies. If you have blocking
+* A simple way to evaluate an application is to check its dependencies. If you have blocking
 persistence APIs (JPA, JDBC), or networking APIs to use, then Spring MVC is the best choice
 for common architectures at least. It is technically feasible with both Reactor and
 RxJava to perform blocking calls on a separate thread but you wouldn't be making the
 most of a non-blocking web stack.
 
-If you have a Spring MVC application with calls to remote services, try the reactive `WebClient`.
+* If you have a Spring MVC application with calls to remote services, try the reactive `WebClient`.
 You can return reactive types (Reactor, RxJava, <<webflux-reactive-libraries,or other>>)
 directly from Spring MVC controller methods. The greater the latency per call, or the
 interdependency among calls, the more dramatic the benefits. Spring MVC controllers
 can call other reactive components too.
 
-If you have a large team, keep in mind the steep learning curve in the shift to non-blocking,
+* If you have a large team, keep in mind the steep learning curve in the shift to non-blocking,
 functional, and declarative programming. A practical way to start without a full switch
 is to use the reactive `WebClient`. Beyond that start small and measure the benefits.
-We expect that for a wide range of applications the shift is unnecessary.
-
-If you are unsure what benefits to look for, start by learning about how non-blocking I/O
-works (e.g. concurrency on single-threaded Node.js is not an oxymoron) and its effects.
-The tag line is "scale with less hardware" but that effect is not guaranteed, not without
-some network I/O that can be slow or unpredictable. This Netflix
-https://medium.com/netflix-techblog/zuul-2-the-netflix-journey-to-asynchronous-non-blocking-systems-45947377fb5c[blog post]
-is a good resource.
+We expect that for a wide range of applications the shift is unnecessary. If you are
+unsure what benefits to look for, start by learning about how non-blocking I/O works
+(e.g. concurrency on single-threaded Node.js) and its effects.
 
 
 
 [[webflux-server-choice]]
-=== Choosing a server
+=== Servers
 
-Spring WebFlux is supported on Netty, Undertow, Tomcat, Jetty, and Servlet 3.1+ containers.
-Each server is adapted to a common Reactive Streams API. The Spring WebFlux programming
-models are built on that common API.
+Spring WebFlux is supported on Tomcat, Jetty, Servlet 3.1+ containers, as well as on
+non-Servlet runtimes such as Netty and Undertow. All servers are adapted to a low-level,
+<<webflux-httphandler,common API>> so that higher level
+<<webflux-programming-models,programming models>> can be supported across servers.
 
-[NOTE]
-====
-*Common question: how can Tomcat and Jetty be used in both stacks?* +
-Tomcat and Jetty are non-blocking at their core. It's the Servlet API that adds a
-blocking facade. Starting in version 3.1 the Servlet API adds a choice for non-blocking I/O.
-However its use requires care to avoid other synchronous and blocking parts. For this
-reason Spring's reactive web stack has a low-level Servlet adapter to bridge to Reactive
-Streams but the Servlet API is otherwise not exposed for direct use.
-====
+Spring WebFlux does not have built-in support to start or stop a server. However it is
+easy to <<webflux-web-handler-api,assemble>> an application from Spring configuration, and
+<<webflux-config,WebFlux infrastructure>>, and <<webflux-httphandler,run it>> with a few
+lines of code.
 
-Spring Boot 2 uses Netty by default with WebFlux because Netty is more widely used in the
-async, non-blocking space and also provides both client and server that can share resources.
-By comparison Servlet 3.1 non-blocking I/O hasn't seen much use because the bar to use it
-is so high. Spring WebFlux opens one practical path to adoption.
+Spring Boot has a WebFlux starter that automates these steps. By default the starter uses
+Netty but it is easy to switch to Tomcat, Jetty, or Undertow simply by changing your
+Maven or Gradle dependencies. Spring Boot defaults to Netty because it is more widely
+used in the async, non-blocking space, and provides a client and a server share resources.
 
-The default server choice in Spring Boot is mainly about the out-of-the-box experience.
-Applications can still choose any of the other supported servers which are also highly
-optimized for performance, fully non-blocking, and adapted to Reactive Streams back
-pressure. In Spring Boot it is trivial to make the switch.
+Tomcat and Jetty can be used with both Spring MVC and WebFlux. Keep in mind however that
+the way they're used is very differently. Spring MVC relies on Servlet blocking I/O and
+allows applications to use the Servlet API directly if they need to. Spring WebFlux
+relies on Servlet 3.1 non-blocking I/O and uses the Servlet API behind a low-level
+adapter and not exposed for direct use.
+
+For Undertow, Spring WebFlux uses Undertow APIs directly without the Servlet API.
 
 
 
@@ -224,6 +230,77 @@ because they scale in a more predictable way. In order to observe those benefits
 need to have some latency including a mix of slow and unpredictable network I/O.
 That's where the reactive stack begins to show its strengths and the differences can be
 dramatic.
+
+
+
+[[webflux-concurrency-model]]
+=== Concurrency Model
+
+Both Spring MVC and Spring WebFlux support annotated controllers, but there is a key
+difference in the concurrency model and default assumptions for blocking and threads.
+
+In Spring MVC, and servlet applications in general, it is assumed that applications _may
+block_ the current thread, e.g. for remote calls, and for this reason servlet containers
+use a large thread pool, to absorb potential blocking during request handling.
+
+In Spring WebFlux, and non-blocking servers in general, it is assumed that applications
+_will not block_, and therefore non-blocking servers use  a small, fixed-size thread pool
+(event loop workers) to handle requests.
+
+[TIP]
+====
+To "scale" and "small number of threads" may sound contradictory but to never block the
+current thread, and rely on callbacks instead, means you don't need extra threads as
+there are no blocking calls to absorb.
+====
+
+_Invoking a Blocking API_
+
+What if you do need to use a blocking library? Both Reactor and RxJava provide the
+`publishOn` operator to continue processing on a different thread. That means there is an
+easy escape latch. Keep in mind however that blocking APIs are not a good fit for
+this concurrency model.
+
+_Mutable State_
+
+In Reactor and RxJava, logic is declared through operators, and at runtime, a reactive
+pipeline is formed where data is processed sequentially, in distinct stages. A key benefit
+of that is that it frees applications from having to protect mutable state because
+application code within that pipeline is never invoked concurrently.
+
+_Threading Model_
+
+What threads should you expect to see on a server running with Spring WebFlux?
+
+* On a "vanilla" Spring WebFlux server (e.g. no data access, nor other optional
+dependencies), you can expect one thread for the server, and several others for request
+processing (typically as many as the number of CPU cores). Servlet containers, however,
+may start with more threads (e.g. 10 on Tomcat), in support of both servlet, blocking I/O
+and servlet 3.1, non-blocking I/O usage.
+
+* The reactive `WebClient` operates in event loop style. So you'll see a small, fixed
+number of processing threads related to that, e.g. "reactor-http-nio-" with the Reactor
+Netty connector. However if Reactor Netty is used for both client and server, the two
+will share event loop resources by default.
+
+* Reactor and RxJava provide thread pool abstractions, called Schedulers, to use with the
+`publishOn` operator that is used to switch processing to a different thread pool.
+The schedulers have names that suggest a specific concurrency strategy, e.g. "parallel"
+for CPU-bound work with a limited number of threads, or "elastic" for I/O-bound work with
+a large number of threads. If you see such threads it means some code is using a
+specific thread pool `Scheduler` strategy.
+
+* Data access libraries and other 3rd party dependencies may also create and use threads
+of their own.
+
+_Configuring_
+
+The Spring Framework does not provide support for starting and stopping
+<<webflux-server-choice,servers>>. To configure the threading model for a server, you'll
+need to use server-specific config APIs, or if using Spring Boot, check the Spring
+Boot configuration options for each server. The WebClient
+<<web-reactive.adoc#webflux-client-builder,can be configured>> directly. For all other
+libraries, refer to their respective documentation.
 
 
 
