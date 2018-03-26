@@ -700,10 +700,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 		if (resource instanceof HttpResource) {
 			HttpHeaders resourceHeaders = ((HttpResource) resource).getResponseHeaders();
-			for (Map.Entry<String, List<String>> entry : resourceHeaders.entrySet()) {
-				String headerName = entry.getKey();
+			resourceHeaders.forEach((headerName, headerValues) -> {
 				boolean first = true;
-				for (String headerValue : entry.getValue()) {
+				for (String headerValue : headerValues) {
 					if (first) {
 						response.setHeader(headerName, headerValue);
 					}
@@ -712,7 +711,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 					}
 					first = false;
 				}
-			}
+			});
 		}
 		response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
 	}

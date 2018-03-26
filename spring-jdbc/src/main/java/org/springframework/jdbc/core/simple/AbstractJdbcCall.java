@@ -314,11 +314,9 @@ public abstract class AbstractJdbcCall {
 		this.callMetaDataContext.initializeMetaData(dataSource);
 
 		// Iterate over the declared RowMappers and register the corresponding SqlParameter
-		for (Map.Entry<String, RowMapper<?>> entry : this.declaredRowMappers.entrySet()) {
-			SqlParameter resultSetParameter =
-					this.callMetaDataContext.createReturnResultSetParameter(entry.getKey(), entry.getValue());
-			this.declaredParameters.add(resultSetParameter);
-		}
+		this.declaredRowMappers.forEach((key, value) -> {
+			this.declaredParameters.add(this.callMetaDataContext.createReturnResultSetParameter(key, value));
+		});
 		this.callMetaDataContext.processParameters(this.declaredParameters);
 
 		this.callString = this.callMetaDataContext.createCallString();
@@ -326,8 +324,8 @@ public abstract class AbstractJdbcCall {
 			logger.debug("Compiled stored procedure. Call string is [" + this.callString + "]");
 		}
 
-		this.callableStatementFactory =
-				new CallableStatementCreatorFactory(this.callString, this.callMetaDataContext.getCallParameters());
+		this.callableStatementFactory = new CallableStatementCreatorFactory(
+				this.callString, this.callMetaDataContext.getCallParameters());
 
 		onCompileInternal();
 	}

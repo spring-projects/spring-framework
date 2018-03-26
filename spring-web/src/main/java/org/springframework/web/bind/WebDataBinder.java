@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -315,9 +315,7 @@ public class WebDataBinder extends DataBinder {
 	 * @see #setBindEmptyMultipartFiles
 	 */
 	protected void bindMultipart(Map<String, List<MultipartFile>> multipartFiles, MutablePropertyValues mpvs) {
-		for (Map.Entry<String, List<MultipartFile>> entry : multipartFiles.entrySet()) {
-			String key = entry.getKey();
-			List<MultipartFile> values = entry.getValue();
+		multipartFiles.forEach((key, values) -> {
 			if (values.size() == 1) {
 				MultipartFile value = values.get(0);
 				if (isBindEmptyMultipartFiles() || !value.isEmpty()) {
@@ -327,7 +325,7 @@ public class WebDataBinder extends DataBinder {
 			else {
 				mpvs.add(key, values);
 			}
-		}
+		});
 	}
 
 }

@@ -466,9 +466,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 			this.customEditors.forEach(target::registerCustomEditor);
 		}
 		if (this.customEditorsForPath != null) {
-			for (Map.Entry<String, CustomEditorHolder> entry : this.customEditorsForPath.entrySet()) {
-				String editorPath = entry.getKey();
-				CustomEditorHolder editorHolder = entry.getValue();
+			this.customEditorsForPath.forEach((editorPath, editorHolder) -> {
 				if (nestedProperty != null) {
 					int pos = PropertyAccessorUtils.getFirstNestedPropertySeparatorIndex(editorPath);
 					if (pos != -1) {
@@ -484,7 +482,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 					target.registerCustomEditor(
 							editorHolder.getRegisteredType(), editorPath, editorHolder.getPropertyEditor());
 				}
-			}
+			});
 		}
 	}
 

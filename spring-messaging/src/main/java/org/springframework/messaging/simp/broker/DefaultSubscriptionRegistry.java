@@ -270,8 +270,8 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 					for (SessionSubscriptionInfo info : subscriptionRegistry.getAllSubscriptions()) {
 						for (String destinationPattern : info.getDestinations()) {
 							if (getPathMatcher().match(destinationPattern, destination)) {
-								for (Subscription subscription : info.getSubscriptions(destinationPattern)) {
-									result.add(info.sessionId, subscription.getId());
+								for (Subscription sub : info.getSubscriptions(destinationPattern)) {
+									result.add(info.sessionId, sub.getId());
 								}
 							}
 						}
@@ -287,27 +287,23 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		public void updateAfterNewSubscription(String destination, String sessionId, String subsId) {
 			synchronized (this.updateCache) {
-				for (Map.Entry<String, LinkedMultiValueMap<String, String>> entry : this.updateCache.entrySet()) {
-					String cachedDestination = entry.getKey();
+				this.updateCache.forEach((cachedDestination, subscriptions) -> {
 					if (getPathMatcher().match(destination, cachedDestination)) {
-						LinkedMultiValueMap<String, String> subs = entry.getValue();
 						// Subscription id's may also be populated via getSubscriptions()
-						List<String> subsForSession = subs.get(sessionId);
+						List<String> subsForSession = subscriptions.get(sessionId);
 						if (subsForSession == null || !subsForSession.contains(subsId)) {
-							subs.add(sessionId, subsId);
-							this.accessCache.put(cachedDestination, subs.deepCopy());
+							subscriptions.add(sessionId, subsId);
+							this.accessCache.put(cachedDestination, subscriptions.deepCopy());
 						}
 					}
-				}
+				});
 			}
 		}
 
 		public void updateAfterRemovedSubscription(String sessionId, String subsId) {
 			synchronized (this.updateCache) {
 				Set<String> destinationsToRemove = new HashSet<>();
-				for (Map.Entry<String, LinkedMultiValueMap<String, String>> entry : this.updateCache.entrySet()) {
-					String destination = entry.getKey();
-					LinkedMultiValueMap<String, String> sessionMap = entry.getValue();
+				this.updateCache.forEach((destination, sessionMap) -> {
 					List<String> subscriptions = sessionMap.get(sessionId);
 					if (subscriptions != null) {
 						subscriptions.remove(subsId);
@@ -321,7 +317,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 							this.accessCache.put(destination, sessionMap.deepCopy());
 						}
 					}
-				}
+				});
 				for (String destination : destinationsToRemove) {
 					this.updateCache.remove(destination);
 					this.accessCache.remove(destination);
@@ -332,9 +328,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		public void updateAfterRemovedSession(SessionSubscriptionInfo info) {
 			synchronized (this.updateCache) {
 				Set<String> destinationsToRemove = new HashSet<>();
-				for (Map.Entry<String, LinkedMultiValueMap<String, String>> entry : this.updateCache.entrySet()) {
-					String destination = entry.getKey();
-					LinkedMultiValueMap<String, String> sessionMap = entry.getValue();
+				this.updateCache.forEach((destination, sessionMap) -> {
 					if (sessionMap.remove(info.getSessionId()) != null) {
 						if (sessionMap.isEmpty()) {
 							destinationsToRemove.add(destination);
@@ -343,7 +337,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 							this.accessCache.put(destination, sessionMap.deepCopy());
 						}
 					}
-				}
+				});
 				for (String destination : destinationsToRemove) {
 					this.updateCache.remove(destination);
 					this.accessCache.remove(destination);
@@ -433,13 +427,9 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		public Subscription getSubscription(String subscriptionId) {
 			for (Map.Entry<String, Set<DefaultSubscriptionRegistry.Subscription>> destinationEntry :
 					this.destinationLookup.entrySet()) {
-
-				Set<Subscription> subs = destinationEntry.getValue();
-				if (subs != null) {
-					for (Subscription sub : subs) {
-						if (sub.getId().equalsIgnoreCase(subscriptionId)) {
-							return sub;
-						}
+				for (Subscription sub : destinationEntry.getValue()) {
+					if (sub.getId().equalsIgnoreCase(subscriptionId)) {
+						return sub;
 					}
 				}
 			}

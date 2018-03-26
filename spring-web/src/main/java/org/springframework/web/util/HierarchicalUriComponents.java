@@ -26,7 +26,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -151,9 +150,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	public String getQuery() {
 		if (!this.queryParams.isEmpty()) {
 			StringBuilder queryBuilder = new StringBuilder();
-			for (Map.Entry<String, List<String>> entry : this.queryParams.entrySet()) {
-				String name = entry.getKey();
-				List<String> values = entry.getValue();
+			this.queryParams.forEach((name, values) -> {
 				if (CollectionUtils.isEmpty(values)) {
 					if (queryBuilder.length() != 0) {
 						queryBuilder.append('&');
@@ -171,7 +168,7 @@ final class HierarchicalUriComponents extends UriComponents {
 						}
 					}
 				}
-			}
+			});
 			return queryBuilder.toString();
 		}
 		else {
@@ -216,14 +213,14 @@ final class HierarchicalUriComponents extends UriComponents {
 	private MultiValueMap<String, String> encodeQueryParams(Charset charset) {
 		int size = this.queryParams.size();
 		MultiValueMap<String, String> result = new LinkedMultiValueMap<>(size);
-		for (Map.Entry<String, List<String>> entry : this.queryParams.entrySet()) {
-			String name = encodeUriComponent(entry.getKey(), charset, Type.QUERY_PARAM);
-			List<String> values = new ArrayList<>(entry.getValue().size());
-			for (String value : entry.getValue()) {
-				values.add(encodeUriComponent(value, charset, Type.QUERY_PARAM));
+		this.queryParams.forEach((key, values) -> {
+			String name = encodeUriComponent(key, charset, Type.QUERY_PARAM);
+			List<String> encodedValues = new ArrayList<>(values.size());
+			for (String value : values) {
+				encodedValues.add(encodeUriComponent(value, charset, Type.QUERY_PARAM));
 			}
-			result.put(name, values);
-		}
+			result.put(name, encodedValues);
+		});
 		return result;
 	}
 
@@ -298,12 +295,12 @@ final class HierarchicalUriComponents extends UriComponents {
 		verifyUriComponent(this.userInfo, Type.USER_INFO);
 		verifyUriComponent(this.host, getHostType());
 		this.path.verify();
-		for (Map.Entry<String, List<String>> entry : queryParams.entrySet()) {
-			verifyUriComponent(entry.getKey(), Type.QUERY_PARAM);
-			for (String value : entry.getValue()) {
+		this.queryParams.forEach((key, values) -> {
+			verifyUriComponent(key, Type.QUERY_PARAM);
+			for (String value : values) {
 				verifyUriComponent(value, Type.QUERY_PARAM);
 			}
-		}
+		});
 		verifyUriComponent(getFragment(), Type.FRAGMENT);
 	}
 
@@ -360,15 +357,15 @@ final class HierarchicalUriComponents extends UriComponents {
 	private MultiValueMap<String, String> expandQueryParams(UriTemplateVariables variables) {
 		int size = this.queryParams.size();
 		MultiValueMap<String, String> result = new LinkedMultiValueMap<>(size);
-		variables = new QueryUriTemplateVariables(variables);
-		for (Map.Entry<String, List<String>> entry : this.queryParams.entrySet()) {
-			String name = expandUriComponent(entry.getKey(), variables);
-			List<String> values = new ArrayList<>(entry.getValue().size());
-			for (String value : entry.getValue()) {
-				values.add(expandUriComponent(value, variables));
+		UriTemplateVariables queryVariables = new QueryUriTemplateVariables(variables);
+		this.queryParams.forEach((key, values) -> {
+			String name = expandUriComponent(key, queryVariables);
+			List<String> expandedValues = new ArrayList<>(values.size());
+			for (String value : values) {
+				expandedValues.add(expandUriComponent(value, queryVariables));
 			}
-			result.put(name, values);
-		}
+			result.put(name, expandedValues);
+		});
 		return result;
 	}
 

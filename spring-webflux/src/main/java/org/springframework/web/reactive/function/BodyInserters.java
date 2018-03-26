@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.function;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -87,7 +86,6 @@ public abstract class BodyInserters {
 	 * @return a {@code BodyInserter} that writes a single object
 	 */
 	public static <T> BodyInserter<T, ReactiveHttpOutputMessage> fromObject(T body) {
-		Assert.notNull(body, "'body' must not be null");
 		return bodyInserterFor(Mono.just(body), ResolvableType.forInstance(body));
 	}
 
@@ -106,8 +104,6 @@ public abstract class BodyInserters {
 	public static <T, P extends Publisher<T>> BodyInserter<P, ReactiveHttpOutputMessage> fromPublisher(
 			P publisher, Class<T> elementClass) {
 
-		Assert.notNull(publisher, "'publisher' must not be null");
-		Assert.notNull(elementClass, "'elementClass' must not be null");
 		return bodyInserterFor(publisher, ResolvableType.forClass(elementClass));
 	}
 
@@ -126,8 +122,6 @@ public abstract class BodyInserters {
 	public static <T, P extends Publisher<T>> BodyInserter<P, ReactiveHttpOutputMessage> fromPublisher(
 			P publisher, ParameterizedTypeReference<T> typeReference) {
 
-		Assert.notNull(publisher, "'publisher' must not be null");
-		Assert.notNull(typeReference, "'typeReference' must not be null");
 		return bodyInserterFor(publisher, ResolvableType.forType(typeReference.getType()));
 	}
 
@@ -140,7 +134,6 @@ public abstract class BodyInserters {
 	 * @return a {@code BodyInserter} that writes a {@code Publisher}
 	 */
 	public static <T extends Resource> BodyInserter<T, ReactiveHttpOutputMessage> fromResource(T resource) {
-		Assert.notNull(resource, "'resource' must not be null");
 		return (outputMessage, context) -> {
 			Mono<T> inputStream = Mono.just(resource);
 			HttpMessageWriter<Resource> messageWriter = resourceHttpMessageWriter(context);
@@ -180,7 +173,6 @@ public abstract class BodyInserters {
 	public static <T, S extends Publisher<ServerSentEvent<T>>> BodyInserter<S, ServerHttpResponse> fromServerSentEvents(
 			S eventsPublisher) {
 
-		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
 		return (serverResponse, context) -> {
 			HttpMessageWriter<ServerSentEvent<T>> messageWriter =
 					findMessageWriter(context, SERVER_SIDE_EVENT_TYPE, MediaType.TEXT_EVENT_STREAM);
@@ -208,7 +200,6 @@ public abstract class BodyInserters {
 	 * @return the inserter that allows adding more form data
 	 */
 	public static FormInserter<String> fromFormData(MultiValueMap<String, String> formData) {
-		Assert.notNull(formData, "'formData' must not be null");
 		return new DefaultFormInserter().with(formData);
 	}
 
@@ -389,7 +380,7 @@ public abstract class BodyInserters {
 		 * @param value the value to be added
 		 * @return this inserter for adding more parts
 		 */
-		FormInserter<T> with(String key, @Nullable T value);
+		FormInserter<T> with(String key, T value);
 
 		/**
 		 * Adds the specified values to the form.
@@ -435,11 +426,6 @@ public abstract class BodyInserters {
 
 		private final MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
 
-
-		public DefaultFormInserter() {
-		}
-
-
 		@Override
 		public FormInserter<String> with(String key, @Nullable String value) {
 			this.data.add(key, value);
@@ -467,14 +453,8 @@ public abstract class BodyInserters {
 
 		private final MultipartBodyBuilder builder = new MultipartBodyBuilder();
 
-
-		public DefaultMultipartInserter() {
-		}
-
-
 		@Override
-		public MultipartInserter with(String key, @Nullable Object value) {
-			Assert.notNull(value, "'value' must not be null");
+		public MultipartInserter with(String key, Object value) {
 			this.builder.part(key, value);
 			return this;
 		}
@@ -486,26 +466,25 @@ public abstract class BodyInserters {
 
 		@SuppressWarnings("unchecked")
 		private MultipartInserter withInternal(MultiValueMap<String, ?> values) {
-			Assert.notNull(values, "'values' must not be null");
-			for (Map.Entry<String, ? extends List<?>> entry : values.entrySet()) {
-				for (Object value : entry.getValue()) {
-					this.builder.part(entry.getKey(), value);
+			values.forEach((key, valueList) -> {
+				for (Object value : valueList) {
+					this.builder.part(key, value);
 				}
-			}
+			});
 			return this;
 		}
 
 		@Override
-		public <T, P extends Publisher<T>> MultipartInserter withPublisher(String name,
-				P publisher, Class<T> elementClass) {
+		public <T, P extends Publisher<T>> MultipartInserter withPublisher(
+				String name, P publisher, Class<T> elementClass) {
 
 			this.builder.asyncPart(name, publisher, elementClass);
 			return this;
 		}
 
 		@Override
-		public <T, P extends Publisher<T>> MultipartInserter withPublisher(String name,
-				P publisher, ParameterizedTypeReference<T> typeReference) {
+		public <T, P extends Publisher<T>> MultipartInserter withPublisher(
+				String name, P publisher, ParameterizedTypeReference<T> typeReference) {
 
 			this.builder.asyncPart(name, publisher, typeReference);
 			return this;

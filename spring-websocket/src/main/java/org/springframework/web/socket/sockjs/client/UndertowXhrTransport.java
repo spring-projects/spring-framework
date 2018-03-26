@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 
@@ -171,11 +170,11 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 
 	private static void addHttpHeaders(ClientRequest request, HttpHeaders headers) {
 		HeaderMap headerMap = request.getRequestHeaders();
-		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-			for (String value : entry.getValue()) {
-				headerMap.add(HttpString.tryFromString(entry.getKey()), value);
+		headers.forEach((key, values) -> {
+			for (String value : values) {
+				headerMap.add(HttpString.tryFromString(key), value);
 			}
-		}
+		});
 	}
 
 	private ClientCallback<ClientExchange> createReceiveCallback(final TransportRequest transportRequest,

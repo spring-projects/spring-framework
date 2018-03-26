@@ -1246,21 +1246,18 @@ public abstract class AnnotationUtils {
 		if (!attributes.validated) {
 			// Validate @AliasFor configuration
 			Map<String, List<String>> aliasMap = getAttributeAliasMap(annotationType);
-			for (String attributeName : aliasMap.keySet()) {
+			aliasMap.forEach((attributeName, aliasedAttributeNames) -> {
 				if (valuesAlreadyReplaced.contains(attributeName)) {
-					continue;
+					return;
 				}
 				Object value = attributes.get(attributeName);
 				boolean valuePresent = (value != null && !(value instanceof DefaultValueHolder));
-
-				for (String aliasedAttributeName : aliasMap.get(attributeName)) {
+				for (String aliasedAttributeName : aliasedAttributeNames) {
 					if (valuesAlreadyReplaced.contains(aliasedAttributeName)) {
 						continue;
 					}
-
 					Object aliasedValue = attributes.get(aliasedAttributeName);
 					boolean aliasPresent = (aliasedValue != null && !(aliasedValue instanceof DefaultValueHolder));
-
 					// Something to validate or replace with an alias?
 					if (valuePresent || aliasPresent) {
 						if (valuePresent && aliasPresent) {
@@ -1290,7 +1287,7 @@ public abstract class AnnotationUtils {
 						}
 					}
 				}
-			}
+			});
 			attributes.validated = true;
 		}
 

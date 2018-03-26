@@ -20,8 +20,6 @@ import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
 
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
@@ -161,11 +159,11 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 
 
 	private static void addHttpHeaders(Request request, HttpHeaders headers) {
-		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-			for (String value : entry.getValue()) {
-				request.header(entry.getKey(), value);
+		headers.forEach((key, values) -> {
+			for (String value : values) {
+				request.header(key, value);
 			}
-		}
+		});
 	}
 
 	private static HttpHeaders toHttpHeaders(HttpFields httpFields) {

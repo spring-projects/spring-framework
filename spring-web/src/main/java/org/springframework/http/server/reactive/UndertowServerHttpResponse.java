@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.StandardOpenOption;
-import java.util.List;
-import java.util.Map;
 
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
@@ -82,10 +80,8 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 
 	@Override
 	protected void applyHeaders() {
-		for (Map.Entry<String, List<String>> entry : getHeaders().entrySet()) {
-			HttpString headerName = HttpString.tryFromString(entry.getKey());
-			this.exchange.getResponseHeaders().addAll(headerName, entry.getValue());
-		}
+		getHeaders().forEach((headerName, headerValues) ->
+				this.exchange.getResponseHeaders().addAll(HttpString.tryFromString(headerName), headerValues));
 	}
 
 	@Override

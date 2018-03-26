@@ -20,8 +20,6 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 import reactor.core.publisher.Flux;
@@ -80,14 +78,8 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		this.originalRequest = original;
 	}
 
-	private static <K, V> void copyMultiValueMap(MultiValueMap<K,V> source,
-			MultiValueMap<K,V> destination) {
-
-		for (Map.Entry<K, List<V>> entry : source.entrySet()) {
-			K key = entry.getKey();
-			List<V> values = new LinkedList<>(entry.getValue());
-			destination.put(key, values);
-		}
+	private static <K, V> void copyMultiValueMap(MultiValueMap<K,V> source, MultiValueMap<K,V> target) {
+		source.forEach((key, value) -> target.put(key, new LinkedList<>(value)));
 	}
 
 
