@@ -141,8 +141,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 		Assert.notNull(valueResolver, "StringValueResolver must not be null");
 		synchronized (this.aliasMap) {
 			Map<String, String> aliasCopy = new HashMap<>(this.aliasMap);
-			for (String alias : aliasCopy.keySet()) {
-				String registeredName = aliasCopy.get(alias);
+			aliasCopy.forEach((alias, registeredName) -> {
 				String resolvedAlias = valueResolver.resolveStringValue(alias);
 				String resolvedName = valueResolver.resolveStringValue(registeredName);
 				if (resolvedAlias == null || resolvedName == null || resolvedAlias.equals(resolvedName)) {
@@ -154,7 +153,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 						if (existingName.equals(resolvedName)) {
 							// Pointing to existing alias - just remove placeholder
 							this.aliasMap.remove(alias);
-							break;
+							return;
 						}
 						throw new IllegalStateException(
 								"Cannot register resolved alias '" + resolvedAlias + "' (original: '" + alias +
@@ -168,7 +167,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 				else if (!registeredName.equals(resolvedName)) {
 					this.aliasMap.put(alias, resolvedName);
 				}
-			}
+			});
 		}
 	}
 

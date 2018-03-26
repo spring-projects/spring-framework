@@ -22,6 +22,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -214,13 +216,18 @@ public class Constants {
 	 */
 	public Set<Object> getValues(@Nullable String namePrefix) {
 		String prefixToUse = (namePrefix != null ? namePrefix.trim().toUpperCase(Locale.ENGLISH) : "");
-		Set<Object> values = new HashSet<>();
-		for (String code : this.fieldCache.keySet()) {
-			if (code.startsWith(prefixToUse)) {
-				values.add(this.fieldCache.get(code));
-			}
-		}
-		return values;
+		return getValues(code -> code.getKey().startsWith(prefixToUse));
+	}
+
+	/**
+	 * Return all values of the given group of constants.
+	 * @param predicate filter values by lambda function
+	 * @return the set of values
+	 */
+	private Set<Object> getValues(Predicate<Map.Entry<String, Object>> predicate) {
+		return this.fieldCache.entrySet().stream().
+				filter(predicate).
+				map(Map.Entry::getValue).collect(Collectors.toSet());
 	}
 
 	/**
@@ -246,13 +253,7 @@ public class Constants {
 	 */
 	public Set<Object> getValuesForSuffix(@Nullable String nameSuffix) {
 		String suffixToUse = (nameSuffix != null ? nameSuffix.trim().toUpperCase(Locale.ENGLISH) : "");
-		Set<Object> values = new HashSet<>();
-		for (String code : this.fieldCache.keySet()) {
-			if (code.endsWith(suffixToUse)) {
-				values.add(this.fieldCache.get(code));
-			}
-		}
-		return values;
+		return getValues(code -> code.getKey().endsWith(suffixToUse));
 	}
 
 

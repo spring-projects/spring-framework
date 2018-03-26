@@ -22,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -244,15 +245,9 @@ public class TableMetaDataContext {
 	 * @param inParameters the parameter names and values
 	 */
 	public List<Object> matchInParameterValuesWithInsertColumns(Map<String, ?> inParameters) {
-		List<Object> values = new ArrayList<>();
 		Map<String, Object> source = new LinkedHashMap<>(inParameters.size());
-		for (String key : inParameters.keySet()) {
-			source.put(key.toLowerCase(), inParameters.get(key));
-		}
-		for (String column : this.tableColumns) {
-			values.add(source.get(column.toLowerCase()));
-		}
-		return values;
+		inParameters.forEach((key, value) -> source.put(key.toLowerCase(), value));
+		return this.tableColumns.stream().map(column -> source.get(column.toLowerCase())).collect(Collectors.toList());
 	}
 
 
