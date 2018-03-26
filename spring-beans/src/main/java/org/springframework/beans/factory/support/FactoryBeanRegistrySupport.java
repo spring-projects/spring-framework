@@ -115,7 +115,9 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 										"Post-processing of FactoryBean's singleton object failed", ex);
 							}
 						}
-						this.factoryBeanObjectCache.put(beanName, object);
+						if (containsSingleton(beanName)) {
+							this.factoryBeanObjectCache.put(beanName, object);
+						}
 					}
 				}
 				return object;
