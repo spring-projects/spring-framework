@@ -71,6 +71,7 @@ public class StandardServletMultipartResolver implements MultipartResolver {
 	 * corresponding exceptions at the time of the {@link #resolveMultipart} call.
 	 * Switch this to "true" for lazy multipart parsing, throwing parse exceptions
 	 * once the application attempts to obtain multipart files or parameters.
+	 * @since 3.2.9
 	 */
 	public void setResolveLazily(boolean resolveLazily) {
 		this.resolveLazily = resolveLazily;
@@ -94,17 +95,20 @@ public class StandardServletMultipartResolver implements MultipartResolver {
 
 	@Override
 	public void cleanupMultipart(MultipartHttpServletRequest request) {
-		// To be on the safe side: explicitly delete the parts,
-		// but only actual file parts (for Resin compatibility)
-		try {
-			for (Part part : request.getParts()) {
-				if (request.getFile(part.getName()) != null) {
-					part.delete();
+		if (!(request instanceof AbstractMultipartHttpServletRequest) ||
+				((AbstractMultipartHttpServletRequest) request).isResolved()) {
+			// To be on the safe side: explicitly delete the parts,
+			// but only actual file parts (for Resin compatibility)
+			try {
+				for (Part part : request.getParts()) {
+					if (request.getFile(part.getName()) != null) {
+						part.delete();
+					}
 				}
 			}
-		}
-		catch (Throwable ex) {
-			LogFactory.getLog(getClass()).warn("Failed to perform cleanup of multipart items", ex);
+			catch (Throwable ex) {
+				LogFactory.getLog(getClass()).warn("Failed to perform cleanup of multipart items", ex);
+			}
 		}
 	}
 
