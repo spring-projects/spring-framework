@@ -181,6 +181,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	private int cacheLevel = CACHE_AUTO;
 
+	private boolean cacheDedicatedConnection = false;
+
 	private int concurrentConsumers = 1;
 
 	private int maxConcurrentConsumers = 1;
@@ -283,6 +285,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #CACHE_CONSUMER
 	 * @see #setCacheLevelName
 	 * @see #setTransactionManager
+	 * @see #setCacheDedicatedConnection(boolean)
 	 */
 	public void setCacheLevel(int cacheLevel) {
 		this.cacheLevel = cacheLevel;
@@ -295,6 +298,25 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		return this.cacheLevel;
 	}
 
+	/**
+	 * Specify if we should perform connection caching with a dedicated {@link Connection}
+	 * <p>Default is {@code false} to use a shared connection for every {@link Session}</p>
+	 * <p>Setting this to {@code true} may be required for some XA Transaction managers
+	 * that may fail to close correctly if there are multiple outstanding transactions</p>
+	 * @see #setCacheLevel(int)
+	 * @see #setCacheLevelName
+	 * @see #setTransactionManager
+	 */
+	public void setCacheDedicatedConnection(boolean cacheDedicatedConnection) {
+		this.cacheDedicatedConnection = cacheDedicatedConnection;
+	}
+
+	/**
+	 * Return if the listener may cache with a transaction manager
+	 */
+	public boolean getCacheDedicatedConnection() {
+		return cacheDedicatedConnection;
+	}
 
 	/**
 	 * Specify concurrency limits via a "lower-upper" String, e.g. "5-10", or a simple
@@ -517,7 +539,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	public void initialize() {
 		// Adapt default cache level.
 		if (this.cacheLevel == CACHE_AUTO) {
-			this.cacheLevel = (getTransactionManager() != null ? CACHE_NONE : CACHE_CONSUMER);
+			this.cacheLevel = (getTransactionManager() != null && !this.cacheDedicatedConnection ? CACHE_NONE : CACHE_CONSUMER);
 		}
 
 		// Prepare taskExecutor and maxMessagesPerTask.
@@ -722,7 +744,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	@Override
 	protected final boolean sharedConnectionEnabled() {
-		return (getCacheLevel() >= CACHE_CONNECTION);
+		return (getCacheLevel() >= CACHE_CONNECTION && !this.cacheDedicatedConnection);
 	}
 
 	/**
@@ -1047,6 +1069,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	private class AsyncMessageListenerInvoker implements SchedulingAwareRunnable {
 
 		@Nullable
+		private Connection connection;
+
+		@Nullable
 		private Session session;
 
 		@Nullable
@@ -1208,9 +1233,17 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				updateRecoveryMarker();
 			}
 			else {
+				if ( sharedConnectionEnabled() ) {
+					this.connection = getSharedConnection();
+				} else {
+					if (this.connection == null && getCacheLevel() >= CACHE_CONNECTION) {
+						this.connection = createConnection();
+						this.connection.start();
+					}
+				}
 				if (this.session == null && getCacheLevel() >= CACHE_SESSION) {
 					updateRecoveryMarker();
-					this.session = createSession(getSharedConnection());
+					this.session = createSession(this.connection);
 				}
 				if (this.consumer == null && getCacheLevel() >= CACHE_CONSUMER) {
 					this.consumer = createListenerConsumer(this.session);
@@ -1244,6 +1277,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			else {
 				JmsUtils.closeMessageConsumer(this.consumer);
 				JmsUtils.closeSession(this.session);
+				JmsUtils.closeConnection(this.connection, true);
 			}
 			if (this.consumer != null) {
 				synchronized (lifecycleMonitor) {
@@ -1252,6 +1286,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			}
 			this.consumer = null;
 			this.session = null;
+			this.connection = null;
 		}
 
 		/**
