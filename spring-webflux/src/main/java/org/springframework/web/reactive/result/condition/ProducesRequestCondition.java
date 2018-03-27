@@ -238,11 +238,8 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 		}
 	}
 
-	private List<MediaType> getAcceptedMediaTypes(ServerWebExchange exchange)
-			throws NotAcceptableStatusException {
-
-		List<MediaType> mediaTypes = this.contentTypeResolver.resolveMediaTypes(exchange);
-		return mediaTypes.isEmpty() ? Collections.singletonList(MediaType.ALL) : mediaTypes;
+	private List<MediaType> getAcceptedMediaTypes(ServerWebExchange exchange) throws NotAcceptableStatusException {
+		return this.contentTypeResolver.resolveMediaTypes(exchange);
 	}
 
 	private int indexOfEqualMediaType(MediaType mediaType) {
