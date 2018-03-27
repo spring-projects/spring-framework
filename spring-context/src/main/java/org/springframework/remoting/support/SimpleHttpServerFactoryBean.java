@@ -153,15 +153,15 @@ public class SimpleHttpServerFactoryBean implements FactoryBean<HttpServer>, Ini
 			this.server.setExecutor(this.executor);
 		}
 		if (this.contexts != null) {
-			for (String key : this.contexts.keySet()) {
-				HttpContext httpContext = this.server.createContext(key, this.contexts.get(key));
+			this.contexts.forEach((key, context) -> {
+				HttpContext httpContext = this.server.createContext(key, context);
 				if (this.filters != null) {
 					httpContext.getFilters().addAll(this.filters);
 				}
 				if (this.authenticator != null) {
 					httpContext.setAuthenticator(this.authenticator);
 				}
-			}
+			});
 		}
 		if (this.logger.isInfoEnabled()) {
 			this.logger.info("Starting HttpServer at address " + address);

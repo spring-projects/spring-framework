@@ -196,8 +196,8 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 			return allMatches;
 		}
 		MultiValueMap<String, String> result = new LinkedMultiValueMap<>(allMatches.size());
-		for (String sessionId : allMatches.keySet()) {
-			for (String subId : allMatches.get(sessionId)) {
+		allMatches.forEach((sessionId, subIds) -> {
+			for (String subId : subIds) {
 				SessionSubscriptionInfo info = this.subscriptionRegistry.getSubscriptions(sessionId);
 				if (info == null) {
 					continue;
@@ -225,7 +225,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 					logger.debug("Failed to evaluate selector", ex);
 				}
 			}
-		}
+		});
 		return result;
 	}
 

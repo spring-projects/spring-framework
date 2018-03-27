@@ -345,11 +345,11 @@ public class MockHttpServletRequestBuilder
 	 * @since 4.2.4
 	 */
 	public MockHttpServletRequestBuilder params(MultiValueMap<String, String> params) {
-		for (String name : params.keySet()) {
-			for (String value : params.get(name)) {
+		params.forEach((name, values) -> {
+			for (String value : values) {
 				this.parameters.add(name, value);
 			}
-		}
+		});
 		return this;
 	}
 
@@ -414,9 +414,7 @@ public class MockHttpServletRequestBuilder
 	 */
 	public MockHttpServletRequestBuilder sessionAttrs(Map<String, Object> sessionAttributes) {
 		Assert.notEmpty(sessionAttributes, "'sessionAttributes' must not be empty");
-		for (String name : sessionAttributes.keySet()) {
-			sessionAttr(name, sessionAttributes.get(name));
-		}
+		sessionAttributes.forEach(this::sessionAttr);
 		return this;
 	}
 
@@ -436,9 +434,7 @@ public class MockHttpServletRequestBuilder
 	 */
 	public MockHttpServletRequestBuilder flashAttrs(Map<String, Object> flashAttributes) {
 		Assert.notEmpty(flashAttributes, "'flashAttributes' must not be empty");
-		for (String name : flashAttributes.keySet()) {
-			flashAttr(name, flashAttributes.get(name));
-		}
+		flashAttributes.forEach(this::flashAttr);
 		return this;
 	}
 
@@ -624,22 +620,22 @@ public class MockHttpServletRequestBuilder
 		request.setContent(this.content);
 		request.setContentType(this.contentType);
 
-		for (String name : this.headers.keySet()) {
-			for (Object value : this.headers.get(name)) {
+		this.headers.forEach((name, values) -> {
+			for (Object value : values) {
 				request.addHeader(name, value);
 			}
-		}
+		});
 
 		if (this.url.getRawQuery() != null) {
 			request.setQueryString(this.url.getRawQuery());
 		}
 		addRequestParams(request, UriComponentsBuilder.fromUri(this.url).build().getQueryParams());
 
-		for (String name : this.parameters.keySet()) {
-			for (String value : this.parameters.get(name)) {
+		this.parameters.forEach((name, values) -> {
+			for (String value : values) {
 				request.addParameter(name, value);
 			}
-		}
+		});
 
 		if (this.content != null && this.content.length > 0) {
 			String requestContentType = request.getContentType();
@@ -658,14 +654,12 @@ public class MockHttpServletRequestBuilder
 			request.setPreferredLocales(this.locales);
 		}
 
-		for (String name : this.requestAttributes.keySet()) {
-			request.setAttribute(name, this.requestAttributes.get(name));
-		}
-		for (String name : this.sessionAttributes.keySet()) {
+		this.requestAttributes.forEach(request::setAttribute);
+		this.sessionAttributes.forEach((name, attribute) -> {
 			HttpSession session = request.getSession();
 			Assert.state(session != null, "No HttpSession");
-			session.setAttribute(name, this.sessionAttributes.get(name));
-		}
+			session.setAttribute(name, attribute);
+		});
 
 		FlashMap flashMap = new FlashMap();
 		flashMap.putAll(this.flashAttributes);

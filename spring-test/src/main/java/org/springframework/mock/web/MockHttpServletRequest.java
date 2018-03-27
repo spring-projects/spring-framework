@@ -526,8 +526,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 */
 	public void setParameters(Map<String, ?> params) {
 		Assert.notNull(params, "Parameter map must not be null");
-		for (String key : params.keySet()) {
-			Object value = params.get(key);
+		params.forEach((key, value) -> {
 			if (value instanceof String) {
 				setParameter(key, (String) value);
 			}
@@ -538,7 +537,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 				throw new IllegalArgumentException(
 						"Parameter map value must be single value " + " or array of type [" + String.class.getName() + "]");
 			}
-		}
+		});
 	}
 
 	/**
@@ -576,8 +575,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 */
 	public void addParameters(Map<String, ?> params) {
 		Assert.notNull(params, "Parameter map must not be null");
-		for (String key : params.keySet()) {
-			Object value = params.get(key);
+		params.forEach((key, value) -> {
 			if (value instanceof String) {
 				addParameter(key, (String) value);
 			}
@@ -588,7 +586,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 				throw new IllegalArgumentException("Parameter map value must be single value " +
 						" or array of type [" + String.class.getName() + "]");
 			}
-		}
+		});
 	}
 
 	/**

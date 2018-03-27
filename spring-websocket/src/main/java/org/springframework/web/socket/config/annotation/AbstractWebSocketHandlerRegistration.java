@@ -153,21 +153,21 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 		M mappings = createMappings();
 		if (this.sockJsServiceRegistration != null) {
 			SockJsService sockJsService = this.sockJsServiceRegistration.getSockJsService();
-			for (WebSocketHandler wsHandler : this.handlerMap.keySet()) {
-				for (String path : this.handlerMap.get(wsHandler)) {
+			this.handlerMap.forEach((wsHandler, paths) -> {
+				for (String path : paths) {
 					String pathPattern = (path.endsWith("/") ? path + "**" : path + "/**");
 					addSockJsServiceMapping(mappings, sockJsService, wsHandler, pathPattern);
 				}
-			}
+			});
 		}
 		else {
 			HandshakeHandler handshakeHandler = getOrCreateHandshakeHandler();
 			HandshakeInterceptor[] interceptors = getInterceptors();
-			for (WebSocketHandler wsHandler : this.handlerMap.keySet()) {
-				for (String path : this.handlerMap.get(wsHandler)) {
+			this.handlerMap.forEach((wsHandler, paths) -> {
+				for (String path : paths) {
 					addWebSocketHandlerMapping(mappings, wsHandler, handshakeHandler, interceptors, path);
 				}
-			}
+			});
 		}
 
 		return mappings;
