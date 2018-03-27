@@ -147,9 +147,7 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 			request.addExtensions(new WebSocketToJettyExtensionConfigAdapter(e));
 		}
 
-		for (String header : headers.keySet()) {
-			request.setHeader(header, headers.get(header));
-		}
+		headers.forEach(request::setHeader);
 
 		Principal user = getUser();
 		final JettyWebSocketSession wsSession = new JettyWebSocketSession(attributes, user);

@@ -86,11 +86,11 @@ public class MatrixVariableMapMethodArgumentResolver implements HandlerMethodArg
 		}
 		else {
 			for (MultiValueMap<String, String> vars : matrixVariables.values()) {
-				for (String name : vars.keySet()) {
-					for (String value : vars.get(name)) {
+				vars.forEach((name, values) -> {
+					for (String value : values) {
 						map.add(name, value);
 					}
-				}
+				});
 			}
 		}
 

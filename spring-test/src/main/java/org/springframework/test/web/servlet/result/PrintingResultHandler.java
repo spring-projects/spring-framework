@@ -135,13 +135,13 @@ public class PrintingResultHandler implements ResultHandler {
 	protected final MultiValueMap<String, String> getParamsMultiValueMap(MockHttpServletRequest request) {
 		Map<String, String[]> params = request.getParameterMap();
 		MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<>();
-		for (String name : params.keySet()) {
+		params.forEach((name, values) -> {
 			if (params.get(name) != null) {
-				for (String value : params.get(name)) {
+				for (String value : values) {
 					multiValueMap.add(name, value);
 				}
 			}
-		}
+		});
 		return multiValueMap;
 	}
 
@@ -235,10 +235,10 @@ public class PrintingResultHandler implements ResultHandler {
 			this.printer.printValue("Attributes", null);
 		}
 		else {
-			for (String name : flashMap.keySet()) {
+			flashMap.forEach((name, value) -> {
 				this.printer.printValue("Attribute", name);
-				this.printer.printValue("value", flashMap.get(name));
-			}
+				this.printer.printValue("value", value);
+			});
 		}
 	}
 

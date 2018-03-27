@@ -567,11 +567,11 @@ public class UrlPathHelper {
 		}
 		else {
 			MultiValueMap<String, String> decodedVars = new LinkedMultiValueMap<>(vars.size());
-			for (String key : vars.keySet()) {
-				for (String value : vars.get(key)) {
+			vars.forEach((key, values) -> {
+				for (String value : values) {
 					decodedVars.add(key, decodeInternal(request, value));
 				}
-			}
+			});
 			return decodedVars;
 		}
 	}
