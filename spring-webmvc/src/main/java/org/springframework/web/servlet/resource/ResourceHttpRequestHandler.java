@@ -69,24 +69,23 @@ import org.springframework.web.util.UrlPathHelper;
  * according to the guidelines of Page Speed, YSlow, etc.
  *
  * <p>The {@linkplain #setLocations "locations"} property takes a list of Spring
- * {@link Resource} locations from which static resources are allowed to
- * be served by this handler. Resources could be served from a classpath location,
- * e.g. "classpath:/META-INF/public-web-resources/", allowing convenient packaging
+ * {@link Resource} locations from which static resources are allowed to be served
+ * by this handler. Resources could be served from a classpath location, e.g.
+ * "classpath:/META-INF/public-web-resources/", allowing convenient packaging
  * and serving of resources such as .js, .css, and others in jar files.
  *
  * <p>This request handler may also be configured with a
  * {@link #setResourceResolvers(List) resourcesResolver} and
  * {@link #setResourceTransformers(List) resourceTransformer} chains to support
- * arbitrary resolution and transformation of resources being served. By default a
- * {@link PathResourceResolver} simply finds resources based on the configured
- * "locations". An application can configure additional resolvers and
- * transformers such as the {@link VersionResourceResolver} which can resolve
- * and prepare URLs for resources with a version in the URL.
+ * arbitrary resolution and transformation of resources being served. By default
+ * a {@link PathResourceResolver} simply finds resources based on the configured
+ * "locations". An application can configure additional resolvers and transformers
+ * such as the {@link VersionResourceResolver} which can resolve and prepare URLs
+ * for resources with a version in the URL.
  *
- * <p>This handler also properly evaluates the {@code Last-Modified} header (if
- * present) so that a {@code 304} status code will be returned as appropriate,
- * avoiding unnecessary overhead for resources that are already cached by the
- * client.
+ * <p>This handler also properly evaluates the {@code Last-Modified} header
+ * (if present) so that a {@code 304} status code will be returned as appropriate,
+ * avoiding unnecessary overhead for resources that are already cached by the client.
  *
  * @author Keith Donald
  * @author Jeremy Grelle
