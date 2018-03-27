@@ -96,6 +96,9 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
+	private static final MediaType DEFAULT_FORM_DATA_MEDIA_TYPE =
+			new MediaType(MediaType.APPLICATION_FORM_URLENCODED, DEFAULT_CHARSET);
+
 
 	private List<MediaType> supportedMediaTypes = new ArrayList<>();
 
@@ -290,15 +293,14 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	private void writeForm(MultiValueMap<String, String> form, @Nullable MediaType contentType,
 			HttpOutputMessage outputMessage) throws IOException {
 
-		Charset charset;
-		if (contentType != null) {
-			outputMessage.getHeaders().setContentType(contentType);
-			charset = (contentType.getCharset() != null ? contentType.getCharset() : this.charset);
-		}
-		else {
-			outputMessage.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		contentType = (contentType != null ? contentType : DEFAULT_FORM_DATA_MEDIA_TYPE);
+		Charset charset = contentType.getCharset();
+		if (charset == null) {
 			charset = this.charset;
+			contentType = new MediaType(contentType, charset);
 		}
+		outputMessage.getHeaders().setContentType(contentType);
+
 		StringBuilder builder = new StringBuilder();
 		for (Iterator<String> nameIterator = form.keySet().iterator(); nameIterator.hasNext();) {
 			String name = nameIterator.next();
