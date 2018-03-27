@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -930,6 +930,32 @@ public abstract class AnnotationUtils {
 	 */
 	public static boolean isInJavaLangAnnotationPackage(String annotationType) {
 		return (annotationType != null && annotationType.startsWith("java.lang.annotation"));
+	}
+
+	/**
+	 * Check the declared attributes of the given annotation, in particular covering
+	 * Google App Engine's late arrival of {@code TypeNotPresentExceptionProxy} for
+	 * {@code Class} values (instead of early {@code Class.getAnnotations() failure}.
+	 * <p>This method not failing indicates that {@link #getAnnotationAttributes(Annotation)}
+	 * won't failure either (when attempted later on).
+	 * @param annotation the annotation to validate
+	 * @throws IllegalStateException if a declared {@code Class} attribute could not be read
+	 * @since 4.3.15
+	 * @see Class#getAnnotations()
+	 * @see #getAnnotationAttributes(Annotation)
+	 */
+	public static void validateAnnotation(Annotation annotation) {
+		for (Method method : getAttributeMethods(annotation.annotationType())) {
+			Class<?> returnType = method.getReturnType();
+			if (returnType == Class.class || returnType == Class[].class) {
+				try {
+					method.invoke(annotation);
+				}
+				catch (Throwable ex) {
+					throw new IllegalStateException("Could not obtain annotation attribute value for " + method, ex);
+				}
+			}
+		}
 	}
 
 	/**
@@ -1882,13 +1908,13 @@ public abstract class AnnotationUtils {
 		if (element instanceof Class && Annotation.class.isAssignableFrom((Class<?>) element)) {
 			// Meta-annotation or (default) value lookup on an annotation type
 			if (loggerToUse.isDebugEnabled()) {
-				loggerToUse.debug("Failed to meta-introspect annotation [" + element + "]: " + ex);
+				loggerToUse.debug("Failed to meta-introspect annotation " + element + ": " + ex);
 			}
 		}
 		else {
 			// Direct annotation lookup on regular Class, Method, Field
 			if (loggerToUse.isInfoEnabled()) {
-				loggerToUse.info("Failed to introspect annotations on [" + element + "]: " + ex);
+				loggerToUse.info("Failed to introspect annotations on " + element + ": " + ex);
 			}
 		}
 	}
