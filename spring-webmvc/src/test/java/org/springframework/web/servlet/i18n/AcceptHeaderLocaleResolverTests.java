@@ -64,12 +64,24 @@ public class AcceptHeaderLocaleResolverTests {
 	}
 
 	@Test
+	public void resolvePreferredAgainstCountryIfPossible() {
+		this.resolver.setSupportedLocales(Arrays.asList(ENGLISH, UK));
+		assertEquals(UK, this.resolver.resolveLocale(request(GERMANY, US, UK)));
+	}
+
+	@Test
+	public void resolvePreferredAgainstLanguageWithMultipleSupportedLocales() {
+		this.resolver.setSupportedLocales(Arrays.asList(GERMAN, US));
+		assertEquals(GERMAN, this.resolver.resolveLocale(request(GERMANY, US, UK)));
+	}
+
+	@Test
 	public void resolvePreferredNotSupportedWithDefault() {
 		this.resolver.setSupportedLocales(Arrays.asList(US, JAPAN));
 		this.resolver.setDefaultLocale(Locale.JAPAN);
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addHeader("Accept-Language", KOREA.toString());
+		request.addHeader("Accept-Language", KOREA.toLanguageTag());
 		request.setPreferredLocales(Collections.singletonList(KOREA));
 		assertEquals(Locale.JAPAN, this.resolver.resolveLocale(request));
 	}
@@ -80,7 +92,7 @@ public class AcceptHeaderLocaleResolverTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		assertEquals(JAPANESE, this.resolver.resolveLocale(request));
 
-		request.addHeader("Accept-Language", US.toString());
+		request.addHeader("Accept-Language", US.toLanguageTag());
 		request.setPreferredLocales(Collections.singletonList(US));
 		assertEquals(US, this.resolver.resolveLocale(request));
 	}
