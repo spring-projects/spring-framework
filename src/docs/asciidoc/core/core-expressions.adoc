@@ -7,17 +7,17 @@
 [[expressions-intro]]
 == Introduction
 
-The Spring Expression Language (SpEL for short) is a powerful expression language that
+The Spring Expression Language (_SpEL_ for short) is a powerful expression language that
 supports querying and manipulating an object graph at runtime. The language syntax is
 similar to Unified EL but offers additional features, most notably method invocation and
 basic string templating functionality.
 
-While there are several other Java expression languages available, OGNL, MVEL, and JBoss
-EL, to name a few, the Spring Expression Language was created to provide the Spring
+While there are several other Java expression languages available -- OGNL, MVEL, and JBoss
+EL, to name a few -- the Spring Expression Language was created to provide the Spring
 community with a single well supported expression language that can be used across all
 the products in the Spring portfolio. Its language features are driven by the
 requirements of the projects in the Spring portfolio, including tooling requirements for
-code completion support within the eclipse based Spring Tool Suite. That said,
+code completion support within the Eclipse based Spring Tool Suite. That said,
 SpEL is based on a technology agnostic API allowing other expression language
 implementations to be integrated should the need arise.
 
@@ -29,10 +29,10 @@ infrastructure classes such as the parser. Most Spring users will not need to de
 this infrastructure and will instead only author expression strings for evaluation. An
 example of this typical use is the integration of SpEL into creating XML or annotated
 based bean definitions as shown in the section <<expressions-beandef,Expression support
-for defining bean definitions.>>
+for defining bean definitions>>.
 
 This chapter covers the features of the expression language, its API, and its language
-syntax. In several places an Inventor and Inventor's Society class are used as the
+syntax. In several places an `Inventor` and Inventor's `Society` classes are used as the
 target objects for expression evaluation. These class declarations and the data used to
 populate them are listed at the end of the chapter.
 
@@ -82,7 +82,7 @@ The following code introduces the SpEL API to evaluate the literal string expres
 The value of the message variable is simply 'Hello World'.
 
 The SpEL classes and interfaces you are most likely to use are located in the packages
-`org.springframework.expression` and its sub packages and `spel.support`.
+`org.springframework.expression` and its sub packages such as `spel.support`.
 
 The interface `ExpressionParser` is responsible for parsing an expression string. In
 this example the expression string is a string literal denoted by the surrounding single
@@ -120,7 +120,7 @@ as shown below.
 ----
 
 SpEL also supports nested properties using standard _dot_ notation, i.e.
-prop1.prop2.prop3 and the setting of property values
+`prop1.prop2.prop3` and the setting of property values
 
 Public fields may also be accessed.
 
@@ -181,7 +181,7 @@ create a boolean condition:
 === `EvaluationContext`
 
 The interface `EvaluationContext` is used when evaluating an expression to resolve
-properties, methods, fields, and to help perform type conversion. There are two
+properties, methods, or fields and to help perform type conversion. There are two
 out-of-the-box implementations.
 
 * `SimpleEvaluationContext` -- exposes a subset of essential SpEL language features and
@@ -190,26 +190,26 @@ of the SpEL language syntax and should be meaningfully restricted. Examples incl
 are not limited to data binding expressions, property-based filters, and others.
 
 * `StandardEvaluationContext` -- exposes the full set of SpEL language features and
-configuration options. You may use it to specify a default root object, and to configure
+configuration options. You may use it to specify a default root object and to configure
 every available evaluation-related strategy.
 
 `SimpleEvaluationContext` is designed to support only a subset of the SpEL language syntax.
-It excludes Java type references, constructors, and bean references. It also requires
-explicit choosing the level of support for properties and methods in expressions.
+It _excludes_ Java type references, constructors, and bean references. It also requires
+that one explicitly choose the level of support for properties and methods in expressions.
 By default, the `create()` static factory method enables only read access to properties.
 You can also obtain a builder to configure the exact level of support needed, targeting
-one of, or some combination of the following:
+one or some combination of the following:
 
-. Custom `PropertyAccessor` only (no reflection).
-. Data binding properties for read-only access.
-. Data binding properties for read and write.
+. Custom `PropertyAccessor` only (no reflection)
+. Data binding properties for read-only access
+. Data binding properties for read and write
 
 
 [[expressions-type-conversion]]
 ==== Type conversion
 
-By default SpEL uses the conversion service available in Spring core (
-`org.springframework.core.convert.ConversionService`). This conversion service comes
+By default SpEL uses the conversion service available in Spring core
+(`org.springframework.core.convert.ConversionService`). This conversion service comes
 with many converters built in for common conversions but is also fully extensible so
 custom conversions between types can be added. Additionally it has the key capability
 that it is generics aware. This means that when working with generic types in
@@ -288,17 +288,17 @@ It is also possible to configure the behaviour of the SpEL expression compiler.
 
 Spring Framework 4.1 includes a basic expression compiler. Expressions are usually
 interpreted which provides a lot of dynamic flexibility during evaluation but
-does not provide the optimum performance. For occasional expression usage
+does not provide optimum performance. For occasional expression usage
 this is fine, but when used by other components like Spring Integration, 
 performance can be very important and there is no real need for the dynamism.
 
-The new SpEL compiler is intended to address this need. The 
+The SpEL compiler is intended to address this need. The 
 compiler will generate a real Java class on the fly during evaluation that embodies the
 expression behavior and use that to achieve much faster expression
 evaluation. Due to the lack of typing around expressions the compiler
 uses information gathered during the interpreted evaluations of an
 expression when performing compilation. For example, it does not know the type
-of a property reference purely from the expression but during the first
+of a property reference purely from the expression, but during the first
 interpreted evaluation it will find out what it is. Of course, basing the 
 compilation on this information could cause trouble later if the types of
 the various expression elements change over time. For this reason compilation
@@ -378,9 +378,9 @@ enum values (`off`, `immediate`, or `mixed`).
 [[expressions-compiler-limitations]]
 ==== Compiler limitations
 
-With Spring Framework 4.1 the basic compilation framework is in place. However, the framework does not
+Since Spring Framework 4.1 the basic compilation framework is in place. However, the framework does not
 yet support compiling every kind of expression. The initial focus has been on the common expressions that are
-likely to be used in performance critical contexts.  These kinds of expression cannot be compiled
+likely to be used in performance critical contexts. The following kinds of expression cannot be compiled
 at the moment:
 
 - expressions involving assignment 
@@ -951,7 +951,7 @@ used).
 === Variables
 
 Variables can be referenced in the expression using the syntax `#variableName`. Variables
-are set using the method setVariable on `EvaluationContext` implementations.
+are set using the method `setVariable` on `EvaluationContext` implementations.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -969,10 +969,10 @@ are set using the method setVariable on `EvaluationContext` implementations.
 [[expressions-this-root]]
 ==== The #this and #root variables
 
-The variable #this is always defined and refers to the current evaluation object
-(against which unqualified references are resolved). The variable #root is always
-defined and refers to the root context object. Although #this may vary as components of
-an expression are evaluated, #root always refers to the root.
+The variable `#this` is always defined and refers to the current evaluation object
+(against which unqualified references are resolved). The variable `#root` is always
+defined and refers to the root context object. Although `#this` may vary as components of
+an expression are evaluated, `#root` always refers to the root.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1047,7 +1047,7 @@ The above method can then be registered and used as follows:
 === Bean references
 
 If the evaluation context has been configured with a bean resolver it is possible to
-lookup beans from an expression using the (@) symbol.
+look up beans from an expression using the `@` symbol.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1060,7 +1060,7 @@ lookup beans from an expression using the (@) symbol.
 	Object bean = parser.parseExpression("@foo").getValue(context);
 ----
 
-To access a factory bean itself, the bean name should instead be prefixed with a (&) symbol.
+To access a factory bean itself, the bean name should instead be prefixed with an `&` symbol.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1087,7 +1087,7 @@ the expression. A minimal example is:
 			"false ? 'trueExp' : 'falseExp'").getValue(String.class);
 ----
 
-In this case, the boolean false results in returning the string value 'falseExp'. A more
+In this case, the boolean false results in returning the string value `'falseExp'`. A more
 realistic example is shown below.
 
 [source,java,indent=0]
@@ -1274,9 +1274,9 @@ define, a common choice is to use `#{ }` as the delimiters. For example,
 	// evaluates to "random number is 0.7038186818312008"
 ----
 
-The string is evaluated by concatenating the literal text 'random number is ' with the
-result of evaluating the expression inside the #{ } delimiter, in this case the result
-of calling that random() method. The second argument to the method `parseExpression()`
+The string is evaluated by concatenating the literal text `'random number is '` with the
+result of evaluating the expression inside the `#{ }` delimiter, in this case the result
+of calling that `random()` method. The second argument to the method `parseExpression()`
 is of the type `ParserContext`. The `ParserContext` interface is used to influence how
 the expression is parsed in order to support the expression templating functionality.
 The definition of `TemplateParserContext` is shown below.
