@@ -247,6 +247,18 @@ public class MimeTypeTests {
 		assertEquals("'v>alue'", mimeType.getParameter("attr"));
 	}
 
+	@Test // SPR-16630
+	public void parseMimeTypeWithSpacesAroundEquals() {
+		MimeType mimeType = MimeTypeUtils.parseMimeType("multipart/x-mixed-replace;boundary = --myboundary");
+		assertEquals("--myboundary", mimeType.getParameter("boundary"));
+	}
+
+	@Test // SPR-16630
+	public void parseMimeTypeWithSpacesAroundEqualsAndQuotedValue() {
+		MimeType mimeType = MimeTypeUtils.parseMimeType("text/plain; foo = \" bar \" ");
+		assertEquals("\" bar \"", mimeType.getParameter("foo"));
+	}
+
 	@Test(expected = InvalidMimeTypeException.class)
 	public void parseMimeTypeIllegalQuotedParameterValue() {
 		MimeTypeUtils.parseMimeType("audio/*;attr=\"");

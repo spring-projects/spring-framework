@@ -225,8 +225,8 @@ public abstract class MimeTypeUtils {
 				}
 				int eqIndex = parameter.indexOf('=');
 				if (eqIndex >= 0) {
-					String attribute = parameter.substring(0, eqIndex);
-					String value = parameter.substring(eqIndex + 1, parameter.length());
+					String attribute = parameter.substring(0, eqIndex).trim();
+					String value = parameter.substring(eqIndex + 1, parameter.length()).trim();
 					parameters.put(attribute, value);
 				}
 			}
