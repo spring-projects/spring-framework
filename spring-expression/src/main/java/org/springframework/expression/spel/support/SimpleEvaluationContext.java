@@ -27,7 +27,6 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.BeanResolver;
 import org.springframework.expression.ConstructorResolver;
 import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.Expression;
 import org.springframework.expression.MethodResolver;
 import org.springframework.expression.OperatorOverloader;
 import org.springframework.expression.PropertyAccessor;
@@ -64,15 +63,17 @@ import org.springframework.lang.Nullable;
  * enables read access to properties via {@link DataBindingPropertyAccessor};
  * same for {@link SimpleEvaluationContext#forReadWriteDataBinding()} when
  * write access is needed as well. Alternatively, configure custom accessors
- * via {@link SimpleEvaluationContext#forPropertyAccessors}.
+ * via {@link SimpleEvaluationContext#forPropertyAccessors}, and potentially
+ * activate method resolution and/or a type converter through the builder.
  *
- * <p>Note that {@code SimpleEvaluationContext} cannot be configured with
- * a default root object. Instead it is meant to be created once and used
- * repeatedly through {@code getValue} calls on a pre-compiled
+ * <p>Note that {@code SimpleEvaluationContext} is typically not configured
+ * with a default root object. Instead it is meant to be created once and
+ * used repeatedly through {@code getValue} calls on a pre-compiled
  * {@link org.springframework.expression.Expression} with both an
- * {@code EvaluationContext} and a root object as arguments
+ * {@code EvaluationContext} and a root object as arguments:
+ * {@link org.springframework.expression.Expression#getValue(EvaluationContext, Object)}.
  *
- * <p>For more flexibility, in particular for internal configuration
+ * <p>For more power and flexibility, in particular for internal configuration
  * scenarios, consider using {@link StandardEvaluationContext} instead.
  *
  * @author Rossen Stoyanchev
@@ -328,8 +329,8 @@ public class SimpleEvaluationContext implements EvaluationContext {
 		/**
 		 * Specify a default root object to resolve against.
 		 * <p>Default is none, expecting an object argument at evaluation time.
-		 * @see Expression#getValue(EvaluationContext)
-		 * @see Expression#getValue(EvaluationContext, Object)
+		 * @see org.springframework.expression.Expression#getValue(EvaluationContext)
+		 * @see org.springframework.expression.Expression#getValue(EvaluationContext, Object)
 		 */
 		public Builder withRootObject(Object rootObject) {
 			this.rootObject = new TypedValue(rootObject);
@@ -339,8 +340,8 @@ public class SimpleEvaluationContext implements EvaluationContext {
 		/**
 		 * Specify a typed root object to resolve against.
 		 * <p>Default is none, expecting an object argument at evaluation time.
-		 * @see Expression#getValue(EvaluationContext)
-		 * @see Expression#getValue(EvaluationContext, Object)
+		 * @see org.springframework.expression.Expression#getValue(EvaluationContext)
+		 * @see org.springframework.expression.Expression#getValue(EvaluationContext, Object)
 		 */
 		public Builder withTypedRootObject(Object rootObject, TypeDescriptor typeDescriptor) {
 			this.rootObject = new TypedValue(rootObject, typeDescriptor);
