@@ -34,7 +34,6 @@ import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.backoff.BackOff;
@@ -182,7 +181,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	private int cacheLevel = CACHE_AUTO;
 
-	private boolean cacheSharedConnection = true;
+	private boolean cacheDedicatedConnection = false;
 
 	private int concurrentConsumers = 1;
 
@@ -286,7 +285,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #CACHE_CONSUMER
 	 * @see #setCacheLevelName
 	 * @see #setTransactionManager
-	 * @see #setCacheSharedConnection(boolean)
+	 * @see #setCacheDedicatedConnection(boolean)
 	 */
 	public void setCacheLevel(int cacheLevel) {
 		this.cacheLevel = cacheLevel;
@@ -300,23 +299,23 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
-	 * Specify if we should perform connection caching with a shared {@link Connection}
-	 * <p>Default is {@code true} to use a shared connection for every {@link Session}</p>
-	 * <p>Setting this to {@code false} may be required for some XA Transaction managers
+	 * Specify if we should perform connection caching with a dedicated {@link Connection}
+	 * <p>Default is {@code false} to use a shared connection for every {@link Session}</p>
+	 * <p>Setting this to {@code true} may be required for some XA Transaction managers
 	 * that may fail to close correctly if there are multiple outstanding transactions</p>
 	 * @see #setCacheLevel(int)
 	 * @see #setCacheLevelName
 	 * @see #setTransactionManager
 	 */
-	public void setCacheSharedConnection(boolean cacheSharedConnection) {
-		this.cacheSharedConnection = cacheSharedConnection;
+	public void setCacheDedicatedConnection(boolean cacheDedicatedConnection) {
+		this.cacheDedicatedConnection = cacheDedicatedConnection;
 	}
 
 	/**
 	 * Return if the listener may cache with a transaction manager
 	 */
-	public boolean getCacheSharedConnection() {
-		return cacheSharedConnection;
+	public boolean getCacheDedicatedConnection() {
+		return cacheDedicatedConnection;
 	}
 
 	/**
@@ -540,7 +539,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	public void initialize() {
 		// Adapt default cache level.
 		if (this.cacheLevel == CACHE_AUTO) {
-			this.cacheLevel = (getTransactionManager() != null && this.cacheSharedConnection ? CACHE_NONE : CACHE_CONSUMER);
+			this.cacheLevel = (getTransactionManager() != null && !this.cacheDedicatedConnection ? CACHE_NONE : CACHE_CONSUMER);
 		}
 
 		// Prepare taskExecutor and maxMessagesPerTask.
@@ -745,7 +744,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	@Override
 	protected final boolean sharedConnectionEnabled() {
-		return (getCacheLevel() >= CACHE_CONNECTION && this.cacheSharedConnection);
+		return (getCacheLevel() >= CACHE_CONNECTION && !this.cacheDedicatedConnection);
 	}
 
 	/**
