@@ -121,7 +121,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 		Enumeration<?> propNames = cacheMappings.propertyNames();
 		while (propNames.hasMoreElements()) {
 			String path = (String) propNames.nextElement();
-			int cacheSeconds = Integer.valueOf(cacheMappings.getProperty(path));
+			int cacheSeconds = Integer.parseInt(cacheMappings.getProperty(path));
 			this.cacheMappings.put(path, cacheSeconds);
 		}
 	}
