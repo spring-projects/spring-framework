@@ -18,6 +18,7 @@ package org.springframework.aop.support;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAwareMethodMatcher;
@@ -208,6 +209,11 @@ public abstract class MethodMatchers {
 				otherCf2 = cfa.cf2;
 			}
 			return (this.cf1.equals(otherCf1) && this.cf2.equals(otherCf2));
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(super.hashCode(), cf1, cf2);
 		}
 	}
 

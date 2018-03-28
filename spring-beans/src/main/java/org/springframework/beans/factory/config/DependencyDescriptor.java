@@ -24,6 +24,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import kotlin.reflect.KProperty;
@@ -388,6 +389,10 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 				this.nestingLevel == otherDesc.nestingLevel && this.containingClass == otherDesc.containingClass);
 	}
 
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), required, eager, nestingLevel, containingClass);
+	}
 
 	//---------------------------------------------------------------------
 	// Serialization support
