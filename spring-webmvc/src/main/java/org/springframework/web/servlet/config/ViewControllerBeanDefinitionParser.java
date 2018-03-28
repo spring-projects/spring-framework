@@ -76,7 +76,7 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 
 		HttpStatus statusCode = null;
 		if (element.hasAttribute("status-code")) {
-			int statusValue = Integer.valueOf(element.getAttribute("status-code"));
+			int statusValue = Integer.parseInt(element.getAttribute("status-code"));
 			statusCode = HttpStatus.valueOf(statusValue);
 		}
 
