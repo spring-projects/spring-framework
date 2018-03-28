@@ -204,11 +204,10 @@ Undertow (and WildFly).
 ====
 A request to overcome the above limitation in the Java WebSocket API has been
 created and can be followed at
-https://java.net/jira/browse/WEBSOCKET_SPEC-211[WEBSOCKET_SPEC-211].
-Tomcat, Jetty, and WebSphere provide their own API alternatives that
-makes it easy to overcome the limitation. We are hopeful that more servers
-will follow their example regardless of when it is addressed in the
-Java WebSocket API.
+https://github.com/eclipse-ee4j/websocket-api/issues/211[WEBSOCKET_SPEC-211].
+Tomcat, Undertow and WebSphere provide their own API alternatives that
+makes it possible to this, and it's also possible with Jetty. We are hopeful
+that more servers will follow do the same.
 ====
 
 A secondary consideration is that Servlet containers with JSR-356 support are expected
