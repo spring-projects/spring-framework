@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.jms.Connection;
@@ -578,6 +579,11 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 					ObjectUtils.nullSafeEquals(this.noLocal, otherKey.noLocal) &&
 					ObjectUtils.nullSafeEquals(this.subscription, otherKey.subscription) &&
 					this.durable == otherKey.durable);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(super.hashCode(), selector, noLocal, subscription, durable);
 		}
 
 		@Override
