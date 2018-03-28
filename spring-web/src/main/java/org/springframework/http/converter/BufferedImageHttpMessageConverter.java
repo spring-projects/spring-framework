@@ -100,7 +100,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	 * @throws IllegalArgumentException if the given content type is not supported by the Java Image I/O API
 	 */
 	public void setDefaultContentType(@Nullable MediaType defaultContentType) {
-		if (defaultContentType!= null) {
+		if (defaultContentType != null) {
 			Iterator<ImageWriter> imageWriters = ImageIO.getImageWritersByMIMEType(defaultContentType.toString());
 			if (!imageWriters.hasNext()) {
 				throw new IllegalArgumentException(

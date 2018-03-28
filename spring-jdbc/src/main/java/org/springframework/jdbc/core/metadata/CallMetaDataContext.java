@@ -276,7 +276,7 @@ public class CallMetaDataContext {
 			}
 			else {
 				throw new InvalidDataAccessApiUsageException(
-						"Return of a ResultSet from a stored procedure is not supported.");
+						"Return of a ResultSet from a stored procedure is not supported");
 			}
 		}
 	}

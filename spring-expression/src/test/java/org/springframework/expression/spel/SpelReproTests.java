@@ -236,7 +236,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void accessingNullPropertyViaReflection_SPR5663() throws AccessException {
+	public void propertyAccessOnNullTarget_SPR5663() throws AccessException {
 		PropertyAccessor accessor = new ReflectivePropertyAccessor();
 		EvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
 		assertFalse(accessor.canRead(context, null, "abc"));

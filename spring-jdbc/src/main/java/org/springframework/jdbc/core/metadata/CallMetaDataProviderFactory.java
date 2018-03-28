@@ -60,8 +60,8 @@ public class CallMetaDataProviderFactory {
 
 
 	/**
-	 * Create a {@link CallMetaDataProvider} based on the database meta-data
-	 * @param dataSource used to retrieve meta-data
+	 * Create a {@link CallMetaDataProvider} based on the database meta-data.
+	 * @param dataSource the JDBC DataSource to use for retrieving meta-data
 	 * @param context the class that holds configuration and meta-data
 	 * @return instance of the CallMetaDataProvider implementation to be used
 	 */

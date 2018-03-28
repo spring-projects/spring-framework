@@ -599,8 +599,7 @@ public class ConcurrentReferenceHashMapTests {
 		protected ReferenceManager createReferenceManager() {
 			return new ReferenceManager() {
 				@Override
-				public Reference<K, V> createReference(Entry<K, V> entry, int hash,
-						@Nullable Reference<K, V> next) {
+				public Reference<K, V> createReference(Entry<K, V> entry, int hash, @Nullable Reference<K, V> next) {
 					if (TestWeakConcurrentCache.this.disableTestHooks) {
 						return super.createReference(entry, hash, next);
 					}
