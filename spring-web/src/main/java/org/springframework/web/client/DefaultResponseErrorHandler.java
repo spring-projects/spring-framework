@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,12 +47,13 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 */
 	@Override
 	public boolean hasError(ClientHttpResponse response) throws IOException {
-		try {
-			return hasError(getHttpStatusCode(response));
+		int rawStatusCode = response.getRawStatusCode();
+		for (HttpStatus statusCode : HttpStatus.values()) {
+			if (statusCode.value() == rawStatusCode) {
+				return hasError(statusCode);
+			}
 		}
-		catch (UnknownHttpStatusCodeException ex) {
-			return false;
-		}
+		return false;
 	}
 
 	/**
@@ -87,13 +88,15 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 				throw new HttpServerErrorException(statusCode, response.getStatusText(),
 						response.getHeaders(), getResponseBody(response), getCharset(response));
 			default:
-				throw new RestClientException("Unknown status code [" + statusCode + "]");
+				throw new UnknownHttpStatusCodeException(statusCode.value(), response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
 		}
 	}
 
 
 	/**
 	 * Determine the HTTP status of the given response.
+	 * <p>Note: Only called from {@link #handleError}, not from {@link #hasError}.
 	 * @param response the response to inspect
 	 * @return the associated HTTP status
 	 * @throws IOException in case of I/O errors
