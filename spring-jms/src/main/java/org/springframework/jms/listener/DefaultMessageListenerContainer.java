@@ -1237,6 +1237,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 					this.connection = getSharedConnection();
 				} else {
 					this.connection = createConnection();
+					this.connection.start();
 				}
 				if (this.session == null && getCacheLevel() >= CACHE_SESSION) {
 					updateRecoveryMarker();
@@ -1274,7 +1275,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			else {
 				JmsUtils.closeMessageConsumer(this.consumer);
 				JmsUtils.closeSession(this.session);
-				JmsUtils.closeConnection(this.connection);
+				JmsUtils.closeConnection(this.connection, true);
 			}
 			if (this.consumer != null) {
 				synchronized (lifecycleMonitor) {
