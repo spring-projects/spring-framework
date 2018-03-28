@@ -236,7 +236,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void accessingNullPropertyViaReflection_SPR5663() throws AccessException {
+	public void propertyAccessOnNullTarget_SPR5663() throws AccessException {
 		PropertyAccessor accessor = new ReflectivePropertyAccessor();
 		EvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
 		assertFalse(accessor.canRead(context, null, "abc"));
@@ -244,17 +244,17 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 		try {
 			accessor.read(context, null, "abc");
-			fail("Should have failed with an IllegalStateException");
+			fail("Should have failed with an AccessException");
 		}
-		catch (IllegalStateException ex) {
+		catch (AccessException ex) {
 			// expected
 		}
 
 		try {
 			accessor.write(context, null, "abc", "foo");
-			fail("Should have failed with an IllegalStateException");
+			fail("Should have failed with an AccessException");
 		}
-		catch (IllegalStateException ex) {
+		catch (AccessException ex) {
 			// expected
 		}
 	}
