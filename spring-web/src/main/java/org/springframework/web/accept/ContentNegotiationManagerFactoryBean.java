@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import javax.servlet.ServletContext;
 
@@ -139,7 +138,7 @@ public class ContentNegotiationManagerFactoryBean
 	 */
 	public void setMediaTypes(Properties mediaTypes) {
 		if (!CollectionUtils.isEmpty(mediaTypes)) {
-			for (Entry<Object, Object> entry : mediaTypes.entrySet()) {
+			for (Map.Entry<Object, Object> entry : mediaTypes.entrySet()) {
 				String extension = ((String)entry.getKey()).toLowerCase(Locale.ENGLISH);
 				MediaType mediaType = MediaType.valueOf((String) entry.getValue());
 				this.mediaTypes.put(extension, mediaType);

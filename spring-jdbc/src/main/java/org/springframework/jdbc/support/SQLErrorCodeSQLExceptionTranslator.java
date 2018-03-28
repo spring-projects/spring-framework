@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
  * concrete and is typically used itself, in which case this rule doesn't apply.
  * <li>Apply error code matching. Error codes are obtained from the SQLErrorCodesFactory
  * by default. This factory loads a "sql-error-codes.xml" file from the class path,
- * defining error code mappings for database names from database metadata.
+ * defining error code mappings for database names from database meta-data.
  * <li>Fallback to a fallback translator. {@link SQLStateSQLExceptionTranslator} is the
  * default fallback translator, analyzing the exception's SQL state only. On Java 6
  * which introduces its own {@code SQLException} subclass hierarchy, we will
@@ -87,8 +87,8 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	/**
 	 * Create a SQL error code translator for the given DataSource.
 	 * Invoking this constructor will cause a Connection to be obtained
-	 * from the DataSource to get the metadata.
-	 * @param dataSource DataSource to use to find metadata and establish
+	 * from the DataSource to get the meta-data.
+	 * @param dataSource DataSource to use to find meta-data and establish
 	 * which error codes are usable
 	 * @see SQLErrorCodesFactory
 	 */
@@ -100,7 +100,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	/**
 	 * Create a SQL error code translator for the given database product name.
 	 * Invoking this constructor will avoid obtaining a Connection from the
-	 * DataSource to get the metadata.
+	 * DataSource to get the meta-data.
 	 * @param dbName the database product name that identifies the error codes entry
 	 * @see SQLErrorCodesFactory
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
@@ -112,7 +112,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 
 	/**
 	 * Create a SQLErrorCode translator given these error codes.
-	 * Does not require a database metadata lookup to be performed using a connection.
+	 * Does not require a database meta-data lookup to be performed using a connection.
 	 * @param sec error codes
 	 */
 	public SQLErrorCodeSQLExceptionTranslator(SQLErrorCodes sec) {
@@ -124,8 +124,8 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	/**
 	 * Set the DataSource for this translator.
 	 * <p>Setting this property will cause a Connection to be obtained from
-	 * the DataSource to get the metadata.
-	 * @param dataSource DataSource to use to find metadata and establish
+	 * the DataSource to get the meta-data.
+	 * @param dataSource DataSource to use to find meta-data and establish
 	 * which error codes are usable
 	 * @see SQLErrorCodesFactory#getErrorCodes(javax.sql.DataSource)
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
@@ -137,7 +137,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	/**
 	 * Set the database product name for this translator.
 	 * <p>Setting this property will avoid obtaining a Connection from the DataSource
-	 * to get the metadata.
+	 * to get the meta-data.
 	 * @param dbName the database product name that identifies the error codes entry
 	 * @see SQLErrorCodesFactory#getErrorCodes(String)
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()

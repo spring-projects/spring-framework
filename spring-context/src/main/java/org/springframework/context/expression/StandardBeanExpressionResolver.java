@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,8 +143,7 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 			}
 			StandardEvaluationContext sec = this.evaluationCache.get(evalContext);
 			if (sec == null) {
-				sec = new StandardEvaluationContext();
-				sec.setRootObject(evalContext);
+				sec = new StandardEvaluationContext(evalContext);
 				sec.addPropertyAccessor(new BeanExpressionContextAccessor());
 				sec.addPropertyAccessor(new BeanFactoryAccessor());
 				sec.addPropertyAccessor(new MapAccessor());

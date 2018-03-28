@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import org.springframework.util.StringUtils;
  * top-level class and it must have a default or no-arg constructor.
  *
  * <p>Column values are mapped based on matching the column name as obtained from result set
- * metadata to public setters for the corresponding properties. The names are matched either
+ * meta-data to public setters for the corresponding properties. The names are matched either
  * directly or by transforming a name separating the parts with underscores to the same name
  * using "camel" case.
  *
@@ -207,7 +207,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 
 	/**
-	 * Initialize the mapping metadata for the given class.
+	 * Initialize the mapping meta-data for the given class.
 	 * @param mappedClass the mapped class
 	 */
 	protected void initialize(Class<T> mappedClass) {
@@ -268,7 +268,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 	/**
 	 * Extract the values for all columns in the current row.
-	 * <p>Utilizes public setters and result set metadata.
+	 * <p>Utilizes public setters and result set meta-data.
 	 * @see java.sql.ResultSetMetaData
 	 */
 	@Override
@@ -361,7 +361,6 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 * @param rs is the ResultSet holding the data
 	 * @param index is the column index
 	 * @param pd the bean property that each result object is expected to match
-	 * (or {@code null} if none specified)
 	 * @return the Object value
 	 * @throws SQLException in case of extraction failure
 	 * @see org.springframework.jdbc.support.JdbcUtils#getResultSetValue(java.sql.ResultSet, int, Class)

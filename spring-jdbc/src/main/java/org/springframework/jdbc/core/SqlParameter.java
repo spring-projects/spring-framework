@@ -25,7 +25,7 @@ import org.springframework.util.Assert;
 /**
  * Object to represent a SQL parameter definition.
  *
- * <p>Parameters may be anonymous in which case "name" is {@code null}.
+ * <p>Parameters may be anonymous, in which case "name" is {@code null}.
  * However, all parameters must define a SQL type according to {@link java.sql.Types}.
  *
  * @author Rod Johnson
@@ -165,7 +165,7 @@ public class SqlParameter {
 
 	/**
 	 * Return whether this parameter is an implicit return parameter used during the
-	 * results preocessing of the CallableStatement.getMoreResults/getUpdateCount.
+	 * results processing of {@code CallableStatement.getMoreResults/getUpdateCount}.
 	 * <p>This implementation always returns {@code false}.
 	 */
 	public boolean isResultsParameter() {

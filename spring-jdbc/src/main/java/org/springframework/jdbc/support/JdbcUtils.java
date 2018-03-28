@@ -303,19 +303,19 @@ public abstract class JdbcUtils {
 	}
 
 	/**
-	 * Extract database meta data via the given DatabaseMetaDataCallback.
-	 * <p>This method will open a connection to the database and retrieve the database metadata.
+	 * Extract database meta-data via the given DatabaseMetaDataCallback.
+	 * <p>This method will open a connection to the database and retrieve the database meta-data.
 	 * Since this method is called before the exception translation feature is configured for
 	 * a datasource, this method can not rely on the SQLException translation functionality.
 	 * <p>Any exceptions will be wrapped in a MetaDataAccessException. This is a checked exception
 	 * and any calling code should catch and handle this exception. You can just log the
 	 * error and hope for the best, but there is probably a more serious error that will
 	 * reappear when you try to access the database again.
-	 * @param dataSource the DataSource to extract metadata for
+	 * @param dataSource the DataSource to extract meta-data for
 	 * @param action callback that will do the actual work
 	 * @return object containing the extracted information, as returned by
 	 * the DatabaseMetaDataCallback's {@code processMetaData} method
-	 * @throws MetaDataAccessException if meta data access failed
+	 * @throws MetaDataAccessException if meta-data access failed
 	 */
 	public static Object extractDatabaseMetaData(DataSource dataSource, DatabaseMetaDataCallback action)
 			throws MetaDataAccessException {
@@ -352,7 +352,7 @@ public abstract class JdbcUtils {
 	/**
 	 * Call the specified method on DatabaseMetaData for the given DataSource,
 	 * and extract the invocation result.
-	 * @param dataSource the DataSource to extract meta data for
+	 * @param dataSource the DataSource to extract meta-data for
 	 * @param metaDataMethodName the name of the DatabaseMetaData method to call
 	 * @return the object returned by the specified DatabaseMetaData method
 	 * @throws MetaDataAccessException if we couldn't access the DatabaseMetaData
@@ -421,7 +421,7 @@ public abstract class JdbcUtils {
 	/**
 	 * Extract a common name for the target database in use even if
 	 * various drivers/platforms provide varying names at runtime.
-	 * @param source the name as provided in database metadata
+	 * @param source the name as provided in database meta-data
 	 * @return the common name to be used (e.g. "DB2" or "Sybase")
 	 */
 	public static String commonDatabaseName(String source) {

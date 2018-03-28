@@ -241,8 +241,7 @@ public class JsonPathExpectationsHelper {
 			return this.jsonPath.read(content);
 		}
 		catch (Throwable ex) {
-			String message = "No value at JSON path \"" + this.expression + "\"";
-			throw new AssertionError(message, ex);
+			throw new AssertionError("No value at JSON path \"" + this.expression + "\": " + ex);
 		}
 	}
 
@@ -251,8 +250,7 @@ public class JsonPathExpectationsHelper {
 			return JsonPath.parse(content).read(this.expression, targetType);
 		}
 		catch (Throwable ex) {
-			String message = "No value at JSON path \"" + this.expression + "\"";
-			throw new AssertionError(message, ex);
+			throw new AssertionError("No value at JSON path \"" + this.expression + "\": " + ex);
 		}
 	}
 
