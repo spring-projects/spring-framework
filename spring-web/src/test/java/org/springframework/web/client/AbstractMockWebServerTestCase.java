@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,7 +168,7 @@ public class AbstractMockWebServerTestCase {
 	}
 
 	private MockResponse formRequest(RecordedRequest request) {
-		assertEquals("application/x-www-form-urlencoded", request.getHeader("Content-Type"));
+		assertEquals("application/x-www-form-urlencoded;charset=UTF-8", request.getHeader("Content-Type"));
 		String body = request.getBody().readUtf8();
 		assertThat(body, Matchers.containsString("name+1=value+1"));
 		assertThat(body, Matchers.containsString("name+2=value+2%2B1"));
