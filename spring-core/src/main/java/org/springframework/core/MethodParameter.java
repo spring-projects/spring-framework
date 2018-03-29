@@ -22,7 +22,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -38,6 +37,7 @@ import kotlin.reflect.jvm.ReflectJvmMapping;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Helper class that encapsulates the specification of a method parameter, i.e. a {@link Method}
@@ -519,8 +519,7 @@ public class MethodParameter {
 			Annotation[][] annotationArray = this.executable.getParameterAnnotations();
 			int index = this.parameterIndex;
 			if (this.executable instanceof Constructor &&
-					this.executable.getDeclaringClass().isMemberClass() &&
-					!Modifier.isStatic(this.executable.getDeclaringClass().getModifiers()) &&
+					ClassUtils.isInnerClass(this.executable.getDeclaringClass()) &&
 					annotationArray.length == this.executable.getParameterCount() - 1) {
 				// Bug in javac in JDK <9: annotation array excludes enclosing instance parameter
 				// for inner classes, so access it with the actual parameter index lowered by 1

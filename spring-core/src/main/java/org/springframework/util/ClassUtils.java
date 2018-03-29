@@ -210,6 +210,14 @@ public abstract class ClassUtils {
 	}
 
 	/**
+	 * Determine if the supplied class is an <em>inner class</em>.
+	 * @return {@code true} if the supplied class is an inner class
+	 */
+	public static boolean isInnerClass(Class<?> clazz) {
+		return clazz != null && clazz.isMemberClass() && !Modifier.isStatic(clazz.getModifiers());
+	}
+
+	/**
 	 * Replacement for {@code Class.forName()} that also returns Class instances
 	 * for primitives (e.g. "int") and array class names (e.g. "String[]").
 	 * Furthermore, it is also capable of resolving inner class names in Java source
