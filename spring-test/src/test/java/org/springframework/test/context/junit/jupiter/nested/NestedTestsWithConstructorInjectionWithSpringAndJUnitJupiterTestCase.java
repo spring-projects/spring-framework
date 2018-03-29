@@ -18,12 +18,14 @@ package org.springframework.test.context.junit.jupiter.nested;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.SpringJUnitJupiterTestSuite;
-import org.springframework.test.context.junit.jupiter.DisabledIf;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.junit.jupiter.nested.NestedTestsWithConstructorInjectionWithSpringAndJUnitJupiterTestCase.TopLevelConfig;
@@ -33,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Integration tests that verify support for {@code @Nested} test classes in conjunction
  * with the {@link SpringExtension} in a JUnit Jupiter environment ... when using
- * constructor injection as opposed to field injection.
+ * constructor injection as opposed to field injection (see SPR-16653).
  *
  * <p>
  * To run these tests in an IDE that does not have built-in support for the JUnit
@@ -49,8 +51,7 @@ class NestedTestsWithConstructorInjectionWithSpringAndJUnitJupiterTestCase {
 
 	final String foo;
 
-	@Autowired
-	NestedTestsWithConstructorInjectionWithSpringAndJUnitJupiterTestCase(String foo) {
+	NestedTestsWithConstructorInjectionWithSpringAndJUnitJupiterTestCase(TestInfo testInfo, @Autowired String foo) {
 		this.foo = foo;
 	}
 
@@ -65,8 +66,6 @@ class NestedTestsWithConstructorInjectionWithSpringAndJUnitJupiterTestCase {
 
 		final String bar;
 
-		// Only fails on JDK 8 if the parameter is annotated with @Autowired.
-		// Works if the constructor itself is annotated with @Autowired.
 		@Autowired
 		AutowiredConstructor(String bar) {
 			this.bar = bar;
@@ -81,15 +80,10 @@ class NestedTestsWithConstructorInjectionWithSpringAndJUnitJupiterTestCase {
 
 	@Nested
 	@SpringJUnitConfig(NestedConfig.class)
-	@DisabledIf(expression = "#{systemProperties['java.version'].startsWith('1.8')}", //
-			reason = "Disabled on Java 8 due to a bug in javac in JDK 8")
-	// See https://github.com/junit-team/junit5/issues/1345
 	class AutowiredConstructorParameter {
 
 		final String bar;
 
-		// Only fails on JDK 8 if the parameter is annotated with @Autowired.
-		// Works if the constructor itself is annotated with @Autowired.
 		AutowiredConstructorParameter(@Autowired String bar) {
 			this.bar = bar;
 		}
@@ -98,6 +92,43 @@ class NestedTestsWithConstructorInjectionWithSpringAndJUnitJupiterTestCase {
 		void nestedTest() throws Exception {
 			assertEquals("foo", foo);
 			assertEquals("bar", bar);
+		}
+	}
+
+	@Nested
+	@SpringJUnitConfig(NestedConfig.class)
+	class QualifiedConstructorParameter {
+
+		final String bar;
+
+		QualifiedConstructorParameter(TestInfo testInfo, @Qualifier("bar") String s) {
+			this.bar = s;
+		}
+
+		@Test
+		void nestedTest() throws Exception {
+			assertEquals("foo", foo);
+			assertEquals("bar", bar);
+		}
+	}
+
+	@Nested
+	@SpringJUnitConfig(NestedConfig.class)
+	class SpelConstructorParameter {
+
+		final String bar;
+		final int answer;
+
+		SpelConstructorParameter(@Autowired String bar, TestInfo testInfo, @Value("#{ 6 * 7 }") int answer) {
+			this.bar = bar;
+			this.answer = answer;
+		}
+
+		@Test
+		void nestedTest() throws Exception {
+			assertEquals("foo", foo);
+			assertEquals("bar", bar);
+			assertEquals(42, answer);
 		}
 	}
 
