@@ -285,11 +285,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		for (PropertyValue newPv : this.propertyValueList) {
 			// if there wasn't an old one, add it
 			PropertyValue pvOld = old.getPropertyValue(newPv.getName());
-			if (pvOld == null) {
-				changes.addPropertyValue(newPv);
-			}
-			else if (!pvOld.equals(newPv)) {
-				// it's changed
+			if (pvOld == null || !pvOld.equals(newPv)) {
 				changes.addPropertyValue(newPv);
 			}
 		}
