@@ -63,10 +63,7 @@ class MessageBodyClientHttpResponseWrapper implements ClientHttpResponse {
 				status == HttpStatus.NOT_MODIFIED)) {
 			return false;
 		}
-		if (getHeaders().getContentLength() == 0) {
-			return false;
-		}
-		return true;
+		return getHeaders().getContentLength() != 0;
 	}
 
 	/**

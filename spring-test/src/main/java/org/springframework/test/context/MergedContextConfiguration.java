@@ -452,11 +452,7 @@ public class MergedContextConfiguration implements Serializable {
 			return false;
 		}
 
-		if (!nullSafeClassName(this.contextLoader).equals(nullSafeClassName(otherConfig.contextLoader))) {
-			return false;
-		}
-
-		return true;
+		return nullSafeClassName(this.contextLoader).equals(nullSafeClassName(otherConfig.contextLoader));
 	}
 
 	/**
