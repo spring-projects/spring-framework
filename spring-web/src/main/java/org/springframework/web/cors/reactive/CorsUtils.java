@@ -54,6 +54,13 @@ public abstract class CorsUtils {
 	 * @code X-Forwarded-Port} headers.
 	 * @return {@code true} if the request is a same-origin one, {@code false} in case
 	 * of a cross-origin request
+	 * <p><strong>Note:</strong> this method uses values from "Forwarded"
+	 * (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>),
+	 * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers,
+	 * if present, in order to reflect the client-originated address.
+	 * Consider using the {@code ForwardedHeaderFilter} in order to choose from a
+	 * central place whether to extract and use, or to discard such headers.
+	 * See the Spring Framework reference for more on this filter.
 	 */
 	public static boolean isSameOrigin(ServerHttpRequest request) {
 		String origin = request.getHeaders().getOrigin();

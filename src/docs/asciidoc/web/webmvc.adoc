@@ -1029,6 +1029,7 @@ Once the Servlet 3.0 configuration is in place, simply add a bean of type
 
 [[filters]]
 == Filters
+[.small]#<<web-reactive.adoc#webflux-filters,Same in Spring WebFlux>>#
 
 The `spring-web` module provides some useful filters.
 
@@ -1048,8 +1049,9 @@ available through the `ServletRequest.getParameter{asterisk}()` family of method
 
 
 
-[[filters-forwarded-headers]]
+[[webflux-filters-forwarded-headers]]
 === Forwarded Headers
+[.small]#<<web-reactive.adoc#webflux-filters-forwarded-headers,Same in Spring WebFlux>>#
 
 As a request goes through proxies such as load balancers the host, port, and
 scheme may change presenting a challenge for applications that need to create links
