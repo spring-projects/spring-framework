@@ -469,20 +469,14 @@ public class CodeFlow implements Opcodes {
 			}
 		}
 		if (clazz.isPrimitive()) {
-			if (clazz == Void.TYPE) {
-				sb.append('V');
-			}
-			else if (clazz == Integer.TYPE) {
-				sb.append('I');
-			}
-			else if (clazz == Boolean.TYPE) {
+			if (clazz == Boolean.TYPE) {
 				sb.append('Z');
+			}
+			else if (clazz == Byte.TYPE) {
+				sb.append('B');
 			}
 			else if (clazz == Character.TYPE) {
 				sb.append('C');
-			}
-			else if (clazz == Long.TYPE) {
-				sb.append('J');
 			}
 			else if (clazz == Double.TYPE) {
 				sb.append('D');
@@ -490,11 +484,17 @@ public class CodeFlow implements Opcodes {
 			else if (clazz == Float.TYPE) {
 				sb.append('F');
 			}
-			else if (clazz == Byte.TYPE) {
-				sb.append('B');
+			else if (clazz == Integer.TYPE) {
+				sb.append('I');
+			}
+			else if (clazz == Long.TYPE) {
+				sb.append('J');
 			}
 			else if (clazz == Short.TYPE) {
 				sb.append('S');
+			}
+			else if (clazz == Void.TYPE) {
+				sb.append('V');
 			}
 		}
 		else {

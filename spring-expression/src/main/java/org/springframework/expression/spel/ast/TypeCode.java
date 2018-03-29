@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,15 +32,15 @@ public enum TypeCode {
 
 	CHAR(Character.TYPE),
 
-	SHORT(Short.TYPE),
+	DOUBLE(Double.TYPE),
+
+	FLOAT(Float.TYPE),
 
 	INT(Integer.TYPE),
 
 	LONG(Long.TYPE),
 
-	FLOAT(Float.TYPE),
-
-	DOUBLE(Double.TYPE);
+	SHORT(Short.TYPE);
 
 
 	private Class<?> type;
@@ -64,7 +64,7 @@ public enum TypeCode {
 				return tcs[i];
 			}
 		}
-		return TypeCode.OBJECT;
+		return OBJECT;
 	}
 
 	public static TypeCode forClass(Class<?> clazz) {
