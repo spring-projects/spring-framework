@@ -711,6 +711,7 @@ public abstract class WebUtils {
 		if (origin == null) {
 			return true;
 		}
+
 		String scheme;
 		String host;
 		int port;
@@ -720,12 +721,9 @@ public abstract class WebUtils {
 			scheme = servletRequest.getScheme();
 			host = servletRequest.getServerName();
 			port = servletRequest.getServerPort();
-
-			if(containsForwardedHeaders(servletRequest)) {
+			if (containsForwardedHeaders(servletRequest)) {
 				UriComponents actualUrl = new UriComponentsBuilder()
-						.scheme(scheme)
-						.host(host)
-						.port(port)
+						.scheme(scheme).host(host).port(port)
 						.adaptFromForwardedHeaders(headers)
 						.build();
 				scheme = actualUrl.getScheme();

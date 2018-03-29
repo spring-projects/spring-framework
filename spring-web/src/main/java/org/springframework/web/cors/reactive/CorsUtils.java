@@ -60,12 +60,13 @@ public abstract class CorsUtils {
 		if (origin == null) {
 			return true;
 		}
-		UriComponentsBuilder urlBuilder = UriComponentsBuilder.fromHttpRequest(request);
-		UriComponents actualUrl = urlBuilder.build();
+
+		UriComponents actualUrl = UriComponentsBuilder.fromHttpRequest(request).build();
 		String actualHost = actualUrl.getHost();
 		int actualPort = getPort(actualUrl.getScheme(), actualUrl.getPort());
 		Assert.notNull(actualHost, "Actual request host must not be null");
 		Assert.isTrue(actualPort != -1, "Actual request port must not be undefined");
+
 		UriComponents originUrl = UriComponentsBuilder.fromOriginHeader(origin).build();
 		return (actualHost.equals(originUrl.getHost()) &&
 				actualPort == getPort(originUrl.getScheme(), originUrl.getPort()));

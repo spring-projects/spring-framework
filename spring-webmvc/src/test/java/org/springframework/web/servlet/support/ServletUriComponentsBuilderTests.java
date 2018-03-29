@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,15 @@
 
 package org.springframework.web.servlet.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.http.HttpRequest;
-import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for
@@ -94,10 +90,7 @@ public class ServletUriComponentsBuilderTests {
 		request.addHeader("X-Forwarded-Proto", "https");
 		request.addHeader("X-Forwarded-Host", "84.198.58.199");
 		request.addHeader("X-Forwarded-Port", "443");
-
-		HttpRequest httpRequest = new ServletServerHttpRequest(request);
-		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
-
+		UriComponents result =  ServletUriComponentsBuilder.fromRequest(request).build();
 		assertEquals("https://84.198.58.199/mvc-showcase", result.toString());
 	}
 
@@ -114,7 +107,6 @@ public class ServletUriComponentsBuilderTests {
 		this.request.setRequestURI("/bar");
 		this.request.addHeader("X-Forwarded-Prefix", "/foo");
 		UriComponents result = ServletUriComponentsBuilder.fromRequest(this.request).build();
-
 		assertEquals("http://localhost/foo/bar", result.toUriString());
 	}
 
@@ -123,7 +115,6 @@ public class ServletUriComponentsBuilderTests {
 		this.request.setRequestURI("/bar");
 		this.request.addHeader("X-Forwarded-Prefix", "/foo/");
 		UriComponents result = ServletUriComponentsBuilder.fromRequest(this.request).build();
-
 		assertEquals("http://localhost/foo/bar", result.toUriString());
 	}
 
