@@ -253,6 +253,18 @@ public class NamedParameterUtilsTests {
 		assertEquals(expectedSql2, finalSql2);
 	}
 
+	@Test
+	public void parseSqlStatementWithSingleLetterInBrackets() {
+		String expectedSql = "select foo from bar where baz = b?z";
+		String sql = "select foo from bar where baz = b:{p}z";
+		
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		assertEquals(1, parsedSql.getParameterNames().size());
+		assertEquals("p", parsedSql.getParameterNames().get(0));
+		String finalSql = NamedParameterUtils.substituteNamedParameters(parsedSql, null);
+		assertEquals(expectedSql, finalSql);
+	}
+
 	@Test  // SPR-2544
 	public void parseSqlStatementWithLogicalAnd() {
 		String expectedSql = "xxx & yyyy";

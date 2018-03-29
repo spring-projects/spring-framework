@@ -130,7 +130,7 @@ public abstract class NamedParameterUtils {
 						throw new InvalidDataAccessApiUsageException(
 								"Non-terminated named parameter declaration at position " + i + " in statement: " + sql);
 					}
-					if (j - i > 3) {
+					if (j - i > 2) {
 						parameter = sql.substring(i + 2, j);
 						namedParameterCount = addNewNamedParameter(namedParameters, namedParameterCount, parameter);
 						totalParameterCount = addNamedParameter(parameterList, totalParameterCount, escapes, i, j + 1, parameter);
