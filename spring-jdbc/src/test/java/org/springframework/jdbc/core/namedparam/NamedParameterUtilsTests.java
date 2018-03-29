@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -251,6 +251,18 @@ public class NamedParameterUtilsTests {
 		assertEquals(0, parsedSql2.getParameterNames().size());
 		String finalSql2 = NamedParameterUtils.substituteNamedParameters(parsedSql2, null);
 		assertEquals(expectedSql2, finalSql2);
+	}
+
+	@Test
+	public void parseSqlStatementWithSingleLetterInBrackets() {
+		String expectedSql = "select foo from bar where baz = b?z";
+		String sql = "select foo from bar where baz = b:{p}z";
+		
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		assertEquals(1, parsedSql.getParameterNames().size());
+		assertEquals("p", parsedSql.getParameterNames().get(0));
+		String finalSql = NamedParameterUtils.substituteNamedParameters(parsedSql, null);
+		assertEquals(expectedSql, finalSql);
 	}
 
 	@Test  // SPR-2544

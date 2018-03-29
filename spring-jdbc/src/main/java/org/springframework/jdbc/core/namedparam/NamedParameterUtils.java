@@ -41,23 +41,21 @@ import org.springframework.util.Assert;
 public abstract class NamedParameterUtils {
 
 	/**
+	 * Set of characters that qualify as comment or quotes starting characters.
+	 */
+	private static final String[] START_SKIP = new String[] {"'", "\"", "--", "/*"};
+
+	/**
+	 * Set of characters that at are the corresponding comment or quotes ending characters.
+	 */
+	private static final String[] STOP_SKIP = new String[] {"'", "\"", "\n", "*/"};
+
+	/**
 	 * Set of characters that qualify as parameter separators,
 	 * indicating that a parameter name in a SQL String has ended.
 	 */
 	private static final char[] PARAMETER_SEPARATORS =
 			new char[] {'"', '\'', ':', '&', ',', ';', '(', ')', '|', '=', '+', '-', '*', '%', '/', '\\', '<', '>', '^'};
-
-	/**
-	 * Set of characters that qualify as comment or quotes starting characters.
-	 */
-	private static final String[] START_SKIP =
-			new String[] {"'", "\"", "--", "/*"};
-
-	/**
-	 * Set of characters that at are the corresponding comment or quotes ending characters.
-	 */
-	private static final String[] STOP_SKIP =
-			new String[] {"'", "\"", "\n", "*/"};
 
 
 	//-------------------------------------------------------------------------
@@ -109,7 +107,7 @@ public abstract class NamedParameterUtils {
 				String parameter = null;
 				if (j < statement.length && c == ':' && statement[j] == '{') {
 					// :{x} style parameter
-					while (j < statement.length && !('}' == statement[j])) {
+					while (j < statement.length && '}' != statement[j]) {
 						j++;
 						if (':' == statement[j] || '{' == statement[j]) {
 							throw new InvalidDataAccessApiUsageException("Parameter name contains invalid character '" +
@@ -120,7 +118,7 @@ public abstract class NamedParameterUtils {
 						throw new InvalidDataAccessApiUsageException(
 								"Non-terminated named parameter declaration at position " + i + " in statement: " + sql);
 					}
-					if (j - i > 3) {
+					if (j - i > 2) {
 						parameter = sql.substring(i + 2, j);
 						namedParameterCount = addNewNamedParameter(namedParameters, namedParameterCount, parameter);
 						totalParameterCount = addNamedParameter(parameterList, totalParameterCount, escapes, i, j + 1, parameter);
@@ -200,7 +198,7 @@ public abstract class NamedParameterUtils {
 			if (statement[position] == START_SKIP[i].charAt(0)) {
 				boolean match = true;
 				for (int j = 1; j < START_SKIP[i].length(); j++) {
-					if (!(statement[position + j] == START_SKIP[i].charAt(j))) {
+					if (statement[position + j] != START_SKIP[i].charAt(j)) {
 						match = false;
 						break;
 					}
@@ -216,7 +214,7 @@ public abstract class NamedParameterUtils {
 									// last comment not closed properly
 									return statement.length;
 								}
-								if (!(statement[m + n] == STOP_SKIP[i].charAt(n))) {
+								if (statement[m + n] != STOP_SKIP[i].charAt(n)) {
 									endMatch = false;
 									break;
 								}
