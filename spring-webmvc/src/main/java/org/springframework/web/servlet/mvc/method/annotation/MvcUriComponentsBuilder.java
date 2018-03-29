@@ -82,14 +82,13 @@ import org.springframework.web.util.UriComponentsBuilder;
  * {@link #relativeTo(org.springframework.web.util.UriComponentsBuilder)}.
  * </ul>
  *
- * <p><strong>Note:</strong> This class extracts and uses values from the headers
- * "Forwarded" (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>),
- * or "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" if
- * "Forwarded" is not found, in order to reflect the client-originated protocol
- * and address. As an alternative consider using the
- * {@link org.springframework.web.filter.ForwardedHeaderFilter} to have such
- * headers extracted once and removed, or removed only (without being used).
- * See the reference for further information including security considerations.
+ * <p><strong>Note:</strong> This class uses values from "Forwarded"
+ * (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>),
+ * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers,
+ * if present, in order to reflect the client-originated protocol and address.
+ * Consider using the {@code ForwardedHeaderFilter} in order to choose from a
+ * central place whether to extract and use, or to discard such headers.
+ * See the Spring Framework reference for more on this filter.
  *
  * @author Oliver Gierke
  * @author Rossen Stoyanchev
