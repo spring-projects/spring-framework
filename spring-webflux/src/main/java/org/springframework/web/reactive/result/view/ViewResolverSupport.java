@@ -57,9 +57,7 @@ public abstract class ViewResolverSupport implements Ordered {
 	public void setSupportedMediaTypes(@Nullable List<MediaType> supportedMediaTypes) {
 		Assert.notEmpty(supportedMediaTypes, "MediaType List must not be empty");
 		this.mediaTypes.clear();
-		if (supportedMediaTypes != null) {
-			this.mediaTypes.addAll(supportedMediaTypes);
-		}
+		this.mediaTypes.addAll(supportedMediaTypes);
 	}
 
 	/**
