@@ -195,7 +195,7 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 		manifest.attributes["Created-By"] =
 				"${System.getProperty("java.version")} (${System.getProperty("java.specification.vendor")})"
 
-		from("${rootProject.projectDir}/src/dist") {
+		from("${rootProject.projectDir}/src/docs/dist") {
 			include "license.txt"
 			include "notice.txt"
 			into "META-INF"
