@@ -81,10 +81,15 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 *
 	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
 	 * and "X-Forwarded-*" headers if found. See class-level docs.
+	 *
+	 * <p>As of 4.3.15, this method replaces the contextPath with the value
+	 * of "X-Forwarded-Prefix" rather than prepending, thus aligning with
+	 * {@code ForwardedHeaderFiller}.
 	 */
 	public static ServletUriComponentsBuilder fromContextPath(HttpServletRequest request) {
 		ServletUriComponentsBuilder builder = initFromRequest(request);
-		builder.replacePath(prependForwardedPrefix(request, request.getContextPath()));
+		String forwardedPrefix = getForwardedPrefix(request);
+		builder.replacePath(forwardedPrefix != null ? forwardedPrefix : request.getContextPath());
 		return builder;
 	}
 
@@ -98,6 +103,10 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 *
 	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
 	 * and "X-Forwarded-*" headers if found. See class-level docs.
+	 *
+	 * <p>As of 4.3.15, this method replaces the contextPath with the value
+	 * of "X-Forwarded-Prefix" rather than prepending, thus aligning with
+	 * {@code ForwardedHeaderFiller}.
 	 */
 	public static ServletUriComponentsBuilder fromServletMapping(HttpServletRequest request) {
 		ServletUriComponentsBuilder builder = fromContextPath(request);
@@ -113,10 +122,14 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 *
 	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
 	 * and "X-Forwarded-*" headers if found. See class-level docs.
+	 *
+	 * <p>As of 4.3.15, this method replaces the contextPath with the value
+	 * of "X-Forwarded-Prefix" rather than prepending, thus aligning with
+	 * {@code ForwardedHeaderFiller}.
 	 */
 	public static ServletUriComponentsBuilder fromRequestUri(HttpServletRequest request) {
 		ServletUriComponentsBuilder builder = initFromRequest(request);
-		builder.initPath(prependForwardedPrefix(request, request.getRequestURI()));
+		builder.initPath(getRequestUriWithForwardedPrefix(request));
 		return builder;
 	}
 
@@ -126,10 +139,14 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 *
 	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
 	 * and "X-Forwarded-*" headers if found. See class-level docs.
+	 *
+	 * <p>As of 4.3.15, this method replaces the contextPath with the value
+	 * of "X-Forwarded-Prefix" rather than prepending, thus aligning with
+	 * {@code ForwardedHeaderFiller}.
 	 */
 	public static ServletUriComponentsBuilder fromRequest(HttpServletRequest request) {
 		ServletUriComponentsBuilder builder = initFromRequest(request);
-		builder.initPath(prependForwardedPrefix(request, request.getRequestURI()));
+		builder.initPath(getRequestUriWithForwardedPrefix(request));
 		builder.query(request.getQueryString());
 		return builder;
 	}
@@ -153,7 +170,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		return builder;
 	}
 
-	private static String prependForwardedPrefix(HttpServletRequest request, String path) {
+	private static String getForwardedPrefix(HttpServletRequest request) {
 		String prefix = null;
 		Enumeration<String> names = request.getHeaderNames();
 		while (names.hasMoreElements()) {
@@ -163,7 +180,22 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 			}
 		}
 		if (prefix != null) {
-			path = prefix + path;
+			while (prefix.endsWith("/")) {
+				prefix = prefix.substring(0, prefix.length() - 1);
+			}
+		}
+		return prefix;
+	}
+
+	private static String getRequestUriWithForwardedPrefix(HttpServletRequest request) {
+		String path = request.getRequestURI();
+		String forwardedPrefix = getForwardedPrefix(request);
+		if (forwardedPrefix != null) {
+			String contextPath = request.getContextPath();
+			if (!StringUtils.isEmpty(contextPath) && !contextPath.equals("/") && path.startsWith(contextPath)) {
+				path = path.substring(contextPath.length());
+			}
+			path = forwardedPrefix + path;
 		}
 		return path;
 	}
@@ -177,6 +209,10 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 *
 	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
 	 * and "X-Forwarded-*" headers if found. See class-level docs.
+	 *
+	 * <p>As of 4.3.15, this method replaces the contextPath with the value
+	 * of "X-Forwarded-Prefix" rather than prepending, thus aligning with
+	 * {@code ForwardedHeaderFiller}.
 	 */
 	public static ServletUriComponentsBuilder fromCurrentContextPath() {
 		return fromContextPath(getCurrentRequest());
@@ -199,6 +235,10 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 *
 	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
 	 * and "X-Forwarded-*" headers if found. See class-level docs.
+	 *
+	 * <p>As of 4.3.15, this method replaces the contextPath with the value
+	 * of "X-Forwarded-Prefix" rather than prepending, thus aligning with
+	 * {@code ForwardedHeaderFiller}.
 	 */
 	public static ServletUriComponentsBuilder fromCurrentRequestUri() {
 		return fromRequestUri(getCurrentRequest());
@@ -210,6 +250,10 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 *
 	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
 	 * and "X-Forwarded-*" headers if found. See class-level docs.
+	 *
+	 * <p>As of 4.3.15, this method replaces the contextPath with the value
+	 * of "X-Forwarded-Prefix" rather than prepending, thus aligning with
+	 * {@code ForwardedHeaderFiller}.
 	 */
 	public static ServletUriComponentsBuilder fromCurrentRequest() {
 		return fromRequest(getCurrentRequest());
