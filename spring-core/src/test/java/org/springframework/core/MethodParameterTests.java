@@ -24,7 +24,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -46,7 +45,7 @@ public class MethodParameterTests {
 
 
 	@Before
-	public void setUp() throws NoSuchMethodException {
+	public void setup() throws NoSuchMethodException {
 		method = getClass().getMethod("method", String.class, Long.TYPE);
 		stringParameter = new MethodParameter(method, 0);
 		longParameter = new MethodParameter(method, 1);
@@ -114,15 +113,22 @@ public class MethodParameterTests {
 		assertNotNull(methodParameter.getParameterAnnotation(Param.class));
 	}
 
-	@Test
-	@Ignore("Disabled until SPR-16652 is resolved")
+	@Test  // SPR-16652
 	public void annotatedConstructorParameterInInnerClass() throws Exception {
-		Constructor<?> constructor = InnerClass.class.getDeclaredConstructor(getClass(), String.class);
-		MethodParameter methodParameter = MethodParameter.forExecutable(constructor, 1);
+		Constructor<?> constructor = InnerClass.class.getConstructor(getClass(), String.class, Integer.class);
+
+		MethodParameter methodParameter = MethodParameter.forExecutable(constructor, 0);
+		assertEquals(getClass(), methodParameter.getParameterType());
+		assertNull(methodParameter.getParameterAnnotation(Param.class));
+
+		methodParameter = MethodParameter.forExecutable(constructor, 1);
 		assertEquals(String.class, methodParameter.getParameterType());
-		assertNull(methodParameter.getParameterAnnotation(Override.class));
 		// The following assertion currently fails if this test class is compiled using JDK 8.
 		assertNotNull("Failed to find @Param annotation", methodParameter.getParameterAnnotation(Param.class));
+
+		methodParameter = MethodParameter.forExecutable(constructor, 2);
+		assertEquals(Integer.class, methodParameter.getParameterType());
+		assertNull(methodParameter.getParameterAnnotation(Param.class));
 	}
 
 
@@ -140,7 +146,7 @@ public class MethodParameterTests {
 	@SuppressWarnings("unused")
 	private class InnerClass {
 
-		InnerClass(@Param String s) {
+		public InnerClass(@Param String s, Integer i) {
 		}
 	}
 
