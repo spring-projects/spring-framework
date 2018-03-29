@@ -127,9 +127,6 @@ public class TypeReference extends SpelNodeImpl {
 			else if (this.type == Long.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Long", "TYPE", "Ljava/lang/Class;");
 			}
-			else if (this.type == Boolean.TYPE) {
-				mv.visitFieldInsn(GETSTATIC, "java/lang/Boolean", "TYPE", "Ljava/lang/Class;");
-	        }
 		}
 		else {
 			mv.visitLdcInsn(Type.getType(this.type));
