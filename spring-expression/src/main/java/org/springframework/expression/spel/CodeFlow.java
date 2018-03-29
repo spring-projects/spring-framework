@@ -58,7 +58,7 @@ public class CodeFlow implements Opcodes {
 	 * sub-expressions like the expressions for the argument values in a method invocation
 	 * expression.
 	 */
-	private final Deque<ArrayList<String>> compilationScopes;
+	private final Deque<List<String>> compilationScopes;
 
 	/**
 	 * As SpEL ast nodes are called to generate code for the main evaluation method
@@ -128,7 +128,7 @@ public class CodeFlow implements Opcodes {
 	 */
 	public void pushDescriptor(@Nullable String descriptor) {
 		if (descriptor != null) {
-			this.compilationScopes.peek().add(descriptor);
+			this.compilationScopes.element().add(descriptor);
 		}
 	}
 
