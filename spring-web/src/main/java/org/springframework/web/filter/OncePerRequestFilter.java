@@ -118,10 +118,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 		if (isAsyncDispatch(request) && shouldNotFilterAsyncDispatch()) {
 			return true;
 		}
-		if (request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE) != null && shouldNotFilterErrorDispatch()) {
-			return true;
-		}
-		return false;
+		return request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE) != null && shouldNotFilterErrorDispatch();
 	}
 
 	/**

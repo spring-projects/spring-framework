@@ -877,10 +877,7 @@ public class ResolvableType implements Serializable {
 				!ObjectUtils.nullSafeEquals(this.variableResolver.getSource(), otherType.variableResolver.getSource()))) {
 			return false;
 		}
-		if (!ObjectUtils.nullSafeEquals(this.componentType, otherType.componentType)) {
-			return false;
-		}
-		return true;
+		return ObjectUtils.nullSafeEquals(this.componentType, otherType.componentType);
 	}
 
 	@Override
