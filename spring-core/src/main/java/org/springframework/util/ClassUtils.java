@@ -32,7 +32,9 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.lang.Nullable;
@@ -102,10 +104,10 @@ public abstract class ClassUtils {
 	private static final Map<String, Class<?>> primitiveTypeNameMap = new HashMap<>(32);
 
 	/**
-	 * Map with common "java.lang" class name as key and corresponding Class as value.
+	 * Map with common Java language class name as key and corresponding Class as value.
 	 * Primarily for efficient deserialization of remote invocations.
 	 */
-	private static final Map<String, Class<?>> commonClassCache = new HashMap<>(32);
+	private static final Map<String, Class<?>> commonClassCache = new HashMap<>(48);
 
 
 	static {
@@ -138,6 +140,9 @@ public abstract class ClassUtils {
 				Object.class, Object[].class, Class.class, Class[].class);
 		registerCommonClasses(Throwable.class, Exception.class, RuntimeException.class,
 				Error.class, StackTraceElement.class, StackTraceElement[].class);
+		registerCommonClasses(Enum.class, Optional.class);
+		registerCommonClasses(Collection.class, List.class, Map.class, Set.class);
+		javaLanguageInterfaces.forEach(ClassUtils::registerCommonClasses);
 	}
 
 
