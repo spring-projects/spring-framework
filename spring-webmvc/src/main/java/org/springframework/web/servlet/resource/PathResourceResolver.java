@@ -183,10 +183,11 @@ public class PathResourceResolver extends AbstractResourceResolver {
 				return resource;
 			}
 			else if (logger.isTraceEnabled()) {
-				logger.trace("Resource path=\"" + resourcePath + "\" was successfully resolved " +
-						"but resource=\"" +	resource.getURL() + "\" is neither under the " +
-						"current location=\"" + location.getURL() + "\" nor under any of the " +
-						"allowed locations=" + Arrays.asList(getAllowedLocations()));
+				Resource[] allowedLocations = getAllowedLocations();
+				logger.trace("Resource path \"" + resourcePath + "\" was successfully resolved " +
+						"but resource \"" +	resource.getURL() + "\" is neither under the " +
+						"current location \"" + location.getURL() + "\" nor under any of the " +
+						"allowed locations " + (allowedLocations != null ? Arrays.asList(allowedLocations) : "[]"));
 			}
 		}
 		return null;
@@ -287,7 +288,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 				String decodedPath = URLDecoder.decode(resourcePath, "UTF-8");
 				if (decodedPath.contains("../") || decodedPath.contains("..\\")) {
 					if (logger.isTraceEnabled()) {
-						logger.trace("Ignoring invalid resource path with escape sequences [" + resourcePath + "]");
+						logger.trace("Resolved resource path contains encoded \"../\" or \"..\\\": " + resourcePath);
 					}
 					return true;
 				}

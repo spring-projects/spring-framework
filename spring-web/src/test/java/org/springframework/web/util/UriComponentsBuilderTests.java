@@ -185,7 +185,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test  // SPR-9832
-	public void fromUriStringQueryParamWithReservedCharInValue() throws URISyntaxException {
+	public void fromUriStringQueryParamWithReservedCharInValue() {
 		String uri = "http://www.google.com/ig/calculator?q=1USD=?EUR";
 		UriComponents result = UriComponentsBuilder.fromUriString(uri).build();
 
@@ -494,7 +494,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void path() throws URISyntaxException {
+	public void path() {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/foo/bar");
 		UriComponents result = builder.build();
 
@@ -503,7 +503,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void pathSegments() throws URISyntaxException {
+	public void pathSegments() {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
 		UriComponents result = builder.pathSegment("foo").pathSegment("bar").build();
 
@@ -593,7 +593,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void queryParams() throws URISyntaxException {
+	public void queryParams() {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
 		UriComponents result = builder.queryParam("baz", "qux", 42).build();
 
@@ -605,7 +605,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void emptyQueryParam() throws URISyntaxException {
+	public void emptyQueryParam() {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
 		UriComponents result = builder.queryParam("baz").build();
 
