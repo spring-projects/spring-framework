@@ -164,7 +164,7 @@ public final class MockMvc {
 		filterChain.doFilter(request, servletResponse);
 
 		if (DispatcherType.ASYNC.equals(request.getDispatcherType()) &&
-				asyncContext != null & !request.isAsyncStarted()) {
+				asyncContext != null && !request.isAsyncStarted()) {
 			asyncContext.complete();
 		}
 
