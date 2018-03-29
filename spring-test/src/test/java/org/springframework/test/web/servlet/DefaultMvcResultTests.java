@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 package org.springframework.test.web.servlet;
+
+import java.util.concurrent.CountDownLatch;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -38,13 +40,14 @@ public class DefaultMvcResultTests {
 	}
 
 	@Test
-	public void getAsyncResultSuccess() throws Exception {
+	public void getAsyncResultSuccess() {
 		this.mvcResult.setAsyncResult("Foo");
-		assertEquals("Foo", this.mvcResult.getAsyncResult());
+		this.mvcResult.setAsyncDispatchLatch(new CountDownLatch(0));
+		this.mvcResult.getAsyncResult();
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void getAsyncResultFailure() throws Exception {
+	public void getAsyncResultFailure() {
 		this.mvcResult.getAsyncResult(0);
 	}
 
