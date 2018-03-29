@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -240,7 +240,7 @@ public abstract class StatementCreatorUtils {
 	private static void setNull(PreparedStatement ps, int paramIndex, int sqlType, @Nullable String typeName)
 			throws SQLException {
 
-		if (sqlType == SqlTypeValue.TYPE_UNKNOWN || sqlType == Types.OTHER) {
+		if (sqlType == SqlTypeValue.TYPE_UNKNOWN || (sqlType == Types.OTHER && typeName == null)) {
 			boolean useSetObject = false;
 			Integer sqlTypeToUse = null;
 			if (!shouldIgnoreGetParameterType) {
