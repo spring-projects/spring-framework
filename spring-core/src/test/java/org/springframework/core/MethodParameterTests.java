@@ -123,7 +123,6 @@ public class MethodParameterTests {
 
 		methodParameter = MethodParameter.forExecutable(constructor, 1);
 		assertEquals(String.class, methodParameter.getParameterType());
-		// The following assertion currently fails if this test class is compiled using JDK 8.
 		assertNotNull("Failed to find @Param annotation", methodParameter.getParameterAnnotation(Param.class));
 
 		methodParameter = MethodParameter.forExecutable(constructor, 2);
