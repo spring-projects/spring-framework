@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,11 @@
 
 package org.springframework.core;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import org.junit.Before;
@@ -25,8 +30,12 @@ import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class MethodParameterTests {
+
+	private Method method;
 
 	private MethodParameter stringParameter;
 
@@ -36,12 +45,13 @@ public class MethodParameterTests {
 
 
 	@Before
-	public void setUp() throws NoSuchMethodException {
-		Method method = getClass().getMethod("method", String.class, Long.TYPE);
+	public void setup() throws NoSuchMethodException {
+		method = getClass().getMethod("method", String.class, Long.TYPE);
 		stringParameter = new MethodParameter(method, 0);
 		longParameter = new MethodParameter(method, 1);
 		intReturnType = new MethodParameter(method, -1);
 	}
+
 
 	@Test
 	public void testEquals() throws NoSuchMethodException {
@@ -60,8 +70,8 @@ public class MethodParameterTests {
 		MethodParameter methodParameter = new MethodParameter(method, 0);
 		assertEquals(stringParameter, methodParameter);
 		assertEquals(methodParameter, stringParameter);
-		assertFalse(longParameter.equals(methodParameter));
-		assertFalse(methodParameter.equals(longParameter));
+		assertNotEquals(longParameter, methodParameter);
+		assertNotEquals(methodParameter, longParameter);
 	}
 
 	@Test
@@ -73,12 +83,58 @@ public class MethodParameterTests {
 		Method method = getClass().getMethod("method", String.class, Long.TYPE);
 		MethodParameter methodParameter = new MethodParameter(method, 0);
 		assertEquals(stringParameter.hashCode(), methodParameter.hashCode());
-		assertTrue(longParameter.hashCode() != methodParameter.hashCode());
+		assertNotEquals(longParameter.hashCode(), methodParameter.hashCode());
+	}
+
+	@Test
+	public void annotatedConstructorParameterInStaticNestedClass() throws Exception {
+		Constructor<?> constructor = NestedClass.class.getDeclaredConstructor(String.class);
+		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(constructor, 0);
+		assertEquals(String.class, methodParameter.getParameterType());
+		assertNotNull("Failed to find @Param annotation", methodParameter.getParameterAnnotation(Param.class));
+		assertNotNull(methodParameter.getParameterAnnotation(Param.class));
+	}
+
+	@Test  // SPR-16652
+	public void annotatedConstructorParameterInInnerClass() throws Exception {
+		Constructor<?> constructor = InnerClass.class.getConstructor(getClass(), String.class, Integer.class);
+
+		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(constructor, 0);
+		assertEquals(getClass(), methodParameter.getParameterType());
+		assertNull(methodParameter.getParameterAnnotation(Param.class));
+
+		methodParameter = MethodParameter.forMethodOrConstructor(constructor, 1);
+		assertEquals(String.class, methodParameter.getParameterType());
+		// The following assertion currently fails if this test class is compiled using JDK 8.
+		assertNotNull("Failed to find @Param annotation", methodParameter.getParameterAnnotation(Param.class));
+
+		methodParameter = MethodParameter.forMethodOrConstructor(constructor, 2);
+		assertEquals(Integer.class, methodParameter.getParameterType());
+		assertNull(methodParameter.getParameterAnnotation(Param.class));
 	}
 
 
 	public int method(String p1, long p2) {
 		return 42;
+	}
+
+	@SuppressWarnings("unused")
+	private static class NestedClass {
+
+		NestedClass(@Param String s) {
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private class InnerClass {
+
+		public InnerClass(@Param String s, Integer i) {
+		}
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.PARAMETER)
+	private @interface Param {
 	}
 
 }

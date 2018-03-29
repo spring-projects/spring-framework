@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -46,6 +47,8 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.core.annotation.SynthesizingMethodParameter
  */
 public class MethodParameter {
+
+	private static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
 
 	private static final Class<?> javaUtilOptionalClass;
 
@@ -482,17 +485,27 @@ public class MethodParameter {
 	 * Return the annotations associated with the specific method/constructor parameter.
 	 */
 	public Annotation[] getParameterAnnotations() {
-		if (this.parameterAnnotations == null) {
+		Annotation[] paramAnns = this.parameterAnnotations;
+		if (paramAnns == null) {
 			Annotation[][] annotationArray = (this.method != null ?
 					this.method.getParameterAnnotations() : this.constructor.getParameterAnnotations());
-			if (this.parameterIndex >= 0 && this.parameterIndex < annotationArray.length) {
-				this.parameterAnnotations = adaptAnnotationArray(annotationArray[this.parameterIndex]);
+			int index = this.parameterIndex;
+			if (this.constructor != null && this.constructor.getDeclaringClass().isMemberClass() &&
+					!Modifier.isStatic(this.constructor.getDeclaringClass().getModifiers()) &&
+					annotationArray.length == this.constructor.getParameterTypes().length - 1) {
+				// Bug in javac in JDK <9: annotation array excludes enclosing instance parameter
+				// for inner classes, so access it with the actual parameter index lowered by 1
+				index = this.parameterIndex - 1;
+			}
+			if (index >= 0 && index < annotationArray.length) {
+				paramAnns = adaptAnnotationArray(annotationArray[index]);
 			}
 			else {
-				this.parameterAnnotations = new Annotation[0];
+				paramAnns = EMPTY_ANNOTATION_ARRAY;
 			}
+			this.parameterAnnotations = paramAnns;
 		}
-		return this.parameterAnnotations;
+		return paramAnns;
 	}
 
 	/**
