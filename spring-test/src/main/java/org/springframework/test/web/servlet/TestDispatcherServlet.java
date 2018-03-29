@@ -18,11 +18,13 @@ package org.springframework.test.web.servlet;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.mock.web.MockAsyncContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
@@ -63,6 +65,7 @@ final class TestDispatcherServlet extends DispatcherServlet {
 
 		registerAsyncResultInterceptors(request);
 		super.service(request, response);
+		initAsyncDispatchLatch(request);
 	}
 
 	private void registerAsyncResultInterceptors(final HttpServletRequest request) {
@@ -79,6 +82,19 @@ final class TestDispatcherServlet extends DispatcherServlet {
 				getMvcResult(request).setAsyncResult(value);
 			}
 		});
+	}
+
+	private void initAsyncDispatchLatch(HttpServletRequest request) {
+		if (request.getAsyncContext() != null) {
+			final CountDownLatch dispatchLatch = new CountDownLatch(1);
+			((MockAsyncContext) request.getAsyncContext()).addDispatchHandler(new Runnable() {
+				@Override
+				public void run() {
+					dispatchLatch.countDown();
+				}
+			});
+			getMvcResult(request).setAsyncDispatchLatch(dispatchLatch);
+		}
 	}
 
 	protected DefaultMvcResult getMvcResult(ServletRequest request) {
