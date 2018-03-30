@@ -277,7 +277,7 @@ The table below lists the special beans detected by the `DispatcherHandler`:
 === Web MVC Config
 [.small]#<<web-reactive.adoc#webflux-framework-config,Same in Spring WebFlux>>#
 
-Applications can declare the infrastructure beans listed in <<mvc-special-bean-types>>
+Applications can declare the infrastructure beans listed in <<mvc-servlet-special-bean-types>>
 that are required to process requests. The `DispatcherServlet` checks the
 `WebApplicationContext` for each special bean. If there are no matching bean types, it
 falls back on the default types listed in
