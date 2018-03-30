@@ -151,11 +151,11 @@ class DefaultMvcResult implements MvcResult {
 	}
 
 	/**
-	 * True if is there a latch was not set, or the latch count reached 0.
+	 * True if the latch count reached 0 within the specified timeout.
 	 */
 	private boolean awaitAsyncDispatch(long timeout) {
 		Assert.state(this.asyncDispatchLatch != null,
-				"The asynDispatch CountDownLatch was not set by the TestDispatcherServlet.\n");
+				"The asyncDispatch CountDownLatch was not set by the TestDispatcherServlet.\n");
 		try {
 			return this.asyncDispatchLatch.await(timeout, TimeUnit.MILLISECONDS);
 		}

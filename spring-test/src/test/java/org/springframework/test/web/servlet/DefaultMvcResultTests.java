@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.servlet;
 
 import java.util.concurrent.CountDownLatch;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.mock.web.MockHttpServletRequest;
-
-import static org.junit.Assert.*;
 
 /**
  * Test fixture for {@link DefaultMvcResult}.
@@ -31,13 +29,7 @@ import static org.junit.Assert.*;
  */
 public class DefaultMvcResultTests {
 
-	private DefaultMvcResult mvcResult;
-
-	@Before
-	public void setup() {
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		this.mvcResult = new DefaultMvcResult(request, null);
-	}
+	private final DefaultMvcResult mvcResult = new DefaultMvcResult(new MockHttpServletRequest(), null);
 
 	@Test
 	public void getAsyncResultSuccess() {
