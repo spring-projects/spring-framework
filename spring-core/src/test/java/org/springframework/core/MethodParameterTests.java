@@ -110,7 +110,6 @@ public class MethodParameterTests {
 		MethodParameter methodParameter = MethodParameter.forExecutable(constructor, 0);
 		assertEquals(String.class, methodParameter.getParameterType());
 		assertNotNull("Failed to find @Param annotation", methodParameter.getParameterAnnotation(Param.class));
-		assertNotNull(methodParameter.getParameterAnnotation(Param.class));
 	}
 
 	@Test  // SPR-16652
