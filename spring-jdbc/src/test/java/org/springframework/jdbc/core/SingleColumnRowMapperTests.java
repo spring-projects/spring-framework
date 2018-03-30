@@ -36,7 +36,7 @@ import static org.junit.Assert.*;
  * @author Kazuki Shimizu
  * @since 5.0.4
  */
-public class SingleColumnRowMapperTest {
+public class SingleColumnRowMapperTests {
 
 	@Test // SPR-16483
 	public void useDefaultConversionService() throws SQLException {
