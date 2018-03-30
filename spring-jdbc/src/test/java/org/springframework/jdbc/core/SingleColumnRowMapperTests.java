@@ -24,11 +24,12 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 import org.junit.Test;
+
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.dao.TypeMismatchDataAccessException;
 
-import static org.mockito.BDDMockito.*;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Tests for {@link SingleColumnRowMapper}.
@@ -38,7 +39,7 @@ import static org.junit.Assert.*;
  */
 public class SingleColumnRowMapperTests {
 
-	@Test // SPR-16483
+	@Test  // SPR-16483
 	public void useDefaultConversionService() throws SQLException {
 		Timestamp timestamp = new Timestamp(0);
 
@@ -57,7 +58,7 @@ public class SingleColumnRowMapperTests {
 		assertEquals(timestamp.toLocalDateTime(), actualLocalDateTime);
 	}
 
-	@Test // SPR-16483
+	@Test  // SPR-16483
 	public void useCustomConversionService() throws SQLException {
 		Timestamp timestamp = new Timestamp(0);
 
@@ -81,7 +82,7 @@ public class SingleColumnRowMapperTests {
 		assertEquals(timestamp.toLocalDateTime(), actualMyLocalDateTime.value);
 	}
 
-	@Test(expected = TypeMismatchDataAccessException.class) // SPR-16483
+	@Test(expected = TypeMismatchDataAccessException.class)  // SPR-16483
 	public void doesNotUseConversionService() throws SQLException {
 		SingleColumnRowMapper<LocalDateTime> rowMapper =
 				SingleColumnRowMapper.newInstance(LocalDateTime.class, null);
@@ -97,9 +98,12 @@ public class SingleColumnRowMapperTests {
 		rowMapper.mapRow(resultSet, 1);
 	}
 
+
 	private static class MyLocalDateTime {
+
 		private final LocalDateTime value;
-		private MyLocalDateTime(LocalDateTime value) {
+
+		public MyLocalDateTime(LocalDateTime value) {
 			this.value = value;
 		}
 	}

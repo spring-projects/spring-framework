@@ -277,10 +277,10 @@ The table below lists the special beans detected by the `DispatcherHandler`:
 === Web MVC Config
 [.small]#<<web-reactive.adoc#webflux-framework-config,Same in Spring WebFlux>>#
 
-Applications can declare the infrastructure beans listed in <<mvc-special-bean-types>>
+Applications can declare the infrastructure beans listed in <<mvc-servlet-special-bean-types>>
 that are required to process requests. The `DispatcherServlet` checks the
-`WebApplicationContext` for each special bean. If there are no matching bean types, it
-falls back on the default types listed in
+`WebApplicationContext` for each special bean. If there are no matching bean types,
+it falls back on the default types listed in
 https://github.com/spring-projects/spring-framework/blob/master/spring-webmvc/src/main/resources/org/springframework/web/servlet/DispatcherServlet.properties[DispatcherServlet.properties].
 
 In most cases the <<mvc-config>> is the best starting point. It declares the required
@@ -3733,9 +3733,9 @@ applications along with a configuration API to customize it.
 For more advanced customizations, not available in the configuration API, see
 <<mvc-config-advanced-java>> and <<mvc-config-advanced-xml>>.
 
-You do not need to understand the underlying beans created by the MVC Java config and the
-MVC namespace but if you want to learn more, see <<mvc-servlet-special-bean-types>> and
-<<mvc-servlet-config>>.
+You do not need to understand the underlying beans created by the MVC Java config and
+the MVC namespace but if you want to learn more, see <<mvc-servlet-special-bean-types>>
+and <<mvc-servlet-config>>.
 
 
 [[mvc-config-enable]]
@@ -3796,10 +3796,10 @@ In Java config implement `WebMvcConfigurer` interface:
 	}
 ----
 
-In XML check attributes and sub-elements of `<mvc:annotation-driven/>`. You can view the
-http://schema.spring.io/mvc/spring-mvc.xsd[Spring MVC XML schema] or use the code
-completion feature of your IDE to discover what attributes and sub-elements are
-available.
+In XML check attributes and sub-elements of `<mvc:annotation-driven/>`. You can
+view the http://schema.spring.io/mvc/spring-mvc.xsd[Spring MVC XML schema] or use
+the code completion feature of your IDE to discover what attributes and
+sub-elements are available.
 
 
 
@@ -3808,8 +3808,8 @@ available.
 [.small]#<<web-reactive.adoc#webflux-config-conversion,Same in Spring WebFlux>>#
 
 By default formatters for `Number` and `Date` types are installed, including support for
-the `@NumberFormat` and `@DateTimeFormat` annotations. Full support for the Joda Time
-formatting library is also installed if Joda Time is present on the classpath.
+the `@NumberFormat` and `@DateTimeFormat` annotations. Full support for the Joda-Time
+formatting library is also installed if Joda-Time is present on the classpath.
 
 In Java config, register custom formatters and converters:
 

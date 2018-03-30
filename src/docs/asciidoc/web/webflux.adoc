@@ -2452,8 +2452,8 @@ In your Java config implement the `WebFluxConfigurer` interface:
 [.small]#<<web.adoc#mvc-config-conversion,Same in Spring MVC>>#
 
 By default formatters for `Number` and `Date` types are installed, including support for
-the `@NumberFormat` and `@DateTimeFormat` annotations. Full support for the Joda Time
-formatting library is also installed if Joda Time is present on the classpath.
+the `@NumberFormat` and `@DateTimeFormat` annotations. Full support for the Joda-Time
+formatting library is also installed if Joda-Time is present on the classpath.
 
 To register custom formatters and converters:
 
