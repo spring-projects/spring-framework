@@ -41,7 +41,7 @@ public abstract class ViewResolverSupport implements Ordered {
 
 	private Charset defaultCharset = StandardCharsets.UTF_8;
 
-	private int order = Integer.MAX_VALUE;
+	private int order = Ordered.LOWEST_PRECEDENCE;
 
 
 	public ViewResolverSupport() {
@@ -84,17 +84,15 @@ public abstract class ViewResolverSupport implements Ordered {
 		return this.defaultCharset;
 	}
 
-
 	/**
-	 * Set the order in which this {@link ViewResolver} is evaluated.
+	 * Specify the order value for this ViewResolver bean.
+	 * <p>The default value is {@code Ordered.LOWEST_PRECEDENCE}, meaning non-ordered.
+	 * @see org.springframework.core.Ordered#getOrder()
 	 */
 	public void setOrder(int order) {
 		this.order = order;
 	}
 
-	/**
-	 * Return the order in which this {@link ViewResolver} is evaluated.
-	 */
 	@Override
 	public int getOrder() {
 		return this.order;
