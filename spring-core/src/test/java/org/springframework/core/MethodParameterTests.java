@@ -92,7 +92,6 @@ public class MethodParameterTests {
 		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(constructor, 0);
 		assertEquals(String.class, methodParameter.getParameterType());
 		assertNotNull("Failed to find @Param annotation", methodParameter.getParameterAnnotation(Param.class));
-		assertNotNull(methodParameter.getParameterAnnotation(Param.class));
 	}
 
 	@Test  // SPR-16652
@@ -105,7 +104,6 @@ public class MethodParameterTests {
 
 		methodParameter = MethodParameter.forMethodOrConstructor(constructor, 1);
 		assertEquals(String.class, methodParameter.getParameterType());
-		// The following assertion currently fails if this test class is compiled using JDK 8.
 		assertNotNull("Failed to find @Param annotation", methodParameter.getParameterAnnotation(Param.class));
 
 		methodParameter = MethodParameter.forMethodOrConstructor(constructor, 2);
