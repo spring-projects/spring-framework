@@ -52,11 +52,15 @@ class ReactorClientHttpRequest extends AbstractClientHttpRequest implements Zero
 
 
 	public ReactorClientHttpRequest(HttpMethod httpMethod, URI uri,
-			HttpClientRequest httpRequest) {
+			HttpClientRequest httpRequest, boolean followRedirects) {
 		this.httpMethod = httpMethod;
 		this.uri = uri;
 		this.httpRequest = httpRequest.failOnClientError(false).failOnServerError(false);
 		this.bufferFactory = new NettyDataBufferFactory(httpRequest.alloc());
+
+		if (followRedirects) {
+			this.httpRequest.followRedirect();
+		}
 	}
 
 

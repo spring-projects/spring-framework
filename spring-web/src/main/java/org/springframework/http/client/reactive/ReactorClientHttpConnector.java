@@ -39,6 +39,7 @@ import org.springframework.http.HttpMethod;
 public class ReactorClientHttpConnector implements ClientHttpConnector {
 
 	private final HttpClient httpClient;
+	private final boolean followRedirects;
 
 
 	/**
@@ -46,9 +47,16 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 	 * with default {@link ClientOptions} and HTTP compression support enabled.
 	 */
 	public ReactorClientHttpConnector() {
-		this.httpClient = HttpClient.builder()
-				.options(options -> options.compression(true))
-				.build();
+		this(false);
+	}
+
+	/**
+	 * Create a Reactor Netty {@link ClientHttpConnector}
+	 * with default {@link ClientOptions} and HTTP compression support enabled
+	 * which will optionally follows redirects.
+	 */
+	public ReactorClientHttpConnector(boolean followRedirects) {
+		this(options -> options.compression(true), followRedirects);
 	}
 
 	/**
@@ -56,7 +64,16 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 	 * {@link HttpClientOptions.Builder}
 	 */
 	public ReactorClientHttpConnector(Consumer<? super HttpClientOptions.Builder> clientOptions) {
+		this(clientOptions, false);
+	}
+
+	/**
+	 * Create a Reactor Netty {@link ClientHttpConnector} with the given
+	 * {@link HttpClientOptions.Builder} which optionally follows redirects.
+	 */
+	public ReactorClientHttpConnector(Consumer<? super HttpClientOptions.Builder> clientOptions, boolean followRedirects) {
 		this.httpClient = HttpClient.create(clientOptions);
+		this.followRedirects = followRedirects;
 	}
 
 
@@ -80,7 +97,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 	}
 
 	private ReactorClientHttpRequest adaptRequest(HttpMethod method, URI uri, HttpClientRequest request) {
-		return new ReactorClientHttpRequest(method, uri, request);
+		return new ReactorClientHttpRequest(method, uri, request, followRedirects);
 	}
 
 	private ClientHttpResponse adaptResponse(HttpClientResponse response) {
