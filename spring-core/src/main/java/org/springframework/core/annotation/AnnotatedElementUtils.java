@@ -30,6 +30,7 @@ import java.util.Set;
 
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -232,7 +233,6 @@ public class AnnotatedElementUtils {
 
 		return Boolean.TRUE.equals(
 			searchWithGetSemantics(element, annotationType, annotationName, new SimpleAnnotationProcessor<Boolean>() {
-
 				@Override
 				@Nullable
 				public Boolean process(@Nullable AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
@@ -950,7 +950,7 @@ public class AnnotatedElementUtils {
 		// Recursively search in meta-annotations
 		for (Annotation annotation : annotations) {
 			Class<? extends Annotation> currentAnnotationType = annotation.annotationType();
-			if (!AnnotationUtils.isInJavaLangAnnotationPackage(currentAnnotationType)) {
+			if (hasSearchableMetaAnnotations(currentAnnotationType, annotationType, annotationName)) {
 				T result = searchWithGetSemantics(currentAnnotationType, annotationType,
 						annotationName, containerType, processor, visited, metaDepth + 1);
 				if (result != null) {
@@ -1083,10 +1083,10 @@ public class AnnotatedElementUtils {
 					}
 				}
 
-				// Search in meta annotations on local annotations
+				// Recursively search in meta-annotations
 				for (Annotation annotation : annotations) {
 					Class<? extends Annotation> currentAnnotationType = annotation.annotationType();
-					if (!AnnotationUtils.isInJavaLangAnnotationPackage(currentAnnotationType)) {
+					if (hasSearchableMetaAnnotations(currentAnnotationType, annotationType, annotationName)) {
 						T result = searchWithFindSemantics(currentAnnotationType, annotationType, annotationName,
 								containerType, processor, visited, metaDepth + 1);
 						if (result != null) {
@@ -1101,28 +1101,33 @@ public class AnnotatedElementUtils {
 					}
 				}
 
-				if (aggregatedResults != null) {
+				if (!CollectionUtils.isEmpty(aggregatedResults)) {
 					// Prepend to support top-down ordering within class hierarchies
 					processor.getAggregatedResults().addAll(0, aggregatedResults);
 				}
 
 				if (element instanceof Method) {
 					Method method = (Method) element;
+					T result;
 
 					// Search on possibly bridged method
 					Method resolvedMethod = BridgeMethodResolver.findBridgedMethod(method);
-					T result = searchWithFindSemantics(resolvedMethod, annotationType, annotationName, containerType,
-							processor, visited, metaDepth);
-					if (result != null) {
-						return result;
+					if (resolvedMethod != method) {
+						result = searchWithFindSemantics(resolvedMethod, annotationType, annotationName,
+								containerType, processor, visited, metaDepth);
+						if (result != null) {
+							return result;
+						}
 					}
 
 					// Search on methods in interfaces declared locally
 					Class<?>[] ifcs = method.getDeclaringClass().getInterfaces();
-					result = searchOnInterfaces(method, annotationType, annotationName, containerType, processor,
-							visited, metaDepth, ifcs);
-					if (result != null) {
-						return result;
+					if (ifcs.length > 0) {
+						result = searchOnInterfaces(method, annotationType, annotationName, containerType,
+								processor, visited, metaDepth, ifcs);
+						if (result != null) {
+							return result;
+						}
 					}
 
 					// Search on methods in class hierarchy and interface hierarchy
@@ -1189,10 +1194,10 @@ public class AnnotatedElementUtils {
 			@Nullable String annotationName, @Nullable Class<? extends Annotation> containerType,
 			Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth, Class<?>[] ifcs) {
 
-		for (Class<?> iface : ifcs) {
-			if (AnnotationUtils.isInterfaceWithAnnotatedMethods(iface)) {
+		for (Class<?> ifc : ifcs) {
+			if (AnnotationUtils.isInterfaceWithAnnotatedMethods(ifc)) {
 				try {
-					Method equivalentMethod = iface.getMethod(method.getName(), method.getParameterTypes());
+					Method equivalentMethod = ifc.getMethod(method.getName(), method.getParameterTypes());
 					T result = searchWithFindSemantics(equivalentMethod, annotationType, annotationName, containerType,
 							processor, visited, metaDepth);
 					if (result != null) {
@@ -1206,6 +1211,26 @@ public class AnnotatedElementUtils {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Determine whether the current annotation type is generally expected to have
+	 * meta-annotations of the specified annotation type that we're searching for,
+	 * explicitly excluding some common cases that would never deliver any results.
+	 */
+	private static boolean hasSearchableMetaAnnotations(Class<? extends Annotation> currentAnnotationType,
+			@Nullable Class<?> annotationType, @Nullable String annotationName) {
+
+		if (AnnotationUtils.isInJavaLangAnnotationPackage(currentAnnotationType)) {
+			return false;
+		}
+		if (currentAnnotationType == Nullable.class || currentAnnotationType.getName().startsWith("java")) {
+			// @Nullable and standard Java annotations are only meant to have standard Java meta-annotations
+			// -> not worth searching otherwise.
+			return ((annotationType != null && annotationType.getName().startsWith("java")) ||
+					(annotationName != null && annotationName.startsWith("java")));
+		}
+		return true;
 	}
 
 	/**

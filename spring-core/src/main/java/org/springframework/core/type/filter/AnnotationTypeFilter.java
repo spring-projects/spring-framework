@@ -114,7 +114,8 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 		}
 		else if (typeName.startsWith("java")) {
 			if (!this.annotationType.getName().startsWith("java")) {
-				// Standard Java classes don't have non-standard annotations on them.
+				// Standard Java types do not have non-standard annotations on them ->
+				// skip any load attempt, in particular for Java language interfaces.
 				return false;
 			}
 			try {

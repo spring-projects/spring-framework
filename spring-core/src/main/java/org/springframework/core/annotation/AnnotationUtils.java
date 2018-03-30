@@ -40,6 +40,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -147,18 +148,18 @@ public abstract class AnnotationUtils {
 	 * <p>Note that this method supports only a single level of meta-annotations.
 	 * For support for arbitrary levels of meta-annotations, use one of the
 	 * {@code find*()} methods instead.
-	 * @param ann the Annotation to check
+	 * @param annotation the Annotation to check
 	 * @param annotationType the annotation type to look for, both locally and as a meta-annotation
 	 * @return the first matching annotation, or {@code null} if not found
 	 * @since 4.0
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
-	public static <A extends Annotation> A getAnnotation(Annotation ann, Class<A> annotationType) {
-		if (annotationType.isInstance(ann)) {
-			return synthesizeAnnotation((A) ann);
+	public static <A extends Annotation> A getAnnotation(Annotation annotation, Class<A> annotationType) {
+		if (annotationType.isInstance(annotation)) {
+			return synthesizeAnnotation((A) annotation);
 		}
-		Class<? extends Annotation> annotatedElement = ann.annotationType();
+		Class<? extends Annotation> annotatedElement = annotation.annotationType();
 		try {
 			return synthesizeAnnotation(annotatedElement.getAnnotation(annotationType), annotatedElement);
 		}
@@ -574,10 +575,10 @@ public abstract class AnnotationUtils {
 	@Nullable
 	private static <A extends Annotation> A searchOnInterfaces(Method method, Class<A> annotationType, Class<?>... ifcs) {
 		A annotation = null;
-		for (Class<?> iface : ifcs) {
-			if (isInterfaceWithAnnotatedMethods(iface)) {
+		for (Class<?> ifc : ifcs) {
+			if (isInterfaceWithAnnotatedMethods(ifc)) {
 				try {
-					Method equivalentMethod = iface.getMethod(method.getName(), method.getParameterTypes());
+					Method equivalentMethod = ifc.getMethod(method.getName(), method.getParameterTypes());
 					annotation = getAnnotation(equivalentMethod, annotationType);
 				}
 				catch (NoSuchMethodException ex) {
@@ -591,15 +592,20 @@ public abstract class AnnotationUtils {
 		return annotation;
 	}
 
-	static boolean isInterfaceWithAnnotatedMethods(Class<?> iface) {
-		Boolean found = annotatedInterfaceCache.get(iface);
+	static boolean isInterfaceWithAnnotatedMethods(Class<?> ifc) {
+		if (ClassUtils.isJavaLanguageInterface(ifc)) {
+			return false;
+		}
+
+		Boolean found = annotatedInterfaceCache.get(ifc);
 		if (found != null) {
 			return found;
 		}
 		found = Boolean.FALSE;
-		for (Method ifcMethod : iface.getMethods()) {
+		for (Method ifcMethod : ifc.getMethods()) {
 			try {
-				if (ifcMethod.getAnnotations().length > 0) {
+				Annotation[] anns = ifcMethod.getAnnotations();
+				if (anns.length > 1 || (anns.length == 1 && anns[0].annotationType() != Nullable.class)) {
 					found = Boolean.TRUE;
 					break;
 				}
@@ -608,7 +614,7 @@ public abstract class AnnotationUtils {
 				handleIntrospectionFailure(ifcMethod, ex);
 			}
 		}
-		annotatedInterfaceCache.put(iface, found);
+		annotatedInterfaceCache.put(ifc, found);
 		return found;
 	}
 
