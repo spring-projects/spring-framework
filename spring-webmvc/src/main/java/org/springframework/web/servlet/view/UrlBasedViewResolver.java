@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,7 +128,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 
 	private String[] viewNames;
 
-	private int order = Integer.MAX_VALUE;
+	private int order = Ordered.LOWEST_PRECEDENCE;
 
 
 	/**
@@ -407,17 +407,14 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	}
 
 	/**
-	 * Set the order in which this {@link org.springframework.web.servlet.ViewResolver}
-	 * is evaluated.
+	 * Specify the order value for this ViewResolver bean.
+	 * <p>The default value is {@code Ordered.LOWEST_PRECEDENCE}, meaning non-ordered.
+	 * @see org.springframework.core.Ordered#getOrder()
 	 */
 	public void setOrder(int order) {
 		this.order = order;
 	}
 
-	/**
-	 * Return the order in which this {@link org.springframework.web.servlet.ViewResolver}
-	 * is evaluated.
-	 */
 	@Override
 	public int getOrder() {
 		return this.order;

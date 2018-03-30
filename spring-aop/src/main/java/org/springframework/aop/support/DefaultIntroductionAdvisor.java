@@ -45,7 +45,7 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 
 	private final Set<Class<?>> interfaces = new LinkedHashSet<Class<?>>();
 
-	private int order = Integer.MAX_VALUE;
+	private int order = Ordered.LOWEST_PRECEDENCE;
 
 
 	/**
@@ -118,7 +118,6 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 		}
 	}
 
-
 	public void setOrder(int order) {
 		this.order = order;
 	}
@@ -127,7 +126,6 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 	public int getOrder() {
 		return this.order;
 	}
-
 
 	@Override
 	public Advice getAdvice() {

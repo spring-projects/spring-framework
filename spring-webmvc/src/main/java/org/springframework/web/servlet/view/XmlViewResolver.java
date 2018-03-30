@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,24 +57,15 @@ public class XmlViewResolver extends AbstractCachingViewResolver
 		implements Ordered, InitializingBean, DisposableBean {
 
 	/** Default if no other location is supplied */
-	public final static String DEFAULT_LOCATION = "/WEB-INF/views.xml";
+	public static final String DEFAULT_LOCATION = "/WEB-INF/views.xml";
 
-
-	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
 	private Resource location;
 
 	private ConfigurableApplicationContext cachedFactory;
 
+	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
-	@Override
-	public int getOrder() {
-		return this.order;
-	}
 
 	/**
 	 * Set the location of the XML file that defines the view beans.
@@ -83,6 +74,20 @@ public class XmlViewResolver extends AbstractCachingViewResolver
 	 */
 	public void setLocation(Resource location) {
 		this.location = location;
+	}
+
+	/**
+	 * Specify the order value for this ViewResolver bean.
+	 * <p>The default value is {@code Ordered.LOWEST_PRECEDENCE}, meaning non-ordered.
+	 * @see org.springframework.core.Ordered#getOrder()
+	 */
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	@Override
+	public int getOrder() {
+		return this.order;
 	}
 
 	/**

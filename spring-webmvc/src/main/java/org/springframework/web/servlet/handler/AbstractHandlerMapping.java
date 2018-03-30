@@ -66,8 +66,6 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport implements HandlerMapping, Ordered {
 
-	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
-
 	private Object defaultHandler;
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
@@ -82,20 +80,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	private CorsProcessor corsProcessor = new DefaultCorsProcessor();
 
+	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
-	/**
-	 * Specify the order value for this HandlerMapping bean.
-	 * <p>Default value is {@code Integer.MAX_VALUE}, meaning that it's non-ordered.
-	 * @see org.springframework.core.Ordered#getOrder()
-	 */
-	public final void setOrder(int order) {
-	  this.order = order;
-	}
-
-	@Override
-	public final int getOrder() {
-	  return this.order;
-	}
 
 	/**
 	 * Set the default handler for this handler mapping.
@@ -233,6 +219,20 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	public CorsProcessor getCorsProcessor() {
 		return this.corsProcessor;
+	}
+
+	/**
+	 * Specify the order value for this HandlerMapping bean.
+	 * <p>The default value is {@code Ordered.LOWEST_PRECEDENCE}, meaning non-ordered.
+	 * @see org.springframework.core.Ordered#getOrder()
+	 */
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	@Override
+	public int getOrder() {
+		return this.order;
 	}
 
 

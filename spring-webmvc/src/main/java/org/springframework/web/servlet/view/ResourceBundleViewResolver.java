@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,10 +63,8 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 		implements Ordered, InitializingBean, DisposableBean {
 
 	/** The default basename if no other basename is supplied. */
-	public final static String DEFAULT_BASENAME = "views";
+	public static final String DEFAULT_BASENAME = "views";
 
-
-	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
 	private String[] basenames = new String[] {DEFAULT_BASENAME};
 
@@ -76,6 +74,8 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 
 	private Locale[] localesToInitialize;
 
+	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
+
 	/* Locale -> BeanFactory */
 	private final Map<Locale, BeanFactory> localeCache =
 			new HashMap<Locale, BeanFactory>();
@@ -84,15 +84,6 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 	private final Map<List<ResourceBundle>, ConfigurableApplicationContext> bundleCache =
 			new HashMap<List<ResourceBundle>, ConfigurableApplicationContext>();
 
-
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
-	@Override
-	public int getOrder() {
-		return this.order;
-	}
 
 	/**
 	 * Set a single basename, following {@link java.util.ResourceBundle} conventions.
@@ -173,6 +164,20 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 	 */
 	public void setLocalesToInitialize(Locale... localesToInitialize) {
 		this.localesToInitialize = localesToInitialize;
+	}
+
+	/**
+	 * Specify the order value for this ViewResolver bean.
+	 * <p>The default value is {@code Ordered.LOWEST_PRECEDENCE}, meaning non-ordered.
+	 * @see org.springframework.core.Ordered#getOrder()
+	 */
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	@Override
+	public int getOrder() {
+		return this.order;
 	}
 
 	/**
