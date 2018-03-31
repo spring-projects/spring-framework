@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,6 +90,7 @@ public final class MockMvc {
 		this.servletContext = servletContext;
 	}
 
+
 	/**
 	 * A default request builder merged into every performed request.
 	 * @see org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder#defaultRequest(RequestBuilder)
@@ -103,7 +104,7 @@ public final class MockMvc {
 	 * @see org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder#alwaysExpect(ResultMatcher)
 	 */
 	void setGlobalResultMatchers(List<ResultMatcher> resultMatchers) {
-		Assert.notNull(resultMatchers, "resultMatchers is required");
+		Assert.notNull(resultMatchers, "ResultMatcher List is required");
 		this.defaultResultMatchers = resultMatchers;
 	}
 
@@ -112,20 +113,17 @@ public final class MockMvc {
 	 * @see org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder#alwaysDo(ResultHandler)
 	 */
 	void setGlobalResultHandlers(List<ResultHandler> resultHandlers) {
-		Assert.notNull(resultHandlers, "resultHandlers is required");
+		Assert.notNull(resultHandlers, "ResultHandler List is required");
 		this.defaultResultHandlers = resultHandlers;
 	}
 
 	/**
 	 * Perform a request and return a type that allows chaining further
 	 * actions, such as asserting expectations, on the result.
-	 *
 	 * @param requestBuilder used to prepare the request to execute;
 	 * see static factory methods in
 	 * {@link org.springframework.test.web.servlet.request.MockMvcRequestBuilders}
-	 *
-	 * @return an instance of {@link ResultActions}; never {@code null}
-	 *
+	 * @return an instance of {@link ResultActions} (never {@code null})
 	 * @see org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 	 * @see org.springframework.test.web.servlet.result.MockMvcResultMatchers
 	 */
@@ -153,29 +151,24 @@ public final class MockMvc {
 		filterChain.doFilter(request, response);
 
 		if (DispatcherType.ASYNC.equals(request.getDispatcherType()) &&
-				request.getAsyncContext() != null & !request.isAsyncStarted()) {
-
+				request.getAsyncContext() != null && !request.isAsyncStarted()) {
 			request.getAsyncContext().complete();
 		}
 
 		applyDefaultResultActions(mvcResult);
-
 		RequestContextHolder.setRequestAttributes(previousAttributes);
 
 		return new ResultActions() {
-
 			@Override
 			public ResultActions andExpect(ResultMatcher matcher) throws Exception {
 				matcher.match(mvcResult);
 				return this;
 			}
-
 			@Override
 			public ResultActions andDo(ResultHandler handler) throws Exception {
 				handler.handle(mvcResult);
 				return this;
 			}
-
 			@Override
 			public MvcResult andReturn() {
 				return mvcResult;
@@ -184,7 +177,6 @@ public final class MockMvc {
 	}
 
 	private void applyDefaultResultActions(MvcResult mvcResult) throws Exception {
-
 		for (ResultMatcher matcher : this.defaultResultMatchers) {
 			matcher.match(mvcResult);
 		}

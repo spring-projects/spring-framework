@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,8 +134,9 @@ public class ListenableFutureCallbackRegistry<T> {
 		synchronized (this.mutex) {
 			this.state = State.SUCCESS;
 			this.result = result;
-			while (!this.successCallbacks.isEmpty()) {
-				notifySuccess(this.successCallbacks.poll());
+			SuccessCallback<? super T> callback;
+			while ((callback = this.successCallbacks.poll()) != null) {
+				notifySuccess(callback);
 			}
 		}
 	}
@@ -149,8 +150,9 @@ public class ListenableFutureCallbackRegistry<T> {
 		synchronized (this.mutex) {
 			this.state = State.FAILURE;
 			this.result = ex;
-			while (!this.failureCallbacks.isEmpty()) {
-				notifyFailure(this.failureCallbacks.poll());
+			FailureCallback callback;
+			while ((callback = this.failureCallbacks.poll()) != null) {
+				notifyFailure(callback);
 			}
 		}
 	}

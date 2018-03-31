@@ -259,10 +259,7 @@ public class UrlPathHelper {
 				}
 				c1 = requestUri.charAt(index1);
 			}
-			if (c1 == c2) {
-				continue;
-			}
-			else if (ignoreCase && (Character.toLowerCase(c1) == Character.toLowerCase(c2))) {
+			if (c1 == c2 || (ignoreCase && (Character.toLowerCase(c1) == Character.toLowerCase(c2)))) {
 				continue;
 			}
 			return null;

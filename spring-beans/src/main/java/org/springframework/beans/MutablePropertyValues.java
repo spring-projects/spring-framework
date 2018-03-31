@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -262,7 +262,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	/**
 	 * Get the raw property value, if any.
 	 * @param propertyName the name to search for
-	 * @return the raw property value, or {@code null}
+	 * @return the raw property value, or {@code null} if none found
 	 * @since 4.0
 	 * @see #getPropertyValue(String)
 	 * @see PropertyValue#getValue()
@@ -283,11 +283,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		for (PropertyValue newPv : this.propertyValueList) {
 			// if there wasn't an old one, add it
 			PropertyValue pvOld = old.getPropertyValue(newPv.getName());
-			if (pvOld == null) {
-				changes.addPropertyValue(newPv);
-			}
-			else if (!pvOld.equals(newPv)) {
-				// it's changed
+			if (pvOld == null || !pvOld.equals(newPv)) {
 				changes.addPropertyValue(newPv);
 			}
 		}

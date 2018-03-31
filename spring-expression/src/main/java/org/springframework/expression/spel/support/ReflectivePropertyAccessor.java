@@ -349,10 +349,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		if (typeDescriptor == null) {
 			// Attempt to populate the cache entry
 			try {
-				if (canRead(context, target, name)) {
-					typeDescriptor = this.typeDescriptorCache.get(cacheKey);
-				}
-				else if (canWrite(context, target, name)) {
+				if (canRead(context, target, name) || canWrite(context, target, name)) {
 					typeDescriptor = this.typeDescriptorCache.get(cacheKey);
 				}
 			}

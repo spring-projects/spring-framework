@@ -4841,7 +4841,7 @@ It also enables the following:
 in addition to the JavaBeans PropertyEditors used for Data Binding.
 . Support for <<format,formatting>> Number fields using the `@NumberFormat` annotation
 through the `ConversionService`.
-. Support for <<format,formatting>> `Date`, `Calendar`, `Long`, and Joda Time fields using the
+. Support for <<format,formatting>> `Date`, `Calendar`, `Long`, and Joda-Time fields using the
 `@DateTimeFormat` annotation.
 . Support for <<mvc-config-validation,validating>> `@Controller` inputs with `@Valid`, if
 a JSR-303 Provider is present on the classpath.
@@ -4925,8 +4925,8 @@ available.
 === Conversion and Formatting
 
 By default formatters for `Number` and `Date` types are installed, including support for
-the `@NumberFormat` and `@DateTimeFormat` annotations. Full support for the Joda Time
-formatting library is also installed if Joda Time is present on the classpath. To
+the `@NumberFormat` and `@DateTimeFormat` annotations. Full support for the Joda-Time
+formatting library is also installed if Joda-Time is present on the classpath. To
 register custom formatters and converters, override the `addFormatters` method:
 
 [source,java,indent=0]

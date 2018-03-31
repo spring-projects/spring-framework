@@ -311,23 +311,23 @@ public abstract class BeanUtils {
 	public static Method resolveSignature(String signature, Class<?> clazz) {
 		Assert.hasText(signature, "'signature' must not be empty");
 		Assert.notNull(clazz, "Class must not be null");
-		int firstParen = signature.indexOf('(');
-		int lastParen = signature.indexOf(')');
-		if (firstParen > -1 && lastParen == -1) {
+		int startParen = signature.indexOf('(');
+		int endParen = signature.indexOf(')');
+		if (startParen > -1 && endParen == -1) {
 			throw new IllegalArgumentException("Invalid method signature '" + signature +
 					"': expected closing ')' for args list");
 		}
-		else if (lastParen > -1 && firstParen == -1) {
+		else if (startParen == -1 && endParen > -1) {
 			throw new IllegalArgumentException("Invalid method signature '" + signature +
 					"': expected opening '(' for args list");
 		}
-		else if (firstParen == -1 && lastParen == -1) {
+		else if (startParen == -1 && endParen == -1) {
 			return findMethodWithMinimalParameters(clazz, signature);
 		}
 		else {
-			String methodName = signature.substring(0, firstParen);
+			String methodName = signature.substring(0, startParen);
 			String[] parameterTypeNames =
-					StringUtils.commaDelimitedListToStringArray(signature.substring(firstParen + 1, lastParen));
+					StringUtils.commaDelimitedListToStringArray(signature.substring(startParen + 1, endParen));
 			Class<?>[] parameterTypes = new Class<?>[parameterTypeNames.length];
 			for (int i = 0; i < parameterTypeNames.length; i++) {
 				String parameterTypeName = parameterTypeNames[i].trim();
