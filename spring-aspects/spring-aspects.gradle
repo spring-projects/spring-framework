@@ -1,7 +1,6 @@
 description = "Spring Aspects"
 
-// redefine the compileJava and compileTestJava tasks in order to
-// compile sources with ajc instead of javac
+// Redefine the compileJava and compileTestJava tasks in order to compile sources with ajc instead of javac
 
 configurations {
 	rt
@@ -81,8 +80,8 @@ compileTestJava {
 
 dependencies {
 	aspects(project(":spring-orm"))
-	ajc("org.aspectj:aspectjtools:1.9.0.RC2")  // for JDK 9 build compatibility
-	rt("org.aspectj:aspectjrt:1.9.0.RC2")  // for JDK 9 build compatibility
+	ajc("org.aspectj:aspectjtools:1.9.0.RC2")  // for JDK 9+ build compatibility
+	rt("org.aspectj:aspectjrt:1.9.0.RC2")  // for JDK 9+ build compatibility
 	compile("org.aspectj:aspectjweaver:${aspectjVersion}")  // for Maven POM exposure
 	optional(project(":spring-aop"))  // for @Async support
 	optional(project(":spring-beans"))  // for @Configurable support
