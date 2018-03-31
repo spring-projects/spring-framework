@@ -98,7 +98,8 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueSync
 						String paramType = param.getNestedParameterType().getName();
 						throw new ServerErrorException(
 								"Found more than one match for URI path parameter '" + name +
-								"' for parameter type [" + paramType + "]. Use 'pathVar' attribute to disambiguate.");
+								"' for parameter type [" + paramType + "]. Use 'pathVar' attribute to disambiguate.",
+								param, null);
 					}
 					paramValues.addAll(params.get(name));
 					found = true;

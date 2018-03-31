@@ -16,10 +16,11 @@
 
 package org.springframework.web.server;
 
+import java.lang.reflect.Method;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
-import org.springframework.web.method.HandlerMethod;
 
 /**
  * Exception for an {@link HttpStatus#INTERNAL_SERVER_ERROR} that exposes extra
@@ -33,47 +34,39 @@ import org.springframework.web.method.HandlerMethod;
 public class ServerErrorException extends ResponseStatusException {
 
 	@Nullable
-	private final HandlerMethod handlerMethod;
+	private final Method handlerMethod;
 
 	@Nullable
 	private final MethodParameter parameter;
 
 
 	/**
-	 * Constructor with an explanation only.
-	 */
-	public ServerErrorException(String reason) {
-		super(HttpStatus.INTERNAL_SERVER_ERROR, reason, null);
-		this.handlerMethod = null;
-		this.parameter = null;
-	}
-
-	/**
-	 * Constructor with a reason and root cause.
+	 * Constructor for a 500 error with a reason and an optional cause.
 	 * @since 5.0.5
 	 */
-	public ServerErrorException(String reason, Throwable cause) {
+	public ServerErrorException(String reason, @Nullable Throwable cause) {
 		super(HttpStatus.INTERNAL_SERVER_ERROR, reason, cause);
 		this.handlerMethod = null;
 		this.parameter = null;
 	}
 
 	/**
-	 * Constructor for a 500 error with a {@link MethodParameter}.
+	 * Constructor for a 500 error with a handler {@link Method} and an optional cause.
+	 * @since 5.0.5
 	 */
-	public ServerErrorException(String reason, MethodParameter parameter, @Nullable Throwable cause) {
-		super(HttpStatus.INTERNAL_SERVER_ERROR, reason, cause);
-		this.handlerMethod = null;
-		this.parameter = parameter;
-	}
-
-	/**
-	 * Constructor for a 500 error with a root cause.
-	 */
-	public ServerErrorException(String reason, HandlerMethod handlerMethod, @Nullable Throwable cause) {
+	public ServerErrorException(String reason, Method handlerMethod, @Nullable Throwable cause) {
 		super(HttpStatus.INTERNAL_SERVER_ERROR, reason, cause);
 		this.handlerMethod = handlerMethod;
 		this.parameter = null;
+	}
+
+	/**
+	 * Constructor for a 500 error with a {@link MethodParameter} and an optional cause.
+	 */
+	public ServerErrorException(String reason, MethodParameter parameter, @Nullable Throwable cause) {
+		super(HttpStatus.INTERNAL_SERVER_ERROR, reason, cause);
+		this.handlerMethod = parameter.getMethod();
+		this.parameter = parameter;
 	}
 
 	/**
@@ -85,18 +78,29 @@ public class ServerErrorException extends ResponseStatusException {
 		this(reason, parameter, null);
 	}
 
+	/**
+	 * Constructor for a 500 error with a reason only.
+	 * @deprecated in favor of {@link #ServerErrorException(String, Throwable)}
+	 */
+	@Deprecated
+	public ServerErrorException(String reason) {
+		super(HttpStatus.INTERNAL_SERVER_ERROR, reason, null);
+		this.handlerMethod = null;
+		this.parameter = null;
+	}
+
 
 	/**
-	 * Return the controller method associated with the error, if any.
+	 * Return the handler method associated with the error, if any.
 	 * @since 5.0.5
 	 */
 	@Nullable
-	public HandlerMethod getHandlerMethod() {
+	public Method getHandlerMethod() {
 		return this.handlerMethod;
 	}
 
 	/**
-	 * Return the controller method argument associated with this error, if any.
+	 * Return the specific method parameter associated with the error, if any.
 	 */
 	@Nullable
 	public MethodParameter getMethodParameter() {

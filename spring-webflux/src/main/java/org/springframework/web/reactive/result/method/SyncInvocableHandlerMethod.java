@@ -109,7 +109,7 @@ public class SyncInvocableHandlerMethod extends HandlerMethod {
 			Throwable ex = processor.getError();
 			if (ex != null) {
 				throw (ex instanceof ServerErrorException ? (ServerErrorException) ex :
-						new ServerErrorException("Failed to invoke: " + getShortLogMessage(), this, ex));
+						new ServerErrorException("Failed to invoke: " + getShortLogMessage(), getMethod(), ex));
 			}
 			return processor.peek();
 		}
