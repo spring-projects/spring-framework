@@ -62,7 +62,7 @@ import org.springframework.web.servlet.View;
 public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 		implements Ordered, InitializingBean, DisposableBean {
 
-	/** The default basename if no other basename is supplied. */
+	/** The default basename if no other basename is supplied */
 	public static final String DEFAULT_BASENAME = "views";
 
 
@@ -88,7 +88,7 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 	/**
 	 * Set a single basename, following {@link java.util.ResourceBundle} conventions.
 	 * The default is "views".
-	 * <p>{@code ResourceBundle} supports different suffixes. For example,
+	 * <p>{@code ResourceBundle} supports different locale suffixes. For example,
 	 * a base name of "views" might map to {@code ResourceBundle} files
 	 * "views", "views_en_au" and "views_de".
 	 * <p>Note that ResourceBundle names are effectively classpath locations: As a
@@ -96,7 +96,8 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 	 * This means that "test.theme" is effectively equivalent to "test/theme",
 	 * just like it is for programmatic {@code java.util.ResourceBundle} usage.
 	 * @see #setBasenames
-	 * @see java.util.ResourceBundle#getBundle(String)
+	 * @see ResourceBundle#getBundle(String)
+	 * @see ResourceBundle#getBundle(String, Locale)
 	 */
 	public void setBasename(String basename) {
 		setBasenames(basename);
@@ -105,19 +106,19 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 	/**
 	 * Set an array of basenames, each following {@link java.util.ResourceBundle}
 	 * conventions. The default is a single basename "views".
-	 * <p>{@code ResourceBundle} supports different suffixes. For example,
+	 * <p>{@code ResourceBundle} supports different locale suffixes. For example,
 	 * a base name of "views" might map to {@code ResourceBundle} files
 	 * "views", "views_en_au" and "views_de".
-	 * <p>The associated resource bundles will be checked sequentially
-	 * when resolving a message code. Note that message definitions in a
-	 * <i>previous</i> resource bundle will override ones in a later bundle,
-	 * due to the sequential lookup.
+	 * <p>The associated resource bundles will be checked sequentially when resolving
+	 * a message code. Note that message definitions in a <i>previous</i> resource
+	 * bundle will override ones in a later bundle, due to the sequential lookup.
 	 * <p>Note that ResourceBundle names are effectively classpath locations: As a
 	 * consequence, the JDK's standard ResourceBundle treats dots as package separators.
 	 * This means that "test.theme" is effectively equivalent to "test/theme",
 	 * just like it is for programmatic {@code java.util.ResourceBundle} usage.
 	 * @see #setBasename
-	 * @see java.util.ResourceBundle#getBundle(String)
+	 * @see ResourceBundle#getBundle(String)
+	 * @see ResourceBundle#getBundle(String, Locale)
 	 */
 	public void setBasenames(String... basenames) {
 		this.basenames = basenames;
@@ -270,7 +271,7 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 	 * @param locale the {@code Locale} to look for
 	 * @return the corresponding {@code ResourceBundle}
 	 * @throws MissingResourceException if no matching bundle could be found
-	 * @see java.util.ResourceBundle#getBundle(String, java.util.Locale, ClassLoader)
+	 * @see ResourceBundle#getBundle(String, Locale, ClassLoader)
 	 */
 	protected ResourceBundle getBundle(String basename, Locale locale) throws MissingResourceException {
 		return ResourceBundle.getBundle(basename, locale, getBundleClassLoader());

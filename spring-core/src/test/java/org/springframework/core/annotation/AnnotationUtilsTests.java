@@ -1018,8 +1018,8 @@ public class AnnotationUtilsTests {
 				XmlFilesImplicitAliasesWithImpliedAliasNamesOmittedContextConfigClass.class, "xmlFile");
 	}
 
-	private void assertAnnotationSynthesisWithImplicitAliasesWithImpliedAliasNamesOmitted(Class<?> clazz,
-			String expected) throws Exception {
+	private void assertAnnotationSynthesisWithImplicitAliasesWithImpliedAliasNamesOmitted(
+			Class<?> clazz, String expected) {
 
 		ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig config = clazz.getAnnotation(
 				ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig.class);

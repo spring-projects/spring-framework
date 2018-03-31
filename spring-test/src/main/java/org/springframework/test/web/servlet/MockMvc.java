@@ -81,9 +81,9 @@ public final class MockMvc {
 	 */
 	MockMvc(TestDispatcherServlet servlet, Filter[] filters, ServletContext servletContext) {
 		Assert.notNull(servlet, "DispatcherServlet is required");
-		Assert.notNull(filters, "filters cannot be null");
-		Assert.noNullElements(filters, "filters cannot contain null values");
-		Assert.notNull(servletContext, "A ServletContext is required");
+		Assert.notNull(filters, "Filters cannot be null");
+		Assert.noNullElements(filters, "Filters cannot contain null values");
+		Assert.notNull(servletContext, "ServletContext is required");
 
 		this.servlet = servlet;
 		this.filters = filters;
