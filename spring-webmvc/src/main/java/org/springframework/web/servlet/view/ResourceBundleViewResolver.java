@@ -63,7 +63,7 @@ import org.springframework.web.servlet.View;
 public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 		implements Ordered, InitializingBean, DisposableBean {
 
-	/** The default basename if no other basename is supplied. */
+	/** The default basename if no other basename is supplied */
 	public static final String DEFAULT_BASENAME = "views";
 
 
@@ -77,13 +77,13 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 	@Nullable
 	private Locale[] localesToInitialize;
 
+	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
+
 	/* Locale -> BeanFactory */
 	private final Map<Locale, BeanFactory> localeCache = new HashMap<>();
 
 	/* List of ResourceBundle -> BeanFactory */
 	private final Map<List<ResourceBundle>, ConfigurableApplicationContext> bundleCache = new HashMap<>();
-
-	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
 
 	/**
@@ -97,7 +97,8 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 	 * This means that "test.theme" is effectively equivalent to "test/theme",
 	 * just like it is for programmatic {@code java.util.ResourceBundle} usage.
 	 * @see #setBasenames
-	 * @see java.util.ResourceBundle#getBundle(String)
+	 * @see ResourceBundle#getBundle(String)
+	 * @see ResourceBundle#getBundle(String, Locale)
 	 */
 	public void setBasename(String basename) {
 		setBasenames(basename);
@@ -118,7 +119,7 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 	 * This means that "test.theme" is effectively equivalent to "test/theme",
 	 * just like it is for programmatic {@code java.util.ResourceBundle} usage.
 	 * @see #setBasename
-	 * @see java.util.ResourceBundle#getBundle(String)
+	 * @see ResourceBundle#getBundle(String)
 	 */
 	public void setBasenames(String... basenames) {
 		this.basenames = basenames;
@@ -271,7 +272,7 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 	 * @param locale the {@code Locale} to look for
 	 * @return the corresponding {@code ResourceBundle}
 	 * @throws MissingResourceException if no matching bundle could be found
-	 * @see java.util.ResourceBundle#getBundle(String, java.util.Locale, ClassLoader)
+	 * @see ResourceBundle#getBundle(String, Locale, ClassLoader)
 	 */
 	protected ResourceBundle getBundle(String basename, Locale locale) throws MissingResourceException {
 		return ResourceBundle.getBundle(basename, locale, getBundleClassLoader());

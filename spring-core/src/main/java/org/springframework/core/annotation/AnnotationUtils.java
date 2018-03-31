@@ -592,7 +592,8 @@ public abstract class AnnotationUtils {
 	}
 
 	static Set<Method> getAnnotatedMethodsInBaseType(Class<?> baseType) {
-		if (ClassUtils.isJavaLanguageInterface(baseType)) {
+		boolean ifcCheck = baseType.isInterface();
+		if (ifcCheck && ClassUtils.isJavaLanguageInterface(baseType)) {
 			return Collections.emptySet();
 		}
 
@@ -600,10 +601,13 @@ public abstract class AnnotationUtils {
 		if (annotatedMethods != null) {
 			return annotatedMethods;
 		}
-		Method[] methods = (baseType.isInterface() ? baseType.getMethods() : baseType.getDeclaredMethods());
+		Method[] methods = (ifcCheck ? baseType.getMethods() : baseType.getDeclaredMethods());
 		for (Method baseMethod : methods) {
 			try {
-				if (hasSearchableAnnotations(baseMethod)) {
+				// Public methods on interfaces (including interface hierarchy),
+				// non-private (and therefore overridable) methods on base classes
+				if ((ifcCheck || !Modifier.isPrivate(baseMethod.getModifiers())) &&
+						hasSearchableAnnotations(baseMethod)) {
 					if (annotatedMethods == null) {
 						annotatedMethods = new HashSet<>();
 					}

@@ -165,8 +165,8 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		TestCallable task2 = new TestCallable(-1);
 		Future<?> future2 = executor.submit(task2);
 		shutdownExecutor();
-		future1.get();
-		future2.get();
+		future1.get(100, TimeUnit.MILLISECONDS);
+		future2.get(100, TimeUnit.MILLISECONDS);
 	}
 
 	@Test
@@ -196,8 +196,8 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		TestCallable task2 = new TestCallable(-1);
 		ListenableFuture<?> future2 = executor.submitListenable(task2);
 		shutdownExecutor();
-		future1.get();
-		future2.get();
+		future1.get(100, TimeUnit.MILLISECONDS);
+		future2.get(100, TimeUnit.MILLISECONDS);
 	}
 
 

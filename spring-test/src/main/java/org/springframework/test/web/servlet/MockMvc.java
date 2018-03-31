@@ -89,6 +89,7 @@ public final class MockMvc {
 		Assert.notNull(servlet, "DispatcherServlet is required");
 		Assert.notNull(filters, "Filters cannot be null");
 		Assert.noNullElements(filters, "Filters cannot contain null values");
+
 		this.servlet = servlet;
 		this.filters = filters;
 		this.servletContext = servlet.getServletContext();
@@ -201,7 +202,6 @@ public final class MockMvc {
 		for (ResultMatcher matcher : this.defaultResultMatchers) {
 			matcher.match(mvcResult);
 		}
-
 		for (ResultHandler handler : this.defaultResultHandlers) {
 			handler.handle(mvcResult);
 		}

@@ -711,7 +711,7 @@ public class AnnotationUtilsTests {
 	public void getAttributeOverrideNameFromWrongTargetAnnotation() throws Exception {
 		Method attribute = AliasedComposedContextConfig.class.getDeclaredMethod("xmlConfigFile");
 		assertThat("xmlConfigFile is not an alias for @Component.",
-			getAttributeOverrideName(attribute, Component.class), is(nullValue()));
+				getAttributeOverrideName(attribute, Component.class), is(nullValue()));
 	}
 
 	@Test
@@ -905,7 +905,6 @@ public class AnnotationUtilsTests {
 	public void synthesizeAnnotationWithAttributeAliasWithMirroredAliasForWrongAttribute() throws Exception {
 		AliasForWithMirroredAliasForWrongAttribute annotation =
 				AliasForWithMirroredAliasForWrongAttributeClass.class.getAnnotation(AliasForWithMirroredAliasForWrongAttribute.class);
-
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(startsWith("Attribute 'bar' in"));
 		exception.expectMessage(containsString(AliasForWithMirroredAliasForWrongAttribute.class.getName()));
@@ -1013,18 +1012,18 @@ public class AnnotationUtilsTests {
 	@Test
 	public void synthesizeAnnotationWithImplicitAliasesWithImpliedAliasNamesOmitted() throws Exception {
 		assertAnnotationSynthesisWithImplicitAliasesWithImpliedAliasNamesOmitted(
-			ValueImplicitAliasesWithImpliedAliasNamesOmittedContextConfigClass.class, "value");
+				ValueImplicitAliasesWithImpliedAliasNamesOmittedContextConfigClass.class, "value");
 		assertAnnotationSynthesisWithImplicitAliasesWithImpliedAliasNamesOmitted(
-			LocationsImplicitAliasesWithImpliedAliasNamesOmittedContextConfigClass.class, "location");
+				LocationsImplicitAliasesWithImpliedAliasNamesOmittedContextConfigClass.class, "location");
 		assertAnnotationSynthesisWithImplicitAliasesWithImpliedAliasNamesOmitted(
-			XmlFilesImplicitAliasesWithImpliedAliasNamesOmittedContextConfigClass.class, "xmlFile");
+				XmlFilesImplicitAliasesWithImpliedAliasNamesOmittedContextConfigClass.class, "xmlFile");
 	}
 
-	private void assertAnnotationSynthesisWithImplicitAliasesWithImpliedAliasNamesOmitted(Class<?> clazz,
-			String expected) throws Exception {
+	private void assertAnnotationSynthesisWithImplicitAliasesWithImpliedAliasNamesOmitted(
+			Class<?> clazz, String expected) {
 
 		ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig config = clazz.getAnnotation(
-			ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig.class);
+				ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig.class);
 		assertNotNull(config);
 
 		ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig synthesizedConfig = synthesizeAnnotation(config);
@@ -1222,7 +1221,6 @@ public class AnnotationUtilsTests {
 	@Test
 	public void synthesizeAnnotationWithAttributeAliasesWithDifferentValues() throws Exception {
 		ContextConfig contextConfig = synthesizeAnnotation(ContextConfigMismatch.class.getAnnotation(ContextConfig.class));
-
 		exception.expect(AnnotationConfigurationException.class);
 		getValue(contextConfig);
 	}
