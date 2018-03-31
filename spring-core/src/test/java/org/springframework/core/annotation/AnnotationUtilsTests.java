@@ -22,7 +22,6 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
@@ -39,7 +38,6 @@ import org.springframework.core.annotation.subpackage.NonPublicAnnotatedClass;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 
 import static java.util.Arrays.*;
 import static java.util.stream.Collectors.*;
@@ -64,23 +62,8 @@ public class AnnotationUtilsTests {
 
 
 	@Before
-	public void clearCachesBeforeTests() {
-		clearCaches();
-	}
-
-	static void clearCaches() {
-		clearCache("findAnnotationCache", "annotatedInterfaceCache", "metaPresentCache", "synthesizableCache",
-				"attributeAliasesCache", "attributeMethodsCache", "aliasDescriptorCache");
-	}
-
-	static void clearCache(String... cacheNames) {
-		stream(cacheNames).forEach(cacheName -> getCache(cacheName).clear());
-	}
-
-	static Map<?, ?> getCache(String cacheName) {
-		Field field = ReflectionUtils.findField(AnnotationUtils.class, cacheName);
-		ReflectionUtils.makeAccessible(field);
-		return (Map<?, ?>) ReflectionUtils.getField(field, null);
+	public void clearCacheBeforeTests() {
+		AnnotationUtils.clearCache();
 	}
 
 
@@ -1544,9 +1527,9 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void interfaceWithAnnotatedMethods() {
-		assertFalse(AnnotationUtils.isInterfaceWithAnnotatedMethods(NonAnnotatedInterface.class));
-		assertTrue(AnnotationUtils.isInterfaceWithAnnotatedMethods(AnnotatedInterface.class));
-		assertFalse(AnnotationUtils.isInterfaceWithAnnotatedMethods(NullableAnnotatedInterface.class));
+		assertTrue(AnnotationUtils.getAnnotatedMethodsInBaseType(NonAnnotatedInterface.class).isEmpty());
+		assertFalse(AnnotationUtils.getAnnotatedMethodsInBaseType(AnnotatedInterface.class).isEmpty());
+		assertTrue(AnnotationUtils.getAnnotatedMethodsInBaseType(NullableAnnotatedInterface.class).isEmpty());
 	}
 
 

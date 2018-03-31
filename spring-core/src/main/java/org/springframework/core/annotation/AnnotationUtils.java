@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -122,7 +123,7 @@ public abstract class AnnotationUtils {
 	private static final Map<AnnotationCacheKey, Boolean> metaPresentCache =
 			new ConcurrentReferenceHashMap<>(256);
 
-	private static final Map<Class<?>, Boolean> annotatedInterfaceCache =
+	private static final Map<Class<?>, Set<Method>> annotatedBaseTypeCache =
 			new ConcurrentReferenceHashMap<>(256);
 
 	private static final Map<Class<? extends Annotation>, Boolean> synthesizableCache =
@@ -539,7 +540,6 @@ public abstract class AnnotationUtils {
 		if (result == null) {
 			Method resolvedMethod = BridgeMethodResolver.findBridgedMethod(method);
 			result = findAnnotation((AnnotatedElement) resolvedMethod, annotationType);
-
 			if (result == null) {
 				result = searchOnInterfaces(method, annotationType, method.getDeclaringClass().getInterfaces());
 			}
@@ -574,48 +574,63 @@ public abstract class AnnotationUtils {
 
 	@Nullable
 	private static <A extends Annotation> A searchOnInterfaces(Method method, Class<A> annotationType, Class<?>... ifcs) {
-		A annotation = null;
 		for (Class<?> ifc : ifcs) {
-			if (isInterfaceWithAnnotatedMethods(ifc)) {
-				try {
-					Method equivalentMethod = ifc.getMethod(method.getName(), method.getParameterTypes());
-					annotation = getAnnotation(equivalentMethod, annotationType);
-				}
-				catch (NoSuchMethodException ex) {
-					// Skip this interface - it doesn't have the method...
-				}
-				if (annotation != null) {
-					break;
+			Set<Method> annotatedMethods = getAnnotatedMethodsInBaseType(ifc);
+			if (!annotatedMethods.isEmpty()) {
+				for (Method annotatedMethod : annotatedMethods) {
+					if (annotatedMethod.getName().equals(method.getName()) &&
+							Arrays.equals(annotatedMethod.getParameterTypes(), method.getParameterTypes())) {
+						A annotation = getAnnotation(annotatedMethod, annotationType);
+						if (annotation != null) {
+							return annotation;
+						}
+					}
 				}
 			}
 		}
-		return annotation;
+		return null;
 	}
 
-	static boolean isInterfaceWithAnnotatedMethods(Class<?> ifc) {
-		if (ClassUtils.isJavaLanguageInterface(ifc)) {
-			return false;
+	static Set<Method> getAnnotatedMethodsInBaseType(Class<?> baseType) {
+		if (ClassUtils.isJavaLanguageInterface(baseType)) {
+			return Collections.emptySet();
 		}
 
-		Boolean found = annotatedInterfaceCache.get(ifc);
-		if (found != null) {
-			return found;
+		Set<Method> annotatedMethods = annotatedBaseTypeCache.get(baseType);
+		if (annotatedMethods != null) {
+			return annotatedMethods;
 		}
-		found = Boolean.FALSE;
-		for (Method ifcMethod : ifc.getMethods()) {
+		Method[] methods = (baseType.isInterface() ? baseType.getMethods() : baseType.getDeclaredMethods());
+		for (Method baseMethod : methods) {
 			try {
-				Annotation[] anns = ifcMethod.getAnnotations();
-				if (anns.length > 1 || (anns.length == 1 && anns[0].annotationType() != Nullable.class)) {
-					found = Boolean.TRUE;
-					break;
+				if (hasSearchableAnnotations(baseMethod)) {
+					if (annotatedMethods == null) {
+						annotatedMethods = new HashSet<>();
+					}
+					annotatedMethods.add(baseMethod);
 				}
 			}
 			catch (Throwable ex) {
-				handleIntrospectionFailure(ifcMethod, ex);
+				handleIntrospectionFailure(baseMethod, ex);
 			}
 		}
-		annotatedInterfaceCache.put(ifc, found);
-		return found;
+		if (annotatedMethods == null) {
+			annotatedMethods = Collections.emptySet();
+		}
+		annotatedBaseTypeCache.put(baseType, annotatedMethods);
+		return annotatedMethods;
+	}
+
+	private static boolean hasSearchableAnnotations(Method ifcMethod) {
+		Annotation[] anns = ifcMethod.getAnnotations();
+		if (anns.length == 0) {
+			return false;
+		}
+		if (anns.length == 1) {
+			Class<?> annType = anns[0].annotationType();
+			return (annType != Nullable.class && annType != Deprecated.class);
+		}
+		return true;
 	}
 
 	/**
@@ -1873,6 +1888,20 @@ public abstract class AnnotationUtils {
 				loggerToUse.info("Failed to introspect annotations on " + element + ": " + ex);
 			}
 		}
+	}
+
+	/**
+	 * Clear the internal annotation metadata cache.
+	 * @since 4.3.15
+	 */
+	public static void clearCache() {
+		findAnnotationCache.clear();
+		metaPresentCache.clear();
+		annotatedBaseTypeCache.clear();
+		synthesizableCache.clear();
+		attributeAliasesCache.clear();
+		attributeMethodsCache.clear();
+		aliasDescriptorCache.clear();
 	}
 
 
