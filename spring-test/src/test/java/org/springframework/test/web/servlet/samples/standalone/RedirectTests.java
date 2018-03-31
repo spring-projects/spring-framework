@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import org.springframework.test.web.Person;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -109,13 +109,13 @@ public class RedirectTests {
 	@Controller
 	private static class PersonController {
 
-		@RequestMapping(value="/persons/{name}", method=RequestMethod.GET)
+		@GetMapping("/persons/{name}")
 		public String getPerson(@PathVariable String name, Model model) {
 			model.addAttribute(new Person(name));
 			return "persons/index";
 		}
 
-		@RequestMapping(value="/persons", method=RequestMethod.POST)
+		@PostMapping
 		public String save(@Valid Person person, Errors errors, RedirectAttributes redirectAttrs) {
 			if (errors.hasErrors()) {
 				return "persons/add";
@@ -125,7 +125,7 @@ public class RedirectTests {
 			return "redirect:/persons/{name}";
 		}
 
-		@RequestMapping(value="/people", method=RequestMethod.POST)
+		@PostMapping("/people")
 		public Object saveSpecial(@Valid Person person, Errors errors, RedirectAttributes redirectAttrs) {
 			if (errors.hasErrors()) {
 				return "persons/add";

@@ -19,8 +19,6 @@ package org.springframework.web.socket.server.standard;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -63,9 +61,7 @@ public class WebLogicRequestUpgradeStrategy extends AbstractTyrusRequestUpgradeS
 			UpgradeInfo upgradeInfo, TyrusUpgradeResponse upgradeResponse) throws IOException, ServletException {
 
 		response.setStatus(upgradeResponse.getStatus());
-		for (Map.Entry<String, List<String>> entry : upgradeResponse.getHeaders().entrySet()) {
-			response.addHeader(entry.getKey(), Utils.getHeaderFromList(entry.getValue()));
-		}
+		upgradeResponse.getHeaders().forEach((key, value) -> response.addHeader(key, Utils.getHeaderFromList(value)));
 
 		AsyncContext asyncContext = request.startAsync();
 		asyncContext.setTimeout(-1L);

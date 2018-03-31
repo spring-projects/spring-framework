@@ -18,6 +18,7 @@ package org.springframework.util;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,7 +46,7 @@ public abstract class MimeTypeUtils {
 					'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
 					'V', 'W', 'X', 'Y', 'Z'};
 
-	private static final Random RND = new Random();
+	private static final Random RND = new SecureRandom();
 
 	/**
 	 * Comparator used by {@link #sortBySpecificity(List)}.
@@ -65,92 +66,92 @@ public abstract class MimeTypeUtils {
 	/**
 	 * Public constant mime type for {@code application/json}.
 	 * */
-	public final static MimeType APPLICATION_JSON;
+	public static final MimeType APPLICATION_JSON;
 
 	/**
 	 * A String equivalent of {@link MimeTypeUtils#APPLICATION_JSON}.
 	 */
-	public final static String APPLICATION_JSON_VALUE = "application/json";
+	public static final String APPLICATION_JSON_VALUE = "application/json";
 
 	/**
 	 * Public constant mime type for {@code application/octet-stream}.
 	 *  */
-	public final static MimeType APPLICATION_OCTET_STREAM;
+	public static final MimeType APPLICATION_OCTET_STREAM;
 
 	/**
 	 * A String equivalent of {@link MimeTypeUtils#APPLICATION_OCTET_STREAM}.
 	 */
-	public final static String APPLICATION_OCTET_STREAM_VALUE = "application/octet-stream";
+	public static final String APPLICATION_OCTET_STREAM_VALUE = "application/octet-stream";
 
 	/**
 	 * Public constant mime type for {@code application/xml}.
 	 */
-	public final static MimeType APPLICATION_XML;
+	public static final MimeType APPLICATION_XML;
 
 	/**
 	 * A String equivalent of {@link MimeTypeUtils#APPLICATION_XML}.
 	 */
-	public final static String APPLICATION_XML_VALUE = "application/xml";
+	public static final String APPLICATION_XML_VALUE = "application/xml";
 
 	/**
 	 * Public constant mime type for {@code image/gif}.
 	 */
-	public final static MimeType IMAGE_GIF;
+	public static final MimeType IMAGE_GIF;
 
 	/**
 	 * A String equivalent of {@link MimeTypeUtils#IMAGE_GIF}.
 	 */
-	public final static String IMAGE_GIF_VALUE = "image/gif";
+	public static final String IMAGE_GIF_VALUE = "image/gif";
 
 	/**
 	 * Public constant mime type for {@code image/jpeg}.
 	 */
-	public final static MimeType IMAGE_JPEG;
+	public static final MimeType IMAGE_JPEG;
 
 	/**
 	 * A String equivalent of {@link MimeTypeUtils#IMAGE_JPEG}.
 	 */
-	public final static String IMAGE_JPEG_VALUE = "image/jpeg";
+	public static final String IMAGE_JPEG_VALUE = "image/jpeg";
 
 	/**
 	 * Public constant mime type for {@code image/png}.
 	 */
-	public final static MimeType IMAGE_PNG;
+	public static final MimeType IMAGE_PNG;
 
 	/**
 	 * A String equivalent of {@link MimeTypeUtils#IMAGE_PNG}.
 	 */
-	public final static String IMAGE_PNG_VALUE = "image/png";
+	public static final String IMAGE_PNG_VALUE = "image/png";
 
 	/**
 	 * Public constant mime type for {@code text/html}.
 	 *  */
-	public final static MimeType TEXT_HTML;
+	public static final MimeType TEXT_HTML;
 
 	/**
 	 * A String equivalent of {@link MimeTypeUtils#TEXT_HTML}.
 	 */
-	public final static String TEXT_HTML_VALUE = "text/html";
+	public static final String TEXT_HTML_VALUE = "text/html";
 
 	/**
 	 * Public constant mime type for {@code text/plain}.
 	 *  */
-	public final static MimeType TEXT_PLAIN;
+	public static final MimeType TEXT_PLAIN;
 
 	/**
 	 * A String equivalent of {@link MimeTypeUtils#TEXT_PLAIN}.
 	 */
-	public final static String TEXT_PLAIN_VALUE = "text/plain";
+	public static final String TEXT_PLAIN_VALUE = "text/plain";
 
 	/**
 	 * Public constant mime type for {@code text/xml}.
 	 *  */
-	public final static MimeType TEXT_XML;
+	public static final MimeType TEXT_XML;
 
 	/**
 	 * A String equivalent of {@link MimeTypeUtils#TEXT_XML}.
 	 */
-	public final static String TEXT_XML_VALUE = "text/xml";
+	public static final String TEXT_XML_VALUE = "text/xml";
 
 
 	static {
@@ -224,8 +225,8 @@ public abstract class MimeTypeUtils {
 				}
 				int eqIndex = parameter.indexOf('=');
 				if (eqIndex >= 0) {
-					String attribute = parameter.substring(0, eqIndex);
-					String value = parameter.substring(eqIndex + 1, parameter.length());
+					String attribute = parameter.substring(0, eqIndex).trim();
+					String value = parameter.substring(eqIndex + 1, parameter.length()).trim();
 					parameters.put(attribute, value);
 				}
 			}
@@ -311,6 +312,9 @@ public abstract class MimeTypeUtils {
 			mimeTypes.sort(SPECIFICITY_COMPARATOR);
 		}
 	}
+
+
+
 
 	/**
 	 * Generate a random MIME boundary as bytes, often used in multipart mime types.

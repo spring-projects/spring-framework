@@ -1106,7 +1106,7 @@ The `number` package provides a `NumberFormatter`, `CurrencyFormatter`, and
 `PercentFormatter` to format `java.lang.Number` objects using a `java.text.NumberFormat`.
 The `datetime` package provides a `DateFormatter` to format `java.util.Date` objects with
 a `java.text.DateFormat`. The `datetime.joda` package provides comprehensive datetime
-formatting support based on the http://joda-time.sourceforge.net[Joda Time library].
+formatting support based on the http://joda-time.sourceforge.net[Joda-Time library].
 
 Consider `DateFormatter` as an example `Formatter` implementation:
 
@@ -1240,7 +1240,7 @@ To trigger formatting, simply annotate fields with @NumberFormat:
 
 A portable format annotation API exists in the `org.springframework.format.annotation`
 package. Use @NumberFormat to format java.lang.Number fields. Use @DateTimeFormat to
-format java.util.Date, java.util.Calendar, java.util.Long, or Joda Time fields.
+format java.util.Date, java.util.Calendar, java.util.Long, or Joda-Time fields.
 
 The example below uses @DateTimeFormat to format a java.util.Date as a ISO Date
 (yyyy-MM-dd):
@@ -1344,10 +1344,10 @@ You will need to ensure that Spring does not register default formatters, and in
 you should register all formatters manually. Use the
 `org.springframework.format.datetime.joda.JodaTimeFormatterRegistrar` or
 `org.springframework.format.datetime.DateFormatterRegistrar` class depending on whether
-you use the Joda Time library.
+you use the Joda-Time library.
 
 For example, the following Java configuration will register a global ' `yyyyMMdd`'
-format. This example does not depend on the Joda Time library:
+format. This example does not depend on the Joda-Time library:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1412,7 +1412,7 @@ Time:
 
 [NOTE]
 ====
-Joda Time provides separate distinct types to represent `date`, `time` and `date-time`
+Joda-Time provides separate distinct types to represent `date`, `time` and `date-time`
 values. The `dateFormatter`, `timeFormatter` and `dateTimeFormatter` properties of the
 `JodaTimeFormatterRegistrar` should be used to configure the different formats for each
 type. The `DateTimeFormatterFactoryBean` provides a convenient way to create formatters.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -65,7 +64,6 @@ public abstract class BodyExtractors {
 	 * @return a {@code BodyExtractor} that reads a mono
 	 */
 	public static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(Class<? extends T> elementClass) {
-		Assert.notNull(elementClass, "'elementClass' must not be null");
 		return toMono(ResolvableType.forClass(elementClass));
 	}
 
@@ -87,12 +85,10 @@ public abstract class BodyExtractors {
 	public static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(
 			ParameterizedTypeReference<T> typeReference) {
 
-		Assert.notNull(typeReference, "'typeReference' must not be null");
 		return toMono(ResolvableType.forType(typeReference.getType()));
 	}
 
 	static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(ResolvableType elementType) {
-		Assert.notNull(elementType, "'elementType' must not be null");
 		return (inputMessage, context) -> readWithMessageReaders(inputMessage, context,
 				elementType,
 				(HttpMessageReader<T> reader) -> {
@@ -117,7 +113,6 @@ public abstract class BodyExtractors {
 	 * @return a {@code BodyExtractor} that reads a flux
 	 */
 	public static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(Class<? extends T> elementClass) {
-		Assert.notNull(elementClass, "'elementClass' must not be null");
 		return toFlux(ResolvableType.forClass(elementClass));
 	}
 
@@ -139,13 +134,11 @@ public abstract class BodyExtractors {
 	public static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(
 			ParameterizedTypeReference<T> typeReference) {
 
-		Assert.notNull(typeReference, "'typeReference' must not be null");
 		return toFlux(ResolvableType.forType(typeReference.getType()));
 	}
 
 	@SuppressWarnings("unchecked")
 	static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(ResolvableType elementType) {
-		Assert.notNull(elementType, "'elementType' must not be null");
 		return (inputMessage, context) -> readWithMessageReaders(inputMessage, context,
 				elementType,
 				(HttpMessageReader<T> reader) -> {

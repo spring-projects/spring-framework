@@ -90,11 +90,11 @@ public class HttpHandlerConnector implements ClientHttpConnector {
 			return Mono.empty();
 		});
 
-		mockServerResponse.setWriteHandler(responseBody -> {
-			log("Creating client response for ", httpMethod, uri);
-			result.onNext(adaptResponse(mockServerResponse, responseBody));
-			return Mono.empty();
-		});
+		mockServerResponse.setWriteHandler(responseBody ->
+				Mono.fromRunnable(() -> {
+					log("Creating client response for ", httpMethod, uri);
+					result.onNext(adaptResponse(mockServerResponse, responseBody));
+				}));
 
 		log("Writing client request for ", httpMethod, uri);
 		requestCallback.apply(mockClientRequest).subscribe(aVoid -> {}, result::onError);

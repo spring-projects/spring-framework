@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,13 +57,13 @@ public enum SpelMessage {
 			"Property or field ''{0}'' cannot be found on null"),
 
 	PROPERTY_OR_FIELD_NOT_READABLE(Kind.ERROR, 1008,
-			"Property or field ''{0}'' cannot be found on object of type ''{1}'' - maybe not public?"),
+			"Property or field ''{0}'' cannot be found on object of type ''{1}'' - maybe not public or not valid?"),
 
 	PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL(Kind.ERROR, 1009,
 			"Property or field ''{0}'' cannot be set on null"),
 
 	PROPERTY_OR_FIELD_NOT_WRITABLE(Kind.ERROR, 1010,
-			"Property or field ''{0}'' cannot be set on object of type ''{1}'' - maybe not public?"),
+			"Property or field ''{0}'' cannot be set on object of type ''{1}'' - maybe not public or not writable?"),
 
 	METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED(Kind.ERROR, 1011,
 			"Method call: Attempted to call method {0} on null context object"),

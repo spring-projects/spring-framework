@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,11 @@
 
 package org.springframework.core;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import org.junit.Before;
@@ -26,6 +31,7 @@ import static org.junit.Assert.*;
 /**
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class MethodParameterTests {
 
@@ -39,7 +45,7 @@ public class MethodParameterTests {
 
 
 	@Before
-	public void setUp() throws NoSuchMethodException {
+	public void setup() throws NoSuchMethodException {
 		method = getClass().getMethod("method", String.class, Long.TYPE);
 		stringParameter = new MethodParameter(method, 0);
 		longParameter = new MethodParameter(method, 1);
@@ -98,9 +104,53 @@ public class MethodParameterTests {
 		new MethodParameter(method, 2);
 	}
 
+	@Test
+	public void annotatedConstructorParameterInStaticNestedClass() throws Exception {
+		Constructor<?> constructor = NestedClass.class.getDeclaredConstructor(String.class);
+		MethodParameter methodParameter = MethodParameter.forExecutable(constructor, 0);
+		assertEquals(String.class, methodParameter.getParameterType());
+		assertNotNull("Failed to find @Param annotation", methodParameter.getParameterAnnotation(Param.class));
+	}
+
+	@Test  // SPR-16652
+	public void annotatedConstructorParameterInInnerClass() throws Exception {
+		Constructor<?> constructor = InnerClass.class.getConstructor(getClass(), String.class, Integer.class);
+
+		MethodParameter methodParameter = MethodParameter.forExecutable(constructor, 0);
+		assertEquals(getClass(), methodParameter.getParameterType());
+		assertNull(methodParameter.getParameterAnnotation(Param.class));
+
+		methodParameter = MethodParameter.forExecutable(constructor, 1);
+		assertEquals(String.class, methodParameter.getParameterType());
+		assertNotNull("Failed to find @Param annotation", methodParameter.getParameterAnnotation(Param.class));
+
+		methodParameter = MethodParameter.forExecutable(constructor, 2);
+		assertEquals(Integer.class, methodParameter.getParameterType());
+		assertNull(methodParameter.getParameterAnnotation(Param.class));
+	}
+
 
 	public int method(String p1, long p2) {
 		return 42;
+	}
+
+	@SuppressWarnings("unused")
+	private static class NestedClass {
+
+		NestedClass(@Param String s) {
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private class InnerClass {
+
+		public InnerClass(@Param String s, Integer i) {
+		}
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.PARAMETER)
+	private @interface Param {
 	}
 
 }

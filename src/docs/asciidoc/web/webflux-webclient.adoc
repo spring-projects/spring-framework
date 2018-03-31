@@ -22,8 +22,10 @@ By comparison to the <<integration.adoc#rest-resttemplate,RestTemplate>>, the
 * supports both synchronous and asynchronous scenarios.
 * supports streaming up or down from a server.
 
-For most concurrent scenarios, e.g. a sequence of possibly inter-dependent HTTP calls,
-or for making remote calls from the server-side, prefer using the `WebClient`.
+The `RestTemplate` is not a good fit for use in non-blocking applications, and therefore
+Spring WebFlux application should always use the `WebClient`. The `WebClient` should also
+be preferred in Spring MVC, in most high concurrency scenarios, and for composing a
+sequence of remote, inter-dependent calls.
 
 
 
@@ -201,9 +203,10 @@ You can also supply form data in-line via `BodyInserters`:
 [[webflux-client-body-multipart]]
 === Multipart data
 
-To send multipart data, provide a `MultiValueMap<String, ?>` where values are either an
-Object representing the part body, or an `HttpEntity` representing the part body and
-headers. `MultipartBodyBuilder` can be used to build the parts:
+To send multipart data, you need to provide a `MultiValueMap<String, ?>` whose values are
+either Objects representing part content, or `HttpEntity` representing the content and
+headers for a part. `MultipartBodyBuilder` provides a convenient API to prepare a
+multipart request:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -214,19 +217,36 @@ headers. `MultipartBodyBuilder` can be used to build the parts:
 	builder.part("jsonPart", new Person("Jason"));
 
 	MultiValueMap<String, HttpEntity<?>> parts = builder.build();
+----
+
+In most cases you do not have to specify the `Content-Type` for each part. The content
+type is determined automatically based on the `HttpMessageWriter` chosen to serialize it,
+or in the case of a `Resource` based on the file extension. If necessary you can
+explicitly provide the `MediaType` to use for each part through one fo the overloaded
+builder `part` methods.
+
+Once a `MultiValueMap` is prepared, the easiest way to pass it to the the `WebClient` is
+through the `syncBody` method:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	MultipartBodyBuilder builder = ...;
 
 	Mono<Void> result = client.post()
 			.uri("/path", id)
-			.syncBody(parts)
+			.syncBody(**builder.build()**)
 			.retrieve()
 			.bodyToMono(Void.class);
 ----
 
-Note that the content type for each part is automatically set based on the extension of the
-file being written or the type of Object. If you prefer you can also be more explicit and
-specify the content type for each part.
+If the `MultiValueMap` contains at least one non-String value, which could also be
+represent regular form data (i.e. "application/x-www-form-urlencoded"), you don't have to
+set the `Content-Type` to "multipart/form-data". This is always the case when using
+`MultipartBodyBuilder` which ensures an `HttpEntity` wrapper.
 
-You can also supply multipart data in-line via `BodyInserters`:
+As an alternative to `MultipartBodyBuilder`, you can also provide multipart content,
+inline-style, through the built-in `BodyInserters`. For example:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -239,6 +259,7 @@ You can also supply multipart data in-line via `BodyInserters`:
 			.retrieve()
 			.bodyToMono(Void.class);
 ----
+
 
 
 

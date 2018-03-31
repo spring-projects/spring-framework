@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.reactive.result.condition;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,7 +46,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public final class ProducesRequestCondition extends AbstractRequestCondition<ProducesRequestCondition> {
 
-	private final static ProducesRequestCondition PRE_FLIGHT_MATCH = new ProducesRequestCondition();
+	private static final ProducesRequestCondition PRE_FLIGHT_MATCH = new ProducesRequestCondition();
 
 
 	private final List<ProduceMediaTypeExpression> mediaTypeAllList =
@@ -192,12 +191,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 			return this;
 		}
 		Set<ProduceMediaTypeExpression> result = new LinkedHashSet<>(expressions);
-		for (Iterator<ProduceMediaTypeExpression> iterator = result.iterator(); iterator.hasNext();) {
-			ProduceMediaTypeExpression expression = iterator.next();
-			if (!expression.match(exchange)) {
-				iterator.remove();
-			}
-		}
+		result.removeIf(expression -> !expression.match(exchange));
 		return (result.isEmpty()) ? null : new ProducesRequestCondition(result, this.contentTypeResolver);
 	}
 
@@ -244,11 +238,8 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 		}
 	}
 
-	private List<MediaType> getAcceptedMediaTypes(ServerWebExchange exchange)
-			throws NotAcceptableStatusException {
-
-		List<MediaType> mediaTypes = this.contentTypeResolver.resolveMediaTypes(exchange);
-		return mediaTypes.isEmpty() ? Collections.singletonList(MediaType.ALL) : mediaTypes;
+	private List<MediaType> getAcceptedMediaTypes(ServerWebExchange exchange) throws NotAcceptableStatusException {
+		return this.contentTypeResolver.resolveMediaTypes(exchange);
 	}
 
 	private int indexOfEqualMediaType(MediaType mediaType) {

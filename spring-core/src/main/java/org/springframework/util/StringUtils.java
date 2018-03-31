@@ -748,8 +748,8 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Parse the given {@code localeString} value into a {@link Locale}.
-	 * <p>This is the inverse operation of {@link Locale#toString Locale's toString}.
+	 * Parse the given {@code String} value into a {@link Locale}, accepting
+	 * the {@link Locale#toString} format as well as BCP 47 language tags.
 	 * @param localeValue the locale value: following either {@code Locale's}
 	 * {@code toString()} format ("en", "en_UK", etc), also accepting spaces as
 	 * separators (as an alternative to underscores), or BCP 47 (e.g. "en-UK")
@@ -770,7 +770,7 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Parse the given {@code localeString} value into a {@link Locale}.
+	 * Parse the given {@code String} representation into a {@link Locale}.
 	 * <p>This is the inverse operation of {@link Locale#toString Locale's toString}.
 	 * @param localeString the locale {@code String}: following {@code Locale's}
 	 * {@code toString()} format ("en", "en_UK", etc), also accepting spaces as

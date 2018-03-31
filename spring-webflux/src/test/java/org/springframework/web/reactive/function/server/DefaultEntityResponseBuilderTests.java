@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.nio.ByteBuffer;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -24,7 +23,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiFunction;
 
 import org.junit.Test;
 import org.reactivestreams.Publisher;
@@ -34,8 +32,6 @@ import reactor.test.StepVerifier;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -44,16 +40,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.*;
 
 /**
@@ -135,7 +128,6 @@ public class DefaultEntityResponseBuilderTests {
 				.verify();
 	}
 
-
 	@Test
 	public void lastModified() throws Exception {
 		ZonedDateTime now = ZonedDateTime.now();
@@ -197,14 +189,6 @@ public class DefaultEntityResponseBuilderTests {
 	public void bodyInserter() throws Exception {
 		String body = "foo";
 		Publisher<String> publisher = Mono.just(body);
-		BiFunction<ServerHttpResponse, BodyInserter.Context, Mono<Void>> writer =
-				(response, strategies) -> {
-					byte[] bodyBytes = body.getBytes(UTF_8);
-					ByteBuffer byteBuffer = ByteBuffer.wrap(bodyBytes);
-					DataBuffer buffer = new DefaultDataBufferFactory().wrap(byteBuffer);
-
-					return response.writeWith(Mono.just(buffer));
-				};
 
 		Mono<EntityResponse<Publisher<String>>> result = EntityResponse.fromPublisher(publisher, String.class).build();
 
@@ -256,7 +240,6 @@ public class DefaultEntityResponseBuilderTests {
 				.expectError(IllegalStateException.class)
 				.verify();
 	}
-
 
 	@Test
 	public void notModifiedLastModified() {

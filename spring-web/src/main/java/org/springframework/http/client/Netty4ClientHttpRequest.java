@@ -19,8 +19,6 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import io.netty.bootstrap.Bootstrap;
@@ -142,9 +140,7 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 
 		nettyRequest.headers().set(HttpHeaders.HOST, this.uri.getHost() + ":" + getPort(uri));
 		nettyRequest.headers().set(HttpHeaders.CONNECTION, "close");
-		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-			nettyRequest.headers().add(entry.getKey(), entry.getValue());
-		}
+		headers.forEach((headerName, headerValues) -> nettyRequest.headers().add(headerName, headerValues));
 		if (!nettyRequest.headers().contains(HttpHeaders.CONTENT_LENGTH) && this.body.buffer().readableBytes() > 0) {
 			nettyRequest.headers().set(HttpHeaders.CONTENT_LENGTH, this.body.buffer().readableBytes());
 		}

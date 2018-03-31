@@ -593,11 +593,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 							registerDependentBeans(beanName, autowiredBeanNames);
 							if (autowiredBeanNames.size() == 1) {
 								String autowiredBeanName = autowiredBeanNames.iterator().next();
-								if (beanFactory.containsBean(autowiredBeanName)) {
-									if (beanFactory.isTypeMatch(autowiredBeanName, field.getType())) {
-										this.cachedFieldValue = new ShortcutDependencyDescriptor(
-												desc, autowiredBeanName, field.getType());
-									}
+								if (beanFactory.containsBean(autowiredBeanName) &&
+										beanFactory.isTypeMatch(autowiredBeanName, field.getType())) {
+									this.cachedFieldValue = new ShortcutDependencyDescriptor(
+											desc, autowiredBeanName, field.getType());
 								}
 							}
 						}
@@ -678,11 +677,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 								Iterator<String> it = autowiredBeans.iterator();
 								for (int i = 0; i < paramTypes.length; i++) {
 									String autowiredBeanName = it.next();
-									if (beanFactory.containsBean(autowiredBeanName)) {
-										if (beanFactory.isTypeMatch(autowiredBeanName, paramTypes[i])) {
-											cachedMethodArguments[i] = new ShortcutDependencyDescriptor(
-													descriptors[i], autowiredBeanName, paramTypes[i]);
-										}
+									if (beanFactory.containsBean(autowiredBeanName) &&
+											beanFactory.isTypeMatch(autowiredBeanName, paramTypes[i])) {
+										cachedMethodArguments[i] = new ShortcutDependencyDescriptor(
+												descriptors[i], autowiredBeanName, paramTypes[i]);
 									}
 								}
 							}

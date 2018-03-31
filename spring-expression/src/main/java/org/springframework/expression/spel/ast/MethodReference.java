@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.asm.Label;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -55,6 +56,9 @@ public class MethodReference extends SpelNodeImpl {
 	private final String name;
 
 	private final boolean nullSafe;
+
+	@Nullable
+	private String originalPrimitiveExitTypeDescriptor;
 
 	@Nullable
 	private volatile CachedMethodExecutor cachedExecutor;
@@ -236,7 +240,14 @@ public class MethodReference extends SpelNodeImpl {
 		CachedMethodExecutor executorToCheck = this.cachedExecutor;
 		if (executorToCheck != null && executorToCheck.get() instanceof ReflectiveMethodExecutor) {
 			Method method = ((ReflectiveMethodExecutor) executorToCheck.get()).getMethod();
-			this.exitTypeDescriptor = CodeFlow.toDescriptor(method.getReturnType());
+			String descriptor = CodeFlow.toDescriptor(method.getReturnType());
+			if (this.nullSafe && CodeFlow.isPrimitive(descriptor)) {
+				originalPrimitiveExitTypeDescriptor = descriptor;
+				this.exitTypeDescriptor = CodeFlow.toBoxedDescriptor(descriptor);
+			}
+			else {
+				this.exitTypeDescriptor = descriptor;
+			}
 		}
 	}
 
@@ -296,24 +307,30 @@ public class MethodReference extends SpelNodeImpl {
 		boolean isStaticMethod = Modifier.isStatic(method.getModifiers());
 		String descriptor = cf.lastDescriptor();
 
-		if (descriptor == null) {
-			if (!isStaticMethod) {
-				// Nothing on the stack but something is needed
-				cf.loadTarget(mv);
-			}
+		Label skipIfNull = null;
+		if (descriptor == null && !isStaticMethod) {
+			// Nothing on the stack but something is needed
+			cf.loadTarget(mv);
 		}
-		else {
-			if (isStaticMethod) {
-				// Something on the stack when nothing is needed
-				mv.visitInsn(POP);
-			}
+		if ((descriptor != null || !isStaticMethod) && this.nullSafe) {
+			mv.visitInsn(DUP);
+			skipIfNull = new Label();
+			Label continueLabel = new Label();
+			mv.visitJumpInsn(IFNONNULL, continueLabel);
+			CodeFlow.insertCheckCast(mv, this.exitTypeDescriptor);
+			mv.visitJumpInsn(GOTO, skipIfNull);
+			mv.visitLabel(continueLabel);
+		}
+		if (descriptor != null && isStaticMethod) {
+			// Something on the stack when nothing is needed
+			mv.visitInsn(POP);
 		}
 		
 		if (CodeFlow.isPrimitive(descriptor)) {
 			CodeFlow.insertBoxIfNecessary(mv, descriptor.charAt(0));
 		}
 
-		String classDesc = null;
+		String classDesc;
 		if (Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
 			classDesc = method.getDeclaringClass().getName().replace('.', '/');
 		}
@@ -323,16 +340,23 @@ public class MethodReference extends SpelNodeImpl {
 			classDesc = publicDeclaringClass.getName().replace('.', '/');
 		}
 
-		if (!isStaticMethod) {
-			if (descriptor == null || !descriptor.substring(1).equals(classDesc)) {
-				CodeFlow.insertCheckCast(mv, "L" + classDesc);
-			}
+		if (!isStaticMethod && (descriptor == null || !descriptor.substring(1).equals(classDesc))) {
+			CodeFlow.insertCheckCast(mv, "L" + classDesc);
 		}
 
 		generateCodeForArguments(mv, cf, method, this.children);
 		mv.visitMethodInsn((isStaticMethod ? INVOKESTATIC : INVOKEVIRTUAL), classDesc, method.getName(),
 				CodeFlow.createSignatureDescriptor(method), method.getDeclaringClass().isInterface());
 		cf.pushDescriptor(this.exitTypeDescriptor);
+
+		if (this.originalPrimitiveExitTypeDescriptor != null) {
+			// The output of the accessor will be a primitive but from the block above it might be null,
+			// so to have a 'common stack' element at skipIfNull target we need to box the primitive
+			CodeFlow.insertBoxIfNecessary(mv, this.originalPrimitiveExitTypeDescriptor);
+		}
+		if (skipIfNull != null) {
+			mv.visitLabel(skipIfNull);
+		}
 	}
 
 

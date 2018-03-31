@@ -21,7 +21,6 @@ import java.nio.ByteBuffer;
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -39,8 +38,8 @@ import org.springframework.util.Assert;
  *
  * @author Violeta Georgieva
  * @since 5.0
+ * @see org.springframework.web.server.adapter.AbstractReactiveWebInitializer
  */
-@WebServlet(asyncSupported = true)
 public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 

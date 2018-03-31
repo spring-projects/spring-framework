@@ -381,10 +381,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 				refName = args[0].toString();
 			}
 			boolean parentRef = false;
-			if (args.length > 1) {
-				if (args[1] instanceof Boolean) {
-					parentRef = (Boolean) args[1];
-				}
+			if (args.length > 1 && args[1] instanceof Boolean) {
+				parentRef = (Boolean) args[1];
 			}
 			return new RuntimeBeanReference(refName, parentRef);
 		}
@@ -411,12 +409,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	private boolean addDeferredProperty(String property, Object newValue) {
-		if (newValue instanceof List) {
-			this.deferredProperties.put(this.currentBeanDefinition.getBeanName() + '.' + property,
-					new DeferredProperty(this.currentBeanDefinition, property, newValue));
-			return true;
-		}
-		else if (newValue instanceof Map) {
+		if (newValue instanceof List || newValue instanceof Map) {
 			this.deferredProperties.put(this.currentBeanDefinition.getBeanName() + '.' + property,
 					new DeferredProperty(this.currentBeanDefinition, property, newValue));
 			return true;

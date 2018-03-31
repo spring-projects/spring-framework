@@ -228,7 +228,9 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 				matches.add(match);
 			}
 		}
-		matches.sort(this.pathMatcher.getPatternComparator(lookupPath));
+		if (matches.size() > 1) {
+			matches.sort(this.pathMatcher.getPatternComparator(lookupPath));
+		}
 		return matches;
 	}
 

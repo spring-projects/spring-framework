@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,43 +104,9 @@ public class VariableReference extends SpelNodeImpl {
 		return !(this.name.equals(THIS) || this.name.equals(ROOT));
 	}
 
-
-	class VariableRef implements ValueRef {
-
-		private final String name;
-
-		private final TypedValue value;
-
-		private final EvaluationContext evaluationContext;
-
-
-		public VariableRef(String name, TypedValue value,
-				EvaluationContext evaluationContext) {
-			this.name = name;
-			this.value = value;
-			this.evaluationContext = evaluationContext;
-		}
-
-
-		@Override
-		public TypedValue getValue() {
-			return this.value;
-		}
-
-		@Override
-		public void setValue(@Nullable Object newValue) {
-			this.evaluationContext.setVariable(this.name, newValue);
-		}
-
-		@Override
-		public boolean isWritable() {
-			return true;
-		}
-	}
-
 	@Override
 	public boolean isCompilable() {
-		return this.exitTypeDescriptor!=null;
+		return (this.exitTypeDescriptor != null);
 	}
 	
 	@Override
@@ -157,5 +123,35 @@ public class VariableReference extends SpelNodeImpl {
 		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
+
+	private static class VariableRef implements ValueRef {
+
+		private final String name;
+
+		private final TypedValue value;
+
+		private final EvaluationContext evaluationContext;
+
+		public VariableRef(String name, TypedValue value, EvaluationContext evaluationContext) {
+			this.name = name;
+			this.value = value;
+			this.evaluationContext = evaluationContext;
+		}
+
+		@Override
+		public TypedValue getValue() {
+			return this.value;
+		}
+
+		@Override
+		public void setValue(@Nullable Object newValue) {
+			this.evaluationContext.setVariable(this.name, newValue);
+		}
+
+		@Override
+		public boolean isWritable() {
+			return true;
+		}
+	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -282,21 +282,21 @@ public class JsonPathExpectationsHelper {
 
 	@Nullable
 	private Object evaluateJsonPath(String content) {
-		String message = "No value at JSON path \"" + this.expression + "\"";
 		try {
 			return this.jsonPath.read(content);
 		}
 		catch (Throwable ex) {
+			String message = "No value at JSON path \"" + this.expression + "\"";
 			throw new AssertionError(message, ex);
 		}
 	}
 
 	private Object evaluateJsonPath(String content, Class<?> targetType) {
-		String message = "No value at JSON path \"" + this.expression + "\"";
 		try {
 			return JsonPath.parse(content).read(this.expression, targetType);
 		}
 		catch (Throwable ex) {
+			String message = "No value at JSON path \"" + this.expression + "\"";
 			throw new AssertionError(message, ex);
 		}
 	}

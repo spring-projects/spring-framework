@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,14 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 	public DefaultClientRequestBuilder(HttpMethod method, URI url) {
 		this.method = method;
 		this.url = url;
+	}
+
+	public DefaultClientRequestBuilder(ClientRequest other) {
+		this(other.method(), other.url());
+		headers(headers -> headers.addAll(other.headers()));
+		cookies(cookies -> cookies.addAll(other.cookies()));
+		attributes(attributes -> attributes.putAll(other.attributes()));
+		body(other.body());
 	}
 
 	@Override

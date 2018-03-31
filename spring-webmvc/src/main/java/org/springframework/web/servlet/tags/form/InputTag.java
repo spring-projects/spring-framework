@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -380,12 +380,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	 */
 	@Override
 	protected boolean isValidDynamicAttribute(String localName, Object value) {
-		if ("type".equals(localName)) {
-			if ("checkbox".equals(value) || "radio".equals(value)) {
-				return false;
-			}
-		}
-		return true;
+		return !("type".equals(localName) && ("checkbox".equals(value) || "radio".equals(value)));
 	}
 
 	/**

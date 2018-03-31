@@ -38,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  * @author Sam Brannen
  * @since 5.0
+ * @see NestedTestsWithConstructorInjectionWithSpringAndJUnitJupiterTestCase
  * @see org.springframework.test.context.junit4.nested.NestedTestsWithSpringRulesTests
  */
 @SpringJUnitConfig(TopLevelConfig.class)

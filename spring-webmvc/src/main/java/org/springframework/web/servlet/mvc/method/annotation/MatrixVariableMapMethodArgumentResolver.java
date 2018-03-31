@@ -54,12 +54,8 @@ public class MatrixVariableMapMethodArgumentResolver implements HandlerMethodArg
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		MatrixVariable matrixVariable = parameter.getParameterAnnotation(MatrixVariable.class);
-		if (matrixVariable != null) {
-			if (Map.class.isAssignableFrom(parameter.getParameterType())) {
-				return !StringUtils.hasText(matrixVariable.name());
-			}
-		}
-		return false;
+		return (matrixVariable != null && Map.class.isAssignableFrom(parameter.getParameterType()) &&
+				!StringUtils.hasText(matrixVariable.name()));
 	}
 
 	@Override
@@ -90,11 +86,11 @@ public class MatrixVariableMapMethodArgumentResolver implements HandlerMethodArg
 		}
 		else {
 			for (MultiValueMap<String, String> vars : matrixVariables.values()) {
-				for (String name : vars.keySet()) {
-					for (String value : vars.get(name)) {
+				vars.forEach((name, values) -> {
+					for (String value : values) {
 						map.add(name, value);
 					}
-				}
+				});
 			}
 		}
 

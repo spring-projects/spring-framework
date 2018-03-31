@@ -65,66 +65,66 @@ public class MediaType extends MimeType implements Serializable {
 	/**
 	 *  Public constant media type for {@code application/atom+xml}.
 	 */
-	public final static MediaType APPLICATION_ATOM_XML;
+	public static final MediaType APPLICATION_ATOM_XML;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_ATOM_XML}.
 	 */
-	public final static String APPLICATION_ATOM_XML_VALUE = "application/atom+xml";
+	public static final String APPLICATION_ATOM_XML_VALUE = "application/atom+xml";
 
 	/**
 	 * Public constant media type for {@code application/x-www-form-urlencoded}.
 	 */
-	public final static MediaType APPLICATION_FORM_URLENCODED;
+	public static final MediaType APPLICATION_FORM_URLENCODED;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_FORM_URLENCODED}.
 	 */
-	public final static String APPLICATION_FORM_URLENCODED_VALUE = "application/x-www-form-urlencoded";
+	public static final String APPLICATION_FORM_URLENCODED_VALUE = "application/x-www-form-urlencoded";
 
 	/**
 	 * Public constant media type for {@code application/json}.
 	 * @see #APPLICATION_JSON_UTF8
 	 */
-	public final static MediaType APPLICATION_JSON;
+	public static final MediaType APPLICATION_JSON;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_JSON}.
 	 * @see #APPLICATION_JSON_UTF8_VALUE
 	 */
-	public final static String APPLICATION_JSON_VALUE = "application/json";
+	public static final String APPLICATION_JSON_VALUE = "application/json";
 
 	/**
 	 * Public constant media type for {@code application/json;charset=UTF-8}.
 	 */
-	public final static MediaType APPLICATION_JSON_UTF8;
+	public static final MediaType APPLICATION_JSON_UTF8;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_JSON_UTF8}.
 	 */
-	public final static String APPLICATION_JSON_UTF8_VALUE = "application/json;charset=UTF-8";
+	public static final String APPLICATION_JSON_UTF8_VALUE = "application/json;charset=UTF-8";
 
 	/**
 	 * Public constant media type for {@code application/octet-stream}.
 	 */
-	public final static MediaType APPLICATION_OCTET_STREAM;
+	public static final MediaType APPLICATION_OCTET_STREAM;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_OCTET_STREAM}.
 	 */
-	public final static String APPLICATION_OCTET_STREAM_VALUE = "application/octet-stream";
+	public static final String APPLICATION_OCTET_STREAM_VALUE = "application/octet-stream";
 
 	/**
 	 * Public constant media type for {@code application/pdf}.
 	 * @since 4.3
 	 */
-	public final static MediaType APPLICATION_PDF;
+	public static final MediaType APPLICATION_PDF;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_PDF}.
 	 * @since 4.3
 	 */
-	public final static String APPLICATION_PDF_VALUE = "application/pdf";
+	public static final String APPLICATION_PDF_VALUE = "application/pdf";
 
 	/**
 	 * Public constant media type for {@code application/problem+json}.
@@ -132,13 +132,13 @@ public class MediaType extends MimeType implements Serializable {
 	 * @see <a href="https://tools.ietf.org/html/rfc7807#section-6.1">
 	 *     Problem Details for HTTP APIs, 6.1. application/problem+json</a>
 	 */
-	public final static MediaType APPLICATION_PROBLEM_JSON;
+	public static final MediaType APPLICATION_PROBLEM_JSON;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_PROBLEM_JSON}.
 	 * @since 5.0
 	 */
-	public final static String APPLICATION_PROBLEM_JSON_VALUE = "application/problem+json";
+	public static final String APPLICATION_PROBLEM_JSON_VALUE = "application/problem+json";
 
 	/**
 	 * Public constant media type for {@code application/problem+json}.
@@ -146,13 +146,13 @@ public class MediaType extends MimeType implements Serializable {
 	 * @see <a href="https://tools.ietf.org/html/rfc7807#section-6.1">
 	 *     Problem Details for HTTP APIs, 6.1. application/problem+json</a>
 	 */
-	public final static MediaType APPLICATION_PROBLEM_JSON_UTF8;
+	public static final MediaType APPLICATION_PROBLEM_JSON_UTF8;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_PROBLEM_JSON_UTF8}.
 	 * @since 5.0
 	 */
-	public final static String APPLICATION_PROBLEM_JSON_UTF8_VALUE = "application/problem+json;charset=UTF-8";
+	public static final String APPLICATION_PROBLEM_JSON_UTF8_VALUE = "application/problem+json;charset=UTF-8";
 
 	/**
 	 * Public constant media type for {@code application/problem+xml}.
@@ -160,152 +160,152 @@ public class MediaType extends MimeType implements Serializable {
 	 * @see <a href="https://tools.ietf.org/html/rfc7807#section-6.2">
 	 *     Problem Details for HTTP APIs, 6.2. application/problem+xml</a>
 	 */
-	public final static MediaType APPLICATION_PROBLEM_XML;
+	public static final MediaType APPLICATION_PROBLEM_XML;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_PROBLEM_XML}.
 	 * @since 5.0
 	 */
-	public final static String APPLICATION_PROBLEM_XML_VALUE = "application/problem+xml";
+	public static final String APPLICATION_PROBLEM_XML_VALUE = "application/problem+xml";
 
 	/**
 	 * Public constant media type for {@code application/rss+xml}.
 	 * @since 4.3.6
 	 */
-	public final static MediaType APPLICATION_RSS_XML;
+	public static final MediaType APPLICATION_RSS_XML;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_RSS_XML}.
 	 * @since 4.3.6
 	 */
-	public final static String APPLICATION_RSS_XML_VALUE = "application/rss+xml";
+	public static final String APPLICATION_RSS_XML_VALUE = "application/rss+xml";
 
 	/**
 	 * Public constant media type for {@code application/stream+json}.
 	 * @since 5.0
 	 */
-	public final static MediaType APPLICATION_STREAM_JSON;
+	public static final MediaType APPLICATION_STREAM_JSON;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_STREAM_JSON}.
 	 * @since 5.0
 	 */
-	public final static String APPLICATION_STREAM_JSON_VALUE = "application/stream+json";
+	public static final String APPLICATION_STREAM_JSON_VALUE = "application/stream+json";
 
 	/**
 	 * Public constant media type for {@code application/xhtml+xml}.
 	 */
-	public final static MediaType APPLICATION_XHTML_XML;
+	public static final MediaType APPLICATION_XHTML_XML;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_XHTML_XML}.
 	 */
-	public final static String APPLICATION_XHTML_XML_VALUE = "application/xhtml+xml";
+	public static final String APPLICATION_XHTML_XML_VALUE = "application/xhtml+xml";
 
 	/**
 	 * Public constant media type for {@code application/xml}.
 	 */
-	public final static MediaType APPLICATION_XML;
+	public static final MediaType APPLICATION_XML;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_XML}.
 	 */
-	public final static String APPLICATION_XML_VALUE = "application/xml";
+	public static final String APPLICATION_XML_VALUE = "application/xml";
 
 	/**
 	 * Public constant media type for {@code image/gif}.
 	 */
-	public final static MediaType IMAGE_GIF;
+	public static final MediaType IMAGE_GIF;
 
 	/**
 	 * A String equivalent of {@link MediaType#IMAGE_GIF}.
 	 */
-	public final static String IMAGE_GIF_VALUE = "image/gif";
+	public static final String IMAGE_GIF_VALUE = "image/gif";
 
 	/**
 	 * Public constant media type for {@code image/jpeg}.
 	 */
-	public final static MediaType IMAGE_JPEG;
+	public static final MediaType IMAGE_JPEG;
 
 	/**
 	 * A String equivalent of {@link MediaType#IMAGE_JPEG}.
 	 */
-	public final static String IMAGE_JPEG_VALUE = "image/jpeg";
+	public static final String IMAGE_JPEG_VALUE = "image/jpeg";
 
 	/**
 	 * Public constant media type for {@code image/png}.
 	 */
-	public final static MediaType IMAGE_PNG;
+	public static final MediaType IMAGE_PNG;
 
 	/**
 	 * A String equivalent of {@link MediaType#IMAGE_PNG}.
 	 */
-	public final static String IMAGE_PNG_VALUE = "image/png";
+	public static final String IMAGE_PNG_VALUE = "image/png";
 
 	/**
 	 * Public constant media type for {@code multipart/form-data}.
 	 */
-	public final static MediaType MULTIPART_FORM_DATA;
+	public static final MediaType MULTIPART_FORM_DATA;
 
 	/**
 	 * A String equivalent of {@link MediaType#MULTIPART_FORM_DATA}.
 	 */
-	public final static String MULTIPART_FORM_DATA_VALUE = "multipart/form-data";
+	public static final String MULTIPART_FORM_DATA_VALUE = "multipart/form-data";
 
 	/**
 	 * Public constant media type for {@code text/event-stream}.
 	 * @since 4.3.6
 	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
 	 */
-	public final static MediaType TEXT_EVENT_STREAM;
+	public static final MediaType TEXT_EVENT_STREAM;
 
 	/**
 	 * A String equivalent of {@link MediaType#TEXT_EVENT_STREAM}.
 	 * @since 4.3.6
 	 */
-	public final static String TEXT_EVENT_STREAM_VALUE = "text/event-stream";
+	public static final String TEXT_EVENT_STREAM_VALUE = "text/event-stream";
 
 	/**
 	 * Public constant media type for {@code text/html}.
 	 */
-	public final static MediaType TEXT_HTML;
+	public static final MediaType TEXT_HTML;
 
 	/**
 	 * A String equivalent of {@link MediaType#TEXT_HTML}.
 	 */
-	public final static String TEXT_HTML_VALUE = "text/html";
+	public static final String TEXT_HTML_VALUE = "text/html";
 
 	/**
 	 * Public constant media type for {@code text/markdown}.
 	 * @since 4.3
 	 */
-	public final static MediaType TEXT_MARKDOWN;
+	public static final MediaType TEXT_MARKDOWN;
 
 	/**
 	 * A String equivalent of {@link MediaType#TEXT_MARKDOWN}.
 	 * @since 4.3
 	 */
-	public final static String TEXT_MARKDOWN_VALUE = "text/markdown";
+	public static final String TEXT_MARKDOWN_VALUE = "text/markdown";
 
 	/**
 	 * Public constant media type for {@code text/plain}.
 	 */
-	public final static MediaType TEXT_PLAIN;
+	public static final MediaType TEXT_PLAIN;
 
 	/**
 	 * A String equivalent of {@link MediaType#TEXT_PLAIN}.
 	 */
-	public final static String TEXT_PLAIN_VALUE = "text/plain";
+	public static final String TEXT_PLAIN_VALUE = "text/plain";
 
 	/**
 	 * Public constant media type for {@code text/xml}.
 	 */
-	public final static MediaType TEXT_XML;
+	public static final MediaType TEXT_XML;
 
 	/**
 	 * A String equivalent of {@link MediaType#TEXT_XML}.
 	 */
-	public final static String TEXT_XML_VALUE = "text/xml";
+	public static final String TEXT_XML_VALUE = "text/xml";
 
 	private static final String PARAM_QUALITY_FACTOR = "q";
 

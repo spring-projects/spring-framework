@@ -204,11 +204,10 @@ Undertow (and WildFly).
 ====
 A request to overcome the above limitation in the Java WebSocket API has been
 created and can be followed at
-https://java.net/jira/browse/WEBSOCKET_SPEC-211[WEBSOCKET_SPEC-211].
-Tomcat, Jetty, and WebSphere provide their own API alternatives that
-makes it easy to overcome the limitation. We are hopeful that more servers
-will follow their example regardless of when it is addressed in the
-Java WebSocket API.
+https://github.com/eclipse-ee4j/websocket-api/issues/211[WEBSOCKET_SPEC-211].
+Tomcat, Undertow and WebSphere provide their own API alternatives that
+makes it possible to this, and it's also possible with Jetty. We are hopeful
+that more servers will follow do the same.
 ====
 
 A secondary consideration is that Servlet containers with JSR-356 support are expected
@@ -1205,82 +1204,146 @@ kinds of arguments and return values supported.
 
 
 [[websocket-stomp-handle-annotations]]
-=== Handler methods
+=== Annotated Controllers
 
-The `@MessageMapping` annotation is supported on methods of `@Controller` classes.
-It can be used for mapping methods to message destinations and can also be combined
-with the type-level `@MessageMapping` for expressing shared mappings across all
-annotated methods within a controller.
+Applications can use annotated `@Controller` classes to handle messages from clients.
+Such classes can declare `@MessageMapping`, `@SubscribeMapping`, and `@ExceptionHandler`
+methods as described next.
 
-By default destination mappings are treated as Ant-style, slash-separated, path
-patterns, e.g. "/foo*", "/foo/**". etc. They can also contain template variables,
-e.g. "/foo/{id}" that can then be referenced via `@DestinationVariable`-annotated
-method arguments.
 
-[NOTE]
+[[websocket-stomp-message-mapping]]
+==== `@MessageMapping`
+
+The `@MessageMapping` annotation can be used on methods to route messages based on their
+destination. It is supported at the method level as well as at the type level. At type
+level `@MessageMapping` is used to express shared mappings across all methods in a
+controller.
+
+By default destination mappings are expected to be Ant-style, path patterns, e.g. "/foo*",
+"/foo/**". The patterns include support for template variables, e.g. "/foo/{id}", that can
+be referenced with `@DestinationVariable` method arguments.
+
+[TIP]
 ====
-Applications can also use dot-separated destinations (vs slash).
+Applications can choose to switch to a dot-separated destination convention.
 See <<websocket-stomp-destination-separator>>.
 ====
 
-The following method arguments are supported for `@MessageMapping` methods:
+`@MessageMapping` methods can have flexible signatures with the following arguments:
 
-* `Message` method argument to get access to the complete message being processed.
-* `@Payload`-annotated argument for access to the payload of a message, converted with
-a `org.springframework.messaging.converter.MessageConverter`.
-The presence of the annotation is not required since it is assumed by default.
-Payload method arguments annotated with validation annotations (like `@Validated`) will
-be subject to JSR-303 validation.
-* `@Header`-annotated arguments for access to a specific header value along with
-type conversion using an `org.springframework.core.convert.converter.Converter`
-if necessary.
-* `@Headers`-annotated method argument that must also be assignable to `java.util.Map`
-for access to all headers in the message.
-* `MessageHeaders` method argument for getting access to a map of all headers.
-* `MessageHeaderAccessor`, `SimpMessageHeaderAccessor`, or `StompHeaderAccessor`
-for access to headers via typed accessor methods.
-* `@DestinationVariable`-annotated arguments for access to template
-variables extracted from the message destination. Values will be converted to
-the declared method argument type as necessary.
-* `java.security.Principal` method arguments reflecting the user logged in at
-the time of the WebSocket HTTP handshake.
+[cols="1,2", options="header"]
+|===
+| Method argument | Description
 
-A return value from an `@MessageMapping` method will be converted with a
-`org.springframework.messaging.converter.MessageConverter` and used as the body
-of a new message that is then sent, by default, to the `"brokerChannel"` with
-the same destination as the client message but using the prefix `"/topic"` by
-default. An `@SendTo` message level annotation can be used to specify any
-other destination instead. It can also be set a class-level to share a common
+| `Message`
+| For access to the complete message.
+
+| `MessageHeaders`
+| For access to the headers within the `Message`.
+
+| `MessageHeaderAccessor`, `SimpMessageHeaderAccessor`, `StompHeaderAccessor`
+| For access to the headers via typed accessor methods.
+
+| `@Payload`
+| For access to the payload of the message, converted (e.g. from JSON) via a configured
+`MessageConverter`.
+
+The presence of this annotation is not required since it is assumed by default if no
+other argument is matched.
+
+Payload arguments may be annotated with `@javax.validation.Valid` or Spring's `@Validated`
+in order to be automatically validated.
+
+| `@Header`
+| For access to a specific header value along with type conversion using an
+`org.springframework.core.convert.converter.Converter` if necessary.
+
+| `@Headers`
+| For access to all headers in the message. This argument must be assignable to
+`java.util.Map`.
+
+| `@DestinationVariable`
+| For access to template variables extracted from the message destination.
+Values will be converted to the declared method argument type as necessary.
+
+| `java.security.Principal`
+| Reflects the user logged in at the time of the WebSocket HTTP handshake.
+
+|===
+
+When an `@MessageMapping` method returns a value, by default the value is serialized to
+a payload through a configured `MessageConverter`, and then sent as a `Message` to the
+`"brokerChannel"` from where it is broadcast to subscribers. The destination of the
+outbound message is the same as that of the inbound message but prefixed with `"/topic"`.
+
+You can use the `@SendTo` method annotation to customize the destination to send
+the payload to. `@SendTo` can also be used at the class level to share a default target
+destination to send messages to. `@SendToUser` is an variant for sending messages only to
+the user associated with a message. See <<websocket-stomp-user-destination>> for details.
+
+The return value from an `@MessageMapping` method may be wrapped with `ListenableFuture`,
+`CompletableFuture`, or `CompletionStage` in order to produce the payload asynchronously.
+
+As an alternative to returning a payload from an `@MessageMapping` method you can also
+send messages using the `SimpMessagingTemplate`, which is also how return values are
+handled under the covers. See <<websocket-stomp-handle-send>>.
+
+
+[[websocket-stomp-subscribe-mapping]]
+==== `@SubscribeMapping`
+
+The `@SubscribeMapping` annotation is used in combination with `@MessageMapping` in order
+to narrow the mapping to subscription messages. In such scenarios, the `@MessageMapping`
+annotation specifies the destination while `@SubscribeMapping` indicates interest in
+subscription messages only.
+
+An `@SubscribeMapping` method is generally no different from any `@MessageMapping`
+method with respect to mapping and input arguments. For example you can combine it with a
+type-level `@MessageMapping` to express a shared destination prefix, and you can use the
+same <<websocket-stomp-message-mapping,method arguments>> as any @MessageMapping` method.
+
+The key difference with `@SubscribeMapping` is that the return value of the method is
+serialized as a payload and sent, not to the "brokerChannel" but to the
+"clientOutboundChannel", effectively replying directly to the client rather than
+broadcasting through the broker. This is useful for implementing one-off, request-reply
+message exchanges, and never holding on to the subscription. A common scenario for this
+pattern is application initialization when data must be loaded and presented.
+
+A `@SubscribeMapping` method can also be annotated with `@SendTo` in which case the
+return value is sent to the `"brokerChannel"` with the explicitly specified target
 destination.
 
-A response message may also be provided asynchronously via a `ListenableFuture`
-or `CompletableFuture`/`CompletionStage` return type signature, analogous to
-deferred results in an MVC handler method.
 
-A `@SubscribeMapping` annotation can be used to map subscription requests to
-`@Controller` methods. It is supported on the method level, but can also be
-combined with a type level `@MessageMapping` annotation that expresses shared
-mappings across all message handling methods within the same controller.
+[[websocket-stomp-exception-handler]]
+==== `@MessageExceptionHandler`
 
-By default the return value from an `@SubscribeMapping` method is sent as a
-message directly back to the connected client and does not pass through the
-broker. This is useful for implementing request-reply message interactions; for
-example, to fetch application data when the application UI is being initialized.
-Or alternatively an `@SubscribeMapping` method can be annotated with `@SendTo`
-in which case the resulting message is sent to the `"brokerChannel"` using
-the specified target destination.
+An application can use `@MessageExceptionHandler` methods to handle exceptions from
+`@MessageMapping` methods. Exceptions of interest can be declared in the annotation
+itself, or through a method argument if you want to get access to the exception instance:
 
-[NOTE]
-====
-In some cases a controller may need to be decorated with an AOP proxy at runtime.
-One example is if you choose to have `@Transactional` annotations directly on the
-controller. When this is the case, for controllers specifically, we recommend
-using class-based proxying. This is typically the default choice with controllers.
-However if a controller must implement an interface that is not a Spring Context
-callback (e.g. `InitializingBean`, `*Aware`, etc), you may need to explicitly
-configure class-based proxying. For example with `<tx:annotation-driven />`,
-change to `<tx:annotation-driven proxy-target-class="true" />`.
-====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	public class MyController {
+
+		// ...
+
+		@MessageExceptionHandler
+		public ApplicationError handleException(MyException exception) {
+			// ...
+			return appError;
+		}
+	}
+----
+
+`@MessageExceptionHandler` methods support flexible method signatures and support the same
+method argument types and return values as <<websocket-stomp-message-mapping>> methods.
+
+Typically `@MessageExceptionHandler` methods apply within the `@Controller` class (or
+class hierarchy) they are declared in. If you want such methods to apply more globally,
+across controllers, you can declare them in a class marked with `@ControllerAdvice`.
+This is comparable to <<web.adoc#mvc-ann-controller-advice,similar support>> in Spring MVC.
 
 
 
@@ -1440,9 +1503,9 @@ values ``guest``/``guest``.
 ====
 The STOMP broker relay always sets the `login` and `passcode` headers on every `CONNECT`
 frame that it forwards to the broker on behalf of clients. Therefore WebSocket clients
-need not set those headers; they will be ignored. As the following section explains,
-instead WebSocket clients should rely on HTTP authentication to protect the WebSocket
-endpoint and establish the client identity.
+need not set those headers; they will be ignored. As the <<websocket-stomp-authentication>>
+section explains, instead WebSocket clients should rely on HTTP authentication to protect
+the WebSocket endpoint and establish the client identity.
 ====
 
 The STOMP broker relay also sends and receives heartbeats to and from the message
@@ -1451,13 +1514,43 @@ and receiving heartbeats (10 seconds each by default). If connectivity to the br
 is lost, the broker relay will continue to try to reconnect, every 5 seconds,
 until it succeeds.
 
-[NOTE]
-====
-A Spring bean can implement `ApplicationListener<BrokerAvailabilityEvent>` in order
+Any Spring bean can implement `ApplicationListener<BrokerAvailabilityEvent>` in order
 to receive notifications when the "system" connection to the broker is lost and
 re-established. For example a Stock Quote service broadcasting stock quotes can
 stop trying to send messages when there is no active "system" connection.
-====
+
+By default, the STOMP broker relay always connects, and reconnects as needed if
+connectivity is lost, to the same host and port. If you wish to supply multiple addresses,
+on each attempt to connect, you can configure a supplier of addresses, instead of a
+fixed host and port. For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Configuration
+@EnableWebSocketMessageBroker
+public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
+
+	// ...
+
+	@Override
+	public void configureMessageBroker(MessageBrokerRegistry registry) {
+		registry.enableStompBrokerRelay("/queue/", "/topic/").setTcpClient(createTcpClient());
+		registry.setApplicationDestinationPrefixes("/app");
+	}
+
+	private ReactorNettyTcpClient<byte[]> createTcpClient() {
+
+		Consumer<ClientOptions.Builder<?>> builderConsumer = builder -> {
+			builder.connectAddress(()-> {
+				// Select address to connect to ...
+			});
+		};
+
+		return new ReactorNettyTcpClient<>(builderConsumer, new StompReactorNettyCodec());
+	}
+}
+----
 
 The STOMP broker relay can also be configured with a `virtualHost` property.
 The value of this property will be set as the `host` header of every `CONNECT` frame

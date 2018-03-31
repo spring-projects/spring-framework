@@ -73,6 +73,18 @@ public class AcceptHeaderLocaleContextResolverTests {
 	}
 
 	@Test
+	public void resolvePreferredAgainstCountryIfPossible() {
+		this.resolver.setSupportedLocales(Arrays.asList(ENGLISH, UK));
+		assertEquals(UK, this.resolver.resolveLocaleContext(exchange(GERMANY, US, UK)).getLocale());
+	}
+
+	@Test
+	public void resolvePreferredAgainstLanguageWithMultipleSupportedLocales() {
+		this.resolver.setSupportedLocales(Arrays.asList(GERMAN, US));
+		assertEquals(GERMAN, this.resolver.resolveLocaleContext(exchange(GERMANY, US, UK)).getLocale());
+	}
+
+	@Test
 	public void resolveMissingAcceptLanguageHeader() {
 		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);

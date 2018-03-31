@@ -927,12 +927,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (bw != null) {
 				return (FactoryBean<?>) bw.getWrappedInstance();
 			}
+			Object beanInstance = getSingleton(beanName, false);
+			if (beanInstance instanceof FactoryBean) {
+				return (FactoryBean<?>) beanInstance;
+			}
 			if (isSingletonCurrentlyInCreation(beanName) ||
 					(mbd.getFactoryBeanName() != null && isSingletonCurrentlyInCreation(mbd.getFactoryBeanName()))) {
 				return null;
 			}
 
-			Object instance = null;
+			Object instance;
 			try {
 				// Mark this bean as currently in creation, even if just partially.
 				beforeSingletonCreation(beanName);
@@ -1556,14 +1560,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return;
 		}
 
+		if (System.getSecurityManager() != null && bw instanceof BeanWrapperImpl) {
+			((BeanWrapperImpl) bw).setSecurityContext(getAccessControlContext());
+		}
+
 		MutablePropertyValues mpvs = null;
 		List<PropertyValue> original;
-
-		if (System.getSecurityManager() != null) {
-			if (bw instanceof BeanWrapperImpl) {
-				((BeanWrapperImpl) bw).setSecurityContext(getAccessControlContext());
-			}
-		}
 
 		if (pvs instanceof MutablePropertyValues) {
 			mpvs = (MutablePropertyValues) pvs;
@@ -1847,8 +1849,21 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	@Override
 	protected void removeSingleton(String beanName) {
-		super.removeSingleton(beanName);
-		this.factoryBeanInstanceCache.remove(beanName);
+		synchronized (getSingletonMutex()) {
+			super.removeSingleton(beanName);
+			this.factoryBeanInstanceCache.remove(beanName);
+		}
+	}
+
+	/**
+	 * Overridden to clear FactoryBean instance cache as well.
+	 */
+	@Override
+	protected void clearSingletonCache() {
+		synchronized (getSingletonMutex()) {
+			super.clearSingletonCache();
+			this.factoryBeanInstanceCache.clear();
+		}
 	}
 
 

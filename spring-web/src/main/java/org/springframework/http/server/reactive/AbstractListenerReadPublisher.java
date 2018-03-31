@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -174,7 +174,12 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
 	private void changeToDemandState(State oldState) {
 		if (changeState(oldState, State.DEMAND)) {
-			checkOnDataAvailable();
+			// Protect from infinite recursion in Undertow, where we can't check if data
+			// is available, so all we can do is to try to read.
+			// Generally, no need to check if we just came out of readAndPublish()...
+			if (!oldState.equals(State.READING)) {
+				checkOnDataAvailable();
+			}
 		}
 	}
 

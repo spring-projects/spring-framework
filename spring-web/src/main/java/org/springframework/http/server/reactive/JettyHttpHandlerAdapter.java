@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.server.HttpOutput;
@@ -34,8 +33,8 @@ import org.springframework.core.io.buffer.DataBufferFactory;
  *
  * @author Violeta Georgieva
  * @since 5.0
+ * @see org.springframework.web.server.adapter.AbstractReactiveWebInitializer
  */
-@WebServlet(asyncSupported = true)
 public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 	public JettyHttpHandlerAdapter(HttpHandler httpHandler) {

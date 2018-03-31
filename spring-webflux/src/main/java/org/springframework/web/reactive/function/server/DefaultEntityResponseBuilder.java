@@ -193,7 +193,7 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 	}
 
 
-	private final static class DefaultEntityResponse<T>
+	private static final class DefaultEntityResponse<T>
 			extends DefaultServerResponseBuilder.AbstractServerResponse
 			implements EntityResponse<T> {
 

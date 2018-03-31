@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import org.springframework.lang.Nullable;
  * concrete and is typically used itself, in which case this rule doesn't apply.
  * <li>Apply error code matching. Error codes are obtained from the SQLErrorCodesFactory
  * by default. This factory loads a "sql-error-codes.xml" file from the class path,
- * defining error code mappings for database names from database metadata.
+ * defining error code mappings for database names from database meta-data.
  * <li>Fallback to a fallback translator. {@link SQLStateSQLExceptionTranslator} is the
  * default fallback translator, analyzing the exception's SQL state only. On Java 6
  * which introduces its own {@code SQLException} subclass hierarchy, we will
@@ -89,8 +89,8 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	/**
 	 * Create a SQL error code translator for the given DataSource.
 	 * Invoking this constructor will cause a Connection to be obtained
-	 * from the DataSource to get the metadata.
-	 * @param dataSource DataSource to use to find metadata and establish
+	 * from the DataSource to get the meta-data.
+	 * @param dataSource DataSource to use to find meta-data and establish
 	 * which error codes are usable
 	 * @see SQLErrorCodesFactory
 	 */
@@ -102,7 +102,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	/**
 	 * Create a SQL error code translator for the given database product name.
 	 * Invoking this constructor will avoid obtaining a Connection from the
-	 * DataSource to get the metadata.
+	 * DataSource to get the meta-data.
 	 * @param dbName the database product name that identifies the error codes entry
 	 * @see SQLErrorCodesFactory
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
@@ -114,7 +114,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 
 	/**
 	 * Create a SQLErrorCode translator given these error codes.
-	 * Does not require a database metadata lookup to be performed using a connection.
+	 * Does not require a database meta-data lookup to be performed using a connection.
 	 * @param sec error codes
 	 */
 	public SQLErrorCodeSQLExceptionTranslator(SQLErrorCodes sec) {
@@ -126,8 +126,8 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	/**
 	 * Set the DataSource for this translator.
 	 * <p>Setting this property will cause a Connection to be obtained from
-	 * the DataSource to get the metadata.
-	 * @param dataSource DataSource to use to find metadata and establish
+	 * the DataSource to get the meta-data.
+	 * @param dataSource DataSource to use to find meta-data and establish
 	 * which error codes are usable
 	 * @see SQLErrorCodesFactory#getErrorCodes(javax.sql.DataSource)
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
@@ -139,7 +139,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	/**
 	 * Set the database product name for this translator.
 	 * <p>Setting this property will avoid obtaining a Connection from the DataSource
-	 * to get the metadata.
+	 * to get the meta-data.
 	 * @param dbName the database product name that identifies the error codes entry
 	 * @see SQLErrorCodesFactory#getErrorCodes(String)
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
@@ -217,14 +217,13 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 				CustomSQLErrorCodesTranslation[] customTranslations = this.sqlErrorCodes.getCustomTranslations();
 				if (customTranslations != null) {
 					for (CustomSQLErrorCodesTranslation customTranslation : customTranslations) {
-						if (Arrays.binarySearch(customTranslation.getErrorCodes(), errorCode) >= 0) {
-							if (customTranslation.getExceptionClass() != null) {
-								DataAccessException customException = createCustomException(
-										task, sql, sqlEx, customTranslation.getExceptionClass());
-								if (customException != null) {
-									logTranslation(task, sql, sqlEx, true);
-									return customException;
-								}
+						if (Arrays.binarySearch(customTranslation.getErrorCodes(), errorCode) >= 0 &&
+								customTranslation.getExceptionClass() != null) {
+							DataAccessException customException = createCustomException(
+									task, sql, sqlEx, customTranslation.getExceptionClass());
+							if (customException != null) {
+								logTranslation(task, sql, sqlEx, true);
+								return customException;
 							}
 						}
 					}
@@ -321,35 +320,35 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	protected DataAccessException createCustomException(
 			String task, @Nullable String sql, SQLException sqlEx, Class<?> exceptionClass) {
 
-		// find appropriate constructor
+		// Find appropriate constructor for the given exception class
 		try {
 			int constructorType = 0;
 			Constructor<?>[] constructors = exceptionClass.getConstructors();
 			for (Constructor<?> constructor : constructors) {
 				Class<?>[] parameterTypes = constructor.getParameterTypes();
-				if (parameterTypes.length == 1 && String.class == parameterTypes[0]) {
-					if (constructorType < MESSAGE_ONLY_CONSTRUCTOR)
-						constructorType = MESSAGE_ONLY_CONSTRUCTOR;
+				if (parameterTypes.length == 1 && String.class == parameterTypes[0] &&
+						constructorType < MESSAGE_ONLY_CONSTRUCTOR) {
+					constructorType = MESSAGE_ONLY_CONSTRUCTOR;
 				}
 				if (parameterTypes.length == 2 && String.class == parameterTypes[0] &&
-						Throwable.class == parameterTypes[1]) {
-					if (constructorType < MESSAGE_THROWABLE_CONSTRUCTOR)
-						constructorType = MESSAGE_THROWABLE_CONSTRUCTOR;
+						Throwable.class == parameterTypes[1] &&
+						constructorType < MESSAGE_THROWABLE_CONSTRUCTOR) {
+					constructorType = MESSAGE_THROWABLE_CONSTRUCTOR;
 				}
 				if (parameterTypes.length == 2 && String.class == parameterTypes[0] &&
-						SQLException.class == parameterTypes[1]) {
-					if (constructorType < MESSAGE_SQLEX_CONSTRUCTOR)
-						constructorType = MESSAGE_SQLEX_CONSTRUCTOR;
+						SQLException.class == parameterTypes[1] &&
+						constructorType < MESSAGE_SQLEX_CONSTRUCTOR) {
+					constructorType = MESSAGE_SQLEX_CONSTRUCTOR;
 				}
 				if (parameterTypes.length == 3 && String.class == parameterTypes[0] &&
-						String.class == parameterTypes[1] && Throwable.class == parameterTypes[2]) {
-					if (constructorType < MESSAGE_SQL_THROWABLE_CONSTRUCTOR)
-						constructorType = MESSAGE_SQL_THROWABLE_CONSTRUCTOR;
+						String.class == parameterTypes[1] && Throwable.class == parameterTypes[2] &&
+						constructorType < MESSAGE_SQL_THROWABLE_CONSTRUCTOR) {
+					constructorType = MESSAGE_SQL_THROWABLE_CONSTRUCTOR;
 				}
 				if (parameterTypes.length == 3 && String.class == parameterTypes[0] &&
-						String.class == parameterTypes[1] && SQLException.class == parameterTypes[2]) {
-					if (constructorType < MESSAGE_SQL_SQLEX_CONSTRUCTOR)
-						constructorType = MESSAGE_SQL_SQLEX_CONSTRUCTOR;
+						String.class == parameterTypes[1] && SQLException.class == parameterTypes[2] &&
+						constructorType < MESSAGE_SQL_SQLEX_CONSTRUCTOR) {
+					constructorType = MESSAGE_SQL_SQLEX_CONSTRUCTOR;
 				}
 			}
 

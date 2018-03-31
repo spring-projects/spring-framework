@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,10 +98,9 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 
 	private boolean isAsyncReturnValue(@Nullable Object value, MethodParameter returnType) {
 		for (HandlerMethodReturnValueHandler handler : this.returnValueHandlers) {
-			if (handler instanceof AsyncHandlerMethodReturnValueHandler) {
-				if (((AsyncHandlerMethodReturnValueHandler) handler).isAsyncReturnValue(value, returnType)) {
-					return true;
-				}
+			if (handler instanceof AsyncHandlerMethodReturnValueHandler &&
+					((AsyncHandlerMethodReturnValueHandler) handler).isAsyncReturnValue(value, returnType)) {
+				return true;
 			}
 		}
 		return false;
@@ -122,9 +121,7 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 			@Nullable List<? extends HandlerMethodReturnValueHandler> handlers) {
 
 		if (handlers != null) {
-			for (HandlerMethodReturnValueHandler handler : handlers) {
-				this.returnValueHandlers.add(handler);
-			}
+			this.returnValueHandlers.addAll(handlers);
 		}
 		return this;
 	}

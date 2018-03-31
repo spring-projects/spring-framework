@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,11 +61,14 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-	private static final ResolvableType MULTIVALUE_TYPE =
-			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
+	private static final MediaType DEFAULT_FORM_DATA_MEDIA_TYPE =
+			new MediaType(MediaType.APPLICATION_FORM_URLENCODED, DEFAULT_CHARSET);
 
 	private static final List<MediaType> MEDIA_TYPES =
 			Collections.singletonList(MediaType.APPLICATION_FORM_URLENCODED);
+
+	private static final ResolvableType MULTIVALUE_TYPE =
+			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
 
 
 	private Charset defaultCharset = DEFAULT_CHARSET;
@@ -117,13 +120,16 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 			ResolvableType elementType, @Nullable MediaType mediaType, ReactiveHttpOutputMessage message,
 			Map<String, Object> hints) {
 
-		MediaType contentType = message.getHeaders().getContentType();
-		if (contentType == null) {
-			contentType = MediaType.APPLICATION_FORM_URLENCODED;
-			message.getHeaders().setContentType(contentType);
+		mediaType = (mediaType != null ? mediaType : DEFAULT_FORM_DATA_MEDIA_TYPE);
+		Charset charset;
+		if (mediaType.getCharset() == null) {
+			charset = getDefaultCharset();
+			mediaType = new MediaType(mediaType, charset);
 		}
-
-		Charset charset = getMediaTypeCharset(contentType);
+		else {
+			charset = mediaType.getCharset();
+		}
+		message.getHeaders().setContentType(mediaType);
 
 		return Mono.from(inputStream).flatMap(form -> {
 					String value = serializeForm(form, charset);

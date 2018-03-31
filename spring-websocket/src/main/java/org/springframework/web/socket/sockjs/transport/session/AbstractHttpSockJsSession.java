@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -332,15 +332,13 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 			this.readyToSend = false;
 			this.response = null;
 			updateLastActiveTime();
-			if (control != null && !control.isCompleted()) {
-				if (control.isStarted()) {
-					try {
-						control.complete();
-					}
-					catch (Throwable ex) {
-						// Could be part of normal workflow (e.g. browser tab closed)
-						logger.debug("Failed to complete request: " + ex.getMessage());
-					}
+			if (control != null && !control.isCompleted() && control.isStarted()) {
+				try {
+					control.complete();
+				}
+				catch (Throwable ex) {
+					// Could be part of normal workflow (e.g. browser tab closed)
+					logger.debug("Failed to complete request: " + ex.getMessage());
 				}
 			}
 		}

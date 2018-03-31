@@ -45,10 +45,10 @@ dependencies {
 	optional("net.sourceforge.htmlunit:htmlunit:2.29") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-	optional("org.seleniumhq.selenium:htmlunit-driver:2.29.2") {
+	optional("org.seleniumhq.selenium:htmlunit-driver:2.29.3") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-	optional("org.seleniumhq.selenium:selenium-java:3.10.0") {
+	optional("org.seleniumhq.selenium:selenium-java:3.11.0") {
 		exclude group: "commons-logging", module: "commons-logging"
 		exclude group: "io.netty", module: "netty"
 	}
@@ -64,8 +64,8 @@ dependencies {
 	testCompile("javax.ejb:javax.ejb-api:3.2")
 	testCompile("javax.interceptor:javax.interceptor-api:1.2.1")
 	testCompile("javax.mail:javax.mail-api:1.6.1")
-	testCompile("org.hibernate:hibernate-core:5.2.14.Final")
-	testCompile("org.hibernate:hibernate-validator:6.0.7.Final")
+	testCompile("org.hibernate:hibernate-core:5.2.16.Final")
+	testCompile("org.hibernate:hibernate-validator:6.0.9.Final")
 	// Enable use of the JUnit Platform Runner
 	testCompile("org.junit.platform:junit-platform-runner:${junitPlatformVersion}")
 	testCompile("org.junit.jupiter:junit-jupiter-params:${junitJupiterVersion}")

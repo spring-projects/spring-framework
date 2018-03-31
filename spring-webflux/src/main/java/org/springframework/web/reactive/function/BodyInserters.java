@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.function;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -87,7 +86,6 @@ public abstract class BodyInserters {
 	 * @return a {@code BodyInserter} that writes a single object
 	 */
 	public static <T> BodyInserter<T, ReactiveHttpOutputMessage> fromObject(T body) {
-		Assert.notNull(body, "'body' must not be null");
 		return bodyInserterFor(Mono.just(body), ResolvableType.forInstance(body));
 	}
 
@@ -106,8 +104,6 @@ public abstract class BodyInserters {
 	public static <T, P extends Publisher<T>> BodyInserter<P, ReactiveHttpOutputMessage> fromPublisher(
 			P publisher, Class<T> elementClass) {
 
-		Assert.notNull(publisher, "'publisher' must not be null");
-		Assert.notNull(elementClass, "'elementClass' must not be null");
 		return bodyInserterFor(publisher, ResolvableType.forClass(elementClass));
 	}
 
@@ -126,8 +122,6 @@ public abstract class BodyInserters {
 	public static <T, P extends Publisher<T>> BodyInserter<P, ReactiveHttpOutputMessage> fromPublisher(
 			P publisher, ParameterizedTypeReference<T> typeReference) {
 
-		Assert.notNull(publisher, "'publisher' must not be null");
-		Assert.notNull(typeReference, "'typeReference' must not be null");
 		return bodyInserterFor(publisher, ResolvableType.forType(typeReference.getType()));
 	}
 
@@ -140,7 +134,6 @@ public abstract class BodyInserters {
 	 * @return a {@code BodyInserter} that writes a {@code Publisher}
 	 */
 	public static <T extends Resource> BodyInserter<T, ReactiveHttpOutputMessage> fromResource(T resource) {
-		Assert.notNull(resource, "'resource' must not be null");
 		return (outputMessage, context) -> {
 			Mono<T> inputStream = Mono.just(resource);
 			HttpMessageWriter<Resource> messageWriter = resourceHttpMessageWriter(context);
@@ -180,7 +173,6 @@ public abstract class BodyInserters {
 	public static <T, S extends Publisher<ServerSentEvent<T>>> BodyInserter<S, ServerHttpResponse> fromServerSentEvents(
 			S eventsPublisher) {
 
-		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
 		return (serverResponse, context) -> {
 			HttpMessageWriter<ServerSentEvent<T>> messageWriter =
 					findMessageWriter(context, SERVER_SIDE_EVENT_TYPE, MediaType.TEXT_EVENT_STREAM);
@@ -200,17 +192,14 @@ public abstract class BodyInserters {
 	 *
 	 * <p>Note that you can also use the {@code syncBody(Object)} method in the
 	 * request builders of both the {@code WebClient} and {@code WebTestClient}.
-	 * In that case the setting of the content type is also not required, just
-	 * be sure the map contains String values only or otherwise it would be
+	 * In that case the setting of the request content type is also not required,
+	 * just be sure the map contains String values only or otherwise it would be
 	 * interpreted as a multipart request.
 	 *
 	 * @param formData the form data to write to the output message
-	 * @return a {@code FormInserter} that writes form data
+	 * @return the inserter that allows adding more form data
 	 */
 	public static FormInserter<String> fromFormData(MultiValueMap<String, String> formData) {
-
-		Assert.notNull(formData, "'formData' must not be null");
-
 		return new DefaultFormInserter().with(formData);
 	}
 
@@ -218,36 +207,27 @@ public abstract class BodyInserters {
 	 * Return a {@link FormInserter} that writes the given key-value pair as
 	 * URL-encoded form data. The returned inserter allows for additional
 	 * entries to be added via {@link FormInserter#with(String, Object)}.
-	 * @param key the key to add to the form
+	 * @param name the key to add to the form
 	 * @param value the value to add to the form
-	 * @return a {@code FormInserter} that writes form data
+	 * @return the inserter that allows adding more form data
 	 */
-	public static FormInserter<String> fromFormData(String key, String value) {
-		Assert.notNull(key, "'key' must not be null");
+	public static FormInserter<String> fromFormData(String name, String value) {
+		Assert.notNull(name, "'key' must not be null");
 		Assert.notNull(value, "'value' must not be null");
-
-		return new DefaultFormInserter().with(key, value);
+		return new DefaultFormInserter().with(name, value);
 	}
 
 	/**
-	 * Return a {@code FormInserter} that writes the given {@code MultiValueMap}
-	 * as multipart data. The values in the {@code MultiValueMap} can be any
-	 * Object representing the body of the part, or an
-	 * {@link org.springframework.http.HttpEntity HttpEntity} representing a part
-	 * with body and headers. The {@code MultiValueMap} can be built conveniently
-	 * using {@link org.springframework.http.client.MultipartBodyBuilder
-	 * MultipartBodyBuilder}. Also the returned inserter allows for additional
-	 * entries to be added via {@link FormInserter#with(String, Object)}.
+	 * Return a {@link MultipartInserter} that writes the given
+	 * {@code MultiValueMap} as multipart data. Values in the map can be an
+	 * Object or an {@link HttpEntity}.
 	 *
-	 * <p>Note that you can also use the {@code syncBody(Object)} method in the
-	 * request builders of both the {@code WebClient} and {@code WebTestClient}.
-	 * In that case the setting of the content type is also not required, just
-	 * be sure the map contains at least one non-String value or otherwise,
-	 * without a content-type header as a hint, it would be interpreted as a
-	 * plain form data request.
+	 * <p>Note that you can also build the multipart data externally with
+	 * {@link MultipartBodyBuilder}, and pass the resulting map directly to the
+	 * {@code syncBody(Object)} shortcut method in {@code WebClient}.
 	 *
 	 * @param multipartData the form data to write to the output message
-	 * @return a {@code BodyInserter} that writes multipart data
+	 * @return the inserter that allows adding more parts
 	 * @see MultipartBodyBuilder
 	 */
 	public static MultipartInserter fromMultipartData(MultiValueMap<String, ?> multipartData) {
@@ -256,57 +236,69 @@ public abstract class BodyInserters {
 	}
 
 	/**
-	 * A variant of {@link #fromMultipartData(MultiValueMap)} for adding
-	 * parts as name-value pairs in-line vs building a {@code MultiValueMap}
-	 * and passing it in.
-	 * @param key the part name
+	 * Return a {@link MultipartInserter} that writes the given parts,
+	 * as multipart data. Values in the map can be an Object or an
+	 * {@link HttpEntity}.
+	 *
+	 * <p>Note that you can also build the multipart data externally with
+	 * {@link MultipartBodyBuilder}, and pass the resulting map directly to the
+	 * {@code syncBody(Object)} shortcut method in {@code WebClient}.
+	 *
+	 * @param name the part name
 	 * @param value the part value, an Object or {@code HttpEntity}
-	 * @return a {@code FormInserter} that can writes the provided multipart
-	 * data and also allows adding more parts
+	 * @return the inserter that allows adding more parts
 	 */
-	public static MultipartInserter fromMultipartData(String key, Object value) {
-		Assert.notNull(key, "'key' must not be null");
+	public static MultipartInserter fromMultipartData(String name, Object value) {
+		Assert.notNull(name, "'key' must not be null");
 		Assert.notNull(value, "'value' must not be null");
-
-		return new DefaultMultipartInserter().with(key, value);
+		return new DefaultMultipartInserter().with(name, value);
 	}
 
 	/**
-	 * A variant of {@link #fromMultipartData(MultiValueMap)} for adding asynchronous data as a
-	 * part in-line vs building a {@code MultiValueMap} and passing it in.
-	 * @param key the part name
+	 * Return a {@link MultipartInserter} that writes the given asynchronous parts,
+	 * as multipart data.
+	 *
+	 * <p>Note that you can also build the multipart data externally with
+	 * {@link MultipartBodyBuilder}, and pass the resulting map directly to the
+	 * {@code syncBody(Object)} shortcut method in {@code WebClient}.
+	 *
+	 * @param name the part name
 	 * @param publisher the publisher that forms the part value
 	 * @param elementClass the class contained in the {@code publisher}
-	 * @return a {@code FormInserter} that can writes the provided multipart
-	 * data and also allows adding more parts
+	 * @return the inserter that allows adding more parts
 	 */
-	public static <T, P extends Publisher<T>> MultipartInserter fromMultipartAsyncData(String key,
+	public static <T, P extends Publisher<T>> MultipartInserter fromMultipartAsyncData(String name,
 			P publisher, Class<T> elementClass) {
 
-		Assert.notNull(key, "'key' must not be null");
+		Assert.notNull(name, "'key' must not be null");
 		Assert.notNull(publisher, "'publisher' must not be null");
 		Assert.notNull(elementClass, "'elementClass' must not be null");
 
-		return new DefaultMultipartInserter().withPublisher(key, publisher, elementClass);
+		return new DefaultMultipartInserter().withPublisher(name, publisher, elementClass);
 	}
 
 	/**
-	 * A variant of {@link #fromMultipartData(MultiValueMap)} for adding asynchronous data as a
-	 * part in-line vs building a {@code MultiValueMap} and passing it in.
-	 * @param key the part name
+	 * Variant of {@link #fromMultipartAsyncData(String, Publisher, Class)} that
+	 * accepts a {@link ParameterizedTypeReference} for the element type, which
+	 * allows specifying generic type information.
+	 *
+	 * <p>Note that you can also build the multipart data externally with
+	 * {@link MultipartBodyBuilder}, and pass the resulting map directly to the
+	 * {@code syncBody(Object)} shortcut method in {@code WebClient}.
+	 *
+	 * @param name the part name
 	 * @param publisher the publisher that forms the part value
 	 * @param typeReference the type contained in the {@code publisher}
-	 * @return a {@code FormInserter} that can writes the provided multipart
-	 * data and also allows adding more parts
+	 * @return the inserter that allows adding more parts
 	 */
-	public static <T, P extends Publisher<T>> MultipartInserter fromMultipartAsyncData(String key,
+	public static <T, P extends Publisher<T>> MultipartInserter fromMultipartAsyncData(String name,
 			P publisher, ParameterizedTypeReference<T> typeReference) {
 
-		Assert.notNull(key, "'key' must not be null");
+		Assert.notNull(name, "'key' must not be null");
 		Assert.notNull(publisher, "'publisher' must not be null");
 		Assert.notNull(typeReference, "'typeReference' must not be null");
 
-		return new DefaultMultipartInserter().withPublisher(key, publisher, typeReference);
+		return new DefaultMultipartInserter().withPublisher(name, publisher, typeReference);
 	}
 
 	/**
@@ -375,26 +367,25 @@ public abstract class BodyInserters {
 
 
 	/**
-	 * Sub-interface of {@link BodyInserter} that allows for additional (multipart) form data to be
-	 * added.
+	 * Extension of {@link BodyInserter} that allows for adding form data or
+	 * multipart form data.
 	 */
-	// Note that FormInserter is parameterized to ClientHttpRequest, not ReactiveHttpOutputMessage
-	// like other return values methods, since sending form data only typically happens on the client-side
-	public interface FormInserter<T> extends
-			BodyInserter<MultiValueMap<String, T>, ClientHttpRequest> {
+	public interface FormInserter<T> extends BodyInserter<MultiValueMap<String, T>, ClientHttpRequest> {
+
+		// FormInserter is parameterized to ClientHttpRequest (for client-side use only)
 
 		/**
 		 * Adds the specified key-value pair to the form.
 		 * @param key the key to be added
 		 * @param value the value to be added
-		 * @return this inserter
+		 * @return this inserter for adding more parts
 		 */
-		FormInserter<T> with(String key, @Nullable T value);
+		FormInserter<T> with(String key, T value);
 
 		/**
 		 * Adds the specified values to the form.
 		 * @param values the values to be added
-		 * @return this inserter
+		 * @return this inserter for adding more parts
 		 */
 		FormInserter<T> with(MultiValueMap<String, T> values);
 
@@ -402,30 +393,30 @@ public abstract class BodyInserters {
 
 
 	/**
-	 * Extension of {@link FormInserter} that has methods for adding asynchronous part data.
+	 * Extension of {@link FormInserter} that allows for adding asynchronous parts.
 	 */
 	public interface MultipartInserter extends FormInserter<Object> {
 
 		/**
-		 * Adds the specified publisher as a part.
-		 *
-		 * @param key the key to be added
-		 * @param publisher the publisher to be added as value
-		 * @param elementClass the class of elements contained in {@code publisher}
-		 * @return this inserter
+		 * Add an asynchronous part with {@link Publisher}-based content.
+		 * @param name the name of the part to add
+		 * @param publisher the part contents
+		 * @param elementClass the type of elements contained in the publisher
+		 * @return this inserter for adding more parts
 		 */
-		<T, P extends Publisher<T>> MultipartInserter withPublisher(String key, P publisher,
+		<T, P extends Publisher<T>> MultipartInserter withPublisher(String name, P publisher,
 				Class<T> elementClass);
 
 		/**
-		 * Adds the specified publisher as a part.
-		 *
-		 * @param key the key to be added
+		 * Variant of {@link #withPublisher(String, Publisher, Class)} that accepts a
+		 * {@link ParameterizedTypeReference} for the element type, which allows
+		 * specifying generic type information.
+		 * @param name the key to be added
 		 * @param publisher the publisher to be added as value
 		 * @param typeReference the type of elements contained in {@code publisher}
-		 * @return this inserter
+		 * @return this inserter for adding more parts
 		 */
-		<T, P extends Publisher<T>> MultipartInserter withPublisher(String key, P publisher,
+		<T, P extends Publisher<T>> MultipartInserter withPublisher(String name, P publisher,
 				ParameterizedTypeReference<T> typeReference);
 
 	}
@@ -434,9 +425,6 @@ public abstract class BodyInserters {
 	private static class DefaultFormInserter implements FormInserter<String> {
 
 		private final MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
-
-		public DefaultFormInserter() {
-		}
 
 		@Override
 		public FormInserter<String> with(String key, @Nullable String value) {
@@ -465,12 +453,8 @@ public abstract class BodyInserters {
 
 		private final MultipartBodyBuilder builder = new MultipartBodyBuilder();
 
-		public DefaultMultipartInserter() {
-		}
-
 		@Override
-		public MultipartInserter with(String key, @Nullable Object value) {
-			Assert.notNull(value, "'value' must not be null");
+		public MultipartInserter with(String key, Object value) {
 			this.builder.part(key, value);
 			return this;
 		}
@@ -482,28 +466,27 @@ public abstract class BodyInserters {
 
 		@SuppressWarnings("unchecked")
 		private MultipartInserter withInternal(MultiValueMap<String, ?> values) {
-			Assert.notNull(values, "'values' must not be null");
-			for (Map.Entry<String, ? extends List<?>> entry : values.entrySet()) {
-				for (Object value : entry.getValue()) {
-					this.builder.part(entry.getKey(), value);
+			values.forEach((key, valueList) -> {
+				for (Object value : valueList) {
+					this.builder.part(key, value);
 				}
-			}
+			});
 			return this;
 		}
 
 		@Override
-		public <T, P extends Publisher<T>> MultipartInserter withPublisher(String key,
-				P publisher, Class<T> elementClass) {
+		public <T, P extends Publisher<T>> MultipartInserter withPublisher(
+				String name, P publisher, Class<T> elementClass) {
 
-			this.builder.asyncPart(key, publisher, elementClass);
+			this.builder.asyncPart(name, publisher, elementClass);
 			return this;
 		}
 
 		@Override
-		public <T, P extends Publisher<T>> MultipartInserter withPublisher(String key,
-				P publisher, ParameterizedTypeReference<T> typeReference) {
+		public <T, P extends Publisher<T>> MultipartInserter withPublisher(
+				String name, P publisher, ParameterizedTypeReference<T> typeReference) {
 
-			this.builder.asyncPart(key, publisher, typeReference);
+			this.builder.asyncPart(name, publisher, typeReference);
 			return this;
 		}
 

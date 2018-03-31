@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,8 +64,10 @@ import org.springframework.util.StringUtils;
  *
  * <p>For example, the following snippet shows how to submit an HTML form:
  * <pre class="code">
- * RestTemplate template = new RestTemplate();  // FormHttpMessageConverter is configured by default
- * MultiValueMap&lt;String, String&gt; form = new LinkedMultiValueMap&lt;String, String&gt;();
+ * RestTemplate template = new RestTemplate();
+ * // AllEncompassingFormHttpMessageConverter is configured by default
+ *
+ * MultiValueMap&lt;String, String&gt; form = new LinkedMultiValueMap&lt;&gt;();
  * form.add("field 1", "value 1");
  * form.add("field 2", "value 2");
  * form.add("field 2", "value 3");
@@ -74,7 +76,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>The following snippet shows how to do a file upload:
  * <pre class="code">
- * MultiValueMap&lt;String, Object&gt; parts = new LinkedMultiValueMap&lt;String, Object&gt;();
+ * MultiValueMap&lt;String, Object&gt; parts = new LinkedMultiValueMap&lt;&gt;();
  * parts.add("field 1", "value 1");
  * parts.add("file", new ClassPathResource("myFile.jpg"));
  * template.postForLocation("http://example.com/myFileUpload", parts);
@@ -87,11 +89,15 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 3.0
- * @see MultiValueMap
+ * @see org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter
+ * @see org.springframework.util.MultiValueMap
  */
 public class FormHttpMessageConverter implements HttpMessageConverter<MultiValueMap<String, ?>> {
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+
+	private static final MediaType DEFAULT_FORM_DATA_MEDIA_TYPE =
+			new MediaType(MediaType.APPLICATION_FORM_URLENCODED, DEFAULT_CHARSET);
 
 
 	private List<MediaType> supportedMediaTypes = new ArrayList<>();
@@ -287,15 +293,14 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	private void writeForm(MultiValueMap<String, String> form, @Nullable MediaType contentType,
 			HttpOutputMessage outputMessage) throws IOException {
 
-		Charset charset;
-		if (contentType != null) {
-			outputMessage.getHeaders().setContentType(contentType);
-			charset = (contentType.getCharset() != null ? contentType.getCharset() : this.charset);
-		}
-		else {
-			outputMessage.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		contentType = (contentType != null ? contentType : DEFAULT_FORM_DATA_MEDIA_TYPE);
+		Charset charset = contentType.getCharset();
+		if (charset == null) {
 			charset = this.charset;
+			contentType = new MediaType(contentType, charset);
 		}
+		outputMessage.getHeaders().setContentType(contentType);
+
 		StringBuilder builder = new StringBuilder();
 		for (Iterator<String> nameIterator = form.keySet().iterator(); nameIterator.hasNext();) {
 			String name = nameIterator.next();
@@ -319,12 +324,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 		if (outputMessage instanceof StreamingHttpOutputMessage) {
 			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
-			streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
-				@Override
-				public void writeTo(OutputStream outputStream) throws IOException {
-					StreamUtils.copy(bytes, outputStream);
-				}
-			});
+			streamingOutputMessage.setBody(outputStream -> StreamUtils.copy(bytes, outputStream));
 		}
 		else {
 			StreamUtils.copy(bytes, outputMessage.getBody());
@@ -347,12 +347,9 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 		if (outputMessage instanceof StreamingHttpOutputMessage) {
 			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
-			streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
-				@Override
-				public void writeTo(OutputStream outputStream) throws IOException {
-					writeParts(outputStream, parts, boundary);
-					writeEnd(outputStream, boundary);
-				}
+			streamingOutputMessage.setBody(outputStream -> {
+				writeParts(outputStream, parts, boundary);
+				writeEnd(outputStream, boundary);
 			});
 		}
 		else {

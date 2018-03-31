@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,7 +104,7 @@ public class GenericConversionServiceTests {
 	@Test
 	public void convert() {
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		assertEquals(new Integer(3), conversionService.convert("3", Integer.class));
+		assertEquals(Integer.valueOf(3), conversionService.convert("3", Integer.class));
 	}
 
 	@Test
@@ -188,7 +188,7 @@ public class GenericConversionServiceTests {
 			}
 		});
 		Integer result = conversionService.convert("3", Integer.class);
-		assertEquals(new Integer(3), result);
+		assertEquals(Integer.valueOf(3), result);
 	}
 
 	// SPR-8718

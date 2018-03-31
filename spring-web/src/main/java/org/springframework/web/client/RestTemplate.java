@@ -89,9 +89,7 @@ import org.springframework.web.util.UriTemplateHandler;
  * HTTP PATCH, HTTP PUT with response body, etc.). Note however that the underlying HTTP
  * library used must also support the desired combination.
  *
- * <p>For each HTTP method there are three variants: two accept a URI template string
- * and URI variables (array or map) while a third accepts a {@link URI}.
- * Note that for URI templates it is assumed encoding is necessary, e.g.
+ * <p><strong>Note:</strong> For URI templates it is assumed encoding is necessary, e.g.
  * {@code restTemplate.getForObject("http://example.com/hotel list")} becomes
  * {@code "http://example.com/hotel%20list"}. This also means if the URI template
  * or URI variables are already encoded, double encoding will occur, e.g.
@@ -914,9 +912,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				HttpHeaders httpHeaders = httpRequest.getHeaders();
 				HttpHeaders requestHeaders = this.requestEntity.getHeaders();
 				if (!requestHeaders.isEmpty()) {
-					for (Map.Entry<String, List<String>> entry : requestHeaders.entrySet()) {
-						httpHeaders.put(entry.getKey(), new LinkedList<>(entry.getValue()));
-					}
+					requestHeaders.forEach((key, values) -> httpHeaders.put(key, new LinkedList<>(values)));
 				}
 				if (httpHeaders.getContentLength() < 0) {
 					httpHeaders.setContentLength(0L);
@@ -935,9 +931,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 								(GenericHttpMessageConverter<Object>) messageConverter;
 						if (genericConverter.canWrite(requestBodyType, requestBodyClass, requestContentType)) {
 							if (!requestHeaders.isEmpty()) {
-								for (Map.Entry<String, List<String>> entry : requestHeaders.entrySet()) {
-									httpHeaders.put(entry.getKey(), new LinkedList<>(entry.getValue()));
-								}
+								requestHeaders.forEach((key, values) -> httpHeaders.put(key, new LinkedList<>(values)));
 							}
 							if (logger.isDebugEnabled()) {
 								if (requestContentType != null) {
@@ -955,9 +949,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 					}
 					else if (messageConverter.canWrite(requestBodyClass, requestContentType)) {
 						if (!requestHeaders.isEmpty()) {
-							for (Map.Entry<String, List<String>> entry : requestHeaders.entrySet()) {
-								httpHeaders.put(entry.getKey(), new LinkedList<>(entry.getValue()));
-							}
+							requestHeaders.forEach((key, values) -> httpHeaders.put(key, new LinkedList<>(values)));
 						}
 						if (logger.isDebugEnabled()) {
 							if (requestContentType != null) {

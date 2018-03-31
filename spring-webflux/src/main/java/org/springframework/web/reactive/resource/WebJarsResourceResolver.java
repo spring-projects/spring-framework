@@ -47,9 +47,9 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class WebJarsResourceResolver extends AbstractResourceResolver {
 
-	private final static String WEBJARS_LOCATION = "META-INF/resources/webjars/";
+	private static final String WEBJARS_LOCATION = "META-INF/resources/webjars/";
 
-	private final static int WEBJARS_LOCATION_LENGTH = WEBJARS_LOCATION.length();
+	private static final int WEBJARS_LOCATION_LENGTH = WEBJARS_LOCATION.length();
 
 
 	private final WebJarAssetLocator webJarAssetLocator;

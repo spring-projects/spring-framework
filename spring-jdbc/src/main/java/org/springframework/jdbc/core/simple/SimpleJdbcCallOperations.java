@@ -71,7 +71,7 @@ public interface SimpleJdbcCallOperations {
 
 	/**
 	 * Specify one or more parameters if desired. These parameters will be supplemented with
-	 * any parameter information retrieved from the database meta data.
+	 * any parameter information retrieved from the database meta-data.
 	 * <p>Note that only parameters declared as {@code SqlParameter} and {@code SqlInOutParameter}
 	 * will be used to provide input values. This is different from the {@code StoredProcedure}
 	 * class which - for backwards compatibility reasons - allows input values to be provided
@@ -96,7 +96,7 @@ public interface SimpleJdbcCallOperations {
 	SimpleJdbcCallOperations returningResultSet(String parameterName, RowMapper<?> rowMapper);
 
 	/**
-	 * Turn off any processing of parameter meta data information obtained via JDBC.
+	 * Turn off any processing of parameter meta-data information obtained via JDBC.
 	 * @return the instance of this SimpleJdbcCall
 	 */
 	SimpleJdbcCallOperations withoutProcedureColumnMetaDataAccess();

@@ -125,7 +125,7 @@ enum TokenKind {
 
 	final char[] tokenChars;
 
-	final private boolean hasPayload;  // is there more to this token than simply the kind
+	private final boolean hasPayload;  // is there more to this token than simply the kind
 
 
 	private TokenKind(String tokenString) {

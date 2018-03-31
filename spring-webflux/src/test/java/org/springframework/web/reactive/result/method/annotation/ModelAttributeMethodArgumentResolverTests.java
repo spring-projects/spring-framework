@@ -361,6 +361,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class Bar {
 
 		private final String name;

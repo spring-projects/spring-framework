@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1391,9 +1391,19 @@ public class XmlBeanFactoryTests {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(OVERRIDES_CONTEXT);
-		TestBean jenny = (TestBean) xbf.getBean("jennyChild");
-		assertEquals(1, jenny.getFriends().size());
-		assertTrue(jenny.getFriends().iterator().next() instanceof TestBean);
+
+		TestBean jenny1 = (TestBean) xbf.getBean("jennyChild");
+		assertEquals(1, jenny1.getFriends().size());
+		Object friend1 = jenny1.getFriends().iterator().next();
+		assertTrue(friend1 instanceof TestBean);
+
+		TestBean jenny2 = (TestBean) xbf.getBean("jennyChild");
+		assertEquals(1, jenny2.getFriends().size());
+		Object friend2 = jenny2.getFriends().iterator().next();
+		assertTrue(friend2 instanceof TestBean);
+
+		assertNotSame(jenny1, jenny2);
+		assertNotSame(friend1, friend2);
 	}
 
 	@Test

@@ -54,13 +54,10 @@ import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link ResourceWebHandler}.
@@ -240,39 +237,85 @@ public class ResourceWebHandlerTests {
 	}
 
 	@Test
-	public void invalidPath() throws Exception {
+	public void testInvalidPath() throws Exception {
+
+		// Use mock ResourceResolver: i.e. we're only testing upfront validations...
+
+		Resource resource = mock(Resource.class);
+		when(resource.getFilename()).thenThrow(new AssertionError("Resource should not be resolved"));
+		when(resource.getInputStream()).thenThrow(new AssertionError("Resource should not be resolved"));
+		ResourceResolver resolver = mock(ResourceResolver.class);
+		when(resolver.resolveResource(any(), any(), any(), any())).thenReturn(Mono.just(resource));
+
+		ResourceWebHandler handler = new ResourceWebHandler();
+		handler.setLocations(Collections.singletonList(new ClassPathResource("test/", getClass())));
+		handler.setResourceResolvers(Collections.singletonList(resolver));
+		handler.afterPropertiesSet();
+
+		testInvalidPath("../testsecret/secret.txt", handler);
+		testInvalidPath("test/../../testsecret/secret.txt", handler);
+		testInvalidPath(":/../../testsecret/secret.txt", handler);
+
+		Resource location = new UrlResource(getClass().getResource("./test/"));
+		this.handler.setLocations(Collections.singletonList(location));
+		Resource secretResource = new UrlResource(getClass().getResource("testsecret/secret.txt"));
+		String secretPath = secretResource.getURL().getPath();
+
+		testInvalidPath("file:" + secretPath, handler);
+		testInvalidPath("/file:" + secretPath, handler);
+		testInvalidPath("url:" + secretPath, handler);
+		testInvalidPath("/url:" + secretPath, handler);
+		testInvalidPath("/../.." + secretPath, handler);
+		testInvalidPath("/%2E%2E/testsecret/secret.txt", handler);
+		testInvalidPath("/%2E%2E/testsecret/secret.txt", handler);
+		testInvalidPath("%2F%2F%2E%2E%2F%2F%2E%2E" + secretPath, handler);
+	}
+
+	private void testInvalidPath(String requestPath, ResourceWebHandler handler) {
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
+		setPathWithinHandlerMapping(exchange, requestPath);
+		StepVerifier.create(handler.handle(exchange))
+				.expectErrorSatisfies(err -> {
+					assertThat(err, instanceOf(ResponseStatusException.class));
+					assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) err).getStatus());
+				}).verify(TIMEOUT);
+	}
+
+	@Test
+	public void testResolvePathWithTraversal() throws Exception {
 		for (HttpMethod method : HttpMethod.values()) {
-			testInvalidPath(method);
+			testResolvePathWithTraversal(method);
 		}
 	}
 
-	private void testInvalidPath(HttpMethod httpMethod) throws Exception {
+	private void testResolvePathWithTraversal(HttpMethod httpMethod) throws Exception {
 		Resource location = new ClassPathResource("test/", getClass());
 		this.handler.setLocations(Collections.singletonList(location));
 
-		testInvalidPath(httpMethod, "../testsecret/secret.txt", location);
-		testInvalidPath(httpMethod, "test/../../testsecret/secret.txt", location);
-		testInvalidPath(httpMethod, ":/../../testsecret/secret.txt", location);
+		testResolvePathWithTraversal(httpMethod, "../testsecret/secret.txt", location);
+		testResolvePathWithTraversal(httpMethod, "test/../../testsecret/secret.txt", location);
+		testResolvePathWithTraversal(httpMethod, ":/../../testsecret/secret.txt", location);
 
 		location = new UrlResource(getClass().getResource("./test/"));
 		this.handler.setLocations(Collections.singletonList(location));
 		Resource secretResource = new UrlResource(getClass().getResource("testsecret/secret.txt"));
 		String secretPath = secretResource.getURL().getPath();
 
-		testInvalidPath(httpMethod, "file:" + secretPath, location);
-		testInvalidPath(httpMethod, "/file:" + secretPath, location);
-		testInvalidPath(httpMethod, "url:" + secretPath, location);
-		testInvalidPath(httpMethod, "/url:" + secretPath, location);
-		testInvalidPath(httpMethod, "////../.." + secretPath, location);
-		testInvalidPath(httpMethod, "/%2E%2E/testsecret/secret.txt", location);
-		testInvalidPath(httpMethod, "url:" + secretPath, location);
+		testResolvePathWithTraversal(httpMethod, "file:" + secretPath, location);
+		testResolvePathWithTraversal(httpMethod, "/file:" + secretPath, location);
+		testResolvePathWithTraversal(httpMethod, "url:" + secretPath, location);
+		testResolvePathWithTraversal(httpMethod, "/url:" + secretPath, location);
+		testResolvePathWithTraversal(httpMethod, "////../.." + secretPath, location);
+		testResolvePathWithTraversal(httpMethod, "/%2E%2E/testsecret/secret.txt", location);
+		testResolvePathWithTraversal(httpMethod, "%2F%2F%2E%2E%2F%2Ftestsecret/secret.txt", location);
+		testResolvePathWithTraversal(httpMethod, "url:" + secretPath, location);
 
 		// The following tests fail with a MalformedURLException on Windows
-		// testInvalidPath(location, "/" + secretPath);
-		// testInvalidPath(location, "/  " + secretPath);
+		// testResolvePathWithTraversal(location, "/" + secretPath);
+		// testResolvePathWithTraversal(location, "/  " + secretPath);
 	}
 
-	private void testInvalidPath(HttpMethod httpMethod, String requestPath, Resource location) throws Exception {
+	private void testResolvePathWithTraversal(HttpMethod httpMethod, String requestPath, Resource location) throws Exception {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.method(httpMethod, ""));
 		setPathWithinHandlerMapping(exchange, requestPath);
 		StepVerifier.create(this.handler.handle(exchange))

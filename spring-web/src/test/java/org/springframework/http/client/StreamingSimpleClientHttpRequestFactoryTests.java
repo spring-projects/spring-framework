@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.http.client;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.Collections;
@@ -27,12 +26,14 @@ import org.junit.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 
 import static org.junit.Assert.*;
 
-public class StreamingSimpleHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
+/**
+ * @author Arjen Poutsma
+ */
+public class StreamingSimpleClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {
@@ -41,21 +42,16 @@ public class StreamingSimpleHttpRequestFactoryTests extends AbstractHttpRequestF
 		return factory;
 	}
 
-	// SPR-8809
-	@Test
+	@Test  // SPR-8809
 	public void interceptor() throws Exception {
 		final String headerName = "MyHeader";
 		final String headerValue = "MyValue";
-		ClientHttpRequestInterceptor interceptor = new ClientHttpRequestInterceptor() {
-			@Override
-			public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
-					throws IOException {
-				request.getHeaders().add(headerName, headerValue);
-				return execution.execute(request, body);
-			}
+		ClientHttpRequestInterceptor interceptor = (request, body, execution) -> {
+			request.getHeaders().add(headerName, headerValue);
+			return execution.execute(request, body);
 		};
-		InterceptingClientHttpRequestFactory factory = new InterceptingClientHttpRequestFactory(createRequestFactory(),
-				Collections.singletonList(interceptor));
+		InterceptingClientHttpRequestFactory factory = new InterceptingClientHttpRequestFactory(
+				createRequestFactory(), Collections.singletonList(interceptor));
 
 		ClientHttpResponse response = null;
 		try {
@@ -81,8 +77,8 @@ public class StreamingSimpleHttpRequestFactoryTests extends AbstractHttpRequestF
 			ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/methods/post"), HttpMethod.POST);
 			final int BUF_SIZE = 4096;
 			final int ITERATIONS = Integer.MAX_VALUE / BUF_SIZE;
-//			final int contentLength = ITERATIONS * BUF_SIZE;
-//			request.getHeaders().setContentLength(contentLength);
+			// final int contentLength = ITERATIONS * BUF_SIZE;
+			// request.getHeaders().setContentLength(contentLength);
 			OutputStream body = request.getBody();
 			for (int i = 0; i < ITERATIONS; i++) {
 				byte[] buffer = new byte[BUF_SIZE];

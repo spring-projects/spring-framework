@@ -110,7 +110,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 	 * @return indicates completion or error
 	 * @since 5.0.2
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected Mono<Void> writeBody(@Nullable Object body, MethodParameter bodyParameter,
 			@Nullable MethodParameter actualParameter, ServerWebExchange exchange) {
 

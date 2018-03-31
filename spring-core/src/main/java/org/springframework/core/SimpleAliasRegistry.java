@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,23 +45,25 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	public void registerAlias(String name, String alias) {
 		Assert.hasText(name, "'name' must not be empty");
 		Assert.hasText(alias, "'alias' must not be empty");
-		if (alias.equals(name)) {
-			this.aliasMap.remove(alias);
-		}
-		else {
-			String registeredName = this.aliasMap.get(alias);
-			if (registeredName != null) {
-				if (registeredName.equals(name)) {
-					// An existing alias - no need to re-register
-					return;
-				}
-				if (!allowAliasOverriding()) {
-					throw new IllegalStateException("Cannot register alias '" + alias + "' for name '" +
-							name + "': It is already registered for name '" + registeredName + "'.");
-				}
+		synchronized (this.aliasMap) {
+			if (alias.equals(name)) {
+				this.aliasMap.remove(alias);
 			}
-			checkForAliasCircle(name, alias);
-			this.aliasMap.put(alias, name);
+			else {
+				String registeredName = this.aliasMap.get(alias);
+				if (registeredName != null) {
+					if (registeredName.equals(name)) {
+						// An existing alias - no need to re-register
+						return;
+					}
+					if (!allowAliasOverriding()) {
+						throw new IllegalStateException("Cannot register alias '" + alias + "' for name '" +
+								name + "': It is already registered for name '" + registeredName + "'.");
+					}
+				}
+				checkForAliasCircle(name, alias);
+				this.aliasMap.put(alias, name);
+			}
 		}
 	}
 
@@ -92,9 +94,11 @@ public class SimpleAliasRegistry implements AliasRegistry {
 
 	@Override
 	public void removeAlias(String alias) {
-		String name = this.aliasMap.remove(alias);
-		if (name == null) {
-			throw new IllegalStateException("No alias '" + alias + "' registered");
+		synchronized (this.aliasMap) {
+			String name = this.aliasMap.remove(alias);
+			if (name == null) {
+				throw new IllegalStateException("No alias '" + alias + "' registered");
+			}
 		}
 	}
 
@@ -137,8 +141,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 		Assert.notNull(valueResolver, "StringValueResolver must not be null");
 		synchronized (this.aliasMap) {
 			Map<String, String> aliasCopy = new HashMap<>(this.aliasMap);
-			for (String alias : aliasCopy.keySet()) {
-				String registeredName = aliasCopy.get(alias);
+			aliasCopy.forEach((alias, registeredName) -> {
 				String resolvedAlias = valueResolver.resolveStringValue(alias);
 				String resolvedName = valueResolver.resolveStringValue(registeredName);
 				if (resolvedAlias == null || resolvedName == null || resolvedAlias.equals(resolvedName)) {
@@ -150,7 +153,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 						if (existingName.equals(resolvedName)) {
 							// Pointing to existing alias - just remove placeholder
 							this.aliasMap.remove(alias);
-							break;
+							return;
 						}
 						throw new IllegalStateException(
 								"Cannot register resolved alias '" + resolvedAlias + "' (original: '" + alias +
@@ -164,7 +167,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 				else if (!registeredName.equals(resolvedName)) {
 					this.aliasMap.put(alias, resolvedName);
 				}
-			}
+			});
 		}
 	}
 

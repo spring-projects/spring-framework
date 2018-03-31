@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.handler;
 
 import java.net.URI;
@@ -44,6 +45,7 @@ import static org.springframework.web.reactive.HandlerMapping.PATH_WITHIN_HANDLE
 public class SimpleUrlHandlerMappingTests {
 
 	@Test
+	@SuppressWarnings("resource")
 	public void handlerMappingJavaConfig() throws Exception {
 		AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext();
 		wac.register(WebConfig.class);
@@ -61,6 +63,7 @@ public class SimpleUrlHandlerMappingTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void handlerMappingXmlConfig() throws Exception {
 		ClassPathXmlApplicationContext wac = new ClassPathXmlApplicationContext("map.xml", getClass());
 		wac.refresh();
@@ -118,7 +121,7 @@ public class SimpleUrlHandlerMappingTests {
 
 	@Configuration
 	static class WebConfig {
-	
+
 		@Bean @SuppressWarnings("unused")
 		public SimpleUrlHandlerMapping handlerMapping() {
 			SimpleUrlHandlerMapping hm = new SimpleUrlHandlerMapping();

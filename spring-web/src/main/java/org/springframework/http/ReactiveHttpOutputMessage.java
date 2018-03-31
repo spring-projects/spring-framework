@@ -45,6 +45,9 @@ public interface ReactiveHttpOutputMessage extends HttpMessage {
 
 	/**
 	 * Register an action to apply just before the HttpOutputMessage is committed.
+	 * <p><strong>Note:</strong> the supplied action must be properly deferred,
+	 * e.g. via {@link Mono#defer} or {@link Mono#fromRunnable}, to ensure it's
+	 * executed in the right order, relative to other actions.
 	 * @param action the action to apply
 	 */
 	void beforeCommit(Supplier<? extends Mono<Void>> action);

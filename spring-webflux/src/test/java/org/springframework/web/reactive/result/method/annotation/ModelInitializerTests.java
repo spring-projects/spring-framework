@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebBindingInitializer;
@@ -61,6 +60,7 @@ import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link ModelInitializer}.
+ *
  * @author Rossen Stoyanchev
  */
 public class ModelInitializerTests {
@@ -298,7 +298,4 @@ public class ModelInitializerTests {
 	private static final ReflectionUtils.MethodFilter BINDER_METHODS = method ->
 			AnnotationUtils.findAnnotation(method, InitBinder.class) != null;
 
-	private static final ReflectionUtils.MethodFilter ATTRIBUTE_METHODS = method ->
-			(AnnotationUtils.findAnnotation(method, RequestMapping.class) == null) &&
-					(AnnotationUtils.findAnnotation(method, ModelAttribute.class) != null);
 }

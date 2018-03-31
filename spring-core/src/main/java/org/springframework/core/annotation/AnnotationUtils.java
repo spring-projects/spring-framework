@@ -40,6 +40,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -147,18 +148,18 @@ public abstract class AnnotationUtils {
 	 * <p>Note that this method supports only a single level of meta-annotations.
 	 * For support for arbitrary levels of meta-annotations, use one of the
 	 * {@code find*()} methods instead.
-	 * @param ann the Annotation to check
+	 * @param annotation the Annotation to check
 	 * @param annotationType the annotation type to look for, both locally and as a meta-annotation
 	 * @return the first matching annotation, or {@code null} if not found
 	 * @since 4.0
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
-	public static <A extends Annotation> A getAnnotation(Annotation ann, Class<A> annotationType) {
-		if (annotationType.isInstance(ann)) {
-			return synthesizeAnnotation((A) ann);
+	public static <A extends Annotation> A getAnnotation(Annotation annotation, Class<A> annotationType) {
+		if (annotationType.isInstance(annotation)) {
+			return synthesizeAnnotation((A) annotation);
 		}
-		Class<? extends Annotation> annotatedElement = ann.annotationType();
+		Class<? extends Annotation> annotatedElement = annotation.annotationType();
 		try {
 			return synthesizeAnnotation(annotatedElement.getAnnotation(annotationType), annotatedElement);
 		}
@@ -574,10 +575,10 @@ public abstract class AnnotationUtils {
 	@Nullable
 	private static <A extends Annotation> A searchOnInterfaces(Method method, Class<A> annotationType, Class<?>... ifcs) {
 		A annotation = null;
-		for (Class<?> iface : ifcs) {
-			if (isInterfaceWithAnnotatedMethods(iface)) {
+		for (Class<?> ifc : ifcs) {
+			if (isInterfaceWithAnnotatedMethods(ifc)) {
 				try {
-					Method equivalentMethod = iface.getMethod(method.getName(), method.getParameterTypes());
+					Method equivalentMethod = ifc.getMethod(method.getName(), method.getParameterTypes());
 					annotation = getAnnotation(equivalentMethod, annotationType);
 				}
 				catch (NoSuchMethodException ex) {
@@ -591,15 +592,20 @@ public abstract class AnnotationUtils {
 		return annotation;
 	}
 
-	static boolean isInterfaceWithAnnotatedMethods(Class<?> iface) {
-		Boolean found = annotatedInterfaceCache.get(iface);
+	static boolean isInterfaceWithAnnotatedMethods(Class<?> ifc) {
+		if (ClassUtils.isJavaLanguageInterface(ifc)) {
+			return false;
+		}
+
+		Boolean found = annotatedInterfaceCache.get(ifc);
 		if (found != null) {
 			return found;
 		}
 		found = Boolean.FALSE;
-		for (Method ifcMethod : iface.getMethods()) {
+		for (Method ifcMethod : ifc.getMethods()) {
 			try {
-				if (ifcMethod.getAnnotations().length > 0) {
+				Annotation[] anns = ifcMethod.getAnnotations();
+				if (anns.length > 1 || (anns.length == 1 && anns[0].annotationType() != Nullable.class)) {
 					found = Boolean.TRUE;
 					break;
 				}
@@ -608,7 +614,7 @@ public abstract class AnnotationUtils {
 				handleIntrospectionFailure(ifcMethod, ex);
 			}
 		}
-		annotatedInterfaceCache.put(iface, found);
+		annotatedInterfaceCache.put(ifc, found);
 		return found;
 	}
 
@@ -896,6 +902,32 @@ public abstract class AnnotationUtils {
 	 */
 	public static boolean isInJavaLangAnnotationPackage(@Nullable String annotationType) {
 		return (annotationType != null && annotationType.startsWith("java.lang.annotation"));
+	}
+
+	/**
+	 * Check the declared attributes of the given annotation, in particular covering
+	 * Google App Engine's late arrival of {@code TypeNotPresentExceptionProxy} for
+	 * {@code Class} values (instead of early {@code Class.getAnnotations() failure}.
+	 * <p>This method not failing indicates that {@link #getAnnotationAttributes(Annotation)}
+	 * won't failure either (when attempted later on).
+	 * @param annotation the annotation to validate
+	 * @throws IllegalStateException if a declared {@code Class} attribute could not be read
+	 * @since 4.3.15
+	 * @see Class#getAnnotations()
+	 * @see #getAnnotationAttributes(Annotation)
+	 */
+	public static void validateAnnotation(Annotation annotation) {
+		for (Method method : getAttributeMethods(annotation.annotationType())) {
+			Class<?> returnType = method.getReturnType();
+			if (returnType == Class.class || returnType == Class[].class) {
+				try {
+					method.invoke(annotation);
+				}
+				catch (Throwable ex) {
+					throw new IllegalStateException("Could not obtain annotation attribute value for " + method, ex);
+				}
+			}
+		}
 	}
 
 	/**
@@ -1220,21 +1252,18 @@ public abstract class AnnotationUtils {
 		if (!attributes.validated) {
 			// Validate @AliasFor configuration
 			Map<String, List<String>> aliasMap = getAttributeAliasMap(annotationType);
-			for (String attributeName : aliasMap.keySet()) {
+			aliasMap.forEach((attributeName, aliasedAttributeNames) -> {
 				if (valuesAlreadyReplaced.contains(attributeName)) {
-					continue;
+					return;
 				}
 				Object value = attributes.get(attributeName);
 				boolean valuePresent = (value != null && !(value instanceof DefaultValueHolder));
-
-				for (String aliasedAttributeName : aliasMap.get(attributeName)) {
+				for (String aliasedAttributeName : aliasedAttributeNames) {
 					if (valuesAlreadyReplaced.contains(aliasedAttributeName)) {
 						continue;
 					}
-
 					Object aliasedValue = attributes.get(aliasedAttributeName);
 					boolean aliasPresent = (aliasedValue != null && !(aliasedValue instanceof DefaultValueHolder));
-
 					// Something to validate or replace with an alias?
 					if (valuePresent || aliasPresent) {
 						if (valuePresent && aliasPresent) {
@@ -1264,7 +1293,7 @@ public abstract class AnnotationUtils {
 						}
 					}
 				}
-			}
+			});
 			attributes.validated = true;
 		}
 
@@ -1835,13 +1864,13 @@ public abstract class AnnotationUtils {
 		if (element instanceof Class && Annotation.class.isAssignableFrom((Class<?>) element)) {
 			// Meta-annotation or (default) value lookup on an annotation type
 			if (loggerToUse.isDebugEnabled()) {
-				loggerToUse.debug("Failed to meta-introspect annotation [" + element + "]: " + ex);
+				loggerToUse.debug("Failed to meta-introspect annotation " + element + ": " + ex);
 			}
 		}
 		else {
 			// Direct annotation lookup on regular Class, Method, Field
 			if (loggerToUse.isInfoEnabled()) {
-				loggerToUse.info("Failed to introspect annotations on [" + element + "]: " + ex);
+				loggerToUse.info("Failed to introspect annotations on " + element + ": " + ex);
 			}
 		}
 	}

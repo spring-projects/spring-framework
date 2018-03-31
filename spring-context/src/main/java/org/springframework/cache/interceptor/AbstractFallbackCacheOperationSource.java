@@ -56,7 +56,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * Canonical value held in cache to indicate no caching attribute was
 	 * found for this method and we don't need to look again.
 	 */
-	private final static Collection<CacheOperation> NULL_CACHING_ATTRIBUTE = Collections.emptyList();
+	private static final Collection<CacheOperation> NULL_CACHING_ATTRIBUTE = Collections.emptyList();
 
 
 	/**

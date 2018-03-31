@@ -1331,6 +1331,12 @@
 								<xsd:documentation><![CDATA[
 	Comma-separated list of origins to allow, e.g. "http://domain1.com, http://domain2.com".
 	The special value "*" allows all domains (default).
+
+	Note that CORS checks use values from "Forwarded" (RFC 7239), "X-Forwarded-Host",
+	"X-Forwarded-Port", and "X-Forwarded-Proto" headers, if present, in order to reflect
+	the client-originated address. Consider using the ForwardedHeaderFilter in order to
+	choose from a central place whether to extract and use such headers, or whether to
+	discard them. See the Spring Framework reference for more on this filter.
 								]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>

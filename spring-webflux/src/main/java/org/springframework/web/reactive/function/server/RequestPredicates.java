@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
@@ -580,6 +581,16 @@ public abstract class RequestPredicates {
 		@Override
 		public Mono<? extends Principal> principal() {
 			return this.request.principal();
+		}
+
+		@Override
+		public Mono<MultiValueMap<String, String>> formData() {
+			return this.request.formData();
+		}
+
+		@Override
+		public Mono<MultiValueMap<String, Part>> multipartData() {
+			return this.request.multipartData();
 		}
 
 		@Override

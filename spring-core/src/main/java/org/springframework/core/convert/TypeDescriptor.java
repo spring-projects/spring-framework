@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,14 +49,14 @@ import org.springframework.util.ObjectUtils;
 @SuppressWarnings("serial")
 public class TypeDescriptor implements Serializable {
 
-	static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
+	private static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
 
-	private static final Map<Class<?>, TypeDescriptor> commonTypesCache = new HashMap<>(18);
+	private static final Map<Class<?>, TypeDescriptor> commonTypesCache = new HashMap<>(32);
 
 	private static final Class<?>[] CACHED_COMMON_TYPES = {
 			boolean.class, Boolean.class, byte.class, Byte.class, char.class, Character.class,
-			double.class, Double.class, int.class, Integer.class, long.class, Long.class,
-			float.class, Float.class, short.class, Short.class, String.class, Object.class};
+			double.class, Double.class, float.class, Float.class, int.class, Integer.class,
+			long.class, Long.class, short.class, Short.class, String.class, Object.class};
 
 	static {
 		for (Class<?> preCachedClass : CACHED_COMMON_TYPES) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,12 +118,11 @@ public class ViewResolverRegistry {
 		this.order = (this.order != null ? this.order : Ordered.HIGHEST_PRECEDENCE);
 
 		if (this.contentNegotiatingResolver != null) {
-			if (!ObjectUtils.isEmpty(defaultViews)) {
-				if (!CollectionUtils.isEmpty(this.contentNegotiatingResolver.getDefaultViews())) {
-					List<View> views = new ArrayList<>(this.contentNegotiatingResolver.getDefaultViews());
-					views.addAll(Arrays.asList(defaultViews));
-					this.contentNegotiatingResolver.setDefaultViews(views);
-				}
+			if (!ObjectUtils.isEmpty(defaultViews) &&
+					!CollectionUtils.isEmpty(this.contentNegotiatingResolver.getDefaultViews())) {
+				List<View> views = new ArrayList<>(this.contentNegotiatingResolver.getDefaultViews());
+				views.addAll(Arrays.asList(defaultViews));
+				this.contentNegotiatingResolver.setDefaultViews(views);
 			}
 		}
 		else {

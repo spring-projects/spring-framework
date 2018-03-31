@@ -259,8 +259,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	}
 
 	private List<MediaType> getAcceptedMediaTypes(HttpServletRequest request) throws HttpMediaTypeNotAcceptableException {
-		List<MediaType> mediaTypes = this.contentNegotiationManager.resolveMediaTypes(new ServletWebRequest(request));
-		return mediaTypes.isEmpty() ? Collections.singletonList(MediaType.ALL) : mediaTypes;
+		return this.contentNegotiationManager.resolveMediaTypes(new ServletWebRequest(request));
 	}
 
 	private int indexOfEqualMediaType(MediaType mediaType) {

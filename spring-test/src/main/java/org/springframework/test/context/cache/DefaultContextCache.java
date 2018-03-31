@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,11 +143,7 @@ public class DefaultContextCache implements ContextCache {
 		MergedContextConfiguration child = key;
 		MergedContextConfiguration parent = child.getParent();
 		while (parent != null) {
-			Set<MergedContextConfiguration> list = this.hierarchyMap.get(parent);
-			if (list == null) {
-				list = new HashSet<>();
-				this.hierarchyMap.put(parent, list);
-			}
+			Set<MergedContextConfiguration> list = this.hierarchyMap.computeIfAbsent(parent, k -> new HashSet<>());
 			list.add(child);
 			child = parent;
 			parent = child.getParent();

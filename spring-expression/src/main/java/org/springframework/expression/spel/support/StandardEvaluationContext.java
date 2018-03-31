@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,18 +38,30 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Provides a default EvaluationContext implementation.
+ * A powerful and highly configurable {@link EvaluationContext} implementation.
+ * This context uses standard implementations of all applicable strategies,
+ * based on reflection to resolve properties, methods and fields.
  *
- * <p>To resolve properties/methods/fields this context uses a reflection mechanism.
+ * <p>For a simpler builder-style context variant for data-binding purposes,
+ * consider using {@link SimpleEvaluationContext} instead which allows for
+ * opting into several SpEL features as needed by specific evaluation cases.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 3.0
+ * @see SimpleEvaluationContext
+ * @see ReflectivePropertyAccessor
+ * @see ReflectiveConstructorResolver
+ * @see ReflectiveMethodResolver
+ * @see StandardTypeLocator
+ * @see StandardTypeConverter
+ * @see StandardTypeComparator
+ * @see StandardOperatorOverloader
  */
 public class StandardEvaluationContext implements EvaluationContext {
 
-	private TypedValue rootObject = TypedValue.NULL;
+	private TypedValue rootObject;
 
 	@Nullable
 	private volatile List<PropertyAccessor> propertyAccessors;
@@ -79,12 +91,20 @@ public class StandardEvaluationContext implements EvaluationContext {
 	private final Map<String, Object> variables = new HashMap<>();
 
 
+	/**
+	 * Create a {@code StandardEvaluationContext} with a null root object.
+	 */
 	public StandardEvaluationContext() {
-		setRootObject(null);
+		this.rootObject = TypedValue.NULL;
 	}
 
+	/**
+	 * Create a {@code StandardEvaluationContext} with the given root object.
+	 * @param rootObject the root object to use
+	 * @see #setRootObject
+	 */
 	public StandardEvaluationContext(Object rootObject) {
-		setRootObject(rootObject);
+		this.rootObject = new TypedValue(rootObject);
 	}
 
 

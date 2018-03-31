@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,9 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 	 * @param considerMetaAnnotations whether to also match on meta-annotations
 	 * @param considerInterfaces whether to also match interfaces
 	 */
-	public AnnotationTypeFilter(Class<? extends Annotation> annotationType, boolean considerMetaAnnotations, boolean considerInterfaces) {
+	public AnnotationTypeFilter(
+			Class<? extends Annotation> annotationType, boolean considerMetaAnnotations, boolean considerInterfaces) {
+
 		super(annotationType.isAnnotationPresent(Inherited.class), considerInterfaces);
 		this.annotationType = annotationType;
 		this.considerMetaAnnotations = considerMetaAnnotations;
@@ -111,6 +113,11 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 			return false;
 		}
 		else if (typeName.startsWith("java")) {
+			if (!this.annotationType.getName().startsWith("java")) {
+				// Standard Java types do not have non-standard annotations on them ->
+				// skip any load attempt, in particular for Java language interfaces.
+				return false;
+			}
 			try {
 				Class<?> clazz = ClassUtils.forName(typeName, getClass().getClassLoader());
 				return ((this.considerMetaAnnotations ? AnnotationUtils.getAnnotation(clazz, this.annotationType) :

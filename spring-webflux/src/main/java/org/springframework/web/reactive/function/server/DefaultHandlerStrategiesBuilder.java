@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.util.Assert;
+import org.springframework.web.reactive.handler.WebFluxResponseStatusExceptionHandler;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
-import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
 import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
 import org.springframework.web.server.i18n.LocaleContextResolver;
 
@@ -58,7 +58,7 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
 	public void defaultConfiguration() {
 		this.codecConfigurer.registerDefaults(true);
-		this.exceptionHandlers.add(new ResponseStatusExceptionHandler());
+		this.exceptionHandlers.add(new WebFluxResponseStatusExceptionHandler());
 		this.localeContextResolver = new AcceptHeaderLocaleContextResolver();
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -556,6 +557,21 @@ public class HttpEntityMethodProcessorMockTests {
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
 		assertConditionalResponse(HttpStatus.OK, "body", etagValue, -1);
+	}
+
+	@Test
+	public void shouldNotFailPreconditionForPutRequests() throws Exception {
+		servletRequest.setMethod("PUT");
+		ZonedDateTime dateTime = ofEpochMilli(new Date().getTime()).atZone(GMT);
+		servletRequest.addHeader(HttpHeaders.IF_UNMODIFIED_SINCE, RFC_1123_DATE_TIME.format(dateTime));
+
+		long justModified = dateTime.plus(1, ChronoUnit.SECONDS).toEpochSecond() * 1000;
+		ResponseEntity<String> returnValue = ResponseEntity.ok()
+				.lastModified(justModified).body("body");
+		initStringMessageConversion(TEXT_PLAIN);
+		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+
+		assertConditionalResponse(HttpStatus.OK, null, null, justModified);
 	}
 
 	@Test

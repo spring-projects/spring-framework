@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -188,10 +189,10 @@ public class PathResourceResolver extends AbstractResourceResolver {
 			}
 			else if (logger.isTraceEnabled()) {
 				Resource[] allowedLocations = getAllowedLocations();
-				logger.trace("Resource path=\"" + resourcePath + "\" was successfully resolved " +
-						"but resource=\"" +	resource.getURL() + "\" is neither under the " +
-						"current location=\"" + location.getURL() + "\" nor under any of the " +
-						"allowed locations=" + (allowedLocations != null ? Arrays.asList(allowedLocations) : "[]"));
+				logger.trace("Resource path \"" + resourcePath + "\" was successfully resolved " +
+						"but resource \"" +	resource.getURL() + "\" is neither under the " +
+						"current location \"" + location.getURL() + "\" nor under any of the " +
+						"allowed locations " + (allowedLocations != null ? Arrays.asList(allowedLocations) : "[]"));
 			}
 		}
 		return null;
@@ -251,21 +252,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 			return true;
 		}
 		locationPath = (locationPath.endsWith("/") || locationPath.isEmpty() ? locationPath : locationPath + "/");
-		if (!resourcePath.startsWith(locationPath)) {
-			return false;
-		}
-
-		if (resourcePath.contains("%")) {
-			// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars...
-			if (URLDecoder.decode(resourcePath, "UTF-8").contains("../")) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Resolved resource path contains \"../\" after decoding: " + resourcePath);
-				}
-				return false;
-			}
-		}
-
-		return true;
+		return (resourcePath.startsWith(locationPath) && !isInvalidEncodedPath(resourcePath));
 	}
 
 	private String encodeIfNecessary(String path, @Nullable HttpServletRequest request, Resource location) {
@@ -289,8 +276,26 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	}
 
 	private boolean shouldEncodeRelativePath(Resource location) {
-		return location instanceof UrlResource &&
-				this.urlPathHelper != null && this.urlPathHelper.isUrlDecode();
+		return (location instanceof UrlResource && this.urlPathHelper != null && this.urlPathHelper.isUrlDecode());
+	}
+
+	private boolean isInvalidEncodedPath(String resourcePath) {
+		if (resourcePath.contains("%")) {
+			// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars...
+			try {
+				String decodedPath = URLDecoder.decode(resourcePath, "UTF-8");
+				if (decodedPath.contains("../") || decodedPath.contains("..\\")) {
+					if (logger.isTraceEnabled()) {
+						logger.trace("Resolved resource path contains encoded \"../\" or \"..\\\": " + resourcePath);
+					}
+					return true;
+				}
+			}
+			catch (UnsupportedEncodingException ex) {
+				// Should never happen...
+			}
+		}
+		return false;
 	}
 
 }

@@ -359,7 +359,7 @@ public class EvaluationTests extends AbstractExpressionTests {
 	@Test
 	public void testTernaryOperator04() {
 		Expression e = parser.parseExpression("1>2?3:4");
-		assertFalse(e.isWritable(eContext));
+		assertFalse(e.isWritable(context));
 	}
 
 	@Test

@@ -39,7 +39,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public final class HeadersRequestCondition extends AbstractRequestCondition<HeadersRequestCondition> {
 
-	private final static HeadersRequestCondition PRE_FLIGHT_MATCH = new HeadersRequestCondition();
+	private static final HeadersRequestCondition PRE_FLIGHT_MATCH = new HeadersRequestCondition();
 
 
 	private final Set<HeaderExpression> expressions;

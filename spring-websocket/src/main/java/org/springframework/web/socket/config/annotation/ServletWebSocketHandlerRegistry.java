@@ -127,11 +127,11 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 		for (ServletWebSocketHandlerRegistration registration : this.registrations) {
 			updateTaskScheduler(registration);
 			MultiValueMap<HttpRequestHandler, String> mappings = registration.getMappings();
-			for (HttpRequestHandler httpHandler : mappings.keySet()) {
-				for (String pattern : mappings.get(httpHandler)) {
+			mappings.forEach((httpHandler, patterns) -> {
+				for (String pattern : patterns) {
 					urlMap.put(pattern, httpHandler);
 				}
-			}
+			});
 		}
 		WebSocketHandlerMapping hm = new WebSocketHandlerMapping();
 		hm.setUrlMap(urlMap);

@@ -946,9 +946,9 @@ plugging in third-party or custom solutions here.
 
 
 [[rest-client-access]]
-=== Accessing REST endpoints
+=== REST Endpoints
 
-The Spring Framework has two choices for client-side access to REST endpoints:
+The Spring Framework provides two choices for making calls to REST endpoints:
 
 * <<rest-resttemplate>> -- the original Spring REST client with an API similar to other
 template classes in Spring such as `JdbcTemplate`, `JmsTemplate` and others.
@@ -963,130 +963,75 @@ to support high concurrency more efficiently (i.e. using a small number of threa
 [[rest-resttemplate]]
 ==== RestTemplate
 
-The `RestTemplate` provides a higher level API over HTTP client libraries with methods
-that correspond to each of the six main HTTP methods that make invoking many RESTful
-services a one-liner and enforce REST best practices.
-
+The `RestTemplate` provides a higher level API over HTTP client libraries. It makes it
+easy to invoke REST endpoints in a single line. It exposes the following groups of
+overloaded methods:
 
 [[rest-overview-of-resttemplate-methods-tbl]]
-.Overview of RestTemplate methods
+.RestTemplate methods
 [cols="1,3"]
 |===
-| HTTP Method | RestTemplate Method
+| Method group | Description
 
-| DELETE
-| {api-spring-framework}/web/client/RestTemplate.html#delete(String,%20Object...)[delete]
+| `getForObject`
+| Retrieve a representation via GET.
 
-| GET
-| {api-spring-framework}/web/client/RestTemplate.html#getForObject(String,%20Class,%20Object...)[getForObject]
-  {api-spring-framework}/web/client/RestTemplate.html#getForEntity(String,%20Class,%20Object...)[getForEntity]
+| `getForEntity`
+| Retrieve a `ResponseEntity`, i.e. status, headers, and body, via GET.
 
-| HEAD
-| {api-spring-framework}/web/client/RestTemplate.html#headForHeaders(String,%20Object...)[headForHeaders(String
-  url, String... uriVariables)]
+| `headForHeaders`
+| Retrieve all headers for a resource via HEAD.
 
-| OPTIONS
-| {api-spring-framework}/web/client/RestTemplate.html#optionsForAllow(String,%20Object...)[optionsForAllow(String
-  url, String... uriVariables)]
+| `postForLocation`
+| Create a new resource via POST and return the Location header from the response.
 
-| POST
-| {api-spring-framework}/web/client/RestTemplate.html#postForLocation(String,%20Object,%20Object...)[postForLocation(String
-  url, Object request, String... uriVariables)]
-  {api-spring-framework}/web/client/RestTemplate.html#postForObject(java.lang.String,%20java.lang.Object,%20java.lang.Class,%20java.lang.String...)[postForObject(String
-  url, Object request, Class<T> responseType, String... uriVariables)]
+| `postForObject`
+| Create a new resource via POST and return the representation from the response.
 
-| PUT
-| {api-spring-framework}/web/client/RestTemplate.html#put(String,%20Object,%20Object...)[put(String
-  url, Object request, String...uriVariables)]
+| `postForEntity`
+| Create a new resource via POST and return the representation from the response.
 
-| PATCH and others
-| {api-spring-framework}/web/client/RestTemplate.html#exchange(java.lang.String,%20org.springframework.http.HttpMethod,%20org.springframework.http.HttpEntity,%20java.lang.Class,%20java.lang.Object...)[exchange]
-  {api-spring-framework}/web/client/RestTemplate.html#execute(java.lang.String,%20org.springframework.http.HttpMethod,%20org.springframework.web.client.RequestCallback,%20org.springframework.web.client.ResponseExtractor,%20java.lang.Object...)[execute]
+| `put`
+| Create or update a resource via PUT.
+
+| `patchForObject`
+| Update a resource via PATCH and return the representation from the response.
+Note that the JDK `HttpURLConnection` does not support the `PATCH` but Apache
+HttpComponents, and others do.
+
+| `delete`
+| Delete the resources at the specified URI via DELETE.
+
+| `optionsForAllow`
+| Retrieve allowed HTTP methods for a resource via ALLOW.
+
+| `exchange`
+| More generalized, and less opinionated version, of the above methods that provides extra
+flexibility when needed. It accepts `RequestEntity`, including HTTP method, URL, headers,
+and body as input, and returns a `ResponseEntity`.
+
+These methods allow the use of `ParameterizedTypeReference` instead of `Class` to specify
+a response type with generics.
+
+| `execute`
+| The most generalized way to perform a request, with full control over request
+preparation and response extraction via callback interfaces.
+
 |===
 
-The names of `RestTemplate` methods follow a naming convention, the first part indicates
-what HTTP method is being invoked and the second part indicates what is returned. For
-example, the method `getForObject()` will perform a GET, convert the HTTP response into
-an object type of your choice and return that object. The method `postForLocation()`
-will do a POST, converting the given object into a HTTP request and return the response
-HTTP Location header where the newly created object can be found. In case of an
-exception processing the HTTP request, an exception of the type `RestClientException`
-will be thrown; this behavior can be changed by plugging in another
-`ResponseErrorHandler` implementation into the `RestTemplate`.
 
-The `exchange` and `execute` methods are generalized versions of the more
-specific methods listed above them and can support additional combinations and methods,
-like HTTP PATCH. However, note that the underlying HTTP library must also support the
-desired combination. The JDK `HttpURLConnection` does not support the `PATCH` method, but
-Apache HttpComponents HttpClient version 4.2 or later does. They also enable
-`RestTemplate` to read an HTTP response to a generic type (e.g. `List<Account>`), using a
-`ParameterizedTypeReference`, a new class that enables capturing and passing generic
-type info.
+[[rest-resttemplate-create]]
+===== Initialization
 
-Objects passed to and returned from these methods are converted to and from HTTP
-messages by `HttpMessageConverter` instances. Converters for the main mime types are
-registered by default, but you can also write your own converter and register it via the
-`messageConverters()` bean property. The default converter instances registered with the
-template are `ByteArrayHttpMessageConverter`, `StringHttpMessageConverter`,
-`FormHttpMessageConverter` and `SourceHttpMessageConverter`. You can override these
-defaults using the `messageConverters()` bean property as would be required if using the
-`MarshallingHttpMessageConverter` or `MappingJackson2HttpMessageConverter`.
+The default constructor uses `java.net.HttpURLConnection` to perform requests. You can
+switch to a different HTTP library with an implementation of `ClientHttpRequestFactory`.
+There is built-in support for the following:
 
-Each method takes URI template arguments in two forms, either as a `String`
-variable-length argument or a `Map<String,String>`. For example,
+* Apache HttpComponents
+* Netty
+* OkHttp
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	String result = restTemplate.getForObject(
-			"http://example.com/hotels/{hotel}/bookings/{booking}", String.class,"42", "21");
-----
-
-using variable-length arguments and
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	Map<String, String> vars = Collections.singletonMap("hotel", "42");
-	String result = restTemplate.getForObject(
-			"http://example.com/hotels/{hotel}/rooms/{hotel}", String.class, vars);
-----
-
-using a `Map<String,String>`.
-
-To create an instance of `RestTemplate` you can simply call the default no-arg
-constructor. This will use standard Java classes from the `java.net` package as the
-underlying implementation to create HTTP requests. This can be overridden by specifying
-an implementation of `ClientHttpRequestFactory`. Spring provides the implementation
-`HttpComponentsClientHttpRequestFactory` that uses the Apache HttpComponents
-`HttpClient` to create requests. `HttpComponentsClientHttpRequestFactory` is configured
-using an instance of `org.apache.http.client.HttpClient` which can in turn be configured
-with credentials information or connection pooling functionality.
-
-[TIP]
-====
-Note that the `java.net` implementation for HTTP requests may raise an exception when
-accessing the status of a response that represents an error (e.g. 401). If this is an
-issue, switch to `HttpComponentsClientHttpRequestFactory` instead.
-====
-
-The previous example using Apache HttpComponents `HttpClient` directly rewritten to use
-the `RestTemplate` is shown below
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	uri = "http://example.com/hotels/{id}/bookings";
-
-	RestTemplate template = new RestTemplate();
-
-	Booking booking = // create booking object
-
-	URI location = template.postForLocation(uri, booking, "1");
-----
-
-To use Apache HttpComponents instead of the native `java.net` functionality, construct
-the `RestTemplate` as follows:
+For example to switch to Apache HttpComponents use:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1094,98 +1039,198 @@ the `RestTemplate` as follows:
 	RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 ----
 
+Each `ClientHttpRequestFactory` exposes configuration options specific to the underlying
+HTTP client library, e.g. for credentials, connection pooling, etc.
+
 [TIP]
 ====
-Apache HttpClient supports gzip encoding. To use it,
-construct a `HttpComponentsClientHttpRequestFactory` like so:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	HttpClient httpClient = HttpClientBuilder.create().build();
-	ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
-	RestTemplate restTemplate = new RestTemplate(requestFactory);
-----
+Note that the `java.net` implementation for HTTP requests may raise an exception when
+accessing the status of a response that represents an error (e.g. 401). If this is an
+issue, switch to another HTTP client library.
 ====
 
-The general callback interface is `RequestCallback` and is called when the execute
-method is invoked.
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public <T> T execute(String url, HttpMethod method, RequestCallback requestCallback,
-			ResponseExtractor<T> responseExtractor, String... uriVariables)
-
-	// also has an overload with uriVariables as a Map<String, String>.
-----
-
-The `RequestCallback` interface is defined as
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public interface RequestCallback {
-	 void doWithRequest(ClientHttpRequest request) throws IOException;
-	}
-----
-
-and allows you to manipulate the request headers and write to the request body. When
-using the execute method you do not have to worry about any resource management, the
-template will always close the request and handle any errors. Refer to the API
-documentation for more information on using the execute method and the meaning of its
-other method arguments.
 
 [[rest-resttemplate-uri]]
-===== Working with the URI
+===== URIs
 
-For each of the main HTTP methods, the `RestTemplate` provides two variants that take
-either a String URI template or `java.net.URI` as the first argument. When using a String
-URI template, encoding is automatically applied:
+Many of the `RestTemplate` methods accepts a URI template and URI template variables,
+either as a `String` vararg, or as `Map<String,String>`.
+
+For example with a `String` vararg:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	String result = restTemplate.getForObject(
+			"http://example.com/hotels/{hotel}/bookings/{booking}", String.class, "42", "21");
+----
+
+Or with a `Map<String, String>`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	Map<String, String> vars = Collections.singletonMap("hotel", "42");
+
+	String result = restTemplate.getForObject(
+			"http://example.com/hotels/{hotel}/rooms/{hotel}", String.class, vars);
+----
+
+Keep in mind URI templates are automatically encoded. For example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	restTemplate.getForObject("http://example.com/hotel list", String.class);
+
+	// Results in request to "http://example.com/hotel%20list"
 ----
 
-The resulting target URI is "http://example.com/hotel%20list". Alternatively you can
-provide an already prepared `java.net.URI` that will be used as is. For more information
-on preparing URIs or customizing how the `RestTemplate` expands URI templates, see
-<<web.adoc#mvc-uri-building,URI Links>> in the "Web Servlet" section.
+You can use the `uriTemplateHandler` property of `RestTemplate` to customize how URIs are
+encoded. Or you can prepare a `java.net.URI` and pass it into one of the `RestTemplate`
+methods that accept a `URI`.
+
+For more details on working with and encoding URIs, see
+<<web.adoc#mvc-uri-building,URI Links>>.
 
 
 [[rest-template-headers]]
-===== Dealing with request and response headers
+===== Headers
 
-Besides the methods described above, the `RestTemplate` also has the `exchange()`
-method, which can be used for arbitrary HTTP method execution based on the `HttpEntity`
-class.
-
-Perhaps most importantly, the `exchange()` method can be used to add request headers and
-read response headers. For example:
+Use the `exchange()` methods to specify request headers. For example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	HttpHeaders requestHeaders = new HttpHeaders();
-	requestHeaders.set("MyRequestHeader", "MyValue");
-	HttpEntity<?> requestEntity = new HttpEntity(requestHeaders);
+	String uriTemplate = "http://example.com/hotels/{hotel}";
+	URI uri = UriComponentsBuilder.fromUriString(uriTemplate).build(42);
 
-	HttpEntity<String> response = template.exchange(
-			"http://example.com/hotels/{hotel}",
-			HttpMethod.GET, requestEntity, String.class, "42");
+	RequestEntity<Void> requestEntity = RequestEntity.get(uri)
+			.header(("MyRequestHeader", "MyValue")
+			.build();
+
+	ResponseEntity<String> response = template.exchange(requestEntity, String.class);
 
 	String responseHeader = response.getHeaders().getFirst("MyResponseHeader");
 	String body = response.getBody();
 ----
 
-In the above example, we first prepare a request entity that contains the
-`MyRequestHeader` header. We then retrieve the response, and read the `MyResponseHeader`
-and body.
+Response headers can be obtained through many `RestTemplate` method variants that return
+`ResponseEntity`.
+
+
+[[rest-template-body]]
+===== Body
+
+Object passed into and returned from `RestTemplate` methods are converted to and from raw
+content with the help of an `HttpMessageConverter`.
+
+On a POST, an input object is serialized to the request body:
+
+	URI location = template.postForLocation("http://example.com/people", person);
+
+The "Content-Type" header of the request does not need to be set explicitly. In most cases
+a compatible message converter can be found based on the source Object type, and the chosen
+message converter will set the content type accordingly. If necessary, you can use the
+`exchange` methods to provide the "Content-Type" request header explicitly, and that in
+turn will influence what message converter is selected.
+
+On a GET, the body of the response is deserialized to an output Object:
+
+	Person person = restTemplate.getForObject("http://example.com/people/{id}", Person.class, 42);
+
+The "Accept" header of the request does not need to be set explicitly. In most cases
+a compatible message converter can be found based on the expected response type, which
+then helps to populate the "Accept" header. If necessary, you can use the `exchange`
+methods to provide the "Accept" header explicitly.
+
+By default `RestTemplate` registers all built-in
+<<rest-message-conversion,message converters>>, depending on classpath checks that help
+to determine what optional conversion libraries are present. You can also set the message
+converters to use explicitly.
+
+
+[[rest-message-conversion]]
+===== Message Conversion
+[.small]#<<web-reactive.adoc#webflux-codecs,Same in Spring WebFlux>>#
+
+The `spring-web` module contains the `HttpMessageConverter` contract for reading and
+writing the body of HTTP requests and responses via `InputStream` and `OutputStream`.
+``HttpMessageConverter``'s are used on the client side, e.g. in the `RestTemplate`, and
+also on the server side, e.g. in Spring MVC REST controllers.
+
+Concrete implementations for the main media (MIME) types are provided in the framework
+and are registered by default with the `RestTemplate` on the client-side and with
+`RequestMethodHandlerAdapter` on the server-side (see
+<<web.adoc#mvc-config-message-converters,Configuring Message Converters>>).
+
+The implementations of ``HttpMessageConverter``s are described in the following sections.
+For all converters a default media type is used but can be overridden by setting the
+`supportedMediaTypes` bean property
+
+[[rest-message-converters-tbl]]
+.HttpMessageConverter Implementations
+[cols="1,3"]
+|===
+| MessageConverter | Description
+
+| `StringHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write Strings from the HTTP
+request and response. By default, this converter supports all text media types (
+`text/{asterisk}`), and writes with a `Content-Type` of `text/plain`.
+
+| `FormHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write form data from the HTTP
+request and response. By default, this converter reads and writes the media type
+`application/x-www-form-urlencoded`. Form data is read from and written into a
+`MultiValueMap<String, String>`.
+
+| `ByteArrayHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write byte arrays from the
+HTTP request and response. By default, this converter supports all media types ( `{asterisk}/{asterisk}`),
+and writes with a `Content-Type` of `application/octet-stream`. This can be overridden
+by setting the `supportedMediaTypes` property, and overriding `getContentType(byte[])`.
+
+| `MarshallingHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write XML using Spring's
+`Marshaller` and `Unmarshaller` abstractions from the `org.springframework.oxm` package.
+This converter requires a `Marshaller` and `Unmarshaller` before it can be used. These
+can be injected via constructor or bean properties. By default this converter supports (
+`text/xml`) and ( `application/xml`).
+
+| `MappingJackson2HttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write JSON using Jackson's
+`ObjectMapper`. JSON mapping can be customized as needed through the use of Jackson's
+provided annotations. When further control is needed, a custom `ObjectMapper` can be
+injected through the `ObjectMapper` property for cases where custom JSON
+serializers/deserializers need to be provided for specific types. By default this
+converter supports ( `application/json`).
+
+| `MappingJackson2XmlHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write XML using
+https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML] extension's
+`XmlMapper`. XML mapping can be customized as needed through the use of JAXB
+or Jackson's provided annotations. When further control is needed, a custom `XmlMapper`
+can be injected through the `ObjectMapper` property for cases where custom XML
+serializers/deserializers need to be provided for specific types. By default this
+converter supports ( `application/xml`).
+
+| `SourceHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write
+`javax.xml.transform.Source` from the HTTP request and response. Only `DOMSource`,
+`SAXSource`, and `StreamSource` are supported. By default, this converter supports (
+`text/xml`) and ( `application/xml`).
+
+| `BufferedImageHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write
+`java.awt.image.BufferedImage` from the HTTP request and response. This converter reads
+and writes the media type supported by the Java I/O API.
+
+|===
+
 
 [[rest-template-jsonview]]
-===== Jackson JSON Views support
+===== Jackson JSON Views
 
 It is possible to specify a http://wiki.fasterxml.com/JacksonJsonViews[Jackson JSON View]
 to serialize only a subset of the object properties. For example:
@@ -1195,103 +1240,58 @@ to serialize only a subset of the object properties. For example:
 ----
 	MappingJacksonValue value = new MappingJacksonValue(new User("eric", "7!jd#h23"));
 	value.setSerializationView(User.WithoutPasswordView.class);
-	HttpEntity<MappingJacksonValue> entity = new HttpEntity<MappingJacksonValue>(value);
-	String s = template.postForObject("http://example.com/user", entity, String.class);
+
+	RequestEntity<MappingJacksonValue> requestEntity =
+		RequestEntity.post(new URI("http://example.com/user")).body(value);
+
+	ResponseEntity<String> response = template.exchange(requestEntity, String.class);
 ----
 
+[[rest-template-multipart]]
+===== Multipart
 
-[[rest-message-conversion]]
-==== HTTP Message Converters
-[.small]#<<web-reactive.adoc#webflux-codecs,Same in Spring WebFlux>>#
+To send multipart data, you need to provide a `MultiValueMap<String, ?>` whose values are
+either Objects representing part content, or `HttpEntity` representing the content and
+headers for a part. `MultipartBodyBuilder` provides a convenient API to prepare a
+multipart request:
 
-The `spring-web` module contains the `HttpMessageConverter` contract for reading and
-writing the body of HTTP requests and responses via `InputStream` and `OutputStream`.
-``HttpMessageConverter``'s are used on the client side, e.g. in the `RestTemplate`, and
-also on the server side, e.g. in Spring MVC REST controllers.
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	MultipartBodyBuilder builder = new MultipartBodyBuilder();
+	builder.part("fieldPart", "fieldValue");
+	builder.part("filePart", new FileSystemResource("...logo.png"));
+	builder.part("jsonPart", new Person("Jason"));
 
-Concrete implementations for the main media (mime) types are provided in the framework
-and are registered by default with the `RestTemplate` on the client-side and with
-`RequestMethodHandlerAdapter` on the server-side (see
-<<web.adoc#mvc-config-message-converters,Configuring Message Converters>>).
+	MultiValueMap<String, HttpEntity<?>> parts = builder.build();
+----
 
-The implementations of ``HttpMessageConverter``s are described in the following sections.
-For all converters a default media type is used but can be overridden by setting the
-`supportedMediaTypes` bean property
+In most cases you do not have to specify the `Content-Type` for each part. The content
+type is determined automatically based on the `HttpMessageConverter` chosen to serialize it,
+or in the case of a `Resource` based on the file extension. If necessary you can
+explicitly provide the `MediaType` to use for each part through one fo the overloaded
+builder `part` methods.
 
-[[rest-string-converter]]
-===== StringHttpMessageConverter
+Once the `MultiValueMap` is ready, you can pass it to the `RestTemplate`:
 
-An `HttpMessageConverter` implementation that can read and write Strings from the HTTP
-request and response. By default, this converter supports all text media types (
-`text/{asterisk}`), and writes with a `Content-Type` of `text/plain`.
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	MultipartBodyBuilder builder = ...;
+	template.postForObject("http://example.com/upload", builder.build(), Void.class);
+----
 
-[[rest-form-converter]]
-===== FormHttpMessageConverter
-
-An `HttpMessageConverter` implementation that can read and write form data from the HTTP
-request and response. By default, this converter reads and writes the media type
-`application/x-www-form-urlencoded`. Form data is read from and written into a
-`MultiValueMap<String, String>`.
-
-[[rest-byte-converter]]
-===== ByteArrayHttpMessageConverter
-
-An `HttpMessageConverter` implementation that can read and write byte arrays from the
-HTTP request and response. By default, this converter supports all media types ( `{asterisk}/{asterisk}`),
-and writes with a `Content-Type` of `application/octet-stream`. This can be overridden
-by setting the `supportedMediaTypes` property, and overriding `getContentType(byte[])`.
-
-[[rest-marhsalling-converter]]
-===== MarshallingHttpMessageConverter
-
-An `HttpMessageConverter` implementation that can read and write XML using Spring's
-`Marshaller` and `Unmarshaller` abstractions from the `org.springframework.oxm` package.
-This converter requires a `Marshaller` and `Unmarshaller` before it can be used. These
-can be injected via constructor or bean properties. By default this converter supports (
-`text/xml`) and ( `application/xml`).
-
-[[rest-mapping-json-converter]]
-===== MappingJackson2HttpMessageConverter
-
-An `HttpMessageConverter` implementation that can read and write JSON using Jackson's
-`ObjectMapper`. JSON mapping can be customized as needed through the use of Jackson's
-provided annotations. When further control is needed, a custom `ObjectMapper` can be
-injected through the `ObjectMapper` property for cases where custom JSON
-serializers/deserializers need to be provided for specific types. By default this
-converter supports ( `application/json`).
-
-[[rest-mapping-xml-converter]]
-===== MappingJackson2XmlHttpMessageConverter
-
-An `HttpMessageConverter` implementation that can read and write XML using
-https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML] extension's
-`XmlMapper`. XML mapping can be customized as needed through the use of JAXB
-or Jackson's provided annotations. When further control is needed, a custom `XmlMapper`
-can be injected through the `ObjectMapper` property for cases where custom XML
-serializers/deserializers need to be provided for specific types. By default this
-converter supports ( `application/xml`).
-
-[[rest-source-converter]]
-===== SourceHttpMessageConverter
-
-An `HttpMessageConverter` implementation that can read and write
-`javax.xml.transform.Source` from the HTTP request and response. Only `DOMSource`,
-`SAXSource`, and `StreamSource` are supported. By default, this converter supports (
-`text/xml`) and ( `application/xml`).
-
-[[rest-buffered-image-converter]]
-===== BufferedImageHttpMessageConverter
-
-An `HttpMessageConverter` implementation that can read and write
-`java.awt.image.BufferedImage` from the HTTP request and response. This converter reads
-and writes the media type supported by the Java I/O API.
+If the `MultiValueMap` contains at least one non-String value, which could also be
+represent regular form data (i.e. "application/x-www-form-urlencoded"), you don't have to
+set the `Content-Type` to "multipart/form-data". This is always the case when using
+`MultipartBodyBuilder` which ensures an `HttpEntity` wrapper.
 
 
 [[rest-async-resttemplate]]
 ==== Async RestTemplate
 
-The `AsyncRestTemplate` is deprecated.
-Please use the <<web-reactive.adoc#webflux-client,WebClient>> instead.
+The `AsyncRestTemplate` is deprecated. For all use cases where the `AsyncRestTemplate`
+is considered for use, please use the <<web-reactive.adoc#webflux-client,WebClient>> instead.
 
 
 
@@ -2738,7 +2738,7 @@ describes all available attributes:
 .Attributes of the JMS <listener> element
 [cols="1,6"]
 |===
-| Attribute| Description
+| Attribute | Description
 
 | id
 | A bean name for the hosting listener container. If not specified, a bean name will be
@@ -2809,7 +2809,7 @@ choices and message redelivery scenarios.
 .Attributes of the JMS <listener-container> element
 [cols="1,6"]
 |===
-| Attribute| Description
+| Attribute | Description
 
 | container-type
 | The type of this listener container. Available options are: `default`, `simple`,
@@ -2931,7 +2931,7 @@ table:
 .Attributes of the JMS <jca-listener-container/> element
 [cols="1,6"]
 |===
-| Attribute| Description
+| Attribute | Description
 
 | factory-id
 | Exposes the settings defined by this element as a `JmsListenerContainerFactory`
@@ -3262,7 +3262,7 @@ these registration behaviors are summarized on the following table:
 .Registration Behaviors
 [cols="1,4"]
 |===
-| Registration behavior| Explanation
+| Registration behavior | Explanation
 
 | `REGISTRATION_FAIL_ON_EXISTING`
 | This is the default registration behavior. If an `MBean` instance has already been
@@ -3518,7 +3518,7 @@ metadata types:
 .Source-level metadata parameters
 [cols="1,3,1"]
 |===
-| Parameter| Description| Applies to
+| Parameter | Description | Applies to
 
 | `ObjectName`
 | Used by `MetadataNamingStrategy` to determine the `ObjectName` of a managed resource
@@ -4903,7 +4903,7 @@ corresponding methods called on the CCI `Interaction` interface:
 .Usage of Interaction execute methods
 [cols="3,1,3"]
 |===
-| CciTemplate method signature| CciTemplate outputRecordCreator property| execute method called on the CCI Interaction
+| CciTemplate method signature | CciTemplate outputRecordCreator property | execute method called on the CCI Interaction
 
 | Record execute(InteractionSpec, Record)
 | not set
@@ -5270,7 +5270,7 @@ The operation object approach uses records in the same manner as the `CciTemplat
 .Usage of Interaction execute methods
 [cols="3,1,3"]
 |===
-| MappingRecordOperation method signature| MappingRecordOperation outputRecordCreator property| execute method called on the CCI Interaction
+| MappingRecordOperation method signature | MappingRecordOperation outputRecordCreator property | execute method called on the CCI Interaction
 
 | Object execute(Object)
 | not set
@@ -5597,9 +5597,8 @@ exception hierarchy.
 
 The `org.springframework.mail.javamail.JavaMailSender` interface adds specialized
 __JavaMail__ features such as MIME message support to the `MailSender` interface (from
-which it inherits). `JavaMailSender` also provides a callback interface for preparation
-of JavaMail MIME messages, called
-`org.springframework.mail.javamail.MimeMessagePreparator`
+which it inherits). `JavaMailSender` also provides a callback interface for preparing
+a 'MimeMessage', called `org.springframework.mail.javamail.MimeMessagePreparator`.
 
 
 
@@ -5722,23 +5721,17 @@ callback interface. Please note in this case that the `mailSender` property is o
 		}
 
 		public void placeOrder(final Order order) {
-
 			// Do the business calculations...
-
 			// Call the collaborators to persist the order...
 
 			MimeMessagePreparator preparator = new MimeMessagePreparator() {
-
 				public void prepare(MimeMessage mimeMessage) throws Exception {
-
 					mimeMessage.setRecipient(Message.RecipientType.TO,
 							new InternetAddress(order.getCustomer().getEmailAddress()));
 					mimeMessage.setFrom(new InternetAddress("mail@mycompany.com"));
-					mimeMessage.setText(
-							"Dear " + order.getCustomer().getFirstName() + " "
-								+ order.getCustomer().getLastName()
-								+ ", thank you for placing order. Your order number is "
-								+ order.getOrderNumber());
+					mimeMessage.setText("Dear " + order.getCustomer().getFirstName() + " " +
+							order.getCustomer().getLastName() + ", thanks for your order. " +
+							"Your order number is " + order.getOrderNumber() + ".");
 				}
 			};
 
@@ -5854,10 +5847,10 @@ along with an inline image.
 
 [WARNING]
 ====
-Inline resources are added to the mime message using the specified `Content-ID` (
-`identifier1234` in the above example). The order in which you are adding the text and
-the resource are __very__ important. Be sure to __first add the text__ and after that
-the resources. If you are doing it the other way around, it won't work!
+Inline resources are added to the `MimeMessage` using the specified `Content-ID`
+(`identifier1234` in the above example). The order in which you are adding the text
+and the resource are __very__ important. Be sure to __first add the text__ and after
+that the resources. If you are doing it the other way around, it won't work!
 ====
 
 
@@ -7413,7 +7406,7 @@ javadoc for more details].
 .Cache annotation settings
 [cols="1,1,1,3"]
 |===
-| XML Attribute| Annotation Attribute| Default| Description
+| XML Attribute | Annotation Attribute | Default | Description
 
 | `cache-manager`
 | N/A (See `CachingConfigurer` javadocs)
@@ -7597,7 +7590,7 @@ counterpart:
 .Spring vs. JSR-107 caching annotations
 [cols="1,1,3"]
 |===
-| Spring| JSR-107| Remark
+| Spring | JSR-107 | Remark
 
 | `@Cacheable`
 | `@CacheResult`
