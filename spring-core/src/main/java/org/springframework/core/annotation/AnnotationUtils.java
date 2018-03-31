@@ -145,17 +145,17 @@ public abstract class AnnotationUtils {
 	 * <p>Note that this method supports only a single level of meta-annotations.
 	 * For support for arbitrary levels of meta-annotations, use one of the
 	 * {@code find*()} methods instead.
-	 * @param ann the Annotation to check
+	 * @param annotation the Annotation to check
 	 * @param annotationType the annotation type to look for, both locally and as a meta-annotation
 	 * @return the first matching annotation, or {@code null} if not found
 	 * @since 4.0
 	 */
 	@SuppressWarnings("unchecked")
-	public static <A extends Annotation> A getAnnotation(Annotation ann, Class<A> annotationType) {
-		if (annotationType.isInstance(ann)) {
-			return synthesizeAnnotation((A) ann);
+	public static <A extends Annotation> A getAnnotation(Annotation annotation, Class<A> annotationType) {
+		if (annotationType.isInstance(annotation)) {
+			return synthesizeAnnotation((A) annotation);
 		}
-		Class<? extends Annotation> annotatedElement = ann.annotationType();
+		Class<? extends Annotation> annotatedElement = annotation.annotationType();
 		try {
 			return synthesizeAnnotation(annotatedElement.getAnnotation(annotationType), annotatedElement);
 		}
@@ -568,7 +568,6 @@ public abstract class AnnotationUtils {
 		if (result == null) {
 			Method resolvedMethod = BridgeMethodResolver.findBridgedMethod(method);
 			result = findAnnotation((AnnotatedElement) resolvedMethod, annotationType);
-
 			if (result == null) {
 				result = searchOnInterfaces(method, annotationType, method.getDeclaringClass().getInterfaces());
 			}
@@ -603,10 +602,10 @@ public abstract class AnnotationUtils {
 
 	private static <A extends Annotation> A searchOnInterfaces(Method method, Class<A> annotationType, Class<?>... ifcs) {
 		A annotation = null;
-		for (Class<?> iface : ifcs) {
-			if (isInterfaceWithAnnotatedMethods(iface)) {
+		for (Class<?> ifc : ifcs) {
+			if (isInterfaceWithAnnotatedMethods(ifc)) {
 				try {
-					Method equivalentMethod = iface.getMethod(method.getName(), method.getParameterTypes());
+					Method equivalentMethod = ifc.getMethod(method.getName(), method.getParameterTypes());
 					annotation = getAnnotation(equivalentMethod, annotationType);
 				}
 				catch (NoSuchMethodException ex) {
@@ -620,13 +619,13 @@ public abstract class AnnotationUtils {
 		return annotation;
 	}
 
-	static boolean isInterfaceWithAnnotatedMethods(Class<?> iface) {
-		Boolean found = annotatedInterfaceCache.get(iface);
+	static boolean isInterfaceWithAnnotatedMethods(Class<?> ifc) {
+		Boolean found = annotatedInterfaceCache.get(ifc);
 		if (found != null) {
 			return found;
 		}
 		found = Boolean.FALSE;
-		for (Method ifcMethod : iface.getMethods()) {
+		for (Method ifcMethod : ifc.getMethods()) {
 			try {
 				if (ifcMethod.getAnnotations().length > 0) {
 					found = Boolean.TRUE;
@@ -637,7 +636,7 @@ public abstract class AnnotationUtils {
 				handleIntrospectionFailure(ifcMethod, ex);
 			}
 		}
-		annotatedInterfaceCache.put(iface, found);
+		annotatedInterfaceCache.put(ifc, found);
 		return found;
 	}
 
@@ -1286,15 +1285,12 @@ public abstract class AnnotationUtils {
 				}
 				Object value = attributes.get(attributeName);
 				boolean valuePresent = (value != null && !(value instanceof DefaultValueHolder));
-
 				for (String aliasedAttributeName : aliasMap.get(attributeName)) {
 					if (valuesAlreadyReplaced.contains(aliasedAttributeName)) {
 						continue;
 					}
-
 					Object aliasedValue = attributes.get(aliasedAttributeName);
 					boolean aliasPresent = (aliasedValue != null && !(aliasedValue instanceof DefaultValueHolder));
-
 					// Something to validate or replace with an alias?
 					if (valuePresent || aliasPresent) {
 						if (valuePresent && aliasPresent) {
@@ -1917,6 +1913,20 @@ public abstract class AnnotationUtils {
 				loggerToUse.info("Failed to introspect annotations on " + element + ": " + ex);
 			}
 		}
+	}
+
+	/**
+	 * Clear the internal annotation metadata cache.
+	 * @since 4.3.15
+	 */
+	public static void clearCache() {
+		findAnnotationCache.clear();
+		metaPresentCache.clear();
+		annotatedInterfaceCache.clear();
+		synthesizableCache.clear();
+		attributeAliasesCache.clear();
+		attributeMethodsCache.clear();
+		aliasDescriptorCache.clear();
 	}
 
 

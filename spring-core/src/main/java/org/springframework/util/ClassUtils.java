@@ -112,7 +112,7 @@ public abstract class ClassUtils {
 			registerCommonClasses(entry.getKey());
 		}
 
-		Set<Class<?>> primitiveTypes = new HashSet<Class<?>>(32);
+		Set<Class<?>> primitiveTypes = new HashSet<Class<?>>(64);
 		primitiveTypes.addAll(primitiveWrapperTypeMap.values());
 		primitiveTypes.addAll(Arrays.asList(new Class<?>[] {
 				boolean[].class, byte[].class, char[].class, double[].class,
@@ -125,9 +125,10 @@ public abstract class ClassUtils {
 		registerCommonClasses(Boolean[].class, Byte[].class, Character[].class, Double[].class,
 				Float[].class, Integer[].class, Long[].class, Short[].class);
 		registerCommonClasses(Number.class, Number[].class, String.class, String[].class,
-				Object.class, Object[].class, Class.class, Class[].class);
+				Class.class, Class[].class, Object.class, Object[].class);
 		registerCommonClasses(Throwable.class, Exception.class, RuntimeException.class,
 				Error.class, StackTraceElement.class, StackTraceElement[].class);
+		registerCommonClasses(Enum.class, Iterable.class, Cloneable.class, Comparable.class);
 	}
 
 

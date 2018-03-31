@@ -80,7 +80,6 @@ public final class MockMvc {
 	 * @see org.springframework.test.web.servlet.setup.MockMvcBuilders
 	 */
 	MockMvc(TestDispatcherServlet servlet, Filter[] filters, ServletContext servletContext) {
-
 		Assert.notNull(servlet, "DispatcherServlet is required");
 		Assert.notNull(filters, "filters cannot be null");
 		Assert.noNullElements(filters, "filters cannot contain null values");
@@ -131,7 +130,6 @@ public final class MockMvc {
 	 * @see org.springframework.test.web.servlet.result.MockMvcResultMatchers
 	 */
 	public ResultActions perform(RequestBuilder requestBuilder) throws Exception {
-
 		if (this.defaultRequestBuilder != null) {
 			if (requestBuilder instanceof Mergeable) {
 				requestBuilder = (RequestBuilder) ((Mergeable) requestBuilder).merge(this.defaultRequestBuilder);
@@ -190,7 +188,6 @@ public final class MockMvc {
 		for (ResultMatcher matcher : this.defaultResultMatchers) {
 			matcher.match(mvcResult);
 		}
-
 		for (ResultHandler handler : this.defaultResultHandlers) {
 			handler.handle(mvcResult);
 		}
