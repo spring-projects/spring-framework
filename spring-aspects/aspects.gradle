@@ -1,5 +1,4 @@
-// redefine the compileJava and compileTestJava tasks in order to
-// compile sources with ajc instead of javac
+// Redefine the compileJava and compileTestJava tasks in order to compile sources with ajc instead of javac
 
 configurations {
 	rt
@@ -8,21 +7,13 @@ configurations {
 	ajInpath
 }
 
-// exclude spring-aspects as a module within IDEA until IDEA-64446 is resolved
-tasks.getByName("idea").onlyIf { false }
-tasks.getByName("ideaModule").onlyIf { false }
-
 compileJava  {
 	actions = []
 	dependsOn configurations.ajc.getTaskDependencyFromProjectDependency(true, "compileJava")
 
 	def outputDir = project.sourceSets.main.output.classesDir
-
 	inputs.files(project.sourceSets.main.allSource + project.sourceSets.main.compileClasspath)
 	outputs.dir outputDir
-
-	ext.sourceCompatibility = project(":spring-core").compileJava.sourceCompatibility
-	ext.targetCompatibility = project(":spring-core").compileJava.targetCompatibility
 
 	doLast{
 		// Assemble runtime classpath from folders and JARs that actually exist
@@ -53,12 +44,8 @@ compileTestJava  {
 	dependsOn jar
 
 	def outputDir = project.sourceSets.test.output.classesDir
-
 	inputs.files(project.sourceSets.test.allSource + project.sourceSets.test.compileClasspath)
 	outputs.dir outputDir
-
-	ext.sourceCompatibility = project(":spring-core").compileTestJava.sourceCompatibility
-	ext.targetCompatibility = project(":spring-core").compileTestJava.targetCompatibility
 
 	doLast{
 		// Assemble runtime classpath from folders and JARs that actually exist
