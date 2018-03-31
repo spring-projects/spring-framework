@@ -92,7 +92,7 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueSyncAr
 
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) {
-		throw new ServerErrorException(name, parameter);
+		throw new ServerErrorException(name, parameter, null);
 	}
 
 	@Override

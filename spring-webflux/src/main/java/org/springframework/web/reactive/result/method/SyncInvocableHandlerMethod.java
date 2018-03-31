@@ -29,6 +29,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
+import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -95,6 +96,7 @@ public class SyncInvocableHandlerMethod extends HandlerMethod {
 	 * @param bindingContext the binding context to use
 	 * @param providedArgs optional list of argument values to match by type
 	 * @return Mono with a {@link HandlerResult}.
+	 * @throws ServerErrorException if method argument resolution or method invocation fails
 	 */
 	@Nullable
 	public HandlerResult invokeForHandlerResult(ServerWebExchange exchange,
@@ -104,9 +106,10 @@ public class SyncInvocableHandlerMethod extends HandlerMethod {
 		this.delegate.invoke(exchange, bindingContext, providedArgs).subscribeWith(processor);
 
 		if (processor.isTerminated()) {
-			Throwable error = processor.getError();
-			if (error != null) {
-				throw (RuntimeException) error;
+			Throwable ex = processor.getError();
+			if (ex != null) {
+				throw (ex instanceof ServerErrorException ? (ServerErrorException) ex :
+						new ServerErrorException("Failed to invoke: " + getShortLogMessage(), this, ex));
 			}
 			return processor.peek();
 		}
