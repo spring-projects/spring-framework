@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -98,8 +100,21 @@ public class SyncInvocableHandlerMethod extends HandlerMethod {
 	public HandlerResult invokeForHandlerResult(ServerWebExchange exchange,
 			BindingContext bindingContext, Object... providedArgs) {
 
-		// This will not block with only sync resolvers allowed
-		return this.delegate.invoke(exchange, bindingContext, providedArgs).block();
+		MonoProcessor<HandlerResult> processor = MonoProcessor.create();
+		this.delegate.invoke(exchange, bindingContext, providedArgs).subscribeWith(processor);
+
+		if (processor.isTerminated()) {
+			Throwable error = processor.getError();
+			if (error != null) {
+				throw (RuntimeException) error;
+			}
+			return processor.peek();
+		}
+		else {
+			// Should never happen...
+			throw new IllegalStateException(
+					"SyncInvocableHandlerMethod should have completed synchronously.");
+		}
 	}
 
 }
