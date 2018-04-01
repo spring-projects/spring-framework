@@ -563,14 +563,11 @@ class ConfigurationClassEnhancer {
 				}
 			}
 
-			((Factory) fbProxy).setCallback(0, new MethodInterceptor() {
-				@Override
-				public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
-					if (method.getName().equals("getObject") && args.length == 0) {
-						return beanFactory.getBean(beanName);
-					}
-					return proxy.invoke(factoryBean, args);
+			((Factory) fbProxy).setCallback(0, (MethodInterceptor) (obj, method, args, proxy) -> {
+				if (method.getName().equals("getObject") && args.length == 0) {
+					return beanFactory.getBean(beanName);
 				}
+				return proxy.invoke(factoryBean, args);
 			});
 
 			return fbProxy;
