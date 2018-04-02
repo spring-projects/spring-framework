@@ -1091,12 +1091,13 @@ See <<mvc-httpcaching-shallowetag>> for more details.
 
 [[filters-cors]]
 === CORS
+[.small]#<<web-reactive.adoc#webflux-filters-cors,Same in Spring WebFlux>>#
 
 Spring MVC provides fine-grained support for CORS configuration through annotations on
 controllers. However when used with Spring Security it is advisable to rely on the built-in
 `CorsFilter` that must be ordered ahead of Spring Security's chain of filters.
 
-See the section on <<mvc-cors>> and the <<mvc-cors-filter,CorsFilter>> for more details.
+See the section on <<mvc-cors>> and the <<mvc-cors-filter>> for more details.
 
 
 

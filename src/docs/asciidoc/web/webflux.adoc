@@ -316,7 +316,7 @@ Server support is organized in two layers:
 
 * <<webflux-httphandler,HttpHandler>> and server adapters -- the most basic, common API
 for HTTP request handling with Reactive Streams back pressure.
-* <<webflux-web-handler-api,WebHandler API>> -- slightly higher level but still general
+* <<webflux-web-handler-api>> -- slightly higher level but still general
 purpose server web API with filter chain style processing.
 
 
@@ -448,7 +448,7 @@ This can be automated through the use of
 
 
 [[webflux-web-handler-api]]
-=== WebHandler API
+=== WebHandler
 
 `HttpHandler` is the lowest level contract for running on different HTTP servers.
 On top of that foundation, the WebHandler API provides a slightly higher level, but
@@ -564,7 +564,7 @@ content to `Flux<Part>` without collecting to a `MultiValueMap`.
 
 
 [[webflux-codecs]]
-=== HTTP Message Codecs
+=== Message Codecs
 [.small]#<<integration.adoc#rest-message-conversion,Same in Spring MVC>>#
 
 The `spring-web` module defines the
@@ -641,6 +641,55 @@ a heartbeat and ignore.
 
 
 
+[[webflux-filters]]
+=== Filters
+[.small]#<<web.adoc#filters,Same in Spring MVC>>#
+
+As part of the <<webflux-web-handler-api>>, the `spring-web` module provides a number of
+`WebFilter` implementations.
+
+
+
+[[webflux-filters-forwarded-headers]]
+==== Forwarded Headers
+[.small]#<<web.adoc#filters-forwarded-headers,Same in Spring MVC>>#
+
+As a request goes through proxies such as load balancers the host, port, and
+scheme may change presenting a challenge for applications that need to create links
+to resources since the links should reflect the host, port, and scheme of the
+original request as seen from a client perspective.
+
+https://tools.ietf.org/html/rfc7239[RFC 7239] defines the "Forwarded" HTTP header
+for proxies to use to provide information about the original request. There are also
+other non-standard headers in use such as "X-Forwarded-Host", "X-Forwarded-Port",
+and "X-Forwarded-Proto".
+
+`ForwardedHeaderFilter` detects, extracts, and uses information from the "Forwarded"
+header, or from "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto".
+It wraps the request in order to overlay its host, port, and scheme and also "hides"
+the forwarded headers for subsequent processing.
+
+Note that there are security considerations when using forwarded headers as explained
+in Section 8 of RFC 7239. At the application level it is difficult to determine whether
+forwarded headers can be trusted or not. This is why the network upstream should be
+configured correctly to filter out untrusted forwarded headers from the outside.
+
+Applications that don't have a proxy and don't need to use forwarded headers can
+configure the `ForwardedHeaderFilter` to remove and ignore such headers.
+
+
+[[webflux-filters-cors]]
+==== CORS
+[.small]#<<web.adoc#filters-cors,Same in Spring MVC>>#
+
+Spring WebFlux provides fine-grained support for CORS configuration through annotations on
+controllers. However when used with Spring Security it is advisable to rely on the built-in
+`CorsFilter` that must be ordered ahead of Spring Security's chain of filters.
+
+See the section on <<webflux-cors>> and the <<webflux-cors-webfilter>> for more details.
+
+
+
 
 [[webflux-dispatcher-handler]]
 == DispatcherHandler
@@ -657,7 +706,7 @@ for access to the context it runs in. If `DispatcherHandler` is declared with th
 name "webHandler" it is in turn discovered by
 {api-spring-framework}/web/server/adapter/WebHttpHandlerBuilder.html[WebHttpHandlerBuilder]
 which puts together a request processing chain as described in
-<<webflux-web-handler-api,WebHandler API>>.
+<<webflux-web-handler-api>>.
 
 Spring configuration in a WebFlux application typically contains:
 
@@ -852,44 +901,6 @@ In order to support media types such as JSON and XML, Spring WebFlux provides
 <<webflux-codecs,HttpMessageWriter>>. Typically you would configure these as default
 views through the <<webflux-config-view-resolvers,WebFlux Config>>. Default views are
 always selected and used if they match the requested media type.
-
-
-[[webflux-filters]]
-== Filters
-[.small]#<<web.adoc#filters,Same in Spring MVC>>#
-
-As part of the <<webflux-web-handler-api>>, the `spring-web` module provides a number of
-`WebFilter` implementations.
-
-
-
-[[webflux-filters-forwarded-headers]]
-=== Forwarded Headers
-[.small]#<<web.adoc#filters-forwarded-headers,Same in Spring MVC>>#
-
-As a request goes through proxies such as load balancers the host, port, and
-scheme may change presenting a challenge for applications that need to create links
-to resources since the links should reflect the host, port, and scheme of the
-original request as seen from a client perspective.
-
-https://tools.ietf.org/html/rfc7239[RFC 7239] defines the "Forwarded" HTTP header
-for proxies to use to provide information about the original request. There are also
-other non-standard headers in use such as "X-Forwarded-Host", "X-Forwarded-Port",
-and "X-Forwarded-Proto".
-
-`ForwardedHeaderFilter` detects, extracts, and uses information from the "Forwarded"
-header, or from "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto".
-It wraps the request in order to overlay its host, port, and scheme and also "hides"
-the forwarded headers for subsequent processing.
-
-Note that there are security considerations when using forwarded headers as explained
-in Section 8 of RFC 7239. At the application level it is difficult to determine whether
-forwarded headers can be trusted or not. This is why the network upstream should be
-configured correctly to filter out untrusted forwarded headers from the outside.
-
-Applications that don't have a proxy and don't need to use forwarded headers can
-configure the `ForwardedHeaderFilter` to remove and ignore such headers.
-
 
 
 
