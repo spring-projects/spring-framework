@@ -1,5 +1,5 @@
 ################################################################################
-# Copyright 2002-2010 the original author or authors.
+# Copyright 2002-2018 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@
 #
 # Defaults for the Java Activation Framework
 # Additional extensions registered in this file:
-# text/plain				java c c++ pl cc h
+# text/plain				java c c++ pl cc h cpp
 #
 ################################################################################
 
 text/html				html htm HTML HTM
-text/plain				txt text TXT TEXT java c c++ pl cc h
+text/plain				txt text TXT TEXT java c c++ pl cc h cpp
 image/gif				gif GIF
 image/ief				ief
 image/jpeg				jpeg jpg jpe JPG
