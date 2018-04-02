@@ -448,31 +448,21 @@ This can be automated through the use of
 
 
 [[webflux-web-handler-api]]
-=== WebHandler
+=== WebHandler API
 
-`HttpHandler` is the lowest level contract for running on different HTTP servers.
-On top of that foundation, the WebHandler API provides a slightly higher level, but
-still general purpose, set of components that form a chain of
-{api-spring-framework}/web/server/WebExceptionHandler.html[WebExceptionHandler's],
-{api-spring-framework}/web/server/WebFilter.html[WebFilter's], and a
-{api-spring-framework}/web/server/WebHandler.html[WebHandler].
+The WebHandler API is a general purpose, server, web API for processing requests through a
+chain of {api-spring-framework}/web/server/WebExceptionHandler.html[WebExceptionHandler's],
+{api-spring-framework}/web/server/WebFilter.html[WebFilter's], and a target
+{api-spring-framework}/web/server/WebHandler.html[WebHandler]. The chain can be assembled
+with `WebHttpHandlerBuilder` either by adding components to the builder or by having them
+detected from a Spring `ApplicationContext`. The builder returns an
+<<webflux-httphandler>> that can then be used to run on any of the supported servers.
 
-All WebHandler API components take `ServerWebExchange` as input which goes beyond
-`ServerHttpRequest` and `ServerHttpResponse` to provide extra building blocks for
-use in web applications such as request attributes, session attributes, access to parsed
-form data, multipart data, and more.
-
-`WebHttpHandlerBuilder` is used to assemble a request processing chain. You can use
-methods on the builder to add components manually, or more likely have them detected from
-a Spring `ApplicationContext`, with the resulting `HttpHandler` ready to run via a
-<<webflux-httphandler,server adapter>>:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-ApplicationContext context = ...
-HttpHandler handler = WebHttpHandlerBuilder.applicationContext(context).build()
-----
+While `HttpHandler` aims to be the most minimal contract across HTTP servers, the
+WebHandler API provides essential features commonly used to build web applications.
+For example, the `ServerWebExchange` available to WebHandler API components provides
+access not only to the request and response, but also to request and session attributes,
+access to parsed form data, multipart data, and more.
 
 
 
@@ -488,12 +478,14 @@ The table below lists the components that `WebHttpHandlerBuilder` detects:
 | <any>
 | `WebExceptionHandler`
 | 0..N
-| Exception handlers to apply after all ``WebFilter``'s and the target `WebHandler`.
+| Provide handling for exceptions from the chain of ``WebFilter``'s and the target
+  `WebHandler`. For more details, see <<webflux-exception-handler>>.
 
 | <any>
 | `WebFilter`
 | 0..N
-| Filters to invoke before and after the target `WebHandler`.
+| Apply interception style logic to before and after the rest of the filter chain and
+  the target `WebHandler`. For more details, see <<webflux-filters>>.
 
 | "webHandler"
 | `WebHandler`
@@ -645,9 +637,13 @@ a heartbeat and ignore.
 === Filters
 [.small]#<<web.adoc#filters,Same in Spring MVC>>#
 
-As part of the <<webflux-web-handler-api>>, the `spring-web` module provides a number of
-`WebFilter` implementations.
+In the <<webflux-web-handler-api>>, a `WebFilter` can be used to apply interception-style
+logic before and after the rest of the processing chain of filters and the target
+`WebHandler`. When using the <<webflux-config>>, registering a `WebFilter` is as simple
+as declaring it as a Spring bean, and optionally expressing precedence via `@Order` on
+the bean declaration or by implementing `Ordered`.
 
+The following describe the available `WebFilter` implementations:
 
 
 [[webflux-filters-forwarded-headers]]
@@ -687,6 +683,37 @@ controllers. However when used with Spring Security it is advisable to rely on t
 `CorsFilter` that must be ordered ahead of Spring Security's chain of filters.
 
 See the section on <<webflux-cors>> and the <<webflux-cors-webfilter>> for more details.
+
+
+
+[[webflux-exception-handler]]
+=== Exceptions
+[.small]#<<web.adoc#mvc-ann-customer-servlet-container-error-page,Same in Spring MVC>>#
+
+In the <<webflux-web-handler-api>>, a `WebExceptionHandler` can be used to to handle
+exceptions from the chain of ``WebFilter``'s and the target `WebHandler`. When using the
+<<webflux-config>>, registering a `WebExceptionHandler` is as simple as declaring it as a
+Spring bean, and optionally expressing precedence via `@Order` on the bean declaration or
+by implementing `Ordered`.
+
+Below are the available `WebExceptionHandler` implementations:
+
+[cols="1,2", options="header"]
+|===
+| Exception Handler | Description
+
+| `ResponseStatusExceptionHandler`
+| Provides handling for exceptions of type
+  {api-spring-framework}/web/server/ResponseStatusException.html[ResponseStatusException]
+  by setting the response to the HTTP status code of the exception.
+
+| `WebFluxResponseStatusExceptionHandler`
+| Extension of `ResponseStatusExceptionHandler` that can also determine the HTTP status
+  code an `@ResponseStatus` annotation on any exception.
+
+  This handler is declared in the <<webflux-config>>.
+
+|===
 
 
 
@@ -805,24 +832,60 @@ processing by writing to the response directly or using a view to render.
 [[webflux-resulthandling]]
 === Result Handling
 
-When `DispatcherHandler` needs to process the return value from a handler, it finds a
-`HandlerResultHandler` that support it and invokes it. The available implementations are
-listed below with their default order (all are declared in the <<webflux-config>>):
+The return value from the invocation of a handler, through a `HandlerAdapter`, is wrapped
+as `HandlerResult`, along with some additional context, and passed to the first
+`HandlerResultHandler` that claims support for it. The table below shows the available
+`HandlerResultHandler` implementations all of which are declared in the <<webflux-config>>:
 
-* `ResponseEntityResultHandler` -- handles `ResponseEntity` return values typically
-returned from annotated controllers. The order is set to 0 since it safely matches return
-values by type.
-* `ServerResponseResultHandler` -- supports `ServerResponse` return values typically
-returned from functional endpoints. The order is set to 0 since it safely matches return
-values by type.
-* `ResponseBodyResultHandler` -- handles return values from `@ResponseBody` methods or
-`@RestController` classes. The order is set to 100, i.e. after result handlers that
-check for a specific type.
-* `ViewResolutionResultHandler` -- performs the <<webflux-viewresolution>> algorithm for
-HTML template rendering. The order is set to `Ordered.LOWEST_PRECEDENCE` since it
-supports several specific types, e.g. `String`, `Map`, `Rendering`, and others, but will
-also treat any other Object as a model attribute. This is why it needs to be last in
-the order.
+[cols="1,2,1", options="header"]
+|===
+| Result Handler Type | Return Values | Default Order
+
+| `ResponseEntityResultHandler`
+| `ResponseEntity`, typically from ``@Controller``'s.
+| 0
+
+| `ServerResponseResultHandler`
+| `ServerResponse`, typically from functional endpoints.
+| 0
+
+| `ResponseBodyResultHandler`
+| Handle return values from `@ResponseBody` methods or `@RestController` classes.
+| 100
+
+| `ViewResolutionResultHandler`
+| `CharSequence` or {api-spring-framework}/web/reactive/result/view/View.html[View],
+  {api-spring-framework}/ui/Model.html[Model] or `Map`,
+  {api-spring-framework}/web/reactive/result/view/Rendering.html[Rendering],
+  or any other Object is treated as a model attribute.
+
+  Also see <<webflux-viewresolution>>.
+| `Integer.MAX_VALUE`
+
+|===
+
+
+
+[[webflux-dispatcher-exceptions]]
+=== Exceptions
+[.small]#<<web.adoc#mvc-exceptionhandlers,Same in Spring MVC>>#
+
+The `HandlerResult` returned from a `HandlerAdapter` may expose a function for error
+handling based on some handler-specific mechanism. This error function is called if:
+
+* the handler (e.g. `@Controller`) invocation fails.
+* handling of the handler return value through a `HandlerResultHandler` fails.
+
+The error function can change the response, e.g. to an error status, as long as an error
+signal occurs before the reactive type returned from the handler produces any data items.
+
+This is how `@ExceptionHandler` methods in `@Controller` classes are supported.
+By contrast, support for the same in Spring MVC is built on a `HandlerExceptionResolver`.
+This generally shouldn't matter, however, keep in mind that in WebFlux you cannot use a
+`@ControllerAdvice` to handle exceptions that occur before a handler is chosen.
+
+See also <<webflux-ann-controller-exceptions>> in the Annotated Controller section, or
+<<webflux-exception-handler>> in the WebHandler API section.
 
 
 
@@ -2159,15 +2222,19 @@ controller method. Use a composite interface if you need to activate multiple vi
 
 
 [[webflux-ann-modelattrib-methods]]
-=== Model Methods
+=== Model
 [.small]#<<web.adoc#mvc-ann-modelattrib-methods,Same in Spring MVC>>#
 
-The `@ModelAttribute` annotation can be used on `@RequestMapping`
-<<webflux-ann-modelattrib-method-args,method arguments>> to create or access an Object
-from the model and bind it to the request. `@ModelAttribute` can also be used as a
-method-level annotation on controller methods whose purpose is not to handle requests
-but to add commonly needed model attributes prior to request handling.
+The `@ModelAttribute` annotation can be used:
 
+* On a <<webflux-ann-modelattrib-method-args,method argument>> in `@RequestMapping` methods
+to create or access an Object from the model, and to bind it to the request through a
+`WebDataBinder`.
+* As a method-level annotation in `@Controller` or `@ControllerAdvice` classes helping
+to initialize the model prior to any `@RequestMapping` method invocation.
+* On a `@RequestMapping` method to mark its return value is a model attribute.
+
+This section discusses `@ModelAttribute` methods, or the 2nd from the list above.
 A controller can have any number of `@ModelAttribute` methods. All such methods are
 invoked before `@RequestMapping` methods in the same controller. A `@ModelAttribute`
 method can also be shared across controllers via `@ControllerAdvice`. See the section on
@@ -2253,14 +2320,16 @@ as a view name. `@ModelAttribute` can also help to customize the model attribute
 
 
 [[webflux-ann-initbinder]]
-=== Binder Methods
+=== DataBinder
 [.small]#<<web.adoc#mvc-ann-initbinder,Same in Spring MVC>>#
 
-`@InitBinder` methods in an `@Controller` or `@ControllerAdvice` class can be used to
-customize type conversion for method arguments that represent String-based request values
-(e.g. request parameters, path variables, headers, cookies, and others). Type conversion
-also applies during data binding of request parameters onto `@ModelAttribute` arguments
-(i.e. command objects).
+`@Controller` or `@ControllerAdvice` classes can have `@InitBinder` methods in order to
+initialize instances of `WebDataBinder`, and those in turn are used to:
+
+* Bind request parameters (i.e. form data or query) to a model object.
+* Convert String-based request values such as request parameters, path variables,
+headers, cookies, and others, to the target type of controller method arguments.
+* Format model object values as String values when rendering HTML forms.
 
 `@InitBinder` methods can register controller-specific `java.bean.PropertyEditor`, or
 Spring `Converter` and `Formatter` components. In addition, the
@@ -2307,6 +2376,73 @@ controller-specific ``Formatter``'s:
 		// ...
 	}
 ----
+
+
+
+[[webflux-ann-controller-exceptions]]
+=== Exceptions
+[.small]#<<web.adoc#mvc-ann-exceptionhandler,Same in Spring MVC>>#
+
+`@Controller` and <<mvc-ann-controller-advice,@ControllerAdvice>> classes can have
+`@ExceptionHandler` methods to handle exceptions from controller methods. For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	public class SimpleController {
+
+		// ...
+
+		@ExceptionHandler
+		public ResponseEntity<String> handle(IOException ex) {
+			// ...
+		}
+
+	}
+----
+
+The annotation can list the exception types to match. Or simply declare the target
+exception as a method argument as shown above. When multiple exception methods match,
+a root exception match is generally preferred to a cause exception match. More formally
+the `ExceptionDepthComparator` is used to sort exceptions based on their depth from the
+thrown exception type.
+
+In a multi-`@ControllerAdvice` arrangement, please declare your primary root exception
+mappings on a `@ControllerAdvice` prioritized with a corresponding order. While a root
+exception match is preferred to a cause, this is mainly among the methods of a given
+controller or `@ControllerAdvice`. That means a cause match on a higher-priority
+`@ControllerAdvice` is preferred to any match (e.g. root) on a lower-priority
+`@ControllerAdvice`.
+
+Support for `@ExceptionHandler` methods in Spring WebFlux is provided by the
+`HandlerAdapter` for `@RequestMapping` methods. See <<webflux-dispatcher-exceptions>>
+under the `DispatcherHandler` section for more details.
+
+
+An `@ExceptionHandler` method in WebFlux supports the same method arguments and return
+values as an `@RequestMapping` method does with the exception of request body and
+`@ModelAttribute` related method arguments.
+
+
+[[webflux-ann-rest-exceptions]]
+==== REST API exceptions
+[.small]#<<web.adoc#mvc-ann-rest-exceptions,Same in Spring MVC>>#
+
+A common requirement for REST services is to include error details in the body of the
+response. The Spring Framework does not automatically do this because the representation
+of error details in the response body is application specific. However a
+`@RestController` may use `@ExceptionHandler` methods with a `ResponseEntity` return
+value to set the status and the body of the response. Such methods may also be declared
+in `@ControllerAdvice` classes to apply them globally.
+
+[NOTE]
+====
+Note that Spring WebFlux does not have an equivalent for the Spring MVC
+`ResponseEntityExceptionHandler` because WebFlux only raises `ResponseStatusException`
+(or sub-classes of), which and those do not need to be translated translation to an HTTP
+status code.
+====
 
 
 

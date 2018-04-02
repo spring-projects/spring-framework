@@ -507,13 +507,13 @@ declare it as an <<mvc-ann-controller-advice>> bean or configure it directly on
 
 
 [[mvc-exceptionhandlers]]
-=== Exception Resolution
+=== Exceptions
+[.small]#<<web-reactive.adoc#webflux-dispatcher-exceptions,Same in Spring WebFlux>>#
 
-If an exception occurs during the mapping or the invocation of a request handler (e.g. an
-`@Controller`), the `DispatcherServlet` delegates to a chain of `HandlerExceptionResolver`
-beans to try and resolve the exception and to provide alternative handling for it, which
-typically means preparing an error response whether an HTML error page, an error status,
-or both.
+If an exception occurs during request mapping or is thrown from a request handler such as
+an `@Controller`, the `DispatcherServlet` delegates to a chain of `HandlerExceptionResolver`
+beans to resolve the exception and provide alternative handling, which typically is an
+error response.
 
 The table below lists the available `HandlerExceptionResolver` implementations:
 
@@ -536,29 +536,27 @@ The table below lists the available `HandlerExceptionResolver` implementations:
 
 | `ExceptionHandlerExceptionResolver`
 | Resolves exceptions by invoking an `@ExceptionHandler` method in an `@Controller` or an
-  `@ControllerAdvice` class. See <<mvc-ann-exceptionhandler>>.
+  `@ControllerAdvice` class. See <<mvc-ann-exceptionhandler,@ExceptionHandler methods>>.
 |===
 
 
 [[mvc-excetionhandlers-handling]]
-==== Handling
+==== Chain of resolvers
 
-You chain exception resolvers by declaring more than one exception resolver beans and,
-if necessary, setting the `order` property to specify ordering. Remember, the higher the
-order property, the later the exception resolver is positioned in the chain.
+You can form an exception resolver chain simply by declaring multiple `HandlerExceptionResolver`
+beans in your Spring configuration and setting their `order` properties as needed.
+The higher the order property, the later the exception resolver is positioned.
 
-The contract of `HandlerExceptionResolver` specifies that it __can__ return:
+The contract of `HandlerExceptionResolver` specifies that it can return:
 
 * `ModelAndView` that points to an error view.
 * Empty `ModelAndView` if the exception was handled within the resolver.
-* `null` if the exception remains unresolved, for subsequent resolvers to try; if the
-exception remains unresolved by any resolver, it is re-thrown and left to propagate to
-the Servlet container.
+* `null` if the exception remains unresolved, for subsequent resolvers to try; and if the
+exception remains at the end, it is allowed to bubble up to the Servlet container.
 
-To configure exception handling is as simple as adding `HandlerExceptionResolver` beans
-to your Spring configuration. The <<mvc-config>> automatically declares built-in
-resolvers for default Spring MVC exceptions, for `@ResponseStatus` annotated exceptions,
-and for support of `@ExceptionHandler` methods. You can customize that list or replace it.
+The <<mvc-config>> automatically declares built-in resolvers for default Spring MVC
+exceptions, for `@ResponseStatus` annotated exceptions, and for support of
+`@ExceptionHandler` methods. You can customize that list or replace it.
 
 
 [[mvc-ann-customer-servlet-container-error-page]]
@@ -2655,15 +2653,19 @@ customized through `jsonpParameterNames` property.
 
 
 [[mvc-ann-modelattrib-methods]]
-=== Model Methods
+=== Model
 [.small]#<<web-reactive.adoc#webflux-ann-modelattrib-methods,Same in Spring WebFlux>>#
 
-The `@ModelAttribute` annotation can be used on `@RequestMapping`
-<<mvc-ann-modelattrib-method-args,method arguments>> to create or access an Object
-from the model and bind it to the request. `@ModelAttribute` can also be used as a
-method-level annotation on controller methods whose purpose is not to handle requests
-but to add commonly needed model attributes prior to request handling.
+The `@ModelAttribute` annotation can be used:
 
+* On a <<mvc-ann-modelattrib-method-args,method argument>> in `@RequestMapping` methods
+to create or access an Object from the model, and to bind it to the request through a
+`WebDataBinder`.
+* As a method-level annotation in `@Controller` or `@ControllerAdvice` classes helping
+to initialize the model prior to any `@RequestMapping` method invocation.
+* On a `@RequestMapping` method to mark its return value is a model attribute.
+
+This section discusses `@ModelAttribute` methods, or the 2nd from the list above.
 A controller can have any number of `@ModelAttribute` methods. All such methods are
 invoked before `@RequestMapping` methods in the same controller. A `@ModelAttribute`
 method can also be shared across controllers via `@ControllerAdvice`. See the section on
@@ -2728,14 +2730,16 @@ the model attribute name:
 
 
 [[mvc-ann-initbinder]]
-=== Binder Methods
+=== DataBinder
 [.small]#<<web-reactive.adoc#webflux-ann-initbinder,Same in Spring WebFlux>>#
 
-`@InitBinder` methods in an `@Controller` or `@ControllerAdvice` class can be used to
-customize type conversion for method arguments that represent String-based request values
-(e.g. request parameters, path variables, headers, cookies, and others). Type conversion
-also applies during data binding of request parameters onto `@ModelAttribute` arguments
-(i.e. command objects).
+`@Controller` or `@ControllerAdvice` classes can have `@InitBinder` methods in order to
+initialize instances of `WebDataBinder`, and those in turn are used to:
+
+* Bind request parameters (i.e. form data or query) to a model object.
+* Convert String-based request values such as request parameters, path variables,
+headers, cookies, and others, to the target type of controller method arguments.
+* Format model object values as String values when rendering HTML forms.
 
 `@InitBinder` methods can register controller-specific `java.bean.PropertyEditor`, or
 Spring `Converter` and `Formatter` components. In addition, the
@@ -2787,15 +2791,11 @@ controller-specific ``Formatter``'s:
 
 
 [[mvc-ann-exceptionhandler]]
-=== Exception Methods
+=== Exceptions
+[.small]#<<web-reactive.adoc#webflux-ann-controller-exceptions,Same in Spring WebFlux>>#
 
-`@ExceptionHandler` methods in an `@Controller` can be used to handle exceptions during
-request handling from the same controller. An `@ExceptionHandler` can also be declared
-in an <<mvc-ann-controller-advice,@ControllerAdvice class>> to apply across controllers.
-Support for `@ExceptionHandler` methods in Spring MVC is provided through the
-<<mvc-exceptionhandlers,HandlerExceptionResolver>> mechanism.
-
-Below is an example:
+`@Controller` and <<mvc-ann-controller-advice,@ControllerAdvice>> classes can have
+`@ExceptionHandler` methods to handle exceptions from controller methods. For example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -2805,7 +2805,7 @@ Below is an example:
 
 		// ...
 
-		@ExceptionHandler(IOException.class)
+		@ExceptionHandler
 		public ResponseEntity<String> handle(IOException ex) {
 			// ...
 		}
@@ -2813,22 +2813,150 @@ Below is an example:
 	}
 ----
 
-The value of the `@ExceptionHandler` annotation can be set to an array of Exception types
-to match to. Or if the annotation value is not set, then the exception type declared in
-the method signature is used instead. `@ExceptionHandler` methods can declare other
-arguments too, e.g. the `HttpServletRequest`. The return value type can be a `String`,
-which is interpreted as a view name, a `ModelAndView` object, a `ResponseEntity`, or you
-can also add the `@ResponseBody` annotation.
+The annotation can list the exception types to match. Or simply declare the target
+exception as a method argument as shown above. When multiple exception methods match,
+a root exception match is generally preferred to a cause exception match. More formally
+the `ExceptionDepthComparator` is used to sort exceptions based on their depth from the
+thrown exception type.
 
-For `@ExceptionHandler` methods, a root exception match will be preferred to just
-matching a cause of the current exception, among the handler methods of a particular
-controller or advice bean. However, a cause match on a higher-priority `@ControllerAdvice`
-will still be preferred to a any match (whether root or cause level) on a lower-priority
-advice bean. As a consequence, when using a multi-advice arrangement, please declare your
-primary root exception mappings on a prioritized advice bean with a corresponding order!
+In a multi-`@ControllerAdvice` arrangement, please declare your primary root exception
+mappings on a `@ControllerAdvice` prioritized with a corresponding order. While a root
+exception match is preferred to a cause, this is mainly among the methods of a given
+controller or `@ControllerAdvice`. That means a cause match on a higher-priority
+`@ControllerAdvice` is preferred to any match (e.g. root) on a lower-priority
+`@ControllerAdvice`.
+
+Support for `@ExceptionHandler` methods in Spring MVC is built on the `DispatcherServlet`
+level, <<mvc-exceptionhandlers,HandlerExceptionResolver>> mechanism.
+
+
+[[mvc-ann-exceptionhandler-args]]
+==== Method arguments
+
+`@ExceptionHandler` methods support the following arguments:
+
+[cols="1,2", options="header"]
+|===
+| Method argument | Description
+
+| Exception type
+| For access to the raised exception.
+
+| `HandlerMethod`
+| For access to the controller method that raised the exception.
+
+| `WebRequest`, `NativeWebRequest`
+| Generic access to request parameters, request & session attributes, without direct
+  use of the Servlet API.
+
+| `javax.servlet.ServletRequest`, `javax.servlet.ServletResponse`
+| Choose any specific request or response type -- e.g. `ServletRequest`, `HttpServletRequest`,
+  or Spring's `MultipartRequest`, `MultipartHttpServletRequest`.
+
+| `javax.servlet.http.HttpSession`
+| Enforces the presence of a session. As a consequence, such an argument is never `null`. +
+  **Note:** Session access is not thread-safe. Consider setting the
+  ``RequestMappingHandlerAdapter``'s "synchronizeOnSession" flag to "true" if multiple
+  requests are allowed to access a session concurrently.
+
+| `java.security.Principal`
+| Currently authenticated user; possibly a specific `Principal` implementation class if known.
+
+| `HttpMethod`
+| The HTTP method of the request.
+
+| `java.util.Locale`
+| The current request locale, determined by the most specific `LocaleResolver` available, in
+  effect, the configured `LocaleResolver`/`LocaleContextResolver`.
+
+| `java.util.TimeZone` + `java.time.ZoneId`
+| The time zone associated with the current request, as determined by a `LocaleContextResolver`.
+
+| `java.io.OutputStream`, `java.io.Writer`
+| For access to the raw response body as exposed by the Servlet API.
+
+| `java.util.Map`, `org.springframework.ui.Model`, `org.springframework.ui.ModelMap`
+| For access to the model for an error response, always empty.
+
+| `RedirectAttributes`
+| Specify attributes to use in case of a redirect -- i.e. to be appended to the query
+  string, and/or flash attributes to be stored temporarily until the request after redirect.
+  See <<mvc-redirecting-passing-data>> and <<mvc-flash-attributes>>.
+
+| `@SessionAttribute`
+| For access to any session attribute; in contrast to model attributes stored in the session
+  as a result of a class-level `@SessionAttributes` declaration. See
+  <<mvc-ann-sessionattribute>> for more details.
+
+| `@RequestAttribute`
+| For access to request attributes. See <<mvc-ann-requestattrib>> for more details.
+
+|===
+
+
+[[mvc-ann-exceptionhandler-return-values]]
+==== Return Values
+
+`@ExceptionHandler` methods support the following return values:
+
+[cols="1,2", options="header"]
+|===
+| Return value | Description
+
+| `@ResponseBody`
+| The return value is converted through ``HttpMessageConverter``s and written to the
+  response. See <<mvc-ann-responsebody>>.
+
+| `HttpEntity<B>`, `ResponseEntity<B>`
+| The return value specifies the full response including HTTP headers and body be converted
+  through ``HttpMessageConverter``s and written to the response.
+  See <<mvc-ann-responseentity>>.
+
+| `String`
+| A view name to be resolved with ``ViewResolver``'s and used together with the implicit
+  model -- determined through command objects and `@ModelAttribute` methods. The handler
+  method may also programmatically enrich the model by declaring a `Model` argument
+  (see above).
+
+| `View`
+| A `View` instance to use for rendering together with the implicit model -- determined
+  through command objects and `@ModelAttribute` methods. The handler method may also
+  programmatically enrich the model by declaring a `Model` argument (see above).
+
+| `java.util.Map`, `org.springframework.ui.Model`
+| Attributes to be added to the implicit model with the view name implicitly determined
+  through a `RequestToViewNameTranslator`.
+
+| `@ModelAttribute`
+| An attribute to be added to the model with the view name implicitly determined through
+  a `RequestToViewNameTranslator`.
+
+  Note that `@ModelAttribute` is optional. See "Any other return value" further below in
+  this table.
+
+| `ModelAndView` object
+| The view and model attributes to use, and optionally a response status.
+
+| `void`
+| A method with a `void` return type (or `null` return value) is considered to have fully
+  handled the response if it also has a `ServletResponse`, or an `OutputStream` argument, or
+  an `@ResponseStatus` annotation. The same is true also if the controller has made a positive
+  ETag or lastModified timestamp check (see <<mvc-caching-etag-lastmodified>> for details).
+
+  If none of the above is true, a `void` return type may also indicate "no response body" for
+  REST controllers, or default view name selection for HTML controllers.
+
+| Any other return value
+| If a return value is not matched to any of the above, by default it is treated as a
+  model attribute to be added to the model, unless it is a simple type, as determined by
+  {api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty]
+  in which case it remains unresolved.
+|===
+
 
 [[mvc-ann-rest-exceptions]]
 ==== REST API exceptions
+[.small]#<<web-reactive.adoc#webflux-ann-rest-exceptions,Same in Spring WebFlux>>#
 
 A common requirement for REST services is to include error details in the body of the
 response. The Spring Framework does not automatically do this because the representation
