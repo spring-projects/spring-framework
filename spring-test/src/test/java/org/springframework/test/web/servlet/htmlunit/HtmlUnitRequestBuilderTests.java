@@ -159,13 +159,13 @@ public class HtmlUnitRequestBuilderTests {
 
 	@Test  // SPR-14916
 	public void buildRequestContentTypeWithFormSubmission() {
+		String contentType = "application/x-www-form-urlencoded";
 		webRequest.setEncodingType(FormEncodingType.URL_ENCODED);
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getContentType(), equalTo("application/x-www-form-urlencoded"));
-		assertThat(actualRequest.getHeader("Content-Type"),
-				equalTo("application/x-www-form-urlencoded;charset=ISO-8859-1"));
+		assertThat(actualRequest.getContentType(), equalTo(contentType));
+		assertThat(actualRequest.getHeader("Content-Type"), equalTo(contentType));
 	}
 
 
