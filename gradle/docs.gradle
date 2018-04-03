@@ -70,9 +70,6 @@ dokka {
 		kotlinDirs -= project.sourceSets.main.java.srcDirs
 	})
 	externalDocumentationLink {
-		url = new URL("http://docs.spring.io/spring-framework/docs/${version}/javadoc-api/")
-	}
-	externalDocumentationLink {
 		url = new URL("http://projectreactor.io/docs/core/release/api/")
 	}
 	externalDocumentationLink {
