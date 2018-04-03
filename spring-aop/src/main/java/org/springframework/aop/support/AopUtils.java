@@ -192,7 +192,9 @@ public abstract class AopUtils {
 	 * @see org.springframework.util.ClassUtils#getMostSpecificMethod
 	 */
 	public static Method getMostSpecificMethod(Method method, @Nullable Class<?> targetClass) {
-		Method resolvedMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
+		Class<?> specificTargetClass = (targetClass != null && !Proxy.isProxyClass(targetClass) ?
+				ClassUtils.getUserClass(targetClass) : null);
+		Method resolvedMethod = ClassUtils.getMostSpecificMethod(method, specificTargetClass);
 		// If we are dealing with method with generic parameters, find the original method.
 		return BridgeMethodResolver.findBridgedMethod(resolvedMethod);
 	}
@@ -236,15 +238,18 @@ public abstract class AopUtils {
 			introductionAwareMethodMatcher = (IntroductionAwareMethodMatcher) methodMatcher;
 		}
 
-		Set<Class<?>> classes = new LinkedHashSet<>(ClassUtils.getAllInterfacesForClassAsSet(targetClass));
-		Class<?> userClass = ClassUtils.getUserClass(targetClass);
-		classes.add(userClass);
+		Set<Class<?>> classes = new LinkedHashSet<>();
+		if (!Proxy.isProxyClass(targetClass)) {
+			classes.add(ClassUtils.getUserClass(targetClass));
+		}
+		classes.addAll(ClassUtils.getAllInterfacesForClassAsSet(targetClass));
+
 		for (Class<?> clazz : classes) {
 			Method[] methods = ReflectionUtils.getAllDeclaredMethods(clazz);
 			for (Method method : methods) {
 				if ((introductionAwareMethodMatcher != null &&
-						introductionAwareMethodMatcher.matches(method, userClass, hasIntroductions)) ||
-						methodMatcher.matches(method, userClass)) {
+						introductionAwareMethodMatcher.matches(method, targetClass, hasIntroductions)) ||
+						methodMatcher.matches(method, targetClass)) {
 					return true;
 				}
 			}
