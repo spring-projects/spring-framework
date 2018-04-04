@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,15 +76,15 @@ class FailingBeforeAndAfterMethodsSpringExtensionTestCase {
 	private static Stream<Class<?>> testClasses() {
 		// @formatter:off
 		return Stream.of(
-				AlwaysFailingBeforeTestClassTestCase.class,
-				AlwaysFailingAfterTestClassTestCase.class,
-				AlwaysFailingPrepareTestInstanceTestCase.class,
-				AlwaysFailingBeforeTestMethodTestCase.class,
-				AlwaysFailingBeforeTestExecutionTestCase.class,
-				AlwaysFailingAfterTestExecutionTestCase.class,
-				AlwaysFailingAfterTestMethodTestCase.class,
-				FailingBeforeTransactionTestCase.class,
-				FailingAfterTransactionTestCase.class);
+				AlwaysFailingBeforeTestClassTestKase.class,
+				AlwaysFailingAfterTestClassTestKase.class,
+				AlwaysFailingPrepareTestInstanceTestKase.class,
+				AlwaysFailingBeforeTestMethodTestKase.class,
+				AlwaysFailingBeforeTestExecutionTestKase.class,
+				AlwaysFailingAfterTestExecutionTestKase.class,
+				AlwaysFailingAfterTestMethodTestKase.class,
+				FailingBeforeTransactionTestKase.class,
+				FailingAfterTransactionTestKase.class);
 		// @formatter:on
 	}
 
@@ -131,16 +131,16 @@ class FailingBeforeAndAfterMethodsSpringExtensionTestCase {
 	}
 
 	private int getExpectedStartedCount(Class<?> testClass) {
-		return (testClass == AlwaysFailingBeforeTestClassTestCase.class ? 0 : 1);
+		return (testClass == AlwaysFailingBeforeTestClassTestKase.class ? 0 : 1);
 	}
 
 	private int getExpectedSucceededCount(Class<?> testClass) {
-		return (testClass == AlwaysFailingAfterTestClassTestCase.class ? 1 : 0);
+		return (testClass == AlwaysFailingAfterTestClassTestKase.class ? 1 : 0);
 	}
 
 	private int getExpectedFailedCount(Class<?> testClass) {
-		if (testClass == AlwaysFailingBeforeTestClassTestCase.class
-				|| testClass == AlwaysFailingAfterTestClassTestCase.class) {
+		if (testClass == AlwaysFailingBeforeTestClassTestKase.class
+				|| testClass == AlwaysFailingAfterTestClassTestKase.class) {
 			return 0;
 		}
 		return 1;
@@ -214,36 +214,44 @@ class FailingBeforeAndAfterMethodsSpringExtensionTestCase {
 	}
 
 	@TestExecutionListeners(AlwaysFailingBeforeTestClassTestExecutionListener.class)
-	private static class AlwaysFailingBeforeTestClassTestCase extends BaseTestCase {
+	// TestKase with a "K" so that it's not picked up by the suite or build
+	static class AlwaysFailingBeforeTestClassTestKase extends BaseTestCase {
 	}
 
 	@TestExecutionListeners(AlwaysFailingAfterTestClassTestExecutionListener.class)
-	private static class AlwaysFailingAfterTestClassTestCase extends BaseTestCase {
+	// TestKase with a "K" so that it's not picked up by the suite or build
+	static class AlwaysFailingAfterTestClassTestKase extends BaseTestCase {
 	}
 
 	@TestExecutionListeners(AlwaysFailingPrepareTestInstanceTestExecutionListener.class)
-	private static class AlwaysFailingPrepareTestInstanceTestCase extends BaseTestCase {
+	// TestKase with a "K" so that it's not picked up by the suite or build
+	static class AlwaysFailingPrepareTestInstanceTestKase extends BaseTestCase {
 	}
 
 	@TestExecutionListeners(AlwaysFailingBeforeTestMethodTestExecutionListener.class)
-	private static class AlwaysFailingBeforeTestMethodTestCase extends BaseTestCase {
+	// TestKase with a "K" so that it's not picked up by the suite or build
+	static class AlwaysFailingBeforeTestMethodTestKase extends BaseTestCase {
 	}
 
 	@TestExecutionListeners(AlwaysFailingBeforeTestExecutionTestExecutionListener.class)
-	private static class AlwaysFailingBeforeTestExecutionTestCase extends BaseTestCase {
+	// TestKase with a "K" so that it's not picked up by the suite or build
+	static class AlwaysFailingBeforeTestExecutionTestKase extends BaseTestCase {
 	}
 
 	@TestExecutionListeners(AlwaysFailingAfterTestExecutionTestExecutionListener.class)
-	private static class AlwaysFailingAfterTestExecutionTestCase extends BaseTestCase {
+	// TestKase with a "K" so that it's not picked up by the suite or build
+	static class AlwaysFailingAfterTestExecutionTestKase extends BaseTestCase {
 	}
 
 	@TestExecutionListeners(AlwaysFailingAfterTestMethodTestExecutionListener.class)
-	private static class AlwaysFailingAfterTestMethodTestCase extends BaseTestCase {
+	// TestKase with a "K" so that it's not picked up by the suite or build
+	static class AlwaysFailingAfterTestMethodTestKase extends BaseTestCase {
 	}
 
 	@SpringJUnitConfig(DatabaseConfig.class)
 	@Transactional
-	private static class FailingBeforeTransactionTestCase {
+	// TestKase with a "K" so that it's not picked up by the suite or build
+	static class FailingBeforeTransactionTestKase {
 
 		@Test
 		void testNothing() {
@@ -257,7 +265,8 @@ class FailingBeforeAndAfterMethodsSpringExtensionTestCase {
 
 	@SpringJUnitConfig(DatabaseConfig.class)
 	@Transactional
-	private static class FailingAfterTransactionTestCase {
+	// TestKase with a "K" so that it's not picked up by the suite or build
+	static class FailingAfterTransactionTestKase {
 
 		@Test
 		void testNothing() {
