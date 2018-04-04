@@ -49,13 +49,13 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author Sam Brannen
  * @since 5.1
- * @see SpringExtensionTestCase
+ * @see SpringExtensionTests
  * @see SpringExtension
  * @see RegisterExtension
  */
 @ContextConfiguration(classes = TestConfig.class)
 @TestPropertySource(properties = "enigma = 42")
-class RegisterExtensionSpringExtensionTestCase {
+class RegisterExtensionSpringExtensionTests {
 
 	@RegisterExtension
 	static final SpringExtension springExtension = new SpringExtension();

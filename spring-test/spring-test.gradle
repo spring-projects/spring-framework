@@ -103,22 +103,34 @@ task testNG(type: Test) {
 	reports.junitXml.destination = file("$buildDir/test-results")
 }
 
+task testJUnitJupiter(type: Test) {
+	description = 'Runs JUnit Jupiter tests.'
+	useJUnitPlatform {
+		includeEngines 'junit-jupiter'
+		excludeTags 'failing-test-case'
+	}
+	filter {
+		includeTestsMatching "org.springframework.test.context.junit.jupiter.*"
+	}
+	reports.junitXml.destination = file("$buildDir/test-results")
+	// Java Util Logging for the JUnit Platform.
+	// systemProperty('java.util.logging.manager', 'org.apache.logging.log4j.jul.LogManager')
+}
+
 test {
 	description = 'Runs JUnit tests.'
-	dependsOn testNG
+	dependsOn testJUnitJupiter, testNG
 	useJUnit()
 	scanForTestClasses = false
-	include(['**/*Tests.class', '**/*Test.class', '**/SpringJUnitJupiterTestSuite.class'])
-	exclude(['**/testng/**/*.*'])
-	// Java Util Logging for JUnit 5.
-	// systemProperty('java.util.logging.manager', 'org.apache.logging.log4j.jul.LogManager')
+	include(['**/*Tests.class', '**/*Test.class'])
+	exclude(['**/testng/**/*.*', '**/jupiter/**/*.*'])
 	reports.junitXml.destination = file("$buildDir/test-results")
 }
 
 task aggregateTestReports(type: TestReport) {
 	description = 'Aggregates JUnit and TestNG test reports.'
 	destinationDir = test.reports.html.destination
-	reportOn test, testNG
+	reportOn test, testJUnitJupiter, testNG
 }
 
 check.dependsOn aggregateTestReports

@@ -48,12 +48,12 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Sam Brannen
  * @since 5.0
  * @see SpringExtension
- * @see ComposedSpringExtensionTestCase
+ * @see ComposedSpringExtensionTests
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TestConfig.class)
 @TestPropertySource(properties = "enigma = 42")
-class SpringExtensionTestCase {
+class SpringExtensionTests {
 
 	@Autowired
 	Person dilbert;

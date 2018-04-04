@@ -17,7 +17,6 @@
 package org.springframework.test.context.junit.jupiter;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,9 +29,8 @@ import org.springframework.test.context.junit.jupiter.comics.Person;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Integration tests which demonstrate support for autowiring individual
- * parameters in test class constructors using {@link Autowired @Autowired}
- * and {@link Value @Value} with the Spring TestContext Framework and JUnit Jupiter.
+ * Integration tests which demonstrate support for {@link Autowired @Autowired}
+ * test class constructors with the Spring TestContext Framework and JUnit Jupiter.
  *
  * <p>To run these tests in an IDE that does not have built-in support for the JUnit
  * Platform, simply run {@link SpringJUnitJupiterTestSuite} as a JUnit 4 test.
@@ -40,26 +38,25 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Sam Brannen
  * @since 5.0
  * @see SpringExtension
- * @see SpringJUnitJupiterAutowiredConstructorInjectionTestCase
+ * @see SpringJUnitJupiterConstructorInjectionTests
  */
 @SpringJUnitConfig(TestConfig.class)
 @TestPropertySource(properties = "enigma = 42")
-class SpringJUnitJupiterConstructorInjectionTestCase {
+class SpringJUnitJupiterAutowiredConstructorInjectionTests {
 
 	final ApplicationContext applicationContext;
 	final Person dilbert;
 	final Dog dog;
 	final Integer enigma;
-	final TestInfo testInfo;
 
-	SpringJUnitJupiterConstructorInjectionTestCase(ApplicationContext applicationContext, @Autowired Person dilbert,
-			@Autowired Dog dog, @Value("${enigma}") Integer enigma, TestInfo testInfo) {
+	@Autowired
+	SpringJUnitJupiterAutowiredConstructorInjectionTests(ApplicationContext applicationContext, Person dilbert, Dog dog,
+			@Value("${enigma}") Integer enigma) {
 
 		this.applicationContext = applicationContext;
 		this.dilbert = dilbert;
 		this.dog = dog;
 		this.enigma = enigma;
-		this.testInfo = testInfo;
 	}
 
 	@Test
@@ -81,11 +78,6 @@ class SpringJUnitJupiterConstructorInjectionTestCase {
 	void propertyPlaceholderInjected() {
 		assertNotNull(this.enigma, "Enigma should have been injected via @Value by Spring");
 		assertEquals(Integer.valueOf(42), this.enigma, "enigma");
-	}
-
-	@Test
-	void testInfoInjected() {
-		assertNotNull(this.testInfo, "TestInfo should have been injected by JUnit");
 	}
 
 }

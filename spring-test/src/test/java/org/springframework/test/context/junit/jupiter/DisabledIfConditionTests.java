@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Tests for {@link DisabledIfCondition} that verify actual condition evaluation
- * results and exception handling; whereas, {@link DisabledIfTestCase} only tests
+ * results and exception handling; whereas, {@link DisabledIfTests} only tests
  * the <em>happy paths</em>.
  *
  * <p>To run these tests in an IDE that does not have built-in support for the JUnit
@@ -48,9 +48,9 @@ import static org.mockito.Mockito.*;
  *
  * @author Sam Brannen
  * @since 5.0
- * @see DisabledIfTestCase
+ * @see DisabledIfTests
  */
-class DisabledIfConditionTestCase {
+class DisabledIfConditionTests {
 
 	private final DisabledIfCondition condition = new DisabledIfCondition();
 

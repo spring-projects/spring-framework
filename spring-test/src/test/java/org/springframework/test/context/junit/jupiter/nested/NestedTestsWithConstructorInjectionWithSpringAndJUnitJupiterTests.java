@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.SpringJUnitJupiterTestSuite;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.test.context.junit.jupiter.nested.NestedTestsWithConstructorInjectionWithSpringAndJUnitJupiterTestCase.TopLevelConfig;
+import org.springframework.test.context.junit.jupiter.nested.NestedTestsWithConstructorInjectionWithSpringAndJUnitJupiterTests.TopLevelConfig;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -43,15 +43,15 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author Sam Brannen
  * @since 5.0.5
- * @see NestedTestsWithSpringAndJUnitJupiterTestCase
+ * @see NestedTestsWithSpringAndJUnitJupiterTests
  * @see org.springframework.test.context.junit4.nested.NestedTestsWithSpringRulesTests
  */
 @SpringJUnitConfig(TopLevelConfig.class)
-class NestedTestsWithConstructorInjectionWithSpringAndJUnitJupiterTestCase {
+class NestedTestsWithConstructorInjectionWithSpringAndJUnitJupiterTests {
 
 	final String foo;
 
-	NestedTestsWithConstructorInjectionWithSpringAndJUnitJupiterTestCase(TestInfo testInfo, @Autowired String foo) {
+	NestedTestsWithConstructorInjectionWithSpringAndJUnitJupiterTests(TestInfo testInfo, @Autowired String foo) {
 		this.foo = foo;
 	}
 
@@ -62,12 +62,12 @@ class NestedTestsWithConstructorInjectionWithSpringAndJUnitJupiterTestCase {
 
 	@Nested
 	@SpringJUnitConfig(NestedConfig.class)
-	class AutowiredConstructor {
+	class AutowiredConstructorTests {
 
 		final String bar;
 
 		@Autowired
-		AutowiredConstructor(String bar) {
+		AutowiredConstructorTests(String bar) {
 			this.bar = bar;
 		}
 
@@ -80,11 +80,11 @@ class NestedTestsWithConstructorInjectionWithSpringAndJUnitJupiterTestCase {
 
 	@Nested
 	@SpringJUnitConfig(NestedConfig.class)
-	class AutowiredConstructorParameter {
+	class AutowiredConstructorParameterTests {
 
 		final String bar;
 
-		AutowiredConstructorParameter(@Autowired String bar) {
+		AutowiredConstructorParameterTests(@Autowired String bar) {
 			this.bar = bar;
 		}
 
@@ -97,11 +97,11 @@ class NestedTestsWithConstructorInjectionWithSpringAndJUnitJupiterTestCase {
 
 	@Nested
 	@SpringJUnitConfig(NestedConfig.class)
-	class QualifiedConstructorParameter {
+	class QualifiedConstructorParameterTests {
 
 		final String bar;
 
-		QualifiedConstructorParameter(TestInfo testInfo, @Qualifier("bar") String s) {
+		QualifiedConstructorParameterTests(TestInfo testInfo, @Qualifier("bar") String s) {
 			this.bar = s;
 		}
 
@@ -114,12 +114,12 @@ class NestedTestsWithConstructorInjectionWithSpringAndJUnitJupiterTestCase {
 
 	@Nested
 	@SpringJUnitConfig(NestedConfig.class)
-	class SpelConstructorParameter {
+	class SpelConstructorParameterTests {
 
 		final String bar;
 		final int answer;
 
-		SpelConstructorParameter(@Autowired String bar, TestInfo testInfo, @Value("#{ 6 * 7 }") int answer) {
+		SpelConstructorParameterTests(@Autowired String bar, TestInfo testInfo, @Value("#{ 6 * 7 }") int answer) {
 			this.bar = bar;
 			this.answer = answer;
 		}
