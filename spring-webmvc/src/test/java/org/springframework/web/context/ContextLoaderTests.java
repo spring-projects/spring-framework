@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -321,6 +321,7 @@ public class ContextLoaderTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testClassPathXmlApplicationContext() throws IOException {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"/org/springframework/web/context/WEB-INF/applicationContext.xml");
@@ -338,30 +339,25 @@ public class ContextLoaderTests {
 		assertTrue("Has kerry", context.containsBean("kerry"));
 	}
 
-	@Test
+	@Test(expected = BeanCreationException.class)
+	@SuppressWarnings("resource")
 	public void testSingletonDestructionOnStartupFailure() throws IOException {
-		try {
-			new ClassPathXmlApplicationContext(new String[] {
-				"/org/springframework/web/context/WEB-INF/applicationContext.xml",
-				"/org/springframework/web/context/WEB-INF/fail.xml" }) {
+		new ClassPathXmlApplicationContext(new String[] {
+			"/org/springframework/web/context/WEB-INF/applicationContext.xml",
+			"/org/springframework/web/context/WEB-INF/fail.xml" }) {
 
-				@Override
-				public void refresh() throws BeansException {
-					try {
-						super.refresh();
-					}
-					catch (BeanCreationException ex) {
-						DefaultListableBeanFactory factory = (DefaultListableBeanFactory) getBeanFactory();
-						assertEquals(0, factory.getSingletonCount());
-						throw ex;
-					}
+			@Override
+			public void refresh() throws BeansException {
+				try {
+					super.refresh();
 				}
-			};
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			// expected
-		}
+				catch (BeanCreationException ex) {
+					DefaultListableBeanFactory factory = (DefaultListableBeanFactory) getBeanFactory();
+					assertEquals(0, factory.getSingletonCount());
+					throw ex;
+				}
+			}
+		};
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ public class XlsViewTests {
 
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testXls() throws Exception {
 		View excelView = new AbstractXlsView() {
 			@Override
@@ -73,6 +74,7 @@ public class XlsViewTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testXlsxView() throws Exception {
 		View excelView = new AbstractXlsxView() {
 			@Override
@@ -96,6 +98,7 @@ public class XlsViewTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testXlsxStreamingView() throws Exception {
 		View excelView = new AbstractXlsxStreamingView() {
 			@Override

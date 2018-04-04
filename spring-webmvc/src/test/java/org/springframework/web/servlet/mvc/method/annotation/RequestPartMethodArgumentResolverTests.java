@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -326,11 +326,11 @@ public class RequestPartMethodArgumentResolverTests {
 
 		Object actualValue = resolver.resolveArgument(optionalMultipartFile, null, webRequest, null);
 		assertTrue(actualValue instanceof Optional);
-		assertEquals("Invalid result", expected, ((Optional) actualValue).get());
+		assertEquals("Invalid result", expected, ((Optional<?>) actualValue).get());
 
 		actualValue = resolver.resolveArgument(optionalMultipartFile, null, webRequest, null);
 		assertTrue(actualValue instanceof Optional);
-		assertEquals("Invalid result", expected, ((Optional) actualValue).get());
+		assertEquals("Invalid result", expected, ((Optional<?>) actualValue).get());
 	}
 
 	@Test
@@ -366,11 +366,11 @@ public class RequestPartMethodArgumentResolverTests {
 
 		Object actualValue = resolver.resolveArgument(optionalMultipartFileList, null, webRequest, null);
 		assertTrue(actualValue instanceof Optional);
-		assertEquals("Invalid result", Collections.singletonList(expected), ((Optional) actualValue).get());
+		assertEquals("Invalid result", Collections.singletonList(expected), ((Optional<?>) actualValue).get());
 
 		actualValue = resolver.resolveArgument(optionalMultipartFileList, null, webRequest, null);
 		assertTrue(actualValue instanceof Optional);
-		assertEquals("Invalid result", Collections.singletonList(expected), ((Optional) actualValue).get());
+		assertEquals("Invalid result", Collections.singletonList(expected), ((Optional<?>) actualValue).get());
 	}
 
 	@Test
@@ -408,11 +408,11 @@ public class RequestPartMethodArgumentResolverTests {
 
 		Object actualValue = resolver.resolveArgument(optionalPart, null, webRequest, null);
 		assertTrue(actualValue instanceof Optional);
-		assertEquals("Invalid result", expected, ((Optional) actualValue).get());
+		assertEquals("Invalid result", expected, ((Optional<?>) actualValue).get());
 
 		actualValue = resolver.resolveArgument(optionalPart, null, webRequest, null);
 		assertTrue(actualValue instanceof Optional);
-		assertEquals("Invalid result", expected, ((Optional) actualValue).get());
+		assertEquals("Invalid result", expected, ((Optional<?>) actualValue).get());
 	}
 
 	@Test
@@ -452,11 +452,11 @@ public class RequestPartMethodArgumentResolverTests {
 
 		Object actualValue = resolver.resolveArgument(optionalPartList, null, webRequest, null);
 		assertTrue(actualValue instanceof Optional);
-		assertEquals("Invalid result", Collections.singletonList(expected), ((Optional) actualValue).get());
+		assertEquals("Invalid result", Collections.singletonList(expected), ((Optional<?>) actualValue).get());
 
 		actualValue = resolver.resolveArgument(optionalPartList, null, webRequest, null);
 		assertTrue(actualValue instanceof Optional);
-		assertEquals("Invalid result", Collections.singletonList(expected), ((Optional) actualValue).get());
+		assertEquals("Invalid result", Collections.singletonList(expected), ((Optional<?>) actualValue).get());
 	}
 
 	@Test

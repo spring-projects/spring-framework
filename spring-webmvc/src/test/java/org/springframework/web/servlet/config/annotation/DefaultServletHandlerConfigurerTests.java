@@ -60,7 +60,6 @@ public class DefaultServletHandlerConfigurerTests {
 	@Test
 	public void enable() throws Exception {
 		configurer.enable();
-		SimpleUrlHandlerMapping getHandlerMapping = configurer.buildHandlerMapping();
 		SimpleUrlHandlerMapping handlerMapping = configurer.buildHandlerMapping();
 		DefaultServletHttpRequestHandler handler = (DefaultServletHttpRequestHandler) handlerMapping.getUrlMap().get("/**");
 

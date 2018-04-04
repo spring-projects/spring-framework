@@ -454,6 +454,7 @@ public class MappingJackson2JsonViewTests {
 
 
 	@JsonFilter("myJacksonFilter")
+	@SuppressWarnings("unused")
 	private static class TestSimpleBeanFiltered {
 
 		private String property1;

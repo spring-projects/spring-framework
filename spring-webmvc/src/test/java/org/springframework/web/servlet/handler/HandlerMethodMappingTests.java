@@ -131,7 +131,7 @@ public class HandlerMethodMappingTests {
 
 		// Direct URL lookup
 
-		List directUrlMatches = this.mapping.getMappingRegistry().getMappingsByUrl(key1);
+		List<String> directUrlMatches = this.mapping.getMappingRegistry().getMappingsByUrl(key1);
 		assertNotNull(directUrlMatches);
 		assertEquals(1, directUrlMatches.size());
 		assertEquals(key1, directUrlMatches.get(0));
@@ -181,7 +181,7 @@ public class HandlerMethodMappingTests {
 
 		// Direct URL lookup
 
-		List directUrlMatches = this.mapping.getMappingRegistry().getMappingsByUrl(key1);
+		List<String> directUrlMatches = this.mapping.getMappingRegistry().getMappingsByUrl(key1);
 		assertNotNull(directUrlMatches);
 		assertEquals(1, directUrlMatches.size());
 		assertEquals(key1, directUrlMatches.get(0));

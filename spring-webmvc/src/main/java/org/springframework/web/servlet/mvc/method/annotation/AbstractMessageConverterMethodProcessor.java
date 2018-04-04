@@ -190,7 +190,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			valueType = getReturnValueType(outputValue, returnType);
 			declaredType = getGenericType(returnType);
 		}
-		
+
 		if (isResourceType(value, returnType)) {
 			outputMessage.getHeaders().set(HttpHeaders.ACCEPT_RANGES, "bytes");
 			if (value != null && inputMessage.getHeaders().getFirst(HttpHeaders.RANGE) != null) {
@@ -262,7 +262,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 				if (genericConverter != null ?
 						((GenericHttpMessageConverter) converter).canWrite(declaredType, valueType, selectedMediaType) :
 						converter.canWrite(valueType, selectedMediaType)) {
-					outputValue = (T) getAdvice().beforeBodyWrite(outputValue, returnType, selectedMediaType,
+					outputValue = getAdvice().beforeBodyWrite(outputValue, returnType, selectedMediaType,
 							(Class<? extends HttpMessageConverter<?>>) converter.getClass(),
 							inputMessage, outputMessage);
 					if (outputValue != null) {
@@ -321,7 +321,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	/**
 	 * @see #getProducibleMediaTypes(HttpServletRequest, Class, Type)
 	 */
-	@SuppressWarnings({"unchecked", "unused"})
+	@SuppressWarnings("unused")
 	protected List<MediaType> getProducibleMediaTypes(HttpServletRequest request, Class<?> valueClass) {
 		return getProducibleMediaTypes(request, valueClass, null);
 	}

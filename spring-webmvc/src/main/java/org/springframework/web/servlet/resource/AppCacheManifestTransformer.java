@@ -118,6 +118,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 			logger.trace("Transforming resource: " + resource);
 		}
 
+		@SuppressWarnings("resource")
 		Scanner scanner = new Scanner(content);
 		LineInfo previous = null;
 		LineAggregator aggregator = new LineAggregator(resource, content);

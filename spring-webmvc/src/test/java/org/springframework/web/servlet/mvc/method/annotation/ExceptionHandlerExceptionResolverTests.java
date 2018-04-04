@@ -93,8 +93,8 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 
-	@SuppressWarnings("ConstantConditions")
 	@Test
+	@SuppressWarnings("ConstantConditions")
 	public void nullHandler() {
 		Object handler = null;
 		this.resolver.afterPropertiesSet();
