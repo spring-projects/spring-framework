@@ -797,7 +797,7 @@ evaluates to `true`, as expected.
 Each symbolic operator can also be specified as a purely alphabetic equivalent. This
 avoids problems where the symbols used have special meaning for the document type in
 which the expression is embedded (eg. an XML document). The textual equivalents are
-shown here: `lt` (`<`), `gt` (`>`), `le` (`<=`), `ge` (`>=`), `eq` (`==`),
+shown here: `lt` (`<`), `gt` (`>`), `le` (`\<=`), `ge` (`>=`), `eq` (`==`),
 `ne` (`!=`), `div` (`/`), `mod` (`%`), `not` (`!`). These are case insensitive.
 
 
