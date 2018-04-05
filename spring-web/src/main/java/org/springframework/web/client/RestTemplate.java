@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -855,6 +856,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 					}
 				}
 				if (!allSupportedMediaTypes.isEmpty()) {
+					allSupportedMediaTypes = allSupportedMediaTypes.stream().distinct().collect(Collectors.toList());
 					MediaType.sortBySpecificity(allSupportedMediaTypes);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Setting request Accept header to " + allSupportedMediaTypes);
