@@ -1235,7 +1235,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			else {
 				if ( sharedConnectionEnabled() ) {
 					this.connection = getSharedConnection();
-				} else {
+				}
+				else {
 					if (this.connection == null && getCacheLevel() >= CACHE_CONNECTION) {
 						this.connection = createConnection();
 						this.connection.start();
