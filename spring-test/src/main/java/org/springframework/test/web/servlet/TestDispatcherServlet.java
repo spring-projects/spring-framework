@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.mock.web.MockAsyncContext;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
@@ -35,6 +37,7 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.util.WebUtils;
 
 /**
  * A sub-class of {@code DispatcherServlet} that saves the result in an
@@ -64,8 +67,24 @@ final class TestDispatcherServlet extends DispatcherServlet {
 			throws ServletException, IOException {
 
 		registerAsyncResultInterceptors(request);
+
 		super.service(request, response);
-		initAsyncDispatchLatch(request);
+
+		if (request.getAsyncContext() != null) {
+			MockHttpServletRequest mockRequest = WebUtils.getNativeRequest(request, MockHttpServletRequest.class);
+			Assert.notNull(mockRequest, "Expected MockHttpServletRequest");
+			MockAsyncContext mockAsyncContext = ((MockAsyncContext) mockRequest.getAsyncContext());
+			Assert.notNull(mockAsyncContext, "MockAsyncContext not found. Did request wrapper not delegate startAsync?");
+
+			final CountDownLatch dispatchLatch = new CountDownLatch(1);
+			mockAsyncContext.addDispatchHandler(new Runnable() {
+				@Override
+				public void run() {
+					dispatchLatch.countDown();
+				}
+			});
+			getMvcResult(request).setAsyncDispatchLatch(dispatchLatch);
+		}
 	}
 
 	private void registerAsyncResultInterceptors(final HttpServletRequest request) {
@@ -82,19 +101,6 @@ final class TestDispatcherServlet extends DispatcherServlet {
 				getMvcResult(request).setAsyncResult(value);
 			}
 		});
-	}
-
-	private void initAsyncDispatchLatch(HttpServletRequest request) {
-		if (request.getAsyncContext() != null) {
-			final CountDownLatch dispatchLatch = new CountDownLatch(1);
-			((MockAsyncContext) request.getAsyncContext()).addDispatchHandler(new Runnable() {
-				@Override
-				public void run() {
-					dispatchLatch.countDown();
-				}
-			});
-			getMvcResult(request).setAsyncDispatchLatch(dispatchLatch);
-		}
 	}
 
 	protected DefaultMvcResult getMvcResult(ServletRequest request) {
