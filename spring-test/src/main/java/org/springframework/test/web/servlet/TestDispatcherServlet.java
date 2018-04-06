@@ -26,6 +26,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockAsyncContext;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
@@ -35,6 +37,7 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.util.WebUtils;
 
 /**
  * A sub-class of {@code DispatcherServlet} that saves the result in an
@@ -68,8 +71,13 @@ final class TestDispatcherServlet extends DispatcherServlet {
 		super.service(request, response);
 
 		if (request.getAsyncContext() != null) {
+			MockHttpServletRequest mockRequest = WebUtils.getNativeRequest(request, MockHttpServletRequest.class);
+			Assert.notNull(mockRequest, "Expected MockHttpServletRequest");
+			MockAsyncContext mockAsyncContext = ((MockAsyncContext) mockRequest.getAsyncContext());
+			Assert.notNull(mockAsyncContext, "MockAsyncContext not found. Did request wrapper not delegate startAsync?");
+
 			CountDownLatch dispatchLatch = new CountDownLatch(1);
-			((MockAsyncContext) request.getAsyncContext()).addDispatchHandler(dispatchLatch::countDown);
+			mockAsyncContext.addDispatchHandler(dispatchLatch::countDown);
 			getMvcResult(request).setAsyncDispatchLatch(dispatchLatch);
 		}
 	}
