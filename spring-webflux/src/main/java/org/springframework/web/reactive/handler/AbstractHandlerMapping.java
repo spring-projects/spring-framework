@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,13 +49,13 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	private static final WebHandler REQUEST_HANDLED_HANDLER = exchange -> Mono.empty();
 
 
-	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
-
 	private final PathPatternParser patternParser;
 
 	private final UrlBasedCorsConfigurationSource globalCorsConfigSource;
 
 	private CorsProcessor corsProcessor = new DefaultCorsProcessor();
+
+	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
 
 	public AbstractHandlerMapping() {
@@ -63,19 +63,6 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 		  this.globalCorsConfigSource = new UrlBasedCorsConfigurationSource(this.patternParser);
 	}
 
-	/**
-	 * Specify the order value for this HandlerMapping bean.
-	 * <p>Default value is {@code Integer.MAX_VALUE}, meaning that it's non-ordered.
-	 * @see org.springframework.core.Ordered#getOrder()
-	 */
-	public final void setOrder(int order) {
-		this.order = order;
-	}
-
-	@Override
-	public final int getOrder() {
-		return this.order;
-	}
 
 	/**
 	 * Shortcut method for setting the same property on the underlying pattern
@@ -138,6 +125,20 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	 */
 	public CorsProcessor getCorsProcessor() {
 		return this.corsProcessor;
+	}
+
+	/**
+	 * Specify the order value for this HandlerMapping bean.
+	 * <p>The default value is {@code Ordered.LOWEST_PRECEDENCE}, meaning non-ordered.
+	 * @see org.springframework.core.Ordered#getOrder()
+	 */
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	@Override
+	public int getOrder() {
+		return this.order;
 	}
 
 

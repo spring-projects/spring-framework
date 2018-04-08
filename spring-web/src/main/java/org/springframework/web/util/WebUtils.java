@@ -677,6 +677,13 @@ public abstract class WebUtils {
 	 * Check the given request origin against a list of allowed origins.
 	 * A list containing "*" means that all origins are allowed.
 	 * An empty list means only same origin is allowed.
+	 * <p><strong>Note:</strong> this method may use values from "Forwarded"
+	 * (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>),
+	 * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers,
+	 * if present, in order to reflect the client-originated address.
+	 * Consider using the {@code ForwardedHeaderFilter} in order to choose from a
+	 * central place whether to extract and use, or to discard such headers.
+	 * See the Spring Framework reference for more on this filter.
 	 * @return {@code true} if the request origin is valid, {@code false} otherwise
 	 * @since 4.1.5
 	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
@@ -701,6 +708,13 @@ public abstract class WebUtils {
 	 * Check if the request is a same-origin one, based on {@code Origin}, {@code Host},
 	 * {@code Forwarded}, {@code X-Forwarded-Proto}, {@code X-Forwarded-Host} and
 	 * @code X-Forwarded-Port} headers.
+	 * <p><strong>Note:</strong> this method uses values from "Forwarded"
+	 * (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>),
+	 * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers,
+	 * if present, in order to reflect the client-originated address.
+	 * Consider using the {@code ForwardedHeaderFilter} in order to choose from a
+	 * central place whether to extract and use, or to discard such headers.
+	 * See the Spring Framework reference for more on this filter.
 	 * @return {@code true} if the request is a same-origin one, {@code false} in case
 	 * of cross-origin request
 	 * @since 4.2
@@ -711,6 +725,7 @@ public abstract class WebUtils {
 		if (origin == null) {
 			return true;
 		}
+
 		String scheme;
 		String host;
 		int port;
@@ -720,12 +735,9 @@ public abstract class WebUtils {
 			scheme = servletRequest.getScheme();
 			host = servletRequest.getServerName();
 			port = servletRequest.getServerPort();
-
-			if(containsForwardedHeaders(servletRequest)) {
+			if (containsForwardedHeaders(servletRequest)) {
 				UriComponents actualUrl = new UriComponentsBuilder()
-						.scheme(scheme)
-						.host(host)
-						.port(port)
+						.scheme(scheme).host(host).port(port)
 						.adaptFromForwardedHeaders(headers)
 						.build();
 				scheme = actualUrl.getScheme();

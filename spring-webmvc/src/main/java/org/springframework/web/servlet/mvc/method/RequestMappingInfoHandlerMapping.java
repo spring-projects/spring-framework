@@ -447,6 +447,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			return result;
 		}
 
+		@SuppressWarnings("unused")
 		public HttpHeaders handle() {
 			return this.headers;
 		}

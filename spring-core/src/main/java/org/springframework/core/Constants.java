@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -215,11 +215,11 @@ public class Constants {
 	public Set<Object> getValues(@Nullable String namePrefix) {
 		String prefixToUse = (namePrefix != null ? namePrefix.trim().toUpperCase(Locale.ENGLISH) : "");
 		Set<Object> values = new HashSet<>();
-		for (String code : this.fieldCache.keySet()) {
+		this.fieldCache.forEach((code, value) -> {
 			if (code.startsWith(prefixToUse)) {
-				values.add(this.fieldCache.get(code));
+				values.add(value);
 			}
-		}
+		});
 		return values;
 	}
 
@@ -247,11 +247,11 @@ public class Constants {
 	public Set<Object> getValuesForSuffix(@Nullable String nameSuffix) {
 		String suffixToUse = (nameSuffix != null ? nameSuffix.trim().toUpperCase(Locale.ENGLISH) : "");
 		Set<Object> values = new HashSet<>();
-		for (String code : this.fieldCache.keySet()) {
+		this.fieldCache.forEach((code, value) -> {
 			if (code.endsWith(suffixToUse)) {
-				values.add(this.fieldCache.get(code));
+				values.add(value);
 			}
-		}
+		});
 		return values;
 	}
 

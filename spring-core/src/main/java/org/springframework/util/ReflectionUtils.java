@@ -679,8 +679,7 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Invoke the given callback on all fields in the target class, going up the
-	 * class hierarchy to get all declared fields.
+	 * Invoke the given callback on all locally declared fields in the given class.
 	 * @param clazz the target class to analyze
 	 * @param fc the callback to invoke for each field
 	 * @since 4.2

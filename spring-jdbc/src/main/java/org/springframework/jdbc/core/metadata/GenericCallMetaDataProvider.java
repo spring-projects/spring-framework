@@ -256,14 +256,14 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 
 
 	/**
-	 * Specify whether the database supports the use of catalog name in procedure calls
+	 * Specify whether the database supports the use of catalog name in procedure calls.
 	 */
 	protected void setSupportsCatalogsInProcedureCalls(boolean supportsCatalogsInProcedureCalls) {
 		this.supportsCatalogsInProcedureCalls = supportsCatalogsInProcedureCalls;
 	}
 
 	/**
-	 * Does the database support the use of catalog name in procedure calls
+	 * Does the database support the use of catalog name in procedure calls?
 	 */
 	@Override
 	public boolean isSupportsCatalogsInProcedureCalls() {
@@ -271,14 +271,14 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	/**
-	 * Specify whether the database supports the use of schema name in procedure calls
+	 * Specify whether the database supports the use of schema name in procedure calls.
 	 */
 	protected void setSupportsSchemasInProcedureCalls(boolean supportsSchemasInProcedureCalls) {
 		this.supportsSchemasInProcedureCalls = supportsSchemasInProcedureCalls;
 	}
 
 	/**
-	 * Does the database support the use of schema name in procedure calls
+	 * Does the database support the use of schema name in procedure calls?
 	 */
 	@Override
 	public boolean isSupportsSchemasInProcedureCalls() {
@@ -286,28 +286,28 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	/**
-	 * Specify whether the database uses upper case for identifiers
+	 * Specify whether the database uses upper case for identifiers.
 	 */
 	protected void setStoresUpperCaseIdentifiers(boolean storesUpperCaseIdentifiers) {
 		this.storesUpperCaseIdentifiers = storesUpperCaseIdentifiers;
 	}
 
 	/**
-	 * Does the database use upper case for identifiers
+	 * Does the database use upper case for identifiers?
 	 */
 	protected boolean isStoresUpperCaseIdentifiers() {
 		return this.storesUpperCaseIdentifiers;
 	}
 
 	/**
-	 * Specify whether the database uses lower case for identifiers
+	 * Specify whether the database uses lower case for identifiers.
 	 */
 	protected void setStoresLowerCaseIdentifiers(boolean storesLowerCaseIdentifiers) {
 		this.storesLowerCaseIdentifiers = storesLowerCaseIdentifiers;
 	}
 
 	/**
-	 * Does the database use lower case for identifiers
+	 * Does the database use lower case for identifiers?
 	 */
 	protected boolean isStoresLowerCaseIdentifiers() {
 		return this.storesLowerCaseIdentifiers;
@@ -315,7 +315,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 
 
 	/**
-	 * Process the procedure column meta-data
+	 * Process the procedure column meta-data.
 	 */
 	private void processProcedureColumns(DatabaseMetaData databaseMetaData,
 			@Nullable String catalogName, @Nullable String schemaName, @Nullable String procedureName) {

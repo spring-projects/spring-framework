@@ -245,9 +245,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			if (logger.isDebugEnabled()) {
 				logger.debug(methods.size() + " request handler methods found on " + userType + ": " + methods);
 			}
-			methods.forEach((methodKey, methodMappingValue) -> {
-					Method invocableMethod = AopUtils.selectInvocableMethod(methodKey, userType);
-					registerHandlerMethod(handler, invocableMethod, methodMappingValue);
+			methods.forEach((method, mapping) -> {
+				Method invocableMethod = AopUtils.selectInvocableMethod(method, userType);
+				registerHandlerMethod(handler, invocableMethod, mapping);
 			});
 		}
 	}
@@ -754,6 +754,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 	private static class EmptyHandler {
 
+		@SuppressWarnings("unused")
 		public void handle() {
 			throw new UnsupportedOperationException("Not implemented");
 		}

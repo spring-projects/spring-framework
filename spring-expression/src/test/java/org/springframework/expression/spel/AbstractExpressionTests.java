@@ -44,7 +44,7 @@ public abstract class AbstractExpressionTests {
 
 	protected final ExpressionParser parser = new SpelExpressionParser();
 
-	protected final StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
+	protected final StandardEvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
 
 
 	/**
@@ -63,7 +63,7 @@ public abstract class AbstractExpressionTests {
 			SpelUtilities.printAbstractSyntaxTree(System.out, expr);
 		}
 
-		Object value = expr.getValue(eContext);
+		Object value = expr.getValue(context);
 
 		// Check the return value
 		if (value == null) {
@@ -95,7 +95,7 @@ public abstract class AbstractExpressionTests {
 			SpelUtilities.printAbstractSyntaxTree(System.out, expr);
 		}
 
-		Object value = expr.getValue(eContext, expectedResultType);
+		Object value = expr.getValue(context, expectedResultType);
 		if (value == null) {
 			if (expectedValue == null) {
 				return;  // no point doing other checks
@@ -127,7 +127,7 @@ public abstract class AbstractExpressionTests {
 		if (DEBUG) {
 			SpelUtilities.printAbstractSyntaxTree(System.out, expr);
 		}
-		Object value = expr.getValue(eContext);
+		Object value = expr.getValue(context);
 		if (value == null) {
 			if (expectedValue == null) {
 				return;  // no point doing other checks
@@ -145,7 +145,7 @@ public abstract class AbstractExpressionTests {
 		assertTrue("Type of the result was not as expected.  Expected '" + expectedClassOfResult +
 				"' but result was of type '" + resultType + "'", expectedClassOfResult.equals(resultType));
 
-		boolean isWritable = expr.isWritable(eContext);
+		boolean isWritable = expr.isWritable(context);
 		if (isWritable != shouldBeWritable) {
 			if (shouldBeWritable)
 				fail("Expected the expression to be writable but it is not");
@@ -184,10 +184,10 @@ public abstract class AbstractExpressionTests {
 				fail("Parser returned null for expression");
 			}
 			if (expectedReturnType != null) {
-				expr.getValue(eContext, expectedReturnType);
+				expr.getValue(context, expectedReturnType);
 			}
 			else {
-				expr.getValue(eContext);
+				expr.getValue(context);
 			}
 			fail("Should have failed with message " + expectedMessage);
 		}

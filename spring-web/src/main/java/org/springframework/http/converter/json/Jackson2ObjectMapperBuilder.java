@@ -660,9 +660,7 @@ public class Jackson2ObjectMapperBuilder {
 			objectMapper.setFilterProvider(this.filters);
 		}
 
-		for (Class<?> target : this.mixIns.keySet()) {
-			objectMapper.addMixIn(target, this.mixIns.get(target));
-		}
+		this.mixIns.forEach((target, mixinSource) -> objectMapper.addMixIn(target, mixinSource));
 
 		if (!this.serializers.isEmpty() || !this.deserializers.isEmpty()) {
 			SimpleModule module = new SimpleModule();
@@ -672,9 +670,7 @@ public class Jackson2ObjectMapperBuilder {
 		}
 
 		customizeDefaultFeatures(objectMapper);
-		for (Object feature : this.features.keySet()) {
-			configureFeature(objectMapper, feature, this.features.get(feature));
-		}
+		this.features.forEach((feature, enabled) -> configureFeature(objectMapper, feature, enabled));
 
 		if (this.handlerInstantiator != null) {
 			objectMapper.setHandlerInstantiator(this.handlerInstantiator);
@@ -699,16 +695,14 @@ public class Jackson2ObjectMapperBuilder {
 
 	@SuppressWarnings("unchecked")
 	private <T> void addSerializers(SimpleModule module) {
-		for (Class<?> type : this.serializers.keySet()) {
-			module.addSerializer((Class<? extends T>) type, (JsonSerializer<T>) this.serializers.get(type));
-		}
+		this.serializers.forEach((type, serializer) ->
+				module.addSerializer((Class<? extends T>) type, (JsonSerializer<T>) serializer));
 	}
 
 	@SuppressWarnings("unchecked")
 	private <T> void addDeserializers(SimpleModule module) {
-		for (Class<?> type : this.deserializers.keySet()) {
-			module.addDeserializer((Class<T>) type, (JsonDeserializer<? extends T>) this.deserializers.get(type));
-		}
+		this.deserializers.forEach((type, deserializer) ->
+				module.addDeserializer((Class<T>) type, (JsonDeserializer<? extends T>) deserializer));
 	}
 
 	private void configureFeature(ObjectMapper objectMapper, Object feature, boolean enabled) {

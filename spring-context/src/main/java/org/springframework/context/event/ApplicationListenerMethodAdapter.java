@@ -366,7 +366,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 					payloadType != null && declaredEventType.isAssignableFrom(payloadType)) {
 				return declaredEventType;
 			}
-			if (declaredEventType.getRawClass().isInstance(event)) {
+			if (eventClass != null && eventClass.isInstance(event)) {
 				return declaredEventType;
 			}
 		}

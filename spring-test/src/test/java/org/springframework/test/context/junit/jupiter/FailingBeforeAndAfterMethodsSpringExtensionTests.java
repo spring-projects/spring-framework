@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.*
  * @author Sam Brannen
  * @since 5.0
  */
-class FailingBeforeAndAfterMethodsSpringExtensionTestCase {
+class FailingBeforeAndAfterMethodsSpringExtensionTests {
 
 	private static Stream<Class<?>> testClasses() {
 		// @formatter:off
@@ -205,6 +205,7 @@ class FailingBeforeAndAfterMethodsSpringExtensionTestCase {
 		}
 	}
 
+	@FailingTestCase
 	@ExtendWith(SpringExtension.class)
 	private static abstract class BaseTestCase {
 
@@ -214,36 +215,37 @@ class FailingBeforeAndAfterMethodsSpringExtensionTestCase {
 	}
 
 	@TestExecutionListeners(AlwaysFailingBeforeTestClassTestExecutionListener.class)
-	private static class AlwaysFailingBeforeTestClassTestCase extends BaseTestCase {
+	static class AlwaysFailingBeforeTestClassTestCase extends BaseTestCase {
 	}
 
 	@TestExecutionListeners(AlwaysFailingAfterTestClassTestExecutionListener.class)
-	private static class AlwaysFailingAfterTestClassTestCase extends BaseTestCase {
+	static class AlwaysFailingAfterTestClassTestCase extends BaseTestCase {
 	}
 
 	@TestExecutionListeners(AlwaysFailingPrepareTestInstanceTestExecutionListener.class)
-	private static class AlwaysFailingPrepareTestInstanceTestCase extends BaseTestCase {
+	static class AlwaysFailingPrepareTestInstanceTestCase extends BaseTestCase {
 	}
 
 	@TestExecutionListeners(AlwaysFailingBeforeTestMethodTestExecutionListener.class)
-	private static class AlwaysFailingBeforeTestMethodTestCase extends BaseTestCase {
+	static class AlwaysFailingBeforeTestMethodTestCase extends BaseTestCase {
 	}
 
 	@TestExecutionListeners(AlwaysFailingBeforeTestExecutionTestExecutionListener.class)
-	private static class AlwaysFailingBeforeTestExecutionTestCase extends BaseTestCase {
+	static class AlwaysFailingBeforeTestExecutionTestCase extends BaseTestCase {
 	}
 
 	@TestExecutionListeners(AlwaysFailingAfterTestExecutionTestExecutionListener.class)
-	private static class AlwaysFailingAfterTestExecutionTestCase extends BaseTestCase {
+	static class AlwaysFailingAfterTestExecutionTestCase extends BaseTestCase {
 	}
 
 	@TestExecutionListeners(AlwaysFailingAfterTestMethodTestExecutionListener.class)
-	private static class AlwaysFailingAfterTestMethodTestCase extends BaseTestCase {
+	static class AlwaysFailingAfterTestMethodTestCase extends BaseTestCase {
 	}
 
+	@FailingTestCase
 	@SpringJUnitConfig(DatabaseConfig.class)
 	@Transactional
-	private static class FailingBeforeTransactionTestCase {
+	static class FailingBeforeTransactionTestCase {
 
 		@Test
 		void testNothing() {
@@ -255,9 +257,10 @@ class FailingBeforeAndAfterMethodsSpringExtensionTestCase {
 		}
 	}
 
+	@FailingTestCase
 	@SpringJUnitConfig(DatabaseConfig.class)
 	@Transactional
-	private static class FailingAfterTransactionTestCase {
+	static class FailingAfterTransactionTestCase {
 
 		@Test
 		void testNothing() {

@@ -103,7 +103,6 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 		return (RequestContext) getPageContext().getAttribute(RequestContextAwareTag.REQUEST_CONTEXT_PAGE_ATTRIBUTE);
 	}
 
-	@SuppressWarnings("deprecation")
 	protected RequestDataValueProcessor getMockRequestDataValueProcessor() {
 		RequestDataValueProcessor mockProcessor = mock(RequestDataValueProcessor.class);
 		HttpServletRequest request = (HttpServletRequest) getPageContext().getRequest();

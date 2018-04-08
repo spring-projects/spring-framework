@@ -58,7 +58,7 @@ public class CodeFlow implements Opcodes {
 	 * sub-expressions like the expressions for the argument values in a method invocation
 	 * expression.
 	 */
-	private final Deque<ArrayList<String>> compilationScopes;
+	private final Deque<List<String>> compilationScopes;
 
 	/**
 	 * As SpEL ast nodes are called to generate code for the main evaluation method
@@ -128,7 +128,7 @@ public class CodeFlow implements Opcodes {
 	 */
 	public void pushDescriptor(@Nullable String descriptor) {
 		if (descriptor != null) {
-			this.compilationScopes.peek().add(descriptor);
+			this.compilationScopes.element().add(descriptor);
 		}
 	}
 
@@ -478,20 +478,14 @@ public class CodeFlow implements Opcodes {
 			}
 		}
 		if (clazz.isPrimitive()) {
-			if (clazz == Void.TYPE) {
-				sb.append('V');
-			}
-			else if (clazz == Integer.TYPE) {
-				sb.append('I');
-			}
-			else if (clazz == Boolean.TYPE) {
+			if (clazz == Boolean.TYPE) {
 				sb.append('Z');
+			}
+			else if (clazz == Byte.TYPE) {
+				sb.append('B');
 			}
 			else if (clazz == Character.TYPE) {
 				sb.append('C');
-			}
-			else if (clazz == Long.TYPE) {
-				sb.append('J');
 			}
 			else if (clazz == Double.TYPE) {
 				sb.append('D');
@@ -499,11 +493,17 @@ public class CodeFlow implements Opcodes {
 			else if (clazz == Float.TYPE) {
 				sb.append('F');
 			}
-			else if (clazz == Byte.TYPE) {
-				sb.append('B');
+			else if (clazz == Integer.TYPE) {
+				sb.append('I');
+			}
+			else if (clazz == Long.TYPE) {
+				sb.append('J');
 			}
 			else if (clazz == Short.TYPE) {
 				sb.append('S');
+			}
+			else if (clazz == Void.TYPE) {
+				sb.append('V');
 			}
 		}
 		else {

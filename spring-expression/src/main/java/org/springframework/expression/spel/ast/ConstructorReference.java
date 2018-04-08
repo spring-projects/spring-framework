@@ -295,20 +295,14 @@ public class ConstructorReference extends SpelNodeImpl {
 			if (arrayTypeCode == TypeCode.OBJECT) {
 				populateReferenceTypeArray(state, newArray, typeConverter, initializer, componentType);
 			}
-			else if (arrayTypeCode == TypeCode.INT) {
-				populateIntArray(state, newArray, typeConverter, initializer);
-			}
 			else if (arrayTypeCode == TypeCode.BOOLEAN) {
 				populateBooleanArray(state, newArray, typeConverter, initializer);
 			}
+			else if (arrayTypeCode == TypeCode.BYTE) {
+				populateByteArray(state, newArray, typeConverter, initializer);
+			}
 			else if (arrayTypeCode == TypeCode.CHAR) {
 				populateCharArray(state, newArray, typeConverter, initializer);
-			}
-			else if (arrayTypeCode == TypeCode.LONG) {
-				populateLongArray(state, newArray, typeConverter, initializer);
-			}
-			else if (arrayTypeCode == TypeCode.SHORT) {
-				populateShortArray(state, newArray, typeConverter, initializer);
 			}
 			else if (arrayTypeCode == TypeCode.DOUBLE) {
 				populateDoubleArray(state, newArray, typeConverter, initializer);
@@ -316,8 +310,14 @@ public class ConstructorReference extends SpelNodeImpl {
 			else if (arrayTypeCode == TypeCode.FLOAT) {
 				populateFloatArray(state, newArray, typeConverter, initializer);
 			}
-			else if (arrayTypeCode == TypeCode.BYTE) {
-				populateByteArray(state, newArray, typeConverter, initializer);
+			else if (arrayTypeCode == TypeCode.INT) {
+				populateIntArray(state, newArray, typeConverter, initializer);
+			}
+			else if (arrayTypeCode == TypeCode.LONG) {
+				populateLongArray(state, newArray, typeConverter, initializer);
+			}
+			else if (arrayTypeCode == TypeCode.SHORT) {
+				populateShortArray(state, newArray, typeConverter, initializer);
 			}
 			else {
 				throw new IllegalStateException(arrayTypeCode.name());

@@ -365,7 +365,6 @@ public class MessageTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	public void nullMessageSource() throws JspException {
 		PageContext pc = createPageContext();
 		ConfigurableWebApplicationContext ctx = (ConfigurableWebApplicationContext)

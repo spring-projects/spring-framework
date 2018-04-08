@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.client;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.Test;
 
@@ -25,6 +26,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.util.StreamUtils;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
@@ -33,6 +35,8 @@ import static org.mockito.BDDMockito.*;
  * Unit tests for {@link DefaultResponseErrorHandler}.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
+ * @author Denys Ivano
  */
 public class DefaultResponseErrorHandlerTests {
 
@@ -119,6 +123,58 @@ public class DefaultResponseErrorHandlerTests {
 		given(response.getHeaders()).willReturn(headers);
 
 		assertFalse(handler.hasError(response));
+	}
+
+	@Test  // SPR-16604
+	public void bodyAvailableAfterHasErrorForUnknownStatusCode() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.TEXT_PLAIN);
+		TestByteArrayInputStream body = new TestByteArrayInputStream("Hello World".getBytes(StandardCharsets.UTF_8));
+
+		given(response.getRawStatusCode()).willReturn(999);
+		given(response.getStatusText()).willReturn("Custom status code");
+		given(response.getHeaders()).willReturn(headers);
+		given(response.getBody()).willReturn(body);
+
+		assertFalse(handler.hasError(response));
+		assertFalse(body.isClosed());
+		assertEquals("Hello World", StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8));
+	}
+
+
+	private static class TestByteArrayInputStream extends ByteArrayInputStream {
+
+		private boolean closed;
+
+		public TestByteArrayInputStream(byte[] buf) {
+			super(buf);
+			this.closed = false;
+		}
+
+		public boolean isClosed() {
+			return closed;
+		}
+
+		@Override
+		public boolean markSupported() {
+			return false;
+		}
+
+		@Override
+		public synchronized void mark(int readlimit) {
+			throw new UnsupportedOperationException("mark/reset not supported");
+		}
+
+		@Override
+		public synchronized void reset() {
+			throw new UnsupportedOperationException("mark/reset not supported");
+		}
+
+		@Override
+		public void close() throws IOException {
+			super.close();
+			this.closed = true;
+		}
 	}
 
 }

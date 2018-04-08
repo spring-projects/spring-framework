@@ -196,8 +196,7 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	 */
 	public LinkedMultiValueMap<K, V> deepCopy() {
 		LinkedMultiValueMap<K, V> copy = new LinkedMultiValueMap<>(this.targetMap.size());
-		this.targetMap.forEach((k, v) -> copy.put(k, new LinkedList<>(v)));
-		
+		this.targetMap.forEach((key, value) -> copy.put(key, new LinkedList<>(value)));
 		return copy;
 	}
 

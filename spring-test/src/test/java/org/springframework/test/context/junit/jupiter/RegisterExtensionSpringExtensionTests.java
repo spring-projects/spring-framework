@@ -22,7 +22,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.TestReporter;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -39,21 +39,26 @@ import org.springframework.test.context.junit.jupiter.comics.Person;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Integration tests which demonstrate that the Spring TestContext Framework can
- * be used with JUnit Jupiter via the {@link SpringExtension}.
+ * Integration tests which demonstrate that the Spring TestContext Framework can be used
+ * with JUnit Jupiter by registering the {@link SpringExtension} via a static field.
+ * Note, however, that this is not the recommended way to register the {@code SpringExtension}.
  *
- * <p>To run these tests in an IDE that does not have built-in support for the JUnit
+ * <p>
+ * To run these tests in an IDE that does not have built-in support for the JUnit
  * Platform, simply run {@link SpringJUnitJupiterTestSuite} as a JUnit 4 test.
  *
  * @author Sam Brannen
- * @since 5.0
+ * @since 5.1
+ * @see SpringExtensionTests
  * @see SpringExtension
- * @see ComposedSpringExtensionTestCase
+ * @see RegisterExtension
  */
-@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TestConfig.class)
 @TestPropertySource(properties = "enigma = 42")
-class SpringExtensionTestCase {
+class RegisterExtensionSpringExtensionTests {
+
+	@RegisterExtension
+	static final SpringExtension springExtension = new SpringExtension();
 
 	@Autowired
 	Person dilbert;
@@ -75,13 +80,16 @@ class SpringExtensionTestCase {
 
 	@Test
 	void applicationContextInjectedIntoMethod(ApplicationContext applicationContext) {
-		assertNotNull(applicationContext, "ApplicationContext should have been injected by Spring");
+		assertNotNull(applicationContext,
+				"ApplicationContext should have been injected by Spring");
 		assertEquals(this.dilbert, applicationContext.getBean("dilbert", Person.class));
 	}
 
 	@Test
-	void genericApplicationContextInjectedIntoMethod(GenericApplicationContext applicationContext) {
-		assertNotNull(applicationContext, "GenericApplicationContext should have been injected by Spring");
+	void genericApplicationContextInjectedIntoMethod(
+			GenericApplicationContext applicationContext) {
+		assertNotNull(applicationContext,
+				"GenericApplicationContext should have been injected by Spring");
 		assertEquals(this.dilbert, applicationContext.getBean("dilbert", Person.class));
 	}
 
@@ -94,11 +102,13 @@ class SpringExtensionTestCase {
 		assertNotNull(this.dog, "Dogbert should have been @Autowired by Spring");
 		assertEquals("Dogbert", this.dog.getName(), "Dog's name");
 
-		assertNotNull(this.cat, "Catbert should have been @Autowired by Spring as the @Primary cat");
+		assertNotNull(this.cat,
+				"Catbert should have been @Autowired by Spring as the @Primary cat");
 		assertEquals("Catbert", this.cat.getName(), "Primary cat's name");
 		assertEquals(2, this.cats.size(), "Number of cats in context");
 
-		assertNotNull(this.enigma, "Enigma should have been injected via @Value by Spring");
+		assertNotNull(this.enigma,
+				"Enigma should have been injected via @Value by Spring");
 		assertEquals(Integer.valueOf(42), this.enigma, "enigma");
 	}
 
@@ -121,12 +131,13 @@ class SpringExtensionTestCase {
 	}
 
 	/**
-	 * NOTE: Test code must be compiled with "-g" (debug symbols) or "-parameters" in order
-	 * for the parameter name to be used as the qualifier; otherwise, use
+	 * NOTE: Test code must be compiled with "-g" (debug symbols) or "-parameters" in
+	 * order for the parameter name to be used as the qualifier; otherwise, use
 	 * {@code @Qualifier("wally")}.
 	 */
 	@Test
-	void autowiredParameterWithImplicitQualifierBasedOnParameterName(@Autowired Person wally) {
+	void autowiredParameterWithImplicitQualifierBasedOnParameterName(
+			@Autowired Person wally) {
 		assertNotNull(wally, "Wally should have been @Autowired by Spring");
 		assertEquals("Wally", wally.getName(), "Person's name");
 	}
@@ -139,19 +150,24 @@ class SpringExtensionTestCase {
 	}
 
 	@Test
-	void autowiredParameterThatDoesNotExistAsJavaUtilOptional(@Autowired Optional<Number> number) {
+	void autowiredParameterThatDoesNotExistAsJavaUtilOptional(
+			@Autowired Optional<Number> number) {
 		assertNotNull(number, "Optional number should have been @Autowired by Spring");
-		assertFalse(number.isPresent(), "Value of Optional number should not be 'present'");
+		assertFalse(number.isPresent(),
+				"Value of Optional number should not be 'present'");
 	}
 
 	@Test
-	void autowiredParameterThatDoesNotExistButIsNotRequired(@Autowired(required = false) Number number) {
-		assertNull(number, "Non-required number should have been @Autowired as 'null' by Spring");
+	void autowiredParameterThatDoesNotExistButIsNotRequired(
+			@Autowired(required = false) Number number) {
+		assertNull(number,
+				"Non-required number should have been @Autowired as 'null' by Spring");
 	}
 
 	@Test
 	void autowiredParameterOfList(@Autowired List<Person> peopleParam) {
-		assertNotNull(peopleParam, "list of people should have been @Autowired by Spring");
+		assertNotNull(peopleParam,
+				"list of people should have been @Autowired by Spring");
 		assertEquals(2, peopleParam.size(), "Number of people in context");
 	}
 
@@ -162,31 +178,37 @@ class SpringExtensionTestCase {
 
 	@Test
 	void valueParameterFromPropertyPlaceholder(@Value("${enigma}") Integer enigmaParam) {
-		assertNotNull(enigmaParam, "Enigma should have been injected via @Value by Spring");
+		assertNotNull(enigmaParam,
+				"Enigma should have been injected via @Value by Spring");
 		assertEquals(Integer.valueOf(42), enigmaParam, "enigma");
 	}
 
 	@Test
-	void valueParameterFromDefaultValueForPropertyPlaceholder(@Value("${bogus:false}") Boolean defaultValue) {
-		assertNotNull(defaultValue, "Default value should have been injected via @Value by Spring");
+	void valueParameterFromDefaultValueForPropertyPlaceholder(
+			@Value("${bogus:false}") Boolean defaultValue) {
+		assertNotNull(defaultValue,
+				"Default value should have been injected via @Value by Spring");
 		assertEquals(false, defaultValue, "default value");
 	}
 
 	@Test
 	void valueParameterFromSpelExpression(@Value("#{@dilbert.name}") String name) {
-		assertNotNull(name, "Dilbert's name should have been injected via SpEL expression in @Value by Spring");
+		assertNotNull(name,
+				"Dilbert's name should have been injected via SpEL expression in @Value by Spring");
 		assertEquals("Dilbert", name, "name from SpEL expression");
 	}
 
 	@Test
-	void valueParameterFromSpelExpressionWithNestedPropertyPlaceholder(@Value("#{'Hello ' + ${enigma}}") String hello) {
-		assertNotNull(hello, "hello should have been injected via SpEL expression in @Value by Spring");
+	void valueParameterFromSpelExpressionWithNestedPropertyPlaceholder(
+			@Value("#{'Hello ' + ${enigma}}") String hello) {
+		assertNotNull(hello,
+				"hello should have been injected via SpEL expression in @Value by Spring");
 		assertEquals("Hello 42", hello, "hello from SpEL expression");
 	}
 
 	@Test
-	void junitAndSpringMethodInjectionCombined(@Autowired Cat kittyCat, TestInfo testInfo, ApplicationContext context,
-			TestReporter testReporter) {
+	void junitAndSpringMethodInjectionCombined(@Autowired Cat kittyCat, TestInfo testInfo,
+			ApplicationContext context, TestReporter testReporter) {
 
 		assertNotNull(testInfo, "TestInfo should have been injected by JUnit");
 		assertNotNull(testReporter, "TestReporter should have been injected by JUnit");

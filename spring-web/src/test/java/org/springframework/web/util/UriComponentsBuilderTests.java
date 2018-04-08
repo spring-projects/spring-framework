@@ -502,7 +502,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void path() throws URISyntaxException {
+	public void path() {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/foo/bar");
 		UriComponents result = builder.build();
 
@@ -511,7 +511,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void pathSegments() throws URISyntaxException {
+	public void pathSegments() {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
 		UriComponents result = builder.pathSegment("foo").pathSegment("bar").build();
 
@@ -565,7 +565,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test  // SPR-12398
-	public void pathWithDuplicateSlashes() throws URISyntaxException {
+	public void pathWithDuplicateSlashes() {
 		UriComponents uriComponents = UriComponentsBuilder.fromPath("/foo/////////bar").build();
 		assertEquals("/foo/bar", uriComponents.getPath());
 	}
@@ -601,7 +601,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void queryParams() throws URISyntaxException {
+	public void queryParams() {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
 		UriComponents result = builder.queryParam("baz", "qux", 42).build();
 
@@ -613,7 +613,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void emptyQueryParam() throws URISyntaxException {
+	public void emptyQueryParam() {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
 		UriComponents result = builder.queryParam("baz").build();
 
@@ -736,7 +736,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void testClone() throws URISyntaxException {
+	public void testClone() {
 		UriComponentsBuilder builder1 = UriComponentsBuilder.newInstance();
 		builder1.scheme("http").host("e1.com").path("/p1").pathSegment("ps1").queryParam("q1").fragment("f1");
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -222,12 +222,14 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 				this.elementDepth++;
 			}
 			if (this.elementDepth > this.barrier) {
+				Assert.state(this.events != null, "No XMLEvent List");
 				this.events.add(event);
 			}
 			if (event.isEndElement()) {
 				this.elementDepth--;
 				if (this.elementDepth == this.barrier) {
 					this.barrier = Integer.MAX_VALUE;
+					Assert.state(this.events != null, "No XMLEvent List");
 					return Mono.just(this.events);
 				}
 			}

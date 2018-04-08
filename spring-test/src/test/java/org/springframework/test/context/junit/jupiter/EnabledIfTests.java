@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,16 +38,16 @@ import static org.junit.jupiter.api.Assertions.fail;
  * @author Tadaya Tsuyukubo
  * @author Sam Brannen
  * @since 5.0
- * @see EnabledIfConditionTestCase
+ * @see EnabledIfConditionTests
  * @see EnabledIf
  * @see SpringExtension
  */
-class EnabledIfTestCase {
+class EnabledIfTests {
 
 	@SpringJUnitConfig(Config.class)
 	@TestPropertySource(properties = "foo = false")
 	@Nested
-	class EnabledIfOnMethodTestCase {
+	class EnabledIfOnMethodTests {
 
 		@Test
 		@EnabledIf("false")
@@ -133,7 +133,7 @@ class EnabledIfTestCase {
 	@SpringJUnitConfig(Config.class)
 	@Nested
 	@EnabledIf("false")
-	class EnabledIfOnClassTestCase {
+	class EnabledIfOnClassTests {
 
 		@Test
 		void foo() {

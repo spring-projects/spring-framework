@@ -3033,7 +3033,6 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	public static class MyModelAndViewResolver implements ModelAndViewResolver {
 
 		@Override
-		@SuppressWarnings("rawtypes")
 		public ModelAndView resolveModelAndView(Method handlerMethod, Class<?> handlerType, Object returnValue,
 				ExtendedModelMap implicitModel, NativeWebRequest webRequest) {
 
@@ -3048,7 +3047,6 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 							throws Exception {
 						response.getWriter().write("myValue");
 					}
-
 				});
 			}
 			return UNRESOLVED;
@@ -3143,7 +3141,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		String ARTICLES_PATH = API_V1 + "/articles";
 	}
 
-	public interface ResourceEndpoint<E extends Entity, P extends EntityPredicate> {
+	public interface ResourceEndpoint<E extends Entity, P extends EntityPredicate<?>> {
 
 		Collection<E> find(String pageable, P predicate) throws IOException;
 

@@ -385,7 +385,6 @@ public class RequestMappingHandlerAdapterTests {
 	@ControllerAdvice
 	private static class ResponseCodeSuppressingAdvice extends AbstractMappingJacksonResponseBodyAdvice {
 
-		@SuppressWarnings("unchecked")
 		@Override
 		protected void beforeBodyWriteInternal(MappingJacksonValue bodyContainer, MediaType contentType,
 				MethodParameter returnType, ServerHttpRequest request, ServerHttpResponse response) {

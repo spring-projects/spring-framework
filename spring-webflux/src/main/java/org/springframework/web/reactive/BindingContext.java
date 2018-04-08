@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.support.BindingAwareConcurrentModel;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
+import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -75,6 +76,7 @@ public class BindingContext {
 	 * @param target the object to create a data binder for
 	 * @param name the name of the target object
 	 * @return the created data binder
+	 * @throws ServerErrorException if {@code @InitBinder} method invocation fails
 	 */
 	public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, @Nullable Object target, String name) {
 		WebExchangeDataBinder dataBinder = new WebExchangeDataBinder(target, name);
@@ -86,6 +88,7 @@ public class BindingContext {
 
 	/**
 	 * Initialize the data binder instance for the given exchange.
+	 * @throws ServerErrorException if {@code @InitBinder} method invocation fails
 	 */
 	protected WebExchangeDataBinder initDataBinder(WebExchangeDataBinder binder, ServerWebExchange exchange) {
 		return binder;
@@ -97,6 +100,7 @@ public class BindingContext {
 	 * @param exchange the current exchange
 	 * @param name the name of the target object
 	 * @return the created data binder
+	 * @throws ServerErrorException if {@code @InitBinder} method invocation fails
 	 */
 	public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, String name) {
 		return createDataBinder(exchange, null, name);

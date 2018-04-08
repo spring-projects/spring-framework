@@ -352,7 +352,7 @@ public class CronSequenceGenerator {
 				if (!split[0].contains("-")) {
 					range[1] = max - 1;
 				}
-				int delta = Integer.valueOf(split[1]);
+				int delta = Integer.parseInt(split[1]);
 				if (delta <= 0) {
 					throw new IllegalArgumentException("Incrementer delta must be 1 or higher: '" +
 							field + "' in expression \"" + this.expression + "\"");

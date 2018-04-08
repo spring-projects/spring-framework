@@ -23,7 +23,6 @@ import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 
 import org.hamcrest.Matcher;
-import org.springframework.test.util.JsonExpectationsHelper;
 import org.w3c.dom.Node;
 
 import org.springframework.http.HttpHeaders;
@@ -32,6 +31,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.mock.http.client.MockClientHttpRequest;
+import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.test.util.XmlExpectationsHelper;
 import org.springframework.test.web.client.RequestMatcher;
 import org.springframework.util.MultiValueMap;
@@ -218,8 +218,8 @@ public class ContentRequestMatchers {
 	 * regardless of formatting.
 	 * <p>Can compare in two modes, depending on {@code strict} parameter value:
 	 * <ul>
-	 *     <li>{@code true}: strict checking. Not extensible, and strict array ordering.</li>
-	 *     <li>{@code false}: lenient checking. Extensible, and non-strict array ordering.</li>
+	 * <li>{@code true}: strict checking. Not extensible, and strict array ordering.</li>
+	 * <li>{@code false}: lenient checking. Extensible, and non-strict array ordering.</li>
 	 * </ul>
 	 * <p>Use of this matcher requires the <a
 	 * href="http://jsonassert.skyscreamer.org/">JSONassert<a/> library.
@@ -232,8 +232,9 @@ public class ContentRequestMatchers {
 			try {
 				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
 				jsonHelper.assertJsonEqual(expectedJsonContent, mockRequest.getBodyAsString(), strict);
-			} catch (Exception e) {
-				throw new AssertionError("Failed to parse expected or actual JSON request content", e);
+			}
+			catch (Exception ex) {
+				throw new AssertionError("Failed to parse expected or actual JSON request content", ex);
 			}
 		};
 	}
@@ -259,4 +260,3 @@ public class ContentRequestMatchers {
 	}
 
 }
-

@@ -416,12 +416,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	private HttpHeaders(Map<String, List<String>> headers, boolean readOnly) {
 		Assert.notNull(headers, "'headers' must not be null");
 		if (readOnly) {
-			Map<String, List<String>> map =
-					new LinkedCaseInsensitiveMap<>(headers.size(), Locale.ENGLISH);
-			for (Entry<String, List<String>> entry : headers.entrySet()) {
-				List<String> values = Collections.unmodifiableList(entry.getValue());
-				map.put(entry.getKey(), values);
-			}
+			Map<String, List<String>> map = new LinkedCaseInsensitiveMap<>(headers.size(), Locale.ENGLISH);
+			headers.forEach((key, valueList) -> map.put(key, Collections.unmodifiableList(valueList)));
 			this.headers = Collections.unmodifiableMap(map);
 		}
 		else {
@@ -1438,9 +1434,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	@Override
 	public void addAll(MultiValueMap<String, String> values) {
-		for (Entry<String, List<String>> entry : values.entrySet()) {
-			addAll(entry.getKey(), entry.getValue());
-		}
+		values.forEach(this::addAll);
 	}
 
 	/**
@@ -1460,17 +1454,13 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	@Override
 	public void setAll(Map<String, String> values) {
-		for (Entry<String, String> entry : values.entrySet()) {
-			set(entry.getKey(), entry.getValue());
-		}
+		values.forEach(this::set);
 	}
 
 	@Override
 	public Map<String, String> toSingleValueMap() {
 		LinkedHashMap<String, String> singleValueMap = new LinkedHashMap<>(this.headers.size());
-		for (Entry<String, List<String>> entry : this.headers.entrySet()) {
-			singleValueMap.put(entry.getKey(), entry.getValue().get(0));
-		}
+		this.headers.forEach((key, valueList) -> singleValueMap.put(key, valueList.get(0)));
 		return singleValueMap;
 	}
 

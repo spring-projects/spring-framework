@@ -184,9 +184,7 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 						.secure(request.isSecure())
 						.remoteAddr(request.getRemoteAddr())
 						.build();
-		for (String header : headers.keySet()) {
-			context.getHeaders().put(header, headers.get(header));
-		}
+		headers.forEach((header, value) -> context.getHeaders().put(header, value));
 		return context;
 	}
 

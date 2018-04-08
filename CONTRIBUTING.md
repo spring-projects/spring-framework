@@ -42,6 +42,8 @@ Before you create a ticket, please take the time to [research first](#Discuss).
 
 If creating a ticket after a discussion on StackOverflow, please provide a self-sufficient description in the ticket, independent of the details on StackOverview. We understand this is extra work but the issue tracker is an important place of record for design discussions and decisions that can often be referenced long after the fix version, for example to revisit decisions, to understand the origin of a feature, and so on.
 
+When ready create a ticket in the [JIRA issue tracker](https://jira.spring.io/browse/SPR).
+
 #### Ticket Lifecycle
 
 When an issue is first created, it may not be assigned and will not have a fix version.

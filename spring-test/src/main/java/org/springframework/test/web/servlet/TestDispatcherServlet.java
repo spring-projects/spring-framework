@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,22 +18,26 @@ package org.springframework.test.web.servlet;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.lang.Nullable;
+import org.springframework.mock.web.MockAsyncContext;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
-import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.util.WebUtils;
 
 /**
  * A sub-class of {@code DispatcherServlet} that saves the result in an
@@ -63,23 +67,39 @@ final class TestDispatcherServlet extends DispatcherServlet {
 			throws ServletException, IOException {
 
 		registerAsyncResultInterceptors(request);
+
 		super.service(request, response);
+
+		if (request.getAsyncContext() != null) {
+			MockHttpServletRequest mockRequest = WebUtils.getNativeRequest(request, MockHttpServletRequest.class);
+			Assert.notNull(mockRequest, "Expected MockHttpServletRequest");
+			MockAsyncContext mockAsyncContext = ((MockAsyncContext) mockRequest.getAsyncContext());
+			Assert.notNull(mockAsyncContext, "MockAsyncContext not found. Did request wrapper not delegate startAsync?");
+
+			CountDownLatch dispatchLatch = new CountDownLatch(1);
+			mockAsyncContext.addDispatchHandler(dispatchLatch::countDown);
+			getMvcResult(request).setAsyncDispatchLatch(dispatchLatch);
+		}
 	}
 
 	private void registerAsyncResultInterceptors(final HttpServletRequest request) {
-		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-		asyncManager.registerCallableInterceptor(KEY, new CallableProcessingInterceptor() {
-			@Override
-			public <T> void postProcess(NativeWebRequest r, Callable<T> task, Object value) throws Exception {
-				getMvcResult(request).setAsyncResult(value);
-			}
-		});
-		asyncManager.registerDeferredResultInterceptor(KEY, new DeferredResultProcessingInterceptor() {
-			@Override
-			public <T> void postProcess(NativeWebRequest r, DeferredResult<T> result, Object value) throws Exception {
-				getMvcResult(request).setAsyncResult(value);
-			}
-		});
+
+		WebAsyncUtils.getAsyncManager(request).registerCallableInterceptor(KEY,
+				new CallableProcessingInterceptor() {
+					@Override
+					public <T> void postProcess(NativeWebRequest r, Callable<T> task, Object value) {
+						// We got the result, must also wait for the dispatch
+						getMvcResult(request).setAsyncResult(value);
+					}
+				});
+
+		WebAsyncUtils.getAsyncManager(request).registerDeferredResultInterceptor(KEY,
+				new DeferredResultProcessingInterceptor() {
+					@Override
+					public <T> void postProcess(NativeWebRequest r, DeferredResult<T> result, Object value) {
+						getMvcResult(request).setAsyncResult(value);
+					}
+				});
 	}
 
 	protected DefaultMvcResult getMvcResult(ServletRequest request) {

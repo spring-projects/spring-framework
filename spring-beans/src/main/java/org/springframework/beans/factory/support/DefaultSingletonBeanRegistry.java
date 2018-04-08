@@ -384,20 +384,12 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @see #registerDependentBean
 	 */
 	public void registerContainedBean(String containedBeanName, String containingBeanName) {
-		// A quick check for an existing entry upfront, avoiding synchronization...
-		Set<String> containedBeans = this.containedBeanMap.get(containingBeanName);
-		if (containedBeans != null && containedBeans.contains(containedBeanName)) {
-			return;
-		}
-
-		// No entry yet -> fully synchronized manipulation of the containedBeans Set
 		synchronized (this.containedBeanMap) {
-			containedBeans = this.containedBeanMap.get(containingBeanName);
-			if (containedBeans == null) {
-				containedBeans = new LinkedHashSet<>(8);
-				this.containedBeanMap.put(containingBeanName, containedBeans);
+			Set<String> containedBeans =
+					this.containedBeanMap.computeIfAbsent(containingBeanName, k -> new LinkedHashSet<>(8));
+			if (!containedBeans.add(containedBeanName)) {
+				return;
 			}
-			containedBeans.add(containedBeanName);
 		}
 		registerDependentBean(containedBeanName, containingBeanName);
 	}
@@ -409,28 +401,19 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @param dependentBeanName the name of the dependent bean
 	 */
 	public void registerDependentBean(String beanName, String dependentBeanName) {
-		// A quick check for an existing entry upfront, avoiding synchronization...
 		String canonicalName = canonicalName(beanName);
-		Set<String> dependentBeans = this.dependentBeanMap.get(canonicalName);
-		if (dependentBeans != null && dependentBeans.contains(dependentBeanName)) {
-			return;
+
+		synchronized (this.dependentBeanMap) {
+			Set<String> dependentBeans =
+					this.dependentBeanMap.computeIfAbsent(canonicalName, k -> new LinkedHashSet<>(8));
+			if (!dependentBeans.add(dependentBeanName)) {
+				return;
+			}
 		}
 
-		// No entry yet -> fully synchronized manipulation of the dependentBeans Set
-		synchronized (this.dependentBeanMap) {
-			dependentBeans = this.dependentBeanMap.get(canonicalName);
-			if (dependentBeans == null) {
-				dependentBeans = new LinkedHashSet<>(8);
-				this.dependentBeanMap.put(canonicalName, dependentBeans);
-			}
-			dependentBeans.add(dependentBeanName);
-		}
 		synchronized (this.dependenciesForBeanMap) {
-			Set<String> dependenciesForBean = this.dependenciesForBeanMap.get(dependentBeanName);
-			if (dependenciesForBean == null) {
-				dependenciesForBean = new LinkedHashSet<>(8);
-				this.dependenciesForBeanMap.put(dependentBeanName, dependenciesForBean);
-			}
+			Set<String> dependenciesForBean =
+					this.dependenciesForBeanMap.computeIfAbsent(dependentBeanName, k -> new LinkedHashSet<>(8));
 			dependenciesForBean.add(canonicalName);
 		}
 	}
@@ -443,7 +426,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @since 4.0
 	 */
 	protected boolean isDependent(String beanName, String dependentBeanName) {
-		return isDependent(beanName, dependentBeanName, null);
+		synchronized (this.dependentBeanMap) {
+			return isDependent(beanName, dependentBeanName, null);
+		}
 	}
 
 	private boolean isDependent(String beanName, String dependentBeanName, @Nullable Set<String> alreadySeen) {
@@ -488,7 +473,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		if (dependentBeans == null) {
 			return new String[0];
 		}
-		return StringUtils.toStringArray(dependentBeans);
+		synchronized (this.dependentBeanMap) {
+			return StringUtils.toStringArray(dependentBeans);
+		}
 	}
 
 	/**
@@ -502,7 +489,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		if (dependenciesForBean == null) {
 			return new String[0];
 		}
-		return StringUtils.toStringArray(dependenciesForBean);
+		synchronized (this.dependenciesForBeanMap) {
+			return StringUtils.toStringArray(dependenciesForBean);
+		}
 	}
 
 	public void destroySingletons() {
@@ -525,6 +514,14 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		this.dependentBeanMap.clear();
 		this.dependenciesForBeanMap.clear();
 
+		clearSingletonCache();
+	}
+
+	/**
+	 * Clear all cached singleton instances in this registry.
+	 * @since 4.3.15
+	 */
+	protected void clearSingletonCache() {
 		synchronized (this.singletonObjects) {
 			this.singletonObjects.clear();
 			this.singletonFactories.clear();
@@ -560,7 +557,11 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	protected void destroyBean(String beanName, @Nullable DisposableBean bean) {
 		// Trigger destruction of dependent beans first...
-		Set<String> dependencies = this.dependentBeanMap.remove(beanName);
+		Set<String> dependencies;
+		synchronized (this.dependentBeanMap) {
+			// Within full synchronization in order to guarantee a disconnected Set
+			dependencies = this.dependentBeanMap.remove(beanName);
+		}
 		if (dependencies != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Retrieved dependent beans for bean '" + beanName + "': " + dependencies);
@@ -581,7 +582,11 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		}
 
 		// Trigger destruction of contained beans...
-		Set<String> containedBeans = this.containedBeanMap.remove(beanName);
+		Set<String> containedBeans;
+		synchronized (this.containedBeanMap) {
+			// Within full synchronization in order to guarantee a disconnected Set
+			containedBeans = this.containedBeanMap.remove(beanName);
+		}
 		if (containedBeans != null) {
 			for (String containedBeanName : containedBeans) {
 				destroySingleton(containedBeanName);

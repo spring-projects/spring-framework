@@ -5624,7 +5624,7 @@ support for autowiring of `@Bean` methods:
 	}
 ----
 
-The example autowires the `String` method parameter `country` to the value of the `Age`
+The example autowires the `String` method parameter `country` to the value of the `age`
 property on another bean named `privateInstance`. A Spring Expression Language element
 defines the value of the property through the notation `#{ <expression> }`. For `@Value`
 annotations, an expression resolver is preconfigured to look for bean names when

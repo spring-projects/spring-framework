@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,16 +36,16 @@ import static org.junit.Assert.assertEquals;
 public class ParameterContentTypeResolverTests {
 
 	@Test
-	public void noKey() throws Exception {
+	public void noKey() {
 		ParameterContentTypeResolver resolver = new ParameterContentTypeResolver(Collections.emptyMap());
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
 
-		assertEquals(0, mediaTypes.size());
+		assertEquals(RequestedContentTypeResolver.MEDIA_TYPE_ALL_LIST, mediaTypes);
 	}
 
 	@Test(expected = NotAcceptableStatusException.class)
-	public void noMatchForKey() throws Exception {
+	public void noMatchForKey() {
 		ParameterContentTypeResolver resolver = new ParameterContentTypeResolver(Collections.emptyMap());
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(createExchange("blah"));
 
@@ -53,7 +53,7 @@ public class ParameterContentTypeResolverTests {
 	}
 
 	@Test
-	public void resolveKeyFromRegistrations() throws Exception {
+	public void resolveKeyFromRegistrations() {
 		ServerWebExchange exchange = createExchange("html");
 
 		Map<String, MediaType> mapping = Collections.emptyMap();
@@ -68,7 +68,7 @@ public class ParameterContentTypeResolverTests {
 	}
 
 	@Test
-	public void resolveKeyThroughMediaTypeFactory() throws Exception {
+	public void resolveKeyThroughMediaTypeFactory() {
 		ServerWebExchange exchange = createExchange("xls");
 		RequestedContentTypeResolver resolver = new ParameterContentTypeResolver(Collections.emptyMap());
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);

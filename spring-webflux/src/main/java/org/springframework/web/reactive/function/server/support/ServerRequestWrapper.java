@@ -35,6 +35,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
@@ -183,6 +184,16 @@ public class ServerRequestWrapper implements ServerRequest {
 	@Override
 	public Mono<? extends Principal> principal() {
 		return this.delegate.principal();
+	}
+
+	@Override
+	public Mono<MultiValueMap<String, String>> formData() {
+		return this.delegate.formData();
+	}
+
+	@Override
+	public Mono<MultiValueMap<String, Part>> multipartData() {
+		return this.delegate.multipartData();
 	}
 
 	/**

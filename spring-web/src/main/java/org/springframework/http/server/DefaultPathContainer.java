@@ -180,9 +180,9 @@ class DefaultPathContainer implements PathContainer {
 			return EMPTY_PATH;
 		}
 
-		Assert.isTrue(fromIndex < toIndex, () -> "fromIndex: " + fromIndex + " should be < toIndex " + toIndex);
 		Assert.isTrue(fromIndex >= 0 && fromIndex < elements.size(), () -> "Invalid fromIndex: " + fromIndex);
 		Assert.isTrue(toIndex >= 0 && toIndex <= elements.size(), () -> "Invalid toIndex: " + toIndex);
+		Assert.isTrue(fromIndex < toIndex, () -> "fromIndex: " + fromIndex + " should be < toIndex " + toIndex);
 
 		List<Element> subList = elements.subList(fromIndex, toIndex);
 		String path = subList.stream().map(Element::value).collect(Collectors.joining(""));

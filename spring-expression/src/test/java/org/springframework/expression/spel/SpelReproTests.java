@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,11 +102,11 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	@Test
 	public void SPR5899() {
-		StandardEvaluationContext eContext = new StandardEvaluationContext(new Spr5899Class());
+		StandardEvaluationContext context = new StandardEvaluationContext(new Spr5899Class());
 		Expression expr = new SpelExpressionParser().parseRaw("tryToInvokeWithNull(12)");
-		assertEquals(12, expr.getValue(eContext));
+		assertEquals(12, expr.getValue(context));
 		expr = new SpelExpressionParser().parseRaw("tryToInvokeWithNull(null)");
-		assertEquals(null, expr.getValue(eContext));
+		assertEquals(null, expr.getValue(context));
 		try {
 			expr = new SpelExpressionParser().parseRaw("tryToInvokeWithNull2(null)");
 			expr.getValue();
@@ -115,73 +115,73 @@ public class SpelReproTests extends AbstractExpressionTests {
 		catch (EvaluationException see) {
 			// success
 		}
-		eContext.setTypeLocator(new MyTypeLocator());
+		context.setTypeLocator(new MyTypeLocator());
 
 		// varargs
 		expr = new SpelExpressionParser().parseRaw("tryToInvokeWithNull3(null,'a','b')");
-		assertEquals("ab", expr.getValue(eContext));
+		assertEquals("ab", expr.getValue(context));
 
 		// varargs 2 - null is packed into the varargs
 		expr = new SpelExpressionParser().parseRaw("tryToInvokeWithNull3(12,'a',null,'c')");
-		assertEquals("anullc", expr.getValue(eContext));
+		assertEquals("anullc", expr.getValue(context));
 
 		// check we can find the ctor ok
 		expr = new SpelExpressionParser().parseRaw("new Spr5899Class().toString()");
-		assertEquals("instance", expr.getValue(eContext));
+		assertEquals("instance", expr.getValue(context));
 
 		expr = new SpelExpressionParser().parseRaw("new Spr5899Class(null).toString()");
-		assertEquals("instance", expr.getValue(eContext));
+		assertEquals("instance", expr.getValue(context));
 
 		// ctor varargs
 		expr = new SpelExpressionParser().parseRaw("new Spr5899Class(null,'a','b').toString()");
-		assertEquals("instance", expr.getValue(eContext));
+		assertEquals("instance", expr.getValue(context));
 
 		// ctor varargs 2
 		expr = new SpelExpressionParser().parseRaw("new Spr5899Class(null,'a', null, 'b').toString()");
-		assertEquals("instance", expr.getValue(eContext));
+		assertEquals("instance", expr.getValue(context));
 	}
 
 	@Test
 	public void SPR5905_InnerTypeReferences() {
-		StandardEvaluationContext eContext = new StandardEvaluationContext(new Spr5899Class());
+		StandardEvaluationContext context = new StandardEvaluationContext(new Spr5899Class());
 		Expression expr = new SpelExpressionParser().parseRaw("T(java.util.Map$Entry)");
-		assertEquals(Map.Entry.class, expr.getValue(eContext));
+		assertEquals(Map.Entry.class, expr.getValue(context));
 
 		expr = new SpelExpressionParser().parseRaw("T(org.springframework.expression.spel.SpelReproTests$Outer$Inner).run()");
-		assertEquals(12, expr.getValue(eContext));
+		assertEquals(12, expr.getValue(context));
 
 		expr = new SpelExpressionParser().parseRaw("new org.springframework.expression.spel.SpelReproTests$Outer$Inner().run2()");
-		assertEquals(13, expr.getValue(eContext));
+		assertEquals(13, expr.getValue(context));
 	}
 
 	@Test
 	public void SPR5804() {
 		Map<String, String> m = new HashMap<>();
 		m.put("foo", "bar");
-		StandardEvaluationContext eContext = new StandardEvaluationContext(m);  // root is a map instance
-		eContext.addPropertyAccessor(new MapAccessor());
+		StandardEvaluationContext context = new StandardEvaluationContext(m);  // root is a map instance
+		context.addPropertyAccessor(new MapAccessor());
 		Expression expr = new SpelExpressionParser().parseRaw("['foo']");
-		assertEquals("bar", expr.getValue(eContext));
+		assertEquals("bar", expr.getValue(context));
 	}
 
 	@Test
 	public void SPR5847() {
-		StandardEvaluationContext eContext = new StandardEvaluationContext(new TestProperties());
+		StandardEvaluationContext context = new StandardEvaluationContext(new TestProperties());
 		String name = null;
 		Expression expr = null;
 
 		expr = new SpelExpressionParser().parseRaw("jdbcProperties['username']");
-		name = expr.getValue(eContext, String.class);
+		name = expr.getValue(context, String.class);
 		assertEquals("Dave", name);
 
 		expr = new SpelExpressionParser().parseRaw("jdbcProperties[username]");
-		name = expr.getValue(eContext, String.class);
+		name = expr.getValue(context, String.class);
 		assertEquals("Dave", name);
 
 		// MapAccessor required for this to work
 		expr = new SpelExpressionParser().parseRaw("jdbcProperties.username");
-		eContext.addPropertyAccessor(new MapAccessor());
-		name = expr.getValue(eContext, String.class);
+		context.addPropertyAccessor(new MapAccessor());
+		name = expr.getValue(context, String.class);
 		assertEquals("Dave", name);
 
 		// --- dotted property names
@@ -189,14 +189,14 @@ public class SpelReproTests extends AbstractExpressionTests {
 		// lookup foo on the root, then bar on that, then use that as the key into
 		// jdbcProperties
 		expr = new SpelExpressionParser().parseRaw("jdbcProperties[foo.bar]");
-		eContext.addPropertyAccessor(new MapAccessor());
-		name = expr.getValue(eContext, String.class);
+		context.addPropertyAccessor(new MapAccessor());
+		name = expr.getValue(context, String.class);
 		assertEquals("Dave2", name);
 
 		// key is foo.bar
 		expr = new SpelExpressionParser().parseRaw("jdbcProperties['foo.bar']");
-		eContext.addPropertyAccessor(new MapAccessor());
-		name = expr.getValue(eContext, String.class);
+		context.addPropertyAccessor(new MapAccessor());
+		name = expr.getValue(context, String.class);
 		assertEquals("Elephant", name);
 	}
 
@@ -236,14 +236,14 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void accessingNullPropertyViaReflection_SPR5663() throws AccessException {
-		PropertyAccessor propertyAccessor = new ReflectivePropertyAccessor();
+	public void propertyAccessOnNullTarget_SPR5663() throws AccessException {
+		PropertyAccessor accessor = new ReflectivePropertyAccessor();
 		EvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
-		assertFalse(propertyAccessor.canRead(context, null, "abc"));
-		assertFalse(propertyAccessor.canWrite(context, null, "abc"));
+		assertFalse(accessor.canRead(context, null, "abc"));
+		assertFalse(accessor.canWrite(context, null, "abc"));
 
 		try {
-			propertyAccessor.read(context, null, "abc");
+			accessor.read(context, null, "abc");
 			fail("Should have failed with an IllegalStateException");
 		}
 		catch (IllegalStateException ex) {
@@ -251,7 +251,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		}
 
 		try {
-			propertyAccessor.write(context, null, "abc", "foo");
+			accessor.write(context, null, "abc", "foo");
 			fail("Should have failed with an IllegalStateException");
 		}
 		catch (IllegalStateException ex) {
@@ -261,36 +261,36 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	@Test
 	public void nestedProperties_SPR6923() {
-		StandardEvaluationContext eContext = new StandardEvaluationContext(new Foo());
+		StandardEvaluationContext context = new StandardEvaluationContext(new Foo());
 		Expression expr = new SpelExpressionParser().parseRaw("resource.resource.server");
-		String name = expr.getValue(eContext, String.class);
+		String name = expr.getValue(context, String.class);
 		assertEquals("abc", name);
 	}
 
 	/** Should be accessing Goo.getKey because 'bar' field evaluates to "key" */
 	@Test
 	public void indexingAsAPropertyAccess_SPR6968_1() {
-		StandardEvaluationContext eContext = new StandardEvaluationContext(new Goo());
+		StandardEvaluationContext context = new StandardEvaluationContext(new Goo());
 		String name = null;
 		Expression expr = null;
 		expr = new SpelExpressionParser().parseRaw("instance[bar]");
-		name = expr.getValue(eContext, String.class);
+		name = expr.getValue(context, String.class);
 		assertEquals("hello", name);
-		name = expr.getValue(eContext, String.class); // will be using the cached accessor this time
+		name = expr.getValue(context, String.class); // will be using the cached accessor this time
 		assertEquals("hello", name);
 	}
 
 	/** Should be accessing Goo.getKey because 'bar' variable evaluates to "key" */
 	@Test
 	public void indexingAsAPropertyAccess_SPR6968_2() {
-		StandardEvaluationContext eContext = new StandardEvaluationContext(new Goo());
-		eContext.setVariable("bar", "key");
+		StandardEvaluationContext context = new StandardEvaluationContext(new Goo());
+		context.setVariable("bar", "key");
 		String name = null;
 		Expression expr = null;
 		expr = new SpelExpressionParser().parseRaw("instance[#bar]");
-		name = expr.getValue(eContext, String.class);
+		name = expr.getValue(context, String.class);
 		assertEquals("hello", name);
-		name = expr.getValue(eContext, String.class); // will be using the cached accessor this time
+		name = expr.getValue(context, String.class); // will be using the cached accessor this time
 		assertEquals("hello", name);
 	}
 
@@ -298,8 +298,8 @@ public class SpelReproTests extends AbstractExpressionTests {
 	@Test
 	public void dollarPrefixedIdentifier_SPR7100() {
 		Holder h = new Holder();
-		StandardEvaluationContext eContext = new StandardEvaluationContext(h);
-		eContext.addPropertyAccessor(new MapAccessor());
+		StandardEvaluationContext context = new StandardEvaluationContext(h);
+		context.addPropertyAccessor(new MapAccessor());
 		h.map.put("$foo", "wibble");
 		h.map.put("foo$bar", "wobble");
 		h.map.put("foobar$$", "wabble");
@@ -310,42 +310,42 @@ public class SpelReproTests extends AbstractExpressionTests {
 		Expression expr = null;
 
 		expr = new SpelExpressionParser().parseRaw("map.$foo");
-		name = expr.getValue(eContext, String.class);
+		name = expr.getValue(context, String.class);
 		assertEquals("wibble", name);
 
 		expr = new SpelExpressionParser().parseRaw("map.foo$bar");
-		name = expr.getValue(eContext, String.class);
+		name = expr.getValue(context, String.class);
 		assertEquals("wobble", name);
 
 		expr = new SpelExpressionParser().parseRaw("map.foobar$$");
-		name = expr.getValue(eContext, String.class);
+		name = expr.getValue(context, String.class);
 		assertEquals("wabble", name);
 
 		expr = new SpelExpressionParser().parseRaw("map.$");
-		name = expr.getValue(eContext, String.class);
+		name = expr.getValue(context, String.class);
 		assertEquals("wubble", name);
 
 		expr = new SpelExpressionParser().parseRaw("map.$$");
-		name = expr.getValue(eContext, String.class);
+		name = expr.getValue(context, String.class);
 		assertEquals("webble", name);
 
 		expr = new SpelExpressionParser().parseRaw("map.$_$");
-		name = expr.getValue(eContext, String.class);
+		name = expr.getValue(context, String.class);
 		assertEquals("tribble", name);
 	}
 
 	/** Should be accessing Goo.wibble field because 'bar' variable evaluates to "wibble" */
 	@Test
 	public void indexingAsAPropertyAccess_SPR6968_3() {
-		StandardEvaluationContext eContext = new StandardEvaluationContext(new Goo());
-		eContext.setVariable("bar", "wibble");
+		StandardEvaluationContext context = new StandardEvaluationContext(new Goo());
+		context.setVariable("bar", "wibble");
 		String name = null;
 		Expression expr = null;
 		expr = new SpelExpressionParser().parseRaw("instance[#bar]");
 		// will access the field 'wibble' and not use a getter
-		name = expr.getValue(eContext, String.class);
+		name = expr.getValue(context, String.class);
 		assertEquals("wobble", name);
-		name = expr.getValue(eContext, String.class); // will be using the cached accessor this time
+		name = expr.getValue(context, String.class); // will be using the cached accessor this time
 		assertEquals("wobble", name);
 	}
 
@@ -356,14 +356,14 @@ public class SpelReproTests extends AbstractExpressionTests {
 	@Test
 	public void indexingAsAPropertyAccess_SPR6968_4() {
 		Goo g = Goo.instance;
-		StandardEvaluationContext eContext = new StandardEvaluationContext(g);
-		eContext.setVariable("bar", "wibble");
+		StandardEvaluationContext context = new StandardEvaluationContext(g);
+		context.setVariable("bar", "wibble");
 		Expression expr = null;
 		expr = new SpelExpressionParser().parseRaw("instance[#bar]='world'");
 		// will access the field 'wibble' and not use a getter
-		expr.getValue(eContext, String.class);
+		expr.getValue(context, String.class);
 		assertEquals("world", g.wibble);
-		expr.getValue(eContext, String.class); // will be using the cached accessor this time
+		expr.getValue(context, String.class); // will be using the cached accessor this time
 		assertEquals("world", g.wibble);
 	}
 
@@ -371,31 +371,31 @@ public class SpelReproTests extends AbstractExpressionTests {
 	@Test
 	public void indexingAsAPropertyAccess_SPR6968_5() {
 		Goo g = Goo.instance;
-		StandardEvaluationContext eContext = new StandardEvaluationContext(g);
+		StandardEvaluationContext context = new StandardEvaluationContext(g);
 		Expression expr = null;
 		expr = new SpelExpressionParser().parseRaw("instance[bar]='world'");
-		expr.getValue(eContext, String.class);
+		expr.getValue(context, String.class);
 		assertEquals("world", g.value);
-		expr.getValue(eContext, String.class); // will be using the cached accessor this time
+		expr.getValue(context, String.class); // will be using the cached accessor this time
 		assertEquals("world", g.value);
 	}
 
 	@Test
 	public void dollars() {
-		StandardEvaluationContext eContext = new StandardEvaluationContext(new XX());
+		StandardEvaluationContext context = new StandardEvaluationContext(new XX());
 		Expression expr = null;
 		expr = new SpelExpressionParser().parseRaw("m['$foo']");
-		eContext.setVariable("file_name", "$foo");
-		assertEquals("wibble", expr.getValue(eContext, String.class));
+		context.setVariable("file_name", "$foo");
+		assertEquals("wibble", expr.getValue(context, String.class));
 	}
 
 	@Test
 	public void dollars2() {
-		StandardEvaluationContext eContext = new StandardEvaluationContext(new XX());
+		StandardEvaluationContext context = new StandardEvaluationContext(new XX());
 		Expression expr = null;
 		expr = new SpelExpressionParser().parseRaw("m[$foo]");
-		eContext.setVariable("file_name", "$foo");
-		assertEquals("wibble", expr.getValue(eContext, String.class));
+		context.setVariable("file_name", "$foo");
+		assertEquals("wibble", expr.getValue(context, String.class));
 	}
 
 	private void checkTemplateParsing(String expression, String expectedValue) {
@@ -448,33 +448,33 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	@Test
 	public void beanResolution() {
-		StandardEvaluationContext eContext = new StandardEvaluationContext(new XX());
+		StandardEvaluationContext context = new StandardEvaluationContext(new XX());
 		Expression expr = null;
 
 		// no resolver registered == exception
 		try {
 			expr = new SpelExpressionParser().parseRaw("@foo");
-			assertEquals("custard", expr.getValue(eContext, String.class));
+			assertEquals("custard", expr.getValue(context, String.class));
 		}
 		catch (SpelEvaluationException see) {
 			assertEquals(SpelMessage.NO_BEAN_RESOLVER_REGISTERED, see.getMessageCode());
 			assertEquals("foo", see.getInserts()[0]);
 		}
 
-		eContext.setBeanResolver(new MyBeanResolver());
+		context.setBeanResolver(new MyBeanResolver());
 
 		// bean exists
 		expr = new SpelExpressionParser().parseRaw("@foo");
-		assertEquals("custard", expr.getValue(eContext, String.class));
+		assertEquals("custard", expr.getValue(context, String.class));
 
 		// bean does not exist
 		expr = new SpelExpressionParser().parseRaw("@bar");
-		assertEquals(null, expr.getValue(eContext, String.class));
+		assertEquals(null, expr.getValue(context, String.class));
 
 		// bean name will cause AccessException
 		expr = new SpelExpressionParser().parseRaw("@goo");
 		try {
-			assertEquals(null, expr.getValue(eContext, String.class));
+			assertEquals(null, expr.getValue(context, String.class));
 		}
 		catch (SpelEvaluationException see) {
 			assertEquals(SpelMessage.EXCEPTION_DURING_BEAN_RESOLUTION, see.getMessageCode());
@@ -485,12 +485,12 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 		// bean exists
 		expr = new SpelExpressionParser().parseRaw("@'foo.bar'");
-		assertEquals("trouble", expr.getValue(eContext, String.class));
+		assertEquals("trouble", expr.getValue(context, String.class));
 
 		// bean exists
 		try {
 			expr = new SpelExpressionParser().parseRaw("@378");
-			assertEquals("trouble", expr.getValue(eContext, String.class));
+			assertEquals("trouble", expr.getValue(context, String.class));
 		}
 		catch (SpelParseException spe) {
 			assertEquals(SpelMessage.INVALID_BEAN_REFERENCE, spe.getMessageCode());
@@ -499,7 +499,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	@Test
 	public void elvis_SPR7209_1() {
-		StandardEvaluationContext eContext = new StandardEvaluationContext(new XX());
+		StandardEvaluationContext context = new StandardEvaluationContext(new XX());
 		Expression expr = null;
 
 		// Different parts of elvis expression are null
@@ -513,7 +513,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		// Different parts of ternary expression are null
 		try {
 			expr = new SpelExpressionParser().parseRaw("(?'abc':'default')");
-			expr.getValue(eContext);
+			expr.getValue(context);
 			fail();
 		}
 		catch (SpelEvaluationException see) {
@@ -525,7 +525,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		// Assignment
 		try {
 			expr = new SpelExpressionParser().parseRaw("(='default')");
-			expr.getValue(eContext);
+			expr.getValue(context);
 			fail();
 		}
 		catch (SpelEvaluationException see) {
@@ -553,55 +553,55 @@ public class SpelReproTests extends AbstractExpressionTests {
 		nameMap.put("givenName", "Arthur");
 		map.put("value", nameMap);
 
-		StandardEvaluationContext ctx = new StandardEvaluationContext(map);
+		StandardEvaluationContext context = new StandardEvaluationContext(map);
 		ExpressionParser parser = new SpelExpressionParser();
 		String el1 = "#root['value'].get('givenName')";
 		Expression exp = parser.parseExpression(el1);
-		Object evaluated = exp.getValue(ctx);
+		Object evaluated = exp.getValue(context);
 		assertEquals("Arthur", evaluated);
 
 		String el2 = "#root['value']['givenName']";
 		exp = parser.parseExpression(el2);
-		evaluated = exp.getValue(ctx);
+		evaluated = exp.getValue(context);
 		assertEquals("Arthur", evaluated);
 	}
 
 	@Test
 	public void projectionTypeDescriptors_1() {
-		StandardEvaluationContext ctx = new StandardEvaluationContext(new C());
+		StandardEvaluationContext context = new StandardEvaluationContext(new C());
 		SpelExpressionParser parser = new SpelExpressionParser();
 		String el1 = "ls.![#this.equals('abc')]";
 		SpelExpression exp = parser.parseRaw(el1);
-		List<?> value = (List<?>) exp.getValue(ctx);
+		List<?> value = (List<?>) exp.getValue(context);
 		// value is list containing [true,false]
 		assertEquals(Boolean.class, value.get(0).getClass());
-		TypeDescriptor evaluated = exp.getValueTypeDescriptor(ctx);
+		TypeDescriptor evaluated = exp.getValueTypeDescriptor(context);
 		assertEquals(null, evaluated.getElementTypeDescriptor());
 	}
 
 	@Test
 	public void projectionTypeDescriptors_2() {
-		StandardEvaluationContext ctx = new StandardEvaluationContext(new C());
+		StandardEvaluationContext context = new StandardEvaluationContext(new C());
 		SpelExpressionParser parser = new SpelExpressionParser();
 		String el1 = "as.![#this.equals('abc')]";
 		SpelExpression exp = parser.parseRaw(el1);
-		Object[] value = (Object[]) exp.getValue(ctx);
+		Object[] value = (Object[]) exp.getValue(context);
 		// value is array containing [true,false]
 		assertEquals(Boolean.class, value[0].getClass());
-		TypeDescriptor evaluated = exp.getValueTypeDescriptor(ctx);
+		TypeDescriptor evaluated = exp.getValueTypeDescriptor(context);
 		assertEquals(Boolean.class, evaluated.getElementTypeDescriptor().getType());
 	}
 
 	@Test
 	public void projectionTypeDescriptors_3() {
-		StandardEvaluationContext ctx = new StandardEvaluationContext(new C());
+		StandardEvaluationContext context = new StandardEvaluationContext(new C());
 		SpelExpressionParser parser = new SpelExpressionParser();
 		String el1 = "ms.![key.equals('abc')]";
 		SpelExpression exp = parser.parseRaw(el1);
-		List<?> value = (List<?>) exp.getValue(ctx);
+		List<?> value = (List<?>) exp.getValue(context);
 		// value is list containing [true,false]
 		assertEquals(Boolean.class, value.get(0).getClass());
-		TypeDescriptor evaluated = exp.getValueTypeDescriptor(ctx);
+		TypeDescriptor evaluated = exp.getValueTypeDescriptor(context);
 		assertEquals(null, evaluated.getElementTypeDescriptor());
 	}
 
@@ -615,23 +615,23 @@ public class SpelReproTests extends AbstractExpressionTests {
 		list.add(new D(null));
 		list.add(new D("zzz"));
 
-		StandardEvaluationContext ctx = new StandardEvaluationContext(list);
+		StandardEvaluationContext context = new StandardEvaluationContext(list);
 		SpelExpressionParser parser = new SpelExpressionParser();
 
 		String el1 = "#root.?[a < 'hhh']";
 		SpelExpression exp = parser.parseRaw(el1);
-		Object value = exp.getValue(ctx);
+		Object value = exp.getValue(context);
 		assertEquals("[D(aaa), D(bbb), D(null), D(ccc), D(null)]", value.toString());
 
 		String el2 = "#root.?[a > 'hhh']";
 		SpelExpression exp2 = parser.parseRaw(el2);
-		Object value2 = exp2.getValue(ctx);
+		Object value2 = exp2.getValue(context);
 		assertEquals("[D(zzz)]", value2.toString());
 
 		// trim out the nulls first
 		String el3 = "#root.?[a!=null].?[a < 'hhh']";
 		SpelExpression exp3 = parser.parseRaw(el3);
-		Object value3 = exp3.getValue(ctx);
+		Object value3 = exp3.getValue(context);
 		assertEquals("[D(aaa), D(bbb), D(ccc)]", value3.toString());
 	}
 
@@ -820,41 +820,41 @@ public class SpelReproTests extends AbstractExpressionTests {
 			}
 		}
 
-		StandardEvaluationContext ctx = new StandardEvaluationContext(new Reserver());
+		StandardEvaluationContext context = new StandardEvaluationContext(new Reserver());
 		SpelExpressionParser parser = new SpelExpressionParser();
 		String ex = "getReserver().NE";
 		SpelExpression exp = parser.parseRaw(ex);
-		String value = (String) exp.getValue(ctx);
+		String value = (String) exp.getValue(context);
 		assertEquals("abc", value);
 
 		ex = "getReserver().ne";
 		exp = parser.parseRaw(ex);
-		value = (String) exp.getValue(ctx);
+		value = (String) exp.getValue(context);
 		assertEquals("def", value);
 
 		ex = "getReserver().m[NE]";
 		exp = parser.parseRaw(ex);
-		value = (String) exp.getValue(ctx);
+		value = (String) exp.getValue(context);
 		assertEquals("xyz", value);
 
 		ex = "getReserver().DIV";
 		exp = parser.parseRaw(ex);
-		assertEquals(1, exp.getValue(ctx));
+		assertEquals(1, exp.getValue(context));
 
 		ex = "getReserver().div";
 		exp = parser.parseRaw(ex);
-		assertEquals(3, exp.getValue(ctx));
+		assertEquals(3, exp.getValue(context));
 
 		exp = parser.parseRaw("NE");
-		assertEquals("abc", exp.getValue(ctx));
+		assertEquals("abc", exp.getValue(context));
 	}
 
 	@Test
 	public void reservedWordProperties_SPR9862() {
-		StandardEvaluationContext ctx = new StandardEvaluationContext();
+		StandardEvaluationContext context = new StandardEvaluationContext();
 		SpelExpressionParser parser = new SpelExpressionParser();
 		SpelExpression expression = parser.parseRaw("T(org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver).CONST");
-		Object value = expression.getValue(ctx);
+		Object value = expression.getValue(context);
 		assertEquals(value, Reserver.CONST);
 	}
 

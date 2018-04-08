@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.junit.jupiter.defaultmethods;
+package org.springframework.test.context.junit.jupiter.generics;
 
 import java.util.List;
 
@@ -30,9 +30,9 @@ import org.springframework.test.context.junit.jupiter.comics.Character;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Interface for integration tests that demonstrate support for interface default
- * methods and Java generics in JUnit Jupiter test classes when used with the Spring
- * TestContext Framework and the {@link SpringExtension}.
+ * Abstract base class for integration tests that demonstrate support for
+ * Java generics in JUnit Jupiter test classes when used with the Spring TestContext
+ * Framework and the {@link SpringExtension}.
  *
  * <p>To run these tests in an IDE that does not have built-in support for the JUnit
  * Platform, simply run {@link SpringJUnitJupiterTestSuite} as a JUnit 4 test.
@@ -41,21 +41,29 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 5.0
  */
 @SpringJUnitConfig(TestConfig.class)
-interface GenericComicCharactersInterfaceDefaultMethodsTestCase<C extends Character> {
+abstract class GenericComicCharactersTests<T extends Character> {
+
+	@Autowired
+	T character;
+
+	@Autowired
+	List<T> characters;
 
 	@Test
-	default void autowiredParameterWithParameterizedList(@Autowired List<C> characters) {
-		assertEquals(getExpectedNumCharacters(), characters.size(), "Number of characters in context");
+	void autowiredFields() {
+		assertNotNull(this.character, "Character should have been @Autowired by Spring");
+		assertEquals(getExpectedName(), character.getName(), "character's name");
+		assertEquals(getExpectedNumCharacters(), this.characters.size(), "Number of characters in context");
 	}
 
 	@Test
-	default void autowiredParameterWithGenericBean(@Autowired C character) {
+	void autowiredParameterByTypeForSingleGenericBean(@Autowired T character) {
 		assertNotNull(character, "Character should have been @Autowired by Spring");
 		assertEquals(getExpectedName(), character.getName(), "character's name");
 	}
 
-	int getExpectedNumCharacters();
+	abstract int getExpectedNumCharacters();
 
-	String getExpectedName();
+	abstract String getExpectedName();
 
 }

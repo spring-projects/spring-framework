@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,8 +112,8 @@ public class FormHttpMessageConverterTests {
 
 		assertEquals("Invalid result", "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3",
 				outputMessage.getBodyAsString(StandardCharsets.UTF_8));
-		assertEquals("Invalid content-type", new MediaType("application", "x-www-form-urlencoded"),
-				outputMessage.getHeaders().getContentType());
+		assertEquals("Invalid content-type", "application/x-www-form-urlencoded;charset=UTF-8",
+				outputMessage.getHeaders().getContentType().toString());
 		assertEquals("Invalid content-length", outputMessage.getBodyAsBytes().length,
 				outputMessage.getHeaders().getContentLength());
 	}

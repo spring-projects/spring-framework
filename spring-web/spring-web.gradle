@@ -29,6 +29,7 @@ dependencies {
 	optional("javax.validation:validation-api:1.1.0.Final")
 	optional("javax.xml.bind:jaxb-api:2.3.0")
 	optional("javax.xml.ws:jaxws-api:2.3.0")
+	optional("org.glassfish.main:javax.jws:4.0-b33")
 	optional("io.reactivex:rxjava:${rxjavaVersion}")
 	optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
 	optional("io.reactivex.rxjava2:rxjava:${rxjava2Version}")

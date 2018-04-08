@@ -20,22 +20,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 
 /**
- * Handle instances of {@link ResponseStatusException}, or of exceptions annotated
- * with {@link ResponseStatus @ResponseStatus}, by extracting the
- * {@code HttpStatus} from them and updating the status of the response.
- *
- * <p>If the response is already committed, the error remains unresolved and is
- * propagated.
+ * Handle {@link ResponseStatusException} by setting the response status.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
@@ -48,7 +41,7 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 
 	@Override
 	public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
-		HttpStatus status = resolveHttpStatus(ex);
+		HttpStatus status = resolveStatus(ex);
 		if (status != null && exchange.getResponse().setStatusCode(status)) {
 			if (status.is5xxServerError()) {
 				logger.error(buildMessage(exchange.getRequest(), ex));
@@ -64,24 +57,34 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 		return Mono.error(ex);
 	}
 
+	private String buildMessage(ServerHttpRequest request, Throwable ex) {
+		return "Failed to handle request [" + request.getMethod() + " " + request.getURI() + "]: " + ex.getMessage();
+	}
+
 	@Nullable
-	private HttpStatus resolveHttpStatus(Throwable ex) {
+	private HttpStatus resolveStatus(Throwable ex) {
+		HttpStatus status = determineStatus(ex);
+		if (status == null) {
+			Throwable cause = ex.getCause();
+			if (cause != null) {
+				status = resolveStatus(cause);
+			}
+		}
+		return status;
+	}
+
+	/**
+	 * Determine the HTTP status implied by the given exception.
+	 * @param ex the exception to introspect
+	 * @return the associated HTTP status, if any
+	 * @since 5.0.5
+	 */
+	@Nullable
+	protected HttpStatus determineStatus(Throwable ex) {
 		if (ex instanceof ResponseStatusException) {
 			return ((ResponseStatusException) ex).getStatus();
 		}
-		ResponseStatus status = AnnotatedElementUtils.findMergedAnnotation(ex.getClass(), ResponseStatus.class);
-		if (status != null) {
-			return status.code();
-		}
-		if (ex.getCause() != null) {
-			return resolveHttpStatus(ex.getCause());
-		}
 		return null;
-	}
-
-	private String buildMessage(ServerHttpRequest request, Throwable ex) {
-		return "Failed to handle request [" + request.getMethod() + " "
-				+ request.getURI() + "]: " + ex.getMessage();
 	}
 
 }

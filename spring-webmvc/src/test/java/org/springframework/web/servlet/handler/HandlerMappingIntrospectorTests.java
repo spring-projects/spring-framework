@@ -83,7 +83,6 @@ public class HandlerMappingIntrospectorTests {
 		assertEquals(expected, actual);
 	}
 
-	@Test @SuppressWarnings("deprecation")
 	public void defaultHandlerMappings() throws Exception {
 		StaticWebApplicationContext cxt = new StaticWebApplicationContext();
 		cxt.refresh();
@@ -170,7 +169,8 @@ public class HandlerMappingIntrospectorTests {
 	}
 
 
-	@Configuration @SuppressWarnings({"WeakerAccess", "unused"})
+	@Configuration
+	@SuppressWarnings({"WeakerAccess", "unused"})
 	static class TestConfig {
 
 		@Bean

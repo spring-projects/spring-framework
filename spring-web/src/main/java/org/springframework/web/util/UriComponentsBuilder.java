@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -724,43 +724,55 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * "Forwarded" (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>,
 	 * or "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" if
 	 * "Forwarded" is not found.
+	 * <p><strong>Note:</strong> this method uses values from forwarded headers,
+	 * if present, in order to reflect the client-originated protocol and address.
+	 * Consider using the {@code ForwardedHeaderFilter} in order to choose from a
+	 * central place whether to extract and use, or to discard such headers.
+	 * See the Spring Framework reference for more on this filter.
 	 * @param headers the HTTP headers to consider
 	 * @return this UriComponentsBuilder
 	 * @since 4.2.7
 	 */
 	UriComponentsBuilder adaptFromForwardedHeaders(HttpHeaders headers) {
-		String forwardedHeader = headers.getFirst("Forwarded");
-		if (StringUtils.hasText(forwardedHeader)) {
-			String forwardedToUse = StringUtils.tokenizeToStringArray(forwardedHeader, ",")[0];
-			Matcher matcher = FORWARDED_PROTO_PATTERN.matcher(forwardedToUse);
-			if (matcher.find()) {
-				scheme(matcher.group(1).trim());
-				port(null);
+		try {
+			String forwardedHeader = headers.getFirst("Forwarded");
+			if (StringUtils.hasText(forwardedHeader)) {
+				String forwardedToUse = StringUtils.tokenizeToStringArray(forwardedHeader, ",")[0];
+				Matcher matcher = FORWARDED_PROTO_PATTERN.matcher(forwardedToUse);
+				if (matcher.find()) {
+					scheme(matcher.group(1).trim());
+					port(null);
+				}
+				matcher = FORWARDED_HOST_PATTERN.matcher(forwardedToUse);
+				if (matcher.find()) {
+					adaptForwardedHost(matcher.group(1).trim());
+				}
 			}
-			matcher = FORWARDED_HOST_PATTERN.matcher(forwardedToUse);
-			if (matcher.find()) {
-				adaptForwardedHost(matcher.group(1).trim());
+			else {
+				String protocolHeader = headers.getFirst("X-Forwarded-Proto");
+				if (StringUtils.hasText(protocolHeader)) {
+					scheme(StringUtils.tokenizeToStringArray(protocolHeader, ",")[0]);
+					port(null);
+				}
+
+				String hostHeader = headers.getFirst("X-Forwarded-Host");
+				if (StringUtils.hasText(hostHeader)) {
+					adaptForwardedHost(StringUtils.tokenizeToStringArray(hostHeader, ",")[0]);
+				}
+
+				String portHeader = headers.getFirst("X-Forwarded-Port");
+				if (StringUtils.hasText(portHeader)) {
+					port(Integer.parseInt(StringUtils.tokenizeToStringArray(portHeader, ",")[0]));
+				}
 			}
 		}
-		else {
-			String protocolHeader = headers.getFirst("X-Forwarded-Proto");
-			if (StringUtils.hasText(protocolHeader)) {
-				scheme(StringUtils.tokenizeToStringArray(protocolHeader, ",")[0]);
-				port(null);
-			}
-
-			String hostHeader = headers.getFirst("X-Forwarded-Host");
-			if (StringUtils.hasText(hostHeader)) {
-				adaptForwardedHost(StringUtils.tokenizeToStringArray(hostHeader, ",")[0]);
-			}
-
-			String portHeader = headers.getFirst("X-Forwarded-Port");
-			if (StringUtils.hasText(portHeader)) {
-				port(Integer.parseInt(StringUtils.tokenizeToStringArray(portHeader, ",")[0]));
-			}
+		catch (NumberFormatException ex) {
+			throw new IllegalArgumentException("Failed to parse a port from \"forwarded\"-type headers. " +
+					"If not behind a trusted proxy, consider using ForwardedHeaderFilter " +
+					"with the removeOnly=true. Request headers: " + headers);
 		}
 
-		if ((this.scheme != null) && ((this.scheme.equals("http") && "80".equals(this.port)) ||
+		if (this.scheme != null && ((this.scheme.equals("http") && "80".equals(this.port)) ||
 				(this.scheme.equals("https") && "443".equals(this.port)))) {
 			port(null);
 		}

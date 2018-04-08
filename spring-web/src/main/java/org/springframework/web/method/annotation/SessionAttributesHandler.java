@@ -112,12 +112,11 @@ public class SessionAttributesHandler {
 	 * @param attributes candidate attributes for session storage
 	 */
 	public void storeAttributes(WebRequest request, Map<String, ?> attributes) {
-		for (String name : attributes.keySet()) {
-			Object value = attributes.get(name);
+		attributes.forEach((name, value) -> {
 			if (value != null && isHandlerSessionAttribute(name, value.getClass())) {
 				this.sessionAttributeStore.storeAttribute(request, name, value);
 			}
-		}
+		});
 	}
 
 	/**

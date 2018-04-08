@@ -49,12 +49,9 @@ task api(type: Javadoc) {
 	}
 }
 
-// Need https://github.com/Kotlin/dokka/issues/184 to be fixed to avoid "Can't find node by signature" log spam
 dokka {
 	dependsOn {
-		subprojects.collect {
-			it.tasks.getByName("jar")
-		}
+		tasks.getByName("api")
 	}
 	doFirst {
 		classpath = subprojects.collect { project -> project.jar.outputs.files.getFiles() }.flatten()
@@ -70,7 +67,8 @@ dokka {
 		kotlinDirs -= project.sourceSets.main.java.srcDirs
 	})
 	externalDocumentationLink {
-		url = new URL("http://docs.spring.io/spring-framework/docs/${version}/javadoc-api/")
+		url = new URL("https://docs.spring.io/spring-framework/docs/$version/javadoc-api/")
+		packageListUrl = new File(buildDir, "api/package-list").toURI().toURL()
 	}
 	externalDocumentationLink {
 		url = new URL("http://projectreactor.io/docs/core/release/api/")

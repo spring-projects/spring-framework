@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.test.context.junit.jupiter.generics;
 
 import org.springframework.test.context.junit.SpringJUnitJupiterTestSuite;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit.jupiter.comics.Dog;
+import org.springframework.test.context.junit.jupiter.comics.Cat;
 
 /**
  * Parameterized test class for integration tests that demonstrate support for
@@ -31,16 +31,16 @@ import org.springframework.test.context.junit.jupiter.comics.Dog;
  * @author Sam Brannen
  * @since 5.0
  */
-class DogTestCase extends GenericComicCharactersTestCase<Dog> {
+class CatTests extends GenericComicCharactersTests<Cat> {
 
 	@Override
 	int getExpectedNumCharacters() {
-		return 1;
+		return 2;
 	}
 
 	@Override
 	String getExpectedName() {
-		return "Dogbert";
+		return "Catbert";
 	}
 
 }

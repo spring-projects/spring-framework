@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,11 +184,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 			nativeHeaders = new LinkedMultiValueMap<>(4);
 			setHeader(NATIVE_HEADERS, nativeHeaders);
 		}
-		List<String> values = nativeHeaders.get(name);
-		if (values == null) {
-			values = new LinkedList<>();
-			nativeHeaders.put(name, values);
-		}
+		List<String> values = nativeHeaders.computeIfAbsent(name, k -> new LinkedList<>());
 		values.add(value);
 		setModified(true);
 	}
@@ -197,8 +193,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		if (headers == null) {
 			return;
 		}
-		headers.forEach((key, values) ->
-				values.forEach(value -> addNativeHeader(key, value)));
+		headers.forEach((key, values) -> values.forEach(value -> addNativeHeader(key, value)));
 	}
 
 	@Nullable

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,16 +168,16 @@ public class SimpAttributes {
 	}
 
 	private void executeDestructionCallbacks() {
-		for (Map.Entry<String, Object> entry : this.attributes.entrySet()) {
-			if (entry.getKey().startsWith(DESTRUCTION_CALLBACK_NAME_PREFIX)) {
+		this.attributes.forEach((key, value) -> {
+			if (key.startsWith(DESTRUCTION_CALLBACK_NAME_PREFIX)) {
 				try {
-					((Runnable) entry.getValue()).run();
+					((Runnable) value).run();
 				}
 				catch (Throwable ex) {
 					logger.error("Uncaught error in session attribute destruction callback", ex);
 				}
 			}
-		}
+		});
 	}
 
 

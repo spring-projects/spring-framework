@@ -44,13 +44,15 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.multipart.FormFieldPart;
+import org.springframework.http.codec.multipart.Part;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 
 /**
@@ -336,4 +338,70 @@ public class DefaultServerRequestTests {
 				.verify();
 	}
 
+	@Test
+	public void formData() throws Exception {
+		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+		DefaultDataBuffer dataBuffer =
+				factory.wrap(ByteBuffer.wrap("foo=bar&baz=qux".getBytes(StandardCharsets.UTF_8)));
+		Flux<DataBuffer> body = Flux.just(dataBuffer);
+
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.GET, "http://example.com")
+				.headers(httpHeaders)
+				.body(body);
+		DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<MultiValueMap<String, String>> resultData = request.formData();
+		StepVerifier.create(resultData)
+				.consumeNextWith(formData -> {
+					assertEquals(2, formData.size());
+					assertEquals("bar", formData.getFirst("foo"));
+					assertEquals("qux", formData.getFirst("baz"));
+				})
+				.verifyComplete();
+	}
+
+	@Test
+	public void multipartData() throws Exception {
+		String data = "--12345\r\n" +
+				"Content-Disposition: form-data; name=\"foo\"\r\n" +
+				"\r\n" +
+				"bar\r\n" +
+				"--12345\r\n" +
+				"Content-Disposition: form-data; name=\"baz\"\r\n" +
+				"\r\n" +
+				"qux\r\n" +
+				"--12345--\r\n";
+		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+		DefaultDataBuffer dataBuffer =
+				factory.wrap(ByteBuffer.wrap(data.getBytes(StandardCharsets.UTF_8)));
+		Flux<DataBuffer> body = Flux.just(dataBuffer);
+
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.set(HttpHeaders.CONTENT_TYPE, "multipart/form-data; boundary=12345");
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.GET, "http://example.com")
+				.headers(httpHeaders)
+				.body(body);
+		DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<MultiValueMap<String, Part>> resultData = request.multipartData();
+		StepVerifier.create(resultData)
+				.consumeNextWith(formData -> {
+					assertEquals(2, formData.size());
+
+					Part part = formData.getFirst("foo");
+					assertTrue(part instanceof FormFieldPart);
+					FormFieldPart formFieldPart = (FormFieldPart) part;
+					assertEquals("bar", formFieldPart.value());
+
+					part = formData.getFirst("baz");
+					assertTrue(part instanceof FormFieldPart);
+					formFieldPart = (FormFieldPart) part;
+					assertEquals("qux", formFieldPart.value());
+				})
+				.verifyComplete();
+	}
 }

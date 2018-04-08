@@ -409,7 +409,8 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 			return false;
 		}
 
-		for (String key : this.parameters.keySet()) {
+		for (Map.Entry<String, String> entry : this.parameters.entrySet()) {
+			String key = entry.getKey();
 			if (!other.parameters.containsKey(key)) {
 				return false;
 			}
@@ -418,7 +419,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 					return false;
 				}
 			}
-			else if (!ObjectUtils.nullSafeEquals(this.parameters.get(key), other.parameters.get(key))) {
+			else if (!ObjectUtils.nullSafeEquals(entry.getValue(), other.parameters.get(key))) {
 				return false;
 			}
 		}

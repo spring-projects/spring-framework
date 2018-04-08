@@ -1,22 +1,3 @@
-/*
-pluginManagement {
-	repositories {
-		maven {
-			url "https://dl.bintray.com/kotlin/kotlin-eap-1.1"
-		}
-		gradlePluginPortal()
-	}
-}
-*/
-
-// Workaround for https://github.com/Kotlin/dokka/issues/146
-pluginManagement {
-	repositories {
-		jcenter()
-		gradlePluginPortal()
-	}
-}
-
 include "spring-aop"
 include "spring-aspects"
 include "spring-beans"

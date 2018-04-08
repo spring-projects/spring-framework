@@ -23,7 +23,9 @@ e.g. Spring MVC controllers with the reactive `WebClient`.
 
 
 [[webflux-new-framework]]
-=== Why a new web framework?
+=== Motivation
+
+Why was Spring WebFlux created?
 
 Part of the answer is the need for a non-blocking web stack to handle concurrency with a
 small number of threads and scale with less hardware resources. Servlet 3.1 did provide
@@ -44,9 +46,9 @@ WebFlux to offer functional web endpoints alongside with annotated controllers.
 
 
 [[webflux-why-reactive]]
-=== Reactive: what and why?
+=== Define "reactive"
 
-We touched on non-blocking and functional but why reactive and what do we mean?
+We touched on non-blocking and functional but what does reactive mean?
 
 The term "reactive" refers to programming models that are built around reacting to change --
 network component reacting to I/O events, UI controller reacting to mouse events, etc.
@@ -131,82 +133,86 @@ annotations and being called back.
 
 
 [[webflux-framework-choice]]
-=== Choosing a web framework
+=== Applicability
 
-Should you use Spring MVC or WebFlux? Let's cover a few different perspectives.
+Spring MVC or WebFlux?
 
-If you have a Spring MVC application that works fine, there is no need to change.
+A natural question to ask but one that sets up an unsound dichotomy. It's actually both
+working together to expand the range of available options. The two are designed for
+continuity and consistency with each other, they are available side by side, and feedback
+from each side benefits both sides. The diagram below shows how the two relate, what they
+have in common, and what each supports uniquely:
+
+image::images/spring-mvc-and-webflux-venn.png[]
+
+Below are some specific points to consider:
+
+* If you have a Spring MVC application that works fine, there is no need to change.
 Imperative programming is the easiest way to write, understand, and debug code.
 You have maximum choice of libraries since historically most are blocking.
 
-If you are already shopping for a non-blocking web stack, Spring WebFlux offers the same
+* If you are already shopping for a non-blocking web stack, Spring WebFlux offers the same
 execution model benefits as others in this space and also provides a choice of servers --
 Netty, Tomcat, Jetty, Undertow, Servlet 3.1+ containers, a choice of programming models --
 annotated controllers and functional web endpoints, and a choice of reactive libraries --
 Reactor, RxJava, or other.
 
-If you are interested in a lightweight, functional web framework for use with Java 8 lambdas
+* If you are interested in a lightweight, functional web framework for use with Java 8 lambdas
 or Kotlin then use the Spring WebFlux functional web endpoints. That can also be a good choice
 for smaller applications or microservices with less complex requirements that can benefit
 from greater transparency and control.
 
-In a microservice architecture you can have a mix of applications with either Spring MVC
+* In a microservice architecture you can have a mix of applications with either Spring MVC
 or Spring WebFlux controllers, or with Spring WebFlux functional endpoints. Having support
 for the same annotation-based programming model in both frameworks makes it easier to
 re-use knowledge while also selecting the right tool for the right job.
 
-A simple way to evaluate an application is to check its dependencies. If you have blocking
+* A simple way to evaluate an application is to check its dependencies. If you have blocking
 persistence APIs (JPA, JDBC), or networking APIs to use, then Spring MVC is the best choice
 for common architectures at least. It is technically feasible with both Reactor and
 RxJava to perform blocking calls on a separate thread but you wouldn't be making the
 most of a non-blocking web stack.
 
-If you have a Spring MVC application with calls to remote services, try the reactive `WebClient`.
+* If you have a Spring MVC application with calls to remote services, try the reactive `WebClient`.
 You can return reactive types (Reactor, RxJava, <<webflux-reactive-libraries,or other>>)
 directly from Spring MVC controller methods. The greater the latency per call, or the
 interdependency among calls, the more dramatic the benefits. Spring MVC controllers
 can call other reactive components too.
 
-If you have a large team, keep in mind the steep learning curve in the shift to non-blocking,
+* If you have a large team, keep in mind the steep learning curve in the shift to non-blocking,
 functional, and declarative programming. A practical way to start without a full switch
 is to use the reactive `WebClient`. Beyond that start small and measure the benefits.
-We expect that for a wide range of applications the shift is unnecessary.
-
-If you are unsure what benefits to look for, start by learning about how non-blocking I/O
-works (e.g. concurrency on single-threaded Node.js is not an oxymoron) and its effects.
-The tag line is "scale with less hardware" but that effect is not guaranteed, not without
-some network I/O that can be slow or unpredictable. This Netflix
-https://medium.com/netflix-techblog/zuul-2-the-netflix-journey-to-asynchronous-non-blocking-systems-45947377fb5c[blog post]
-is a good resource.
+We expect that for a wide range of applications the shift is unnecessary. If you are
+unsure what benefits to look for, start by learning about how non-blocking I/O works
+(e.g. concurrency on single-threaded Node.js) and its effects.
 
 
 
 [[webflux-server-choice]]
-=== Choosing a server
+=== Servers
 
-Spring WebFlux is supported on Netty, Undertow, Tomcat, Jetty, and Servlet 3.1+ containers.
-Each server is adapted to a common Reactive Streams API. The Spring WebFlux programming
-models are built on that common API.
+Spring WebFlux is supported on Tomcat, Jetty, Servlet 3.1+ containers, as well as on
+non-Servlet runtimes such as Netty and Undertow. All servers are adapted to a low-level,
+<<webflux-httphandler,common API>> so that higher level
+<<webflux-programming-models,programming models>> can be supported across servers.
 
-[NOTE]
-====
-*Common question: how can Tomcat and Jetty be used in both stacks?* +
-Tomcat and Jetty are non-blocking at their core. It's the Servlet API that adds a
-blocking facade. Starting in version 3.1 the Servlet API adds a choice for non-blocking I/O.
-However its use requires care to avoid other synchronous and blocking parts. For this
-reason Spring's reactive web stack has a low-level Servlet adapter to bridge to Reactive
-Streams but the Servlet API is otherwise not exposed for direct use.
-====
+Spring WebFlux does not have built-in support to start or stop a server. However it is
+easy to <<webflux-web-handler-api,assemble>> an application from Spring configuration, and
+<<webflux-config,WebFlux infrastructure>>, and <<webflux-httphandler,run it>> with a few
+lines of code.
 
-Spring Boot 2 uses Netty by default with WebFlux because Netty is more widely used in the
-async, non-blocking space and also provides both client and server that can share resources.
-By comparison Servlet 3.1 non-blocking I/O hasn't seen much use because the bar to use it
-is so high. Spring WebFlux opens one practical path to adoption.
+Spring Boot has a WebFlux starter that automates these steps. By default the starter uses
+Netty but it is easy to switch to Tomcat, Jetty, or Undertow simply by changing your
+Maven or Gradle dependencies. Spring Boot defaults to Netty because it is more widely
+used in the async, non-blocking space, and provides a client and a server share resources.
 
-The default server choice in Spring Boot is mainly about the out-of-the-box experience.
-Applications can still choose any of the other supported servers which are also highly
-optimized for performance, fully non-blocking, and adapted to Reactive Streams back
-pressure. In Spring Boot it is trivial to make the switch.
+Tomcat and Jetty can be used with both Spring MVC and WebFlux. Keep in mind however that
+the way they're used is very differently. Spring MVC relies on Servlet blocking I/O and
+allows applications to use the Servlet API directly if they need to. Spring WebFlux
+relies on Servlet 3.1 non-blocking I/O and uses the Servlet API behind a low-level
+adapter and not exposed for direct use.
+
+For Undertow, Spring WebFlux uses Undertow APIs directly without the Servlet API.
 
 
 
@@ -227,6 +233,77 @@ dramatic.
 
 
 
+[[webflux-concurrency-model]]
+=== Concurrency Model
+
+Both Spring MVC and Spring WebFlux support annotated controllers, but there is a key
+difference in the concurrency model and default assumptions for blocking and threads.
+
+In Spring MVC, and servlet applications in general, it is assumed that applications _may
+block_ the current thread, e.g. for remote calls, and for this reason servlet containers
+use a large thread pool, to absorb potential blocking during request handling.
+
+In Spring WebFlux, and non-blocking servers in general, it is assumed that applications
+_will not block_, and therefore non-blocking servers use  a small, fixed-size thread pool
+(event loop workers) to handle requests.
+
+[TIP]
+====
+To "scale" and "small number of threads" may sound contradictory but to never block the
+current thread, and rely on callbacks instead, means you don't need extra threads as
+there are no blocking calls to absorb.
+====
+
+_Invoking a Blocking API_
+
+What if you do need to use a blocking library? Both Reactor and RxJava provide the
+`publishOn` operator to continue processing on a different thread. That means there is an
+easy escape latch. Keep in mind however that blocking APIs are not a good fit for
+this concurrency model.
+
+_Mutable State_
+
+In Reactor and RxJava, logic is declared through operators, and at runtime, a reactive
+pipeline is formed where data is processed sequentially, in distinct stages. A key benefit
+of that is that it frees applications from having to protect mutable state because
+application code within that pipeline is never invoked concurrently.
+
+_Threading Model_
+
+What threads should you expect to see on a server running with Spring WebFlux?
+
+* On a "vanilla" Spring WebFlux server (e.g. no data access, nor other optional
+dependencies), you can expect one thread for the server, and several others for request
+processing (typically as many as the number of CPU cores). Servlet containers, however,
+may start with more threads (e.g. 10 on Tomcat), in support of both servlet, blocking I/O
+and servlet 3.1, non-blocking I/O usage.
+
+* The reactive `WebClient` operates in event loop style. So you'll see a small, fixed
+number of processing threads related to that, e.g. "reactor-http-nio-" with the Reactor
+Netty connector. However if Reactor Netty is used for both client and server, the two
+will share event loop resources by default.
+
+* Reactor and RxJava provide thread pool abstractions, called Schedulers, to use with the
+`publishOn` operator that is used to switch processing to a different thread pool.
+The schedulers have names that suggest a specific concurrency strategy, e.g. "parallel"
+for CPU-bound work with a limited number of threads, or "elastic" for I/O-bound work with
+a large number of threads. If you see such threads it means some code is using a
+specific thread pool `Scheduler` strategy.
+
+* Data access libraries and other 3rd party dependencies may also create and use threads
+of their own.
+
+_Configuring_
+
+The Spring Framework does not provide support for starting and stopping
+<<webflux-server-choice,servers>>. To configure the threading model for a server, you'll
+need to use server-specific config APIs, or if using Spring Boot, check the Spring
+Boot configuration options for each server. The WebClient
+<<web-reactive.adoc#webflux-client-builder,can be configured>> directly. For all other
+libraries, refer to their respective documentation.
+
+
+
 
 [[webflux-reactive-spring-web]]
 == Reactive Spring Web
@@ -239,7 +316,7 @@ Server support is organized in two layers:
 
 * <<webflux-httphandler,HttpHandler>> and server adapters -- the most basic, common API
 for HTTP request handling with Reactive Streams back pressure.
-* <<webflux-web-handler-api,WebHandler API>> -- slightly higher level but still general
+* <<webflux-web-handler-api>> -- slightly higher level but still general
 purpose server web API with filter chain style processing.
 
 
@@ -373,29 +450,19 @@ This can be automated through the use of
 [[webflux-web-handler-api]]
 === WebHandler API
 
-`HttpHandler` is the lowest level contract for running on different HTTP servers.
-On top of that foundation, the WebHandler API provides a slightly higher level, but
-still general purpose, set of components that form a chain of
-{api-spring-framework}/web/server/WebExceptionHandler.html[WebExceptionHandler's],
-{api-spring-framework}/web/server/WebFilter.html[WebFilter's], and a
-{api-spring-framework}/web/server/WebHandler.html[WebHandler].
+The WebHandler API is a general purpose, server, web API for processing requests through a
+chain of {api-spring-framework}/web/server/WebExceptionHandler.html[WebExceptionHandler's],
+{api-spring-framework}/web/server/WebFilter.html[WebFilter's], and a target
+{api-spring-framework}/web/server/WebHandler.html[WebHandler]. The chain can be assembled
+with `WebHttpHandlerBuilder` either by adding components to the builder or by having them
+detected from a Spring `ApplicationContext`. The builder returns an
+<<webflux-httphandler>> that can then be used to run on any of the supported servers.
 
-All WebHandler API components take `ServerWebExchange` as input which goes beyond
-`ServerHttpRequest` and `ServerHttpResponse` to provide extra building blocks for
-use in web applications such as request attributes, session attributes, access to parsed
-form data, multipart data, and more.
-
-`WebHttpHandlerBuilder` is used to assemble a request processing chain. You can use
-methods on the builder to add components manually, or more likely have them detected from
-a Spring `ApplicationContext`, with the resulting `HttpHandler` ready to run via a
-<<webflux-httphandler,server adapter>>:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-ApplicationContext context = ...
-HttpHandler handler = WebHttpHandlerBuilder.applicationContext(context).build()
-----
+While `HttpHandler` aims to be the most minimal contract across HTTP servers, the
+WebHandler API provides essential features commonly used to build web applications.
+For example, the `ServerWebExchange` available to WebHandler API components provides
+access not only to the request and response, but also to request and session attributes,
+access to parsed form data, multipart data, and more.
 
 
 
@@ -411,12 +478,14 @@ The table below lists the components that `WebHttpHandlerBuilder` detects:
 | <any>
 | `WebExceptionHandler`
 | 0..N
-| Exception handlers to apply after all ``WebFilter``'s and the target `WebHandler`.
+| Provide handling for exceptions from the chain of ``WebFilter``'s and the target
+  `WebHandler`. For more details, see <<webflux-exception-handler>>.
 
 | <any>
 | `WebFilter`
 | 0..N
-| Filters to invoke before and after the target `WebHandler`.
+| Apply interception style logic to before and after the rest of the filter chain and
+  the target `WebHandler`. For more details, see <<webflux-filters>>.
 
 | "webHandler"
 | `WebHandler`
@@ -487,7 +556,7 @@ content to `Flux<Part>` without collecting to a `MultiValueMap`.
 
 
 [[webflux-codecs]]
-=== HTTP Message Codecs
+=== Message Codecs
 [.small]#<<integration.adoc#rest-message-conversion,Same in Spring MVC>>#
 
 The `spring-web` module defines the
@@ -564,6 +633,90 @@ a heartbeat and ignore.
 
 
 
+[[webflux-filters]]
+=== Filters
+[.small]#<<web.adoc#filters,Same in Spring MVC>>#
+
+In the <<webflux-web-handler-api>>, a `WebFilter` can be used to apply interception-style
+logic before and after the rest of the processing chain of filters and the target
+`WebHandler`. When using the <<webflux-config>>, registering a `WebFilter` is as simple
+as declaring it as a Spring bean, and optionally expressing precedence via `@Order` on
+the bean declaration or by implementing `Ordered`.
+
+The following describe the available `WebFilter` implementations:
+
+
+[[webflux-filters-forwarded-headers]]
+==== Forwarded Headers
+[.small]#<<web.adoc#filters-forwarded-headers,Same in Spring MVC>>#
+
+As a request goes through proxies such as load balancers the host, port, and
+scheme may change presenting a challenge for applications that need to create links
+to resources since the links should reflect the host, port, and scheme of the
+original request as seen from a client perspective.
+
+https://tools.ietf.org/html/rfc7239[RFC 7239] defines the "Forwarded" HTTP header
+for proxies to use to provide information about the original request. There are also
+other non-standard headers in use such as "X-Forwarded-Host", "X-Forwarded-Port",
+and "X-Forwarded-Proto".
+
+`ForwardedHeaderFilter` detects, extracts, and uses information from the "Forwarded"
+header, or from "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto".
+It wraps the request in order to overlay its host, port, and scheme and also "hides"
+the forwarded headers for subsequent processing.
+
+Note that there are security considerations when using forwarded headers as explained
+in Section 8 of RFC 7239. At the application level it is difficult to determine whether
+forwarded headers can be trusted or not. This is why the network upstream should be
+configured correctly to filter out untrusted forwarded headers from the outside.
+
+Applications that don't have a proxy and don't need to use forwarded headers can
+configure the `ForwardedHeaderFilter` to remove and ignore such headers.
+
+
+[[webflux-filters-cors]]
+==== CORS
+[.small]#<<web.adoc#filters-cors,Same in Spring MVC>>#
+
+Spring WebFlux provides fine-grained support for CORS configuration through annotations on
+controllers. However when used with Spring Security it is advisable to rely on the built-in
+`CorsFilter` that must be ordered ahead of Spring Security's chain of filters.
+
+See the section on <<webflux-cors>> and the <<webflux-cors-webfilter>> for more details.
+
+
+
+[[webflux-exception-handler]]
+=== Exceptions
+[.small]#<<web.adoc#mvc-ann-customer-servlet-container-error-page,Same in Spring MVC>>#
+
+In the <<webflux-web-handler-api>>, a `WebExceptionHandler` can be used to to handle
+exceptions from the chain of ``WebFilter``'s and the target `WebHandler`. When using the
+<<webflux-config>>, registering a `WebExceptionHandler` is as simple as declaring it as a
+Spring bean, and optionally expressing precedence via `@Order` on the bean declaration or
+by implementing `Ordered`.
+
+Below are the available `WebExceptionHandler` implementations:
+
+[cols="1,2", options="header"]
+|===
+| Exception Handler | Description
+
+| `ResponseStatusExceptionHandler`
+| Provides handling for exceptions of type
+  {api-spring-framework}/web/server/ResponseStatusException.html[ResponseStatusException]
+  by setting the response to the HTTP status code of the exception.
+
+| `WebFluxResponseStatusExceptionHandler`
+| Extension of `ResponseStatusExceptionHandler` that can also determine the HTTP status
+  code an `@ResponseStatus` annotation on any exception.
+
+  This handler is declared in the <<webflux-config>>.
+
+|===
+
+
+
 
 [[webflux-dispatcher-handler]]
 == DispatcherHandler
@@ -580,7 +733,7 @@ for access to the context it runs in. If `DispatcherHandler` is declared with th
 name "webHandler" it is in turn discovered by
 {api-spring-framework}/web/server/adapter/WebHttpHandlerBuilder.html[WebHttpHandlerBuilder]
 which puts together a request processing chain as described in
-<<webflux-web-handler-api,WebHandler API>>.
+<<webflux-web-handler-api>>.
 
 Spring configuration in a WebFlux application typically contains:
 
@@ -679,24 +832,60 @@ processing by writing to the response directly or using a view to render.
 [[webflux-resulthandling]]
 === Result Handling
 
-When `DispatcherHandler` needs to process the return value from a handler, it finds a
-`HandlerResultHandler` that support it and invokes it. The available implementations are
-listed below with their default order (all are declared in the <<webflux-config>>):
+The return value from the invocation of a handler, through a `HandlerAdapter`, is wrapped
+as `HandlerResult`, along with some additional context, and passed to the first
+`HandlerResultHandler` that claims support for it. The table below shows the available
+`HandlerResultHandler` implementations all of which are declared in the <<webflux-config>>:
 
-* `ResponseEntityResultHandler` -- handles `ResponseEntity` return values typically
-returned from annotated controllers. The order is set to 0 since it safely matches return
-values by type.
-* `ServerResponseResultHandler` -- supports `ServerResponse` return values typically
-returned from functional endpoints. The order is set to 0 since it safely matches return
-values by type.
-* `ResponseBodyResultHandler` -- handles return values from `@ResponseBody` methods or
-`@RestController` classes. The order is set to 100, i.e. after result handlers that
-check for a specific type.
-* `ViewResolutionResultHandler` -- performs the <<webflux-viewresolution>> algorithm for
-HTML template rendering. The order is set to `Ordered.LOWEST_PRECEDENCE` since it
-supports several specific types, e.g. `String`, `Map`, `Rendering`, and others, but will
-also treat any other Object as a model attribute. This is why it needs to be last in
-the order.
+[cols="1,2,1", options="header"]
+|===
+| Result Handler Type | Return Values | Default Order
+
+| `ResponseEntityResultHandler`
+| `ResponseEntity`, typically from ``@Controller``'s.
+| 0
+
+| `ServerResponseResultHandler`
+| `ServerResponse`, typically from functional endpoints.
+| 0
+
+| `ResponseBodyResultHandler`
+| Handle return values from `@ResponseBody` methods or `@RestController` classes.
+| 100
+
+| `ViewResolutionResultHandler`
+| `CharSequence` or {api-spring-framework}/web/reactive/result/view/View.html[View],
+  {api-spring-framework}/ui/Model.html[Model] or `Map`,
+  {api-spring-framework}/web/reactive/result/view/Rendering.html[Rendering],
+  or any other Object is treated as a model attribute.
+
+  Also see <<webflux-viewresolution>>.
+| `Integer.MAX_VALUE`
+
+|===
+
+
+
+[[webflux-dispatcher-exceptions]]
+=== Exceptions
+[.small]#<<web.adoc#mvc-exceptionhandlers,Same in Spring MVC>>#
+
+The `HandlerResult` returned from a `HandlerAdapter` may expose a function for error
+handling based on some handler-specific mechanism. This error function is called if:
+
+* the handler (e.g. `@Controller`) invocation fails.
+* handling of the handler return value through a `HandlerResultHandler` fails.
+
+The error function can change the response, e.g. to an error status, as long as an error
+signal occurs before the reactive type returned from the handler produces any data items.
+
+This is how `@ExceptionHandler` methods in `@Controller` classes are supported.
+By contrast, support for the same in Spring MVC is built on a `HandlerExceptionResolver`.
+This generally shouldn't matter, however, keep in mind that in WebFlux you cannot use a
+`@ControllerAdvice` to handle exceptions that occur before a handler is chosen.
+
+See also <<webflux-ann-controller-exceptions>> in the Annotated Controller section, or
+<<webflux-exception-handler>> in the WebHandler API section.
 
 
 
@@ -1789,27 +1978,26 @@ Content-Transfer-Encoding: 8bit
 ... File Data ...
 ----
 
-You can access the "meta-data" part with `@RequestPart` which would deserialize it from
-JSON (similar to `@RequestBody`) through one of the configured <<webflux-codecs>>:
+You can access individual parts with `@RequestPart`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	@PostMapping("/")
-	public String handle(**@RequestPart("meta-data") MetaData metadata,
+	public String handle(**@RequestPart("meta-data") Part metadata,
 			@RequestPart("file-data") FilePart file**) {
 		// ...
 	}
 ----
 
-To access multipart data sequentially, in streaming fashion, use `@RequestBody` with
-`Flux<Part>` instead. For example:
+To deserialize the raw part content, for example to JSON (similar to `@RequestBody`),
+simply declare a concrete target Object, instead of `Part`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	@PostMapping("/")
-	public String handle(**@RequestBody Flux<Part> parts**) {
+	public String handle(**@RequestPart("meta-data") MetaData metadata**) {
 		// ...
 	}
 ----
@@ -1828,6 +2016,29 @@ public String handle(**@Valid** @RequestPart("meta-data") MetaData metadata,
 		**BindingResult result**) {
 	// ...
 }
+----
+
+To access all multipart data in as a `MultiValueMap` use `@RequestBody`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@PostMapping("/")
+	public String handle(**@RequestBody Mono<MultiValueMap<String, Part>> parts**) {
+		// ...
+	}
+----
+
+To access multipart data sequentially, in streaming fashion, use `@RequestBody` with
+`Flux<Part>` instead. For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@PostMapping("/")
+	public String handle(**@RequestBody Flux<Part> parts**) {
+		// ...
+	}
 ----
 
 
@@ -2011,15 +2222,19 @@ controller method. Use a composite interface if you need to activate multiple vi
 
 
 [[webflux-ann-modelattrib-methods]]
-=== Model Methods
+=== Model
 [.small]#<<web.adoc#mvc-ann-modelattrib-methods,Same in Spring MVC>>#
 
-The `@ModelAttribute` annotation can be used on `@RequestMapping`
-<<webflux-ann-modelattrib-method-args,method arguments>> to create or access an Object
-from the model and bind it to the request. `@ModelAttribute` can also be used as a
-method-level annotation on controller methods whose purpose is not to handle requests
-but to add commonly needed model attributes prior to request handling.
+The `@ModelAttribute` annotation can be used:
 
+* On a <<webflux-ann-modelattrib-method-args,method argument>> in `@RequestMapping` methods
+to create or access an Object from the model, and to bind it to the request through a
+`WebDataBinder`.
+* As a method-level annotation in `@Controller` or `@ControllerAdvice` classes helping
+to initialize the model prior to any `@RequestMapping` method invocation.
+* On a `@RequestMapping` method to mark its return value is a model attribute.
+
+This section discusses `@ModelAttribute` methods, or the 2nd from the list above.
 A controller can have any number of `@ModelAttribute` methods. All such methods are
 invoked before `@RequestMapping` methods in the same controller. A `@ModelAttribute`
 method can also be shared across controllers via `@ControllerAdvice`. See the section on
@@ -2105,14 +2320,16 @@ as a view name. `@ModelAttribute` can also help to customize the model attribute
 
 
 [[webflux-ann-initbinder]]
-=== Binder Methods
+=== DataBinder
 [.small]#<<web.adoc#mvc-ann-initbinder,Same in Spring MVC>>#
 
-`@InitBinder` methods in an `@Controller` or `@ControllerAdvice` class can be used to
-customize type conversion for method arguments that represent String-based request values
-(e.g. request parameters, path variables, headers, cookies, and others). Type conversion
-also applies during data binding of request parameters onto `@ModelAttribute` arguments
-(i.e. command objects).
+`@Controller` or `@ControllerAdvice` classes can have `@InitBinder` methods in order to
+initialize instances of `WebDataBinder`, and those in turn are used to:
+
+* Bind request parameters (i.e. form data or query) to a model object.
+* Convert String-based request values such as request parameters, path variables,
+headers, cookies, and others, to the target type of controller method arguments.
+* Format model object values as String values when rendering HTML forms.
 
 `@InitBinder` methods can register controller-specific `java.bean.PropertyEditor`, or
 Spring `Converter` and `Formatter` components. In addition, the
@@ -2159,6 +2376,73 @@ controller-specific ``Formatter``'s:
 		// ...
 	}
 ----
+
+
+
+[[webflux-ann-controller-exceptions]]
+=== Exceptions
+[.small]#<<web.adoc#mvc-ann-exceptionhandler,Same in Spring MVC>>#
+
+`@Controller` and <<mvc-ann-controller-advice,@ControllerAdvice>> classes can have
+`@ExceptionHandler` methods to handle exceptions from controller methods. For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	public class SimpleController {
+
+		// ...
+
+		@ExceptionHandler
+		public ResponseEntity<String> handle(IOException ex) {
+			// ...
+		}
+
+	}
+----
+
+The annotation can list the exception types to match. Or simply declare the target
+exception as a method argument as shown above. When multiple exception methods match,
+a root exception match is generally preferred to a cause exception match. More formally
+the `ExceptionDepthComparator` is used to sort exceptions based on their depth from the
+thrown exception type.
+
+In a multi-`@ControllerAdvice` arrangement, please declare your primary root exception
+mappings on a `@ControllerAdvice` prioritized with a corresponding order. While a root
+exception match is preferred to a cause, this is mainly among the methods of a given
+controller or `@ControllerAdvice`. That means a cause match on a higher-priority
+`@ControllerAdvice` is preferred to any match (e.g. root) on a lower-priority
+`@ControllerAdvice`.
+
+Support for `@ExceptionHandler` methods in Spring WebFlux is provided by the
+`HandlerAdapter` for `@RequestMapping` methods. See <<webflux-dispatcher-exceptions>>
+under the `DispatcherHandler` section for more details.
+
+
+An `@ExceptionHandler` method in WebFlux supports the same method arguments and return
+values as an `@RequestMapping` method does with the exception of request body and
+`@ModelAttribute` related method arguments.
+
+
+[[webflux-ann-rest-exceptions]]
+==== REST API exceptions
+[.small]#<<web.adoc#mvc-ann-rest-exceptions,Same in Spring MVC>>#
+
+A common requirement for REST services is to include error details in the body of the
+response. The Spring Framework does not automatically do this because the representation
+of error details in the response body is application specific. However a
+`@RestController` may use `@ExceptionHandler` methods with a `ResponseEntity` return
+value to set the status and the body of the response. Such methods may also be declared
+in `@ControllerAdvice` classes to apply them globally.
+
+[NOTE]
+====
+Note that Spring WebFlux does not have an equivalent for the Spring MVC
+`ResponseEntityExceptionHandler` because WebFlux only raises `ResponseStatusException`
+(or sub-classes of), which and those do not need to be translated translation to an HTTP
+status code.
+====
 
 
 
@@ -2315,8 +2599,8 @@ In your Java config implement the `WebFluxConfigurer` interface:
 [.small]#<<web.adoc#mvc-config-conversion,Same in Spring MVC>>#
 
 By default formatters for `Number` and `Date` types are installed, including support for
-the `@NumberFormat` and `@DateTimeFormat` annotations. Full support for the Joda Time
-formatting library is also installed if Joda Time is present on the classpath.
+the `@NumberFormat` and `@DateTimeFormat` annotations. Full support for the Joda-Time
+formatting library is also installed if Joda-Time is present on the classpath.
 
 To register custom formatters and converters:
 

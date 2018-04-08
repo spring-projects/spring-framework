@@ -244,13 +244,21 @@ public class TableMetaDataContext {
 	 * @param inParameters the parameter names and values
 	 */
 	public List<Object> matchInParameterValuesWithInsertColumns(Map<String, ?> inParameters) {
-		List<Object> values = new ArrayList<>();
-		Map<String, Object> source = new LinkedHashMap<>(inParameters.size());
-		for (String key : inParameters.keySet()) {
-			source.put(key.toLowerCase(), inParameters.get(key));
-		}
+		List<Object> values = new ArrayList<>(inParameters.size());
 		for (String column : this.tableColumns) {
-			values.add(source.get(column.toLowerCase()));
+			Object value = inParameters.get(column);
+			if (value == null) {
+				value = inParameters.get(column.toLowerCase());
+				if (value == null) {
+					for (Map.Entry<String, ?> entry : inParameters.entrySet()) {
+						if (column.equalsIgnoreCase(entry.getKey())) {
+							value = entry.getValue();
+							// TODO: break;
+						}
+					}
+				}
+			}
+			values.add(value);
 		}
 		return values;
 	}

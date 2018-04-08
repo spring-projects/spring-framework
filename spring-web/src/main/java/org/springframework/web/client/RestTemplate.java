@@ -912,9 +912,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				HttpHeaders httpHeaders = httpRequest.getHeaders();
 				HttpHeaders requestHeaders = this.requestEntity.getHeaders();
 				if (!requestHeaders.isEmpty()) {
-					for (Map.Entry<String, List<String>> entry : requestHeaders.entrySet()) {
-						httpHeaders.put(entry.getKey(), new LinkedList<>(entry.getValue()));
-					}
+					requestHeaders.forEach((key, values) -> httpHeaders.put(key, new LinkedList<>(values)));
 				}
 				if (httpHeaders.getContentLength() < 0) {
 					httpHeaders.setContentLength(0L);
@@ -933,9 +931,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 								(GenericHttpMessageConverter<Object>) messageConverter;
 						if (genericConverter.canWrite(requestBodyType, requestBodyClass, requestContentType)) {
 							if (!requestHeaders.isEmpty()) {
-								for (Map.Entry<String, List<String>> entry : requestHeaders.entrySet()) {
-									httpHeaders.put(entry.getKey(), new LinkedList<>(entry.getValue()));
-								}
+								requestHeaders.forEach((key, values) -> httpHeaders.put(key, new LinkedList<>(values)));
 							}
 							if (logger.isDebugEnabled()) {
 								if (requestContentType != null) {
@@ -953,9 +949,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 					}
 					else if (messageConverter.canWrite(requestBodyClass, requestContentType)) {
 						if (!requestHeaders.isEmpty()) {
-							for (Map.Entry<String, List<String>> entry : requestHeaders.entrySet()) {
-								httpHeaders.put(entry.getKey(), new LinkedList<>(entry.getValue()));
-							}
+							requestHeaders.forEach((key, values) -> httpHeaders.put(key, new LinkedList<>(values)));
 						}
 						if (logger.isDebugEnabled()) {
 							if (requestContentType != null) {

@@ -119,9 +119,9 @@ public abstract class NamedParameterUtils {
 				String parameter = null;
 				if (j < statement.length && c == ':' && statement[j] == '{') {
 					// :{x} style parameter
-					while (j < statement.length && '}' != statement[j]) {
+					while (j < statement.length && statement[j] != '}') {
 						j++;
-						if (':' == statement[j] || '{' == statement[j]) {
+						if (statement[j] == ':' || statement[j] == '{') {
 							throw new InvalidDataAccessApiUsageException("Parameter name contains invalid character '" +
 									statement[j] + "' at position " + i + " in statement: " + sql);
 						}
@@ -130,10 +130,11 @@ public abstract class NamedParameterUtils {
 						throw new InvalidDataAccessApiUsageException(
 								"Non-terminated named parameter declaration at position " + i + " in statement: " + sql);
 					}
-					if (j - i > 3) {
+					if (j - i > 2) {
 						parameter = sql.substring(i + 2, j);
 						namedParameterCount = addNewNamedParameter(namedParameters, namedParameterCount, parameter);
-						totalParameterCount = addNamedParameter(parameterList, totalParameterCount, escapes, i, j + 1, parameter);
+						totalParameterCount = addNamedParameter(
+								parameterList, totalParameterCount, escapes, i, j + 1, parameter);
 					}
 					j++;
 				}
@@ -144,7 +145,8 @@ public abstract class NamedParameterUtils {
 					if (j - i > 1) {
 						parameter = sql.substring(i + 1, j);
 						namedParameterCount = addNewNamedParameter(namedParameters, namedParameterCount, parameter);
-						totalParameterCount = addNamedParameter(parameterList, totalParameterCount, escapes, i, j, parameter);
+						totalParameterCount = addNamedParameter(
+								parameterList, totalParameterCount, escapes, i, j, parameter);
 					}
 				}
 				i = j - 1;

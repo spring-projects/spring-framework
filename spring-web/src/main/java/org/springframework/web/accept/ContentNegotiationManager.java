@@ -45,9 +45,6 @@ import org.springframework.web.context.request.NativeWebRequest;
  */
 public class ContentNegotiationManager implements ContentNegotiationStrategy, MediaTypeFileExtensionResolver {
 
-	private static final List<MediaType> MEDIA_TYPE_ALL = Collections.singletonList(MediaType.ALL);
-
-
 	private final List<ContentNegotiationStrategy> strategies = new ArrayList<>();
 
 	private final Set<MediaTypeFileExtensionResolver> resolvers = new LinkedHashSet<>();
@@ -125,12 +122,12 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	public List<MediaType> resolveMediaTypes(NativeWebRequest request) throws HttpMediaTypeNotAcceptableException {
 		for (ContentNegotiationStrategy strategy : this.strategies) {
 			List<MediaType> mediaTypes = strategy.resolveMediaTypes(request);
-			if (mediaTypes.isEmpty() || mediaTypes.equals(MEDIA_TYPE_ALL)) {
+			if (mediaTypes.equals(MEDIA_TYPE_ALL_LIST)) {
 				continue;
 			}
 			return mediaTypes;
 		}
-		return Collections.emptyList();
+		return MEDIA_TYPE_ALL_LIST;
 	}
 
 	@Override

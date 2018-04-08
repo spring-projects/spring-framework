@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -93,19 +91,18 @@ final class SimpleBufferingClientHttpRequest extends AbstractBufferingClientHttp
 	 * @param headers the headers to add
 	 */
 	static void addHeaders(HttpURLConnection connection, HttpHeaders headers) {
-		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-			String headerName = entry.getKey();
+		headers.forEach((headerName, headerValues) -> {
 			if (HttpHeaders.COOKIE.equalsIgnoreCase(headerName)) {  // RFC 6265
-				String headerValue = StringUtils.collectionToDelimitedString(entry.getValue(), "; ");
+				String headerValue = StringUtils.collectionToDelimitedString(headerValues, "; ");
 				connection.setRequestProperty(headerName, headerValue);
 			}
 			else {
-				for (String headerValue : entry.getValue()) {
+				for (String headerValue : headerValues) {
 					String actualHeaderValue = headerValue != null ? headerValue : "";
 					connection.addRequestProperty(headerName, actualHeaderValue);
 				}
 			}
-		}
+		});
 	}
 
 }

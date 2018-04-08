@@ -7,17 +7,17 @@
 [[expressions-intro]]
 == Introduction
 
-The Spring Expression Language (SpEL for short) is a powerful expression language that
+The Spring Expression Language (_SpEL_ for short) is a powerful expression language that
 supports querying and manipulating an object graph at runtime. The language syntax is
 similar to Unified EL but offers additional features, most notably method invocation and
 basic string templating functionality.
 
-While there are several other Java expression languages available, OGNL, MVEL, and JBoss
-EL, to name a few, the Spring Expression Language was created to provide the Spring
+While there are several other Java expression languages available -- OGNL, MVEL, and JBoss
+EL, to name a few -- the Spring Expression Language was created to provide the Spring
 community with a single well supported expression language that can be used across all
 the products in the Spring portfolio. Its language features are driven by the
 requirements of the projects in the Spring portfolio, including tooling requirements for
-code completion support within the eclipse based Spring Tool Suite. That said,
+code completion support within the Eclipse based Spring Tool Suite. That said,
 SpEL is based on a technology agnostic API allowing other expression language
 implementations to be integrated should the need arise.
 
@@ -29,10 +29,10 @@ infrastructure classes such as the parser. Most Spring users will not need to de
 this infrastructure and will instead only author expression strings for evaluation. An
 example of this typical use is the integration of SpEL into creating XML or annotated
 based bean definitions as shown in the section <<expressions-beandef,Expression support
-for defining bean definitions.>>
+for defining bean definitions>>.
 
 This chapter covers the features of the expression language, its API, and its language
-syntax. In several places an Inventor and Inventor's Society class are used as the
+syntax. In several places an `Inventor` and Inventor's `Society` classes are used as the
 target objects for expression evaluation. These class declarations and the data used to
 populate them are listed at the end of the chapter.
 
@@ -82,7 +82,7 @@ The following code introduces the SpEL API to evaluate the literal string expres
 The value of the message variable is simply 'Hello World'.
 
 The SpEL classes and interfaces you are most likely to use are located in the packages
-`org.springframework.expression` and its sub packages and `spel.support`.
+`org.springframework.expression` and its sub packages such as `spel.support`.
 
 The interface `ExpressionParser` is responsible for parsing an expression string. In
 this example the expression string is a string literal denoted by the surrounding single
@@ -120,7 +120,7 @@ as shown below.
 ----
 
 SpEL also supports nested properties using standard _dot_ notation, i.e.
-prop1.prop2.prop3 and the setting of property values
+`prop1.prop2.prop3` and the setting of property values
 
 Public fields may also be accessed.
 
@@ -181,29 +181,35 @@ create a boolean condition:
 === `EvaluationContext`
 
 The interface `EvaluationContext` is used when evaluating an expression to resolve
-properties, methods, fields, and to help perform type conversion. The out-of-the-box
-implementations, `SimpleEvalutationContext` and `StandardEvaluationContext`, use
-reflection to manipulate the object, caching `java.lang.reflect.Method`,
-`java.lang.reflect.Field`, and `java.lang.reflect.Constructor` instances for increased
-performance.
+properties, methods, or fields and to help perform type conversion. There are two
+out-of-the-box implementations.
 
-`SimpleEvaluationContext` exposes a subset of essential SpEL language features and
-configuration options. Certain categories of expressions, do not require the full extent
-of the SpEL language syntax and arguably should be meaningfully restricted. Examples
-include but are not limited to data binding expressions, property-based filters, and
-others. To effect, `SimpleEvaluationContext` supports a subset of the SpEL language syntax
-that excludes references to Java types, constructors, and bean references.
+* `SimpleEvaluationContext` -- exposes a subset of essential SpEL language features and
+configuration options, for categories of expressions that do not require the full extent
+of the SpEL language syntax and should be meaningfully restricted. Examples include but
+are not limited to data binding expressions, property-based filters, and others.
 
-`StandardEvaluationContext` exposes the full set of SpEL language features and
-configuration options. You may use it to specify a default root object, and to configure
+* `StandardEvaluationContext` -- exposes the full set of SpEL language features and
+configuration options. You may use it to specify a default root object and to configure
 every available evaluation-related strategy.
+
+`SimpleEvaluationContext` is designed to support only a subset of the SpEL language syntax.
+It _excludes_ Java type references, constructors, and bean references. It also requires
+that one explicitly choose the level of support for properties and methods in expressions.
+By default, the `create()` static factory method enables only read access to properties.
+You can also obtain a builder to configure the exact level of support needed, targeting
+one or some combination of the following:
+
+. Custom `PropertyAccessor` only (no reflection)
+. Data binding properties for read-only access
+. Data binding properties for read and write
 
 
 [[expressions-type-conversion]]
 ==== Type conversion
 
-By default SpEL uses the conversion service available in Spring core (
-`org.springframework.core.convert.ConversionService`). This conversion service comes
+By default SpEL uses the conversion service available in Spring core
+(`org.springframework.core.convert.ConversionService`). This conversion service comes
 with many converters built in for common conversions but is also fully extensible so
 custom conversions between types can be added. Additionally it has the key capability
 that it is generics aware. This means that when working with generic types in
@@ -225,11 +231,10 @@ being placed in it. A simple example:
 	Simple simple = new Simple();
 	simple.booleanList.add(true);
 
-	SimpleEvaluationContext context = new SimpleEvaluationContext();
+	EvaluationContext context = SimpleEvaluationContext().forReadOnlyDataBinding().build();
 
 	// false is passed in here as a string. SpEL and the conversion service will
 	// correctly recognize that it needs to be a Boolean and convert it
-
 	parser.parseExpression("booleanList[0]").setValue(context, simple, "false");
 
 	// b will be false
@@ -283,17 +288,17 @@ It is also possible to configure the behaviour of the SpEL expression compiler.
 
 Spring Framework 4.1 includes a basic expression compiler. Expressions are usually
 interpreted which provides a lot of dynamic flexibility during evaluation but
-does not provide the optimum performance. For occasional expression usage
+does not provide optimum performance. For occasional expression usage
 this is fine, but when used by other components like Spring Integration, 
 performance can be very important and there is no real need for the dynamism.
 
-The new SpEL compiler is intended to address this need. The 
+The SpEL compiler is intended to address this need. The 
 compiler will generate a real Java class on the fly during evaluation that embodies the
 expression behavior and use that to achieve much faster expression
 evaluation. Due to the lack of typing around expressions the compiler
 uses information gathered during the interpreted evaluations of an
 expression when performing compilation. For example, it does not know the type
-of a property reference purely from the expression but during the first
+of a property reference purely from the expression, but during the first
 interpreted evaluation it will find out what it is. Of course, basing the 
 compilation on this information could cause trouble later if the types of
 the various expression elements change over time. For this reason compilation
@@ -373,9 +378,9 @@ enum values (`off`, `immediate`, or `mixed`).
 [[expressions-compiler-limitations]]
 ==== Compiler limitations
 
-With Spring Framework 4.1 the basic compilation framework is in place. However, the framework does not
+Since Spring Framework 4.1 the basic compilation framework is in place. However, the framework does not
 yet support compiling every kind of expression. The initial focus has been on the common expressions that are
-likely to be used in performance critical contexts.  These kinds of expression cannot be compiled
+likely to be used in performance critical contexts. The following kinds of expression cannot be compiled
 at the moment:
 
 - expressions involving assignment 
@@ -602,7 +607,7 @@ arrays and lists are obtained using square bracket notation.
 [subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
-	SimpleEvaluationContext context = new SimpleEvaluationContext();
+	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
 
 	// Inventions Array
 
@@ -773,11 +778,11 @@ expression based `matches` operator.
 
 	// evaluates to true
 	boolean trueValue = parser.parseExpression(
-			"'5.00' matches '\^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
+			"'5.00' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
 
 	//evaluates to false
 	boolean falseValue = parser.parseExpression(
-			"'5.0067' matches '\^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
+			"'5.0067' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
 ----
 
 [NOTE]
@@ -790,7 +795,7 @@ evaluates to `true`, as expected.
 Each symbolic operator can also be specified as a purely alphabetic equivalent. This
 avoids problems where the symbols used have special meaning for the document type in
 which the expression is embedded (eg. an XML document). The textual equivalents are
-shown here: `lt` (`<`), `gt` (`>`), `le` (`<=`), `ge` (`>=`), `eq` (`==`),
+shown here: `lt` (`<`), `gt` (`>`), `le` (`\<=`), `ge` (`>=`), `eq` (`==`),
 `ne` (`!=`), `div` (`/`), `mod` (`%`), `not` (`!`). These are case insensitive.
 
 
@@ -844,33 +849,33 @@ operators are demonstrated below.
 [subs="verbatim,quotes"]
 ----
 	// Addition
-	int two = parser.parseExpression("1 + 1").getValue(Integer.class); // 2
+	int two = parser.parseExpression("1 + 1").getValue(Integer.class);  // 2
 
 	String testString = parser.parseExpression(
-			"'test' + ' ' + 'string'").getValue(String.class); // 'test string'
+			"'test' + ' ' + 'string'").getValue(String.class);  // 'test string'
 
 	// Subtraction
-	int four = parser.parseExpression("1 - -3").getValue(Integer.class); // 4
+	int four = parser.parseExpression("1 - -3").getValue(Integer.class);  // 4
 
-	double d = parser.parseExpression("1000.00 - 1e4").getValue(Double.class); // -9000
+	double d = parser.parseExpression("1000.00 - 1e4").getValue(Double.class);  // -9000
 
 	// Multiplication
-	int six = parser.parseExpression("-2 * -3").getValue(Integer.class); // 6
+	int six = parser.parseExpression("-2 * -3").getValue(Integer.class);  // 6
 
-	double twentyFour = parser.parseExpression("2.0 * 3e0 * 4").getValue(Double.class); // 24.0
+	double twentyFour = parser.parseExpression("2.0 * 3e0 * 4").getValue(Double.class);  // 24.0
 
 	// Division
-	int minusTwo = parser.parseExpression("6 / -3").getValue(Integer.class); // -2
+	int minusTwo = parser.parseExpression("6 / -3").getValue(Integer.class);  // -2
 
-	double one = parser.parseExpression("8.0 / 4e0 / 2").getValue(Double.class); // 1.0
+	double one = parser.parseExpression("8.0 / 4e0 / 2").getValue(Double.class);  // 1.0
 
 	// Modulus
-	int three = parser.parseExpression("7 % 4").getValue(Integer.class); // 3
+	int three = parser.parseExpression("7 % 4").getValue(Integer.class);  // 3
 
-	int one = parser.parseExpression("8 / 5 % 2").getValue(Integer.class); // 1
+	int one = parser.parseExpression("8 / 5 % 2").getValue(Integer.class);  // 1
 
 	// Operator precedence
-	int minusTwentyOne = parser.parseExpression("1+2-3*8").getValue(Integer.class); // -21
+	int minusTwentyOne = parser.parseExpression("1+2-3*8").getValue(Integer.class);  // -21
 ----
 
 
@@ -885,14 +890,13 @@ done within a call to `setValue` but can also be done inside a call to `getValue
 [subs="verbatim,quotes"]
 ----
 	Inventor inventor = new Inventor();
-	SimpleEvaluationContext context = new SimpleEvaluationContext();
+	EvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().build();
 
-	parser.parseExpression("Name").setValue(context, inventor, "Alexander Seovic2");
+	parser.parseExpression("Name").setValue(context, inventor, "Aleksandar Seovic");
 
 	// alternatively
-
 	String aleks = parser.parseExpression(
-			"Name = 'Alexandar Seovic'").getValue(context, inventor, String.class);
+			"Name = 'Aleksandar Seovic'").getValue(context, inventor, String.class);
 ----
 
 
@@ -947,28 +951,28 @@ used).
 === Variables
 
 Variables can be referenced in the expression using the syntax `#variableName`. Variables
-are set using the method setVariable on `EvaluationContext` implementations.
+are set using the method `setVariable` on `EvaluationContext` implementations.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
-	SimpleEvaluationContext context = new SimpleEvaluationContext();
+
+	EvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().build();
 	context.setVariable("newName", "Mike Tesla");
 
 	parser.parseExpression("Name = #newName").getValue(context, tesla);
-
-	System.out.println(tesla.getName()) // "Mike Tesla"
+	System.out.println(tesla.getName())  // "Mike Tesla"
 ----
 
 
 [[expressions-this-root]]
 ==== The #this and #root variables
 
-The variable #this is always defined and refers to the current evaluation object
-(against which unqualified references are resolved). The variable #root is always
-defined and refers to the root context object. Although #this may vary as components of
-an expression are evaluated, #root always refers to the root.
+The variable `#this` is always defined and refers to the current evaluation object
+(against which unqualified references are resolved). The variable `#root` is always
+defined and refers to the root context object. Although `#this` may vary as components of
+an expression are evaluated, `#root` always refers to the root.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -979,8 +983,8 @@ an expression are evaluated, #root always refers to the root.
 
 	// create parser and set variable 'primes' as the array of integers
 	ExpressionParser parser = new SpelExpressionParser();
-	SimpleEvaluationContext context = new SimpleEvaluationContext();
-	context.setVariable("primes",primes);
+	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataAccess();
+	context.setVariable("primes", primes);
 
 	// all prime numbers > 10 from the list (using selection ?{...})
 	// evaluates to [11, 13, 17]
@@ -1001,7 +1005,7 @@ expression string. The function is registered through the `EvaluationContext`.
 ----
 	Method method = ...;
 
-	SimpleEvaluationContext context = new SimpleEvaluationContext();
+	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
 	context.setVariable("myFunction", method);
 ----
 
@@ -1013,7 +1017,7 @@ For example, given a utility method to reverse a string is shown below:
 	public abstract class StringUtils {
 
 		public static String reverseString(String input) {
-			StringBuilder backwards = new StringBuilder();
+			StringBuilder backwards = new StringBuilder(input.length());
 			for (int i = 0; i < input.length(); i++)
 				backwards.append(input.charAt(input.length() - 1 - i));
 			}
@@ -1028,13 +1032,13 @@ The above method can then be registered and used as follows:
 [subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
-	SimpleEvaluationContext context = new SimpleEvaluationContext();
 
+	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
 	context.setVariable("reverseString",
-		StringUtils.class.getDeclaredMethod("reverseString", String.class));
+			StringUtils.class.getDeclaredMethod("reverseString", String.class));
 
 	String helloWorldReversed = parser.parseExpression(
-		"#reverseString('hello')").getValue(context, String.class);
+			"#reverseString('hello')").getValue(context, String.class);
 ----
 
 
@@ -1043,7 +1047,7 @@ The above method can then be registered and used as follows:
 === Bean references
 
 If the evaluation context has been configured with a bean resolver it is possible to
-lookup beans from an expression using the (@) symbol.
+look up beans from an expression using the `@` symbol.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1056,7 +1060,7 @@ lookup beans from an expression using the (@) symbol.
 	Object bean = parser.parseExpression("@foo").getValue(context);
 ----
 
-To access a factory bean itself, the bean name should instead be prefixed with a (&) symbol.
+To access a factory bean itself, the bean name should instead be prefixed with an `&` symbol.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1083,7 +1087,7 @@ the expression. A minimal example is:
 			"false ? 'trueExp' : 'falseExp'").getValue(String.class);
 ----
 
-In this case, the boolean false results in returning the string value 'falseExp'. A more
+In this case, the boolean false results in returning the string value `'falseExp'`. A more
 realistic example is shown below.
 
 [source,java,indent=0]
@@ -1117,7 +1121,7 @@ example:
 [subs="verbatim,quotes"]
 ----
 	String name = "Elvis Presley";
-	String displayName = name != null ? name : "Unknown";
+	String displayName = (name != null ? name : "Unknown");
 ----
 
 Instead you can use the Elvis operator, named for the resemblance to Elvis' hair style.
@@ -1128,8 +1132,7 @@ Instead you can use the Elvis operator, named for the resemblance to Elvis' hair
 	ExpressionParser parser = new SpelExpressionParser();
 
 	String name = parser.parseExpression("name?:'Unknown'").getValue(String.class);
-
-	System.out.println(name); // 'Unknown'
+	System.out.println(name);  // 'Unknown'
 ----
 
 Here is a more complex example.
@@ -1138,19 +1141,15 @@ Here is a more complex example.
 [subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
+	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
 
 	Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
-	SimpleEvaluationContext context = new SimpleEvaluationContext();
-
 	String name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, tesla, String.class);
-
-	System.out.println(name); // Nikola Tesla
+	System.out.println(name);  // Nikola Tesla
 
 	tesla.setName(null);
-
 	name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, tesla, String.class);
-
-	System.out.println(name); // Elvis Presley
+	System.out.println(name);  // Elvis Presley
 ----
 
 
@@ -1168,20 +1167,17 @@ safe navigation operator will simply return null instead of throwing an exceptio
 [subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
+	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
 
 	Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
 	tesla.setPlaceOfBirth(new PlaceOfBirth("Smiljan"));
 
-	SimpleEvaluationContext context = new SimpleEvaluationContext();
-
 	String city = parser.parseExpression("PlaceOfBirth?.City").getValue(context, tesla, String.class);
-	System.out.println(city); // Smiljan
+	System.out.println(city);  // Smiljan
 
 	tesla.setPlaceOfBirth(null);
-
 	city = parser.parseExpression("PlaceOfBirth?.City").getValue(context, tesla, String.class);
-
-	System.out.println(city); // null - does not throw NullPointerException!!!
+	System.out.println(city);  // null - does not throw NullPointerException!!!
 ----
 
 [NOTE]
@@ -1234,7 +1230,8 @@ where the entry value is less than 27.
 
 In addition to returning all the selected elements, it is possible to retrieve just the
 first or the last value. To obtain the first entry matching the selection the syntax is
-`^[...]` whilst to obtain the last matching selection the syntax is `$[...]`.
+`.^[selectionExpression]` whilst to obtain the last matching selection the syntax is
+`.$[selectionExpression]`.
 
 
 
@@ -1242,7 +1239,7 @@ first or the last value. To obtain the first entry matching the selection the sy
 === Collection Projection
 
 Projection allows a collection to drive the evaluation of a sub-expression and the
-result is a new collection. The syntax for projection is `![projectionExpression]`. Most
+result is a new collection. The syntax for projection is `.![projectionExpression]`. Most
 easily understood by example, suppose we have a list of inventors but want the list of
 cities where they were born. Effectively we want to evaluate 'placeOfBirth.city' for
 every entry in the inventor list. Using projection:
@@ -1278,9 +1275,9 @@ define, a common choice is to use `#{ }` as the delimiters. For example,
 	// evaluates to "random number is 0.7038186818312008"
 ----
 
-The string is evaluated by concatenating the literal text 'random number is ' with the
-result of evaluating the expression inside the #{ } delimiter, in this case the result
-of calling that random() method. The second argument to the method `parseExpression()`
+The string is evaluated by concatenating the literal text `'random number is '` with the
+result of evaluating the expression inside the `#{ }` delimiter, in this case the result
+of calling that `random()` method. The second argument to the method `parseExpression()`
 is of the type `ParserContext`. The `ParserContext` interface is used to influence how
 the expression is parsed in order to support the expression templating functionality.
 The definition of `TemplateParserContext` is shown below.

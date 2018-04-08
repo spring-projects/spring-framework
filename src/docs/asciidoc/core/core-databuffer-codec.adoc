@@ -43,6 +43,8 @@ This is different from the JDK's `ByteBuffer`, which only exposes one position f
 writing, and a separate `flip()` operation to switch between the two  I/O operations.
 In general, the following invariant holds for the read position, write position, and the capacity:
 
+[literal]
+[subs="verbatim,quotes"]
 --
 	`0` <= _read position_ <= _write position_ <= _capacity_
 --

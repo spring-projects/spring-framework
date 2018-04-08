@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -431,7 +431,8 @@ class ConfigurationClassEnhancer {
 
 		@Override
 		public boolean isMatch(Method candidateMethod) {
-			return BeanAnnotationHelper.isBeanAnnotated(candidateMethod);
+			return (candidateMethod.getDeclaringClass() != Object.class &&
+					BeanAnnotationHelper.isBeanAnnotated(candidateMethod));
 		}
 
 		private ConfigurableBeanFactory getBeanFactory(Object enhancedConfigInstance) {
@@ -562,14 +563,11 @@ class ConfigurationClassEnhancer {
 				}
 			}
 
-			((Factory) fbProxy).setCallback(0, new MethodInterceptor() {
-				@Override
-				public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
-					if (method.getName().equals("getObject") && args.length == 0) {
-						return beanFactory.getBean(beanName);
-					}
-					return proxy.invoke(factoryBean, args);
+			((Factory) fbProxy).setCallback(0, (MethodInterceptor) (obj, method, args, proxy) -> {
+				if (method.getName().equals("getObject") && args.length == 0) {
+					return beanFactory.getBean(beanName);
 				}
+				return proxy.invoke(factoryBean, args);
 			});
 
 			return fbProxy;

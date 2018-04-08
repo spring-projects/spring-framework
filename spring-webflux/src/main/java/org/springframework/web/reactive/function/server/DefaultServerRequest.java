@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -188,6 +189,16 @@ class DefaultServerRequest implements ServerRequest {
 	@Override
 	public Mono<? extends Principal> principal() {
 		return this.exchange.getPrincipal();
+	}
+
+	@Override
+	public Mono<MultiValueMap<String, String>> formData() {
+		return this.exchange.getFormData();
+	}
+
+	@Override
+	public Mono<MultiValueMap<String, Part>> multipartData() {
+		return this.exchange.getMultipartData();
 	}
 
 	private ServerHttpRequest request() {
