@@ -96,11 +96,23 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/json;charset=UTF-8}.
+	 *
+	 * <p>This {@link MediaType#APPLICATION_JSON} variant should be used to set JSON
+	 * content type because while
+	 * <a href="https://tools.ietf.org/html/rfc7159#section-11">RFC7159</a>
+	 * clearly states that "no charset parameter is defined for this registration", some
+	 * browsers require it for interpreting correctly UTF-8 special characters.
 	 */
 	public static final MediaType APPLICATION_JSON_UTF8;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_JSON_UTF8}.
+	 *
+	 * <p>This {@link MediaType#APPLICATION_JSON_VALUE} variant should be used to set JSON
+	 * content type because while
+	 * <a href="https://tools.ietf.org/html/rfc7159#section-11">RFC7159</a>
+	 * clearly states that "no charset parameter is defined for this registration", some
+	 * browsers require it for interpreting correctly UTF-8 special characters.
 	 */
 	public static final String APPLICATION_JSON_UTF8_VALUE = "application/json;charset=UTF-8";
 
