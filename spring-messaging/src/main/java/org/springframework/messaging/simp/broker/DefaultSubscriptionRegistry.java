@@ -26,7 +26,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -34,7 +33,7 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.support.SimpleEvaluationContext;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -63,6 +62,10 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 	/** Default maximum number of entries for the destination cache: 1024 */
 	public static final int DEFAULT_CACHE_LIMIT = 1024;
+
+	/** Static evaluation context to reuse */
+	private static EvaluationContext messageEvalContext =
+			SimpleEvaluationContext.forPropertyAccessors(new SimpMessageHeaderPropertyAccessor()).build();
 
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
@@ -191,7 +194,6 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		if (!this.selectorHeaderInUse) {
 			return allMatches;
 		}
-		EvaluationContext context = null;
 		MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>(allMatches.size());
 		for (String sessionId : allMatches.keySet()) {
 			for (String subId : allMatches.get(sessionId)) {
@@ -208,12 +210,8 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 					result.add(sessionId, subId);
 					continue;
 				}
-				if (context == null) {
-					context = new StandardEvaluationContext(message);
-					context.getPropertyAccessors().add(new SimpMessageHeaderPropertyAccessor());
-				}
 				try {
-					if (expression.getValue(context, boolean.class)) {
+					if (Boolean.TRUE.equals(expression.getValue(messageEvalContext, message, Boolean.class))) {
 						result.add(sessionId, subId);
 					}
 				}
@@ -525,7 +523,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		@Override
 		public Class<?>[] getSpecificTargetClasses() {
-			return new Class<?>[] {MessageHeaders.class};
+			return new Class<?>[] {Message.class, MessageHeaders.class};
 		}
 
 		@Override
@@ -534,19 +532,29 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		}
 
 		@Override
-		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-			MessageHeaders headers = (MessageHeaders) target;
-			SimpMessageHeaderAccessor accessor =
-					MessageHeaderAccessor.getAccessor(headers, SimpMessageHeaderAccessor.class);
+		public TypedValue read(EvaluationContext context, Object target, String name) {
 			Object value;
-			if ("destination".equalsIgnoreCase(name)) {
-				value = accessor.getDestination();
+			if (target instanceof Message) {
+				value = name.equals("headers") ? ((Message) target).getHeaders() : null;
+			}
+			else if (target instanceof MessageHeaders) {
+				MessageHeaders headers = (MessageHeaders) target;
+				SimpMessageHeaderAccessor accessor =
+						MessageHeaderAccessor.getAccessor(headers, SimpMessageHeaderAccessor.class);
+				Assert.state(accessor != null, "No SimpMessageHeaderAccessor");
+				if ("destination".equalsIgnoreCase(name)) {
+					value = accessor.getDestination();
+				}
+				else {
+					value = accessor.getFirstNativeHeader(name);
+					if (value == null) {
+						value = headers.get(name);
+					}
+				}
 			}
 			else {
-				value = accessor.getFirstNativeHeader(name);
-				if (value == null) {
-					value = headers.get(name);
-				}
+				// Should never happen...
+				throw new IllegalStateException("Expected Message or MessageHeaders.");
 			}
 			return new TypedValue(value);
 		}
