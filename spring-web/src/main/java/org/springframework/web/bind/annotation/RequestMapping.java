@@ -193,10 +193,10 @@ public @interface RequestMapping {
 	 * <pre class="code">
 	 * produces = "text/plain"
 	 * produces = {"text/plain", "application/*"}
-	 * produces = "application/json; charset=UTF-8"
+	 * produces = MediaType.APPLICATION_JSON_UTF8_VALUE
 	 * </pre>
 	 * <p>It affects the actual content type written, for example to produce a JSON response
-	 * with UTF-8 encoding, {@code "application/json; charset=UTF-8"} should be used.
+	 * with UTF-8 encoding, {@link org.springframework.http.MediaType#APPLICATION_JSON_UTF8_VALUE} should be used.
 	 * <p>Expressions can be negated by using the "!" operator, as in "!text/plain", which matches
 	 * all requests with a {@code Accept} other than "text/plain".
 	 * <p><b>Supported at the type level as well as at the method level!</b>

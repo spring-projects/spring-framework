@@ -1425,7 +1425,7 @@ will overrides rather than extend the class level declaration.
 [TIP]
 ====
 `MediaType` provides constants for commonly used media types -- e.g.
-`APPLICATION_JSON_VALUE`, `APPLICATION_JSON_UTF8_VALUE`.
+`APPLICATION_JSON_VALUE`, `APPLICATION_XML_VALUE`.
 ====
 
 
@@ -1449,6 +1449,14 @@ content types that a controller method produces:
 The media type can specify a character set. Negated expressions are supported -- e.g.
 `!text/plain` means any content type other than "text/plain".
 
+[NOTE]
+====
+For JSON content type, the UTF-8 charset should be specified even if
+https://tools.ietf.org/html/rfc7159#section-11[RFC7159]
+clearly states that "no charset parameter is defined for this registration" because some
+browsers require it for interpreting correctly UTF-8 special characters.
+====
+
 You can declare a shared produces attribute at the class level. Unlike most other request
 mapping attributes however when used at the class level, a method-level produces attribute
 will overrides rather than extend the class level declaration.
@@ -1456,7 +1464,7 @@ will overrides rather than extend the class level declaration.
 [TIP]
 ====
 `MediaType` provides constants for commonly used media types -- e.g.
-`APPLICATION_JSON_VALUE`, `APPLICATION_JSON_UTF8_VALUE`.
+`APPLICATION_JSON_UTF8_VALUE`, `APPLICATION_XML_VALUE`.
 ====
 
 
