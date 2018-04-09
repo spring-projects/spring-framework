@@ -166,11 +166,11 @@ type `Bar` may or may not exist. The same behavior applies to autowired construc
 
 [NOTE]
 ====
-If you are using bean validation on classes with
-https://kotlinlang.org/docs/reference/classes.html#constructors[primary constructor properties],
-make sure to use
+If you are using bean validation on classes with properties or a primary constructor
+parameters, you may need to leverage
 https://kotlinlang.org/docs/reference/annotations.html#annotation-use-site-targets[annotation use-site targets]
-as described in https://stackoverflow.com/a/35853200/1092077[this Stack Overflow response].
+like `@field:NotNull` or `@get:Size(min=5, max=15)` as described in
+https://stackoverflow.com/a/35853200/1092077[this Stack Overflow response].
 ====
 
 
