@@ -63,7 +63,7 @@ overwhelm its destination.
 
 Reactive Streams is a
 https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.1/README.md#specification[small spec],
-also http://download.java.net/java/jdk9/docs/api/java/util/concurrent/Flow.html[adopted] in Java 9,
+also https://docs.oracle.com/javase/9/docs/api/java/util/concurrent/Flow.html[adopted] in Java 9,
 that defines the interaction between asynchronous components with back pressure.
 For example a data repository -- acting as
 http://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/org/reactivestreams/Publisher.html[Publisher],
