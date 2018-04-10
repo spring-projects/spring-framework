@@ -126,6 +126,7 @@ public abstract class AnnotationUtils {
 	private static final Map<Class<?>, Set<Method>> annotatedBaseTypeCache =
 			new ConcurrentReferenceHashMap<>(256);
 
+	@SuppressWarnings("unused")
 	@Deprecated  // just here for older tool versions trying to reflectively clear the cache
 	private static final Map<Class<?>, ?> annotatedInterfaceCache = annotatedBaseTypeCache;
 
