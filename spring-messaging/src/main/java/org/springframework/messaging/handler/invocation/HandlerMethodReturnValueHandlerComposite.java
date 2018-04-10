@@ -71,9 +71,7 @@ public class HandlerMethodReturnValueHandlerComposite implements AsyncHandlerMet
 			@Nullable List<? extends HandlerMethodReturnValueHandler> handlers) {
 
 		if (handlers != null) {
-			for (HandlerMethodReturnValueHandler handler : handlers) {
-				this.returnValueHandlers.add(handler);
-			}
+			this.returnValueHandlers.addAll(handlers);
 		}
 		return this;
 	}
@@ -85,7 +83,9 @@ public class HandlerMethodReturnValueHandlerComposite implements AsyncHandlerMet
 
 	@Nullable
 	private HandlerMethodReturnValueHandler getReturnValueHandler(MethodParameter returnType) {
-		for (HandlerMethodReturnValueHandler handler : this.returnValueHandlers) {
+		// Avoid allocating an iterator
+		for (int i = 0, size = this.returnValueHandlers.size(); i < size; i++) {
+			HandlerMethodReturnValueHandler handler = this.returnValueHandlers.get(i);
 			if (handler.supportsReturnType(returnType)) {
 				return handler;
 			}
