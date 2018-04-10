@@ -88,11 +88,15 @@ public class MockServerRequest implements ServerRequest {
 	@Nullable
 	private Principal principal;
 
+	@Nullable
+	private final InetSocketAddress remoteAddress;
+
 
 	private MockServerRequest(HttpMethod method, URI uri, String contextPath, MockHeaders headers,
 			MultiValueMap<String, HttpCookie> cookies, @Nullable Object body,
 			Map<String, Object> attributes, MultiValueMap<String, String> queryParams,
-			Map<String, String> pathVariables, @Nullable WebSession session, @Nullable Principal principal) {
+			Map<String, String> pathVariables, @Nullable WebSession session, @Nullable Principal principal,
+			@Nullable InetSocketAddress remoteAddress) {
 
 		this.method = method;
 		this.uri = uri;
@@ -105,6 +109,7 @@ public class MockServerRequest implements ServerRequest {
 		this.pathVariables = pathVariables;
 		this.session = session;
 		this.principal = principal;
+		this.remoteAddress = remoteAddress;
 	}
 
 
@@ -141,6 +146,11 @@ public class MockServerRequest implements ServerRequest {
 	@Override
 	public MultiValueMap<String, HttpCookie> cookies() {
 		return this.cookies;
+	}
+
+	@Override
+	public Optional<InetSocketAddress> remoteAddress() {
+		return Optional.ofNullable(this.remoteAddress);
 	}
 
 	@Override
@@ -262,7 +272,15 @@ public class MockServerRequest implements ServerRequest {
 
 		Builder session(WebSession session);
 
+		/**
+		 * @deprecated  in favor of {@link #principal(Principal)}
+		 */
+		@Deprecated
 		Builder session(Principal principal);
+
+		Builder principal(Principal principal);
+
+		Builder remoteAddress(InetSocketAddress remoteAddress);
 
 		MockServerRequest body(Object body);
 
@@ -296,6 +314,9 @@ public class MockServerRequest implements ServerRequest {
 
 		@Nullable
 		private Principal principal;
+
+		@Nullable
+		private InetSocketAddress remoteAddress;
 
 		@Override
 		public Builder method(HttpMethod method) {
@@ -401,8 +422,20 @@ public class MockServerRequest implements ServerRequest {
 
 		@Override
 		public Builder session(Principal principal) {
+			return principal(principal);
+		}
+
+		@Override
+		public Builder principal(Principal principal) {
 			Assert.notNull(principal, "'principal' must not be null");
 			this.principal = principal;
+			return this;
+		}
+
+		@Override
+		public Builder remoteAddress(InetSocketAddress remoteAddress) {
+			Assert.notNull(remoteAddress, "'remoteAddress' must not be null");
+			this.remoteAddress = remoteAddress;
 			return this;
 		}
 
@@ -411,14 +444,14 @@ public class MockServerRequest implements ServerRequest {
 			this.body = body;
 			return new MockServerRequest(this.method, this.uri, this.contextPath, this.headers,
 					this.cookies, this.body, this.attributes, this.queryParams, this.pathVariables,
-					this.session, this.principal);
+					this.session, this.principal, this.remoteAddress);
 		}
 
 		@Override
 		public MockServerRequest build() {
 			return new MockServerRequest(this.method, this.uri, this.contextPath, this.headers,
 					this.cookies, null, this.attributes, this.queryParams, this.pathVariables,
-					this.session, this.principal);
+					this.session, this.principal, this.remoteAddress);
 		}
 	}
 

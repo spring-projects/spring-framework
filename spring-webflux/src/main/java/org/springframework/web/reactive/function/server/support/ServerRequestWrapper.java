@@ -117,6 +117,11 @@ public class ServerRequestWrapper implements ServerRequest {
 	}
 
 	@Override
+	public Optional<InetSocketAddress> remoteAddress() {
+		return this.delegate.remoteAddress();
+	}
+
+	@Override
 	public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor) {
 		return this.delegate.body(extractor);
 	}

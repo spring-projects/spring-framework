@@ -117,6 +117,11 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@Override
+	public Optional<InetSocketAddress> remoteAddress() {
+		return Optional.ofNullable(request().getRemoteAddress());
+	}
+
+	@Override
 	public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor) {
 		return body(extractor, Collections.emptyMap());
 	}

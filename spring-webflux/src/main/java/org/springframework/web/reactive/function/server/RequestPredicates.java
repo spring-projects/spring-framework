@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function.server;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -511,6 +512,11 @@ public abstract class RequestPredicates {
 		@Override
 		public MultiValueMap<String, HttpCookie> cookies() {
 			return this.request.cookies();
+		}
+
+		@Override
+		public Optional<InetSocketAddress> remoteAddress() {
+			return this.request.remoteAddress();
 		}
 
 		@Override

@@ -115,6 +115,12 @@ public interface ServerRequest {
 	MultiValueMap<String, HttpCookie> cookies();
 
 	/**
+	 * Return the remote address where this request is connected to, if available.
+	 * @since 5.1
+	 */
+	Optional<InetSocketAddress> remoteAddress();
+
+	/**
 	 * Extract the body with the given {@code BodyExtractor}.
 	 * @param extractor the {@code BodyExtractor} that reads from the request
 	 * @param <T> the type of the body returned
