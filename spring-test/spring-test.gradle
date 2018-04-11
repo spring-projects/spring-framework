@@ -35,7 +35,7 @@ dependencies {
 	optional("javax.websocket:javax.websocket-api:1.1")
 	optional("junit:junit:4.12")
 	optional("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
-	optional("org.testng:testng:6.14.2")
+	optional("org.testng:testng:6.14.3")
 	optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 	optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 	optional("org.hamcrest:hamcrest-core:1.3")
