@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,11 +42,26 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	private final Map<PathPattern, CorsConfiguration> corsConfigurations;
 
 	private final PathPatternParser patternParser;
-	
+
+
+	/**
+	 * Construct a new {@code UrlBasedCorsConfigurationSource} instance with default
+	 * {@code PathPatternParser}.
+	 * @since 5.0.6
+	 */
+	public UrlBasedCorsConfigurationSource() {
+		this(new PathPatternParser());
+	}
+
+	/**
+	 * Construct a new {@code UrlBasedCorsConfigurationSource} instance from the supplied
+	 * {@code PathPatternParser}.
+	 */
 	public UrlBasedCorsConfigurationSource(PathPatternParser patternParser) {
 		this.corsConfigurations = new LinkedHashMap<>();
 		this.patternParser = patternParser;
 	}
+
 
 	/**
 	 * Set CORS configuration based on URL patterns.
