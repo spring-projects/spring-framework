@@ -46,7 +46,6 @@ import test.aop.PerTargetAspect;
 import test.aop.TwoAdviceAspect;
 
 import org.springframework.aop.Advisor;
-import org.springframework.aop.aspectj.annotation.ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.ProxyFactory;
@@ -114,7 +113,8 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		assertEquals("Around advice must NOT apply", realAge, itb.getAge());
 
 		Advised advised = (Advised) itb;
-		SyntheticInstantiationAdvisor sia = (SyntheticInstantiationAdvisor) advised.getAdvisors()[1];
+		ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor sia =
+				(ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor) advised.getAdvisors()[1];
 		assertTrue(sia.getPointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
 		InstantiationModelAwarePointcutAdvisorImpl imapa = (InstantiationModelAwarePointcutAdvisorImpl) advised.getAdvisors()[3];
 		LazySingletonAspectInstanceFactoryDecorator maaif =
@@ -201,7 +201,8 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		Advised advised = (Advised) itb;
 		// Will be ExposeInvocationInterceptor, synthetic instantiation advisor, 2 method advisors
 		assertEquals(4, advised.getAdvisors().length);
-		SyntheticInstantiationAdvisor sia = (SyntheticInstantiationAdvisor) advised.getAdvisors()[1];
+		ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor sia =
+				(ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor) advised.getAdvisors()[1];
 		assertTrue(sia.getPointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
 		InstantiationModelAwarePointcutAdvisorImpl imapa = (InstantiationModelAwarePointcutAdvisorImpl) advised.getAdvisors()[2];
 		LazySingletonAspectInstanceFactoryDecorator maaif =
@@ -236,7 +237,8 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		Advised advised = (Advised) itb;
 		// Will be ExposeInvocationInterceptor, synthetic instantiation advisor, 2 method advisors
 		assertEquals(4, advised.getAdvisors().length);
-		SyntheticInstantiationAdvisor sia = (SyntheticInstantiationAdvisor) advised.getAdvisors()[1];
+		ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor sia =
+				(ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor) advised.getAdvisors()[1];
 		assertTrue(sia.getPointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
 		InstantiationModelAwarePointcutAdvisorImpl imapa = (InstantiationModelAwarePointcutAdvisorImpl) advised.getAdvisors()[2];
 		LazySingletonAspectInstanceFactoryDecorator maaif =
@@ -369,9 +371,9 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 	@Test
 	public void testIntroductionAdvisorExcludedFromTargetImplementingInterface() {
 		assertTrue(AopUtils.findAdvisorsThatCanApply(
-						getFixture().getAdvisors(
-									new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable(), "someBean")),
-						CannotBeUnlocked.class).isEmpty());
+				getFixture().getAdvisors(
+						new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable(), "someBean")),
+				CannotBeUnlocked.class).isEmpty());
 		assertEquals(2, AopUtils.findAdvisorsThatCanApply(getFixture().getAdvisors(
 				new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable(),"someBean")), NotLockable.class).size());
 	}
@@ -699,6 +701,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 
 	@Aspect
 	public static class NamedPointcutAspectWithoutFQN {
+
 		@Pointcut("execution(* getAge())")
 		public void getAge() {
 		}
@@ -755,7 +758,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 
 		@Around(value="setAge(age)",argNames="age")
 		// @ArgNames({"age"})	// AMC needs more work here? ignoring pjp arg... ok??
-								// argNames should be suported in Around as it is in Pointcut
+		// argNames should be suported in Around as it is in Pointcut
 		public void changeReturnType(ProceedingJoinPoint pjp, int age) throws Throwable {
 			pjp.proceed(new Object[] {age*2});
 		}
@@ -764,12 +767,12 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 
 	@Aspect
 	public static class ManyValuedArgs {
+
 		public String mungeArgs(String a, int b, int c, String d, StringBuffer e) {
 			return a + b + c + d + e;
 		}
 
-		@Around(value="execution(String mungeArgs(..)) && args(a, b, c, d, e)",
-				argNames="b,c,d,e,a")
+		@Around(value="execution(String mungeArgs(..)) && args(a, b, c, d, e)", argNames="b,c,d,e,a")
 		public String reverseAdvice(ProceedingJoinPoint pjp, int b, int c, String d, StringBuffer e, String a) throws Throwable {
 			assertEquals(a + b+ c+ d+ e, pjp.proceed());
 			return a + b + c + d + e;
@@ -779,6 +782,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 
 	@Aspect
 	public static class ExceptionAspect {
+
 		private final Exception ex;
 
 		public ExceptionAspect(Exception ex) {
@@ -805,8 +809,11 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 
 	@Aspect
 	public static class ExceptionHandling {
+
 		public int successCount;
+
 		public int failureCount;
+
 		public int afterCount;
 
 		@AfterReturning("execution(* echo(*))")
@@ -878,10 +885,12 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 abstract class AbstractMakeModifiable {
 
 	public interface MutableModifable extends Modifiable {
+
 		void markDirty();
 	}
 
 	public static class ModifiableImpl implements MutableModifable {
+
 		private boolean modified;
 
 		@Override
@@ -900,10 +909,9 @@ abstract class AbstractMakeModifiable {
 		}
 	}
 
-	@Before(value="execution(void set*(*)) && this(modifiable) && args(newValue)",
-			argNames="modifiable,newValue")
-	public void recordModificationIfSetterArgumentDiffersFromOldValue(JoinPoint jp,
-		MutableModifable mixin, Object newValue) {
+	@Before(value="execution(void set*(*)) && this(modifiable) && args(newValue)", argNames="modifiable,newValue")
+	public void recordModificationIfSetterArgumentDiffersFromOldValue(
+			JoinPoint jp, MutableModifable mixin, Object newValue) {
 
 		/*
 		 * We use the mixin to check and, if necessary, change,
@@ -968,6 +976,7 @@ class MakeITestBeanModifiable extends AbstractMakeModifiable {
 
 }
 
+
 /**
  * Adds a declare parents pointcut - spr5307
  * @author Andy Clement
@@ -977,8 +986,7 @@ class MakeITestBeanModifiable extends AbstractMakeModifiable {
 class MakeAnnotatedTypeModifiable extends AbstractMakeModifiable {
 
 	@DeclareParents(value = "(@org.springframework.aop.aspectj.annotation.Measured *)",
-//	@DeclareParents(value = "(@Measured *)", // this would be a nice alternative...
-			defaultImpl=DefaultLockable.class)
+			defaultImpl = DefaultLockable.class)
 	public static Lockable mixin;
 
 }
@@ -990,8 +998,7 @@ class MakeAnnotatedTypeModifiable extends AbstractMakeModifiable {
 @Aspect
 class MakeLockable {
 
-	@DeclareParents(value = "org.springframework..*",
-			defaultImpl=DefaultLockable.class)
+	@DeclareParents(value = "org.springframework..*", defaultImpl = DefaultLockable.class)
 	public static Lockable mixin;
 
 	@Before(value="execution(void set*(*)) && this(mixin)", argNames="mixin")
@@ -1043,6 +1050,7 @@ interface Modifiable {
 
 }
 
+
 /**
  * Used as a target.
  * @author Andy Clement
@@ -1050,10 +1058,11 @@ interface Modifiable {
 interface AnnotatedTarget {
 }
 
+
 @Measured
 class AnnotatedTargetImpl implements AnnotatedTarget {
-
 }
+
 
 @Retention(RetentionPolicy.RUNTIME)
 @interface Measured {}
@@ -1078,9 +1087,7 @@ class PerThisAspect {
 
 	public int count;
 
-	/**
-	 * Just to check that this doesn't cause problems with introduction processing
-	 */
+	// Just to check that this doesn't cause problems with introduction processing
 	private ITestBean fieldThatShouldBeIgnoredBySpringAtAspectJProcessing = new TestBean();
 
 	@Around("execution(int *.getAge())")
