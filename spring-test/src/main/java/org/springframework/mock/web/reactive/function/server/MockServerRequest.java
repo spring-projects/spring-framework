@@ -273,7 +273,7 @@ public class MockServerRequest implements ServerRequest {
 		Builder session(WebSession session);
 
 		/**
-		 * @deprecated  in favor of {@link #principal(Principal)}
+		 * @deprecated in favor of {@link #principal(Principal)}
 		 */
 		@Deprecated
 		Builder session(Principal principal);
@@ -421,6 +421,7 @@ public class MockServerRequest implements ServerRequest {
 		}
 
 		@Override
+		@Deprecated
 		public Builder session(Principal principal) {
 			return principal(principal);
 		}
@@ -541,6 +542,5 @@ public class MockServerRequest implements ServerRequest {
 			return MockServerRequest.this.headers.headers;
 		}
 	}
-
 
 }
