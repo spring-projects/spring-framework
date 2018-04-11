@@ -126,6 +126,7 @@ public abstract class AnnotationUtils {
 	private static final Map<Class<?>, Set<Method>> annotatedBaseTypeCache =
 			new ConcurrentReferenceHashMap<>(256);
 
+	@SuppressWarnings("unused")
 	@Deprecated  // just here for older tool versions trying to reflectively clear the cache
 	private static final Map<Class<?>, ?> annotatedInterfaceCache = annotatedBaseTypeCache;
 
@@ -165,7 +166,8 @@ public abstract class AnnotationUtils {
 		}
 		Class<? extends Annotation> annotatedElement = annotation.annotationType();
 		try {
-			return synthesizeAnnotation(annotatedElement.getAnnotation(annotationType), annotatedElement);
+			A metaAnn = annotatedElement.getAnnotation(annotationType);
+			return (metaAnn != null ? synthesizeAnnotation(metaAnn, annotatedElement) : null);
 		}
 		catch (Throwable ex) {
 			handleIntrospectionFailure(annotatedElement, ex);
