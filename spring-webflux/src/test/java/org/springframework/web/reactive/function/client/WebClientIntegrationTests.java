@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,9 +48,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.Pojo;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Integration tests using a {@link ExchangeFunction} through {@link WebClient}.
@@ -145,20 +143,23 @@ public class WebClientIntegrationTests {
 		});
 	}
 
-	@Test
+	@Test // SPR-16715
 	public void shouldReceiveJsonAsTypeReferenceString() throws Exception {
-		String content = "{\"bar\":\"barbar\",\"foo\":\"foofoo\"}";
+		String content = "{\"containerValue\":{\"fooValue\":\"bar\"}}";
 		prepareResponse(response -> response
 				.setHeader("Content-Type", "application/json").setBody(content));
 
-		Mono<String> result = this.webClient.get()
+		Mono<ValueContainer<Foo>> result = this.webClient.get()
 				.uri("/json").accept(MediaType.APPLICATION_JSON)
 				.retrieve()
-				.bodyToMono(new ParameterizedTypeReference<String>() {
-				});
+				.bodyToMono(new ParameterizedTypeReference<ValueContainer<Foo>>() {});
 
 		StepVerifier.create(result)
-				.expectNext(content)
+				.assertNext(valueContainer -> {
+					Foo foo = valueContainer.getContainerValue();
+					assertNotNull(foo);
+					assertEquals("bar", foo.getFooValue());
+				})
 				.expectComplete().verify(Duration.ofSeconds(3));
 
 		expectRequestCount(1);
@@ -648,6 +649,35 @@ public class WebClientIntegrationTests {
 
 		MyException(String message) {
 			super(message);
+		}
+	}
+
+
+	static class ValueContainer<T> {
+
+		private T containerValue;
+
+
+		public T getContainerValue() {
+			return containerValue;
+		}
+
+		public void setContainerValue(T containerValue) {
+			this.containerValue = containerValue;
+		}
+	}
+
+	static class Foo {
+
+		private String fooValue;
+
+
+		public String getFooValue() {
+			return fooValue;
+		}
+
+		public void setFooValue(String fooValue) {
+			this.fooValue = fooValue;
 		}
 	}
 
