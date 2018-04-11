@@ -84,7 +84,7 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private Collection<String> destinationPrefixes = new ArrayList<>();
+	private final List<String> destinationPrefixes = new ArrayList<>();
 
 	private final List<HandlerMethodArgumentResolver> customArgumentResolvers = new ArrayList<>(4);
 
@@ -428,7 +428,9 @@ public abstract class AbstractMethodMessageHandler<T>
 		if (CollectionUtils.isEmpty(this.destinationPrefixes)) {
 			return destination;
 		}
-		for (String prefix : this.destinationPrefixes) {
+		// Avoid unnecessary iterator allocation
+		for (int i = 0, size = this.destinationPrefixes.size(); i < size; i++) {
+			String prefix = this.destinationPrefixes.get(i);
 			if (destination.startsWith(prefix)) {
 				return destination.substring(prefix.length());
 			}
