@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -212,7 +212,7 @@ public abstract class AbstractAopProxyTests {
 	}
 
 	@Test
-	public void testSerializationSerializableTargetAndAdvice() throws Throwable {
+	public void testSerializableTargetAndAdvice() throws Throwable {
 		SerializablePerson personTarget = new SerializablePerson();
 		personTarget.setName("jim");
 		personTarget.setAge(26);
@@ -435,7 +435,7 @@ public abstract class AbstractAopProxyTests {
 		TestBean raw = new OwnSpouse();
 
 		ProxyCreatorSupport pc = new ProxyCreatorSupport();
-		pc.setInterfaces(new Class<?>[] {ITestBean.class});
+		pc.setInterfaces(ITestBean.class);
 		pc.setTarget(raw);
 
 		ITestBean tb = (ITestBean) createProxy(pc);
@@ -457,7 +457,7 @@ public abstract class AbstractAopProxyTests {
 		pc.addAdvice(mi);
 
 		// We don't care about the object
-		mockTargetSource.setTarget(new Object());
+		mockTargetSource.setTarget(new TestBean());
 		pc.setTargetSource(mockTargetSource);
 		AopProxy aop = createAopProxy(pc);
 

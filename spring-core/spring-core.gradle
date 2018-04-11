@@ -40,7 +40,7 @@ task cglibRepackJar(type: Jar) { repackJar ->
 				}
 				// Repackage net.sf.cglib => org.springframework.cglib
 				rule(pattern: "net.sf.cglib.**", result: "org.springframework.cglib.@1")
-				// As mentioned above, transform cglib"s internal asm dependencies from
+				// As mentioned above, transform cglib's internal asm dependencies from
 				// org.objectweb.asm => org.springframework.asm. Doing this counts on the
 				// the fact that Spring and cglib depend on the same version of asm!
 				rule(pattern: "org.objectweb.asm.**", result: "org.springframework.asm.@1")
@@ -98,6 +98,11 @@ jar {
 	dependsOn cglibRepackJar
 	from(zipTree(cglibRepackJar.archivePath)) {
 		include "org/springframework/cglib/**"
+		exclude "org/springframework/cglib/core/AbstractClassGenerator*.class"
+		exclude "org/springframework/cglib/core/KeyFactory*.class"
+		exclude "org/springframework/cglib/core/ReflectUtils*.class"
+		exclude "org/springframework/cglib/proxy/Enhancer*.class"
+		exclude "org/springframework/cglib/proxy/MethodProxy*.class"
 	}
 
 	dependsOn objenesisRepackJar
