@@ -62,6 +62,7 @@ dependencies {
 	optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+	optional("org.eclipse.jetty:jetty-reactive-httpclient:1.0.0")
 	testCompile("io.projectreactor:reactor-test")
 	testCompile("org.apache.taglibs:taglibs-standard-jstlel:1.2.5") {
 		exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"

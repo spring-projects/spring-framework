@@ -12,7 +12,10 @@ server <<web-reactive.adoc#webflux-fn,functional web framework>>.
 The API exposes Reactor `Flux` and `Mono` types, also see
 <<web-reactive.adoc#webflux-reactive-libraries>>. By default it uses
 it uses https://github.com/reactor/reactor-netty[Reactor Netty] as the HTTP client
-library but others can be plugged in through a custom `ClientHttpConnector`.
+library and
+https://github.com/jetty-project/jetty-reactive-httpclient[Jetty ReactiveStreams HttpClient]
+is supported as well via `JettyClientHttpConnector`, but others can be plugged in
+through a custom `ClientHttpConnector`.
 
 By comparison to the <<integration.adoc#rest-resttemplate,RestTemplate>>, the
 `WebClient` is:

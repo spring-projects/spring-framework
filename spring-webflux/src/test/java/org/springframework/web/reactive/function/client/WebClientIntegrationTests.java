@@ -32,6 +32,8 @@ import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -46,6 +48,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.client.reactive.JettyClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.Pojo;
 
 import static org.junit.Assert.*;
@@ -56,18 +61,35 @@ import static org.junit.Assert.*;
  * @author Brian Clozel
  * @author Rossen Stoyanchev
  * @author Denys Ivano
+ * @author Sebastien Deleuze
  */
+@RunWith(Parameterized.class)
 public class WebClientIntegrationTests {
 
 	private MockWebServer server;
 
 	private WebClient webClient;
 
+	@Parameterized.Parameter(0)
+	public ClientHttpConnector connector;
+
+	@Parameterized.Parameters(name = "webClient [{0}]")
+	public static Object[][] arguments() {
+
+		return new Object[][] {
+				{new JettyClientHttpConnector()},
+				{new ReactorClientHttpConnector()}
+		};
+	}
 
 	@Before
 	public void setup() {
 		this.server = new MockWebServer();
-		this.webClient = WebClient.create(this.server.url("/").toString());
+		this.webClient = WebClient
+				.builder()
+				.clientConnector(this.connector)
+				.baseUrl(this.server.url("/").toString())
+				.build();
 	}
 
 	@After
@@ -111,6 +133,28 @@ public class WebClientIntegrationTests {
 				.header("X-Test-Header", "testvalue")
 				.retrieve()
 				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectNext("Hello Spring!")
+				.expectComplete().verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertEquals("testvalue", request.getHeader("X-Test-Header"));
+			assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
+			assertEquals("/greeting?name=Spring", request.getPath());
+		});
+	}
+
+	@Test
+	public void shouldReceivePlainTextFlux() throws Exception {
+		prepareResponse(response -> response.setBody("Hello Spring!"));
+
+		Flux<String> result = this.webClient.get()
+				.uri("/greeting?name=Spring")
+				.header("X-Test-Header", "testvalue")
+				.exchange()
+				.flatMapMany(response -> response.bodyToFlux(String.class));
 
 		StepVerifier.create(result)
 				.expectNext("Hello Spring!")
