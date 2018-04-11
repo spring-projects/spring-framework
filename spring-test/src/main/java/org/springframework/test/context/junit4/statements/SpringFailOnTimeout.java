@@ -91,15 +91,15 @@ public class SpringFailOnTimeout extends Statement {
 			Exception failure = null;
 			try {
 				this.next.evaluate();
-			} catch (Exception e){
-				failure = e;
+			} catch (Exception ex){
+				failure = ex;
 			}
 			finally {
 				long elapsed = System.currentTimeMillis() - startTime;
 				if (elapsed > this.timeout) {
 					TimeoutException timeoutException = new TimeoutException(
 							String.format("Test took %s ms; limit was %s ms.", elapsed, this.timeout));
-					if(failure != null && timeoutException.getCause() == null){
+					if (failure != null) {
 						timeoutException.initCause(failure);
 					}
 					throw timeoutException;
