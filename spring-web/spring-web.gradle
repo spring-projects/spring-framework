@@ -29,6 +29,7 @@ dependencies {
 	optional("io.netty:netty-all")
 	optional("io.projectreactor.netty:reactor-netty")
 	optional("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
+	optional("org.eclipse.jetty:jetty-reactive-httpclient:1.0.0")
 	optional("org.eclipse.jetty:jetty-server:${jettyVersion}") {
 		exclude group: "javax.servlet", module: "javax.servlet-api"
 	}
