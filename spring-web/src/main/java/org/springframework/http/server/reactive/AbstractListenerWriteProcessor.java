@@ -193,6 +193,12 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 		return result;
 	}
 
+	private void changeStateToReceived(State oldState) {
+		if (changeState(oldState, State.RECEIVED)) {
+			writeIfPossible();
+		}
+	}
+
 	private void changeStateToComplete(State oldState) {
 		if (changeState(oldState, State.COMPLETED)) {
 			writingComplete();
@@ -255,9 +261,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 				}
 				else {
 					processor.dataReceived(data);
-					if (processor.changeState(this, RECEIVED)) {
-						processor.writeIfPossible();
-					}
+					processor.changeStateToReceived(this);
 				}
 			}
 			@Override
@@ -286,13 +290,8 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 								}
 							}
 						}
-						else if (processor.changeState(WRITING, RECEIVED)) {
-							if (processor.subscriberCompleted) {
-								processor.changeStateToComplete(RECEIVED);
-							}
-							else {
-								processor.writeIfPossible();
-							}
+						else {
+							processor.changeStateToReceived(WRITING);
 						}
 					}
 					catch (IOException ex) {
