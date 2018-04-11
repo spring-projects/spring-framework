@@ -166,7 +166,8 @@ public abstract class AnnotationUtils {
 		}
 		Class<? extends Annotation> annotatedElement = annotation.annotationType();
 		try {
-			return synthesizeAnnotation(annotatedElement.getAnnotation(annotationType), annotatedElement);
+			A metaAnn = annotatedElement.getAnnotation(annotationType);
+			return (metaAnn != null ? synthesizeAnnotation(metaAnn, annotatedElement) : null);
 		}
 		catch (Throwable ex) {
 			handleIntrospectionFailure(annotatedElement, ex);
