@@ -218,11 +218,6 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 		}
 
 		@Override
-		protected void writingPaused() {
-			this.channel.suspendWrites();
-		}
-
-		@Override
 		protected void writingComplete() {
 			this.channel.getWriteSetter().set(null);
 			this.channel.resumeWrites();
