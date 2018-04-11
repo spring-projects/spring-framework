@@ -99,7 +99,8 @@ jar {
 	from(zipTree(cglibRepackJar.archivePath)) {
 		include "org/springframework/cglib/**"
 		exclude "org/springframework/cglib/core/AbstractClassGenerator*.class"
-		exclude "org/springframework/cglib/core/KeyFactory*.class"
+		exclude "org/springframework/cglib/core/KeyFactory.class"
+		exclude "org/springframework/cglib/core/KeyFactory\$*.class"
 		exclude "org/springframework/cglib/core/ReflectUtils*.class"
 		exclude "org/springframework/cglib/proxy/Enhancer*.class"
 		exclude "org/springframework/cglib/proxy/MethodProxy*.class"
