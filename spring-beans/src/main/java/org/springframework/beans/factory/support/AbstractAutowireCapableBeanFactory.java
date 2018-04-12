@@ -727,7 +727,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 						Class<?> returnType = AutowireUtils.resolveReturnTypeForFactoryMethod(
 								factoryMethod, args, getBeanClassLoader());
 						if (returnType != null) {
-							uniqueCandidate = (commonType == null ? factoryMethod : null);
+							uniqueCandidate = (commonType == null && returnType == factoryMethod.getReturnType() ?
+									factoryMethod : null);
 							commonType = ClassUtils.determineCommonAncestor(returnType, commonType);
 							if (commonType == null) {
 								// Ambiguous return types found: return null to indicate "not determinable".
@@ -752,12 +753,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 		}
 
-		if (commonType != null) {
-			// Clear return type found: all factory methods return same type.
-			mbd.factoryMethodReturnType = (uniqueCandidate != null ?
-					ResolvableType.forMethodReturnType(uniqueCandidate) : ResolvableType.forClass(commonType));
+		if (commonType == null) {
+			return null;
 		}
-		return commonType;
+		// Common return type found: all factory methods return same type. For a non-parameterized
+		// unique candidate, cache the full type declaration context of the target factory method.
+		cachedReturnType = (uniqueCandidate != null ?
+				ResolvableType.forMethodReturnType(uniqueCandidate) : ResolvableType.forClass(commonType));
+		mbd.factoryMethodReturnType = cachedReturnType;
+		return cachedReturnType.resolve();
 	}
 
 	/**
