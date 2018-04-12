@@ -25,10 +25,12 @@ import java.sql.Clob;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,6 +62,12 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.jdbc.core.support.SqlLobValue
  */
 public abstract class StatementCreatorUtils {
+
+	/**
+	 * 
+	 */
+	private static final String PG_TIMESTAMP_CLASS = "org.postgresql.util.PGTimestamp";
+
 
 	/**
 	 * System property that instructs Spring to ignore {@link java.sql.ParameterMetaData#getParameterType}
@@ -378,17 +386,15 @@ public abstract class StatementCreatorUtils {
 			}
 		}
 		else if (sqlType == Types.TIMESTAMP) {
+			String databaseProductName = ps.getConnection().getMetaData().getDatabaseProductName();
 			if (inValue instanceof java.util.Date) {
-				if (inValue instanceof java.sql.Timestamp) {
-					ps.setTimestamp(paramIndex, (java.sql.Timestamp) inValue);
-				}
-				else {
-					ps.setTimestamp(paramIndex, new java.sql.Timestamp(((java.util.Date) inValue).getTime()));
-				}
+				ps.setTimestamp(paramIndex,
+							getTimeStamp(databaseProductName,(Date) inValue));
 			}
 			else if (inValue instanceof Calendar) {
 				Calendar cal = (Calendar) inValue;
-				ps.setTimestamp(paramIndex, new java.sql.Timestamp(cal.getTime().getTime()), cal);
+				ps.setTimestamp(paramIndex,
+						getTimeStamp(databaseProductName,cal.getTime()), cal);
 			}
 			else {
 				ps.setObject(paramIndex, inValue, Types.TIMESTAMP);
@@ -415,6 +421,25 @@ public abstract class StatementCreatorUtils {
 			// Fall back to generic setObject call with SQL type specified.
 			ps.setObject(paramIndex, inValue, sqlType);
 		}
+	}
+	
+	private static Timestamp getTimeStamp(String databaseProductName,Date origObject) {
+		if("PostgreSQL".equals(databaseProductName)) {
+			if(PG_TIMESTAMP_CLASS.equals(origObject.getClass().getName())) {
+				return (Timestamp) origObject;
+			}
+			try {
+				Class<?> pgTimestampClass = Class.forName(PG_TIMESTAMP_CLASS);
+				return (Timestamp) pgTimestampClass.getConstructor(long.class).newInstance(origObject.getTime());
+			} catch (Exception e) {
+				//do nothing return regular timestamp
+			}
+		} 
+
+		if(origObject instanceof Timestamp) {
+			return (Timestamp) origObject;
+		}
+		return new Timestamp(origObject.getTime());
 	}
 
 	/**
