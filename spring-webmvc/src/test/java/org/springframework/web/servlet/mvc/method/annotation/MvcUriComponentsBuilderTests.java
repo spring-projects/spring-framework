@@ -51,7 +51,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -319,6 +319,7 @@ public class MvcUriComponentsBuilderTests {
 		String mappingName = "PAC#getAddressesForCountry";
 		String url = MvcUriComponentsBuilder.fromMappingName(mappingName).arg(0, "DE").buildAndExpand(123);
 		assertEquals("/base/people/123/addresses/DE", url);
+		context.close();
 	}
 
 	@Test
@@ -334,6 +335,7 @@ public class MvcUriComponentsBuilderTests {
 		MvcUriComponentsBuilder mvcBuilder = MvcUriComponentsBuilder.relativeTo(baseUrl);
 		String url = mvcBuilder.withMappingName("PAC#getAddressesForCountry").arg(0, "DE").buildAndExpand(123);
 		assertEquals("http://example.org:9999/base/people/123/addresses/DE", url);
+		context.close();
 	}
 
 	@Test
@@ -505,7 +507,7 @@ public class MvcUriComponentsBuilderTests {
 
 
 	@EnableWebMvc
-	static class WebConfig implements WebMvcConfigurer {
+	static class WebConfig extends WebMvcConfigurerAdapter {
 
 		@Bean
 		public PersonsAddressesController controller() {
@@ -516,7 +518,7 @@ public class MvcUriComponentsBuilderTests {
 
 	@Controller
 	@RequestMapping("/hotels/{hotel}")
-	public class BookingController {
+	static class BookingController {
 
 		@GetMapping("/bookings/{booking}")
 		public Object getBooking(@PathVariable Long booking) {
