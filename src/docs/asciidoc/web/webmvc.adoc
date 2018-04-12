@@ -3098,7 +3098,8 @@ per request, and also provides an option to remove and ignore such headers.
 [[mvc-links-to-controllers]]
 === Links to controllers
 
-Spring MVC provides a mechanism to prepare links to controller methods. For example:
+Spring MVC provides a mechanism to prepare links to controller methods. For example,
+the following MVC controller easily allows for link creation:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3108,7 +3109,7 @@ Spring MVC provides a mechanism to prepare links to controller methods. For exam
 	public class BookingController {
 
 		@GetMapping("/bookings/{booking}")
-		public String getBooking(@PathVariable Long booking) {
+		public ModelAndView getBooking(@PathVariable Long booking) {
 			// ...
 		}
 	}
@@ -3144,6 +3145,16 @@ akin to mock testing through proxies to avoid referring to the controller method
 
 	URI uri = uriComponents.encode().toUri();
 ----
+
+[NOTE]
+====
+Controller method signatures are limited in their design when supposed to be usable for
+link creation with `fromMethodCall`. Aside from needing a proper parameter signature,
+there is a technical limitation on the return type: namely generating a runtime proxy
+for link builder invocations, so the return type must not be `final`. In particular,
+the common `String` return type for view names does not work here; use `ModelAndView`
+or even plain `Object` (with a `String` return value) instead.
+====
 
 The above examples use static methods in `MvcUriComponentsBuilder`. Internally they rely
 on `ServletUriComponentsBuilder` to prepare a base URL from the scheme, host, port,
