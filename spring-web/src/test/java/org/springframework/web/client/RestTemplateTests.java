@@ -19,6 +19,7 @@ package org.springframework.web.client;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -48,14 +49,30 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-import static org.springframework.http.HttpMethod.*;
-import static org.springframework.http.MediaType.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.willThrow;
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.HEAD;
+import static org.springframework.http.HttpMethod.OPTIONS;
+import static org.springframework.http.HttpMethod.PATCH;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.PUT;
+import static org.springframework.http.MediaType.parseMediaType;
 
 /**
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  */
 @SuppressWarnings("unchecked")
 public class RestTemplateTests {
@@ -89,29 +106,19 @@ public class RestTemplateTests {
 
 	@Test
 	public void varArgsTemplateVariables() throws Exception {
-		given(requestFactory.createRequest(new URI("http://example.com/hotels/42/bookings/21"), GET))
-				.willReturn(request);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+		mockSentRequest(GET, "http://example.com/hotels/42/bookings/21");
+		mockResponseStatus(HttpStatus.OK);
 
-		template.execute("http://example.com/hotels/{hotel}/bookings/{booking}", GET, null, null, "42",
-				"21");
+		template.execute("http://example.com/hotels/{hotel}/bookings/{booking}", GET,
+				null, null, "42", "21");
 
 		verify(response).close();
 	}
 
 	@Test
 	public void varArgsNullTemplateVariable() throws Exception {
-		given(requestFactory.createRequest(new URI("http://example.com/-foo"), GET))
-				.willReturn(request);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+		mockSentRequest(GET, "http://example.com/-foo");
+		mockResponseStatus(HttpStatus.OK);
 
 		template.execute("http://example.com/{first}-{last}", GET, null, null, null, "foo");
 
@@ -120,13 +127,8 @@ public class RestTemplateTests {
 
 	@Test
 	public void mapTemplateVariables() throws Exception {
-		given(requestFactory.createRequest(new URI("http://example.com/hotels/42/bookings/42"), GET))
-				.willReturn(request);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+		mockSentRequest(GET, "http://example.com/hotels/42/bookings/42");
+		mockResponseStatus(HttpStatus.OK);
 
 		Map<String, String> vars = Collections.singletonMap("hotel", "42");
 		template.execute("http://example.com/hotels/{hotel}/bookings/{hotel}", GET, null, null, vars);
@@ -136,13 +138,8 @@ public class RestTemplateTests {
 
 	@Test
 	public void mapNullTemplateVariable() throws Exception {
-		given(requestFactory.createRequest(new URI("http://example.com/-foo"), GET))
-				.willReturn(request);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+		mockSentRequest(GET, "http://example.com/-foo");
+		mockResponseStatus(HttpStatus.OK);
 
 		Map<String, String> vars = new HashMap<>(2);
 		vars.put("first", null);
@@ -155,12 +152,8 @@ public class RestTemplateTests {
 	@Test  // SPR-15201
 	public void uriTemplateWithTrailingSlash() throws Exception {
 		String url = "http://example.com/spring/";
-		given(requestFactory.createRequest(new URI(url), GET)).willReturn(request);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+		mockSentRequest(GET, url);
+		mockResponseStatus(HttpStatus.OK);
 
 		template.execute(url, GET, null, null);
 
@@ -169,17 +162,14 @@ public class RestTemplateTests {
 
 	@Test
 	public void errorHandling() throws Exception {
-		URI uri = new URI("http://example.com");
-		given(requestFactory.createRequest(uri, GET)).willReturn(request);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(true);
-		given(response.getStatusCode()).willReturn(HttpStatus.INTERNAL_SERVER_ERROR);
-		given(response.getStatusText()).willReturn("Internal Server Error");
+		String url = "http://example.com";
+		mockSentRequest(GET, url);
+		mockResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 		willThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR))
-				.given(errorHandler).handleError(uri, GET, response);
+				.given(errorHandler).handleError(new URI(url), GET, response);
 
 		try {
-			template.execute("http://example.com", GET, null, null);
+			template.execute(url, GET, null, null);
 			fail("HttpServerErrorException expected");
 		}
 		catch (HttpServerErrorException ex) {
@@ -191,55 +181,33 @@ public class RestTemplateTests {
 
 	@Test
 	public void getForObject() throws Exception {
-		given(converter.canRead(String.class, null)).willReturn(true);
-		MediaType textPlain = new MediaType("text", "plain");
-		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(textPlain));
-		given(requestFactory.createRequest(new URI("http://example.com"), GET)).willReturn(request);
-		HttpHeaders requestHeaders = new HttpHeaders();
-		given(request.getHeaders()).willReturn(requestHeaders);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
 		String expected = "Hello World";
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setContentType(textPlain);
-		responseHeaders.setContentLength(10);
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
-		given(response.getHeaders()).willReturn(responseHeaders);
-		given(response.getBody()).willReturn(new ByteArrayInputStream(expected.getBytes()));
-		given(converter.canRead(String.class, textPlain)).willReturn(true);
-		given(converter.read(eq(String.class), any(HttpInputMessage.class))).willReturn(expected);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+		mockTextPlainHttpMessageConverter();
+		HttpHeaders requestHeaders = new HttpHeaders();
+		mockSentRequest(GET, "http://example.com", requestHeaders);
+		mockResponseStatus(HttpStatus.OK);
+		mockTextResponseBody("Hello World");
 
 		String result = template.getForObject("http://example.com", String.class);
 		assertEquals("Invalid GET result", expected, result);
-		assertEquals("Invalid Accept header", textPlain.toString(), requestHeaders.getFirst("Accept"));
+		assertEquals("Invalid Accept header", MediaType.TEXT_PLAIN_VALUE,
+				requestHeaders.getFirst("Accept"));
 
 		verify(response).close();
 	}
 
 	@Test
 	public void getUnsupportedMediaType() throws Exception {
+		mockSentRequest(GET, "http://example.com/resource");
+		mockResponseStatus(HttpStatus.OK);
+
 		given(converter.canRead(String.class, null)).willReturn(true);
 		MediaType supportedMediaType = new MediaType("foo", "bar");
 		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(supportedMediaType));
-		given(requestFactory.createRequest(new URI("http://example.com/resource"), GET)).willReturn(request);
-		HttpHeaders requestHeaders = new HttpHeaders();
-		given(request.getHeaders()).willReturn(requestHeaders);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		MediaType contentType = new MediaType("bar", "baz");
-		responseHeaders.setContentType(contentType);
-		responseHeaders.setContentLength(10);
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
-		given(response.getHeaders()).willReturn(responseHeaders);
-		given(response.getBody()).willReturn(new ByteArrayInputStream("Foo".getBytes()));
-		given(converter.canRead(String.class, contentType)).willReturn(false);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+
+		MediaType barBaz = new MediaType("bar", "baz");
+		mockResponseBody("Foo", new MediaType("bar", "baz"));
+		given(converter.canRead(String.class, barBaz)).willReturn(false);
 
 		try {
 			template.getForObject("http://example.com/{p}", String.class, "resource");
@@ -252,32 +220,42 @@ public class RestTemplateTests {
 		verify(response).close();
 	}
 
+	@Test
+	public void requestAvoidsDuplicateAcceptHeaderValues() throws Exception {
+		HttpMessageConverter firstConverter = mock(HttpMessageConverter.class);
+		given(firstConverter.canRead(any(), any())).willReturn(true);
+		given(firstConverter.getSupportedMediaTypes())
+				.willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		HttpMessageConverter secondConverter = mock(HttpMessageConverter.class);
+		given(secondConverter.canRead(any(), any())).willReturn(true);
+		given(secondConverter.getSupportedMediaTypes())
+				.willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+
+		HttpHeaders requestHeaders = new HttpHeaders();
+		mockSentRequest(GET, "http://example.com/", requestHeaders);
+		mockResponseStatus(HttpStatus.OK);
+		mockTextResponseBody("Hello World");
+
+		template.setMessageConverters(Arrays.asList(firstConverter, secondConverter));
+		template.getForObject("http://example.com/", String.class);
+
+		assertEquals("Sent duplicate Accept header values", 1,
+				requestHeaders.getAccept().size());
+	}
 
 	@Test
 	public void getForEntity() throws Exception {
-		given(converter.canRead(String.class, null)).willReturn(true);
-		MediaType textPlain = new MediaType("text", "plain");
-		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(textPlain));
-		given(requestFactory.createRequest(new URI("http://example.com"), GET)).willReturn(request);
 		HttpHeaders requestHeaders = new HttpHeaders();
-		given(request.getHeaders()).willReturn(requestHeaders);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
+		mockSentRequest(GET, "http://example.com", requestHeaders);
+		mockTextPlainHttpMessageConverter();
+		mockResponseStatus(HttpStatus.OK);
 		String expected = "Hello World";
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setContentType(textPlain);
-		responseHeaders.setContentLength(10);
-		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
-		given(response.getStatusText()).willReturn(HttpStatus.OK.getReasonPhrase());
-		given(response.getHeaders()).willReturn(responseHeaders);
-		given(response.getBody()).willReturn(new ByteArrayInputStream(expected.getBytes()));
-		given(converter.canRead(String.class, textPlain)).willReturn(true);
-		given(converter.read(eq(String.class), any(HttpInputMessage.class))).willReturn(expected);
+		mockTextResponseBody(expected);
 
 		ResponseEntity<String> result = template.getForEntity("http://example.com", String.class);
 		assertEquals("Invalid GET result", expected, result.getBody());
-		assertEquals("Invalid Accept header", textPlain.toString(), requestHeaders.getFirst("Accept"));
-		assertEquals("Invalid Content-Type header", textPlain, result.getHeaders().getContentType());
+		assertEquals("Invalid Accept header", MediaType.TEXT_PLAIN_VALUE, requestHeaders.getFirst("Accept"));
+		assertEquals("Invalid Content-Type header", MediaType.TEXT_PLAIN, result.getHeaders().getContentType());
 		assertEquals("Invalid status code", HttpStatus.OK, result.getStatusCode());
 
 		verify(response).close();
@@ -287,15 +265,8 @@ public class RestTemplateTests {
 	public void getForObjectWithCustomUriTemplateHandler() throws Exception {
 		DefaultUriBuilderFactory uriTemplateHandler = new DefaultUriBuilderFactory();
 		template.setUriTemplateHandler(uriTemplateHandler);
-
-		URI expectedUri = new URI("http://example.com/hotels/1/pic/pics%2Flogo.png/size/150x150");
-		given(requestFactory.createRequest(expectedUri, GET)).willReturn(request);
-
-		given(request.getHeaders()).willReturn(new HttpHeaders());
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
-
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
+		mockSentRequest(GET, "http://example.com/hotels/1/pic/pics%2Flogo.png/size/150x150");
+		mockResponseStatus(HttpStatus.OK);
 		given(response.getHeaders()).willReturn(new HttpHeaders());
 		given(response.getBody()).willReturn(StreamUtils.emptyInput());
 
@@ -312,14 +283,10 @@ public class RestTemplateTests {
 
 	@Test
 	public void headForHeaders() throws Exception {
-		given(requestFactory.createRequest(new URI("http://example.com"), HEAD)).willReturn(request);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
+		mockSentRequest(HEAD, "http://example.com");
+		mockResponseStatus(HttpStatus.OK);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		given(response.getHeaders()).willReturn(responseHeaders);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
 
 		HttpHeaders result = template.headForHeaders("http://example.com");
 
@@ -330,19 +297,14 @@ public class RestTemplateTests {
 
 	@Test
 	public void postForLocation() throws Exception {
-		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(request);
+		mockSentRequest(POST, "http://example.com");
+		mockTextPlainHttpMessageConverter();
+		mockResponseStatus(HttpStatus.OK);
 		String helloWorld = "Hello World";
-		given(converter.canWrite(String.class, null)).willReturn(true);
-		converter.write(helloWorld, null, request);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		URI expected = new URI("http://example.com/hotels");
 		responseHeaders.setLocation(expected);
 		given(response.getHeaders()).willReturn(responseHeaders);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
 
 		URI result = template.postForLocation("http://example.com", helloWorld);
 		assertEquals("Invalid POST result", expected, result);
@@ -352,25 +314,18 @@ public class RestTemplateTests {
 
 	@Test
 	public void postForLocationEntityContentType() throws Exception {
-		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(request);
+		mockSentRequest(POST, "http://example.com");
+		mockTextPlainHttpMessageConverter();
+		mockResponseStatus(HttpStatus.OK);
+
 		String helloWorld = "Hello World";
-		MediaType contentType = MediaType.TEXT_PLAIN;
-		given(converter.canWrite(String.class, contentType)).willReturn(true);
-		HttpHeaders requestHeaders = new HttpHeaders();
-		given(request.getHeaders()).willReturn(requestHeaders);
-		converter.write(helloWorld, contentType, request);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		URI expected = new URI("http://example.com/hotels");
 		responseHeaders.setLocation(expected);
 		given(response.getHeaders()).willReturn(responseHeaders);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
 
 		HttpHeaders entityHeaders = new HttpHeaders();
-		entityHeaders.setContentType(contentType);
+		entityHeaders.setContentType(MediaType.TEXT_PLAIN);
 		HttpEntity<String> entity = new HttpEntity<>(helloWorld, entityHeaders);
 
 		URI result = template.postForLocation("http://example.com", entity);
@@ -381,25 +336,18 @@ public class RestTemplateTests {
 
 	@Test
 	public void postForLocationEntityCustomHeader() throws Exception {
-		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(request);
-		String helloWorld = "Hello World";
-		given(converter.canWrite(String.class, null)).willReturn(true);
 		HttpHeaders requestHeaders = new HttpHeaders();
-		given(request.getHeaders()).willReturn(requestHeaders);
-		converter.write(helloWorld, null, request);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
+		mockSentRequest(POST, "http://example.com", requestHeaders);
+		mockTextPlainHttpMessageConverter();
+		mockResponseStatus(HttpStatus.OK);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		URI expected = new URI("http://example.com/hotels");
 		responseHeaders.setLocation(expected);
 		given(response.getHeaders()).willReturn(responseHeaders);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
 
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.set("MyHeader", "MyValue");
-		HttpEntity<String> entity = new HttpEntity<>(helloWorld, entityHeaders);
+		HttpEntity<String> entity = new HttpEntity<>("Hello World", entityHeaders);
 
 		URI result = template.postForLocation("http://example.com", entity);
 		assertEquals("Invalid POST result", expected, result);
@@ -410,19 +358,11 @@ public class RestTemplateTests {
 
 	@Test
 	public void postForLocationNoLocation() throws Exception {
-		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(request);
-		String helloWorld = "Hello World";
-		given(converter.canWrite(String.class, null)).willReturn(true);
-		converter.write(helloWorld, null, request);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		given(response.getHeaders()).willReturn(responseHeaders);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+		mockSentRequest(POST, "http://example.com");
+		mockTextPlainHttpMessageConverter();
+		mockResponseStatus(HttpStatus.OK);
 
-		URI result = template.postForLocation("http://example.com", helloWorld);
+		URI result = template.postForLocation("http://example.com", "Hello World");
 		assertNull("Invalid POST result", result);
 
 		verify(response).close();
@@ -430,16 +370,9 @@ public class RestTemplateTests {
 
 	@Test
 	public void postForLocationNull() throws Exception {
-		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(request);
 		HttpHeaders requestHeaders = new HttpHeaders();
-		given(request.getHeaders()).willReturn(requestHeaders);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		given(response.getHeaders()).willReturn(responseHeaders);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+		mockSentRequest(POST, "http://example.com", requestHeaders);
+		mockResponseStatus(HttpStatus.OK);
 
 		template.postForLocation("http://example.com", null);
 		assertEquals("Invalid content length", 0, requestHeaders.getContentLength());
@@ -449,65 +382,33 @@ public class RestTemplateTests {
 
 	@Test
 	public void postForObject() throws Exception {
-		MediaType textPlain = new MediaType("text", "plain");
-		given(converter.canRead(Integer.class, null)).willReturn(true);
-		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(textPlain));
-		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(this.request);
+		mockTextPlainHttpMessageConverter();
 		HttpHeaders requestHeaders = new HttpHeaders();
-		given(this.request.getHeaders()).willReturn(requestHeaders);
-		String request = "Hello World";
-		given(converter.canWrite(String.class, null)).willReturn(true);
-		converter.write(request, null, this.request);
-		given(this.request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
-		Integer expected = 42;
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setContentType(textPlain);
-		responseHeaders.setContentLength(10);
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
-		given(response.getHeaders()).willReturn(responseHeaders);
-		given(response.getBody()).willReturn(new ByteArrayInputStream(expected.toString().getBytes()));
-		given(converter.canRead(Integer.class, textPlain)).willReturn(true);
-		given(converter.read(eq(Integer.class), any(HttpInputMessage.class))).willReturn(expected);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+		mockSentRequest(POST, "http://example.com", requestHeaders);
+		mockResponseStatus(HttpStatus.OK);
+		String expected = "42";
+		mockResponseBody(expected, MediaType.TEXT_PLAIN);
 
-		Integer result = template.postForObject("http://example.com", request, Integer.class);
+		String result = template.postForObject("http://example.com", "Hello World", String.class);
 		assertEquals("Invalid POST result", expected, result);
-		assertEquals("Invalid Accept header", textPlain.toString(), requestHeaders.getFirst("Accept"));
+		assertEquals("Invalid Accept header", MediaType.TEXT_PLAIN_VALUE, requestHeaders.getFirst("Accept"));
 
 		verify(response).close();
 	}
 
 	@Test
 	public void postForEntity() throws Exception {
-		MediaType textPlain = new MediaType("text", "plain");
-		given(converter.canRead(Integer.class, null)).willReturn(true);
-		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(textPlain));
-		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(this.request);
+		mockTextPlainHttpMessageConverter();
 		HttpHeaders requestHeaders = new HttpHeaders();
-		given(this.request.getHeaders()).willReturn(requestHeaders);
-		String request = "Hello World";
-		given(converter.canWrite(String.class, null)).willReturn(true);
-		converter.write(request, null, this.request);
-		given(this.request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
-		Integer expected = 42;
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setContentType(textPlain);
-		responseHeaders.setContentLength(10);
-		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
-		given(response.getStatusText()).willReturn(HttpStatus.OK.getReasonPhrase());
-		given(response.getHeaders()).willReturn(responseHeaders);
-		given(response.getBody()).willReturn(new ByteArrayInputStream(expected.toString().getBytes()));
-		given(converter.canRead(Integer.class, textPlain)).willReturn(true);
-		given(converter.read(eq(Integer.class), any(HttpInputMessage.class))).willReturn(expected);
+		mockSentRequest(POST, "http://example.com", requestHeaders);
+		mockResponseStatus(HttpStatus.OK);
+		String expected = "42";
+		mockResponseBody(expected, MediaType.TEXT_PLAIN);
 
-		ResponseEntity<Integer> result = template.postForEntity("http://example.com", request, Integer.class);
+		ResponseEntity<String> result = template.postForEntity("http://example.com", "Hello World", String.class);
 		assertEquals("Invalid POST result", expected, result.getBody());
-		assertEquals("Invalid Content-Type", textPlain, result.getHeaders().getContentType());
-		assertEquals("Invalid Accept header", textPlain.toString(), requestHeaders.getFirst("Accept"));
+		assertEquals("Invalid Content-Type", MediaType.TEXT_PLAIN, result.getHeaders().getContentType());
+		assertEquals("Invalid Accept header", MediaType.TEXT_PLAIN_VALUE, requestHeaders.getFirst("Accept"));
 		assertEquals("Invalid status code", HttpStatus.OK, result.getStatusCode());
 
 		verify(response).close();
@@ -515,27 +416,18 @@ public class RestTemplateTests {
 
 	@Test
 	public void postForObjectNull() throws Exception {
-		MediaType textPlain = new MediaType("text", "plain");
-		given(converter.canRead(Integer.class, null)).willReturn(true);
-		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(textPlain));
-		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(request);
+		mockTextPlainHttpMessageConverter();
 		HttpHeaders requestHeaders = new HttpHeaders();
-		given(request.getHeaders()).willReturn(requestHeaders);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
+		mockSentRequest(POST, "http://example.com", requestHeaders);
+		mockResponseStatus(HttpStatus.OK);
 		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setContentType(textPlain);
+		responseHeaders.setContentType(MediaType.TEXT_PLAIN);
 		responseHeaders.setContentLength(10);
 		given(response.getHeaders()).willReturn(responseHeaders);
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
 		given(response.getBody()).willReturn(StreamUtils.emptyInput());
-		given(converter.canRead(Integer.class, textPlain)).willReturn(true);
-		given(converter.read(Integer.class, response)).willReturn(null);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+		given(converter.read(String.class, response)).willReturn(null);
 
-		Integer result = template.postForObject("http://example.com", null, Integer.class);
+		String result = template.postForObject("http://example.com", null, String.class);
 		assertNull("Invalid POST result", result);
 		assertEquals("Invalid content length", 0, requestHeaders.getContentLength());
 
@@ -544,27 +436,20 @@ public class RestTemplateTests {
 
 	@Test
 	public void postForEntityNull() throws Exception {
-		MediaType textPlain = new MediaType("text", "plain");
-		given(converter.canRead(Integer.class, null)).willReturn(true);
-		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(textPlain));
-		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(request);
+		mockTextPlainHttpMessageConverter();
 		HttpHeaders requestHeaders = new HttpHeaders();
-		given(request.getHeaders()).willReturn(requestHeaders);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
+		mockSentRequest(POST, "http://example.com", requestHeaders);
+		mockResponseStatus(HttpStatus.OK);
 		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setContentType(textPlain);
+		responseHeaders.setContentType(MediaType.TEXT_PLAIN);
 		responseHeaders.setContentLength(10);
 		given(response.getHeaders()).willReturn(responseHeaders);
-		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
-		given(response.getStatusText()).willReturn(HttpStatus.OK.getReasonPhrase());
 		given(response.getBody()).willReturn(StreamUtils.emptyInput());
-		given(converter.canRead(Integer.class, textPlain)).willReturn(true);
-		given(converter.read(Integer.class, response)).willReturn(null);
+		given(converter.read(String.class, response)).willReturn(null);
 
-		ResponseEntity<Integer> result = template.postForEntity("http://example.com", null, Integer.class);
+		ResponseEntity<String> result = template.postForEntity("http://example.com", null, String.class);
 		assertFalse("Invalid POST result", result.hasBody());
-		assertEquals("Invalid Content-Type", textPlain, result.getHeaders().getContentType());
+		assertEquals("Invalid Content-Type", MediaType.TEXT_PLAIN, result.getHeaders().getContentType());
 		assertEquals("Invalid content length", 0, requestHeaders.getContentLength());
 		assertEquals("Invalid status code", HttpStatus.OK, result.getStatusCode());
 
@@ -573,31 +458,20 @@ public class RestTemplateTests {
 
 	@Test
 	public void put() throws Exception {
-		given(converter.canWrite(String.class, null)).willReturn(true);
-		given(requestFactory.createRequest(new URI("http://example.com"), PUT)).willReturn(request);
-		String helloWorld = "Hello World";
-		converter.write(helloWorld, null, request);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+		mockTextPlainHttpMessageConverter();
+		mockSentRequest(PUT, "http://example.com");
+		mockResponseStatus(HttpStatus.OK);
 
-		template.put("http://example.com", helloWorld);
+		template.put("http://example.com", "Hello World");
 
 		verify(response).close();
 	}
 
 	@Test
 	public void putNull() throws Exception {
-		given(requestFactory.createRequest(new URI("http://example.com"), PUT)).willReturn(request);
 		HttpHeaders requestHeaders = new HttpHeaders();
-		given(request.getHeaders()).willReturn(requestHeaders);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+		mockSentRequest(PUT, "http://example.com", requestHeaders);
+		mockResponseStatus(HttpStatus.OK);
 
 		template.put("http://example.com", null);
 		assertEquals("Invalid content length", 0, requestHeaders.getContentLength());
@@ -607,60 +481,33 @@ public class RestTemplateTests {
 
 	@Test
 	public void patchForObject() throws Exception {
-		MediaType textPlain = new MediaType("text", "plain");
-		given(converter.canRead(Integer.class, null)).willReturn(true);
-		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(textPlain));
-		given(requestFactory.createRequest(new URI("http://example.com"), PATCH)).willReturn(this.request);
+		mockTextPlainHttpMessageConverter();
 		HttpHeaders requestHeaders = new HttpHeaders();
-		given(this.request.getHeaders()).willReturn(requestHeaders);
-		String request = "Hello World";
-		given(converter.canWrite(String.class, null)).willReturn(true);
-		converter.write(request, null, this.request);
-		given(this.request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
-		Integer expected = 42;
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setContentType(textPlain);
-		responseHeaders.setContentLength(10);
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
-		given(response.getHeaders()).willReturn(responseHeaders);
-		given(response.getBody()).willReturn(new ByteArrayInputStream(expected.toString().getBytes()));
-		given(converter.canRead(Integer.class, textPlain)).willReturn(true);
-		given(converter.read(eq(Integer.class), any(HttpInputMessage.class))).willReturn(expected);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+		mockSentRequest(PATCH, "http://example.com", requestHeaders);
+		mockResponseStatus(HttpStatus.OK);
+		String expected = "42";
+		mockResponseBody("42", MediaType.TEXT_PLAIN);
 
-		Integer result = template.patchForObject("http://example.com", request, Integer.class);
+		String result = template.patchForObject("http://example.com", "Hello World", String.class);
 		assertEquals("Invalid POST result", expected, result);
-		assertEquals("Invalid Accept header", textPlain.toString(), requestHeaders.getFirst("Accept"));
+		assertEquals("Invalid Accept header", MediaType.TEXT_PLAIN_VALUE, requestHeaders.getFirst("Accept"));
 
 		verify(response).close();
 	}
 
 	@Test
 	public void patchForObjectNull() throws Exception {
-		MediaType textPlain = new MediaType("text", "plain");
-		given(converter.canRead(Integer.class, null)).willReturn(true);
-		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(textPlain));
-		given(requestFactory.createRequest(new URI("http://example.com"), PATCH)).willReturn(request);
+		mockTextPlainHttpMessageConverter();
 		HttpHeaders requestHeaders = new HttpHeaders();
-		given(request.getHeaders()).willReturn(requestHeaders);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
+		mockSentRequest(PATCH, "http://example.com", requestHeaders);
+		mockResponseStatus(HttpStatus.OK);
 		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setContentType(textPlain);
+		responseHeaders.setContentType(MediaType.TEXT_PLAIN);
 		responseHeaders.setContentLength(10);
 		given(response.getHeaders()).willReturn(responseHeaders);
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
 		given(response.getBody()).willReturn(StreamUtils.emptyInput());
-		given(converter.canRead(Integer.class, textPlain)).willReturn(true);
-		given(converter.read(Integer.class, response)).willReturn(null);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
 
-		Integer result = template.patchForObject("http://example.com", null, Integer.class);
+		String result = template.patchForObject("http://example.com", null, String.class);
 		assertNull("Invalid POST result", result);
 		assertEquals("Invalid content length", 0, requestHeaders.getContentLength());
 
@@ -668,15 +515,10 @@ public class RestTemplateTests {
 	}
 
 
-
 	@Test
 	public void delete() throws Exception {
-		given(requestFactory.createRequest(new URI("http://example.com"), DELETE)).willReturn(request);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+		mockSentRequest(DELETE, "http://example.com");
+		mockResponseStatus(HttpStatus.OK);
 
 		template.delete("http://example.com");
 
@@ -685,16 +527,12 @@ public class RestTemplateTests {
 
 	@Test
 	public void optionsForAllow() throws Exception {
-		given(requestFactory.createRequest(new URI("http://example.com"), OPTIONS)).willReturn(request);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
+		mockSentRequest(OPTIONS, "http://example.com");
+		mockResponseStatus(HttpStatus.OK);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		EnumSet<HttpMethod> expected = EnumSet.of(GET, POST);
 		responseHeaders.setAllow(expected);
 		given(response.getHeaders()).willReturn(responseHeaders);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
 
 		Set<HttpMethod> result = template.optionsForAllow("http://example.com");
 		assertEquals("Invalid OPTIONS result", expected, result);
@@ -705,12 +543,8 @@ public class RestTemplateTests {
 	@Test  // SPR-9325, SPR-13860
 	public void ioException() throws Exception {
 		String url = "http://example.com/resource?access_token=123";
-
-		given(converter.canRead(String.class, null)).willReturn(true);
-		MediaType mediaType = new MediaType("foo", "bar");
-		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(mediaType));
-		given(requestFactory.createRequest(new URI(url), GET)).willReturn(request);
-		given(request.getHeaders()).willReturn(new HttpHeaders());
+		mockSentRequest(GET, url);
+		mockHttpMessageConverter(new MediaType("foo", "bar"), String.class);
 		given(request.execute()).willThrow(new IOException("Socket failure"));
 
 		try {
@@ -719,7 +553,7 @@ public class RestTemplateTests {
 		}
 		catch (ResourceAccessException ex) {
 			assertEquals("I/O error on GET request for \"http://example.com/resource\": " +
-					"Socket failure; nested exception is java.io.IOException: Socket failure",
+							"Socket failure; nested exception is java.io.IOException: Socket failure",
 					ex.getMessage());
 		}
 	}
@@ -749,32 +583,17 @@ public class RestTemplateTests {
 
 	@Test
 	public void exchange() throws Exception {
-		given(converter.canRead(Integer.class, null)).willReturn(true);
-		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(this.request);
+		mockTextPlainHttpMessageConverter();
 		HttpHeaders requestHeaders = new HttpHeaders();
-		given(this.request.getHeaders()).willReturn(requestHeaders);
-		given(converter.canWrite(String.class, null)).willReturn(true);
-		String body = "Hello World";
-		converter.write(body, null, this.request);
-		given(this.request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
-		Integer expected = 42;
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setContentType(MediaType.TEXT_PLAIN);
-		responseHeaders.setContentLength(10);
-		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
-		given(response.getStatusText()).willReturn(HttpStatus.OK.getReasonPhrase());
-		given(response.getHeaders()).willReturn(responseHeaders);
-		given(response.getBody()).willReturn(new ByteArrayInputStream(expected.toString().getBytes()));
-		given(converter.canRead(Integer.class, MediaType.TEXT_PLAIN)).willReturn(true);
-		given(converter.read(Integer.class, response)).willReturn(expected);
-		given(converter.read(eq(Integer.class), any(HttpInputMessage.class))).willReturn(expected);
+		mockSentRequest(POST, "http://example.com", requestHeaders);
+		mockResponseStatus(HttpStatus.OK);
+		String expected = "42";
+		mockResponseBody(expected, MediaType.TEXT_PLAIN);
 
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.set("MyHeader", "MyValue");
-		HttpEntity<String> entity = new HttpEntity<>(body, entityHeaders);
-		ResponseEntity<Integer> result = template.exchange("http://example.com", POST, entity, Integer.class);
+		HttpEntity<String> entity = new HttpEntity<>("Hello World", entityHeaders);
+		ResponseEntity<String> result = template.exchange("http://example.com", POST, entity, String.class);
 		assertEquals("Invalid POST result", expected, result.getBody());
 		assertEquals("Invalid Content-Type", MediaType.TEXT_PLAIN, result.getHeaders().getContentType());
 		assertEquals("Invalid Accept header", MediaType.TEXT_PLAIN_VALUE, requestHeaders.getFirst("Accept"));
@@ -789,24 +608,18 @@ public class RestTemplateTests {
 	public void exchangeParameterizedType() throws Exception {
 		GenericHttpMessageConverter converter = mock(GenericHttpMessageConverter.class);
 		template.setMessageConverters(Collections.<HttpMessageConverter<?>>singletonList(converter));
-
 		ParameterizedTypeReference<List<Integer>> intList = new ParameterizedTypeReference<List<Integer>>() {};
 		given(converter.canRead(intList.getType(), null, null)).willReturn(true);
 		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(this.request);
-		HttpHeaders requestHeaders = new HttpHeaders();
-		given(this.request.getHeaders()).willReturn(requestHeaders);
 		given(converter.canWrite(String.class, String.class, null)).willReturn(true);
-		String requestBody = "Hello World";
-		converter.write(requestBody, String.class, null, this.request);
-		given(this.request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
+
+		HttpHeaders requestHeaders = new HttpHeaders();
+		mockSentRequest(POST, "http://example.com", requestHeaders);
 		List<Integer> expected = Collections.singletonList(42);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(MediaType.TEXT_PLAIN);
 		responseHeaders.setContentLength(10);
-		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
-		given(response.getStatusText()).willReturn(HttpStatus.OK.getReasonPhrase());
+		mockResponseStatus(HttpStatus.OK);
 		given(response.getHeaders()).willReturn(responseHeaders);
 		given(response.getBody()).willReturn(new ByteArrayInputStream(Integer.toString(42).getBytes()));
 		given(converter.canRead(intList.getType(), null, MediaType.TEXT_PLAIN)).willReturn(true);
@@ -814,7 +627,7 @@ public class RestTemplateTests {
 
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.set("MyHeader", "MyValue");
-		HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, entityHeaders);
+		HttpEntity<String> requestEntity = new HttpEntity<>("Hello World", entityHeaders);
 		ResponseEntity<List<Integer>> result = template.exchange("http://example.com", POST, requestEntity, intList);
 		assertEquals("Invalid POST result", expected, result.getBody());
 		assertEquals("Invalid Content-Type", MediaType.TEXT_PLAIN, result.getHeaders().getContentType());
@@ -833,14 +646,9 @@ public class RestTemplateTests {
 		};
 		template.setInterceptors(Collections.singletonList(interceptor));
 
-		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(request);
 		HttpHeaders requestHeaders = new HttpHeaders();
-		given(request.getHeaders()).willReturn(requestHeaders);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+		mockSentRequest(POST, "http://example.com", requestHeaders);
+		mockResponseStatus(HttpStatus.OK);
 
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.add("MyHeader", "MyEntityValue");
@@ -861,25 +669,62 @@ public class RestTemplateTests {
 
 		MediaType contentType = MediaType.TEXT_PLAIN;
 		given(converter.canWrite(String.class, contentType)).willReturn(true);
-		given(requestFactory.createRequest(new URI("http://example.com"), POST)).willReturn(request);
-		String helloWorld = "Hello World";
 		HttpHeaders requestHeaders = new HttpHeaders();
-		given(request.getHeaders()).willReturn(requestHeaders);
-		converter.write(helloWorld, contentType, request);
-		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(false);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+		mockSentRequest(POST, "http://example.com", requestHeaders);
+		mockResponseStatus(HttpStatus.OK);
 
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.setContentType(contentType);
 		entityHeaders.add("MyHeader", "MyEntityValue");
-		HttpEntity<String> entity = new HttpEntity<>(helloWorld, entityHeaders);
+		HttpEntity<String> entity = new HttpEntity<>("Hello World", entityHeaders);
 		template.exchange("http://example.com", POST, entity, Void.class);
 		assertThat(requestHeaders.get("MyHeader"), contains("MyEntityValue", "MyInterceptorValue"));
 
 		verify(response).close();
+	}
+
+	private void mockSentRequest(HttpMethod method, String uri) throws Exception {
+		mockSentRequest(method, uri, new HttpHeaders());
+	}
+
+	private void mockSentRequest(HttpMethod method, String uri, HttpHeaders requestHeaders) throws Exception {
+		given(requestFactory.createRequest(new URI(uri), method)).willReturn(request);
+		given(request.getHeaders()).willReturn(requestHeaders);
+	}
+
+	private void mockResponseStatus(HttpStatus responseStatus) throws Exception {
+		given(request.execute()).willReturn(response);
+		given(errorHandler.hasError(response)).willReturn(responseStatus.isError());
+		given(response.getStatusCode()).willReturn(responseStatus);
+		given(response.getRawStatusCode()).willReturn(responseStatus.value());
+		given(response.getStatusText()).willReturn(responseStatus.getReasonPhrase());
+	}
+
+	private void mockTextPlainHttpMessageConverter() {
+		mockHttpMessageConverter(MediaType.TEXT_PLAIN, String.class);
+	}
+
+	private void mockHttpMessageConverter(MediaType mediaType, Class type) {
+		given(converter.canRead(type, null)).willReturn(true);
+		given(converter.canRead(type, mediaType)).willReturn(true);
+		given(converter.getSupportedMediaTypes())
+				.willReturn(Collections.singletonList(mediaType));
+		given(converter.canRead(type, mediaType)).willReturn(true);
+		given(converter.canWrite(type, null)).willReturn(true);
+		given(converter.canWrite(type, mediaType)).willReturn(true);
+	}
+
+	private void mockTextResponseBody(String expectedBody) throws Exception {
+		mockResponseBody(expectedBody, MediaType.TEXT_PLAIN);
+	}
+
+	private void mockResponseBody(String expectedBody, MediaType mediaType) throws Exception {
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setContentType(mediaType);
+		responseHeaders.setContentLength(expectedBody.length());
+		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getBody()).willReturn(new ByteArrayInputStream(expectedBody.getBytes()));
+		given(converter.read(eq(String.class), any(HttpInputMessage.class))).willReturn(expectedBody);
 	}
 
 }

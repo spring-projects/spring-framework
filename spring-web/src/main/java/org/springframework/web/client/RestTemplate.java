@@ -25,6 +25,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -836,45 +838,43 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		@Override
 		public void doWithRequest(ClientHttpRequest request) throws IOException {
 			if (this.responseType != null) {
-				Class<?> responseClass = null;
-				if (this.responseType instanceof Class) {
-					responseClass = (Class<?>) this.responseType;
+				final Class<?> responseClass = (this.responseType instanceof Class) ?
+						(Class<?>) this.responseType : null;
+				final List<MediaType> allSupportedMediaTypes = getMessageConverters().stream()
+						.filter(converter -> canReadResponse(responseClass, converter))
+						.flatMap(this::getSupportedMediaTypes)
+						.distinct()
+						.sorted(MediaType.SPECIFICITY_COMPARATOR)
+						.collect(Collectors.toList());
+				if (logger.isDebugEnabled()) {
+					logger.debug("Setting request Accept header to " + allSupportedMediaTypes);
 				}
-				List<MediaType> allSupportedMediaTypes = new ArrayList<>();
-				for (HttpMessageConverter<?> converter : getMessageConverters()) {
-					if (responseClass != null) {
-						if (converter.canRead(responseClass, null)) {
-							allSupportedMediaTypes.addAll(getSupportedMediaTypes(converter));
-						}
-					}
-					else if (converter instanceof GenericHttpMessageConverter) {
-						GenericHttpMessageConverter<?> genericConverter = (GenericHttpMessageConverter<?>) converter;
-						if (genericConverter.canRead(this.responseType, null, null)) {
-							allSupportedMediaTypes.addAll(getSupportedMediaTypes(converter));
-						}
-					}
-				}
-				if (!allSupportedMediaTypes.isEmpty()) {
-					MediaType.sortBySpecificity(allSupportedMediaTypes);
-					if (logger.isDebugEnabled()) {
-						logger.debug("Setting request Accept header to " + allSupportedMediaTypes);
-					}
-					request.getHeaders().setAccept(allSupportedMediaTypes);
-				}
+				request.getHeaders().setAccept(allSupportedMediaTypes);
 			}
 		}
 
-		private List<MediaType> getSupportedMediaTypes(HttpMessageConverter<?> messageConverter) {
-			List<MediaType> supportedMediaTypes = messageConverter.getSupportedMediaTypes();
-			List<MediaType> result = new ArrayList<>(supportedMediaTypes.size());
-			for (MediaType supportedMediaType : supportedMediaTypes) {
-				if (supportedMediaType.getCharset() != null) {
-					supportedMediaType =
-							new MediaType(supportedMediaType.getType(), supportedMediaType.getSubtype());
-				}
-				result.add(supportedMediaType);
+		private boolean canReadResponse(@Nullable Class<?> responseClass, HttpMessageConverter<?> converter) {
+			if (responseClass != null) {
+				return converter.canRead(responseClass, null);
 			}
-			return result;
+			else if (converter instanceof GenericHttpMessageConverter) {
+				GenericHttpMessageConverter<?> genericConverter =
+						(GenericHttpMessageConverter<?>) converter;
+				return genericConverter
+						.canRead(this.responseType, null, null);
+			}
+			return false;
+		}
+
+		private Stream<MediaType> getSupportedMediaTypes(HttpMessageConverter<?> messageConverter) {
+			return messageConverter.getSupportedMediaTypes()
+					.stream()
+					.map(mediaType -> {
+						if (mediaType.getCharset() != null) {
+							return new MediaType(mediaType.getType(), mediaType.getSubtype());
+						}
+						return mediaType;
+					});
 		}
 	}
 
