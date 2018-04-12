@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.junit4.spr16716;
+package org.springframework.test.context.junit4.statements;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
