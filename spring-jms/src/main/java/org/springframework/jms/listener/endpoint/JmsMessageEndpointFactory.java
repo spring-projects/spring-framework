@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,6 +84,7 @@ public class JmsMessageEndpointFactory extends AbstractMessageEndpointFactory  {
 
 		@Override
 		public void onMessage(Message message) {
+			Throwable endpointEx = null;
 			boolean applyDeliveryCalls = !hasBeforeDeliveryBeenCalled();
 			if (applyDeliveryCalls) {
 				try {
@@ -97,6 +98,7 @@ public class JmsMessageEndpointFactory extends AbstractMessageEndpointFactory  {
 				getMessageListener().onMessage(message);
 			}
 			catch (RuntimeException | Error ex) {
+				endpointEx = ex;
 				onEndpointException(ex);
 				throw ex;
 			}
@@ -106,7 +108,9 @@ public class JmsMessageEndpointFactory extends AbstractMessageEndpointFactory  {
 						afterDelivery();
 					}
 					catch (ResourceException ex) {
-						throw new JmsResourceException(ex);
+						if (endpointEx == null) {
+							throw new JmsResourceException(ex);
+						}
 					}
 				}
 			}
