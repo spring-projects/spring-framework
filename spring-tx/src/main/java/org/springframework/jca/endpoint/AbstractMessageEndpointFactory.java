@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -250,6 +250,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 		 */
 		protected final void onEndpointException(Throwable ex) {
 			this.transactionDelegate.setRollbackOnly();
+			logger.debug("Transaction marked as rollback-only after endpoint exception", ex);
 		}
 
 		/**
@@ -268,6 +269,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 				this.transactionDelegate.endTransaction();
 			}
 			catch (Throwable ex) {
+				logger.warn("Failed to complete transaction after endpoint delivery", ex);
 				throw new ApplicationServerInternalException("Failed to complete transaction", ex);
 			}
 		}
@@ -279,7 +281,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 				this.transactionDelegate.endTransaction();
 			}
 			catch (Throwable ex) {
-				logger.error("Could not complete unfinished transaction on endpoint release", ex);
+				logger.warn("Could not complete unfinished transaction on endpoint release", ex);
 			}
 		}
 	}
@@ -298,11 +300,10 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 		private boolean rollbackOnly;
 
 		public TransactionDelegate(XAResource xaResource) {
-			if (xaResource == null) {
-				if (transactionFactory != null && !transactionFactory.supportsResourceAdapterManagedTransactions()) {
-					throw new IllegalStateException("ResourceAdapter-provided XAResource is required for " +
-							"transaction management. Check your ResourceAdapter's configuration.");
-				}
+			if (xaResource == null && transactionFactory != null &&
+					!transactionFactory.supportsResourceAdapterManagedTransactions()) {
+				throw new IllegalStateException("ResourceAdapter-provided XAResource is required for " +
+						"transaction management. Check your ResourceAdapter's configuration.");
 			}
 			this.xaResource = xaResource;
 		}

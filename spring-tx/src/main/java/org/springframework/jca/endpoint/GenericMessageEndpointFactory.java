@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,24 +96,21 @@ public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactor
 
 		@Override
 		public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+			Throwable endpointEx = null;
 			boolean applyDeliveryCalls = !hasBeforeDeliveryBeenCalled();
 			if (applyDeliveryCalls) {
 				try {
 					beforeDelivery(null);
 				}
 				catch (ResourceException ex) {
-					if (ReflectionUtils.declaresException(methodInvocation.getMethod(), ex.getClass())) {
-						throw ex;
-					}
-					else {
-						throw new InternalResourceException(ex);
-					}
+					throw adaptExceptionIfNecessary(methodInvocation, ex);
 				}
 			}
 			try {
 				return methodInvocation.proceed();
 			}
 			catch (Throwable ex) {
+				endpointEx = ex;
 				onEndpointException(ex);
 				throw ex;
 			}
@@ -123,14 +120,20 @@ public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactor
 						afterDelivery();
 					}
 					catch (ResourceException ex) {
-						if (ReflectionUtils.declaresException(methodInvocation.getMethod(), ex.getClass())) {
-							throw ex;
-						}
-						else {
-							throw new InternalResourceException(ex);
+						if (endpointEx == null) {
+							throw adaptExceptionIfNecessary(methodInvocation, ex);
 						}
 					}
 				}
+			}
+		}
+
+		private Exception adaptExceptionIfNecessary(MethodInvocation methodInvocation, ResourceException ex) {
+			if (ReflectionUtils.declaresException(methodInvocation.getMethod(), ex.getClass())) {
+				return ex;
+			}
+			else {
+				return new InternalResourceException(ex);
 			}
 		}
 
