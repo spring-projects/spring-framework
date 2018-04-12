@@ -84,7 +84,7 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private Collection<String> destinationPrefixes = new ArrayList<>();
+	private final List<String> destinationPrefixes = new ArrayList<>();
 
 	private final List<HandlerMethodArgumentResolver> customArgumentResolvers = new ArrayList<>(4);
 
@@ -420,6 +420,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * <p>If there are no matching prefixes, return {@code null}.
 	 * <p>If there are no destination prefixes, return the destination as is.
 	 */
+	@SuppressWarnings("ForLoopReplaceableByForEach")
 	@Nullable
 	protected String getLookupDestination(@Nullable String destination) {
 		if (destination == null) {
@@ -428,7 +429,8 @@ public abstract class AbstractMethodMessageHandler<T>
 		if (CollectionUtils.isEmpty(this.destinationPrefixes)) {
 			return destination;
 		}
-		for (String prefix : this.destinationPrefixes) {
+		for (int i = 0; i < this.destinationPrefixes.size(); i++) {
+			String prefix = this.destinationPrefixes.get(i);
 			if (destination.startsWith(prefix)) {
 				return destination.substring(prefix.length());
 			}

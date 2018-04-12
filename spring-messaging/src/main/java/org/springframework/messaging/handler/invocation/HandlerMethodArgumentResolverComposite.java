@@ -71,9 +71,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 			@Nullable List<? extends HandlerMethodArgumentResolver> argumentResolvers) {
 
 		if (argumentResolvers != null) {
-			for (HandlerMethodArgumentResolver resolver : argumentResolvers) {
-				this.argumentResolvers.add(resolver);
-			}
+			this.argumentResolvers.addAll(argumentResolvers);
 		}
 		return this;
 	}
