@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,18 @@ import org.junit.Assert.*
 import org.junit.Test
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.beans.factory.getBean
+import org.springframework.beans.factory.getBeansOfType
 import org.springframework.context.support.BeanDefinitionDsl.*
 import org.springframework.core.env.SimpleCommandLinePropertySource
 import org.springframework.core.env.get
+import org.springframework.mock.env.MockPropertySource
 
 @Suppress("UNUSED_EXPRESSION")
 class BeanDefinitionDslTests {
 	
 	@Test
 	fun `Declare beans with the functional Kotlin DSL`() {
-		val beans = beans { 
+		val beans = beans {
 			bean<Foo>()
 			bean<Bar>("bar", scope = Scope.PROTOTYPE)
 			bean { Baz(ref()) }
@@ -87,7 +89,7 @@ class BeanDefinitionDslTests {
 			}
 		}
 
-		val context = GenericApplicationContext().apply { 
+		val context = GenericApplicationContext().apply {
 			environment.propertySources.addFirst(SimpleCommandLinePropertySource("--name=foofoo"))
 			beans.initialize(this)
 			refresh()
@@ -103,6 +105,43 @@ class BeanDefinitionDslTests {
 		val foofoo = context.getBean<FooFoo>()
 		assertEquals("foofoo", foofoo.name)
 	}
+
+	@Test  // SPR-16412
+	fun `Declare beans depending on environment properties`() {
+		val beans = beans {
+			val n = env["number-of-beans"].toInt()
+			for (i in 1..n) {
+				bean("string$i") { Foo() }
+			}
+		}
+
+		val context = GenericApplicationContext().apply {
+			environment.propertySources.addLast(MockPropertySource().withProperty("number-of-beans", 5))
+			beans.initialize(this)
+			refresh()
+		}
+
+		for (i in 1..5) {
+			assertNotNull(context.getBean("string$i"))
+		}
+	}
+
+	@Test  // SPR-16269
+	fun `Provide access to the context for allowing calling advanced features like getBeansOfType`() {
+		val beans = beans {
+			bean<Foo>("foo1")
+			bean<Foo>("foo2")
+			bean { BarBar(context.getBeansOfType<Foo>().values) }
+		}
+
+		val context = GenericApplicationContext().apply {
+			beans.initialize(this)
+			refresh()
+		}
+
+		val barbar = context.getBean<BarBar>()
+		assertEquals(2, barbar.foos.size)
+	}
 	
 }
 
@@ -110,3 +149,4 @@ class Foo
 class Bar
 class Baz(val bar: Bar)
 class FooFoo(val name: String)
+class BarBar(val foos: Collection<Foo>)
