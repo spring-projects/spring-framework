@@ -406,24 +406,40 @@ public abstract class ClassUtils {
 		Assert.notNull(clazz, "Class must not be null");
 		try {
 			ClassLoader target = clazz.getClassLoader();
-			if (target == null) {
+			// Common cases
+			if (target == classLoader || target == null) {
 				return true;
 			}
-			ClassLoader cur = classLoader;
-			if (cur == target) {
-				return true;
+			if (classLoader == null) {
+				return false;
 			}
-			while (cur != null) {
-				cur = cur.getParent();
-				if (cur == target) {
+			// Check for match in ancestors -> positive
+			ClassLoader current = classLoader;
+			while (current != null) {
+				current = current.getParent();
+				if (current == target) {
 					return true;
 				}
 			}
-			return false;
+			// Check for match in children -> negative
+			while (target != null) {
+				target = target.getParent();
+				if (target == classLoader) {
+					return false;
+				}
+			}
 		}
 		catch (SecurityException ex) {
-			// Probably from the system ClassLoader - let's consider it safe.
-			return true;
+			// Fall through to Class reference comparison below
+		}
+
+		try {
+			// Fallback for ClassLoaders without parent/child relationship:
+			// safe if same Class can be loaded from given ClassLoader
+			return (clazz == forName(clazz.getName(), classLoader));
+		}
+		catch (ClassNotFoundException ex) {
+			return false;
 		}
 	}
 
