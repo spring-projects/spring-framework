@@ -420,6 +420,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * <p>If there are no matching prefixes, return {@code null}.
 	 * <p>If there are no destination prefixes, return the destination as is.
 	 */
+	@SuppressWarnings("ForLoopReplaceableByForEach")
 	@Nullable
 	protected String getLookupDestination(@Nullable String destination) {
 		if (destination == null) {
@@ -428,8 +429,7 @@ public abstract class AbstractMethodMessageHandler<T>
 		if (CollectionUtils.isEmpty(this.destinationPrefixes)) {
 			return destination;
 		}
-		// Avoid unnecessary iterator allocation
-		for (int i = 0, size = this.destinationPrefixes.size(); i < size; i++) {
+		for (int i = 0; i < this.destinationPrefixes.size(); i++) {
 			String prefix = this.destinationPrefixes.get(i);
 			if (destination.startsWith(prefix)) {
 				return destination.substring(prefix.length());

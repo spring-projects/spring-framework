@@ -1,5 +1,6 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+/*
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,10 +82,10 @@ public class HandlerMethodReturnValueHandlerComposite implements AsyncHandlerMet
 		return getReturnValueHandler(returnType) != null;
 	}
 
+	@SuppressWarnings("ForLoopReplaceableByForEach")
 	@Nullable
 	private HandlerMethodReturnValueHandler getReturnValueHandler(MethodParameter returnType) {
-		// Avoid allocating an iterator
-		for (int i = 0, size = this.returnValueHandlers.size(); i < size; i++) {
+		for (int i = 0; i < this.returnValueHandlers.size(); i++) {
 			HandlerMethodReturnValueHandler handler = this.returnValueHandlers.get(i);
 			if (handler.supportsReturnType(returnType)) {
 				return handler;
