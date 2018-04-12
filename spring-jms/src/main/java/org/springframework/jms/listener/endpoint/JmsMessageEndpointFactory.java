@@ -21,7 +21,6 @@ import javax.jms.MessageListener;
 import javax.resource.ResourceException;
 import javax.resource.spi.UnavailableException;
 
-import org.springframework.core.NestedExceptionUtils;
 import org.springframework.jca.endpoint.AbstractMessageEndpointFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -94,13 +93,11 @@ public class JmsMessageEndpointFactory extends AbstractMessageEndpointFactory  {
 					throw new JmsResourceException(ex);
 				}
 			}
-			Throwable failure = null;
 			try {
 				getMessageListener().onMessage(message);
 			}
 			catch (RuntimeException | Error ex) {
 				onEndpointException(ex);
-				failure = ex;
 				throw ex;
 			}
 			finally {
@@ -109,9 +106,7 @@ public class JmsMessageEndpointFactory extends AbstractMessageEndpointFactory  {
 						afterDelivery();
 					}
 					catch (ResourceException ex) {
-						JmsResourceException jmsResourceException = new JmsResourceException(ex);
-						NestedExceptionUtils.getRootCause(jmsResourceException).initCause(failure);
-						throw jmsResourceException;
+						throw new JmsResourceException(ex);
 					}
 				}
 			}
