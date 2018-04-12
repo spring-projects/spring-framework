@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.core.OverridingClassLoader;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.UrlResource;
@@ -672,6 +673,8 @@ public class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("mock", rbd);
 
+		assertEquals(Runnable.class, bf.getType("mock"));
+		assertEquals(Runnable.class, bf.getType("mock"));
 		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
 		assertEquals(1, beans.size());
 	}
@@ -700,6 +703,10 @@ public class BeanFactoryGenericsTests {
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class);
 		bf.registerBeanDefinition("mock", rbd);
 
+		assertTrue(bf.isTypeMatch("mock", Runnable.class));
+		assertTrue(bf.isTypeMatch("mock", Runnable.class));
+		assertEquals(Runnable.class, bf.getType("mock"));
+		assertEquals(Runnable.class, bf.getType("mock"));
 		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
 		assertEquals(1, beans.size());
 	}
@@ -717,6 +724,10 @@ public class BeanFactoryGenericsTests {
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class.getName());
 		bf.registerBeanDefinition("mock", rbd);
 
+		assertTrue(bf.isTypeMatch("mock", Runnable.class));
+		assertTrue(bf.isTypeMatch("mock", Runnable.class));
+		assertEquals(Runnable.class, bf.getType("mock"));
+		assertEquals(Runnable.class, bf.getType("mock"));
 		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
 		assertEquals(1, beans.size());
 	}
@@ -732,6 +743,10 @@ public class BeanFactoryGenericsTests {
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(new TypedStringValue(Runnable.class.getName()));
 		bf.registerBeanDefinition("mock", rbd);
 
+		assertTrue(bf.isTypeMatch("mock", Runnable.class));
+		assertTrue(bf.isTypeMatch("mock", Runnable.class));
+		assertEquals(Runnable.class, bf.getType("mock"));
+		assertEquals(Runnable.class, bf.getType("mock"));
 		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
 		assertEquals(1, beans.size());
 	}
@@ -749,6 +764,10 @@ public class BeanFactoryGenericsTests {
 		rbd.getConstructorArgumentValues().addGenericArgumentValue("x");
 		bf.registerBeanDefinition("mock", rbd);
 
+		assertFalse(bf.isTypeMatch("mock", Runnable.class));
+		assertFalse(bf.isTypeMatch("mock", Runnable.class));
+		assertNull(bf.getType("mock"));
+		assertNull(bf.getType("mock"));
 		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
 		assertEquals(0, beans.size());
 	}
@@ -766,6 +785,32 @@ public class BeanFactoryGenericsTests {
 		rbd.getConstructorArgumentValues().addIndexedArgumentValue(0, Runnable.class);
 		bf.registerBeanDefinition("mock", rbd);
 
+		assertTrue(bf.isTypeMatch("mock", Runnable.class));
+		assertTrue(bf.isTypeMatch("mock", Runnable.class));
+		assertEquals(Runnable.class, bf.getType("mock"));
+		assertEquals(Runnable.class, bf.getType("mock"));
+		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
+		assertEquals(1, beans.size());
+	}
+
+	@Test  // SPR-16720
+	public void parameterizedInstanceFactoryMethodWithTempClassLoader() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setTempClassLoader(new OverridingClassLoader(getClass().getClassLoader()));
+
+		RootBeanDefinition rbd = new RootBeanDefinition(MocksControl.class);
+		bf.registerBeanDefinition("mocksControl", rbd);
+
+		rbd = new RootBeanDefinition();
+		rbd.setFactoryBeanName("mocksControl");
+		rbd.setFactoryMethodName("createMock");
+		rbd.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class);
+		bf.registerBeanDefinition("mock", rbd);
+
+		assertTrue(bf.isTypeMatch("mock", Runnable.class));
+		assertTrue(bf.isTypeMatch("mock", Runnable.class));
+		assertEquals(Runnable.class, bf.getType("mock"));
+		assertEquals(Runnable.class, bf.getType("mock"));
 		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
 		assertEquals(1, beans.size());
 	}
