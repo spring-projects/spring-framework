@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import org.springframework.web.server.WebHandler;
  * <li>{@link HandlerResultHandler} -- process handler return values
  * </ul>
  *
- * <p>{@code DispatcherHandler} s also designed to be a Spring bean itself and
+ * <p>{@code DispatcherHandler} is also designed to be a Spring bean itself and
  * implements {@link ApplicationContextAware} for access to the context it runs
  * in. If {@code DispatcherHandler} is declared with the bean name "webHandler"
  * it is discovered by {@link WebHttpHandlerBuilder#applicationContext} which
