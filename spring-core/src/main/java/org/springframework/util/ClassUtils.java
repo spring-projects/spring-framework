@@ -348,13 +348,16 @@ public abstract class ClassUtils {
 			return true;
 		}
 		try {
-			return (clazz == classLoader.loadClass(clazz.getName()));
-			// Else: different class with same name found
+			if (clazz.getClassLoader() == classLoader) {
+				return true;
+			}
 		}
-		catch (ClassNotFoundException ex) {
-			// No corresponding class found at all
-			return false;
+		catch (SecurityException ex) {
+			// Fall through to loadable check below
 		}
+
+		// Visible if same Class can be loaded from given ClassLoader
+		return isLoadable(clazz, classLoader);
 	}
 
 	/**
@@ -392,12 +395,29 @@ public abstract class ClassUtils {
 			}
 		}
 		catch (SecurityException ex) {
-			// Fall through to Class reference comparison below
+			// Fall through to loadable check below
 		}
 
 		// Fallback for ClassLoaders without parent/child relationship:
 		// safe if same Class can be loaded from given ClassLoader
-		return (classLoader != null && isVisible(clazz, classLoader));
+		return (classLoader != null && isLoadable(clazz, classLoader));
+	}
+
+	/**
+	 * Check whether the given class is loadable in the given ClassLoader.
+	 * @param clazz the class to check (typically an interface)
+	 * @param classLoader the ClassLoader to check against
+	 * @since 5.0.6
+	 */
+	private static boolean isLoadable(Class<?> clazz, ClassLoader classLoader) {
+		try {
+			return (clazz == classLoader.loadClass(clazz.getName()));
+			// Else: different class with same name found
+		}
+		catch (ClassNotFoundException ex) {
+			// No corresponding class found at all
+			return false;
+		}
 	}
 
 	/**
@@ -711,14 +731,16 @@ public abstract class ClassUtils {
 	public static Set<Class<?>> getAllInterfacesForClassAsSet(Class<?> clazz, @Nullable ClassLoader classLoader) {
 		Assert.notNull(clazz, "Class must not be null");
 		if (clazz.isInterface() && isVisible(clazz, classLoader)) {
-			return Collections.<Class<?>>singleton(clazz);
+			return Collections.singleton(clazz);
 		}
 		Set<Class<?>> interfaces = new LinkedHashSet<>();
 		Class<?> current = clazz;
 		while (current != null) {
 			Class<?>[] ifcs = current.getInterfaces();
 			for (Class<?> ifc : ifcs) {
-				interfaces.addAll(getAllInterfacesForClassAsSet(ifc, classLoader));
+				if (isVisible(ifc, classLoader)) {
+					interfaces.add(ifc);
+				}
 			}
 			current = current.getSuperclass();
 		}
@@ -1211,8 +1233,7 @@ public abstract class ClassUtils {
 	 * {@code targetClass} doesn't implement it or is {@code null}
 	 */
 	public static Method getMostSpecificMethod(Method method, @Nullable Class<?> targetClass) {
-		if (isOverridable(method, targetClass) &&
-				targetClass != null && targetClass != method.getDeclaringClass()) {
+		if (targetClass != null && targetClass != method.getDeclaringClass() && isOverridable(method, targetClass)) {
 			try {
 				if (Modifier.isPublic(method.getModifiers())) {
 					try {

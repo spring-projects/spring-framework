@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,7 +185,7 @@ public class AspectJAutoProxyCreatorTests {
 		// Create a child factory with a bean that should be woven
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.getPropertyValues().addPropertyValue(new PropertyValue("name", "Adrian"))
-				.addPropertyValue(new PropertyValue("age", new Integer(34)));
+				.addPropertyValue(new PropertyValue("age", 34));
 		childAc.registerBeanDefinition("adrian2", bd);
 		// Register the advisor auto proxy creator with subclass
 		childAc.registerBeanDefinition(AnnotationAwareAspectJAutoProxyCreator.class.getName(), new RootBeanDefinition(
@@ -271,24 +271,44 @@ public class AspectJAutoProxyCreatorTests {
 	}
 
 	@Test
+	public void testTwoAdviceAspect() {
+		ClassPathXmlApplicationContext bf = newContext("twoAdviceAspect.xml");
+
+		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
+		testAgeAspect(adrian1, 0, 2);
+	}
+
+	@Test
 	public void testTwoAdviceAspectSingleton() {
-		doTestTwoAdviceAspectWith("twoAdviceAspect.xml");
+		ClassPathXmlApplicationContext bf = newContext("twoAdviceAspectSingleton.xml");
+
+		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
+		testAgeAspect(adrian1, 0, 1);
+		ITestBean adrian2 = (ITestBean) bf.getBean("adrian");
+		assertNotSame(adrian1, adrian2);
+		testAgeAspect(adrian2, 2, 1);
 	}
 
 	@Test
 	public void testTwoAdviceAspectPrototype() {
-		doTestTwoAdviceAspectWith("twoAdviceAspectPrototype.xml");
-	}
+		ClassPathXmlApplicationContext bf = newContext("twoAdviceAspectPrototype.xml");
 
-	private void doTestTwoAdviceAspectWith(String location) {
-		ClassPathXmlApplicationContext bf = newContext(location);
-
-		boolean aspectSingleton = bf.isSingleton("aspect");
 		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
-		testPrototype(adrian1, 0);
+		testAgeAspect(adrian1, 0, 1);
 		ITestBean adrian2 = (ITestBean) bf.getBean("adrian");
 		assertNotSame(adrian1, adrian2);
-		testPrototype(adrian2, aspectSingleton ? 2 : 0);
+		testAgeAspect(adrian2, 0, 1);
+	}
+
+	private void testAgeAspect(ITestBean adrian, int start, int increment) {
+		assertTrue(AopUtils.isAopProxy(adrian));
+		adrian.setName("");
+		assertEquals(start, adrian.age());
+		int newAge = 32;
+		adrian.setAge(newAge);
+		assertEquals(start + increment, adrian.age());
+		adrian.setAge(0);
+		assertEquals(start + increment * 2, adrian.age());
 	}
 
 	@Test
@@ -310,18 +330,6 @@ public class AspectJAutoProxyCreatorTests {
 		ITestBean adrian = (ITestBean) bf.getBean("adrian");
 		assertTrue(AopUtils.isAopProxy(adrian));
 		assertEquals(68, adrian.getAge());
-	}
-
-	private void testPrototype(ITestBean adrian1, int start) {
-		assertTrue(AopUtils.isAopProxy(adrian1));
-		//TwoAdviceAspect twoAdviceAspect = (TwoAdviceAspect) bf.getBean(TwoAdviceAspect.class.getName());
-		adrian1.setName("");
-		assertEquals(start++, adrian1.getAge());
-		int newAge = 32;
-		adrian1.setAge(newAge);
-		assertEquals(start++, adrian1.getAge());
-		adrian1.setAge(0);
-		assertEquals(start++, adrian1.getAge());
 	}
 
 	@Test
