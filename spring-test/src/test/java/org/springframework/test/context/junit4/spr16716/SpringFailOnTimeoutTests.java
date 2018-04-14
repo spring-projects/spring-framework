@@ -84,6 +84,7 @@ public class SpringFailOnTimeoutTests {
 		new SpringFailOnTimeout(statement, 100).evaluate();
 	}
 
+	@SuppressWarnings("serial")
 	private static class Boom extends RuntimeException {
 	}
 
