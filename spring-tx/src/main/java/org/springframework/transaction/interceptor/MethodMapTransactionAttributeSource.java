@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Simple {@link TransactionAttributeSource} implementation that
@@ -144,7 +145,7 @@ public class MethodMapTransactionAttributeSource
 		Assert.notNull(mappedName, "Mapped name must not be null");
 		String name = clazz.getName() + '.'  + mappedName;
 
-		Method[] methods = clazz.getDeclaredMethods();
+		Method[] methods = ReflectionUtils.getAllDeclaredMethods(clazz);
 		List<Method> matchingMethods = new ArrayList<>();
 		for (Method method : methods) {
 			if (isMatch(method.getName(), mappedName)) {
@@ -156,7 +157,7 @@ public class MethodMapTransactionAttributeSource
 					"Couldn't find method '" + mappedName + "' on class [" + clazz.getName() + "]");
 		}
 
-		// register all matching methods
+		// Register all matching methods
 		for (Method method : matchingMethods) {
 			String regMethodName = this.methodNameMap.get(method);
 			if (regMethodName == null || (!regMethodName.equals(name) && regMethodName.length() <= name.length())) {
