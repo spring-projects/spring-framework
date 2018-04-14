@@ -117,6 +117,7 @@ dependencies {
 	}
 	testCompile(files(genCastor.classesDir).builtBy(genCastor))
 	testCompile(files(genJaxb.classesDir).builtBy(genJaxb))
+	testCompile("org.xmlunit:xmlunit-matchers:2.5.1")
 	testRuntime("xerces:xercesImpl:2.11.0")  // for Castor
 	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0")
 	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0")
