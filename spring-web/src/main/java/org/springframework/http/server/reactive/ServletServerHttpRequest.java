@@ -198,6 +198,8 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	/**
 	 * Read from the request body InputStream and return a DataBuffer.
 	 * Invoked only when {@link ServletInputStream#isReady()} returns "true".
+	 * @return a DataBuffer with data read, or {@link #EOF_BUFFER} if the input
+	 * stream returned -1, or null if 0 bytes were read.
 	 */
 	@Nullable
 	DataBuffer readFromInputStream() throws IOException {
@@ -211,7 +213,8 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 			dataBuffer.write(this.buffer, 0, read);
 			return dataBuffer;
 		}
-		else if (read == -1) {
+
+		if (read == -1) {
 			return EOF_BUFFER;
 		}
 
@@ -273,13 +276,12 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		protected DataBuffer read() throws IOException {
 			if (this.inputStream.isReady()) {
 				DataBuffer dataBuffer = readFromInputStream();
-				if (dataBuffer != EOF_BUFFER) {
-					return dataBuffer;
-				}
-				else {
+				if (dataBuffer == EOF_BUFFER) {
 					// No need to wait for container callback...
 					onAllDataRead();
+					dataBuffer = null;
 				}
+				return dataBuffer;
 			}
 			return null;
 		}
