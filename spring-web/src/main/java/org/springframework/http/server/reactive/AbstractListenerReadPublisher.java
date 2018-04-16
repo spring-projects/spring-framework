@@ -320,8 +320,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 			<T> void onDataAvailable(AbstractListenerReadPublisher<T> publisher) {
 				if (publisher.changeState(this, READING)) {
 					try {
-						boolean demandAvailable = publisher.
-								readAndPublish();
+						boolean demandAvailable = publisher.readAndPublish();
 						if (demandAvailable) {
 							publisher.changeToDemandState(READING);
 						}
