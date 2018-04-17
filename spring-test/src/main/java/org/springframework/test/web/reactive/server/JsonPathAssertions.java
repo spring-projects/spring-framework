@@ -16,6 +16,8 @@
 
 package org.springframework.test.web.reactive.server;
 
+import org.hamcrest.Matcher;
+
 import org.springframework.test.util.JsonPathExpectationsHelper;
 
 /**
@@ -132,4 +134,11 @@ public class JsonPathAssertions {
 		return this.bodySpec;
 	}
 
+	/**
+	 * Applies {@link JsonPathExpectationsHelper#assertValue(String, Matcher)}
+	 */
+	public <T> WebTestClient.BodyContentSpec matches(Matcher<T> matcher) {
+		this.pathHelper.assertValue(this.content, matcher);
+		return this.bodySpec;
+	}
 }
