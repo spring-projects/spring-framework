@@ -663,13 +663,11 @@ class SpecificationLikeTests {
 [[kotlin-webtestclient-issue]]
 ==== `WebTestClient` type inference issue in Kotlin
 
-`WebTestClient` is not usable yet in Kotlin due to a
-https://youtrack.jetbrains.com/issue/KT-5464[type inference issue] which is
-expected to be fixed as of Kotlin 1.3. You can watch
-https://jira.spring.io/browse/SPR-16057[SPR-16057] for up-to-date information. Meanwhile,
-the proposed alternative is to use directly `WebClient` with its Reactor and Spring Kotlin
-extensions to perform integration tests on an embedded WebFlux server.
+Due to a https://youtrack.jetbrains.com/issue/KT-5464[type inference issue], make sure to
+use Kotlin `expectBody` extension (like `.expectBody<String>().isEqualTo("foo")`) since it
+provides a workaround for the Kotlin issue with the Java API.
 
+See also the related https://jira.spring.io/browse/SPR-16057[SPR-16057] issue.
 
 
 

@@ -19,12 +19,15 @@ package org.springframework.test.web.reactive.server
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Answers
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.reactivestreams.Publisher
+import org.springframework.web.reactive.function.server.ServerResponse.*
+import org.springframework.web.reactive.function.server.router
 
 /**
  * Mock object based tests for [WebTestClient] Kotlin extensions
@@ -52,6 +55,30 @@ class WebTestClientExtensionsTests {
 	fun `ResponseSpec#expectBody with reified type parameters`() {
 		responseSpec.expectBody<Foo>()
 		verify(responseSpec, times(1)).expectBody(Foo::class.java)
+	}
+
+	@Test
+	fun `KotlinBodySpec#isEqualTo`() {
+		WebTestClient
+				.bindToRouterFunction( router { GET("/") { ok().syncBody("foo") } } )
+				.build()
+				.get().uri("/").exchange().expectBody<String>().isEqualTo("foo")
+	}
+
+	@Test
+	fun `KotlinBodySpec#consumeWith`() {
+		WebTestClient
+				.bindToRouterFunction( router { GET("/") { ok().syncBody("foo") } } )
+				.build()
+				.get().uri("/").exchange().expectBody<String>().consumeWith { assertEquals("foo", it.responseBody) }
+	}
+
+	@Test
+	fun `KotlinBodySpec#returnResult`() {
+		WebTestClient
+				.bindToRouterFunction( router { GET("/") { ok().syncBody("foo") } } )
+				.build()
+				.get().uri("/").exchange().expectBody<String>().returnResult().apply { assertEquals("foo", responseBody) }
 	}
 
 	@Test

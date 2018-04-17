@@ -555,13 +555,18 @@ public abstract class AnnotationUtils {
 				if (clazz == null || Object.class == clazz) {
 					break;
 				}
-				try {
-					Method equivalentMethod = clazz.getDeclaredMethod(method.getName(), method.getParameterTypes());
-					Method resolvedEquivalentMethod = BridgeMethodResolver.findBridgedMethod(equivalentMethod);
-					result = findAnnotation((AnnotatedElement) resolvedEquivalentMethod, annotationType);
-				}
-				catch (NoSuchMethodException ex) {
-					// No equivalent method found
+				Set<Method> annotatedMethods = getAnnotatedMethodsInBaseType(clazz);
+				if (!annotatedMethods.isEmpty()) {
+					for (Method annotatedMethod : annotatedMethods) {
+						if (annotatedMethod.getName().equals(method.getName()) &&
+								Arrays.equals(annotatedMethod.getParameterTypes(), method.getParameterTypes())) {
+							Method resolvedSuperMethod = BridgeMethodResolver.findBridgedMethod(annotatedMethod);
+							result = findAnnotation((AnnotatedElement) resolvedSuperMethod, annotationType);
+							if (result != null) {
+								break;
+							}
+						}
+					}
 				}
 				if (result == null) {
 					result = searchOnInterfaces(method, annotationType, clazz.getInterfaces());
