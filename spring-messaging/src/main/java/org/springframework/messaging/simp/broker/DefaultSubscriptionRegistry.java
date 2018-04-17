@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.PathMatcher;
+import org.springframework.util.StringUtils;
 
 /**
  * Implementation of {@link SubscriptionRegistry} that stores subscriptions
@@ -113,24 +114,25 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 	}
 
 	/**
-	 * Configure the name of a selector header that a subscription message can
-	 * have in order to filter messages based on their headers. The value of the
-	 * header can use Spring EL expressions against message headers.
-	 * <p>For example the following expression expects a header called "foo" to
-	 * have the value "bar":
+	 * Configure the name of a header that a subscription message can have for
+	 * the purpose of filtering messages matched to the subscription. The header
+	 * value is expected to be a Spring EL boolean expression to be applied to
+	 * the headers of messages matched to the subscription.
+	 * <p>For example:
 	 * <pre>
 	 * headers.foo == 'bar'
 	 * </pre>
-	 * <p>By default this is set to "selector".
+	 * <p>By default this is set to "selector". You can set it to a different
+	 * name, or to {@code null} to turn off support for a selector header.
+	 * @param selectorHeaderName the name to use for a selector header
 	 * @since 4.2
 	 */
 	public void setSelectorHeaderName(String selectorHeaderName) {
-		Assert.notNull(selectorHeaderName, "'selectorHeaderName' must not be null");
-		this.selectorHeaderName = selectorHeaderName;
+		this.selectorHeaderName = StringUtils.hasText(selectorHeaderName) ? selectorHeaderName : null;
 	}
 
 	/**
-	 * Return the name for the selector header.
+	 * Return the name for the selector header name.
 	 * @since 4.2
 	 */
 	public String getSelectorHeaderName() {
@@ -142,25 +144,31 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 	protected void addSubscriptionInternal(
 			String sessionId, String subsId, String destination, Message<?> message) {
 
+		Expression expression = getSelectorExpression(message.getHeaders());
+		this.subscriptionRegistry.addSubscription(sessionId, subsId, destination, expression);
+		this.destinationCache.updateAfterNewSubscription(destination, sessionId, subsId);
+	}
+
+	private Expression getSelectorExpression(MessageHeaders headers) {
 		Expression expression = null;
-		MessageHeaders headers = message.getHeaders();
-		String selector = SimpMessageHeaderAccessor.getFirstNativeHeader(getSelectorHeaderName(), headers);
-		if (selector != null) {
-			try {
-				expression = this.expressionParser.parseExpression(selector);
-				this.selectorHeaderInUse = true;
-				if (logger.isTraceEnabled()) {
-					logger.trace("Subscription selector: [" + selector + "]");
+		if (getSelectorHeaderName() != null) {
+			String selector = SimpMessageHeaderAccessor.getFirstNativeHeader(getSelectorHeaderName(), headers);
+			if (selector != null) {
+				try {
+					expression = this.expressionParser.parseExpression(selector);
+					this.selectorHeaderInUse = true;
+					if (logger.isTraceEnabled()) {
+						logger.trace("Subscription selector: [" + selector + "]");
+					}
 				}
-			}
-			catch (Throwable ex) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Failed to parse selector: " + selector, ex);
+				catch (Throwable ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Failed to parse selector: " + selector, ex);
+					}
 				}
 			}
 		}
-		this.subscriptionRegistry.addSubscription(sessionId, subsId, destination, expression);
-		this.destinationCache.updateAfterNewSubscription(destination, sessionId, subsId);
+		return expression;
 	}
 
 	@Override

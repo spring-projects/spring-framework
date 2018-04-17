@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,21 +51,25 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
-	private final Map<String, SessionInfo> sessions = new ConcurrentHashMap<String, SessionInfo>();
-
-	private SubscriptionRegistry subscriptionRegistry;
 
 	private PathMatcher pathMatcher;
 
 	private Integer cacheLimit;
 
+	private String selectorHeaderName = "selector";
+
 	private TaskScheduler taskScheduler;
 
 	private long[] heartbeatValue;
 
-	private ScheduledFuture<?> heartbeatFuture;
-
 	private MessageHeaderInitializer headerInitializer;
+
+
+	private SubscriptionRegistry subscriptionRegistry;
+
+	private final Map<String, SessionInfo> sessions = new ConcurrentHashMap<String, SessionInfo>();
+
+	private ScheduledFuture<?> heartbeatFuture;
 
 
 	/**
@@ -96,10 +100,38 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		this.subscriptionRegistry = subscriptionRegistry;
 		initPathMatcherToUse();
 		initCacheLimitToUse();
+		initSelectorHeaderNameToUse();
 	}
 
 	public SubscriptionRegistry getSubscriptionRegistry() {
 		return this.subscriptionRegistry;
+	}
+
+	/**
+	 * Configure the name of a header that a subscription message can have for
+	 * the purpose of filtering messages matched to the subscription. The header
+	 * value is expected to be a Spring EL boolean expression to be applied to
+	 * the headers of messages matched to the subscription.
+	 * <p>For example:
+	 * <pre>
+	 * headers.foo == 'bar'
+	 * </pre>
+	 * <p>By default this is set to "selector". You can set it to a different
+	 * name, or to {@code null} to turn off support for a selector header.
+	 * @param selectorHeaderName the name to use for a selector header
+	 * @since 4.3.17
+	 * @see #setSubscriptionRegistry
+	 * @see DefaultSubscriptionRegistry#setSelectorHeaderName(String)
+	 */
+	public void setSelectorHeaderName(String selectorHeaderName) {
+		this.selectorHeaderName = selectorHeaderName;
+		initSelectorHeaderNameToUse();
+	}
+
+	private void initSelectorHeaderNameToUse() {
+		if (this.subscriptionRegistry instanceof DefaultSubscriptionRegistry) {
+			((DefaultSubscriptionRegistry) this.subscriptionRegistry).setSelectorHeaderName(this.selectorHeaderName);
+		}
 	}
 
 	/**
