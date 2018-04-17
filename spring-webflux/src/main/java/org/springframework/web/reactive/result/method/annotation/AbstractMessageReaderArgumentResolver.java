@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import reactor.core.publisher.Flux;
@@ -151,14 +152,17 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		MediaType contentType = request.getHeaders().getContentType();
 		MediaType mediaType = (contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM);
 
+		Supplier<Throwable> missingBodyError = isBodyRequired || (adapter != null && !adapter.supportsEmpty()) ?
+				() -> handleMissingBody(bodyParameter) : null;
+
 		for (HttpMessageReader<?> reader : getMessageReaders()) {
 			if (reader.canRead(elementType, mediaType)) {
 				Map<String, Object> readHints = Collections.emptyMap();
 				if (adapter != null && adapter.isMultiValue()) {
 					Flux<?> flux = reader.read(actualType, elementType, request, response, readHints);
 					flux = flux.onErrorResume(ex -> Flux.error(handleReadError(bodyParameter, ex)));
-					if (isBodyRequired || !adapter.supportsEmpty()) {
-						flux = flux.switchIfEmpty(Flux.error(handleMissingBody(bodyParameter)));
+					if (missingBodyError != null) {
+						flux = flux.switchIfEmpty(Flux.error(missingBodyError));
 					}
 					Object[] hints = extractValidationHints(bodyParameter);
 					if (hints != null) {
@@ -171,8 +175,8 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 					// Single-value (with or without reactive type wrapper)
 					Mono<?> mono = reader.readMono(actualType, elementType, request, response, readHints);
 					mono = mono.onErrorResume(ex -> Mono.error(handleReadError(bodyParameter, ex)));
-					if (isBodyRequired || (adapter != null && !adapter.supportsEmpty())) {
-						mono = mono.switchIfEmpty(Mono.error(handleMissingBody(bodyParameter)));
+					if (missingBodyError != null) {
+						mono = mono.switchIfEmpty(Mono.error(missingBodyError));
 					}
 					Object[] hints = extractValidationHints(bodyParameter);
 					if (hints != null) {
@@ -197,8 +201,8 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 				// Body not empty, back to 415..
 				throw new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes);
 			});
-			if (isBodyRequired || (adapter != null && !adapter.supportsEmpty())) {
-				body = body.switchIfEmpty(Mono.error(handleMissingBody(bodyParameter)));
+			if (missingBodyError != null) {
+				body = body.switchIfEmpty(Mono.error(missingBodyError));
 			}
 			return (adapter != null ? Mono.just(adapter.fromPublisher(body)) : Mono.from(body));
 		}
