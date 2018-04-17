@@ -127,8 +127,8 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 
 	/**
 	 * Read the body from a method argument with {@link HttpMessageReader}.
-	 * @param bodyParameter the {@link MethodParameter} to read
-	 * @param actualParameter the actual {@link MethodParameter} to read; could be different
+	 * @param bodyParam the {@link MethodParameter} to read
+	 * @param actualParam the actual {@link MethodParameter} to read; could be different
 	 * from {@code bodyParameter} when processing {@code HttpEntity} for example
 	 * @param isBodyRequired true if the body is required
 	 * @param bindingContext the binding context to use
@@ -136,12 +136,11 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	 * @return the body
 	 * @since 5.0.2
 	 */
-	protected Mono<Object> readBody(MethodParameter bodyParameter, @Nullable MethodParameter actualParameter,
+	protected Mono<Object> readBody(MethodParameter bodyParam, @Nullable MethodParameter actualParam,
 			boolean isBodyRequired, BindingContext bindingContext, ServerWebExchange exchange) {
 
-		ResolvableType bodyType = ResolvableType.forMethodParameter(bodyParameter);
-		ResolvableType actualType = (actualParameter == null ?
-				bodyType : ResolvableType.forMethodParameter(actualParameter));
+		ResolvableType bodyType = ResolvableType.forMethodParameter(bodyParam);
+		ResolvableType actualType = actualParam == null ? bodyType : ResolvableType.forMethodParameter(actualParam);
 		Class<?> resolvedType = bodyType.resolve();
 		ReactiveAdapter adapter = (resolvedType != null ? getAdapterRegistry().getAdapter(resolvedType) : null);
 		ResolvableType elementType = (adapter != null ? bodyType.getGeneric() : bodyType);
@@ -153,42 +152,37 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		MediaType mediaType = (contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM);
 
 		Supplier<Throwable> missingBodyError = isBodyRequired || (adapter != null && !adapter.supportsEmpty()) ?
-				() -> handleMissingBody(bodyParameter) : null;
+				() -> handleMissingBody(bodyParam) : null;
 
 		for (HttpMessageReader<?> reader : getMessageReaders()) {
 			if (reader.canRead(elementType, mediaType)) {
 				Map<String, Object> readHints = Collections.emptyMap();
 				if (adapter != null && adapter.isMultiValue()) {
 					Flux<?> flux = reader.read(actualType, elementType, request, response, readHints);
-					flux = flux.onErrorResume(ex -> Flux.error(handleReadError(bodyParameter, ex)));
+					flux = flux.onErrorResume(ex -> Flux.error(handleReadError(bodyParam, ex)));
 					if (missingBodyError != null) {
 						flux = flux.switchIfEmpty(Flux.error(missingBodyError));
 					}
-					Object[] hints = extractValidationHints(bodyParameter);
+					Object[] hints = extractValidationHints(bodyParam);
 					if (hints != null) {
 						flux = flux.doOnNext(target ->
-								validate(target, hints, bodyParameter, bindingContext, exchange));
+								validate(target, hints, bodyParam, bindingContext, exchange));
 					}
 					return Mono.just(adapter.fromPublisher(flux));
 				}
 				else {
 					// Single-value (with or without reactive type wrapper)
 					Mono<?> mono = reader.readMono(actualType, elementType, request, response, readHints);
-					mono = mono.onErrorResume(ex -> Mono.error(handleReadError(bodyParameter, ex)));
+					mono = mono.onErrorResume(ex -> Mono.error(handleReadError(bodyParam, ex)));
 					if (missingBodyError != null) {
 						mono = mono.switchIfEmpty(Mono.error(missingBodyError));
 					}
-					Object[] hints = extractValidationHints(bodyParameter);
+					Object[] hints = extractValidationHints(bodyParam);
 					if (hints != null) {
 						mono = mono.doOnNext(target ->
-								validate(target, hints, bodyParameter, bindingContext, exchange));
+								validate(target, hints, bodyParam, bindingContext, exchange));
 					}
-					if (adapter != null) {
-						return Mono.just(adapter.fromPublisher(mono));
-					}
-					else {
-						return Mono.from(mono);
-					}
+					return adapter != null ? Mono.just(adapter.fromPublisher(mono)) : Mono.from(mono);
 				}
 			}
 		}
