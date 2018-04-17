@@ -384,6 +384,23 @@
                 ]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
+		<xsd:attribute name="selector-header" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.messaging.simp.stomp.SimpleBrokerMessageHandler"><![CDATA[
+	Configure the name of a header that a subscription message can have for
+	the purpose of filtering messages matched to the subscription. The header
+	value is expected to be a Spring EL boolean expression to be applied to
+	the headers of messages matched to the subscription.
+
+	For example:
+	headers.foo == 'bar'
+
+	By default this is set to "selector". You can set it to a different
+	name, or to "" to turn off support for a selector header.
+                ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+
 	</xsd:complexType>
 
 	<xsd:complexType name="channel">
