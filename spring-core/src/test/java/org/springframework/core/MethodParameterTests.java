@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.concurrent.Callable;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -96,7 +97,7 @@ public class MethodParameterTests {
 
 	@Test  // SPR-16652
 	public void annotatedConstructorParameterInInnerClass() throws Exception {
-		Constructor<?> constructor = InnerClass.class.getConstructor(getClass(), String.class, Integer.class);
+		Constructor<?> constructor = InnerClass.class.getConstructor(getClass(), String.class, Callable.class);
 
 		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(constructor, 0);
 		assertEquals(getClass(), methodParameter.getParameterType());
@@ -107,8 +108,26 @@ public class MethodParameterTests {
 		assertNotNull("Failed to find @Param annotation", methodParameter.getParameterAnnotation(Param.class));
 
 		methodParameter = MethodParameter.forMethodOrConstructor(constructor, 2);
-		assertEquals(Integer.class, methodParameter.getParameterType());
+		assertEquals(Callable.class, methodParameter.getParameterType());
 		assertNull(methodParameter.getParameterAnnotation(Param.class));
+	}
+
+	@Test  // SPR-16734
+	public void genericConstructorParameterInInnerClass() throws Exception {
+		Constructor<?> constructor = InnerClass.class.getConstructor(getClass(), String.class, Callable.class);
+
+		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(constructor, 0);
+		assertEquals(getClass(), methodParameter.getParameterType());
+		assertEquals(getClass(), methodParameter.getGenericParameterType());
+
+		methodParameter = MethodParameter.forMethodOrConstructor(constructor, 1);
+		assertEquals(String.class, methodParameter.getParameterType());
+		assertEquals(String.class, methodParameter.getGenericParameterType());
+
+		methodParameter = MethodParameter.forMethodOrConstructor(constructor, 2);
+		assertEquals(Callable.class, methodParameter.getParameterType());
+		assertEquals(ResolvableType.forClassWithGenerics(Callable.class, Integer.class).getType(),
+				methodParameter.getGenericParameterType());
 	}
 
 
@@ -126,7 +145,7 @@ public class MethodParameterTests {
 	@SuppressWarnings("unused")
 	private class InnerClass {
 
-		public InnerClass(@Param String s, Integer i) {
+		public InnerClass(@Param String s, Callable<Integer> i) {
 		}
 	}
 

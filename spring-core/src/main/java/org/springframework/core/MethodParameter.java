@@ -337,7 +337,6 @@ public class MethodParameter {
 		return (isOptional() ? nested() : this);
 	}
 
-
 	/**
 	 * Set a containing class to resolve the parameter type against.
 	 */
@@ -390,9 +389,19 @@ public class MethodParameter {
 				paramType = (method != null ? method.getGenericReturnType() : void.class);
 			}
 			else {
-				paramType = (this.method != null ?
-						this.method.getGenericParameterTypes()[this.parameterIndex] :
-						this.constructor.getGenericParameterTypes()[this.parameterIndex]);
+				Type[] genericParameterTypes = (this.method != null ?
+						this.method.getGenericParameterTypes() : this.constructor.getGenericParameterTypes());
+				int index = this.parameterIndex;
+				if (this.constructor != null && this.constructor.getDeclaringClass().isMemberClass() &&
+						!Modifier.isStatic(this.constructor.getDeclaringClass().getModifiers()) &&
+						genericParameterTypes.length == this.constructor.getParameterTypes().length - 1) {
+					// Bug in javac: type array excludes enclosing instance parameter
+					// for inner classes with at least one generic constructor parameter,
+					// so access it with the actual parameter index lowered by 1
+					index = this.parameterIndex - 1;
+				}
+				paramType = (index >= 0 && index < genericParameterTypes.length ?
+						genericParameterTypes[index] : getParameterType());
 			}
 			this.genericParameterType = paramType;
 		}
@@ -497,12 +506,8 @@ public class MethodParameter {
 				// for inner classes, so access it with the actual parameter index lowered by 1
 				index = this.parameterIndex - 1;
 			}
-			if (index >= 0 && index < annotationArray.length) {
-				paramAnns = adaptAnnotationArray(annotationArray[index]);
-			}
-			else {
-				paramAnns = EMPTY_ANNOTATION_ARRAY;
-			}
+			paramAnns = (index >= 0 && index < annotationArray.length ?
+					adaptAnnotationArray(annotationArray[index]) : EMPTY_ANNOTATION_ARRAY);
 			this.parameterAnnotations = paramAnns;
 		}
 		return paramAnns;
