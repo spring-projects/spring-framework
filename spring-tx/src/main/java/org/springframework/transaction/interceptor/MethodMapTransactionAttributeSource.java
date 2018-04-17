@@ -32,7 +32,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Simple {@link TransactionAttributeSource} implementation that
@@ -145,7 +144,7 @@ public class MethodMapTransactionAttributeSource
 		Assert.notNull(mappedName, "Mapped name must not be null");
 		String name = clazz.getName() + '.'  + mappedName;
 
-		Method[] methods = ReflectionUtils.getAllDeclaredMethods(clazz);
+		Method[] methods = clazz.getDeclaredMethods();
 		List<Method> matchingMethods = new ArrayList<>();
 		for (Method method : methods) {
 			if (isMatch(method.getName(), mappedName)) {
