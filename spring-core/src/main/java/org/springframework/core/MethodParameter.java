@@ -419,7 +419,18 @@ public class MethodParameter {
 				paramType = (method != null ? method.getGenericReturnType() : void.class);
 			}
 			else {
-				paramType = this.executable.getGenericParameterTypes()[this.parameterIndex];
+				Type[] genericParameterTypes = this.executable.getGenericParameterTypes();
+				int index = this.parameterIndex;
+				if (this.executable instanceof Constructor &&
+						ClassUtils.isInnerClass(this.executable.getDeclaringClass()) &&
+						genericParameterTypes.length == this.executable.getParameterCount() - 1) {
+					// Bug in javac: type array excludes enclosing instance parameter
+					// for inner classes with at least one generic constructor parameter,
+					// so access it with the actual parameter index lowered by 1
+					index = this.parameterIndex - 1;
+				}
+				paramType = (index >= 0 && index < genericParameterTypes.length ?
+						genericParameterTypes[index] : getParameterType());
 			}
 			this.genericParameterType = paramType;
 		}
@@ -525,12 +536,8 @@ public class MethodParameter {
 				// for inner classes, so access it with the actual parameter index lowered by 1
 				index = this.parameterIndex - 1;
 			}
-			if (index >= 0 && index < annotationArray.length) {
-				paramAnns = adaptAnnotationArray(annotationArray[index]);
-			}
-			else {
-				paramAnns = EMPTY_ANNOTATION_ARRAY;
-			}
+			paramAnns = (index >= 0 && index < annotationArray.length ?
+					adaptAnnotationArray(annotationArray[index]) : EMPTY_ANNOTATION_ARRAY);
 			this.parameterAnnotations = paramAnns;
 		}
 		return paramAnns;
@@ -770,7 +777,6 @@ public class MethodParameter {
 			}
 			return false;
 		}
-		
 	}
 
 }
