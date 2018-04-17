@@ -51,9 +51,6 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
-	private final Map<String, SessionInfo> sessions = new ConcurrentHashMap<>();
-
-	private SubscriptionRegistry subscriptionRegistry;
 
 	@Nullable
 	private PathMatcher pathMatcher;
@@ -62,16 +59,24 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	private Integer cacheLimit;
 
 	@Nullable
+	private String selectorHeaderName = "selector";
+
+	@Nullable
 	private TaskScheduler taskScheduler;
 
 	@Nullable
 	private long[] heartbeatValue;
 
 	@Nullable
-	private ScheduledFuture<?> heartbeatFuture;
+	private MessageHeaderInitializer headerInitializer;
+
+
+	private SubscriptionRegistry subscriptionRegistry;
+
+	private final Map<String, SessionInfo> sessions = new ConcurrentHashMap<>();
 
 	@Nullable
-	private MessageHeaderInitializer headerInitializer;
+	private ScheduledFuture<?> heartbeatFuture;
 
 
 	/**
@@ -102,6 +107,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		this.subscriptionRegistry = subscriptionRegistry;
 		initPathMatcherToUse();
 		initCacheLimitToUse();
+		initSelectorHeaderNameToUse();
 	}
 
 	public SubscriptionRegistry getSubscriptionRegistry() {
@@ -146,6 +152,33 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	private void initCacheLimitToUse() {
 		if (this.cacheLimit != null && this.subscriptionRegistry instanceof DefaultSubscriptionRegistry) {
 			((DefaultSubscriptionRegistry) this.subscriptionRegistry).setCacheLimit(this.cacheLimit);
+		}
+	}
+
+	/**
+	 * Configure the name of a header that a subscription message can have for
+	 * the purpose of filtering messages matched to the subscription. The header
+	 * value is expected to be a Spring EL boolean expression to be applied to
+	 * the headers of messages matched to the subscription.
+	 * <p>For example:
+	 * <pre>
+	 * headers.foo == 'bar'
+	 * </pre>
+	 * <p>By default this is set to "selector". You can set it to a different
+	 * name, or to {@code null} to turn off support for a selector header.
+	 * @param selectorHeaderName the name to use for a selector header
+	 * @since 4.3.17
+	 * @see #setSubscriptionRegistry
+	 * @see DefaultSubscriptionRegistry#setSelectorHeaderName(String)
+	 */
+	public void setSelectorHeaderName(@Nullable String selectorHeaderName) {
+		this.selectorHeaderName = selectorHeaderName;
+		initSelectorHeaderNameToUse();
+	}
+
+	private void initSelectorHeaderNameToUse() {
+		if (this.subscriptionRegistry instanceof DefaultSubscriptionRegistry) {
+			((DefaultSubscriptionRegistry) this.subscriptionRegistry).setSelectorHeaderName(this.selectorHeaderName);
 		}
 	}
 

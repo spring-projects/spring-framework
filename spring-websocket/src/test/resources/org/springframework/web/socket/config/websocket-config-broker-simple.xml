@@ -35,7 +35,8 @@
 
 		<websocket:stomp-error-handler ref="errorHandler" />
 
-		<websocket:simple-broker prefix="/topic, /queue" heartbeat="15000,15000" scheduler="scheduler" />
+		<websocket:simple-broker prefix="/topic, /queue" selector-header="my-selector"
+				heartbeat="15000,15000" scheduler="scheduler" />
 
 	</websocket:message-broker>
 

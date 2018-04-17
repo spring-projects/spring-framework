@@ -383,6 +383,10 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 				String heartbeatValue = simpleBrokerElem.getAttribute("heartbeat");
 				brokerDef.getPropertyValues().add("heartbeatValue", heartbeatValue);
 			}
+			if (simpleBrokerElem.hasAttribute("selector-header")) {
+				String headerName = simpleBrokerElem.getAttribute("selector-header");
+				brokerDef.getPropertyValues().add("selectorHeaderName", headerName);
+			}
 		}
 		else if (brokerRelayElem != null) {
 			String prefix = brokerRelayElem.getAttribute("prefix");
