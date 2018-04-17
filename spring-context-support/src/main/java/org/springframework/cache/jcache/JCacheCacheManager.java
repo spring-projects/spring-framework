@@ -52,10 +52,21 @@ public class JCacheCacheManager extends AbstractTransactionSupportingCacheManage
 	}
 
 	/**
-	 * Create a new JCacheCacheManager for the given backing JCache.
+	 * Create a new non-transaction-aware JCacheCacheManager for the given backing JCache.
 	 * @param cacheManager the backing JCache {@link javax.cache.CacheManager}
 	 */
 	public JCacheCacheManager(CacheManager cacheManager) {
+		this(false, cacheManager);
+	}
+
+
+	/**
+	 * Create a new JCacheCacheManager for the given backing JCache and transaction-aware parameter.
+	 * @param transactionAware whether this cache manager will be transaction aware.
+	 * @param cacheManager the backing JCache {@link javax.cache.CacheManager}
+	 */
+	public JCacheCacheManager(boolean transactionAware, CacheManager cacheManager) {
+		super(transactionAware);
 		this.cacheManager = cacheManager;
 	}
 

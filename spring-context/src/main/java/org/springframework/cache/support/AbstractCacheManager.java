@@ -43,6 +43,13 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 
 	private volatile Set<String> cacheNames = Collections.emptySet();
 
+	private CacheDecorator cacheDecorator;
+
+	public AbstractCacheManager() {}
+
+	public AbstractCacheManager(CacheDecorator cacheDecorator) {
+		this.cacheDecorator = cacheDecorator;
+	}
 
 	// Early cache initialization on startup
 
@@ -170,7 +177,7 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	 * or simply the passed-in Cache object by default
 	 */
 	protected Cache decorateCache(Cache cache) {
-		return cache;
+		return this.cacheDecorator != null && this.cacheDecorator.shouldDecorate() ? this.cacheDecorator.decorateCache(cache) : cache;
 	}
 
 	/**
@@ -191,4 +198,11 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 		return null;
 	}
 
+	public CacheDecorator getCacheDecorator() {
+		return cacheDecorator;
+	}
+
+	public void setCacheDecorator(CacheDecorator cacheDecorator) {
+		this.cacheDecorator = cacheDecorator;
+	}
 }

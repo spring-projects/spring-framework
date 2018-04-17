@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 3.2
  * @see #setTargetCacheManager
- * @see TransactionAwareCacheDecorator
+ * @see TransactionAwareCache
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public class TransactionAwareCacheManagerProxy implements CacheManager, InitializingBean {
@@ -80,7 +80,7 @@ public class TransactionAwareCacheManagerProxy implements CacheManager, Initiali
 	public Cache getCache(String name) {
 		Assert.state(this.targetCacheManager != null, "No target CacheManager set");
 		Cache targetCache = this.targetCacheManager.getCache(name);
-		return (targetCache != null ? new TransactionAwareCacheDecorator(targetCache) : null);
+		return (targetCache != null ? new TransactionAwareCache(targetCache) : null);
 	}
 
 	@Override

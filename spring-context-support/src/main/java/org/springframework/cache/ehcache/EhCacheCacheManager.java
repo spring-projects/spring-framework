@@ -49,10 +49,21 @@ public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManag
 	}
 
 	/**
-	 * Create a new EhCacheCacheManager for the given backing EhCache CacheManager.
+	 * Create a new non-transaction-aware EhCacheCacheManager for the given backing EhCache CacheManager.
 	 * @param cacheManager the backing EhCache {@link net.sf.ehcache.CacheManager}
 	 */
 	public EhCacheCacheManager(net.sf.ehcache.CacheManager cacheManager) {
+		this(false, cacheManager);
+	}
+
+
+	/**
+	 * Create a new EhCacheCacheManager for the given backing EhCache CacheManager and transaction aware attribute.
+	 * @param transactionAware whether the resulting EhCacheCacheManager will be transaction aware
+	 * @param cacheManager the backing EhCache {@link net.sf.ehcache.CacheManager}
+	 */
+	public EhCacheCacheManager(boolean transactionAware, net.sf.ehcache.CacheManager cacheManager) {
+		super(transactionAware);
 		this.cacheManager = cacheManager;
 	}
 

@@ -45,11 +45,9 @@ public class JCacheCacheManagerTests extends AbstractTransactionSupportingCacheM
 		cacheManagerMock.addCache(CACHE_NAME);
 
 		cacheManager = new JCacheCacheManager(cacheManagerMock.getCacheManager());
-		cacheManager.setTransactionAware(false);
 		cacheManager.afterPropertiesSet();
 
-		transactionalCacheManager = new JCacheCacheManager(cacheManagerMock.getCacheManager());
-		transactionalCacheManager.setTransactionAware(true);
+		transactionalCacheManager = new JCacheCacheManager(true, cacheManagerMock.getCacheManager());
 		transactionalCacheManager.afterPropertiesSet();
 	}
 
