@@ -194,6 +194,22 @@ public class EvaluationTests extends AbstractExpressionTests {
 		evaluate("27 matches '^.*2.*$'", true, Boolean.class);  // conversion int>string
 	}
 
+	@Test  // SPR-16731
+	public void testMatchesWithPatternAccessThreshold() {
+		String pattern = "^(?=[a-z0-9-]{1,47})([a-z0-9]+[-]{0,1}){1,47}[a-z0-9]{1}$";
+		String expression = "'abcde-fghijklmn-o42pasdfasdfasdf.qrstuvwxyz10x.xx.yyy.zasdfasfd' matches \'" + pattern + "\'";
+		Expression expr = parser.parseExpression(expression);
+		try {
+			expr.getValue();
+			fail("Should have exceeded threshold");
+		}
+		catch (EvaluationException ee) {
+			SpelEvaluationException see = (SpelEvaluationException) ee;
+			assertEquals(SpelMessage.FLAWED_PATTERN, see.getMessageCode());
+			assertTrue(see.getCause() instanceof IllegalStateException);
+		}
+	}
+
 	// mixing operators
 	@Test
 	public void testMixingOperators01() {

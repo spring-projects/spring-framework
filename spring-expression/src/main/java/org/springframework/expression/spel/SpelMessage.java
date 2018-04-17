@@ -57,13 +57,13 @@ public enum SpelMessage {
 			"Property or field ''{0}'' cannot be found on null"),
 
 	PROPERTY_OR_FIELD_NOT_READABLE(Kind.ERROR, 1008,
-			"Property or field ''{0}'' cannot be found on object of type ''{1}'' - maybe not public?"),
+			"Property or field ''{0}'' cannot be found on object of type ''{1}'' - maybe not public or not valid?"),
 
 	PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL(Kind.ERROR, 1009,
 			"Property or field ''{0}'' cannot be set on null"),
 
 	PROPERTY_OR_FIELD_NOT_WRITABLE(Kind.ERROR, 1010,
-			"Property or field ''{0}'' cannot be set on object of type ''{1}'' - maybe not public?"),
+			"Property or field ''{0}'' cannot be set on object of type ''{1}'' - maybe not public or not writable?"),
 
 	METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED(Kind.ERROR, 1011,
 			"Method call: Attempted to call method {0} on null context object"),
@@ -156,7 +156,7 @@ public enum SpelMessage {
 	NOT_A_REAL(Kind.ERROR, 1040,
 			"The value ''{0}'' cannot be parsed as a double"),
 
-	MORE_INPUT(Kind.ERROR,1041,
+	MORE_INPUT(Kind.ERROR, 1041,
 			"After parsing a valid expression, there is still more data in the expression: ''{0}''"),
 
 	RIGHT_OPERAND_PROBLEM(Kind.ERROR, 1042,
@@ -226,21 +226,22 @@ public enum SpelMessage {
 			"A required array dimension has not been specified"),
 
 	INITIALIZER_LENGTH_INCORRECT(Kind.ERROR, 1064,
-			"array initializer size does not match array dimensions"),
+			"Array initializer size does not match array dimensions"),
 
-	UNEXPECTED_ESCAPE_CHAR(Kind.ERROR, 1065, "unexpected escape character."),
+	UNEXPECTED_ESCAPE_CHAR(Kind.ERROR, 1065,
+			"Unexpected escape character"),
 
 	OPERAND_NOT_INCREMENTABLE(Kind.ERROR, 1066,
-			"the expression component ''{0}'' does not support increment"),
+			"The expression component ''{0}'' does not support increment"),
 
 	OPERAND_NOT_DECREMENTABLE(Kind.ERROR, 1067,
-			"the expression component ''{0}'' does not support decrement"),
+			"The expression component ''{0}'' does not support decrement"),
 
 	NOT_ASSIGNABLE(Kind.ERROR, 1068,
-			"the expression component ''{0}'' is not assignable"),
+			"The expression component ''{0}'' is not assignable"),
 
 	MISSING_CHARACTER(Kind.ERROR, 1069,
-			"missing expected character ''{0}''"),
+			"Missing expected character ''{0}''"),
 
 	LEFT_OPERAND_PROBLEM(Kind.ERROR, 1070,
 			"Problem parsing left operand"),
@@ -248,8 +249,13 @@ public enum SpelMessage {
 	MISSING_SELECTION_EXPRESSION(Kind.ERROR, 1071,
 			"A required selection expression has not been specified"),
 
-	EXCEPTION_RUNNING_COMPILED_EXPRESSION(Kind.ERROR,1072,
-			"An exception occurred whilst evaluating a compiled expression");
+	/** @since 4.1 */
+	EXCEPTION_RUNNING_COMPILED_EXPRESSION(Kind.ERROR, 1072,
+			"An exception occurred whilst evaluating a compiled expression"),
+
+	/** @since 4.3.17 */
+	FLAWED_PATTERN(Kind.ERROR, 1073,
+			"Failed to efficiently evaluate pattern ''{0}'': consider redesigning it");
 
 
 	private final Kind kind;
