@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,8 @@ import org.springframework.expression.spel.support.BooleanTypedValue;
  */
 public class OperatorMatches extends Operator {
 
+	private static final int PATTERN_ACCESS_THRESHOLD = 1000000;
+
 	private final ConcurrentMap<String, Pattern> patternCache = new ConcurrentHashMap<>();
 
 
@@ -79,11 +81,59 @@ public class OperatorMatches extends Operator {
 				pattern = Pattern.compile(rightString);
 				this.patternCache.putIfAbsent(rightString, pattern);
 			}
-			Matcher matcher = pattern.matcher(left);
+			Matcher matcher = pattern.matcher(new MatcherInput(left, new AccessCount()));
 			return BooleanTypedValue.forValue(matcher.matches());
 		}
 		catch (PatternSyntaxException ex) {
-			throw new SpelEvaluationException(rightOp.getStartPosition(), ex, SpelMessage.INVALID_PATTERN, right);
+			throw new SpelEvaluationException(
+					rightOp.getStartPosition(), ex, SpelMessage.INVALID_PATTERN, right);
+		}
+		catch (IllegalStateException ex) {
+			throw new SpelEvaluationException(
+					rightOp.getStartPosition(), ex, SpelMessage.FLAWED_PATTERN, right);
+		}
+	}
+
+
+	private static class AccessCount {
+
+		private int count;
+
+		public void check() throws IllegalStateException {
+			if (this.count++ > PATTERN_ACCESS_THRESHOLD) {
+				throw new IllegalStateException("Pattern access threshold exceeded");
+			}
+		}
+	}
+
+
+	private static class MatcherInput implements CharSequence {
+
+		private final CharSequence value;
+
+		private AccessCount access;
+
+		public MatcherInput(CharSequence value, AccessCount access) {
+			this.value = value;
+			this.access = access;
+		}
+
+		public char charAt(int index) {
+			this.access.check();
+			return this.value.charAt(index);
+		}
+
+		public CharSequence subSequence(int start, int end) {
+			return new MatcherInput(this.value.subSequence(start, end), this.access);
+		}
+
+		public int length() {
+			return this.value.length();
+		}
+
+		@Override
+		public String toString() {
+			return this.value.toString();
 		}
 	}
 
