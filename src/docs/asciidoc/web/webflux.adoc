@@ -309,7 +309,7 @@ libraries, refer to their respective documentation.
 == Reactive Spring Web
 
 The `spring-web` module provides low level infrastructure and HTTP abstractions -- client
-and server, to build reactive web applications. All public APIs are build around Reactive
+and server, to build reactive web applications. All public APIs are built around Reactive
 Streams with Reactor as a backing implementation.
 
 Server support is organized in two layers:
@@ -582,7 +582,7 @@ adds ``Encoder``'s and ``Decoder``'s for Jackson JSON, Jackson Smile, and JAXB2.
 The `spring-web` module also contains some web-specific readers and writers for
 server-sent events, form data, and multipart requests.
 
-To configure or customize the readers and writers to use applications will typically use
+To configure or customize the readers and writers to use, applications will typically use
 `ClientCodecConfigurer` or `ServerCodecConfigurer`.
 
 
