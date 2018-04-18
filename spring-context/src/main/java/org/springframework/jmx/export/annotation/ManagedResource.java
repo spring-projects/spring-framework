@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
+
 /**
- * JDK 1.5+ class-level annotation that indicates to register instances of a
- * class with a JMX server, corresponding to the ManagedResource attribute.
+ * Class-level annotation that indicates to register instances of a class
+ * with a JMX server, corresponding to the {@code ManagedResource} attribute.
  *
  * <p><b>Note:</b> This annotation is marked as inherited, allowing for generic
  * management-aware base classes. In such a scenario, it is recommended to
@@ -34,6 +36,7 @@ import java.lang.annotation.Target;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 1.2
  * @see org.springframework.jmx.export.metadata.ManagedResource
  */
@@ -44,11 +47,12 @@ import java.lang.annotation.Target;
 public @interface ManagedResource {
 
 	/**
-	 * The annotation value is equivalent to the {@code objectName}
-	 * attribute, for simple default usage.
+	 * Alias for the {@link #objectName} attribute, for simple default usage.
 	 */
+	@AliasFor("objectName")
 	String value() default "";
 
+	@AliasFor("value")
 	String objectName() default "";
 
 	String description() default "";

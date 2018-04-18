@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,17 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.DefaultFrameFormat;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.FrameFormat;
+import org.springframework.web.socket.sockjs.frame.DefaultSockJsFrameFormat;
+import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
+import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
+import org.springframework.web.socket.sockjs.transport.SockJsSession;
 import org.springframework.web.socket.sockjs.transport.TransportType;
-import org.springframework.web.socket.sockjs.transport.session.SockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSession;
 
 /**
@@ -38,7 +38,6 @@ import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSe
  */
 public class EventSourceTransportHandler extends AbstractHttpSendingTransportHandler {
 
-
 	@Override
 	public TransportType getTransportType() {
 		return TransportType.EVENT_SOURCE;
@@ -46,35 +45,38 @@ public class EventSourceTransportHandler extends AbstractHttpSendingTransportHan
 
 	@Override
 	protected MediaType getContentType() {
-		return new MediaType("text", "event-stream", Charset.forName("UTF-8"));
+		return new MediaType("text", "event-stream", StandardCharsets.UTF_8);
 	}
 
 	@Override
-	public StreamingSockJsSession createSession(String sessionId, WebSocketHandler wsHandler,
-			Map<String, Object> attributes) {
-
-		return new EventSourceStreamingSockJsSession(sessionId, getSockJsServiceConfig(), wsHandler, attributes);
+	public boolean checkSessionType(SockJsSession session) {
+		return session instanceof EventSourceStreamingSockJsSession;
 	}
 
 	@Override
-	protected FrameFormat getFrameFormat(ServerHttpRequest request) {
-		return new DefaultFrameFormat("data: %s\r\n\r\n");
+	public StreamingSockJsSession createSession(
+			String sessionId, WebSocketHandler handler, Map<String, Object> attributes) {
+
+		return new EventSourceStreamingSockJsSession(sessionId, getServiceConfig(), handler, attributes);
+	}
+
+	@Override
+	protected SockJsFrameFormat getFrameFormat(ServerHttpRequest request) {
+		return new DefaultSockJsFrameFormat("data: %s\r\n\r\n");
 	}
 
 
-	private final class EventSourceStreamingSockJsSession extends StreamingSockJsSession {
+	private class EventSourceStreamingSockJsSession extends StreamingSockJsSession {
 
-		private EventSourceStreamingSockJsSession(String sessionId, SockJsServiceConfig config,
+		public EventSourceStreamingSockJsSession(String sessionId, SockJsServiceConfig config,
 				WebSocketHandler wsHandler, Map<String, Object> attributes) {
 
 			super(sessionId, config, wsHandler, attributes);
 		}
 
 		@Override
-		protected void writePrelude() throws IOException {
-			getResponse().getBody().write('\r');
-			getResponse().getBody().write('\n');
-			getResponse().flush();
+		protected byte[] getPrelude(ServerHttpRequest request) {
+			return new byte[] { '\r', '\n' };
 		}
 	}
 

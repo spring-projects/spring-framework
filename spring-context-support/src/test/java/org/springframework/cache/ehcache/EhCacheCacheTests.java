@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,12 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.config.CacheConfiguration;
-
+import net.sf.ehcache.config.Configuration;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.cache.Cache;
+import org.springframework.cache.AbstractCacheTests;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
@@ -32,73 +33,49 @@ import static org.junit.Assert.*;
 
 /**
  * @author Costin Leau
+ * @author Stephane Nicoll
+ * @author Juergen Hoeller
  */
-public class EhCacheCacheTests {
+public class EhCacheCacheTests extends AbstractCacheTests<EhCacheCache> {
 
-	protected final static String CACHE_NAME = "testCache";
+	private CacheManager cacheManager;
 
-	protected Ehcache nativeCache;
+	private Ehcache nativeCache;
 
-	protected Cache cache;
+	private EhCacheCache cache;
 
 
 	@Before
-	public void setUp() throws Exception {
-		if (CacheManager.getInstance().cacheExists(CACHE_NAME)) {
-			nativeCache = CacheManager.getInstance().getEhcache(CACHE_NAME);
-		}
-		else {
-			nativeCache = new net.sf.ehcache.Cache(new CacheConfiguration(CACHE_NAME, 100));
-			CacheManager.getInstance().addCache(nativeCache);
-		}
+	public void setup() {
+		cacheManager = new CacheManager(new Configuration().name("EhCacheCacheTests")
+				.defaultCache(new CacheConfiguration("default", 100)));
+		nativeCache = new net.sf.ehcache.Cache(new CacheConfiguration(CACHE_NAME, 100));
+		cacheManager.addCache(nativeCache);
+
 		cache = new EhCacheCache(nativeCache);
-		cache.clear();
+	}
+
+	@After
+	public void shutdown() {
+		cacheManager.shutdown();
 	}
 
 
-	@Test
-	public void testCacheName() throws Exception {
-		assertEquals(CACHE_NAME, cache.getName());
+	@Override
+	protected EhCacheCache getCache() {
+		return cache;
 	}
 
-	@Test
-	public void testNativeCache() throws Exception {
-		assertSame(nativeCache, cache.getNativeCache());
+	@Override
+	protected Ehcache getNativeCache() {
+		return nativeCache;
 	}
 
-	@Test
-	public void testCachePut() throws Exception {
-		Object key = "enescu";
-		Object value = "george";
-
-		assertNull(cache.get(key));
-		cache.put(key, value);
-		assertEquals(value, cache.get(key).get());
-	}
-
-	@Test
-	public void testCacheRemove() throws Exception {
-		Object key = "enescu";
-		Object value = "george";
-
-		assertNull(cache.get(key));
-		cache.put(key, value);
-	}
-
-	@Test
-	public void testCacheClear() throws Exception {
-		assertNull(cache.get("enescu"));
-		cache.put("enescu", "george");
-		assertNull(cache.get("vlaicu"));
-		cache.put("vlaicu", "aurel");
-		cache.clear();
-		assertNull(cache.get("vlaicu"));
-		assertNull(cache.get("enescu"));
-	}
 
 	@Test
 	public void testExpiredElements() throws Exception {
 		Assume.group(TestGroup.LONG_RUNNING);
+
 		String key = "brancusi";
 		String value = "constantin";
 		Element brancusi = new Element(key, value);

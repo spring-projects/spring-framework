@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.lang.Nullable;
 
 /**
  * Utility class for creating a scoped proxy.
@@ -38,7 +39,7 @@ public abstract class ScopedProxyUtils {
 
 
 	/**
-	 * Generates a scoped proxy for the supplied target bean, registering the target
+	 * Generate a scoped proxy for the supplied target bean, registering the target
 	 * bean with an internal name and setting 'targetBeanName' on the scoped proxy.
 	 * @param definition the original bean definition
 	 * @param registry the bean definition registry
@@ -50,20 +51,20 @@ public abstract class ScopedProxyUtils {
 
 		String originalBeanName = definition.getBeanName();
 		BeanDefinition targetDefinition = definition.getBeanDefinition();
+		String targetBeanName = getTargetBeanName(originalBeanName);
 
 		// Create a scoped proxy definition for the original bean name,
 		// "hiding" the target bean in an internal target definition.
 		RootBeanDefinition proxyDefinition = new RootBeanDefinition(ScopedProxyFactoryBean.class);
-		proxyDefinition.setOriginatingBeanDefinition(definition.getBeanDefinition());
+		proxyDefinition.setDecoratedDefinition(new BeanDefinitionHolder(targetDefinition, targetBeanName));
+		proxyDefinition.setOriginatingBeanDefinition(targetDefinition);
 		proxyDefinition.setSource(definition.getSource());
-		proxyDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		proxyDefinition.setRole(targetDefinition.getRole());
 
-		String targetBeanName = getTargetBeanName(originalBeanName);
 		proxyDefinition.getPropertyValues().add("targetBeanName", targetBeanName);
-
 		if (proxyTargetClass) {
 			targetDefinition.setAttribute(AutoProxyUtils.PRESERVE_TARGET_CLASS_ATTRIBUTE, Boolean.TRUE);
-			// ScopedFactoryBean's "proxyTargetClass" default is TRUE, so we don't need to set it explicitly here.
+			// ScopedProxyFactoryBean's "proxyTargetClass" default is TRUE, so we don't need to set it explicitly here.
 		}
 		else {
 			proxyDefinition.getPropertyValues().add("proxyTargetClass", Boolean.FALSE);
@@ -89,12 +90,21 @@ public abstract class ScopedProxyUtils {
 	}
 
 	/**
-	 * Generates the bean name that is used within the scoped proxy to reference the target bean.
+	 * Generate the bean name that is used within the scoped proxy to reference the target bean.
 	 * @param originalBeanName the original name of bean
 	 * @return the generated bean to be used to reference the target bean
 	 */
 	public static String getTargetBeanName(String originalBeanName) {
 		return TARGET_NAME_PREFIX + originalBeanName;
+	}
+
+	/**
+	 * Specify if the {@code beanName} is the name of a bean that references the target
+	 * bean within a scoped proxy.
+	 * @since 4.1.4
+	 */
+	public static boolean isScopedTarget(@Nullable String beanName) {
+		return (beanName != null && beanName.startsWith(TARGET_NAME_PREFIX));
 	}
 
 }

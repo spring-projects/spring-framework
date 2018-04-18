@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.ContentHandler;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Convenience methods for working with the DOM API, in particular for working with DOM Nodes and DOM Elements.
+ * Convenience methods for working with the DOM API,
+ * in particular for working with DOM Nodes and DOM Elements.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -55,12 +57,12 @@ public abstract class DomUtils {
 	 * @see org.w3c.dom.Element
 	 * @see org.w3c.dom.Element#getElementsByTagName
 	 */
-	public static List<Element> getChildElementsByTagName(Element ele, String[] childEleNames) {
+	public static List<Element> getChildElementsByTagName(Element ele, String... childEleNames) {
 		Assert.notNull(ele, "Element must not be null");
 		Assert.notNull(childEleNames, "Element names collection must not be null");
 		List<String> childEleNameList = Arrays.asList(childEleNames);
 		NodeList nl = ele.getChildNodes();
-		List<Element> childEles = new ArrayList<Element>();
+		List<Element> childEles = new ArrayList<>();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			if (node instanceof Element && nodeNameMatch(node, childEleNameList)) {
@@ -81,7 +83,7 @@ public abstract class DomUtils {
 	 * @see org.w3c.dom.Element#getElementsByTagName
 	 */
 	public static List<Element> getChildElementsByTagName(Element ele, String childEleName) {
-		return getChildElementsByTagName(ele, new String[]{childEleName});
+		return getChildElementsByTagName(ele, new String[] {childEleName});
 	}
 
 	/**
@@ -90,6 +92,7 @@ public abstract class DomUtils {
 	 * @param childEleName the child element name to look for
 	 * @return the {@code org.w3c.dom.Element} instance, or {@code null} if none found
 	 */
+	@Nullable
 	public static Element getChildElementByTagName(Element ele, String childEleName) {
 		Assert.notNull(ele, "Element must not be null");
 		Assert.notNull(childEleName, "Element name must not be null");
@@ -109,6 +112,7 @@ public abstract class DomUtils {
 	 * @param childEleName the child element name to look for
 	 * @return the extracted text value, or {@code null} if no child element found
 	 */
+	@Nullable
 	public static String getChildElementValueByTagName(Element ele, String childEleName) {
 		Element child = getChildElementByTagName(ele, childEleName);
 		return (child != null ? getTextValue(child) : null);
@@ -122,7 +126,7 @@ public abstract class DomUtils {
 	public static List<Element> getChildElements(Element ele) {
 		Assert.notNull(ele, "Element must not be null");
 		NodeList nl = ele.getChildNodes();
-		List<Element> childEles = new ArrayList<Element>();
+		List<Element> childEles = new ArrayList<>();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			if (node instanceof Element) {
@@ -184,7 +188,7 @@ public abstract class DomUtils {
 	/**
 	 * Matches the given node's name and local name against the given desired names.
 	 */
-	private static boolean nodeNameMatch(Node node, Collection desiredNames) {
+	private static boolean nodeNameMatch(Node node, Collection<?> desiredNames) {
 		return (desiredNames.contains(node.getNodeName()) || desiredNames.contains(node.getLocalName()));
 	}
 

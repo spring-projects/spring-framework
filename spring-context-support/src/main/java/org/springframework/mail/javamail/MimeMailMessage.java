@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.mail.javamail;
 
 import java.util.Date;
-
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
@@ -104,7 +103,7 @@ public class MimeMailMessage implements MailMessage {
 	}
 
 	@Override
-	public void setTo(String[] to) throws MailParseException {
+	public void setTo(String... to) throws MailParseException {
 		try {
 			this.helper.setTo(to);
 		}
@@ -124,7 +123,7 @@ public class MimeMailMessage implements MailMessage {
 	}
 
 	@Override
-	public void setCc(String[] cc) throws MailParseException {
+	public void setCc(String... cc) throws MailParseException {
 		try {
 			this.helper.setCc(cc);
 		}
@@ -144,7 +143,7 @@ public class MimeMailMessage implements MailMessage {
 	}
 
 	@Override
-	public void setBcc(String[] bcc) throws MailParseException {
+	public void setBcc(String... bcc) throws MailParseException {
 		try {
 			this.helper.setBcc(bcc);
 		}

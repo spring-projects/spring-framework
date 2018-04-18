@@ -1,6 +1,4 @@
-
 /**
- *
  * This package contains classes that allow easy access to EJBs.
  * The basis are AOP interceptors run before and after the EJB invocation.
  * In particular, the classes in this package allow transparent access
@@ -20,7 +18,10 @@
  * <p>However, the implementation and naming of classes in this package has changed.
  * It now uses FactoryBeans and AOP, rather than the custom bean definitions described in
  * <i>Expert One-on-One J2EE</i>.
- *
  */
+@NonNullApi
+@NonNullFields
 package org.springframework.ejb.access;
 
+import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

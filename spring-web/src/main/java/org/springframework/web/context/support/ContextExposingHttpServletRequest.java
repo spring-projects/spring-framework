@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package org.springframework.web.context.support;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -37,8 +37,10 @@ public class ContextExposingHttpServletRequest extends HttpServletRequestWrapper
 
 	private final WebApplicationContext webApplicationContext;
 
+	@Nullable
 	private final Set<String> exposedContextBeanNames;
 
+	@Nullable
 	private Set<String> explicitAttributes;
 
 
@@ -59,8 +61,8 @@ public class ContextExposingHttpServletRequest extends HttpServletRequestWrapper
 	 * are supposed to be exposed (if this is non-null, only the beans in this
 	 * Set are eligible for exposure as attributes)
 	 */
-	public ContextExposingHttpServletRequest(
-			HttpServletRequest originalRequest, WebApplicationContext context, Set<String> exposedContextBeanNames) {
+	public ContextExposingHttpServletRequest(HttpServletRequest originalRequest, WebApplicationContext context,
+			@Nullable Set<String> exposedContextBeanNames) {
 
 		super(originalRequest);
 		Assert.notNull(context, "WebApplicationContext must not be null");
@@ -78,6 +80,7 @@ public class ContextExposingHttpServletRequest extends HttpServletRequestWrapper
 
 
 	@Override
+	@Nullable
 	public Object getAttribute(String name) {
 		if ((this.explicitAttributes == null || !this.explicitAttributes.contains(name)) &&
 				(this.exposedContextBeanNames == null || this.exposedContextBeanNames.contains(name)) &&
@@ -93,7 +96,7 @@ public class ContextExposingHttpServletRequest extends HttpServletRequestWrapper
 	public void setAttribute(String name, Object value) {
 		super.setAttribute(name, value);
 		if (this.explicitAttributes == null) {
-			this.explicitAttributes = new HashSet<String>(8);
+			this.explicitAttributes = new HashSet<>(8);
 		}
 		this.explicitAttributes.add(name);
 	}

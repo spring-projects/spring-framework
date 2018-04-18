@@ -16,12 +16,13 @@
 
 package org.springframework.beans.factory.xml;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
-import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.tests.sample.beans.ITestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for combining the expression language and the p namespace. Due to the required EL dependency, this test is in

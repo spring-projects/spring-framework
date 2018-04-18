@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,9 @@ public class ParsedSql {
 
 	private String originalSql;
 
-	private List<String> parameterNames = new ArrayList<String>();
+	private List<String> parameterNames = new ArrayList<>();
 
-	private List<int[]> parameterIndexes = new ArrayList<int[]>();
+	private List<int[]> parameterIndexes = new ArrayList<>();
 
 	private int namedParameterCount;
 
@@ -70,7 +70,7 @@ public class ParsedSql {
 
 	/**
 	 * Return all of the parameters (bind variables) in the parsed SQL statement.
-	 * Repeated occurences of the same parameter name are included here.
+	 * Repeated occurrences of the same parameter name are included here.
 	 */
 	List<String> getParameterNames() {
 		return this.parameterNames;
@@ -89,7 +89,7 @@ public class ParsedSql {
 
 	/**
 	 * Set the count of named parameters in the SQL statement.
-	 * Each parameter name counts once; repeated occurences do not count here.
+	 * Each parameter name counts once; repeated occurrences do not count here.
 	 */
 	void setNamedParameterCount(int namedParameterCount) {
 		this.namedParameterCount = namedParameterCount;
@@ -97,7 +97,7 @@ public class ParsedSql {
 
 	/**
 	 * Return the count of named parameters in the SQL statement.
-	 * Each parameter name counts once; repeated occurences do not count here.
+	 * Each parameter name counts once; repeated occurrences do not count here.
 	 */
 	int getNamedParameterCount() {
 		return this.namedParameterCount;
@@ -119,7 +119,7 @@ public class ParsedSql {
 
 	/**
 	 * Set the total count of all of the parameters in the SQL statement.
-	 * Repeated occurences of the same parameter name do count here.
+	 * Repeated occurrences of the same parameter name do count here.
 	 */
 	void setTotalParameterCount(int totalParameterCount) {
 		this.totalParameterCount = totalParameterCount;
@@ -127,7 +127,7 @@ public class ParsedSql {
 
 	/**
 	 * Return the total count of all of the parameters in the SQL statement.
-	 * Repeated occurences of the same parameter name do count here.
+	 * Repeated occurrences of the same parameter name do count here.
 	 */
 	int getTotalParameterCount() {
 		return this.totalParameterCount;

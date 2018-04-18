@@ -43,7 +43,7 @@ class JndiLookupBeanDefinitionParser extends AbstractJndiLocatingBeanDefinitionP
 
 
 	@Override
-	protected Class getBeanClass(Element element) {
+	protected Class<?> getBeanClass(Element element) {
 		return JndiObjectFactoryBean.class;
 	}
 

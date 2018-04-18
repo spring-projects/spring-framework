@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.context.request;
 
+import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
 
 /**
@@ -52,11 +53,6 @@ import org.springframework.ui.ModelMap;
  * @see org.springframework.web.servlet.DispatcherServlet
  * @see org.springframework.web.servlet.handler.AbstractHandlerMapping#setInterceptors
  * @see org.springframework.web.servlet.HandlerInterceptor
- * @see org.springframework.web.portlet.context.PortletWebRequest
- * @see org.springframework.web.portlet.DispatcherPortlet
- * @see org.springframework.web.portlet.handler.AbstractHandlerMapping#setInterceptors
- * @see org.springframework.web.portlet.handler.AbstractHandlerMapping#setApplyWebRequestInterceptorsToRenderPhaseOnly
- * @see org.springframework.web.portlet.HandlerInterceptor
  */
 public interface WebRequestInterceptor {
 
@@ -80,7 +76,7 @@ public interface WebRequestInterceptor {
 	 * and/or to add further model attributes, if desired.
 	 * @throws Exception in case of errors
 	 */
-	void postHandle(WebRequest request, ModelMap model) throws Exception;
+	void postHandle(WebRequest request, @Nullable ModelMap model) throws Exception;
 
 	/**
 	 * Callback after completion of request processing, that is, after rendering
@@ -92,6 +88,6 @@ public interface WebRequestInterceptor {
 	 * @param ex exception thrown on handler execution, if any
 	 * @throws Exception in case of errors
 	 */
-	void afterCompletion(WebRequest request, Exception ex) throws Exception;
+	void afterCompletion(WebRequest request, @Nullable Exception ex) throws Exception;
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -34,9 +33,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * <p>Mock implementation of the {@link javax.servlet.FilterChain} interface. Used
- * for testing the web framework; also useful for testing custom
- * {@link javax.servlet.Filter} implementations.
+ * Mock implementation of the {@link javax.servlet.FilterChain} interface.
  *
  * <p>A {@link MockFilterChain} can be configured with one or more filters and a
  * Servlet to invoke. The first time the chain is called, it invokes all filters
@@ -46,7 +43,6 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @author Rob Winch
  * @author Rossen Stoyanchev
- *
  * @since 2.0.3
  * @see MockFilterConfig
  * @see PassThroughFilterChain
@@ -73,7 +69,6 @@ public class MockFilterChain implements FilterChain {
 
 	/**
 	 * Create a FilterChain with a Servlet.
-	 *
 	 * @param servlet the Servlet to invoke
 	 * @since 3.2
 	 */
@@ -83,7 +78,6 @@ public class MockFilterChain implements FilterChain {
 
 	/**
 	 * Create a {@code FilterChain} with Filter's and a Servlet.
-	 *
 	 * @param servlet the {@link Servlet} to invoke in this {@link FilterChain}
 	 * @param filters the {@link Filter}'s to invoke in this {@link FilterChain}
 	 * @since 3.2
@@ -98,6 +92,7 @@ public class MockFilterChain implements FilterChain {
 		Filter[] allFilters = ObjectUtils.addObjectToArray(filters, new ServletFilterProxy(servlet));
 		return Arrays.asList(allFilters);
 	}
+
 
 	/**
 	 * Return the request that {@link #doFilter} has been called with.
@@ -121,10 +116,7 @@ public class MockFilterChain implements FilterChain {
 	public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
 		Assert.notNull(request, "Request must not be null");
 		Assert.notNull(response, "Response must not be null");
-
-		if (this.request != null) {
-			 throw new IllegalStateException("This FilterChain has already been called!");
-		}
+		Assert.state(this.request == null, "This FilterChain has already been called!");
 
 		if (this.iterator == null) {
 			this.iterator = this.filters.iterator();

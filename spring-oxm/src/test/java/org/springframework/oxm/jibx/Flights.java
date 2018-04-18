@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,14 @@ import java.util.ArrayList;
 
 public class Flights {
 
-	protected ArrayList flightList = new ArrayList();
+	protected ArrayList<FlightType> flightList = new ArrayList<>();
 
 	public void addFlight(FlightType flight) {
 		flightList.add(flight);
 	}
 
 	public FlightType getFlight(int index) {
-		return (FlightType) flightList.get(index);
+		return flightList.get(index);
 	}
 
 	public int sizeFlightList() {

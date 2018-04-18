@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.aop;
 
 import java.lang.reflect.Method;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Part of a {@link Pointcut}: Checks whether the target method is eligible for advice.
@@ -57,7 +59,7 @@ public interface MethodMatcher {
 	 * the candidate class must be taken to be the method's declaring class)
 	 * @return whether or not this method matches statically
 	 */
-	boolean matches(Method method, Class<?> targetClass);
+	boolean matches(Method method, @Nullable Class<?> targetClass);
 
 	/**
 	 * Is this MethodMatcher dynamic, that is, must a final call be made on the
@@ -86,7 +88,7 @@ public interface MethodMatcher {
 	 * @return whether there's a runtime match
 	 * @see MethodMatcher#matches(Method, Class)
 	 */
-	boolean matches(Method method, Class<?> targetClass, Object[] args);
+	boolean matches(Method method, @Nullable Class<?> targetClass, Object... args);
 
 
 	/**

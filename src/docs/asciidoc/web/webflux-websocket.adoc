@@ -1,0 +1,164 @@
+[[webflux-websocket]]
+= WebSockets
+[.small]#<<web.adoc#websocket,Same in Servlet stack>>#
+
+This part of the reference documentation covers support for Reactive stack, WebSocket
+messaging.
+
+
+include::websocket-intro.adoc[leveloffset=+1]
+
+
+
+[[webflux-websocket-server]]
+== WebSocket API
+[.small]#<<web.adoc#websocket-server,Same in Servlet stack>>#
+
+The Spring Framework provides a WebSocket API that can be used to write client and
+server side applications that handle WebSocket messages.
+
+
+
+[[webflux-websocket-server-handler]]
+=== WebSocketHandler
+[.small]#<<web.adoc#websocket-server-handler,Same in Servlet stack>>#
+
+Creating a WebSocket server is as simple as implementing `WebSocketHandler`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	import org.springframework.web.reactive.socket.WebSocketHandler;
+	import org.springframework.web.reactive.socket.WebSocketSession;
+
+	public class MyWebSocketHandler implements WebSocketHandler {
+
+		@Override
+		public Mono<Void> handle(WebSocketSession session) {
+			// ...
+		}
+	}
+----
+
+Spring WebFlux provides a `WebSocketHandlerAdapter` that can adapt WebSocket
+requests and use the above handler to handle the resulting WebSocket session. After the
+adapter is registered as a bean, you can map requests to your handler, for example using
+`SimpleUrlHandlerMapping`. This is shown below:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	static class WebConfig {
+
+		@Bean
+		public HandlerMapping handlerMapping() {
+			Map<String, WebSocketHandler> map = new HashMap<>();
+			map.put("/path", new MyWebSocketHandler());
+
+			SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
+			mapping.setUrlMap(map);
+			mapping.setOrder(-1); // before annotated controllers
+			return mapping;
+		}
+
+		@Bean
+		public WebSocketHandlerAdapter handlerAdapter() {
+			return new WebSocketHandlerAdapter();
+		}
+	}
+----
+
+
+
+[[webflux-websocket-server-handshake]]
+=== WebSocket Handshake
+[.small]#<<web.adoc#websocket-server-handshake,Same in Servlet stack>>#
+
+`WebSocketHandlerAdapter` does not perform WebSocket handshakes itself. Instead it
+delegates to an instance of `WebSocketService`. The default `WebSocketService`
+implementation is `HandshakeWebSocketService`.
+
+The `HandshakeWebSocketService` performs basic checks on the WebSocket request and
+delegates to a server-specific `RequestUpgradeStrategy`. At present upgrade strategies
+exist for Reactor Netty, Tomcat, Jetty, and Undertow.
+
+
+
+[[webflux-websocket-server-config]]
+=== Server config
+[.small]#<<web.adoc#websocket-server-runtime-configuration,Same in Servlet stack>>#
+
+The `RequestUpgradeStrategy` for each server exposes the WebSocket-related configuration
+options available for the underlying WebSocket engine. Below is an example of setting
+WebSocket options when running on Tomcat:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	static class WebConfig {
+
+		@Bean
+		public WebSocketHandlerAdapter handlerAdapter() {
+			return new WebSocketHandlerAdapter(webSocketService());
+		}
+
+		@Bean
+		public WebSocketService webSocketService() {
+			TomcatRequestUpgradeStrategy strategy = new TomcatRequestUpgradeStrategy();
+			strategy.setMaxSessionIdleTimeout(0L);
+			return new HandshakeWebSocketService(strategy);
+		}
+	}
+----
+
+Check the upgrade strategy for your server to see what options are available. Currently
+only Tomcat and Jetty expose such options.
+
+
+
+[[webflux-websocket-server-cors]]
+=== CORS
+[.small]#<<web.adoc#websocket-server-allowed-origins,Same in Servlet stack>>#
+
+The easiest way to configure CORS and restrict access to a WebSocket endpoint is to
+have your `WebSocketHandler` implement `CorsConfigurationSource` and return a
+`CorsConfiguraiton` with allowed origins, headers, etc. If for any reason you can't do
+that, you can also set the `corsConfigurations` property on the `SimpleUrlHandler` to
+specify CORS settings by URL pattern. If both are specified they're combined via the
+`combine` method on `CorsConfiguration`.
+
+
+
+[[webflux-websocket-client]]
+== WebSocketClient
+
+Spring WebFlux provides a `WebSocketClient` abstraction with implementations for
+Reactor Netty, Tomcat, Jetty, Undertow, and standard Java (i.e. JSR-356).
+
+[NOTE]
+====
+The Tomcat client is effectively an extension of the standard Java one with some extra
+functionality in the `WebSocketSession` handling taking advantage of Tomcat specific
+API to suspend receiving messages for back pressure.
+====
+
+To start a WebSocket session, create an instance of the client and use its `execute`
+methods:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+WebSocketClient client = new ReactorNettyWebSocketClient();
+
+URI url = new URI("ws://localhost:8080/path");
+client.execute(url, session ->
+		session.receive()
+				.doOnNext(System.out::println)
+				.then());
+----
+
+Some clients, e.g. Jetty, implement `Lifecycle` and need to be started in stopped
+before you can use them. All clients have constructor options related to configuration
+of the underlying WebSocket client.

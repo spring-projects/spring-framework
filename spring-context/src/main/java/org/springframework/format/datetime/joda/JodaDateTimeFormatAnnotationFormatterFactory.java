@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
@@ -30,25 +29,28 @@ import org.joda.time.ReadableInstant;
 import org.joda.time.ReadablePartial;
 import org.joda.time.format.DateTimeFormatter;
 
-import org.springframework.context.EmbeddedValueResolverAware;
+import org.springframework.context.support.EmbeddedValueResolutionSupport;
 import org.springframework.format.AnnotationFormatterFactory;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.util.StringValueResolver;
+import org.springframework.util.StringUtils;
 
 /**
  * Formats fields annotated with the {@link DateTimeFormat} annotation using Joda-Time.
+ *
+ * <p><b>NOTE:</b> Spring's Joda-Time support requires Joda-Time 2.x, as of Spring 4.0.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @since 3.0
  * @see DateTimeFormat
  */
-public class JodaDateTimeFormatAnnotationFormatterFactory
-		implements AnnotationFormatterFactory<DateTimeFormat>, EmbeddedValueResolverAware {
+public class JodaDateTimeFormatAnnotationFormatterFactory extends EmbeddedValueResolutionSupport
+		implements AnnotationFormatterFactory<DateTimeFormat> {
 
 	private static final Set<Class<?>> FIELD_TYPES;
+
 	static {
 		// Create the set of field types that may be annotated with @DateTimeFormat.
 		// Note: the 3 ReadablePartial concrete types are registered explicitly since
@@ -56,7 +58,7 @@ public class JodaDateTimeFormatAnnotationFormatterFactory
 		// (if we did not do this, the default byType rules for LocalDate, LocalTime,
 		// and LocalDateTime would take precedence over the annotation rule, which
 		// is not what we want)
-		Set<Class<?>> fieldTypes = new HashSet<Class<?>>(8);
+		Set<Class<?>> fieldTypes = new HashSet<>(8);
 		fieldTypes.add(ReadableInstant.class);
 		fieldTypes.add(LocalDate.class);
 		fieldTypes.add(LocalTime.class);
@@ -65,19 +67,6 @@ public class JodaDateTimeFormatAnnotationFormatterFactory
 		fieldTypes.add(Calendar.class);
 		fieldTypes.add(Long.class);
 		FIELD_TYPES = Collections.unmodifiableSet(fieldTypes);
-	}
-
-
-	private StringValueResolver embeddedValueResolver;
-
-
-	@Override
-	public void setEmbeddedValueResolver(StringValueResolver resolver) {
-		this.embeddedValueResolver = resolver;
-	}
-
-	protected String resolveEmbeddedValue(String value) {
-		return (this.embeddedValueResolver != null ? this.embeddedValueResolver.resolveStringValue(value) : value);
 	}
 
 
@@ -103,8 +92,19 @@ public class JodaDateTimeFormatAnnotationFormatterFactory
 	}
 
 	@Override
-	public Parser<DateTime> getParser(DateTimeFormat annotation, Class<?> fieldType) {
-		return new DateTimeParser(getFormatter(annotation, fieldType));
+	public Parser<?> getParser(DateTimeFormat annotation, Class<?> fieldType) {
+		if (LocalDate.class == fieldType) {
+			return new LocalDateParser(getFormatter(annotation, fieldType));
+		}
+		else if (LocalTime.class == fieldType) {
+			return new LocalTimeParser(getFormatter(annotation, fieldType));
+		}
+		else if (LocalDateTime.class == fieldType) {
+			return new LocalDateTimeParser(getFormatter(annotation, fieldType));
+		}
+		else {
+			return new DateTimeParser(getFormatter(annotation, fieldType));
+		}
 	}
 
 	/**
@@ -116,9 +116,15 @@ public class JodaDateTimeFormatAnnotationFormatterFactory
 	 */
 	protected DateTimeFormatter getFormatter(DateTimeFormat annotation, Class<?> fieldType) {
 		DateTimeFormatterFactory factory = new DateTimeFormatterFactory();
-		factory.setStyle(resolveEmbeddedValue(annotation.style()));
+		String style = resolveEmbeddedValue(annotation.style());
+		if (StringUtils.hasLength(style)) {
+			factory.setStyle(style);
+		}
 		factory.setIso(annotation.iso());
-		factory.setPattern(resolveEmbeddedValue(annotation.pattern()));
+		String pattern = resolveEmbeddedValue(annotation.pattern());
+		if (StringUtils.hasLength(pattern)) {
+			factory.setPattern(pattern);
+		}
 		return factory.createDateTimeFormatter();
 	}
 

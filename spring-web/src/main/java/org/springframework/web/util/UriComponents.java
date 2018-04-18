@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,9 @@
 package org.springframework.web.util;
 
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -26,124 +27,131 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Represents an immutable collection of URI components, mapping component type to string
- * values. Contains convenience getters for all components. Effectively similar to {@link
- * java.net.URI}, but with more powerful encoding options and support for URI template
- * variables.
+ * Represents an immutable collection of URI components, mapping component type to
+ * String values. Contains convenience getters for all components. Effectively similar
+ * to {@link java.net.URI}, but with more powerful encoding options and support for
+ * URI template variables.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 3.1
  * @see UriComponentsBuilder
  */
+@SuppressWarnings("serial")
 public abstract class UriComponents implements Serializable {
 
-	private static final String DEFAULT_ENCODING = "UTF-8";
-
-	/** Captures URI template variable names. */
+	/** Captures URI template variable names */
 	private static final Pattern NAMES_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
 
 
+	@Nullable
 	private final String scheme;
 
+	@Nullable
 	private final String fragment;
 
 
-	protected UriComponents(String scheme, String fragment) {
+	protected UriComponents(@Nullable String scheme, @Nullable String fragment) {
 		this.scheme = scheme;
 		this.fragment = fragment;
 	}
 
 
-	// component getters
+	// Component getters
 
 	/**
-	 * Returns the scheme. Can be {@code null}.
+	 * Return the scheme. Can be {@code null}.
 	 */
+	@Nullable
 	public final String getScheme() {
 		return this.scheme;
 	}
 
 	/**
-	 * Returns the scheme specific part. Can be {@code null}.
+	 * Return the fragment. Can be {@code null}.
 	 */
-	public abstract String getSchemeSpecificPart();
-
-	/**
-	 * Returns the user info. Can be {@code null}.
-	 */
-	public abstract String getUserInfo();
-
-	/**
-	 * Returns the host. Can be {@code null}.
-	 */
-	public abstract String getHost();
-
-	/**
-	 * Returns the port. Returns {@code -1} if no port has been set.
-	 */
-	public abstract int getPort();
-
-	/**
-	 * Returns the path. Can be {@code null}.
-	 */
-	public abstract String getPath();
-
-	/**
-	 * Returns the list of path segments. Empty if no path has been set.
-	 */
-	public abstract List<String> getPathSegments();
-
-	/**
-	 * Returns the query. Can be {@code null}.
-	 */
-	public abstract String getQuery();
-
-	/**
-	 * Returns the map of query parameters. Empty if no query has been set.
-	 */
-	public abstract MultiValueMap<String, String> getQueryParams();
-
-	/**
-	 * Returns the fragment. Can be {@code null}.
-	 */
+	@Nullable
 	public final String getFragment() {
 		return this.fragment;
 	}
 
+	/**
+	 * Return the scheme specific part. Can be {@code null}.
+	 */
+	@Nullable
+	public abstract String getSchemeSpecificPart();
 
 	/**
-	 * Encode all URI components using their specific encoding rules, and returns the
-	 * result as a new {@code UriComponents} instance. This method uses UTF-8 to encode.
-	 * @return the encoded uri components
+	 * Return the user info. Can be {@code null}.
+	 */
+	@Nullable
+	public abstract String getUserInfo();
+
+	/**
+	 * Return the host. Can be {@code null}.
+	 */
+	@Nullable
+	public abstract String getHost();
+
+	/**
+	 * Return the port. {@code -1} if no port has been set.
+	 */
+	public abstract int getPort();
+
+	/**
+	 * Return the path. Can be {@code null}.
+	 */
+	@Nullable
+	public abstract String getPath();
+
+	/**
+	 * Return the list of path segments. Empty if no path has been set.
+	 */
+	public abstract List<String> getPathSegments();
+
+	/**
+	 * Return the query. Can be {@code null}.
+	 */
+	@Nullable
+	public abstract String getQuery();
+
+	/**
+	 * Return the map of query parameters. Empty if no query has been set.
+	 */
+	public abstract MultiValueMap<String, String> getQueryParams();
+
+
+	/**
+	 * A variant of {@link #encode(Charset)} that uses "UTF-8" as the charset.
+	 * @return a new {@code UriComponents} instance with encoded values
 	 */
 	public final UriComponents encode() {
-		try {
-			return encode(DEFAULT_ENCODING);
-		}
-		catch (UnsupportedEncodingException e) {
-			throw new InternalError("\"" + DEFAULT_ENCODING + "\" not supported");
-		}
+		return encode(StandardCharsets.UTF_8);
 	}
 
 	/**
-	 * Encode all URI components using their specific encoding rules, and
-	 * returns the result as a new {@code UriComponents} instance.
-	 * @param encoding the encoding of the values contained in this map
-	 * @return the encoded uri components
-	 * @throws UnsupportedEncodingException if the given encoding is not supported
+	 * Encode each URI component by percent encoding illegal characters, which
+	 * includes non-US-ASCII characters, and also characters that are otherwise
+	 * illegal within a given URI component type, as defined in RFC 3986. The
+	 * effect of this method, with regards to encoding, is comparable to using
+	 * the multi-argument constructor of {@link URI}.
+	 * @param charset the encoding of the values contained in this map
+	 * @return a new {@code UriComponents} instance with encoded values
 	 */
-	public abstract UriComponents encode(String encoding) throws UnsupportedEncodingException;
+	public abstract UriComponents encode(Charset charset);
 
 	/**
-	 * Replaces all URI template variables with the values from a given map. The map keys
-	 * represent variable names; the values variable values. The order of variables is not
-	 * significant.
+	 * Replace all URI template variables with the values from a given map.
+	 * <p>The given map keys represent variable names; the corresponding values
+	 * represent variable values. The order of variables is not significant.
 	 * @param uriVariables the map of URI variables
-	 * @return the expanded uri components
+	 * @return the expanded URI components
 	 */
 	public final UriComponents expand(Map<String, ?> uriVariables) {
 		Assert.notNull(uriVariables, "'uriVariables' must not be null");
@@ -151,10 +159,10 @@ public abstract class UriComponents implements Serializable {
 	}
 
 	/**
-	 * Replaces all URI template variables with the values from a given array. The array
-	 * represent variable values. The order of variables is significant.
-	 * @param uriVariableValues URI variable values
-	 * @return the expanded uri components
+	 * Replace all URI template variables with the values from a given array.
+	 * <p>The given array represents variable values. The order of variables is significant.
+	 * @param uriVariableValues the URI variable values
+	 * @return the expanded URI components
 	 */
 	public final UriComponents expand(Object... uriVariableValues) {
 		Assert.notNull(uriVariableValues, "'uriVariableValues' must not be null");
@@ -162,43 +170,79 @@ public abstract class UriComponents implements Serializable {
 	}
 
 	/**
-	 * Replaces all URI template variables with the values from the given {@link
+	 * Replace all URI template variables with the values from the given
+	 * {@link UriTemplateVariables}.
+	 * @param uriVariables the URI template values
+	 * @return the expanded URI components
+	 */
+	public final UriComponents expand(UriTemplateVariables uriVariables) {
+		Assert.notNull(uriVariables, "'uriVariables' must not be null");
+		return expandInternal(uriVariables);
+	}
+
+	/**
+	 * Replace all URI template variables with the values from the given {@link
 	 * UriTemplateVariables}
 	 * @param uriVariables URI template values
-	 * @return the expanded uri components
+	 * @return the expanded URI components
 	 */
 	abstract UriComponents expandInternal(UriTemplateVariables uriVariables);
 
 	/**
-	 * Normalize the path removing sequences like "path/..".
+	 * Normalize the path removing sequences like "path/..". Note that
+	 * normalization is applied to the full path, and not to individual path
+	 * segments.
 	 * @see org.springframework.util.StringUtils#cleanPath(String)
 	 */
 	public abstract UriComponents normalize();
 
 	/**
-	 * Returns a URI string from this {@code UriComponents} instance.
+	 * Concatenate all URI components to return the fully formed URI String.
+	 * <p>This method does nothing more than a simple concatenation based on
+	 * current values. That means it could produce different results if invoked
+	 * before vs after methods that can change individual values such as
+	 * {@code encode}, {@code expand}, or {@code normalize}.
 	 */
 	public abstract String toUriString();
 
 	/**
-	 * Returns a {@code URI} from this {@code UriComponents} instance.
+	 * Create a {@link URI} from this instance as follows:
+	 * <p>If the current instance is {@link #encode() encoded}, form the full
+	 * URI String via {@link #toUriString()}, and then pass it to the single
+	 * argument {@link URI} constructor which preserves percent encoding.
+	 * <p>If not yet encoded, pass individual URI component values to the
+	 * multi-argument {@link URI} constructor which quotes illegal characters
+	 * that cannot appear in their respective URI component.
 	 */
 	public abstract URI toUri();
 
+	/**
+	 * A simple pass-through to {@link #toUriString()}.
+	 */
 	@Override
 	public final String toString() {
 		return toUriString();
 	}
 
+	/**
+	 * Set all components of the given UriComponentsBuilder.
+	 * @since 4.2
+	 */
+	protected abstract void copyToUriComponentsBuilder(UriComponentsBuilder builder);
 
-	// static expansion helpers
 
-	static String expandUriComponent(String source, UriTemplateVariables uriVariables) {
+	// Static expansion helpers
+
+	@Nullable
+	static String expandUriComponent(@Nullable String source, UriTemplateVariables uriVariables) {
 		if (source == null) {
 			return null;
 		}
 		if (source.indexOf('{') == -1) {
 			return source;
+		}
+		if (source.indexOf(':') != -1) {
+			source = sanitizeSource(source);
 		}
 		Matcher matcher = NAMES_PATTERN.matcher(source);
 		StringBuffer sb = new StringBuffer();
@@ -206,6 +250,9 @@ public abstract class UriComponents implements Serializable {
 			String match = matcher.group(1);
 			String variableName = getVariableName(match);
 			Object variableValue = uriVariables.getValue(variableName);
+			if (UriTemplateVariables.SKIP_VALUE.equals(variableValue)) {
+				continue;
+			}
 			String variableValueString = getVariableValueAsString(variableValue);
 			String replacement = Matcher.quoteReplacement(variableValueString);
 			matcher.appendReplacement(sb, replacement);
@@ -214,12 +261,33 @@ public abstract class UriComponents implements Serializable {
 		return sb.toString();
 	}
 
+	/**
+	 * Remove nested "{}" such as in URI vars with regular expressions.
+	 */
+	private static String sanitizeSource(String source) {
+		int level = 0;
+		StringBuilder sb = new StringBuilder();
+		for (char c : source.toCharArray()) {
+			if (c == '{') {
+				level++;
+			}
+			if (c == '}') {
+				level--;
+			}
+			if (level > 1 || (level == 1 && c == '}')) {
+				continue;
+			}
+			sb.append(c);
+		}
+		return sb.toString();
+	}
+
 	private static String getVariableName(String match) {
 		int colonIdx = match.indexOf(':');
 		return (colonIdx != -1 ? match.substring(0, colonIdx) : match);
 	}
 
-	private static String getVariableValueAsString(Object variableValue) {
+	private static String getVariableValueAsString(@Nullable Object variableValue) {
 		return (variableValue != null ? variableValue.toString() : "");
 	}
 
@@ -228,9 +296,19 @@ public abstract class UriComponents implements Serializable {
 	 * Defines the contract for URI Template variables
 	 * @see HierarchicalUriComponents#expand
 	 */
-	interface UriTemplateVariables {
+	public interface UriTemplateVariables {
 
-		Object getValue(String name);
+		Object SKIP_VALUE = UriTemplateVariables.class;
+
+		/**
+		 * Get the value for the given URI variable name.
+		 * If the value is {@code null}, an empty String is expanded.
+		 * If the value is {@link #SKIP_VALUE}, the URI variable is not expanded.
+		 * @param name the variable name
+		 * @return the variable value, possibly {@code null} or {@link #SKIP_VALUE}
+		 */
+		@Nullable
+		Object getValue(@Nullable String name);
 	}
 
 
@@ -246,7 +324,8 @@ public abstract class UriComponents implements Serializable {
 		}
 
 		@Override
-		public Object getValue(String name) {
+		@Nullable
+		public Object getValue(@Nullable String name) {
 			if (!this.uriVariables.containsKey(name)) {
 				throw new IllegalArgumentException("Map has no value for '" + name + "'");
 			}
@@ -267,10 +346,10 @@ public abstract class UriComponents implements Serializable {
 		}
 
 		@Override
-		public Object getValue(String name) {
+		@Nullable
+		public Object getValue(@Nullable String name) {
 			if (!this.valueIterator.hasNext()) {
-				throw new IllegalArgumentException(
-						"Not enough variable values available to expand '" + name + "'");
+				throw new IllegalArgumentException("Not enough variable values available to expand '" + name + "'");
 			}
 			return this.valueIterator.next();
 		}

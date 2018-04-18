@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.xml.SimpleSaxErrorHandler;
 import org.springframework.util.xml.XmlValidationModeDetector;
@@ -112,10 +113,12 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	private SourceExtractor sourceExtractor = new NullSourceExtractor();
 
+	@Nullable
 	private NamespaceHandlerResolver namespaceHandlerResolver;
 
 	private DocumentLoader documentLoader = new DefaultDocumentLoader();
 
+	@Nullable
 	private EntityResolver entityResolver;
 
 	private ErrorHandler errorHandler = new SimpleSaxErrorHandler(logger);
@@ -123,7 +126,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	private final XmlValidationModeDetector validationModeDetector = new XmlValidationModeDetector();
 
 	private final ThreadLocal<Set<EncodedResource>> resourcesCurrentlyBeingLoaded =
-			new NamedThreadLocal<Set<EncodedResource>>("XML bean definition resources currently being loaded");
+			new NamedThreadLocal<>("XML bean definition resources currently being loaded");
 
 
 	/**
@@ -134,6 +137,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	public XmlBeanDefinitionReader(BeanDefinitionRegistry registry) {
 		super(registry);
 	}
+
 
 	/**
 	 * Set whether to use XML validation. Default is {@code true}.
@@ -196,7 +200,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * which exhibits fail fast behaviour. External tools can provide an alternative implementation
 	 * that collates errors and warnings for display in the tool UI.
 	 */
-	public void setProblemReporter(ProblemReporter problemReporter) {
+	public void setProblemReporter(@Nullable ProblemReporter problemReporter) {
 		this.problemReporter = (problemReporter != null ? problemReporter : new FailFastProblemReporter());
 	}
 
@@ -206,7 +210,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * External tools can provide an alternative implementation to monitor the components being
 	 * registered in the BeanFactory.
 	 */
-	public void setEventListener(ReaderEventListener eventListener) {
+	public void setEventListener(@Nullable ReaderEventListener eventListener) {
 		this.eventListener = (eventListener != null ? eventListener : new EmptyReaderEventListener());
 	}
 
@@ -216,7 +220,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * as the source object. This means that - during normal runtime execution -
 	 * no additional source metadata is attached to the bean configuration metadata.
 	 */
-	public void setSourceExtractor(SourceExtractor sourceExtractor) {
+	public void setSourceExtractor(@Nullable SourceExtractor sourceExtractor) {
 		this.sourceExtractor = (sourceExtractor != null ? sourceExtractor : new NullSourceExtractor());
 	}
 
@@ -225,7 +229,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * <p>If none is specified, a default instance will be created through
 	 * {@link #createDefaultNamespaceHandlerResolver()}.
 	 */
-	public void setNamespaceHandlerResolver(NamespaceHandlerResolver namespaceHandlerResolver) {
+	public void setNamespaceHandlerResolver(@Nullable NamespaceHandlerResolver namespaceHandlerResolver) {
 		this.namespaceHandlerResolver = namespaceHandlerResolver;
 	}
 
@@ -234,7 +238,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * <p>The default implementation is {@link DefaultDocumentLoader}
 	 * which loads {@link Document} instances using JAXP.
 	 */
-	public void setDocumentLoader(DocumentLoader documentLoader) {
+	public void setDocumentLoader(@Nullable DocumentLoader documentLoader) {
 		this.documentLoader = (documentLoader != null ? documentLoader : new DefaultDocumentLoader());
 	}
 
@@ -243,7 +247,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * <p>By default, {@link ResourceEntityResolver} will be used. Can be overridden
 	 * for custom entity resolution, for example relative to some specific base path.
 	 */
-	public void setEntityResolver(EntityResolver entityResolver) {
+	public void setEntityResolver(@Nullable EntityResolver entityResolver) {
 		this.entityResolver = entityResolver;
 	}
 
@@ -283,11 +287,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * <p>The default is {@link DefaultBeanDefinitionDocumentReader}.
 	 * @param documentReaderClass the desired BeanDefinitionDocumentReader implementation class
 	 */
-	public void setDocumentReaderClass(Class<?> documentReaderClass) {
-		if (documentReaderClass == null || !BeanDefinitionDocumentReader.class.isAssignableFrom(documentReaderClass)) {
-			throw new IllegalArgumentException(
-					"documentReaderClass must be an implementation of the BeanDefinitionDocumentReader interface");
-		}
+	public void setDocumentReaderClass(Class<? extends BeanDefinitionDocumentReader> documentReaderClass) {
 		this.documentReaderClass = documentReaderClass;
 	}
 
@@ -318,7 +318,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 		Set<EncodedResource> currentResources = this.resourcesCurrentlyBeingLoaded.get();
 		if (currentResources == null) {
-			currentResources = new HashSet<EncodedResource>(4);
+			currentResources = new HashSet<>(4);
 			this.resourcesCurrentlyBeingLoaded.set(currentResources);
 		}
 		if (!currentResources.add(encodedResource)) {
@@ -368,7 +368,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
-	public int loadBeanDefinitions(InputSource inputSource, String resourceDescription)
+	public int loadBeanDefinitions(InputSource inputSource, @Nullable String resourceDescription)
 			throws BeanDefinitionStoreException {
 
 		return doLoadBeanDefinitions(inputSource, new DescriptiveResource(resourceDescription));
@@ -381,13 +381,13 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @param resource the resource descriptor for the XML file
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
+	 * @see #doLoadDocument
+	 * @see #registerBeanDefinitions
 	 */
 	protected int doLoadBeanDefinitions(InputSource inputSource, Resource resource)
 			throws BeanDefinitionStoreException {
 		try {
-			int validationMode = getValidationModeForResource(resource);
-			Document doc = this.documentLoader.loadDocument(
-					inputSource, getEntityResolver(), this.errorHandler, validationMode, isNamespaceAware());
+			Document doc = doLoadDocument(inputSource, resource);
 			return registerBeanDefinitions(doc, resource);
 		}
 		catch (BeanDefinitionStoreException ex) {
@@ -413,6 +413,20 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			throw new BeanDefinitionStoreException(resource.getDescription(),
 					"Unexpected exception parsing XML document from " + resource, ex);
 		}
+	}
+
+	/**
+	 * Actually load the specified document using the configured DocumentLoader.
+	 * @param inputSource the SAX InputSource to read from
+	 * @param resource the resource descriptor for the XML file
+	 * @return the DOM Document
+	 * @throws Exception when thrown from the DocumentLoader
+	 * @see #setDocumentLoader
+	 * @see DocumentLoader#loadDocument
+	 */
+	protected Document doLoadDocument(InputSource inputSource, Resource resource) throws Exception {
+		return this.documentLoader.loadDocument(inputSource, getEntityResolver(), this.errorHandler,
+				getValidationModeForResource(resource), isNamespaceAware());
 	}
 
 
@@ -489,7 +503,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	public int registerBeanDefinitions(Document doc, Resource resource) throws BeanDefinitionStoreException {
 		BeanDefinitionDocumentReader documentReader = createBeanDefinitionDocumentReader();
-		documentReader.setEnvironment(this.getEnvironment());
 		int countBefore = getRegistry().getBeanDefinitionCount();
 		documentReader.registerBeanDefinitions(doc, createReaderContext(resource));
 		return getRegistry().getBeanDefinitionCount() - countBefore;
@@ -508,12 +521,20 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	/**
 	 * Create the {@link XmlReaderContext} to pass over to the document reader.
 	 */
-	protected XmlReaderContext createReaderContext(Resource resource) {
+	public XmlReaderContext createReaderContext(Resource resource) {
+		return new XmlReaderContext(resource, this.problemReporter, this.eventListener,
+				this.sourceExtractor, this, getNamespaceHandlerResolver());
+	}
+
+	/**
+	 * Lazily create a default NamespaceHandlerResolver, if not set before.
+	 * @see #createDefaultNamespaceHandlerResolver()
+	 */
+	public NamespaceHandlerResolver getNamespaceHandlerResolver() {
 		if (this.namespaceHandlerResolver == null) {
 			this.namespaceHandlerResolver = createDefaultNamespaceHandlerResolver();
 		}
-		return new XmlReaderContext(resource, this.problemReporter, this.eventListener,
-				this.sourceExtractor, this, this.namespaceHandlerResolver);
+		return this.namespaceHandlerResolver;
 	}
 
 	/**
@@ -521,7 +542,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * Default implementation returns an instance of {@link DefaultNamespaceHandlerResolver}.
 	 */
 	protected NamespaceHandlerResolver createDefaultNamespaceHandlerResolver() {
-		return new DefaultNamespaceHandlerResolver(getResourceLoader().getClassLoader());
+		ClassLoader cl = (getResourceLoader() != null ? getResourceLoader().getClassLoader() : getBeanClassLoader());
+		return new DefaultNamespaceHandlerResolver(cl);
 	}
 
 }

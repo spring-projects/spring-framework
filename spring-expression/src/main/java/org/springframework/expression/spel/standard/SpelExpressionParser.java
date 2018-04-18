@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.common.TemplateAwareExpressionParser;
 import org.springframework.expression.spel.SpelParserConfiguration;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -35,14 +36,14 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 
 
 	/**
-	 * Create a parser with standard configuration.
+	 * Create a parser with default settings.
 	 */
 	public SpelExpressionParser() {
-		this.configuration = new SpelParserConfiguration(false, false);
+		this.configuration = new SpelParserConfiguration();
 	}
 
 	/**
-	 * Create a parser with some configured behavior.
+	 * Create a parser with the specified configuration.
 	 * @param configuration custom configuration options
 	 */
 	public SpelExpressionParser(SpelParserConfiguration configuration) {
@@ -51,13 +52,13 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 	}
 
 
-	@Override
-	protected SpelExpression doParseExpression(String expressionString, ParserContext context) throws ParseException {
-		return new InternalSpelExpressionParser(this.configuration).doParseExpression(expressionString, context);
-	}
-
 	public SpelExpression parseRaw(String expressionString) throws ParseException {
 		return doParseExpression(expressionString, null);
+	}
+
+	@Override
+	protected SpelExpression doParseExpression(String expressionString, @Nullable ParserContext context) throws ParseException {
+		return new InternalSpelExpressionParser(this.configuration).doParseExpression(expressionString, context);
 	}
 
 }

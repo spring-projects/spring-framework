@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -28,7 +27,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
- * Servlet 2.3 Filter that exposes the request to the current thread,
+ * Servlet Filter that exposes the request to the current thread,
  * through both {@link org.springframework.context.i18n.LocaleContextHolder} and
  * {@link RequestContextHolder}. To be registered as filter in {@code web.xml}.
  *
@@ -69,6 +68,7 @@ public class RequestContextFilter extends OncePerRequestFilter {
 		this.threadContextInheritable = threadContextInheritable;
 	}
 
+
 	/**
 	 * Returns "false" so that the filter may set up the request context in each
 	 * asynchronously dispatched thread.
@@ -92,7 +92,7 @@ public class RequestContextFilter extends OncePerRequestFilter {
 			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
-		ServletRequestAttributes attributes = new ServletRequestAttributes(request);
+		ServletRequestAttributes attributes = new ServletRequestAttributes(request, response);
 		initContextHolders(request, attributes);
 
 		try {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.jdbc.core;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Common base class for ResultSet-supporting SqlParameters like
  * {@link SqlOutParameter} and {@link SqlReturnResultSet}.
@@ -25,11 +27,14 @@ package org.springframework.jdbc.core;
  */
 public class ResultSetSupportingSqlParameter extends SqlParameter {
 
-	private ResultSetExtractor resultSetExtractor;
+	@Nullable
+	private ResultSetExtractor<?> resultSetExtractor;
 
+	@Nullable
 	private RowCallbackHandler rowCallbackHandler;
 
-	private RowMapper rowMapper;
+	@Nullable
+	private RowMapper<?> rowMapper;
 
 
 	/**
@@ -58,7 +63,7 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	 * @param sqlType SQL type of the parameter according to java.sql.Types
 	 * @param typeName the type name of the parameter (optional)
 	 */
-	public ResultSetSupportingSqlParameter(String name, int sqlType, String typeName) {
+	public ResultSetSupportingSqlParameter(String name, int sqlType, @Nullable String typeName) {
 		super(name, sqlType, typeName);
 	}
 
@@ -68,7 +73,7 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	 * @param sqlType SQL type of the parameter according to java.sql.Types
 	 * @param rse ResultSetExtractor to use for parsing the ResultSet
 	 */
-	public ResultSetSupportingSqlParameter(String name, int sqlType, ResultSetExtractor rse) {
+	public ResultSetSupportingSqlParameter(String name, int sqlType, ResultSetExtractor<?> rse) {
 		super(name, sqlType);
 		this.resultSetExtractor = rse;
 	}
@@ -90,7 +95,7 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	 * @param sqlType SQL type of the parameter according to java.sql.Types
 	 * @param rm RowMapper to use for parsing the ResultSet
 	 */
-	public ResultSetSupportingSqlParameter(String name, int sqlType, RowMapper rm) {
+	public ResultSetSupportingSqlParameter(String name, int sqlType, RowMapper<?> rm) {
 		super(name, sqlType);
 		this.rowMapper = rm;
 	}
@@ -107,13 +112,15 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	/**
 	 * Return the ResultSetExtractor held by this parameter, if any.
 	 */
-	public ResultSetExtractor getResultSetExtractor() {
+	@Nullable
+	public ResultSetExtractor<?> getResultSetExtractor() {
 		return this.resultSetExtractor;
 	}
 
 	/**
 	 * Return the RowCallbackHandler held by this parameter, if any.
 	 */
+	@Nullable
 	public RowCallbackHandler getRowCallbackHandler() {
 		return this.rowCallbackHandler;
 	}
@@ -121,13 +128,14 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	/**
 	 * Return the RowMapper held by this parameter, if any.
 	 */
-	public RowMapper getRowMapper() {
+	@Nullable
+	public RowMapper<?> getRowMapper() {
 		return this.rowMapper;
 	}
 
 
 	/**
-	 * <p>This implementation always returns {@code false}.
+	 * This implementation always returns {@code false}.
 	 */
 	@Override
 	public boolean isInputValueProvided() {

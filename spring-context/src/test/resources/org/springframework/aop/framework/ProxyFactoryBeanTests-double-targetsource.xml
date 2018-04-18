@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<!--
+	Tests for misconfiguring the proxy factory bean using a target source in the
+	interceptor list as well as set by the targetSource property
+-->
+
+<beans>
+
+	<bean id="eveTargetSource" class="org.springframework.aop.target.SingletonTargetSource">
+		<constructor-arg>
+			<bean class="org.springframework.tests.sample.beans.TestBean">
+				<property name="name"><value>Eve</value></property>
+			</bean>
+		</constructor-arg>
+	</bean>
+
+	<bean id="adam" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="name"><value>Adam</value></property>
+	</bean>
+
+	<bean id="adamTargetSource" class="org.springframework.aop.target.SingletonTargetSource">
+		<constructor-arg>
+			<ref bean="adam"/>
+		</constructor-arg>
+	</bean>
+
+	<bean id="countingBeforeAdvice"
+		class="org.springframework.tests.aop.advice.CountingBeforeAdvice"
+	/>
+
+	<bean id="doubleTarget"
+		class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces"><value>org.springframework.tests.sample.beans.ITestBean</value></property>
+		<!-- this is the one used and NOT the one set by targetSource -->
+		<property name="interceptorNames"><value>countingBeforeAdvice,adamTargetSource</value></property>
+	
+		<property name="targetSource"><ref bean="eveTargetSource"/></property>
+	</bean>
+
+	<!-- but this is also possible -->
+	<bean id="arbitraryTarget"
+		class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces"><value>org.springframework.tests.sample.beans.ITestBean</value></property>
+		<!-- this is the one used and NOT the one set by targetSource -->
+		<property name="interceptorNames"><value>adam</value></property>
+		<property name="targetSource"><ref bean="eveTargetSource"/></property>
+	</bean>
+
+	
+</beans>	
+
+

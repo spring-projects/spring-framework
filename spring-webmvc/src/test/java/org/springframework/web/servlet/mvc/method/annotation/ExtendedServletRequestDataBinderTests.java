@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,19 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.tests.sample.beans.TestBean;
+
 import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.servlet.HandlerMapping;
+
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for {@link ExtendedServletRequestDataBinder}.
@@ -45,7 +46,7 @@ public class ExtendedServletRequestDataBinderTests {
 
 	@Test
 	public void createBinder() throws Exception {
-		Map<String, String> uriTemplateVars = new HashMap<String, String>();
+		Map<String, String> uriTemplateVars = new HashMap<>();
 		uriTemplateVars.put("name", "nameValue");
 		uriTemplateVars.put("age", "25");
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
@@ -62,7 +63,7 @@ public class ExtendedServletRequestDataBinderTests {
 	public void uriTemplateVarAndRequestParam() throws Exception {
 		request.addParameter("age", "35");
 
-		Map<String, String> uriTemplateVars = new HashMap<String, String>();
+		Map<String, String> uriTemplateVars = new HashMap<>();
 		uriTemplateVars.put("name", "nameValue");
 		uriTemplateVars.put("age", "25");
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);

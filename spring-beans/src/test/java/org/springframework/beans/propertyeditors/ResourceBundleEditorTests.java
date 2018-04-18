@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package org.springframework.beans.propertyeditors;
 
-import static org.junit.Assert.*;
-
 import java.util.ResourceBundle;
 
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the {@link ResourceBundleEditor} class.
@@ -28,9 +28,10 @@ import org.junit.Test;
  * @author Rick Evans
  * @author Chris Beams
  */
-public final class ResourceBundleEditorTests {
+public class ResourceBundleEditorTests {
 
 	private static final String BASE_NAME = ResourceBundleEditorTests.class.getName();
+
 	private static final String MESSAGE_KEY = "punk";
 
 
@@ -40,7 +41,8 @@ public final class ResourceBundleEditorTests {
 		editor.setAsText(BASE_NAME);
 		Object value = editor.getValue();
 		assertNotNull("Returned ResourceBundle was null (must not be for valid setAsText(..) call).", value);
-		assertTrue("Returned object was not a ResourceBundle (must be for valid setAsText(..) call).", value instanceof ResourceBundle);
+		assertTrue("Returned object was not a ResourceBundle (must be for valid setAsText(..) call).",
+				value instanceof ResourceBundle);
 		ResourceBundle bundle = (ResourceBundle) value;
 		String string = bundle.getString(MESSAGE_KEY);
 		assertEquals(MESSAGE_KEY, string);
@@ -52,7 +54,8 @@ public final class ResourceBundleEditorTests {
 		editor.setAsText(BASE_NAME + "_");
 		Object value = editor.getValue();
 		assertNotNull("Returned ResourceBundle was null (must not be for valid setAsText(..) call).", value);
-		assertTrue("Returned object was not a ResourceBundle (must be for valid setAsText(..) call).", value instanceof ResourceBundle);
+		assertTrue("Returned object was not a ResourceBundle (must be for valid setAsText(..) call).",
+				value instanceof ResourceBundle);
 		ResourceBundle bundle = (ResourceBundle) value;
 		String string = bundle.getString(MESSAGE_KEY);
 		assertEquals(MESSAGE_KEY, string);
@@ -64,7 +67,8 @@ public final class ResourceBundleEditorTests {
 		editor.setAsText(BASE_NAME + "Lang" + "_en");
 		Object value = editor.getValue();
 		assertNotNull("Returned ResourceBundle was null (must not be for valid setAsText(..) call).", value);
-		assertTrue("Returned object was not a ResourceBundle (must be for valid setAsText(..) call).", value instanceof ResourceBundle);
+		assertTrue("Returned object was not a ResourceBundle (must be for valid setAsText(..) call).",
+				value instanceof ResourceBundle);
 		ResourceBundle bundle = (ResourceBundle) value;
 		String string = bundle.getString(MESSAGE_KEY);
 		assertEquals("yob", string);
@@ -76,7 +80,8 @@ public final class ResourceBundleEditorTests {
 		editor.setAsText(BASE_NAME + "LangCountry" + "_en_GB");
 		Object value = editor.getValue();
 		assertNotNull("Returned ResourceBundle was null (must not be for valid setAsText(..) call).", value);
-		assertTrue("Returned object was not a ResourceBundle (must be for valid setAsText(..) call).", value instanceof ResourceBundle);
+		assertTrue("Returned object was not a ResourceBundle (must be for valid setAsText(..) call).",
+				value instanceof ResourceBundle);
 		ResourceBundle bundle = (ResourceBundle) value;
 		String string = bundle.getString(MESSAGE_KEY);
 		assertEquals("chav", string);
@@ -88,31 +93,32 @@ public final class ResourceBundleEditorTests {
 		editor.setAsText(BASE_NAME + "LangCountryDialect" + "_en_GB_GLASGOW");
 		Object value = editor.getValue();
 		assertNotNull("Returned ResourceBundle was null (must not be for valid setAsText(..) call).", value);
-		assertTrue("Returned object was not a ResourceBundle (must be for valid setAsText(..) call).", value instanceof ResourceBundle);
+		assertTrue("Returned object was not a ResourceBundle (must be for valid setAsText(..) call).",
+				value instanceof ResourceBundle);
 		ResourceBundle bundle = (ResourceBundle) value;
 		String string = bundle.getString(MESSAGE_KEY);
 		assertEquals("ned", string);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSetAsTextWithNull() throws Exception {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText(null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSetAsTextWithEmptyString() throws Exception {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText("");
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSetAsTextWithWhiteSpaceString() throws Exception {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText("   ");
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSetAsTextWithJustSeparatorString() throws Exception {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText("_");

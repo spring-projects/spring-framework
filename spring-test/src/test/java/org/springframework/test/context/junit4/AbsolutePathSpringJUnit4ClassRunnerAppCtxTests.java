@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.test.context.junit4;
 
-import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
@@ -30,7 +29,6 @@ import org.springframework.test.context.ContextConfiguration;
  * @see ClassPathResourceSpringJUnit4ClassRunnerAppCtxTests
  * @see RelativePathSpringJUnit4ClassRunnerAppCtxTests
  */
-@RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { SpringJUnit4ClassRunnerAppCtxTests.DEFAULT_CONTEXT_RESOURCE_PATH }, inheritLocations = false)
 public class AbsolutePathSpringJUnit4ClassRunnerAppCtxTests extends SpringJUnit4ClassRunnerAppCtxTests {
 	/* all tests are in the parent class. */

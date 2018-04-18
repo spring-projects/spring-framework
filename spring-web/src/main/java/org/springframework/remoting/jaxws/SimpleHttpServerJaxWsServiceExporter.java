@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,10 @@ import com.sun.net.httpserver.HttpServer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
+import org.springframework.lang.UsesSunHttpServer;
+import org.springframework.util.Assert;
+
 /**
  * Simple exporter for JAX-WS services, autodetecting annotated service beans
  * (through the JAX-WS {@link javax.jws.WebService} annotation) and exporting
@@ -46,14 +50,17 @@ import org.apache.commons.logging.LogFactory;
  * @see javax.xml.ws.Endpoint#publish(Object)
  * @see SimpleJaxWsServiceExporter
  */
+@UsesSunHttpServer
 public class SimpleHttpServerJaxWsServiceExporter extends AbstractJaxWsServiceExporter {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private HttpServer server;
 
 	private int port = 8080;
 
+	@Nullable
 	private String hostname;
 
 	private int backlog = -1;
@@ -62,8 +69,10 @@ public class SimpleHttpServerJaxWsServiceExporter extends AbstractJaxWsServiceEx
 
 	private String basePath = "/";
 
+	@Nullable
 	private List<Filter> filters;
 
+	@Nullable
 	private Authenticator authenticator;
 
 	private boolean localServer = false;
@@ -154,11 +163,12 @@ public class SimpleHttpServerJaxWsServiceExporter extends AbstractJaxWsServiceEx
 		if (this.server == null) {
 			InetSocketAddress address = (this.hostname != null ?
 					new InetSocketAddress(this.hostname, this.port) : new InetSocketAddress(this.port));
-			this.server = HttpServer.create(address, this.backlog);
+			HttpServer server = HttpServer.create(address, this.backlog);
 			if (this.logger.isInfoEnabled()) {
 				this.logger.info("Starting HttpServer at address " + address);
 			}
-			this.server.start();
+			server.start();
+			this.server = server;
 			this.localServer = true;
 		}
 		super.afterPropertiesSet();
@@ -181,6 +191,7 @@ public class SimpleHttpServerJaxWsServiceExporter extends AbstractJaxWsServiceEx
 	 * @return the fully populated HttpContext
 	 */
 	protected HttpContext buildHttpContext(Endpoint endpoint, String serviceName) {
+		Assert.state(this.server != null, "No HttpServer available");
 		String fullPath = calculateEndpointPath(endpoint, serviceName);
 		HttpContext httpContext = this.server.createContext(fullPath);
 		if (this.filters != null) {
@@ -206,7 +217,7 @@ public class SimpleHttpServerJaxWsServiceExporter extends AbstractJaxWsServiceEx
 	@Override
 	public void destroy() {
 		super.destroy();
-		if (this.localServer) {
+		if (this.server != null && this.localServer) {
 			logger.info("Stopping HttpServer");
 			this.server.stop(this.shutdownDelay);
 		}

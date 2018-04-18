@@ -146,7 +146,7 @@ public class MutableSortDefinition implements SortDefinition, Serializable {
 
 	/**
 	 * Return whether to toggle the ascending flag if the same property gets set again
-	 * (that is, {@link #setProperty} gets called with already set property name again).
+	 * (that is, {@code setProperty} gets called with already set property name again).
 	 */
 	public boolean isToggleAscendingOnProperty() {
 		return this.toggleAscendingOnProperty;

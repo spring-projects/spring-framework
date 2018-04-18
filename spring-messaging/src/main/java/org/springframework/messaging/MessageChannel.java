@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,39 +17,41 @@
 package org.springframework.messaging;
 
 /**
- * Base channel interface defining common behavior for sending messages.
+ * Defines methods for sending messages.
  *
  * @author Mark Fisher
  * @since 4.0
  */
+@FunctionalInterface
 public interface MessageChannel {
 
 	/**
 	 * Constant for sending a message without a prescribed timeout.
 	 */
-	public static final long INDEFINITE_TIMEOUT = -1;
+	long INDEFINITE_TIMEOUT = -1;
 
 
 	/**
-	 * Send a {@link Message} to this channel. May throw a RuntimeException for
-	 * non-recoverable errors. Otherwise, if the Message cannot be sent for a non-fatal
-	 * reason this method will return 'false', and if the Message is sent successfully, it
-	 * will return 'true'.
-	 *
-	 * <p>Depending on the implementation, this method may block indefinitely. To provide a
-	 * maximum wait time, use {@link #send(Message, long)}.
-	 * @param message the {@link Message} to send
-	 * @return whether or not the Message has been sent successfully
+	 * Send a {@link Message} to this channel. If the message is sent successfully,
+	 * the method returns {@code true}. If the message cannot be sent due to a
+	 * non-fatal reason, the method returns {@code false}. The method may also
+	 * throw a RuntimeException in case of non-recoverable errors.
+	 * <p>This method may block indefinitely, depending on the implementation.
+	 * To provide a maximum wait time, use {@link #send(Message, long)}.
+	 * @param message the message to send
+	 * @return whether or not the message was sent
 	 */
-	boolean send(Message<?> message);
+	default boolean send(Message<?> message) {
+		return send(message, INDEFINITE_TIMEOUT);
+	}
 
 	/**
-	 * Send a message, blocking until either the message is accepted or the specified
-	 * timeout period elapses.
-	 * @param message the {@link Message} to send
-	 * @param timeout the timeout in milliseconds or #INDEFINITE_TIMEOUT
-	 * @return {@code true} if the message is sent successfully, {@code false} if the
-	 *         specified timeout period elapses or the send is interrupted
+	 * Send a message, blocking until either the message is accepted or the
+	 * specified timeout period elapses.
+	 * @param message the message to send
+	 * @param timeout the timeout in milliseconds or {@link #INDEFINITE_TIMEOUT}
+	 * @return {@code true} if the message is sent, {@code false} if not
+	 * including a timeout of an interrupt of the send
 	 */
 	boolean send(Message<?> message, long timeout);
 

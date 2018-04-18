@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,18 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 
 /**
  * SockJS transport types.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 4.0
  */
 public enum TransportType {
 
-	WEBSOCKET("websocket", HttpMethod.GET),
+	WEBSOCKET("websocket", HttpMethod.GET, "origin"),
 
 	XHR("xhr", HttpMethod.POST, "cors", "jsessionid", "no_cache"),
 
@@ -44,9 +46,25 @@ public enum TransportType {
 
 	XHR_STREAMING("xhr_streaming", HttpMethod.POST, "cors", "jsessionid", "no_cache"),
 
-	EVENT_SOURCE("eventsource", HttpMethod.GET, "jsessionid", "no_cache"),
+	EVENT_SOURCE("eventsource", HttpMethod.GET, "origin", "jsessionid", "no_cache"),
 
-	HTML_FILE("htmlfile", HttpMethod.GET, "jsessionid", "no_cache");
+	HTML_FILE("htmlfile", HttpMethod.GET, "cors", "jsessionid", "no_cache");
+
+
+	private static final Map<String, TransportType> TRANSPORT_TYPES;
+
+	static {
+		Map<String, TransportType> transportTypes = new HashMap<>();
+		for (TransportType type : values()) {
+			transportTypes.put(type.value, type);
+		}
+		TRANSPORT_TYPES = Collections.unmodifiableMap(transportTypes);
+	}
+
+	@Nullable
+	public static TransportType fromValue(String value) {
+		return TRANSPORT_TYPES.get(value);
+	}
 
 
 	private final String value;
@@ -55,17 +73,8 @@ public enum TransportType {
 
 	private final List<String> headerHints;
 
-	private static final Map<String, TransportType> TRANSPORT_TYPES;
-	static {
-		Map<String, TransportType> transportTypes = new HashMap<String, TransportType>();
-		for (TransportType type : values()) {
-			transportTypes.put(type.value, type);
-		}
-		TRANSPORT_TYPES = Collections.unmodifiableMap(transportTypes);
-	}
 
-
-	private TransportType(String value, HttpMethod httpMethod, String... headerHints) {
+	TransportType(String value, HttpMethod httpMethod, String... headerHints) {
 		this.value = value;
 		this.httpMethod = httpMethod;
 		this.headerHints = Arrays.asList(headerHints);
@@ -76,9 +85,6 @@ public enum TransportType {
 		return this.value;
 	}
 
-	/**
-	 * The HTTP method for this transport.
-	 */
 	public HttpMethod getHttpMethod() {
 		return this.httpMethod;
 	}
@@ -87,17 +93,18 @@ public enum TransportType {
 		return this.headerHints.contains("no_cache");
 	}
 
-	public boolean supportsCors() {
-		return this.headerHints.contains("cors");
-	}
-
 	public boolean sendsSessionCookie() {
 		return this.headerHints.contains("jsessionid");
 	}
 
-	public static TransportType fromValue(String value) {
-		return TRANSPORT_TYPES.get(value);
+	public boolean supportsCors() {
+		return this.headerHints.contains("cors");
 	}
+
+	public boolean supportsOrigin() {
+		return this.headerHints.contains("cors") || this.headerHints.contains("origin");
+	}
+
 
 	@Override
 	public String toString() {

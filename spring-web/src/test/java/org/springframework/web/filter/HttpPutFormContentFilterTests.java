@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,6 @@
 
 package org.springframework.web.filter;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -29,10 +23,13 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.test.MockFilterChain;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
+
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for {@link HttpPutFormContentFilter}.
@@ -49,6 +46,7 @@ public class HttpPutFormContentFilterTests {
 
 	private MockFilterChain filterChain;
 
+
 	@Before
 	public void setup() {
 		filter = new HttpPutFormContentFilter();
@@ -59,14 +57,15 @@ public class HttpPutFormContentFilterTests {
 		filterChain = new MockFilterChain();
 	}
 
+
 	@Test
 	public void wrapPutAndPatchOnly() throws Exception {
-		request.setContent("".getBytes("ISO-8859-1"));
+		request.setContent("foo=bar".getBytes("ISO-8859-1"));
 		for (HttpMethod method : HttpMethod.values()) {
 			request.setMethod(method.name());
 			filterChain = new MockFilterChain();
 			filter.doFilter(request, response, filterChain);
-			if (method.equals(HttpMethod.PUT) || method.equals(HttpMethod.PATCH)) {
+			if (method == HttpMethod.PUT || method == HttpMethod.PATCH) {
 				assertNotSame("Should wrap HTTP method " + method, request, filterChain.getRequest());
 			}
 			else {
@@ -139,6 +138,7 @@ public class HttpPutFormContentFilterTests {
 
 	@Test
 	public void getParameterValues() throws Exception {
+		request.setQueryString("name=value1&name=value2");
 		request.addParameter("name", "value1");
 		request.addParameter("name", "value2");
 		request.setContent("name=value3&name=value4".getBytes("ISO-8859-1"));
@@ -152,6 +152,7 @@ public class HttpPutFormContentFilterTests {
 
 	@Test
 	public void getParameterValuesFromQueryString() throws Exception {
+		request.setQueryString("name=value1&name=value2");
 		request.addParameter("name", "value1");
 		request.addParameter("name", "value2");
 		request.setContent("anotherName=anotherValue".getBytes("ISO-8859-1"));
@@ -191,6 +192,7 @@ public class HttpPutFormContentFilterTests {
 
 	@Test
 	public void getParameterMap() throws Exception {
+		request.setQueryString("name=value1&name=value2");
 		request.addParameter("name", "value1");
 		request.addParameter("name", "value2");
 		request.setContent("name=value3&name4=value4".getBytes("ISO-8859-1"));
@@ -202,6 +204,15 @@ public class HttpPutFormContentFilterTests {
 		assertEquals(2, parameters.size());
 		assertArrayEquals(new String[] {"value1", "value2", "value3"}, parameters.get("name"));
 		assertArrayEquals(new String[] {"value4"}, parameters.get("name4"));
+	}
+
+	@Test  // SPR-15835
+	public void hiddenHttpMethodFilterFollowedByHttpPutFormContentFilter() throws Exception {
+		request.addParameter("_method", "PUT");
+		request.addParameter("hiddenField", "testHidden");
+		filter.doFilter(request, response, filterChain);
+
+		assertArrayEquals(new String[]{"testHidden"}, filterChain.getRequest().getParameterValues("hiddenField"));
 	}
 
 }

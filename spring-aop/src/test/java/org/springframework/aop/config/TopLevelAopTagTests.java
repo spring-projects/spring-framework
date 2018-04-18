@@ -16,13 +16,14 @@
 
 package org.springframework.aop.config;
 
-import static org.junit.Assert.assertTrue;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
-
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
+
+import static org.junit.Assert.*;
+import static org.springframework.tests.TestResourceUtils.*;
 
 /**
  * Tests that the &lt;aop:config/&gt; element can be used as a top level element.
@@ -30,7 +31,7 @@ import org.springframework.core.io.Resource;
  * @author Rob Harrop
  * @author Chris Beams
  */
-public final class TopLevelAopTagTests {
+public class TopLevelAopTagTests {
 
 	private static final Resource CONTEXT = qualifiedResource(TopLevelAopTagTests.class, "context.xml");
 

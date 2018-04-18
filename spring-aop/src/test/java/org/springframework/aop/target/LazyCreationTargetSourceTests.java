@@ -16,18 +16,19 @@
 
 package org.springframework.aop.target;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactory;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class LazyCreationTargetSourceTests {
+public class LazyCreationTargetSourceTests {
 
 	@Test
 	public void testCreateLazy() {

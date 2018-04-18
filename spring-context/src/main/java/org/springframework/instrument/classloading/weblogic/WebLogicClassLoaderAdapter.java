@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ class WebLogicClassLoaderAdapter {
 
 	private final ClassLoader classLoader;
 
-	private final Class wlPreProcessorClass;
+	private final Class<?> wlPreProcessorClass;
 
 	private final Method addPreProcessorMethod;
 
@@ -51,11 +51,11 @@ class WebLogicClassLoaderAdapter {
 
 	private final Method getParentMethod;
 
-	private final Constructor wlGenericClassLoaderConstructor;
+	private final Constructor<?> wlGenericClassLoaderConstructor;
 
 
 	public WebLogicClassLoaderAdapter(ClassLoader classLoader) {
-		Class wlGenericClassLoaderClass = null;
+		Class<?> wlGenericClassLoaderClass;
 		try {
 			wlGenericClassLoaderClass = classLoader.loadClass(GENERIC_CLASS_LOADER_NAME);
 			this.wlPreProcessorClass = classLoader.loadClass(CLASS_PRE_PROCESSOR_NAME);
@@ -66,12 +66,15 @@ class WebLogicClassLoaderAdapter {
 			this.wlGenericClassLoaderConstructor = wlGenericClassLoaderClass.getConstructor(
 					this.getClassFinderMethod.getReturnType(), ClassLoader.class);
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new IllegalStateException(
 					"Could not initialize WebLogic LoadTimeWeaver because WebLogic 10 API classes are not available", ex);
 		}
-		Assert.isInstanceOf(wlGenericClassLoaderClass, classLoader,
-				"ClassLoader must be instance of [" + wlGenericClassLoaderClass.getName() + "]");
+
+		if (!wlGenericClassLoaderClass.isInstance(classLoader)) {
+			throw new IllegalArgumentException(
+					"ClassLoader must be an instance of [" + wlGenericClassLoaderClass.getName() + "]: " + classLoader);
+		}
 		this.classLoader = classLoader;
 	}
 
@@ -81,13 +84,13 @@ class WebLogicClassLoaderAdapter {
 		try {
 			InvocationHandler adapter = new WebLogicClassPreProcessorAdapter(transformer, this.classLoader);
 			Object adapterInstance = Proxy.newProxyInstance(this.wlPreProcessorClass.getClassLoader(),
-					new Class[] {this.wlPreProcessorClass}, adapter);
+					new Class<?>[] {this.wlPreProcessorClass}, adapter);
 			this.addPreProcessorMethod.invoke(this.classLoader, adapterInstance);
 		}
 		catch (InvocationTargetException ex) {
 			throw new IllegalStateException("WebLogic addInstanceClassPreProcessor method threw exception", ex.getCause());
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new IllegalStateException("Could not invoke WebLogic addInstanceClassPreProcessor method", ex);
 		}
 	}
@@ -106,8 +109,9 @@ class WebLogicClassLoaderAdapter {
 		catch (InvocationTargetException ex) {
 			throw new IllegalStateException("WebLogic GenericClassLoader constructor failed", ex.getCause());
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new IllegalStateException("Could not construct WebLogic GenericClassLoader", ex);
 		}
 	}
+
 }

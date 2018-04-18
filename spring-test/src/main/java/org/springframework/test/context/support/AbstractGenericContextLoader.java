@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 
 package org.springframework.test.context.support;
-
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,6 +52,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 2.5
  * @see #loadContext(MergedContextConfiguration)
  * @see #loadContext(String...)
@@ -68,6 +68,8 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * <p>Implementation details:
 	 *
 	 * <ul>
+	 * <li>Calls {@link #validateMergedContextConfiguration(MergedContextConfiguration)}
+	 * to allow subclasses to validate the supplied configuration before proceeding.</li>
 	 * <li>Creates a {@link GenericApplicationContext} instance.</li>
 	 * <li>If the supplied {@code MergedContextConfiguration} references a
 	 * {@linkplain MergedContextConfiguration#getParent() parent configuration},
@@ -90,6 +92,8 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * annotation configuration processors.</li>
 	 * <li>Calls {@link #customizeContext(GenericApplicationContext)} to allow for customizing the context
 	 * before it is refreshed.</li>
+	 * <li>Calls {@link #customizeContext(ConfigurableApplicationContext, MergedContextConfiguration)} to
+	 * allow for customizing the context before it is refreshed.</li>
 	 * <li>{@link ConfigurableApplicationContext#refresh Refreshes} the
 	 * context and registers a JVM shutdown hook for it.</li>
 	 * </ul>
@@ -106,6 +110,8 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 				mergedConfig));
 		}
 
+		validateMergedContextConfiguration(mergedConfig);
+
 		GenericApplicationContext context = new GenericApplicationContext();
 
 		ApplicationContext parent = mergedConfig.getParentApplicationContext();
@@ -118,9 +124,24 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 		loadBeanDefinitions(context, mergedConfig);
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		customizeContext(context);
+		customizeContext(context, mergedConfig);
 		context.refresh();
 		context.registerShutdownHook();
 		return context;
+	}
+
+	/**
+	 * Validate the supplied {@link MergedContextConfiguration} with respect to
+	 * what this context loader supports.
+	 * <p>The default implementation is a <em>no-op</em> but can be overridden by
+	 * subclasses as appropriate.
+	 * @param mergedConfig the merged configuration to validate
+	 * @throws IllegalStateException if the supplied configuration is not valid
+	 * for this context loader
+	 * @since 4.0.4
+	 */
+	protected void validateMergedContextConfiguration(MergedContextConfiguration mergedConfig) {
+		/* no-op */
 	}
 
 	/**
@@ -187,6 +208,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * @see GenericApplicationContext#setAllowBeanDefinitionOverriding
 	 * @see GenericApplicationContext#setResourceLoader
 	 * @see GenericApplicationContext#setId
+	 * @see #prepareContext(ConfigurableApplicationContext, MergedContextConfiguration)
 	 * @since 2.5
 	 */
 	protected void prepareContext(GenericApplicationContext context) {
@@ -260,6 +282,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * @param context the newly created application context
 	 * @see #loadContext(MergedContextConfiguration)
 	 * @see #loadContext(String...)
+	 * @see #customizeContext(ConfigurableApplicationContext, MergedContextConfiguration)
 	 * @since 2.5
 	 */
 	protected void customizeContext(GenericApplicationContext context) {

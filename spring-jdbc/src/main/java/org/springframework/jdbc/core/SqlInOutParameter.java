@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,7 @@ package org.springframework.jdbc.core;
  * Will return {@code true} for SqlParameter's {@link #isInputValueProvided}
  * test, in contrast to a standard SqlOutParameter.
  *
- * <p>Output parameters - like all stored procedure parameters -
- * must have names.
+ * <p>Output parameters - like all stored procedure parameters - must have names.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -77,7 +76,7 @@ public class SqlInOutParameter extends SqlOutParameter {
 	 * @param sqlType SQL type of the parameter according to java.sql.Types
 	 * @param rse ResultSetExtractor to use for parsing the ResultSet
 	 */
-	public SqlInOutParameter(String name, int sqlType, ResultSetExtractor rse) {
+	public SqlInOutParameter(String name, int sqlType, ResultSetExtractor<?> rse) {
 		super(name, sqlType, rse);
 	}
 
@@ -97,7 +96,7 @@ public class SqlInOutParameter extends SqlOutParameter {
 	 * @param sqlType SQL type of the parameter according to java.sql.Types
 	 * @param rm RowMapper to use for parsing the ResultSet
 	 */
-	public SqlInOutParameter(String name, int sqlType, RowMapper rm) {
+	public SqlInOutParameter(String name, int sqlType, RowMapper<?> rm) {
 		super(name, sqlType, rm);
 	}
 

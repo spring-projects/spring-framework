@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.junit4;
 
-import org.junit.runner.RunWith;
-
 import org.springframework.test.context.ContextConfiguration;
 
 /**
@@ -30,7 +28,6 @@ import org.springframework.test.context.ContextConfiguration;
  * @see SpringJUnit4ClassRunnerAppCtxTests
  * @see AbsolutePathSpringJUnit4ClassRunnerAppCtxTests
  */
-@RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "SpringJUnit4ClassRunnerAppCtxTests-context.xml" })
 public class RelativePathSpringJUnit4ClassRunnerAppCtxTests extends SpringJUnit4ClassRunnerAppCtxTests {
 	/* all tests are in the parent class. */

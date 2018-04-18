@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.context.request.async;
 
 import org.springframework.web.context.request.NativeWebRequest;
@@ -24,14 +25,17 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Rossen Stoyanchev
  * @author Rob Winch
  * @since 3.2
+ * @deprecated as of 5.0 where DeferredResultProcessingInterceptor has default methods
  */
+@Deprecated
 public abstract class DeferredResultProcessingInterceptorAdapter implements DeferredResultProcessingInterceptor {
 
 	/**
 	 * This implementation is empty.
 	 */
 	@Override
-	public <T> void beforeConcurrentHandling(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception {
+	public <T> void beforeConcurrentHandling(NativeWebRequest request, DeferredResult<T> deferredResult)
+			throws Exception {
 	}
 
 	/**
@@ -50,10 +54,21 @@ public abstract class DeferredResultProcessingInterceptorAdapter implements Defe
 	}
 
 	/**
-	 * This implementation returns {@code true} by default.
+	 * This implementation returns {@code true} by default allowing other interceptors
+	 * to be given a chance to handle the timeout.
 	 */
 	@Override
 	public <T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception {
+		return true;
+	}
+
+	/**
+	 * This implementation returns {@code true} by default allowing other interceptors
+	 * to be given a chance to handle the error.
+	 */
+	@Override
+	public <T> boolean handleError(NativeWebRequest request, DeferredResult<T> deferredResult, Throwable t)
+			throws Exception {
 		return true;
 	}
 

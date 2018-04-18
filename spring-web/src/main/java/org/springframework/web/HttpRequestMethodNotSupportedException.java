@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,15 @@
 package org.springframework.web;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.EnumSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import javax.servlet.ServletException;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 /**
  * Exception thrown when a request handler does not support a
@@ -36,6 +39,7 @@ public class HttpRequestMethodNotSupportedException extends ServletException {
 
 	private String method;
 
+	@Nullable
 	private String[] supportedMethods;
 
 
@@ -50,24 +54,6 @@ public class HttpRequestMethodNotSupportedException extends ServletException {
 	/**
 	 * Create a new HttpRequestMethodNotSupportedException.
 	 * @param method the unsupported HTTP request method
-	 * @param supportedMethods the actually supported HTTP methods
-	 */
-	public HttpRequestMethodNotSupportedException(String method, String[] supportedMethods) {
-		this(method, supportedMethods, "Request method '" + method + "' not supported");
-	}
-
-	/**
-	 * Create a new HttpRequestMethodNotSupportedException.
-	 * @param method the unsupported HTTP request method
-	 * @param supportedMethods the actually supported HTTP methods
-	 */
-	public HttpRequestMethodNotSupportedException(String method, Collection<String> supportedMethods) {
-		this(method, supportedMethods.toArray(new String[supportedMethods.size()]));
-	}
-
-	/**
-	 * Create a new HttpRequestMethodNotSupportedException.
-	 * @param method the unsupported HTTP request method
 	 * @param msg the detail message
 	 */
 	public HttpRequestMethodNotSupportedException(String method, String msg) {
@@ -77,10 +63,28 @@ public class HttpRequestMethodNotSupportedException extends ServletException {
 	/**
 	 * Create a new HttpRequestMethodNotSupportedException.
 	 * @param method the unsupported HTTP request method
+	 * @param supportedMethods the actually supported HTTP methods (may be {@code null})
+	 */
+	public HttpRequestMethodNotSupportedException(String method, @Nullable Collection<String> supportedMethods) {
+		this(method, (supportedMethods != null ? StringUtils.toStringArray(supportedMethods) : null));
+	}
+
+	/**
+	 * Create a new HttpRequestMethodNotSupportedException.
+	 * @param method the unsupported HTTP request method
+	 * @param supportedMethods the actually supported HTTP methods (may be {@code null})
+	 */
+	public HttpRequestMethodNotSupportedException(String method, @Nullable String[] supportedMethods) {
+		this(method, supportedMethods, "Request method '" + method + "' not supported");
+	}
+
+	/**
+	 * Create a new HttpRequestMethodNotSupportedException.
+	 * @param method the unsupported HTTP request method
 	 * @param supportedMethods the actually supported HTTP methods
 	 * @param msg the detail message
 	 */
-	public HttpRequestMethodNotSupportedException(String method, String[] supportedMethods, String msg) {
+	public HttpRequestMethodNotSupportedException(String method, @Nullable String[] supportedMethods, String msg) {
 		super(msg);
 		this.method = method;
 		this.supportedMethods = supportedMethods;
@@ -95,21 +99,31 @@ public class HttpRequestMethodNotSupportedException extends ServletException {
 	}
 
 	/**
-	 * Return the actually supported HTTP methods, if known.
+	 * Return the actually supported HTTP methods, or {@code null} if not known.
 	 */
+	@Nullable
 	public String[] getSupportedMethods() {
 		return this.supportedMethods;
 	}
 
 	/**
-	 * Return the actually supported HTTP methods, if known, as {@link HttpMethod} instances.
+	 * Return the actually supported HTTP methods as {@link HttpMethod} instances,
+	 * or {@code null} if not known.
+	 * @since 3.2
 	 */
+	@Nullable
 	public Set<HttpMethod> getSupportedHttpMethods() {
-		Set<HttpMethod> supportedMethods = new LinkedHashSet<HttpMethod>();
-		for (String value : this.supportedMethods) {
-			supportedMethods.add(HttpMethod.valueOf(value));
+		if (this.supportedMethods == null) {
+			return null;
 		}
-		return Collections.unmodifiableSet(supportedMethods);
+		List<HttpMethod> supportedMethods = new LinkedList<>();
+		for (String value : this.supportedMethods) {
+			HttpMethod resolved = HttpMethod.resolve(value);
+			if (resolved != null) {
+				supportedMethods.add(resolved);
+			}
+		}
+		return EnumSet.copyOf(supportedMethods);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.AfterAdvice;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -61,7 +62,7 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 	private final Object throwsAdvice;
 
 	/** Methods on throws advice, keyed by exception class */
-	private final Map<Class, Method> exceptionHandlerMap = new HashMap<Class, Method>();
+	private final Map<Class<?>, Method> exceptionHandlerMap = new HashMap<>();
 
 
 	/**
@@ -77,11 +78,11 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 		Method[] methods = throwsAdvice.getClass().getMethods();
 		for (Method method : methods) {
 			if (method.getName().equals(AFTER_THROWING) &&
-					(method.getParameterTypes().length == 1 || method.getParameterTypes().length == 4) &&
-					Throwable.class.isAssignableFrom(method.getParameterTypes()[method.getParameterTypes().length - 1])
+					(method.getParameterCount() == 1 || method.getParameterCount() == 4) &&
+					Throwable.class.isAssignableFrom(method.getParameterTypes()[method.getParameterCount() - 1])
 				) {
 				// Have an exception handler
-				this.exceptionHandlerMap.put(method.getParameterTypes()[method.getParameterTypes().length - 1], method);
+				this.exceptionHandlerMap.put(method.getParameterTypes()[method.getParameterCount() - 1], method);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Found exception handler method: " + method);
 				}
@@ -103,13 +104,14 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 	 * @param exception the exception thrown
 	 * @return a handler for the given exception type
 	 */
+	@Nullable
 	private Method getExceptionHandler(Throwable exception) {
-		Class exceptionClass = exception.getClass();
+		Class<?> exceptionClass = exception.getClass();
 		if (logger.isTraceEnabled()) {
 			logger.trace("Trying to find handler for exception of type [" + exceptionClass.getName() + "]");
 		}
 		Method handler = this.exceptionHandlerMap.get(exceptionClass);
-		while (handler == null && !exceptionClass.equals(Throwable.class)) {
+		while (handler == null && exceptionClass != Throwable.class) {
 			exceptionClass = exceptionClass.getSuperclass();
 			handler = this.exceptionHandlerMap.get(exceptionClass);
 		}
@@ -135,7 +137,7 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 
 	private void invokeHandlerMethod(MethodInvocation mi, Throwable ex, Method method) throws Throwable {
 		Object[] handlerArgs;
-		if (method.getParameterTypes().length == 1) {
+		if (method.getParameterCount() == 1) {
 			handlerArgs = new Object[] { ex };
 		}
 		else {

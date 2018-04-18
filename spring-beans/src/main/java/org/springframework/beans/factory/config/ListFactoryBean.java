@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,8 @@ import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
-import org.springframework.core.GenericCollectionTypeResolver;
+import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 
 /**
  * Simple factory for shared List instances. Allows for central setup
@@ -32,17 +33,20 @@ import org.springframework.core.GenericCollectionTypeResolver;
  * @see SetFactoryBean
  * @see MapFactoryBean
  */
-public class ListFactoryBean extends AbstractFactoryBean<List> {
+public class ListFactoryBean extends AbstractFactoryBean<List<Object>> {
 
-	private List sourceList;
+	@Nullable
+	private List<?> sourceList;
 
-	private Class targetListClass;
+	@SuppressWarnings("rawtypes")
+	@Nullable
+	private Class<? extends List> targetListClass;
 
 
 	/**
 	 * Set the source List, typically populated via XML "list" elements.
 	 */
-	public void setSourceList(List sourceList) {
+	public void setSourceList(List<?> sourceList) {
 		this.sourceList = sourceList;
 	}
 
@@ -52,7 +56,8 @@ public class ListFactoryBean extends AbstractFactoryBean<List> {
 	 * <p>Default is a {@code java.util.ArrayList}.
 	 * @see java.util.ArrayList
 	 */
-	public void setTargetListClass(Class targetListClass) {
+	@SuppressWarnings("rawtypes")
+	public void setTargetListClass(@Nullable Class<? extends List> targetListClass) {
 		if (targetListClass == null) {
 			throw new IllegalArgumentException("'targetListClass' must not be null");
 		}
@@ -64,26 +69,27 @@ public class ListFactoryBean extends AbstractFactoryBean<List> {
 
 
 	@Override
+	@SuppressWarnings("rawtypes")
 	public Class<List> getObjectType() {
 		return List.class;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected List createInstance() {
+	protected List<Object> createInstance() {
 		if (this.sourceList == null) {
 			throw new IllegalArgumentException("'sourceList' is required");
 		}
-		List result = null;
+		List<Object> result = null;
 		if (this.targetListClass != null) {
-			result = (List) BeanUtils.instantiateClass(this.targetListClass);
+			result = BeanUtils.instantiateClass(this.targetListClass);
 		}
 		else {
-			result = new ArrayList(this.sourceList.size());
+			result = new ArrayList<>(this.sourceList.size());
 		}
-		Class valueType = null;
+		Class<?> valueType = null;
 		if (this.targetListClass != null) {
-			valueType = GenericCollectionTypeResolver.getCollectionType(this.targetListClass);
+			valueType = ResolvableType.forClass(this.targetListClass).asCollection().resolveGeneric();
 		}
 		if (valueType != null) {
 			TypeConverter converter = getBeanTypeConverter();

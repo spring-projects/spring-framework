@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,13 @@ package org.springframework.core.io;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URI;
+import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -27,6 +33,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
+
 import org.springframework.util.FileCopyUtils;
 
 import static org.hamcrest.Matchers.*;
@@ -39,17 +46,20 @@ import static org.mockito.BDDMockito.*;
  * @author Philippe Marschall
  * @author Phillip Webb
  * @author Nicholas Williams
+ * @author Stephane Nicoll
+ * @author Juergen Hoeller
+ * @author Arjen Poutsma
  */
 public class PathResourceTests {
 
-	private static final String TEST_DIR = platformPath("src/test/java/org/"
-			+ "springframework/core/io");
+	private static final String TEST_DIR =
+			platformPath("src/test/resources/org/springframework/core/io");
 
-	private static final String TEST_FILE = platformPath("src/test/java/org/"
-			+ "springframework/core/io/example.properties");
+	private static final String TEST_FILE =
+			platformPath("src/test/resources/org/springframework/core/io/example.properties");
 
-	private static final String NON_EXISTING_FILE = platformPath("src/test/java/org/"
-			+ "springframework/core/io/doesnotexist.properties");
+	private static final String NON_EXISTING_FILE =
+			platformPath("src/test/resources/org/springframework/core/io/doesnotexist.properties");
 
 
 	private static String platformPath(String string) {
@@ -65,136 +75,136 @@ public class PathResourceTests {
 
 
 	@Test
-	public void nullPath() throws Exception {
+	public void nullPath() {
 		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("Path must not be null");
 		new PathResource((Path) null);
 	}
 
 	@Test
-	public void nullPathString() throws Exception {
+	public void nullPathString() {
 		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("Path must not be null");
 		new PathResource((String) null);
 	}
 
 	@Test
-	public void nullUri() throws Exception {
+	public void nullUri() {
 		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("URI must not be null");
 		new PathResource((URI) null);
 	}
 
 	@Test
-	public void createFromPath() throws Exception {
+	public void createFromPath() {
 		Path path = Paths.get(TEST_FILE);
 		PathResource resource = new PathResource(path);
 		assertThat(resource.getPath(), equalTo(TEST_FILE));
 	}
 
 	@Test
-	public void createFromString() throws Exception {
+	public void createFromString() {
 		PathResource resource = new PathResource(TEST_FILE);
 		assertThat(resource.getPath(), equalTo(TEST_FILE));
 	}
 
 	@Test
-	public void createFromUri() throws Exception {
+	public void createFromUri() {
 		File file = new File(TEST_FILE);
 		PathResource resource = new PathResource(file.toURI());
 		assertThat(resource.getPath(), equalTo(file.getAbsoluteFile().toString()));
 	}
 
 	@Test
-	public void getPathForFile() throws Exception {
+	public void getPathForFile() {
 		PathResource resource = new PathResource(TEST_FILE);
 		assertThat(resource.getPath(), equalTo(TEST_FILE));
 	}
 
 	@Test
-	public void getPathForDir() throws Exception {
+	public void getPathForDir() {
 		PathResource resource = new PathResource(TEST_DIR);
 		assertThat(resource.getPath(), equalTo(TEST_DIR));
 	}
 
 	@Test
-	public void fileExists() throws Exception {
+	public void fileExists() {
 		PathResource resource = new PathResource(TEST_FILE);
 		assertThat(resource.exists(), equalTo(true));
 	}
 
 	@Test
-	public void dirExists() throws Exception {
+	public void dirExists() {
 		PathResource resource = new PathResource(TEST_DIR);
 		assertThat(resource.exists(), equalTo(true));
 	}
 
 	@Test
-	public void fileDoesNotExist() throws Exception {
+	public void fileDoesNotExist() {
 		PathResource resource = new PathResource(NON_EXISTING_FILE);
 		assertThat(resource.exists(), equalTo(false));
 	}
 
 	@Test
-	public void fileIsReadable() throws Exception {
+	public void fileIsReadable() {
 		PathResource resource = new PathResource(TEST_FILE);
 		assertThat(resource.isReadable(), equalTo(true));
 	}
 
 	@Test
-	public void doesNotExistIsNotReadable() throws Exception {
+	public void doesNotExistIsNotReadable() {
 		PathResource resource = new PathResource(NON_EXISTING_FILE);
 		assertThat(resource.isReadable(), equalTo(false));
 	}
 
 	@Test
-	public void directoryIsNotReadable() throws Exception {
+	public void directoryIsNotReadable() {
 		PathResource resource = new PathResource(TEST_DIR);
 		assertThat(resource.isReadable(), equalTo(false));
 	}
 
 	@Test
-	public void getInputStream() throws Exception {
+	public void getInputStream() throws IOException {
 		PathResource resource = new PathResource(TEST_FILE);
 		byte[] bytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
 		assertThat(bytes.length, greaterThan(0));
 	}
 
 	@Test
-	public void getInputStreamForDir() throws Exception {
+	public void getInputStreamForDir() throws IOException {
 		PathResource resource = new PathResource(TEST_DIR);
 		thrown.expect(FileNotFoundException.class);
 		resource.getInputStream();
 	}
 
 	@Test
-	public void getInputStreamDoesNotExist() throws Exception {
+	public void getInputStreamDoesNotExist() throws IOException {
 		PathResource resource = new PathResource(NON_EXISTING_FILE);
 		thrown.expect(FileNotFoundException.class);
 		resource.getInputStream();
 	}
 
 	@Test
-	public void getUrl() throws Exception {
+	public void getUrl() throws IOException {
 		PathResource resource = new PathResource(TEST_FILE);
 		assertThat(resource.getURL().toString(), Matchers.endsWith("core/io/example.properties"));
 	}
 
 	@Test
-	public void getUri() throws Exception {
+	public void getUri() throws IOException {
 		PathResource resource = new PathResource(TEST_FILE);
 		assertThat(resource.getURI().toString(), Matchers.endsWith("core/io/example.properties"));
 	}
 
 	@Test
-	public void getFile() throws Exception {
+	public void getFile() throws IOException {
 		PathResource resource = new PathResource(TEST_FILE);
 		File file = new File(TEST_FILE);
 		assertThat(resource.getFile().getAbsoluteFile(), equalTo(file.getAbsoluteFile()));
 	}
 
 	@Test
-	public void getFileUnsupported() throws Exception {
+	public void getFileUnsupported() throws IOException {
 		Path path = mock(Path.class);
 		given(path.normalize()).willReturn(path);
 		given(path.toFile()).willThrow(new UnsupportedOperationException());
@@ -204,72 +214,72 @@ public class PathResourceTests {
 	}
 
 	@Test
-	public void contentLength() throws Exception {
+	public void contentLength() throws IOException {
 		PathResource resource = new PathResource(TEST_FILE);
 		File file = new File(TEST_FILE);
 		assertThat(resource.contentLength(), equalTo(file.length()));
 	}
 
 	@Test
-	public void contentLengthForDirectory() throws Exception {
+	public void contentLengthForDirectory() throws IOException {
 		PathResource resource = new PathResource(TEST_DIR);
 		File file = new File(TEST_DIR);
 		assertThat(resource.contentLength(), equalTo(file.length()));
 	}
 
 	@Test
-	public void lastModified() throws Exception {
+	public void lastModified() throws IOException {
 		PathResource resource = new PathResource(TEST_FILE);
 		File file = new File(TEST_FILE);
-		assertThat(resource.lastModified(), equalTo(file.lastModified()));
+		assertThat(resource.lastModified() / 1000, equalTo(file.lastModified() / 1000));
 	}
 
 	@Test
-	public void createRelativeFromDir() throws Exception {
+	public void createRelativeFromDir() throws IOException {
 		Resource resource = new PathResource(TEST_DIR).createRelative("example.properties");
 		assertThat(resource, equalTo((Resource) new PathResource(TEST_FILE)));
 	}
 
 	@Test
-	public void createRelativeFromFile() throws Exception {
+	public void createRelativeFromFile() throws IOException {
 		Resource resource = new PathResource(TEST_FILE).createRelative("../example.properties");
 		assertThat(resource, equalTo((Resource) new PathResource(TEST_FILE)));
 	}
 
 	@Test
-	public void filename() throws Exception {
+	public void filename() {
 		Resource resource = new PathResource(TEST_FILE);
 		assertThat(resource.getFilename(), equalTo("example.properties"));
 	}
 
 	@Test
-	public void description() throws Exception {
+	public void description() {
 		Resource resource = new PathResource(TEST_FILE);
 		assertThat(resource.getDescription(), containsString("path ["));
 		assertThat(resource.getDescription(), containsString(TEST_FILE));
 	}
 
 	@Test
-	public void fileIsWritable() throws Exception {
+	public void fileIsWritable() {
 		PathResource resource = new PathResource(TEST_FILE);
 		assertThat(resource.isWritable(), equalTo(true));
 	}
 
 	@Test
-	public void directoryIsNotWritable() throws Exception {
+	public void directoryIsNotWritable() {
 		PathResource resource = new PathResource(TEST_DIR);
 		assertThat(resource.isWritable(), equalTo(false));
 	}
 
 	@Test
-	public void outputStream() throws Exception {
+	public void outputStream() throws IOException {
 		PathResource resource = new PathResource(temporaryFolder.newFile("test").toPath());
-		FileCopyUtils.copy("test".getBytes(), resource.getOutputStream());
+		FileCopyUtils.copy("test".getBytes(StandardCharsets.UTF_8), resource.getOutputStream());
 		assertThat(resource.contentLength(), equalTo(4L));
 	}
 
 	@Test
-	public void doesNotExistOutputStream() throws Exception {
+	public void doesNotExistOutputStream() throws IOException {
 		File file = temporaryFolder.newFile("test");
 		file.delete();
 		PathResource resource = new PathResource(file.toPath());
@@ -278,10 +288,63 @@ public class PathResourceTests {
 	}
 
 	@Test
-	public void directoryOutputStream() throws Exception {
+	public void directoryOutputStream() throws IOException {
 		PathResource resource = new PathResource(TEST_DIR);
 		thrown.expect(FileNotFoundException.class);
 		resource.getOutputStream();
+	}
+
+	@Test
+	public void getReadableByteChannel() throws IOException {
+		PathResource resource = new PathResource(TEST_FILE);
+		ReadableByteChannel channel = null;
+		try {
+			channel = resource.readableChannel();
+			ByteBuffer buffer = ByteBuffer.allocate((int) resource.contentLength());
+			channel.read(buffer);
+			buffer.rewind();
+			assertThat(buffer.limit(), greaterThan(0));
+		}
+		finally {
+			if (channel != null) {
+				channel.close();
+			}
+		}
+	}
+
+	@Test
+	public void getReadableByteChannelForDir() throws IOException {
+		PathResource resource = new PathResource(TEST_DIR);
+		try {
+			resource.readableChannel();
+		}
+		catch (AccessDeniedException ex) {
+			// on Windows
+		}
+	}
+
+	@Test
+	public void getReadableByteChannelDoesNotExist() throws IOException {
+		PathResource resource = new PathResource(NON_EXISTING_FILE);
+		thrown.expect(FileNotFoundException.class);
+		resource.readableChannel();
+	}
+
+	@Test
+	public void getWritableChannel() throws IOException {
+		PathResource resource = new PathResource(temporaryFolder.newFile("test").toPath());
+		ByteBuffer buffer = ByteBuffer.wrap("test".getBytes(StandardCharsets.UTF_8));
+		WritableByteChannel channel = null;
+		try {
+			channel = resource.writableChannel();
+			channel.write(buffer);
+		}
+		finally {
+			if (channel != null) {
+				channel.close();
+			}
+		}
+		assertThat(resource.contentLength(), equalTo(4L));
 	}
 
 }

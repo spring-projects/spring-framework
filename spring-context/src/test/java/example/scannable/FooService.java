@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,13 @@ package example.scannable;
 import java.util.concurrent.Future;
 
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Indexed;
 
 /**
  * @author Mark Fisher
  * @author Juergen Hoeller
  */
+@Indexed
 public interface FooService {
 
 	String foo(int id);

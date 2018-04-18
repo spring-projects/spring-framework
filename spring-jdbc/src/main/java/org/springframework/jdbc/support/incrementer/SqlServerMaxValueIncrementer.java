@@ -1,29 +1,36 @@
+/*
+ * Copyright 2002-2014 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.jdbc.support.incrementer;
 
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.jdbc.support.JdbcUtils;
-
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.Statement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * {@link DataFieldMaxValueIncrementer} that increments the maximum value of a given SQL Server table
- * with the equivalent of an auto-increment column. Note: If you use this class, your Derby key
+ * with the equivalent of an auto-increment column. Note: If you use this class, your table key
  * column should <i>NOT</i> be defined as an IDENTITY column, as the sequence table does the job.
  *
- * <p>This class is inteded to be used with Microsoft SQL Server.
+ * <p>This class is intended to be used with Microsoft SQL Server.
  *
  * <p>The sequence is kept in a table. There should be one sequence table per
  * table that needs an auto-generated key.
  *
  * <p>Example:
  *
- * <pre class="code"> create table tab (id int not null primary key, text varchar(100))
+ * <pre class="code">create table tab (id int not null primary key, text varchar(100))
  * create table tab_sequence (id bigint identity)
  * insert into tab_sequence default values</pre>
  *
@@ -32,8 +39,8 @@ import java.sql.SQLException;
  * is rolled back, the unused values will never be served. The maximum hole size in
  * numbering is consequently the value of cacheSize.
  *
- * <b>HINT:</b>  Since Microsoft SQL Server supports the JDBC 3.0 {@code getGeneratedKeys} method,
- * it is recommended to use IDENTITY columns directly in the tables and then using a
+ * <b>HINT:</b> Since Microsoft SQL Server supports the JDBC 3.0 {@code getGeneratedKeys}
+ * method, it is recommended to use IDENTITY columns directly in the tables and then using a
  * {@link org.springframework.jdbc.core.simple.SimpleJdbcInsert} or utilizing
  * a {@link org.springframework.jdbc.support.KeyHolder} when calling the with the
  * {@code update(PreparedStatementCreator psc, KeyHolder generatedKeyHolder)}
@@ -42,16 +49,10 @@ import java.sql.SQLException;
  * <p>Thanks to Preben Nilsson for the suggestion!
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @since 2.5.5
  */
-public class SqlServerMaxValueIncrementer extends AbstractColumnMaxValueIncrementer {
-
-	/** The current cache of values */
-	private long[] valueCache;
-
-	/** The next id to serve from the value cache */
-	private int nextValueIndex = -1;
-
+public class SqlServerMaxValueIncrementer extends AbstractIdentityColumnMaxValueIncrementer {
 
 	/**
 	 * Default constructor for bean property style usage.
@@ -74,45 +75,13 @@ public class SqlServerMaxValueIncrementer extends AbstractColumnMaxValueIncremen
 
 
 	@Override
-	protected synchronized long getNextKey() throws DataAccessException {
-		if (this.nextValueIndex < 0 || this.nextValueIndex >= getCacheSize()) {
-			/*
-			* Need to use straight JDBC code because we need to make sure that the insert and select
-			* are performed on the same connection (otherwise we can't be sure that @@identity
-			* returnes the correct value)
-			*/
-			Connection con = DataSourceUtils.getConnection(getDataSource());
-			Statement stmt = null;
-			try {
-				stmt = con.createStatement();
-				DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
-				this.valueCache = new long[getCacheSize()];
-				this.nextValueIndex = 0;
-				for (int i = 0; i < getCacheSize(); i++) {
-					stmt.executeUpdate("insert into " + getIncrementerName() + " default values");
-					ResultSet rs = stmt.executeQuery("select @@identity");
-					try {
-						if (!rs.next()) {
-							throw new DataAccessResourceFailureException("@@identity failed after executing an update");
-						}
-						this.valueCache[i] = rs.getLong(1);
-					}
-					finally {
-						JdbcUtils.closeResultSet(rs);
-					}
-				}
-				long maxValue = this.valueCache[(this.valueCache.length - 1)];
-				stmt.executeUpdate("delete from " + getIncrementerName() + " where " + getColumnName() + " < " + maxValue);
-			}
-			catch (SQLException ex) {
-				throw new DataAccessResourceFailureException("Could not increment identity", ex);
-			}
-			finally {
-				JdbcUtils.closeStatement(stmt);
-				DataSourceUtils.releaseConnection(con, getDataSource());
-			}
-		}
-		return this.valueCache[this.nextValueIndex++];
+	protected String getIncrementStatement() {
+		return "insert into " + getIncrementerName() + " default values";
+	}
+
+	@Override
+	protected String getIdentityStatement() {
+		return "select @@identity";
 	}
 
 }

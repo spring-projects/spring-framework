@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import org.springframework.util.ClassUtils;
 @SuppressWarnings("serial")
 public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCreator {
 
-	private static final Comparator DEFAULT_PRECEDENCE_COMPARATOR = new AspectJPrecedenceComparator();
+	private static final Comparator<Advisor> DEFAULT_PRECEDENCE_COMPARATOR = new AspectJPrecedenceComparator();
 
 
 	/**
@@ -67,16 +67,14 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 	@Override
 	@SuppressWarnings("unchecked")
 	protected List<Advisor> sortAdvisors(List<Advisor> advisors) {
-		List<PartiallyComparableAdvisorHolder> partiallyComparableAdvisors =
-				new ArrayList<PartiallyComparableAdvisorHolder>(advisors.size());
+		List<PartiallyComparableAdvisorHolder> partiallyComparableAdvisors = new ArrayList<>(advisors.size());
 		for (Advisor element : advisors) {
 			partiallyComparableAdvisors.add(
 					new PartiallyComparableAdvisorHolder(element, DEFAULT_PRECEDENCE_COMPARATOR));
 		}
-		List<PartiallyComparableAdvisorHolder> sorted =
-				PartialOrder.sort(partiallyComparableAdvisors);
+		List<PartiallyComparableAdvisorHolder> sorted = PartialOrder.sort(partiallyComparableAdvisors);
 		if (sorted != null) {
-			List<Advisor> result = new ArrayList<Advisor>(advisors.size());
+			List<Advisor> result = new ArrayList<>(advisors.size());
 			for (PartiallyComparableAdvisorHolder pcAdvisor : sorted) {
 				result.add(pcAdvisor.getAdvisor());
 			}
@@ -98,14 +96,13 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 	}
 
 	@Override
-	protected boolean shouldSkip(Class beanClass, String beanName) {
+	protected boolean shouldSkip(Class<?> beanClass, String beanName) {
 		// TODO: Consider optimization by caching the list of the aspect names
 		List<Advisor> candidateAdvisors = findCandidateAdvisors();
 		for (Advisor advisor : candidateAdvisors) {
-			if (advisor instanceof AspectJPointcutAdvisor) {
-				if (((AbstractAspectJAdvice) advisor.getAdvice()).getAspectName().equals(beanName)) {
-					return true;
-				}
+			if (advisor instanceof AspectJPointcutAdvisor &&
+					((AspectJPointcutAdvisor) advisor).getAspectName().equals(beanName)) {
+				return true;
 			}
 		}
 		return super.shouldSkip(beanClass, beanName);

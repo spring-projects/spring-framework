@@ -34,7 +34,7 @@ public class BeanIsNotAFactoryException extends BeanNotOfRequiredTypeException {
 	 * @param actualType the actual type returned, which did not match
 	 * the expected type
 	 */
-	public BeanIsNotAFactoryException(String name, Class actualType) {
+	public BeanIsNotAFactoryException(String name, Class<?> actualType) {
 		super(name, FactoryBean.class, actualType);
 	}
 

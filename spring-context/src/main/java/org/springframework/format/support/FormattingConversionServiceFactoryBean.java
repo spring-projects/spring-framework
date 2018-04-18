@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -63,16 +64,21 @@ import org.springframework.util.StringValueResolver;
 public class FormattingConversionServiceFactoryBean
 		implements FactoryBean<FormattingConversionService>, EmbeddedValueResolverAware, InitializingBean {
 
+	@Nullable
 	private Set<?> converters;
 
+	@Nullable
 	private Set<?> formatters;
 
+	@Nullable
 	private Set<FormatterRegistrar> formatterRegistrars;
 
 	private boolean registerDefaultFormatters = true;
 
+	@Nullable
 	private StringValueResolver embeddedValueResolver;
 
+	@Nullable
 	private FormattingConversionService conversionService;
 
 
@@ -134,17 +140,17 @@ public class FormattingConversionServiceFactoryBean
 	public void afterPropertiesSet() {
 		this.conversionService = new DefaultFormattingConversionService(this.embeddedValueResolver, this.registerDefaultFormatters);
 		ConversionServiceFactory.registerConverters(this.converters, this.conversionService);
-		registerFormatters();
+		registerFormatters(this.conversionService);
 	}
 
-	private void registerFormatters() {
+	private void registerFormatters(FormattingConversionService conversionService) {
 		if (this.formatters != null) {
 			for (Object formatter : this.formatters) {
 				if (formatter instanceof Formatter<?>) {
-					this.conversionService.addFormatter((Formatter<?>) formatter);
+					conversionService.addFormatter((Formatter<?>) formatter);
 				}
 				else if (formatter instanceof AnnotationFormatterFactory<?>) {
-					this.conversionService.addFormatterForFieldAnnotation((AnnotationFormatterFactory<?>) formatter);
+					conversionService.addFormatterForFieldAnnotation((AnnotationFormatterFactory<?>) formatter);
 				}
 				else {
 					throw new IllegalArgumentException(
@@ -154,26 +160,14 @@ public class FormattingConversionServiceFactoryBean
 		}
 		if (this.formatterRegistrars != null) {
 			for (FormatterRegistrar registrar : this.formatterRegistrars) {
-				registrar.registerFormatters(this.conversionService);
+				registrar.registerFormatters(conversionService);
 			}
 		}
-		installFormatters(this.conversionService);
-	}
-
-	/**
-	 * Subclasses may override this method to register formatters and/or converters.
-	 * Starting with Spring 3.1 however the recommended way of doing that is to
-	 * through FormatterRegistrars.
-	 * @see #setFormatters(Set)
-	 * @see #setFormatterRegistrars(Set)
-	 * @deprecated since Spring 3.1 in favor of {@link #setFormatterRegistrars(Set)}
-	 */
-	@Deprecated
-	protected void installFormatters(FormatterRegistry registry) {
 	}
 
 
 	@Override
+	@Nullable
 	public FormattingConversionService getObject() {
 		return this.conversionService;
 	}

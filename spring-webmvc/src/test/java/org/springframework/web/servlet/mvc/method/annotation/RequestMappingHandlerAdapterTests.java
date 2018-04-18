@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,27 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJacksonValue;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.Model;
@@ -38,13 +54,13 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.ModelAndView;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link RequestMappingHandlerAdapter}.
  *
  * @author Rossen Stoyanchev
- *
  * @see ServletAnnotationControllerHandlerMethodTests
  * @see HandlerMethodAnnotationDetectionTests
  * @see RequestMappingHandlerAdapterIntegrationTests
@@ -65,6 +81,7 @@ public class RequestMappingHandlerAdapterTests {
 
 	private StaticWebApplicationContext webAppContext;
 
+
 	@BeforeClass
 	public static void setupOnce() {
 		RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
@@ -81,28 +98,29 @@ public class RequestMappingHandlerAdapterTests {
 		this.webAppContext = new StaticWebApplicationContext();
 		this.handlerAdapter = new RequestMappingHandlerAdapter();
 		this.handlerAdapter.setApplicationContext(this.webAppContext);
-		this.request = new MockHttpServletRequest();
+		this.request = new MockHttpServletRequest("GET", "/");
 		this.response = new MockHttpServletResponse();
 	}
+
 
 	@Test
 	public void cacheControlWithoutSessionAttributes() throws Exception {
 		HandlerMethod handlerMethod = handlerMethod(new SimpleController(), "handle");
-		this.handlerAdapter.afterPropertiesSet();
 		this.handlerAdapter.setCacheSeconds(100);
-		this.handlerAdapter.handle(this.request, this.response, handlerMethod);
+		this.handlerAdapter.afterPropertiesSet();
 
-		assertTrue(response.getHeader("Cache-Control").toString().contains("max-age"));
+		this.handlerAdapter.handle(this.request, this.response, handlerMethod);
+		assertTrue(response.getHeader("Cache-Control").contains("max-age"));
 	}
 
 	@Test
 	public void cacheControlWithSessionAttributes() throws Exception {
 		SessionAttributeController handler = new SessionAttributeController();
-		this.handlerAdapter.afterPropertiesSet();
 		this.handlerAdapter.setCacheSeconds(100);
-		this.handlerAdapter.handle(this.request, this.response, handlerMethod(handler, "handle"));
+		this.handlerAdapter.afterPropertiesSet();
 
-		assertEquals("no-cache", this.response.getHeader("Cache-Control"));
+		this.handlerAdapter.handle(this.request, this.response, handlerMethod(handler, "handle"));
+		assertEquals("no-store", this.response.getHeader("Cache-Control"));
 	}
 
 	@Test
@@ -112,7 +130,7 @@ public class RequestMappingHandlerAdapterTests {
 		HandlerMethodReturnValueHandler viewHandler = new ViewNameMethodReturnValueHandler();
 
 		this.handlerAdapter.setArgumentResolvers(Arrays.asList(redirectAttributesResolver, modelResolver));
-		this.handlerAdapter.setReturnValueHandlers(Arrays.asList(viewHandler));
+		this.handlerAdapter.setReturnValueHandlers(Collections.singletonList(viewHandler));
 		this.handlerAdapter.setIgnoreDefaultModelOnRedirect(true);
 		this.handlerAdapter.afterPropertiesSet();
 
@@ -127,7 +145,7 @@ public class RequestMappingHandlerAdapterTests {
 	@Test
 	public void setCustomArgumentResolvers() throws Exception {
 		HandlerMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
-		this.handlerAdapter.setCustomArgumentResolvers(Arrays.asList(resolver));
+		this.handlerAdapter.setCustomArgumentResolvers(Collections.singletonList(resolver));
 		this.handlerAdapter.afterPropertiesSet();
 
 		assertTrue(this.handlerAdapter.getArgumentResolvers().contains(resolver));
@@ -137,7 +155,7 @@ public class RequestMappingHandlerAdapterTests {
 	@Test
 	public void setArgumentResolvers() throws Exception {
 		HandlerMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
-		this.handlerAdapter.setArgumentResolvers(Arrays.asList(resolver));
+		this.handlerAdapter.setArgumentResolvers(Collections.singletonList(resolver));
 		this.handlerAdapter.afterPropertiesSet();
 
 		assertMethodProcessorCount(1, INIT_BINDER_RESOLVER_COUNT, HANDLER_COUNT);
@@ -146,7 +164,7 @@ public class RequestMappingHandlerAdapterTests {
 	@Test
 	public void setInitBinderArgumentResolvers() throws Exception {
 		HandlerMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
-		this.handlerAdapter.setInitBinderArgumentResolvers(Arrays.<HandlerMethodArgumentResolver>asList(resolver));
+		this.handlerAdapter.setInitBinderArgumentResolvers(Collections.singletonList(resolver));
 		this.handlerAdapter.afterPropertiesSet();
 
 		assertMethodProcessorCount(RESOLVER_COUNT, 1, HANDLER_COUNT);
@@ -155,7 +173,7 @@ public class RequestMappingHandlerAdapterTests {
 	@Test
 	public void setCustomReturnValueHandlers() {
 		HandlerMethodReturnValueHandler handler = new ViewNameMethodReturnValueHandler();
-		this.handlerAdapter.setCustomReturnValueHandlers(Arrays.asList(handler));
+		this.handlerAdapter.setCustomReturnValueHandlers(Collections.singletonList(handler));
 		this.handlerAdapter.afterPropertiesSet();
 
 		assertTrue(this.handlerAdapter.getReturnValueHandlers().contains(handler));
@@ -165,7 +183,7 @@ public class RequestMappingHandlerAdapterTests {
 	@Test
 	public void setReturnValueHandlers() {
 		HandlerMethodReturnValueHandler handler = new ModelMethodProcessor();
-		this.handlerAdapter.setReturnValueHandlers(Arrays.asList(handler));
+		this.handlerAdapter.setReturnValueHandlers(Collections.singletonList(handler));
 		this.handlerAdapter.afterPropertiesSet();
 
 		assertMethodProcessorCount(RESOLVER_COUNT, INIT_BINDER_RESOLVER_COUNT, 1);
@@ -184,6 +202,77 @@ public class RequestMappingHandlerAdapterTests {
 		assertEquals("gAttr2", mav.getModel().get("attr2"));
 	}
 
+	@Test
+	public void modelAttributeAdviceInParentContext() throws Exception {
+		StaticWebApplicationContext parent = new StaticWebApplicationContext();
+		parent.registerSingleton("maa", ModelAttributeAdvice.class);
+		parent.refresh();
+		this.webAppContext.setParent(parent);
+		this.webAppContext.refresh();
+
+		HandlerMethod handlerMethod = handlerMethod(new SimpleController(), "handle");
+		this.handlerAdapter.afterPropertiesSet();
+		ModelAndView mav = this.handlerAdapter.handle(this.request, this.response, handlerMethod);
+
+		assertEquals("lAttr1", mav.getModel().get("attr1"));
+		assertEquals("gAttr2", mav.getModel().get("attr2"));
+	}
+
+	@Test
+	public void modelAttributePackageNameAdvice() throws Exception {
+		this.webAppContext.registerSingleton("mapa", ModelAttributePackageAdvice.class);
+		this.webAppContext.registerSingleton("manupa", ModelAttributeNotUsedPackageAdvice.class);
+		this.webAppContext.refresh();
+
+		HandlerMethod handlerMethod = handlerMethod(new SimpleController(), "handle");
+		this.handlerAdapter.afterPropertiesSet();
+		ModelAndView mav = this.handlerAdapter.handle(this.request, this.response, handlerMethod);
+
+		assertEquals("lAttr1", mav.getModel().get("attr1"));
+		assertEquals("gAttr2", mav.getModel().get("attr2"));
+		assertEquals(null,mav.getModel().get("attr3"));
+	}
+
+	// SPR-10859
+
+	@Test
+	public void responseBodyAdvice() throws Exception {
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
+		converters.add(new MappingJackson2HttpMessageConverter());
+		this.handlerAdapter.setMessageConverters(converters);
+
+		this.webAppContext.registerSingleton("rba", ResponseCodeSuppressingAdvice.class);
+		this.webAppContext.refresh();
+
+		this.request.addHeader("Accept", MediaType.APPLICATION_JSON_VALUE);
+		this.request.setParameter("c", "callback");
+
+		HandlerMethod handlerMethod = handlerMethod(new SimpleController(), "handleBadRequest");
+		this.handlerAdapter.afterPropertiesSet();
+		this.handlerAdapter.handle(this.request, this.response, handlerMethod);
+
+		assertEquals(200, this.response.getStatus());
+		assertEquals("{\"status\":400,\"message\":\"body\"}", this.response.getContentAsString());
+	}
+
+	@Test
+	public void jsonpResponseBodyAdvice() throws Exception {
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
+		converters.add(new MappingJackson2HttpMessageConverter());
+		this.handlerAdapter.setMessageConverters(converters);
+
+		this.webAppContext.registerSingleton("jsonpAdvice", JsonpAdvice.class);
+		this.webAppContext.refresh();
+
+		testJsonp("callback", true);
+		testJsonp("_callback", true);
+		testJsonp("_Call.bAcK", true);
+		testJsonp("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_.", true);
+
+		testJsonp("<script>", false);
+		testJsonp("!foo!bar", false);
+	}
 
 	private HandlerMethod handlerMethod(Object handler, String methodName, Class<?>... paramTypes) throws Exception {
 		Method method = handler.getClass().getDeclaredMethod(methodName, paramTypes);
@@ -194,6 +283,26 @@ public class RequestMappingHandlerAdapterTests {
 		assertEquals(resolverCount, this.handlerAdapter.getArgumentResolvers().size());
 		assertEquals(initBinderResolverCount, this.handlerAdapter.getInitBinderArgumentResolvers().size());
 		assertEquals(handlerCount, this.handlerAdapter.getReturnValueHandlers().size());
+	}
+
+	private void testJsonp(String value, boolean validValue) throws Exception {
+
+		this.request = new MockHttpServletRequest("GET", "/");
+		this.request.addHeader("Accept", MediaType.APPLICATION_JSON_VALUE);
+		this.request.setParameter("c", value);
+		this.response = new MockHttpServletResponse();
+
+		HandlerMethod handlerMethod = handlerMethod(new SimpleController(), "handleWithResponseEntity");
+		this.handlerAdapter.afterPropertiesSet();
+		this.handlerAdapter.handle(this.request, this.response, handlerMethod);
+
+		assertEquals(200, this.response.getStatus());
+		if (validValue) {
+			assertEquals("/**/" + value + "({\"foo\":\"bar\"});", this.response.getContentAsString());
+		}
+		else {
+			assertEquals("{\"foo\":\"bar\"}", this.response.getContentAsString());
+		}
 	}
 
 
@@ -208,7 +317,18 @@ public class RequestMappingHandlerAdapterTests {
 		public String handle() {
 			return null;
 		}
+
+		public ResponseEntity<Map<String, String>> handleWithResponseEntity() {
+			return new ResponseEntity<>(Collections.singletonMap(
+					"foo", "bar"), HttpStatus.OK);
+		}
+
+		public ResponseEntity<String> handleBadRequest() {
+			return new ResponseEntity<>("body", HttpStatus.BAD_REQUEST);
+		}
+
 	}
+
 
 	@SessionAttributes("attr1")
 	private static class SessionAttributeController {
@@ -217,6 +337,7 @@ public class RequestMappingHandlerAdapterTests {
 		public void handle() {
 		}
 	}
+
 
 	@SuppressWarnings("unused")
 	private static class RedirectAttributeController {
@@ -227,13 +348,62 @@ public class RequestMappingHandlerAdapterTests {
 		}
 	}
 
+
 	@ControllerAdvice
 	private static class ModelAttributeAdvice {
 
+		@SuppressWarnings("unused")
 		@ModelAttribute
 		public void addAttributes(Model model) {
 			model.addAttribute("attr1", "gAttr1");
 			model.addAttribute("attr2", "gAttr2");
+		}
+	}
+
+
+	@ControllerAdvice({"org.springframework.web.servlet.mvc.method.annotation", "java.lang"})
+	private static class ModelAttributePackageAdvice {
+
+		@SuppressWarnings("unused")
+		@ModelAttribute
+		public void addAttributes(Model model) {
+			model.addAttribute("attr2", "gAttr2");
+		}
+	}
+
+
+	@ControllerAdvice("java.lang")
+	private static class ModelAttributeNotUsedPackageAdvice {
+
+		@SuppressWarnings("unused")
+		@ModelAttribute
+		public void addAttributes(Model model) {
+			model.addAttribute("attr3", "gAttr3");
+		}
+	}
+
+	@ControllerAdvice
+	private static class ResponseCodeSuppressingAdvice extends AbstractMappingJacksonResponseBodyAdvice {
+
+		@Override
+		protected void beforeBodyWriteInternal(MappingJacksonValue bodyContainer, MediaType contentType,
+				MethodParameter returnType, ServerHttpRequest request, ServerHttpResponse response) {
+
+			int status = ((ServletServerHttpResponse) response).getServletResponse().getStatus();
+			response.setStatusCode(HttpStatus.OK);
+
+			Map<String, Object> map = new LinkedHashMap<>();
+			map.put("status", status);
+			map.put("message", bodyContainer.getValue());
+			bodyContainer.setValue(map);
+		}
+	}
+
+	@ControllerAdvice
+	private static class JsonpAdvice extends AbstractJsonpResponseBodyAdvice {
+
+		public JsonpAdvice() {
+			super("c");
 		}
 	}
 

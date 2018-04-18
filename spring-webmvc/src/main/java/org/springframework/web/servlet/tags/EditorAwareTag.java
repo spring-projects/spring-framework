@@ -20,6 +20,8 @@ import java.beans.PropertyEditor;
 
 import javax.servlet.jsp.JspException;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Interface to be implemented by JSP tags that expose a
  * PropertyEditor for a property that they are currently bound to.
@@ -37,6 +39,7 @@ public interface EditorAwareTag {
 	 * @return the current PropertyEditor, or {@code null} if none
 	 * @throws JspException if resolving the editor failed
 	 */
+	@Nullable
 	PropertyEditor getEditor() throws JspException;
 
 }

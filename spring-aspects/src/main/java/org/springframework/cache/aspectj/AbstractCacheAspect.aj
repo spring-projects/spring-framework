@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,10 @@ import java.lang.reflect.Method;
 
 import org.aspectj.lang.annotation.SuppressAjWarnings;
 import org.aspectj.lang.reflect.MethodSignature;
+
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.cache.interceptor.CacheAspectSupport;
+import org.springframework.cache.interceptor.CacheOperationInvoker;
 import org.springframework.cache.interceptor.CacheOperationSource;
 
 /**
@@ -35,9 +38,10 @@ import org.springframework.cache.interceptor.CacheOperationSource;
  * relevant Spring cache definition will <i>not</i> be resolved.
  *
  * @author Costin Leau
+ * @author Stephane Nicoll
  * @since 3.1
  */
-public abstract aspect AbstractCacheAspect extends CacheAspectSupport {
+public abstract aspect AbstractCacheAspect extends CacheAspectSupport implements DisposableBean {
 
 	protected AbstractCacheAspect() {
 	}
@@ -51,18 +55,34 @@ public abstract aspect AbstractCacheAspect extends CacheAspectSupport {
 		setCacheOperationSources(cos);
 	}
 
+	@Override
+	public void destroy() {
+		clearMetadataCache(); // An aspect is basically a singleton
+	}
+
 	@SuppressAjWarnings("adviceDidNotMatch")
 	Object around(final Object cachedObject) : cacheMethodExecution(cachedObject) {
 		MethodSignature methodSignature = (MethodSignature) thisJoinPoint.getSignature();
 		Method method = methodSignature.getMethod();
 
-		Invoker aspectJInvoker = new Invoker() {
+		CacheOperationInvoker aspectJInvoker = new CacheOperationInvoker() {
 			public Object invoke() {
-				return proceed(cachedObject);
+				try {
+					return proceed(cachedObject);
+				}
+				catch (Throwable ex) {
+					throw new ThrowableWrapper(ex);
+				}
 			}
 		};
 
-		return execute(aspectJInvoker, thisJoinPoint.getTarget(), method, thisJoinPoint.getArgs());
+		try {
+			return execute(aspectJInvoker, thisJoinPoint.getTarget(), method, thisJoinPoint.getArgs());
+		}
+		catch (CacheOperationInvoker.ThrowableWrapper th) {
+			AnyThrow.throwUnchecked(th.getOriginal());
+			return null; // never reached
+		}
 	}
 
 	/**

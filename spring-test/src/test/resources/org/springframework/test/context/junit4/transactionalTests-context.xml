@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<jdbc:embedded-database id="dataSource" generate-name="true">
+		<jdbc:script location="classpath:/org/springframework/test/jdbc/schema.sql"/>
+	</jdbc:embedded-database>
+
+	<jdbc:embedded-database id="dataSource2" generate-name="true">
+		<jdbc:script location="classpath:/org/springframework/test/jdbc/schema.sql"/>
+	</jdbc:embedded-database>
+
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+		p:dataSource-ref="dataSource" />
+
+	<bean id="transactionManager2" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+		p:dataSource-ref="dataSource2">
+	</bean>
+
+</beans>

@@ -16,15 +16,15 @@
 
 package org.springframework.test.context.junit4.annotation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import org.junit.Test;
-import org.springframework.tests.sample.beans.Employee;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.DelegatingSmartContextLoader;
+import org.springframework.tests.sample.beans.Employee;
+
+import static org.junit.Assert.*;
 
 /**
  * Integration tests that verify support for configuration classes in

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,10 @@
 
 package org.springframework.test.context.junit4.orm;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
+import javax.persistence.PersistenceException;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.exception.ConstraintViolationException;
-import org.hibernate.exception.GenericJDBCException;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -33,6 +29,9 @@ import org.springframework.test.context.junit4.AbstractTransactionalJUnit4Spring
 import org.springframework.test.context.junit4.orm.domain.DriversLicense;
 import org.springframework.test.context.junit4.orm.domain.Person;
 import org.springframework.test.context.junit4.orm.service.PersonService;
+
+import static org.junit.Assert.*;
+import static org.springframework.test.transaction.TransactionTestUtils.*;
 
 /**
  * Transactional integration tests regarding <i>manual</i> session flushing with
@@ -75,7 +74,7 @@ public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4Sp
 		assertNotNull("Should be able to find Sam", sam);
 		DriversLicense driversLicense = sam.getDriversLicense();
 		assertNotNull("Sam's driver's license should not be null", driversLicense);
-		assertEquals("Verifying Sam's driver's license number", new Long(1234), driversLicense.getNumber());
+		assertEquals("Verifying Sam's driver's license number", Long.valueOf(1234), driversLicense.getNumber());
 	}
 
 	@Test
@@ -109,11 +108,17 @@ public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4Sp
 		// finally flushed (i.e., in production code)
 	}
 
-	@Test(expected = GenericJDBCException.class)
-	public void updateSamWithNullDriversLicenseWithSessionFlush() {
+	@Test(expected = ConstraintViolationException.class)
+	public void updateSamWithNullDriversLicenseWithSessionFlush() throws Throwable {
 		updateSamWithNullDriversLicense();
 		// Manual flush is required to avoid false positive in test
-		sessionFactory.getCurrentSession().flush();
+		try {
+			sessionFactory.getCurrentSession().flush();
+		}
+		catch (PersistenceException ex) {
+			// Wrapped in Hibernate 5.2, with the constraint violation as cause
+			throw ex.getCause();
+		}
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,20 @@
 
 package org.springframework.web.context.support;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
+import org.springframework.context.annotation.AnnotationConfigRegistry;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 import org.springframework.context.annotation.ScopeMetadataResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ContextLoader;
 
@@ -64,7 +70,7 @@ import org.springframework.web.context.ContextLoader;
  * {@linkplain ContextLoader#CONTEXT_INITIALIZER_CLASSES_PARAM "contextInitializerClasses"}
  * context-param / init-param. In such cases, users should favor the {@link #refresh()}
  * and {@link #scan(String...)} methods over the {@link #setConfigLocation(String)}
- * method, which is primarily for use by {@code ContextLoader}
+ * method, which is primarily for use by {@code ContextLoader}.
  *
  * <p>Note: In case of multiple {@code @Configuration} classes, later {@code @Bean}
  * definitions will override ones defined in earlier loaded files. This can be leveraged
@@ -75,67 +81,65 @@ import org.springframework.web.context.ContextLoader;
  * @since 3.0
  * @see org.springframework.context.annotation.AnnotationConfigApplicationContext
  */
-public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWebApplicationContext {
+public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWebApplicationContext
+		implements AnnotationConfigRegistry {
 
-	private Class<?>[] annotatedClasses;
-
-	private String[] basePackages;
-
+	@Nullable
 	private BeanNameGenerator beanNameGenerator;
 
+	@Nullable
 	private ScopeMetadataResolver scopeMetadataResolver;
 
+	private final Set<Class<?>> annotatedClasses = new LinkedHashSet<>();
+
+	private final Set<String> basePackages = new LinkedHashSet<>();
+
+
 	/**
-	 * {@inheritDoc}
-	 * <p>This implementation accepts delimited values in the form of fully-qualified
-	 * class names, (typically of {@code Configuration} classes) or fully-qualified
-	 * packages to scan for annotated classes. During {@link #loadBeanDefinitions}, these
-	 * locations will be processed in their given order, first attempting to load each
-	 * value as a class. If class loading fails (i.e. a {@code ClassNotFoundException}
-	 * occurs), the value is assumed to be a package and scanning is attempted.
-	 * <p>Note that this method exists primarily for compatibility with Spring's
-	 * {@link org.springframework.web.context.ContextLoader} and that if this application
-	 * context is being configured through an
-	 * {@link org.springframework.context.ApplicationContextInitializer}, use of the
-	 * {@link #register} and {@link #scan} methods are preferred.
-	 * @see #register(Class...)
-	 * @see #scan(String...)
-	 * @see #setConfigLocations(String[])
-	 * @see #loadBeanDefinitions(DefaultListableBeanFactory)
+	 * Set a custom {@link BeanNameGenerator} for use with {@link AnnotatedBeanDefinitionReader}
+	 * and/or {@link ClassPathBeanDefinitionScanner}.
+	 * <p>Default is {@link org.springframework.context.annotation.AnnotationBeanNameGenerator}.
+	 * @see AnnotatedBeanDefinitionReader#setBeanNameGenerator
+	 * @see ClassPathBeanDefinitionScanner#setBeanNameGenerator
 	 */
-	@Override
-	public void setConfigLocation(String location) {
-		super.setConfigLocation(location);
+	public void setBeanNameGenerator(@Nullable BeanNameGenerator beanNameGenerator) {
+		this.beanNameGenerator = beanNameGenerator;
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>This implementation accepts individual location values as fully-qualified class
-	 * names (typically {@code @Configuration} classes) or fully-qualified packages to
-	 * scan. During {@link #loadBeanDefinitions}, these locations will be processed in
-	 * order, first attempting to load values as a class, and upon class loading failure
-	 * the value is assumed to be a package to be scanned.
-	 * <p>Note that this method exists primarily for compatibility with Spring's
-	 * {@link org.springframework.web.context.ContextLoader} and that if this application
-	 * context is being configured through an
-	 * {@link org.springframework.context.ApplicationContextInitializer}, use of the
-	 * {@link #register} and {@link #scan} methods are preferred.
-	 * @see #scan(String...)
-	 * @see #register(Class...)
-	 * @see #setConfigLocation(String)
-	 * @see #loadBeanDefinitions(DefaultListableBeanFactory)
+	 * Return the custom {@link BeanNameGenerator} for use with {@link AnnotatedBeanDefinitionReader}
+	 * and/or {@link ClassPathBeanDefinitionScanner}, if any.
 	 */
-	@Override
-	public void setConfigLocations(String[] locations) {
-		super.setConfigLocations(locations);
+	@Nullable
+	protected BeanNameGenerator getBeanNameGenerator() {
+		return this.beanNameGenerator;
 	}
+
+	/**
+	 * Set a custom {@link ScopeMetadataResolver} for use with {@link AnnotatedBeanDefinitionReader}
+	 * and/or {@link ClassPathBeanDefinitionScanner}.
+	 * <p>Default is an {@link org.springframework.context.annotation.AnnotationScopeMetadataResolver}.
+	 * @see AnnotatedBeanDefinitionReader#setScopeMetadataResolver
+	 * @see ClassPathBeanDefinitionScanner#setScopeMetadataResolver
+	 */
+	public void setScopeMetadataResolver(@Nullable ScopeMetadataResolver scopeMetadataResolver) {
+		this.scopeMetadataResolver = scopeMetadataResolver;
+	}
+
+	/**
+	 * Return the custom {@link ScopeMetadataResolver} for use with {@link AnnotatedBeanDefinitionReader}
+	 * and/or {@link ClassPathBeanDefinitionScanner}, if any.
+	 */
+	@Nullable
+	protected ScopeMetadataResolver getScopeMetadataResolver() {
+		return this.scopeMetadataResolver;
+	}
+
 
 	/**
 	 * Register one or more annotated classes to be processed.
-	 * Note that {@link #refresh()} must be called in order for the context to fully
-	 * process the new class.
-	 * <p>Calls to {@link #register} are idempotent; adding the same
-	 * annotated class more than once has no additional effect.
+	 * <p>Note that {@link #refresh()} must be called in order for the context
+	 * to fully process the new classes.
 	 * @param annotatedClasses one or more annotated classes,
 	 * e.g. {@link org.springframework.context.annotation.Configuration @Configuration} classes
 	 * @see #scan(String...)
@@ -145,13 +149,13 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 */
 	public void register(Class<?>... annotatedClasses) {
 		Assert.notEmpty(annotatedClasses, "At least one annotated class must be specified");
-		this.annotatedClasses = annotatedClasses;
+		Collections.addAll(this.annotatedClasses, annotatedClasses);
 	}
 
 	/**
 	 * Perform a scan within the specified base packages.
-	 * Note that {@link #refresh()} must be called in order for the context to
-	 * fully process the new class.
+	 * <p>Note that {@link #refresh()} must be called in order for the context
+	 * to fully process the new classes.
 	 * @param basePackages the packages to check for annotated classes
 	 * @see #loadBeanDefinitions(DefaultListableBeanFactory)
 	 * @see #register(Class...)
@@ -160,8 +164,9 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 */
 	public void scan(String... basePackages) {
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
-		this.basePackages = basePackages;
+		Collections.addAll(this.basePackages, basePackages);
 	}
+
 
 	/**
 	 * Register a {@link org.springframework.beans.factory.config.BeanDefinition} for
@@ -177,6 +182,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 * <p>Configuration class bean definitions are registered with generated bean
 	 * definition names unless the {@code value} attribute is provided to the stereotype
 	 * annotation.
+	 * @param beanFactory the bean factory to load bean definitions into
 	 * @see #register(Class...)
 	 * @see #scan(String...)
 	 * @see #setConfigLocation(String)
@@ -186,46 +192,43 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 */
 	@Override
 	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) {
-		AnnotatedBeanDefinitionReader reader = new AnnotatedBeanDefinitionReader(beanFactory);
-		reader.setEnvironment(this.getEnvironment());
-
-		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(beanFactory);
-		scanner.setEnvironment(this.getEnvironment());
+		AnnotatedBeanDefinitionReader reader = getAnnotatedBeanDefinitionReader(beanFactory);
+		ClassPathBeanDefinitionScanner scanner = getClassPathBeanDefinitionScanner(beanFactory);
 
 		BeanNameGenerator beanNameGenerator = getBeanNameGenerator();
-		ScopeMetadataResolver scopeMetadataResolver = getScopeMetadataResolver();
 		if (beanNameGenerator != null) {
 			reader.setBeanNameGenerator(beanNameGenerator);
 			scanner.setBeanNameGenerator(beanNameGenerator);
-			beanFactory.registerSingleton(
-					AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR, beanNameGenerator);
+			beanFactory.registerSingleton(AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR, beanNameGenerator);
 		}
+
+		ScopeMetadataResolver scopeMetadataResolver = getScopeMetadataResolver();
 		if (scopeMetadataResolver != null) {
 			reader.setScopeMetadataResolver(scopeMetadataResolver);
 			scanner.setScopeMetadataResolver(scopeMetadataResolver);
 		}
 
-		if (!ObjectUtils.isEmpty(this.annotatedClasses)) {
+		if (!this.annotatedClasses.isEmpty()) {
 			if (logger.isInfoEnabled()) {
 				logger.info("Registering annotated classes: [" +
-						StringUtils.arrayToCommaDelimitedString(this.annotatedClasses) + "]");
+						StringUtils.collectionToCommaDelimitedString(this.annotatedClasses) + "]");
 			}
-			reader.register(this.annotatedClasses);
+			reader.register(ClassUtils.toClassArray(this.annotatedClasses));
 		}
 
-		if (!ObjectUtils.isEmpty(this.basePackages)) {
+		if (!this.basePackages.isEmpty()) {
 			if (logger.isInfoEnabled()) {
 				logger.info("Scanning base packages: [" +
-						StringUtils.arrayToCommaDelimitedString(this.basePackages) + "]");
+						StringUtils.collectionToCommaDelimitedString(this.basePackages) + "]");
 			}
-			scanner.scan(this.basePackages);
+			scanner.scan(StringUtils.toStringArray(this.basePackages));
 		}
 
 		String[] configLocations = getConfigLocations();
 		if (configLocations != null) {
 			for (String configLocation : configLocations) {
 				try {
-					Class<?> clazz = getClassLoader().loadClass(configLocation);
+					Class<?> clazz = ClassUtils.forName(configLocation, getClassLoader());
 					if (logger.isInfoEnabled()) {
 						logger.info("Successfully resolved class for [" + configLocation + "]");
 					}
@@ -250,37 +253,33 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 		}
 	}
 
-	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
-		this.beanNameGenerator = beanNameGenerator;
+
+	/**
+	 * Build an {@link AnnotatedBeanDefinitionReader} for the given bean factory.
+	 * <p>This should be pre-configured with the {@code Environment} (if desired)
+	 * but not with a {@code BeanNameGenerator} or {@code ScopeMetadataResolver} yet.
+	 * @param beanFactory the bean factory to load bean definitions into
+	 * @since 4.1.9
+	 * @see #getEnvironment()
+	 * @see #getBeanNameGenerator()
+	 * @see #getScopeMetadataResolver()
+	 */
+	protected AnnotatedBeanDefinitionReader getAnnotatedBeanDefinitionReader(DefaultListableBeanFactory beanFactory) {
+		return new AnnotatedBeanDefinitionReader(beanFactory, getEnvironment());
 	}
 
 	/**
-	 * Provide a custom {@link BeanNameGenerator} for use with {@link AnnotatedBeanDefinitionReader}
-	 * and/or {@link ClassPathBeanDefinitionScanner}, if any.
-	 * <p>Default is {@link org.springframework.context.annotation.AnnotationBeanNameGenerator}.
-	 * @see AnnotatedBeanDefinitionReader#setBeanNameGenerator
-	 * @see ClassPathBeanDefinitionScanner#setBeanNameGenerator
+	 * Build a {@link ClassPathBeanDefinitionScanner} for the given bean factory.
+	 * <p>This should be pre-configured with the {@code Environment} (if desired)
+	 * but not with a {@code BeanNameGenerator} or {@code ScopeMetadataResolver} yet.
+	 * @param beanFactory the bean factory to load bean definitions into
+	 * @since 4.1.9
+	 * @see #getEnvironment()
+	 * @see #getBeanNameGenerator()
+	 * @see #getScopeMetadataResolver()
 	 */
-	protected BeanNameGenerator getBeanNameGenerator() {
-		return this.beanNameGenerator;
+	protected ClassPathBeanDefinitionScanner getClassPathBeanDefinitionScanner(DefaultListableBeanFactory beanFactory) {
+		return new ClassPathBeanDefinitionScanner(beanFactory, true, getEnvironment());
 	}
 
-	/**
-	 * Set the {@link ScopeMetadataResolver} to use for detected bean classes.
-	 * <p>The default is an {@link org.springframework.context.annotation.AnnotationScopeMetadataResolver}.
-	 */
-	public void setScopeMetadataResolver(ScopeMetadataResolver scopeMetadataResolver) {
-		this.scopeMetadataResolver = scopeMetadataResolver;
-	}
-
-	/**
-	 * Provide a custom {@link ScopeMetadataResolver} for use with {@link AnnotatedBeanDefinitionReader}
-	 * and/or {@link ClassPathBeanDefinitionScanner}, if any.
-	 * <p>Default is {@link org.springframework.context.annotation.AnnotationScopeMetadataResolver}.
-	 * @see AnnotatedBeanDefinitionReader#setScopeMetadataResolver
-	 * @see ClassPathBeanDefinitionScanner#setScopeMetadataResolver
-	 */
-	protected ScopeMetadataResolver getScopeMetadataResolver() {
-		return this.scopeMetadataResolver;
-	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringValueResolver;
 
@@ -58,13 +59,15 @@ public abstract class AnnotationBeanUtils {
 	 * @param excludedProperties the names of excluded properties, if any
 	 * @see org.springframework.beans.BeanWrapper
 	 */
-	public static void copyPropertiesToBean(Annotation ann, Object bean, StringValueResolver valueResolver, String... excludedProperties) {
-		Set<String> excluded =  new HashSet<String>(Arrays.asList(excludedProperties));
+	public static void copyPropertiesToBean(Annotation ann, Object bean, @Nullable StringValueResolver valueResolver,
+			String... excludedProperties) {
+
+		Set<String> excluded = new HashSet<>(Arrays.asList(excludedProperties));
 		Method[] annotationProperties = ann.annotationType().getDeclaredMethods();
 		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(bean);
 		for (Method annotationProperty : annotationProperties) {
 			String propertyName = annotationProperty.getName();
-			if ((!excluded.contains(propertyName)) && bw.isWritableProperty(propertyName)) {
+			if (!excluded.contains(propertyName) && bw.isWritableProperty(propertyName)) {
 				Object value = ReflectionUtils.invokeMethod(annotationProperty, ann);
 				if (valueResolver != null && value instanceof String) {
 					value = valueResolver.resolveStringValue((String) value);

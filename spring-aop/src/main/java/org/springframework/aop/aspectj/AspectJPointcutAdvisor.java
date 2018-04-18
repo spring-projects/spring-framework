@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import org.aopalliance.aop.Advice;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * AspectJPointcutAdvisor that adapts an {@link AbstractAspectJAdvice}
@@ -38,6 +38,7 @@ public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 
 	private final Pointcut pointcut;
 
+	@Nullable
 	private Integer order;
 
 
@@ -51,10 +52,20 @@ public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 		this.pointcut = advice.buildSafePointcut();
 	}
 
+
 	public void setOrder(int order) {
 		this.order = order;
 	}
 
+	@Override
+	public int getOrder() {
+		if (this.order != null) {
+			return this.order;
+		}
+		else {
+			return this.advice.getOrder();
+		}
+	}
 
 	@Override
 	public boolean isPerInstance() {
@@ -71,14 +82,13 @@ public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 		return this.pointcut;
 	}
 
-	@Override
-	public int getOrder() {
-		if (this.order != null) {
-			return this.order;
-		}
-		else {
-			return this.advice.getOrder();
-		}
+	/**
+	 * Return the name of the aspect (bean) in which the advice was declared.
+	 * @since 4.3.15
+	 * @see AbstractAspectJAdvice#getAspectName()
+	 */
+	public String getAspectName() {
+		return this.advice.getAspectName();
 	}
 
 
@@ -91,12 +101,12 @@ public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 			return false;
 		}
 		AspectJPointcutAdvisor otherAdvisor = (AspectJPointcutAdvisor) other;
-		return (ObjectUtils.nullSafeEquals(this.advice, otherAdvisor.advice));
+		return this.advice.equals(otherAdvisor.advice);
 	}
 
 	@Override
 	public int hashCode() {
-		return AspectJPointcutAdvisor.class.hashCode();
+		return AspectJPointcutAdvisor.class.hashCode() * 29 + this.advice.hashCode();
 	}
 
 }

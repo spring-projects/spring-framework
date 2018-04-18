@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.mock.web.test.MockFilterConfig;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -32,21 +32,25 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-public class RequestContextFilterTests extends TestCase {
+public class RequestContextFilterTests {
 
-	public void testHappyPath() throws Exception {
+	@Test
+	public void happyPath() throws Exception {
 		testFilterInvocation(null);
 	}
 
-	public void testWithException() throws Exception {
+	@Test
+	public void withException() throws Exception {
 		testFilterInvocation(new ServletException());
 	}
 
-	public void testFilterInvocation(final ServletException sex) throws Exception {
+	private void testFilterInvocation(final ServletException sex) throws Exception {
 		final MockHttpServletRequest req = new MockHttpServletRequest();
 		req.setAttribute("myAttr", "myValue");
 		final MockHttpServletResponse resp = new MockHttpServletResponse();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.transaction.support;
+
+import java.io.Flushable;
 
 /**
  * Interface for transaction synchronization callbacks.
@@ -32,9 +34,8 @@ package org.springframework.transaction.support;
  * @see TransactionSynchronizationManager
  * @see AbstractPlatformTransactionManager
  * @see org.springframework.jdbc.datasource.DataSourceUtils#CONNECTION_SYNCHRONIZATION_ORDER
- * @see org.springframework.orm.hibernate3.SessionFactoryUtils#SESSION_SYNCHRONIZATION_ORDER
  */
-public interface TransactionSynchronization {
+public interface TransactionSynchronization extends Flushable {
 
 	/** Completion status in case of proper commit */
 	int STATUS_COMMITTED = 0;
@@ -51,21 +52,25 @@ public interface TransactionSynchronization {
 	 * Supposed to unbind resources from TransactionSynchronizationManager if managing any.
 	 * @see TransactionSynchronizationManager#unbindResource
 	 */
-	void suspend();
+	default void suspend() {
+	}
 
 	/**
 	 * Resume this synchronization.
 	 * Supposed to rebind resources to TransactionSynchronizationManager if managing any.
 	 * @see TransactionSynchronizationManager#bindResource
 	 */
-	void resume();
+	default void resume() {
+	}
 
 	/**
 	 * Flush the underlying session to the datastore, if applicable:
 	 * for example, a Hibernate/JPA session.
 	 * @see org.springframework.transaction.TransactionStatus#flush()
 	 */
-	void flush();
+	@Override
+	default void flush() {
+	}
 
 	/**
 	 * Invoked before transaction commit (before "beforeCompletion").
@@ -81,7 +86,8 @@ public interface TransactionSynchronization {
 	 * (note: do not throw TransactionException subclasses here!)
 	 * @see #beforeCompletion
 	 */
-	void beforeCommit(boolean readOnly);
+	default void beforeCommit(boolean readOnly) {
+	}
 
 	/**
 	 * Invoked before transaction commit/rollback.
@@ -94,7 +100,8 @@ public interface TransactionSynchronization {
 	 * @see #beforeCommit
 	 * @see #afterCompletion
 	 */
-	void beforeCompletion();
+	default void beforeCompletion() {
+	}
 
 	/**
 	 * Invoked after transaction commit. Can perform further operations right
@@ -111,7 +118,8 @@ public interface TransactionSynchronization {
 	 * @throws RuntimeException in case of errors; will be <b>propagated to the caller</b>
 	 * (note: do not throw TransactionException subclasses here!)
 	 */
-	void afterCommit();
+	default void afterCommit() {
+	}
 
 	/**
 	 * Invoked after transaction commit/rollback.
@@ -131,6 +139,7 @@ public interface TransactionSynchronization {
 	 * @see #STATUS_UNKNOWN
 	 * @see #beforeCompletion
 	 */
-	void afterCompletion(int status);
+	default void afterCompletion(int status) {
+	}
 
 }

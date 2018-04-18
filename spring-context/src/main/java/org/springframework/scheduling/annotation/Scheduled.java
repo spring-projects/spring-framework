@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,17 +24,21 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation that marks a method to be scheduled. Exactly one of the
- * {@link #cron()}, {@link #fixedDelay()}, or {@link #fixedRate()}
+ * An annotation that marks a method to be scheduled. Exactly one of
+ * the {@link #cron()}, {@link #fixedDelay()}, or {@link #fixedRate()}
  * attributes must be specified.
  *
- * <p>The annotated method must expect no arguments and have a
- * {@code void} return type.
+ * <p>The annotated method must expect no arguments. It will typically have
+ * a {@code void} return type; if not, the returned value will be ignored
+ * when called through the scheduler.
  *
  * <p>Processing of {@code @Scheduled} annotations is performed by
  * registering a {@link ScheduledAnnotationBeanPostProcessor}. This can be
  * done manually or, more conveniently, through the {@code <task:annotation-driven/>}
  * element or @{@link EnableScheduling} annotation.
+ *
+ * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
+ * <em>composed annotations</em> with attribute overrides.
  *
  * @author Mark Fisher
  * @author Dave Syer
@@ -42,6 +46,7 @@ import java.lang.annotation.Target;
  * @since 3.0
  * @see EnableScheduling
  * @see ScheduledAnnotationBeanPostProcessor
+ * @see Schedules
  */
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
@@ -60,29 +65,44 @@ public @interface Scheduled {
 	String cron() default "";
 
 	/**
-	 * Execute the annotated method with a fixed period between the end
-	 * of the last invocation and the start of the next.
+	 * A time zone for which the cron expression will be resolved. By default, this
+	 * attribute is the empty String (i.e. the server's local time zone will be used).
+	 * @return a zone id accepted by {@link java.util.TimeZone#getTimeZone(String)},
+	 * or an empty String to indicate the server's default time zone
+	 * @since 4.0
+	 * @see org.springframework.scheduling.support.CronTrigger#CronTrigger(String, java.util.TimeZone)
+	 * @see java.util.TimeZone
+	 */
+	String zone() default "";
+
+	/**
+	 * Execute the annotated method with a fixed period in milliseconds between the
+	 * end of the last invocation and the start of the next.
 	 * @return the delay in milliseconds
 	 */
 	long fixedDelay() default -1;
 
 	/**
-	 * Execute the annotated method with a fixed period between the end
-	 * of the last invocation and the start of the next.
+	 * Execute the annotated method with a fixed period in milliseconds between the
+	 * end of the last invocation and the start of the next.
 	 * @return the delay in milliseconds as a String value, e.g. a placeholder
+	 * or a {@link java.time.Duration#parse java.time.Duration} compliant value
 	 * @since 3.2.2
 	 */
 	String fixedDelayString() default "";
 
 	/**
-	 * Execute the annotated method with a fixed period between invocations.
+	 * Execute the annotated method with a fixed period in milliseconds between
+	 * invocations.
 	 * @return the period in milliseconds
 	 */
 	long fixedRate() default -1;
 
 	/**
-	 * Execute the annotated method with a fixed period between invocations.
+	 * Execute the annotated method with a fixed period in milliseconds between
+	 * invocations.
 	 * @return the period in milliseconds as a String value, e.g. a placeholder
+	 * or a {@link java.time.Duration#parse java.time.Duration} compliant value
 	 * @since 3.2.2
 	 */
 	String fixedRateString() default "";
@@ -99,6 +119,7 @@ public @interface Scheduled {
 	 * Number of milliseconds to delay before the first execution of a
 	 * {@link #fixedRate()} or {@link #fixedDelay()} task.
 	 * @return the initial delay in milliseconds as a String value, e.g. a placeholder
+	 * or a {@link java.time.Duration#parse java.time.Duration} compliant value
 	 * @since 3.2.2
 	 */
 	String initialDelayString() default "";

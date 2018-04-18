@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,132 +25,78 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URL;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.core.NestedIOException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Utility for detecting the JBoss VFS version available in the classpath.
- * JBoss AS 5+ uses VFS 2.x (package {@code org.jboss.virtual}) while
- * JBoss AS 6+ uses VFS 3.x (package {@code org.jboss.vfs}).
+ * Utility for detecting and accessing JBoss VFS in the classpath.
+ *
+ * <p>As of Spring 4.0, this class supports VFS 3.x on JBoss AS 6+ (package
+ * {@code org.jboss.vfs}) and is in particular compatible with JBoss AS 7 and
+ * WildFly 8.
  *
  * <p>Thanks go to Marius Bogoevici for the initial patch.
- *
  * <b>Note:</b> This is an internal class and should not be used outside the framework.
  *
  * @author Costin Leau
+ * @author Juergen Hoeller
  * @since 3.0.3
  */
 public abstract class VfsUtils {
 
-	private static final Log logger = LogFactory.getLog(VfsUtils.class);
-
-	private static final String VFS2_PKG = "org.jboss.virtual.";
 	private static final String VFS3_PKG = "org.jboss.vfs.";
 	private static final String VFS_NAME = "VFS";
 
-	private static enum VFS_VER { V2, V3 }
+	private static final Method VFS_METHOD_GET_ROOT_URL;
+	private static final Method VFS_METHOD_GET_ROOT_URI;
 
-	private static VFS_VER version;
+	private static final Method VIRTUAL_FILE_METHOD_EXISTS;
+	private static final Method VIRTUAL_FILE_METHOD_GET_INPUT_STREAM;
+	private static final Method VIRTUAL_FILE_METHOD_GET_SIZE;
+	private static final Method VIRTUAL_FILE_METHOD_GET_LAST_MODIFIED;
+	private static final Method VIRTUAL_FILE_METHOD_TO_URL;
+	private static final Method VIRTUAL_FILE_METHOD_TO_URI;
+	private static final Method VIRTUAL_FILE_METHOD_GET_NAME;
+	private static final Method VIRTUAL_FILE_METHOD_GET_PATH_NAME;
+	private static final Method VIRTUAL_FILE_METHOD_GET_CHILD;
 
-	private static Method VFS_METHOD_GET_ROOT_URL = null;
-	private static Method VFS_METHOD_GET_ROOT_URI = null;
+	protected static final Class<?> VIRTUAL_FILE_VISITOR_INTERFACE;
+	protected static final Method VIRTUAL_FILE_METHOD_VISIT;
 
-	private static Method VIRTUAL_FILE_METHOD_EXISTS = null;
-	private static Method VIRTUAL_FILE_METHOD_GET_INPUT_STREAM;
-	private static Method VIRTUAL_FILE_METHOD_GET_SIZE;
-	private static Method VIRTUAL_FILE_METHOD_GET_LAST_MODIFIED;
-	private static Method VIRTUAL_FILE_METHOD_TO_URL;
-	private static Method VIRTUAL_FILE_METHOD_TO_URI;
-	private static Method VIRTUAL_FILE_METHOD_GET_NAME;
-	private static Method VIRTUAL_FILE_METHOD_GET_PATH_NAME;
-	private static Method VIRTUAL_FILE_METHOD_GET_CHILD;
-
-	protected static Class<?> VIRTUAL_FILE_VISITOR_INTERFACE;
-	protected static Method VIRTUAL_FILE_METHOD_VISIT;
-
-	private static Method VFS_UTILS_METHOD_IS_NESTED_FILE = null;
-	private static Method VFS_UTILS_METHOD_GET_COMPATIBLE_URI = null;
-	private static Field VISITOR_ATTRIBUTES_FIELD_RECURSE = null;
-	private static Method GET_PHYSICAL_FILE = null;
+	private static final Field VISITOR_ATTRIBUTES_FIELD_RECURSE;
+	private static final Method GET_PHYSICAL_FILE;
 
 	static {
 		ClassLoader loader = VfsUtils.class.getClassLoader();
-		String pkg;
-		Class<?> vfsClass;
-
-		// check for JBoss 6
 		try {
-			vfsClass = loader.loadClass(VFS3_PKG + VFS_NAME);
-			version = VFS_VER.V3;
-			pkg = VFS3_PKG;
+			Class<?> vfsClass = loader.loadClass(VFS3_PKG + VFS_NAME);
+			VFS_METHOD_GET_ROOT_URL = vfsClass.getMethod("getChild", URL.class);
+			VFS_METHOD_GET_ROOT_URI = vfsClass.getMethod("getChild", URI.class);
 
-			if (logger.isDebugEnabled()) {
-				logger.debug("JBoss VFS packages for JBoss AS 6 found");
-			}
+			Class<?> virtualFile = loader.loadClass(VFS3_PKG + "VirtualFile");
+			VIRTUAL_FILE_METHOD_EXISTS = virtualFile.getMethod("exists");
+			VIRTUAL_FILE_METHOD_GET_INPUT_STREAM = virtualFile.getMethod("openStream");
+			VIRTUAL_FILE_METHOD_GET_SIZE = virtualFile.getMethod("getSize");
+			VIRTUAL_FILE_METHOD_GET_LAST_MODIFIED = virtualFile.getMethod("getLastModified");
+			VIRTUAL_FILE_METHOD_TO_URI = virtualFile.getMethod("toURI");
+			VIRTUAL_FILE_METHOD_TO_URL = virtualFile.getMethod("toURL");
+			VIRTUAL_FILE_METHOD_GET_NAME = virtualFile.getMethod("getName");
+			VIRTUAL_FILE_METHOD_GET_PATH_NAME = virtualFile.getMethod("getPathName");
+			GET_PHYSICAL_FILE = virtualFile.getMethod("getPhysicalFile");
+			VIRTUAL_FILE_METHOD_GET_CHILD = virtualFile.getMethod("getChild", String.class);
+
+			VIRTUAL_FILE_VISITOR_INTERFACE = loader.loadClass(VFS3_PKG + "VirtualFileVisitor");
+			VIRTUAL_FILE_METHOD_VISIT = virtualFile.getMethod("visit", VIRTUAL_FILE_VISITOR_INTERFACE);
+
+			Class<?> visitorAttributesClass = loader.loadClass(VFS3_PKG + "VisitorAttributes");
+			VISITOR_ATTRIBUTES_FIELD_RECURSE = visitorAttributesClass.getField("RECURSE");
 		}
-		catch (ClassNotFoundException ex) {
-			// fallback to JBoss 5
-			if (logger.isDebugEnabled())
-				logger.debug("JBoss VFS packages for JBoss AS 6 not found; falling back to JBoss AS 5 packages");
-			try {
-				vfsClass = loader.loadClass(VFS2_PKG + VFS_NAME);
-
-				version = VFS_VER.V2;
-				pkg = VFS2_PKG;
-
-				if (logger.isDebugEnabled())
-					logger.debug("JBoss VFS packages for JBoss AS 5 found");
-			}
-			catch (ClassNotFoundException ex2) {
-				logger.error("JBoss VFS packages (for both JBoss AS 5 and 6) were not found - JBoss VFS support disabled");
-				throw new IllegalStateException("Cannot detect JBoss VFS packages", ex2);
-			}
-		}
-
-		// cache reflective information
-		try {
-			String methodName = (VFS_VER.V3.equals(version) ? "getChild" : "getRoot");
-
-			VFS_METHOD_GET_ROOT_URL = ReflectionUtils.findMethod(vfsClass, methodName, URL.class);
-			VFS_METHOD_GET_ROOT_URI = ReflectionUtils.findMethod(vfsClass, methodName, URI.class);
-
-			Class<?> virtualFile = loader.loadClass(pkg + "VirtualFile");
-
-			VIRTUAL_FILE_METHOD_EXISTS = ReflectionUtils.findMethod(virtualFile, "exists");
-			VIRTUAL_FILE_METHOD_GET_INPUT_STREAM = ReflectionUtils.findMethod(virtualFile, "openStream");
-			VIRTUAL_FILE_METHOD_GET_SIZE = ReflectionUtils.findMethod(virtualFile, "getSize");
-			VIRTUAL_FILE_METHOD_GET_LAST_MODIFIED = ReflectionUtils.findMethod(virtualFile, "getLastModified");
-			VIRTUAL_FILE_METHOD_TO_URI = ReflectionUtils.findMethod(virtualFile, "toURI");
-			VIRTUAL_FILE_METHOD_TO_URL = ReflectionUtils.findMethod(virtualFile, "toURL");
-			VIRTUAL_FILE_METHOD_GET_NAME = ReflectionUtils.findMethod(virtualFile, "getName");
-			VIRTUAL_FILE_METHOD_GET_PATH_NAME = ReflectionUtils.findMethod(virtualFile, "getPathName");
-			GET_PHYSICAL_FILE = ReflectionUtils.findMethod(virtualFile, "getPhysicalFile");
-
-			methodName = (VFS_VER.V3.equals(version) ? "getChild" : "findChild");
-
-			VIRTUAL_FILE_METHOD_GET_CHILD = ReflectionUtils.findMethod(virtualFile, methodName, String.class);
-
-			Class<?> utilsClass = loader.loadClass(pkg + "VFSUtils");
-
-			VFS_UTILS_METHOD_GET_COMPATIBLE_URI = ReflectionUtils.findMethod(utilsClass, "getCompatibleURI",
-					virtualFile);
-			VFS_UTILS_METHOD_IS_NESTED_FILE = ReflectionUtils.findMethod(utilsClass, "isNestedFile", virtualFile);
-
-			VIRTUAL_FILE_VISITOR_INTERFACE = loader.loadClass(pkg + "VirtualFileVisitor");
-			VIRTUAL_FILE_METHOD_VISIT = ReflectionUtils.findMethod(virtualFile, "visit", VIRTUAL_FILE_VISITOR_INTERFACE);
-
-			Class<?> visitorAttributesClass = loader.loadClass(pkg + "VisitorAttributes");
-			VISITOR_ATTRIBUTES_FIELD_RECURSE = ReflectionUtils.findField(visitorAttributesClass, "RECURSE");
-		}
-		catch (ClassNotFoundException ex) {
-			throw new IllegalStateException("Could not detect the JBoss VFS infrastructure", ex);
+		catch (Throwable ex) {
+			throw new IllegalStateException("Could not detect JBoss VFS infrastructure", ex);
 		}
 	}
 
-	protected static Object invokeVfsMethod(Method method, Object target, Object... args) throws IOException {
+	protected static Object invokeVfsMethod(Method method, @Nullable Object target, Object... args) throws IOException {
 		try {
 			return method.invoke(target, args);
 		}
@@ -224,20 +170,7 @@ public abstract class VfsUtils {
 	}
 
 	static File getFile(Object vfsResource) throws IOException {
-		if (VFS_VER.V2.equals(version)) {
-			if ((Boolean) invokeVfsMethod(VFS_UTILS_METHOD_IS_NESTED_FILE, null, vfsResource)) {
-				throw new IOException("File resolution not supported for nested resource: " + vfsResource);
-			}
-			try {
-				return new File((URI) invokeVfsMethod(VFS_UTILS_METHOD_GET_COMPATIBLE_URI, null, vfsResource));
-			}
-			catch (Exception ex) {
-				throw new NestedIOException("Failed to obtain File reference for " + vfsResource, ex);
-			}
-		}
-		else {
-			return (File) invokeVfsMethod(GET_PHYSICAL_FILE, vfsResource);
-		}
+		return (File) invokeVfsMethod(GET_PHYSICAL_FILE, vfsResource);
 	}
 
 	static Object getRoot(URI url) throws IOException {
@@ -250,11 +183,14 @@ public abstract class VfsUtils {
 		return invokeVfsMethod(VFS_METHOD_GET_ROOT_URL, null, url);
 	}
 
-	protected static Object doGetVisitorAttribute() {
+	@Nullable
+	protected static Object doGetVisitorAttributes() {
 		return ReflectionUtils.getField(VISITOR_ATTRIBUTES_FIELD_RECURSE, null);
 	}
 
+	@Nullable
 	protected static String doGetPath(Object resource) {
 		return (String) ReflectionUtils.invokeMethod(VIRTUAL_FILE_METHOD_GET_PATH_NAME, resource);
 	}
+
 }

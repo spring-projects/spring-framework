@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.lang.Nullable;
 
 /**
  * A factory for common {@link org.springframework.core.convert.ConversionService}
@@ -40,7 +41,7 @@ public abstract class ConversionServiceFactory {
 	 * {@link ConverterFactory}, or {@link GenericConverter}
 	 * @param registry the target registry
 	 */
-	public static void registerConverters(Set<?> converters, ConverterRegistry registry) {
+	public static void registerConverters(@Nullable Set<?> converters, ConverterRegistry registry) {
 		if (converters != null) {
 			for (Object converter : converters) {
 				if (converter instanceof GenericConverter) {
@@ -58,24 +59,6 @@ public abstract class ConversionServiceFactory {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Create a new default GenericConversionService instance that can be safely modified.
-	 * @deprecated in Spring 3.1 in favor of {@link DefaultConversionService#DefaultConversionService()}
-	 */
-	@Deprecated
-	public static GenericConversionService createDefaultConversionService() {
-		return new DefaultConversionService();
-	}
-
-	/**
-	 * Populate the given GenericConversionService instance with the set of default converters.
-	 * @deprecated in Spring 3.1 in favor of {@link DefaultConversionService#addDefaultConverters(ConverterRegistry)}
-	 */
-	@Deprecated
-	public static void addDefaultConverters(GenericConversionService conversionService) {
-		DefaultConversionService.addDefaultConverters(conversionService);
 	}
 
 }

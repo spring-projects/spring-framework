@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@
 
 package org.springframework.aop.aspectj.annotation;
 
+import java.io.Serializable;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.Ordered;
-import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.annotation.Order;
+import org.springframework.core.annotation.OrderUtils;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -38,7 +41,8 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.beans.factory.BeanFactory
  * @see LazySingletonAspectInstanceFactoryDecorator
  */
-public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInstanceFactory {
+@SuppressWarnings("serial")
+public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInstanceFactory, Serializable {
 
 	private final BeanFactory beanFactory;
 
@@ -55,7 +59,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	 * @param name name of the bean
 	 */
 	public BeanFactoryAspectInstanceFactory(BeanFactory beanFactory, String name) {
-		this(beanFactory, name, beanFactory.getType(name));
+		this(beanFactory, name, null);
 	}
 
 	/**
@@ -65,11 +69,19 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	 * @param beanFactory BeanFactory to obtain instance(s) from
 	 * @param name the name of the bean
 	 * @param type the type that should be introspected by AspectJ
+	 * ({@code null} indicates resolution through {@link BeanFactory#getType} via the bean name)
 	 */
-	public BeanFactoryAspectInstanceFactory(BeanFactory beanFactory, String name, Class type) {
+	public BeanFactoryAspectInstanceFactory(BeanFactory beanFactory, String name, @Nullable Class<?> type) {
+		Assert.notNull(beanFactory, "BeanFactory must not be null");
+		Assert.notNull(name, "Bean name must not be null");
 		this.beanFactory = beanFactory;
 		this.name = name;
-		this.aspectMetadata = new AspectMetadata(type, name);
+		Class<?> resolvedType = type;
+		if (type == null) {
+			resolvedType = beanFactory.getType(name);
+			Assert.notNull(resolvedType, "Unresolvable bean type - explicitly specify the aspect class");
+		}
+		this.aspectMetadata = new AspectMetadata(resolvedType, name);
 	}
 
 
@@ -79,18 +91,34 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	}
 
 	@Override
+	@Nullable
 	public ClassLoader getAspectClassLoader() {
-		if (this.beanFactory instanceof ConfigurableBeanFactory) {
-			return ((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader();
-		}
-		else {
-			return ClassUtils.getDefaultClassLoader();
-		}
+		return (this.beanFactory instanceof ConfigurableBeanFactory ?
+				((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader() :
+				ClassUtils.getDefaultClassLoader());
 	}
 
 	@Override
 	public AspectMetadata getAspectMetadata() {
 		return this.aspectMetadata;
+	}
+
+	@Override
+	@Nullable
+	public Object getAspectCreationMutex() {
+		if (this.beanFactory.isSingleton(this.name)) {
+			// Rely on singleton semantics provided by the factory -> no local lock.
+			return null;
+		}
+		else if (this.beanFactory instanceof ConfigurableBeanFactory) {
+			// No singleton guarantees from the factory -> let's lock locally but
+			// reuse the factory's singleton lock, just in case a lazy dependency
+			// of our advice bean happens to trigger the singleton lock implicitly...
+			return ((ConfigurableBeanFactory) this.beanFactory).getSingletonMutex();
+		}
+		else {
+			return this;
+		}
 	}
 
 	/**
@@ -110,10 +138,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 			if (Ordered.class.isAssignableFrom(type) && this.beanFactory.isSingleton(this.name)) {
 				return ((Ordered) this.beanFactory.getBean(this.name)).getOrder();
 			}
-			Order order = AnnotationUtils.findAnnotation(type, Order.class);
-			if (order != null) {
-				return order.value();
-			}
+			return OrderUtils.getOrder(type, Ordered.LOWEST_PRECEDENCE);
 		}
 		return Ordered.LOWEST_PRECEDENCE;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.interceptor.AbstractFallbackTransactionAttributeSource;
 import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.util.Assert;
@@ -85,7 +86,7 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	 */
 	public AnnotationTransactionAttributeSource(boolean publicMethodsOnly) {
 		this.publicMethodsOnly = publicMethodsOnly;
-		this.annotationParsers = new LinkedHashSet<TransactionAnnotationParser>(2);
+		this.annotationParsers = new LinkedHashSet<>(2);
 		this.annotationParsers.add(new SpringTransactionAnnotationParser());
 		if (jta12Present) {
 			this.annotationParsers.add(new JtaTransactionAnnotationParser());
@@ -112,7 +113,7 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	public AnnotationTransactionAttributeSource(TransactionAnnotationParser... annotationParsers) {
 		this.publicMethodsOnly = true;
 		Assert.notEmpty(annotationParsers, "At least one TransactionAnnotationParser needs to be specified");
-		Set<TransactionAnnotationParser> parsers = new LinkedHashSet<TransactionAnnotationParser>(annotationParsers.length);
+		Set<TransactionAnnotationParser> parsers = new LinkedHashSet<>(annotationParsers.length);
 		Collections.addAll(parsers, annotationParsers);
 		this.annotationParsers = parsers;
 	}
@@ -129,11 +130,13 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 
 
 	@Override
+	@Nullable
 	protected TransactionAttribute findTransactionAttribute(Method method) {
 		return determineTransactionAttribute(method);
 	}
 
 	@Override
+	@Nullable
 	protected TransactionAttribute findTransactionAttribute(Class<?> clazz) {
 		return determineTransactionAttribute(clazz);
 	}
@@ -149,6 +152,7 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	 * @return TransactionAttribute the configured transaction attribute,
 	 * or {@code null} if none was found
 	 */
+	@Nullable
 	protected TransactionAttribute determineTransactionAttribute(AnnotatedElement ae) {
 		for (TransactionAnnotationParser annotationParser : this.annotationParsers) {
 			TransactionAttribute attr = annotationParser.parseTransactionAnnotation(ae);

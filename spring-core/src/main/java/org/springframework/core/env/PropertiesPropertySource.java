@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,18 @@ import java.util.Properties;
  * {@link Properties#getProperty} and {@link Properties#setProperty}.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class PropertiesPropertySource extends MapPropertySource {
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public PropertiesPropertySource(String name, Properties source) {
 		super(name, (Map) source);
+	}
+
+	protected PropertiesPropertySource(String name, Map<String, Object> source) {
+		super(name, source);
 	}
 
 }

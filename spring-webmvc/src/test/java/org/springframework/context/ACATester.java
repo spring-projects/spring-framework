@@ -18,11 +18,6 @@ package org.springframework.context;
 
 import java.util.Locale;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationContextException;
-import org.springframework.context.NoSuchMessageException;
-
 public class ACATester implements ApplicationContextAware {
 
 	private ApplicationContext ac;

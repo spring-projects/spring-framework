@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,10 @@
 
 package org.springframework.aop.interceptor;
 
-import static org.junit.Assert.assertEquals;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
+
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.tests.sample.beans.DerivedTestBean;
@@ -28,12 +27,14 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 06.04.2004
  */
-public final class ConcurrencyThrottleInterceptorTests {
+public class ConcurrencyThrottleInterceptorTests {
 
 	protected static final Log logger = LogFactory.getLog(ConcurrencyThrottleInterceptorTests.class);
 
@@ -46,7 +47,7 @@ public final class ConcurrencyThrottleInterceptorTests {
 	public void testSerializable() throws Exception {
 		DerivedTestBean tb = new DerivedTestBean();
 		ProxyFactory proxyFactory = new ProxyFactory();
-		proxyFactory.setInterfaces(new Class[] {ITestBean.class});
+		proxyFactory.setInterfaces(ITestBean.class);
 		ConcurrencyThrottleInterceptor cti = new ConcurrencyThrottleInterceptor();
 		proxyFactory.addAdvice(cti);
 		proxyFactory.setTarget(tb);
@@ -74,7 +75,7 @@ public final class ConcurrencyThrottleInterceptorTests {
 	private void testMultipleThreads(int concurrencyLimit) {
 		TestBean tb = new TestBean();
 		ProxyFactory proxyFactory = new ProxyFactory();
-		proxyFactory.setInterfaces(new Class[] {ITestBean.class});
+		proxyFactory.setInterfaces(ITestBean.class);
 		ConcurrencyThrottleInterceptor cti = new ConcurrencyThrottleInterceptor();
 		cti.setConcurrencyLimit(concurrencyLimit);
 		proxyFactory.addAdvice(cti);
@@ -94,7 +95,7 @@ public final class ConcurrencyThrottleInterceptorTests {
 				ex.printStackTrace();
 			}
 			threads[i] = new ConcurrencyThread(proxy,
-					i % 2 == 0 ? (Throwable) new OutOfMemoryError() : (Throwable) new IllegalStateException());
+					i % 2 == 0 ? new OutOfMemoryError() : new IllegalStateException());
 			threads[i].start();
 		}
 		for (int i = 0; i < NR_OF_THREADS; i++) {

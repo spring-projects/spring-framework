@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,17 +36,17 @@ public class Spr7538Tests {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		context.setTypeConverter(converter);
 
-		List<Foo> arguments = new ArrayList<Foo>();
+		List<Foo> arguments = new ArrayList<>();
 
 		// !!!! With the below line commented you'll get NPE. Uncomment and everything is OK!
 		//arguments.add(new Foo());
 
-		List<TypeDescriptor> paramDescriptors = new ArrayList<TypeDescriptor>();
+		List<TypeDescriptor> paramDescriptors = new ArrayList<>();
 		Method method = AlwaysTrueReleaseStrategy.class.getMethod("checkCompleteness", List.class);
 		paramDescriptors.add(new TypeDescriptor(new MethodParameter(method, 0)));
 
 
-		List<TypeDescriptor> argumentTypes = new ArrayList<TypeDescriptor>();
+		List<TypeDescriptor> argumentTypes = new ArrayList<>();
 		argumentTypes.add(TypeDescriptor.forObject(arguments));
 		ReflectiveMethodResolver resolver = new ReflectiveMethodResolver();
 		MethodExecutor executor = resolver.resolve(context, target, "checkCompleteness", argumentTypes);

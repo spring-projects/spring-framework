@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ package org.springframework.context.support;
 import java.io.IOException;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.lang.Nullable;
 
 /**
  * Base class for {@link org.springframework.context.ApplicationContext}
@@ -64,11 +64,14 @@ import org.springframework.context.ApplicationContextException;
  */
 public abstract class AbstractRefreshableApplicationContext extends AbstractApplicationContext {
 
+	@Nullable
 	private Boolean allowBeanDefinitionOverriding;
 
+	@Nullable
 	private Boolean allowCircularReferences;
 
 	/** Bean factory for this context */
+	@Nullable
 	private DefaultListableBeanFactory beanFactory;
 
 	/** Synchronization monitor for the internal BeanFactory */
@@ -85,7 +88,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * Create a new AbstractRefreshableApplicationContext with the given parent context.
 	 * @param parent the parent context
 	 */
-	public AbstractRefreshableApplicationContext(ApplicationContext parent) {
+	public AbstractRefreshableApplicationContext(@Nullable ApplicationContext parent) {
 		super(parent);
 	}
 
@@ -149,8 +152,10 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	@Override
 	protected final void closeBeanFactory() {
 		synchronized (this.beanFactoryMonitor) {
-			this.beanFactory.setSerializationId(null);
-			this.beanFactory = null;
+			if (this.beanFactory != null) {
+				this.beanFactory.setSerializationId(null);
+				this.beanFactory = null;
+			}
 		}
 	}
 
@@ -222,7 +227,6 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 		if (this.allowCircularReferences != null) {
 			beanFactory.setAllowCircularReferences(this.allowCircularReferences);
 		}
-		beanFactory.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
 	}
 
 	/**

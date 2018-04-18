@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,17 +21,25 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.util.IdGenerator;
 
 import static org.junit.Assert.*;
 
-
 /**
  * @author Mark Fisher
+ * @author Rossen Stoyanchev
  */
 public class MessageBuilderTests {
+
+	@Rule
+	public final ExpectedException thrown = ExpectedException.none();
+
 
 	@Test
 	public void testSimpleMessageCreation() {
@@ -43,7 +51,7 @@ public class MessageBuilderTests {
 	public void testHeaderValues() {
 		Message<String> message = MessageBuilder.withPayload("test")
 				.setHeader("foo", "bar")
-				.setHeader("count", new Integer(123))
+				.setHeader("count", 123)
 				.build();
 		assertEquals("bar", message.getHeaders().get("foo", String.class));
 		assertEquals(new Integer(123), message.getHeaders().get("count", Integer.class));
@@ -154,11 +162,11 @@ public class MessageBuilderTests {
 	@Test
 	public void testCopySameHeaderValuesNotModifiedSameMessage() throws Exception {
 		Date current = new Date();
-		Map<String, Object> originalHeaders = new HashMap<String, Object>();
+		Map<String, Object> originalHeaders = new HashMap<>();
 		originalHeaders.put("b", "xyz");
 		originalHeaders.put("c", current);
 		Message<?> original = MessageBuilder.withPayload("foo").setHeader("a", 123).copyHeaders(originalHeaders).build();
-		Map<String, Object> newHeaders = new HashMap<String, Object>();
+		Map<String, Object> newHeaders = new HashMap<>();
 		newHeaders.put("a", 123);
 		newHeaders.put("b", "xyz");
 		newHeaders.put("c", current);
@@ -166,4 +174,61 @@ public class MessageBuilderTests {
 		assertEquals(original, result);
 	}
 
+	@Test
+	public void testBuildMessageWithMutableHeaders() {
+		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
+		accessor.setLeaveMutable(true);
+		MessageHeaders headers = accessor.getMessageHeaders();
+		Message<?> message = MessageBuilder.createMessage("payload", headers);
+		accessor.setHeader("foo", "bar");
+
+		assertEquals("bar", headers.get("foo"));
+		assertSame(accessor, MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class));
+	}
+
+	@Test
+	public void testBuildMessageWithDefaultMutability() {
+		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
+		MessageHeaders headers = accessor.getMessageHeaders();
+		Message<?> message = MessageBuilder.createMessage("foo", headers);
+
+		this.thrown.expect(IllegalStateException.class);
+		this.thrown.expectMessage("Already immutable");
+		accessor.setHeader("foo", "bar");
+
+		assertSame(accessor, MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class));
+	}
+
+	@Test
+	public void testBuildMessageWithoutIdAndTimestamp() {
+		MessageHeaderAccessor headerAccessor = new MessageHeaderAccessor();
+		headerAccessor.setIdGenerator(new IdGenerator() {
+			@Override
+			public UUID generateId() {
+				return MessageHeaders.ID_VALUE_NONE;
+			}
+		});
+		Message<?> message = MessageBuilder.createMessage("foo", headerAccessor.getMessageHeaders());
+		assertNull(message.getHeaders().getId());
+		assertNull(message.getHeaders().getTimestamp());
+	}
+
+	@Test
+	public void testBuildMultipleMessages() {
+		MessageHeaderAccessor headerAccessor = new MessageHeaderAccessor();
+		MessageBuilder<?> messageBuilder = MessageBuilder.withPayload("payload").setHeaders(headerAccessor);
+
+		headerAccessor.setHeader("foo", "bar1");
+		Message<?> message1 = messageBuilder.build();
+
+		headerAccessor.setHeader("foo", "bar2");
+		Message<?> message2 = messageBuilder.build();
+
+		headerAccessor.setHeader("foo", "bar3");
+		Message<?> message3 = messageBuilder.build();
+
+		assertEquals("bar1", message1.getHeaders().get("foo"));
+		assertEquals("bar2", message2.getHeaders().get("foo"));
+		assertEquals("bar3", message3.getHeaders().get("foo"));
+	}
 }

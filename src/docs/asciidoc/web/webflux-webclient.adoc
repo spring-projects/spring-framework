@@ -1,0 +1,377 @@
+[[webflux-client]]
+= WebClient
+
+The `spring-webflux` module includes a reactive, non-blocking client for HTTP requests
+with a functional-style API client and Reactive Streams support. `WebClient` depends on a
+lower level HTTP client library to execute requests and that support is pluggable.
+
+`WebClient`
+uses the same <<web-reactive.adoc#webflux-codecs,codecs>> as WebFlux server applications do, and
+shares a common base package, some common APIs, and infrastructure with the
+server <<web-reactive.adoc#webflux-fn,functional web framework>>.
+The API exposes Reactor `Flux` and `Mono` types, also see
+<<web-reactive.adoc#webflux-reactive-libraries>>. By default it uses
+it uses https://github.com/reactor/reactor-netty[Reactor Netty] as the HTTP client
+library but others can be plugged in through a custom `ClientHttpConnector`.
+
+By comparison to the <<integration.adoc#rest-resttemplate,RestTemplate>>, the
+`WebClient` is:
+
+* non-blocking, reactive, and supports higher concurrency with less hardware resources.
+* provides a functional API that takes advantage of Java 8 lambdas.
+* supports both synchronous and asynchronous scenarios.
+* supports streaming up or down from a server.
+
+The `RestTemplate` is not a good fit for use in non-blocking applications, and therefore
+Spring WebFlux application should always use the `WebClient`. The `WebClient` should also
+be preferred in Spring MVC, in most high concurrency scenarios, and for composing a
+sequence of remote, inter-dependent calls.
+
+
+
+
+[[webflux-client-retrieve]]
+== Retrieve
+
+The `retrieve()` method is the easiest way to get a response body and decode it:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	WebClient client = WebClient.create("http://example.org");
+
+	Mono<Person> result = client.get()
+			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+			.retrieve()
+			.bodyToMono(Person.class);
+----
+
+You can also get a stream of objects decoded from the response:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	Flux<Quote> result = client.get()
+			.uri("/quotes").accept(MediaType.TEXT_EVENT_STREAM)
+			.retrieve()
+			.bodyToFlux(Quote.class);
+----
+
+By default, responses with 4xx or 5xx status codes result in an error of type
+`WebClientResponseException` but you can customize that:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	Mono<Person> result = client.get()
+			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+			.retrieve()
+			.onStatus(HttpStatus::is4xxServerError, response -> ...)
+			.onStatus(HttpStatus::is5xxServerError, response -> ...)
+			.bodyToMono(Person.class);
+----
+
+
+
+
+[[webflux-client-exchange]]
+== Exchange
+
+The `exchange()` method provides more control. The below example is equivalent
+to `retrieve()` but also provides access to the `ClientResponse`:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	Mono<Person> result = client.get()
+			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+			.exchange()
+			.flatMap(response -> response.bodyToMono(Person.class));
+----
+
+At this level you can also create a full `ResponseEntity`:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	Mono<ResponseEntity<Person>> result = client.get()
+			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+			.exchange()
+			.flatMap(response -> response.toEntity(Person.class));
+----
+
+Note that unlike `retrieve()`, with `exchange()` there are no automatic error signals for
+4xx and 5xx responses. You have to check the status code and decide how to proceed.
+
+[CAUTION]
+====
+When using `exchange()` you must always use any of the body or toEntity methods of
+`ClientResponse` to ensure resources are released and to avoid potential issues with HTTP
+connection pooling. You can use `bodyToMono(Void.class)` if no response content is
+expected. However keep in mind that if the response does have content, the connection
+will be closed and will not be placed back in the pool.
+====
+
+
+
+
+[[webflux-client-body]]
+== Request body
+
+The request body can be encoded from an Object:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	Mono<Person> personMono = ... ;
+
+	Mono<Void> result = client.post()
+			.uri("/persons/{id}", id)
+			.contentType(MediaType.APPLICATION_JSON)
+			.body(personMono, Person.class)
+			.retrieve()
+			.bodyToMono(Void.class);
+----
+
+You can also have a stream of objects encoded:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	Flux<Person> personFlux = ... ;
+
+	Mono<Void> result = client.post()
+			.uri("/persons/{id}", id)
+			.contentType(MediaType.APPLICATION_STREAM_JSON)
+			.body(personFlux, Person.class)
+			.retrieve()
+			.bodyToMono(Void.class);
+----
+
+Or if you have the actual value, use the `syncBody` shortcut method:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	Person person = ... ;
+
+	Mono<Void> result = client.post()
+			.uri("/persons/{id}", id)
+			.contentType(MediaType.APPLICATION_JSON)
+			.syncBody(person)
+			.retrieve()
+			.bodyToMono(Void.class);
+----
+
+
+
+[[webflux-client-body-form]]
+=== Form data
+
+To send form data, provide a `MultiValueMap<String, String>` as the body. Note that the
+content is automatically set to `"application/x-www-form-urlencoded"` by the
+`FormHttpMessageWriter`:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	MultiValueMap<String, String> formData = ... ;
+
+	Mono<Void> result = client.post()
+			.uri("/path", id)
+			.syncBody(formData)
+			.retrieve()
+			.bodyToMono(Void.class);
+----
+
+You can also supply form data in-line via `BodyInserters`:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	import static org.springframework.web.reactive.function.BodyInserters.*;
+
+	Mono<Void> result = client.post()
+			.uri("/path", id)
+			.body(fromFormData("k1", "v1").with("k2", "v2"))
+			.retrieve()
+			.bodyToMono(Void.class);
+----
+
+
+
+[[webflux-client-body-multipart]]
+=== Multipart data
+
+To send multipart data, you need to provide a `MultiValueMap<String, ?>` whose values are
+either Objects representing part content, or `HttpEntity` representing the content and
+headers for a part. `MultipartBodyBuilder` provides a convenient API to prepare a
+multipart request:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	MultipartBodyBuilder builder = new MultipartBodyBuilder();
+	builder.part("fieldPart", "fieldValue");
+	builder.part("filePart", new FileSystemResource("...logo.png"));
+	builder.part("jsonPart", new Person("Jason"));
+
+	MultiValueMap<String, HttpEntity<?>> parts = builder.build();
+----
+
+In most cases you do not have to specify the `Content-Type` for each part. The content
+type is determined automatically based on the `HttpMessageWriter` chosen to serialize it,
+or in the case of a `Resource` based on the file extension. If necessary you can
+explicitly provide the `MediaType` to use for each part through one fo the overloaded
+builder `part` methods.
+
+Once a `MultiValueMap` is prepared, the easiest way to pass it to the the `WebClient` is
+through the `syncBody` method:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	MultipartBodyBuilder builder = ...;
+
+	Mono<Void> result = client.post()
+			.uri("/path", id)
+			.syncBody(**builder.build()**)
+			.retrieve()
+			.bodyToMono(Void.class);
+----
+
+If the `MultiValueMap` contains at least one non-String value, which could also be
+represent regular form data (i.e. "application/x-www-form-urlencoded"), you don't have to
+set the `Content-Type` to "multipart/form-data". This is always the case when using
+`MultipartBodyBuilder` which ensures an `HttpEntity` wrapper.
+
+As an alternative to `MultipartBodyBuilder`, you can also provide multipart content,
+inline-style, through the built-in `BodyInserters`. For example:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	import static org.springframework.web.reactive.function.BodyInserters.*;
+
+	Mono<Void> result = client.post()
+			.uri("/path", id)
+			.body(fromMultipartData("fieldPart", "value").with("filePart", resource))
+			.retrieve()
+			.bodyToMono(Void.class);
+----
+
+
+
+
+[[webflux-client-builder]]
+== Builder options
+
+A simple way to create `WebClient` is through the static factory methods `create()` and
+`create(String)` with a base URL for all requests. You can also use `WebClient.builder()`
+for access to more options.
+
+To customize the underlying HTTP client:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	SslContext sslContext = ...
+
+	ClientHttpConnector connector = new ReactorClientHttpConnector(
+			builder -> builder.sslContext(sslContext));
+
+	WebClient webClient = WebClient.builder()
+			.clientConnector(connector)
+			.build();
+----
+
+To customize the <<web-reactive.adoc#webflux-codecs,HTTP codecs>> used for encoding and
+decoding HTTP messages:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	ExchangeStrategies strategies = ExchangeStrategies.builder()
+			.codecs(configurer -> {
+				// ...
+			})
+			.build();
+
+	WebClient webClient = WebClient.builder()
+			.exchangeStrategies(strategies)
+			.build();
+----
+
+The builder can be used to insert <<webflux-client-filter>>.
+
+Explore the `WebClient.Builder` in your IDE for other options related to URI building,
+default headers (and cookies), and more.
+
+After the `WebClient` is built, you can always obtain a new builder from it, in order to
+build a new `WebClient`, based on, but without affecting the current instance:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	WebClient modifiedClient = client.mutate()
+			// user builder methods...
+			.build();
+----
+
+
+
+
+[[webflux-client-filter]]
+== Filters
+
+`WebClient` supports interception style request filtering:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	WebClient client = WebClient.builder()
+			.filter((request, next) -> {
+				ClientRequest filtered = ClientRequest.from(request)
+						.header("foo", "bar")
+						.build();
+				return next.exchange(filtered);
+			})
+			.build();
+----
+
+`ExchangeFilterFunctions` provides a filter for basic authentication:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+
+	// static import of ExchangeFilterFunctions.basicAuthentication
+
+	WebClient client = WebClient.builder()
+			.filter(basicAuthentication("user", "pwd"))
+			.build();
+----
+
+You can also mutate an existing `WebClient` instance without affecting the original:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	WebClient filteredClient = client.mutate()
+			.filter(basicAuthentication("user", "pwd")
+			.build();
+----
+
+
+
+
+[[webflux-client-testing]]
+== Testing
+
+To test code that uses the `WebClient`, you can use a mock web server such as the
+https://github.com/square/okhttp#mockwebserver[OkHttp MockWebServer]. To see example
+use, check
+https://github.com/spring-projects/spring-framework/blob/master/spring-webflux/src/test/java/org/springframework/web/reactive/function/client/WebClientIntegrationTests.java[WebClientIntegrationTests]
+in the Spring Framework tests, or the
+https://github.com/square/okhttp/tree/master/samples/static-server[static-server]
+sample in the OkHttp repository.

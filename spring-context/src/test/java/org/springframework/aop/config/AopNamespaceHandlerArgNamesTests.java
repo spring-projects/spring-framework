@@ -16,17 +16,18 @@
 
 package org.springframework.aop.config;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public final class AopNamespaceHandlerArgNamesTests {
+public class AopNamespaceHandlerArgNamesTests {
 
 	@Test
 	public void testArgNamesOK() {

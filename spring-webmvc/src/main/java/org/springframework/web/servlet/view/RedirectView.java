@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,27 +33,22 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.servlet.FlashMap;
-import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.SmartView;
 import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
-import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * <p>View that redirects to an absolute, context relative, or current request
+ * View that redirects to an absolute, context relative, or current request
  * relative URL. The URL may be a URI template in which case the URI template
  * variables will be replaced with values available in the model. By default
  * all primitive model attributes (or collections thereof) are exposed as HTTP
@@ -99,11 +94,18 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 	private boolean exposeModelAttributes = true;
 
+	@Nullable
 	private String encodingScheme;
 
+	@Nullable
 	private HttpStatus statusCode;
 
 	private boolean expandUriTemplateVariables = true;
+
+	private boolean propagateQueryParams = false;
+
+	@Nullable
+	private String[] hosts;
 
 
 	/**
@@ -236,6 +238,47 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	}
 
 	/**
+	 * When set to {@code true} the query string of the current URL is appended
+	 * and thus propagated through to the redirected URL.
+	 * <p>Defaults to {@code false}.
+	 * @since 4.1
+	 */
+	public void setPropagateQueryParams(boolean propagateQueryParams) {
+		this.propagateQueryParams = propagateQueryParams;
+	}
+
+	/**
+	 * Whether to propagate the query params of the current URL.
+	 * @since 4.1
+	 */
+	public boolean isPropagateQueryProperties() {
+		return this.propagateQueryParams;
+	}
+
+	/**
+	 * Configure one or more hosts associated with the application.
+	 * All other hosts will be considered external hosts.
+	 * <p>In effect, this property provides a way turn off encoding via
+	 * {@link HttpServletResponse#encodeRedirectURL} for URLs that have a
+	 * host and that host is not listed as a known host.
+	 * <p>If not set (the default) all URLs are encoded through the response.
+	 * @param hosts one or more application hosts
+	 * @since 4.3
+	 */
+	public void setHosts(@Nullable String... hosts) {
+		this.hosts = hosts;
+	}
+
+	/**
+	 * Return the configured application hosts.
+	 * @since 4.3
+	 */
+	@Nullable
+	public String[] getHosts() {
+		return this.hosts;
+	}
+
+	/**
 	 * Returns "true" indicating this view performs a redirect.
 	 */
 	@Override
@@ -251,34 +294,28 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 		return false;
 	}
 
+
 	/**
 	 * Convert model to request parameters and redirect to the given URL.
 	 * @see #appendQueryProperties
 	 * @see #sendRedirect
 	 */
 	@Override
-	protected void renderMergedOutputModel(
-			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response)
-			throws IOException {
+	protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
 
 		String targetUrl = createTargetUrl(model, request);
 		targetUrl = updateTargetUrl(targetUrl, model, request, response);
 
-		FlashMap flashMap = RequestContextUtils.getOutputFlashMap(request);
-		if (!CollectionUtils.isEmpty(flashMap)) {
-			UriComponents uriComponents = UriComponentsBuilder.fromUriString(targetUrl).build();
-			flashMap.setTargetRequestPath(uriComponents.getPath());
-			flashMap.addTargetRequestParams(uriComponents.getQueryParams());
-		}
+		// Save flash attributes
+		RequestContextUtils.saveOutputFlashMap(targetUrl, request, response);
 
-		FlashMapManager flashMapManager = RequestContextUtils.getFlashMapManager(request);
-		flashMapManager.saveOutputFlashMap(flashMap, request, response);
-
+		// Redirect
 		sendRedirect(request, response, targetUrl, this.http10Compatible);
 	}
 
 	/**
-	 * Creates the target URL by checking if the redirect string is a URI template first,
+	 * Create the target URL by checking if the redirect string is a URI template first,
 	 * expanding it with the given model, and then optionally appending simple type model
 	 * attributes as query String parameters.
 	 */
@@ -287,6 +324,9 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 		// Prepare target URL.
 		StringBuilder targetUrl = new StringBuilder();
+		String url = getUrl();
+		Assert.state(url != null, "'url' not set");
+
 		if (this.contextRelative && getUrl().startsWith("/")) {
 			// Do not apply context path to relative URLs.
 			targetUrl.append(request.getContextPath());
@@ -305,7 +345,9 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			Map<String, String> variables = getCurrentRequestUriVariables(request);
 			targetUrl = replaceUriTemplateVariables(targetUrl.toString(), model, variables, enc);
 		}
-
+		if (isPropagateQueryProperties()) {
+		 	appendCurrentQueryParams(targetUrl, request);
+		}
 		if (this.exposeModelAttributes) {
 			appendQueryProperties(targetUrl, model, enc);
 		}
@@ -328,15 +370,17 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			throws UnsupportedEncodingException {
 
 		StringBuilder result = new StringBuilder();
-		Matcher m = URI_TEMPLATE_VARIABLE_PATTERN.matcher(targetUrl);
+		Matcher matcher = URI_TEMPLATE_VARIABLE_PATTERN.matcher(targetUrl);
 		int endLastMatch = 0;
-		while (m.find()) {
-			String name = m.group(1);
-			Object value = model.containsKey(name) ? model.remove(name) : currentUriVariables.get(name);
-			Assert.notNull(value, "Model has no value for '" + name + "'");
-			result.append(targetUrl.substring(endLastMatch, m.start()));
+		while (matcher.find()) {
+			String name = matcher.group(1);
+			Object value = (model.containsKey(name) ? model.remove(name) : currentUriVariables.get(name));
+			if (value == null) {
+				throw new IllegalArgumentException("Model has no value for key '" + name + "'");
+			}
+			result.append(targetUrl.substring(endLastMatch, matcher.start()));
 			result.append(UriUtils.encodePathSegment(value.toString(), encodingScheme));
-			endLastMatch = m.end();
+			endLastMatch = matcher.end();
 		}
 		result.append(targetUrl.substring(endLastMatch, targetUrl.length()));
 		return result;
@@ -344,9 +388,39 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 	@SuppressWarnings("unchecked")
 	private Map<String, String> getCurrentRequestUriVariables(HttpServletRequest request) {
-		Map<String, String> uriVars =
-			(Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
+		Map<String, String> uriVars = (Map<String, String>) request.getAttribute(name);
 		return (uriVars != null) ? uriVars : Collections.<String, String> emptyMap();
+	}
+
+	/**
+	 * Append the query string of the current request to the target redirect URL.
+	 * @param targetUrl the StringBuilder to append the properties to
+	 * @param request the current request
+	 * @since 4.1
+	 */
+	protected void appendCurrentQueryParams(StringBuilder targetUrl, HttpServletRequest request) {
+		String query = request.getQueryString();
+		if (StringUtils.hasText(query)) {
+			// Extract anchor fragment, if any.
+			String fragment = null;
+			int anchorIndex = targetUrl.indexOf("#");
+			if (anchorIndex > -1) {
+				fragment = targetUrl.substring(anchorIndex);
+				targetUrl.delete(anchorIndex, targetUrl.length());
+			}
+
+			if (targetUrl.toString().indexOf('?') < 0) {
+				targetUrl.append('?').append(query);
+			}
+			else {
+				targetUrl.append('&').append(query);
+			}
+			// Append anchor fragment, if any, to end of URL.
+			if (fragment != null) {
+				targetUrl.append(fragment);
+			}
+		}
 	}
 
 	/**
@@ -379,7 +453,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 				valueIter = Arrays.asList(ObjectUtils.toObjectArray(rawValue)).iterator();
 			}
 			else if (rawValue instanceof Collection) {
-				valueIter = ((Collection) rawValue).iterator();
+				valueIter = ((Collection<Object>) rawValue).iterator();
 			}
 			else {
 				valueIter = Collections.singleton(rawValue).iterator();
@@ -416,12 +490,12 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	 * @see #isEligibleProperty(String, Object)
 	 */
 	protected Map<String, Object> queryProperties(Map<String, Object> model) {
-		Map<String, Object> result = new LinkedHashMap<String, Object>();
-		for (Map.Entry<String, Object> entry : model.entrySet()) {
-			if (isEligibleProperty(entry.getKey(), entry.getValue())) {
-				result.put(entry.getKey(), entry.getValue());
+		Map<String, Object> result = new LinkedHashMap<>();
+		model.forEach((name, value) -> {
+			if (isEligibleProperty(name, value)) {
+				result.put(name, value);
 			}
-		}
+		});
 		return result;
 	}
 
@@ -435,14 +509,13 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	 * @param value the value of the model element
 	 * @return whether the element is eligible as query property
 	 */
-	protected boolean isEligibleProperty(String key, Object value) {
+	protected boolean isEligibleProperty(String key, @Nullable Object value) {
 		if (value == null) {
 			return false;
 		}
 		if (isEligibleValue(value)) {
 			return true;
 		}
-
 		if (value.getClass().isArray()) {
 			int length = Array.getLength(value);
 			if (length == 0) {
@@ -456,9 +529,8 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			}
 			return true;
 		}
-
 		if (value instanceof Collection) {
-			Collection coll = (Collection) value;
+			Collection<?> coll = (Collection<?>) value;
 			if (coll.isEmpty()) {
 				return false;
 			}
@@ -469,7 +541,6 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			}
 			return true;
 		}
-
 		return false;
 	}
 
@@ -481,7 +552,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	 * @return whether the element value is eligible
 	 * @see BeanUtils#isSimpleValueType
 	 */
-	protected boolean isEligibleValue(Object value) {
+	protected boolean isEligibleValue(@Nullable Object value) {
 		return (value != null && BeanUtils.isSimpleValueType(value.getClass()));
 	}
 
@@ -496,33 +567,27 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	 * @see java.net.URLEncoder#encode(String)
 	 */
 	protected String urlEncode(String input, String encodingScheme) throws UnsupportedEncodingException {
-		return (input != null ? URLEncoder.encode(input, encodingScheme) : null);
+		return URLEncoder.encode(input, encodingScheme);
 	}
 
 	/**
 	 * Find the registered {@link RequestDataValueProcessor}, if any, and allow
 	 * it to update the redirect target URL.
+	 * @param targetUrl the given redirect URL
 	 * @return the updated URL or the same as URL as the one passed in
 	 */
 	protected String updateTargetUrl(String targetUrl, Map<String, Object> model,
-								  HttpServletRequest request, HttpServletResponse response) {
+			HttpServletRequest request, HttpServletResponse response) {
 
-		RequestContext requestContext = null;
-		if (getWebApplicationContext() != null) {
-			requestContext = createRequestContext(request, response, model);
-		}
-		else {
-			WebApplicationContext wac = ContextLoader.getCurrentWebApplicationContext();
-			if (wac != null && wac.getServletContext() != null) {
-				requestContext = new RequestContext(request, response, wac.getServletContext(), model);
-			}
+		WebApplicationContext wac = getWebApplicationContext();
+		if (wac == null) {
+			wac = RequestContextUtils.findWebApplicationContext(request, getServletContext());
 		}
 
-		if (requestContext != null) {
-			RequestDataValueProcessor processor = requestContext.getRequestDataValueProcessor();
-			if (processor != null) {
-				targetUrl = processor.processUrl(request, targetUrl);
-			}
+		if (wac != null && wac.containsBean(RequestContextUtils.REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME)) {
+			RequestDataValueProcessor processor = wac.getBean(
+					RequestContextUtils.REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME, RequestDataValueProcessor.class);
+			return processor.processUrl(request, targetUrl);
 		}
 
 		return targetUrl;
@@ -536,27 +601,56 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	 * @param http10Compatible whether to stay compatible with HTTP 1.0 clients
 	 * @throws IOException if thrown by response methods
 	 */
-	protected void sendRedirect(
-			HttpServletRequest request, HttpServletResponse response, String targetUrl, boolean http10Compatible)
-			throws IOException {
+	protected void sendRedirect(HttpServletRequest request, HttpServletResponse response,
+			String targetUrl, boolean http10Compatible) throws IOException {
 
-		String encodedRedirectURL = response.encodeRedirectURL(targetUrl);
-
+		String encodedURL = (isRemoteHost(targetUrl) ? targetUrl : response.encodeRedirectURL(targetUrl));
 		if (http10Compatible) {
+			HttpStatus attributeStatusCode = (HttpStatus) request.getAttribute(View.RESPONSE_STATUS_ATTRIBUTE);
 			if (this.statusCode != null) {
 				response.setStatus(this.statusCode.value());
-				response.setHeader("Location", encodedRedirectURL);
+				response.setHeader("Location", encodedURL);
+			}
+			else if (attributeStatusCode != null) {
+				response.setStatus(attributeStatusCode.value());
+				response.setHeader("Location", encodedURL);
 			}
 			else {
 				// Send status code 302 by default.
-				response.sendRedirect(encodedRedirectURL);
+				response.sendRedirect(encodedURL);
 			}
 		}
 		else {
 			HttpStatus statusCode = getHttp11StatusCode(request, response, targetUrl);
 			response.setStatus(statusCode.value());
-			response.setHeader("Location", encodedRedirectURL);
+			response.setHeader("Location", encodedURL);
 		}
+	}
+
+	/**
+	 * Whether the given targetUrl has a host that is a "foreign" system in which
+	 * case {@link HttpServletResponse#encodeRedirectURL} will not be applied.
+	 * This method returns {@code true} if the {@link #setHosts(String[])}
+	 * property is configured and the target URL has a host that does not match.
+	 * @param targetUrl the target redirect URL
+	 * @return {@code true} the target URL has a remote host, {@code false} if it
+	 * the URL does not have a host or the "host" property is not configured.
+	 * @since 4.3
+	 */
+	protected boolean isRemoteHost(String targetUrl) {
+		if (ObjectUtils.isEmpty(getHosts())) {
+			return false;
+		}
+		String targetHost = UriComponentsBuilder.fromUriString(targetUrl).build().getHost();
+		if (StringUtils.isEmpty(targetHost)) {
+			return false;
+		}
+		for (String host : getHosts()) {
+			if (targetHost.equals(host)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**

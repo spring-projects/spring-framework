@@ -32,9 +32,10 @@ package org.springframework.asm;
 /**
  * A visitor to visit a Java class. The methods of this class must be called in
  * the following order: <tt>visit</tt> [ <tt>visitSource</tt> ] [
- * <tt>visitOuterClass</tt> ] ( <tt>visitAnnotation</tt> |
- * <tt>visitAttribute</tt> )* ( <tt>visitInnerClass</tt> | <tt>visitField</tt> |
- * <tt>visitMethod</tt> )* <tt>visitEnd</tt>.
+ * <tt>visitModule</tt> ][ <tt>visitOuterClass</tt> ] ( <tt>visitAnnotation</tt> |
+ * <tt>visitTypeAnnotation</tt> | <tt>visitAttribute</tt> )* (
+ * <tt>visitInnerClass</tt> | <tt>visitField</tt> | <tt>visitMethod</tt> )*
+ * <tt>visitEnd</tt>.
  * 
  * @author Eric Bruneton
  */
@@ -42,7 +43,7 @@ public abstract class ClassVisitor {
 
     /**
      * The ASM API version implemented by this visitor. The value of this field
-     * must be one of {@link Opcodes#ASM4}.
+     * must be one of {@link Opcodes#ASM4}, {@link Opcodes#ASM5} or {@link Opcodes#ASM6}.
      */
     protected final int api;
 
@@ -57,7 +58,7 @@ public abstract class ClassVisitor {
      * 
      * @param api
      *            the ASM API version implemented by this visitor. Must be one
-     *            of {@link Opcodes#ASM4}.
+     *            of {@link Opcodes#ASM4}, {@link Opcodes#ASM5} or {@link Opcodes#ASM6}.
      */
     public ClassVisitor(final int api) {
         this(api, null);
@@ -68,17 +69,15 @@ public abstract class ClassVisitor {
      * 
      * @param api
      *            the ASM API version implemented by this visitor. Must be one
-     *            of {@link Opcodes#ASM4}.
+     *            of {@link Opcodes#ASM4}, {@link Opcodes#ASM5} or {@link Opcodes#ASM6}.
      * @param cv
      *            the class visitor to which this visitor must delegate method
      *            calls. May be null.
      */
     public ClassVisitor(final int api, final ClassVisitor cv) {
-		/* SPRING PATCH: REMOVED FOR CGLIB 3.0 COMPATIBILITY
-        if (api != Opcodes.ASM4) {
+        if (api < Opcodes.ASM4 || api > Opcodes.ASM6) {
             throw new IllegalArgumentException();
         }
-        */
         this.api = api;
         this.cv = cv;
     }
@@ -133,6 +132,28 @@ public abstract class ClassVisitor {
     }
 
     /**
+     * Visit the module corresponding to the class.
+     * @param name
+     *            module name
+     * @param access
+     *            module flags, among {@code ACC_OPEN}, {@code ACC_SYNTHETIC}
+     *            and {@code ACC_MANDATED}.
+     * @param version
+     *            module version or null.
+     * @return a visitor to visit the module values, or <tt>null</tt> if
+     *         this visitor is not interested in visiting this module.
+     */
+    public ModuleVisitor visitModule(String name, int access, String version) {
+        if (api < Opcodes.ASM6) {
+            throw new RuntimeException();
+        }
+        if (cv != null) {
+            return cv.visitModule(name, access, version);
+        }
+        return null;
+    }
+
+    /**
      * Visits the enclosing class of the class. This method must be called only
      * if the class has an enclosing class.
      * 
@@ -166,6 +187,41 @@ public abstract class ClassVisitor {
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         if (cv != null) {
             return cv.visitAnnotation(desc, visible);
+        }
+        return null;
+    }
+
+    /**
+     * Visits an annotation on a type in the class signature.
+     * 
+     * @param typeRef
+     *            a reference to the annotated type. The sort of this type
+     *            reference must be {@link TypeReference#CLASS_TYPE_PARAMETER
+     *            CLASS_TYPE_PARAMETER},
+     *            {@link TypeReference#CLASS_TYPE_PARAMETER_BOUND
+     *            CLASS_TYPE_PARAMETER_BOUND} or
+     *            {@link TypeReference#CLASS_EXTENDS CLASS_EXTENDS}. See
+     *            {@link TypeReference}.
+     * @param typePath
+     *            the path to the annotated type argument, wildcard bound, array
+     *            element type, or static inner type within 'typeRef'. May be
+     *            <tt>null</tt> if the annotation targets 'typeRef' as a whole.
+     * @param desc
+     *            the class descriptor of the annotation class.
+     * @param visible
+     *            <tt>true</tt> if the annotation is visible at runtime.
+     * @return a visitor to visit the annotation values, or <tt>null</tt> if
+     *         this visitor is not interested in visiting this annotation.
+     */
+    public AnnotationVisitor visitTypeAnnotation(int typeRef,
+            TypePath typePath, String desc, boolean visible) {
+		/* SPRING PATCH: REMOVED FOR COMPATIBILITY WITH CGLIB 3.1
+        if (api < Opcodes.ASM5) {
+            throw new RuntimeException();
+        }
+        */
+        if (cv != null) {
+            return cv.visitTypeAnnotation(typeRef, typePath, desc, visible);
         }
         return null;
     }

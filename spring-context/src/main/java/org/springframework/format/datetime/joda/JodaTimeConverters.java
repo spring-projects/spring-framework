@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.format.datetime.joda;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
 import org.joda.time.LocalDate;
@@ -36,8 +35,13 @@ import org.springframework.format.datetime.DateFormatterRegistrar;
  * Installs lower-level type converters required to integrate
  * Joda-Time support into Spring's field formatting system.
  *
+ * <p>Note: {@link JodaTimeFormatterRegistrar} installs these converters
+ * and relies on several of them for its formatters. Some additional
+ * converters are just being registered for custom conversion scenarios.
+ *
  * @author Keith Donald
  * @author Phillip Webb
+ * @author Juergen Hoeller
  * @since 3.0
  */
 final class JodaTimeConverters {
@@ -46,8 +50,10 @@ final class JodaTimeConverters {
 	 * Install the converters into the converter registry.
 	 * @param registry the converter registry
 	 */
+	@SuppressWarnings("deprecation")
 	public static void registerConverters(ConverterRegistry registry) {
 		DateFormatterRegistrar.addDateConverters(registry);
+
 		registry.addConverter(new DateTimeToLocalDateConverter());
 		registry.addConverter(new DateTimeToLocalTimeConverter());
 		registry.addConverter(new DateTimeToLocalDateTimeConverter());
@@ -59,6 +65,9 @@ final class JodaTimeConverters {
 		registry.addConverter(new DateTimeToLongConverter());
 		registry.addConverter(new DateToReadableInstantConverter());
 		registry.addConverter(new CalendarToReadableInstantConverter());
+		registry.addConverter(new LongToReadableInstantConverter());
+		registry.addConverter(new LocalDateTimeToLocalDateConverter());
+		registry.addConverter(new LocalDateTimeToLocalTimeConverter());
 	}
 
 
@@ -89,10 +98,11 @@ final class JodaTimeConverters {
 	}
 
 
-	private static class DateTimeToDateMidnightConverter implements Converter<DateTime, DateMidnight> {
+	@Deprecated
+	private static class DateTimeToDateMidnightConverter implements Converter<DateTime, org.joda.time.DateMidnight> {
 
 		@Override
-		public DateMidnight convert(DateTime source) {
+		public org.joda.time.DateMidnight convert(DateTime source) {
 			return source.toDateMidnight();
 		}
 	}
@@ -144,7 +154,7 @@ final class JodaTimeConverters {
 
 
 	/**
-	 * Used when printing a java.util.Date field with a ReadableInstantPrinter.
+	 * Used when printing a {@code java.util.Date} field with a ReadableInstantPrinter.
 	 * @see MillisecondInstantPrinter
 	 * @see JodaDateTimeFormatAnnotationFormatterFactory
 	 */
@@ -158,7 +168,7 @@ final class JodaTimeConverters {
 
 
 	/**
-	 * Used when printing a java.util.Calendar field with a ReadableInstantPrinter.
+	 * Used when printing a {@code java.util.Calendar} field with a ReadableInstantPrinter.
 	 * @see MillisecondInstantPrinter
 	 * @see JodaDateTimeFormatAnnotationFormatterFactory
 	 */
@@ -167,6 +177,38 @@ final class JodaTimeConverters {
 		@Override
 		public ReadableInstant convert(Calendar source) {
 			return new DateTime(source);
+		}
+	}
+
+
+	/**
+	 * Used when printing a Long field with a ReadableInstantPrinter.
+	 * @see MillisecondInstantPrinter
+	 * @see JodaDateTimeFormatAnnotationFormatterFactory
+	 */
+	private static class LongToReadableInstantConverter implements Converter<Long, ReadableInstant> {
+
+		@Override
+		public ReadableInstant convert(Long source) {
+			return new DateTime(source.longValue());
+		}
+	}
+
+
+	private static class LocalDateTimeToLocalDateConverter implements Converter<LocalDateTime, LocalDate> {
+
+		@Override
+		public LocalDate convert(LocalDateTime source) {
+			return source.toLocalDate();
+		}
+	}
+
+
+	private static class LocalDateTimeToLocalTimeConverter implements Converter<LocalDateTime, LocalTime> {
+
+		@Override
+		public LocalTime convert(LocalDateTime source) {
+			return source.toLocalTime();
 		}
 	}
 

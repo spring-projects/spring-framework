@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,23 +22,20 @@ import javax.persistence.PersistenceException;
 
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.jdbc.datasource.ConnectionHandle;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 
 /**
- * SPI strategy that encapsulates certain functionality that standard JPA 2.0
- * does not offer, such as access to the underlying JDBC Connection. This
- * strategy is mainly intended for standalone usage of a JPA provider; most
- * of its functionality is not relevant when running with JTA transactions.
+ * SPI strategy that encapsulates certain functionality that standard JPA 2.1 does
+ * not offer, such as access to the underlying JDBC Connection. This strategy is
+ * mainly intended for standalone usage of a JPA provider; most of its functionality
+ * is not relevant when running with JTA transactions.
  *
- * <p>Also allows for the provision of value-added methods for portable yet
- * more capable EntityManager and EntityManagerFactory subinterfaces offered
- * by Spring.
- *
- * <p>In general, it is recommended to derive from DefaultJpaDialect instead of
- * implementing this interface directly. This allows for inheriting common
- * behavior (present and future) from DefaultJpaDialect, only overriding
- * specific hooks to plug in concrete vendor-specific behavior.
+ * <p>In general, it is recommended to derive from {@link DefaultJpaDialect} instead
+ * of implementing this interface directly. This allows for inheriting common behavior
+ * (present and future) from DefaultJpaDialect, only overriding specific hooks to
+ * plug in concrete vendor-specific behavior.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -82,6 +79,7 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * @see javax.persistence.EntityTransaction#begin
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils#prepareConnectionForTransaction
 	 */
+	@Nullable
 	Object beginTransaction(EntityManager entityManager, TransactionDefinition definition)
 			throws PersistenceException, SQLException, TransactionException;
 
@@ -104,7 +102,8 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * @throws javax.persistence.PersistenceException if thrown by JPA methods
 	 * @see #cleanupTransaction
 	 */
-	Object prepareTransaction(EntityManager entityManager, boolean readOnly, String name)
+	@Nullable
+	Object prepareTransaction(EntityManager entityManager, boolean readOnly, @Nullable String name)
 			throws PersistenceException;
 
 	/**
@@ -118,7 +117,7 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * @see #beginTransaction
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils#resetConnectionAfterTransaction
 	 */
-	void cleanupTransaction(Object transactionData);
+	void cleanupTransaction(@Nullable Object transactionData);
 
 	/**
 	 * Retrieve the JDBC Connection that the given JPA EntityManager uses underneath,
@@ -141,17 +140,16 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * an implementation should use a special handle that references that other object.
 	 * @param entityManager the current JPA EntityManager
 	 * @param readOnly whether the Connection is only needed for read-only purposes
-	 * @return a handle for the JDBC Connection, to be passed into
-	 * {@code releaseJdbcConnection}, or {@code null}
-	 * if no JDBC Connection can be retrieved
+	 * @return a handle for the Connection, to be passed into {@code releaseJdbcConnection},
+	 * or {@code null} if no JDBC Connection can be retrieved
 	 * @throws javax.persistence.PersistenceException if thrown by JPA methods
 	 * @throws java.sql.SQLException if thrown by JDBC methods
 	 * @see #releaseJdbcConnection
 	 * @see org.springframework.jdbc.datasource.ConnectionHandle#getConnection
 	 * @see org.springframework.jdbc.datasource.SimpleConnectionHandle
 	 * @see JpaTransactionManager#setDataSource
-	 * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor
 	 */
+	@Nullable
 	ConnectionHandle getJdbcConnection(EntityManager entityManager, boolean readOnly)
 			throws PersistenceException, SQLException;
 

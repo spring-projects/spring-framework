@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,16 @@
 
 package org.springframework.format.datetime.joda;
 
+import java.util.TimeZone;
+
 import org.joda.time.Chronology;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
+
+import org.springframework.context.i18n.LocaleContext;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
+import org.springframework.lang.Nullable;
 
 /**
  * A context that holds user-specific Joda-Time settings such as the user's
@@ -32,37 +39,46 @@ import org.joda.time.format.DateTimeFormatter;
  */
 public class JodaTimeContext {
 
+	@Nullable
 	private Chronology chronology;
 
+	@Nullable
 	private DateTimeZone timeZone;
 
 
 	/**
-	 * Set the user's chronology.
+	 * Set the user's chronology (calendar system).
 	 */
-	public void setChronology(Chronology chronology) {
+	public void setChronology(@Nullable Chronology chronology) {
 		this.chronology = chronology;
 	}
 
 	/**
-	 * The user's chronology (calendar system), if any.
+	 * Return the user's chronology (calendar system), if any.
 	 */
+	@Nullable
 	public Chronology getChronology() {
 		return this.chronology;
 	}
 
 	/**
-	 * Set the user's timezone.
+	 * Set the user's time zone.
+	 * <p>Alternatively, set a {@link TimeZoneAwareLocaleContext} on
+	 * {@link LocaleContextHolder}. This context class will fall back to
+	 * checking the locale context if no setting has been provided here.
+	 * @see org.springframework.context.i18n.LocaleContextHolder#getTimeZone()
+	 * @see org.springframework.context.i18n.LocaleContextHolder#setLocaleContext
 	 */
-	public void setTimeZone(DateTimeZone timeZone) {
+	public void setTimeZone(@Nullable DateTimeZone timeZone) {
 		this.timeZone = timeZone;
 	}
 
 	/**
-	 * The user's timezone, if any.
+	 * Return the user's time zone, if any.
 	 */
+	@Nullable
 	public DateTimeZone getTimeZone() {
-		return timeZone;
+		return this.timeZone;
 	}
 
 
@@ -79,6 +95,15 @@ public class JodaTimeContext {
 		}
 		if (this.timeZone != null) {
 			formatter = formatter.withZone(this.timeZone);
+		}
+		else {
+			LocaleContext localeContext = LocaleContextHolder.getLocaleContext();
+			if (localeContext instanceof TimeZoneAwareLocaleContext) {
+				TimeZone timeZone = ((TimeZoneAwareLocaleContext) localeContext).getTimeZone();
+				if (timeZone != null) {
+					formatter = formatter.withZone(DateTimeZone.forTimeZone(timeZone));
+				}
+			}
 		}
 		return formatter;
 	}

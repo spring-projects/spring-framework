@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,40 @@ package org.springframework.web.servlet.tags;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 
+import org.springframework.lang.Nullable;
+
 /**
- * JSP tag for collecting name-value parameters and passing them to a
+ * The {@code <param>} tag collects name-value parameters and passes them to a
  * {@link ParamAware} ancestor in the tag hierarchy.
  *
  * <p>This tag must be nested under a param aware tag.
  *
+ * <table>
+ * <caption>Attribute Summary</caption>
+ * <thead>
+ * <tr>
+ * <th class="colFirst">Attribute</th>
+ * <th class="colOne">Required?</th>
+ * <th class="colOne">Runtime Expression?</th>
+ * <th class="colLast">Description</th>
+ * </tr>
+ * </thead>
+ * <tbody>
+ * <tr class="altColor">
+ * <td>name</p></td>
+ * <td>true</p></td>
+ * <td>true</p></td>
+ * <td>The name of the parameter.</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td>value</p></td>
+ * <td>false</p></td>
+ * <td>true</p></td>
+ * <td>The value of the parameter.</p></td>
+ * </tr>
+ * </tbody>
+ * </table>
+ * 
  * @author Scott Andrews
  * @author Nicholas Williams
  * @since 3.0
@@ -34,13 +62,29 @@ import javax.servlet.jsp.tagext.BodyTagSupport;
 @SuppressWarnings("serial")
 public class ParamTag extends BodyTagSupport {
 
-	private String name;
+	private String name = "";
 
+	@Nullable
 	private String value;
 
 	private boolean valueSet;
 
-	// tag lifecycle
+
+	/**
+	 * Set the name of the parameter (required).
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * Set the value of the parameter (optional).
+	 */
+	public void setValue(String value) {
+		this.value = value;
+		this.valueSet = true;
+	}
+
 
 	@Override
 	public int doEndTag() throws JspException {
@@ -50,16 +94,14 @@ public class ParamTag extends BodyTagSupport {
 			param.setValue(this.value);
 		}
 		else if (getBodyContent() != null) {
-			// get the value from the tag body
+			// Get the value from the tag body
 			param.setValue(getBodyContent().getString().trim());
 		}
 
-		// find a param aware ancestor
-		ParamAware paramAwareTag = (ParamAware) findAncestorWithClass(this,
-				ParamAware.class);
+		// Find a param aware ancestor
+		ParamAware paramAwareTag = (ParamAware) findAncestorWithClass(this, ParamAware.class);
 		if (paramAwareTag == null) {
-			throw new JspException(
-					"The param tag must be a descendant of a tag that supports parameters");
+			throw new JspException("The param tag must be a descendant of a tag that supports parameters");
 		}
 
 		paramAwareTag.addParam(param);
@@ -67,37 +109,10 @@ public class ParamTag extends BodyTagSupport {
 		return EVAL_PAGE;
 	}
 
-	// tag attribute accessors
-
-	/**
-	 * Sets the name of the parameter
-	 *
-	 * <p>
-	 * Required
-	 *
-	 * @param name the parameter name
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	/**
-	 * Sets the value of the parameter
-	 *
-	 * <p>
-	 * Optional. If not set, the tag's body content is evaluated
-	 *
-	 * @param value the parameter value
-	 */
-	public void setValue(String value) {
-		this.value = value;
-		this.valueSet = true;
-	}
-
 	@Override
 	public void release() {
 		super.release();
-		this.name = null;
+		this.name = "";
 		this.value = null;
 		this.valueSet = false;
 	}

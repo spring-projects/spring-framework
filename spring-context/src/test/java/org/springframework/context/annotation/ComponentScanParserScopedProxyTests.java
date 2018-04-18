@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,43 @@
 
 package org.springframework.context.annotation;
 
-import example.scannable.FooService;
-import example.scannable.ScopedProxyTestBean;
-import static org.junit.Assert.*;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.FatalBeanException;
+import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.tests.context.SimpleMapScope;
 import org.springframework.util.SerializationTestUtils;
 
+import example.scannable.FooService;
+import example.scannable.ScopedProxyTestBean;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+
 /**
  * @author Mark Fisher
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class ComponentScanParserScopedProxyTests {
+
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
+
 
 	@Test
 	public void testDefaultScopedProxy() {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyDefaultTests.xml");
 		context.getBeanFactory().registerScope("myScope", new SimpleMapScope());
+
 		ScopedProxyTestBean bean = (ScopedProxyTestBean) context.getBean("scopedProxyTestBean");
 		// should not be a proxy
 		assertFalse(AopUtils.isAopProxy(bean));
+		context.close();
 	}
 
 	@Test
@@ -48,9 +60,11 @@ public class ComponentScanParserScopedProxyTests {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyNoTests.xml");
 		context.getBeanFactory().registerScope("myScope", new SimpleMapScope());
+
 		ScopedProxyTestBean bean = (ScopedProxyTestBean) context.getBean("scopedProxyTestBean");
 		// should not be a proxy
 		assertFalse(AopUtils.isAopProxy(bean));
+		context.close();
 	}
 
 	@Test
@@ -58,6 +72,7 @@ public class ComponentScanParserScopedProxyTests {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyInterfacesTests.xml");
 		context.getBeanFactory().registerScope("myScope", new SimpleMapScope());
+
 		// should cast to the interface
 		FooService bean = (FooService) context.getBean("scopedProxyTestBean");
 		// should be dynamic proxy
@@ -67,6 +82,7 @@ public class ComponentScanParserScopedProxyTests {
 		FooService deserialized = (FooService) SerializationTestUtils.serializeAndDeserialize(bean);
 		assertNotNull(deserialized);
 		assertEquals("bar", deserialized.foo(1));
+		context.close();
 	}
 
 	@Test
@@ -74,6 +90,7 @@ public class ComponentScanParserScopedProxyTests {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyTargetClassTests.xml");
 		context.getBeanFactory().registerScope("myScope", new SimpleMapScope());
+
 		ScopedProxyTestBean bean = (ScopedProxyTestBean) context.getBean("scopedProxyTestBean");
 		// should be a class-based proxy
 		assertTrue(AopUtils.isCglibProxy(bean));
@@ -82,18 +99,17 @@ public class ComponentScanParserScopedProxyTests {
 		ScopedProxyTestBean deserialized = (ScopedProxyTestBean) SerializationTestUtils.serializeAndDeserialize(bean);
 		assertNotNull(deserialized);
 		assertEquals("bar", deserialized.foo(1));
+		context.close();
 	}
 
 	@Test
-	public void testInvalidConfigScopedProxy() {
-		try {
-			new ClassPathXmlApplicationContext(
-					"org/springframework/context/annotation/scopedProxyInvalidConfigTests.xml");
-			fail("should have thrown Exception; scope-resolver and scoped-proxy both provided");
-		}
-		catch (FatalBeanException e) {
-			// expected
-		}
+	@SuppressWarnings("resource")
+	public void testInvalidConfigScopedProxy() throws Exception {
+		exception.expect(BeanDefinitionParsingException.class);
+		exception.expectMessage(containsString("Cannot define both 'scope-resolver' and 'scoped-proxy' on <component-scan> tag"));
+		exception.expectMessage(containsString("Offending resource: class path resource [org/springframework/context/annotation/scopedProxyInvalidConfigTests.xml]"));
+
+		new ClassPathXmlApplicationContext("org/springframework/context/annotation/scopedProxyInvalidConfigTests.xml");
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.util;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Utility methods for simple pattern matching, in particular for
@@ -33,7 +35,7 @@ public abstract class PatternMatchUtils {
 	 * @param str the String to match
 	 * @return whether the String matches the given pattern
 	 */
-	public static boolean simpleMatch(String pattern, String str) {
+	public static boolean simpleMatch(@Nullable String pattern, @Nullable String str) {
 		if (pattern == null || str == null) {
 			return false;
 		}
@@ -50,6 +52,9 @@ public abstract class PatternMatchUtils {
 				return str.endsWith(pattern.substring(1));
 			}
 			String part = pattern.substring(1, nextIndex);
+			if ("".equals(part)) {
+				return simpleMatch(pattern.substring(nextIndex), str);
+			}
 			int partIndex = str.indexOf(part);
 			while (partIndex != -1) {
 				if (simpleMatch(pattern.substring(nextIndex), str.substring(partIndex + part.length()))) {
@@ -72,10 +77,10 @@ public abstract class PatternMatchUtils {
 	 * @param str the String to match
 	 * @return whether the String matches any of the given patterns
 	 */
-	public static boolean simpleMatch(String[] patterns, String str) {
+	public static boolean simpleMatch(@Nullable String[] patterns, String str) {
 		if (patterns != null) {
-			for (int i = 0; i < patterns.length; i++) {
-				if (simpleMatch(patterns[i], str)) {
+			for (String pattern : patterns) {
+				if (simpleMatch(pattern, str)) {
 					return true;
 				}
 			}

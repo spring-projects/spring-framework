@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,26 +17,26 @@
 package org.springframework.context.annotation;
 
 import org.junit.Test;
-import org.springframework.beans.factory.BeanCreationException;
+
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests cornering bug SPR-8514.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class ConfigurationWithFactoryBeanAndAutowiringTests {
 
 	@Test
 	public void withConcreteFactoryBeanImplementationAsReturnType() {
-		AnnotationConfigApplicationContext ctx =
-			new AnnotationConfigApplicationContext();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AppConfig.class);
 		ctx.register(ConcreteFactoryBeanImplementationConfig.class);
 		ctx.refresh();
@@ -44,8 +44,7 @@ public class ConfigurationWithFactoryBeanAndAutowiringTests {
 
 	@Test
 	public void withParameterizedFactoryBeanImplementationAsReturnType() {
-		AnnotationConfigApplicationContext ctx =
-			new AnnotationConfigApplicationContext();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AppConfig.class);
 		ctx.register(ParameterizedFactoryBeanImplementationConfig.class);
 		ctx.refresh();
@@ -53,8 +52,7 @@ public class ConfigurationWithFactoryBeanAndAutowiringTests {
 
 	@Test
 	public void withParameterizedFactoryBeanInterfaceAsReturnType() {
-		AnnotationConfigApplicationContext ctx =
-			new AnnotationConfigApplicationContext();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AppConfig.class);
 		ctx.register(ParameterizedFactoryBeanInterfaceConfig.class);
 		ctx.refresh();
@@ -62,163 +60,209 @@ public class ConfigurationWithFactoryBeanAndAutowiringTests {
 
 	@Test
 	public void withNonPublicParameterizedFactoryBeanInterfaceAsReturnType() {
-		AnnotationConfigApplicationContext ctx =
-			new AnnotationConfigApplicationContext();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AppConfig.class);
 		ctx.register(NonPublicParameterizedFactoryBeanInterfaceConfig.class);
 		ctx.refresh();
 	}
 
-	@Test(expected=BeanCreationException.class)
+	@Test
 	public void withRawFactoryBeanInterfaceAsReturnType() {
-		AnnotationConfigApplicationContext ctx =
-			new AnnotationConfigApplicationContext();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AppConfig.class);
 		ctx.register(RawFactoryBeanInterfaceConfig.class);
 		ctx.refresh();
 	}
 
-	@Test(expected=BeanCreationException.class)
+	@Test
 	public void withWildcardParameterizedFactoryBeanInterfaceAsReturnType() {
-		AnnotationConfigApplicationContext ctx =
-			new AnnotationConfigApplicationContext();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AppConfig.class);
 		ctx.register(WildcardParameterizedFactoryBeanInterfaceConfig.class);
 		ctx.refresh();
 	}
 
-}
-
-
-class DummyBean {
-}
-
-
-class MyFactoryBean implements FactoryBean<String> {
-	@Override
-	public String getObject() throws Exception {
-		return "foo";
-	}
-	@Override
-	public Class<String> getObjectType() {
-		return String.class;
-	}
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
-}
-
-
-class MyParameterizedFactoryBean<T> implements FactoryBean<T> {
-
-	private final T obj;
-
-	public MyParameterizedFactoryBean(T obj) {
-		this.obj = obj;
+	@Test
+	public void withFactoryBeanCallingBean() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(AppConfig.class);
+		ctx.register(FactoryBeanCallingConfig.class);
+		ctx.refresh();
+		assertEquals("true", ctx.getBean("myString"));
 	}
 
-	@Override
-	public T getObject() throws Exception {
-		return obj;
+
+	static class DummyBean {
 	}
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public Class<T> getObjectType() {
-		return (Class<T>)obj.getClass();
+
+	static class MyFactoryBean implements FactoryBean<String>, InitializingBean {
+
+		private boolean initialized = false;
+
+		@Override
+		public void afterPropertiesSet() throws Exception {
+			this.initialized = true;
+		}
+
+		@Override
+		public String getObject() throws Exception {
+			return "foo";
+		}
+
+		@Override
+		public Class<String> getObjectType() {
+			return String.class;
+		}
+
+		@Override
+		public boolean isSingleton() {
+			return true;
+		}
+
+		public String getString() {
+			return Boolean.toString(this.initialized);
+		}
 	}
 
-	@Override
-	public boolean isSingleton() {
-		return true;
+
+	static class MyParameterizedFactoryBean<T> implements FactoryBean<T> {
+
+		private final T obj;
+
+		public MyParameterizedFactoryBean(T obj) {
+			this.obj = obj;
+		}
+
+		@Override
+		public T getObject() throws Exception {
+			return obj;
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public Class<T> getObjectType() {
+			return (Class<T>)obj.getClass();
+		}
+
+		@Override
+		public boolean isSingleton() {
+			return true;
+		}
 	}
-}
 
 
-@Configuration
-class AppConfig {
-	@Bean
-	public DummyBean dummyBean() {
-		return new DummyBean();
+	@Configuration
+	static class AppConfig {
+
+		@Bean
+		public DummyBean dummyBean() {
+			return new DummyBean();
+		}
 	}
-}
 
 
-@Configuration
-class ConcreteFactoryBeanImplementationConfig {
-	@Autowired
-	private DummyBean dummyBean;
+	@Configuration
+	static class ConcreteFactoryBeanImplementationConfig {
 
-	@Bean
-	public MyFactoryBean factoryBean() {
-		Assert.notNull(dummyBean, "DummyBean was not injected.");
-		return new MyFactoryBean();
+		@Autowired
+		private DummyBean dummyBean;
+
+		@Bean
+		public MyFactoryBean factoryBean() {
+			Assert.notNull(dummyBean, "DummyBean was not injected.");
+			return new MyFactoryBean();
+		}
 	}
-}
 
 
-@Configuration
-class ParameterizedFactoryBeanImplementationConfig {
-	@Autowired
-	private DummyBean dummyBean;
+	@Configuration
+	static class ParameterizedFactoryBeanImplementationConfig {
 
-	@Bean
-	public MyParameterizedFactoryBean<String> factoryBean() {
-		Assert.notNull(dummyBean, "DummyBean was not injected.");
-		return new MyParameterizedFactoryBean<String>("whatev");
+		@Autowired
+		private DummyBean dummyBean;
+
+		@Bean
+		public MyParameterizedFactoryBean<String> factoryBean() {
+			Assert.notNull(dummyBean, "DummyBean was not injected.");
+			return new MyParameterizedFactoryBean<>("whatev");
+		}
 	}
-}
 
 
-@Configuration
-class ParameterizedFactoryBeanInterfaceConfig {
-	@Autowired
-	private DummyBean dummyBean;
+	@Configuration
+	static class ParameterizedFactoryBeanInterfaceConfig {
 
-	@Bean
-	public FactoryBean<String> factoryBean() {
-		Assert.notNull(dummyBean, "DummyBean was not injected.");
-		return new MyFactoryBean();
+		@Autowired
+		private DummyBean dummyBean;
+
+		@Bean
+		public FactoryBean<String> factoryBean() {
+			Assert.notNull(dummyBean, "DummyBean was not injected.");
+			return new MyFactoryBean();
+		}
 	}
-}
 
 
-@Configuration
-class NonPublicParameterizedFactoryBeanInterfaceConfig {
-	@Autowired
-	private DummyBean dummyBean;
+	@Configuration
+	static class NonPublicParameterizedFactoryBeanInterfaceConfig {
 
-	@Bean
-	FactoryBean<String> factoryBean() {
-		Assert.notNull(dummyBean, "DummyBean was not injected.");
-		return new MyFactoryBean();
+		@Autowired
+		private DummyBean dummyBean;
+
+		@Bean
+		FactoryBean<String> factoryBean() {
+			Assert.notNull(dummyBean, "DummyBean was not injected.");
+			return new MyFactoryBean();
+		}
 	}
-}
 
 
-@Configuration
-class RawFactoryBeanInterfaceConfig {
-	@Autowired
-	private DummyBean dummyBean;
+	@Configuration
+	static class RawFactoryBeanInterfaceConfig {
 
-	@Bean
-	@SuppressWarnings("rawtypes")
-	public FactoryBean factoryBean() {
-		Assert.notNull(dummyBean, "DummyBean was not injected.");
-		return new MyFactoryBean();
+		@Autowired
+		private DummyBean dummyBean;
+
+		@Bean
+		@SuppressWarnings("rawtypes")
+		public FactoryBean factoryBean() {
+			Assert.notNull(dummyBean, "DummyBean was not injected.");
+			return new MyFactoryBean();
+		}
 	}
-}
 
 
-@Configuration
-class WildcardParameterizedFactoryBeanInterfaceConfig {
-	@Autowired
-	private DummyBean dummyBean;
+	@Configuration
+	static class WildcardParameterizedFactoryBeanInterfaceConfig {
 
-	@Bean
-	public FactoryBean<?> factoryBean() {
-		Assert.notNull(dummyBean, "DummyBean was not injected.");
-		return new MyFactoryBean();
+		@Autowired
+		private DummyBean dummyBean;
+
+		@Bean
+		public FactoryBean<?> factoryBean() {
+			Assert.notNull(dummyBean, "DummyBean was not injected.");
+			return new MyFactoryBean();
+		}
 	}
+
+
+	@Configuration
+	static class FactoryBeanCallingConfig {
+
+		@Autowired
+		private DummyBean dummyBean;
+
+		@Bean
+		public MyFactoryBean factoryBean() {
+			Assert.notNull(dummyBean, "DummyBean was not injected.");
+			return new MyFactoryBean();
+		}
+
+		@Bean
+		public String myString() {
+			return factoryBean().getString();
+		}
+	}
+
 }

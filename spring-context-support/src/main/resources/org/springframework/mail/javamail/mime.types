@@ -1,0 +1,322 @@
+################################################################################
+# Copyright 2002-2018 the original author or authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+################################################################################
+
+################################################################################
+#
+# Defaults for the Java Activation Framework (revised).
+# Modified extensions registered in this file:
+# text/plain			java c c++ cpp pl cc h
+# image/png				png
+#
+################################################################################
+
+text/html				html htm HTML HTM
+text/plain				txt text TXT TEXT java c c++ cpp pl cc h
+image/gif				gif GIF
+image/ief				ief
+image/jpeg				jpeg jpg jpe JPG
+image/tiff				tiff tif
+image/x-xwindowdump			xwd
+application/postscript			ai eps ps
+application/rtf				rtf
+application/x-tex			tex
+application/x-texinfo			texinfo texi
+application/x-troff			t tr roff
+audio/basic				au
+audio/midi				midi mid
+audio/x-aifc				aifc
+audio/x-aiff				aif aiff
+audio/x-mpeg				mpeg mpg
+audio/x-wav				wav
+video/mpeg				mpeg mpg mpe
+video/quicktime				qt mov
+video/x-msvideo				avi
+
+################################################################################
+#
+# Additional file types adapted from
+# http://www.utoronto.ca/webdocs/HTMLdocs/Book/Book-3ed/appb/mimetype.html
+# kindly re-licensed to Apache Software License 2.0 by Ian Graham.
+#
+################################################################################
+
+# TEXT TYPES
+
+text/x-speech				talk
+text/css				css
+text/csv				csv
+
+# IMAGE TYPES
+
+# X-Windows bitmap (b/w)
+image/x-xbitmap				xbm
+# X-Windows pixelmap (8-bit color)
+image/x-xpixmap				xpm
+# Portable Network Graphics
+image/png				png
+# Image Exchange Format (RFC 1314)
+image/ief				ief
+# RGB
+image/rgb				rgb
+# Group III Fax (RFC 1494)
+image/g3fax				g3f
+# X Windowdump format
+image/x-xwindowdump			xwd
+# Macintosh PICT format
+image/x-pict				pict
+# PPM (UNIX PPM package)
+image/x-portable-pixmap			ppm
+# PGM (UNIX PPM package)
+image/x-portable-graymap		pgm
+# PBM (UNIX PPM package)
+image/x-portable-bitmap			pbm
+# PNM (UNIX PPM package)
+image/x-portable-anymap			pnm
+# Microsoft Windows bitmap
+image/x-ms-bmp				bmp
+# CMU raster
+image/x-cmu-raster			ras
+# Kodak Photo-CD
+image/x-photo-cd			pcd
+# Computer Graphics Metafile
+image/cgm				cgm
+# CALS Type 1 or 2
+image/x-cals				mil cal
+# Fractal Image Format (Iterated Systems)
+image/fif				fif
+# QuickSilver active image (Micrografx)
+image/x-mgx-dsf				dsf
+# CMX vector image (Corel)
+image/x-cmx				cmx
+# Wavelet-compressed (Summus)
+image/wavelet				wi
+# AutoCad Drawing (SoftSource)
+image/vnd.dwg				dwg
+# AutoCad DXF file (SoftSource)
+image/vnd.dxf				dxf
+# Simple Vector Format (SoftSource)
+image/vnd.svf				svf
+
+# AUDIO/VOICE/MUSIC RELATED TYPES
+
+# """basic""audio - 8-bit u-law PCM"
+audio/basic				au snd
+# Macintosh audio format (AIpple)
+audio/x-aiff				aif aiff aifc
+# Microsoft audio
+audio/x-wav				wav
+# MPEG audio
+audio/x-mpeg				mpa abs mpega
+# MPEG-2 audio
+audio/x-mpeg-2				mp2a mpa2
+# compressed speech (Echo Speech Corp.)
+audio/echospeech			es
+# Toolvox speech audio (Voxware)
+audio/voxware				vox
+# RapidTransit compressed audio (Fast Man)
+application/fastman			lcc
+# Realaudio (Progressive Networks)
+application/x-pn-realaudio		ra ram
+# MIDI music data
+x-music/x-midi				mmid
+# Koan music data (SSeyo)
+application/vnd.koan			skp
+# Speech synthesis data (MVP Solutions)
+text/x-speech				talk
+
+# VIDEO TYPES
+
+# MPEG video
+video/mpeg				mpeg mpg mpe
+# MPEG-2 video
+video/mpeg-2				mpv2 mp2v
+# Macintosh Quicktime
+video/quicktime				qt mov
+# Microsoft video
+video/x-msvideo				avi
+# SGI Movie format
+video/x-sgi-movie			movie
+# VDOlive streaming video (VDOnet)
+video/vdo				vdo
+# Vivo streaming video (Vivo software)
+video/vnd.vivo				viv
+
+# SPECIAL HTTP/WEB APPLICATION TYPES
+
+# Proxy autoconfiguration (Netscape browsers)
+application/x-ns-proxy-autoconfig	pac
+# Netscape Cooltalk chat data (Netscape)
+x-conference/x-cooltalk			ice
+
+# TEXT-RELATED
+
+# PostScript
+application/postscript			ai eps ps
+# Microsoft Rich Text Format
+application/rtf				rtf
+# Adobe Acrobat PDF
+application/pdf				pdf
+# Maker Interchange Format (FrameMaker)
+application/vnd.mif			mif
+# Troff document
+application/x-troff			t tr roff
+# Troff document with MAN macros
+application/x-troff-man			man
+# Troff document with ME macros
+application/x-troff-me			me
+# Troff document with MS macros
+application/x-troff-ms			ms
+# LaTeX document
+application/x-latex			latex
+# Tex/LateX document
+application/x-tex			tex
+# GNU TexInfo document
+application/x-texinfo			texinfo texi
+# TeX dvi format
+application/x-dvi			dvi
+# MS word document
+application/msword			doc DOC
+# Office Document Architecture
+application/oda				oda
+# Envoy Document
+application/envoy			evy
+
+# ARCHIVE/COMPRESSED ARCHIVES
+
+# Gnu tar format
+application/x-gtar			gtar
+# 4.3BSD tar format
+application/x-tar			tar
+# POSIX tar format
+application/x-ustar			ustar
+# Old CPIO format
+application/x-bcpio			bcpio
+# POSIX CPIO format
+application/x-cpio			cpio
+# UNIX sh shell archive
+application/x-shar			shar
+# DOS/PC - Pkzipped archive
+application/zip				zip
+# Macintosh Binhexed archive
+application/mac-binhex40		hqx
+# Macintosh Stuffit Archive
+application/x-stuffit			sit sea
+# Fractal Image Format
+application/fractals			fif
+# "Binary UUencoded"
+application/octet-stream		bin uu
+# PC executable
+application/octet-stream		exe
+# "WAIS ""sources"""
+application/x-wais-source		src wsrc
+# NCSA HDF data format
+application/hdf				hdf
+
+# DOWNLOADABLE PROGRAM/SCRIPTS
+
+# Javascript program
+text/javascript				js ls mocha
+# UNIX bourne shell program
+application/x-sh			sh
+# UNIX c-shell program
+application/x-csh			csh
+# Perl program
+application/x-perl			pl
+# Tcl (Tool Control Language) program
+application/x-tcl			tcl
+
+# ANIMATION/MULTIMEDIA
+
+# FutureSplash vector animation (FutureWave)
+application/futuresplash		spl
+# mBED multimedia data (mBED)
+application/mbedlet			mbd
+# PowerMedia multimedia (RadMedia)
+application/x-rad-powermedia		rad
+
+# PRESENTATION
+
+# PowerPoint presentation (Microsoft)
+application/mspowerpoint		ppz
+# ASAP WordPower (Software Publishing Corp.)
+application/x-asap			asp
+# Astound Web Player multimedia data (GoldDisk)
+application/astound			asn
+
+# SPECIAL EMBEDDED OBJECT
+
+# OLE script e.g. Visual Basic (Ncompass)
+application/x-olescript			axs
+# OLE Object (Microsoft/NCompass)
+application/x-oleobject			ods
+# OpenScape OLE/OCX objects (Business@Web)
+x-form/x-openscape			opp
+# Visual Basic objects (Amara)
+application/x-webbasic			wba
+# Specialized data entry forms (Alpha Software)
+application/x-alpha-form		frm
+# client-server objects (Wayfarer Communications)
+x-script/x-wfxclient			wfx
+
+# GENERAL APPLICATIONS
+
+# Undefined binary data (often executable progs)
+application/octet-stream		exe com
+# Pointcast news data (Pointcast)
+application/x-pcn			pcn
+# Excel spreadsheet (Microsoft)
+application/vnd.ms-excel		xls
+# PowerPoint (Microsoft)
+application/vnd.ms-powerpoint		ppt
+# Microsoft Project (Microsoft)
+application/vnd.ms-project		mpp
+# SourceView document (Dataware Electronics)
+application/vnd.svd			svd
+# Net Install - software install (20/20 Software)
+application/x-net-install		ins
+# Carbon Copy - remote control/access (Microcom)
+application/ccv				ccv
+# Spreadsheets (Visual Components)
+workbook/formulaone			vts
+
+# 2D/3D DATA/VIRTUAL REALITY TYPES
+
+# VRML data file
+x-world/x-vrml				wrl vrml
+# WIRL - VRML data (VREAM)
+x-world/x-vream				vrw
+# Play3D 3d scene data (Play3D)
+application/x-p3d			p3d
+# Viscape Interactive 3d world data (Superscape)
+x-world/x-svr				svr
+# WebActive 3d data (Plastic Thought)
+x-world/x-wvr				wvr
+# QuickDraw3D scene data (Apple)
+x-world/x-3dmf				3dmf
+
+# SCIENTIFIC/MATH/CAD TYPES
+
+# Mathematica notebook
+application/mathematica			ma
+# Computational meshes for numerical simulations
+x-model/x-mesh				msh
+# Vis5D 5-dimensional data
+application/vis5d			v5d
+# IGES models -- CAD/CAM (CGM) data
+application/iges			igs
+# Autocad WHIP vector drawings
+drawing/x-dwf				dwf
+

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,26 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 21.11.2003
  */
-public class MethodInvokerTests extends TestCase {
+public class MethodInvokerTests {
 
-	public void testPlainMethodInvoker() throws Exception {
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
+
+
+	@Test
+	public void plainMethodInvoker() throws Exception {
 		// sanity check: singleton, non-static should work
 		TestClass1 tc1 = new TestClass1();
 		MethodInvoker mi = new MethodInvoker();
@@ -39,18 +49,28 @@ public class MethodInvokerTests extends TestCase {
 		Integer i = (Integer) mi.invoke();
 		assertEquals(1, i.intValue());
 
+		// defensive check: singleton, non-static should work with null array
+		tc1 = new TestClass1();
+		mi = new MethodInvoker();
+		mi.setTargetObject(tc1);
+		mi.setTargetMethod("method1");
+		mi.setArguments((Object[]) null);
+		mi.prepare();
+		i = (Integer) mi.invoke();
+		assertEquals(1, i.intValue());
+
 		// sanity check: check that argument count matching works
 		mi = new MethodInvoker();
 		mi.setTargetClass(TestClass1.class);
 		mi.setTargetMethod("supertypes");
-		mi.setArguments(new Object[] {new ArrayList<>(), new ArrayList<>(), "hello"});
+		mi.setArguments(new ArrayList<>(), new ArrayList<>(), "hello");
 		mi.prepare();
 		assertEquals("hello", mi.invoke());
 
 		mi = new MethodInvoker();
 		mi.setTargetClass(TestClass1.class);
 		mi.setTargetMethod("supertypes2");
-		mi.setArguments(new Object[] {new ArrayList<>(), new ArrayList<>(), "hello", "bogus"});
+		mi.setArguments(new ArrayList<>(), new ArrayList<>(), "hello", "bogus");
 		mi.prepare();
 		assertEquals("hello", mi.invoke());
 
@@ -58,85 +78,84 @@ public class MethodInvokerTests extends TestCase {
 		mi = new MethodInvoker();
 		mi.setTargetClass(TestClass1.class);
 		mi.setTargetMethod("supertypes2");
-		mi.setArguments(new Object[] {new ArrayList<>(), new ArrayList<>(), "hello", Boolean.TRUE});
-		try {
-			mi.prepare();
-			fail("Shouldn't have matched without argument conversion");
-		}
-		catch (NoSuchMethodException ex) {
-			// expected
-		}
+		mi.setArguments(new ArrayList<>(), new ArrayList<>(), "hello", Boolean.TRUE);
+
+		exception.expect(NoSuchMethodException.class);
+		mi.prepare();
 	}
 
-	public void testStringWithMethodInvoker() throws Exception {
-		try {
-			MethodInvoker methodInvoker = new MethodInvoker();
-			methodInvoker.setTargetObject(new Greeter());
-			methodInvoker.setTargetMethod("greet");
-			methodInvoker.setArguments(new Object[] {new String("no match")});
-			methodInvoker.prepare();
-			fail("Should have thrown a NoSuchMethodException");
-		}
-		catch (NoSuchMethodException e) {
-			// expected
-		}
-	}
-
-	public void testPurchaserWithMethodInvoker() throws Exception {
+	@Test
+	public void stringWithMethodInvoker() throws Exception {
 		MethodInvoker methodInvoker = new MethodInvoker();
 		methodInvoker.setTargetObject(new Greeter());
 		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Object[] {new Purchaser()});
+		methodInvoker.setArguments("no match");
+
+		exception.expect(NoSuchMethodException.class);
+		methodInvoker.prepare();
+	}
+
+	@Test
+	public void purchaserWithMethodInvoker() throws Exception {
+		MethodInvoker methodInvoker = new MethodInvoker();
+		methodInvoker.setTargetObject(new Greeter());
+		methodInvoker.setTargetMethod("greet");
+		methodInvoker.setArguments(new Purchaser());
 		methodInvoker.prepare();
 		String greeting = (String) methodInvoker.invoke();
 		assertEquals("purchaser: hello", greeting);
 	}
 
-	public void testShopperWithMethodInvoker() throws Exception {
+	@Test
+	public void shopperWithMethodInvoker() throws Exception {
 		MethodInvoker methodInvoker = new MethodInvoker();
 		methodInvoker.setTargetObject(new Greeter());
 		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Object[] {new Shopper()});
+		methodInvoker.setArguments(new Shopper());
 		methodInvoker.prepare();
 		String greeting = (String) methodInvoker.invoke();
 		assertEquals("purchaser: may I help you?", greeting);
 	}
 
-	public void testSalesmanWithMethodInvoker() throws Exception {
+	@Test
+	public void salesmanWithMethodInvoker() throws Exception {
 		MethodInvoker methodInvoker = new MethodInvoker();
 		methodInvoker.setTargetObject(new Greeter());
 		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Object[] {new Salesman()});
+		methodInvoker.setArguments(new Salesman());
 		methodInvoker.prepare();
 		String greeting = (String) methodInvoker.invoke();
 		assertEquals("greetable: how are sales?", greeting);
 	}
 
-	public void testCustomerWithMethodInvoker() throws Exception {
+	@Test
+	public void customerWithMethodInvoker() throws Exception {
 		MethodInvoker methodInvoker = new MethodInvoker();
 		methodInvoker.setTargetObject(new Greeter());
 		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Object[] {new Customer()});
+		methodInvoker.setArguments(new Customer());
 		methodInvoker.prepare();
 		String greeting = (String) methodInvoker.invoke();
 		assertEquals("customer: good day", greeting);
 	}
 
-	public void testRegularWithMethodInvoker() throws Exception {
+	@Test
+	public void regularWithMethodInvoker() throws Exception {
 		MethodInvoker methodInvoker = new MethodInvoker();
 		methodInvoker.setTargetObject(new Greeter());
 		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Object[] {new Regular("Kotter")});
+		methodInvoker.setArguments(new Regular("Kotter"));
 		methodInvoker.prepare();
 		String greeting = (String) methodInvoker.invoke();
 		assertEquals("regular: welcome back Kotter", greeting);
 	}
 
-	public void testVIPWithMethodInvoker() throws Exception {
+	@Test
+	public void vipWithMethodInvoker() throws Exception {
 		MethodInvoker methodInvoker = new MethodInvoker();
 		methodInvoker.setTargetObject(new Greeter());
 		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Object[] {new VIP("Fonzie")});
+		methodInvoker.setArguments(new VIP("Fonzie"));
 		methodInvoker.prepare();
 		String greeting = (String) methodInvoker.invoke();
 		assertEquals("regular: whassup dude?", greeting);
@@ -216,13 +235,13 @@ public class MethodInvokerTests extends TestCase {
 	}
 
 
-	private static interface Greetable {
+	private interface Greetable {
 
 		String getGreeting();
 	}
 
 
-	private static interface Person extends Greetable {
+	private interface Person extends Greetable {
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 package org.springframework.scheduling.config;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -23,10 +27,6 @@ import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * Parser for the 'scheduled-tasks' element of the scheduling namespace.
@@ -55,10 +55,10 @@ public class ScheduledTasksBeanDefinitionParser extends AbstractSingleBeanDefini
 	@Override
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 		builder.setLazyInit(false); // lazy scheduled tasks are a contradiction in terms -> force to false
-		ManagedList<RuntimeBeanReference> cronTaskList = new ManagedList<RuntimeBeanReference>();
-		ManagedList<RuntimeBeanReference> fixedDelayTaskList = new ManagedList<RuntimeBeanReference>();
-		ManagedList<RuntimeBeanReference> fixedRateTaskList = new ManagedList<RuntimeBeanReference>();
-		ManagedList<RuntimeBeanReference> triggerTaskList = new ManagedList<RuntimeBeanReference>();
+		ManagedList<RuntimeBeanReference> cronTaskList = new ManagedList<>();
+		ManagedList<RuntimeBeanReference> fixedDelayTaskList = new ManagedList<>();
+		ManagedList<RuntimeBeanReference> fixedRateTaskList = new ManagedList<>();
+		ManagedList<RuntimeBeanReference> triggerTaskList = new ManagedList<>();
 		NodeList childNodes = element.getChildNodes();
 		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node child = childNodes.item(i);

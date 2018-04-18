@@ -8,17 +8,21 @@
 		<property name="exposeSchedulerInRepository" value="true"/>
 	</bean>
 
+	<bean id="otherScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="schedulerName" value="otherScheduler"/>
+	</bean>
+
 	<bean class="org.springframework.scheduling.quartz.SchedulerAccessorBean">
 		<property name="schedulerName" value="myScheduler"/>
 		<property name="triggers">
 			<list>
-				<ref local="exportTrigger"/>
-				<ref local="importTrigger"/>
+				<ref bean="exportTrigger"/>
+				<ref bean="importTrigger"/>
 			</list>
 		</property>
 	</bean>
 
-	<bean id="exportTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
+	<bean id="exportTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
 		<property name="jobDetail">
 			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
 				<property name="targetObject" ref="exportService"/>
@@ -29,7 +33,7 @@
 		<property name="repeatCount" value="1"/>
 	</bean>
 
-	<bean id="importTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
+	<bean id="importTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
 		<property name="jobDetail">
 			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
 				<property name="targetObject" ref="importService"/>

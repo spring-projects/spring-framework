@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,14 @@ package org.springframework.web.servlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A strategy interface for retrieving and saving FlashMap instances.
  * See {@link FlashMap} for a general overview of flash attributes.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
- *
  * @see FlashMap
  */
 public interface FlashMapManager {
@@ -41,12 +42,13 @@ public interface FlashMapManager {
 	 * @param response the current response
 	 * @return a FlashMap matching the current request or {@code null}
 	 */
+	@Nullable
 	FlashMap retrieveAndUpdate(HttpServletRequest request, HttpServletResponse response);
 
 	/**
 	 * Save the given FlashMap, in some underlying storage and set the start
 	 * of its expiration period.
-	 * <p><strong>Note:</strong> Invoke this method prior to a redirect in order
+	 * <p><strong>NOTE:</strong> Invoke this method prior to a redirect in order
 	 * to allow saving the FlashMap in the HTTP session or in a response
 	 * cookie before the response is committed.
 	 * @param flashMap the FlashMap to save

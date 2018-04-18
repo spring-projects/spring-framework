@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Helper class that allows for specifying a method to invoke in a declarative
  * fashion, be it static or non-static.
@@ -27,10 +29,6 @@ import java.lang.reflect.Modifier;
  * <p>Usage: Specify "targetClass"/"targetMethod" or "targetObject"/"targetMethod",
  * optionally specify arguments, prepare the invoker. Afterwards, you may
  * invoke the method any number of times, obtaining the invocation result.
- *
- * <p>Typically not used directly but via its subclasses
- * {@link org.springframework.beans.factory.config.MethodInvokingFactoryBean} and
- * {@link org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean}.
  *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
@@ -40,17 +38,23 @@ import java.lang.reflect.Modifier;
  */
 public class MethodInvoker {
 
-	private Class targetClass;
+	@Nullable
+	protected Class<?> targetClass;
 
+	@Nullable
 	private Object targetObject;
 
+	@Nullable
 	private String targetMethod;
 
+	@Nullable
 	private String staticMethod;
 
-	private Object[] arguments = new Object[0];
+	@Nullable
+	private Object[] arguments;
 
 	/** The method we will call */
+	@Nullable
 	private Method methodObject;
 
 
@@ -61,14 +65,15 @@ public class MethodInvoker {
 	 * @see #setTargetObject
 	 * @see #setTargetMethod
 	 */
-	public void setTargetClass(Class targetClass) {
+	public void setTargetClass(@Nullable Class<?> targetClass) {
 		this.targetClass = targetClass;
 	}
 
 	/**
 	 * Return the target class on which to call the target method.
 	 */
-	public Class getTargetClass() {
+	@Nullable
+	public Class<?> getTargetClass() {
 		return this.targetClass;
 	}
 
@@ -79,7 +84,7 @@ public class MethodInvoker {
 	 * @see #setTargetClass
 	 * @see #setTargetMethod
 	 */
-	public void setTargetObject(Object targetObject) {
+	public void setTargetObject(@Nullable Object targetObject) {
 		this.targetObject = targetObject;
 		if (targetObject != null) {
 			this.targetClass = targetObject.getClass();
@@ -89,6 +94,7 @@ public class MethodInvoker {
 	/**
 	 * Return the target object on which to call the target method.
 	 */
+	@Nullable
 	public Object getTargetObject() {
 		return this.targetObject;
 	}
@@ -100,13 +106,14 @@ public class MethodInvoker {
 	 * @see #setTargetClass
 	 * @see #setTargetObject
 	 */
-	public void setTargetMethod(String targetMethod) {
+	public void setTargetMethod(@Nullable String targetMethod) {
 		this.targetMethod = targetMethod;
 	}
 
 	/**
 	 * Return the name of the method to be invoked.
 	 */
+	@Nullable
 	public String getTargetMethod() {
 		return this.targetMethod;
 	}
@@ -126,15 +133,15 @@ public class MethodInvoker {
 	 * Set arguments for the method invocation. If this property is not set,
 	 * or the Object array is of length 0, a method with no arguments is assumed.
 	 */
-	public void setArguments(Object[] arguments) {
-		this.arguments = (arguments != null ? arguments : new Object[0]);
+	public void setArguments(Object... arguments) {
+		this.arguments = arguments;
 	}
 
 	/**
 	 * Return the arguments for the method invocation.
 	 */
 	public Object[] getArguments() {
-		return this.arguments;
+		return (this.arguments != null ? this.arguments : new Object[0]);
 	}
 
 
@@ -158,17 +165,13 @@ public class MethodInvoker {
 			this.targetMethod = methodName;
 		}
 
-		Class targetClass = getTargetClass();
+		Class<?> targetClass = getTargetClass();
 		String targetMethod = getTargetMethod();
-		if (targetClass == null) {
-			throw new IllegalArgumentException("Either 'targetClass' or 'targetObject' is required");
-		}
-		if (targetMethod == null) {
-			throw new IllegalArgumentException("Property 'targetMethod' is required");
-		}
+		Assert.notNull(targetClass, "Either 'targetClass' or 'targetObject' is required");
+		Assert.notNull(targetMethod, "Property 'targetMethod' is required");
 
 		Object[] arguments = getArguments();
-		Class[] argTypes = new Class[arguments.length];
+		Class<?>[] argTypes = new Class<?>[arguments.length];
 		for (int i = 0; i < arguments.length; ++i) {
 			argTypes[i] = (arguments[i] != null ? arguments[i].getClass() : Object.class);
 		}
@@ -194,7 +197,7 @@ public class MethodInvoker {
 	 * @return the resolved Class
 	 * @throws ClassNotFoundException if the class name was invalid
 	 */
-	protected Class resolveClassName(String className) throws ClassNotFoundException {
+	protected Class<?> resolveClassName(String className) throws ClassNotFoundException {
 		return ClassUtils.forName(className, ClassUtils.getDefaultClassLoader());
 	}
 
@@ -205,18 +208,21 @@ public class MethodInvoker {
 	 * @see #getTargetMethod()
 	 * @see #getArguments()
 	 */
+	@Nullable
 	protected Method findMatchingMethod() {
 		String targetMethod = getTargetMethod();
 		Object[] arguments = getArguments();
 		int argCount = arguments.length;
 
-		Method[] candidates = ReflectionUtils.getAllDeclaredMethods(getTargetClass());
+		Class<?> targetClass = getTargetClass();
+		Assert.state(targetClass != null, "No target class set");
+		Method[] candidates = ReflectionUtils.getAllDeclaredMethods(targetClass);
 		int minTypeDiffWeight = Integer.MAX_VALUE;
 		Method matchingMethod = null;
 
 		for (Method candidate : candidates) {
 			if (candidate.getName().equals(targetMethod)) {
-				Class[] paramTypes = candidate.getParameterTypes();
+				Class<?>[] paramTypes = candidate.getParameterTypes();
 				if (paramTypes.length == argCount) {
 					int typeDiffWeight = getTypeDifferenceWeight(paramTypes, arguments);
 					if (typeDiffWeight < minTypeDiffWeight) {
@@ -262,6 +268,7 @@ public class MethodInvoker {
 	 * @throws IllegalAccessException if the target method couldn't be accessed
 	 * @see #prepare
 	 */
+	@Nullable
 	public Object invoke() throws InvocationTargetException, IllegalAccessException {
 		// In the static case, target will simply be {@code null}.
 		Object targetObject = getTargetObject();
@@ -287,19 +294,22 @@ public class MethodInvoker {
 	 * Therefore, with an arg of type Integer, a constructor (Integer) would be preferred to a
 	 * constructor (Number) which would in turn be preferred to a constructor (Object).
 	 * All argument weights get accumulated.
+	 * <p>Note: This is the algorithm used by MethodInvoker itself and also the algorithm
+	 * used for constructor and factory method selection in Spring's bean container (in case
+	 * of lenient constructor resolution which is the default for regular bean definitions).
 	 * @param paramTypes the parameter types to match
 	 * @param args the arguments to match
 	 * @return the accumulated weight for all arguments
 	 */
-	public static int getTypeDifferenceWeight(Class[] paramTypes, Object[] args) {
+	public static int getTypeDifferenceWeight(Class<?>[] paramTypes, Object[] args) {
 		int result = 0;
 		for (int i = 0; i < paramTypes.length; i++) {
 			if (!ClassUtils.isAssignableValue(paramTypes[i], args[i])) {
 				return Integer.MAX_VALUE;
 			}
 			if (args[i] != null) {
-				Class paramType = paramTypes[i];
-				Class superClass = args[i].getClass().getSuperclass();
+				Class<?> paramType = paramTypes[i];
+				Class<?> superClass = args[i].getClass().getSuperclass();
 				while (superClass != null) {
 					if (paramType.equals(superClass)) {
 						result = result + 2;

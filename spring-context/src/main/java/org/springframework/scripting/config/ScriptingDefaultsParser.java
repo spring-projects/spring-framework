@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.util.StringUtils;
  * @author Mark Fisher
  * @since 2.5
  */
-public class ScriptingDefaultsParser implements BeanDefinitionParser {
+class ScriptingDefaultsParser implements BeanDefinitionParser {
 
 	private static final String REFRESH_CHECK_DELAY_ATTRIBUTE = "refresh-check-delay";
 
@@ -41,7 +41,7 @@ public class ScriptingDefaultsParser implements BeanDefinitionParser {
 				LangNamespaceUtils.registerScriptFactoryPostProcessorIfNecessary(parserContext.getRegistry());
 		String refreshCheckDelay = element.getAttribute(REFRESH_CHECK_DELAY_ATTRIBUTE);
 		if (StringUtils.hasText(refreshCheckDelay)) {
-			bd.getPropertyValues().add("defaultRefreshCheckDelay", new Long(refreshCheckDelay));
+			bd.getPropertyValues().add("defaultRefreshCheckDelay", Long.valueOf(refreshCheckDelay));
 		}
 		String proxyTargetClass = element.getAttribute(PROXY_TARGET_CLASS_ATTRIBUTE);
 		if (StringUtils.hasText(proxyTargetClass)) {

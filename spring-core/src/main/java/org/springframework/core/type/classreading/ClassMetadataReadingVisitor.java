@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,9 @@ import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
 import org.springframework.asm.SpringAsmInfo;
 import org.springframework.core.type.ClassMetadata;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * ASM class visitor which looks only for the class name and implemented types,
@@ -43,23 +45,27 @@ import org.springframework.util.ClassUtils;
  */
 class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata {
 
-	private String className;
+	private String className = "";
 
 	private boolean isInterface;
+
+	private boolean isAnnotation;
 
 	private boolean isAbstract;
 
 	private boolean isFinal;
 
+	@Nullable
 	private String enclosingClassName;
 
 	private boolean independentInnerClass;
 
+	@Nullable
 	private String superClassName;
 
-	private String[] interfaces;
+	private String[] interfaces = new String[0];
 
-	private Set<String> memberClassNames = new LinkedHashSet<String>();
+	private Set<String> memberClassNames = new LinkedHashSet<>(4);
 
 
 	public ClassMetadataReadingVisitor() {
@@ -68,12 +74,15 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 
 
 	@Override
-	public void visit(int version, int access, String name, String signature, String supername, String[] interfaces) {
+	public void visit(
+			int version, int access, String name, String signature, @Nullable String supername, String[] interfaces) {
+
 		this.className = ClassUtils.convertResourcePathToClassName(name);
 		this.isInterface = ((access & Opcodes.ACC_INTERFACE) != 0);
+		this.isAnnotation = ((access & Opcodes.ACC_ANNOTATION) != 0);
 		this.isAbstract = ((access & Opcodes.ACC_ABSTRACT) != 0);
 		this.isFinal = ((access & Opcodes.ACC_FINAL) != 0);
-		if (supername != null) {
+		if (supername != null && !this.isInterface) {
 			this.superClassName = ClassUtils.convertResourcePathToClassName(supername);
 		}
 		this.interfaces = new String[interfaces.length];
@@ -88,7 +97,7 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 	}
 
 	@Override
-	public void visitInnerClass(String name, String outerName, String innerName, int access) {
+	public void visitInnerClass(String name, @Nullable String outerName, String innerName, int access) {
 		if (outerName != null) {
 			String fqName = ClassUtils.convertResourcePathToClassName(name);
 			String fqOuterName = ClassUtils.convertResourcePathToClassName(outerName);
@@ -147,6 +156,11 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 	}
 
 	@Override
+	public boolean isAnnotation() {
+		return this.isAnnotation;
+	}
+
+	@Override
 	public boolean isAbstract() {
 		return this.isAbstract;
 	}
@@ -172,6 +186,7 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 	}
 
 	@Override
+	@Nullable
 	public String getEnclosingClassName() {
 		return this.enclosingClassName;
 	}
@@ -182,6 +197,7 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 	}
 
 	@Override
+	@Nullable
 	public String getSuperClassName() {
 		return this.superClassName;
 	}
@@ -193,42 +209,41 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 
 	@Override
 	public String[] getMemberClassNames() {
-		return this.memberClassNames.toArray(new String[this.memberClassNames.size()]);
+		return StringUtils.toStringArray(this.memberClassNames);
 	}
 
-}
 
+	private static class EmptyAnnotationVisitor extends AnnotationVisitor {
 
-class EmptyAnnotationVisitor extends AnnotationVisitor {
+		public EmptyAnnotationVisitor() {
+			super(SpringAsmInfo.ASM_VERSION);
+		}
 
-	public EmptyAnnotationVisitor() {
-		super(SpringAsmInfo.ASM_VERSION);
+		@Override
+		public AnnotationVisitor visitAnnotation(String name, String desc) {
+			return this;
+		}
+
+		@Override
+		public AnnotationVisitor visitArray(String name) {
+			return this;
+		}
 	}
 
-	@Override
-	public AnnotationVisitor visitAnnotation(String name, String desc) {
-		return this;
+
+	private static class EmptyMethodVisitor extends MethodVisitor {
+
+		public EmptyMethodVisitor() {
+			super(SpringAsmInfo.ASM_VERSION);
+		}
 	}
 
-	@Override
-	public AnnotationVisitor visitArray(String name) {
-		return this;
-	}
-}
 
+	private static class EmptyFieldVisitor extends FieldVisitor {
 
-class EmptyMethodVisitor extends MethodVisitor {
-
-	public EmptyMethodVisitor() {
-		super(SpringAsmInfo.ASM_VERSION);
-	}
-}
-
-
-class EmptyFieldVisitor extends FieldVisitor {
-
-	public EmptyFieldVisitor() {
-		super(SpringAsmInfo.ASM_VERSION);
+		public EmptyFieldVisitor() {
+			super(SpringAsmInfo.ASM_VERSION);
+		}
 	}
 
 }

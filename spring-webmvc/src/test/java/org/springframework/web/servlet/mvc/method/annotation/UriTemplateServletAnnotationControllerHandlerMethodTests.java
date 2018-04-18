@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
@@ -29,11 +26,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.context.ApplicationContextInitializer;
@@ -49,29 +46,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
-import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
-import org.springframework.web.servlet.mvc.annotation.UriTemplateServletAnnotationControllerTests;
 import org.springframework.web.servlet.view.AbstractView;
 
+import static org.junit.Assert.*;
+
 /**
- * The origin of this test class is {@link UriTemplateServletAnnotationControllerTests}.
- *
- * Tests in this class run against the {@link HandlerMethod} infrastructure:
- * <ul>
- * 	<li>RequestMappingHandlerMapping
- * 	<li>RequestMappingHandlerAdapter
- * 	<li>ExceptionHandlerExceptionResolver
- * </ul>
- *
- * <p>Rather than against the existing infrastructure:
- * <ul>
- * 	<li>DefaultAnnotationHandlerMapping
- * 	<li>AnnotationMethodHandlerAdapter
- * 	<li>AnnotationMethodHandlerExceptionResolver
- * </ul>
- *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
@@ -100,7 +81,7 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 
 	@Test
 	public void pathVarsInModel() throws Exception {
-		final Map<String, Object> pathVars = new HashMap<String, Object>();
+		final Map<String, Object> pathVars = new HashMap<>();
 		pathVars.put("hotel", "42");
 		pathVars.put("booking", 21);
 		pathVars.put("other", "other");
@@ -398,8 +379,8 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 		public void handle(@PathVariable("hotel") String hotel,
 				@PathVariable int booking,
 				@PathVariable String other,
-				@MatrixVariable(value="q", pathVar="hotel") int qHotel,
-				@MatrixVariable(value="q", pathVar="other") int qOther,
+				@MatrixVariable(name = "q", pathVar = "hotel") int qHotel,
+				@MatrixVariable(name = "q", pathVar = "other") int qOther,
 				Writer writer) throws IOException {
 			assertEquals("Invalid path variable value", "42", hotel);
 			assertEquals("Invalid path variable value", 21, booking);
@@ -590,14 +571,14 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 	@RequestMapping("/category")
 	public static class MultiPathController {
 
-		@RequestMapping(value = {"/{category}/page/{page}", "/**/{category}/page/{page}"})
+		@RequestMapping(value = {"/{category}/page/{page}", "/*/{category}/page/{page}"})
 		public void category(@PathVariable String category, @PathVariable int page, Writer writer) throws IOException {
 			writer.write("handle1-");
 			writer.write("category-" + category);
 			writer.write("page-" + page);
 		}
 
-		@RequestMapping(value = {"/{category}", "/**/{category}"})
+		@RequestMapping(value = {"/{category}", "/*/{category}"})
 		public void category(@PathVariable String category, Writer writer) throws IOException {
 			writer.write("handle2-");
 			writer.write("category-" + category);
@@ -617,7 +598,7 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 	}
 
 	@Controller
-	@RequestMapping("/*/menu/**")
+	@RequestMapping("/*/menu/") // was /*/menu/**
 	public static class MenuTreeController {
 
 		@RequestMapping("type/{var}")

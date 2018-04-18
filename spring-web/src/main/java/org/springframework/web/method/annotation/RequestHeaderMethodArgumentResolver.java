@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.util.Map;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -48,23 +50,26 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 	 * placeholder and #{...} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to have expressions
 	 */
-	public RequestHeaderMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
+	public RequestHeaderMethodArgumentResolver(@Nullable ConfigurableBeanFactory beanFactory) {
 		super(beanFactory);
 	}
 
+
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return parameter.hasParameterAnnotation(RequestHeader.class)
-				&& !Map.class.isAssignableFrom(parameter.getParameterType());
+		return (parameter.hasParameterAnnotation(RequestHeader.class) &&
+				!Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType()));
 	}
 
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		RequestHeader annotation = parameter.getParameterAnnotation(RequestHeader.class);
-		return new RequestHeaderNamedValueInfo(annotation);
+		RequestHeader ann = parameter.getParameterAnnotation(RequestHeader.class);
+		Assert.state(ann != null, "No RequestHeader annotation");
+		return new RequestHeaderNamedValueInfo(ann);
 	}
 
 	@Override
+	@Nullable
 	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
 		String[] headerValues = request.getHeaderValues(name);
 		if (headerValues != null) {
@@ -76,16 +81,17 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 	}
 
 	@Override
-	protected void handleMissingValue(String headerName, MethodParameter param) throws ServletRequestBindingException {
-		String paramType = param.getParameterType().getName();
-		throw new ServletRequestBindingException(
-				"Missing header '" + headerName + "' for method parameter type [" + paramType + "]");
+	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
+		throw new ServletRequestBindingException("Missing request header '" + name +
+				"' for method parameter of type " + parameter.getNestedParameterType().getSimpleName());
 	}
+
 
 	private static class RequestHeaderNamedValueInfo extends NamedValueInfo {
 
 		private RequestHeaderNamedValueInfo(RequestHeader annotation) {
-			super(annotation.value(), annotation.required(), annotation.defaultValue());
+			super(annotation.name(), annotation.required(), annotation.defaultValue());
 		}
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package org.springframework.cglib;
 
 /**
- * Empty class used to ensure that the {@code org.springframework.cglib} package is
- * processed during Javadoc generation.
+ * Empty class used to ensure that the {@code org.springframework.cglib}
+ * package is processed during javadoc generation.
  *
- * <p>See <a href="package-summary.html">package-level Javadoc</a> for more
+ * <p>See <a href="package-summary.html">package-level javadocs</a> for more
  * information on {@code org.springframework.cglib}.
  *
  * @author Chris Beams

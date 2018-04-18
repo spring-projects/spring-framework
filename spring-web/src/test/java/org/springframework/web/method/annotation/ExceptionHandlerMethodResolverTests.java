@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,20 @@
 
 package org.springframework.web.method.annotation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.SocketException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for {@link ExceptionHandlerMethodResolver} tests.
@@ -89,10 +88,11 @@ public class ExceptionHandlerMethodResolverTests {
 		new ExceptionHandlerMethodResolver(AmbiguousController.class);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = IllegalStateException.class)
 	public void noExceptionMapping() {
 		new ExceptionHandlerMethodResolver(NoExceptionController.class);
 	}
+
 
 	@Controller
 	static class ExceptionController {
@@ -112,6 +112,7 @@ public class ExceptionHandlerMethodResolverTests {
 		}
 	}
 
+
 	@Controller
 	static class InheritedController extends ExceptionController {
 
@@ -119,6 +120,7 @@ public class ExceptionHandlerMethodResolverTests {
 		public void handleIOException()	{
 		}
 	}
+
 
 	@Controller
 	static class AmbiguousController {
@@ -136,6 +138,7 @@ public class ExceptionHandlerMethodResolverTests {
 			return ClassUtils.getShortName(ex.getClass());
 		}
 	}
+
 
 	@Controller
 	static class NoExceptionController {

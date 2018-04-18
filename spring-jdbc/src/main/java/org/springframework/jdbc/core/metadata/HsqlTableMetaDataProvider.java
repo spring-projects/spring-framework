@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,9 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
 /**
- * The HSQL specific implementation of the {@link TableMetaDataProvider}. Suports a feature for
- * retreiving generated keys without the JDBC 3.0 getGeneratedKeys support.
+ * The HSQL specific implementation of {@link TableMetaDataProvider}.
+ * Supports a feature for retrieving generated keys without the JDBC 3.0
+ * {@code getGeneratedKeys} support.
  *
  * @author Thomas Risberg
  * @since 2.5
@@ -38,9 +39,9 @@ public class HsqlTableMetaDataProvider extends GenericTableMetaDataProvider {
 		return true;
 	}
 
-
 	@Override
 	public String getSimpleQueryForGetGeneratedKey(String tableName, String keyColumnName) {
 		return "select max(identity()) from " + tableName;
 	}
+
 }

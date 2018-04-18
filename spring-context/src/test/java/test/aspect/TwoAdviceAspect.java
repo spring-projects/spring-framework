@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,17 @@ import org.aspectj.lang.annotation.Before;
 
 @Aspect
 public class TwoAdviceAspect {
+
 	private int totalCalls;
 
-	@Around("execution(* getAge())")
+	@Around("execution(* org.springframework.tests.sample.beans.ITestBean.age())")
 	public int returnCallCount(ProceedingJoinPoint pjp) throws Exception {
 		return totalCalls;
 	}
 
-	@Before("execution(* setAge(int)) && args(newAge)")
+	@Before("execution(* org.springframework.tests.sample.beans.ITestBean.setAge(int)) && args(newAge)")
 	public void countSet(int newAge) throws Exception {
 		++totalCalls;
 	}
+
 }

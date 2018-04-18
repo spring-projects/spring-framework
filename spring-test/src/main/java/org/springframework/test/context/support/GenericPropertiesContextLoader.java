@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.Properties;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.test.context.MergedContextConfiguration;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Concrete implementation of {@link AbstractGenericContextLoader} that reads
@@ -45,8 +47,26 @@ public class GenericPropertiesContextLoader extends AbstractGenericContextLoader
 	 * Returns &quot;{@code -context.properties}&quot;.
 	 */
 	@Override
-	public String getResourceSuffix() {
+	protected String getResourceSuffix() {
 		return "-context.properties";
+	}
+
+	/**
+	 * Ensure that the supplied {@link MergedContextConfiguration} does not
+	 * contain {@link MergedContextConfiguration#getClasses() classes}.
+	 * @since 4.0.4
+	 * @see AbstractGenericContextLoader#validateMergedContextConfiguration
+	 */
+	@Override
+	protected void validateMergedContextConfiguration(MergedContextConfiguration mergedConfig) {
+		if (mergedConfig.hasClasses()) {
+			String msg = String.format(
+				"Test class [%s] has been configured with @ContextConfiguration's 'classes' attribute %s, "
+						+ "but %s does not support annotated classes.", mergedConfig.getTestClass().getName(),
+				ObjectUtils.nullSafeToString(mergedConfig.getClasses()), getClass().getSimpleName());
+			logger.error(msg);
+			throw new IllegalStateException(msg);
+		}
 	}
 
 }

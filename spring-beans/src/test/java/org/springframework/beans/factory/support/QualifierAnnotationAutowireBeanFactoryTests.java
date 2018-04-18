@@ -16,10 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -27,12 +23,15 @@ import java.lang.annotation.Target;
 
 import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.ClassUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Mark Fisher

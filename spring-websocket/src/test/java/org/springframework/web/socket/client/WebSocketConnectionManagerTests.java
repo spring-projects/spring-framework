@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,17 +21,20 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.springframework.context.SmartLifecycle;
+
+import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureTask;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.adapter.WebSocketHandlerAdapter;
-import org.springframework.web.socket.support.LoggingWebSocketHandlerDecorator;
-import org.springframework.web.socket.support.WebSocketHandlerDecorator;
+import org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Test fixture for {@link WebSocketConnectionManager}.
@@ -40,41 +43,34 @@ import static org.mockito.Mockito.*;
  */
 public class WebSocketConnectionManagerTests {
 
+
 	@Test
 	public void openConnection() throws Exception {
-
 		List<String> subprotocols = Arrays.asList("abc");
 
-		WebSocketClient client = mock(WebSocketClient.class);
-		WebSocketHandler handler = new WebSocketHandlerAdapter();
+		TestLifecycleWebSocketClient client = new TestLifecycleWebSocketClient(false);
+		WebSocketHandler handler = new TextWebSocketHandler();
 
 		WebSocketConnectionManager manager = new WebSocketConnectionManager(client, handler , "/path/{id}", "123");
 		manager.setSubProtocols(subprotocols);
 		manager.openConnection();
 
-		ArgumentCaptor<WebSocketHandlerDecorator> captor = ArgumentCaptor.forClass(WebSocketHandlerDecorator.class);
-		ArgumentCaptor<HttpHeaders> headersCaptor = ArgumentCaptor.forClass(HttpHeaders.class);
-		ArgumentCaptor<URI> uriCaptor = ArgumentCaptor.forClass(URI.class);
-
-		verify(client).doHandshake(captor.capture(), headersCaptor.capture(), uriCaptor.capture());
-
-		HttpHeaders expectedHeaders = new HttpHeaders();
+		WebSocketHttpHeaders expectedHeaders = new WebSocketHttpHeaders();
 		expectedHeaders.setSecWebSocketProtocol(subprotocols);
 
-		assertEquals(expectedHeaders, headersCaptor.getValue());
-		assertEquals(new URI("/path/123"), uriCaptor.getValue());
+		assertEquals(expectedHeaders, client.headers);
+		assertEquals(new URI("/path/123"), client.uri);
 
-		WebSocketHandlerDecorator loggingHandler = captor.getValue();
+		WebSocketHandlerDecorator loggingHandler = (WebSocketHandlerDecorator) client.webSocketHandler;
 		assertEquals(LoggingWebSocketHandlerDecorator.class, loggingHandler.getClass());
 
 		assertSame(handler, loggingHandler.getDelegate());
 	}
 
 	@Test
-	public void syncClientLifecycle() throws Exception {
-
+	public void clientLifecycle() throws Exception {
 		TestLifecycleWebSocketClient client = new TestLifecycleWebSocketClient(false);
-		WebSocketHandler handler = new WebSocketHandlerAdapter();
+		WebSocketHandler handler = new TextWebSocketHandler();
 		WebSocketConnectionManager manager = new WebSocketConnectionManager(client, handler , "/a");
 
 		manager.startInternal();
@@ -84,24 +80,17 @@ public class WebSocketConnectionManagerTests {
 		assertFalse(client.isRunning());
 	}
 
-	@Test
-	public void dontSyncClientLifecycle() throws Exception {
 
-		TestLifecycleWebSocketClient client = new TestLifecycleWebSocketClient(true);
-		WebSocketHandler handler = new WebSocketHandlerAdapter();
-		WebSocketConnectionManager manager = new WebSocketConnectionManager(client, handler , "/a");
-
-		manager.startInternal();
-		assertTrue(client.isRunning());
-
-		manager.stopInternal();
-		assertTrue(client.isRunning());
-	}
-
-
-	private static class TestLifecycleWebSocketClient implements WebSocketClient, SmartLifecycle {
+	private static class TestLifecycleWebSocketClient implements WebSocketClient, Lifecycle {
 
 		private boolean running;
+
+		private WebSocketHandler webSocketHandler;
+
+		private HttpHeaders headers;
+
+		private URI uri;
+
 
 		public TestLifecycleWebSocketClient(boolean running) {
 			this.running = running;
@@ -123,30 +112,21 @@ public class WebSocketConnectionManagerTests {
 		}
 
 		@Override
-		public int getPhase() {
-			return 0;
+		public ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler handler,
+				String uriTemplate, Object... uriVars) {
+
+			URI uri = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVars).encode().toUri();
+			return doHandshake(handler, null, uri);
 		}
 
 		@Override
-		public boolean isAutoStartup() {
-			return false;
-		}
+		public ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler handler,
+				WebSocketHttpHeaders headers, URI uri) {
 
-		@Override
-		public void stop(Runnable callback) {
-			this.running = false;
-		}
-
-		@Override
-		public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, String uriTemplate, Object... uriVariables)
-				throws WebSocketConnectFailureException {
-			return null;
-		}
-
-		@Override
-		public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, HttpHeaders headers, URI uri)
-				throws WebSocketConnectFailureException {
-			return null;
+			this.webSocketHandler = handler;
+			this.headers = headers;
+			this.uri = uri;
+			return new ListenableFutureTask<>(() -> null);
 		}
 	}
 

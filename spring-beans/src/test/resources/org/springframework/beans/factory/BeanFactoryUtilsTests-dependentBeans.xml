@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+	<bean id="a" class="java.lang.Object" />
+
+	<bean id="b" class="java.lang.Integer">
+		<constructor-arg value="50" />
+	</bean>
+
+	<bean id="c" class="java.lang.String">
+		<constructor-arg ref="b" />
+	</bean>
+
+	<bean id="int" class="java.lang.Integer">
+		<constructor-arg ref="c" />
+	</bean>
+
+	<bean id="long" class="java.lang.Long">
+		<constructor-arg ref="c" />
+	</bean>
+
+	<bean id="buffer" class="java.lang.StringBuffer">
+		<constructor-arg ref="int" />
+	</bean>
+
+	<bean id="thread" class="java.lang.Thread"/>
+
+	<bean id="field" class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
+	   <property name="targetObject" ref="thread"/>
+   	   <property name="targetField" value="MAX_PRIORITY"/>
+	 </bean>
+
+	<bean id="secondBuffer" class="java.lang.StringBuffer">
+		<constructor-arg ref="field"/>
+	</bean>
+
+</beans>

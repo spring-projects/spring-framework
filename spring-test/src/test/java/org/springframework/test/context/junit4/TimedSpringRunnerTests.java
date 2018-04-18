@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,23 @@
 
 package org.springframework.test.context.junit4;
 
-import static org.junit.Assert.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runner.notification.RunNotifier;
+import org.junit.runner.Runner;
 import org.junit.runners.JUnit4;
+
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+
+import static org.springframework.test.context.junit4.JUnitTestingUtils.*;
 
 /**
  * Verifies proper handling of the following in conjunction with the
- * {@link SpringJUnit4ClassRunner}:
+ * {@link SpringRunner}:
  * <ul>
  * <li>JUnit's {@link Test#timeout() @Test(timeout=...)}</li>
  * <li>Spring's {@link Timed @Timed}</li>
@@ -42,28 +44,23 @@ import org.springframework.tests.TestGroup;
 @RunWith(JUnit4.class)
 public class TimedSpringRunnerTests {
 
+	protected Class<?> getTestCase() {
+		return TimedSpringRunnerTestCase.class;
+	}
+
+	protected Class<? extends Runner> getRunnerClass() {
+		return SpringRunner.class;
+	}
+
 	@Test
 	public void timedTests() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-		Class<TimedSpringRunnerTestCase> testClass = TimedSpringRunnerTestCase.class;
-		TrackingRunListener listener = new TrackingRunListener();
-		RunNotifier notifier = new RunNotifier();
-		notifier.addListener(listener);
-
-		new SpringJUnit4ClassRunner(testClass).run(notifier);
-		assertEquals("Verifying number of failures for test class [" + testClass + "].", 3,
-			listener.getTestFailureCount());
-		assertEquals("Verifying number of tests started for test class [" + testClass + "].", 5,
-			listener.getTestStartedCount());
-		assertEquals("Verifying number of tests finished for test class [" + testClass + "].", 5,
-			listener.getTestFinishedCount());
+		runTestsAndAssertCounters(getRunnerClass(), getTestCase(), 7, 5, 7, 0, 0);
 	}
 
 
 	@Ignore("TestCase classes are run manually by the enclosing test class")
-	@RunWith(SpringJUnit4ClassRunner.class)
 	@TestExecutionListeners({})
-	public static final class TimedSpringRunnerTestCase {
+	public static class TimedSpringRunnerTestCase {
 
 		// Should Pass.
 		@Test(timeout = 2000)
@@ -79,16 +76,30 @@ public class TimedSpringRunnerTests {
 		}
 
 		// Should Fail due to timeout.
-		@Test(timeout = 10)
+		@Test(timeout = 100)
 		public void jUnitTimeoutWithSleep() throws Exception {
-			Thread.sleep(20);
+			Thread.sleep(200);
 		}
 
 		// Should Fail due to timeout.
 		@Test
-		@Timed(millis = 10)
+		@Timed(millis = 100)
 		public void springTimeoutWithSleep() throws Exception {
-			Thread.sleep(20);
+			Thread.sleep(200);
+		}
+
+		// Should Fail due to timeout.
+		@Test
+		@MetaTimed
+		public void springTimeoutWithSleepAndMetaAnnotation() throws Exception {
+			Thread.sleep(200);
+		}
+
+		// Should Fail due to timeout.
+		@Test
+		@MetaTimedWithOverride(millis = 100)
+		public void springTimeoutWithSleepAndMetaAnnotationAndOverride() throws Exception {
+			Thread.sleep(200);
 		}
 
 		// Should Fail due to duplicate configuration.
@@ -97,6 +108,17 @@ public class TimedSpringRunnerTests {
 		public void springAndJUnitTimeouts() {
 			/* no-op */
 		}
+	}
+
+	@Timed(millis = 100)
+	@Retention(RetentionPolicy.RUNTIME)
+	private static @interface MetaTimed {
+	}
+
+	@Timed(millis = 1000)
+	@Retention(RetentionPolicy.RUNTIME)
+	private static @interface MetaTimedWithOverride {
+		long millis() default 1000;
 	}
 
 }

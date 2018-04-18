@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,12 @@ package org.springframework.format.datetime.standard;
 import java.time.ZoneId;
 import java.time.chrono.Chronology;
 import java.time.format.DateTimeFormatter;
+import java.util.TimeZone;
+
+import org.springframework.context.i18n.LocaleContext;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
+import org.springframework.lang.Nullable;
 
 /**
  * A context that holds user-specific <code>java.time</code> (JSR-310) settings
@@ -31,37 +37,46 @@ import java.time.format.DateTimeFormatter;
  */
 public class DateTimeContext {
 
+	@Nullable
 	private Chronology chronology;
 
+	@Nullable
 	private ZoneId timeZone;
 
 
 	/**
-	 * Set the user's chronology.
+	 * Set the user's chronology (calendar system).
 	 */
-	public void setChronology(Chronology chronology) {
+	public void setChronology(@Nullable Chronology chronology) {
 		this.chronology = chronology;
 	}
 
 	/**
-	 * The user's chronology (calendar system), if any.
+	 * Return the user's chronology (calendar system), if any.
 	 */
+	@Nullable
 	public Chronology getChronology() {
 		return this.chronology;
 	}
 
 	/**
-	 * Set the user's timezone.
+	 * Set the user's time zone.
+	 * <p>Alternatively, set a {@link TimeZoneAwareLocaleContext} on
+	 * {@link LocaleContextHolder}. This context class will fall back to
+	 * checking the locale context if no setting has been provided here.
+	 * @see org.springframework.context.i18n.LocaleContextHolder#getTimeZone()
+	 * @see org.springframework.context.i18n.LocaleContextHolder#setLocaleContext
 	 */
-	public void setTimeZone(ZoneId timeZone) {
+	public void setTimeZone(@Nullable ZoneId timeZone) {
 		this.timeZone = timeZone;
 	}
 
 	/**
-	 * The user's timezone, if any.
+	 * Return the user's time zone, if any.
 	 */
+	@Nullable
 	public ZoneId getTimeZone() {
-		return timeZone;
+		return this.timeZone;
 	}
 
 
@@ -78,6 +93,15 @@ public class DateTimeContext {
 		}
 		if (this.timeZone != null) {
 			formatter = formatter.withZone(this.timeZone);
+		}
+		else {
+			LocaleContext localeContext = LocaleContextHolder.getLocaleContext();
+			if (localeContext instanceof TimeZoneAwareLocaleContext) {
+				TimeZone timeZone = ((TimeZoneAwareLocaleContext) localeContext).getTimeZone();
+				if (timeZone != null) {
+					formatter = formatter.withZone(timeZone.toZoneId());
+				}
+			}
 		}
 		return formatter;
 	}

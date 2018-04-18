@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,15 @@
 package org.springframework.beans.factory.xml;
 
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Arrays;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.springframework.beans.factory.config.FieldRetrievingFactoryBean;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
@@ -35,19 +36,23 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.beans.CollectingReaderEventListener;
 import org.springframework.tests.sample.beans.CustomEnum;
 import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.util.LinkedCaseInsensitiveMap;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Mark Fisher
  */
-public class UtilNamespaceHandlerTests extends TestCase {
+public class UtilNamespaceHandlerTests {
 
 	private DefaultListableBeanFactory beanFactory;
 
 	private CollectingReaderEventListener listener = new CollectingReaderEventListener();
 
-	@Override
+
+	@Before
 	public void setUp() {
 		this.beanFactory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
@@ -55,17 +60,21 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		reader.loadBeanDefinitions(new ClassPathResource("testUtilNamespace.xml", getClass()));
 	}
 
-	public void testConstant() throws Exception {
+
+	@Test
+	public void testConstant() {
 		Integer min = (Integer) this.beanFactory.getBean("min");
 		assertEquals(Integer.MIN_VALUE, min.intValue());
 	}
 
-	public void testConstantWithDefaultName() throws Exception {
+	@Test
+	public void testConstantWithDefaultName() {
 		Integer max = (Integer) this.beanFactory.getBean("java.lang.Integer.MAX_VALUE");
 		assertEquals(Integer.MAX_VALUE, max.intValue());
 	}
 
-	public void testEvents() throws Exception {
+	@Test
+	public void testEvents() {
 		ComponentDefinition propertiesComponent = this.listener.getComponentDefinition("myProperties");
 		assertNotNull("Event for 'myProperties' not sent", propertiesComponent);
 		AbstractBeanDefinition propertiesBean = (AbstractBeanDefinition) propertiesComponent.getBeanDefinitions()[0];
@@ -77,30 +86,35 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		assertEquals("Incorrect BeanDefinition", FieldRetrievingFactoryBean.class, constantBean.getBeanClass());
 	}
 
-	public void testNestedProperties() throws Exception {
+	@Test
+	public void testNestedProperties() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
 		Properties props = bean.getSomeProperties();
 		assertEquals("Incorrect property value", "bar", props.get("foo"));
 	}
 
-	public void testPropertyPath() throws Exception {
+	@Test
+	public void testPropertyPath() {
 		String name = (String) this.beanFactory.getBean("name");
 		assertEquals("Rob Harrop", name);
 	}
 
-	public void testNestedPropertyPath() throws Exception {
+	@Test
+	public void testNestedPropertyPath() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
 		assertEquals("Rob Harrop", bean.getName());
 	}
 
-	public void testSimpleMap() throws Exception {
+	@Test
+	public void testSimpleMap() {
 		Map map = (Map) this.beanFactory.getBean("simpleMap");
 		assertEquals("bar", map.get("foo"));
 		Map map2 = (Map) this.beanFactory.getBean("simpleMap");
 		assertTrue(map == map2);
 	}
 
-	public void testScopedMap() throws Exception {
+	@Test
+	public void testScopedMap() {
 		Map map = (Map) this.beanFactory.getBean("scopedMap");
 		assertEquals("bar", map.get("foo"));
 		Map map2 = (Map) this.beanFactory.getBean("scopedMap");
@@ -108,14 +122,16 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		assertTrue(map != map2);
 	}
 
-	public void testSimpleList() throws Exception {
+	@Test
+	public void testSimpleList() {
 		List list = (List) this.beanFactory.getBean("simpleList");
 		assertEquals("Rob Harrop", list.get(0));
 		List list2 = (List) this.beanFactory.getBean("simpleList");
 		assertTrue(list == list2);
 	}
 
-	public void testScopedList() throws Exception {
+	@Test
+	public void testScopedList() {
 		List list = (List) this.beanFactory.getBean("scopedList");
 		assertEquals("Rob Harrop", list.get(0));
 		List list2 = (List) this.beanFactory.getBean("scopedList");
@@ -123,14 +139,16 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		assertTrue(list != list2);
 	}
 
-	public void testSimpleSet() throws Exception {
+	@Test
+	public void testSimpleSet() {
 		Set set = (Set) this.beanFactory.getBean("simpleSet");
 		assertTrue(set.contains("Rob Harrop"));
 		Set set2 = (Set) this.beanFactory.getBean("simpleSet");
 		assertTrue(set == set2);
 	}
 
-	public void testScopedSet() throws Exception {
+	@Test
+	public void testScopedSet() {
 		Set set = (Set) this.beanFactory.getBean("scopedSet");
 		assertTrue(set.contains("Rob Harrop"));
 		Set set2 = (Set) this.beanFactory.getBean("scopedSet");
@@ -138,13 +156,22 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		assertTrue(set != set2);
 	}
 
-	public void testMapWithRef() throws Exception {
+	@Test
+	public void testMapWithRef() {
 		Map map = (Map) this.beanFactory.getBean("mapWithRef");
 		assertTrue(map instanceof TreeMap);
 		assertEquals(this.beanFactory.getBean("testBean"), map.get("bean"));
 	}
 
-	public void testNestedCollections() throws Exception {
+	@Test
+	public void testMapWithTypes() {
+		Map map = (Map) this.beanFactory.getBean("mapWithTypes");
+		assertTrue(map instanceof LinkedCaseInsensitiveMap);
+		assertEquals(this.beanFactory.getBean("testBean"), map.get("bean"));
+	}
+
+	@Test
+	public void testNestedCollections() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("nestedCollectionsBean");
 
 		List list = bean.getSomeList();
@@ -171,7 +198,8 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		assertFalse(map == bean2.getSomeMap());
 	}
 
-	public void testNestedShortcutCollections() throws Exception {
+	@Test
+	public void testNestedShortcutCollections() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("nestedShortcutCollections");
 
 		assertEquals(1, bean.getStringArray().length);
@@ -194,7 +222,8 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		assertFalse(set == bean2.getSomeSet());
 	}
 
-	public void testNestedInCollections() throws Exception {
+	@Test
+	public void testNestedInCollections() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("nestedCustomTagBean");
 
 		List list = bean.getSomeList();
@@ -219,7 +248,8 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		assertFalse(map == bean2.getSomeMap());
 	}
 
-	public void testCircularCollections() throws Exception {
+	@Test
+	public void testCircularCollections() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionsBean");
 
 		List list = bean.getSomeList();
@@ -235,7 +265,8 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		assertEquals(bean, map.get("foo"));
 	}
 
-	public void testCircularCollectionBeansStartingWithList() throws Exception {
+	@Test
+	public void testCircularCollectionBeansStartingWithList() {
 		this.beanFactory.getBean("circularList");
 		TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionBeansBean");
 
@@ -255,7 +286,8 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		assertEquals(bean, map.get("foo"));
 	}
 
-	public void testCircularCollectionBeansStartingWithSet() throws Exception {
+	@Test
+	public void testCircularCollectionBeansStartingWithSet() {
 		this.beanFactory.getBean("circularSet");
 		TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionBeansBean");
 
@@ -275,7 +307,8 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		assertEquals(bean, map.get("foo"));
 	}
 
-	public void testCircularCollectionBeansStartingWithMap() throws Exception {
+	@Test
+	public void testCircularCollectionBeansStartingWithMap() {
 		this.beanFactory.getBean("circularMap");
 		TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionBeansBean");
 
@@ -295,12 +328,14 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		assertEquals(bean, map.get("foo"));
 	}
 
-	public void testNestedInConstructor() throws Exception {
+	@Test
+	public void testNestedInConstructor() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("constructedTestBean");
 		assertEquals("Rob Harrop", bean.getName());
 	}
 
-	public void testLoadProperties() throws Exception {
+	@Test
+	public void testLoadProperties() {
 		Properties props = (Properties) this.beanFactory.getBean("myProperties");
 		assertEquals("Incorrect property value", "bar", props.get("foo"));
 		assertEquals("Incorrect property value", null, props.get("foo2"));
@@ -308,7 +343,8 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		assertTrue(props == props2);
 	}
 
-	public void testScopedProperties() throws Exception {
+	@Test
+	public void testScopedProperties() {
 		Properties props = (Properties) this.beanFactory.getBean("myScopedProperties");
 		assertEquals("Incorrect property value", "bar", props.get("foo"));
 		assertEquals("Incorrect property value", null, props.get("foo2"));
@@ -318,30 +354,35 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		assertTrue(props != props2);
 	}
 
-	public void testLocalProperties() throws Exception {
+	@Test
+	public void testLocalProperties() {
 		Properties props = (Properties) this.beanFactory.getBean("myLocalProperties");
 		assertEquals("Incorrect property value", null, props.get("foo"));
 		assertEquals("Incorrect property value", "bar2", props.get("foo2"));
 	}
 
-	public void testMergedProperties() throws Exception {
+	@Test
+	public void testMergedProperties() {
 		Properties props = (Properties) this.beanFactory.getBean("myMergedProperties");
 		assertEquals("Incorrect property value", "bar", props.get("foo"));
 		assertEquals("Incorrect property value", "bar2", props.get("foo2"));
 	}
 
+	@Test
 	public void testLocalOverrideDefault() {
 		Properties props = (Properties) this.beanFactory.getBean("defaultLocalOverrideProperties");
 		assertEquals("Incorrect property value", "bar", props.get("foo"));
 		assertEquals("Incorrect property value", "local2", props.get("foo2"));
 	}
 
+	@Test
 	public void testLocalOverrideFalse() {
 		Properties props = (Properties) this.beanFactory.getBean("falseLocalOverrideProperties");
 		assertEquals("Incorrect property value", "bar", props.get("foo"));
 		assertEquals("Incorrect property value", "local2", props.get("foo2"));
 	}
 
+	@Test
 	public void testLocalOverrideTrue() {
 		Properties props = (Properties) this.beanFactory.getBean("trueLocalOverrideProperties");
 		assertEquals("Incorrect property value", "local", props.get("foo"));

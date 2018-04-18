@@ -1,0 +1,91 @@
+description = "Spring Web"
+
+apply plugin: "groovy"
+apply plugin: "io.spring.dependency-management"
+
+dependencyManagement {
+	imports {
+		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
+		mavenBom "io.netty:netty-bom:${nettyVersion}"
+	}
+	resolutionStrategy {
+		cacheChangingModulesFor 0, 'seconds'
+	}
+	applyMavenExclusions = false
+}
+
+dependencies {
+	compile(project(":spring-beans"))
+	compile(project(":spring-core"))
+	optional(project(":spring-aop"))
+	optional(project(":spring-context"))
+	optional(project(":spring-oxm"))
+	optional("javax.servlet:javax.servlet-api:3.1.0")
+	optional("javax.servlet.jsp:javax.servlet.jsp-api:2.3.2-b02")
+	optional("javax.el:javax.el-api:3.0.1-b04")
+	optional("javax.faces:javax.faces-api:2.2")
+	optional("javax.json.bind:javax.json.bind-api:1.0")
+	optional("javax.mail:javax.mail-api:1.6.1")
+	optional("javax.validation:validation-api:1.1.0.Final")
+	optional("javax.xml.bind:jaxb-api:2.3.0")
+	optional("javax.xml.ws:jaxws-api:2.3.0")
+	optional("org.glassfish.main:javax.jws:4.0-b33")
+	optional("io.reactivex:rxjava:${rxjavaVersion}")
+	optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
+	optional("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
+	optional("io.netty:netty-all")
+	optional("io.projectreactor.ipc:reactor-netty")
+	optional("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
+	optional("org.eclipse.jetty:jetty-server:${jettyVersion}") {
+		exclude group: "javax.servlet", module: "javax.servlet-api"
+	}
+	optional("org.eclipse.jetty:jetty-servlet:${jettyVersion}") {
+		exclude group: "javax.servlet", module: "javax.servlet-api"
+	}
+	optional("io.undertow:undertow-core:${undertowVersion}")
+	optional("com.squareup.okhttp3:okhttp:3.10.0")
+	optional("org.apache.httpcomponents:httpclient:4.5.5") {
+		exclude group: "commons-logging", module: "commons-logging"
+	}
+	optional("org.apache.httpcomponents:httpasyncclient:4.1.3") {
+		exclude group: "commons-logging", module: "commons-logging"
+	}
+	optional("commons-fileupload:commons-fileupload:1.3.3")
+	optional("org.synchronoss.cloud:nio-multipart-parser:1.1.0")
+	optional("com.fasterxml.woodstox:woodstox-core:5.0.3") {  // woodstox before aalto
+		exclude group: "stax", module: "stax-api"
+	}
+	optional("com.fasterxml:aalto-xml:1.0.0")
+	optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
+	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
+	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jackson2Version}")
+	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${jackson2Version}")
+	optional("com.google.code.gson:gson:2.8.2")
+	optional("com.google.protobuf:protobuf-java-util:3.5.1")
+	optional("com.googlecode.protobuf-java-format:protobuf-java-format:1.4")
+	optional("com.rometools:rome:1.9.0")
+	optional("com.caucho:hessian:4.0.51")
+	optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
+	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+	testCompile("io.projectreactor:reactor-test")
+	testCompile("org.apache.taglibs:taglibs-standard-jstlel:1.2.5") {
+		exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
+	}
+	testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jackson2Version}")
+	testCompile("com.fasterxml.jackson.datatype:jackson-datatype-joda:${jackson2Version}")
+	testCompile("com.fasterxml.jackson.module:jackson-module-kotlin:${jackson2Version}")
+	testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
+	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
+	testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
+	testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
+	testCompile("com.squareup.okhttp3:mockwebserver:3.10.0")
+	testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+	testCompile("org.skyscreamer:jsonassert:1.5.0")
+	testCompile("org.xmlunit:xmlunit-matchers:2.5.1")
+	testRuntime("com.sun.mail:javax.mail:1.6.1")
+	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0")
+	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0")
+	testRuntime("javax.json:javax.json-api:1.1.2")
+	testRuntime("org.apache.johnzon:johnzon-jsonb:1.1.7")
+}

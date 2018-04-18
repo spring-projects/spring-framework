@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.client;
 import java.io.IOException;
 
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 
 /**
  * Generic callback interface used by {@link RestTemplate}'s retrieval methods
@@ -32,6 +33,7 @@ import org.springframework.http.client.ClientHttpResponse;
  * @since 3.0
  * @see RestTemplate#execute
  */
+@FunctionalInterface
 public interface ResponseExtractor<T> {
 
 	/**
@@ -40,6 +42,7 @@ public interface ResponseExtractor<T> {
 	 * @return the extracted data
 	 * @throws IOException in case of I/O errors
 	 */
+	@Nullable
 	T extractData(ClientHttpResponse response) throws IOException;
 
 }

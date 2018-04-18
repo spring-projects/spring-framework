@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.context.annotation;
+
+import org.junit.Test;
+
+import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
+import org.springframework.tests.sample.beans.TestBean;
 
 import static org.junit.Assert.*;
 
-import org.junit.Test;
-import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ConfigurationClassParser;
-import org.springframework.context.annotation.Import;
-
-import org.springframework.tests.sample.beans.TestBean;
-
-
 /**
- * TCK-style unit tests for handling circular use of the {@link Import} annotation. Explore
- * subclass hierarchy for specific concrete implementations.
+ * TCK-style unit tests for handling circular use of the {@link Import} annotation.
+ * Explore the subclass hierarchy for specific concrete implementations.
  *
  * @author Chris Beams
  */
@@ -38,22 +35,22 @@ public abstract class AbstractCircularImportDetectionTests {
 
 	protected abstract String loadAsConfigurationSource(Class<?> clazz) throws Exception;
 
+
 	@Test
 	public void simpleCircularImportIsDetected() throws Exception {
 		boolean threw = false;
 		try {
 			newParser().parse(loadAsConfigurationSource(A.class), "A");
-		} catch (BeanDefinitionParsingException ex) {
+		}
+		catch (BeanDefinitionParsingException ex) {
 			assertTrue("Wrong message. Got: " + ex.getMessage(),
 					ex.getMessage().contains(
 						"Illegal attempt by @Configuration class 'AbstractCircularImportDetectionTests.B' " +
 						"to import class 'AbstractCircularImportDetectionTests.A'"));
 			threw = true;
 		}
-
 		assertTrue(threw);
 	}
-
 
 	@Test
 	public void complexCircularImportIsDetected() throws Exception {
@@ -68,65 +65,78 @@ public abstract class AbstractCircularImportDetectionTests {
 						"to import class 'AbstractCircularImportDetectionTests.Z'"));
 			threw = true;
 		}
-
 		assertTrue(threw);
 	}
+
 
 	@Configuration
 	@Import(B.class)
 	static class A {
+
 		@Bean
 		TestBean b1() {
 			return new TestBean();
 		}
 	}
 
+
 	@Configuration
 	@Import(A.class)
 	static class B {
+
 		@Bean
 		TestBean b2() {
 			return new TestBean();
 		}
 	}
 
+
 	@Configuration
-	@Import( { Y.class, Z.class })
+	@Import({Y.class, Z.class})
 	class X {
+
 		@Bean
 		TestBean x() {
 			return new TestBean();
 		}
 	}
 
+
 	@Configuration
 	class Y {
+
 		@Bean
 		TestBean y() {
 			return new TestBean();
 		}
 	}
 
+
 	@Configuration
-	@Import( { Z1.class, Z2.class })
+	@Import({Z1.class, Z2.class})
 	class Z {
+
 		@Bean
 		TestBean z() {
 			return new TestBean();
 		}
 	}
 
+
 	@Configuration
 	class Z1 {
+
 		@Bean
 		TestBean z1() {
 			return new TestBean();
 		}
 	}
 
+
 	@Configuration
 	@Import(Z.class)
 	class Z2 {
+
 		@Bean
 		TestBean z2() {
 			return new TestBean();

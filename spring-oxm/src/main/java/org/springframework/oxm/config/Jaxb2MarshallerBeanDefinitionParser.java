@@ -1,6 +1,6 @@
 /*
-* Copyright 2002-2012 the original author or authors.
-  *
+ * Copyright 2002-2016 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,6 @@
 
 package org.springframework.oxm.config;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.w3c.dom.Element;
@@ -36,24 +35,22 @@ import org.springframework.util.xml.DomUtils;
  */
 class Jaxb2MarshallerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
-	private static final String JAXB2_MARSHALLER_CLASS_NAME = "org.springframework.oxm.jaxb.Jaxb2Marshaller";
-
 	@Override
 	protected String getBeanClassName(Element element) {
-		return JAXB2_MARSHALLER_CLASS_NAME;
+		return "org.springframework.oxm.jaxb.Jaxb2Marshaller";
 	}
 
 	@Override
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder beanDefinitionBuilder) {
-		String contextPath = element.getAttribute("contextPath");
+		String contextPath = element.getAttribute("context-path");
 		if (StringUtils.hasText(contextPath)) {
 			beanDefinitionBuilder.addPropertyValue("contextPath", contextPath);
 		}
-		List classes = DomUtils.getChildElementsByTagName(element, "class-to-be-bound");
+
+		List<Element> classes = DomUtils.getChildElementsByTagName(element, "class-to-be-bound");
 		if (!classes.isEmpty()) {
-			ManagedList classesToBeBound = new ManagedList(classes.size());
-			for (Iterator iterator = classes.iterator(); iterator.hasNext();) {
-				Element classToBeBound = (Element) iterator.next();
+			ManagedList<String> classesToBeBound = new ManagedList<>(classes.size());
+			for (Element classToBeBound : classes) {
 				String className = classToBeBound.getAttribute("name");
 				classesToBeBound.add(className);
 			}

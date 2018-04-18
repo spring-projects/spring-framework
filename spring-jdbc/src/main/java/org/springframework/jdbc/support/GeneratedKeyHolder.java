@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.lang.Nullable;
 
 /**
  * Default implementation of the {@link KeyHolder} interface, to be used for
@@ -45,7 +46,7 @@ public class GeneratedKeyHolder implements KeyHolder {
 	 * Create a new GeneratedKeyHolder with a default list.
 	 */
 	public GeneratedKeyHolder() {
-		this.keyList = new LinkedList<Map<String, Object>>();
+		this.keyList = new LinkedList<>();
 	}
 
 	/**
@@ -58,8 +59,9 @@ public class GeneratedKeyHolder implements KeyHolder {
 
 
 	@Override
+	@Nullable
 	public Number getKey() throws InvalidDataAccessApiUsageException, DataRetrievalFailureException {
-		if (this.keyList.size() == 0) {
+		if (this.keyList.isEmpty()) {
 			return null;
 		}
 		if (this.keyList.size() > 1 || this.keyList.get(0).size() > 1) {
@@ -85,8 +87,9 @@ public class GeneratedKeyHolder implements KeyHolder {
 	}
 
 	@Override
+	@Nullable
 	public Map<String, Object> getKeys() throws InvalidDataAccessApiUsageException {
-		if (this.keyList.size() == 0) {
+		if (this.keyList.isEmpty()) {
 			return null;
 		}
 		if (this.keyList.size() > 1)

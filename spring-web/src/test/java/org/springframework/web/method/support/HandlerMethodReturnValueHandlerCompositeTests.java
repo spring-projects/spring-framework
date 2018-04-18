@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,84 +16,116 @@
 
 package org.springframework.web.method.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.MethodParameter;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * Test fixture with {@link HandlerMethodReturnValueHandlerComposite}.
- *
  * @author Rossen Stoyanchev
  */
+@SuppressWarnings("unused")
 public class HandlerMethodReturnValueHandlerCompositeTests {
 
 	private HandlerMethodReturnValueHandlerComposite handlers;
 
+	private HandlerMethodReturnValueHandler integerHandler;
+
 	ModelAndViewContainer mavContainer;
 
-	private MethodParameter paramInt;
+	private MethodParameter integerType;
 
-	private MethodParameter paramStr;
+	private MethodParameter stringType;
+
 
 	@Before
 	public void setUp() throws Exception {
-		handlers = new HandlerMethodReturnValueHandlerComposite();
+
+		this.integerType = new MethodParameter(getClass().getDeclaredMethod("handleInteger"), -1);
+		this.stringType = new MethodParameter(getClass().getDeclaredMethod("handleString"), -1);
+
+		this.integerHandler = mock(HandlerMethodReturnValueHandler.class);
+		when(this.integerHandler.supportsReturnType(this.integerType)).thenReturn(true);
+
+		this.handlers = new HandlerMethodReturnValueHandlerComposite();
+		this.handlers.addHandler(this.integerHandler);
+
 		mavContainer = new ModelAndViewContainer();
-		paramInt = new MethodParameter(getClass().getDeclaredMethod("handleInteger"), -1);
-		paramStr = new MethodParameter(getClass().getDeclaredMethod("handleString"), -1);
 	}
 
 	@Test
 	public void supportsReturnType() throws Exception {
-		registerHandler(Integer.class);
-
-		assertTrue(this.handlers.supportsReturnType(paramInt));
-		assertFalse(this.handlers.supportsReturnType(paramStr));
+		assertTrue(this.handlers.supportsReturnType(this.integerType));
+		assertFalse(this.handlers.supportsReturnType(this.stringType));
 	}
 
 	@Test
 	public void handleReturnValue() throws Exception {
-		StubReturnValueHandler handler = registerHandler(Integer.class);
-		this.handlers.handleReturnValue(Integer.valueOf(55), paramInt, mavContainer, null);
-
-		assertEquals(Integer.valueOf(55), handler.getReturnValue());
+		this.handlers.handleReturnValue(55, this.integerType, this.mavContainer, null);
+		verify(this.integerHandler).handleReturnValue(55, this.integerType, this.mavContainer, null);
 	}
 
 	@Test
-	public void handleReturnValueMultipleHandlers() throws Exception {
-		StubReturnValueHandler h1 = registerHandler(Integer.class);
-		StubReturnValueHandler h2 = registerHandler(Integer.class);
-		this.handlers.handleReturnValue(Integer.valueOf(55), paramInt, mavContainer, null);
+	public void handleReturnValueWithMultipleHandlers() throws Exception {
+		HandlerMethodReturnValueHandler anotherIntegerHandler = mock(HandlerMethodReturnValueHandler.class);
+		when(anotherIntegerHandler.supportsReturnType(this.integerType)).thenReturn(true);
 
-		assertEquals("Didn't use the 1st registered handler", Integer.valueOf(55), h1.getReturnValue());
-		assertNull("Shouldn't have use the 2nd registered handler", h2.getReturnValue());
+		this.handlers.handleReturnValue(55, this.integerType, this.mavContainer, null);
+
+		verify(this.integerHandler).handleReturnValue(55, this.integerType, this.mavContainer, null);
+		verifyNoMoreInteractions(anotherIntegerHandler);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test // SPR-13083
+	public void handleReturnValueWithAsyncHandler() throws Exception {
+
+		Promise<Integer> promise = new Promise<>();
+		MethodParameter promiseType = new MethodParameter(getClass().getDeclaredMethod("handlePromise"), -1);
+
+		HandlerMethodReturnValueHandler responseBodyHandler = mock(HandlerMethodReturnValueHandler.class);
+		when(responseBodyHandler.supportsReturnType(promiseType)).thenReturn(true);
+		this.handlers.addHandler(responseBodyHandler);
+
+		AsyncHandlerMethodReturnValueHandler promiseHandler = mock(AsyncHandlerMethodReturnValueHandler.class);
+		when(promiseHandler.supportsReturnType(promiseType)).thenReturn(true);
+		when(promiseHandler.isAsyncReturnValue(promise, promiseType)).thenReturn(true);
+		this.handlers.addHandler(promiseHandler);
+
+		this.handlers.handleReturnValue(promise, promiseType, this.mavContainer, null);
+
+		verify(promiseHandler).isAsyncReturnValue(promise, promiseType);
+		verify(promiseHandler).supportsReturnType(promiseType);
+		verify(promiseHandler).handleReturnValue(promise, promiseType, this.mavContainer, null);
+		verifyNoMoreInteractions(promiseHandler);
+		verifyNoMoreInteractions(responseBodyHandler);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
 	public void noSuitableReturnValueHandler() throws Exception {
-		registerHandler(Integer.class);
-		this.handlers.handleReturnValue("value", paramStr, null, null);
+		this.handlers.handleReturnValue("value", this.stringType, null, null);
 	}
 
-	private StubReturnValueHandler registerHandler(Class<?> returnType) {
-		StubReturnValueHandler handler = new StubReturnValueHandler(returnType);
-		handlers.addHandler(handler);
-		return handler;
-	}
 
-	@SuppressWarnings("unused")
 	private Integer handleInteger() {
 		return null;
 	}
 
-	@SuppressWarnings("unused")
 	private String handleString() {
 		return null;
 	}
+
+	private Promise<Integer> handlePromise() {
+		return null;
+	}
+
+	private static class Promise<T> {}
 
 }

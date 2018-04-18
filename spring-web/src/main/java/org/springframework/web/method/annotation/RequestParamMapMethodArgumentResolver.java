@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -30,13 +31,15 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Resolves {@link Map} method arguments annotated with an @{@link RequestParam} where the annotation does not
- * specify a request parameter name. See {@link RequestParamMethodArgumentResolver} for resolving {@link Map}
+ * Resolves {@link Map} method arguments annotated with an @{@link RequestParam}
+ * where the annotation does not specify a request parameter name.
+ * See {@link RequestParamMethodArgumentResolver} for resolving {@link Map}
  * method arguments with a request parameter name.
  *
- * <p>The created {@link Map} contains all request parameter name/value pairs. If the method parameter type
- * is {@link MultiValueMap} instead, the created map contains all request parameters and all there values for
- * cases where request parameters have multiple values.
+ * <p>The created {@link Map} contains all request parameter name/value pairs.
+ * If the method parameter type is {@link MultiValueMap} instead, the created
+ * map contains all request parameters and all there values for cases where
+ * request parameters have multiple values.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -47,40 +50,34 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		RequestParam requestParamAnnot = parameter.getParameterAnnotation(RequestParam.class);
-		if (requestParamAnnot != null) {
-			if (Map.class.isAssignableFrom(parameter.getParameterType())) {
-				return !StringUtils.hasText(requestParamAnnot.value());
-			}
-		}
-		return false;
+		RequestParam requestParam = parameter.getParameterAnnotation(RequestParam.class);
+		return (requestParam != null && Map.class.isAssignableFrom(parameter.getParameterType()) &&
+				!StringUtils.hasText(requestParam.name()));
 	}
 
 	@Override
-	public Object resolveArgument(
-			MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
-			throws Exception {
+	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 
 		Class<?> paramType = parameter.getParameterType();
 
 		Map<String, String[]> parameterMap = webRequest.getParameterMap();
 		if (MultiValueMap.class.isAssignableFrom(paramType)) {
-			MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>(parameterMap.size());
-			for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
-				for (String value : entry.getValue()) {
-					result.add(entry.getKey(), value);
+			MultiValueMap<String, String> result = new LinkedMultiValueMap<>(parameterMap.size());
+			parameterMap.forEach((key, values) -> {
+				for (String value : values) {
+					result.add(key, value);
 				}
-			}
+			});
 			return result;
 		}
 		else {
-			Map<String, String> result = new LinkedHashMap<String, String>(parameterMap.size());
-			for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
-				if (entry.getValue().length > 0) {
-					result.put(entry.getKey(), entry.getValue()[0]);
+			Map<String, String> result = new LinkedHashMap<>(parameterMap.size());
+			parameterMap.forEach((key, values) -> {
+				if (values.length > 0) {
+					result.put(key, values[0]);
 				}
-			}
+			});
 			return result;
 		}
 	}

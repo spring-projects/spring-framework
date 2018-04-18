@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,9 +48,10 @@ public class AnnotationClassFilter implements ClassFilter {
 	/**
 	 * Create a new AnnotationClassFilter for the given annotation type.
 	 * @param annotationType the annotation type to look for
-	 * @param checkInherited whether to explicitly check the superclasses and
-	 * interfaces for the annotation type as well (even if the annotation type
-	 * is not marked as inherited itself)
+	 * @param checkInherited whether to also check the superclasses and
+	 * interfaces as well as meta-annotations for the annotation type
+	 * (i.e. whether to use {@link AnnotationUtils#findAnnotation(Class, Class)}
+	 * semantics instead of standard Java {@link Class#isAnnotationPresent})
 	 */
 	public AnnotationClassFilter(Class<? extends Annotation> annotationType, boolean checkInherited) {
 		Assert.notNull(annotationType, "Annotation type must not be null");
@@ -60,10 +61,32 @@ public class AnnotationClassFilter implements ClassFilter {
 
 
 	@Override
-	public boolean matches(Class clazz) {
+	public boolean matches(Class<?> clazz) {
 		return (this.checkInherited ?
 				(AnnotationUtils.findAnnotation(clazz, this.annotationType) != null) :
 				clazz.isAnnotationPresent(this.annotationType));
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof AnnotationClassFilter)) {
+			return false;
+		}
+		AnnotationClassFilter otherCf = (AnnotationClassFilter) other;
+		return (this.annotationType.equals(otherCf.annotationType) && this.checkInherited == otherCf.checkInherited);
+	}
+
+	@Override
+	public int hashCode() {
+		return this.annotationType.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getName() + ": " + this.annotationType;
 	}
 
 }

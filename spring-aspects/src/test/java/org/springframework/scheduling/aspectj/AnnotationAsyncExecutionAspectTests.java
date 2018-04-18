@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,17 @@
 
 package org.springframework.scheduling.aspectj;
 
+import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -31,8 +35,10 @@ import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.concurrent.ListenableFuture;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.*;
 
@@ -40,12 +46,16 @@ import static org.junit.Assert.*;
  * Unit tests for {@link AnnotationAsyncExecutionAspect}.
  *
  * @author Ramnivas Laddad
+ * @author Stephane Nicoll
  */
 public class AnnotationAsyncExecutionAspectTests {
 
 	private static final long WAIT_TIME = 1000; //milliseconds
 
+	private final AsyncUncaughtExceptionHandler defaultExceptionHandler = new SimpleAsyncUncaughtExceptionHandler();
+
 	private CountingExecutor executor;
+
 
 	@Before
 	public void setUp() {
@@ -54,6 +64,7 @@ public class AnnotationAsyncExecutionAspectTests {
 		executor = new CountingExecutor();
 		AnnotationAsyncExecutionAspect.aspectOf().setExecutor(executor);
 	}
+
 
 	@Test
 	public void asyncMethodGetsRoutedAsynchronously() {
@@ -130,14 +141,59 @@ public class AnnotationAsyncExecutionAspectTests {
 		assertThat(defaultThread.get(), not(Thread.currentThread()));
 		assertThat(defaultThread.get().getName(), not(startsWith("e1-")));
 
-		Future<Thread> e1Thread = obj.e1Work();
+		ListenableFuture<Thread> e1Thread = obj.e1Work();
 		assertThat(e1Thread.get().getName(), startsWith("e1-"));
+
+		CompletableFuture<Thread> e1OtherThread = obj.e1OtherWork();
+		assertThat(e1OtherThread.get().getName(), startsWith("e1-"));
+	}
+
+	@Test
+	public void exceptionHandlerCalled() {
+		Method m = ReflectionUtils.findMethod(ClassWithException.class, "failWithVoid");
+		TestableAsyncUncaughtExceptionHandler exceptionHandler = new TestableAsyncUncaughtExceptionHandler();
+		AnnotationAsyncExecutionAspect.aspectOf().setExceptionHandler(exceptionHandler);
+		try {
+			assertFalse("Handler should not have been called", exceptionHandler.isCalled());
+			ClassWithException obj = new ClassWithException();
+			obj.failWithVoid();
+			exceptionHandler.await(3000);
+			exceptionHandler.assertCalledWith(m, UnsupportedOperationException.class);
+		}
+		finally {
+			AnnotationAsyncExecutionAspect.aspectOf().setExceptionHandler(defaultExceptionHandler);
+		}
+	}
+
+	@Test
+	public void exceptionHandlerNeverThrowsUnexpectedException() {
+		Method m = ReflectionUtils.findMethod(ClassWithException.class, "failWithVoid");
+		TestableAsyncUncaughtExceptionHandler exceptionHandler = new TestableAsyncUncaughtExceptionHandler(true);
+		AnnotationAsyncExecutionAspect.aspectOf().setExceptionHandler(exceptionHandler);
+		try {
+			assertFalse("Handler should not have been called", exceptionHandler.isCalled());
+			ClassWithException obj = new ClassWithException();
+			try {
+				obj.failWithVoid();
+				exceptionHandler.await(3000);
+				exceptionHandler.assertCalledWith(m, UnsupportedOperationException.class);
+			}
+			catch (Exception ex) {
+				fail("No unexpected exception should have been received but got " + ex.getMessage());
+			}
+		}
+		finally {
+			AnnotationAsyncExecutionAspect.aspectOf().setExceptionHandler(defaultExceptionHandler);
+
+		}
 	}
 
 
 	@SuppressWarnings("serial")
 	private static class CountingExecutor extends SimpleAsyncTaskExecutor {
+
 		int submitStartCounter;
+
 		int submitCompleteCounter;
 
 		@Override
@@ -154,7 +210,8 @@ public class AnnotationAsyncExecutionAspectTests {
 		public synchronized void waitForCompletion() {
 			try {
 				wait(WAIT_TIME);
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException ex) {
 				fail("Didn't finish the async job in " + WAIT_TIME + " milliseconds");
 			}
 		}
@@ -162,6 +219,7 @@ public class AnnotationAsyncExecutionAspectTests {
 
 
 	static class ClassWithoutAsyncAnnotation {
+
 		int counter;
 
 		@Async public void incrementAsync() {
@@ -192,6 +250,7 @@ public class AnnotationAsyncExecutionAspectTests {
 
 	@Async
 	static class ClassWithAsyncAnnotation {
+
 		int counter;
 
 		public void increment() {
@@ -214,14 +273,30 @@ public class AnnotationAsyncExecutionAspectTests {
 
 
 	static class ClassWithQualifiedAsyncMethods {
+
 		@Async
 		public Future<Thread> defaultWork() {
 			return new AsyncResult<Thread>(Thread.currentThread());
 		}
 
 		@Async("e1")
-		public Future<Thread> e1Work() {
+		public ListenableFuture<Thread> e1Work() {
 			return new AsyncResult<Thread>(Thread.currentThread());
 		}
+
+		@Async("e1")
+		public CompletableFuture<Thread> e1OtherWork() {
+			return CompletableFuture.completedFuture(Thread.currentThread());
+		}
 	}
+
+
+	static class ClassWithException {
+
+		@Async
+		public void failWithVoid() {
+			 throw new UnsupportedOperationException("failWithVoid");
+		}
+	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.core.convert;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A service interface for type conversion. This is the entry point into the convert system.
  * Call {@link #convert(Object, Class)} to perform a thread-safe type conversion using this system.
@@ -27,55 +29,66 @@ package org.springframework.core.convert;
 public interface ConversionService {
 
 	/**
-	 * Returns true if objects of sourceType can be converted to targetType.
-	 * If this method returns true, it means {@link #convert(Object, Class)} is capable of converting an instance of sourceType to targetType.
-	 * Special note on collections, arrays, and maps types:
-	 * For conversion between collection, array, and map types, this method will return 'true'
-	 * even though a convert invocation may still generate a {@link ConversionException} if the underlying elements are not convertible.
-	 * Callers are expected to handle this exceptional case when working with collections and maps.
-	 * @param sourceType the source type to convert from (may be null if source is null)
+	 * Return {@code true} if objects of {@code sourceType} can be converted to the {@code targetType}.
+	 * <p>If this method returns {@code true}, it means {@link #convert(Object, Class)} is capable
+	 * of converting an instance of {@code sourceType} to {@code targetType}.
+	 * <p>Special note on collections, arrays, and maps types:
+	 * For conversion between collection, array, and map types, this method will return {@code true}
+	 * even though a convert invocation may still generate a {@link ConversionException} if the
+	 * underlying elements are not convertible. Callers are expected to handle this exceptional case
+	 * when working with collections and maps.
+	 * @param sourceType the source type to convert from (may be {@code null} if source is {@code null})
 	 * @param targetType the target type to convert to (required)
-	 * @return true if a conversion can be performed, false if not
-	 * @throws IllegalArgumentException if targetType is null
+	 * @return {@code true} if a conversion can be performed, {@code false} if not
+	 * @throws IllegalArgumentException if {@code targetType} is {@code null}
 	 */
-	boolean canConvert(Class<?> sourceType, Class<?> targetType);
+	boolean canConvert(@Nullable Class<?> sourceType, Class<?> targetType);
 
 	/**
-	 * Returns true if objects of sourceType can be converted to the targetType.
-	 * The TypeDescriptors provide additional context about the source and target locations where conversion would occur, often object fields or property locations.
-	 * If this method returns true, it means {@link #convert(Object, TypeDescriptor, TypeDescriptor)} is capable of converting an instance of sourceType to targetType.
-	 * Special note on collections, arrays, and maps types:
-	 * For conversion between collection, array, and map types, this method will return 'true'
-	 * even though a convert invocation may still generate a {@link ConversionException} if the underlying elements are not convertible.
-	 * Callers are expected to handle this exceptional case when working with collections and maps.
-	 * @param sourceType context about the source type to convert from (may be null if source is null)
+	 * Return {@code true} if objects of {@code sourceType} can be converted to the {@code targetType}.
+	 * The TypeDescriptors provide additional context about the source and target locations
+	 * where conversion would occur, often object fields or property locations.
+	 * <p>If this method returns {@code true}, it means {@link #convert(Object, TypeDescriptor, TypeDescriptor)}
+	 * is capable of converting an instance of {@code sourceType} to {@code targetType}.
+	 * <p>Special note on collections, arrays, and maps types:
+	 * For conversion between collection, array, and map types, this method will return {@code true}
+	 * even though a convert invocation may still generate a {@link ConversionException} if the
+	 * underlying elements are not convertible. Callers are expected to handle this exceptional case
+	 * when working with collections and maps.
+	 * @param sourceType context about the source type to convert from
+	 * (may be {@code null} if source is {@code null})
 	 * @param targetType context about the target type to convert to (required)
-	 * @return true if a conversion can be performed between the source and target types, false if not
-	 * @throws IllegalArgumentException if targetType is null
+	 * @return {@code true} if a conversion can be performed between the source and target types,
+	 * {@code false} if not
+	 * @throws IllegalArgumentException if {@code targetType} is {@code null}
 	 */
-	boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType);
+	boolean canConvert(@Nullable TypeDescriptor sourceType, TypeDescriptor targetType);
 
 	/**
-	 * Convert the source to targetType.
-	 * @param source the source object to convert (may be null)
+	 * Convert the given {@code source} to the specified {@code targetType}.
+	 * @param source the source object to convert (may be {@code null})
 	 * @param targetType the target type to convert to (required)
 	 * @return the converted object, an instance of targetType
 	 * @throws ConversionException if a conversion exception occurred
-	 * @throws IllegalArgumentException if targetType is null
+	 * @throws IllegalArgumentException if targetType is {@code null}
 	 */
-	<T> T convert(Object source, Class<T> targetType);
+	@Nullable
+	<T> T convert(@Nullable Object source, Class<T> targetType);
 
 	/**
-	 * Convert the source to targetType.
-	 * The TypeDescriptors provide additional context about the source and target locations where conversion will occur, often object fields or property locations.
-	 * @param source the source object to convert (may be null)
-	 * @param sourceType context about the source type converting from (may be null if source is null)
+	 * Convert the given {@code source} to the specified {@code targetType}.
+	 * The TypeDescriptors provide additional context about the source and target locations
+	 * where conversion will occur, often object fields or property locations.
+	 * @param source the source object to convert (may be {@code null})
+	 * @param sourceType context about the source type to convert from
+	 * (may be {@code null} if source is {@code null})
 	 * @param targetType context about the target type to convert to (required)
-	 * @return the converted object, an instance of {@link TypeDescriptor#getObjectType() targetType}</code>
+	 * @return the converted object, an instance of {@link TypeDescriptor#getObjectType() targetType}
 	 * @throws ConversionException if a conversion exception occurred
-	 * @throws IllegalArgumentException if targetType is null
-	 * @throws IllegalArgumentException if sourceType is null but source is not null
+	 * @throws IllegalArgumentException if targetType is {@code null},
+	 * or {@code sourceType} is {@code null} but source is not {@code null}
 	 */
-	Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
+	@Nullable
+	Object convert(@Nullable Object source, @Nullable TypeDescriptor sourceType, TypeDescriptor targetType);
 
 }

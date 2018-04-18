@@ -16,14 +16,15 @@
 
 package org.springframework.aop.framework;
 
-import static org.junit.Assert.assertEquals;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.aop.AopInvocationException;
+
+import static org.junit.Assert.*;
 
 /**
  * Test for SPR-4675. A null value returned from around advice is very hard to debug if

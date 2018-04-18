@@ -1,9 +1,10 @@
-
 /**
- *
  * Support package for declarative messaging configuration,
- * with XML schema being the primary configuration format.
- *
+ * with Java configuration and XML schema support.
  */
+@NonNullApi
+@NonNullFields
 package org.springframework.jms.config;
 
+import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

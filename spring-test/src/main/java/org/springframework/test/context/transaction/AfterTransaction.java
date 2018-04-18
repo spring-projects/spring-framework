@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,23 +23,27 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * <p>
- * Test annotation to indicate that the annotated {@code public void}
- * method should be executed <em>after</em> a transaction is ended for test
- * methods configured to run within a transaction via the
- * {@code &#064;Transactional} annotation.
- * </p>
- * <p>
- * The {@code &#064;AfterTransaction} methods of superclasses will be
- * executed after those of the current class.
- * </p>
+ * <p>Test annotation which indicates that the annotated {@code void} method
+ * should be executed <em>after</em> a transaction is ended for a test method
+ * configured to run within a transaction via Spring's {@code @Transactional}
+ * annotation.
+ *
+ * <p>{@code @AfterTransaction} methods declared in superclasses or as interface
+ * default methods will be executed after those of the current test class.
+ *
+ * <p>As of Spring Framework 4.0, this annotation may be used as a
+ * <em>meta-annotation</em> to create custom <em>composed annotations</em>.
+ *
+ * <p>As of Spring Framework 4.3, {@code @AfterTransaction} may also be
+ * declared on Java 8 based interface default methods.
  *
  * @author Sam Brannen
  * @since 2.5
  * @see org.springframework.transaction.annotation.Transactional
+ * @see BeforeTransaction
  */
-@Documented
+@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Documented
 public @interface AfterTransaction {
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,14 @@
 
 package org.springframework.test.context.junit4;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.BeansException;
-import org.springframework.tests.sample.beans.Employee;
-import org.springframework.tests.sample.beans.Pet;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,13 +35,16 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.GenericXmlContextLoader;
+import org.springframework.tests.sample.beans.Employee;
+import org.springframework.tests.sample.beans.Pet;
+
+import static org.junit.Assert.*;
 
 /**
- * <p>
  * SpringJUnit4ClassRunnerAppCtxTests serves as a <em>proof of concept</em>
  * JUnit 4 based test class, which verifies the expected functionality of
- * {@link SpringJUnit4ClassRunner} in conjunction with the following:
- * </p>
+ * {@link SpringRunner} in conjunction with the following:
+ *
  * <ul>
  * <li>{@link ContextConfiguration @ContextConfiguration}</li>
  * <li>{@link Autowired @Autowired}</li>
@@ -61,18 +57,15 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
  * <li>{@link BeanNameAware}</li>
  * <li>{@link InitializingBean}</li>
  * </ul>
- * <p>
- * Since no application context resource
+ *
+ * <p>Since no application context resource
  * {@link ContextConfiguration#locations() locations} are explicitly declared
  * and since the {@link ContextConfiguration#loader() ContextLoader} is left set
  * to the default value of {@link GenericXmlContextLoader}, this test class's
  * dependencies will be injected via {@link Autowired @Autowired},
  * {@link Inject @Inject}, and {@link Resource @Resource} from beans defined in
  * the {@link ApplicationContext} loaded from the default classpath resource:
- *
- * {@code &quot;/org/springframework/test/context/junit/SpringJUnit4ClassRunnerAppCtxTests-context.xml&quot;}
- * .
- * </p>
+ * {@value #DEFAULT_CONTEXT_RESOURCE_PATH}.
  *
  * @author Sam Brannen
  * @since 2.5
@@ -80,16 +73,14 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
  * @see RelativePathSpringJUnit4ClassRunnerAppCtxTests
  * @see InheritedConfigSpringJUnit4ClassRunnerAppCtxTests
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ContextConfiguration
-@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class })
+@TestExecutionListeners(DependencyInjectionTestExecutionListener.class)
 public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAware, BeanNameAware, InitializingBean {
 
 	/**
 	 * Default resource path for the application context configuration for
-	 * {@link SpringJUnit4ClassRunnerAppCtxTests}:
-	 *
-	 * {@code &quot;/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml&quot;}
+	 * {@link SpringJUnit4ClassRunnerAppCtxTests}: {@value #DEFAULT_CONTEXT_RESOURCE_PATH}
 	 */
 	public static final String DEFAULT_CONTEXT_RESOURCE_PATH = "/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml";
 

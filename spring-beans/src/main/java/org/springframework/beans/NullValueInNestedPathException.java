@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ package org.springframework.beans;
  * spouse property of the target object has a null value.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 @SuppressWarnings("serial")
 public class NullValueInNestedPathException extends InvalidPropertyException {
@@ -33,7 +34,7 @@ public class NullValueInNestedPathException extends InvalidPropertyException {
 	 * @param beanClass the offending bean class
 	 * @param propertyName the offending property
 	 */
-	public NullValueInNestedPathException(Class beanClass, String propertyName) {
+	public NullValueInNestedPathException(Class<?> beanClass, String propertyName) {
 		super(beanClass, propertyName, "Value of nested property '" + propertyName + "' is null");
 	}
 
@@ -43,8 +44,20 @@ public class NullValueInNestedPathException extends InvalidPropertyException {
 	 * @param propertyName the offending property
 	 * @param msg the detail message
 	 */
-	public NullValueInNestedPathException(Class beanClass, String propertyName, String msg) {
+	public NullValueInNestedPathException(Class<?> beanClass, String propertyName, String msg) {
 		super(beanClass, propertyName, msg);
+	}
+
+	/**
+	 * Create a new NullValueInNestedPathException.
+	 * @param beanClass the offending bean class
+	 * @param propertyName the offending property
+	 * @param msg the detail message
+	 * @param cause the root cause
+	 * @since 4.3.2
+	 */
+	public NullValueInNestedPathException(Class<?> beanClass, String propertyName, String msg, Throwable cause) {
+		super(beanClass, propertyName, msg, cause);
 	}
 
 }

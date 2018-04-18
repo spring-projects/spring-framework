@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.core.type.filter;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
+
 /**
  * A simple filter which matches classes that are assignable to a given type.
  *
@@ -26,18 +29,25 @@ package org.springframework.core.type.filter;
  */
 public class AssignableTypeFilter extends AbstractTypeHierarchyTraversingFilter {
 
-	private final Class targetType;
+	private final Class<?> targetType;
 
 
 	/**
 	 * Create a new AssignableTypeFilter for the given type.
 	 * @param targetType the type to match
 	 */
-	public AssignableTypeFilter(Class targetType) {
+	public AssignableTypeFilter(Class<?> targetType) {
 		super(true, true);
 		this.targetType = targetType;
 	}
 
+	/**
+	 * Return the {@code type} that this instance is using to filter candidates.
+	 * @since 5.0
+	 */
+	public final Class<?> getTargetType() {
+		return this.targetType;
+	}
 
 	@Override
 	protected boolean matchClassName(String className) {
@@ -45,29 +55,32 @@ public class AssignableTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 	}
 
 	@Override
+	@Nullable
 	protected Boolean matchSuperClass(String superClassName) {
 		return matchTargetType(superClassName);
 	}
 
 	@Override
+	@Nullable
 	protected Boolean matchInterface(String interfaceName) {
 		return matchTargetType(interfaceName);
 	}
 
+	@Nullable
 	protected Boolean matchTargetType(String typeName) {
 		if (this.targetType.getName().equals(typeName)) {
 			return true;
 		}
 		else if (Object.class.getName().equals(typeName)) {
-			return Boolean.FALSE;
+			return false;
 		}
-		else if (typeName.startsWith("java.")) {
+		else if (typeName.startsWith("java")) {
 			try {
-				Class clazz = getClass().getClassLoader().loadClass(typeName);
-				return Boolean.valueOf(this.targetType.isAssignableFrom(clazz));
+				Class<?> clazz = ClassUtils.forName(typeName, getClass().getClassLoader());
+				return this.targetType.isAssignableFrom(clazz);
 			}
-			catch (ClassNotFoundException ex) {
-				// Class not found - can't determine a match that way.
+			catch (Throwable ex) {
+				// Class not regularly loadable - can't determine a match that way.
 			}
 		}
 		return null;

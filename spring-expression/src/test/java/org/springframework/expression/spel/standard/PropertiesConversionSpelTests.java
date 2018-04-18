@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.expression.spel.standard;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -26,8 +24,9 @@ import java.util.UUID;
 import org.junit.Test;
 
 import org.springframework.expression.Expression;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Mark Fisher
@@ -51,7 +50,7 @@ public class PropertiesConversionSpelTests {
 
 	@Test
 	public void mapWithAllStringValues() {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("x", "1");
 		map.put("y", "2");
 		map.put("z", "3");
@@ -64,7 +63,7 @@ public class PropertiesConversionSpelTests {
 
 	@Test
 	public void mapWithNonStringValue() {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("x", "1");
 		map.put("y", 2);
 		map.put("z", "3");

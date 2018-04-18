@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import org.springframework.transaction.annotation.AnnotationTransactionAttribute
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Concrete AspectJ transaction aspect using Spring's @Transactional annotation.
+ * Concrete AspectJ transaction aspect using Spring's
+ * {@link org.springframework.transaction.annotation.Transactional} annotation.
  *
  * <p>When using this aspect, you <i>must</i> annotate the implementation class
  * (and/or methods within that class), <i>not</i> the interface (if any) that
@@ -32,9 +33,9 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * <p>An @Transactional annotation on a method within the class overrides the
  * default transaction semantics given by the class annotation (if present).
- * Any method may be annotated (regardless of visibility).
- * Annotating non-public methods directly is the only way
- * to get transaction demarcation for the execution of such operations.
+ * Any method may be annotated (regardless of visibility). Annotating
+ * non-public methods directly is the only way to get transaction demarcation
+ * for the execution of such operations.
  *
  * @author Rod Johnson
  * @author Ramnivas Laddad
@@ -66,8 +67,6 @@ public aspect AnnotationTransactionAspect extends AbstractTransactionAspect {
 	 * will have Spring transaction management applied.
 	 */
 	protected pointcut transactionalMethodExecution(Object txObject) :
-		(executionOfAnyPublicMethodInAtTransactionalType()
-		 || executionOfTransactionalMethod() )
-		 && this(txObject);
+		(executionOfAnyPublicMethodInAtTransactionalType() || executionOfTransactionalMethod() ) && this(txObject);
 
 }

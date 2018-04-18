@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.core.io.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,104 +24,102 @@ import java.util.List;
 
 import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.core.io.Resource;
+import org.springframework.util.StringUtils;
+
+import static org.junit.Assert.*;
 
 /**
- * If this test case fails, uncomment diagnostics in
- * {@code assertProtocolAndFilenames} method.
+ * If this test case fails, uncomment diagnostics in the
+ * {@link #assertProtocolAndFilenames} method.
  *
  * @author Oliver Hutchison
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 17.11.2004
  */
 public class PathMatchingResourcePatternResolverTests {
 
 	private static final String[] CLASSES_IN_CORE_IO_SUPPORT =
 			new String[] {"EncodedResource.class", "LocalizedResourceHelper.class",
-										"PathMatchingResourcePatternResolver.class",
-										"PropertiesLoaderSupport.class", "PropertiesLoaderUtils.class",
-										"ResourceArrayPropertyEditor.class",
-										"ResourcePatternResolver.class", "ResourcePatternUtils.class"};
+					"PathMatchingResourcePatternResolver.class", "PropertiesLoaderSupport.class",
+					"PropertiesLoaderUtils.class", "ResourceArrayPropertyEditor.class",
+					"ResourcePatternResolver.class", "ResourcePatternUtils.class"};
 
 	private static final String[] TEST_CLASSES_IN_CORE_IO_SUPPORT =
 			new String[] {"PathMatchingResourcePatternResolverTests.class"};
 
-	private static final String[] CLASSES_IN_COMMONSLOGGING =
-			new String[] {"Log.class", "LogConfigurationException.class", "LogFactory.class",
-										"LogFactory$1.class", "LogFactory$2.class", "LogFactory$3.class",
-										"LogFactory$4.class", "LogFactory$5.class", "LogFactory$6.class",
-										"LogSource.class"};
+	private static final String[] CLASSES_IN_REACTIVESTREAMS =
+			new String[] {"Processor.class", "Publisher.class", "Subscriber.class", "Subscription.class"};
 
 	private PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
 
-	@Test
-	public void testInvalidPrefixWithPatternElementInIt() throws IOException {
-		try {
-			resolver.getResources("xx**:**/*.xy");
-			fail("Should have thrown FileNotFoundException");
-		}
-		catch (FileNotFoundException ex) {
-			// expected
-		}
+	@Test(expected = FileNotFoundException.class)
+	public void invalidPrefixWithPatternElementInIt() throws IOException {
+		resolver.getResources("xx**:**/*.xy");
 	}
 
 	@Test
-	public void testSingleResourceOnFileSystem() throws IOException {
+	public void singleResourceOnFileSystem() throws IOException {
 		Resource[] resources =
 				resolver.getResources("org/springframework/core/io/support/PathMatchingResourcePatternResolverTests.class");
 		assertEquals(1, resources.length);
-		assertProtocolAndFilename(resources[0], "file", "PathMatchingResourcePatternResolverTests.class");
+		assertProtocolAndFilenames(resources, "file", "PathMatchingResourcePatternResolverTests.class");
 	}
 
 	@Test
-	public void testSingleResourceInJar() throws IOException {
-		Resource[] resources = resolver.getResources("java/net/URL.class");
+	public void singleResourceInJar() throws IOException {
+		Resource[] resources = resolver.getResources("org/reactivestreams/Publisher.class");
 		assertEquals(1, resources.length);
-		assertProtocolAndFilename(resources[0], "jar", "URL.class");
+		assertProtocolAndFilenames(resources, "jar", "Publisher.class");
 	}
 
-	@Ignore // passes under eclipse, fails under ant
+	@Ignore  // passes under Eclipse, fails under Ant
 	@Test
-	public void testClasspathStarWithPatternOnFileSystem() throws IOException {
+	public void classpathStarWithPatternOnFileSystem() throws IOException {
 		Resource[] resources = resolver.getResources("classpath*:org/springframework/core/io/sup*/*.class");
 		// Have to exclude Clover-generated class files here,
 		// as we might be running as part of a Clover test run.
-		List noCloverResources = new ArrayList();
-		for (int i = 0; i < resources.length; i++) {
-			if (resources[i].getFilename().indexOf("$__CLOVER_") == -1) {
-				noCloverResources.add(resources[i]);
+		List<Resource> noCloverResources = new ArrayList<>();
+		for (Resource resource : resources) {
+			if (!resource.getFilename().contains("$__CLOVER_")) {
+				noCloverResources.add(resource);
 			}
 		}
-		resources = (Resource[]) noCloverResources.toArray(new Resource[noCloverResources.size()]);
-		assertProtocolAndFilenames(resources, "file", CLASSES_IN_CORE_IO_SUPPORT, TEST_CLASSES_IN_CORE_IO_SUPPORT);
+		resources = noCloverResources.toArray(new Resource[noCloverResources.size()]);
+		assertProtocolAndFilenames(resources, "file",
+				StringUtils.concatenateStringArrays(CLASSES_IN_CORE_IO_SUPPORT, TEST_CLASSES_IN_CORE_IO_SUPPORT));
 	}
 
 	@Test
-	public void testClasspathWithPatternInJar() throws IOException {
-		Resource[] resources = resolver.getResources("classpath:org/apache/commons/logging/*.class");
-		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_COMMONSLOGGING);
+	public void classpathWithPatternInJar() throws IOException {
+		Resource[] resources = resolver.getResources("classpath:org/reactivestreams/*.class");
+		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_REACTIVESTREAMS);
 	}
 
 	@Test
-	public void testClasspathStartWithPatternInJar() throws IOException {
-		Resource[] resources = resolver.getResources("classpath*:org/apache/commons/logging/*.class");
-		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_COMMONSLOGGING);
+	public void classpathStarWithPatternInJar() throws IOException {
+		Resource[] resources = resolver.getResources("classpath*:org/reactivestreams/*.class");
+		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_REACTIVESTREAMS);
 	}
 
-	private void assertProtocolAndFilename(Resource resource, String urlProtocol, String fileName) throws IOException {
-		assertProtocolAndFilenames(new Resource[] {resource}, urlProtocol, new String[] {fileName});
+	@Test
+	public void rootPatternRetrievalInJarFiles() throws IOException {
+		Resource[] resources = resolver.getResources("classpath*:*.dtd");
+		boolean found = false;
+		for (Resource resource : resources) {
+			if (resource.getFilename().equals("aspectj_1_5_0.dtd")) {
+				found = true;
+			}
+		}
+		assertTrue("Could not find aspectj_1_5_0.dtd in the root of the aspectjweaver jar", found);
 	}
 
-	private void assertProtocolAndFilenames(
-			Resource[] resources, String urlProtocol, String[] fileNames1, String[] fileNames2) throws IOException {
-		List fileNames = new ArrayList(Arrays.asList(fileNames1));
-		fileNames.addAll(Arrays.asList(fileNames2));
-		assertProtocolAndFilenames(resources, urlProtocol, (String[]) fileNames.toArray(new String[fileNames.size()]));
-	}
 
-	private void assertProtocolAndFilenames(Resource[] resources, String urlProtocol, String[] fileNames)
+	private void assertProtocolAndFilenames(Resource[] resources, String protocol, String... filenames)
 			throws IOException {
 
 		// Uncomment the following if you encounter problems with matching against the file system
@@ -145,21 +140,18 @@ public class PathMatchingResourcePatternResolverTests {
 //			System.out.println(resources[i]);
 //		}
 
-		assertEquals("Correct number of files found", fileNames.length, resources.length);
-		for (int i = 0; i < resources.length; i++) {
-			Resource resource = resources[i];
-			assertEquals(urlProtocol, resource.getURL().getProtocol());
-			assertFilenameIn(resource, fileNames);
+		assertEquals("Correct number of files found", filenames.length, resources.length);
+		for (Resource resource : resources) {
+			String actualProtocol = resource.getURL().getProtocol();
+			assertEquals(protocol, actualProtocol);
+			assertFilenameIn(resource, filenames);
 		}
 	}
 
-	private void assertFilenameIn(Resource resource, String[] fileNames) {
-		for (int i = 0; i < fileNames.length; i++) {
-			if (resource.getFilename().endsWith(fileNames[i])) {
-				return;
-			}
-		}
-		fail("resource [" + resource + "] does not have a filename that matches and of the names in 'fileNames'");
+	private void assertFilenameIn(Resource resource, String... filenames) {
+		String filename = resource.getFilename();
+		assertTrue(resource + " does not have a filename that matches any of the specified names",
+				Arrays.stream(filenames).anyMatch(filename::endsWith));
 	}
 
 }

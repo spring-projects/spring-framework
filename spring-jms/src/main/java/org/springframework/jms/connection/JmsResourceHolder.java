@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.jms.connection;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,9 +30,12 @@ import javax.jms.TransactionInProgressException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.ResourceHolderSupport;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * JMS resource holder, wrapping a JMS Connection and a JMS Session.
@@ -49,16 +53,16 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 
 	private static final Log logger = LogFactory.getLog(JmsResourceHolder.class);
 
+	@Nullable
 	private ConnectionFactory connectionFactory;
 
 	private boolean frozen = false;
 
-	private final List<Connection> connections = new LinkedList<Connection>();
+	private final List<Connection> connections = new LinkedList<>();
 
-	private final List<Session> sessions = new LinkedList<Session>();
+	private final List<Session> sessions = new LinkedList<>();
 
-	private final Map<Connection, List<Session>> sessionsPerConnection =
-			new HashMap<Connection, List<Session>>();
+	private final Map<Connection, List<Session>> sessionsPerConnection = new HashMap<>();
 
 
 	/**
@@ -74,7 +78,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	 * @param connectionFactory the JMS ConnectionFactory that this
 	 * resource holder is associated with (may be {@code null})
 	 */
-	public JmsResourceHolder(ConnectionFactory connectionFactory) {
+	public JmsResourceHolder(@Nullable ConnectionFactory connectionFactory) {
 		this.connectionFactory = connectionFactory;
 	}
 
@@ -105,7 +109,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	 * @param connection the JMS Connection
 	 * @param session the JMS Session
 	 */
-	public JmsResourceHolder(ConnectionFactory connectionFactory, Connection connection, Session session) {
+	public JmsResourceHolder(@Nullable ConnectionFactory connectionFactory, Connection connection, Session session) {
 		this.connectionFactory = connectionFactory;
 		addConnection(connection);
 		addSession(session, connection);
@@ -129,17 +133,13 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 		addSession(session, null);
 	}
 
-	public final void addSession(Session session, Connection connection) {
+	public final void addSession(Session session, @Nullable Connection connection) {
 		Assert.isTrue(!this.frozen, "Cannot add Session because JmsResourceHolder is frozen");
 		Assert.notNull(session, "Session must not be null");
 		if (!this.sessions.contains(session)) {
 			this.sessions.add(session);
 			if (connection != null) {
-				List<Session> sessions = this.sessionsPerConnection.get(connection);
-				if (sessions == null) {
-					sessions = new LinkedList<Session>();
-					this.sessionsPerConnection.put(connection, sessions);
-				}
+				List<Session> sessions = this.sessionsPerConnection.computeIfAbsent(connection, k -> new LinkedList<>());
 				sessions.add(session);
 			}
 		}
@@ -150,27 +150,29 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	}
 
 
+	@Nullable
 	public Connection getConnection() {
 		return (!this.connections.isEmpty() ? this.connections.get(0) : null);
 	}
 
+	@Nullable
 	public Connection getConnection(Class<? extends Connection> connectionType) {
 		return CollectionUtils.findValueOfType(this.connections, connectionType);
 	}
 
+	@Nullable
 	public Session getSession() {
 		return (!this.sessions.isEmpty() ? this.sessions.get(0) : null);
 	}
 
+	@Nullable
 	public Session getSession(Class<? extends Session> sessionType) {
 		return getSession(sessionType, null);
 	}
 
-	public Session getSession(Class<? extends Session> sessionType, Connection connection) {
-		List<Session> sessions = this.sessions;
-		if (connection != null) {
-			sessions = this.sessionsPerConnection.get(connection);
-		}
+	@Nullable
+	public Session getSession(Class<? extends Session> sessionType, @Nullable Connection connection) {
+		List<Session> sessions = (connection != null ? this.sessionsPerConnection.get(connection) : this.sessions);
 		return CollectionUtils.findValueOfType(sessions, sessionType);
 	}
 
@@ -183,7 +185,36 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 			catch (TransactionInProgressException ex) {
 				// Ignore -> can only happen in case of a JTA transaction.
 			}
-			// Let IllegalStateException through: It might point out an unexpectedly closed session.
+			catch (javax.jms.IllegalStateException ex) {
+				if (this.connectionFactory != null) {
+					try {
+						Method getDataSourceMethod = this.connectionFactory.getClass().getMethod("getDataSource");
+						Object ds = ReflectionUtils.invokeMethod(getDataSourceMethod, this.connectionFactory);
+						while (ds != null) {
+							if (TransactionSynchronizationManager.hasResource(ds)) {
+								// IllegalStateException from sharing the underlying JDBC Connection
+								// which typically gets committed first, e.g. with Oracle AQ --> ignore
+								return;
+							}
+							try {
+								// Check for decorated DataSource a la Spring's DelegatingDataSource
+								Method getTargetDataSourceMethod = ds.getClass().getMethod("getTargetDataSource");
+								ds = ReflectionUtils.invokeMethod(getTargetDataSourceMethod, ds);
+							}
+							catch (NoSuchMethodException nsme) {
+								ds = null;
+							}
+						}
+					}
+					catch (Throwable ex2) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("No working getDataSource method found on ConnectionFactory: " + ex2);
+						}
+						// No working getDataSource method - cannot perform DataSource transaction check
+					}
+				}
+				throw ex;
+			}
 		}
 	}
 

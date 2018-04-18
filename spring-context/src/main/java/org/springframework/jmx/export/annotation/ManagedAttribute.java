@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * JDK 1.5+ method-level annotation that indicates to expose a given bean
- * property as JMX attribute, corresponding to the ManagedAttribute attribute.
+ * Method-level annotation that indicates to expose a given bean property as a
+ * JMX attribute, corresponding to the {@code ManagedAttribute} attribute.
  * Only valid when used on a JavaBean getter or setter.
  *
  * @author Rob Harrop

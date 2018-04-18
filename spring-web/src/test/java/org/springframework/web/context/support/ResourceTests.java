@@ -1,12 +1,13 @@
 package org.springframework.web.context.support;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 
 import org.junit.Test;
+
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.test.MockServletContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Chris Beams

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 package org.springframework.util.xml;
 
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import javax.xml.namespace.QName;
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLEventReader;
@@ -43,6 +41,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.ext.Locator2;
 import org.xml.sax.helpers.AttributesImpl;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -51,35 +50,35 @@ import org.springframework.util.StringUtils;
  * an {@code XMLEventReader}, and calls the corresponding methods on the SAX callback interfaces.
  *
  * @author Arjen Poutsma
+ * @since 3.0
  * @see XMLEventReader
  * @see #setContentHandler(org.xml.sax.ContentHandler)
  * @see #setDTDHandler(org.xml.sax.DTDHandler)
  * @see #setEntityResolver(org.xml.sax.EntityResolver)
  * @see #setErrorHandler(org.xml.sax.ErrorHandler)
- * @since 3.0
  */
+@SuppressWarnings("rawtypes")
 class StaxEventXMLReader extends AbstractStaxXMLReader {
 
 	private static final String DEFAULT_XML_VERSION = "1.0";
 
 	private final XMLEventReader reader;
 
-	private final Map<String, String> namespaces = new LinkedHashMap<String, String>();
-
 	private String xmlVersion = DEFAULT_XML_VERSION;
 
+	@Nullable
 	private String encoding;
+
 
 	/**
 	 * Constructs a new instance of the {@code StaxEventXmlReader} that reads from the given
 	 * {@code XMLEventReader}. The supplied event reader must be in {@code XMLStreamConstants.START_DOCUMENT} or
 	 * {@code XMLStreamConstants.START_ELEMENT} state.
-	 *
 	 * @param reader the {@code XMLEventReader} to read from
 	 * @throws IllegalStateException if the reader is not at the start of a document or element
 	 */
 	StaxEventXMLReader(XMLEventReader reader) {
-		Assert.notNull(reader, "'reader' must not be null");
+		Assert.notNull(reader, "XMLEventReader must not be null");
 		try {
 			XMLEvent event = reader.peek();
 			if (event != null && !(event.isStartDocument() || event.isStartElement())) {
@@ -89,17 +88,17 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 		catch (XMLStreamException ex) {
 			throw new IllegalStateException("Could not read first element: " + ex.getMessage());
 		}
-
 		this.reader = reader;
 	}
+
 
 	@Override
 	protected void parseInternal() throws SAXException, XMLStreamException {
 		boolean documentStarted = false;
 		boolean documentEnded = false;
 		int elementDepth = 0;
-		while (reader.hasNext() && elementDepth >= 0) {
-			XMLEvent event = reader.nextEvent();
+		while (this.reader.hasNext() && elementDepth >= 0) {
+			XMLEvent event = this.reader.nextEvent();
 			if (!event.isStartDocument() && !event.isEndDocument() && !documentStarted) {
 				handleStartDocument(event);
 				documentStarted = true;
@@ -165,42 +164,37 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 				this.encoding = startDocument.getCharacterEncodingScheme();
 			}
 		}
-
 		if (getContentHandler() != null) {
 			final Location location = event.getLocation();
 			getContentHandler().setDocumentLocator(new Locator2() {
-
 				@Override
 				public int getColumnNumber() {
-					return location != null ? location.getColumnNumber() : -1;
+					return (location != null ? location.getColumnNumber() : -1);
 				}
-
 				@Override
 				public int getLineNumber() {
-					return location != null ? location.getLineNumber() : -1;
+					return (location != null ? location.getLineNumber() : -1);
 				}
-
 				@Override
+				@Nullable
 				public String getPublicId() {
-					return location != null ? location.getPublicId() : null;
+					return (location != null ? location.getPublicId() : null);
 				}
-
 				@Override
+				@Nullable
 				public String getSystemId() {
-					return location != null ? location.getSystemId() : null;
+					return (location != null ? location.getSystemId() : null);
 				}
-
 				@Override
 				public String getXMLVersion() {
 					return xmlVersion;
 				}
-
 				@Override
+				@Nullable
 				public String getEncoding() {
 					return encoding;
 				}
 			});
-
 			getContentHandler().startDocument();
 		}
 	}
@@ -317,7 +311,6 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 
 	private Attributes getAttributes(StartElement event) {
 		AttributesImpl attributes = new AttributesImpl();
-
 		for (Iterator i = event.getAttributes(); i.hasNext();) {
 			Attribute attribute = (Attribute) i.next();
 			QName qName = attribute.getName();
@@ -329,8 +322,7 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 			if (type == null) {
 				type = "CDATA";
 			}
-			attributes
-					.addAttribute(namespace, qName.getLocalPart(), toQualifiedName(qName), type, attribute.getValue());
+			attributes.addAttribute(namespace, qName.getLocalPart(), toQualifiedName(qName), type, attribute.getValue());
 		}
 		if (hasNamespacePrefixesFeature()) {
 			for (Iterator i = event.getNamespaces(); i.hasNext();) {

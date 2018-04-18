@@ -18,8 +18,9 @@ package org.springframework.util;
 
 import java.util.Properties;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
@@ -103,7 +104,7 @@ public class PropertyPlaceholderHelperTests {
 		assertEquals("foo=bar,bar=${bar}", this.helper.replacePlaceholders(text, props));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testUnresolvedPlaceholderAsError() {
 		String text = "foo=${foo},bar=${bar}";
 		Properties props = new Properties();

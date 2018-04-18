@@ -16,18 +16,13 @@
 
 package org.springframework.test.context.junit4.spr9051;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
-import static org.springframework.test.transaction.TransactionTestUtils.inTransaction;
-
 import javax.sql.DataSource;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.tests.sample.beans.Employee;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -36,11 +31,15 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
+import org.springframework.tests.sample.beans.Employee;
 import org.springframework.transaction.annotation.Transactional;
+
+import static org.junit.Assert.*;
+import static org.springframework.test.transaction.TransactionTestUtils.*;
 
 /**
  * This set of tests (i.e., all concrete subclasses) investigates the claims made in
- * <a href="https://jira.springsource.org/browse/SPR-9051" target="_blank">SPR-9051</a>
+ * <a href="https://jira.spring.io/browse/SPR-9051" target="_blank">SPR-9051</a>
  * with regard to transactional tests.
  *
  * @author Sam Brannen

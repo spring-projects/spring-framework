@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,19 @@ package org.springframework.messaging.support;
 
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
 
 /**
- * A builder for creating {@link GenericMessage} or {@link ErrorMessage} if the payload is
- * {@link Throwable}.
+ * A builder for creating a {@link GenericMessage}
+ * (or {@link ErrorMessage} if the payload is of type {@link Throwable}).
  *
  * @author Arjen Poutsma
  * @author Mark Fisher
+ * @author Rossen Stoyanchev
  * @since 4.0
  * @see GenericMessage
  * @see ErrorMessage
@@ -36,61 +39,43 @@ public final class MessageBuilder<T> {
 
 	private final T payload;
 
-	private final MessageHeaderAccessor headerAccessor;
-
+	@Nullable
 	private final Message<T> originalMessage;
 
+	private MessageHeaderAccessor headerAccessor;
 
-	/**
-	 * Private constructor to be invoked from the static factory methods only.
-	 */
-	private MessageBuilder(T payload, Message<T> originalMessage, MessageHeaderAccessor headerAccessor) {
-		Assert.notNull(payload, "payload must not be null");
-		this.payload = payload;
+
+	private MessageBuilder(Message<T> originalMessage) {
+		Assert.notNull(originalMessage, "Message must not be null");
+		this.payload = originalMessage.getPayload();
 		this.originalMessage = originalMessage;
-		this.headerAccessor = (headerAccessor != null) ?
-				headerAccessor : new MessageHeaderAccessor(originalMessage);
+		this.headerAccessor = new MessageHeaderAccessor(originalMessage);
 	}
 
-	/**
-	 * Create a builder for a new {@link Message} instance pre-populated with all of the
-	 * headers copied from the provided message. The payload of the provided Message will
-	 * also be used as the payload for the new message.
-	 *
-	 * @param message the Message from which the payload and all headers will be copied
-	 */
-	public static <T> MessageBuilder<T> fromMessage(Message<T> message) {
-		Assert.notNull(message, "message must not be null");
-		MessageBuilder<T> builder = new MessageBuilder<T>(message.getPayload(), message, null);
-		return builder;
+	private MessageBuilder(T payload, MessageHeaderAccessor accessor) {
+		Assert.notNull(payload, "Payload must not be null");
+		Assert.notNull(accessor, "MessageHeaderAccessor must not be null");
+		this.payload = payload;
+		this.originalMessage = null;
+		this.headerAccessor = accessor;
 	}
 
-	/**
-	 * Create a builder for a new {@link Message} instance with the provided payload.
-	 *
-	 * @param payload the payload for the new message
-	 */
-	public static <T> MessageBuilder<T> withPayload(T payload) {
-		MessageBuilder<T> builder = new MessageBuilder<T>(payload, null, null);
-		return builder;
-	}
 
 	/**
-	 * Create a builder for a new {@link Message} instance with the provided payload and headers.
-	 *
-	 * @param payload the payload for the new message
-	 * @param headerAccessor the headers for the message
+	 * Set the message headers to use by providing a {@code MessageHeaderAccessor}.
+	 * @param accessor the headers to use
 	 */
-	public static <T> MessageBuilder<T> withPayloadAndHeaders(T payload, MessageHeaderAccessor headerAccessor) {
-		MessageBuilder<T> builder = new MessageBuilder<T>(payload, null, headerAccessor);
-		return builder;
+	public MessageBuilder<T> setHeaders(MessageHeaderAccessor accessor) {
+		Assert.notNull(accessor, "MessageHeaderAccessor must not be null");
+		this.headerAccessor = accessor;
+		return this;
 	}
 
 	/**
 	 * Set the value for the given header name. If the provided value is {@code null},
 	 * the header will be removed.
 	 */
-	public MessageBuilder<T> setHeader(String headerName, Object headerValue) {
+	public MessageBuilder<T> setHeader(String headerName, @Nullable Object headerValue) {
 		this.headerAccessor.setHeader(headerName, headerValue);
 		return this;
 	}
@@ -126,7 +111,7 @@ public final class MessageBuilder<T> {
 	 * existing values. Use { {@link #copyHeadersIfAbsent(Map)} to avoid overwriting
 	 * values. Note that the 'id' and 'timestamp' header values will never be overwritten.
 	 */
-	public MessageBuilder<T> copyHeaders(Map<String, ?> headersToCopy) {
+	public MessageBuilder<T> copyHeaders(@Nullable Map<String, ?> headersToCopy) {
 		this.headerAccessor.copyHeaders(headersToCopy);
 		return this;
 	}
@@ -135,7 +120,7 @@ public final class MessageBuilder<T> {
 	 * Copy the name-value pairs from the provided Map. This operation will <em>not</em>
 	 * overwrite any existing values.
 	 */
-	public MessageBuilder<T> copyHeadersIfAbsent(Map<String, ?> headersToCopy) {
+	public MessageBuilder<T> copyHeadersIfAbsent(@Nullable Map<String, ?> headersToCopy) {
 		this.headerAccessor.copyHeadersIfAbsent(headersToCopy);
 		return this;
 	}
@@ -162,13 +147,57 @@ public final class MessageBuilder<T> {
 
 	@SuppressWarnings("unchecked")
 	public Message<T> build() {
-		if ((this.originalMessage != null) && !this.headerAccessor.isModified()) {
+		if (this.originalMessage != null && !this.headerAccessor.isModified()) {
 			return this.originalMessage;
 		}
+		MessageHeaders headersToUse = this.headerAccessor.toMessageHeaders();
 		if (this.payload instanceof Throwable) {
-			return (Message<T>) new ErrorMessage((Throwable) this.payload, this.headerAccessor.toMap());
+			return (Message<T>) new ErrorMessage((Throwable) this.payload, headersToUse);
 		}
-		return new GenericMessage<T>(this.payload, this.headerAccessor.toMap());
+		else {
+			return new GenericMessage<>(this.payload, headersToUse);
+		}
+	}
+
+
+	/**
+	 * Create a builder for a new {@link Message} instance pre-populated with all of the
+	 * headers copied from the provided message. The payload of the provided Message will
+	 * also be used as the payload for the new message.
+	 * @param message the Message from which the payload and all headers will be copied
+	 */
+	public static <T> MessageBuilder<T> fromMessage(Message<T> message) {
+		return new MessageBuilder<>(message);
+	}
+
+	/**
+	 * Create a new builder for a message with the given payload.
+	 * @param payload the payload
+	 */
+	public static <T> MessageBuilder<T> withPayload(T payload) {
+		return new MessageBuilder<>(payload, new MessageHeaderAccessor());
+	}
+
+	/**
+	 * A shortcut factory method for creating a message with the given payload
+	 * and {@code MessageHeaders}.
+	 * <p><strong>Note:</strong> the given {@code MessageHeaders} instance is used
+	 * directly in the new message, i.e. it is not copied.
+	 * @param payload the payload to use (never {@code null})
+	 * @param messageHeaders the headers to use (never {@code null})
+	 * @return the created message
+	 * @since 4.1
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> Message<T> createMessage(@Nullable T payload, MessageHeaders messageHeaders) {
+		Assert.notNull(payload, "Payload must not be null");
+		Assert.notNull(messageHeaders, "MessageHeaders must not be null");
+		if (payload instanceof Throwable) {
+			return (Message<T>) new ErrorMessage((Throwable) payload, messageHeaders);
+		}
+		else {
+			return new GenericMessage<>(payload, messageHeaders);
+		}
 	}
 
 }

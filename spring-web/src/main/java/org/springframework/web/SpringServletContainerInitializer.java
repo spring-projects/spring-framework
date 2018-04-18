@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web;
 
 import java.lang.reflect.Modifier;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -28,6 +27,8 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.HandlesTypes;
 
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Servlet 3.0 {@link ServletContainerInitializer} designed to support code-based
@@ -47,12 +48,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
  * Final Draft specification for complete details.
  *
  * <h3>In combination with {@code web.xml}</h3>
- * <p>If a web application includes a {@code WEB-INF/web.xml} file, it is important to
- * understand that neither this nor any other {@code ServletContextInitializer} will be
- * processed unless the {@code <web-app>} element's {@code version} attribute is >= "3.0"
- * and the {@code xsi:schemaLocation} for "http://java.sun.com/xml/ns/javaee" is set to
- * "http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd".
- * <p>A web application can choose to limit the amount of classpath scanning the Servlet
+ * A web application can choose to limit the amount of classpath scanning the Servlet
  * container does at startup either through the {@code metadata-complete} attribute in
  * {@code web.xml}, which controls scanning for Servlet annotations or through an
  * {@code <absolute-ordering>} element also in {@code web.xml}, which controls which
@@ -119,18 +115,14 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 	/**
 	 * Delegate the {@code ServletContext} to any {@link WebApplicationInitializer}
 	 * implementations present on the application classpath.
-	 *
 	 * <p>Because this class declares @{@code HandlesTypes(WebApplicationInitializer.class)},
 	 * Servlet 3.0+ containers will automatically scan the classpath for implementations
 	 * of Spring's {@code WebApplicationInitializer} interface and provide the set of all
 	 * such types to the {@code webAppInitializerClasses} parameter of this method.
-	 *
-	 * <p>If no {@code WebApplicationInitializer} implementations are found on the
-	 * classpath, this method is effectively a no-op. An INFO-level log message will be
-	 * issued notifying the user that the {@code ServletContainerInitializer} has indeed
-	 * been invoked but that no {@code WebApplicationInitializer} implementations were
-	 * found.
-	 *
+	 * <p>If no {@code WebApplicationInitializer} implementations are found on the classpath,
+	 * this method is effectively a no-op. An INFO-level log message will be issued notifying
+	 * the user that the {@code ServletContainerInitializer} has indeed been invoked but that
+	 * no {@code WebApplicationInitializer} implementations were found.
 	 * <p>Assuming that one or more {@code WebApplicationInitializer} types are detected,
 	 * they will be instantiated (and <em>sorted</em> if the @{@link
 	 * org.springframework.core.annotation.Order @Order} annotation is present or
@@ -140,7 +132,6 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 	 * that each instance may register and configure servlets such as Spring's
 	 * {@code DispatcherServlet}, listeners such as Spring's {@code ContextLoaderListener},
 	 * or any other Servlet API componentry such as filters.
-	 *
 	 * @param webAppInitializerClasses all implementations of
 	 * {@link WebApplicationInitializer} found on the application classpath
 	 * @param servletContext the servlet context to be initialized
@@ -148,10 +139,10 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 	 * @see AnnotationAwareOrderComparator
 	 */
 	@Override
-	public void onStartup(Set<Class<?>> webAppInitializerClasses, ServletContext servletContext)
+	public void onStartup(@Nullable Set<Class<?>> webAppInitializerClasses, ServletContext servletContext)
 			throws ServletException {
 
-		List<WebApplicationInitializer> initializers = new LinkedList<WebApplicationInitializer>();
+		List<WebApplicationInitializer> initializers = new LinkedList<>();
 
 		if (webAppInitializerClasses != null) {
 			for (Class<?> waiClass : webAppInitializerClasses) {
@@ -160,7 +151,8 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 				if (!waiClass.isInterface() && !Modifier.isAbstract(waiClass.getModifiers()) &&
 						WebApplicationInitializer.class.isAssignableFrom(waiClass)) {
 					try {
-						initializers.add((WebApplicationInitializer) waiClass.newInstance());
+						initializers.add((WebApplicationInitializer)
+								ReflectionUtils.accessibleConstructor(waiClass).newInstance());
 					}
 					catch (Throwable ex) {
 						throw new ServletException("Failed to instantiate WebApplicationInitializer class", ex);
@@ -174,9 +166,8 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 			return;
 		}
 
-		Collections.sort(initializers, new AnnotationAwareOrderComparator());
-		servletContext.log("Spring WebApplicationInitializers detected on classpath: " + initializers);
-
+		servletContext.log(initializers.size() + " Spring WebApplicationInitializers detected on classpath");
+		AnnotationAwareOrderComparator.sort(initializers);
 		for (WebApplicationInitializer initializer : initializers) {
 			initializer.onStartup(servletContext);
 		}

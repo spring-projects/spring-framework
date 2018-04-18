@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Read-only EL property accessor that knows how to retrieve keys
@@ -33,7 +35,7 @@ public class EnvironmentAccessor implements PropertyAccessor {
 
 	@Override
 	public Class<?>[] getSpecificTargetClasses() {
-		return new Class[] { Environment.class };
+		return new Class<?>[] {Environment.class};
 	}
 
 	/**
@@ -41,7 +43,7 @@ public class EnvironmentAccessor implements PropertyAccessor {
 	 * @return true
 	 */
 	@Override
-	public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+	public boolean canRead(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
 		return true;
 	}
 
@@ -50,24 +52,25 @@ public class EnvironmentAccessor implements PropertyAccessor {
 	 * environment.
 	 */
 	@Override
-	public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-		return new TypedValue(((Environment)target).getProperty(name));
+	public TypedValue read(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
+		Assert.state(target instanceof Environment, "Target must be of type Environment");
+		return new TypedValue(((Environment) target).getProperty(name));
 	}
 
 	/**
-	 * Read only.
-	 * @return false
+	 * Read-only: returns {@code false}.
 	 */
 	@Override
-	public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
+	public boolean canWrite(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
 		return false;
 	}
 
 	/**
-	 * Read only. No-op.
+	 * Read-only: no-op.
 	 */
 	@Override
-	public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
+	public void write(EvaluationContext context, @Nullable Object target, String name, @Nullable Object newValue)
+			throws AccessException {
 	}
 
 }

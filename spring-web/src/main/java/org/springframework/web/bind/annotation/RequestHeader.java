@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,17 +22,24 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
+
 /**
  * Annotation which indicates that a method parameter should be bound to a web request header.
- * Supported for annotated handler methods in Servlet and Portlet environments.
+ *
+ * <p>Supported for annotated handler methods in Servlet and Portlet environments.
+ *
+ * <p>If the method parameter is {@link java.util.Map Map&lt;String, String&gt;},
+ * {@link org.springframework.util.MultiValueMap MultiValueMap&lt;String, String&gt;},
+ * or {@link org.springframework.http.HttpHeaders HttpHeaders} then the map is
+ * populated with all header names and values.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  * @see RequestMapping
  * @see RequestParam
  * @see CookieValue
- * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
- * @see org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
@@ -40,23 +47,33 @@ import java.lang.annotation.Target;
 public @interface RequestHeader {
 
 	/**
-	 * The name of the request header to bind to.
+	 * Alias for {@link #name}.
 	 */
+	@AliasFor("name")
 	String value() default "";
 
 	/**
+	 * The name of the request header to bind to.
+	 * @since 4.2
+	 */
+	@AliasFor("value")
+	String name() default "";
+
+	/**
 	 * Whether the header is required.
-	 * <p>Default is {@code true}, leading to an exception thrown in case
-	 * of the header missing in the request. Switch this to {@code false}
-	 * if you prefer a {@code null} in case of the header missing.
-	 * <p>Alternatively, provide a {@link #defaultValue}, which implicitly sets
-	 * this flag to {@code false}.
+	 * <p>Defaults to {@code true}, leading to an exception being thrown
+	 * if the header is missing in the request. Switch this to
+	 * {@code false} if you prefer a {@code null} value if the header is
+	 * not present in the request.
+	 * <p>Alternatively, provide a {@link #defaultValue}, which implicitly
+	 * sets this flag to {@code false}.
 	 */
 	boolean required() default true;
 
 	/**
-	 * The default value to use as a fallback. Supplying a default value implicitly
-	 * sets {@link #required} to {@code false}.
+	 * The default value to use as a fallback.
+	 * <p>Supplying a default value implicitly sets {@link #required} to
+	 * {@code false}.
 	 */
 	String defaultValue() default ValueConstants.DEFAULT_NONE;
 

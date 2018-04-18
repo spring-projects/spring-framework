@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Convenient class for building up pointcuts. All methods return
@@ -180,7 +179,6 @@ public class ComposablePointcut implements Pointcut, Serializable {
 		return this.methodMatcher;
 	}
 
-
 	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
@@ -189,28 +187,19 @@ public class ComposablePointcut implements Pointcut, Serializable {
 		if (!(other instanceof ComposablePointcut)) {
 			return false;
 		}
-
-		ComposablePointcut that = (ComposablePointcut) other;
-		return ObjectUtils.nullSafeEquals(that.classFilter, this.classFilter) &&
-				ObjectUtils.nullSafeEquals(that.methodMatcher, this.methodMatcher);
+		ComposablePointcut otherPointcut = (ComposablePointcut) other;
+		return (this.classFilter.equals(otherPointcut.classFilter) &&
+				this.methodMatcher.equals(otherPointcut.methodMatcher));
 	}
 
 	@Override
 	public int hashCode() {
-		int code = 17;
-		if (this.classFilter != null) {
-			code = 37 * code + this.classFilter.hashCode();
-		}
-		if (this.methodMatcher != null) {
-			code = 37 * code + this.methodMatcher.hashCode();
-		}
-		return code;
+		return this.classFilter.hashCode() * 37 + this.methodMatcher.hashCode();
 	}
 
 	@Override
 	public String toString() {
-		return "ComposablePointcut: ClassFilter [" + this.classFilter +
-				"], MethodMatcher [" + this.methodMatcher + "]";
+		return "ComposablePointcut: " + this.classFilter + ", " +this.methodMatcher;
 	}
 
 }

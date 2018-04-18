@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.ServiceLoader;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -31,30 +32,33 @@ import org.springframework.util.ClassUtils;
  * @since 2.5
  * @see java.util.ServiceLoader
  */
-public abstract class AbstractServiceLoaderBasedFactoryBean extends AbstractFactoryBean
+public abstract class AbstractServiceLoaderBasedFactoryBean extends AbstractFactoryBean<Object>
 		implements BeanClassLoaderAware {
 
-	private Class serviceType;
+	@Nullable
+	private Class<?> serviceType;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 
 	/**
 	 * Specify the desired service type (typically the service's public API).
 	 */
-	public void setServiceType(Class serviceType) {
+	public void setServiceType(@Nullable Class<?> serviceType) {
 		this.serviceType = serviceType;
 	}
 
 	/**
 	 * Return the desired service type.
 	 */
-	public Class getServiceType() {
+	@Nullable
+	public Class<?> getServiceType() {
 		return this.serviceType;
 	}
 
 	@Override
-	public void setBeanClassLoader(ClassLoader beanClassLoader) {
+	public void setBeanClassLoader(@Nullable ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
 
@@ -75,6 +79,6 @@ public abstract class AbstractServiceLoaderBasedFactoryBean extends AbstractFact
 	 * @param serviceLoader the ServiceLoader for the configured service class
 	 * @return the object to expose
 	 */
-	protected abstract Object getObjectToExpose(ServiceLoader serviceLoader);
+	protected abstract Object getObjectToExpose(ServiceLoader<?> serviceLoader);
 
 }

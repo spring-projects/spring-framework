@@ -17,13 +17,14 @@
 package org.springframework.ejb.config;
 
 import org.w3c.dom.Element;
-import static org.springframework.beans.factory.xml.BeanDefinitionParserDelegate.*;
 
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
+
+import static org.springframework.beans.factory.xml.BeanDefinitionParserDelegate.*;
 
 /**
  * Abstract base class for BeanDefinitionParsers which build

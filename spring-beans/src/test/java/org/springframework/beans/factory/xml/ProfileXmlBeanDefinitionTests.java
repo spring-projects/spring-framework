@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,19 @@
 
 package org.springframework.beans.factory.xml;
 
-import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertThat;
-
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ClassPathResource;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests various combinations of profile declarations against various profile
@@ -41,10 +42,13 @@ public class ProfileXmlBeanDefinitionTests {
 
 	private static final String PROD_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-prodProfile.xml";
 	private static final String DEV_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-devProfile.xml";
+	private static final String NOT_DEV_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-notDevProfile.xml";
 	private static final String ALL_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-noProfile.xml";
 	private static final String MULTI_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-multiProfile.xml";
+	private static final String MULTI_NEGATED_XML = "ProfileXmlBeanDefinitionTests-multiProfileNegated.xml";
+	private static final String MULTI_NOT_DEV_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-multiProfileNotDev.xml";
 	private static final String MULTI_ELIGIBLE_SPACE_DELIMITED_XML = "ProfileXmlBeanDefinitionTests-spaceDelimitedProfile.xml";
-	private static final String UNKOWN_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-unknownProfile.xml";
+	private static final String UNKNOWN_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-unknownProfile.xml";
 	private static final String DEFAULT_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-defaultProfile.xml";
 	private static final String CUSTOM_DEFAULT_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-customDefaultProfile.xml";
 	private static final String DEFAULT_AND_DEV_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-defaultAndDevProfile.xml";
@@ -58,7 +62,7 @@ public class ProfileXmlBeanDefinitionTests {
 
 	private static final String TARGET_BEAN = "foo";
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testProfileValidation() {
 		beanFactoryFor(PROD_ELIGIBLE_XML, NULL_ACTIVE);
 	}
@@ -71,9 +75,14 @@ public class ProfileXmlBeanDefinitionTests {
 		assertThat(beanFactoryFor(PROD_ELIGIBLE_XML, MULTI_ACTIVE), containsTargetBean());
 
 		assertThat(beanFactoryFor(DEV_ELIGIBLE_XML, NONE_ACTIVE), not(containsTargetBean()));
-		assertThat(beanFactoryFor(DEV_ELIGIBLE_XML, PROD_ACTIVE), not(containsTargetBean()));
 		assertThat(beanFactoryFor(DEV_ELIGIBLE_XML, DEV_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(DEV_ELIGIBLE_XML, PROD_ACTIVE), not(containsTargetBean()));
 		assertThat(beanFactoryFor(DEV_ELIGIBLE_XML, MULTI_ACTIVE), containsTargetBean());
+
+		assertThat(beanFactoryFor(NOT_DEV_ELIGIBLE_XML, NONE_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(NOT_DEV_ELIGIBLE_XML, DEV_ACTIVE), not(containsTargetBean()));
+		assertThat(beanFactoryFor(NOT_DEV_ELIGIBLE_XML, PROD_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(NOT_DEV_ELIGIBLE_XML, MULTI_ACTIVE), not(containsTargetBean()));
 
 		assertThat(beanFactoryFor(ALL_ELIGIBLE_XML, NONE_ACTIVE), containsTargetBean());
 		assertThat(beanFactoryFor(ALL_ELIGIBLE_XML, DEV_ACTIVE), containsTargetBean());
@@ -86,13 +95,25 @@ public class ProfileXmlBeanDefinitionTests {
 		assertThat(beanFactoryFor(MULTI_ELIGIBLE_XML, PROD_ACTIVE), containsTargetBean());
 		assertThat(beanFactoryFor(MULTI_ELIGIBLE_XML, MULTI_ACTIVE), containsTargetBean());
 
+		assertThat(beanFactoryFor(MULTI_NEGATED_XML, NONE_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(MULTI_NEGATED_XML, UNKNOWN_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(MULTI_NEGATED_XML, DEV_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(MULTI_NEGATED_XML, PROD_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(MULTI_NEGATED_XML, MULTI_ACTIVE), not(containsTargetBean()));
+
+		assertThat(beanFactoryFor(MULTI_NOT_DEV_ELIGIBLE_XML, NONE_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(MULTI_NOT_DEV_ELIGIBLE_XML, UNKNOWN_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(MULTI_NOT_DEV_ELIGIBLE_XML, DEV_ACTIVE), not(containsTargetBean()));
+		assertThat(beanFactoryFor(MULTI_NOT_DEV_ELIGIBLE_XML, PROD_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(MULTI_NOT_DEV_ELIGIBLE_XML, MULTI_ACTIVE), containsTargetBean());
+
 		assertThat(beanFactoryFor(MULTI_ELIGIBLE_SPACE_DELIMITED_XML, NONE_ACTIVE), not(containsTargetBean()));
 		assertThat(beanFactoryFor(MULTI_ELIGIBLE_SPACE_DELIMITED_XML, UNKNOWN_ACTIVE), not(containsTargetBean()));
 		assertThat(beanFactoryFor(MULTI_ELIGIBLE_SPACE_DELIMITED_XML, DEV_ACTIVE), containsTargetBean());
 		assertThat(beanFactoryFor(MULTI_ELIGIBLE_SPACE_DELIMITED_XML, PROD_ACTIVE), containsTargetBean());
 		assertThat(beanFactoryFor(MULTI_ELIGIBLE_SPACE_DELIMITED_XML, MULTI_ACTIVE), containsTargetBean());
 
-		assertThat(beanFactoryFor(UNKOWN_ELIGIBLE_XML, MULTI_ACTIVE), not(containsTargetBean()));
+		assertThat(beanFactoryFor(UNKNOWN_ELIGIBLE_XML, MULTI_ACTIVE), not(containsTargetBean()));
 	}
 
 	@Test

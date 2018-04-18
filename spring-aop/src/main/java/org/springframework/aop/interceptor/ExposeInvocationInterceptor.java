@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.core.NamedThreadLocal;
-import org.springframework.core.Ordered;
+import org.springframework.core.PriorityOrdered;
 
 /**
  * Interceptor that exposes the current {@link org.aopalliance.intercept.MethodInvocation}
@@ -41,7 +41,7 @@ import org.springframework.core.Ordered;
  * @author Juergen Hoeller
  */
 @SuppressWarnings("serial")
-public class ExposeInvocationInterceptor implements MethodInterceptor, Ordered, Serializable {
+public class ExposeInvocationInterceptor implements MethodInterceptor, PriorityOrdered, Serializable {
 
 	/** Singleton instance of this class */
 	public static final ExposeInvocationInterceptor INSTANCE = new ExposeInvocationInterceptor();
@@ -58,7 +58,7 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Ordered, 
 	};
 
 	private static final ThreadLocal<MethodInvocation> invocation =
-			new NamedThreadLocal<MethodInvocation>("Current AOP method invocation");
+			new NamedThreadLocal<>("Current AOP method invocation");
 
 
 	/**
@@ -98,7 +98,7 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Ordered, 
 
 	@Override
 	public int getOrder() {
-		return Ordered.HIGHEST_PRECEDENCE + 1;
+		return PriorityOrdered.HIGHEST_PRECEDENCE + 1;
 	}
 
 	/**

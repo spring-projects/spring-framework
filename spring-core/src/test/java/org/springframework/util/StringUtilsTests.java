@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,30 +20,36 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Properties;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rick Evans
  */
-public class StringUtilsTests extends TestCase {
+public class StringUtilsTests {
 
-	public void testHasTextBlank() throws Exception {
+	@Test
+	public void testHasTextBlank() {
 		String blank = "          ";
 		assertEquals(false, StringUtils.hasText(blank));
 	}
 
-	public void testHasTextNullEmpty() throws Exception {
+	@Test
+	public void testHasTextNullEmpty() {
 		assertEquals(false, StringUtils.hasText(null));
 		assertEquals(false, StringUtils.hasText(""));
 	}
 
-	public void testHasTextValid() throws Exception {
+	@Test
+	public void testHasTextValid() {
 		assertEquals(true, StringUtils.hasText("t"));
 	}
 
-	public void testContainsWhitespace() throws Exception {
+	@Test
+	public void testContainsWhitespace() {
 		assertFalse(StringUtils.containsWhitespace(null));
 		assertFalse(StringUtils.containsWhitespace(""));
 		assertFalse(StringUtils.containsWhitespace("a"));
@@ -55,7 +61,8 @@ public class StringUtilsTests extends TestCase {
 		assertTrue(StringUtils.containsWhitespace("a  b"));
 	}
 
-	public void testTrimWhitespace() throws Exception {
+	@Test
+	public void testTrimWhitespace() {
 		assertEquals(null, StringUtils.trimWhitespace(null));
 		assertEquals("", StringUtils.trimWhitespace(""));
 		assertEquals("", StringUtils.trimWhitespace(" "));
@@ -67,7 +74,8 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("a b  c", StringUtils.trimWhitespace(" a b  c "));
 	}
 
-	public void testTrimAllWhitespace() throws Exception {
+	@Test
+	public void testTrimAllWhitespace() {
 		assertEquals("", StringUtils.trimAllWhitespace(""));
 		assertEquals("", StringUtils.trimAllWhitespace(" "));
 		assertEquals("", StringUtils.trimAllWhitespace("\t"));
@@ -78,7 +86,8 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("abc", StringUtils.trimAllWhitespace(" a b  c "));
 	}
 
-	public void testTrimLeadingWhitespace() throws Exception {
+	@Test
+	public void testTrimLeadingWhitespace() {
 		assertEquals(null, StringUtils.trimLeadingWhitespace(null));
 		assertEquals("", StringUtils.trimLeadingWhitespace(""));
 		assertEquals("", StringUtils.trimLeadingWhitespace(" "));
@@ -90,7 +99,8 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("a b  c ", StringUtils.trimLeadingWhitespace(" a b  c "));
 	}
 
-	public void testTrimTrailingWhitespace() throws Exception {
+	@Test
+	public void testTrimTrailingWhitespace() {
 		assertEquals(null, StringUtils.trimTrailingWhitespace(null));
 		assertEquals("", StringUtils.trimTrailingWhitespace(""));
 		assertEquals("", StringUtils.trimTrailingWhitespace(" "));
@@ -102,7 +112,8 @@ public class StringUtilsTests extends TestCase {
 		assertEquals(" a b  c", StringUtils.trimTrailingWhitespace(" a b  c "));
 	}
 
-	public void testTrimLeadingCharacter() throws Exception {
+	@Test
+	public void testTrimLeadingCharacter() {
 		assertEquals(null, StringUtils.trimLeadingCharacter(null, ' '));
 		assertEquals("", StringUtils.trimLeadingCharacter("", ' '));
 		assertEquals("", StringUtils.trimLeadingCharacter(" ", ' '));
@@ -114,7 +125,8 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("a b  c ", StringUtils.trimLeadingCharacter(" a b  c ", ' '));
 	}
 
-	public void testTrimTrailingCharacter() throws Exception {
+	@Test
+	public void testTrimTrailingCharacter() {
 		assertEquals(null, StringUtils.trimTrailingCharacter(null, ' '));
 		assertEquals("", StringUtils.trimTrailingCharacter("", ' '));
 		assertEquals("", StringUtils.trimTrailingCharacter(" ", ' '));
@@ -126,6 +138,61 @@ public class StringUtilsTests extends TestCase {
 		assertEquals(" a b  c", StringUtils.trimTrailingCharacter(" a b  c ", ' '));
 	}
 
+	@Test
+	public void testStartsWithIgnoreCase() {
+		String prefix = "fOo";
+		assertTrue(StringUtils.startsWithIgnoreCase("foo", prefix));
+		assertTrue(StringUtils.startsWithIgnoreCase("Foo", prefix));
+		assertTrue(StringUtils.startsWithIgnoreCase("foobar", prefix));
+		assertTrue(StringUtils.startsWithIgnoreCase("foobarbar", prefix));
+		assertTrue(StringUtils.startsWithIgnoreCase("Foobar", prefix));
+		assertTrue(StringUtils.startsWithIgnoreCase("FoobarBar", prefix));
+		assertTrue(StringUtils.startsWithIgnoreCase("foObar", prefix));
+		assertTrue(StringUtils.startsWithIgnoreCase("FOObar", prefix));
+		assertTrue(StringUtils.startsWithIgnoreCase("fOobar", prefix));
+		assertFalse(StringUtils.startsWithIgnoreCase(null, prefix));
+		assertFalse(StringUtils.startsWithIgnoreCase("fOobar", null));
+		assertFalse(StringUtils.startsWithIgnoreCase("b", prefix));
+		assertFalse(StringUtils.startsWithIgnoreCase("barfoo", prefix));
+		assertFalse(StringUtils.startsWithIgnoreCase("barfoobar", prefix));
+	}
+
+	@Test
+	public void testEndsWithIgnoreCase() {
+		String suffix = "fOo";
+		assertTrue(StringUtils.endsWithIgnoreCase("foo", suffix));
+		assertTrue(StringUtils.endsWithIgnoreCase("Foo", suffix));
+		assertTrue(StringUtils.endsWithIgnoreCase("barfoo", suffix));
+		assertTrue(StringUtils.endsWithIgnoreCase("barbarfoo", suffix));
+		assertTrue(StringUtils.endsWithIgnoreCase("barFoo", suffix));
+		assertTrue(StringUtils.endsWithIgnoreCase("barBarFoo", suffix));
+		assertTrue(StringUtils.endsWithIgnoreCase("barfoO", suffix));
+		assertTrue(StringUtils.endsWithIgnoreCase("barFOO", suffix));
+		assertTrue(StringUtils.endsWithIgnoreCase("barfOo", suffix));
+		assertFalse(StringUtils.endsWithIgnoreCase(null, suffix));
+		assertFalse(StringUtils.endsWithIgnoreCase("barfOo", null));
+		assertFalse(StringUtils.endsWithIgnoreCase("b", suffix));
+		assertFalse(StringUtils.endsWithIgnoreCase("foobar", suffix));
+		assertFalse(StringUtils.endsWithIgnoreCase("barfoobar", suffix));
+	}
+
+	@Test
+	public void testSubstringMatch() {
+		assertTrue(StringUtils.substringMatch("foo", 0, "foo"));
+		assertTrue(StringUtils.substringMatch("foo", 1, "oo"));
+		assertTrue(StringUtils.substringMatch("foo", 2, "o"));
+		assertFalse(StringUtils.substringMatch("foo", 0, "fOo"));
+		assertFalse(StringUtils.substringMatch("foo", 1, "fOo"));
+		assertFalse(StringUtils.substringMatch("foo", 2, "fOo"));
+		assertFalse(StringUtils.substringMatch("foo", 3, "fOo"));
+		assertFalse(StringUtils.substringMatch("foo", 1, "Oo"));
+		assertFalse(StringUtils.substringMatch("foo", 2, "Oo"));
+		assertFalse(StringUtils.substringMatch("foo", 3, "Oo"));
+		assertFalse(StringUtils.substringMatch("foo", 2, "O"));
+		assertFalse(StringUtils.substringMatch("foo", 3, "O"));
+	}
+
+	@Test
 	public void testCountOccurrencesOf() {
 		assertTrue("nullx2 = 0",
 				StringUtils.countOccurrencesOf(null, null) == 0);
@@ -152,7 +219,8 @@ public class StringUtilsTests extends TestCase {
 		assertTrue("test last", StringUtils.countOccurrencesOf(s, "r") == 2);
 	}
 
-	public void testReplace() throws Exception {
+	@Test
+	public void testReplace() {
 		String inString = "a6AazAaa77abaa";
 		String oldPattern = "aa";
 		String newPattern = "foo";
@@ -163,18 +231,19 @@ public class StringUtilsTests extends TestCase {
 
 		// Non match: no change
 		s = StringUtils.replace(inString, "qwoeiruqopwieurpoqwieur", newPattern);
-		assertTrue("Replace non matched is equal", s.equals(inString));
+		assertSame("Replace non-matched is returned as-is", inString, s);
 
 		// Null new pattern: should ignore
 		s = StringUtils.replace(inString, oldPattern, null);
-		assertTrue("Replace non matched is equal", s.equals(inString));
+		assertSame("Replace non-matched is returned as-is", inString, s);
 
 		// Null old pattern: should ignore
 		s = StringUtils.replace(inString, null, newPattern);
-		assertTrue("Replace non matched is equal", s.equals(inString));
+		assertSame("Replace non-matched is returned as-is", inString, s);
 	}
 
-	public void testDelete() throws Exception {
+	@Test
+	public void testDelete() {
 		String inString = "The quick brown fox jumped over the lazy dog";
 
 		String noThe = StringUtils.delete(inString, "the");
@@ -200,7 +269,8 @@ public class StringUtilsTests extends TestCase {
 		assertTrue("Result is unchanged", nochange.equals(inString));
 	}
 
-	public void testDeleteAny() throws Exception {
+	@Test
+	public void testDeleteAny() {
 		String inString = "Able was I ere I saw Elba";
 
 		String res = StringUtils.deleteAny(inString, "I");
@@ -213,45 +283,51 @@ public class StringUtilsTests extends TestCase {
 		assertTrue("Result is unchanged", mismatch.equals(inString));
 
 		String whitespace = "This is\n\n\n    \t   a messagy string with whitespace\n";
-		assertTrue("Has CR", whitespace.indexOf("\n") != -1);
-		assertTrue("Has tab", whitespace.indexOf("\t") != -1);
-		assertTrue("Has  sp", whitespace.indexOf(" ") != -1);
+		assertTrue("Has CR", whitespace.contains("\n"));
+		assertTrue("Has tab", whitespace.contains("\t"));
+		assertTrue("Has  sp", whitespace.contains(" "));
 		String cleaned = StringUtils.deleteAny(whitespace, "\n\t ");
-		assertTrue("Has no CR", cleaned.indexOf("\n") == -1);
-		assertTrue("Has no tab", cleaned.indexOf("\t") == -1);
-		assertTrue("Has no sp", cleaned.indexOf(" ") == -1);
+		assertTrue("Has no CR", !cleaned.contains("\n"));
+		assertTrue("Has no tab", !cleaned.contains("\t"));
+		assertTrue("Has no sp", !cleaned.contains(" "));
 		assertTrue("Still has chars", cleaned.length() > 10);
 	}
 
 
+	@Test
 	public void testQuote() {
 		assertEquals("'myString'", StringUtils.quote("myString"));
 		assertEquals("''", StringUtils.quote(""));
 		assertNull(StringUtils.quote(null));
 	}
 
+	@Test
 	public void testQuoteIfString() {
 		assertEquals("'myString'", StringUtils.quoteIfString("myString"));
 		assertEquals("''", StringUtils.quoteIfString(""));
-		assertEquals(new Integer(5), StringUtils.quoteIfString(new Integer(5)));
+		assertEquals(Integer.valueOf(5), StringUtils.quoteIfString(5));
 		assertNull(StringUtils.quoteIfString(null));
 	}
 
+	@Test
 	public void testUnqualify() {
 		String qualified = "i.am.not.unqualified";
 		assertEquals("unqualified", StringUtils.unqualify(qualified));
 	}
 
+	@Test
 	public void testCapitalize() {
 		String capitalized = "i am not capitalized";
 		assertEquals("I am not capitalized", StringUtils.capitalize(capitalized));
 	}
 
+	@Test
 	public void testUncapitalize() {
 		String capitalized = "I am capitalized";
 		assertEquals("i am capitalized", StringUtils.uncapitalize(capitalized));
 	}
 
+	@Test
 	public void testGetFilename() {
 		assertEquals(null, StringUtils.getFilename(null));
 		assertEquals("", StringUtils.getFilename(""));
@@ -263,6 +339,7 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("myfile.txt", StringUtils.getFilename("mypath/myfile.txt"));
 	}
 
+	@Test
 	public void testGetFilenameExtension() {
 		assertEquals(null, StringUtils.getFilenameExtension(null));
 		assertEquals(null, StringUtils.getFilenameExtension(""));
@@ -276,8 +353,8 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("txt", StringUtils.getFilenameExtension("/home/user/.m2/settings/myfile.txt"));
 	}
 
+	@Test
 	public void testStripFilenameExtension() {
-		assertEquals(null, StringUtils.stripFilenameExtension(null));
 		assertEquals("", StringUtils.stripFilenameExtension(""));
 		assertEquals("myfile", StringUtils.stripFilenameExtension("myfile"));
 		assertEquals("myfile", StringUtils.stripFilenameExtension("myfile."));
@@ -290,6 +367,7 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("/home/user/.m2/settings/myfile", StringUtils.stripFilenameExtension("/home/user/.m2/settings/myfile.txt"));
 	}
 
+	@Test
 	public void testCleanPath() {
 		assertEquals("mypath/myfile", StringUtils.cleanPath("mypath/myfile"));
 		assertEquals("mypath/myfile", StringUtils.cleanPath("mypath\\myfile"));
@@ -299,8 +377,11 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("../mypath/myfile", StringUtils.cleanPath("../mypath/../mypath/myfile"));
 		assertEquals("../mypath/myfile", StringUtils.cleanPath("mypath/../../mypath/myfile"));
 		assertEquals("/../mypath/myfile", StringUtils.cleanPath("/../mypath/myfile"));
+		assertEquals("/mypath/myfile", StringUtils.cleanPath("/a/:b/../../mypath/myfile"));
+		assertEquals("file:///c:/path/to/the%20file.txt", StringUtils.cleanPath("file:///c:/some/../path/to/the%20file.txt"));
 	}
 
+	@Test
 	public void testPathEquals() {
 		assertTrue("Must be true for the same strings",
 				StringUtils.pathEquals("/dummy1/dummy2/dummy3",
@@ -346,6 +427,7 @@ public class StringUtilsTests extends TestCase {
 						"/dummy1/dummy2/dummy4"));
 	}
 
+	@Test
 	public void testConcatenateStringArrays() {
 		String[] input1 = new String[] {"myString2"};
 		String[] input2 = new String[] {"myString1", "myString2"};
@@ -355,11 +437,13 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("myString1", result[1]);
 		assertEquals("myString2", result[2]);
 
-		assertEquals(input1, StringUtils.concatenateStringArrays(input1, null));
-		assertEquals(input2, StringUtils.concatenateStringArrays(null, input2));
+		assertArrayEquals(input1, StringUtils.concatenateStringArrays(input1, null));
+		assertArrayEquals(input2, StringUtils.concatenateStringArrays(null, input2));
 		assertNull(StringUtils.concatenateStringArrays(null, null));
 	}
 
+	@Test
+	@Deprecated
 	public void testMergeStringArrays() {
 		String[] input1 = new String[] {"myString2"};
 		String[] input2 = new String[] {"myString1", "myString2"};
@@ -368,11 +452,12 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("myString2", result[0]);
 		assertEquals("myString1", result[1]);
 
-		assertEquals(input1, StringUtils.mergeStringArrays(input1, null));
-		assertEquals(input2, StringUtils.mergeStringArrays(null, input2));
+		assertArrayEquals(input1, StringUtils.mergeStringArrays(input1, null));
+		assertArrayEquals(input2, StringUtils.mergeStringArrays(null, input2));
 		assertNull(StringUtils.mergeStringArrays(null, null));
 	}
 
+	@Test
 	public void testSortStringArray() {
 		String[] input = new String[] {"myString2"};
 		input = StringUtils.addStringToArray(input, "myString1");
@@ -384,13 +469,15 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("myString2", input[1]);
 	}
 
+	@Test
 	public void testRemoveDuplicateStrings() {
 		String[] input = new String[] {"myString2", "myString1", "myString2"};
 		input = StringUtils.removeDuplicateStrings(input);
-		assertEquals("myString1", input[0]);
-		assertEquals("myString2", input[1]);
+		assertEquals("myString2", input[0]);
+		assertEquals("myString1", input[1]);
 	}
 
+	@Test
 	public void testSplitArrayElementsIntoProperties() {
 		String[] input = new String[] {"key1=value1 ", "key2 =\"value2\""};
 		Properties result = StringUtils.splitArrayElementsIntoProperties(input, "=");
@@ -398,6 +485,7 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("\"value2\"", result.getProperty("key2"));
 	}
 
+	@Test
 	public void testSplitArrayElementsIntoPropertiesAndDeletedChars() {
 		String[] input = new String[] {"key1=value1 ", "key2 =\"value2\""};
 		Properties result = StringUtils.splitArrayElementsIntoProperties(input, "=", "\"");
@@ -405,6 +493,7 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("value2", result.getProperty("key2"));
 	}
 
+	@Test
 	public void testTokenizeToStringArray() {
 		String[] sa = StringUtils.tokenizeToStringArray("a,b , ,c", ",");
 		assertEquals(3, sa.length);
@@ -412,6 +501,7 @@ public class StringUtilsTests extends TestCase {
 				sa[0].equals("a") && sa[1].equals("b") && sa[2].equals("c"));
 	}
 
+	@Test
 	public void testTokenizeToStringArrayWithNotIgnoreEmptyTokens() {
 		String[] sa = StringUtils.tokenizeToStringArray("a,b , ,c", ",", true, false);
 		assertEquals(4, sa.length);
@@ -419,6 +509,7 @@ public class StringUtilsTests extends TestCase {
 				sa[0].equals("a") && sa[1].equals("b") && sa[2].equals("") && sa[3].equals("c"));
 	}
 
+	@Test
 	public void testTokenizeToStringArrayWithNotTrimTokens() {
 		String[] sa = StringUtils.tokenizeToStringArray("a,b ,c", ",", false, true);
 		assertEquals(3, sa.length);
@@ -426,26 +517,21 @@ public class StringUtilsTests extends TestCase {
 				sa[0].equals("a") && sa[1].equals("b ") && sa[2].equals("c"));
 	}
 
+	@Test
 	public void testCommaDelimitedListToStringArrayWithNullProducesEmptyArray() {
 		String[] sa = StringUtils.commaDelimitedListToStringArray(null);
 		assertTrue("String array isn't null with null input", sa != null);
 		assertTrue("String array length == 0 with null input", sa.length == 0);
 	}
 
+	@Test
 	public void testCommaDelimitedListToStringArrayWithEmptyStringProducesEmptyArray() {
 		String[] sa = StringUtils.commaDelimitedListToStringArray("");
 		assertTrue("String array isn't null with null input", sa != null);
 		assertTrue("String array length == 0 with null input", sa.length == 0);
 	}
 
-	private void testStringArrayReverseTransformationMatches(String[] sa) {
-		String[] reverse =
-				StringUtils.commaDelimitedListToStringArray(StringUtils.arrayToCommaDelimitedString(sa));
-		assertEquals("Reverse transformation is equal",
-				Arrays.asList(sa),
-				Arrays.asList(reverse));
-	}
-
+	@Test
 	public void testDelimitedListToStringArrayWithComma() {
 		String[] sa = StringUtils.delimitedListToStringArray("a,b", ",");
 		assertEquals(2, sa.length);
@@ -453,6 +539,7 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("b", sa[1]);
 	}
 
+	@Test
 	public void testDelimitedListToStringArrayWithSemicolon() {
 		String[] sa = StringUtils.delimitedListToStringArray("a;b", ";");
 		assertEquals(2, sa.length);
@@ -460,6 +547,7 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("b", sa[1]);
 	}
 
+	@Test
 	public void testDelimitedListToStringArrayWithEmptyString() {
 		String[] sa = StringUtils.delimitedListToStringArray("a,b", "");
 		assertEquals(3, sa.length);
@@ -468,28 +556,39 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("b", sa[2]);
 	}
 
+	@Test
 	public void testDelimitedListToStringArrayWithNullDelimiter() {
 		String[] sa = StringUtils.delimitedListToStringArray("a,b", null);
 		assertEquals(1, sa.length);
 		assertEquals("a,b", sa[0]);
 	}
 
+	@Test
 	public void testCommaDelimitedListToStringArrayMatchWords() {
 		// Could read these from files
 		String[] sa = new String[] {"foo", "bar", "big"};
 		doTestCommaDelimitedListToStringArrayLegalMatch(sa);
-		testStringArrayReverseTransformationMatches(sa);
+		doTestStringArrayReverseTransformationMatches(sa);
 
 		sa = new String[] {"a", "b", "c"};
 		doTestCommaDelimitedListToStringArrayLegalMatch(sa);
-		testStringArrayReverseTransformationMatches(sa);
+		doTestStringArrayReverseTransformationMatches(sa);
 
 		// Test same words
 		sa = new String[] {"AA", "AA", "AA", "AA", "AA"};
 		doTestCommaDelimitedListToStringArrayLegalMatch(sa);
-		testStringArrayReverseTransformationMatches(sa);
+		doTestStringArrayReverseTransformationMatches(sa);
 	}
 
+	private void doTestStringArrayReverseTransformationMatches(String[] sa) {
+		String[] reverse =
+				StringUtils.commaDelimitedListToStringArray(StringUtils.arrayToCommaDelimitedString(sa));
+		assertEquals("Reverse transformation is equal",
+				Arrays.asList(sa),
+				Arrays.asList(reverse));
+	}
+
+	@Test
 	public void testCommaDelimitedListToStringArraySingleString() {
 		// Could read these from files
 		String s = "woeirqupoiewuropqiewuorpqiwueopriquwopeiurqopwieur";
@@ -499,6 +598,7 @@ public class StringUtilsTests extends TestCase {
 				sa[0].equals(s));
 	}
 
+	@Test
 	public void testCommaDelimitedListToStringArrayWithOtherPunctuation() {
 		// Could read these from files
 		String[] sa = new String[] {"xcvwert4456346&*.", "///", ".!", ".", ";"};
@@ -508,6 +608,7 @@ public class StringUtilsTests extends TestCase {
 	/**
 	 * We expect to see the empty Strings in the output.
 	 */
+	@Test
 	public void testCommaDelimitedListToStringArrayEmptyStrings() {
 		// Could read these from files
 		String[] sa = StringUtils.commaDelimitedListToStringArray("a,,b");
@@ -520,115 +621,89 @@ public class StringUtilsTests extends TestCase {
 	}
 
 	private void doTestCommaDelimitedListToStringArrayLegalMatch(String[] components) {
-		StringBuffer sbuf = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < components.length; i++) {
 			if (i != 0) {
-				sbuf.append(",");
+				sb.append(",");
 			}
-			sbuf.append(components[i]);
+			sb.append(components[i]);
 		}
-		String[] sa = StringUtils.commaDelimitedListToStringArray(sbuf.toString());
+		String[] sa = StringUtils.commaDelimitedListToStringArray(sb.toString());
 		assertTrue("String array isn't null with legal match", sa != null);
 		assertEquals("String array length is correct with legal match", components.length, sa.length);
 		assertTrue("Output equals input", Arrays.equals(sa, components));
 	}
 
-	public void testEndsWithIgnoreCase() {
-		String suffix = "fOo";
-		assertTrue(StringUtils.endsWithIgnoreCase("foo", suffix));
-		assertTrue(StringUtils.endsWithIgnoreCase("Foo", suffix));
-		assertTrue(StringUtils.endsWithIgnoreCase("barfoo", suffix));
-		assertTrue(StringUtils.endsWithIgnoreCase("barbarfoo", suffix));
-		assertTrue(StringUtils.endsWithIgnoreCase("barFoo", suffix));
-		assertTrue(StringUtils.endsWithIgnoreCase("barBarFoo", suffix));
-		assertTrue(StringUtils.endsWithIgnoreCase("barfoO", suffix));
-		assertTrue(StringUtils.endsWithIgnoreCase("barFOO", suffix));
-		assertTrue(StringUtils.endsWithIgnoreCase("barfOo", suffix));
-		assertFalse(StringUtils.endsWithIgnoreCase(null, suffix));
-		assertFalse(StringUtils.endsWithIgnoreCase("barfOo", null));
-		assertFalse(StringUtils.endsWithIgnoreCase("b", suffix));
-	}
 
-	public void testParseLocaleStringSunnyDay() throws Exception {
+	@Test
+	public void testParseLocaleStringSunnyDay() {
 		Locale expectedLocale = Locale.UK;
 		Locale locale = StringUtils.parseLocaleString(expectedLocale.toString());
 		assertNotNull("When given a bona-fide Locale string, must not return null.", locale);
 		assertEquals(expectedLocale, locale);
 	}
 
-	public void testParseLocaleStringWithMalformedLocaleString() throws Exception {
+	@Test
+	public void testParseLocaleStringWithMalformedLocaleString() {
 		Locale locale = StringUtils.parseLocaleString("_banjo_on_my_knee");
 		assertNotNull("When given a malformed Locale string, must not return null.", locale);
 	}
 
-	public void testParseLocaleStringWithEmptyLocaleStringYieldsNullLocale() throws Exception {
+	@Test
+	public void testParseLocaleStringWithEmptyLocaleStringYieldsNullLocale() {
 		Locale locale = StringUtils.parseLocaleString("");
 		assertNull("When given an empty Locale string, must return null.", locale);
 	}
 
-	/**
-	 * <a href="http://opensource.atlassian.com/projects/spring/browse/SPR-8637">See SPR-8637</a>.
-	 */
-	public void testParseLocaleWithMultiSpecialCharactersInVariant() throws Exception {
-		final String variant = "proper-northern";
-		final String localeString = "en_GB_" + variant;
+	@Test  // SPR-8637
+	public void testParseLocaleWithMultiSpecialCharactersInVariant() {
+		String variant = "proper-northern";
+		String localeString = "en_GB_" + variant;
 		Locale locale = StringUtils.parseLocaleString(localeString);
 		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
 	}
 
-	/**
-	 * <a href="http://opensource.atlassian.com/projects/spring/browse/SPR-3671">See SPR-3671</a>.
-	 */
-	public void testParseLocaleWithMultiValuedVariant() throws Exception {
-		final String variant = "proper_northern";
-		final String localeString = "en_GB_" + variant;
+	@Test  // SPR-3671
+	public void testParseLocaleWithMultiValuedVariant() {
+		String variant = "proper_northern";
+		String localeString = "en_GB_" + variant;
 		Locale locale = StringUtils.parseLocaleString(localeString);
 		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
 	}
 
-	/**
-	 * <a href="http://opensource.atlassian.com/projects/spring/browse/SPR-3671">See SPR-3671</a>.
-	 */
-	public void testParseLocaleWithMultiValuedVariantUsingSpacesAsSeparators() throws Exception {
-		final String variant = "proper northern";
-		final String localeString = "en GB " + variant;
+	@Test  // SPR-3671
+	public void testParseLocaleWithMultiValuedVariantUsingSpacesAsSeparators() {
+		String variant = "proper northern";
+		String localeString = "en GB " + variant;
 		Locale locale = StringUtils.parseLocaleString(localeString);
 		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
 	}
 
-	/**
-	 * <a href="http://opensource.atlassian.com/projects/spring/browse/SPR-3671">See SPR-3671</a>.
-	 */
-	public void testParseLocaleWithMultiValuedVariantUsingMixtureOfUnderscoresAndSpacesAsSeparators() throws Exception {
-		final String variant = "proper northern";
-		final String localeString = "en_GB_" + variant;
+	@Test  // SPR-3671
+	public void testParseLocaleWithMultiValuedVariantUsingMixtureOfUnderscoresAndSpacesAsSeparators() {
+		String variant = "proper northern";
+		String localeString = "en_GB_" + variant;
 		Locale locale = StringUtils.parseLocaleString(localeString);
 		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
 	}
 
-	/**
-	 * <a href="http://opensource.atlassian.com/projects/spring/browse/SPR-3671">See SPR-3671</a>.
-	 */
-	public void testParseLocaleWithMultiValuedVariantUsingSpacesAsSeparatorsWithLotsOfLeadingWhitespace() throws Exception {
-		final String variant = "proper northern";
-		final String localeString = "en GB            " + variant; // lots of whitespace
+	@Test  // SPR-3671
+	public void testParseLocaleWithMultiValuedVariantUsingSpacesAsSeparatorsWithLotsOfLeadingWhitespace() {
+		String variant = "proper northern";
+		String localeString = "en GB            " + variant;  // lots of whitespace
 		Locale locale = StringUtils.parseLocaleString(localeString);
 		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
 	}
 
-	/**
-	 * <a href="http://opensource.atlassian.com/projects/spring/browse/SPR-3671">See SPR-3671</a>.
-	 */
-	public void testParseLocaleWithMultiValuedVariantUsingUnderscoresAsSeparatorsWithLotsOfLeadingWhitespace() throws Exception {
-		final String variant = "proper_northern";
-		final String localeString = "en_GB_____" + variant; // lots of underscores
+	@Test  // SPR-3671
+	public void testParseLocaleWithMultiValuedVariantUsingUnderscoresAsSeparatorsWithLotsOfLeadingWhitespace() {
+		String variant = "proper_northern";
+		String localeString = "en_GB_____" + variant;  // lots of underscores
 		Locale locale = StringUtils.parseLocaleString(localeString);
 		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
 	}
 
-	/**
-	 * <a href="http://opensource.atlassian.com/projects/spring/browse/SPR-7779">See SPR-7779</a>.
-	 */
+	@Test  // SPR-7779
 	public void testParseLocaleWithInvalidCharacters() {
 		try {
 			StringUtils.parseLocaleString("%0D%0AContent-length:30%0D%0A%0D%0A%3Cscript%3Ealert%28123%29%3C/script%3E");
@@ -639,11 +714,23 @@ public class StringUtilsTests extends TestCase {
 		}
 	}
 
-	/**
-	 * See SPR-9420.
-	 */
+	@Test  // SPR-9420
 	public void testParseLocaleWithSameLowercaseTokenForLanguageAndCountry() {
 		assertEquals("tr_TR", StringUtils.parseLocaleString("tr_tr").toString());
 		assertEquals("bg_BG_vnt", StringUtils.parseLocaleString("bg_bg_vnt").toString());
 	}
+
+	@Test  // SPR-11806
+	public void testParseLocaleWithVariantContainingCountryCode() {
+		String variant = "GBtest";
+		String localeString = "en_GB_" + variant;
+		Locale locale = StringUtils.parseLocaleString(localeString);
+		assertEquals("Variant containing country code not extracted correctly", variant, locale.getVariant());
+	}
+
+	@Test  // SPR-14718
+	public void testParseJava7Variant() {
+		assertEquals("sr_#LATN", StringUtils.parseLocaleString("sr_#LATN").toString());
+	}
+
 }

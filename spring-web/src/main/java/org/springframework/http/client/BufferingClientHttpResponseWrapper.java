@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,12 @@ import java.io.InputStream;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**
- * Simple implementation of {@link ClientHttpResponse} that reads the request's body into memory,
- * thus allowing for multiple invocations of {@link #getBody()}.
+ * Simple implementation of {@link ClientHttpResponse} that reads the response's body
+ * into memory, thus allowing for multiple invocations of {@link #getBody()}.
  *
  * @author Arjen Poutsma
  * @since 3.1
@@ -35,6 +36,7 @@ final class BufferingClientHttpResponseWrapper implements ClientHttpResponse {
 
 	private final ClientHttpResponse response;
 
+	@Nullable
 	private byte[] body;
 
 

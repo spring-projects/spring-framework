@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@
 package org.springframework.context.annotation;
 
 import org.junit.Test;
+
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.annotation.componentscan.importing.ImportingConfig;
 import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
 
 /**
@@ -36,17 +39,66 @@ public class ComponentScanAndImportAnnotationInteractionTests {
 		ctx.getBean(SimpleComponent.class); // succeeds -> there is only one bean of type SimpleComponent
 	}
 
+	@Test
+	public void componentScanOverlapsWithImportUsingAsm() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("config1", new RootBeanDefinition(Config1.class.getName()));
+		ctx.registerBeanDefinition("config2", new RootBeanDefinition(Config2.class.getName()));
+		ctx.refresh(); // no conflicts found trying to register SimpleComponent
+		ctx.getBean(SimpleComponent.class); // succeeds -> there is only one bean of type SimpleComponent
+	}
 
-	@Configuration
+	@Test
+	public void componentScanViaImport() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(Config3.class);
+		ctx.refresh();
+		ctx.getBean(SimpleComponent.class);
+	}
+
+	@Test
+	public void componentScanViaImportUsingAsm() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("config", new RootBeanDefinition(Config3.class.getName()));
+		ctx.refresh();
+		ctx.getBean(SimpleComponent.class);
+	}
+
+	@Test
+	public void componentScanViaImportUsingScan() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.scan("org.springframework.context.annotation.componentscan.importing");
+		ctx.refresh();
+		ctx.getBean(SimpleComponent.class);
+	}
+
+	@Test
+	public void circularImportViaComponentScan() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("config", new RootBeanDefinition(ImportingConfig.class.getName()));
+		ctx.refresh();
+		ctx.getBean(SimpleComponent.class);
+	}
+
+
 	@ComponentScan("org.springframework.context.annotation.componentscan.simple")
-	static class Config1 {
-
+	static final class Config1 {
 	}
 
 
-	@Configuration
 	@Import(org.springframework.context.annotation.componentscan.simple.SimpleComponent.class)
-	static class Config2 {
-
+	static final class Config2 {
 	}
+
+
+	@Import(ImportedConfig.class)
+	static final class Config3 {
+	}
+
+
+	@ComponentScan("org.springframework.context.annotation.componentscan.simple")
+	@ComponentScan("org.springframework.context.annotation.componentscan.importing")
+	public static final class ImportedConfig {
+	}
+
 }

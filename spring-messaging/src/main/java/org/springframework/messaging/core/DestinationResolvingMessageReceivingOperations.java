@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.core;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
-
 /**
+ * Extends {@link MessageReceivingOperations} and adds operations for receiving messages
+ * from a destination specified as a (resolvable) String name.
+ *
  * @author Mark Fisher
+ * @author Rossen Stoyanchev
  * @since 4.0
+ * @see DestinationResolver
  */
 public interface DestinationResolvingMessageReceivingOperations<D> extends MessageReceivingOperations<D> {
 
-	<P> Message<P> receive(String destinationName) throws MessagingException;
+	/**
+	 * Resolve the given destination name and receive a message from it.
+	 * @param destinationName the destination name to resolve
+	 */
+	@Nullable
+	Message<?> receive(String destinationName) throws MessagingException;
 
-	Object receiveAndConvert(String destinationName) throws MessagingException;
+	/**
+	 * Resolve the given destination name, receive a message from it,
+	 * convert the payload to the specified target type.
+	 * @param destinationName the destination name to resolve
+	 * @param targetClass the target class for the converted payload
+	 */
+	@Nullable
+	<T> T receiveAndConvert(String destinationName, Class<T> targetClass) throws MessagingException;
 
 }

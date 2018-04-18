@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -43,6 +44,7 @@ public class BeanFactoryAdvisorRetrievalHelper {
 
 	private final ConfigurableListableBeanFactory beanFactory;
 
+	@Nullable
 	private String[] cachedAdvisorBeanNames;
 
 
@@ -76,29 +78,38 @@ public class BeanFactoryAdvisorRetrievalHelper {
 			}
 		}
 		if (advisorNames.length == 0) {
-			return new LinkedList<Advisor>();
+			return new LinkedList<>();
 		}
 
-		List<Advisor> advisors = new LinkedList<Advisor>();
+		List<Advisor> advisors = new LinkedList<>();
 		for (String name : advisorNames) {
-			if (isEligibleBean(name) && !this.beanFactory.isCurrentlyInCreation(name)) {
-				try {
-					advisors.add(this.beanFactory.getBean(name, Advisor.class));
-				}
-				catch (BeanCreationException ex) {
-					Throwable rootCause = ex.getMostSpecificCause();
-					if (rootCause instanceof BeanCurrentlyInCreationException) {
-						BeanCreationException bce = (BeanCreationException) rootCause;
-						if (this.beanFactory.isCurrentlyInCreation(bce.getBeanName())) {
-							if (logger.isDebugEnabled()) {
-								logger.debug("Ignoring currently created advisor '" + name + "': " + ex.getMessage());
-							}
-							// Ignore: indicates a reference back to the bean we're trying to advise.
-							// We want to find advisors other than the currently created bean itself.
-							continue;
-						}
+			if (isEligibleBean(name)) {
+				if (this.beanFactory.isCurrentlyInCreation(name)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Skipping currently created advisor '" + name + "'");
 					}
-					throw ex;
+				}
+				else {
+					try {
+						advisors.add(this.beanFactory.getBean(name, Advisor.class));
+					}
+					catch (BeanCreationException ex) {
+						Throwable rootCause = ex.getMostSpecificCause();
+						if (rootCause instanceof BeanCurrentlyInCreationException) {
+							BeanCreationException bce = (BeanCreationException) rootCause;
+							String bceBeanName = bce.getBeanName();
+							if (bceBeanName != null && this.beanFactory.isCurrentlyInCreation(bceBeanName)) {
+								if (logger.isDebugEnabled()) {
+									logger.debug("Skipping advisor '" + name +
+											"' with dependency on currently created bean: " + ex.getMessage());
+								}
+								// Ignore: indicates a reference back to the bean we're trying to advise.
+								// We want to find advisors other than the currently created bean itself.
+								continue;
+							}
+						}
+						throw ex;
+					}
 				}
 			}
 		}

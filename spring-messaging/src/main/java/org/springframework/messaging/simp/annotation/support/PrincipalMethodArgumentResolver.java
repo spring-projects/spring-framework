@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,16 +20,14 @@ import java.security.Principal;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.handler.method.HandlerMethodArgumentResolver;
+import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-
 
 /**
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public class PrincipalMethodArgumentResolver implements HandlerMethodArgumentResolver {
-
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -39,8 +37,7 @@ public class PrincipalMethodArgumentResolver implements HandlerMethodArgumentRes
 
 	@Override
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		Principal user = headers.getUser();
+		Principal user = SimpMessageHeaderAccessor.getUser(message.getHeaders());
 		if (user == null) {
 			throw new MissingSessionUserException(message);
 		}

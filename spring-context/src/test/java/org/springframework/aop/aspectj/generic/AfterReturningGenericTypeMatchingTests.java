@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.aop.aspectj.generic;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -26,10 +24,12 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.tests.sample.beans.Employee;
+import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests ensuring that after-returning advice for generic parameters bound to
@@ -40,7 +40,7 @@ import org.springframework.tests.sample.beans.Employee;
  * @author Ramnivas Laddad
  * @author Chris Beams
  */
-public final class AfterReturningGenericTypeMatchingTests {
+public class AfterReturningGenericTypeMatchingTests {
 
 	private GenericReturnTypeVariationClass testBean;
 
@@ -105,19 +105,19 @@ public final class AfterReturningGenericTypeMatchingTests {
 class GenericReturnTypeVariationClass {
 
 	public Collection<String> getStrings() {
-		return new ArrayList<String>();
+		return new ArrayList<>();
 	}
 
 	public Collection<Integer> getIntegers() {
-		return new ArrayList<Integer>();
+		return new ArrayList<>();
 	}
 
 	public Collection<TestBean> getTestBeans() {
-		return new ArrayList<TestBean>();
+		return new ArrayList<>();
 	}
 
 	public Collection<Employee> getEmployees() {
-		return new ArrayList<Employee>();
+		return new ArrayList<>();
 	}
 }
 

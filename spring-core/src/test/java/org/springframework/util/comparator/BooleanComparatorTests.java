@@ -16,12 +16,12 @@
 
 package org.springframework.util.comparator;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-
 import java.util.Comparator;
 
 import org.junit.Test;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests for {@link BooleanComparator}.
@@ -35,14 +35,14 @@ public class BooleanComparatorTests {
 	@Test
 	public void shouldCompareWithTrueLow() {
 		Comparator<Boolean> c = new BooleanComparator(true);
-		assertThat(c.compare(new Boolean(true), new Boolean(false)), is(-1));
+		assertThat(c.compare(true, false), is(-1));
 		assertThat(c.compare(Boolean.TRUE, Boolean.TRUE), is(0));
 	}
 
 	@Test
 	public void shouldCompareWithTrueHigh() {
 		Comparator<Boolean> c = new BooleanComparator(false);
-		assertThat(c.compare(new Boolean(true), new Boolean(false)), is(1));
+		assertThat(c.compare(true, false), is(1));
 		assertThat(c.compare(Boolean.TRUE, Boolean.TRUE), is(0));
 	}
 

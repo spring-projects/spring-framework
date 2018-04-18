@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,25 +19,27 @@ package org.springframework.jdbc.support.rowset;
 import org.springframework.jdbc.InvalidResultSetAccessException;
 
 /**
- * Meta data interface for Spring's SqlRowSet,
- * analogous to {@code javax.sql.ResultSetMetaData}
+ * Metadata interface for Spring's {@link SqlRowSet}, analogous to JDBC's
+ * {@link java.sql.ResultSetMetaData}.
  *
- * <p>The main difference to the standard JDBC RowSetMetaData is that an SQLException
- * is never thrown here. This allows a SqlRowSetMetaData to be used without having
- * to deal with checked exceptions. A SqlRowSetMetaData will throw Spring's
- * {@code org.springframework.jdbc.InvalidResultSetAccessException}
+ * <p>The main difference to the standard JDBC ResultSetMetaData is that a
+ * {@link java.sql.SQLException} is never thrown here. This allows
+ * SqlRowSetMetaData to be used without having to deal with checked exceptions.
+ * SqlRowSetMetaData will throw Spring's {@link InvalidResultSetAccessException}
  * instead (when appropriate).
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @since 1.2
- * @see SqlRowSet#getMetaData
+ * @see SqlRowSet#getMetaData()
  * @see java.sql.ResultSetMetaData
  * @see org.springframework.jdbc.InvalidResultSetAccessException
  */
 public interface SqlRowSetMetaData {
 
 	/**
-	 * Retrieves the catalog name of the table that served as the source for the specified column.
+	 * Retrieve the catalog name of the table that served as the source for the
+	 * specified column.
 	 * @param columnIndex the index of the column
 	 * @return the catalog name
 	 * @see java.sql.ResultSetMetaData#getCatalogName(int)
@@ -45,7 +47,7 @@ public interface SqlRowSetMetaData {
 	String getCatalogName(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
-	 * Retrieves the fully qualified class that the specified column will be mapped to.
+	 * Retrieve the fully qualified class that the specified column will be mapped to.
 	 * @param columnIndex the index of the column
 	 * @return the class name as a String
 	 * @see java.sql.ResultSetMetaData#getColumnClassName(int)
@@ -53,7 +55,7 @@ public interface SqlRowSetMetaData {
 	String getColumnClassName(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
-	 * Retrives the number of columns in the RowSet.
+	 * Retrieve the number of columns in the RowSet.
 	 * @return the number of columns
 	 * @see java.sql.ResultSetMetaData#getColumnCount()
 	 */
@@ -66,7 +68,7 @@ public interface SqlRowSetMetaData {
 	String[] getColumnNames() throws InvalidResultSetAccessException;
 
 	/**
-	 * Retrieves the maximum width of the designated column.
+	 * Retrieve the maximum width of the designated column.
 	 * @param columnIndex the index of the column
 	 * @return the width of the column
 	 * @see java.sql.ResultSetMetaData#getColumnDisplaySize(int)
@@ -99,7 +101,7 @@ public interface SqlRowSetMetaData {
 	int getColumnType(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
-	 * Retrieves the DBMS-specific type name for the indicated column.
+	 * Retrieve the DBMS-specific type name for the indicated column.
 	 * @param columnIndex the index of the column
 	 * @return the type name
 	 * @see java.sql.ResultSetMetaData#getColumnTypeName(int)
@@ -107,7 +109,7 @@ public interface SqlRowSetMetaData {
 	String getColumnTypeName(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
-	 * Retrieves the precision for the indicated column.
+	 * Retrieve the precision for the indicated column.
 	 * @param columnIndex the index of the column
 	 * @return the precision
 	 * @see java.sql.ResultSetMetaData#getPrecision(int)
@@ -115,7 +117,7 @@ public interface SqlRowSetMetaData {
 	int getPrecision(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
-	 * Retrieves the scale of the indicated column.
+	 * Retrieve the scale of the indicated column.
 	 * @param columnIndex the index of the column
 	 * @return the scale
 	 * @see java.sql.ResultSetMetaData#getScale(int)
@@ -123,7 +125,8 @@ public interface SqlRowSetMetaData {
 	int getScale(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
-	 * Retrieves the schema name of the table that served as the source for the specified column.
+	 * Retrieve the schema name of the table that served as the source for the
+	 * specified column.
 	 * @param columnIndex the index of the column
 	 * @return the schema name
 	 * @see java.sql.ResultSetMetaData#getSchemaName(int)
@@ -131,7 +134,8 @@ public interface SqlRowSetMetaData {
 	String getSchemaName(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
-	 * Retrieves the name of the table that served as the source for the specified column.
+	 * Retrieve the name of the table that served as the source for the
+	 * specified column.
 	 * @param columnIndex the index of the column
 	 * @return the name of the table
 	 * @see java.sql.ResultSetMetaData#getTableName(int)
@@ -139,7 +143,7 @@ public interface SqlRowSetMetaData {
 	String getTableName(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
-	 * Indicates whether the case of the designated column is significant.
+	 * Indicate whether the case of the designated column is significant.
 	 * @param columnIndex the index of the column
 	 * @return true if the case sensitive, false otherwise
 	 * @see java.sql.ResultSetMetaData#isCaseSensitive(int)
@@ -147,7 +151,7 @@ public interface SqlRowSetMetaData {
 	boolean isCaseSensitive(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
-	 * Indicates whether the designated column contains a currency value.
+	 * Indicate whether the designated column contains a currency value.
 	 * @param columnIndex the index of the column
 	 * @return true if the value is a currency value, false otherwise
 	 * @see java.sql.ResultSetMetaData#isCurrency(int)
@@ -155,7 +159,7 @@ public interface SqlRowSetMetaData {
 	boolean isCurrency(int columnIndex) throws InvalidResultSetAccessException;
 
 	/**
-	 * Indicates whether the designated column contains a signed number.
+	 * Indicate whether the designated column contains a signed number.
 	 * @param columnIndex the index of the column
 	 * @return true if the column contains a signed number, false otherwise
 	 * @see java.sql.ResultSetMetaData#isSigned(int)

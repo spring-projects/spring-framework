@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package org.springframework.beans;
 
-import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -44,24 +44,23 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 
 	private final String name;
 
+	@Nullable
 	private final Object value;
-
-	private Object source;
 
 	private boolean optional = false;
 
 	private boolean converted = false;
 
+	@Nullable
 	private Object convertedValue;
 
 	/** Package-visible field that indicates whether conversion is necessary */
+	@Nullable
 	volatile Boolean conversionNecessary;
 
 	/** Package-visible field for caching the resolved property path tokens */
-	volatile Object resolvedTokens;
-
-	/** Package-visible field for caching the resolved PropertyDescriptor */
-	volatile PropertyDescriptor resolvedDescriptor;
+	@Nullable
+	transient volatile Object resolvedTokens;
 
 
 	/**
@@ -69,7 +68,8 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	 * @param name the name of the property (never {@code null})
 	 * @param value the value of the property (possibly before type conversion)
 	 */
-	public PropertyValue(String name, Object value) {
+	public PropertyValue(String name, @Nullable Object value) {
+		Assert.notNull(name, "Name must not be null");
 		this.name = name;
 		this.value = value;
 	}
@@ -82,13 +82,12 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 		Assert.notNull(original, "Original must not be null");
 		this.name = original.getName();
 		this.value = original.getValue();
-		this.source = original.getSource();
 		this.optional = original.isOptional();
 		this.converted = original.converted;
 		this.convertedValue = original.convertedValue;
 		this.conversionNecessary = original.conversionNecessary;
 		this.resolvedTokens = original.resolvedTokens;
-		this.resolvedDescriptor = original.resolvedDescriptor;
+		setSource(original.getSource());
 		copyAttributesFrom(original);
 	}
 
@@ -98,15 +97,14 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	 * @param original the PropertyValue to link to (never {@code null})
 	 * @param newValue the new value to apply
 	 */
-	public PropertyValue(PropertyValue original, Object newValue) {
+	public PropertyValue(PropertyValue original, @Nullable Object newValue) {
 		Assert.notNull(original, "Original must not be null");
 		this.name = original.getName();
 		this.value = newValue;
-		this.source = original;
 		this.optional = original.isOptional();
 		this.conversionNecessary = original.conversionNecessary;
 		this.resolvedTokens = original.resolvedTokens;
-		this.resolvedDescriptor = original.resolvedDescriptor;
+		setSource(original);
 		copyAttributesFrom(original);
 	}
 
@@ -124,6 +122,7 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	 * It is the responsibility of the BeanWrapper implementation to
 	 * perform type conversion.
 	 */
+	@Nullable
 	public Object getValue() {
 		return this.value;
 	}
@@ -135,16 +134,28 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	 */
 	public PropertyValue getOriginalPropertyValue() {
 		PropertyValue original = this;
-		while (original.source instanceof PropertyValue && original.source != original) {
-			original = (PropertyValue) original.source;
+		Object source = getSource();
+		while (source instanceof PropertyValue && source != original) {
+			original = (PropertyValue) source;
+			source = original.getSource();
 		}
 		return original;
 	}
 
+	/**
+	 * Set whether this is an optional value, that is, to be ignored
+	 * when no corresponding property exists on the target class.
+	 * @since 3.0
+	 */
 	public void setOptional(boolean optional) {
 		this.optional = optional;
 	}
 
+	/**
+	 * Return whether this is an optional value, that is, to be ignored
+	 * when no corresponding property exists on the target class.
+	 * @since 3.0
+	 */
 	public boolean isOptional() {
 		return this.optional;
 	}
@@ -161,7 +172,7 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	 * Set the converted value of the constructor argument,
 	 * after processed type conversion.
 	 */
-	public synchronized void setConvertedValue(Object value) {
+	public synchronized void setConvertedValue(@Nullable Object value) {
 		this.converted = true;
 		this.convertedValue = value;
 	}
@@ -170,6 +181,7 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	 * Return the converted value of the constructor argument,
 	 * after processed type conversion.
 	 */
+	@Nullable
 	public synchronized Object getConvertedValue() {
 		return this.convertedValue;
 	}
@@ -186,7 +198,7 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 		PropertyValue otherPv = (PropertyValue) other;
 		return (this.name.equals(otherPv.name) &&
 				ObjectUtils.nullSafeEquals(this.value, otherPv.value) &&
-				ObjectUtils.nullSafeEquals(this.source, otherPv.source));
+				ObjectUtils.nullSafeEquals(getSource(), otherPv.getSource()));
 	}
 
 	@Override

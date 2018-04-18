@@ -16,12 +16,13 @@
 
 package org.springframework.aop.aspectj.generic;
 
-import static org.junit.Assert.*;
-
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.junit.Test;
+
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for AspectJ pointcut expression matching when working with bridge methods.

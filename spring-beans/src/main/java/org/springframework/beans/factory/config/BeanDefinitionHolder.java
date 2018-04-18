@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.beans.factory.config;
 
 import org.springframework.beans.BeanMetadataElement;
+import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -41,6 +43,7 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 
 	private final String beanName;
 
+	@Nullable
 	private final String[] aliases;
 
 
@@ -59,7 +62,7 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 	 * @param beanName the name of the bean, as specified for the bean definition
 	 * @param aliases alias names for the bean, or {@code null} if none
 	 */
-	public BeanDefinitionHolder(BeanDefinition beanDefinition, String beanName, String[] aliases) {
+	public BeanDefinitionHolder(BeanDefinition beanDefinition, String beanName, @Nullable String[] aliases) {
 		Assert.notNull(beanDefinition, "BeanDefinition must not be null");
 		Assert.notNull(beanName, "Bean name must not be null");
 		this.beanDefinition = beanDefinition;
@@ -100,6 +103,7 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 	 * Return the alias names for the bean, as specified directly for the bean definition.
 	 * @return the array of alias names, or {@code null} if none
 	 */
+	@Nullable
 	public String[] getAliases() {
 		return this.aliases;
 	}
@@ -109,6 +113,7 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 	 * @see BeanDefinition#getSource()
 	 */
 	@Override
+	@Nullable
 	public Object getSource() {
 		return this.beanDefinition.getSource();
 	}
@@ -117,9 +122,10 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 	 * Determine whether the given candidate name matches the bean name
 	 * or the aliases stored in this bean definition.
 	 */
-	public boolean matchesName(String candidateName) {
-		return (candidateName != null &&
-				(candidateName.equals(this.beanName) || ObjectUtils.containsElement(this.aliases, candidateName)));
+	public boolean matchesName(@Nullable String candidateName) {
+		return (candidateName != null && (candidateName.equals(this.beanName) ||
+				candidateName.equals(BeanFactoryUtils.transformedBeanName(this.beanName)) ||
+				ObjectUtils.containsElement(this.aliases, candidateName)));
 	}
 
 

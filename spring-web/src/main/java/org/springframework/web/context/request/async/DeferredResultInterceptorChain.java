@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.context.request.async;
 
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
@@ -29,7 +31,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  */
 class DeferredResultInterceptorChain {
 
-	private static Log logger = LogFactory.getLog(DeferredResultInterceptorChain.class);
+	private static final Log logger = LogFactory.getLog(DeferredResultInterceptorChain.class);
 
 	private final List<DeferredResultProcessingInterceptor> interceptors;
 
@@ -40,7 +42,9 @@ class DeferredResultInterceptorChain {
 		this.interceptors = interceptors;
 	}
 
-	public void applyBeforeConcurrentHandling(NativeWebRequest request, DeferredResult<?> deferredResult) throws Exception {
+	public void applyBeforeConcurrentHandling(NativeWebRequest request, DeferredResult<?> deferredResult)
+			throws Exception {
+
 		for (DeferredResultProcessingInterceptor interceptor : this.interceptors) {
 			interceptor.beforeConcurrentHandling(request, deferredResult);
 		}
@@ -53,7 +57,9 @@ class DeferredResultInterceptorChain {
 		}
 	}
 
-	public Object applyPostProcess(NativeWebRequest request,  DeferredResult<?> deferredResult, Object concurrentResult) {
+	public Object applyPostProcess(NativeWebRequest request,  DeferredResult<?> deferredResult,
+			Object concurrentResult) {
+
 		try {
 			for (int i = this.preProcessingIndex; i >= 0; i--) {
 				this.interceptors.get(i).postProcess(request, deferredResult, concurrentResult);
@@ -74,6 +80,24 @@ class DeferredResultInterceptorChain {
 				break;
 			}
 		}
+	}
+
+	/**
+	 * @return true to continue error handling, or false to bypass any further
+	 * error handling
+	 */
+	public boolean triggerAfterError(NativeWebRequest request, DeferredResult<?> deferredResult, Throwable ex)
+			throws Exception {
+
+		for (DeferredResultProcessingInterceptor interceptor : this.interceptors) {
+			if (deferredResult.isSetOrExpired()) {
+				return false;
+			}
+			if (!interceptor.handleError(request, deferredResult, ex)){
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public void triggerAfterCompletion(NativeWebRequest request, DeferredResult<?> deferredResult) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,9 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -29,17 +31,16 @@ import org.springframework.util.StringUtils;
  * <ul>
  * <li>pattern: regular expression for the fully-qualified method names to match.
  * The exact regexp syntax will depend on the subclass (e.g. Perl5 regular expressions)
- * <li>patterns: alternative property taking a String array of patterns. The result will
- * be the union of these patterns.
+ * <li>patterns: alternative property taking a String array of patterns.
+ * The result will be the union of these patterns.
  * </ul>
  *
  * <p>Note: the regular expressions must be a match. For example,
  * {@code .*get.*} will match com.mycom.Foo.getBar().
  * {@code get.*} will not.
  *
- * <p>This base class is serializable. Subclasses should declare all fields transient
- * - the initPatternRepresentation method in this class will be invoked again on the
- * client side on deserialization.
+ * <p>This base class is serializable. Subclasses should declare all fields transient;
+ * the {@link #initPatternRepresentation} method will be invoked again on deserialization.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -51,10 +52,14 @@ import org.springframework.util.StringUtils;
 public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPointcut
 		implements Serializable {
 
-	/** Regular expressions to match */
+	/**
+	 * Regular expressions to match.
+	 */
 	private String[] patterns = new String[0];
 
-	/** Regular expressions <strong>not</strong> to match */
+	/**
+	 * Regular expressions <strong>not</strong> to match.
+	 */
 	private String[] excludedPatterns = new String[0];
 
 
@@ -64,15 +69,15 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	 * @see #setPatterns
 	 */
 	public void setPattern(String pattern) {
-		setPatterns(new String[] {pattern});
+		setPatterns(pattern);
 	}
 
 	/**
 	 * Set the regular expressions defining methods to match.
-	 * Matching will be the union of all these; if any match,
-	 * the pointcut matches.
+	 * Matching will be the union of all these; if any match, the pointcut matches.
+	 * @see #setPattern
 	 */
-	public void setPatterns(String[] patterns) {
+	public void setPatterns(String... patterns) {
 		Assert.notEmpty(patterns, "'patterns' must not be empty");
 		this.patterns = new String[patterns.length];
 		for (int i = 0; i < patterns.length; i++) {
@@ -94,15 +99,15 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	 * @see #setExcludedPatterns
 	 */
 	public void setExcludedPattern(String excludedPattern) {
-		setExcludedPatterns(new String[] {excludedPattern});
+		setExcludedPatterns(excludedPattern);
 	}
 
 	/**
 	 * Set the regular expressions defining methods to match for exclusion.
-	 * Matching will be the union of all these; if any match,
-	 * the pointcut matches.
+	 * Matching will be the union of all these; if any match, the pointcut matches.
+	 * @see #setExcludedPattern
 	 */
-	public void setExcludedPatterns(String[] excludedPatterns) {
+	public void setExcludedPatterns(String... excludedPatterns) {
 		Assert.notEmpty(excludedPatterns, "'excludedPatterns' must not be empty");
 		this.excludedPatterns = new String[excludedPatterns.length];
 		for (int i = 0; i < excludedPatterns.length; i++) {
@@ -125,9 +130,9 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	 * plus the name of the method.
 	 */
 	@Override
-	public boolean matches(Method method, Class targetClass) {
-		return ((targetClass != null && matchesPattern(targetClass.getName() + "." + method.getName())) ||
-				matchesPattern(method.getDeclaringClass().getName() + "." + method.getName()));
+	public boolean matches(Method method, @Nullable Class<?> targetClass) {
+		return ((targetClass != null && matchesPattern(ClassUtils.getQualifiedMethodName(method, targetClass))) ||
+				matchesPattern(ClassUtils.getQualifiedMethodName(method)));
 	}
 
 	/**
@@ -173,18 +178,18 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	protected abstract void initExcludedPatternRepresentation(String[] patterns) throws IllegalArgumentException;
 
 	/**
-	 * Does the pattern at the given index match this string?
-	 * @param pattern {@code String} pattern to match
-	 * @param patternIndex index of pattern from 0
-	 * @return {@code true} if there is a match, else {@code false}.
+	 * Does the pattern at the given index match the given String?
+	 * @param pattern the {@code String} pattern to match
+	 * @param patternIndex index of pattern (starting from 0)
+	 * @return {@code true} if there is a match, {@code false} otherwise
 	 */
 	protected abstract boolean matches(String pattern, int patternIndex);
 
 	/**
-	 * Does the exclusion pattern at the given index match this string?
-	 * @param pattern {@code String} pattern to match.
-	 * @param patternIndex index of pattern starting from 0.
-	 * @return {@code true} if there is a match, else {@code false}.
+	 * Does the exclusion pattern at the given index match the given String?
+	 * @param pattern the {@code String} pattern to match
+	 * @param patternIndex index of pattern (starting from 0)
+	 * @return {@code true} if there is a match, {@code false} otherwise
 	 */
 	protected abstract boolean matchesExclusion(String pattern, int patternIndex);
 

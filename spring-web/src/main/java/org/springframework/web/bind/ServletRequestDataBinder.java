@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.bind;
 import javax.servlet.ServletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.BindException;
 import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.util.WebUtils;
@@ -30,10 +31,6 @@ import org.springframework.web.util.WebUtils;
  * <p>See the DataBinder/WebDataBinder superclasses for customization options,
  * which include specifying allowed/required fields, and registering custom
  * property editors.
- *
- * <p>Used by Spring Web MVC's BaseCommandController and MultiActionController.
- * Note that BaseCommandController and its subclasses allow for easy customization
- * of the binder instances that they use through overriding {@code initBinder}.
  *
  * <p>Can also be used for manual data binding in custom web controllers:
  * for example, in a plain Controller implementation or in a MultiActionController
@@ -59,7 +56,6 @@ import org.springframework.web.util.WebUtils;
  * @see #setAllowedFields
  * @see #setRequiredFields
  * @see #setFieldMarkerPrefix
- * @see org.springframework.web.servlet.mvc.BaseCommandController#initBinder
  */
 public class ServletRequestDataBinder extends WebDataBinder {
 
@@ -69,7 +65,7 @@ public class ServletRequestDataBinder extends WebDataBinder {
 	 * if the binder is just used to convert a plain parameter value)
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
-	public ServletRequestDataBinder(Object target) {
+	public ServletRequestDataBinder(@Nullable Object target) {
 		super(target);
 	}
 
@@ -79,7 +75,7 @@ public class ServletRequestDataBinder extends WebDataBinder {
 	 * if the binder is just used to convert a plain parameter value)
 	 * @param objectName the name of the target object
 	 */
-	public ServletRequestDataBinder(Object target, String objectName) {
+	public ServletRequestDataBinder(@Nullable Object target, String objectName) {
 		super(target, objectName);
 	}
 
@@ -99,7 +95,6 @@ public class ServletRequestDataBinder extends WebDataBinder {
 	 * @param request request with parameters to bind (can be multipart)
 	 * @see org.springframework.web.multipart.MultipartHttpServletRequest
 	 * @see org.springframework.web.multipart.MultipartFile
-	 * @see #bindMultipartFiles
 	 * @see #bind(org.springframework.beans.PropertyValues)
 	 */
 	public void bind(ServletRequest request) {

@@ -16,11 +16,12 @@
 
 package org.springframework.aop.aspectj;
 
-import static org.junit.Assert.*;
-
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Ramnivas Laddad

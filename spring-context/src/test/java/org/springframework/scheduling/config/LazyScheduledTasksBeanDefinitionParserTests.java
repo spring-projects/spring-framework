@@ -17,6 +17,7 @@
 package org.springframework.scheduling.config;
 
 import org.junit.Test;
+
 import org.springframework.context.support.GenericXmlApplicationContext;
 
 /**
@@ -40,15 +41,19 @@ public class LazyScheduledTasksBeanDefinitionParserTests {
 		while (!task.executed) {
 			try {
 				Thread.sleep(10);
-			} catch (Exception e) { /* Do Nothing */ }
+			}
+			catch (Exception ex) { /* Do Nothing */ }
 		}
 	}
 
+
 	static class Task {
+
 		volatile boolean executed = false;
 
 		public void doWork() {
 			executed = true;
 		}
 	}
+
 }

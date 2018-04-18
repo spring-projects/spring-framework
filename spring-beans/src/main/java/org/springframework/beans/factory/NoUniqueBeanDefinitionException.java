@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans.factory;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -33,6 +34,9 @@ import org.springframework.util.StringUtils;
 public class NoUniqueBeanDefinitionException extends NoSuchBeanDefinitionException {
 
 	private int numberOfBeansFound;
+
+	@Nullable
+	private Collection<String> beanNamesFound;
 
 
 	/**
@@ -54,6 +58,7 @@ public class NoUniqueBeanDefinitionException extends NoSuchBeanDefinitionExcepti
 	public NoUniqueBeanDefinitionException(Class<?> type, Collection<String> beanNamesFound) {
 		this(type, beanNamesFound.size(), "expected single matching bean but found " + beanNamesFound.size() + ": " +
 				StringUtils.collectionToCommaDelimitedString(beanNamesFound));
+		this.beanNamesFound = beanNamesFound;
 	}
 
 	/**
@@ -74,6 +79,17 @@ public class NoUniqueBeanDefinitionException extends NoSuchBeanDefinitionExcepti
 	@Override
 	public int getNumberOfBeansFound() {
 		return this.numberOfBeansFound;
+	}
+
+	/**
+	 * Return the names of all beans found when only one matching bean was expected.
+	 * Note that this may be {@code null} if not specified at construction time.
+	 * @since 4.3
+	 * @see #getBeanType()
+	 */
+	@Nullable
+	public Collection<String> getBeanNamesFound() {
+		return this.beanNamesFound;
 	}
 
 }

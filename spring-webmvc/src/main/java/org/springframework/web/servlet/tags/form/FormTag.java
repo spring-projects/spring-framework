@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Map;
-
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -28,19 +28,210 @@ import javax.servlet.jsp.PageContext;
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.core.Conventions;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.util.HtmlUtils;
+import org.springframework.web.util.UriUtils;
 
 /**
- * Databinding-aware JSP tag for rendering an HTML '{@code form}' whose
- * inner elements are bound to properties on a <em>form object</em>.
+ * The {@code <form>} tag renders an HTML 'form' tag and exposes a binding path to
+ * inner tags for binding.
  *
  * <p>Users should place the form object into the
  * {@link org.springframework.web.servlet.ModelAndView ModelAndView} when
  * populating the data for their view. The name of this form object can be
  * configured using the {@link #setModelAttribute "modelAttribute"} property.
+ *
+ * <p>
+ * <table>
+ * <caption>Attribute Summary</caption>
+ * <thead>
+ * <tr>
+ * <th class="colFirst">Attribute</th>
+ * <th class="colOne">Required?</th>
+ * <th class="colOne">Runtime Expression?</th>
+ * <th class="colLast">Description</th>
+ * </tr>
+ * </thead>
+ * <tbody>
+ * <tr class="altColor">
+ * <td><p>acceptCharset</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>Specifies the list of character encodings for input data that is accepted
+ * by the server processing this form. The value is a space- and/or comma-delimited
+ * list of charset values. The client must interpret this list as an exclusive-or
+ * list, i.e., the server is able to accept any single character encoding per
+ * entity received.</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>action</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Required Attribute</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td><p>cssClass</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Optional Attribute</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>cssStyle</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Optional Attribute</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td><p>dir</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Standard Attribute</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>enctype</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Optional Attribute</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td><p>htmlEscape</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>Enable/disable HTML escaping of rendered values.</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>id</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Standard Attribute</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td><p>lang</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Standard Attribute</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>method</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Optional Attribute</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td><p>methodParam</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>The parameter name used for HTTP methods other then GET and POST.
+ * Default is '_method'.</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>modelAttribute</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>Name of the model attribute under which the form object is exposed.
+ * Defaults to 'command'.</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td><p>name</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Standard Attribute - added for backwards compatibility cases</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>onclick</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Event Attribute</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td><p>ondblclick</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Event Attribute</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>onkeydown</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Event Attribute</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td><p>onkeypress</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Event Attribute</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>onkeyup</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Event Attribute</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td><p>onmousedown</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Event Attribute</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>onmousemove</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Event Attribute</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td><p>onmouseout</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Event Attribute</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>onmouseover</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Event Attribute</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td><p>onmouseup</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Event Attribute</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>onreset</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Event Attribute</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td><p>onsubmit</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Event Attribute</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>servletRelativeAction</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>Action reference to be appended to the current servlet path</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td><p>target</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Optional Attribute</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>title</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>HTML Standard Attribute</p></td>
+ * </tr>
+ * </tbody>
+ * </table>
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -143,23 +334,6 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Set the name of the form attribute in the model.
-	 * <p>May be a runtime expression.
-	 * @see #setModelAttribute
-	 */
-	public void setCommandName(String commandName) {
-		this.modelAttribute = commandName;
-	}
-
-	/**
-	 * Get the name of the form attribute in the model.
-	 * @see #getModelAttribute
-	 */
-	protected String getCommandName() {
-		return this.modelAttribute;
-	}
-
-	/**
 	 * Set the value of the '{@code name}' attribute.
 	 * <p>May be a runtime expression.
 	 * <p>Name is not a valid attribute for form on XHTML 1.0. However,
@@ -193,15 +367,18 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Set the value of the '{@code action}' attribute.
+	 * Set the value of the '{@code action}' attribute through a value
+	 * that is to be appended to the current servlet path.
 	 * <p>May be a runtime expression.
+	 * @since 3.2.3
 	 */
-	public void setServletRelativeAction(String servletRelativeaction) {
-		this.servletRelativeAction = (servletRelativeaction != null ? servletRelativeaction : "");
+	public void setServletRelativeAction(String servletRelativeAction) {
+		this.servletRelativeAction = (servletRelativeAction != null ? servletRelativeAction : "");
 	}
 
 	/**
-	 * Get the value of the '{@code action}' attribute.
+	 * Get the servlet-relative value of the '{@code action}' attribute.
+	 * @since 3.2.3
 	 */
 	protected String getServletRelativeAction() {
 		return this.servletRelativeAction;
@@ -321,8 +498,9 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the name of the request param for non-browser supported HTTP methods.
+	 * @since 4.2.3
 	 */
-	protected String getMethodParameter() {
+	protected String getMethodParam() {
 		return this.methodParam;
 	}
 
@@ -332,6 +510,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	protected boolean isMethodBrowserSupported(String method) {
 		return ("get".equalsIgnoreCase(method) || "post".equalsIgnoreCase(method));
 	}
+
 
 	/**
 	 * Writes the opening part of the block	'{@code form}' tag and exposes
@@ -358,7 +537,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 		if (!isMethodBrowserSupported(getMethod())) {
 			assertHttpMethod(getMethod());
-			String inputName = getMethodParameter();
+			String inputName = getMethodParam();
 			String inputType = "hidden";
 			tagWriter.startTag(INPUT_TAG);
 			writeOptionalAttribute(tagWriter, TYPE_ATTRIBUTE, inputType);
@@ -382,7 +561,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	private String getHttpMethod() {
-		return isMethodBrowserSupported(getMethod()) ? getMethod() : DEFAULT_METHOD;
+		return (isMethodBrowserSupported(getMethod()) ? getMethod() : DEFAULT_METHOD);
 	}
 
 	private void assertHttpMethod(String method) {
@@ -422,7 +601,6 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * with the context and servlet paths, and the result is used. Otherwise, the
 	 * {@link org.springframework.web.servlet.support.RequestContext#getRequestUri()
 	 * originating URI} is used.
-	 *
 	 * @return the value that is to be used for the '{@code action}' attribute
 	 */
 	protected String resolveAction() throws JspException {
@@ -434,7 +612,8 @@ public class FormTag extends AbstractHtmlElementTag {
 		}
 		else if (StringUtils.hasText(servletRelativeAction)) {
 			String pathToServlet = getRequestContext().getPathToServlet();
-			if (servletRelativeAction.startsWith("/") && !servletRelativeAction.startsWith(getRequestContext().getContextPath())) {
+			if (servletRelativeAction.startsWith("/") &&
+					!servletRelativeAction.startsWith(getRequestContext().getContextPath())) {
 				servletRelativeAction = pathToServlet + servletRelativeAction;
 			}
 			servletRelativeAction = getDisplayString(evaluate(ACTION_ATTRIBUTE, servletRelativeAction));
@@ -442,6 +621,13 @@ public class FormTag extends AbstractHtmlElementTag {
 		}
 		else {
 			String requestUri = getRequestContext().getRequestUri();
+			String encoding = this.pageContext.getResponse().getCharacterEncoding();
+			try {
+				requestUri = UriUtils.encodePath(requestUri, encoding);
+			}
+			catch (UnsupportedCharsetException ex) {
+				// shouldn't happen - if it does, proceed with requestUri as-is
+			}
 			ServletResponse response = this.pageContext.getResponse();
 			if (response instanceof HttpServletResponse) {
 				requestUri = ((HttpServletResponse) response).encodeURL(requestUri);
@@ -467,7 +653,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	private String processAction(String action) {
 		RequestDataValueProcessor processor = getRequestContext().getRequestDataValueProcessor();
 		ServletRequest request = this.pageContext.getRequest();
-		if ((processor != null) && (request instanceof HttpServletRequest)) {
+		if (processor != null && request instanceof HttpServletRequest) {
 			action = processor.processAction((HttpServletRequest) request, action, getHttpMethod());
 		}
 		return action;
@@ -481,7 +667,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	public int doEndTag() throws JspException {
 		RequestDataValueProcessor processor = getRequestContext().getRequestDataValueProcessor();
 		ServletRequest request = this.pageContext.getRequest();
-		if ((processor != null) && (request instanceof HttpServletRequest)) {
+		if (processor != null && request instanceof HttpServletRequest) {
 			writeHiddenFields(processor.getExtraHiddenFields((HttpServletRequest) request));
 		}
 		this.tagWriter.endTag();
@@ -492,12 +678,14 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * Writes the given values as hidden fields.
 	 */
 	private void writeHiddenFields(Map<String, String> hiddenFields) throws JspException {
-		if (hiddenFields != null) {
+		if (!CollectionUtils.isEmpty(hiddenFields)) {
+			this.tagWriter.appendValue("<div>\n");
 			for (String name : hiddenFields.keySet()) {
 				this.tagWriter.appendValue("<input type=\"hidden\" ");
 				this.tagWriter.appendValue("name=\"" + name + "\" value=\"" + hiddenFields.get(name) + "\" ");
 				this.tagWriter.appendValue("/>\n");
 			}
+			this.tagWriter.appendValue("</div>");
 		}
 	}
 
@@ -507,6 +695,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	@Override
 	public void doFinally() {
 		super.doFinally();
+
 		this.pageContext.removeAttribute(MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		if (this.previousNestedPath != null) {
 			// Expose previous nestedPath value.

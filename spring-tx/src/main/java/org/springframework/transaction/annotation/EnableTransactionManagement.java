@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,15 @@ import org.springframework.core.Ordered;
 
 /**
  * Enables Spring's annotation-driven transaction management capability, similar to
- * the support found in Spring's {@code <tx:*>} XML namespace. To be used
- * on @{@link org.springframework.context.annotation.Configuration Configuration} classes
- * as follows:
+ * the support found in Spring's {@code <tx:*>} XML namespace. To be used on
+ * {@link org.springframework.context.annotation.Configuration @Configuration}
+ * classes as follows:
+ *
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableTransactionManagement
  * public class AppConfig {
+ *
  *     &#064;Bean
  *     public FooRepository fooRepository() {
  *         // configure and return a class having &#064;Transactional methods
@@ -54,19 +56,26 @@ import org.springframework.core.Ordered;
  *
  * <p>For reference, the example above can be compared to the following Spring XML
  * configuration:
+ *
  * <pre class="code">
  * {@code
  * <beans>
+ *
  *     <tx:annotation-driven/>
+ *
  *     <bean id="fooRepository" class="com.foo.JdbcFooRepository">
  *         <constructor-arg ref="dataSource"/>
  *     </bean>
+ *
  *     <bean id="dataSource" class="com.vendor.VendorDataSource"/>
+ *
  *     <bean id="transactionManager" class="org.sfwk...DataSourceTransactionManager">
  *         <constructor-arg ref="dataSource"/>
  *     </bean>
+ *
  * </beans>
  * }</pre>
+ *
  * In both of the scenarios above, {@code @EnableTransactionManagement} and {@code
  * <tx:annotation-driven/>} are responsible for registering the necessary Spring
  * components that power annotation-driven transaction management, such as the
@@ -87,10 +96,12 @@ import org.springframework.core.Ordered;
  * {@code @EnableTransactionManagement} and the exact transaction manager bean to be used,
  * the {@link TransactionManagementConfigurer} callback interface may be implemented -
  * notice the {@code implements} clause and the {@code @Override}-annotated method below:
+ *
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableTransactionManagement
  * public class AppConfig implements TransactionManagementConfigurer {
+ *
  *     &#064;Bean
  *     public FooRepository fooRepository() {
  *         // configure and return a class having &#064;Transactional methods
@@ -112,6 +123,7 @@ import org.springframework.core.Ordered;
  *         return txManager();
  *     }
  * }</pre>
+ *
  * This approach may be desirable simply because it is more explicit, or it may be
  * necessary in order to distinguish between two {@code PlatformTransactionManager} beans
  * present in the same container.  As the name suggests, the
@@ -119,15 +131,19 @@ import org.springframework.core.Ordered;
  * {@code @Transactional} methods. See {@link TransactionManagementConfigurer} Javadoc
  * for further details.
  *
- * <p>The {@link #mode()} attribute controls how advice is applied; if the mode is
+ * <p>The {@link #mode} attribute controls how advice is applied: If the mode is
  * {@link AdviceMode#PROXY} (the default), then the other attributes control the behavior
- * of the proxying.
+ * of the proxying. Please note that proxy mode allows for interception of calls through
+ * the proxy only; local calls within the same class cannot get intercepted that way.
  *
- * <p>If the {@linkplain #mode} is set to {@link AdviceMode#ASPECTJ}, then the
- * {@link #proxyTargetClass()} attribute is obsolete. Note also that in this case the
- * {@code spring-aspects} module JAR must be present on the classpath.
+ * <p>Note that if the {@linkplain #mode} is set to {@link AdviceMode#ASPECTJ}, then the
+ * value of the {@link #proxyTargetClass} attribute will be ignored. Note also that in
+ * this case the {@code spring-aspects} module JAR must be present on the classpath, with
+ * compile-time weaving or load-time weaving applying the aspect to the affected classes.
+ * There is no proxy involved in such a scenario; local calls will be intercepted as well.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see TransactionManagementConfigurer
  * @see TransactionManagementConfigurationSelector
@@ -145,7 +161,6 @@ public @interface EnableTransactionManagement {
 	 * opposed to standard Java interface-based proxies ({@code false}). The default is
 	 * {@code false}. <strong>Applicable only if {@link #mode()} is set to
 	 * {@link AdviceMode#PROXY}</strong>.
-	 *
 	 * <p>Note that setting this attribute to {@code true} will affect <em>all</em>
 	 * Spring-managed beans requiring proxying, not just those marked with
 	 * {@code @Transactional}. For example, other beans marked with Spring's
@@ -156,16 +171,22 @@ public @interface EnableTransactionManagement {
 	boolean proxyTargetClass() default false;
 
 	/**
-	 * Indicate how transactional advice should be applied. The default is
-	 * {@link AdviceMode#PROXY}.
-	 * @see AdviceMode
+	 * Indicate how transactional advice should be applied.
+	 * <p><b>The default is {@link AdviceMode#PROXY}.</b>
+	 * Please note that proxy mode allows for interception of calls through the proxy
+	 * only. Local calls within the same class cannot get intercepted that way; an
+	 * {@link Transactional} annotation on such a method within a local call will be
+	 * ignored since Spring's interceptor does not even kick in for such a runtime
+	 * scenario. For a more advanced mode of interception, consider switching this to
+	 * {@link AdviceMode#ASPECTJ}.
 	 */
 	AdviceMode mode() default AdviceMode.PROXY;
 
 	/**
 	 * Indicate the ordering of the execution of the transaction advisor
 	 * when multiple advices are applied at a specific joinpoint.
-	 * The default is {@link Ordered#LOWEST_PRECEDENCE}.
+	 * <p>The default is {@link Ordered#LOWEST_PRECEDENCE}.
 	 */
 	int order() default Ordered.LOWEST_PRECEDENCE;
+
 }

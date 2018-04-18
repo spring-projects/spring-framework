@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditorSupport;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -43,6 +44,7 @@ public class StringArrayPropertyEditor extends PropertyEditorSupport {
 
 	private final String separator;
 
+	@Nullable
 	private final String charsToDelete;
 
 	private final boolean emptyArrayAsNull;
@@ -84,7 +86,7 @@ public class StringArrayPropertyEditor extends PropertyEditorSupport {
 	 * @param emptyArrayAsNull {@code true} if an empty String array
 	 * is to be transformed into {@code null}
 	 * @param trimValues {@code true} if the values in the parsed arrays
-	 * are to be be trimmed of whitespace (default is true).
+	 * are to be trimmed of whitespace (default is true).
 	 */
 	public StringArrayPropertyEditor(String separator, boolean emptyArrayAsNull, boolean trimValues) {
 		this(separator, null, emptyArrayAsNull, trimValues);
@@ -99,7 +101,7 @@ public class StringArrayPropertyEditor extends PropertyEditorSupport {
 	 * @param emptyArrayAsNull {@code true} if an empty String array
 	 * is to be transformed into {@code null}
 	 */
-	public StringArrayPropertyEditor(String separator, String charsToDelete, boolean emptyArrayAsNull) {
+	public StringArrayPropertyEditor(String separator, @Nullable String charsToDelete, boolean emptyArrayAsNull) {
 		this(separator, charsToDelete, emptyArrayAsNull, true);
 	}
 
@@ -112,9 +114,11 @@ public class StringArrayPropertyEditor extends PropertyEditorSupport {
 	 * @param emptyArrayAsNull {@code true} if an empty String array
 	 * is to be transformed into {@code null}
 	 * @param trimValues {@code true} if the values in the parsed arrays
-	 * are to be be trimmed of whitespace (default is true).
+	 * are to be trimmed of whitespace (default is true).
 	 */
-	public StringArrayPropertyEditor(String separator, String charsToDelete, boolean emptyArrayAsNull, boolean trimValues) {
+	public StringArrayPropertyEditor(
+			String separator, @Nullable String charsToDelete, boolean emptyArrayAsNull, boolean trimValues) {
+
 		this.separator = separator;
 		this.charsToDelete = charsToDelete;
 		this.emptyArrayAsNull = emptyArrayAsNull;

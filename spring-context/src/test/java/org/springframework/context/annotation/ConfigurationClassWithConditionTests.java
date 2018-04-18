@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,13 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Map;
 
-import org.junit.After;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.annotation.AnnotationAttributes;
-import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.stereotype.Component;
@@ -37,25 +35,17 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Tests for {@link Conditional} beans.
+ * Test for {@link Conditional} beans.
  *
  * @author Phillip Webb
+ * @author Juergen Hoeller
  */
 @SuppressWarnings("resource")
 public class ConfigurationClassWithConditionTests {
 
-	private final AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
-	@After
-	public void closeContext() {
-		ctx.close();
-	}
-
 	@Test
 	public void conditionalOnMissingBeanMatch() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(BeanOneConfiguration.class, BeanTwoConfiguration.class);
 		ctx.refresh();
 		assertTrue(ctx.containsBean("bean1"));
@@ -65,6 +55,7 @@ public class ConfigurationClassWithConditionTests {
 
 	@Test
 	public void conditionalOnMissingBeanNoMatch() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(BeanTwoConfiguration.class);
 		ctx.refresh();
 		assertFalse(ctx.containsBean("bean1"));
@@ -74,6 +65,7 @@ public class ConfigurationClassWithConditionTests {
 
 	@Test
 	public void conditionalOnBeanMatch() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(BeanOneConfiguration.class, BeanThreeConfiguration.class);
 		ctx.refresh();
 		assertTrue(ctx.containsBean("bean1"));
@@ -82,6 +74,7 @@ public class ConfigurationClassWithConditionTests {
 
 	@Test
 	public void conditionalOnBeanNoMatch() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(BeanThreeConfiguration.class);
 		ctx.refresh();
 		assertFalse(ctx.containsBean("bean1"));
@@ -90,25 +83,50 @@ public class ConfigurationClassWithConditionTests {
 
 	@Test
 	public void metaConditional() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigurationWithMetaCondition.class);
 		ctx.refresh();
 		assertTrue(ctx.containsBean("bean"));
 	}
 
 	@Test
+	public void metaConditionalWithAsm() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("config", new RootBeanDefinition(ConfigurationWithMetaCondition.class.getName()));
+		ctx.refresh();
+		assertTrue(ctx.containsBean("bean"));
+	}
+
+	@Test
 	public void nonConfigurationClass() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(NonConfigurationClass.class);
 		ctx.refresh();
-		thrown.expect(NoSuchBeanDefinitionException.class);
-		assertNull(ctx.getBean(NonConfigurationClass.class));
+		assertFalse(ctx.containsBean("bean1"));
+	}
+
+	@Test
+	public void nonConfigurationClassWithAsm() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("config", new RootBeanDefinition(NonConfigurationClass.class.getName()));
+		ctx.refresh();
+		assertFalse(ctx.containsBean("bean1"));
 	}
 
 	@Test
 	public void methodConditional() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConditionOnMethodConfiguration.class);
 		ctx.refresh();
-		thrown.expect(NoSuchBeanDefinitionException.class);
-		assertNull(ctx.getBean(ExampleBean.class));
+		assertFalse(ctx.containsBean("bean1"));
+	}
+
+	@Test
+	public void methodConditionalWithAsm() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("config", new RootBeanDefinition(ConditionOnMethodConfiguration.class.getName()));
+		ctx.refresh();
+		assertFalse(ctx.containsBean("bean1"));
 	}
 
 	@Test
@@ -119,26 +137,31 @@ public class ConfigurationClassWithConditionTests {
 	}
 
 	@Test
-	public void importsNotLoaded() throws Exception {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(ImportsNotLoaded.class);
-		ctx.refresh();
-		assertThat(ctx.containsBeanDefinition("a"), equalTo(false));
-		assertThat(ctx.containsBeanDefinition("b"), equalTo(false));
+	public void conditionOnOverriddenMethodHonored() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithBeanSkipped.class);
+		assertEquals(0, context.getBeansOfType(ExampleBean.class).size());
 	}
 
 	@Test
-	public void sensibleConditionContext() throws Exception {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.setResourceLoader(new DefaultResourceLoader());
-		ctx.setClassLoader(getClass().getClassLoader());
-		ctx.register(SensibleConditionContext.class);
-		ctx.refresh();
-		assertThat(ctx.getBean(ExampleBean.class), instanceOf(ExampleBean.class));
+	public void noConditionOnOverriddenMethodHonored() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithBeanReactivated.class);
+		Map<String, ExampleBean> beans = context.getBeansOfType(ExampleBean.class);
+		assertEquals(1, beans.size());
+		assertEquals("baz", beans.keySet().iterator().next());
 	}
+
+	@Test
+	public void configWithAlternativeBeans() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithAlternativeBeans.class);
+		Map<String, ExampleBean> beans = context.getBeansOfType(ExampleBean.class);
+		assertEquals(1, beans.size());
+		assertEquals("baz", beans.keySet().iterator().next());
+	}
+
 
 	@Configuration
 	static class BeanOneConfiguration {
+
 		@Bean
 		public ExampleBean bean1() {
 			return new ExampleBean();
@@ -148,6 +171,7 @@ public class ConfigurationClassWithConditionTests {
 	@Configuration
 	@Conditional(NoBeanOneCondition.class)
 	static class BeanTwoConfiguration {
+
 		@Bean
 		public ExampleBean bean2() {
 			return new ExampleBean();
@@ -157,6 +181,7 @@ public class ConfigurationClassWithConditionTests {
 	@Configuration
 	@Conditional(HasBeanOneCondition.class)
 	static class BeanThreeConfiguration {
+
 		@Bean
 		public ExampleBean bean3() {
 			return new ExampleBean();
@@ -166,6 +191,7 @@ public class ConfigurationClassWithConditionTests {
 	@Configuration
 	@MetaConditional("test")
 	static class ConfigurationWithMetaCondition {
+
 		@Bean
 		public ExampleBean bean() {
 			return new ExampleBean();
@@ -175,14 +201,22 @@ public class ConfigurationClassWithConditionTests {
 	@Conditional(MetaConditionalFilter.class)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface MetaConditional {
+	public @interface MetaConditional {
+
 		String value();
 	}
 
 	@Conditional(NeverCondition.class)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ElementType.TYPE, ElementType.METHOD})
-	public static @interface Never {
+	public @interface Never {
+	}
+
+	@Conditional(AlwaysCondition.class)
+	@Never
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ElementType.TYPE, ElementType.METHOD})
+	public @interface MetaNever {
 	}
 
 	static class NoBeanOneCondition implements Condition {
@@ -217,15 +251,29 @@ public class ConfigurationClassWithConditionTests {
 	}
 
 	static class NeverCondition implements Condition {
+
 		@Override
 		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
 			return false;
 		}
 	}
 
+	static class AlwaysCondition implements Condition {
+
+		@Override
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			return true;
+		}
+	}
+
 	@Component
-	@Never
+	@MetaNever
 	static class NonConfigurationClass {
+
+		@Bean
+		public ExampleBean bean1() {
+			return new ExampleBean();
+		}
 	}
 
 	@Configuration
@@ -240,8 +288,9 @@ public class ConfigurationClassWithConditionTests {
 
 	@Configuration
 	@Never
-	@Import({ ConfigurationNotCreated.class, RegistrarNotCreated.class, ImportSelectorNotCreated.class })
+	@Import({ConfigurationNotCreated.class, RegistrarNotCreated.class, ImportSelectorNotCreated.class})
 	static class ImportsNotCreated {
+
 		static {
 			if (true) throw new RuntimeException();
 		}
@@ -249,12 +298,14 @@ public class ConfigurationClassWithConditionTests {
 
 	@Configuration
 	static class ConfigurationNotCreated {
+
 		static {
 			if (true) throw new RuntimeException();
 		}
 	}
 
 	static class RegistrarNotCreated implements ImportBeanDefinitionRegistrar {
+
 		static {
 			if (true) throw new RuntimeException();
 		}
@@ -278,73 +329,51 @@ public class ConfigurationClassWithConditionTests {
 
 	}
 
-	@Configuration
-	@Never
-	@Import({ ConfigurationNotLoaded.class, RegistrarNotLoaded.class, ImportSelectorNotLoaded.class })
-	static class ImportsNotLoaded {
-		static {
-			if (true) throw new RuntimeException();
-		}
+	static class ExampleBean {
 	}
 
 	@Configuration
-	static class ConfigurationNotLoaded {
+	static class ConfigWithBeanActive {
+
 		@Bean
-		public String a() {
-			return "a";
-		}
-	}
-
-	static class RegistrarNotLoaded implements ImportBeanDefinitionRegistrar {
-		@Override
-		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
-				BeanDefinitionRegistry registry) {
-			throw new RuntimeException();
-		}
-	}
-
-	static class ImportSelectorNotLoaded implements ImportSelector {
-
-		@Override
-		public String[] selectImports(AnnotationMetadata importingClassMetadata) {
-			return new String[] { SelectedConfigurationNotLoaded.class.getName() };
-		}
-
-	}
-
-	@Configuration
-	static class SelectedConfigurationNotLoaded {
-		@Bean
-		public String b() {
-			return "b";
-		}
-	}
-
-	@Configuration
-	@Conditional(SensibleConditionContextCondition.class)
-	static class SensibleConditionContext {
-		@Bean
-		ExampleBean exampleBean() {
+		public ExampleBean baz() {
 			return new ExampleBean();
 		}
 	}
 
-	static class SensibleConditionContextCondition implements Condition {
+	static class ConfigWithBeanSkipped extends ConfigWithBeanActive {
 
 		@Override
-		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-			assertThat(context.getApplicationContext(), notNullValue());
-			assertThat(context.getBeanFactory(), notNullValue());
-			assertThat(context.getClassLoader(), notNullValue());
-			assertThat(context.getEnvironment(), notNullValue());
-			assertThat(context.getRegistry(), notNullValue());
-			assertThat(context.getResourceLoader(), notNullValue());
-			return true;
+		@Bean
+		@Conditional(NeverCondition.class)
+		public ExampleBean baz() {
+			return new ExampleBean();
 		}
-
 	}
 
-	static class ExampleBean {
+	static class ConfigWithBeanReactivated extends ConfigWithBeanSkipped {
+
+		@Override
+		@Bean
+		public ExampleBean baz() {
+			return new ExampleBean();
+		}
+	}
+
+	@Configuration
+	static class ConfigWithAlternativeBeans {
+
+		@Bean(name = "baz")
+		@Conditional(AlwaysCondition.class)
+		public ExampleBean baz1() {
+			return new ExampleBean();
+		}
+
+		@Bean(name = "baz")
+		@Conditional(NeverCondition.class)
+		public ExampleBean baz2() {
+			return new ExampleBean();
+		}
 	}
 
 }

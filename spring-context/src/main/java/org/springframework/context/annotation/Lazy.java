@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,14 +42,21 @@ import java.lang.annotation.Target;
  * method within a {@code @Lazy}-annotated {@code @Configuration} class, this indicates
  * overriding the 'default lazy' behavior and that the bean should be eagerly initialized.
  *
+ * <p>In addition to its role for component initialization, this annotation may also be placed
+ * on injection points marked with {@link org.springframework.beans.factory.annotation.Autowired}
+ * or {@link javax.inject.Inject}: In that context, it leads to the creation of a
+ * lazy-resolution proxy for all affected dependencies, as an alternative to using
+ * {@link org.springframework.beans.factory.ObjectFactory} or {@link javax.inject.Provider}.
+ *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.0
  * @see Primary
  * @see Bean
  * @see Configuration
  * @see org.springframework.stereotype.Component
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.PARAMETER, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Lazy {

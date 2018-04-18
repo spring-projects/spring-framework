@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,16 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -50,8 +52,10 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 
 	private final BeanDefinitionRegistry registry;
 
+	@Nullable
 	private ResourceLoader resourceLoader;
 
+	@Nullable
 	private ClassLoader beanClassLoader;
 
 	private Environment environment;
@@ -67,7 +71,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 	 * {@link org.springframework.context.ApplicationContext} implementations.
 	 * <p>If given a plain BeanDefinitionRegistry, the default ResourceLoader will be a
 	 * {@link org.springframework.core.io.support.PathMatchingResourcePatternResolver}.
-	 * <p>If the the passed-in bean factory also implements {@link EnvironmentCapable} its
+	 * <p>If the passed-in bean factory also implements {@link EnvironmentCapable} its
 	 * environment will be used by this reader.  Otherwise, the reader will initialize and
 	 * use a {@link StandardEnvironment}. All ApplicationContext implementations are
 	 * EnvironmentCapable, while normal BeanFactory implementations are not.
@@ -118,11 +122,12 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
 	 */
-	public void setResourceLoader(ResourceLoader resourceLoader) {
+	public void setResourceLoader(@Nullable ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
 	}
 
 	@Override
+	@Nullable
 	public ResourceLoader getResourceLoader() {
 		return this.resourceLoader;
 	}
@@ -134,11 +139,12 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 	 * with the corresponding Classes to be resolved later (or never).
 	 * @see Thread#getContextClassLoader()
 	 */
-	public void setBeanClassLoader(ClassLoader beanClassLoader) {
+	public void setBeanClassLoader(@Nullable ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
 
 	@Override
+	@Nullable
 	public ClassLoader getBeanClassLoader() {
 		return this.beanClassLoader;
 	}
@@ -149,6 +155,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 	 * should be read and which should be omitted.
 	 */
 	public void setEnvironment(Environment environment) {
+		Assert.notNull(environment, "Environment must not be null");
 		this.environment = environment;
 	}
 
@@ -162,7 +169,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 	 * (without explicit bean name specified).
 	 * <p>Default is a {@link DefaultBeanNameGenerator}.
 	 */
-	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
+	public void setBeanNameGenerator(@Nullable BeanNameGenerator beanNameGenerator) {
 		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : new DefaultBeanNameGenerator());
 	}
 
@@ -202,7 +209,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 	 * @see #loadBeanDefinitions(org.springframework.core.io.Resource)
 	 * @see #loadBeanDefinitions(org.springframework.core.io.Resource[])
 	 */
-	public int loadBeanDefinitions(String location, Set<Resource> actualResources) throws BeanDefinitionStoreException {
+	public int loadBeanDefinitions(String location, @Nullable Set<Resource> actualResources) throws BeanDefinitionStoreException {
 		ResourceLoader resourceLoader = getResourceLoader();
 		if (resourceLoader == null) {
 			throw new BeanDefinitionStoreException(

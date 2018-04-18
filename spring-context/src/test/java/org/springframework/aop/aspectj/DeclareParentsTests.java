@@ -18,16 +18,14 @@ package org.springframework.aop.aspectj;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.aop.framework.Advised;
+import test.mixin.Lockable;
+
 import org.springframework.aop.support.AopUtils;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
-
-import test.mixin.Lockable;
+import org.springframework.tests.sample.beans.ITestBean;
 
 import static org.junit.Assert.*;
 
@@ -35,11 +33,9 @@ import static org.junit.Assert.*;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class DeclareParentsTests {
+public class DeclareParentsTests {
 
 	private ITestBean testBeanProxy;
-
-	private TestBean testBeanTarget;
 
 	private ApplicationContext ctx;
 
@@ -49,9 +45,6 @@ public final class DeclareParentsTests {
 
 		testBeanProxy = (ITestBean) ctx.getBean("testBean");
 		assertTrue(AopUtils.isAopProxy(testBeanProxy));
-
-		// we need the real target too, not just the proxy...
-		testBeanTarget = (TestBean) ((Advised) testBeanProxy).getTargetSource().getTarget();
 	}
 
 	@Test

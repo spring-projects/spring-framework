@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 package org.springframework.aop.aspectj.annotation;
 
+import java.io.Serializable;
+
 import org.springframework.aop.aspectj.SingletonAspectInstanceFactory;
 import org.springframework.core.Ordered;
-import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.annotation.Order;
+import org.springframework.core.annotation.OrderUtils;
 
 /**
  * Implementation of {@link MetadataAwareAspectInstanceFactory} that is backed
@@ -31,8 +32,9 @@ import org.springframework.core.annotation.Order;
  * @since 2.0
  * @see SimpleMetadataAwareAspectInstanceFactory
  */
+@SuppressWarnings("serial")
 public class SingletonMetadataAwareAspectInstanceFactory extends SingletonAspectInstanceFactory
-		implements MetadataAwareAspectInstanceFactory {
+		implements MetadataAwareAspectInstanceFactory, Serializable {
 
 	private final AspectMetadata metadata;
 
@@ -53,19 +55,14 @@ public class SingletonMetadataAwareAspectInstanceFactory extends SingletonAspect
 		return this.metadata;
 	}
 
-	/**
-	 * Check whether the aspect class carries an
-	 * {@link org.springframework.core.annotation.Order} annotation,
-	 * falling back to {@code Ordered.LOWEST_PRECEDENCE}.
-	 * @see org.springframework.core.annotation.Order
-	 */
+	@Override
+	public Object getAspectCreationMutex() {
+		return this;
+	}
+
 	@Override
 	protected int getOrderForAspectClass(Class<?> aspectClass) {
-		Order order = AnnotationUtils.findAnnotation(aspectClass, Order.class);
-		if (order != null) {
-			return order.value();
-		}
-		return Ordered.LOWEST_PRECEDENCE;
+		return OrderUtils.getOrder(aspectClass, Ordered.LOWEST_PRECEDENCE);
 	}
 
 }

@@ -16,14 +16,15 @@
 
 package org.springframework.aop.aspectj;
 
-import static org.junit.Assert.*;
-
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.Ordered;
+
+import static org.junit.Assert.*;
 
 /**
  * Test for SPR-3522. Arguments changed on a call to proceed should be
@@ -32,7 +33,7 @@ import org.springframework.core.Ordered;
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public final class ProceedTests {
+public class ProceedTests {
 
 	private SimpleBean testBean;
 

@@ -16,18 +16,16 @@
 
 package org.springframework.context.annotation;
 
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.junit.Assert.assertThat;
-
 import org.junit.Test;
+
 import org.springframework.beans.BeansException;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.tests.sample.beans.TestBean;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests semantics of declaring {@link BeanFactoryPostProcessor}-returning @Bean

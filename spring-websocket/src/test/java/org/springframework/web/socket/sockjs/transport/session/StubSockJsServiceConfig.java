@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,8 +18,9 @@ package org.springframework.web.socket.sockjs.transport.session;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.web.socket.sockjs.support.frame.Jackson2SockJsMessageCodec;
-import org.springframework.web.socket.sockjs.support.frame.SockJsMessageCodec;
+import org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec;
+import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
+import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 
 /**
  * @author Rossen Stoyanchev
@@ -33,6 +34,8 @@ public class StubSockJsServiceConfig implements SockJsServiceConfig {
 	private TaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
 
 	private SockJsMessageCodec messageCodec = new Jackson2SockJsMessageCodec();
+
+	private int httpMessageCacheSize = 100;
 
 
 	@Override
@@ -69,6 +72,14 @@ public class StubSockJsServiceConfig implements SockJsServiceConfig {
 
 	public void setMessageCodec(SockJsMessageCodec messageCodec) {
 		this.messageCodec = messageCodec;
+	}
+
+	public int getHttpMessageCacheSize() {
+		return this.httpMessageCacheSize;
+	}
+
+	public void setHttpMessageCacheSize(int httpMessageCacheSize) {
+		this.httpMessageCacheSize = httpMessageCacheSize;
 	}
 
 }

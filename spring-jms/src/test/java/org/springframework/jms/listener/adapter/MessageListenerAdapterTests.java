@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,7 @@ package org.springframework.jms.listener.adapter;
 
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
-
 import javax.jms.BytesMessage;
-import javax.jms.IllegalStateException;
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -35,6 +33,7 @@ import javax.jms.TextMessage;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 
@@ -306,8 +305,11 @@ public class MessageListenerAdapterTests {
 		};
 		try {
 			adapter.onMessage(sentTextMessage, session);
-			fail("expected InvalidDestinationException");
-		} catch(InvalidDestinationException ex) { /* expected */ }
+			fail("expected CouldNotSendReplyException with InvalidDestinationException");
+		}
+		catch (ReplyFailureException ex) {
+			assertEquals(InvalidDestinationException.class, ex.getCause().getClass());
+		}
 
 		verify(responseTextMessage).setJMSCorrelationID(CORRELATION_ID);
 		verify(delegate).handleMessage(sentTextMessage);
@@ -342,8 +344,11 @@ public class MessageListenerAdapterTests {
 		};
 		try {
 			adapter.onMessage(sentTextMessage, session);
-			fail("expected JMSException");
-		} catch(JMSException ex) { /* expected */ }
+			fail("expected CouldNotSendReplyException with JMSException");
+		}
+		catch (ReplyFailureException ex) {
+			assertEquals(JMSException.class, ex.getCause().getClass());
+		}
 
 		verify(responseTextMessage).setJMSCorrelationID(CORRELATION_ID);
 		verify(messageProducer).close();
@@ -367,41 +372,8 @@ public class MessageListenerAdapterTests {
 		try {
 			adapter.onMessage(message, session);
 			fail("expected ListenerExecutionFailedException");
-		} catch(ListenerExecutionFailedException ex) { /* expected */ }
-	}
-
-	@Test
-	public void testFailsIfNoDefaultListenerMethodNameIsSupplied() throws Exception {
-		final TextMessage message = mock(TextMessage.class);
-		given(message.getText()).willReturn(TEXT);
-
-		final MessageListenerAdapter adapter = new MessageListenerAdapter() {
-			@Override
-			protected void handleListenerException(Throwable ex) {
-				assertTrue(ex instanceof IllegalStateException);
-			}
-		};
-		adapter.setDefaultListenerMethod(null);
-		adapter.onMessage(message);
-	}
-
-	@Test
-	public void testFailsWhenOverriddenGetListenerMethodNameReturnsNull() throws Exception {
-		final TextMessage message = mock(TextMessage.class);
-		given(message.getText()).willReturn(TEXT);
-
-		final MessageListenerAdapter adapter = new MessageListenerAdapter() {
-			@Override
-			protected void handleListenerException(Throwable ex) {
-				assertTrue(ex instanceof javax.jms.IllegalStateException);
-			}
-			@Override
-			protected String getListenerMethodName(Message originalMessage, Object extractedMessage) {
-				return null;
-			}
-		};
-		adapter.setDefaultListenerMethod(null);
-		adapter.onMessage(message);
+		}
+		catch (ListenerExecutionFailedException ex) { /* expected */ }
 	}
 
 	@Test
@@ -420,8 +392,11 @@ public class MessageListenerAdapterTests {
 		adapter.setMessageConverter(null);
 		try {
 			adapter.onMessage(sentTextMessage, session);
-			fail("expected MessageConversionException");
-		} catch(MessageConversionException ex) { /* expected */ }
+			fail("expected CouldNotSendReplyException with MessageConversionException");
+		}
+		catch (ReplyFailureException ex) {
+			assertEquals(MessageConversionException.class, ex.getCause().getClass());
+		}
 	}
 
 	@Test

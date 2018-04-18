@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,18 @@
 
 package org.springframework.jdbc.datasource.lookup;
 
-import static org.junit.Assert.*;
-
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Rick Evans
  * @author Chris Beams
  */
-public final class JndiDataSourceLookupTests {
+public class JndiDataSourceLookupTests {
 
 	private static final String DATA_SOURCE_NAME = "Love is like a stove, burns you when it's hot";
 
@@ -36,10 +36,9 @@ public final class JndiDataSourceLookupTests {
 		final DataSource expectedDataSource = new StubDataSource();
 		JndiDataSourceLookup lookup = new JndiDataSourceLookup() {
 			@Override
-			@SuppressWarnings("unchecked")
-			protected Object lookup(String jndiName, Class requiredType) {
+			protected <T> T lookup(String jndiName, Class<T> requiredType) {
 				assertEquals(DATA_SOURCE_NAME, jndiName);
-				return expectedDataSource;
+				return requiredType.cast(expectedDataSource);
 			}
 		};
 		DataSource dataSource = lookup.getDataSource(DATA_SOURCE_NAME);
@@ -47,12 +46,11 @@ public final class JndiDataSourceLookupTests {
 		assertSame(expectedDataSource, dataSource);
 	}
 
-	@Test(expected=DataSourceLookupFailureException.class)
+	@Test(expected = DataSourceLookupFailureException.class)
 	public void testNoDataSourceAtJndiLocation() throws Exception {
 		JndiDataSourceLookup lookup = new JndiDataSourceLookup() {
 			@Override
-			@SuppressWarnings("unchecked")
-			protected Object lookup(String jndiName, Class requiredType) throws NamingException {
+			protected <T> T lookup(String jndiName, Class<T> requiredType) throws NamingException {
 				assertEquals(DATA_SOURCE_NAME, jndiName);
 				throw new NamingException();
 			}

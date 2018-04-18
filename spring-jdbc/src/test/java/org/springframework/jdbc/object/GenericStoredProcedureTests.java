@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,13 @@ import java.sql.Connection;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
-import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.TestDataSourceWrapper;
 
 import static org.junit.Assert.*;
@@ -39,8 +37,6 @@ import static org.mockito.BDDMockito.*;
  * @author Thomas Risberg
  */
 public class GenericStoredProcedureTests {
-
-	private final boolean debugEnabled = LogFactory.getLog(JdbcTemplate.class).isDebugEnabled();
 
 	@Test
 	public void testAddInvoices() throws Exception {
@@ -56,20 +52,20 @@ public class GenericStoredProcedureTests {
 
 		given(callableStatement.execute()).willReturn(false);
 		given(callableStatement.getUpdateCount()).willReturn(-1);
-		given(callableStatement.getObject(3)).willReturn(new Integer(4));
+		given(callableStatement.getObject(3)).willReturn(4);
 
 		given(connection.prepareCall("{call " + "add_invoice" + "(?, ?, ?)}")).willReturn(callableStatement);
 
 		StoredProcedure adder = (StoredProcedure) bf.getBean("genericProcedure");
-		Map<String, Object> in = new HashMap<String, Object>(2);
+		Map<String, Object> in = new HashMap<>(2);
 		in.put("amount", 1106);
 		in.put("custid", 3);
-		Map out = adder.execute(in);
+		Map<String, Object> out = adder.execute(in);
 		Integer id = (Integer) out.get("newid");
 		assertEquals(4, id.intValue());
 
-		verify(callableStatement).setObject(1, new Integer(1106), Types.INTEGER);
-		verify(callableStatement).setObject(2, new Integer(3), Types.INTEGER);
+		verify(callableStatement).setObject(1, 1106, Types.INTEGER);
+		verify(callableStatement).setObject(2, 3, Types.INTEGER);
 		verify(callableStatement).registerOutParameter(3, Types.INTEGER);
 		verify(callableStatement).close();
 	}

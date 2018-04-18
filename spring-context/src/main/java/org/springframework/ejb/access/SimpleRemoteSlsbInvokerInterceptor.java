@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.ejb.access;
 
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
-
 import javax.ejb.CreateException;
 import javax.ejb.EJBObject;
 import javax.naming.NamingException;
@@ -26,6 +25,7 @@ import javax.naming.NamingException;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.RemoteLookupFailureException;
 import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
 
@@ -67,6 +67,7 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 
 	private boolean cacheSessionBean = false;
 
+	@Nullable
 	private Object beanInstance;
 
 	private final Object beanInstanceMonitor = new Object();
@@ -92,6 +93,7 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 	 * for example to hold a single shared EJB component instance.
 	 */
 	@Override
+	@Nullable
 	protected Object doInvoke(MethodInvocation invocation) throws Throwable {
 		Object ejb = null;
 		try {

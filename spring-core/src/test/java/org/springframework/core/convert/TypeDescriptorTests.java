@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -32,36 +34,28 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Test;
+
 import org.springframework.core.MethodParameter;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
+ * Tests for {@link TypeDescriptor}.
+ *
  * @author Keith Donald
  * @author Andy Clement
  * @author Phillip Webb
+ * @author Sam Brannen
+ * @author Nathan Piper
  */
 @SuppressWarnings("rawtypes")
 public class TypeDescriptorTests {
-
-	public List<String> listOfString;
-
-	public List<List<String>> listOfListOfString = new ArrayList<List<String>>();
-
-	public List<List> listOfListOfUnknown = new ArrayList<List>();
-
-	public int[] intArray;
-
-	public List<String>[] arrayOfListOfString;
-
-	public List<Integer> listField = new ArrayList<Integer>();
-
-	public Map<String, Integer> mapField = new HashMap<String, Integer>();
-
-	public Map<String, List<Integer>> nestedMapField = new HashMap<String, List<Integer>>();
 
 	@Test
 	public void parameterPrimitive() throws Exception {
@@ -74,10 +68,6 @@ public class TypeDescriptorTests {
 		assertEquals(0, desc.getAnnotations().length);
 		assertFalse(desc.isCollection());
 		assertFalse(desc.isMap());
-	}
-
-	public void testParameterPrimitive(int primitive) {
-
 	}
 
 	@Test
@@ -94,10 +84,6 @@ public class TypeDescriptorTests {
 		assertFalse(desc.isMap());
 	}
 
-	public void testParameterScalar(String value) {
-
-	}
-
 	@Test
 	public void parameterList() throws Exception {
 		MethodParameter methodParameter = new MethodParameter(getClass().getMethod("testParameterList", List.class), 0);
@@ -105,7 +91,7 @@ public class TypeDescriptorTests {
 		assertEquals(List.class, desc.getType());
 		assertEquals(List.class, desc.getObjectType());
 		assertEquals("java.util.List", desc.getName());
-		assertEquals("java.util.List<java.util.List<java.util.Map<java.lang.Integer, java.lang.Enum>>>", desc.toString());
+		assertEquals("java.util.List<java.util.List<java.util.Map<java.lang.Integer, java.lang.Enum<?>>>>", desc.toString());
 		assertTrue(!desc.isPrimitive());
 		assertEquals(0, desc.getAnnotations().length);
 		assertTrue(desc.isCollection());
@@ -117,10 +103,6 @@ public class TypeDescriptorTests {
 		assertEquals(Integer.class, desc.getElementTypeDescriptor().getElementTypeDescriptor().getMapKeyTypeDescriptor().getType());
 		assertEquals(Enum.class, desc.getElementTypeDescriptor().getElementTypeDescriptor().getMapValueTypeDescriptor().getType());
 		assertFalse(desc.isMap());
-	}
-
-	public void testParameterList(List<List<Map<Integer, Enum<?>>>> list) {
-
 	}
 
 	@Test
@@ -139,10 +121,6 @@ public class TypeDescriptorTests {
 		assertFalse(desc.isMap());
 	}
 
-	public void testParameterListNoParamTypes(List list) {
-
-	}
-
 	@Test
 	public void parameterArray() throws Exception {
 		MethodParameter methodParameter = new MethodParameter(getClass().getMethod("testParameterArray", Integer[].class), 0);
@@ -158,10 +136,6 @@ public class TypeDescriptorTests {
 		assertEquals(Integer.class, desc.getElementTypeDescriptor().getType());
 		assertEquals(TypeDescriptor.valueOf(Integer.class), desc.getElementTypeDescriptor());
 		assertFalse(desc.isMap());
-	}
-
-	public void testParameterArray(Integer[] array) {
-
 	}
 
 	@Test
@@ -184,10 +158,6 @@ public class TypeDescriptorTests {
 		assertEquals(String.class, desc.getMapValueTypeDescriptor().getElementTypeDescriptor().getType());
 	}
 
-	public void testParameterMap(Map<Integer, List<String>> map) {
-
-	}
-
 	@Test
 	public void parameterAnnotated() throws Exception {
 		TypeDescriptor t1 = new TypeDescriptor(new MethodParameter(getClass().getMethod("testAnnotatedMethod", String.class), 0));
@@ -198,36 +168,20 @@ public class TypeDescriptorTests {
 		assertEquals(123, t1.getAnnotation(ParameterAnnotation.class).value());
 	}
 
-	@Target({ElementType.PARAMETER})
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface ParameterAnnotation {
-		int value();
-	}
-
-	public void testAnnotatedMethod(@ParameterAnnotation(123) String parameter) {
-
-	}
-
 	@Test
 	public void propertyComplex() throws Exception {
-		Property property = new Property(getClass(), getClass().getMethod("getComplexProperty"), getClass().getMethod("setComplexProperty", Map.class));
+		Property property = new Property(getClass(), getClass().getMethod("getComplexProperty"),
+				getClass().getMethod("setComplexProperty", Map.class));
 		TypeDescriptor desc = new TypeDescriptor(property);
 		assertEquals(String.class, desc.getMapKeyTypeDescriptor().getType());
 		assertEquals(Integer.class, desc.getMapValueTypeDescriptor().getElementTypeDescriptor().getElementTypeDescriptor().getType());
 	}
 
-	public Map<String, List<List<Integer>>> getComplexProperty() {
-		return null;
-	}
-
-	public void setComplexProperty(Map<String, List<List<Integer>>> complexProperty) {
-
-	}
-
 	@Test
 	public void propertyGenericType() throws Exception {
 		GenericType<Integer> genericBean = new IntegerType();
-		Property property = new Property(getClass(), genericBean.getClass().getMethod("getProperty"), genericBean.getClass().getMethod("setProperty", Integer.class));
+		Property property = new Property(getClass(), genericBean.getClass().getMethod("getProperty"),
+				genericBean.getClass().getMethod("setProperty", Integer.class));
 		TypeDescriptor desc = new TypeDescriptor(property);
 		assertEquals(Integer.class, desc.getType());
 	}
@@ -235,7 +189,8 @@ public class TypeDescriptorTests {
 	@Test
 	public void propertyTypeCovariance() throws Exception {
 		GenericType<Number> genericBean = new NumberType();
-		Property property = new Property(getClass(), genericBean.getClass().getMethod("getProperty"), genericBean.getClass().getMethod("setProperty", Number.class));
+		Property property = new Property(getClass(), genericBean.getClass().getMethod("getProperty"),
+				genericBean.getClass().getMethod("setProperty", Number.class));
 		TypeDescriptor desc = new TypeDescriptor(property);
 		assertEquals(Integer.class, desc.getType());
 	}
@@ -243,69 +198,18 @@ public class TypeDescriptorTests {
 	@Test
 	public void propertyGenericTypeList() throws Exception {
 		GenericType<Integer> genericBean = new IntegerType();
-		Property property = new Property(getClass(), genericBean.getClass().getMethod("getListProperty"), genericBean.getClass().getMethod("setListProperty", List.class));
+		Property property = new Property(getClass(), genericBean.getClass().getMethod("getListProperty"),
+				genericBean.getClass().getMethod("setListProperty", List.class));
 		TypeDescriptor desc = new TypeDescriptor(property);
 		assertEquals(List.class, desc.getType());
 		assertEquals(Integer.class, desc.getElementTypeDescriptor().getType());
 	}
 
-	public interface GenericType<T> {
-		T getProperty();
-
-		void setProperty(T t);
-
-		List<T> getListProperty();
-
-		void setListProperty(List<T> t);
-
- 	}
-
-	public class IntegerType implements GenericType<Integer> {
-
-		@Override
-		public Integer getProperty() {
-			return null;
-		}
-
-		@Override
-		public void setProperty(Integer t) {
-		}
-
-		@Override
-		public List<Integer> getListProperty() {
-			return null;
-		}
-
-		@Override
-		public void setListProperty(List<Integer> t) {
-		}
-	}
-
-	public class NumberType implements GenericType<Number> {
-
-		@Override
-		public Integer getProperty() {
-			return null;
-		}
-
-		@Override
-		public void setProperty(Number t) {
-		}
-
-		@Override
-		public List<Number> getListProperty() {
-			return null;
-		}
-
-		@Override
-		public void setListProperty(List<Number> t) {
-		}
-	}
-
 	@Test
 	public void propertyGenericClassList() throws Exception {
 		IntegerClass genericBean = new IntegerClass();
-		Property property = new Property(genericBean.getClass(), genericBean.getClass().getMethod("getListProperty"), genericBean.getClass().getMethod("setListProperty", List.class));
+		Property property = new Property(genericBean.getClass(), genericBean.getClass().getMethod("getListProperty"),
+				genericBean.getClass().getMethod("setListProperty", List.class));
 		TypeDescriptor desc = new TypeDescriptor(property);
 		assertEquals(List.class, desc.getType());
 		assertEquals(Integer.class, desc.getElementTypeDescriptor().getType());
@@ -313,32 +217,10 @@ public class TypeDescriptorTests {
 		assertTrue(desc.hasAnnotation(MethodAnnotation1.class));
 	}
 
-	public static class GenericClass<T> {
-
-		public T getProperty() {
-			return null;
-		}
-
-		public void setProperty(T t) {
-		}
-
-		@MethodAnnotation1
-		public List<T> getListProperty() {
-			return null;
-		}
-
-		public void setListProperty(List<T> t) {
-		}
-
-	}
-
-	public static class IntegerClass extends GenericClass<Integer> {
-
-	}
-
 	@Test
 	public void property() throws Exception {
-		Property property = new Property(getClass(), getClass().getMethod("getProperty"), getClass().getMethod("setProperty", Map.class));
+		Property property = new Property(
+				getClass(), getClass().getMethod("getProperty"), getClass().getMethod("setProperty", Map.class));
 		TypeDescriptor desc = new TypeDescriptor(property);
 		assertEquals(Map.class, desc.getType());
 		assertEquals(Integer.class, desc.getMapKeyTypeDescriptor().getElementTypeDescriptor().getType());
@@ -348,35 +230,25 @@ public class TypeDescriptorTests {
 		assertNotNull(desc.getAnnotation(MethodAnnotation3.class));
 	}
 
-	@MethodAnnotation1
-	public Map<List<Integer>, List<Long>> getProperty() {
-		return property;
+	@Test
+	public void getAnnotationOnMethodThatIsLocallyAnnotated() throws Exception {
+		assertAnnotationFoundOnMethod(MethodAnnotation1.class, "methodWithLocalAnnotation");
 	}
 
-	@MethodAnnotation2
-	public void setProperty(Map<List<Integer>, List<Long>> property) {
-		this.property = property;
+	@Test
+	public void getAnnotationOnMethodThatIsMetaAnnotated() throws Exception {
+		assertAnnotationFoundOnMethod(MethodAnnotation1.class, "methodWithComposedAnnotation");
 	}
 
-	@MethodAnnotation3
-	private Map<List<Integer>, List<Long>> property;
-
-	@Target({ElementType.METHOD})
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface MethodAnnotation1 {
-
+	@Test
+	public void getAnnotationOnMethodThatIsMetaMetaAnnotated() throws Exception {
+		assertAnnotationFoundOnMethod(MethodAnnotation1.class, "methodWithComposedComposedAnnotation");
 	}
 
-	@Target({ElementType.METHOD})
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface MethodAnnotation2 {
-
-	}
-
-	@Target({ElementType.FIELD})
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface MethodAnnotation3 {
-
+	private void assertAnnotationFoundOnMethod(Class<? extends Annotation> annotationType, String methodName) throws Exception {
+		TypeDescriptor typeDescriptor = new TypeDescriptor(new MethodParameter(getClass().getMethod(methodName), -1));
+		assertNotNull("Should have found @" + annotationType.getSimpleName() + " on " + methodName + ".",
+				typeDescriptor.getAnnotation(annotationType));
 	}
 
 	@Test
@@ -389,8 +261,6 @@ public class TypeDescriptorTests {
 		assertEquals(Integer.class, typeDescriptor.getType());
 		assertEquals(Integer.class, typeDescriptor.getObjectType());
 	}
-
-	public Integer fieldScalar;
 
 	@Test
 	public void fieldList() throws Exception {
@@ -435,7 +305,7 @@ public class TypeDescriptorTests {
 		assertTrue(typeDescriptor.isArray());
 		assertEquals(List.class,typeDescriptor.getElementTypeDescriptor().getType());
 		assertEquals(String.class, typeDescriptor.getElementTypeDescriptor().getElementTypeDescriptor().getType());
-		assertEquals("java.util.List[]",typeDescriptor.toString());
+		assertEquals("java.util.List<java.lang.String>[]",typeDescriptor.toString());
 	}
 
 	@Test
@@ -456,22 +326,11 @@ public class TypeDescriptorTests {
 		assertEquals(Long.class, desc.getMapValueTypeDescriptor().getElementTypeDescriptor().getType());
 	}
 
-	public Map<List<Integer>, List<Long>> fieldMap;
-
 	@Test
 	public void fieldAnnotated() throws Exception {
 		TypeDescriptor typeDescriptor = new TypeDescriptor(getClass().getField("fieldAnnotated"));
 		assertEquals(1, typeDescriptor.getAnnotations().length);
 		assertNotNull(typeDescriptor.getAnnotation(FieldAnnotation.class));
-	}
-
-	@FieldAnnotation
-	public List<String> fieldAnnotated;
-
-	@Target({ElementType.FIELD})
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface FieldAnnotation {
-
 	}
 
 	@Test
@@ -544,45 +403,26 @@ public class TypeDescriptorTests {
 		assertEquals(String.class, t1.getType());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void nestedMethodParameterNot1NestedLevel() throws Exception {
 		TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test4", List.class), 0, 2), 2);
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test
 	public void nestedTooManyLevels() throws Exception {
 		TypeDescriptor t1 = TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test4", List.class), 0), 3);
-		assertEquals(String.class, t1.getType());
+		assertNull(t1);
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test
 	public void nestedMethodParameterTypeNotNestable() throws Exception {
-		TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test5", String.class), 0), 2);
+		TypeDescriptor t1 = TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test5", String.class), 0), 2);
+		assertNull(t1);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void nestedMethodParameterTypeInvalidNestingLevel() throws Exception {
 		TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test5", String.class), 0, 2), 2);
-	}
-
-	public void test1(List<String> param1) {
-
-	}
-
-	public void test2(List<List<String>> param1) {
-
-	}
-
-	public void test3(Map<Integer, String> param1) {
-
-	}
-
-	public void test4(List<Map<Integer, String>> param1) {
-
-	}
-
-	public void test5(String param1) {
-
 	}
 
 	@Test
@@ -594,31 +434,17 @@ public class TypeDescriptorTests {
 		assertNull(t2);
 	}
 
-	public void test6(List<List> param1) {
-
-	}
-
 	@Test
 	public void nestedFieldTypeMapTwoLevels() throws Exception {
 		TypeDescriptor t1 = TypeDescriptor.nested(getClass().getField("test4"), 2);
 		assertEquals(String.class, t1.getType());
 	}
 
-	public List<Map<Integer, String>> test4;
-
 	@Test
 	public void nestedPropertyTypeMapTwoLevels() throws Exception {
 		Property property = new Property(getClass(), getClass().getMethod("getTest4"), getClass().getMethod("setTest4", List.class));
 		TypeDescriptor t1 = TypeDescriptor.nested(property, 2);
 		assertEquals(String.class, t1.getType());
-	}
-
-	public List<Map<Integer, String>> getTest4() {
-		return null;
-	}
-
-	public void setTest4(List<Map<Integer, String>> test4) {
-
 	}
 
 	@Test
@@ -690,7 +516,7 @@ public class TypeDescriptorTests {
 	@Test
 	public void narrow() {
 		TypeDescriptor desc = TypeDescriptor.valueOf(Number.class);
-		Integer value = new Integer(3);
+		Integer value = Integer.valueOf(3);
 		desc = desc.narrow(value);
 		assertEquals(Integer.class, desc.getType());
 	}
@@ -698,7 +524,7 @@ public class TypeDescriptorTests {
 	@Test
 	public void elementType() {
 		TypeDescriptor desc = TypeDescriptor.valueOf(List.class);
-		Integer value = new Integer(3);
+		Integer value = Integer.valueOf(3);
 		desc = desc.elementTypeDescriptor(value);
 		assertEquals(Integer.class, desc.getType());
 	}
@@ -707,19 +533,16 @@ public class TypeDescriptorTests {
 	public void elementTypePreserveContext() throws Exception {
 		TypeDescriptor desc = new TypeDescriptor(getClass().getField("listPreserveContext"));
 		assertEquals(Integer.class, desc.getElementTypeDescriptor().getElementTypeDescriptor().getType());
-		List<Integer> value = new ArrayList<Integer>(3);
+		List<Integer> value = new ArrayList<>(3);
 		desc = desc.elementTypeDescriptor(value);
 		assertEquals(Integer.class, desc.getElementTypeDescriptor().getType());
 		assertNotNull(desc.getAnnotation(FieldAnnotation.class));
 	}
 
-	@FieldAnnotation
-	public List<List<Integer>> listPreserveContext;
-
 	@Test
 	public void mapKeyType() {
 		TypeDescriptor desc = TypeDescriptor.valueOf(Map.class);
-		Integer value = new Integer(3);
+		Integer value = Integer.valueOf(3);
 		desc = desc.getMapKeyTypeDescriptor(value);
 		assertEquals(Integer.class, desc.getType());
 	}
@@ -728,19 +551,16 @@ public class TypeDescriptorTests {
 	public void mapKeyTypePreserveContext() throws Exception {
 		TypeDescriptor desc = new TypeDescriptor(getClass().getField("mapPreserveContext"));
 		assertEquals(Integer.class, desc.getMapKeyTypeDescriptor().getElementTypeDescriptor().getType());
-		List<Integer> value = new ArrayList<Integer>(3);
+		List<Integer> value = new ArrayList<>(3);
 		desc = desc.getMapKeyTypeDescriptor(value);
 		assertEquals(Integer.class, desc.getElementTypeDescriptor().getType());
 		assertNotNull(desc.getAnnotation(FieldAnnotation.class));
 	}
 
-	@FieldAnnotation
-	public Map<List<Integer>, List<Integer>> mapPreserveContext;
-
 	@Test
 	public void mapValueType() {
 		TypeDescriptor desc = TypeDescriptor.valueOf(Map.class);
-		Integer value = new Integer(3);
+		Integer value = Integer.valueOf(3);
 		desc = desc.getMapValueTypeDescriptor(value);
 		assertEquals(Integer.class, desc.getType());
 	}
@@ -749,14 +569,14 @@ public class TypeDescriptorTests {
 	public void mapValueTypePreserveContext() throws Exception {
 		TypeDescriptor desc = new TypeDescriptor(getClass().getField("mapPreserveContext"));
 		assertEquals(Integer.class, desc.getMapValueTypeDescriptor().getElementTypeDescriptor().getType());
-		List<Integer> value = new ArrayList<Integer>(3);
+		List<Integer> value = new ArrayList<>(3);
 		desc = desc.getMapValueTypeDescriptor(value);
 		assertEquals(Integer.class, desc.getElementTypeDescriptor().getType());
 		assertNotNull(desc.getAnnotation(FieldAnnotation.class));
 	}
 
 	@Test
-	public void equals() throws Exception {
+	public void equality() throws Exception {
 		TypeDescriptor t1 = TypeDescriptor.valueOf(String.class);
 		TypeDescriptor t2 = TypeDescriptor.valueOf(String.class);
 		TypeDescriptor t3 = TypeDescriptor.valueOf(Date.class);
@@ -777,6 +597,19 @@ public class TypeDescriptorTests {
 		TypeDescriptor t11 = new TypeDescriptor(getClass().getField("mapField"));
 		TypeDescriptor t12 = new TypeDescriptor(getClass().getField("mapField"));
 		assertEquals(t11, t12);
+
+		MethodParameter testAnnotatedMethod = new MethodParameter(getClass().getMethod("testAnnotatedMethod", String.class), 0);
+		TypeDescriptor t13 = new TypeDescriptor(testAnnotatedMethod);
+		TypeDescriptor t14 = new TypeDescriptor(testAnnotatedMethod);
+		assertEquals(t13, t14);
+
+		TypeDescriptor t15 = new TypeDescriptor(testAnnotatedMethod);
+		TypeDescriptor t16 = new TypeDescriptor(new MethodParameter(getClass().getMethod("testAnnotatedMethodDifferentAnnotationValue", String.class), 0));
+		assertNotEquals(t15, t16);
+
+		TypeDescriptor t17 = new TypeDescriptor(testAnnotatedMethod);
+		TypeDescriptor t18 = new TypeDescriptor(new MethodParameter(getClass().getMethod("test5", String.class), 0));
+		assertNotEquals(t17, t18);
 	}
 
 	@Test
@@ -795,10 +628,6 @@ public class TypeDescriptorTests {
 		assertTrue(TypeDescriptor.valueOf(List.class).isAssignableTo(new TypeDescriptor(getClass().getField("listField"))));
 	}
 
-	public List notGenericList;
-
-	public List<Number> isAssignableElementTypes;
-
 	@Test
 	public void isAssignableMapKeyValueTypes() throws Exception {
 		assertTrue(new TypeDescriptor(getClass().getField("mapField")).isAssignableTo(new TypeDescriptor(getClass().getField("mapField"))));
@@ -808,9 +637,23 @@ public class TypeDescriptorTests {
 		assertTrue(TypeDescriptor.valueOf(Map.class).isAssignableTo(new TypeDescriptor(getClass().getField("mapField"))));
 	}
 
-	public Map notGenericMap;
+	@Test
+	public void multiValueMap() throws Exception {
+		TypeDescriptor td = new TypeDescriptor(getClass().getField("multiValueMap"));
+		assertTrue(td.isMap());
+		assertEquals(String.class, td.getMapKeyTypeDescriptor().getType());
+		assertEquals(List.class, td.getMapValueTypeDescriptor().getType());
+		assertEquals(Integer.class,
+				td.getMapValueTypeDescriptor().getElementTypeDescriptor().getType());
+	}
 
-	public Map<CharSequence, Number> isAssignableMapKeyValueTypes;
+	@Test
+	public void passDownGeneric() throws Exception {
+		TypeDescriptor td = new TypeDescriptor(getClass().getField("passDownGeneric"));
+		assertEquals(List.class, td.getElementTypeDescriptor().getType());
+		assertEquals(Set.class, td.getElementTypeDescriptor().getElementTypeDescriptor().getType());
+		assertEquals(Integer.class, td.getElementTypeDescriptor().getElementTypeDescriptor().getElementTypeDescriptor().getType());
+	}
 
 	@Test
 	public void testUpCast() throws Exception {
@@ -829,8 +672,9 @@ public class TypeDescriptorTests {
 		try {
 			typeDescriptor.upcast(Collection.class);
 			fail("Did not throw");
-		} catch(IllegalArgumentException e) {
-			assertEquals("interface java.util.Map is not assignable to interface java.util.Collection", e.getMessage());
+		}
+		catch (IllegalArgumentException ex) {
+			assertEquals("interface java.util.Map is not assignable to interface java.util.Collection", ex.getMessage());
 		}
 	}
 
@@ -858,12 +702,12 @@ public class TypeDescriptorTests {
 
 	@Test
 	public void createMapArray() throws Exception {
-		TypeDescriptor mapType = TypeDescriptor.map(LinkedHashMap.class, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class));
+		TypeDescriptor mapType = TypeDescriptor.map(
+				LinkedHashMap.class, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class));
 		TypeDescriptor arrayType = TypeDescriptor.array(mapType);
 		assertEquals(arrayType.getType(), LinkedHashMap[].class);
 		assertEquals(arrayType.getElementTypeDescriptor(), mapType);
 	}
-
 
 	@Test
 	public void createStringArray() throws Exception {
@@ -887,4 +731,291 @@ public class TypeDescriptorTests {
 		TypeDescriptor readObject = (TypeDescriptor) inputStream.readObject();
 		assertThat(readObject, equalTo(typeDescriptor));
 	}
+
+	@Test
+	public void createCollectionWithNullElement() throws Exception {
+		TypeDescriptor typeDescriptor = TypeDescriptor.collection(List.class, null);
+		assertThat(typeDescriptor.getElementTypeDescriptor(), nullValue());
+	}
+
+	@Test
+	public void createMapWithNullElements() throws Exception {
+		TypeDescriptor typeDescriptor = TypeDescriptor.map(LinkedHashMap.class, null, null);
+		assertThat(typeDescriptor.getMapKeyTypeDescriptor(), nullValue());
+		assertThat(typeDescriptor.getMapValueTypeDescriptor(), nullValue());
+	}
+
+	@Test
+	public void getSource() throws Exception {
+		Field field = getClass().getField("fieldScalar");
+		MethodParameter methodParameter = new MethodParameter(getClass().getMethod("testParameterPrimitive", int.class), 0);
+		assertThat(new TypeDescriptor(field).getSource(), equalTo((Object) field));
+		assertThat(new TypeDescriptor(methodParameter).getSource(), equalTo((Object) methodParameter));
+		assertThat(TypeDescriptor.valueOf(Integer.class).getSource(), equalTo((Object) Integer.class));
+	}
+
+
+	// Methods designed for test introspection
+
+	public void testParameterPrimitive(int primitive) {
+	}
+
+	public void testParameterScalar(String value) {
+	}
+
+	public void testParameterList(List<List<Map<Integer, Enum<?>>>> list) {
+	}
+
+	public void testParameterListNoParamTypes(List list) {
+	}
+
+	public void testParameterArray(Integer[] array) {
+	}
+
+	public void testParameterMap(Map<Integer, List<String>> map) {
+	}
+
+	public void test1(List<String> param1) {
+	}
+
+	public void test2(List<List<String>> param1) {
+	}
+
+	public void test3(Map<Integer, String> param1) {
+	}
+
+	public void test4(List<Map<Integer, String>> param1) {
+	}
+
+	public void test5(String param1) {
+	}
+
+	public void test6(List<List> param1) {
+	}
+
+	public List<Map<Integer, String>> getTest4() {
+		return null;
+	}
+
+	public void setTest4(List<Map<Integer, String>> test4) {
+	}
+
+	public Map<String, List<List<Integer>>> getComplexProperty() {
+		return null;
+	}
+
+	@MethodAnnotation1
+	public Map<List<Integer>, List<Long>> getProperty() {
+		return property;
+	}
+
+	@MethodAnnotation2
+	public void setProperty(Map<List<Integer>, List<Long>> property) {
+		this.property = property;
+	}
+
+	@MethodAnnotation1
+	public void methodWithLocalAnnotation() {
+	}
+
+	@ComposedMethodAnnotation1
+	public void methodWithComposedAnnotation() {
+	}
+
+	@ComposedComposedMethodAnnotation1
+	public void methodWithComposedComposedAnnotation() {
+	}
+
+	public void setComplexProperty(Map<String, List<List<Integer>>> complexProperty) {
+	}
+
+	public void testAnnotatedMethod(@ParameterAnnotation(123) String parameter) {
+	}
+
+	public void testAnnotatedMethodDifferentAnnotationValue(@ParameterAnnotation(567) String parameter) {
+	}
+
+
+	// Fields designed for test introspection
+
+	public Integer fieldScalar;
+
+	public List<String> listOfString;
+
+	public List<List<String>> listOfListOfString = new ArrayList<>();
+
+	public List<List> listOfListOfUnknown = new ArrayList<>();
+
+	public int[] intArray;
+
+	public List<String>[] arrayOfListOfString;
+
+	public List<Integer> listField = new ArrayList<>();
+
+	public Map<String, Integer> mapField = new HashMap<>();
+
+	public Map<String, List<Integer>> nestedMapField = new HashMap<>();
+
+	public Map<List<Integer>, List<Long>> fieldMap;
+
+	public List<Map<Integer, String>> test4;
+
+	@FieldAnnotation
+	public List<String> fieldAnnotated;
+
+	@FieldAnnotation
+	public List<List<Integer>> listPreserveContext;
+
+	@FieldAnnotation
+	public Map<List<Integer>, List<Integer>> mapPreserveContext;
+
+	@MethodAnnotation3
+	private Map<List<Integer>, List<Long>> property;
+
+	public List notGenericList;
+
+	public List<Number> isAssignableElementTypes;
+
+	public Map notGenericMap;
+
+	public Map<CharSequence, Number> isAssignableMapKeyValueTypes;
+
+	public MultiValueMap<String, Integer> multiValueMap = new LinkedMultiValueMap<>();
+
+	public PassDownGeneric<Integer> passDownGeneric = new PassDownGeneric<>();
+
+
+	// Classes designed for test introspection
+
+	@SuppressWarnings("serial")
+	public static class PassDownGeneric<T> extends ArrayList<List<Set<T>>> {
+	}
+
+
+	public static class GenericClass<T> {
+
+		public T getProperty() {
+			return null;
+		}
+
+		public void setProperty(T t) {
+		}
+
+		@MethodAnnotation1
+		public List<T> getListProperty() {
+			return null;
+		}
+
+		public void setListProperty(List<T> t) {
+		}
+	}
+
+
+	public static class IntegerClass extends GenericClass<Integer> {
+	}
+
+
+	public interface GenericType<T> {
+
+		T getProperty();
+
+		void setProperty(T t);
+
+		List<T> getListProperty();
+
+		void setListProperty(List<T> t);
+	}
+
+
+	public class IntegerType implements GenericType<Integer> {
+
+		@Override
+		public Integer getProperty() {
+			return null;
+		}
+
+		@Override
+		public void setProperty(Integer t) {
+		}
+
+		@Override
+		public List<Integer> getListProperty() {
+			return null;
+		}
+
+		@Override
+		public void setListProperty(List<Integer> t) {
+		}
+	}
+
+
+	public class NumberType implements GenericType<Number> {
+
+		@Override
+		public Integer getProperty() {
+			return null;
+		}
+
+		@Override
+		public void setProperty(Number t) {
+		}
+
+		@Override
+		public List<Number> getListProperty() {
+			return null;
+		}
+
+		@Override
+		public void setListProperty(List<Number> t) {
+		}
+	}
+
+
+	// Annotations used on tested elements
+
+	@Target({ElementType.PARAMETER})
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface ParameterAnnotation {
+
+		int value();
+	}
+
+
+	@Target({ElementType.FIELD})
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface FieldAnnotation {
+	}
+
+
+	@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface MethodAnnotation1 {
+	}
+
+
+	@Target({ElementType.METHOD})
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface MethodAnnotation2 {
+	}
+
+
+	@Target({ElementType.FIELD})
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface MethodAnnotation3 {
+	}
+
+
+	@MethodAnnotation1
+	@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface ComposedMethodAnnotation1 {
+	}
+
+
+	@ComposedMethodAnnotation1
+	@Target(ElementType.METHOD)
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface ComposedComposedMethodAnnotation1 {
+	}
+
 }

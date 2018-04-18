@@ -18,10 +18,10 @@ package org.springframework.beans;
 
 import java.beans.IntrospectionException;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
 import org.junit.Test;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link ExtendedBeanInfoTests}.

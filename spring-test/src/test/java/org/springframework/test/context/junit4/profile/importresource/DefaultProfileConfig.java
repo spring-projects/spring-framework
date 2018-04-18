@@ -16,10 +16,10 @@
 
 package org.springframework.test.context.junit4.profile.importresource;
 
-import org.springframework.tests.sample.beans.Pet;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.tests.sample.beans.Pet;
 
 /**
  * @author Juergen Hoeller

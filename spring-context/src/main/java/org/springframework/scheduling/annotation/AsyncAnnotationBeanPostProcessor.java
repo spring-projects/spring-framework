@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,14 @@ package org.springframework.scheduling.annotation;
 import java.lang.annotation.Annotation;
 import java.util.concurrent.Executor;
 
-import org.springframework.aop.framework.AbstractAdvisingBeanPostProcessor;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.aop.framework.autoproxy.AbstractBeanFactoryAwareAdvisingPostProcessor;
+import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -38,28 +42,53 @@ import org.springframework.util.Assert;
  * processor will detect both Spring's {@link Async @Async} annotation as well
  * as the EJB 3.1 {@code javax.ejb.Asynchronous} annotation.
  *
+ * <p>For methods having a {@code void} return type, any exception thrown
+ * during the asynchronous method invocation cannot be accessed by the
+ * caller. An {@link AsyncUncaughtExceptionHandler} can be specified to handle
+ * these cases.
+ *
  * <p>Note: The underlying async advisor applies before existing advisors by default,
  * in order to switch to async execution as early as possible in the invocation chain.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 3.0
  * @see Async
  * @see AsyncAnnotationAdvisor
  * @see #setBeforeExistingAdvisors
+ * @see ScheduledAnnotationBeanPostProcessor
  */
 @SuppressWarnings("serial")
-public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostProcessor
-		implements BeanFactoryAware {
+public class AsyncAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAdvisingPostProcessor {
 
+	/**
+	 * The default name of the {@link TaskExecutor} bean to pick up: "taskExecutor".
+	 * <p>Note that the initial lookup happens by type; this is just the fallback
+	 * in case of multiple executor beans found in the context.
+	 * @since 4.2
+	 * @see AnnotationAsyncExecutionInterceptor#DEFAULT_TASK_EXECUTOR_BEAN_NAME
+	 */
+	public static final String DEFAULT_TASK_EXECUTOR_BEAN_NAME =
+			AnnotationAsyncExecutionInterceptor.DEFAULT_TASK_EXECUTOR_BEAN_NAME;
+
+
+	protected final Log logger = LogFactory.getLog(getClass());
+
+	@Nullable
 	private Class<? extends Annotation> asyncAnnotationType;
 
+	@Nullable
 	private Executor executor;
+
+	@Nullable
+	private AsyncUncaughtExceptionHandler exceptionHandler;
 
 
 	public AsyncAnnotationBeanPostProcessor() {
 		setBeforeExistingAdvisors(true);
 	}
+
 
 	/**
 	 * Set the 'async' annotation type to be detected at either class or method
@@ -77,15 +106,33 @@ public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostPr
 
 	/**
 	 * Set the {@link Executor} to use when invoking methods asynchronously.
+	 * <p>If not specified, default executor resolution will apply: searching for a
+	 * unique {@link TaskExecutor} bean in the context, or for an {@link Executor}
+	 * bean named "taskExecutor" otherwise. If neither of the two is resolvable,
+	 * a local default executor will be created within the interceptor.
+	 * @see AsyncAnnotationAdvisor#AsyncAnnotationAdvisor(Executor, AsyncUncaughtExceptionHandler)
+	 * @see AnnotationAsyncExecutionInterceptor#getDefaultExecutor(BeanFactory)
+	 * @see #DEFAULT_TASK_EXECUTOR_BEAN_NAME
 	 */
 	public void setExecutor(Executor executor) {
 		this.executor = executor;
 	}
 
+	/**
+	 * Set the {@link AsyncUncaughtExceptionHandler} to use to handle uncaught
+	 * exceptions thrown by asynchronous method executions.
+	 * @since 4.1
+	 */
+	public void setExceptionHandler(AsyncUncaughtExceptionHandler exceptionHandler) {
+		this.exceptionHandler = exceptionHandler;
+	}
+
+
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
-		AsyncAnnotationAdvisor advisor = (this.executor != null ?
-				new AsyncAnnotationAdvisor(this.executor) : new AsyncAnnotationAdvisor());
+		super.setBeanFactory(beanFactory);
+
+		AsyncAnnotationAdvisor advisor = new AsyncAnnotationAdvisor(this.executor, this.exceptionHandler);
 		if (this.asyncAnnotationType != null) {
 			advisor.setAsyncAnnotationType(this.asyncAnnotationType);
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
@@ -36,15 +35,19 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-import org.springframework.tests.sample.beans.Colour;
-import org.springframework.tests.sample.beans.Pet;
-import org.springframework.tests.sample.beans.TestBean;
+import org.junit.Test;
+
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.format.Formatter;
 import org.springframework.format.support.FormattingConversionService;
+import org.springframework.tests.sample.beans.Colour;
+import org.springframework.tests.sample.beans.Pet;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Thomas Risberg
@@ -53,6 +56,7 @@ import org.springframework.validation.BindingResult;
  * @author Benjamin Hoffmann
  * @author Jeremy Grelle
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class CheckboxesTagTests extends AbstractFormTagTests {
 
 	private CheckboxesTag tag;
@@ -71,7 +75,8 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		this.tag.setPageContext(getPageContext());
 	}
 
-	public void testWithMultiValueArray() throws Exception {
+	@Test
+	public void withMultiValueArray() throws Exception {
 		this.tag.setPath("stringArray");
 		this.tag.setItems(new Object[] {"foo", "bar", "baz"});
 		int result = this.tag.doStartTag();
@@ -109,7 +114,8 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("baz", spanElement3.getStringValue());
 	}
 
-	public void testWithMultiValueArrayAndDynamicAttributes() throws Exception {
+	@Test
+	public void withMultiValueArrayAndDynamicAttributes() throws Exception {
 		String dynamicAttribute1 = "attr1";
 		String dynamicAttribute2 = "attr2";
 
@@ -162,7 +168,8 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 
 	}
 
-	public void testWithMultiValueArrayWithDelimiter() throws Exception {
+	@Test
+	public void withMultiValueArrayWithDelimiter() throws Exception {
 		this.tag.setDelimiter("<br/>");
 		this.tag.setPath("stringArray");
 		this.tag.setItems(new Object[] {"foo", "bar", "baz"});
@@ -207,7 +214,8 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("baz", spanElement3.getStringValue());
 	}
 
-	public void testWithMultiValueMap() throws Exception {
+	@Test
+	public void withMultiValueMap() throws Exception {
 		this.tag.setPath("stringArray");
 		Map m = new LinkedHashMap();
 		m.put("foo", "FOO");
@@ -250,7 +258,8 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("BAZ", spanElement3.getStringValue());
 	}
 
-	public void testWithPetItemsMap() throws Exception {
+	@Test
+	public void withPetItemsMap() throws Exception {
 		this.tag.setPath("someSet");
 		Map m = new LinkedHashMap();
 		m.put(new ItemPet("PET1"), "PET1Label");
@@ -294,7 +303,8 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("PET3Label", spanElement3.getStringValue());
 	}
 
-	public void testWithMultiValueMapWithDelimiter() throws Exception {
+	@Test
+	public void withMultiValueMapWithDelimiter() throws Exception {
 		String delimiter = " | ";
 		this.tag.setDelimiter(delimiter);
 		this.tag.setPath("stringArray");
@@ -339,7 +349,8 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals(delimiter + "BAZ", spanElement3.getStringValue());
 	}
 
-	public void testWithMultiValueWithEditor() throws Exception {
+	@Test
+	public void withMultiValueWithEditor() throws Exception {
 		this.tag.setPath("stringArray");
 		this.tag.setItems(new Object[] {"   foo", "   bar", "   baz"});
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
@@ -381,7 +392,8 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("   baz", checkboxElement3.attribute("value").getValue());
 	}
 
-	public void testWithMultiValueWithReverseEditor() throws Exception {
+	@Test
+	public void withMultiValueWithReverseEditor() throws Exception {
 		this.tag.setPath("stringArray");
 		this.tag.setItems(new Object[] {"FOO", "BAR", "BAZ"});
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
@@ -422,7 +434,8 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("BAZ", checkboxElement3.attribute("value").getValue());
 	}
 
-	public void testWithMultiValueWithFormatter() throws Exception {
+	@Test
+	public void withMultiValueWithFormatter() throws Exception {
 		this.tag.setPath("stringArray");
 		this.tag.setItems(new Object[] {"   foo", "   bar", "   baz"});
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
@@ -473,7 +486,8 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("   baz", checkboxElement3.attribute("value").getValue());
 	}
 
-	public void testCollectionOfPets() throws Exception {
+	@Test
+	public void collectionOfPets() throws Exception {
 		this.tag.setPath("pets");
 		List allPets = new ArrayList();
 		allPets.add(new ItemPet("Rudiger"));
@@ -540,7 +554,8 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 	/**
 	 * Test case where items toString() doesn't fit the item ID
 	 */
-	public void testCollectionOfItemPets() throws Exception {
+	@Test
+	public void collectionOfItemPets() throws Exception {
 		this.tag.setPath("someSet");
 		List allPets = new ArrayList();
 		allPets.add(new ItemPet("PET1"));
@@ -588,7 +603,8 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("PET3", spanElement3.getStringValue());
 	}
 
-	public void testCollectionOfPetsWithEditor() throws Exception {
+	@Test
+	public void collectionOfPetsWithEditor() throws Exception {
 		this.tag.setPath("pets");
 		List allPets = new ArrayList();
 		allPets.add(new ItemPet("Rudiger"));
@@ -657,7 +673,8 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("MUFTY", spanElement5.getStringValue());
 	}
 
-	public void testWithNullValue() throws Exception {
+	@Test
+	public void withNullValue() throws Exception {
 		try {
 			this.tag.setPath("name");
 			this.tag.doStartTag();
@@ -668,7 +685,8 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		}
 	}
 
-	public void testHiddenElementOmittedOnDisabled() throws Exception {
+	@Test
+	public void hiddenElementOmittedOnDisabled() throws Exception {
 		this.tag.setPath("stringArray");
 		this.tag.setItems(new Object[] {"foo", "bar", "baz"});
 		this.tag.setDisabled(true);
@@ -693,7 +711,8 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("foo", checkboxElement.attribute("value").getValue());
 	}
 
-	public void testSpanElementCustomizable() throws Exception {
+	@Test
+	public void spanElementCustomizable() throws Exception {
 		this.tag.setPath("stringArray");
 		this.tag.setItems(new Object[] {"foo", "bar", "baz"});
 		this.tag.setElement("element");
@@ -710,7 +729,8 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("element", spanElement.getName());
 	}
 
-	public void testDynamicTypeAttribute() throws JspException {
+	@Test
+	public void dynamicTypeAttribute() throws JspException {
 		try {
 			this.tag.setDynamicAttribute(null, "type", "email");
 			fail("Expected exception");
@@ -753,7 +773,7 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		this.bean.setDate(getDate());
 		this.bean.setName("Rob Harrop");
 		this.bean.setJedi(true);
-		this.bean.setSomeBoolean(new Boolean(true));
+		this.bean.setSomeBoolean(Boolean.TRUE);
 		this.bean.setStringArray(new String[] {"bar", "foo"});
 		this.bean.setSomeIntegerArray(new Integer[] {new Integer(2), new Integer(1)});
 		this.bean.setOtherColours(colours);

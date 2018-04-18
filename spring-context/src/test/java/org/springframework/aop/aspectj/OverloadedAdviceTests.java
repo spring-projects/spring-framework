@@ -16,11 +16,12 @@
 
 package org.springframework.aop.aspectj;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * Integration tests for overloaded advice.
@@ -28,7 +29,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public final class OverloadedAdviceTests {
+public class OverloadedAdviceTests {
 
 	@Test
 	public void testExceptionOnConfigParsingWithMismatchedAdviceMethod() {

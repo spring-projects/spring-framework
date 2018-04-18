@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,19 @@ import com.lowagie.text.pdf.PdfWriter;
 import org.springframework.web.servlet.view.AbstractView;
 
 /**
- * Abstract superclass for PDF views, using Bruno Lowagie's
- * <a href="http://www.lowagie.com/iText">iText</a> package.
- * Application-specific view classes will extend this class.
- * The view will be held in the subclass itself, not in a template.
+ * Abstract superclass for PDF views. Application-specific view classes
+ * will extend this class. The view will be held in the subclass itself,
+ * not in a template.
  *
- * <p>Note: Internet Explorer requires a ".pdf" extension, as
- * it doesn't always respect the declared content type.
+ * <p>This view implementation uses Bruno Lowagie's
+ * <a href="http://www.lowagie.com/iText">iText</a> API.
+ * Known to work with the original iText 2.1.7 as well as its fork
+ * <a href="https://github.com/LibrePDF/OpenPDF">OpenPDF</a>.
+ * <b>We strongly recommend OpenPDF since it is actively maintained
+ * and fixes an important vulnerability for untrusted PDF content.</b>
+ *
+ * <p>Note: Internet Explorer requires a ".pdf" extension, as it doesn't
+ * always respect the declared content type.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -172,7 +178,7 @@ public abstract class AbstractPdfView extends AbstractView {
 	 * @param writer the PdfWriter to use
 	 * @param request in case we need locale etc. Shouldn't look at attributes.
 	 * @param response in case we need to set cookies. Shouldn't write to it.
-	 * @throws Exception any exception that occured during document building
+	 * @throws Exception any exception that occurred during document building
 	 * @see com.lowagie.text.Document#open()
 	 * @see com.lowagie.text.Document#close()
 	 */

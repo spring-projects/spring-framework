@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
 import org.springframework.format.Formatter;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
-import org.springframework.util.Assert;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -44,24 +43,31 @@ import org.springframework.util.StringUtils;
  */
 public class DateFormatter implements Formatter<Date> {
 
+	private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+
 	private static final Map<ISO, String> ISO_PATTERNS;
+
 	static {
-		Map<ISO, String> formats = new HashMap<DateTimeFormat.ISO, String>(4);
+		Map<ISO, String> formats = new EnumMap<>(ISO.class);
 		formats.put(ISO.DATE, "yyyy-MM-dd");
-		formats.put(ISO.TIME, "HH:mm:ss.SSSZ");
-		formats.put(ISO.DATE_TIME, "yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+		formats.put(ISO.TIME, "HH:mm:ss.SSSXXX");
+		formats.put(ISO.DATE_TIME, "yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 		ISO_PATTERNS = Collections.unmodifiableMap(formats);
 	}
 
 
+	@Nullable
 	private String pattern;
 
 	private int style = DateFormat.DEFAULT;
 
+	@Nullable
 	private String stylePattern;
 
+	@Nullable
 	private ISO iso;
 
+	@Nullable
 	private TimeZone timeZone;
 
 	private boolean lenient = false;
@@ -170,34 +176,36 @@ public class DateFormatter implements Formatter<Date> {
 		if (StringUtils.hasLength(this.pattern)) {
 			return new SimpleDateFormat(this.pattern, locale);
 		}
-		if (iso != null && iso != ISO.NONE) {
-			String pattern = ISO_PATTERNS.get(iso);
-			Assert.state(pattern != null, "Unsupported ISO format " + iso);
+		if (this.iso != null && this.iso != ISO.NONE) {
+			String pattern = ISO_PATTERNS.get(this.iso);
+			if (pattern == null) {
+				throw new IllegalStateException("Unsupported ISO format " + this.iso);
+			}
 			SimpleDateFormat format = new SimpleDateFormat(pattern);
-			format.setTimeZone(TimeZone.getTimeZone("UTC"));
+			format.setTimeZone(UTC);
 			return format;
 		}
-		if(StringUtils.hasLength(stylePattern)) {
+		if (StringUtils.hasLength(this.stylePattern)) {
 			int dateStyle = getStylePatternForChar(0);
 			int timeStyle = getStylePatternForChar(1);
-			if(dateStyle != -1 && timeStyle != -1) {
+			if (dateStyle != -1 && timeStyle != -1) {
 				return DateFormat.getDateTimeInstance(dateStyle, timeStyle, locale);
 			}
-			if(dateStyle != -1) {
+			if (dateStyle != -1) {
 				return DateFormat.getDateInstance(dateStyle, locale);
 			}
-			if(timeStyle != -1) {
+			if (timeStyle != -1) {
 				return DateFormat.getTimeInstance(timeStyle, locale);
 			}
-			throw new IllegalStateException("Unsupported style pattern '"+ stylePattern+ "'");
+			throw new IllegalStateException("Unsupported style pattern '" + this.stylePattern + "'");
 
 		}
 		return DateFormat.getDateInstance(this.style, locale);
 	}
 
 	private int getStylePatternForChar(int index) {
-		if(stylePattern != null && stylePattern.length() > index) {
-			switch (stylePattern.charAt(index)) {
+		if (this.stylePattern != null && this.stylePattern.length() > index) {
+			switch (this.stylePattern.charAt(index)) {
 				case 'S': return DateFormat.SHORT;
 				case 'M': return DateFormat.MEDIUM;
 				case 'L': return DateFormat.LONG;
@@ -205,7 +213,7 @@ public class DateFormatter implements Formatter<Date> {
 				case '-': return -1;
 			}
 		}
-		throw new IllegalStateException("Unsupported style pattern '"+ stylePattern+ "'");
+		throw new IllegalStateException("Unsupported style pattern '" + this.stylePattern + "'");
 	}
 
 }

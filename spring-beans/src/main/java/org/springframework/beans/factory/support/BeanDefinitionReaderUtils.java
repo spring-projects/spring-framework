@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -54,7 +55,7 @@ public class BeanDefinitionReaderUtils {
 	 * @throws ClassNotFoundException if the bean class could not be loaded
 	 */
 	public static AbstractBeanDefinition createBeanDefinition(
-			String parentName, String className, ClassLoader classLoader) throws ClassNotFoundException {
+			@Nullable String parentName, @Nullable String className, @Nullable ClassLoader classLoader) throws ClassNotFoundException {
 
 		GenericBeanDefinition bd = new GenericBeanDefinition();
 		bd.setParentName(parentName);
@@ -67,6 +68,23 @@ public class BeanDefinitionReaderUtils {
 			}
 		}
 		return bd;
+	}
+
+	/**
+	 * Generate a bean name for the given top-level bean definition,
+	 * unique within the given bean factory.
+	 * @param beanDefinition the bean definition to generate a bean name for
+	 * @param registry the bean factory that the definition is going to be
+	 * registered with (to check for existing bean names)
+	 * @return the generated bean name
+	 * @throws BeanDefinitionStoreException if no unique name can be generated
+	 * for the given bean definition
+	 * @see #generateBeanName(BeanDefinition, BeanDefinitionRegistry, boolean)
+	 */
+	public static String generateBeanName(BeanDefinition beanDefinition, BeanDefinitionRegistry registry)
+			throws BeanDefinitionStoreException {
+
+		return generateBeanName(beanDefinition, registry, false);
 	}
 
 	/**
@@ -118,22 +136,6 @@ public class BeanDefinitionReaderUtils {
 	}
 
 	/**
-	 * Generate a bean name for the given top-level bean definition,
-	 * unique within the given bean factory.
-	 * @param beanDefinition the bean definition to generate a bean name for
-	 * @param registry the bean factory that the definition is going to be
-	 * registered with (to check for existing bean names)
-	 * @return the generated bean name
-	 * @throws BeanDefinitionStoreException if no unique name can be generated
-	 * for the given bean definition
-	 */
-	public static String generateBeanName(BeanDefinition beanDefinition, BeanDefinitionRegistry registry)
-			throws BeanDefinitionStoreException {
-
-		return generateBeanName(beanDefinition, registry, false);
-	}
-
-	/**
 	 * Register the given bean definition with the given bean factory.
 	 * @param definitionHolder the bean definition including name and aliases
 	 * @param registry the bean factory to register with
@@ -150,8 +152,8 @@ public class BeanDefinitionReaderUtils {
 		// Register aliases for bean name, if any.
 		String[] aliases = definitionHolder.getAliases();
 		if (aliases != null) {
-			for (String aliase : aliases) {
-				registry.registerAlias(beanName, aliase);
+			for (String alias : aliases) {
+				registry.registerAlias(beanName, alias);
 			}
 		}
 	}

@@ -16,19 +16,23 @@
 
 package org.springframework.web.servlet.view.xslt;
 
-import junit.framework.TestCase;
-import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.util.ClassUtils;
+import org.junit.Test;
 
 import java.util.Locale;
+
+import static org.junit.Assert.*;
+
+import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.util.ClassUtils;
 
 /**
  * @author Rob Harrop
  * @since 2.0
  */
-public class XsltViewResolverTests extends TestCase {
+public class XsltViewResolverTests {
 
-	public void testResolveView() throws Exception {
+	@Test
+	public void resolveView() throws Exception {
 		StaticApplicationContext ctx = new StaticApplicationContext();
 
 		String prefix = ClassUtils.classPackageAsResourcePath(getClass());

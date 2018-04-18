@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import javax.servlet.ServletContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.ServletContextAware;
 
 /**
@@ -48,6 +49,7 @@ public class ServletContextAttributeExporter implements ServletContextAware {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private Map<String, Object> attributes;
 
 
@@ -65,16 +67,18 @@ public class ServletContextAttributeExporter implements ServletContextAware {
 
 	@Override
 	public void setServletContext(ServletContext servletContext) {
-		for (Map.Entry<String, Object> entry : attributes.entrySet()) {
-			String attributeName = entry.getKey();
-			if (logger.isWarnEnabled()) {
-				if (servletContext.getAttribute(attributeName) != null) {
-					logger.warn("Replacing existing ServletContext attribute with name '" + attributeName + "'");
+		if (this.attributes != null) {
+			for (Map.Entry<String, Object> entry : this.attributes.entrySet()) {
+				String attributeName = entry.getKey();
+				if (logger.isWarnEnabled()) {
+					if (servletContext.getAttribute(attributeName) != null) {
+						logger.warn("Replacing existing ServletContext attribute with name '" + attributeName + "'");
+					}
 				}
-			}
-			servletContext.setAttribute(attributeName, entry.getValue());
-			if (logger.isInfoEnabled()) {
-				logger.info("Exported ServletContext attribute with name '" + attributeName + "'");
+				servletContext.setAttribute(attributeName, entry.getValue());
+				if (logger.isInfoEnabled()) {
+					logger.info("Exported ServletContext attribute with name '" + attributeName + "'");
+				}
 			}
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.context.annotation;
 
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotatedTypeMetadata;
+import org.springframework.util.MultiValueMap;
 
 /**
  * {@link Condition} that matches based on the value of a {@link Profile @Profile}
@@ -25,17 +25,21 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
  *
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Juergen Hoeller
  * @since 4.0
  */
 class ProfileCondition implements Condition {
 
 	@Override
 	public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-		if (context.getEnvironment() != null && metadata.isAnnotated(Profile.class.getName())) {
-			AnnotationAttributes profile = AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(Profile.class.getName()));
-			if (!context.getEnvironment().acceptsProfiles(profile.getStringArray("value"))) {
-				return false;
+		MultiValueMap<String, Object> attrs = metadata.getAllAnnotationAttributes(Profile.class.getName());
+		if (attrs != null) {
+			for (Object value : attrs.get("value")) {
+				if (context.getEnvironment().acceptsProfiles((String[]) value)) {
+					return true;
+				}
 			}
+			return false;
 		}
 		return true;
 	}

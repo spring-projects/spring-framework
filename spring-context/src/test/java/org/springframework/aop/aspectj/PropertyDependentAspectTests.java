@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.aop.aspectj;
 
-import static org.junit.Assert.*;
-
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -27,6 +25,8 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import static org.junit.Assert.*;
+
 /**
  * Check that an aspect that depends on another bean, where the referenced bean
  * itself is advised by the same aspect, works correctly.
@@ -35,25 +35,29 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class PropertyDependentAspectTests {
+@SuppressWarnings("resource")
+public class PropertyDependentAspectTests {
 
 	@Test
-	public void testPropertyDependentAspectWithPropertyDeclaredBeforeAdvice() throws Exception {
+	public void propertyDependentAspectWithPropertyDeclaredBeforeAdvice()
+			throws Exception {
 		checkXmlAspect(getClass().getSimpleName() + "-before.xml");
 	}
 
 	@Test
-	public void testPropertyDependentAspectWithPropertyDeclaredAfterAdvice() throws Exception {
+	public void propertyDependentAspectWithPropertyDeclaredAfterAdvice() throws Exception {
 		checkXmlAspect(getClass().getSimpleName() + "-after.xml");
 	}
 
 	@Test
-	public void testPropertyDependentAtAspectJAspectWithPropertyDeclaredBeforeAdvice() throws Exception {
+	public void propertyDependentAtAspectJAspectWithPropertyDeclaredBeforeAdvice()
+			throws Exception {
 		checkAtAspectJAspect(getClass().getSimpleName() + "-atAspectJ-before.xml");
 	}
 
 	@Test
-	public void testPropertyDependentAtAspectJAspectWithPropertyDeclaredAfterAdvice() throws Exception {
+	public void propertyDependentAtAspectJAspectWithPropertyDeclaredAfterAdvice()
+			throws Exception {
 		checkAtAspectJAspect(getClass().getSimpleName() + "-atAspectJ-after.xml");
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.instrument.InstrumentationSavingAgent;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -53,11 +54,13 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 			InstrumentationLoadTimeWeaver.class.getClassLoader());
 
 
+	@Nullable
 	private final ClassLoader classLoader;
 
+	@Nullable
 	private final Instrumentation instrumentation;
 
-	private final List<ClassFileTransformer> transformers = new ArrayList<ClassFileTransformer>(4);
+	private final List<ClassFileTransformer> transformers = new ArrayList<>(4);
 
 
 	/**
@@ -71,8 +74,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 	 * Create a new InstrumentationLoadTimeWeaver for the given ClassLoader.
 	 * @param classLoader the ClassLoader that registered transformers are supposed to apply to
 	 */
-	public InstrumentationLoadTimeWeaver(ClassLoader classLoader) {
-		Assert.notNull(classLoader, "ClassLoader must not be null");
+	public InstrumentationLoadTimeWeaver(@Nullable ClassLoader classLoader) {
 		this.classLoader = classLoader;
 		this.instrumentation = getInstrumentation();
 	}
@@ -84,10 +86,8 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 		FilteringClassFileTransformer actualTransformer =
 				new FilteringClassFileTransformer(transformer, this.classLoader);
 		synchronized (this.transformers) {
-			if (this.instrumentation == null) {
-				throw new IllegalStateException(
-						"Must start with Java agent to use InstrumentationLoadTimeWeaver. See Spring documentation.");
-			}
+			Assert.state(this.instrumentation != null,
+					"Must start with Java agent to use InstrumentationLoadTimeWeaver. See Spring documentation.");
 			this.instrumentation.addTransformer(actualTransformer);
 			this.transformers.add(actualTransformer);
 		}
@@ -100,6 +100,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 	 */
 	@Override
 	public ClassLoader getInstrumentableClassLoader() {
+		Assert.state(this.classLoader != null, "No ClassLoader available");
 		return this.classLoader;
 	}
 
@@ -116,7 +117,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 	 */
 	public void removeTransformers() {
 		synchronized (this.transformers) {
-			if (!this.transformers.isEmpty()) {
+			if (this.instrumentation != null && !this.transformers.isEmpty()) {
 				for (int i = this.transformers.size() - 1; i >= 0; i--) {
 					this.instrumentation.removeTransformer(this.transformers.get(i));
 				}
@@ -139,6 +140,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 	 * @return the Instrumentation instance, or {@code null} if none found
 	 * @see #isInstrumentationAvailable()
 	 */
+	@Nullable
 	private static Instrumentation getInstrumentation() {
 		if (AGENT_CLASS_PRESENT) {
 			return InstrumentationAccessor.getInstrumentation();
@@ -167,18 +169,22 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 
 		private final ClassFileTransformer targetTransformer;
 
+		@Nullable
 		private final ClassLoader targetClassLoader;
 
-		public FilteringClassFileTransformer(ClassFileTransformer targetTransformer, ClassLoader targetClassLoader) {
+		public FilteringClassFileTransformer(
+				ClassFileTransformer targetTransformer, @Nullable ClassLoader targetClassLoader) {
+
 			this.targetTransformer = targetTransformer;
 			this.targetClassLoader = targetClassLoader;
 		}
 
 		@Override
+		@Nullable
 		public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
 				ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
 
-			if (!this.targetClassLoader.equals(loader)) {
+			if (this.targetClassLoader != loader) {
 				return null;
 			}
 			return this.targetTransformer.transform(

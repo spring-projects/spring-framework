@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@ package org.springframework.jdbc.datasource.embedded;
 
 import java.sql.Driver;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
- * Initializes an HSQL embedded database instance.
- * Call {@link #getInstance()} to get the singleton instance of this class.
+ * {@link EmbeddedDatabaseConfigurer} for an HSQL embedded database instance.
+ *
+ * <p>Call {@link #getInstance()} to get the singleton instance of this class.
  *
  * @author Keith Donald
  * @author Oliver Gierke
@@ -30,23 +32,26 @@ import org.springframework.util.ClassUtils;
  */
 final class HsqlEmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigurer {
 
-	private static HsqlEmbeddedDatabaseConfigurer INSTANCE;
+	@Nullable
+	private static HsqlEmbeddedDatabaseConfigurer instance;
 
 	private final Class<? extends Driver> driverClass;
 
+
 	/**
 	 * Get the singleton {@link HsqlEmbeddedDatabaseConfigurer} instance.
-	 * @return the configurer
+	 * @return the configurer instance
 	 * @throws ClassNotFoundException if HSQL is not on the classpath
 	 */
 	@SuppressWarnings("unchecked")
 	public static synchronized HsqlEmbeddedDatabaseConfigurer getInstance() throws ClassNotFoundException {
-		if (INSTANCE == null) {
-			INSTANCE = new HsqlEmbeddedDatabaseConfigurer(
-					(Class<? extends Driver>) ClassUtils.forName("org.hsqldb.jdbcDriver", HsqlEmbeddedDatabaseConfigurer.class.getClassLoader()));
+		if (instance == null) {
+			instance = new HsqlEmbeddedDatabaseConfigurer( (Class<? extends Driver>)
+					ClassUtils.forName("org.hsqldb.jdbcDriver", HsqlEmbeddedDatabaseConfigurer.class.getClassLoader()));
 		}
-		return INSTANCE;
+		return instance;
 	}
+
 
 	private HsqlEmbeddedDatabaseConfigurer(Class<? extends Driver> driverClass) {
 		this.driverClass = driverClass;

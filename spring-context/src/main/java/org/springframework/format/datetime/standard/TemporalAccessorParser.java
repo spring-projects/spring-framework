@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,22 +65,22 @@ public final class TemporalAccessorParser implements Parser<TemporalAccessor> {
 	@Override
 	public TemporalAccessor parse(String text, Locale locale) throws ParseException {
 		DateTimeFormatter formatterToUse = DateTimeContextHolder.getFormatter(this.formatter, locale);
-		if (LocalDate.class.equals(this.temporalAccessorType)) {
+		if (LocalDate.class == this.temporalAccessorType) {
 			return LocalDate.parse(text, formatterToUse);
 		}
-		else if (LocalTime.class.equals(this.temporalAccessorType)) {
+		else if (LocalTime.class == this.temporalAccessorType) {
 			return LocalTime.parse(text, formatterToUse);
 		}
-		else if (LocalDateTime.class.equals(this.temporalAccessorType)) {
+		else if (LocalDateTime.class == this.temporalAccessorType) {
 			return LocalDateTime.parse(text, formatterToUse);
 		}
-		else if (ZonedDateTime.class.equals(this.temporalAccessorType)) {
+		else if (ZonedDateTime.class == this.temporalAccessorType) {
 			return ZonedDateTime.parse(text, formatterToUse);
 		}
-		else if (OffsetDateTime.class.equals(this.temporalAccessorType)) {
+		else if (OffsetDateTime.class == this.temporalAccessorType) {
 			return OffsetDateTime.parse(text, formatterToUse);
 		}
-		else if (OffsetTime.class.equals(this.temporalAccessorType)) {
+		else if (OffsetTime.class == this.temporalAccessorType) {
 			return OffsetTime.parse(text, formatterToUse);
 		}
 		else {

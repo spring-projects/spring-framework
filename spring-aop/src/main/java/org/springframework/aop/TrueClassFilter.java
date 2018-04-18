@@ -35,7 +35,7 @@ class TrueClassFilter implements ClassFilter, Serializable {
 	}
 
 	@Override
-	public boolean matches(Class clazz) {
+	public boolean matches(Class<?> clazz) {
 		return true;
 	}
 

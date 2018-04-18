@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@ package org.springframework.aop.framework;
 import org.aopalliance.intercept.Interceptor;
 
 import org.springframework.aop.TargetSource;
-import org.springframework.util.Assert;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
- * Factory for AOP proxies for programmatic use, rather than via a bean
- * factory. This class provides a simple way of obtaining and configuring
- * AOP proxies in code.
+ * Factory for AOP proxies for programmatic use, rather than via declarative
+ * setup in a bean factory. This class provides a simple way of obtaining
+ * and configuring AOP proxy instances in custom user code.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -47,9 +47,8 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * @param target the target object to be proxied
 	 */
 	public ProxyFactory(Object target) {
-		Assert.notNull(target, "Target object must not be null");
-		setInterfaces(ClassUtils.getAllInterfaces(target));
 		setTarget(target);
+		setInterfaces(ClassUtils.getAllInterfaces(target));
 	}
 
 	/**
@@ -57,7 +56,7 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * <p>No target, only interfaces. Must add interceptors.
 	 * @param proxyInterfaces the interfaces that the proxy should implement
 	 */
-	public ProxyFactory(Class[] proxyInterfaces) {
+	public ProxyFactory(Class<?>... proxyInterfaces) {
 		setInterfaces(proxyInterfaces);
 	}
 
@@ -69,7 +68,7 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * @param proxyInterface the interface that the proxy should implement
 	 * @param interceptor the interceptor that the proxy should invoke
 	 */
-	public ProxyFactory(Class proxyInterface, Interceptor interceptor) {
+	public ProxyFactory(Class<?> proxyInterface, Interceptor interceptor) {
 		addInterface(proxyInterface);
 		addAdvice(interceptor);
 	}
@@ -80,7 +79,7 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * @param proxyInterface the interface that the proxy should implement
 	 * @param targetSource the TargetSource that the proxy should invoke
 	 */
-	public ProxyFactory(Class proxyInterface, TargetSource targetSource) {
+	public ProxyFactory(Class<?> proxyInterface, TargetSource targetSource) {
 		addInterface(proxyInterface);
 		setTargetSource(targetSource);
 	}
@@ -107,7 +106,7 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * (or {@code null} for the low-level proxy facility's default)
 	 * @return the proxy object
 	 */
-	public Object getProxy(ClassLoader classLoader) {
+	public Object getProxy(@Nullable ClassLoader classLoader) {
 		return createAopProxy().getProxy(classLoader);
 	}
 

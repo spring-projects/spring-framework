@@ -16,31 +16,24 @@
 
 package org.springframework.messaging.core;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessagingException;
 
 /**
- * Thrown by a ChannelResolver when it cannot resolve a channel name.
+ * Thrown by a {@link DestinationResolver} when it cannot resolve a destination.
  *
  * @author Mark Fisher
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
 @SuppressWarnings("serial")
 public class DestinationResolutionException extends MessagingException {
 
-	/**
-	 * Create a new ChannelResolutionException.
-	 * @param description the description
-	 */
 	public DestinationResolutionException(String description) {
 		super(description);
 	}
 
-	/**
-	 * Create a new ChannelResolutionException.
-	 * @param description the description
-	 * @param cause the root cause (if any)
-	 */
-	public DestinationResolutionException(String description, Throwable cause) {
+	public DestinationResolutionException(@Nullable String description, @Nullable Throwable cause) {
 		super(description, cause);
 	}
 

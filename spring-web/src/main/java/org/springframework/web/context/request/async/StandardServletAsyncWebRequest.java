@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
@@ -35,8 +36,8 @@ import org.springframework.web.context.request.ServletWebRequest;
  *
  * <p>The servlet and all filters involved in an async request must have async
  * support enabled using the Servlet API or by adding an
- * {@code <async-support>true</async-support>} element to servlet and filter
- * declarations in web.xml
+ * {@code <async-supported>true</async-supported>} element to servlet and filter
+ * declarations in {@code web.xml}.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -49,9 +50,11 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 	private AtomicBoolean asyncCompleted = new AtomicBoolean(false);
 
-	private final List<Runnable> timeoutHandlers = new ArrayList<Runnable>();
+	private final List<Runnable> timeoutHandlers = new ArrayList<>();
 
-	private final List<Runnable> completionHandlers = new ArrayList<Runnable>();
+	private final List<Consumer<Throwable>> exceptionHandlers = new ArrayList<>();
+
+	private final List<Runnable> completionHandlers = new ArrayList<>();
 
 
 	/**
@@ -63,9 +66,9 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 		super(request, response);
 	}
 
+
 	/**
-	 * {@inheritDoc}
-	 * <p>In Servlet 3 async processing, the timeout period begins after the
+	 * In Servlet 3 async processing, the timeout period begins after the
 	 * container processing thread has exited.
 	 */
 	@Override
@@ -80,13 +83,18 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	}
 
 	@Override
+	public void addErrorHandler(Consumer<Throwable> exceptionHandler) {
+		this.exceptionHandlers.add(exceptionHandler);
+	}
+
+	@Override
 	public void addCompletionHandler(Runnable runnable) {
 		this.completionHandlers.add(runnable);
 	}
 
 	@Override
 	public boolean isAsyncStarted() {
-		return ((this.asyncContext != null) && getRequest().isAsyncStarted());
+		return (this.asyncContext != null && getRequest().isAsyncStarted());
 	}
 
 	/**
@@ -107,6 +115,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 				"or by adding \"<async-supported>true</async-supported>\" to servlet and " +
 				"filter declarations in web.xml.");
 		Assert.state(!isAsyncComplete(), "Async processing has already completed");
+
 		if (isAsyncStarted()) {
 			return;
 		}
@@ -123,6 +132,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 		this.asyncContext.dispatch();
 	}
 
+
 	// ---------------------------------------------------------------------
 	// Implementation of AsyncListener methods
 	// ---------------------------------------------------------------------
@@ -133,20 +143,17 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 	@Override
 	public void onError(AsyncEvent event) throws IOException {
+		this.exceptionHandlers.forEach(consumer -> consumer.accept(event.getThrowable()));
 	}
 
 	@Override
 	public void onTimeout(AsyncEvent event) throws IOException {
-		for (Runnable handler : this.timeoutHandlers) {
-			handler.run();
-		}
+		this.timeoutHandlers.forEach(Runnable::run);
 	}
 
 	@Override
 	public void onComplete(AsyncEvent event) throws IOException {
-		for (Runnable handler : this.completionHandlers) {
-			handler.run();
-		}
+		this.completionHandlers.forEach(Runnable::run);
 		this.asyncContext = null;
 		this.asyncCompleted.set(true);
 	}

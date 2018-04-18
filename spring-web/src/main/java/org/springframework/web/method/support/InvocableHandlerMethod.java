@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,10 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.SessionStatus;
@@ -32,34 +33,28 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.HandlerMethod;
 
 /**
- * Provides a method for invoking the handler method for a given request after resolving its method argument
- * values through registered {@link HandlerMethodArgumentResolver}s.
+ * Provides a method for invoking the handler method for a given request after resolving its
+ * method argument values through registered {@link HandlerMethodArgumentResolver}s.
  *
- * <p>Argument resolution often requires a {@link WebDataBinder} for data binding or for type conversion.
- * Use the {@link #setDataBinderFactory(WebDataBinderFactory)} property to supply a binder factory to pass to
- * argument resolvers.
+ * <p>Argument resolution often requires a {@link WebDataBinder} for data binding or for type
+ * conversion. Use the {@link #setDataBinderFactory(WebDataBinderFactory)} property to supply
+ * a binder factory to pass to argument resolvers.
  *
- * <p>Use {@link #setHandlerMethodArgumentResolvers(HandlerMethodArgumentResolverComposite)} to customize
- * the list of argument resolvers.
+ * <p>Use {@link #setHandlerMethodArgumentResolvers} to customize the list of argument resolvers.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class InvocableHandlerMethod extends HandlerMethod {
 
-	private HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
-
+	@Nullable
 	private WebDataBinderFactory dataBinderFactory;
+
+	private HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
-
-	/**
-	 * Creates an instance from the given handler and method.
-	 */
-	public InvocableHandlerMethod(Object bean, Method method) {
-		super(bean, method);
-	}
 
 	/**
 	 * Create an instance from a {@code HandlerMethod}.
@@ -69,19 +64,28 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Constructs a new handler method with the given bean instance, method name and parameters.
+	 * Create an instance from a bean instance and a method.
+	 */
+	public InvocableHandlerMethod(Object bean, Method method) {
+		super(bean, method);
+	}
+
+	/**
+	 * Construct a new handler method with the given bean instance, method name and parameters.
 	 * @param bean the object bean
 	 * @param methodName the method name
 	 * @param parameterTypes the method parameter types
 	 * @throws NoSuchMethodException when the method cannot be found
 	 */
-	public InvocableHandlerMethod(
-			Object bean, String methodName, Class<?>... parameterTypes) throws NoSuchMethodException {
+	public InvocableHandlerMethod(Object bean, String methodName, Class<?>... parameterTypes)
+			throws NoSuchMethodException {
+
 		super(bean, methodName, parameterTypes);
 	}
 
+
 	/**
-	 * Sets the {@link WebDataBinderFactory} to be passed to argument resolvers allowing them to create
+	 * Set the {@link WebDataBinderFactory} to be passed to argument resolvers allowing them to create
 	 * a {@link WebDataBinder} for data binding and type conversion purposes.
 	 * @param dataBinderFactory the data binder factory.
 	 */
@@ -105,101 +109,85 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		this.parameterNameDiscoverer = parameterNameDiscoverer;
 	}
 
+
 	/**
-	 * Invoke the method after resolving its argument values in the context of the given request. <p>Argument
-	 * values are commonly resolved through {@link HandlerMethodArgumentResolver}s. The {@code provideArgs}
-	 * parameter however may supply argument values to be used directly, i.e. without argument resolution.
-	 * Examples of provided argument values include a {@link WebDataBinder}, a {@link SessionStatus}, or
-	 * a thrown exception instance. Provided argument values are checked before argument resolvers.
-	 *
+	 * Invoke the method after resolving its argument values in the context of the given request.
+	 * <p>Argument values are commonly resolved through {@link HandlerMethodArgumentResolver}s.
+	 * The {@code providedArgs} parameter however may supply argument values to be used directly,
+	 * i.e. without argument resolution. Examples of provided argument values include a
+	 * {@link WebDataBinder}, a {@link SessionStatus}, or a thrown exception instance.
+	 * Provided argument values are checked before argument resolvers.
 	 * @param request the current request
 	 * @param mavContainer the ModelAndViewContainer for this request
 	 * @param providedArgs "given" arguments matched by type, not resolved
 	 * @return the raw value returned by the invoked method
-	 * @exception Exception raised if no suitable argument resolver can be found, or the method raised an exception
+	 * @throws Exception raised if no suitable argument resolver can be found,
+	 * or if the method raised an exception
 	 */
-	public final Object invokeForRequest(NativeWebRequest request,
-										 ModelAndViewContainer mavContainer,
-										 Object... providedArgs) throws Exception {
+	@Nullable
+	public Object invokeForRequest(NativeWebRequest request, @Nullable ModelAndViewContainer mavContainer,
+			Object... providedArgs) throws Exception {
+
 		Object[] args = getMethodArgumentValues(request, mavContainer, providedArgs);
-
 		if (logger.isTraceEnabled()) {
-			StringBuilder builder = new StringBuilder("Invoking [");
-			builder.append(this.getMethod().getName()).append("] method with arguments ");
-			builder.append(Arrays.asList(args));
-			logger.trace(builder.toString());
+			logger.trace("Invoking '" + ClassUtils.getQualifiedMethodName(getMethod(), getBeanType()) +
+					"' with arguments " + Arrays.toString(args));
 		}
-
-		Object returnValue = invoke(args);
-
+		Object returnValue = doInvoke(args);
 		if (logger.isTraceEnabled()) {
-			logger.trace("Method [" + this.getMethod().getName() + "] returned [" + returnValue + "]");
+			logger.trace("Method [" + ClassUtils.getQualifiedMethodName(getMethod(), getBeanType()) +
+					"] returned [" + returnValue + "]");
 		}
-
 		return returnValue;
 	}
 
 	/**
 	 * Get the method argument values for the current request.
 	 */
-	private Object[] getMethodArgumentValues(
-			NativeWebRequest request, ModelAndViewContainer mavContainer,
+	private Object[] getMethodArgumentValues(NativeWebRequest request, @Nullable ModelAndViewContainer mavContainer,
 			Object... providedArgs) throws Exception {
 
 		MethodParameter[] parameters = getMethodParameters();
 		Object[] args = new Object[parameters.length];
 		for (int i = 0; i < parameters.length; i++) {
 			MethodParameter parameter = parameters[i];
-			parameter.initParameterNameDiscovery(parameterNameDiscoverer);
-			GenericTypeResolver.resolveParameterType(parameter, getBean().getClass());
-
+			parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
 			args[i] = resolveProvidedArgument(parameter, providedArgs);
 			if (args[i] != null) {
 				continue;
 			}
-
-			if (argumentResolvers.supportsParameter(parameter)) {
+			if (this.argumentResolvers.supportsParameter(parameter)) {
 				try {
-					args[i] = argumentResolvers.resolveArgument(parameter, mavContainer, request, dataBinderFactory);
+					args[i] = this.argumentResolvers.resolveArgument(
+							parameter, mavContainer, request, this.dataBinderFactory);
 					continue;
-				} catch (Exception ex) {
-					if (logger.isTraceEnabled()) {
-						logger.trace(getArgumentResolutionErrorMessage("Error resolving argument", i), ex);
+				}
+				catch (Exception ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug(getArgumentResolutionErrorMessage("Failed to resolve", i), ex);
 					}
 					throw ex;
 				}
 			}
-
 			if (args[i] == null) {
-				String msg = getArgumentResolutionErrorMessage("No suitable resolver for argument", i);
-				throw new IllegalStateException(msg);
+				throw new IllegalStateException("Could not resolve method parameter at index " +
+						parameter.getParameterIndex() + " in " + parameter.getExecutable().toGenericString() +
+						": " + getArgumentResolutionErrorMessage("No suitable resolver for", i));
 			}
 		}
 		return args;
 	}
 
-	private String getArgumentResolutionErrorMessage(String message, int index) {
-		MethodParameter param = getMethodParameters()[index];
-		message += " [" + index + "] [type=" + param.getParameterType().getName() + "]";
-		return getDetailedErrorMessage(message);
-	}
-
-	/**
-	 * Adds HandlerMethod details such as the controller type and method signature to the given error message.
-	 * @param message error message to append the HandlerMethod details to
-	 */
-	protected String getDetailedErrorMessage(String message) {
-		StringBuilder sb = new StringBuilder(message).append("\n");
-		sb.append("HandlerMethod details: \n");
-		sb.append("Controller [").append(getBeanType().getName()).append("]\n");
-		sb.append("Method [").append(getBridgedMethod().toGenericString()).append("]\n");
-		return sb.toString();
+	private String getArgumentResolutionErrorMessage(String text, int index) {
+		Class<?> paramType = getMethodParameters()[index].getParameterType();
+		return text + " argument " + index + " of type '" + paramType.getName() + "'";
 	}
 
 	/**
 	 * Attempt to resolve a method parameter from the list of provided argument values.
 	 */
-	private Object resolveProvidedArgument(MethodParameter parameter, Object... providedArgs) {
+	@Nullable
+	private Object resolveProvidedArgument(MethodParameter parameter, @Nullable Object... providedArgs) {
 		if (providedArgs == null) {
 			return null;
 		}
@@ -211,21 +199,23 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		return null;
 	}
 
+
 	/**
 	 * Invoke the handler method with the given argument values.
 	 */
-	private Object invoke(Object... args) throws Exception {
-		ReflectionUtils.makeAccessible(this.getBridgedMethod());
+	protected Object doInvoke(Object... args) throws Exception {
+		ReflectionUtils.makeAccessible(getBridgedMethod());
 		try {
 			return getBridgedMethod().invoke(getBean(), args);
 		}
-		catch (IllegalArgumentException e) {
-			String msg = getInvocationErrorMessage(e.getMessage(), args);
-			throw new IllegalArgumentException(msg, e);
+		catch (IllegalArgumentException ex) {
+			assertTargetBean(getBridgedMethod(), getBean(), args);
+			String text = (ex.getMessage() != null ? ex.getMessage() : "Illegal argument");
+			throw new IllegalStateException(getInvocationErrorMessage(text, args), ex);
 		}
-		catch (InvocationTargetException e) {
+		catch (InvocationTargetException ex) {
 			// Unwrap for HandlerExceptionResolvers ...
-			Throwable targetException = e.getTargetException();
+			Throwable targetException = ex.getTargetException();
 			if (targetException instanceof RuntimeException) {
 				throw (RuntimeException) targetException;
 			}
@@ -236,16 +226,35 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				throw (Exception) targetException;
 			}
 			else {
-				String msg = getInvocationErrorMessage("Failed to invoke controller method", args);
-				throw new IllegalStateException(msg, targetException);
+				String text = getInvocationErrorMessage("Failed to invoke handler method", args);
+				throw new IllegalStateException(text, targetException);
 			}
 		}
 	}
 
-	private String getInvocationErrorMessage(String message, Object[] resolvedArgs) {
-		StringBuilder sb = new StringBuilder(getDetailedErrorMessage(message));
+	/**
+	 * Assert that the target bean class is an instance of the class where the given
+	 * method is declared. In some cases the actual controller instance at request-
+	 * processing time may be a JDK dynamic proxy (lazy initialization, prototype
+	 * beans, and others). {@code @Controller}'s that require proxying should prefer
+	 * class-based proxy mechanisms.
+	 */
+	private void assertTargetBean(Method method, Object targetBean, Object[] args) {
+		Class<?> methodDeclaringClass = method.getDeclaringClass();
+		Class<?> targetBeanClass = targetBean.getClass();
+		if (!methodDeclaringClass.isAssignableFrom(targetBeanClass)) {
+			String text = "The mapped handler method class '" + methodDeclaringClass.getName() +
+					"' is not an instance of the actual controller bean class '" +
+					targetBeanClass.getName() + "'. If the controller requires proxying " +
+					"(e.g. due to @Transactional), please use class-based proxying.";
+			throw new IllegalStateException(getInvocationErrorMessage(text, args));
+		}
+	}
+
+	private String getInvocationErrorMessage(String text, Object[] resolvedArgs) {
+		StringBuilder sb = new StringBuilder(getDetailedErrorMessage(text));
 		sb.append("Resolved arguments: \n");
-		for (int i=0; i < resolvedArgs.length; i++) {
+		for (int i = 0; i < resolvedArgs.length; i++) {
 			sb.append("[").append(i).append("] ");
 			if (resolvedArgs[i] == null) {
 				sb.append("[null] \n");
@@ -255,6 +264,18 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				sb.append("[value=").append(resolvedArgs[i]).append("]\n");
 			}
 		}
+		return sb.toString();
+	}
+
+	/**
+	 * Adds HandlerMethod details such as the bean type and method signature to the message.
+	 * @param text error message to append the HandlerMethod details to
+	 */
+	protected String getDetailedErrorMessage(String text) {
+		StringBuilder sb = new StringBuilder(text).append("\n");
+		sb.append("HandlerMethod details: \n");
+		sb.append("Controller [").append(getBeanType().getName()).append("]\n");
+		sb.append("Method [").append(getBridgedMethod().toGenericString()).append("]\n");
 		return sb.toString();
 	}
 

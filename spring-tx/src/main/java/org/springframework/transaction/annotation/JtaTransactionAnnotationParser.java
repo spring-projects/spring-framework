@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,10 @@ import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
 
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
@@ -36,10 +39,12 @@ import org.springframework.transaction.interceptor.TransactionAttribute;
 public class JtaTransactionAnnotationParser implements TransactionAnnotationParser, Serializable {
 
 	@Override
+	@Nullable
 	public TransactionAttribute parseTransactionAnnotation(AnnotatedElement ae) {
-		javax.transaction.Transactional ann = AnnotationUtils.getAnnotation(ae, javax.transaction.Transactional.class);
-		if (ann != null) {
-			return parseTransactionAnnotation(ann);
+		AnnotationAttributes attributes =
+				AnnotatedElementUtils.getMergedAnnotationAttributes(ae, javax.transaction.Transactional.class);
+		if (attributes != null) {
+			return parseTransactionAnnotation(attributes);
 		}
 		else {
 			return null;
@@ -47,16 +52,21 @@ public class JtaTransactionAnnotationParser implements TransactionAnnotationPars
 	}
 
 	public TransactionAttribute parseTransactionAnnotation(javax.transaction.Transactional ann) {
+		return parseTransactionAnnotation(AnnotationUtils.getAnnotationAttributes(ann, false, false));
+	}
+
+	protected TransactionAttribute parseTransactionAnnotation(AnnotationAttributes attributes) {
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
-		rbta.setPropagationBehaviorName(RuleBasedTransactionAttribute.PREFIX_PROPAGATION + ann.value().toString());
-		ArrayList<RollbackRuleAttribute> rollBackRules = new ArrayList<RollbackRuleAttribute>();
-		Class[] rbf = ann.rollbackOn();
-		for (Class rbRule : rbf) {
+		rbta.setPropagationBehaviorName(
+				RuleBasedTransactionAttribute.PREFIX_PROPAGATION + attributes.getEnum("value").toString());
+		ArrayList<RollbackRuleAttribute> rollBackRules = new ArrayList<>();
+		Class<?>[] rbf = attributes.getClassArray("rollbackOn");
+		for (Class<?> rbRule : rbf) {
 			RollbackRuleAttribute rule = new RollbackRuleAttribute(rbRule);
 			rollBackRules.add(rule);
 		}
-		Class[] nrbf = ann.dontRollbackOn();
-		for (Class rbRule : nrbf) {
+		Class<?>[] nrbf = attributes.getClassArray("dontRollbackOn");
+		for (Class<?> rbRule : nrbf) {
 			NoRollbackRuleAttribute rule = new NoRollbackRuleAttribute(rbRule);
 			rollBackRules.add(rule);
 		}

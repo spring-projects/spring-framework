@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,6 @@
 
 package org.springframework.web.multipart.commons;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +30,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -48,6 +43,7 @@ import org.apache.commons.fileupload.FileItemHeaders;
 import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.junit.Test;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.mock.web.test.MockFilterConfig;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -64,6 +60,8 @@ import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 import org.springframework.web.multipart.support.MultipartFilter;
 import org.springframework.web.multipart.support.StringMultipartFileEditor;
 import org.springframework.web.util.WebUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -113,20 +111,22 @@ public class CommonsMultipartResolverTests {
 		doTestFiles(request);
 
 		doTestBinding(resolver, originalRequest, request);
+
+		wac.close();
 	}
 
 	private void doTestParameters(MultipartHttpServletRequest request) {
-		Set<String> parameterNames = new HashSet<String>();
-		Enumeration parameterEnum = request.getParameterNames();
+		Set<String> parameterNames = new HashSet<>();
+		Enumeration<String> parameterEnum = request.getParameterNames();
 		while (parameterEnum.hasMoreElements()) {
-			parameterNames.add((String) parameterEnum.nextElement());
+			parameterNames.add(parameterEnum.nextElement());
 		}
 		assertEquals(3, parameterNames.size());
 		assertTrue(parameterNames.contains("field3"));
 		assertTrue(parameterNames.contains("field4"));
 		assertTrue(parameterNames.contains("getField"));
 		assertEquals("value3", request.getParameter("field3"));
-		List parameterValues = Arrays.asList(request.getParameterValues("field3"));
+		List<String> parameterValues = Arrays.asList(request.getParameterValues("field3"));
 		assertEquals(1, parameterValues.size());
 		assertTrue(parameterValues.contains("value3"));
 		assertEquals("value4", request.getParameter("field4"));
@@ -137,8 +137,8 @@ public class CommonsMultipartResolverTests {
 		assertEquals("value4", request.getParameter("field4"));
 		assertEquals("getValue", request.getParameter("getField"));
 
-		List<String> parameterMapKeys = new ArrayList<String>();
-		List<Object> parameterMapValues = new ArrayList<Object>();
+		List<String> parameterMapKeys = new ArrayList<>();
+		List<Object> parameterMapValues = new ArrayList<>();
 		for (Object o : request.getParameterMap().keySet()) {
 			String key = (String) o;
 			parameterMapKeys.add(key);
@@ -165,10 +165,10 @@ public class CommonsMultipartResolverTests {
 	}
 
 	private void doTestFiles(MultipartHttpServletRequest request) throws IOException {
-		Set<String> fileNames = new HashSet<String>();
-		Iterator fileIter = request.getFileNames();
+		Set<String> fileNames = new HashSet<>();
+		Iterator<String> fileIter = request.getFileNames();
 		while (fileIter.hasNext()) {
-			fileNames.add((String) fileIter.next());
+			fileNames.add(fileIter.next());
 		}
 		assertEquals(3, fileNames.size());
 		assertTrue(fileNames.contains("field1"));
@@ -258,13 +258,13 @@ public class CommonsMultipartResolverTests {
 		binder.setBindEmptyMultipartFiles(false);
 		String firstBound = mtb2.getField2();
 		binder.bind(request);
-		assertTrue(mtb2.getField2().length() > 0);
+		assertFalse(mtb2.getField2().isEmpty());
 		assertEquals(firstBound, mtb2.getField2());
 
 		request = resolver.resolveMultipart(originalRequest);
 		binder.setBindEmptyMultipartFiles(true);
 		binder.bind(request);
-		assertTrue(mtb2.getField2().length() == 0);
+		assertTrue(mtb2.getField2().isEmpty());
 	}
 
 	@Test
@@ -284,7 +284,7 @@ public class CommonsMultipartResolverTests {
 		final MultipartFilter filter = new MultipartFilter();
 		filter.init(filterConfig);
 
-		final List<MultipartFile> files = new ArrayList<MultipartFile>();
+		final List<MultipartFile> files = new ArrayList<>();
 		final FilterChain filterChain = new FilterChain() {
 			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
@@ -322,7 +322,7 @@ public class CommonsMultipartResolverTests {
 		MockFilterConfig filterConfig = new MockFilterConfig(wac.getServletContext(), "filter");
 		filterConfig.addInitParameter("multipartResolverBeanName", "myMultipartResolver");
 
-		final List<MultipartFile> files = new ArrayList<MultipartFile>();
+		final List<MultipartFile> files = new ArrayList<>();
 		FilterChain filterChain = new FilterChain() {
 			@Override
 			public void doFilter(ServletRequest originalRequest, ServletResponse response) {
@@ -373,19 +373,19 @@ public class CommonsMultipartResolverTests {
 		protected FileUpload newFileUpload(FileItemFactory fileItemFactory) {
 			return new ServletFileUpload() {
 				@Override
-				public List parseRequest(HttpServletRequest request) {
+				public List<FileItem> parseRequest(HttpServletRequest request) {
 					if (request instanceof MultipartHttpServletRequest) {
 						throw new IllegalStateException("Already a multipart request");
 					}
-					List<FileItem> fileItems = new ArrayList<FileItem>();
+					List<FileItem> fileItems = new ArrayList<>();
 					MockFileItem fileItem1 = new MockFileItem(
 						"field1", "type1", empty ? "" : "field1.txt", empty ? "" : "text1");
 					MockFileItem fileItem1x = new MockFileItem(
 						"field1", "type1", empty ? "" : "field1.txt", empty ? "" : "text1");
 					MockFileItem fileItem2 = new MockFileItem(
-						"field2", "type2", empty ? "" : "C:/field2.txt", empty ? "" : "text2");
+						"field2", "type2", empty ? "" : "C:\\mypath/field2.txt", empty ? "" : "text2");
 					MockFileItem fileItem2x = new MockFileItem(
-						"field2x", "type2", empty ? "" : "C:\\field2x.txt", empty ? "" : "text2");
+						"field2x", "type2", empty ? "" : "C:/mypath\\field2x.txt", empty ? "" : "text2");
 					MockFileItem fileItem3 = new MockFileItem("field3", null, null, "value3");
 					MockFileItem fileItem4 = new MockFileItem("field4", "text/html; charset=iso-8859-1", null, "value4");
 					MockFileItem fileItem5 = new MockFileItem("field4", null, null, "value5");

@@ -16,17 +16,17 @@
 
 package org.springframework.aop.aspectj;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-
 import org.springframework.tests.sample.beans.CountingTestBean;
 import org.springframework.tests.sample.beans.IOther;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.tests.sample.beans.subpkg.DeepBean;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the {@link TypePatternClassFilter} class.
@@ -35,9 +35,9 @@ import org.springframework.tests.sample.beans.subpkg.DeepBean;
  * @author Rick Evans
  * @author Chris Beams
  */
-public final class TypePatternClassFilterTests {
+public class TypePatternClassFilterTests {
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidPattern() {
 		// should throw - pattern must be recognized as invalid
 		new TypePatternClassFilter("-");
@@ -78,12 +78,12 @@ public final class TypePatternClassFilterTests {
 		assertTrue("matches Double",tpcf.matches(Double.class));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSetTypePatternWithNullArgument() throws Exception {
 		new TypePatternClassFilter(null);
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void testInvocationOfMatchesMethodBlowsUpWhenNoTypePatternHasBeenSet() throws Exception {
 		new TypePatternClassFilter().matches(String.class);
 	}

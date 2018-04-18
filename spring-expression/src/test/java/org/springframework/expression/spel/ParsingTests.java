@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package org.springframework.expression.spel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import org.junit.Test;
+
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+
+import static org.junit.Assert.*;
 
 /**
  * Parse some expressions and check we get the AST we expect. Rather than inspecting each node in the AST, we ask it to
@@ -298,30 +298,26 @@ public class ParsingTests {
 	}
 
 	// inline list creation
-	// public void testInlineListCreation01() {
-	// parseCheck("{1, 2, 3, 4, 5}", "{1,2,3,4,5}");
-	// }
-	//
-	// public void testInlineListCreation02() {
-	// parseCheck("{'abc','xyz'}", "{'abc','xyz'}");
-	// }
+	@Test
+	public void testInlineListCreation01() {
+		parseCheck("{1, 2, 3, 4, 5}", "{1,2,3,4,5}");
+	}
 
-	// // inline map creation
-	// public void testInlineMapCreation01() {
-	// parseCheck("#{'key1':'Value 1', 'today':DateTime.Today}");
-	// }
-	//
-	// public void testInlineMapCreation02() {
-	// parseCheck("#{1:'January', 2:'February', 3:'March'}");
-	// }
-	//
-	// public void testInlineMapCreation03() {
-	// parseCheck("#{'key1':'Value 1', 'today':'Monday'}['key1']");
-	// }
-	//
-	// public void testInlineMapCreation04() {
-	// parseCheck("#{1:'January', 2:'February', 3:'March'}[3]");
-	// }
+	@Test
+	public void testInlineListCreation02() {
+		parseCheck("{'abc','xyz'}", "{'abc','xyz'}");
+	}
+
+	// inline map creation
+	@Test
+	public void testInlineMapCreation01() {
+		parseCheck("{'key1':'Value 1','today':DateTime.Today}");
+	}
+
+	@Test
+	public void testInlineMapCreation02() {
+		parseCheck("{1:'January',2:'February',3:'March'}");
+	}
 
 	// methods
 	@Test
@@ -466,7 +462,8 @@ public class ParsingTests {
 				fail("Parsed exception was null");
 			}
 			assertEquals("String form of AST does not match expected output", expectedStringFormOfAST, e.toStringAST());
-		} catch (ParseException ee) {
+		}
+		catch (ParseException ee) {
 			ee.printStackTrace();
 			fail("Unexpected Exception: " + ee.getMessage());
 		}

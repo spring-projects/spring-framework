@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,60 @@
 
 package org.springframework.cache.config;
 
-import static org.junit.Assert.assertSame;
-
 import org.junit.Test;
+
+import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheInterceptor;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Costin Leau
  * @author Chris Beams
+ * @author Stephane Nicoll
  */
-public class AnnotationNamespaceDrivenTests extends AbstractAnnotationTests {
+public class AnnotationNamespaceDrivenTests extends AbstractCacheAnnotationTests {
 
 	@Override
-	protected ApplicationContext getApplicationContext() {
+	protected ConfigurableApplicationContext getApplicationContext() {
 		return new GenericXmlApplicationContext(
 				"/org/springframework/cache/config/annotationDrivenCacheNamespace.xml");
 	}
 
 	@Test
-	public void testKeyStrategy() throws Exception {
-		CacheInterceptor ci = ctx.getBean("org.springframework.cache.interceptor.CacheInterceptor#0",
-				CacheInterceptor.class);
-		assertSame(ctx.getBean("keyGenerator"), ci.getKeyGenerator());
+	public void testKeyStrategy() {
+		CacheInterceptor ci = this.ctx.getBean(
+				"org.springframework.cache.interceptor.CacheInterceptor#0", CacheInterceptor.class);
+		assertSame(this.ctx.getBean("keyGenerator"), ci.getKeyGenerator());
 	}
+
+	@Test
+	public void cacheResolver() {
+		ConfigurableApplicationContext context = new GenericXmlApplicationContext(
+				"/org/springframework/cache/config/annotationDrivenCacheNamespace-resolver.xml");
+
+		CacheInterceptor ci = context.getBean(CacheInterceptor.class);
+		assertSame(context.getBean("cacheResolver"), ci.getCacheResolver());
+		context.close();
+	}
+
+	@Test
+	public void bothSetOnlyResolverIsUsed() {
+		ConfigurableApplicationContext context = new GenericXmlApplicationContext(
+				"/org/springframework/cache/config/annotationDrivenCacheNamespace-manager-resolver.xml");
+
+		CacheInterceptor ci = context.getBean(CacheInterceptor.class);
+		assertSame(context.getBean("cacheResolver"), ci.getCacheResolver());
+		context.close();
+	}
+
+	@Test
+	public void testCacheErrorHandler() {
+		CacheInterceptor ci = this.ctx.getBean(
+				"org.springframework.cache.interceptor.CacheInterceptor#0", CacheInterceptor.class);
+		assertSame(this.ctx.getBean("errorHandler", CacheErrorHandler.class), ci.getErrorHandler());
+	}
+
 }

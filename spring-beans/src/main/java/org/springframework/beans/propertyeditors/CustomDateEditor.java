@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -33,15 +34,13 @@ import org.springframework.util.StringUtils;
  * and rendering them in the UI form.
  *
  * <p>In web MVC code, this editor will typically be registered with
- * {@code binder.registerCustomEditor} calls in a custom
- * {@code initBinder} method.
+ * {@code binder.registerCustomEditor}.
  *
  * @author Juergen Hoeller
  * @since 28.04.2003
  * @see java.util.Date
  * @see java.text.DateFormat
  * @see org.springframework.validation.DataBinder#registerCustomEditor
- * @see org.springframework.web.servlet.mvc.BaseCommandController#initBinder
  */
 public class CustomDateEditor extends PropertyEditorSupport {
 
@@ -96,7 +95,7 @@ public class CustomDateEditor extends PropertyEditorSupport {
 	 * Parse the Date from the given text, using the specified DateFormat.
 	 */
 	@Override
-	public void setAsText(String text) throws IllegalArgumentException {
+	public void setAsText(@Nullable String text) throws IllegalArgumentException {
 		if (this.allowEmpty && !StringUtils.hasText(text)) {
 			// Treat empty String as null value.
 			setValue(null);

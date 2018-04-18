@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.util.Assert;
+import org.springframework.lang.Nullable;
 
 /**
  * Read-only {@code Map<String, String>} implementation that is backed by system
@@ -41,7 +41,7 @@ abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
 
 	@Override
 	public boolean containsKey(Object key) {
-		return get(key) != null;
+		return (get(key) != null);
 	}
 
 	/**
@@ -49,12 +49,13 @@ abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
 	 * @throws IllegalArgumentException if given key is non-String
 	 */
 	@Override
+	@Nullable
 	public String get(Object key) {
-		Assert.isInstanceOf(String.class, key,
-			String.format("expected key [%s] to be of type String, got %s",
-					key, key.getClass().getName()));
-
-		return this.getSystemAttribute((String) key);
+		if (!(key instanceof String)) {
+			throw new IllegalArgumentException(
+					"Type of key [" + key.getClass().getName() + "] must be java.lang.String");
+		}
+		return getSystemAttribute((String) key);
 	}
 
 	@Override
@@ -64,10 +65,11 @@ abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
 
 	/**
 	 * Template method that returns the underlying system attribute.
-	 *
 	 * <p>Implementations typically call {@link System#getProperty(String)} or {@link System#getenv(String)} here.
 	 */
+	@Nullable
 	protected abstract String getSystemAttribute(String attributeName);
+
 
 	// Unsupported
 
@@ -102,7 +104,7 @@ abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
 	}
 
 	@Override
-	public void putAll(Map<? extends String, ? extends String> m) {
+	public void putAll(Map<? extends String, ? extends String> map) {
 		throw new UnsupportedOperationException();
 	}
 

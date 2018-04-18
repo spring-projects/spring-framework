@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.junit.Test;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
@@ -47,31 +48,31 @@ public class ImportBeanDefinitionRegistrarTests {
 
 	@Test
 	public void shouldInvokeAwareMethodsInImportBeanDefinitionRegistrar() {
-
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		context.getBean(MessageSource.class);
 
-		assertThat(SampleRegistrar.beanFactory, is((BeanFactory) context.getBeanFactory()));
+		assertThat(SampleRegistrar.beanFactory, is(context.getBeanFactory()));
 		assertThat(SampleRegistrar.classLoader, is(context.getBeanFactory().getBeanClassLoader()));
 		assertThat(SampleRegistrar.resourceLoader, is(notNullValue()));
-		assertThat(SampleRegistrar.environment, is((Environment) context.getEnvironment()));
+		assertThat(SampleRegistrar.environment, is(context.getEnvironment()));
 	}
+
 
 	@Sample
 	@Configuration
 	static class Config {
-
 	}
+
 
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Import(SampleRegistrar.class)
-	public static @interface Sample {
-
+	public @interface Sample {
 	}
 
-	static class SampleRegistrar implements ImportBeanDefinitionRegistrar, BeanClassLoaderAware, ResourceLoaderAware,
-			BeanFactoryAware, EnvironmentAware {
+
+	private static class SampleRegistrar implements ImportBeanDefinitionRegistrar,
+			BeanClassLoaderAware, ResourceLoaderAware, BeanFactoryAware, EnvironmentAware {
 
 		static ClassLoader classLoader;
 		static ResourceLoader resourceLoader;
@@ -99,7 +100,9 @@ public class ImportBeanDefinitionRegistrarTests {
 		}
 
 		@Override
-		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
+				BeanDefinitionRegistry registry) {
 		}
 	}
+
 }

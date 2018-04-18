@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,17 @@
 
 package org.springframework.test.context.junit4.spr8849;
 
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.junit.Assert.*;
 
 /**
  * This name of this class intentionally does not end with "Test" or "Tests"
@@ -37,13 +41,19 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @ContextConfiguration
 public class TestClass2 {
 
-	@Autowired
+	@Configuration
+	@ImportResource("classpath:/org/springframework/test/context/junit4/spr8849/datasource-config.xml")
+	static class Config {
+	}
+
+
+	@Resource
 	DataSource dataSource;
 
 
 	@Test
 	public void dummyTest() {
-		// it's sufficient if the ApplicationContext loads without errors.
+		assertNotNull(dataSource);
 	}
 
 }

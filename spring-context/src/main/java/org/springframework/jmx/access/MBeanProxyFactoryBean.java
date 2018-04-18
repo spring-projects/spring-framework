@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.MBeanServerNotFoundException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -48,10 +49,13 @@ import org.springframework.util.ClassUtils;
 public class MBeanProxyFactoryBean extends MBeanClientInterceptor
 		implements FactoryBean<Object>, BeanClassLoaderAware, InitializingBean {
 
-	private Class proxyInterface;
+	@Nullable
+	private Class<?> proxyInterface;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
+	@Nullable
 	private Object mbeanProxy;
 
 
@@ -62,7 +66,7 @@ public class MBeanProxyFactoryBean extends MBeanClientInterceptor
 	 * conventional Java methods for MBean operations.
 	 * @see #setObjectName
 	 */
-	public void setProxyInterface(Class proxyInterface) {
+	public void setProxyInterface(Class<?> proxyInterface) {
 		this.proxyInterface = proxyInterface;
 	}
 
@@ -95,6 +99,7 @@ public class MBeanProxyFactoryBean extends MBeanClientInterceptor
 
 
 	@Override
+	@Nullable
 	public Object getObject() {
 		return this.mbeanProxy;
 	}

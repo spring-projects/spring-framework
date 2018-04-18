@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,12 @@ import java.beans.Introspector;
 import java.lang.reflect.Method;
 
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link BeanInfoFactory} implementation that evaluates whether bean classes have
- * "non-standard" JavaBeans setter methods and are thus candidates for introspection by
- * Spring's {@link ExtendedBeanInfo}.
+ * "non-standard" JavaBeans setter methods and are thus candidates for introspection
+ * by Spring's (package-visible) {@code ExtendedBeanInfo} implementation.
  *
  * <p>Ordered at {@link Ordered#LOWEST_PRECEDENCE} to allow other user-defined
  * {@link BeanInfoFactory} types to take precedence.
@@ -34,21 +35,22 @@ import org.springframework.core.Ordered;
  * @author Chris Beams
  * @since 3.2
  * @see BeanInfoFactory
+ * @see CachedIntrospectionResults
  */
-public class ExtendedBeanInfoFactory implements Ordered, BeanInfoFactory {
+public class ExtendedBeanInfoFactory implements BeanInfoFactory, Ordered {
 
 	/**
-	 * Return a new {@link ExtendedBeanInfo} for the given bean class.
+	 * Return an {@link ExtendedBeanInfo} for the given bean class, if applicable.
 	 */
 	@Override
+	@Nullable
 	public BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException {
-		return supports(beanClass) ?
-				new ExtendedBeanInfo(Introspector.getBeanInfo(beanClass)) : null;
+		return (supports(beanClass) ? new ExtendedBeanInfo(Introspector.getBeanInfo(beanClass)) : null);
 	}
 
 	/**
-	 * Return whether the given bean class declares or inherits any non-void returning
-	 * JavaBeans or <em>indexed property</em> setter methods.
+	 * Return whether the given bean class declares or inherits any non-void
+	 * returning bean property or indexed property setter methods.
 	 */
 	private boolean supports(Class<?> beanClass) {
 		for (Method method : beanClass.getMethods()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.concurrent;
 
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
@@ -29,12 +30,18 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.core.task.AsyncListenableTaskExecutor;
+import org.springframework.core.task.TaskDecorator;
 import org.springframework.core.task.TaskRejectedException;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
+import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureTask;
 
 /**
- * JavaBean that allows for configuring a JDK 1.5 {@link java.util.concurrent.ThreadPoolExecutor}
+ * JavaBean that allows for configuring a {@link java.util.concurrent.ThreadPoolExecutor}
  * in bean style (through its "corePoolSize", "maxPoolSize", "keepAliveSeconds", "queueCapacity"
  * properties) and exposing it as a Spring {@link org.springframework.core.task.TaskExecutor}.
  * This class is also well suited for management and monitoring (e.g. through JMX),
@@ -42,13 +49,13 @@ import org.springframework.util.Assert;
  * (all supporting updates at runtime); "poolSize", "activeCount" (for introspection only).
  *
  * <p>For an alternative, you may set up a ThreadPoolExecutor instance directly using
- * constructor injection, or use a factory method definition that points to the JDK 1.5
+ * constructor injection, or use a factory method definition that points to the
  * {@link java.util.concurrent.Executors} class. To expose such a raw Executor as a
  * Spring {@link org.springframework.core.task.TaskExecutor}, simply wrap it with a
  * {@link org.springframework.scheduling.concurrent.ConcurrentTaskExecutor} adapter.
  *
  * <p><b>NOTE:</b> This class implements Spring's
- * {@link org.springframework.core.task.TaskExecutor} interface as well as the JDK 1.5
+ * {@link org.springframework.core.task.TaskExecutor} interface as well as the
  * {@link java.util.concurrent.Executor} interface, with the former being the primary
  * interface, the other just serving as secondary convenience. For this reason, the
  * exception handling follows the TaskExecutor contract rather than the Executor contract,
@@ -64,7 +71,8 @@ import org.springframework.util.Assert;
  * @see ConcurrentTaskExecutor
  */
 @SuppressWarnings("serial")
-public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport implements SchedulingTaskExecutor {
+public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
+		implements AsyncListenableTaskExecutor, SchedulingTaskExecutor {
 
 	private final Object poolSizeMonitor = new Object();
 
@@ -74,11 +82,19 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 
 	private int keepAliveSeconds = 60;
 
-	private boolean allowCoreThreadTimeOut = false;
-
 	private int queueCapacity = Integer.MAX_VALUE;
 
+	private boolean allowCoreThreadTimeOut = false;
+
+	@Nullable
+	private TaskDecorator taskDecorator;
+
+	@Nullable
 	private ThreadPoolExecutor threadPoolExecutor;
+
+	// Runnable decorator to user-level FutureTask, if different
+	private final Map<Runnable, Object> decoratedTaskMap =
+			new ConcurrentReferenceHashMap<>(16, ConcurrentReferenceHashMap.ReferenceType.WEAK);
 
 
 	/**
@@ -151,19 +167,6 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 	}
 
 	/**
-	 * Specify whether to allow core threads to time out. This enables dynamic
-	 * growing and shrinking even in combination with a non-zero queue (since
-	 * the max pool size will only grow once the queue is full).
-	 * <p>Default is "false". Note that this feature is only available on Java 6
-	 * or above. On Java 5, consider switching to the backport-concurrent
-	 * version of ThreadPoolTaskExecutor which also supports this feature.
-	 * @see java.util.concurrent.ThreadPoolExecutor#allowCoreThreadTimeOut(boolean)
-	 */
-	public void setAllowCoreThreadTimeOut(boolean allowCoreThreadTimeOut) {
-		this.allowCoreThreadTimeOut = allowCoreThreadTimeOut;
-	}
-
-	/**
 	 * Set the capacity for the ThreadPoolExecutor's BlockingQueue.
 	 * Default is {@code Integer.MAX_VALUE}.
 	 * <p>Any positive value will lead to a LinkedBlockingQueue instance;
@@ -175,15 +178,66 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 		this.queueCapacity = queueCapacity;
 	}
 
+	/**
+	 * Specify whether to allow core threads to time out. This enables dynamic
+	 * growing and shrinking even in combination with a non-zero queue (since
+	 * the max pool size will only grow once the queue is full).
+	 * <p>Default is "false".
+	 * @see java.util.concurrent.ThreadPoolExecutor#allowCoreThreadTimeOut(boolean)
+	 */
+	public void setAllowCoreThreadTimeOut(boolean allowCoreThreadTimeOut) {
+		this.allowCoreThreadTimeOut = allowCoreThreadTimeOut;
+	}
 
+	/**
+	 * Specify a custom {@link TaskDecorator} to be applied to any {@link Runnable}
+	 * about to be executed.
+	 * <p>Note that such a decorator is not necessarily being applied to the
+	 * user-supplied {@code Runnable}/{@code Callable} but rather to the actual
+	 * execution callback (which may be a wrapper around the user-supplied task).
+	 * <p>The primary use case is to set some execution context around the task's
+	 * invocation, or to provide some monitoring/statistics for task execution.
+	 * @since 4.3
+	 */
+	public void setTaskDecorator(TaskDecorator taskDecorator) {
+		this.taskDecorator = taskDecorator;
+	}
+
+
+	/**
+	 * Note: This method exposes an {@link ExecutorService} to its base class
+	 * but stores the actual {@link ThreadPoolExecutor} handle internally.
+	 * Do not override this method for replacing the executor, rather just for
+	 * decorating its {@code ExecutorService} handle or storing custom state.
+	 */
 	@Override
 	protected ExecutorService initializeExecutor(
 			ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 
 		BlockingQueue<Runnable> queue = createQueue(this.queueCapacity);
-		ThreadPoolExecutor executor  = new ThreadPoolExecutor(
-				this.corePoolSize, this.maxPoolSize, this.keepAliveSeconds, TimeUnit.SECONDS,
-				queue, threadFactory, rejectedExecutionHandler);
+
+		ThreadPoolExecutor executor;
+		if (this.taskDecorator != null) {
+			executor = new ThreadPoolExecutor(
+					this.corePoolSize, this.maxPoolSize, this.keepAliveSeconds, TimeUnit.SECONDS,
+					queue, threadFactory, rejectedExecutionHandler) {
+				@Override
+				public void execute(Runnable command) {
+					Runnable decorated = taskDecorator.decorate(command);
+					if (decorated != command) {
+						decoratedTaskMap.put(decorated, command);
+					}
+					super.execute(decorated);
+				}
+			};
+		}
+		else {
+			executor = new ThreadPoolExecutor(
+					this.corePoolSize, this.maxPoolSize, this.keepAliveSeconds, TimeUnit.SECONDS,
+					queue, threadFactory, rejectedExecutionHandler);
+
+		}
+
 		if (this.allowCoreThreadTimeOut) {
 			executor.allowCoreThreadTimeOut(true);
 		}
@@ -203,10 +257,10 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 	 */
 	protected BlockingQueue<Runnable> createQueue(int queueCapacity) {
 		if (queueCapacity > 0) {
-			return new LinkedBlockingQueue<Runnable>(queueCapacity);
+			return new LinkedBlockingQueue<>(queueCapacity);
 		}
 		else {
-			return new SynchronousQueue<Runnable>();
+			return new SynchronousQueue<>();
 		}
 	}
 
@@ -225,7 +279,11 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 	 * @see java.util.concurrent.ThreadPoolExecutor#getPoolSize()
 	 */
 	public int getPoolSize() {
-		return getThreadPoolExecutor().getPoolSize();
+		if (this.threadPoolExecutor == null) {
+			// Not initialized yet: assume core pool size.
+			return this.corePoolSize;
+		}
+		return this.threadPoolExecutor.getPoolSize();
 	}
 
 	/**
@@ -233,7 +291,11 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 	 * @see java.util.concurrent.ThreadPoolExecutor#getActiveCount()
 	 */
 	public int getActiveCount() {
-		return getThreadPoolExecutor().getActiveCount();
+		if (this.threadPoolExecutor == null) {
+			// Not initialized yet: assume no active threads.
+			return 0;
+		}
+		return this.threadPoolExecutor.getActiveCount();
 	}
 
 
@@ -272,6 +334,42 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+		}
+	}
+
+	@Override
+	public ListenableFuture<?> submitListenable(Runnable task) {
+		ExecutorService executor = getThreadPoolExecutor();
+		try {
+			ListenableFutureTask<Object> future = new ListenableFutureTask<>(task, null);
+			executor.execute(future);
+			return future;
+		}
+		catch (RejectedExecutionException ex) {
+			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+		}
+	}
+
+	@Override
+	public <T> ListenableFuture<T> submitListenable(Callable<T> task) {
+		ExecutorService executor = getThreadPoolExecutor();
+		try {
+			ListenableFutureTask<T> future = new ListenableFutureTask<>(task);
+			executor.execute(future);
+			return future;
+		}
+		catch (RejectedExecutionException ex) {
+			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+		}
+	}
+
+	@Override
+	protected void cancelRemainingTask(Runnable task) {
+		super.cancelRemainingTask(task);
+		// Cancel associated user-level Future handle as well
+		Object original = this.decoratedTaskMap.get(task);
+		if (original instanceof Future) {
+			((Future<?>) original).cancel(true);
 		}
 	}
 

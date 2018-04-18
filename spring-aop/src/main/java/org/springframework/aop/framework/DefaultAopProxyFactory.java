@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,25 +17,23 @@
 package org.springframework.aop.framework;
 
 import java.io.Serializable;
+import java.lang.reflect.Proxy;
 
 import org.springframework.aop.SpringProxy;
 
 /**
- * Default {@link AopProxyFactory} implementation,
- * creating either a CGLIB proxy or a JDK dynamic proxy.
+ * Default {@link AopProxyFactory} implementation, creating either a CGLIB proxy
+ * or a JDK dynamic proxy.
  *
- * <p>Creates a CGLIB proxy if one the following is true
- * for a given {@link AdvisedSupport} instance:
+ * <p>Creates a CGLIB proxy if one the following is true for a given
+ * {@link AdvisedSupport} instance:
  * <ul>
- * <li>the "optimize" flag is set
- * <li>the "proxyTargetClass" flag is set
+ * <li>the {@code optimize} flag is set
+ * <li>the {@code proxyTargetClass} flag is set
  * <li>no proxy interfaces have been specified
  * </ul>
  *
- * <p>Note that the CGLIB library classes have to be present on
- * the class path if an actual CGLIB proxy needs to be created.
- *
- * <p>In general, specify "proxyTargetClass" to enforce a CGLIB proxy,
+ * <p>In general, specify {@code proxyTargetClass} to enforce a CGLIB proxy,
  * or specify one or more interfaces to use a JDK dynamic proxy.
  *
  * @author Rod Johnson
@@ -51,15 +49,15 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 	@Override
 	public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException {
 		if (config.isOptimize() || config.isProxyTargetClass() || hasNoUserSuppliedProxyInterfaces(config)) {
-			Class targetClass = config.getTargetClass();
+			Class<?> targetClass = config.getTargetClass();
 			if (targetClass == null) {
 				throw new AopConfigException("TargetSource cannot determine target class: " +
 						"Either an interface or a target is required for proxy creation.");
 			}
-			if (targetClass.isInterface()) {
+			if (targetClass.isInterface() || Proxy.isProxyClass(targetClass)) {
 				return new JdkDynamicAopProxy(config);
 			}
-			return CglibProxyFactory.createCglibProxy(config);
+			return new ObjenesisCglibAopProxy(config);
 		}
 		else {
 			return new JdkDynamicAopProxy(config);
@@ -72,20 +70,8 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 	 * (or no proxy interfaces specified at all).
 	 */
 	private boolean hasNoUserSuppliedProxyInterfaces(AdvisedSupport config) {
-		Class[] interfaces = config.getProxiedInterfaces();
-		return (interfaces.length == 0 || (interfaces.length == 1 && SpringProxy.class.equals(interfaces[0])));
-	}
-
-
-	/**
-	 * Inner factory class used to just introduce a CGLIB dependency
-	 * when actually creating a CGLIB proxy.
-	 */
-	private static class CglibProxyFactory {
-
-		public static AopProxy createCglibProxy(AdvisedSupport advisedSupport) {
-			return new CglibAopProxy(advisedSupport);
-		}
+		Class<?>[] ifcs = config.getProxiedInterfaces();
+		return (ifcs.length == 0 || (ifcs.length == 1 && SpringProxy.class.isAssignableFrom(ifcs[0])));
 	}
 
 }

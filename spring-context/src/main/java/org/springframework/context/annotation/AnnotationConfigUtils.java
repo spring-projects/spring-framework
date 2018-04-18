@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package org.springframework.context.annotation;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -26,24 +28,34 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.event.DefaultEventListenerFactory;
+import org.springframework.context.event.EventListenerMethodProcessor;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
-
-import static org.springframework.context.annotation.MetadataUtils.*;
 
 /**
  * Utility class that allows for convenient registration of common
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} and
  * {@link org.springframework.beans.factory.config.BeanFactoryPostProcessor}
- * definitions for annotation-based configuration.
+ * definitions for annotation-based configuration. Also registers a common
+ * {@link org.springframework.beans.factory.support.AutowireCandidateResolver}.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 2.5
+ * @see ContextAnnotationAutowireCandidateResolver
  * @see CommonAnnotationBeanPostProcessor
- * @see org.springframework.context.annotation.ConfigurationClassPostProcessor
+ * @see ConfigurationClassPostProcessor
  * @see org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor
  * @see org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor
  * @see org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor
@@ -86,60 +98,6 @@ public class AnnotationConfigUtils {
 			"org.springframework.context.annotation.internalCommonAnnotationProcessor";
 
 	/**
-	 * The bean name of the internally managed Scheduled annotation processor.
-	 */
-	public static final String SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME =
-			"org.springframework.context.annotation.internalScheduledAnnotationProcessor";
-
-	/**
-	 * The bean name of the internally managed Async annotation processor.
-	 */
-	public static final String ASYNC_ANNOTATION_PROCESSOR_BEAN_NAME =
-			"org.springframework.context.annotation.internalAsyncAnnotationProcessor";
-
-	/**
-	 * The bean name of the internally managed AspectJ async execution aspect.
-	 */
-	public static final String ASYNC_EXECUTION_ASPECT_BEAN_NAME =
-			"org.springframework.scheduling.config.internalAsyncExecutionAspect";
-
-	/**
-	 * The class name of the AspectJ async execution aspect.
-	 */
-	public static final String ASYNC_EXECUTION_ASPECT_CLASS_NAME =
-			"org.springframework.scheduling.aspectj.AnnotationAsyncExecutionAspect";
-
-	/**
-	 * The name of the AspectJ async execution aspect @{@code Configuration} class.
-	 */
-	public static final String ASYNC_EXECUTION_ASPECT_CONFIGURATION_CLASS_NAME =
-			"org.springframework.scheduling.aspectj.AspectJAsyncConfiguration";
-
-	/**
-	 * The bean name of the internally managed cache advisor.
-	 */
-	public static final String CACHE_ADVISOR_BEAN_NAME =
-			"org.springframework.cache.config.internalCacheAdvisor";
-
-	/**
-	 * The bean name of the internally managed cache aspect.
-	 */
-	public static final String CACHE_ASPECT_BEAN_NAME =
-			"org.springframework.cache.config.internalCacheAspect";
-
-	/**
-	 * The class name of the AspectJ caching aspect.
-	 */
-	public static final String CACHE_ASPECT_CLASS_NAME =
-			"org.springframework.cache.aspectj.AnnotationCacheAspect";
-
-	/**
-	 * The name of the AspectJ caching aspect @{@code Configuration} class.
-	 */
-	public static final String CACHE_ASPECT_CONFIGURATION_CLASS_NAME =
-			"org.springframework.cache.aspectj.AspectJCachingConfiguration";
-
-	/**
 	 * The bean name of the internally managed JPA annotation processor.
 	 */
 	public static final String PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME =
@@ -149,6 +107,17 @@ public class AnnotationConfigUtils {
 	private static final String PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME =
 			"org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor";
 
+	/**
+	 * The bean name of the internally managed @EventListener annotation processor.
+	 */
+	public static final String EVENT_LISTENER_PROCESSOR_BEAN_NAME =
+			"org.springframework.context.event.internalEventListenerProcessor";
+
+	/**
+	 * The bean name of the internally managed EventListenerFactory.
+	 */
+	public static final String EVENT_LISTENER_FACTORY_BEAN_NAME =
+			"org.springframework.context.event.internalEventListenerFactory";
 
 	private static final boolean jsr250Present =
 			ClassUtils.isPresent("javax.annotation.Resource", AnnotationConfigUtils.class.getClassLoader());
@@ -175,9 +144,19 @@ public class AnnotationConfigUtils {
 	 * that have actually been registered by this call
 	 */
 	public static Set<BeanDefinitionHolder> registerAnnotationConfigProcessors(
-			BeanDefinitionRegistry registry, Object source) {
+			BeanDefinitionRegistry registry, @Nullable Object source) {
 
-		Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<BeanDefinitionHolder>(4);
+		DefaultListableBeanFactory beanFactory = unwrapDefaultListableBeanFactory(registry);
+		if (beanFactory != null) {
+			if (!(beanFactory.getDependencyComparator() instanceof AnnotationAwareOrderComparator)) {
+				beanFactory.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+			}
+			if (!(beanFactory.getAutowireCandidateResolver() instanceof ContextAnnotationAutowireCandidateResolver)) {
+				beanFactory.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());
+			}
+		}
+
+		Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<>(4);
 
 		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);
@@ -208,8 +187,8 @@ public class AnnotationConfigUtils {
 		if (jpaPresent && !registry.containsBeanDefinition(PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition();
 			try {
-				ClassLoader cl = AnnotationConfigUtils.class.getClassLoader();
-				def.setBeanClass(cl.loadClass(PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME));
+				def.setBeanClass(ClassUtils.forName(PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME,
+						AnnotationConfigUtils.class.getClassLoader()));
 			}
 			catch (ClassNotFoundException ex) {
 				throw new IllegalStateException(
@@ -217,6 +196,17 @@ public class AnnotationConfigUtils {
 			}
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME));
+		}
+
+		if (!registry.containsBeanDefinition(EVENT_LISTENER_PROCESSOR_BEAN_NAME)) {
+			RootBeanDefinition def = new RootBeanDefinition(EventListenerMethodProcessor.class);
+			def.setSource(source);
+			beanDefs.add(registerPostProcessor(registry, def, EVENT_LISTENER_PROCESSOR_BEAN_NAME));
+		}
+		if (!registry.containsBeanDefinition(EVENT_LISTENER_FACTORY_BEAN_NAME)) {
+			RootBeanDefinition def = new RootBeanDefinition(DefaultEventListenerFactory.class);
+			def.setSource(source);
+			beanDefs.add(registerPostProcessor(registry, def, EVENT_LISTENER_FACTORY_BEAN_NAME));
 		}
 
 		return beanDefs;
@@ -230,21 +220,52 @@ public class AnnotationConfigUtils {
 		return new BeanDefinitionHolder(definition, beanName);
 	}
 
-	static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd) {
-		AnnotationMetadata metadata = abd.getMetadata();
+	@Nullable
+	private static DefaultListableBeanFactory unwrapDefaultListableBeanFactory(BeanDefinitionRegistry registry) {
+		if (registry instanceof DefaultListableBeanFactory) {
+			return (DefaultListableBeanFactory) registry;
+		}
+		else if (registry instanceof GenericApplicationContext) {
+			return ((GenericApplicationContext) registry).getDefaultListableBeanFactory();
+		}
+		else {
+			return null;
+		}
+	}
+
+	public static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd) {
+		processCommonDefinitionAnnotations(abd, abd.getMetadata());
+	}
+
+	static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd, AnnotatedTypeMetadata metadata) {
+		AnnotationAttributes lazy = attributesFor(metadata, Lazy.class);
+		if (lazy != null) {
+			abd.setLazyInit(lazy.getBoolean("value"));
+		}
+		else if (abd.getMetadata() != metadata) {
+			lazy = attributesFor(abd.getMetadata(), Lazy.class);
+			if (lazy != null) {
+				abd.setLazyInit(lazy.getBoolean("value"));
+			}
+		}
+
 		if (metadata.isAnnotated(Primary.class.getName())) {
 			abd.setPrimary(true);
 		}
-		if (metadata.isAnnotated(Lazy.class.getName())) {
-			abd.setLazyInit(attributesFor(metadata, Lazy.class).getBoolean("value"));
+		AnnotationAttributes dependsOn = attributesFor(metadata, DependsOn.class);
+		if (dependsOn != null) {
+			abd.setDependsOn(dependsOn.getStringArray("value"));
 		}
-		if (metadata.isAnnotated(DependsOn.class.getName())) {
-			abd.setDependsOn(attributesFor(metadata, DependsOn.class).getStringArray("value"));
-		}
+
 		if (abd instanceof AbstractBeanDefinition) {
-			if (metadata.isAnnotated(Role.class.getName())) {
-				Integer role = attributesFor(metadata, Role.class).getNumber("value");
-				((AbstractBeanDefinition)abd).setRole(role);
+			AbstractBeanDefinition absBd = (AbstractBeanDefinition) abd;
+			AnnotationAttributes role = attributesFor(metadata, Role.class);
+			if (role != null) {
+				absBd.setRole(role.getNumber("value").intValue());
+			}
+			AnnotationAttributes description = attributesFor(metadata, Description.class);
+			if (description != null) {
+				absBd.setDescription(description.getString("value"));
 			}
 		}
 	}
@@ -260,5 +281,49 @@ public class AnnotationConfigUtils {
 		return ScopedProxyCreator.createScopedProxy(definition, registry, proxyTargetClass);
 	}
 
+	@Nullable
+	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, Class<?> annotationClass) {
+		return attributesFor(metadata, annotationClass.getName());
+	}
+
+	@Nullable
+	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, String annotationClassName) {
+		return AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(annotationClassName, false));
+	}
+
+	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata,
+			Class<?> containerClass, Class<?> annotationClass) {
+
+		return attributesForRepeatable(metadata, containerClass.getName(), annotationClass.getName());
+	}
+
+	@SuppressWarnings("unchecked")
+	static Set<AnnotationAttributes> attributesForRepeatable(
+			AnnotationMetadata metadata, String containerClassName, String annotationClassName) {
+
+		Set<AnnotationAttributes> result = new LinkedHashSet<>();
+
+		// Direct annotation present?
+		addAttributesIfNotNull(result, metadata.getAnnotationAttributes(annotationClassName, false));
+
+		// Container annotation present?
+		Map<String, Object> container = metadata.getAnnotationAttributes(containerClassName, false);
+		if (container != null && container.containsKey("value")) {
+			for (Map<String, Object> containedAttributes : (Map<String, Object>[]) container.get("value")) {
+				addAttributesIfNotNull(result, containedAttributes);
+			}
+		}
+
+		// Return merged result
+		return Collections.unmodifiableSet(result);
+	}
+
+	private static void addAttributesIfNotNull(
+			Set<AnnotationAttributes> result, @Nullable Map<String, Object> attributes) {
+
+		if (attributes != null) {
+			result.add(AnnotationAttributes.fromMap(attributes));
+		}
+	}
 
 }

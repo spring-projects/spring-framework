@@ -19,11 +19,11 @@ package org.springframework.context.annotation;
 import java.lang.instrument.ClassFileTransformer;
 
 import org.junit.Test;
+
 import org.springframework.context.annotation.EnableLoadTimeWeaving.AspectJWeaving;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 
-import static org.mockito.Matchers.*;
 import static org.mockito.BDDMockito.*;
 
 /**

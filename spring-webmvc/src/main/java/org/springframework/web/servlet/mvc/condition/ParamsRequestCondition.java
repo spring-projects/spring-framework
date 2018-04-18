@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.util.WebUtils;
 
@@ -38,6 +39,7 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 
 	private final Set<ParamExpression> expressions;
 
+
 	/**
 	 * Create a new instance from the given param expressions.
 	 * @param params expressions with syntax defined in {@link RequestMapping#params()};
@@ -48,29 +50,29 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	}
 
 	private ParamsRequestCondition(Collection<ParamExpression> conditions) {
-		this.expressions = Collections.unmodifiableSet(new LinkedHashSet<ParamExpression>(conditions));
+		this.expressions = Collections.unmodifiableSet(new LinkedHashSet<>(conditions));
 	}
 
+
 	private static Collection<ParamExpression> parseExpressions(String... params) {
-		Set<ParamExpression> expressions = new LinkedHashSet<ParamExpression>();
-		if (params != null) {
-			for (String param : params) {
-				expressions.add(new ParamExpression(param));
-			}
+		Set<ParamExpression> expressions = new LinkedHashSet<>();
+		for (String param : params) {
+			expressions.add(new ParamExpression(param));
 		}
 		return expressions;
 	}
+
 
 	/**
 	 * Return the contained request parameter expressions.
 	 */
 	public Set<NameValueExpression<String>> getExpressions() {
-		return new LinkedHashSet<NameValueExpression<String>>(this.expressions);
+		return new LinkedHashSet<>(this.expressions);
 	}
 
 	@Override
 	protected Collection<ParamExpression> getContent() {
-		return expressions;
+		return this.expressions;
 	}
 
 	@Override
@@ -84,7 +86,7 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	 */
 	@Override
 	public ParamsRequestCondition combine(ParamsRequestCondition other) {
-		Set<ParamExpression> set = new LinkedHashSet<ParamExpression>(this.expressions);
+		Set<ParamExpression> set = new LinkedHashSet<>(this.expressions);
 		set.addAll(other.expressions);
 		return new ParamsRequestCondition(set);
 	}
@@ -94,6 +96,7 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	 * or {@code null} otherwise.
 	 */
 	@Override
+	@Nullable
 	public ParamsRequestCondition getMatchingCondition(HttpServletRequest request) {
 		for (ParamExpression expression : expressions) {
 			if (!expression.match(request)) {
@@ -106,19 +109,19 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	/**
 	 * Returns:
 	 * <ul>
-	 * 	<li>0 if the two conditions have the same number of parameter expressions
-	 * 	<li>Less than 0 if "this" instance has more parameter expressions
-	 * 	<li>Greater than 0 if the "other" instance has more parameter expressions
+	 * <li>0 if the two conditions have the same number of parameter expressions
+	 * <li>Less than 0 if "this" instance has more parameter expressions
+	 * <li>Greater than 0 if the "other" instance has more parameter expressions
 	 * </ul>
-	 *
 	 * <p>It is assumed that both instances have been obtained via
 	 * {@link #getMatchingCondition(HttpServletRequest)} and each instance
 	 * contains the matching parameter expressions only or is otherwise empty.
 	 */
 	@Override
 	public int compareTo(ParamsRequestCondition other, HttpServletRequest request) {
-		return other.expressions.size() - this.expressions.size();
+		return (other.expressions.size() - this.expressions.size());
 	}
+
 
 	/**
 	 * Parses and matches a single param expression to a request.
@@ -130,18 +133,24 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 		}
 
 		@Override
+		protected boolean isCaseSensitiveName() {
+			return true;
+		}
+
+		@Override
 		protected String parseValue(String valueExpression) {
 			return valueExpression;
 		}
 
 		@Override
 		protected boolean matchName(HttpServletRequest request) {
-			return WebUtils.hasSubmitParameter(request, name);
+			return (WebUtils.hasSubmitParameter(request, this.name) ||
+					request.getParameterMap().containsKey(this.name));
 		}
 
 		@Override
 		protected boolean matchValue(HttpServletRequest request) {
-			return value.equals(request.getParameter(name));
+			return ObjectUtils.nullSafeEquals(this.value, request.getParameter(this.name));
 		}
 	}
 

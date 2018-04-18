@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.springframework.expression.spel.InternalParseException;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelParseException;
+import org.springframework.lang.Nullable;
 
 /**
  * Common superclass for nodes representing literals (boolean, string, number, etc).
@@ -31,15 +32,17 @@ import org.springframework.expression.spel.SpelParseException;
  */
 public abstract class Literal extends SpelNodeImpl {
 
+	@Nullable
 	private final String originalValue;
 
 
-	public Literal(String originalValue, int pos) {
+	public Literal(@Nullable String originalValue, int pos) {
 		super(pos);
 		this.originalValue = originalValue;
 	}
 
 
+	@Nullable
 	public final String getOriginalValue() {
 		return this.originalValue;
 	}
@@ -51,7 +54,7 @@ public abstract class Literal extends SpelNodeImpl {
 
 	@Override
 	public String toString() {
-		return getLiteralValue().getValue().toString();
+		return String.valueOf(getLiteralValue().getValue());
 	}
 
 	@Override
@@ -64,8 +67,9 @@ public abstract class Literal extends SpelNodeImpl {
 
 
 	/**
-	 * Process the string form of a number, using the specified base if supplied and return an appropriate literal to
-	 * hold it. Any suffix to indicate a long will be taken into account (either 'l' or 'L' is supported).
+	 * Process the string form of a number, using the specified base if supplied
+	 * and return an appropriate literal to hold it. Any suffix to indicate a
+	 * long will be taken into account (either 'l' or 'L' is supported).
 	 * @param numberToken the token holding the number as its payload (eg. 1234 or 0xCAFE)
 	 * @param radix the base of number
 	 * @return a subtype of Literal that can represent it
@@ -75,8 +79,8 @@ public abstract class Literal extends SpelNodeImpl {
 			int value = Integer.parseInt(numberToken, radix);
 			return new IntLiteral(numberToken, pos, value);
 		}
-		catch (NumberFormatException nfe) {
-			throw new InternalParseException(new SpelParseException(pos>>16, nfe, SpelMessage.NOT_AN_INTEGER, numberToken));
+		catch (NumberFormatException ex) {
+			throw new InternalParseException(new SpelParseException(pos>>16, ex, SpelMessage.NOT_AN_INTEGER, numberToken));
 		}
 	}
 
@@ -85,8 +89,8 @@ public abstract class Literal extends SpelNodeImpl {
 			long value = Long.parseLong(numberToken, radix);
 			return new LongLiteral(numberToken, pos, value);
 		}
-		catch (NumberFormatException nfe) {
-			throw new InternalParseException(new SpelParseException(pos>>16, nfe, SpelMessage.NOT_A_LONG, numberToken));
+		catch (NumberFormatException ex) {
+			throw new InternalParseException(new SpelParseException(pos>>16, ex, SpelMessage.NOT_A_LONG, numberToken));
 		}
 	}
 
@@ -101,8 +105,8 @@ public abstract class Literal extends SpelNodeImpl {
 				return new RealLiteral(numberToken, pos, value);
 			}
 		}
-		catch (NumberFormatException nfe) {
-			throw new InternalParseException(new SpelParseException(pos>>16, nfe, SpelMessage.NOT_A_REAL, numberToken));
+		catch (NumberFormatException ex) {
+			throw new InternalParseException(new SpelParseException(pos>>16, ex, SpelMessage.NOT_A_REAL, numberToken));
 		}
 	}
 

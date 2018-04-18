@@ -1,0 +1,145 @@
+
+[[web-uricomponents]]
+= UriComponents
+[.small]#Spring MVC and Spring WebFlux#
+
+`UriComponents` is comparable to `java.net.URI`. However it comes with a dedicated
+`UriComponentsBuilder` and supports URI template variables:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	String uriTemplate = "http://example.com/hotels/{hotel}";
+
+	UriComponents uriComponents = UriComponentsBuilder.fromUriString(uriTemplate)  // <1>
+			.queryParam("q", "{q}")  // <2>
+			.build(); // <3>
+
+	URI uri = uriComponents.expand("Westin", "123").encode().toUri();  // <4>
+----
+<1> Static factory method with a URI template.
+<2> Add or replace URI components.
+<3> Build `UriComponents`.
+<4> Expand URI variables, encode, and obtain the `URI`.
+
+The above can be done as a single chain and with a shortcut:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	String uriTemplate = "http://example.com/hotels/{hotel}";
+
+	URI uri = UriComponentsBuilder.fromUriString(uriTemplate)
+			.queryParam("q", "{q}")
+			.buildAndExpand("Westin", "123")
+			.encode()
+			.toUri();
+----
+
+
+[[web-uribuilder]]
+= UriBuilder
+[.small]#Spring MVC and Spring WebFlux#
+
+<<web-uricomponents,UriComponentsBuilder>> is an implementation of `UriBuilder`. Together
+`UriBuilderFactory` and `UriBuilder` provide a pluggable mechanism for building a URI
+from a URI template, as well as a way to share common properties such as a base URI,
+encoding strategy, and others.
+
+Both the `RestTemplate` and the `WebClient` can be configured with a `UriBuilderFactory`
+in order to customize how URIs are created from URI templates. The default implementation
+relies on `UriComponentsBuilder` internally and provides options to configure a common
+base URI, an alternative encoding mode strategy, and more.
+
+An example of configuring the `RestTemplate`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	String baseUrl = "http://example.com";
+	DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl);
+
+	RestTemplate restTemplate = new RestTemplate();
+	restTemplate.setUriTemplateHandler(factory);
+----
+
+Examples of configuring the `WebClient`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	String baseUrl = "http://example.com";
+	DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl);
+
+	// Configure the UriBuilderFactory..
+	WebClient client = WebClient.builder().uriBuilderFactory(factory).build();
+
+	// Or use shortcut on builder..
+	WebClient client = WebClient.builder().baseUrl(baseUrl).build();
+
+	// Or use create shortcut...
+	WebClient client = WebClient.create(baseUrl);
+----
+
+You can also use `DefaultUriBuilderFactory` directly, as you would `UriComponentsBuilder`.
+The main difference is that `DefaultUriBuilderFactory` is stateful and can be re-used to
+prepare many URLs, sharing common configuration, such as a base URL, while
+`UriComponentsBuilder` is stateless and per URI.
+
+An example of using the `DefaultUriBuilderFactory`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	String baseUrl = "http://example.com";
+	DefaultUriBuilderFactory uriBuilderFactory = new DefaultUriBuilderFactory(baseUrl);
+
+	URI uri = uriBuilderFactory.uriString("/hotels/{hotel}")
+			.queryParam("q", "{q}")
+			.build("Westin", "123"); // encoding strategy applied..
+----
+
+
+[[web-uri-encoding]]
+= URI Encoding
+[.small]#Spring MVC and Spring WebFlux#
+
+The default way of encoding URIs in `UriComponents` works as follows:
+
+. URI variables are expanded.
+. Each URI component (path, query, etc) is encoded individually.
+
+The rules for encoding are as follows: within a URI component, apply percent encoding to
+all illegal characters, including non-US-ASCII characters, and all other characters that
+are illegal within the URI component, as defined in RFC 3986.
+
+[TIP]
+====
+The encoding in `UriComponents` is comparable to the multi-argument constructor of
+`java.net.URI`, as described in the "Escaped octets, quotation, encoding, and decoding"
+section of its class-level Javadoc.
+====
+
+The above default encoding strategy *does not* encode all characters with reserved
+meaning, but only the ones that are illegal within a given URI component. If this is not
+what you expect, you can use the alternative strategy described next.
+
+When using <<web-uribuilder,DefaultUriBuilderFactory>> -- plugged into the `WebClient`,
+`RestTemplate`, or used directly, you can switch to an alternative encoding strategy as
+shown below:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	String baseUrl = "http://example.com";
+	DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl)
+	factory.setEncodingMode(EncodingMode.VALUES_ONLY);
+
+	// ...
+----
+
+This alternative encoding strategy applies `UriUtils.encode(String, Charset)` to each URI
+variable value prior to expanding it, effectively encoding all non-US-ASCII characters,
+and *all* characters with reserved meaning in a URI, which ensures that the expanded URI
+variables do not have any impact on the structure or meaning of the URI.
+

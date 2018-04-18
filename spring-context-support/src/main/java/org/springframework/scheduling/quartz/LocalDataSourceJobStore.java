@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.scheduling.quartz;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import javax.sql.DataSource;
 
 import org.quartz.SchedulerConfigException;
@@ -32,11 +31,12 @@ import org.quartz.utils.DBConnectionManager;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
+import org.springframework.lang.Nullable;
 
 /**
- * Subclass of Quartz's JobStoreCMT class that delegates to a Spring-managed
- * DataSource instead of using a Quartz-managed connection pool. This JobStore
- * will be used if SchedulerFactoryBean's "dataSource" property is set.
+ * Subclass of Quartz's {@link JobStoreCMT} class that delegates to a Spring-managed
+ * {@link DataSource} instead of using a Quartz-managed JDBC connection pool.
+ * This JobStore will be used if SchedulerFactoryBean's "dataSource" property is set.
  *
  * <p>Supports both transactional and non-transactional DataSource access.
  * With a non-XA DataSource and local Spring transactions, a single DataSource
@@ -59,6 +59,7 @@ import org.springframework.jdbc.support.MetaDataAccessException;
  * @see org.springframework.jdbc.datasource.DataSourceUtils#doGetConnection
  * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
  */
+@SuppressWarnings("unchecked")  // due to a warning in Quartz 2.2's JobStoreCMT
 public class LocalDataSourceJobStore extends JobStoreCMT {
 
 	/**
@@ -78,19 +79,17 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 	public static final String NON_TX_DATA_SOURCE_PREFIX = "springNonTxDataSource.";
 
 
+	@Nullable
 	private DataSource dataSource;
 
 
 	@Override
-	public void initialize(ClassLoadHelper loadHelper, SchedulerSignaler signaler)
-			throws SchedulerConfigException {
-
+	public void initialize(ClassLoadHelper loadHelper, SchedulerSignaler signaler) throws SchedulerConfigException {
 		// Absolutely needs thread-bound DataSource to initialize.
 		this.dataSource = SchedulerFactoryBean.getConfigTimeDataSource();
 		if (this.dataSource == null) {
-			throw new SchedulerConfigException(
-				"No local DataSource found for configuration - " +
-				"'dataSource' property must be set on SchedulerFactoryBean");
+			throw new SchedulerConfigException("No local DataSource found for configuration - " +
+					"'dataSource' property must be set on SchedulerFactoryBean");
 		}
 
 		// Configure transactional connection settings for Quartz.
@@ -110,14 +109,17 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 					public void shutdown() {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}
+					/* Quartz 2.2 initialize method */
+					public void initialize() {
+						// Do nothing - a Spring-managed DataSource has its own lifecycle.
+					}
 				}
 		);
 
 		// Non-transactional DataSource is optional: fall back to default
 		// DataSource if not explicitly specified.
 		DataSource nonTxDataSource = SchedulerFactoryBean.getConfigTimeNonTransactionalDataSource();
-		final DataSource nonTxDataSourceToUse =
-				(nonTxDataSource != null ? nonTxDataSource : this.dataSource);
+		final DataSource nonTxDataSourceToUse = (nonTxDataSource != null ? nonTxDataSource : this.dataSource);
 
 		// Configure non-transactional connection settings for Quartz.
 		setNonManagedTXDataSource(NON_TX_DATA_SOURCE_PREFIX + getInstanceName());
@@ -135,21 +137,24 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 					public void shutdown() {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}
+					/* Quartz 2.2 initialize method */
+					public void initialize() {
+						// Do nothing - a Spring-managed DataSource has its own lifecycle.
+					}
 				}
 		);
 
-		// No, if HSQL is the platform, we really don't want to use locks
+		// No, if HSQL is the platform, we really don't want to use locks...
 		try {
-			String productName = JdbcUtils.extractDatabaseMetaData(dataSource,
-					"getDatabaseProductName").toString();
+			String productName = JdbcUtils.extractDatabaseMetaData(this.dataSource, "getDatabaseProductName");
 			productName = JdbcUtils.commonDatabaseName(productName);
-			if (productName != null
-					&& productName.toLowerCase().contains("hsql")) {
+			if (productName != null && productName.toLowerCase().contains("hsql")) {
 				setUseDBLocks(false);
 				setLockHandler(new SimpleSemaphore());
 			}
-		} catch (MetaDataAccessException e) {
-			logWarnIfNonZero(1, "Could not detect database type.  Assuming locks can be taken.");
+		}
+		catch (MetaDataAccessException ex) {
+			logWarnIfNonZero(1, "Could not detect database type. Assuming locks can be taken.");
 		}
 
 		super.initialize(loadHelper, signaler);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,9 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.util.Assert;
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
@@ -37,8 +38,8 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final List<HandlerMethodReturnValueHandler> returnValueHandlers =
-		new ArrayList<HandlerMethodReturnValueHandler>();
+	private final List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<>();
+
 
 	/**
 	 * Return a read-only list with the registered handlers, or an empty list.
@@ -56,42 +57,60 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 		return getReturnValueHandler(returnType) != null;
 	}
 
-	/**
-	 * Iterate over registered {@link HandlerMethodReturnValueHandler}s and invoke the one that supports it.
-	 * @exception IllegalStateException if no suitable {@link HandlerMethodReturnValueHandler} is found.
-	 */
-	@Override
-	public void handleReturnValue(
-			Object returnValue, MethodParameter returnType,
-			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)
-			throws Exception {
-
-		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
-		Assert.notNull(handler, "Unknown return value type [" + returnType.getParameterType().getName() + "]");
-		handler.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
-	}
-
-	/**
-	 * Find a registered {@link HandlerMethodReturnValueHandler} that supports the given return type.
-	 */
+	@Nullable
 	private HandlerMethodReturnValueHandler getReturnValueHandler(MethodParameter returnType) {
-		for (HandlerMethodReturnValueHandler returnValueHandler : returnValueHandlers) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Testing if return value handler [" + returnValueHandler + "] supports [" +
-						returnType.getGenericParameterType() + "]");
-			}
-			if (returnValueHandler.supportsReturnType(returnType)) {
-				return returnValueHandler;
+		for (HandlerMethodReturnValueHandler handler : this.returnValueHandlers) {
+			if (handler.supportsReturnType(returnType)) {
+				return handler;
 			}
 		}
 		return null;
 	}
 
 	/**
+	 * Iterate over registered {@link HandlerMethodReturnValueHandler}s and invoke the one that supports it.
+	 * @throws IllegalStateException if no suitable {@link HandlerMethodReturnValueHandler} is found.
+	 */
+	@Override
+	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
+			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
+
+		HandlerMethodReturnValueHandler handler = selectHandler(returnValue, returnType);
+		if (handler == null) {
+			throw new IllegalArgumentException("Unknown return value type: " + returnType.getParameterType().getName());
+		}
+		handler.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
+	}
+
+	@Nullable
+	private HandlerMethodReturnValueHandler selectHandler(@Nullable Object value, MethodParameter returnType) {
+		boolean isAsyncValue = isAsyncReturnValue(value, returnType);
+		for (HandlerMethodReturnValueHandler handler : this.returnValueHandlers) {
+			if (isAsyncValue && !(handler instanceof AsyncHandlerMethodReturnValueHandler)) {
+				continue;
+			}
+			if (handler.supportsReturnType(returnType)) {
+				return handler;
+			}
+		}
+		return null;
+	}
+
+	private boolean isAsyncReturnValue(@Nullable Object value, MethodParameter returnType) {
+		for (HandlerMethodReturnValueHandler handler : this.returnValueHandlers) {
+			if (handler instanceof AsyncHandlerMethodReturnValueHandler &&
+					((AsyncHandlerMethodReturnValueHandler) handler).isAsyncReturnValue(value, returnType)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Add the given {@link HandlerMethodReturnValueHandler}.
 	 */
-	public HandlerMethodReturnValueHandlerComposite addHandler(HandlerMethodReturnValueHandler returnValuehandler) {
-		returnValueHandlers.add(returnValuehandler);
+	public HandlerMethodReturnValueHandlerComposite addHandler(HandlerMethodReturnValueHandler handler) {
+		this.returnValueHandlers.add(handler);
 		return this;
 	}
 
@@ -99,11 +118,10 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 	 * Add the given {@link HandlerMethodReturnValueHandler}s.
 	 */
 	public HandlerMethodReturnValueHandlerComposite addHandlers(
-			List<? extends HandlerMethodReturnValueHandler> returnValueHandlers) {
-		if (returnValueHandlers != null) {
-			for (HandlerMethodReturnValueHandler handler : returnValueHandlers) {
-				this.returnValueHandlers.add(handler);
-			}
+			@Nullable List<? extends HandlerMethodReturnValueHandler> handlers) {
+
+		if (handlers != null) {
+			this.returnValueHandlers.addAll(handlers);
 		}
 		return this;
 	}

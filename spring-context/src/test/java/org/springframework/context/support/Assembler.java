@@ -21,6 +21,7 @@ package org.springframework.context.support;
  */
 public class Assembler implements TestIF {
 
+	@SuppressWarnings("unused")
 	private Service service;
 	private Logic l;
 	private String name;

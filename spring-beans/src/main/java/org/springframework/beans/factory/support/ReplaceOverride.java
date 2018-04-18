@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class ReplaceOverride extends MethodOverride {
 
 	private final String methodReplacerBeanName;
 
-	private List<String> typeIdentifiers = new LinkedList<String>();
+	private List<String> typeIdentifiers = new LinkedList<>();
 
 
 	/**
@@ -51,6 +51,7 @@ public class ReplaceOverride extends MethodOverride {
 		Assert.notNull(methodName, "Method replacer bean name must not be null");
 		this.methodReplacerBeanName = methodReplacerBeanName;
 	}
+
 
 	/**
 	 * Return the name of the bean implementing MethodReplacer.
@@ -68,40 +69,28 @@ public class ReplaceOverride extends MethodOverride {
 		this.typeIdentifiers.add(identifier);
 	}
 
-
 	@Override
 	public boolean matches(Method method) {
-		// TODO could cache result for efficiency
 		if (!method.getName().equals(getMethodName())) {
-			// It can't match.
 			return false;
 		}
-
 		if (!isOverloaded()) {
-			// No overloaded: don't worry about arg type matching.
+			// Not overloaded: don't worry about arg type matching...
 			return true;
 		}
-
-		// If we get to here, we need to insist on precise argument matching.
-		if (this.typeIdentifiers.size() != method.getParameterTypes().length) {
+		// If we get here, we need to insist on precise argument matching...
+		if (this.typeIdentifiers.size() != method.getParameterCount()) {
 			return false;
 		}
 		for (int i = 0; i < this.typeIdentifiers.size(); i++) {
 			String identifier = this.typeIdentifiers.get(i);
 			if (!method.getParameterTypes()[i].getName().contains(identifier)) {
-				// This parameter cannot match.
 				return false;
 			}
 		}
 		return true;
 	}
 
-
-	@Override
-	public String toString() {
-		return "Replace override for method '" + getMethodName() + "; will call bean '" +
-				this.methodReplacerBeanName + "'";
-	}
 
 	@Override
 	public boolean equals(Object other) {
@@ -119,6 +108,11 @@ public class ReplaceOverride extends MethodOverride {
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.methodReplacerBeanName);
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.typeIdentifiers);
 		return hashCode;
+	}
+
+	@Override
+	public String toString() {
+		return "Replace override for method '" + getMethodName() + "'";
 	}
 
 }

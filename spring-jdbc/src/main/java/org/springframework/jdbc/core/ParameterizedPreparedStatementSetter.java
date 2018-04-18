@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
- * Parameterized callback interface used by the {@link JdbcTemplate} class for batch updates.
+ * Parameterized callback interface used by the {@link JdbcTemplate} class for
+ * batch updates.
  *
  * <p>This interface sets values on a {@link java.sql.PreparedStatement} provided
  * by the JdbcTemplate class, for each of a number of updates in a batch using the
@@ -36,11 +37,11 @@ import java.sql.SQLException;
  * @since 3.1
  * @see JdbcTemplate#batchUpdate(String, java.util.Collection, int, ParameterizedPreparedStatementSetter)
  */
+@FunctionalInterface
 public interface ParameterizedPreparedStatementSetter<T> {
 
 	/**
 	 * Set parameter values on the given PreparedStatement.
-	 *
 	 * @param ps the PreparedStatement to invoke setter methods on
 	 * @param argument the object containing the values to be set
 	 * @throws SQLException if a SQLException is encountered (i.e. there is no need to catch SQLException)

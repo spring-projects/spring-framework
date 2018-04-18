@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.format.datetime.joda;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -27,7 +24,11 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.junit.Test;
+
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Phillip Webb
@@ -49,34 +50,36 @@ public class DateTimeFormatterFactoryTests {
 
 
 	@Test
-	public void createDateTimeFormatter() throws Exception {
+	public void createDateTimeFormatter() {
 		assertThat(factory.createDateTimeFormatter(), is(equalTo(DateTimeFormat.mediumDateTime())));
 	}
 
 	@Test
-	public void createDateTimeFormatterWithPattern() throws Exception {
+	public void createDateTimeFormatterWithPattern() {
 		factory = new DateTimeFormatterFactory("yyyyMMddHHmmss");
 		DateTimeFormatter formatter = factory.createDateTimeFormatter();
 		assertThat(formatter.print(dateTime), is("20091021121000"));
 	}
 
 	@Test
-	public void createDateTimeFormatterWithNullFallback() throws Exception {
+	public void createDateTimeFormatterWithNullFallback() {
 		DateTimeFormatter formatter = factory.createDateTimeFormatter(null);
 		assertThat(formatter, is(nullValue()));
 	}
 
 	@Test
-	public void createDateTimeFormatterWithFallback() throws Exception {
+	public void createDateTimeFormatterWithFallback() {
 		DateTimeFormatter fallback = DateTimeFormat.forStyle("LL");
 		DateTimeFormatter formatter = factory.createDateTimeFormatter(fallback);
 		assertThat(formatter, is(sameInstance(fallback)));
 	}
 
 	@Test
-	public void createDateTimeFormatterInOrderOfPropertyPriority() throws Exception {
+	public void createDateTimeFormatterInOrderOfPropertyPriority() {
 		factory.setStyle("SS");
-		assertThat(applyLocale(factory.createDateTimeFormatter()).print(dateTime), is("10/21/09 12:10 PM"));
+		String value = applyLocale(factory.createDateTimeFormatter()).print(dateTime);
+		assertTrue(value.startsWith("10/21/09"));
+		assertTrue(value.endsWith("12:10 PM"));
 
 		factory.setIso(ISO.DATE);
 		assertThat(applyLocale(factory.createDateTimeFormatter()).print(dateTime), is("2009-10-21"));
@@ -86,7 +89,7 @@ public class DateTimeFormatterFactoryTests {
 	}
 
 	@Test
-	public void createDateTimeFormatterWithTimeZone() throws Exception {
+	public void createDateTimeFormatterWithTimeZone() {
 		factory.setPattern("yyyyMMddHHmmss Z");
 		factory.setTimeZone(TEST_TIMEZONE);
 		DateTimeZone dateTimeZone = DateTimeZone.forTimeZone(TEST_TIMEZONE);

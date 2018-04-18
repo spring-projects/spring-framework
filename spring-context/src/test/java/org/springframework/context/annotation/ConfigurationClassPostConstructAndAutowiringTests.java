@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package org.springframework.context.annotation;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
 import javax.annotation.PostConstruct;
 
 import org.junit.Test;
-import org.springframework.tests.sample.beans.TestBean;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.tests.sample.beans.TestBean;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests cornering the issue reported in SPR-8080. If the product of a @Bean method
@@ -101,6 +102,7 @@ public class ConfigurationClassPostConstructAndAutowiringTests {
 
 	@Configuration
 	static class Config2 {
+
 		TestBean testBean;
 
 		@Autowired

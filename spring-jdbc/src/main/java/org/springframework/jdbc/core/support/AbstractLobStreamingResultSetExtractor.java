@@ -25,6 +25,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.LobRetrievalFailureException;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.lang.Nullable;
 
 /**
  * Abstract ResultSetExtractor implementation that assumes streaming of LOB data.
@@ -53,7 +54,7 @@ import org.springframework.jdbc.core.ResultSetExtractor;
  * @see org.springframework.jdbc.support.lob.LobHandler
  * @see org.springframework.jdbc.LobRetrievalFailureException
  */
-public abstract class AbstractLobStreamingResultSetExtractor implements ResultSetExtractor {
+public abstract class AbstractLobStreamingResultSetExtractor<T> implements ResultSetExtractor<T> {
 
 	/**
 	 * Delegates to handleNoRowFound, handleMultipleRowsFound and streamData,
@@ -65,7 +66,8 @@ public abstract class AbstractLobStreamingResultSetExtractor implements ResultSe
 	 * @see org.springframework.jdbc.LobRetrievalFailureException
 	 */
 	@Override
-	public final Object extractData(ResultSet rs) throws SQLException, DataAccessException {
+	@Nullable
+	public final T extractData(ResultSet rs) throws SQLException, DataAccessException {
 		if (!rs.next()) {
 			handleNoRowFound();
 		}

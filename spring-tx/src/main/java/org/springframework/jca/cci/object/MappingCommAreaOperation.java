@@ -17,7 +17,6 @@
 package org.springframework.jca.cci.object;
 
 import java.io.IOException;
-
 import javax.resource.cci.ConnectionFactory;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;

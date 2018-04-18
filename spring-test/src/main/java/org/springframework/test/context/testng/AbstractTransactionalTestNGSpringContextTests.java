@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,17 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.EncodedResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 /**
  * Abstract {@linkplain Transactional transactional} extension of
@@ -47,6 +50,17 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>Concrete subclasses must fulfill the same requirements outlined in
  * {@link AbstractTestNGSpringContextTests}.
  *
+ * <p>The following {@link org.springframework.test.context.TestExecutionListener
+ * TestExecutionListeners} are configured by default:
+ *
+ * <ul>
+ * <li>{@link org.springframework.test.context.web.ServletTestExecutionListener}
+ * <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener}
+ * <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener}
+ * <li>{@link org.springframework.test.context.transaction.TransactionalTestExecutionListener}
+ * <li>{@link org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener}
+ * </ul>
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
@@ -54,15 +68,16 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.context.ContextConfiguration
  * @see org.springframework.test.context.TestExecutionListeners
  * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
- * @see org.springframework.test.context.transaction.TransactionConfiguration
+ * @see org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener
  * @see org.springframework.transaction.annotation.Transactional
+ * @see org.springframework.test.annotation.Commit
  * @see org.springframework.test.annotation.Rollback
  * @see org.springframework.test.context.transaction.BeforeTransaction
  * @see org.springframework.test.context.transaction.AfterTransaction
  * @see org.springframework.test.jdbc.JdbcTestUtils
  * @see org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests
  */
-@TestExecutionListeners(TransactionalTestExecutionListener.class)
+@TestExecutionListeners({TransactionalTestExecutionListener.class, SqlScriptsTestExecutionListener.class})
 @Transactional
 public abstract class AbstractTransactionalTestNGSpringContextTests extends AbstractTestNGSpringContextTests {
 
@@ -70,8 +85,9 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	 * The {@code JdbcTemplate} that this base class manages, available to subclasses.
 	 * @since 3.2
 	 */
-	protected JdbcTemplate jdbcTemplate;
+	protected final JdbcTemplate jdbcTemplate = new JdbcTemplate();
 
+	@Nullable
 	private String sqlScriptEncoding;
 
 
@@ -81,7 +97,7 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	 */
 	@Autowired
 	public void setDataSource(DataSource dataSource) {
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
+		this.jdbcTemplate.setDataSource(dataSource);
 	}
 
 	/**
@@ -162,21 +178,21 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	/**
 	 * Execute the given SQL script.
 	 * <p>Use with caution outside of a transaction!
-	 * <p>The script will normally be loaded by classpath. There should be one
-	 * statement per line. Any semicolons will be removed. <b>Do not use this
-	 * method to execute DDL if you expect rollback.</b>
+	 * <p>The script will normally be loaded by classpath.
+	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
 	 * @param sqlResourcePath the Spring resource path for the SQL script
 	 * @param continueOnError whether or not to continue without throwing an
 	 * exception in the event of an error
 	 * @throws DataAccessException if there is an error executing a statement
-	 * and continueOnError was {@code false}
-	 * @see JdbcTestUtils#executeSqlScript(JdbcTemplate, EncodedResource, boolean)
+	 * @see ResourceDatabasePopulator
 	 * @see #setSqlScriptEncoding
 	 */
 	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError) throws DataAccessException {
+		DataSource ds = this.jdbcTemplate.getDataSource();
+		Assert.state(ds != null, "No DataSource set");
+		Assert.state(this.applicationContext != null, "No ApplicationContext available");
 		Resource resource = this.applicationContext.getResource(sqlResourcePath);
-		JdbcTestUtils.executeSqlScript(this.jdbcTemplate, new EncodedResource(resource, this.sqlScriptEncoding),
-			continueOnError);
+		new ResourceDatabasePopulator(continueOnError, false, this.sqlScriptEncoding, resource).execute(ds);
 	}
 
 }

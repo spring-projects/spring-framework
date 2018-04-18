@@ -17,11 +17,11 @@
 package org.springframework.jmx.export;
 
 import javax.management.InstanceAlreadyExistsException;
-import javax.management.ObjectName;
 import javax.management.MBeanInfo;
-import javax.management.modelmbean.RequiredModelMBean;
+import javax.management.ObjectName;
 import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.ModelMBeanInfoSupport;
+import javax.management.modelmbean.RequiredModelMBean;
 
 import org.junit.Test;
 

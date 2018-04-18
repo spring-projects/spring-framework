@@ -34,7 +34,7 @@ package org.springframework.asm;
  * 
  * @author Eric Bruneton
  */
-final class Frame {
+class Frame {
 
     /*
      * Frames are computed in a two steps process: during the visit of each
@@ -70,8 +70,8 @@ final class Frame {
      * stack types. VALUE depends on KIND. For LOCAL types, it is an index in
      * the input local variable types. For STACK types, it is a position
      * relatively to the top of input frame stack. For BASE types, it is either
-     * one of the constants defined in FrameVisitor, or for OBJECT and
-     * UNINITIALIZED types, a tag and an index in the type table.
+     * one of the constants defined below, or for OBJECT and UNINITIALIZED
+     * types, a tag and an index in the type table.
      * 
      * Output frames can contain types of any kind and with a positive or
      * negative dimension (and even unassigned types, represented by 0 - which
@@ -163,7 +163,7 @@ final class Frame {
     private static final int LOCAL = 0x2000000;
 
     /**
-     * Kind of the the types that are relative to the stack of an input stack
+     * Kind of the types that are relative to the stack of an input stack
      * map frame. The value of such types is a position relatively to the top of
      * this stack.
      */
@@ -496,7 +496,7 @@ final class Frame {
      * When the stack map frames are completely computed, this field is the
      * actual number of types in {@link #outputStack}.
      */
-    private int outputStackTop;
+    int outputStackTop;
 
     /**
      * Number of types that are initialized in the basic block.
@@ -519,6 +519,110 @@ final class Frame {
      * description of the algorithm).
      */
     private int[] initializations;
+
+    /**
+     * Sets this frame to the given value.
+     *
+     * @param cw
+     *            the ClassWriter to which this label belongs.
+     * @param nLocal
+     *            the number of local variables.
+     * @param local
+     *            the local variable types. Primitive types are represented by
+     *            {@link Opcodes#TOP}, {@link Opcodes#INTEGER},
+     *            {@link Opcodes#FLOAT}, {@link Opcodes#LONG},
+     *            {@link Opcodes#DOUBLE},{@link Opcodes#NULL} or
+     *            {@link Opcodes#UNINITIALIZED_THIS} (long and double are
+     *            represented by a single element). Reference types are
+     *            represented by String objects (representing internal names),
+     *            and uninitialized types by Label objects (this label
+     *            designates the NEW instruction that created this uninitialized
+     *            value).
+     * @param nStack
+     *            the number of operand stack elements.
+     * @param stack
+     *            the operand stack types (same format as the "local" array).
+     */
+    final void set(ClassWriter cw, final int nLocal, final Object[] local,
+            final int nStack, final Object[] stack) {
+        int i = convert(cw, nLocal, local, inputLocals);
+        while (i < local.length) {
+            inputLocals[i++] = TOP;
+        }
+        int nStackTop = 0;
+        for (int j = 0; j < nStack; ++j) {
+            if (stack[j] == Opcodes.LONG || stack[j] == Opcodes.DOUBLE) {
+                ++nStackTop;
+            }
+        }
+        inputStack = new int[nStack + nStackTop];
+        convert(cw, nStack, stack, inputStack);
+        outputStackTop = 0;
+        initializationCount = 0;
+    }
+
+    /**
+     * Converts types from the MethodWriter.visitFrame() format to the Frame
+     * format.
+     *
+     * @param cw
+     *            the ClassWriter to which this label belongs.
+     * @param nInput
+     *            the number of types to convert.
+     * @param input
+     *            the types to convert. Primitive types are represented by
+     *            {@link Opcodes#TOP}, {@link Opcodes#INTEGER},
+     *            {@link Opcodes#FLOAT}, {@link Opcodes#LONG},
+     *            {@link Opcodes#DOUBLE},{@link Opcodes#NULL} or
+     *            {@link Opcodes#UNINITIALIZED_THIS} (long and double are
+     *            represented by a single element). Reference types are
+     *            represented by String objects (representing internal names),
+     *            and uninitialized types by Label objects (this label
+     *            designates the NEW instruction that created this uninitialized
+     *            value).
+     * @param output
+     *            where to store the converted types.
+     * @return the number of output elements.
+     */
+    private static int convert(ClassWriter cw, int nInput, Object[] input,
+            int[] output) {
+        int i = 0;
+        for (int j = 0; j < nInput; ++j) {
+            if (input[j] instanceof Integer) {
+                output[i++] = BASE | ((Integer) input[j]).intValue();
+                if (input[j] == Opcodes.LONG || input[j] == Opcodes.DOUBLE) {
+                    output[i++] = TOP;
+                }
+            } else if (input[j] instanceof String) {
+                output[i++] = type(cw, Type.getObjectType((String) input[j])
+                        .getDescriptor());
+            } else {
+                output[i++] = UNINITIALIZED
+                        | cw.addUninitializedType("",
+                                ((Label) input[j]).position);
+            }
+        }
+        return i;
+    }
+
+    /**
+     * Sets this frame to the value of the given frame. WARNING: after this
+     * method is called the two frames share the same data structures. It is
+     * recommended to discard the given frame f to avoid unexpected side
+     * effects.
+     *
+     * @param f
+     *            The new frame value.
+     */
+    final void set(final Frame f) {
+        inputLocals = f.inputLocals;
+        inputStack = f.inputStack;
+        outputLocals = f.outputLocals;
+        outputStack = f.outputStack;
+        outputStackTop = f.outputStackTop;
+        initializationCount = f.initializationCount;
+        initializations = f.initializations;
+    }
 
     /**
      * Returns the output frame local variable type at the given index.
@@ -585,7 +689,7 @@ final class Frame {
         }
         // pushes the type on the output stack
         outputStack[outputStackTop++] = type;
-        // updates the maximun height reached by the output stack, if needed
+        // updates the maximum height reached by the output stack, if needed
         int top = owner.inputStackTop + outputStackTop;
         if (top > owner.outputStackMax) {
             owner.outputStackMax = top;
@@ -809,7 +913,7 @@ final class Frame {
      * @param maxLocals
      *            the maximum number of local variables of this method.
      */
-    void initInputFrame(final ClassWriter cw, final int access,
+    final void initInputFrame(final ClassWriter cw, final int access,
             final Type[] args, final int maxLocals) {
         inputLocals = new int[maxLocals];
         inputStack = new int[0];
@@ -1283,7 +1387,7 @@ final class Frame {
      * @return <tt>true</tt> if the input frame of the given label has been
      *         changed by this operation.
      */
-    boolean merge(final ClassWriter cw, final Frame frame, final int edge) {
+    final boolean merge(final ClassWriter cw, final Frame frame, final int edge) {
         boolean changed = false;
         int i, s, dim, kind, t;
 
@@ -1417,6 +1521,7 @@ final class Frame {
                 // if t is the NULL type, merge(u,t)=u, so there is no change
                 return false;
             } else if ((t & (DIM | BASE_KIND)) == (u & (DIM | BASE_KIND))) {
+                // if t and u have the same dimension and same base kind
                 if ((u & BASE_KIND) == OBJECT) {
                     // if t is also a reference type, and if u and t have the
                     // same dimension merge(u,t) = dim(t) | common parent of the
@@ -1425,13 +1530,21 @@ final class Frame {
                             | cw.getMergedType(t & BASE_VALUE, u & BASE_VALUE);
                 } else {
                     // if u and t are array types, but not with the same element
-                    // type, merge(u,t)=java/lang/Object
-                    v = OBJECT | cw.addType("java/lang/Object");
+                    // type, merge(u,t) = dim(u) - 1 | java/lang/Object
+                    int vdim = ELEMENT_OF + (u & DIM);
+                    v = vdim | OBJECT | cw.addType("java/lang/Object");
                 }
             } else if ((t & BASE_KIND) == OBJECT || (t & DIM) != 0) {
-                // if t is any other reference or array type,
-                // merge(u,t)=java/lang/Object
-                v = OBJECT | cw.addType("java/lang/Object");
+                // if t is any other reference or array type, the merged type
+                // is min(udim, tdim) | java/lang/Object, where udim is the
+                // array dimension of u, minus 1 if u is an array type with a
+                // primitive element type (and similarly for tdim).
+                int tdim = (((t & DIM) == 0 || (t & BASE_KIND) == OBJECT) ? 0
+                        : ELEMENT_OF) + (t & DIM);
+                int udim = (((u & DIM) == 0 || (u & BASE_KIND) == OBJECT) ? 0
+                        : ELEMENT_OF) + (u & DIM);
+                v = Math.min(tdim, udim) | OBJECT
+                        | cw.addType("java/lang/Object");
             } else {
                 // if t is any other type, merge(u,t)=TOP
                 v = TOP;

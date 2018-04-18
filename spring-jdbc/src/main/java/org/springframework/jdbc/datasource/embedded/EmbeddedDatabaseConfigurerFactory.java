@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,22 @@ package org.springframework.jdbc.datasource.embedded;
 import org.springframework.util.Assert;
 
 /**
- * Maps well-known {@link EmbeddedDatabaseType embedded database types} to
- * {@link EmbeddedDatabaseConfigurer} strategies.
+ * Maps well-known {@linkplain EmbeddedDatabaseType embedded database types}
+ * to {@link EmbeddedDatabaseConfigurer} strategies.
  *
  * @author Keith Donald
  * @author Oliver Gierke
+ * @author Sam Brannen
  * @since 3.0
  */
 final class EmbeddedDatabaseConfigurerFactory {
 
+	/**
+	 * Return a configurer instance for the given embedded database type.
+	 * @param type HSQL, H2 or Derby
+	 * @return the configurer instance
+	 * @throws IllegalStateException if the driver for the specified database type is not available
+	 */
 	public static EmbeddedDatabaseConfigurer getConfigurer(EmbeddedDatabaseType type) throws IllegalStateException {
 		Assert.notNull(type, "EmbeddedDatabaseType is required");
 		try {
@@ -39,16 +46,12 @@ final class EmbeddedDatabaseConfigurerFactory {
 				case DERBY:
 					return DerbyEmbeddedDatabaseConfigurer.getInstance();
 				default:
-					throw new UnsupportedOperationException("Other embedded database types not yet supported");
+					throw new UnsupportedOperationException("Embedded database type [" + type + "] is not supported");
 			}
 		}
-		catch (ClassNotFoundException ex) {
-			throw new IllegalStateException("Driver for test database type [" + type +
-					"] is not available in the classpath", ex);
+		catch (ClassNotFoundException | NoClassDefFoundError ex) {
+			throw new IllegalStateException("Driver for test database type [" + type + "] is not available", ex);
 		}
-	}
-
-	private EmbeddedDatabaseConfigurerFactory() {
 	}
 
 }

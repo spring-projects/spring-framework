@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.context.ServletContextAware;
@@ -66,8 +68,10 @@ public class DefaultServletHttpRequestHandler implements HttpRequestHandler, Ser
 	private static final String WEBSPHERE_DEFAULT_SERVLET_NAME = "SimpleFileServlet";
 
 
+	@Nullable
 	private String defaultServletName;
 
+	@Nullable
 	private ServletContext servletContext;
 
 
@@ -114,10 +118,11 @@ public class DefaultServletHttpRequestHandler implements HttpRequestHandler, Ser
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
+		Assert.state(this.servletContext != null, "No ServletContext set");
 		RequestDispatcher rd = this.servletContext.getNamedDispatcher(this.defaultServletName);
 		if (rd == null) {
 			throw new IllegalStateException("A RequestDispatcher could not be located for the default servlet '" +
-					this.defaultServletName +"'");
+					this.defaultServletName + "'");
 		}
 		rd.forward(request, response);
 	}

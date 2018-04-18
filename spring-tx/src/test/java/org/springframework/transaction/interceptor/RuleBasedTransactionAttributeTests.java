@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.transaction.interceptor;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.Collections;
@@ -25,7 +23,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.Test;
+
 import org.springframework.transaction.TransactionDefinition;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
@@ -50,7 +51,7 @@ public class RuleBasedTransactionAttributeTests {
 	 */
 	@Test
 	public void testRuleForRollbackOnChecked() {
-		List<RollbackRuleAttribute> list = new LinkedList<RollbackRuleAttribute>();
+		List<RollbackRuleAttribute> list = new LinkedList<>();
 		list.add(new RollbackRuleAttribute(IOException.class.getName()));
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, list);
 
@@ -63,7 +64,7 @@ public class RuleBasedTransactionAttributeTests {
 
 	@Test
 	public void testRuleForCommitOnUnchecked() {
-		List<RollbackRuleAttribute> list = new LinkedList<RollbackRuleAttribute>();
+		List<RollbackRuleAttribute> list = new LinkedList<>();
 		list.add(new NoRollbackRuleAttribute(MyRuntimeException.class.getName()));
 		list.add(new RollbackRuleAttribute(IOException.class.getName()));
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, list);
@@ -78,7 +79,7 @@ public class RuleBasedTransactionAttributeTests {
 
 	@Test
 	public void testRuleForSelectiveRollbackOnCheckedWithString() {
-		List<RollbackRuleAttribute> l = new LinkedList<RollbackRuleAttribute>();
+		List<RollbackRuleAttribute> l = new LinkedList<>();
 		l.add(new RollbackRuleAttribute(java.rmi.RemoteException.class.getName()));
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, l);
 		doTestRuleForSelectiveRollbackOnChecked(rta);
@@ -105,7 +106,7 @@ public class RuleBasedTransactionAttributeTests {
 	 */
 	@Test
 	public void testRuleForCommitOnSubclassOfChecked() {
-		List<RollbackRuleAttribute> list = new LinkedList<RollbackRuleAttribute>();
+		List<RollbackRuleAttribute> list = new LinkedList<>();
 		// Note that it's important to ensure that we have this as
 		// a FQN: otherwise it will match everything!
 		list.add(new RollbackRuleAttribute("java.lang.Exception"));
@@ -120,7 +121,7 @@ public class RuleBasedTransactionAttributeTests {
 
 	@Test
 	public void testRollbackNever() {
-		List<RollbackRuleAttribute> list = new LinkedList<RollbackRuleAttribute>();
+		List<RollbackRuleAttribute> list = new LinkedList<>();
 		list.add(new NoRollbackRuleAttribute("Throwable"));
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, list);
 
@@ -133,7 +134,7 @@ public class RuleBasedTransactionAttributeTests {
 
 	@Test
 	public void testToStringMatchesEditor() {
-		List<RollbackRuleAttribute> list = new LinkedList<RollbackRuleAttribute>();
+		List<RollbackRuleAttribute> list = new LinkedList<>();
 		list.add(new NoRollbackRuleAttribute("Throwable"));
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, list);
 
@@ -153,7 +154,7 @@ public class RuleBasedTransactionAttributeTests {
 	 */
 	@Test
 	public void testConflictingRulesToDetermineExactContract() {
-		List<RollbackRuleAttribute> list = new LinkedList<RollbackRuleAttribute>();
+		List<RollbackRuleAttribute> list = new LinkedList<>();
 		list.add(new NoRollbackRuleAttribute(MyBusinessWarningException.class));
 		list.add(new RollbackRuleAttribute(MyBusinessException.class));
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, list);

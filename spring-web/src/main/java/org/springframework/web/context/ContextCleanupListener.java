@@ -59,9 +59,9 @@ public class ContextCleanupListener implements ServletContextListener {
 	 * @param sc the ServletContext to check
 	 */
 	static void cleanupAttributes(ServletContext sc) {
-		Enumeration attrNames = sc.getAttributeNames();
+		Enumeration<String> attrNames = sc.getAttributeNames();
 		while (attrNames.hasMoreElements()) {
-			String attrName = (String) attrNames.nextElement();
+			String attrName = attrNames.nextElement();
 			if (attrName.startsWith("org.springframework.")) {
 				Object attrValue = sc.getAttribute(attrName);
 				if (attrValue instanceof DisposableBean) {

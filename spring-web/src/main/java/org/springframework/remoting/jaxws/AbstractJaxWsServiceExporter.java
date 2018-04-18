@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package org.springframework.remoting.jaxws;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -27,7 +26,6 @@ import javax.xml.ws.Endpoint;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.WebServiceProvider;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.CannotLoadBeanClassException;
@@ -35,14 +33,12 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Abstract exporter for JAX-WS services, autodetecting annotated service beans
  * (through the JAX-WS {@link javax.jws.WebService} annotation).
- * Compatible with JAX-WS 2.0, 2.1 and 2.2.
  *
  * <p>Subclasses need to implement the {@link #publishEndpoint} template methods
  * for actual endpoint exposure.
@@ -56,17 +52,22 @@ import org.springframework.util.ReflectionUtils;
  */
 public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, InitializingBean, DisposableBean {
 
+	@Nullable
 	private Map<String, Object> endpointProperties;
 
+	@Nullable
 	private Executor executor;
 
+	@Nullable
 	private String bindingType;
 
-	private Object[] webServiceFeatures;
+	@Nullable
+	private WebServiceFeature[] endpointFeatures;
 
+	@Nullable
 	private ListableBeanFactory beanFactory;
 
-	private final Set<Endpoint> publishedEndpoints = new LinkedHashSet<Endpoint>();
+	private final Set<Endpoint> publishedEndpoints = new LinkedHashSet<>();
 
 
 	/**
@@ -98,12 +99,12 @@ public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, 
 	}
 
 	/**
-	 * Allows for providing JAX-WS 2.2 WebServiceFeature specifications:
-	 * in the form of actual {@link javax.xml.ws.WebServiceFeature} objects,
-	 * WebServiceFeature Class references, or WebServiceFeature class names.
+	 * Specify WebServiceFeature objects (e.g. as inner bean definitions)
+	 * to apply to JAX-WS endpoint creation.
+	 * @since 4.0
 	 */
-	public void setWebServiceFeatures(Object[] webServiceFeatures) {
-		this.webServiceFeatures = webServiceFeatures;
+	public void setEndpointFeatures(WebServiceFeature... endpointFeatures) {
+		this.endpointFeatures = endpointFeatures;
 	}
 
 	/**
@@ -133,11 +134,14 @@ public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, 
 	 * @see #publishEndpoint
 	 */
 	public void publishEndpoints() {
-		Set<String> beanNames = new LinkedHashSet<String>(this.beanFactory.getBeanDefinitionCount());
-		beanNames.addAll(Arrays.asList(this.beanFactory.getBeanDefinitionNames()));
+		Assert.state(this.beanFactory != null, "No BeanFactory set");
+
+		Set<String> beanNames = new LinkedHashSet<>(this.beanFactory.getBeanDefinitionCount());
+		Collections.addAll(beanNames, this.beanFactory.getBeanDefinitionNames());
 		if (this.beanFactory instanceof ConfigurableBeanFactory) {
-			beanNames.addAll(Arrays.asList(((ConfigurableBeanFactory) this.beanFactory).getSingletonNames()));
+			Collections.addAll(beanNames, ((ConfigurableBeanFactory) this.beanFactory).getSingletonNames());
 		}
+
 		for (String beanName : beanNames) {
 			try {
 				Class<?> type = this.beanFactory.getType(beanName);
@@ -176,12 +180,9 @@ public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, 
 	 * @see Endpoint#create(String, Object)
 	 */
 	protected Endpoint createEndpoint(Object bean) {
-		if (this.webServiceFeatures != null) {
-			return new FeatureEndpointProvider().createEndpoint(this.bindingType, bean, this.webServiceFeatures);
-		}
-		else {
-			return Endpoint.create(this.bindingType, bean);
-		}
+		return (this.endpointFeatures != null ?
+				Endpoint.create(this.bindingType, bean, this.endpointFeatures) :
+				Endpoint.create(this.bindingType, bean));
 	}
 
 
@@ -207,55 +208,6 @@ public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, 
 	public void destroy() {
 		for (Endpoint endpoint : this.publishedEndpoints) {
 			endpoint.stop();
-		}
-	}
-
-
-	/**
-	 * Inner class in order to avoid a hard-coded JAX-WS 2.2 dependency.
-	 * JAX-WS 2.0 and 2.1 didn't have WebServiceFeatures for endpoints yet...
-	 */
-	private class FeatureEndpointProvider {
-
-		public Endpoint createEndpoint(String bindingType, Object implementor, Object[] features) {
-			WebServiceFeature[] wsFeatures = new WebServiceFeature[features.length];
-			for (int i = 0; i < features.length; i++) {
-				wsFeatures[i] = convertWebServiceFeature(features[i]);
-			}
-			try {
-				Method create = Endpoint.class.getMethod("create", String.class, Object.class, WebServiceFeature[].class);
-				return (Endpoint) ReflectionUtils.invokeMethod(create, null, bindingType, implementor, wsFeatures);
-			}
-			catch (NoSuchMethodException ex) {
-				throw new IllegalStateException("JAX-WS 2.2 not available - cannot create feature endpoints", ex);
-			}
-		}
-
-		private WebServiceFeature convertWebServiceFeature(Object feature) {
-			Assert.notNull(feature, "WebServiceFeature specification object must not be null");
-			if (feature instanceof WebServiceFeature) {
-				return (WebServiceFeature) feature;
-			}
-			else if (feature instanceof Class) {
-				return (WebServiceFeature) BeanUtils.instantiate((Class<?>) feature);
-			}
-			else if (feature instanceof String) {
-				try {
-					Class<?> featureClass = getBeanClassLoader().loadClass((String) feature);
-					return (WebServiceFeature) BeanUtils.instantiate(featureClass);
-				}
-				catch (ClassNotFoundException ex) {
-					throw new IllegalArgumentException("Could not load WebServiceFeature class [" + feature + "]");
-				}
-			}
-			else {
-				throw new IllegalArgumentException("Unknown WebServiceFeature specification type: " + feature.getClass());
-			}
-		}
-
-		private ClassLoader getBeanClassLoader() {
-			return (beanFactory instanceof ConfigurableBeanFactory ?
-					((ConfigurableBeanFactory) beanFactory).getBeanClassLoader() : ClassUtils.getDefaultClassLoader());
 		}
 	}
 

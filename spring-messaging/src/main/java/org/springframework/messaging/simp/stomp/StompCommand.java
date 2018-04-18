@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,64 +16,76 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.messaging.simp.SimpMessageType;
 
-
 /**
+ * Represents a STOMP command.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public enum StompCommand {
 
 	// client
-	CONNECT,
-	STOMP,
-	SEND,
-	SUBSCRIBE,
-	UNSUBSCRIBE,
-	ACK,
-	NACK,
-	BEGIN,
-	COMMIT,
-	ABORT,
-	DISCONNECT,
+	STOMP(SimpMessageType.CONNECT),
+	CONNECT(SimpMessageType.CONNECT),
+	DISCONNECT(SimpMessageType.DISCONNECT),
+	SUBSCRIBE(SimpMessageType.SUBSCRIBE, true, true, false),
+	UNSUBSCRIBE(SimpMessageType.UNSUBSCRIBE, false, true, false),
+	SEND(SimpMessageType.MESSAGE, true, false, true),
+	ACK(SimpMessageType.OTHER),
+	NACK(SimpMessageType.OTHER),
+	BEGIN(SimpMessageType.OTHER),
+	COMMIT(SimpMessageType.OTHER),
+	ABORT(SimpMessageType.OTHER),
 
 	// server
-	CONNECTED,
-	MESSAGE,
-	RECEIPT,
-	ERROR;
+	CONNECTED(SimpMessageType.OTHER),
+	RECEIPT(SimpMessageType.OTHER),
+	MESSAGE(SimpMessageType.MESSAGE, true, true, true),
+	ERROR(SimpMessageType.OTHER, false, false, true);
 
 
-	private static Map<StompCommand, SimpMessageType> messageTypeLookup = new HashMap<StompCommand, SimpMessageType>();
+	private final SimpMessageType messageType;
 
-	private static Set<StompCommand> destinationRequiredLookup =
-			new HashSet<StompCommand>(Arrays.asList(SEND, SUBSCRIBE, MESSAGE));
+	private final boolean destination;
 
-	static {
-		messageTypeLookup.put(StompCommand.CONNECT, SimpMessageType.CONNECT);
-		messageTypeLookup.put(StompCommand.STOMP, SimpMessageType.CONNECT);
-		messageTypeLookup.put(StompCommand.SEND, SimpMessageType.MESSAGE);
-		messageTypeLookup.put(StompCommand.MESSAGE, SimpMessageType.MESSAGE);
-		messageTypeLookup.put(StompCommand.SUBSCRIBE, SimpMessageType.SUBSCRIBE);
-		messageTypeLookup.put(StompCommand.UNSUBSCRIBE, SimpMessageType.UNSUBSCRIBE);
-		messageTypeLookup.put(StompCommand.DISCONNECT, SimpMessageType.DISCONNECT);
+	private final boolean subscriptionId;
+
+	private final boolean body;
+
+
+	StompCommand(SimpMessageType messageType) {
+		this(messageType, false, false, false);
 	}
 
+	StompCommand(SimpMessageType messageType, boolean destination, boolean subscriptionId, boolean body) {
+		this.messageType = messageType;
+		this.destination = destination;
+		this.subscriptionId = subscriptionId;
+		this.body = body;
+	}
+
+
 	public SimpMessageType getMessageType() {
-		SimpMessageType type = messageTypeLookup.get(this);
-		return (type != null) ? type : SimpMessageType.OTHER;
+		return this.messageType;
 	}
 
 	public boolean requiresDestination() {
-		return destinationRequiredLookup.contains(this);
+		return this.destination;
+	}
+
+	public boolean requiresSubscriptionId() {
+		return this.subscriptionId;
+	}
+
+	public boolean requiresContentLength() {
+		return this.body;
+	}
+
+	public boolean isBodyAllowed() {
+		return this.body;
 	}
 
 }

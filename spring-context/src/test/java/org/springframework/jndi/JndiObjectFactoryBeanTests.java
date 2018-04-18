@@ -20,6 +20,8 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 
 import org.junit.Test;
+
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.tests.mock.jndi.ExpectedLookupTemplate;
 import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.tests.sample.beans.ITestBean;
@@ -142,8 +144,7 @@ public class JndiObjectFactoryBeanTests {
 	@Test
 	public void testLookupWithExpectedTypeAndNoMatch() throws Exception {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
-		Object o = new Object();
-		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", o));
+		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", new Object()));
 		jof.setJndiName("foo");
 		jof.setExpectedType(String.class);
 		try {
@@ -151,15 +152,14 @@ public class JndiObjectFactoryBeanTests {
 			fail("Should have thrown NamingException");
 		}
 		catch (NamingException ex) {
-			assertTrue(ex.getMessage().indexOf("java.lang.String") != -1);
+			assertTrue(ex.getMessage().contains("java.lang.String"));
 		}
 	}
 
 	@Test
 	public void testLookupWithDefaultObject() throws Exception {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
-		String s = "";
-		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", s));
+		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", ""));
 		jof.setJndiName("myFoo");
 		jof.setExpectedType(String.class);
 		jof.setDefaultObject("myString");
@@ -170,8 +170,7 @@ public class JndiObjectFactoryBeanTests {
 	@Test
 	public void testLookupWithDefaultObjectAndExpectedType() throws Exception {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
-		String s = "";
-		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", s));
+		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", ""));
 		jof.setJndiName("myFoo");
 		jof.setExpectedType(String.class);
 		jof.setDefaultObject("myString");
@@ -180,13 +179,35 @@ public class JndiObjectFactoryBeanTests {
 	}
 
 	@Test
+	public void testLookupWithDefaultObjectAndExpectedTypeConversion() throws Exception {
+		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
+		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", ""));
+		jof.setJndiName("myFoo");
+		jof.setExpectedType(Integer.class);
+		jof.setDefaultObject("5");
+		jof.afterPropertiesSet();
+		assertEquals(new Integer(5), jof.getObject());
+	}
+
+	@Test
+	public void testLookupWithDefaultObjectAndExpectedTypeConversionViaBeanFactory() throws Exception {
+		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
+		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", ""));
+		jof.setJndiName("myFoo");
+		jof.setExpectedType(Integer.class);
+		jof.setDefaultObject("5");
+		jof.setBeanFactory(new DefaultListableBeanFactory());
+		jof.afterPropertiesSet();
+		assertEquals(new Integer(5), jof.getObject());
+	}
+
+	@Test
 	public void testLookupWithDefaultObjectAndExpectedTypeNoMatch() throws Exception {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
-		String s = "";
-		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", s));
+		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", ""));
 		jof.setJndiName("myFoo");
-		jof.setExpectedType(String.class);
-		jof.setDefaultObject(Boolean.TRUE);
+		jof.setExpectedType(Boolean.class);
+		jof.setDefaultObject("5");
 		try {
 			jof.afterPropertiesSet();
 			fail("Should have thrown IllegalArgumentException");

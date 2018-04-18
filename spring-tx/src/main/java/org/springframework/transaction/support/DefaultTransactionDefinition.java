@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.transaction.support;
 import java.io.Serializable;
 
 import org.springframework.core.Constants;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
 
 /**
@@ -59,6 +60,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 
 	private boolean readOnly = false;
 
+	@Nullable
 	private String name;
 
 
@@ -91,7 +93,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	}
 
 	/**
-	 * Create a new DefaultTransactionDefinition with the the given
+	 * Create a new DefaultTransactionDefinition with the given
 	 * propagation behavior. Can be modified through bean property setters.
 	 * @param propagationBehavior one of the propagation constants in the
 	 * TransactionDefinition interface
@@ -108,13 +110,13 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * Set the propagation behavior by the name of the corresponding constant in
 	 * TransactionDefinition, e.g. "PROPAGATION_REQUIRED".
 	 * @param constantName name of the constant
-	 * @exception IllegalArgumentException if the supplied value is not resolvable
+	 * @throws IllegalArgumentException if the supplied value is not resolvable
 	 * to one of the {@code PROPAGATION_} constants or is {@code null}
 	 * @see #setPropagationBehavior
 	 * @see #PROPAGATION_REQUIRED
 	 */
 	public final void setPropagationBehaviorName(String constantName) throws IllegalArgumentException {
-		if (constantName == null || !constantName.startsWith(PREFIX_PROPAGATION)) {
+		if (!constantName.startsWith(PREFIX_PROPAGATION)) {
 			throw new IllegalArgumentException("Only propagation constants allowed");
 		}
 		setPropagationBehavior(constants.asNumber(constantName).intValue());
@@ -123,8 +125,16 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	/**
 	 * Set the propagation behavior. Must be one of the propagation constants
 	 * in the TransactionDefinition interface. Default is PROPAGATION_REQUIRED.
-	 * @exception IllegalArgumentException if the supplied value is not
-	 * one of the {@code PROPAGATION_} constants
+	 * <p>Exclusively designed for use with {@link #PROPAGATION_REQUIRED} or
+	 * {@link #PROPAGATION_REQUIRES_NEW} since it only applies to newly started
+	 * transactions. Consider switching the "validateExistingTransactions" flag to
+	 * "true" on your transaction manager if you'd like isolation level declarations
+	 * to get rejected when participating in an existing transaction with a different
+	 * isolation level.
+	 * <p>Note that a transaction manager that does not support custom isolation levels
+	 * will throw an exception when given any other level than {@link #ISOLATION_DEFAULT}.
+	 * @throws IllegalArgumentException if the supplied value is not one of the
+	 * {@code PROPAGATION_} constants
 	 * @see #PROPAGATION_REQUIRED
 	 */
 	public final void setPropagationBehavior(int propagationBehavior) {
@@ -143,13 +153,13 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * Set the isolation level by the name of the corresponding constant in
 	 * TransactionDefinition, e.g. "ISOLATION_DEFAULT".
 	 * @param constantName name of the constant
-	 * @exception IllegalArgumentException if the supplied value is not resolvable
+	 * @throws IllegalArgumentException if the supplied value is not resolvable
 	 * to one of the {@code ISOLATION_} constants or is {@code null}
 	 * @see #setIsolationLevel
 	 * @see #ISOLATION_DEFAULT
 	 */
 	public final void setIsolationLevelName(String constantName) throws IllegalArgumentException {
-		if (constantName == null || !constantName.startsWith(PREFIX_ISOLATION)) {
+		if (!constantName.startsWith(PREFIX_ISOLATION)) {
 			throw new IllegalArgumentException("Only isolation constants allowed");
 		}
 		setIsolationLevel(constants.asNumber(constantName).intValue());
@@ -158,8 +168,16 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	/**
 	 * Set the isolation level. Must be one of the isolation constants
 	 * in the TransactionDefinition interface. Default is ISOLATION_DEFAULT.
-	 * @exception IllegalArgumentException if the supplied value is not
-	 * one of the {@code ISOLATION_} constants
+	 * <p>Exclusively designed for use with {@link #PROPAGATION_REQUIRED} or
+	 * {@link #PROPAGATION_REQUIRES_NEW} since it only applies to newly started
+	 * transactions. Consider switching the "validateExistingTransactions" flag to
+	 * "true" on your transaction manager if you'd like isolation level declarations
+	 * to get rejected when participating in an existing transaction with a different
+	 * isolation level.
+	 * <p>Note that a transaction manager that does not support custom isolation levels
+	 * will throw an exception when given any other level than {@link #ISOLATION_DEFAULT}.
+	 * @throws IllegalArgumentException if the supplied value is not one of the
+	 * {@code ISOLATION_} constants
 	 * @see #ISOLATION_DEFAULT
 	 */
 	public final void setIsolationLevel(int isolationLevel) {
@@ -177,6 +195,11 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	/**
 	 * Set the timeout to apply, as number of seconds.
 	 * Default is TIMEOUT_DEFAULT (-1).
+	 * <p>Exclusively designed for use with {@link #PROPAGATION_REQUIRED} or
+	 * {@link #PROPAGATION_REQUIRES_NEW} since it only applies to newly started
+	 * transactions.
+	 * <p>Note that a transaction manager that does not support timeouts will throw
+	 * an exception when given any other timeout than {@link #TIMEOUT_DEFAULT}.
 	 * @see #TIMEOUT_DEFAULT
 	 */
 	public final void setTimeout(int timeout) {
@@ -194,6 +217,16 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	/**
 	 * Set whether to optimize as read-only transaction.
 	 * Default is "false".
+	 * <p>The read-only flag applies to any transaction context, whether backed
+	 * by an actual resource transaction ({@link #PROPAGATION_REQUIRED}/
+	 * {@link #PROPAGATION_REQUIRES_NEW}) or operating non-transactionally at
+	 * the resource level ({@link #PROPAGATION_SUPPORTS}). In the latter case,
+	 * the flag will only apply to managed resources within the application,
+	 * such as a Hibernate {@code Session}.
+	 * <p>This just serves as a hint for the actual transaction subsystem;
+	 * it will <i>not necessarily</i> cause failure of write access attempts.
+	 * A transaction manager which cannot interpret the read-only hint will
+	 * <i>not</i> throw an exception when asked for a read-only transaction.
 	 */
 	public final void setReadOnly(boolean readOnly) {
 		this.readOnly = readOnly;
@@ -214,6 +247,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	}
 
 	@Override
+	@Nullable
 	public final String getName() {
 		return this.name;
 	}
@@ -225,7 +259,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 */
 	@Override
 	public boolean equals(Object other) {
-		return (other instanceof TransactionDefinition && toString().equals(other.toString()));
+		return (this == other || (other instanceof TransactionDefinition && toString().equals(other.toString())));
 	}
 
 	/**

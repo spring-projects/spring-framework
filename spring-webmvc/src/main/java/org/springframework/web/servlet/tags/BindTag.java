@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,13 @@ import java.beans.PropertyEditor;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.PageContext;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.support.BindStatus;
 
 /**
- * Bind tag, supporting evaluation of binding errors for a certain
+ * The {@code <bind>} tag supports evaluation of binding errors for a certain
  * bean or bean property. Exposes a "status" variable of type
  * {@link org.springframework.web.servlet.support.BindStatus},
  * to both Java expressions and JSP EL expressions.
@@ -40,6 +42,43 @@ import org.springframework.web.servlet.support.BindStatus;
  * as the bean property that this errors object applies to. Nested tags
  * such as the {@link TransformTag} can access those exposed properties.
  *
+ * <table>
+ * <caption>Attribute Summary</caption>
+ * <thead>
+ * <tr>
+ * <th class="colFirst">Attribute</th>
+ * <th class="colOne">Required?</th>
+ * <th class="colOne">Runtime Expression?</th>
+ * <th class="colLast">Description</th>
+ * </tr>
+ * </thead>
+ * <tbody>
+ * <tr class="altColor">
+ * <td><p>htmlEscape</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>Set HTML escaping for this tag, as boolean value. Overrides the default
+ * HTML escaping setting for the current page.</p></td>
+ * </tr>
+ * <tr class="rowColor">
+ * <td><p>ignoreNestedPath</p></td>
+ * <td><p>false</p></td>
+ * <td><p>true</p></td>
+ * <td><p>Set whether to ignore a nested path, if any.
+ * Default is to not ignore.</p></td>
+ * </tr>
+ * <tr class="altColor">
+ * <td><p>path</p></td>
+ * <td><p>true</p></td>
+ * <td><p>true</p></td>
+ * <td><p>The path to the bean or bean property to bind status information for.
+ * For instance account.name, company.address.zipCode or just employee. The status
+ * object will exported to the page scope, specifically for this bean or bean
+ * property</p></td>
+ * </tr>
+ * </tbody>
+ * </table>
+ * 
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #setPath
@@ -53,14 +92,17 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 	public static final String STATUS_VARIABLE_NAME = "status";
 
 
-	private String path;
+	private String path = "";
 
 	private boolean ignoreNestedPath = false;
 
+	@Nullable
 	private BindStatus status;
 
+	@Nullable
 	private Object previousPageStatus;
 
+	@Nullable
 	private Object previousRequestStatus;
 
 
@@ -149,14 +191,23 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 
 
 	/**
+	 * Return the current BindStatus.
+	 */
+	private BindStatus getStatus() {
+		Assert.state(this.status != null, "No current BindStatus");
+		return this.status;
+	}
+
+	/**
 	 * Retrieve the property that this tag is currently bound to,
 	 * or {@code null} if bound to an object rather than a specific property.
 	 * Intended for cooperating nesting tags.
 	 * @return the property that this tag is currently bound to,
 	 * or {@code null} if none
 	 */
+	@Nullable
 	public final String getProperty() {
-		return this.status.getExpression();
+		return getStatus().getExpression();
 	}
 
 	/**
@@ -164,13 +215,15 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 	 * Intended for cooperating nesting tags.
 	 * @return the current Errors instance, or {@code null} if none
 	 */
+	@Nullable
 	public final Errors getErrors() {
-		return this.status.getErrors();
+		return getStatus().getErrors();
 	}
 
 	@Override
+	@Nullable
 	public final PropertyEditor getEditor() {
-		return this.status.getEditor();
+		return getStatus().getEditor();
 	}
 
 

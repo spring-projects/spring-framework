@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,17 @@
 
 package org.springframework.ui.context.support;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.context.HierarchicalMessageSource;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.context.HierarchicalThemeSource;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
@@ -41,20 +43,30 @@ import org.springframework.ui.context.ThemeSource;
  * @see java.util.ResourceBundle
  * @see org.springframework.context.support.ResourceBundleMessageSource
  */
-public class ResourceBundleThemeSource implements HierarchicalThemeSource {
+public class ResourceBundleThemeSource implements HierarchicalThemeSource, BeanClassLoaderAware {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private ThemeSource parentThemeSource;
 
 	private String basenamePrefix = "";
 
+	@Nullable
+	private String defaultEncoding;
+
+	@Nullable
+	private Boolean fallbackToSystemLocale;
+
+	@Nullable
+	private ClassLoader beanClassLoader;
+
 	/** Map from theme name to Theme instance */
-	private final Map<String, Theme> themeCache = new HashMap<String, Theme>();
+	private final Map<String, Theme> themeCache = new ConcurrentHashMap<>();
 
 
 	@Override
-	public void setParentThemeSource(ThemeSource parent) {
+	public void setParentThemeSource(@Nullable ThemeSource parent) {
 		this.parentThemeSource = parent;
 
 		// Update existing Theme objects.
@@ -67,6 +79,7 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource {
 	}
 
 	@Override
+	@Nullable
 	public ThemeSource getParentThemeSource() {
 		return this.parentThemeSource;
 	}
@@ -81,8 +94,35 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource {
 	 * just like it is for programmatic {@code java.util.ResourceBundle} usage.
 	 * @see java.util.ResourceBundle#getBundle(String)
 	 */
-	public void setBasenamePrefix(String basenamePrefix) {
+	public void setBasenamePrefix(@Nullable String basenamePrefix) {
 		this.basenamePrefix = (basenamePrefix != null ? basenamePrefix : "");
+	}
+
+	/**
+	 * Set the default charset to use for parsing resource bundle files.
+	 * <p>{@link ResourceBundleMessageSource}'s default is the
+	 * {@code java.util.ResourceBundle} default encoding: ISO-8859-1.
+	 * @since 4.2
+	 * @see ResourceBundleMessageSource#setDefaultEncoding
+	 */
+	public void setDefaultEncoding(@Nullable String defaultEncoding) {
+		this.defaultEncoding = defaultEncoding;
+	}
+
+	/**
+	 * Set whether to fall back to the system Locale if no files for a
+	 * specific Locale have been found.
+	 * <p>{@link ResourceBundleMessageSource}'s default is "true".
+	 * @since 4.2
+	 * @see ResourceBundleMessageSource#setFallbackToSystemLocale
+	 */
+	public void setFallbackToSystemLocale(boolean fallbackToSystemLocale) {
+		this.fallbackToSystemLocale = fallbackToSystemLocale;
+	}
+
+	@Override
+	public void setBeanClassLoader(@Nullable ClassLoader beanClassLoader) {
+		this.beanClassLoader = beanClassLoader;
 	}
 
 
@@ -96,24 +136,25 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource {
 	 * @see #createMessageSource
 	 */
 	@Override
+	@Nullable
 	public Theme getTheme(String themeName) {
-		if (themeName == null) {
-			return null;
-		}
-		synchronized (this.themeCache) {
-			Theme theme = this.themeCache.get(themeName);
-			if (theme == null) {
-				String basename = this.basenamePrefix + themeName;
-				MessageSource messageSource = createMessageSource(basename);
-				theme = new SimpleTheme(themeName, messageSource);
-				initParent(theme);
-				this.themeCache.put(themeName, theme);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Theme created: name '" + themeName + "', basename [" + basename + "]");
+		Theme theme = this.themeCache.get(themeName);
+		if (theme == null) {
+			synchronized (this.themeCache) {
+				theme = this.themeCache.get(themeName);
+				if (theme == null) {
+					String basename = this.basenamePrefix + themeName;
+					MessageSource messageSource = createMessageSource(basename);
+					theme = new SimpleTheme(themeName, messageSource);
+					initParent(theme);
+					this.themeCache.put(themeName, theme);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Theme created: name '" + themeName + "', basename [" + basename + "]");
+					}
 				}
 			}
-			return theme;
 		}
+		return theme;
 	}
 
 	/**
@@ -130,6 +171,15 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource {
 	protected MessageSource createMessageSource(String basename) {
 		ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
 		messageSource.setBasename(basename);
+		if (this.defaultEncoding != null) {
+			messageSource.setDefaultEncoding(this.defaultEncoding);
+		}
+		if (this.fallbackToSystemLocale != null) {
+			messageSource.setFallbackToSystemLocale(this.fallbackToSystemLocale);
+		}
+		if (this.beanClassLoader != null) {
+			messageSource.setBeanClassLoader(this.beanClassLoader);
+		}
 		return messageSource;
 	}
 

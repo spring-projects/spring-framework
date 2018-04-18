@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ package org.springframework.core.env;
  * property resolution and profile-related operations, this implementation configures two
  * default property sources, to be searched in the following order:
  * <ul>
- *   <li>{@linkplain AbstractEnvironment#getSystemProperties() system properties}
- *   <li>{@linkplain AbstractEnvironment#getSystemEnvironment() system environment variables}
+ * <li>{@linkplain AbstractEnvironment#getSystemProperties() system properties}
+ * <li>{@linkplain AbstractEnvironment#getSystemEnvironment() system environment variables}
  * </ul>
  *
  * That is, if the key "xyz" is present both in the JVM system properties as well as in
@@ -41,7 +41,7 @@ package org.springframework.core.env;
  * instance available from {@link #getPropertySources()}. See
  * {@link ConfigurableEnvironment} Javadoc for usage examples.
  *
- * <p>See {@link SystemEnvironmentPropertySource} Javadoc for details on special handling
+ * <p>See {@link SystemEnvironmentPropertySource} javadoc for details on special handling
  * of property names in shell environments (e.g. Bash) that disallow period characters in
  * variable names.
  *
@@ -61,8 +61,8 @@ public class StandardEnvironment extends AbstractEnvironment {
 
 
 	/**
-	 * Customize the set of property sources with those appropriate for any standard Java
-	 * environment:
+	 * Customize the set of property sources with those appropriate for any standard
+	 * Java environment:
 	 * <ul>
 	 * <li>{@value #SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME}
 	 * <li>{@value #SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME}

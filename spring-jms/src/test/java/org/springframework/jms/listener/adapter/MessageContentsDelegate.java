@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ public interface MessageContentsDelegate {
 
 	void handleMessage(CharSequence message);
 
-	void handleMessage(Map message);
+	void handleMessage(Map<String, Object>  message);
 
 	void handleMessage(byte[] message);
 

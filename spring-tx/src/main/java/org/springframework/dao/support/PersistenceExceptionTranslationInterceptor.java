@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -47,9 +48,13 @@ import org.springframework.util.ReflectionUtils;
 public class PersistenceExceptionTranslationInterceptor
 		implements MethodInterceptor, BeanFactoryAware, InitializingBean {
 
-	private PersistenceExceptionTranslator persistenceExceptionTranslator;
+	@Nullable
+	private volatile PersistenceExceptionTranslator persistenceExceptionTranslator;
 
 	private boolean alwaysTranslate = false;
+
+	@Nullable
+	private ListableBeanFactory beanFactory;
 
 
 	/**
@@ -63,10 +68,11 @@ public class PersistenceExceptionTranslationInterceptor
 	/**
 	 * Create a new PersistenceExceptionTranslationInterceptor
 	 * for the given PersistenceExceptionTranslator.
-	 * @param persistenceExceptionTranslator the PersistenceExceptionTranslator to use
+	 * @param pet the PersistenceExceptionTranslator to use
 	 */
-	public PersistenceExceptionTranslationInterceptor(PersistenceExceptionTranslator persistenceExceptionTranslator) {
-		setPersistenceExceptionTranslator(persistenceExceptionTranslator);
+	public PersistenceExceptionTranslationInterceptor(PersistenceExceptionTranslator pet) {
+		Assert.notNull(pet, "PersistenceExceptionTranslator must not be null");
+		this.persistenceExceptionTranslator = pet;
 	}
 
 	/**
@@ -76,7 +82,8 @@ public class PersistenceExceptionTranslationInterceptor
 	 * PersistenceExceptionTranslators from
 	 */
 	public PersistenceExceptionTranslationInterceptor(ListableBeanFactory beanFactory) {
-		this.persistenceExceptionTranslator = detectPersistenceExceptionTranslators(beanFactory);
+		Assert.notNull(beanFactory, "ListableBeanFactory must not be null");
+		this.beanFactory = beanFactory;
 	}
 
 
@@ -87,7 +94,6 @@ public class PersistenceExceptionTranslationInterceptor
 	 * @see #detectPersistenceExceptionTranslators
 	 */
 	public void setPersistenceExceptionTranslator(PersistenceExceptionTranslator pet) {
-		Assert.notNull(pet, "PersistenceExceptionTranslator must not be null");
 		this.persistenceExceptionTranslator = pet;
 	}
 
@@ -115,40 +121,15 @@ public class PersistenceExceptionTranslationInterceptor
 				throw new IllegalArgumentException(
 						"Cannot use PersistenceExceptionTranslator autodetection without ListableBeanFactory");
 			}
-			this.persistenceExceptionTranslator =
-					detectPersistenceExceptionTranslators((ListableBeanFactory) beanFactory);
+			this.beanFactory = (ListableBeanFactory) beanFactory;
 		}
 	}
 
 	@Override
 	public void afterPropertiesSet() {
-		if (this.persistenceExceptionTranslator == null) {
+		if (this.persistenceExceptionTranslator == null && this.beanFactory == null) {
 			throw new IllegalArgumentException("Property 'persistenceExceptionTranslator' is required");
 		}
-	}
-
-
-	/**
-	 * Detect all PersistenceExceptionTranslators in the given BeanFactory.
-	 * @param beanFactory the ListableBeanFactory to obtaining all
-	 * PersistenceExceptionTranslators from
-	 * @return a chained PersistenceExceptionTranslator, combining all
-	 * PersistenceExceptionTranslators found in the factory
-	 * @see ChainedPersistenceExceptionTranslator
-	 */
-	protected PersistenceExceptionTranslator detectPersistenceExceptionTranslators(ListableBeanFactory beanFactory) {
-		// Find all translators, being careful not to activate FactoryBeans.
-		Map<String, PersistenceExceptionTranslator> pets = BeanFactoryUtils.beansOfTypeIncludingAncestors(
-				beanFactory, PersistenceExceptionTranslator.class, false, false);
-		if (pets.isEmpty()) {
-			throw new IllegalStateException(
-					"No persistence exception translators found in bean factory. Cannot perform exception translation.");
-		}
-		ChainedPersistenceExceptionTranslator cpet = new ChainedPersistenceExceptionTranslator();
-		for (PersistenceExceptionTranslator pet : pets.values()) {
-			cpet.addDelegate(pet);
-		}
-		return cpet;
 	}
 
 
@@ -163,9 +144,34 @@ public class PersistenceExceptionTranslationInterceptor
 				throw ex;
 			}
 			else {
-				throw DataAccessUtils.translateIfNecessary(ex, this.persistenceExceptionTranslator);
+				PersistenceExceptionTranslator translator = this.persistenceExceptionTranslator;
+				if (translator == null) {
+					Assert.state(this.beanFactory != null, "No PersistenceExceptionTranslator set");
+					translator = detectPersistenceExceptionTranslators(this.beanFactory);
+					this.persistenceExceptionTranslator = translator;
+				}
+				throw DataAccessUtils.translateIfNecessary(ex, translator);
 			}
 		}
+	}
+
+	/**
+	 * Detect all PersistenceExceptionTranslators in the given BeanFactory.
+	 * @param beanFactory the ListableBeanFactory to obtaining all
+	 * PersistenceExceptionTranslators from
+	 * @return a chained PersistenceExceptionTranslator, combining all
+	 * PersistenceExceptionTranslators found in the factory
+	 * @see ChainedPersistenceExceptionTranslator
+	 */
+	protected PersistenceExceptionTranslator detectPersistenceExceptionTranslators(ListableBeanFactory beanFactory) {
+		// Find all translators, being careful not to activate FactoryBeans.
+		Map<String, PersistenceExceptionTranslator> pets = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+				beanFactory, PersistenceExceptionTranslator.class, false, false);
+		ChainedPersistenceExceptionTranslator cpet = new ChainedPersistenceExceptionTranslator();
+		for (PersistenceExceptionTranslator pet : pets.values()) {
+			cpet.addDelegate(pet);
+		}
+		return cpet;
 	}
 
 }

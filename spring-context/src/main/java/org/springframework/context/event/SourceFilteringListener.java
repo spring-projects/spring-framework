@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.context.event;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
+import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.context.ApplicationListener} decorator that filters
@@ -29,13 +31,15 @@ import org.springframework.core.Ordered;
  * method instead of specifying a delegate listener.
  *
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 2.0.5
  */
-public class SourceFilteringListener implements SmartApplicationListener {
+public class SourceFilteringListener implements GenericApplicationListener, SmartApplicationListener {
 
 	private final Object source;
 
-	private SmartApplicationListener delegate;
+	@Nullable
+	private GenericApplicationListener delegate;
 
 
 	/**
@@ -45,10 +49,10 @@ public class SourceFilteringListener implements SmartApplicationListener {
 	 * @param delegate the delegate listener to invoke with event
 	 * from the specified source
 	 */
-	public SourceFilteringListener(Object source, ApplicationListener delegate) {
+	public SourceFilteringListener(Object source, ApplicationListener<?> delegate) {
 		this.source = source;
-		this.delegate = (delegate instanceof SmartApplicationListener ?
-				(SmartApplicationListener) delegate : new GenericApplicationListenerAdapter(delegate));
+		this.delegate = (delegate instanceof GenericApplicationListener ?
+				(GenericApplicationListener) delegate : new GenericApplicationListenerAdapter(delegate));
 	}
 
 	/**
@@ -71,13 +75,18 @@ public class SourceFilteringListener implements SmartApplicationListener {
 	}
 
 	@Override
-	public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
+	public boolean supportsEventType(ResolvableType eventType) {
 		return (this.delegate == null || this.delegate.supportsEventType(eventType));
 	}
 
 	@Override
-	public boolean supportsSourceType(Class<?> sourceType) {
-		return sourceType.isInstance(this.source);
+	public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
+		return supportsEventType(ResolvableType.forType(eventType));
+	}
+
+	@Override
+	public boolean supportsSourceType(@Nullable Class<?> sourceType) {
+		return (sourceType != null && sourceType.isInstance(this.source));
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public abstract class ApplicationEvent extends EventObject {
 
 	/**
 	 * Create a new ApplicationEvent.
-	 * @param source the component that published the event (never {@code null})
+	 * @param source the object on which the event initially occurred (never {@code null})
 	 */
 	public ApplicationEvent(Object source) {
 		super(source);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.tests.mock.jndi;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.naming.NamingException;
 
 import org.springframework.jndi.JndiTemplate;
@@ -32,7 +31,7 @@ import org.springframework.jndi.JndiTemplate;
  */
 public class ExpectedLookupTemplate extends JndiTemplate {
 
-	private final Map<String, Object> jndiObjects = new ConcurrentHashMap<String, Object>();
+	private final Map<String, Object> jndiObjects = new ConcurrentHashMap<>();
 
 
 	/**

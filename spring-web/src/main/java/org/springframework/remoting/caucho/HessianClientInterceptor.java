@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import com.caucho.hessian.io.SerializerFactory;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
@@ -67,6 +68,7 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 
 	private HessianProxyFactory proxyFactory = new HessianProxyFactory();
 
+	@Nullable
 	private Object hessianProxy;
 
 
@@ -76,7 +78,7 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 	 * <p>Allows to use an externally configured factory instance,
 	 * in particular a custom HessianProxyFactory subclass.
 	 */
-	public void setProxyFactory(HessianProxyFactory proxyFactory) {
+	public void setProxyFactory(@Nullable HessianProxyFactory proxyFactory) {
 		this.proxyFactory = (proxyFactory != null ? proxyFactory : new HessianProxyFactory());
 	}
 
@@ -237,6 +239,7 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 
 
 	@Override
+	@Nullable
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		if (this.hessianProxy == null) {
 			throw new IllegalStateException("HessianClientInterceptor is not properly initialized - " +

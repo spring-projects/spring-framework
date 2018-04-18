@@ -16,18 +16,17 @@
 
 package org.springframework.aop.target;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
-
 import java.util.Set;
 
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.ITestBean;
+
+import static org.junit.Assert.*;
+import static org.springframework.tests.TestResourceUtils.*;
 
 /**
  * @author Juergen Hoeller
@@ -35,7 +34,7 @@ import org.springframework.tests.sample.beans.ITestBean;
  * @author Chris Beams
  * @since 07.01.2005
  */
-public final class LazyInitTargetSourceTests {
+public class LazyInitTargetSourceTests {
 
 	private static final Class<?> CLASS = LazyInitTargetSourceTests.class;
 

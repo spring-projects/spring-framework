@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,24 @@
 
 package org.springframework.web.socket.sockjs.transport.session;
 
+import java.io.IOException;
 import java.util.Map;
 
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
-import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
-import org.springframework.web.socket.sockjs.support.frame.SockJsMessageCodec;
+import org.springframework.web.socket.sockjs.frame.SockJsFrame;
+import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
+import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 
 /**
  * A SockJS session for use with polling HTTP transports.
  *
  * @author Rossen Stoyanchev
+ * @since 4.0
  */
 public class PollingSockJsSession extends AbstractHttpSockJsSession {
-
 
 	public PollingSockJsSession(String sessionId, SockJsServiceConfig config,
 			WebSocketHandler wsHandler, Map<String, Object> attributes) {
@@ -39,12 +43,26 @@ public class PollingSockJsSession extends AbstractHttpSockJsSession {
 
 
 	@Override
+	protected void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
+			boolean initialRequest) throws IOException {
+
+		if (initialRequest) {
+			writeFrame(SockJsFrame.openFrame());
+		}
+		else if (!getMessageCache().isEmpty()) {
+			flushCache();
+		}
+		else {
+			scheduleHeartbeat();
+		}
+	}
+
+	@Override
 	protected void flushCache() throws SockJsTransportFailureException {
-
-		cancelHeartbeat();
-		String[] messages = getMessageCache().toArray(new String[getMessageCache().size()]);
-		getMessageCache().clear();
-
+		String[] messages = new String[getMessageCache().size()];
+		for (int i = 0; i < messages.length; i++) {
+			messages[i] = getMessageCache().poll();
+		}
 		SockJsMessageCodec messageCodec = getSockJsServiceConfig().getMessageCodec();
 		SockJsFrame frame = SockJsFrame.messageFrame(messageCodec, messages);
 		writeFrame(frame);
@@ -57,4 +75,3 @@ public class PollingSockJsSession extends AbstractHttpSockJsSession {
 	}
 
 }
-

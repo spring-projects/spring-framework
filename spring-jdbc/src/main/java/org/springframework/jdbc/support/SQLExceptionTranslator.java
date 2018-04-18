@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.jdbc.support;
 import java.sql.SQLException;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.lang.Nullable;
 
 /**
  * Strategy interface for translating between {@link SQLException SQLExceptions}
@@ -33,6 +34,7 @@ import org.springframework.dao.DataAccessException;
  * @author Juergen Hoeller
  * @see org.springframework.dao.DataAccessException
  */
+@FunctionalInterface
 public interface SQLExceptionTranslator {
 
 	/**
@@ -44,11 +46,15 @@ public interface SQLExceptionTranslator {
 	 * check (and subsequent cast) is considered reliable when expecting JDBC-based
 	 * access to have happened.
 	 * @param task readable text describing the task being attempted
-	 * @param sql SQL query or update that caused the problem (may be {@code null})
+	 * @param sql SQL query or update that caused the problem (if known)
 	 * @param ex the offending {@code SQLException}
-	 * @return the DataAccessException, wrapping the {@code SQLException}
+	 * @return the DataAccessException wrapping the {@code SQLException},
+	 * or {@code null} if no translation could be applied
+	 * (in a custom translator; the default translators always throw an
+	 * {@link org.springframework.jdbc.UncategorizedSQLException} in such a case)
 	 * @see org.springframework.dao.DataAccessException#getRootCause()
 	 */
-	DataAccessException translate(String task, String sql, SQLException ex);
+	@Nullable
+	DataAccessException translate(String task, @Nullable String sql, SQLException ex);
 
 }

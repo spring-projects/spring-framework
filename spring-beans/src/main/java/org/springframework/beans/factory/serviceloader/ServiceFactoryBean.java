@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.ServiceLoader;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that exposes the
@@ -33,8 +34,8 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 public class ServiceFactoryBean extends AbstractServiceLoaderBasedFactoryBean implements BeanClassLoaderAware {
 
 	@Override
-	protected Object getObjectToExpose(ServiceLoader serviceLoader) {
-		Iterator it = serviceLoader.iterator();
+	protected Object getObjectToExpose(ServiceLoader<?> serviceLoader) {
+		Iterator<?> it = serviceLoader.iterator();
 		if (!it.hasNext()) {
 			throw new IllegalStateException(
 					"ServiceLoader could not find service for type [" + getServiceType() + "]");
@@ -43,7 +44,8 @@ public class ServiceFactoryBean extends AbstractServiceLoaderBasedFactoryBean im
 	}
 
 	@Override
-	public Class getObjectType() {
+	@Nullable
+	public Class<?> getObjectType() {
 		return getServiceType();
 	}
 

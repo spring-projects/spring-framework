@@ -1,0 +1,274 @@
+[[mvc-cors]]
+= CORS
+[.small]#<<web-reactive.adoc#webflux-cors,Same in Spring WebFlux>>#
+
+
+
+
+[[mvc-cors-intro]]
+== Introduction
+[.small]#<<web-reactive.adoc#webflux-cors-intro,Same in Spring WebFlux>>#
+
+For security reasons browsers prohibit AJAX calls to resources outside the current origin.
+For example you could have your bank account in one tab and evil.com in another. Scripts
+from evil.com should not be able to make AJAX requests to your bank API with your
+credentials, e.g. withdrawing money from your account!
+
+Cross-Origin Resource Sharing (CORS) is a http://www.w3.org/TR/cors/[W3C specification]
+implemented by http://caniuse.com/#feat=cors[most browsers] that allows you to specify
+what kind of cross domain requests are authorized rather than using less secure and less
+powerful workarounds based on IFRAME or JSONP.
+
+
+
+
+[[mvc-cors-processing]]
+== Processing
+[.small]#<<web-reactive.adoc#webflux-cors-processing,Same in Spring WebFlux>>#
+
+The CORS specification distinguishes between preflight, simple, and actual requests.
+To learn how CORS works, you can read
+https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS[this article], among
+many others, or refer to the specification for more details.
+
+Spring MVC ``HandlerMapping``'s provide built-in support for CORS. After successfully
+mapping a request to a handler, ``HandlerMapping``'s check the CORS configuration for the
+given request and handler and take further actions. Preflight requests are handled
+directly while simple and actual CORS requests are intercepted, validated, and have
+required CORS response headers set.
+
+In order to enable cross-origin requests (i.e. the `Origin` header is present and
+differs from the host of the request) you need to have some explicitly declared CORS
+configuration. If no matching CORS configuration is found, preflight requests are
+rejected. No CORS headers are added to the responses of simple and actual CORS requests
+and consequently browsers reject them.
+
+Each `HandlerMapping` can be
+{api-spring-framework}/web/servlet/handler/AbstractHandlerMapping.html#setCorsConfigurations-java.util.Map-[configured]
+individually with URL pattern based `CorsConfiguration` mappings. In most cases applications
+will use the MVC Java config or the XML namespace to declare such mappings, which results
+in a single, global map passed to all ``HadlerMappping``'s.
+
+Global CORS configuration at the `HandlerMapping` level can be combined with more
+fine-grained, handler-level CORS configuration. For example annotated controllers can use
+class or method-level `@CrossOrigin` annotations (other handlers can implement
+`CorsConfigurationSource`).
+
+The rules for combining global and local configuration are generally additive -- e.g.
+all global and all local origins. For those attributes where only a single value can be
+accepted such as `allowCredentials` and `maxAge`, the local overrides the global value. See
+{api-spring-framework}/web/cors/CorsConfiguration.html#combine-org.springframework.web.cors.CorsConfiguration-[`CorsConfiguration#combine(CorsConfiguration)`]
+for more details.
+
+[TIP]
+====
+To learn more from the source or make advanced customizations, check:
+
+* `CorsConfiguration`
+* `CorsProcessor`, `DefaultCorsProcessor`
+* `AbstractHandlerMapping`
+====
+
+
+
+
+[[mvc-cors-controller]]
+== @CrossOrigin
+[.small]#<<web-reactive.adoc#webflux-cors-controller,Same in Spring WebFlux>>#
+
+The {api-spring-framework}/web/bind/annotation/CrossOrigin.html[`@CrossOrigin`]
+annotation enables cross-origin requests on annotated controller methods:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@RestController
+@RequestMapping("/account")
+public class AccountController {
+
+	@CrossOrigin
+	@GetMapping("/{id}")
+	public Account retrieve(@PathVariable Long id) {
+		// ...
+	}
+
+	@DeleteMapping("/{id}")
+	public void remove(@PathVariable Long id) {
+		// ...
+	}
+}
+----
+
+By default `@CrossOrigin` allows:
+
+* All origins.
+* All headers.
+* All HTTP methods to which the controller method is mapped.
+* `allowedCredentials` is not enabled by default since that establishes a trust level
+that exposes sensitive user-specific information such as cookies and CSRF tokens, and
+should only be used where appropriate.
+* `maxAge` is set to 30 minutes.
+
+`@CrossOrigin` is supported at the class level too and inherited by all methods:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@CrossOrigin(origins = "http://domain2.com", maxAge = 3600)
+@RestController
+@RequestMapping("/account")
+public class AccountController {
+
+	@GetMapping("/{id}")
+	public Account retrieve(@PathVariable Long id) {
+		// ...
+	}
+
+	@DeleteMapping("/{id}")
+	public void remove(@PathVariable Long id) {
+		// ...
+	}
+}
+----
+
+`CrossOrigin` can be used at both class and method-level:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@CrossOrigin(maxAge = 3600)
+@RestController
+@RequestMapping("/account")
+public class AccountController {
+
+	@CrossOrigin("http://domain2.com")
+	@GetMapping("/{id}")
+	public Account retrieve(@PathVariable Long id) {
+		// ...
+	}
+
+	@DeleteMapping("/{id}")
+	public void remove(@PathVariable Long id) {
+		// ...
+	}
+}
+----
+
+
+
+
+[[mvc-cors-global]]
+== Global Config
+[.small]#<<web-reactive.adoc#webflux-cors-global,Same in Spring WebFlux>>#
+
+In addition to fine-grained, controller method level configuration you'll probably want to
+define some global CORS configuration too. You can set URL-based `CorsConfiguration`
+mappings individually on any `HandlerMapping`. Most applications however will use the
+MVC Java config or the MVC XNM namespace to do that.
+
+By default global configuration enables the following:
+
+* All origins.
+* All headers.
+* `GET`, `HEAD`, and `POST` methods.
+* `allowedCredentials` is not enabled by default since that establishes a trust level
+that exposes sensitive user-specific information such as cookies and CSRF tokens, and
+should only be used where appropriate.
+* `maxAge` is set to 30 minutes.
+
+
+
+
+[[mvc-cors-global-java]]
+=== Java Config
+[.small]#<<web-reactive.adoc#webflux-cors-global,Same in Spring WebFlux>>#
+
+To enable CORS in the MVC Java config, use the `CorsRegistry` callback:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Configuration
+@EnableWebMvc
+public class WebConfig implements WebMvcConfigurer {
+
+	@Override
+	public void addCorsMappings(CorsRegistry registry) {
+
+		registry.addMapping("/api/**")
+			.allowedOrigins("http://domain2.com")
+			.allowedMethods("PUT", "DELETE")
+			.allowedHeaders("header1", "header2", "header3")
+			.exposedHeaders("header1", "header2")
+			.allowCredentials(true).maxAge(3600);
+
+		// Add more mappings...
+	}
+}
+----
+
+
+
+[[mvc-cors-global-xml]]
+=== XML Config
+
+To enable CORS in the XML namespace, use the `<mvc:cors>` element:
+
+[source,xml,indent=0]
+[subs="verbatim"]
+----
+<mvc:cors>
+
+	<mvc:mapping path="/api/**"
+		allowed-origins="http://domain1.com, http://domain2.com"
+		allowed-methods="GET, PUT"
+		allowed-headers="header1, header2, header3"
+		exposed-headers="header1, header2" allow-credentials="true"
+		max-age="123" />
+
+	<mvc:mapping path="/resources/**"
+		allowed-origins="http://domain1.com" />
+
+</mvc:cors>
+----
+
+
+
+
+[[mvc-cors-filter]]
+== CORS Filter
+[.small]#<<web-reactive.adoc#webflux-cors-webfilter,Same in Spring WebFlux>>#
+
+You can apply CORS support through the built-in
+{api-spring-framework}/web/filter/CorsFilter.html[`CorsFilter`].
+
+[NOTE]
+====
+If you're trying to use the `CorsFilter` with Spring Security, keep in mind that Spring
+Security has
+https://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#cors[built-in support]
+for CORS.
+====
+
+To configure the filter pass a
+`CorsConfigurationSource` to its constructor:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+CorsConfiguration config = new CorsConfiguration();
+
+// Possibly...
+// config.applyPermitDefaultValues()
+
+config.setAllowCredentials(true);
+config.addAllowedOrigin("http://domain1.com");
+config.addAllowedHeader("*");
+config.addAllowedMethod("*");
+
+UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+source.registerCorsConfiguration("/**", config);
+
+CorsFilter filter = new CorsFilter(source);
+----
+

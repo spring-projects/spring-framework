@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.beans.factory.config;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Interface that defines a registry for shared bean instances.
@@ -68,6 +70,7 @@ public interface SingletonBeanRegistry {
 	 * @return the registered singleton object, or {@code null} if none found
 	 * @see ConfigurableListableBeanFactory#getBeanDefinition
 	 */
+	@Nullable
 	Object getSingleton(String beanName);
 
 	/**
@@ -121,5 +124,12 @@ public interface SingletonBeanRegistry {
 	 * @see org.springframework.beans.factory.ListableBeanFactory#getBeanDefinitionCount
 	 */
 	int getSingletonCount();
+
+	/**
+	 * Return the singleton mutex used by this registry (for external collaborators).
+	 * @return the mutex object (never {@code null})
+	 * @since 4.2
+	 */
+	Object getSingletonMutex();
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,9 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
 /**
- * The PostgreSQL specific implementation of the {@link org.springframework.jdbc.core.metadata.TableMetaDataProvider}.
- * Suports a feature for retreiving generated keys without the JDBC 3.0 getGeneratedKeys support.
+ * The PostgreSQL specific implementation of {@link TableMetaDataProvider}.
+ * Supports a feature for retrieving generated keys without the JDBC 3.0
+ * {@code getGeneratedKeys} support.
  *
  * @author Thomas Risberg
  * @since 2.5
@@ -32,19 +33,15 @@ public class PostgresTableMetaDataProvider extends GenericTableMetaDataProvider 
 		super(databaseMetaData);
 	}
 
+
 	@Override
 	public boolean isGetGeneratedKeysSimulated() {
-		if (getDatabaseVersion().compareTo("8.2.0") >= 0) {
-			return true;
-		}
-		else {
-			logger.warn("PostgreSQL does not support getGeneratedKeys or INSERT ... RETURNING in version " + getDatabaseVersion());
-			return false;
-		}
+		return true;
 	}
 
 	@Override
 	public String getSimpleQueryForGetGeneratedKey(String tableName, String keyColumnName) {
 		return "RETURNING " + keyColumnName;
 	}
+
 }

@@ -17,7 +17,6 @@
 package org.springframework.jca.cci;
 
 import java.sql.SQLException;
-
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
@@ -32,6 +31,7 @@ import javax.resource.cci.RecordFactory;
 import javax.resource.cci.ResultSet;
 
 import org.junit.Test;
+
 import org.springframework.jca.cci.connection.ConnectionSpecConnectionFactoryAdapter;
 import org.springframework.jca.cci.connection.NotSupportedRecordFactory;
 import org.springframework.jca.cci.core.CciTemplate;
@@ -529,8 +529,7 @@ public class CciTemplateTests {
 		given(interaction.execute(interactionSpec, inputOutputRecord)).willReturn(null);
 
 		CciTemplate ct = new CciTemplate(connectionFactory);
-		Record tmpOutputRecord = ct.execute(interactionSpec,
-				inputOutputRecord);
+		Record tmpOutputRecord = ct.execute(interactionSpec, inputOutputRecord);
 		assertNull(tmpOutputRecord);
 
 		verify(interaction).execute(interactionSpec, inputOutputRecord);

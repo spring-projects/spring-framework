@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.jms.listener.SessionAwareMessageListener;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationBasedExporter;
 import org.springframework.remoting.support.RemoteInvocationResult;
@@ -58,6 +59,7 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 
 	private boolean ignoreInvalidRequests = true;
 
+	@Nullable
 	private Object proxy;
 
 
@@ -73,7 +75,7 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 	 * special kinds of messages, or might be specifically tailored for
 	 * translating RemoteInvocation(Result)s into specific kinds of messages.
 	 */
-	public void setMessageConverter(MessageConverter messageConverter) {
+	public void setMessageConverter(@Nullable MessageConverter messageConverter) {
 		this.messageConverter = (messageConverter != null ? messageConverter : new SimpleMessageConverter());
 	}
 
@@ -111,6 +113,7 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 	 * in case of an invalid message that will simply be ignored)
 	 * @throws javax.jms.JMSException in case of message access failure
 	 */
+	@Nullable
 	protected RemoteInvocation readRemoteInvocation(Message requestMessage) throws JMSException {
 		Object content = this.messageConverter.fromMessage(requestMessage);
 		if (content instanceof RemoteInvocation) {
@@ -178,6 +181,7 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 	 * @see #readRemoteInvocation
 	 * @see #setIgnoreInvalidRequests
 	 */
+	@Nullable
 	protected RemoteInvocation onInvalidRequest(Message requestMessage) throws JMSException {
 		if (this.ignoreInvalidRequests) {
 			if (logger.isWarnEnabled()) {

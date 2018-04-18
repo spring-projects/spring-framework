@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.context.annotation;
 
 import org.springframework.beans.factory.parsing.FailFastProblemReporter;
@@ -22,12 +23,8 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 
 /**
- * Unit test proving that ASM-based {@link ConfigurationClassParser} correctly detects circular use of
- * the {@link Import @Import} annotation.
- *
- * <p>While this test is the only subclass of {@link AbstractCircularImportDetectionTests}, the
- * hierarchy remains in place in case a JDT-based ConfigurationParser implementation needs to be
- * developed.
+ * Unit test proving that ASM-based {@link ConfigurationClassParser} correctly detects
+ * circular use of the {@link Import @Import} annotation.
  *
  * @author Chris Beams
  */
@@ -41,8 +38,7 @@ public class AsmCircularImportDetectionTests extends AbstractCircularImportDetec
 				new StandardEnvironment(),
 				new DefaultResourceLoader(),
 				new AnnotationBeanNameGenerator(),
-				new DefaultListableBeanFactory(),
-				null);
+				new DefaultListableBeanFactory());
 	}
 
 	@Override
