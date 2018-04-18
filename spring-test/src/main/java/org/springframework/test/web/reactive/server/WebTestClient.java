@@ -820,6 +820,14 @@ public interface WebTestClient {
 		BodyContentSpec json(String expectedJson);
 
 		/**
+		 * Parse the expected and actual response content as XML and perform a
+		 * comparison verifying the same structure.
+		 * @param expectedXml the expected JSON content.
+		 * @since 5.1
+		 */
+		BodyContentSpec xml(String expectedXml);
+
+		/**
 		 * Access to response body assertions using a
 		 * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expression
 		 * to inspect a specific subset of the body.
@@ -829,6 +837,32 @@ public interface WebTestClient {
 		 * @param args arguments to parameterize the expression
 		 */
 		JsonPathAssertions jsonPath(String expression, Object... args);
+
+		/**
+		 * Access to response body assertions using an XPath expression to inspect a specific
+		 * subset of the body.
+		 * <p>The XPath expression can be a parameterized string using
+		 * formatting specifiers as defined in {@link String#format}.
+		 * @param expression The XPath expression
+		 * @param args arguments to parameterize the expression
+		 * @see #xpath(String, Map, Object...)
+		 * @since 5.1
+		 */
+		default XpathAssertions xpath(String expression, Object... args){
+			return xpath(expression, null, args);
+		}
+
+		/**
+		 * Access to response body assertions with specific namespaces using an XPath
+		 * expression to inspect a specific subset of the body.
+		 * <p>The XPath expression can be a parameterized string using
+		 * formatting specifiers as defined in {@link String#format}.
+		 * @param expression The XPath expression
+		 * @param namespaces The namespaces
+		 * @param args arguments to parameterize the expression
+		 * @since 5.1
+		 */
+		XpathAssertions xpath(String expression, Map<String, String> namespaces, Object... args);
 
 		/**
 		 * Assert the response body content with the given {@link Consumer}.
