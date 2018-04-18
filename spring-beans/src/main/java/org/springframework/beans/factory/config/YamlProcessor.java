@@ -300,7 +300,7 @@ public abstract class YamlProcessor {
 				}
 			}
 			else {
-				result.put(key, (value != null ? value : ""));
+				result.put(key, value);
 			}
 		});
 	}
