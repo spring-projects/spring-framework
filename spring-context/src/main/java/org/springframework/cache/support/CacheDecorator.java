@@ -33,6 +33,4 @@ public interface CacheDecorator {
 	 * @return the decorated cache
 	 */
 	Cache decorateCache(Cache cache);
-
-	boolean shouldDecorate();
 }

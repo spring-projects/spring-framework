@@ -42,11 +42,9 @@ public class TransactionAwareCacheDecorator implements CacheDecorator {
 
 	@Override
 	public Cache decorateCache(Cache cache) {
-		return new TransactionAwareCache(cache);
-	}
-
-	@Override
-	public boolean shouldDecorate() {
-		return this.transactionAware;
+		if (this.transactionAware) {
+			return new TransactionAwareCache(cache);
+		}
+		return cache;
 	}
 }
