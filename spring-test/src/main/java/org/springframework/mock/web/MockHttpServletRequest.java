@@ -392,18 +392,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	@Override
 	public void setCharacterEncoding(@Nullable String characterEncoding) {
 		this.characterEncoding = characterEncoding;
-		updateContentTypeHeader();
-	}
-
-	private void updateContentTypeHeader() {
-		if (StringUtils.hasLength(this.contentType)) {
-			StringBuilder sb = new StringBuilder(this.contentType);
-			if (!this.contentType.toLowerCase().contains(CHARSET_PREFIX) &&
-					StringUtils.hasLength(this.characterEncoding)) {
-				sb.append(";").append(CHARSET_PREFIX).append(this.characterEncoding);
-			}
-			doAddHeaderValue(HttpHeaders.CONTENT_TYPE, sb.toString(), true);
-		}
 	}
 
 	/**
@@ -480,7 +468,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 					this.characterEncoding = contentType.substring(charsetIndex + CHARSET_PREFIX.length());
 				}
 			}
-			updateContentTypeHeader();
+			doAddHeaderValue(HttpHeaders.CONTENT_TYPE, contentType, false);
 		}
 	}
 

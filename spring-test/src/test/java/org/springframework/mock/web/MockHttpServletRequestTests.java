@@ -159,19 +159,21 @@ public class MockHttpServletRequestTests {
 
 	@Test
 	public void setContentTypeThenCharacterEncoding() {
-		request.setContentType("test/plain");
+		String contentType = "test/plain";
+		request.setContentType(contentType);
 		request.setCharacterEncoding("UTF-8");
-		assertEquals("test/plain", request.getContentType());
-		assertEquals("test/plain;charset=UTF-8", request.getHeader(HttpHeaders.CONTENT_TYPE));
+		assertEquals(contentType, request.getContentType());
+		assertEquals(contentType, request.getHeader(HttpHeaders.CONTENT_TYPE));
 		assertEquals("UTF-8", request.getCharacterEncoding());
 	}
 
 	@Test
 	public void setCharacterEncodingThenContentType() {
+		String contentType = "test/plain";
 		request.setCharacterEncoding("UTF-8");
-		request.setContentType("test/plain");
-		assertEquals("test/plain", request.getContentType());
-		assertEquals("test/plain;charset=UTF-8", request.getHeader(HttpHeaders.CONTENT_TYPE));
+		request.setContentType(contentType);
+		assertEquals(contentType, request.getContentType());
+		assertEquals(contentType, request.getHeader(HttpHeaders.CONTENT_TYPE));
 		assertEquals("UTF-8", request.getCharacterEncoding());
 	}
 
