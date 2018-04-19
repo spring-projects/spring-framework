@@ -16,15 +16,11 @@
 
 package org.springframework.http.codec;
 
-import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.IntPredicate;
-import java.util.stream.Collectors;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -35,7 +31,6 @@ import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
@@ -51,11 +46,11 @@ import org.springframework.lang.Nullable;
  */
 public class ServerSentEventHttpMessageReader implements HttpMessageReader<Object> {
 
-	private static final IntPredicate NEWLINE_DELIMITER = b -> b == '\n' || b == '\r';
-
 	private static final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 	private static final StringDecoder stringDecoder = StringDecoder.textPlainOnly();
+
+	private static final ResolvableType STRING_TYPE = ResolvableType.forClass(String.class);
 
 
 	@Nullable
@@ -110,77 +105,53 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 		boolean shouldWrap = isServerSentEvent(elementType);
 		ResolvableType valueType = (shouldWrap ? elementType.getGeneric(0) : elementType);
 
-		return Flux.from(message.getBody())
-				.concatMap(ServerSentEventHttpMessageReader::splitOnNewline)
-				.map(buffer -> {
-					CharBuffer charBuffer = StandardCharsets.UTF_8.decode(buffer.asByteBuffer());
-					DataBufferUtils.release(buffer);
-					return charBuffer.toString();
-				})
-				.bufferUntil(line -> line.equals("\n"))
-				.concatMap(rawLines -> {
-					String[] lines = rawLines.stream().collect(Collectors.joining()).split("\\r?\\n");
-					return buildEvent(lines, valueType, hints)
-							.filter(event -> shouldWrap || event.data() != null)
-							.map(event -> shouldWrap ? event : event.data());
-				})
-				.cast(Object.class);
+		return stringDecoder.decode(message.getBody(), STRING_TYPE, null, Collections.emptyMap())
+				.bufferUntil(line -> line.equals(""))
+				.concatMap(lines -> buildEvent(lines, valueType, shouldWrap, hints));
 	}
 
-	private static Flux<DataBuffer> splitOnNewline(DataBuffer dataBuffer) {
-		List<DataBuffer> results = new ArrayList<>();
-		int startIdx = 0;
-		int endIdx;
-		final int limit = dataBuffer.readableByteCount();
-		do {
-			endIdx = dataBuffer.indexOf(NEWLINE_DELIMITER, startIdx);
-			int length = endIdx != -1 ? endIdx - startIdx + 1 : limit - startIdx;
-			DataBuffer token = dataBuffer.slice(startIdx, length);
-			results.add(DataBufferUtils.retain(token));
-			startIdx = endIdx + 1;
-		}
-		while (startIdx < limit && endIdx != -1);
-		DataBufferUtils.release(dataBuffer);
-		return Flux.fromIterable(results);
-	}
-
-	private Mono<ServerSentEvent<Object>> buildEvent(String[] lines, ResolvableType valueType,
+	private Mono<?> buildEvent(List<String> lines, ResolvableType valueType, boolean shouldWrap,
 			Map<String, Object> hints) {
 
-		ServerSentEvent.Builder<Object> sseBuilder = ServerSentEvent.builder();
+		ServerSentEvent.Builder<Object> sseBuilder = shouldWrap ? ServerSentEvent.builder() : null;
 		StringBuilder data = null;
 		StringBuilder comment = null;
 
 		for (String line : lines) {
-			if (line.startsWith("id:")) {
-				sseBuilder.id(line.substring(3));
-			}
-			else if (line.startsWith("event:")) {
-				sseBuilder.event(line.substring(6));
-			}
-			else if (line.startsWith("data:")) {
+			if (line.startsWith("data:")) {
 				data = (data != null ? data : new StringBuilder());
 				data.append(line.substring(5)).append("\n");
 			}
-			else if (line.startsWith("retry:")) {
-				sseBuilder.retry(Duration.ofMillis(Long.valueOf(line.substring(6))));
-			}
-			else if (line.startsWith(":")) {
-				comment = (comment != null ? comment : new StringBuilder());
-				comment.append(line.substring(1)).append("\n");
+			if (shouldWrap) {
+				if (line.startsWith("id:")) {
+					sseBuilder.id(line.substring(3));
+				}
+				else if (line.startsWith("event:")) {
+					sseBuilder.event(line.substring(6));
+				}
+				else if (line.startsWith("retry:")) {
+					sseBuilder.retry(Duration.ofMillis(Long.valueOf(line.substring(6))));
+				}
+				else if (line.startsWith(":")) {
+					comment = (comment != null ? comment : new StringBuilder());
+					comment.append(line.substring(1)).append("\n");
+				}
 			}
 		}
-		if (comment != null) {
-			sseBuilder.comment(comment.toString().substring(0, comment.length() - 1));
-		}
-		if (data != null) {
-			return decodeData(data.toString(), valueType, hints).map(decodedData -> {
-				sseBuilder.data(decodedData);
+
+		Mono<?> decodedData = (data != null ? decodeData(data.toString(), valueType, hints) : Mono.empty());
+
+		if (shouldWrap) {
+			if (comment != null) {
+				sseBuilder.comment(comment.toString().substring(0, comment.length() - 1));
+			}
+			return decodedData.map(o -> {
+				sseBuilder.data(o);
 				return sseBuilder.build();
 			});
 		}
 		else {
-			return Mono.just(sseBuilder.build());
+			return decodedData;
 		}
 	}
 
