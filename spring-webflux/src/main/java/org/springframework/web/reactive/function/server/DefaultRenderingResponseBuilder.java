@@ -184,7 +184,7 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 
 		@Override
 		protected Mono<Void> writeToInternal(ServerWebExchange exchange, Context context) {
-			MediaType responseContentType = exchange.getResponse().getHeaders().getContentType();
+			MediaType contentType = exchange.getResponse().getHeaders().getContentType();
 			Locale locale = LocaleContextHolder.getLocale(exchange.getLocaleContext());
 			Stream<ViewResolver> viewResolverStream = context.viewResolvers().stream();
 
@@ -195,8 +195,9 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 							new IllegalArgumentException("Could not resolve view with name '" + name() + "'")))
 					.flatMap(view -> {
 						List<MediaType> mediaTypes = view.getSupportedMediaTypes();
-						MediaType contentType = (responseContentType == null && !mediaTypes.isEmpty() ? mediaTypes.get(0) : responseContentType);
-						return view.render(model(), contentType, exchange);
+						return view.render(model(),
+								contentType == null && !mediaTypes.isEmpty() ? mediaTypes.get(0) : contentType,
+								exchange);
 					});
 		}
 
