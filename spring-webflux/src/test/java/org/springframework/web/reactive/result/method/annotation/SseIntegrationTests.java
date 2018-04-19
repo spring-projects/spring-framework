@@ -18,6 +18,7 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.time.Duration;
 
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -32,8 +33,10 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.http.server.reactive.bootstrap.JettyHttpServer;
 import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.config.EnableWebFlux;
@@ -103,51 +106,42 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@Test
 	public void sseAsEvent() {
-		Flux<ServerSentEvent<String>> result = this.webClient.get()
+
+		Assume.assumeTrue(server instanceof JettyHttpServer);
+
+		Flux<ServerSentEvent<Person>> result = this.webClient.get()
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
 				.retrieve()
-				.bodyToFlux(new ParameterizedTypeReference<ServerSentEvent<String>>() {});
+				.bodyToFlux(new ParameterizedTypeReference<ServerSentEvent<Person>>() {});
 
-		StepVerifier.create(result)
-				.consumeNextWith( event -> {
-					assertEquals("0", event.id());
-					assertEquals("foo", event.data());
-					assertEquals("bar", event.comment());
-					assertNull(event.event());
-					assertNull(event.retry());
-				})
-				.consumeNextWith( event -> {
-					assertEquals("1", event.id());
-					assertEquals("foo", event.data());
-					assertEquals("bar", event.comment());
-					assertNull(event.event());
-					assertNull(event.retry());
-				})
-				.thenCancel()
-				.verify(Duration.ofSeconds(5L));
+		verifyPersonEvents(result);
 	}
 
 	@Test
 	public void sseAsEventWithoutAcceptHeader() {
-		Flux<ServerSentEvent<String>> result = this.webClient.get()
+		Flux<ServerSentEvent<Person>> result = this.webClient.get()
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
 				.retrieve()
-				.bodyToFlux(new ParameterizedTypeReference<ServerSentEvent<String>>() {});
+				.bodyToFlux(new ParameterizedTypeReference<ServerSentEvent<Person>>() {});
 
+		verifyPersonEvents(result);
+	}
+
+	private void verifyPersonEvents(Flux<ServerSentEvent<Person>> result) {
 		StepVerifier.create(result)
 				.consumeNextWith( event -> {
 					assertEquals("0", event.id());
-					assertEquals("foo", event.data());
-					assertEquals("bar", event.comment());
+					assertEquals(new Person("foo 0"), event.data());
+					assertEquals("bar 0", event.comment());
 					assertNull(event.event());
 					assertNull(event.retry());
 				})
 				.consumeNextWith( event -> {
 					assertEquals("1", event.id());
-					assertEquals("foo", event.data());
-					assertEquals("bar", event.comment());
+					assertEquals(new Person("foo 1"), event.data());
+					assertEquals("bar 1", event.comment());
 					assertNull(event.event());
 					assertNull(event.retry());
 				})
@@ -180,6 +174,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@RestController
 	@SuppressWarnings("unused")
+	@RequestMapping("/sse")
 	static class SseController {
 
 		private static final Flux<Long> INTERVAL = interval(Duration.ofMillis(100), 50);
@@ -187,25 +182,26 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		private MonoProcessor<Void> cancellation = MonoProcessor.create();
 
 
-		@GetMapping("/sse/string")
+		@GetMapping("/string")
 		Flux<String> string() {
 			return INTERVAL.map(l -> "foo " + l);
 		}
 
-		@GetMapping("/sse/person")
+		@GetMapping("/person")
 		Flux<Person> person() {
 			return INTERVAL.map(l -> new Person("foo " + l));
 		}
 
-		@GetMapping("/sse/event")
-		Flux<ServerSentEvent<String>> sse() {
-			return INTERVAL.map(l -> ServerSentEvent.builder("foo")
-					.id(Long.toString(l))
-					.comment("bar")
-					.build());
+		@GetMapping("/event")
+		Flux<ServerSentEvent<Person>> sse() {
+			return INTERVAL.take(2).map(l ->
+					ServerSentEvent.builder(new Person("foo " + l))
+							.id(Long.toString(l))
+							.comment("bar " + l)
+							.build());
 		}
 
-		@GetMapping("/sse/infinite")
+		@GetMapping("/infinite")
 		Flux<String> infinite() {
 			return Flux.just(0, 1).map(l -> "foo " + l)
 					.mergeWith(Flux.never())
