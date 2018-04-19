@@ -63,8 +63,8 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 		Flux<String> result = this.webClient.get()
 				.uri("/string")
 				.accept(TEXT_EVENT_STREAM)
-				.exchange()
-				.flatMapMany(response -> response.body(toFlux(String.class)));
+				.retrieve()
+				.bodyToFlux(String.class);
 
 		StepVerifier.create(result)
 				.expectNext("foo 0")
@@ -78,8 +78,8 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 		Flux<Person> result = this.webClient.get()
 				.uri("/person")
 				.accept(TEXT_EVENT_STREAM)
-				.exchange()
-				.flatMapMany(response -> response.body(toFlux(Person.class)));
+				.retrieve()
+				.bodyToFlux(Person.class);
 
 		StepVerifier.create(result)
 				.expectNext(new Person("foo 0"))
@@ -93,9 +93,8 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 		Flux<ServerSentEvent<String>> result = this.webClient.get()
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
-				.exchange()
-				.flatMapMany(response -> response.body(toFlux(
-						new ParameterizedTypeReference<ServerSentEvent<String>>() {})));
+				.retrieve()
+				.bodyToFlux(new ParameterizedTypeReference<ServerSentEvent<String>>() {});
 
 		StepVerifier.create(result)
 				.consumeNextWith( event -> {

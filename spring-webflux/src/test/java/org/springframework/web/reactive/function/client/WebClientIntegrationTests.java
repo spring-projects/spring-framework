@@ -106,8 +106,8 @@ public class WebClientIntegrationTests {
 		Mono<String> result = this.webClient.get()
 				.uri("/greeting?name=Spring")
 				.header("X-Test-Header", "testvalue")
-				.exchange()
-				.flatMap(response -> response.bodyToMono(String.class));
+				.retrieve()
+				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
 				.expectNext("Hello Spring!")
@@ -256,8 +256,8 @@ public class WebClientIntegrationTests {
 		Mono<Pojo> result = this.webClient.get()
 				.uri("/pojo")
 				.accept(MediaType.APPLICATION_JSON)
-				.exchange()
-				.flatMap(response -> response.bodyToMono(Pojo.class));
+				.retrieve()
+				.bodyToMono(Pojo.class);
 
 		StepVerifier.create(result)
 				.consumeNextWith(p -> assertEquals("barbar", p.getBar()))
@@ -280,8 +280,8 @@ public class WebClientIntegrationTests {
 		Flux<Pojo> result = this.webClient.get()
 				.uri("/pojos")
 				.accept(MediaType.APPLICATION_JSON)
-				.exchange()
-				.flatMapMany(response -> response.bodyToFlux(Pojo.class));
+				.retrieve()
+				.bodyToFlux(Pojo.class);
 
 		StepVerifier.create(result)
 				.consumeNextWith(p -> assertThat(p.getBar(), Matchers.is("bar1")))
@@ -306,8 +306,8 @@ public class WebClientIntegrationTests {
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
 				.syncBody(new Pojo("foofoo", "barbar"))
-				.exchange()
-				.flatMap(response -> response.bodyToMono(Pojo.class));
+				.retrieve()
+				.bodyToMono(Pojo.class);
 
 		StepVerifier.create(result)
 				.consumeNextWith(p -> assertEquals("BARBAR", p.getBar()))
@@ -332,8 +332,8 @@ public class WebClientIntegrationTests {
 		Mono<String> result = this.webClient.get()
 				.uri("/test")
 				.cookie("testkey", "testvalue")
-				.exchange()
-				.flatMap(response -> response.bodyToMono(String.class));
+				.retrieve()
+				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
 				.expectNext("test")
