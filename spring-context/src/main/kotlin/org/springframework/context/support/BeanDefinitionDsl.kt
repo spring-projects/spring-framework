@@ -240,7 +240,7 @@ open class BeanDefinitionDsl(private val condition: (ConfigurableEnvironment) ->
 	 * @return a Map with the matching beans, containing the bean names as
 	 * keys and the corresponding bean instances as values
 	 */
-	inline fun <reified T : Any> BeanDefinitionDsl.refAll() : Map<String, T> {
+	inline fun <reified T : Any> refAll() : Map<String, T> {
 		return context.getBeansOfType(T::class.java)
 	}
 
