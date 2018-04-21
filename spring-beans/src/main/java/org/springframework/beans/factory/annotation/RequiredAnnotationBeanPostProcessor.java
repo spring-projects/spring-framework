@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,8 +56,8 @@ import org.springframework.util.Assert;
  * and obviates the need (<b>in part</b>) for a developer to code a method that
  * simply checks that all required properties have actually been set.
  *
- * <p>Please note that an 'init' method may still need to implemented (and may
- * still be desirable), because all that this class does is enforce that a
+ * <p>Please note that an 'init' method may still need to be implemented (and may
+ * still be desirable), because all that this class does is enforcing that a
  * 'required' property has actually been configured with a value. It does
  * <b>not</b> check anything else... In particular, it does not check that a
  * configured value is not {@code null}.
