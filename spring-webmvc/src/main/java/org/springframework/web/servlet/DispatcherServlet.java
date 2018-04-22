@@ -136,6 +136,7 @@ import org.springframework.web.util.WebUtils;
  * @see org.springframework.web.HttpRequestHandler
  * @see org.springframework.web.servlet.mvc.Controller
  * @see org.springframework.web.context.ContextLoaderListener
+ * 一个web应用初始化的容器，首先初始化的是这个
  */
 @SuppressWarnings("serial")
 public class DispatcherServlet extends FrameworkServlet {
