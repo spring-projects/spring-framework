@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -39,7 +38,6 @@ import static org.junit.Assert.assertEquals;
  *
  * @author Sebastien Deleuze
  */
-@Ignore  // for JDK 9 compatibility, see KT-18833
 public class KotlinScriptTemplateTests {
 
 	@Test
