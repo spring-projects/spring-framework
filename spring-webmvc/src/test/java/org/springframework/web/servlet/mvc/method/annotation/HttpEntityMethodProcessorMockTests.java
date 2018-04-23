@@ -16,7 +16,9 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -27,6 +29,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,6 +38,7 @@ import org.mockito.ArgumentCaptor;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -545,6 +549,23 @@ public class HttpEntityMethodProcessorMockTests {
 		then(resourceRegionMessageConverter).should(never()).write(
 				anyCollection(), eq(APPLICATION_OCTET_STREAM), any(HttpOutputMessage.class));
 		assertEquals(416, servletResponse.getStatus());
+	}
+
+	@Test //SPR-16754
+	public void disableRangeSupportForStreamingResponses() throws Exception {
+		InputStream is = new ByteArrayInputStream("Content".getBytes(StandardCharsets.UTF_8));
+		InputStreamResource resource = new InputStreamResource(is, "test");
+		ResponseEntity<Resource> returnValue = ResponseEntity.ok(resource);
+		servletRequest.addHeader("Range", "bytes=0-5");
+
+		given(resourceMessageConverter.canWrite(any(), eq(null))).willReturn(true);
+		given(resourceMessageConverter.canWrite(any(), eq(APPLICATION_OCTET_STREAM))).willReturn(true);
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntityResource, mavContainer, webRequest);
+		then(resourceMessageConverter).should(times(1)).write(
+				any(InputStreamResource.class), eq(APPLICATION_OCTET_STREAM), any(HttpOutputMessage.class));
+		assertEquals(200, servletResponse.getStatus());
+		assertThat(servletResponse.getHeader(HttpHeaders.ACCEPT_RANGES), Matchers.isEmptyOrNullString());
 	}
 
 	@Test  //SPR-14767
