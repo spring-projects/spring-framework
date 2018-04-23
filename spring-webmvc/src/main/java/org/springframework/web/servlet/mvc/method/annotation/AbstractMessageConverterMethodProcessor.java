@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpEntity;
@@ -302,7 +303,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 * Return whether the returned value or the declared return type extend {@link Resource}
 	 */
 	protected boolean isResourceType(@Nullable Object value, MethodParameter returnType) {
-		return Resource.class.isAssignableFrom(value != null ? value.getClass() : returnType.getParameterType());
+		Class<?> clazz = getReturnValueType(value, returnType);
+		return clazz != InputStreamResource.class && Resource.class.isAssignableFrom(clazz);
 	}
 
 	/**
