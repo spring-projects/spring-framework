@@ -25,11 +25,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.function.Consumer;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -41,6 +43,7 @@ import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
@@ -119,6 +122,11 @@ public interface ServerRequest {
 	 * @since 5.1
 	 */
 	Optional<InetSocketAddress> remoteAddress();
+
+	/**
+	 * Return the readers used to convert the body of this request.
+	 */
+	List<HttpMessageReader<?>> messageReaders();
 
 	/**
 	 * Extract the body with the given {@code BodyExtractor}.
@@ -271,7 +279,16 @@ public interface ServerRequest {
 	 */
 	Mono<MultiValueMap<String, Part>> multipartData();
 
+	/**
+	 * Returns the web exchange that this request is based on. Manipulating the exchange directly,
+	 * instead of using the methods provided on {@code ServerRequest} and {@code ServerResponse},
+	 * can lead to irregular results.
+	 *
+	 * @return the web exchange
+	 */
+	ServerWebExchange exchange();
 
+	// Static methods
 
 	/**
 	 * Create a new {@code ServerRequest} based on the given {@code ServerWebExchange} and
@@ -284,6 +301,15 @@ public interface ServerRequest {
 		return new DefaultServerRequest(exchange, messageReaders);
 	}
 
+	/**
+	 * Create a builder with the status, headers, and cookies of the given request.
+	 * @param other the response to copy the status, headers, and cookies from
+	 * @return the created builder
+	 */
+	static Builder from(ServerRequest other) {
+		Assert.notNull(other, "'other' must not be null");
+		return new DefaultServerRequestBuilder(other);
+	}
 
 	/**
 	 * Represents the headers of the HTTP request.
@@ -347,6 +373,110 @@ public interface ServerRequest {
 		 * Return the headers as a {@link HttpHeaders} instance.
 		 */
 		HttpHeaders asHttpHeaders();
+	}
+
+
+	/**
+	 * Defines a builder for a request.
+	 */
+	interface Builder {
+
+		/**
+		 * Set the method of the request.
+		 * @param method the new method
+		 * @return this builder
+		 */
+		Builder method(HttpMethod method);
+
+		/**
+		 * Set the uri of the request.
+		 * @param uri the new uri
+		 * @return this builder
+		 */
+		Builder uri(URI uri);
+
+		/**
+		 * Add the given header value(s) under the given name.
+		 * @param headerName  the header name
+		 * @param headerValues the header value(s)
+		 * @return this builder
+		 * @see HttpHeaders#add(String, String)
+		 */
+		Builder header(String headerName, String... headerValues);
+
+		/**
+		 * Manipulate this request's headers with the given consumer. The
+		 * headers provided to the consumer are "live", so that the consumer can be used to
+		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
+		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
+		 * {@link HttpHeaders} methods.
+		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
+		 * @return this builder
+		 */
+		Builder headers(Consumer<HttpHeaders> headersConsumer);
+
+		/**
+		 * Add a cookie with the given name and value(s).
+		 * @param name the cookie name
+		 * @param values the cookie value(s)
+		 * @return this builder
+		 */
+		Builder cookie(String name, String... values);
+
+		/**
+		 * Manipulate this request's cookies with the given consumer. The
+		 * map provided to the consumer is "live", so that the consumer can be used to
+		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing header values,
+		 * {@linkplain MultiValueMap#remove(Object) remove} values, or use any of the other
+		 * {@link MultiValueMap} methods.
+		 * @param cookiesConsumer a function that consumes the cookies map
+		 * @return this builder
+		 */
+		Builder cookies(Consumer<MultiValueMap<String, HttpCookie>> cookiesConsumer);
+
+		/**
+		 * Sets the body of the request. Calling this methods will
+		 * {@linkplain org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer) release}
+		 * the existing body of the builder.
+		 * @param body the new body.
+		 * @return this builder
+		 */
+		Builder body(Flux<DataBuffer> body);
+
+		/**
+		 * Sets the body of the request to the UTF-8 encoded bytes of the given string.
+		 * Calling this methods will
+		 * {@linkplain org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer) release}
+		 * the existing body of the builder.
+		 * @param body the new body.
+		 * @return this builder
+		 */
+		Builder body(String body);
+
+		/**
+		 * Adds an attribute with the given name and value.
+		 * @param name  the attribute name
+		 * @param value the attribute value
+		 * @return this builder
+		 */
+		Builder attribute(String name, Object value);
+
+		/**
+		 * Manipulate this request's attributes with the given consumer. The map provided to the
+		 * consumer is "live", so that the consumer can be used to
+		 * {@linkplain Map#put(Object, Object) overwrite} existing header values,
+		 * {@linkplain Map#remove(Object) remove} values, or use any of the other
+		 * {@link Map} methods.
+		 * @param attributesConsumer a function that consumes the attributes map
+		 * @return this builder
+		 */
+		Builder attributes(Consumer<Map<String, Object>> attributesConsumer);
+
+		/**
+		 * Builds the request.
+		 * @return the built request
+		 */
+		ServerRequest build();
 	}
 
 }

@@ -121,6 +121,11 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@Override
+	public List<HttpMessageReader<?>> messageReaders() {
+		return this.messageReaders;
+	}
+
+	@Override
 	public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor) {
 		return body(extractor, Collections.emptyMap());
 	}
@@ -208,7 +213,8 @@ class DefaultServerRequest implements ServerRequest {
 		return this.exchange.getRequest();
 	}
 
-	ServerWebExchange exchange() {
+	@Override
+	public ServerWebExchange exchange() {
 		return this.exchange;
 	}
 

@@ -40,6 +40,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -47,6 +48,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriUtils;
@@ -525,6 +527,11 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public List<HttpMessageReader<?>> messageReaders() {
+			return this.request.messageReaders();
+		}
+
+		@Override
 		public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor) {
 			return this.request.body(extractor);
 		}
@@ -602,6 +609,11 @@ public abstract class RequestPredicates {
 		@Override
 		public Mono<MultiValueMap<String, Part>> multipartData() {
 			return this.request.multipartData();
+		}
+
+		@Override
+		public ServerWebExchange exchange() {
+			return this.request.exchange();
 		}
 
 		@Override
