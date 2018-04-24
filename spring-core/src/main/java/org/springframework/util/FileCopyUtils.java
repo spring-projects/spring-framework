@@ -51,6 +51,7 @@ public abstract class FileCopyUtils {
 	//---------------------------------------------------------------------
 
 	/**
+	 * 拷贝文件，不包含文件夹
 	 * Copy the contents of the given input File to the given output File.
 	 * @param in the file to copy from
 	 * @param out the file to copy to
@@ -65,6 +66,7 @@ public abstract class FileCopyUtils {
 	}
 
 	/**
+     * 将给定的byte数组拷贝到文件中
 	 * Copy the contents of the given byte array to the given output File.
 	 * @param in the byte array to copy from
 	 * @param out the file to copy to
