@@ -215,6 +215,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 
 
 	/**
+	 * 支持流量控制
 	 * Subclass of the general ConcurrencyThrottleSupport class,
 	 * making {@code beforeAccess()} and {@code afterAccess()}
 	 * visible to the surrounding class.

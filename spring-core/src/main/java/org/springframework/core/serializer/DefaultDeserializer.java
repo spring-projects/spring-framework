@@ -23,6 +23,7 @@ import java.io.ObjectInputStream;
 import org.springframework.core.NestedIOException;
 
 /**
+ * 对象反序列化默认实现
  * Deserializer that reads an input stream using Java Serialization.
  *
  * @author Gary Russell
@@ -32,6 +33,7 @@ import org.springframework.core.NestedIOException;
 public class DefaultDeserializer implements Deserializer<Object> {
 
 	/**
+	 * 将流反序列化成一个对象
 	 * Reads the input stream and deserializes into an object.
 	 */
 	@Override

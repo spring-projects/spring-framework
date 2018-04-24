@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
+ * 反序列化对象接口
  * A strategy interface for converting from data in an InputStream to an Object.
  *
  * @author Gary Russell

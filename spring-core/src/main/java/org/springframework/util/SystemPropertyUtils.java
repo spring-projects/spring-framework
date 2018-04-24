@@ -104,8 +104,8 @@ public abstract class SystemPropertyUtils {
 				return propVal;
 			}
 			catch (Throwable ex) {
-				System.err.println("Could not resolve placeholder '" + placeholderName + "' in [" +
-						this.text + "] as system property: " + ex);
+
+				System.err.println("Could not resolve placeholder '" + placeholderName + "' in [" + this.text + "] as system property: " + ex);
 				return null;
 			}
 		}

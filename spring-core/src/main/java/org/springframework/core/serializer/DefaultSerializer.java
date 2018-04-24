@@ -22,6 +22,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 
 /**
+ * 对象序列化默认实现
  * Serializer that writes an object to an output stream using Java Serialization.
  *
  * @author Gary Russell
@@ -31,6 +32,7 @@ import java.io.Serializable;
 public class DefaultSerializer implements Serializer<Object> {
 
 	/**
+	 * 将对象序列化并输出到流中
 	 * Writes the source object to an output stream using Java Serialization.
 	 * The source object must implement {@link Serializable}.
 	 */

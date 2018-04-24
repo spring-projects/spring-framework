@@ -62,6 +62,7 @@ public abstract class BeanUtils {
 
 
 	/**
+	 * 创建一个类的对象，如果是接口，会抛出错误信息
 	 * Convenience method to instantiate a class using its no-arg constructor.
 	 * As this method doesn't try to load classes by name, it should avoid
 	 * class-loading issues.
@@ -86,6 +87,7 @@ public abstract class BeanUtils {
 	}
 
 	/**
+     * 使用无参构造器实例化一个类的对象
 	 * Instantiate a class using its no-arg constructor.
 	 * As this method doesn't try to load classes by name, it should avoid
 	 * class-loading issues.
@@ -130,6 +132,7 @@ public abstract class BeanUtils {
 	}
 
 	/**
+     * 使用匹配参数的构造器实例化一个类的对象
 	 * Convenience method to instantiate a class using the given constructor.
 	 * As this method doesn't try to load classes by name, it should avoid
 	 * class-loading issues.
@@ -165,6 +168,7 @@ public abstract class BeanUtils {
 	}
 
 	/**
+     * 根据方法名和参数类型，查询某个类中的方法
 	 * Find a method with the given method name and the given parameter types,
 	 * declared on the given class or one of its superclasses. Prefers public methods,
 	 * but will return a protected, package access, or private method too.
@@ -188,6 +192,7 @@ public abstract class BeanUtils {
 	}
 
 	/**
+     * 根据方法名和参数类型，查询某个类中的公开方法
 	 * Find a method with the given method name and the given parameter types,
 	 * declared on the given class or one of its superclasses. Will return a public,
 	 * protected, package access, or private method.
@@ -211,6 +216,7 @@ public abstract class BeanUtils {
 	}
 
 	/**
+     * 使用最小的参数数量查询某个类中的方法
 	 * Find a method with the given method name and minimal parameters (best case: none),
 	 * declared on the given class or one of its superclasses. Prefers public methods,
 	 * but will return a protected, package access, or private method too.
@@ -236,6 +242,7 @@ public abstract class BeanUtils {
 	}
 
 	/**
+     * 使用最小的参数数量查询某个类中的公开方法
 	 * Find a method with the given method name and minimal parameters (best case: none),
 	 * declared on the given class or one of its superclasses. Will return a public,
 	 * protected, package access, or private method.
@@ -258,6 +265,7 @@ public abstract class BeanUtils {
 	}
 
 	/**
+     * 根据方法名查询指定方法列表中的方法
 	 * Find a method with the given method name and minimal parameters (best case: none)
 	 * in the given list of methods.
 	 * @param methods the methods to check
