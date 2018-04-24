@@ -29,6 +29,7 @@ import java.io.IOException;
 public abstract class FileSystemUtils {
 
 	/**
+	 * 删除目录下所有的子目录及文件，包含目录本身
 	 * Delete the supplied {@link File} - for directories,
 	 * recursively delete any nested directories or files as well.
 	 * @param root the root {@code File} to delete
@@ -51,6 +52,7 @@ public abstract class FileSystemUtils {
 	}
 
 	/**
+     * 把源文件或者文件夹复制到目的文件或者文件夹，这里只验证源或目的是不是文件或者文件夹且不允许为空
 	 * Recursively copy the contents of the {@code src} file/directory
 	 * to the {@code dest} file/directory.
 	 * @param src the source directory
@@ -64,6 +66,7 @@ public abstract class FileSystemUtils {
 	}
 
 	/**
+     * 将源文件或者文件夹复制到目的文件或者文件夹，这里是实现部分
 	 * Actually copy the contents of the {@code src} file/directory
 	 * to the {@code dest} file/directory.
 	 * @param src the source directory
