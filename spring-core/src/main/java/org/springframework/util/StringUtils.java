@@ -209,14 +209,18 @@ public abstract class StringUtils {
 			return str;
 		}
 
-		StringBuilder sb = new StringBuilder(str);
-		while (sb.length() > 0 && Character.isWhitespace(sb.charAt(0))) {
-			sb.deleteCharAt(0);
+		int beginIndex = 0;
+		int endIndex = str.length() - 1;
+
+		while (beginIndex <= endIndex && Character.isWhitespace(str.charAt(beginIndex))) {
+			beginIndex++;
 		}
-		while (sb.length() > 0 && Character.isWhitespace(sb.charAt(sb.length() - 1))) {
-			sb.deleteCharAt(sb.length() - 1);
+
+		while (endIndex > beginIndex && Character.isWhitespace(str.charAt(endIndex))) {
+			endIndex--;
 		}
-		return sb.toString();
+
+		return str.substring(beginIndex, endIndex + 1);
 	}
 
 	/**
