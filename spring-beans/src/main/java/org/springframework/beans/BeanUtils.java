@@ -304,6 +304,7 @@ public abstract class BeanUtils {
 	}
 
 	/**
+     * 根据方法签名查询方法
 	 * Parse a method signature in the form {@code methodName[([arg_list])]},
 	 * where {@code arg_list} is an optional, comma-separated list of fully-qualified
 	 * type names, and attempts to resolve that signature against the supplied {@code Class}.
