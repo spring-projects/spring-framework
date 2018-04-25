@@ -248,7 +248,19 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 				rollbackOnException(this.transactionManager, status, ex);
 				throw ex;
 			}
-			this.transactionManager.commit(status);
+			try {
+				this.transactionManager.commit(status);
+			}
+			catch (Throwable ex) {
+				if (status.isCompleted()) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Caught exception committing transaction and rolled back: " + ex);
+					}
+				}
+				else {
+					throw ex;
+				}
+			}
 			return messageReceived;
 		}
 
