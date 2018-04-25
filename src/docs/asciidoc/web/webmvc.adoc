@@ -4106,8 +4106,8 @@ In Java config, register interceptors to apply to incoming requests:
 
 		@Override
 		public void addInterceptors(InterceptorRegistry registry) {
-			registry.addInterceptor(new LocaleInterceptor());
-			registry.addInterceptor(new ThemeInterceptor()).addPathPatterns("/**").excludePathPatterns("/admin/**");
+			registry.addInterceptor(new LocaleChangeInterceptor());
+			registry.addInterceptor(new ThemeChangeInterceptor()).addPathPatterns("/**").excludePathPatterns("/admin/**");
 			registry.addInterceptor(new SecurityInterceptor()).addPathPatterns("/secure/*");
 		}
 	}
