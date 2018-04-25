@@ -172,11 +172,8 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	 * or simply the passed-in Cache object by default
 	 */
 	protected Cache decorateCache(Cache cache) {
-		if (cacheDecorators != null) {
-			for (CacheDecorator cacheDecorator : cacheDecorators) {
-				cache = cacheDecorator.decorateCache(cache);
-			}
-			return cache;
+		for (CacheDecorator cacheDecorator : cacheDecorators) {
+			cache = cacheDecorator.decorateCache(cache);
 		}
 		return cache;
 	}
