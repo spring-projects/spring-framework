@@ -63,13 +63,14 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 	@Nullable
 	private ClientHttpConnector connector;
 
-	private ExchangeStrategies exchangeStrategies = ExchangeStrategies.withDefaults();
+	private ExchangeStrategies exchangeStrategies;
 
 	@Nullable
 	private ExchangeFunction exchangeFunction;
 
 
 	public DefaultWebClientBuilder() {
+		this.exchangeStrategies = ExchangeStrategies.withDefaults();
 	}
 
 	public DefaultWebClientBuilder(DefaultWebClientBuilder other) {
