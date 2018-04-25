@@ -46,6 +46,6 @@ public abstract class AbstractTransactionSupportingCacheManager extends Abstract
 	 *                         put/evict operation only in the after-commit phase of a successful transaction.
 	 */
 	public AbstractTransactionSupportingCacheManager(boolean transactionAware) {
-		super(new TransactionAwareCacheDecorator(transactionAware));
+		super.addCacheDecorator(new TransactionAwareCacheDecorator(transactionAware));
 	}
 }

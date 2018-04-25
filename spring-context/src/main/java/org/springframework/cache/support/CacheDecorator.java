@@ -19,11 +19,12 @@ package org.springframework.cache.support;
 import org.springframework.cache.Cache;
 
 /**
- * A functonal interface to allow us to decorate the {@code Cache} instances before they are added to the {@code org.springframework.cache.CacheManager}.
+ * An interface to allow us to decorate the {@code Cache} instances before they are added to the {@code org.springframework.cache.CacheManager}.
  *
  * @author Petar Tahchiev
  * @since 5.1.0
  */
+@FunctionalInterface
 public interface CacheDecorator {
 
 	/**

@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @author Stas Volsky
- * @since 3.2
+ * @since 5.1
  * @see TransactionAwareCacheManagerProxy
  */
 public class TransactionAwareCache implements Cache {

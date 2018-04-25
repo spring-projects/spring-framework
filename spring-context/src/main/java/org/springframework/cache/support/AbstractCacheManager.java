@@ -18,6 +18,7 @@ package org.springframework.cache.support;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,13 +44,7 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 
 	private volatile Set<String> cacheNames = Collections.emptySet();
 
-	private CacheDecorator cacheDecorator;
-
-	public AbstractCacheManager() {}
-
-	public AbstractCacheManager(CacheDecorator cacheDecorator) {
-		this.cacheDecorator = cacheDecorator;
-	}
+	private Set<CacheDecorator> cacheDecorators = new HashSet<>();
 
 	// Early cache initialization on startup
 
@@ -177,7 +172,13 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	 * or simply the passed-in Cache object by default
 	 */
 	protected Cache decorateCache(Cache cache) {
-		return this.cacheDecorator != null ? this.cacheDecorator.decorateCache(cache) : cache;
+		if (cacheDecorators != null) {
+			for (CacheDecorator cacheDecorator : cacheDecorators) {
+				cache = cacheDecorator.decorateCache(cache);
+			}
+			return cache;
+		}
+		return cache;
 	}
 
 	/**
@@ -198,11 +199,11 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 		return null;
 	}
 
-	public CacheDecorator getCacheDecorator() {
-		return cacheDecorator;
+	public Set<CacheDecorator> getCacheDecorators() {
+		return cacheDecorators;
 	}
 
-	public void setCacheDecorator(CacheDecorator cacheDecorator) {
-		this.cacheDecorator = cacheDecorator;
+	public void addCacheDecorator(CacheDecorator cacheDecorator) {
+		this.cacheDecorators.add(cacheDecorator);
 	}
 }
