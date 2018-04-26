@@ -82,7 +82,7 @@ public interface ExchangeStrategies {
 
 
 	/**
-	 * A mutable builder for a {@link ExchangeStrategies}.
+	 * A mutable builder for an {@link ExchangeStrategies}.
 	 */
 	interface Builder {
 
