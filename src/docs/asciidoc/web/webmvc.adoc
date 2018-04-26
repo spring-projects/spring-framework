@@ -4162,6 +4162,7 @@ In Java config, customize requested content type resolution:
 		@Override
 		public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
 			configurer.mediaType("json", MediaType.APPLICATION_JSON);
+			configurer.mediaType("xml", MediaType.APPLICATION_XML);
 		}
 	}
 ----
@@ -4212,7 +4213,7 @@ Below is an example that adds Jackson JSON and XML converters with a customized
 					.dateFormat(new SimpleDateFormat("yyyy-MM-dd"))
 					.modulesToInstall(new ParameterNamesModule());
 			converters.add(new MappingJackson2HttpMessageConverter(builder.build()));
-			converters.add(new MappingJackson2XmlHttpMessageConverter(builder.xml().build()));
+			converters.add(new MappingJackson2XmlHttpMessageConverter(builder.createXmlMapper(true).build()));
 		}
 	}
 ----
@@ -4389,7 +4390,7 @@ In Java config simply add the respective "Configurer" bean:
 		@Bean
 		public FreeMarkerConfigurer freeMarkerConfigurer() {
 			FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
-			configurer.setTemplateLoaderPath("/WEB-INF/");
+			configurer.setTemplateLoaderPath("/freemarker");
 			return configurer;
 		}
 	}
@@ -4683,7 +4684,7 @@ hook of the Spring `ApplicationContext`:
 ----
 
 Note that `MyPostProcessor` needs to be declared as a bean either explicitly in XML or
-detected through a `<component scan/>` declaration.
+detected through a `<component-scan/>` declaration.
 
 
 
