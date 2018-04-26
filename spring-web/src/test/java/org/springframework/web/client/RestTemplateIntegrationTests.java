@@ -310,6 +310,29 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 		assertNull(template.postForObject(baseUrl + "/jsonpost", null, String.class));
 	}
 
+	@Test  // SPR-16773
+	public void urlConnectionBufferedErrorstream() throws Exception {
+		// This test may only fail if this unittest is run alone in complete isolation,
+		// because the system-property is evaluated in a static initializer.
+		final String enableBufferingPropertyName = "sun.net.http.errorstream.enableBuffering";
+		String enableBufferingPropertyValue = System.getProperty("enableBufferingPropertyName");
+		System.setProperty(enableBufferingPropertyName, "true");
+		try {
+			template.execute(baseUrl + "/statusbody/notfound", HttpMethod.GET, null, null);
+			fail("HttpClientErrorException expected");
+		}
+		catch (HttpClientErrorException ex) {
+			assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+			assertNotNull(ex.getStatusText());
+			assertEquals("Not Found", ex.getResponseBodyAsString());
+		} finally {
+			if (enableBufferingPropertyValue != null) {
+				System.setProperty(enableBufferingPropertyName, enableBufferingPropertyValue);
+			} else {
+				System.clearProperty(enableBufferingPropertyName);
+			}
+		}
+	}
 
 	public interface MyJacksonView1 {}
 

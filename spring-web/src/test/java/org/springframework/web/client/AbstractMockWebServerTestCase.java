@@ -244,6 +244,9 @@ public class AbstractMockWebServerTestCase {
 				else if (request.getPath().equals("/status/server")) {
 					return new MockResponse().setResponseCode(500);
 				}
+				else if (request.getPath().equals("/statusbody/notfound")) {
+					return new MockResponse().setBody("Not Found").setResponseCode(404);
+				}
 				else if (request.getPath().contains("/uri/")) {
 					return new MockResponse().setBody(request.getPath()).setHeader("Content-Type", "text/plain");
 				}
