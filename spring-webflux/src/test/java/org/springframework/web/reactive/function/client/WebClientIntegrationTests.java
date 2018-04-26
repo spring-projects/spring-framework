@@ -51,7 +51,7 @@ import org.springframework.http.codec.Pojo;
 import static org.junit.Assert.*;
 
 /**
- * Integration tests using a {@link ExchangeFunction} through {@link WebClient}.
+ * Integration tests using an {@link ExchangeFunction} through {@link WebClient}.
  *
  * @author Brian Clozel
  * @author Rossen Stoyanchev

@@ -37,7 +37,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * {@code HttpMessageWriter} that wraps and delegates to a {@link Encoder}.
+ * {@code HttpMessageWriter} that wraps and delegates to an {@link Encoder}.
  *
  * <p>Also a {@code HttpMessageWriter} that pre-resolves encoding hints
  * from the extra information available on the server side such as the request
