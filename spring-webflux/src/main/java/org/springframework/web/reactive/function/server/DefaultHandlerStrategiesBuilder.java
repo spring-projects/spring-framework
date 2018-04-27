@@ -64,35 +64,34 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
 	@Override
 	public HandlerStrategies.Builder codecs(Consumer<ServerCodecConfigurer> consumer) {
-		Assert.notNull(consumer, "'consumer' must not be null");
 		consumer.accept(this.codecConfigurer);
 		return this;
 	}
 
 	@Override
 	public HandlerStrategies.Builder viewResolver(ViewResolver viewResolver) {
-		Assert.notNull(viewResolver, "'viewResolver' must not be null");
+		Assert.notNull(viewResolver, "ViewResolver must not be null");
 		this.viewResolvers.add(viewResolver);
 		return this;
 	}
 
 	@Override
 	public HandlerStrategies.Builder webFilter(WebFilter filter) {
-		Assert.notNull(filter, "'filter' must not be null");
+		Assert.notNull(filter, "WebFilter must not be null");
 		this.webFilters.add(filter);
 		return this;
 	}
 
 	@Override
 	public HandlerStrategies.Builder exceptionHandler(WebExceptionHandler exceptionHandler) {
-		Assert.notNull(exceptionHandler, "'exceptionHandler' must not be null");
+		Assert.notNull(exceptionHandler, "WebExceptionHandler must not be null");
 		this.exceptionHandlers.add(exceptionHandler);
 		return this;
 	}
 
 	@Override
 	public HandlerStrategies.Builder localeContextResolver(LocaleContextResolver localeContextResolver) {
-		Assert.notNull(localeContextResolver, "'localeContextResolver' must not be null");
+		Assert.notNull(localeContextResolver, "LocaleContextResolver must not be null");
 		this.localeContextResolver = localeContextResolver;
 		return this;
 	}

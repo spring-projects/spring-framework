@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,11 +83,8 @@ public abstract class RouterFunctions {
 	 * {@code predicate} evaluates to {@code true}
 	 * @see RequestPredicates
 	 */
-	public static <T extends ServerResponse> RouterFunction<T> route(RequestPredicate predicate,
-			HandlerFunction<T> handlerFunction) {
-
-		Assert.notNull(predicate, "'predicate' must not be null");
-		Assert.notNull(handlerFunction, "'handlerFunction' must not be null");
+	public static <T extends ServerResponse> RouterFunction<T> route(
+			RequestPredicate predicate, HandlerFunction<T> handlerFunction) {
 
 		return new DefaultRouterFunction<>(predicate, handlerFunction);
 	}
@@ -115,11 +112,8 @@ public abstract class RouterFunctions {
 	 * {@code predicate} evaluates to {@code true}
 	 * @see RequestPredicates
 	 */
-	public static <T extends ServerResponse> RouterFunction<T> nest(RequestPredicate predicate,
-			RouterFunction<T> routerFunction) {
-
-		Assert.notNull(predicate, "'predicate' must not be null");
-		Assert.notNull(routerFunction, "'routerFunction' must not be null");
+	public static <T extends ServerResponse> RouterFunction<T> nest(
+			RequestPredicate predicate, RouterFunction<T> routerFunction) {
 
 		return new DefaultNestedRouterFunction<>(predicate, routerFunction);
 	}
@@ -136,8 +130,6 @@ public abstract class RouterFunctions {
 	 * @return a router function that routes to resources
 	 */
 	public static RouterFunction<ServerResponse> resources(String pattern, Resource location) {
-		Assert.hasLength(pattern, "'pattern' must not be empty");
-		Assert.notNull(location, "'location' must not be null");
 		return resources(new PathResourceLookupFunction(pattern, location));
 	}
 
@@ -149,7 +141,6 @@ public abstract class RouterFunctions {
 	 * @return a router function that routes to resources
 	 */
 	public static RouterFunction<ServerResponse> resources(Function<ServerRequest, Mono<Resource>> lookupFunction) {
-		Assert.notNull(lookupFunction, "'lookupFunction' must not be null");
 		return new ResourcesRouterFunction(lookupFunction);
 	}
 
@@ -192,9 +183,6 @@ public abstract class RouterFunctions {
 	 * @return an http handler that handles HTTP request using the given router function
 	 */
 	public static HttpHandler toHttpHandler(RouterFunction<?> routerFunction, HandlerStrategies strategies) {
-		Assert.notNull(routerFunction, "RouterFunction must not be null");
-		Assert.notNull(strategies, "HandlerStrategies must not be null");
-
 		WebHandler webHandler = toWebHandler(routerFunction, strategies);
 		return WebHttpHandlerBuilder.webHandler(webHandler)
 				.filters(filters -> filters.addAll(strategies.webFilters()))
@@ -396,8 +384,9 @@ public abstract class RouterFunctions {
 
 		private final HandlerFunction<T> handlerFunction;
 
-		public DefaultRouterFunction(RequestPredicate predicate,
-				HandlerFunction<T> handlerFunction) {
+		public DefaultRouterFunction(RequestPredicate predicate, HandlerFunction<T> handlerFunction) {
+			Assert.notNull(predicate, "Predicate must not be null");
+			Assert.notNull(handlerFunction, "HandlerFunction must not be null");
 			this.predicate = predicate;
 			this.handlerFunction = handlerFunction;
 		}
@@ -406,8 +395,7 @@ public abstract class RouterFunctions {
 		public Mono<HandlerFunction<T>> route(ServerRequest request) {
 			if (this.predicate.test(request)) {
 				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("Predicate \"%s\" matches against \"%s\"",
-							this.predicate, request));
+					logger.debug(String.format("Predicate \"%s\" matches against \"%s\"", this.predicate, request));
 				}
 				return Mono.just(this.handlerFunction);
 			}
@@ -430,8 +418,9 @@ public abstract class RouterFunctions {
 
 		private final RouterFunction<T> routerFunction;
 
-		public DefaultNestedRouterFunction(RequestPredicate predicate,
-				RouterFunction<T> routerFunction) {
+		public DefaultNestedRouterFunction(RequestPredicate predicate, RouterFunction<T> routerFunction) {
+			Assert.notNull(predicate, "Predicate must not be null");
+			Assert.notNull(routerFunction, "RouterFunction must not be null");
 			this.predicate = predicate;
 			this.routerFunction = routerFunction;
 		}
@@ -466,6 +455,7 @@ public abstract class RouterFunctions {
 		private final Function<ServerRequest, Mono<Resource>> lookupFunction;
 
 		public ResourcesRouterFunction(Function<ServerRequest, Mono<Resource>> lookupFunction) {
+			Assert.notNull(lookupFunction, "Function must not be null");
 			this.lookupFunction = lookupFunction;
 		}
 

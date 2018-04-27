@@ -125,14 +125,10 @@ public final class MultipartBodyBuilder {
 	 * @param elementClass the type of elements contained in the publisher
 	 * @return builder that allows for further customization of part headers
 	 */
-	public <T, P extends Publisher<T>> PartBuilder asyncPart(String name, P publisher,
-			Class<T> elementClass) {
-
-		Assert.notNull(elementClass, "'elementClass' must not be null");
-		ResolvableType elementType = ResolvableType.forClass(elementClass);
+	public <T, P extends Publisher<T>> PartBuilder asyncPart(String name, P publisher, Class<T> elementClass) {
 		Assert.hasLength(name, "'name' must not be empty");
 		Assert.notNull(publisher, "'publisher' must not be null");
-		Assert.notNull(elementType, "'elementType' must not be null");
+		Assert.notNull(elementClass, "'elementClass' must not be null");
 
 		HttpHeaders headers = new HttpHeaders();
 		PublisherPartBuilder<T, P> builder = new PublisherPartBuilder<>(headers, publisher, elementClass);
@@ -150,14 +146,12 @@ public final class MultipartBodyBuilder {
 	 * @param typeReference the type of elements contained in the publisher
 	 * @return builder that allows for further customization of part headers
 	 */
-	public <T, P extends Publisher<T>> PartBuilder asyncPart(String name, P publisher,
-			ParameterizedTypeReference<T> typeReference) {
+	public <T, P extends Publisher<T>> PartBuilder asyncPart(
+			String name, P publisher, ParameterizedTypeReference<T> typeReference) {
 
-		Assert.notNull(typeReference, "'typeReference' must not be null");
-		ResolvableType elementType1 = ResolvableType.forType(typeReference);
 		Assert.hasLength(name, "'name' must not be empty");
 		Assert.notNull(publisher, "'publisher' must not be null");
-		Assert.notNull(elementType1, "'typeReference' must not be null");
+		Assert.notNull(typeReference, "'typeReference' must not be null");
 
 		HttpHeaders headers = new HttpHeaders();
 		PublisherPartBuilder<T, P> builder = new PublisherPartBuilder<>(headers, publisher, typeReference);
@@ -210,7 +204,6 @@ public final class MultipartBodyBuilder {
 		@Nullable
 		protected final Object body;
 
-
 		public DefaultPartBuilder(HttpHeaders headers, @Nullable Object body) {
 			this.headers = headers;
 			this.body = body;
@@ -224,7 +217,6 @@ public final class MultipartBodyBuilder {
 
 		@Override
 		public PartBuilder headers(Consumer<HttpHeaders> headersConsumer) {
-			Assert.notNull(headersConsumer, "'headersConsumer' must not be null");
 			headersConsumer.accept(this.headers);
 			return this;
 		}
@@ -238,7 +230,6 @@ public final class MultipartBodyBuilder {
 	private static class PublisherPartBuilder<S, P extends Publisher<S>> extends DefaultPartBuilder {
 
 		private final ResolvableType resolvableType;
-
 
 		public PublisherPartBuilder(HttpHeaders headers, P body, Class<S> elementClass) {
 			super(headers, body);
@@ -255,12 +246,11 @@ public final class MultipartBodyBuilder {
 			this.resolvableType = other.getResolvableType();
 		}
 
-
 		@Override
 		@SuppressWarnings("unchecked")
 		public HttpEntity<?> build() {
 			P publisher = (P) this.body;
-			Assert.state(publisher != null, "'publisher' must not be null");
+			Assert.state(publisher != null, "Publisher must not be null");
 			return new PublisherEntity<>(this.headers, publisher, this.resolvableType);
 		}
 	}

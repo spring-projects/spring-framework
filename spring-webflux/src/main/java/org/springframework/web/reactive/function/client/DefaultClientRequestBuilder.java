@@ -47,7 +47,7 @@ import org.springframework.web.reactive.function.BodyInserters;
  * @author Arjen Poutsma
  * @since 5.0
  */
-class DefaultClientRequestBuilder implements ClientRequest.Builder {
+final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 	private final HttpHeaders headers = new HttpHeaders();
 
@@ -63,17 +63,20 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 
 	public DefaultClientRequestBuilder(HttpMethod method, URI url) {
-		this.method = method;
-		this.url = url;
+		method(method);
+		url(url);
 	}
 
 	public DefaultClientRequestBuilder(ClientRequest other) {
-		this(other.method(), other.url());
+		Assert.notNull(other, "ClientRequest must not be null");
+		method(other.method());
+		url(other.url());
 		headers(headers -> headers.addAll(other.headers()));
 		cookies(cookies -> cookies.addAll(other.cookies()));
 		attributes(attributes -> attributes.putAll(other.attributes()));
 		body(other.body());
 	}
+
 
 	@Override
 	public ClientRequest.Builder method(HttpMethod method) {
@@ -99,7 +102,6 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 	@Override
 	public ClientRequest.Builder headers(Consumer<HttpHeaders> headersConsumer) {
-		Assert.notNull(headersConsumer, "'headersConsumer' must not be null");
 		headersConsumer.accept(this.headers);
 		return this;
 	}
@@ -114,7 +116,6 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 	@Override
 	public ClientRequest.Builder cookies(Consumer<MultiValueMap<String, String>> cookiesConsumer) {
-		Assert.notNull(cookiesConsumer, "'cookiesConsumer' must not be null");
 		cookiesConsumer.accept(this.cookies);
 		return this;
 	}
@@ -129,8 +130,8 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 	}
 
 	@Override
-	public <S, P extends Publisher<S>> ClientRequest.Builder body(P publisher,
-			ParameterizedTypeReference<S> typeReference) {
+	public <S, P extends Publisher<S>> ClientRequest.Builder body(
+			P publisher, ParameterizedTypeReference<S> typeReference) {
 
 		Assert.notNull(publisher, "'publisher' must not be null");
 		Assert.notNull(typeReference, "'typeReference' must not be null");
@@ -147,7 +148,6 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 	@Override
 	public ClientRequest.Builder attributes(Consumer<Map<String, Object>> attributesConsumer) {
-		Assert.notNull(attributesConsumer, "'attributesConsumer' must not be null");
 		attributesConsumer.accept(this.attributes);
 		return this;
 	}

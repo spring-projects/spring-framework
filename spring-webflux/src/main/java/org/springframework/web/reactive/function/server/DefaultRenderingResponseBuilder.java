@@ -49,7 +49,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Juergen Hoeller
  * @since 5.0
  */
-class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
+final class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 
 	private final String name;
 
@@ -63,6 +63,7 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 
 
 	public DefaultRenderingResponseBuilder(RenderingResponse other) {
+		Assert.notNull(other, "RenderingResponse must not be null");
 		this.name = other.name();
 		this.status = (other instanceof DefaultRenderingResponse ?
 				((DefaultRenderingResponse) other).statusCode : other.statusCode().value());
@@ -71,6 +72,7 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 	}
 
 	public DefaultRenderingResponseBuilder(String name) {
+		Assert.notNull(name, "Name must not be null");
 		this.name = name;
 	}
 

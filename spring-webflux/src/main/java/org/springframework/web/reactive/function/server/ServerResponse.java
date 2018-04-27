@@ -38,7 +38,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2CodecSupport;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -91,7 +90,6 @@ public interface ServerResponse {
 	 * @return the created builder
 	 */
 	static BodyBuilder from(ServerResponse other) {
-		Assert.notNull(other, "Other ServerResponse must not be null");
 		return new DefaultServerResponseBuilder(other);
 	}
 
@@ -101,7 +99,6 @@ public interface ServerResponse {
 	 * @return the created builder
 	 */
 	static BodyBuilder status(HttpStatus status) {
-		Assert.notNull(status, "HttpStatus must not be null");
 		return new DefaultServerResponseBuilder(status);
 	}
 

@@ -55,7 +55,7 @@ public class ClientResponseWrapper implements ClientResponse {
 	 * @param delegate the response to wrap
 	 */
 	public ClientResponseWrapper(ClientResponse delegate) {
-		Assert.notNull(delegate, "'delegate' must not be null");
+		Assert.notNull(delegate, "Delegate is required");
 		this.delegate = delegate;
 	}
 
