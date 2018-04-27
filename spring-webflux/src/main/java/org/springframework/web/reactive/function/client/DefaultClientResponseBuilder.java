@@ -29,7 +29,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.client.reactive.ClientHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -55,7 +54,7 @@ class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 
 	public DefaultClientResponseBuilder(ExchangeStrategies strategies) {
-		Assert.notNull(strategies, "'strategies' must not be null");
+		Assert.notNull(strategies, "ExchangeStrategies must not be null");
 		this.strategies = strategies;
 	}
 
@@ -66,9 +65,10 @@ class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		cookies(cookies -> cookies.addAll(other.cookies()));
 	}
 
+
 	@Override
 	public DefaultClientResponseBuilder statusCode(HttpStatus statusCode) {
-		Assert.notNull(statusCode, "'statusCode' must not be null");
+		Assert.notNull(statusCode, "HttpStatus must not be null");
 		this.statusCode = statusCode;
 		return this;
 	}
@@ -83,7 +83,7 @@ class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 	@Override
 	public ClientResponse.Builder headers(Consumer<HttpHeaders> headersConsumer) {
-		Assert.notNull(headersConsumer, "'headersConsumer' must not be null");
+		Assert.notNull(headersConsumer, "Consumer must not be null");
 		headersConsumer.accept(this.headers);
 		return this;
 	}
@@ -97,16 +97,15 @@ class DefaultClientResponseBuilder implements ClientResponse.Builder {
 	}
 
 	@Override
-	public ClientResponse.Builder cookies(
-			Consumer<MultiValueMap<String, ResponseCookie>> cookiesConsumer) {
-		Assert.notNull(cookiesConsumer, "'cookiesConsumer' must not be null");
+	public ClientResponse.Builder cookies(Consumer<MultiValueMap<String, ResponseCookie>> cookiesConsumer) {
+		Assert.notNull(cookiesConsumer, "Consumer must not be null");
 		cookiesConsumer.accept(this.cookies);
 		return this;
 	}
 
 	@Override
 	public ClientResponse.Builder body(Flux<DataBuffer> body) {
-		Assert.notNull(body, "'body' must not be null");
+		Assert.notNull(body, "Body must not be null");
 		releaseBody();
 		this.body = body;
 		return this;
@@ -114,7 +113,7 @@ class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 	@Override
 	public ClientResponse.Builder body(String body) {
-		Assert.notNull(body, "'body' must not be null");
+		Assert.notNull(body, "Body must not be null");
 		releaseBody();
 		DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
 		this.body = Flux.just(body).
@@ -131,10 +130,11 @@ class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 	@Override
 	public ClientResponse build() {
-		ClientHttpResponse clientHttpResponse = new BuiltClientHttpResponse(this.statusCode,
-				this.headers, this.cookies, this.body);
+		ClientHttpResponse clientHttpResponse = new BuiltClientHttpResponse(
+				this.statusCode, this.headers, this.cookies, this.body);
 		return new DefaultClientResponse(clientHttpResponse, this.strategies);
 	}
+
 
 	private static class BuiltClientHttpResponse implements ClientHttpResponse {
 
@@ -147,27 +147,22 @@ class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		private final Flux<DataBuffer> body;
 
 		public BuiltClientHttpResponse(HttpStatus statusCode, HttpHeaders headers,
-				MultiValueMap<String, ResponseCookie> cookies,
-				Flux<DataBuffer> body) {
+				MultiValueMap<String, ResponseCookie> cookies, Flux<DataBuffer> body) {
 
 			this.statusCode = statusCode;
 			this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
-			this.cookies = unmodifiableCopy(cookies);
+			this.cookies = CollectionUtils.unmodifiableMultiValueMap(cookies);
 			this.body = body;
-		}
-
-		private static @Nullable <K, V> MultiValueMap<K, V> unmodifiableCopy(@Nullable MultiValueMap<K, V> original) {
-			if (original != null) {
-				return CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>(original));
-			}
-			else {
-				return null;
-			}
 		}
 
 		@Override
 		public HttpStatus getStatusCode() {
 			return this.statusCode;
+		}
+
+		@Override
+		public int getRawStatusCode() {
+			return this.statusCode.value();
 		}
 
 		@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,14 +62,18 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public HttpHeaders getHeaders() {
 		HttpHeaders headers = new HttpHeaders();
-		this.response.responseHeaders().entries()
-		             .forEach(e -> headers.add(e.getKey(), e.getValue()));
+		this.response.responseHeaders().entries().forEach(e -> headers.add(e.getKey(), e.getValue()));
 		return headers;
 	}
 
 	@Override
 	public HttpStatus getStatusCode() {
-		return HttpStatus.valueOf(this.response.status().code());
+		return HttpStatus.valueOf(getRawStatusCode());
+	}
+
+	@Override
+	public int getRawStatusCode() {
+		return this.response.status().code();
 	}
 
 	@Override
@@ -91,7 +95,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	public String toString() {
 		return "ReactorClientHttpResponse{" +
 				"request=[" + this.response.method().name() + " " + this.response.uri() + "]," +
-				"status=" + getStatusCode() + '}';
+				"status=" + getRawStatusCode() + '}';
 	}
 
 }

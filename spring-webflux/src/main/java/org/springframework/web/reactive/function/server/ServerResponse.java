@@ -322,7 +322,6 @@ public interface ServerResponse {
 
 		/**
 		 * Build the response entity with no body.
-		 * @return the built response
 		 */
 		Mono<ServerResponse> build();
 
@@ -330,14 +329,12 @@ public interface ServerResponse {
 		 * Build the response entity with no body.
 		 * The response will be committed when the given {@code voidPublisher} completes.
 		 * @param voidPublisher publisher publisher to indicate when the response should be committed
-		 * @return the built response
 		 */
 		Mono<ServerResponse> build(Publisher<Void> voidPublisher);
 
 		/**
 		 * Build the response entity with a custom writer function.
 		 * @param writeFunction the function used to write to the {@link ServerWebExchange}
-		 * @return the built response
 		 */
 		Mono<ServerResponse> build(BiFunction<ServerWebExchange, Context, Mono<Void>> writeFunction);
 	}

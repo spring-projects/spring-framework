@@ -86,7 +86,6 @@ public interface ClientRequest {
 		}
 	}
 
-
 	/**
 	 * Return the attributes of this request.
 	 */
@@ -222,8 +221,7 @@ public interface ClientRequest {
 		 * @param <P> the type of the {@code Publisher}
 		 * @return the built request
 		 */
-		<S, P extends Publisher<S>> Builder body(P publisher,
-				ParameterizedTypeReference<S> typeReference);
+		<S, P extends Publisher<S>> Builder body(P publisher, ParameterizedTypeReference<S> typeReference);
 
 		/**
 		 * Set the attribute with the given name to the given value.
@@ -243,8 +241,7 @@ public interface ClientRequest {
 		Builder attributes(Consumer<Map<String, Object>> attributesConsumer);
 
 		/**
-		 * Builds the request.
-		 * @return the request
+		 * Build the request.
 		 */
 		ClientRequest build();
 	}
