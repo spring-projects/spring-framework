@@ -35,7 +35,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 
@@ -160,7 +159,6 @@ public interface ClientResponse {
 	 * @return the created builder
 	 */
 	static Builder from(ClientResponse other) {
-		Assert.notNull(other, "Other ClientResponse must not be null");
 		return new DefaultClientResponseBuilder(other);
 	}
 

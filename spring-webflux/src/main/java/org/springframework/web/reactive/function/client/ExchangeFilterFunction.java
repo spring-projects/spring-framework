@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public interface ExchangeFilterFunction {
 	 * {@code after} function
 	 */
 	default ExchangeFilterFunction andThen(ExchangeFilterFunction after) {
-		Assert.notNull(after, "'after' must not be null");
+		Assert.notNull(after, "ExchangeFilterFunction must not be null");
 		return (request, next) -> {
 			ExchangeFunction nextExchange = exchangeRequest -> after.filter(exchangeRequest, next);
 			return filter(request, nextExchange);
@@ -63,7 +63,7 @@ public interface ExchangeFilterFunction {
 	 * @return the filtered exchange function
 	 */
 	default ExchangeFunction apply(ExchangeFunction exchange) {
-		Assert.notNull(exchange, "'exchange' must not be null");
+		Assert.notNull(exchange, "ExchangeFunction must not be null");
 		return request -> this.filter(request, exchange);
 	}
 
@@ -73,10 +73,8 @@ public interface ExchangeFilterFunction {
 	 * @param requestProcessor the request processor
 	 * @return the filter adaptation of the request processor
 	 */
-	static ExchangeFilterFunction ofRequestProcessor(Function<ClientRequest,
-			Mono<ClientRequest>> requestProcessor) {
-
-		Assert.notNull(requestProcessor, "'requestProcessor' must not be null");
+	static ExchangeFilterFunction ofRequestProcessor(Function<ClientRequest, Mono<ClientRequest>> requestProcessor) {
+		Assert.notNull(requestProcessor, "Function must not be null");
 		return (request, next) -> requestProcessor.apply(request).flatMap(next::exchange);
 	}
 
@@ -86,10 +84,8 @@ public interface ExchangeFilterFunction {
 	 * @param responseProcessor the response processor
 	 * @return the filter adaptation of the request processor
 	 */
-	static ExchangeFilterFunction ofResponseProcessor(Function<ClientResponse,
-			Mono<ClientResponse>> responseProcessor) {
-
-		Assert.notNull(responseProcessor, "'responseProcessor' must not be null");
+	static ExchangeFilterFunction ofResponseProcessor(Function<ClientResponse, Mono<ClientResponse>> responseProcessor) {
+		Assert.notNull(responseProcessor, "Function must not be null");
 		return (request, next) -> next.exchange(request).flatMap(responseProcessor);
 	}
 

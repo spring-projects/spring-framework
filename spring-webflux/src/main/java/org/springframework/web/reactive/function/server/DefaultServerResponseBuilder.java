@@ -71,13 +71,15 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 
 	public DefaultServerResponseBuilder(ServerResponse other) {
+		Assert.notNull(other, "ServerResponse must not be null");
 		this.statusCode = (other instanceof AbstractServerResponse ?
 				((AbstractServerResponse) other).statusCode : other.statusCode().value());
 		this.headers.addAll(other.headers());
 	}
 
-	public DefaultServerResponseBuilder(HttpStatus statusCode) {
-		this.statusCode = statusCode.value();
+	public DefaultServerResponseBuilder(HttpStatus status) {
+		Assert.notNull(status, "HttpStatus must not be null");
+		this.statusCode = status.value();
 	}
 
 	public DefaultServerResponseBuilder(int statusCode) {
@@ -406,12 +408,10 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				public List<HttpMessageWriter<?>> messageWriters() {
 					return context.messageWriters();
 				}
-
 				@Override
 				public Optional<ServerHttpRequest> serverRequest() {
 					return Optional.of(exchange.getRequest());
 				}
-
 				@Override
 				public Map<String, Object> hints() {
 					return hints;

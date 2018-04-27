@@ -26,7 +26,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -57,7 +56,6 @@ public interface RenderingResponse extends ServerResponse {
 	 * @return the created builder
 	 */
 	static Builder from(RenderingResponse other) {
-		Assert.notNull(other, "Other RenderingResponse must not be null");
 		return new DefaultRenderingResponseBuilder(other);
 	}
 
@@ -67,7 +65,6 @@ public interface RenderingResponse extends ServerResponse {
 	 * @return the created builder
 	 */
 	static Builder create(String name) {
-		Assert.notNull(name, "'name' must not be null");
 		return new DefaultRenderingResponseBuilder(name);
 	}
 

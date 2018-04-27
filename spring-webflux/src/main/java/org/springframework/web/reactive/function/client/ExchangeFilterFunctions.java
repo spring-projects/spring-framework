@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,6 @@ public abstract class ExchangeFilterFunctions {
 	public static ExchangeFilterFunction basicAuthentication(String username, String password) {
 		Assert.notNull(username, "'username' must not be null");
 		Assert.notNull(password, "'password' must not be null");
-
 		checkIllegalCharacters(username, password);
 		return basicAuthenticationInternal(r -> Optional.of(new Credentials(username, password)));
 	}
@@ -134,8 +133,8 @@ public abstract class ExchangeFilterFunctions {
 	public static ExchangeFilterFunction statusError(Predicate<HttpStatus> statusPredicate,
 			Function<ClientResponse, ? extends Throwable> exceptionFunction) {
 
-		Assert.notNull(statusPredicate, "'statusPredicate' must not be null");
-		Assert.notNull(exceptionFunction, "'exceptionFunction' must not be null");
+		Assert.notNull(statusPredicate, "Predicate must not be null");
+		Assert.notNull(exceptionFunction, "Function must not be null");
 
 		return ExchangeFilterFunction.ofResponseProcessor(
 				clientResponse -> {
@@ -168,7 +167,6 @@ public abstract class ExchangeFilterFunctions {
 		public Credentials(String username, String password) {
 			Assert.notNull(username, "'username' must not be null");
 			Assert.notNull(password, "'password' must not be null");
-
 			this.username = username;
 			this.password = password;
 		}

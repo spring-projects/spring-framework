@@ -28,7 +28,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ClientHttpRequest;
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
 
@@ -109,7 +108,6 @@ public interface ClientRequest {
 	 * @return the created builder
 	 */
 	static Builder from(ClientRequest other) {
-		Assert.notNull(other, "'other' must not be null");
 		return new DefaultClientRequestBuilder(other);
 	}
 

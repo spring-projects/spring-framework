@@ -43,7 +43,6 @@ import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyExtractors;
@@ -128,7 +127,6 @@ class DefaultServerRequest implements ServerRequest {
 
 	@Override
 	public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor, Map<String, Object> hints) {
-		Assert.notNull(extractor, "'extractor' must not be null");
 		return extractor.extract(request(),
 				new BodyExtractor.Context() {
 					@Override
@@ -279,6 +277,7 @@ class DefaultServerRequest implements ServerRequest {
 		}
 	}
 
+
 	private final class ServerRequestAdapter implements HttpRequest {
 
 		@Override
@@ -296,6 +295,5 @@ class DefaultServerRequest implements ServerRequest {
 			return request().getHeaders();
 		}
 	}
-
 
 }

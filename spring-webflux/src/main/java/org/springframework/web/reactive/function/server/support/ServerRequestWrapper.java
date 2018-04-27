@@ -201,6 +201,7 @@ public class ServerRequestWrapper implements ServerRequest {
 		return this.delegate.multipartData();
 	}
 
+
 	/**
 	 * Implementation of the {@code Headers} interface that can be subclassed
 	 * to adapt the headers in a
@@ -211,16 +212,14 @@ public class ServerRequestWrapper implements ServerRequest {
 
 		private final Headers headers;
 
-
 		/**
 		 * Create a new {@code HeadersWrapper} that wraps the given request.
 		 * @param headers the headers to wrap
 		 */
 		public HeadersWrapper(Headers headers) {
-			Assert.notNull(headers, "'headers' must not be null");
+			Assert.notNull(headers, "Headers must not be null");
 			this.headers = headers;
 		}
-
 
 		@Override
 		public List<MediaType> accept() {

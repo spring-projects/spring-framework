@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.web.util.UriBuilderFactory;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-class DefaultWebClientBuilder implements WebClient.Builder {
+final class DefaultWebClientBuilder implements WebClient.Builder {
 
 	@Nullable
 	private String baseUrl;
@@ -74,7 +74,7 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	public DefaultWebClientBuilder(DefaultWebClientBuilder other) {
-		Assert.notNull(other, "'other' must not be null");
+		Assert.notNull(other, "DefaultWebClientBuilder must not be null");
 
 		this.baseUrl = other.baseUrl;
 		this.defaultUriVariables = (other.defaultUriVariables != null ?
@@ -125,7 +125,6 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 
 	@Override
 	public WebClient.Builder defaultHeaders(Consumer<HttpHeaders> headersConsumer) {
-		Assert.notNull(headersConsumer, "'headersConsumer' must not be null");
 		headersConsumer.accept(initHeaders());
 		return this;
 	}
@@ -145,7 +144,6 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 
 	@Override
 	public WebClient.Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer) {
-		Assert.notNull(cookiesConsumer, "Cookies consumer must not be null");
 		cookiesConsumer.accept(initCookies());
 		return this;
 	}
@@ -172,7 +170,6 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 
 	@Override
 	public WebClient.Builder filters(Consumer<List<ExchangeFilterFunction>> filtersConsumer) {
-		Assert.notNull(filtersConsumer, "Filters consumer must not be null");
 		filtersConsumer.accept(initFilters());
 		return this;
 	}
@@ -214,7 +211,8 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 			HttpHeaders copy = new HttpHeaders();
 			copy.putAll(original);
 			return HttpHeaders.readOnlyHttpHeaders(copy);
-		} else {
+		}
+		else {
 			return null;
 		}
 	}
@@ -259,8 +257,6 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 
 	@Override
 	public WebClient.Builder apply(Consumer<WebClient.Builder> builderConsumer) {
-		Assert.notNull(builderConsumer, "'builderConsumer' must not be null");
-
 		builderConsumer.accept(this);
 		return this;
 	}

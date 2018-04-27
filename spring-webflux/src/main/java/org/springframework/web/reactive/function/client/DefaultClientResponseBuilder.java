@@ -40,7 +40,7 @@ import org.springframework.util.MultiValueMap;
  * @author Arjen Poutsma
  * @since 5.0.5
  */
-class DefaultClientResponseBuilder implements ClientResponse.Builder {
+final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 	private final HttpHeaders headers = new HttpHeaders();
 
@@ -59,7 +59,8 @@ class DefaultClientResponseBuilder implements ClientResponse.Builder {
 	}
 
 	public DefaultClientResponseBuilder(ClientResponse other) {
-		this(other.strategies());
+		Assert.notNull(other, "ClientResponse must not be null");
+		this.strategies = other.strategies();
 		statusCode(other.statusCode());
 		headers(headers -> headers.addAll(other.headers().asHttpHeaders()));
 		cookies(cookies -> cookies.addAll(other.cookies()));

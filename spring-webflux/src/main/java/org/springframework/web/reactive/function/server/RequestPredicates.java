@@ -316,7 +316,7 @@ public abstract class RequestPredicates {
 		private final HttpMethod httpMethod;
 
 		public HttpMethodPredicate(HttpMethod httpMethod) {
-			Assert.notNull(httpMethod, "'httpMethod' must not be null");
+			Assert.notNull(httpMethod, "HttpMethod must not be null");
 			this.httpMethod = httpMethod;
 		}
 
@@ -388,7 +388,7 @@ public abstract class RequestPredicates {
 		private final Predicate<ServerRequest.Headers> headersPredicate;
 
 		public HeadersPredicate(Predicate<ServerRequest.Headers> headersPredicate) {
-			Assert.notNull(headersPredicate, "'headersPredicate' must not be null");
+			Assert.notNull(headersPredicate, "Predicate must not be null");
 			this.headersPredicate = headersPredicate;
 		}
 
@@ -410,13 +410,15 @@ public abstract class RequestPredicates {
 		private final RequestPredicate right;
 
 		public AndRequestPredicate(RequestPredicate left, RequestPredicate right) {
+			Assert.notNull(left, "Left RequestPredicate must not be null");
+			Assert.notNull(right, "Right RequestPredicate must not be null");
 			this.left = left;
 			this.right = right;
 		}
 
 		@Override
 		public boolean test(ServerRequest t) {
-			return this.left.test(t) && this.right.test(t);
+			return (this.left.test(t) && this.right.test(t));
 		}
 
 		@Override
@@ -437,12 +439,15 @@ public abstract class RequestPredicates {
 		private final RequestPredicate right;
 
 		public OrRequestPredicate(RequestPredicate left, RequestPredicate right) {
+			Assert.notNull(left, "Left RequestPredicate must not be null");
+			Assert.notNull(right, "Right RequestPredicate must not be null");
 			this.left = left;
 			this.right = right;
 		}
+
 		@Override
 		public boolean test(ServerRequest t) {
-			return this.left.test(t) || this.right.test(t);
+			return (this.left.test(t) || this.right.test(t));
 		}
 
 		@Override
