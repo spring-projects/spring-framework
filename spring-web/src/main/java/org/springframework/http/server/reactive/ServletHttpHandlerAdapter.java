@@ -279,7 +279,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		@Override
 		public void onError(Throwable ex) {
-			logger.error("Handling completed with error", ex);
+			logger.warn("Handling completed with error: " + ex.getMessage());
 			runIfAsyncNotComplete(this.asyncContext, this.isCompleted, () -> {
 				if (this.asyncContext.getResponse().isCommitted()) {
 					logger.debug("Dispatching into container to raise error");

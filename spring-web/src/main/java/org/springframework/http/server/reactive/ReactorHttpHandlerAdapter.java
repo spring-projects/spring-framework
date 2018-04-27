@@ -73,7 +73,7 @@ public class ReactorHttpHandlerAdapter implements BiFunction<HttpServerRequest, 
 		}
 
 		return this.httpHandler.handle(adaptedRequest, adaptedResponse)
-				.doOnError(ex -> logger.error("Handling completed with error", ex))
+				.doOnError(ex -> logger.warn("Handling completed with error: " + ex.getMessage()))
 				.doOnSuccess(aVoid -> logger.debug("Handling completed with success"));
 	}
 

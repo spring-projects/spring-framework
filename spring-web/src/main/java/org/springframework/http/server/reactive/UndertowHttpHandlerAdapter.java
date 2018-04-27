@@ -97,7 +97,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 		@Override
 		public void onError(Throwable ex) {
-			logger.error("Handling completed with error", ex);
+			logger.warn("Handling completed with error: " + ex.getMessage());
 			if (this.exchange.isResponseStarted()) {
 				try {
 					logger.debug("Closing connection");
