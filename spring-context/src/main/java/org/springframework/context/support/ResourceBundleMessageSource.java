@@ -220,7 +220,25 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	protected ResourceBundle doGetBundle(String basename, Locale locale) throws MissingResourceException {
 		ClassLoader classLoader = getBundleClassLoader();
 		Assert.state(classLoader != null, "No bundle ClassLoader set");
-		return ResourceBundle.getBundle(basename, locale, classLoader, new MessageSourceControl());
+		String defaultEncoding = getDefaultEncoding();
+
+		if ((defaultEncoding != null && !"ISO-8859-1".equals(defaultEncoding)) ||
+				!isFallbackToSystemLocale() || getCacheMillis() >= 0) {
+			try {
+				return ResourceBundle.getBundle(basename, locale, classLoader, new MessageSourceControl());
+			}
+			catch (UnsupportedOperationException ex) {
+				// Probably in a Jigsaw environment on JDK 9+
+				throw new IllegalStateException(
+						"Custom ResourceBundleMessageSource configuration requires custom ResourceBundle.Control " +
+						"which is not supported in current system environment (e.g. JDK 9+ module path deployment): " +
+						"consider using defaults (ISO-8859-1 encoding, fallback to system locale, unlimited caching)",
+						ex);
+			}
+		}
+		else {
+			return ResourceBundle.getBundle(basename, locale, classLoader);
+		}
 	}
 
 	/**
