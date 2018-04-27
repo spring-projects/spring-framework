@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.aop.support.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcher;
@@ -70,6 +71,10 @@ public class AnnotationMethodMatcher extends StaticMethodMatcher {
 	public boolean matches(Method method, @Nullable Class<?> targetClass) {
 		if (matchesMethod(method)) {
 			return true;
+		}
+		// Proxy classes never have annotations on their redeclared methods.
+		if (targetClass != null && Proxy.isProxyClass(targetClass)) {
+			return false;
 		}
 		// The method may be on an interface, so let's check on the target class as well.
 		Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
