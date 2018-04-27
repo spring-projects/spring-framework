@@ -797,10 +797,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		@Override
 		public void doWithRequest(ClientHttpRequest request) throws IOException {
 			if (this.responseType != null) {
-				final Class<?> responseClass = (this.responseType instanceof Class) ?
-						(Class<?>) this.responseType : null;
-				final List<MediaType> allSupportedMediaTypes = getMessageConverters().stream()
-						.filter(converter -> canReadResponse(responseClass, converter))
+				List<MediaType> allSupportedMediaTypes = getMessageConverters().stream()
+						.filter(converter -> canReadResponse(this.responseType, converter))
 						.flatMap(this::getSupportedMediaTypes)
 						.distinct()
 						.sorted(MediaType.SPECIFICITY_COMPARATOR)
@@ -812,15 +810,14 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			}
 		}
 
-		private boolean canReadResponse(@Nullable Class<?> responseClass, HttpMessageConverter<?> converter) {
+		private boolean canReadResponse(Type responseType, HttpMessageConverter<?> converter) {
+			Class<?> responseClass = (responseType instanceof Class ? (Class<?>) responseType : null);
 			if (responseClass != null) {
 				return converter.canRead(responseClass, null);
 			}
 			else if (converter instanceof GenericHttpMessageConverter) {
-				GenericHttpMessageConverter<?> genericConverter =
-						(GenericHttpMessageConverter<?>) converter;
-				return genericConverter
-						.canRead(this.responseType, null, null);
+				GenericHttpMessageConverter<?> genericConverter = (GenericHttpMessageConverter<?>) converter;
+				return genericConverter.canRead(responseType, null, null);
 			}
 			return false;
 		}
