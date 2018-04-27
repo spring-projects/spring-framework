@@ -43,9 +43,11 @@ public class EhCacheCacheManagerTests extends AbstractTransactionSupportingCache
 		addNativeCache(CACHE_NAME);
 
 		cacheManager = new EhCacheCacheManager(nativeCacheManager);
+		cacheManager.setTransactionAware(false);
 		cacheManager.afterPropertiesSet();
 
-		transactionalCacheManager = new EhCacheCacheManager(true, nativeCacheManager);
+		transactionalCacheManager = new EhCacheCacheManager(nativeCacheManager);
+		transactionalCacheManager.setTransactionAware(true);
 		transactionalCacheManager.afterPropertiesSet();
 	}
 
