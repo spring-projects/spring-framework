@@ -62,7 +62,7 @@ however, it would be even more confusing if Spring used its own terminology.
   method or the handling of an exception. In Spring AOP, a join point __always__
   represents a method execution.
 * __Advice__: action taken by an aspect at a particular join point. Different types of
-  advice include "around," "before" and "after" advice. (Advice types are discussed
+  advice include "around", "before" and "after" advice. (Advice types are discussed
   below.) Many AOP frameworks, including Spring, model an advice as an __interceptor__,
   maintaining a chain of interceptors __around__ the join point.
 * __Pointcut__: a predicate that matches join points. Advice is associated with a
