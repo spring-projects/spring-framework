@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans.factory.config;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -114,6 +115,20 @@ public class YamlMapFactoryBeanTests {
 		Map<String, Object> sub = (Map<String, Object>) object;
 		assertEquals(1, sub.size());
 		assertEquals(Integer.valueOf(3), sub.get("key1.key2"));
+	}
+
+	@Test
+	public void mapWithEmptyArrayValue() {
+		this.factory.setResources(new ByteArrayResource("a: alpha\ntest: []".getBytes()));
+		assertTrue(this.factory.getObject().containsKey("test"));
+		assertEquals(((List<?>)this.factory.getObject().get("test")).size(), 0);
+	}
+
+	@Test
+	public void mapWithEmptyValue() {
+		this.factory.setResources(new ByteArrayResource("a: alpha\ntest:".getBytes()));
+		assertTrue(this.factory.getObject().containsKey("test"));
+		assertNull(this.factory.getObject().get("test"));
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -205,6 +205,15 @@ public class YamlPropertiesFactoryBeanTests {
 		Properties properties = factory.getObject();
 		assertThat(properties.getProperty("foo"), equalTo("bar"));
 		assertThat(properties.getProperty("spam"), equalTo(""));
+	}
+
+	@Test
+	public void testLoadEmptyArrayValue() {
+		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
+		factory.setResources(new ByteArrayResource("a: alpha\ntest: []".getBytes()));
+		Properties properties = factory.getObject();
+		assertThat(properties.getProperty("a"), equalTo("alpha"));
+		assertThat(properties.getProperty("test"), equalTo(""));
 	}
 
 	@Test
