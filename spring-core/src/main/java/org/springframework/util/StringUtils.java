@@ -55,6 +55,7 @@ import org.springframework.lang.Nullable;
  * @author Arjen Poutsma
  * @author Sam Brannen
  * @author Brian Clozel
+ * @author Omkar Marathe
  * @since 16 April 2001
  */
 public abstract class StringUtils {
@@ -87,6 +88,21 @@ public abstract class StringUtils {
 	 */
 	public static boolean isEmpty(@Nullable Object str) {
 		return (str == null || "".equals(str));
+	}
+	
+	/**
+	 * Check whether the given {@code String} is not empty.
+	 * <p>This method accepts any Object as an argument, comparing it to
+	 * {@code null} and the empty String. As a consequence, this method
+	 * will never return {@code false} for a non-null non-String object.
+	 * <p>The Object signature is useful for general attribute handling code
+	 * that commonly deals with Strings but generally has to iterate over
+	 * Objects since attributes may e.g. be primitive value objects as well.
+	 * @param str the candidate String
+	 * @since 5.1.0
+	 */
+	public static boolean isNotEmpty(@Nullable Object str) {
+		return !(str == null || "".equals(str));
 	}
 
 	/**

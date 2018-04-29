@@ -37,6 +37,7 @@ import org.springframework.lang.Nullable;
  * @author Rob Harrop
  * @author Chris Beams
  * @author Sam Brannen
+ * @author Omkar Marathe
  * @since 19.03.2004
  * @see ClassUtils
  * @see CollectionUtils
@@ -107,6 +108,16 @@ public abstract class ObjectUtils {
 	public static boolean isEmpty(@Nullable Object[] array) {
 		return (array == null || array.length == 0);
 	}
+	
+	/**
+	 * Determine whether the given array is not empty:
+	 * i.e. not {@code null} or not of zero length.
+	 * @param array the array to check
+	 * @see #isNotEmpty(Object)
+	 */
+	public static boolean isNotEmpty(@Nullable Object[] array) {
+		return !(array == null || array.length == 0);
+	}
 
 	/**
 	 * Determine whether the given object is empty.
@@ -154,6 +165,32 @@ public abstract class ObjectUtils {
 
 		// else
 		return false;
+	}
+	
+	/**
+	 * Determine whether the given object is not empty.
+	 * <p>This method supports the following object types.
+	 * <ul>
+	 * <li>{@code Optional}: considered empty if {@link Optional#empty()}</li>
+	 * <li>{@code Array}: considered empty if its length is zero</li>
+	 * <li>{@link CharSequence}: considered empty if its length is zero</li>
+	 * <li>{@link Collection}: delegates to {@link Collection#isEmpty()}</li>
+	 * <li>{@link Map}: delegates to {@link Map#isEmpty()}</li>
+	 * </ul>
+	 * <p>If the given object is non-null and not one of the aforementioned
+	 * supported types, this method returns {@code true}.
+	 * @param obj the object to check
+	 * @return {@code false} if the object is {@code null} or <em>empty</em>
+	 * @since 5.1.0
+	 * @see Optional#isPresent()
+	 * @see ObjectUtils#isEmpty(Object[])
+	 * @see StringUtils#hasLength(CharSequence)
+	 * @see StringUtils#isEmpty(Object)
+	 * @see CollectionUtils#isEmpty(java.util.Collection)
+	 * @see CollectionUtils#isEmpty(java.util.Map)
+	 */
+	public static boolean isNotEmpty(@Nullable Object obj) {
+		return !ObjectUtils.isEmpty(obj);
 	}
 
 	/**

@@ -54,6 +54,22 @@ public class CollectionUtilsTests {
 		map.put("foo", "bar");
 		assertFalse(CollectionUtils.isEmpty(map));
 	}
+	
+	@Test
+	public void testIsNotEmpty() {
+		assertFalse(CollectionUtils.isNotEmpty((Set<Object>) null));
+		assertFalse(CollectionUtils.isNotEmpty((Map<String, String>) null));
+		assertFalse(CollectionUtils.isNotEmpty(new HashMap<String, String>()));
+		assertFalse(CollectionUtils.isNotEmpty(new HashSet<>()));
+
+		List<Object> list = new LinkedList<>();
+		list.add(new Object());
+		assertTrue(CollectionUtils.isNotEmpty(list));
+
+		Map<String, String> map = new HashMap<>();
+		map.put("foo", "bar");
+		assertTrue(CollectionUtils.isNotEmpty(map));
+	}
 
 	@Test
 	public void testMergeArrayIntoCollection() {
