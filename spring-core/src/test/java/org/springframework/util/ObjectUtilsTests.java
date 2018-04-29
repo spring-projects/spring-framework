@@ -94,6 +94,11 @@ public class ObjectUtilsTests {
 	public void isEmptyNull() {
 		assertTrue(isEmpty(null));
 	}
+	
+	@Test
+	public void isNotEmptyNull() {
+		assertFalse(isNotEmpty(null));
+	}
 
 	@Test
 	public void isEmptyArray() {
@@ -103,6 +108,16 @@ public class ObjectUtilsTests {
 
 		assertFalse(isEmpty(new int[] { 42 }));
 		assertFalse(isEmpty(new Integer[] { 42 }));
+	}
+	
+	@Test
+	public void isNotEmptyArray() {
+		assertFalse(isNotEmpty(new char[0]));
+		assertFalse(isNotEmpty(new Object[0]));
+		assertFalse(isNotEmpty(new Integer[0]));
+
+		assertTrue(isNotEmpty(new int[] { 42 }));
+		assertTrue(isNotEmpty(new Integer[] { 42 }));
 	}
 
 	@Test
@@ -115,6 +130,17 @@ public class ObjectUtilsTests {
 		assertFalse(isEmpty(set));
 		assertFalse(isEmpty(Arrays.asList("foo")));
 	}
+	
+	@Test
+	public void isNotEmptyCollection() {
+		assertFalse(isNotEmpty(Collections.emptyList()));
+		assertFalse(isNotEmpty(Collections.emptySet()));
+
+		Set<String> set = new HashSet<>();
+		set.add("foo");
+		assertTrue(isNotEmpty(set));
+		assertTrue(isNotEmpty(Arrays.asList("foo")));
+	}
 
 	@Test
 	public void isEmptyMap() {
@@ -123,6 +149,15 @@ public class ObjectUtilsTests {
 		HashMap<String, Object> map = new HashMap<>();
 		map.put("foo", 42L);
 		assertFalse(isEmpty(map));
+	}
+	
+	@Test
+	public void isNotEmptyMap() {
+		assertFalse(isNotEmpty(Collections.emptyMap()));
+
+		HashMap<String, Object> map = new HashMap<>();
+		map.put("foo", 42L);
+		assertTrue(isNotEmpty(map));
 	}
 
 	@Test
@@ -135,11 +170,28 @@ public class ObjectUtilsTests {
 		assertFalse(isEmpty("\t"));
 		assertFalse(isEmpty("foo"));
 	}
+	
+	@Test
+	public void isNotEmptyCharSequence() {
+		assertFalse(isNotEmpty(new StringBuilder()));
+		assertFalse(isNotEmpty(""));
+
+		assertTrue(isNotEmpty(new StringBuilder("foo")));
+		assertTrue(isNotEmpty("   "));
+		assertTrue(isNotEmpty("\t"));
+		assertTrue(isNotEmpty("foo"));
+	}
 
 	@Test
 	public void isEmptyUnsupportedObjectType() {
 		assertFalse(isEmpty(42L));
 		assertFalse(isEmpty(new Object()));
+	}
+	
+	@Test
+	public void isNotEmptyUnsupportedObjectType() {
+		assertTrue(isNotEmpty(42L));
+		assertTrue(isNotEmpty(new Object()));
 	}
 
 	@Test
