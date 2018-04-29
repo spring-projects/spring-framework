@@ -293,10 +293,14 @@ public abstract class YamlProcessor {
 				// Need a compound key
 				@SuppressWarnings("unchecked")
 				Collection<Object> collection = (Collection<Object>) value;
-				int count = 0;
-				for (Object object : collection) {
-					buildFlattenedMap(result,
-							Collections.singletonMap("[" + (count++) + "]", object), key);
+				if (collection.isEmpty()) {
+					result.put(key, "");
+				} else {
+					int count = 0;
+					for (Object object : collection) {
+						buildFlattenedMap(result, Collections.singletonMap(
+								"[" + (count++) + "]", object), key);
+					}
 				}
 			}
 			else {
