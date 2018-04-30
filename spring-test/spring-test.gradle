@@ -81,9 +81,9 @@ dependencies {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
 	testCompile('io.projectreactor.ipc:reactor-netty')
+	testCompile('de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1')
 	// Pull in the latest JUnit 5 Launcher API and the Vintage engine as well
 	// so that we can run JUnit 4 tests in IntelliJ IDEA.
-	testCompile('de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1')
 	testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
 	testRuntime("org.junit.platform:junit-platform-launcher:${junitPlatformVersion}")
 	testRuntime("org.junit.vintage:junit-vintage-engine:${junitVintageVersion}")
@@ -118,7 +118,7 @@ task testJUnitJupiter(type: Test) {
 }
 
 test {
-	description = 'Runs JUnit tests.'
+	description = 'Runs JUnit 4 tests.'
 	dependsOn testJUnitJupiter, testNG
 	useJUnit()
 	scanForTestClasses = false
