@@ -207,7 +207,7 @@ Maven or Gradle dependencies. Spring Boot defaults to Netty because it is more w
 used in the async, non-blocking space, and provides a client and a server share resources.
 
 Tomcat and Jetty can be used with both Spring MVC and WebFlux. Keep in mind however that
-the way they're used is very differently. Spring MVC relies on Servlet blocking I/O and
+the way they're used is very different. Spring MVC relies on Servlet blocking I/O and
 allows applications to use the Servlet API directly if they need to. Spring WebFlux
 relies on Servlet 3.1 non-blocking I/O and uses the Servlet API behind a low-level
 adapter and not exposed for direct use.
