@@ -613,6 +613,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		}
 
 		@PostMapping("/rxjava2-single")
+		@SuppressWarnings("deprecation")
 		public io.reactivex.Completable createWithRxJava2Single(@RequestBody io.reactivex.Single<Person> single) {
 			return single.map(persons::add).toCompletable();
 		}
@@ -628,6 +629,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		}
 
 		@PostMapping("/rxjava2-observable")
+		@SuppressWarnings("deprecation")
 		public io.reactivex.Completable createWithRxJava2Observable(
 				@RequestBody io.reactivex.Observable<Person> observable) {
 
@@ -635,6 +637,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		}
 
 		@PostMapping("/flowable")
+		@SuppressWarnings("deprecation")
 		public io.reactivex.Completable createWithFlowable(@RequestBody Flowable<Person> flowable) {
 			return flowable.toList().doOnSuccess(persons::addAll).toCompletable();
 		}
