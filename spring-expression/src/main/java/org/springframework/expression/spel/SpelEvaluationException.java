@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public class SpelEvaluationException extends EvaluationException {
 	}
 
 	public SpelEvaluationException(int position, Throwable cause, SpelMessage message, Object... inserts) {
-		super(position, message.formatMessage(inserts),cause);
+		super(position, message.formatMessage(inserts), cause);
 		this.message = message;
 		this.inserts = inserts;
 	}
