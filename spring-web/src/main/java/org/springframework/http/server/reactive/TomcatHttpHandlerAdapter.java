@@ -17,6 +17,7 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletRequest;
@@ -50,7 +51,7 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 	@Override
 	protected ServerHttpRequest createRequest(HttpServletRequest request, AsyncContext asyncContext)
-			throws IOException {
+			throws IOException, URISyntaxException {
 
 		Assert.notNull(getServletPath(), "servletPath is not initialized.");
 		return new TomcatServerHttpRequest(request, asyncContext, getServletPath(),
@@ -68,7 +69,8 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 	private final class TomcatServerHttpRequest extends ServletServerHttpRequest {
 
 		public TomcatServerHttpRequest(HttpServletRequest request, AsyncContext context,
-				String servletPath, DataBufferFactory factory, int bufferSize) throws IOException {
+				String servletPath, DataBufferFactory factory, int bufferSize)
+				throws IOException, URISyntaxException {
 
 			super(request, context, servletPath, factory, bufferSize);
 		}
