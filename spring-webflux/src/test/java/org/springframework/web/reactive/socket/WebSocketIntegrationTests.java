@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,6 +127,21 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 		assertEquals("my-header:my-value", output.block(Duration.ofMillis(5000)));
 	}
 
+	@Test
+	public void sessionClosing() throws Exception {
+		this.client.execute(getUrl("/close"),
+				session -> {
+					logger.debug("Starting..");
+					return session.receive()
+							.doOnNext(s -> logger.debug("inbound " + s))
+							.then()
+							.doFinally(signalType -> {
+								logger.debug("Completed with: " + signalType);
+							});
+				})
+				.block(Duration.ofMillis(5000));
+	}
+
 
 	@Configuration
 	static class WebConfig {
@@ -137,6 +152,7 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 			map.put("/echo", new EchoWebSocketHandler());
 			map.put("/sub-protocol", new SubProtocolWebSocketHandler());
 			map.put("/custom-header", new CustomHeaderHandler());
+			map.put("/close", new SessionClosingHandler());
 
 			SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
 			mapping.setUrlMap(map);
@@ -180,6 +196,14 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 			String payload = "my-header:" + headers.getFirst("my-header");
 			WebSocketMessage message = session.textMessage(payload);
 			return session.send(Mono.just(message));
+		}
+	}
+
+	private static class SessionClosingHandler implements WebSocketHandler {
+
+		@Override
+		public Mono<Void> handle(WebSocketSession session) {
+			return Flux.never().mergeWith(session.close(CloseStatus.GOING_AWAY)).then();
 		}
 	}
 
