@@ -17,6 +17,7 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.AsyncContext;
@@ -155,6 +156,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 	@Override
 	public void service(ServletRequest request, ServletResponse response) throws ServletException, IOException {
+
 		if (DispatcherType.ASYNC.equals(request.getDispatcherType())) {
 			Throwable ex = (Throwable) request.getAttribute(WRITE_ERROR_ATTRIBUTE_NAME);
 			throw new ServletException("Write publisher error", ex);
@@ -164,7 +166,18 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		AsyncContext asyncContext = request.startAsync();
 		asyncContext.setTimeout(-1);
 
-		ServerHttpRequest httpRequest = createRequest(((HttpServletRequest) request), asyncContext);
+		ServerHttpRequest httpRequest;
+		try {
+			httpRequest = createRequest(((HttpServletRequest) request), asyncContext);
+		}
+		catch (URISyntaxException ex) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Invalid URL for incoming request: " + ex.getMessage());
+			}
+			((HttpServletResponse) response).setStatus(400);
+			asyncContext.complete();
+			return;
+		}
 		ServerHttpResponse httpResponse = createResponse(((HttpServletResponse) response), asyncContext);
 
 		if (httpRequest.getMethod() == HttpMethod.HEAD) {
@@ -179,7 +192,9 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		this.httpHandler.handle(httpRequest, httpResponse).subscribe(subscriber);
 	}
 
-	protected ServerHttpRequest createRequest(HttpServletRequest request, AsyncContext context) throws IOException {
+	protected ServerHttpRequest createRequest(HttpServletRequest request, AsyncContext context)
+			throws IOException, URISyntaxException {
+
 		Assert.notNull(this.servletPath, "Servlet path is not initialized");
 		return new ServletServerHttpRequest(
 				request, context, this.servletPath, getDataBufferFactory(), getBufferSize());

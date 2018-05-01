@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.function.IntPredicate;
 import javax.net.ssl.SSLSession;
@@ -59,19 +60,21 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	private final RequestBodyPublisher body;
 
 
-	public UndertowServerHttpRequest(HttpServerExchange exchange, DataBufferFactory bufferFactory) {
+	public UndertowServerHttpRequest(HttpServerExchange exchange, DataBufferFactory bufferFactory)
+			throws URISyntaxException {
+
 		super(initUri(exchange), "", initHeaders(exchange));
 		this.exchange = exchange;
 		this.body = new RequestBodyPublisher(exchange, bufferFactory);
 		this.body.registerListeners(exchange);
 	}
 
-	private static URI initUri(HttpServerExchange exchange) {
+	private static URI initUri(HttpServerExchange exchange) throws URISyntaxException {
 		Assert.notNull(exchange, "HttpServerExchange is required.");
 		String requestURL = exchange.getRequestURL();
 		String query = exchange.getQueryString();
 		String requestUriAndQuery = StringUtils.isEmpty(query) ? requestURL : requestURL + "?" + query;
-		return URI.create(requestUriAndQuery);
+		return new URI(requestUriAndQuery);
 	}
 
 	private static HttpHeaders initHeaders(HttpServerExchange exchange) {
