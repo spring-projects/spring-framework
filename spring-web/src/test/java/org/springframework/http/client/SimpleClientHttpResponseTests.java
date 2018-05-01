@@ -98,6 +98,22 @@ public class SimpleClientHttpResponseTests {
 		verify(this.connection, never()).disconnect();
 	}
 
+	@Test  // SPR-16773
+	public void shouldNotDrainWhenErrorstreamClosed() throws Exception {
+		InputStream is = mock(InputStream.class);
+		given(this.connection.getErrorStream()).willReturn(is);
+		doNothing().when(is).close();
+		given(is.read(any())).willThrow(new IllegalStateException(
+			"must not drain after close else buffered HttpUrlConnection#Errorstream throws"));
+
+		InputStream responseStream = this.response.getBody();
+		responseStream.close();
+		this.response.close();
+
+		verify(is).close();
+		// never drained after responsestream-close
+		verify(is, never()).read(any());
+	}
 
 	class TestByteArrayInputStream extends ByteArrayInputStream {
 

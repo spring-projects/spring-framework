@@ -16,6 +16,7 @@
 
 package org.springframework.http.client;
 
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -86,7 +87,13 @@ final class SimpleClientHttpResponse extends AbstractClientHttpResponse {
 	public InputStream getBody() throws IOException {
 		InputStream errorStream = this.connection.getErrorStream();
 		this.responseStream = (errorStream != null ? errorStream : this.connection.getInputStream());
-		return this.responseStream;
+		return new FilterInputStream(this.responseStream) {
+			@Override
+			public void close() throws IOException {
+				super.close();
+				SimpleClientHttpResponse.this.responseStream = null;
+			}
+		};
 	}
 
 	@Override
@@ -95,6 +102,7 @@ final class SimpleClientHttpResponse extends AbstractClientHttpResponse {
 			try {
 				StreamUtils.drain(this.responseStream);
 				this.responseStream.close();
+				this.responseStream = null;
 			}
 			catch (IOException ex) {
 				// ignore
