@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,8 +115,9 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 	/**
 	 * Set the default charset to use for parsing properties files.
 	 * Used if no file-specific charset is specified for a file.
-	 * <p>Default is none, using the {@code java.util.Properties}
-	 * default encoding: ISO-8859-1.
+	 * <p>The effective default is the {@code java.util.Properties}
+	 * default encoding: ISO-8859-1. A {@code null} value indicates
+	 * the platform default encoding.
 	 * <p>Only applies to classic properties files, not to XML files.
 	 * @param defaultEncoding the default charset
 	 */
