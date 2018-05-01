@@ -20,7 +20,6 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
 import reactor.ipc.netty.NettyInbound;
 import reactor.ipc.netty.NettyOutbound;
 import reactor.ipc.netty.NettyPipeline;
@@ -35,16 +34,14 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 
 
 /**
- * Spring {@link WebSocketSession} implementation that adapts to Reactor Netty's
- * WebSocket {@link NettyInbound} and {@link NettyOutbound}.
+ * {@link WebSocketSession} implementation for use with the Reactor Netty's
+ * {@link NettyInbound} and {@link NettyOutbound}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class ReactorNettyWebSocketSession
 		extends NettyWebSocketSessionSupport<ReactorNettyWebSocketSession.WebSocketConnection> {
-
-	private final MonoProcessor<WebSocketFrame> closeMono = MonoProcessor.create();
 
 
 	public ReactorNettyWebSocketSession(WebsocketInbound inbound, WebsocketOutbound outbound,
