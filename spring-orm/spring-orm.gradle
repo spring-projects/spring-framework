@@ -9,7 +9,7 @@ dependencies {
 	optional(project(":spring-context"))
 	optional(project(":spring-web"))
 	optional("org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.1")
-	optional("org.hibernate:hibernate-core:5.2.16.Final")
+	optional("org.hibernate:hibernate-core:5.2.17.Final")
 	optional("javax.servlet:javax.servlet-api:3.1.0")
 	testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 	testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
