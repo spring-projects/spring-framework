@@ -28,7 +28,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -103,7 +102,6 @@ public class ReactorNettyTcpStompClientTests {
 	}
 
 	@Test
-	@Ignore // https://github.com/reactor/reactor-core/issues/1184
 	public void publishSubscribe() throws Exception {
 		String destination = "/topic/foo";
 		ConsumingHandler consumingHandler1 = new ConsumingHandler(destination);
