@@ -288,9 +288,12 @@ class ConfigurationClassParser {
 						this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
 				// Check the set of scanned definitions for any further config classes and parse recursively if needed
 				for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
-					if (ConfigurationClassUtils.checkConfigurationClassCandidate(
-							holder.getBeanDefinition(), this.metadataReaderFactory)) {
-						parse(holder.getBeanDefinition().getBeanClassName(), holder.getBeanName());
+					BeanDefinition bdCand = holder.getBeanDefinition().getOriginatingBeanDefinition();
+					if (bdCand == null) {
+						bdCand = holder.getBeanDefinition();
+					}
+					if (ConfigurationClassUtils.checkConfigurationClassCandidate(bdCand, this.metadataReaderFactory)) {
+						parse(bdCand.getBeanClassName(), holder.getBeanName());
 					}
 				}
 			}
