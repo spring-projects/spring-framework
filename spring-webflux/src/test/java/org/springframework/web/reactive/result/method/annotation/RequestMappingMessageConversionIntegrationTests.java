@@ -227,6 +227,13 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 						JSON, Person.class).getBody());
 	}
 
+	@Test  // SPR-16759
+	public void personTransformWithMonoAndXml() throws Exception {
+		assertEquals(new Person("ROBERT"),
+				performPost("/person-transform/mono", MediaType.APPLICATION_XML, new Person("Robert"),
+						MediaType.APPLICATION_XML, Person.class).getBody());
+	}
+
 	@Test
 	public void personTransformWithSingle() throws Exception {
 		assertEquals(new Person("ROBERT"),
