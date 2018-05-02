@@ -23,6 +23,7 @@ import javax.xml.stream.events.XMLEvent;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
@@ -159,7 +160,7 @@ public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	@Test
 	public void decodeSingleXmlRootElement() throws Exception {
 		Flux<DataBuffer> source = Flux.just(stringBuffer(POJO_ROOT));
-		Flux<Object> output = this.decoder.decode(source, ResolvableType.forClass(Pojo.class),
+		Mono<Object> output = this.decoder.decodeToMono(source, ResolvableType.forClass(Pojo.class),
 				null, Collections.emptyMap());
 
 		StepVerifier.create(output)
@@ -171,7 +172,7 @@ public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	@Test
 	public void decodeSingleXmlTypeElement() throws Exception {
 		Flux<DataBuffer> source = Flux.just(stringBuffer(POJO_ROOT));
-		Flux<Object> output = this.decoder.decode(source, ResolvableType.forClass(TypePojo.class),
+		Mono<Object> output = this.decoder.decodeToMono(source, ResolvableType.forClass(TypePojo.class),
 				null, Collections.emptyMap());
 
 		StepVerifier.create(output)
