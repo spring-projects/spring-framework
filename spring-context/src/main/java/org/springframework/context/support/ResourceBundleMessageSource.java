@@ -80,7 +80,8 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * This allows for very efficient hash lookups, significantly faster
 	 * than the ResourceBundle class's own cache.
 	 */
-	private final Map<String, Map<Locale, ResourceBundle>> cachedResourceBundles = new ConcurrentHashMap<>();
+	private final Map<String, Map<Locale, ResourceBundle>> cachedResourceBundles =
+			new ConcurrentHashMap<>();
 
 	/**
 	 * Cache to hold already generated MessageFormats.
@@ -90,7 +91,11 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * very efficient hash lookups without concatenated keys.
 	 * @see #getMessageFormat
 	 */
-	private final Map<ResourceBundle, Map<String, Map<Locale, MessageFormat>>> cachedBundleMessageFormats = new ConcurrentHashMap<>();
+	private final Map<ResourceBundle, Map<String, Map<Locale, MessageFormat>>> cachedBundleMessageFormats =
+			new ConcurrentHashMap<>();
+
+	@Nullable
+	private volatile MessageSourceControl control = new MessageSourceControl();
 
 
 	/**
@@ -220,7 +225,24 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	protected ResourceBundle doGetBundle(String basename, Locale locale) throws MissingResourceException {
 		ClassLoader classLoader = getBundleClassLoader();
 		Assert.state(classLoader != null, "No bundle ClassLoader set");
-		return ResourceBundle.getBundle(basename, locale, classLoader, new MessageSourceControl());
+
+		MessageSourceControl control = this.control;
+		if (control != null) {
+			try {
+				return ResourceBundle.getBundle(basename, locale, classLoader, control);
+			}
+			catch (UnsupportedOperationException ex) {
+				// Probably in a Jigsaw environment on JDK 9+
+				this.control = null;
+				if (logger.isInfoEnabled()) {
+					logger.info("ResourceBundle.Control not supported in current system environment: " +
+							ex.getMessage() + " - falling back to plain ResourceBundle.getBundle retrieval.");
+				}
+			}
+		}
+
+		// Fallback: plain getBundle lookup without Control handle
+		return ResourceBundle.getBundle(basename, locale, classLoader);
 	}
 
 	/**
@@ -266,7 +288,8 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 		if (msg != null) {
 			if (codeMap == null) {
 				codeMap = new ConcurrentHashMap<>();
-				Map<String, Map<Locale, MessageFormat>> existing = this.cachedBundleMessageFormats.putIfAbsent(bundle, codeMap);
+				Map<String, Map<Locale, MessageFormat>> existing =
+						this.cachedBundleMessageFormats.putIfAbsent(bundle, codeMap);
 				if (existing != null) {
 					codeMap = existing;
 				}
@@ -341,9 +364,9 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 				final String resourceName = toResourceName(bundleName, "properties");
 				final ClassLoader classLoader = loader;
 				final boolean reloadFlag = reload;
-				InputStream stream;
+				InputStream inputStream;
 				try {
-					stream = AccessController.doPrivileged((PrivilegedExceptionAction<InputStream>) () -> {
+					inputStream = AccessController.doPrivileged((PrivilegedExceptionAction<InputStream>) () -> {
 						InputStream is = null;
 						if (reloadFlag) {
 							URL url = classLoader.getResource(resourceName);
@@ -364,12 +387,12 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 				catch (PrivilegedActionException ex) {
 					throw (IOException) ex.getException();
 				}
-				if (stream != null) {
+				if (inputStream != null) {
 					String encoding = getDefaultEncoding();
 					if (encoding == null) {
 						encoding = "ISO-8859-1";
 					}
-					try (InputStreamReader bundleReader = new InputStreamReader(stream, encoding)) {
+					try (InputStreamReader bundleReader = new InputStreamReader(inputStream, encoding)) {
 						return loadBundle(bundleReader);
 					}
 				}
