@@ -33,7 +33,7 @@ import static org.junit.Assert.*;
 /**
  * @author Stephane Nicoll
  */
-public class TransactionAwareCacheDecoratorTests {
+public class TransactionAwareCacheTests {
 
 	@Rule
 	public final ExpectedException thrown = ExpectedException.none();
@@ -43,20 +43,20 @@ public class TransactionAwareCacheDecoratorTests {
 	@Test
 	public void createWithNullTarget() {
 		this.thrown.expect(IllegalArgumentException.class);
-		new TransactionAwareCacheDecorator(null);
+		new TransactionAwareCache(null);
 	}
 
 	@Test
 	public void getTargetCache() {
 		Cache target = new ConcurrentMapCache("testCache");
-		TransactionAwareCacheDecorator cache = new TransactionAwareCacheDecorator(target);
+		TransactionAwareCache cache = new TransactionAwareCache(target);
 		assertSame(target, cache.getTargetCache());
 	}
 
 	@Test
 	public void regularOperationsOnTarget() {
 		Cache target = new ConcurrentMapCache("testCache");
-		Cache cache = new TransactionAwareCacheDecorator(target);
+		Cache cache = new TransactionAwareCache(target);
 		assertEquals(target.getName(), cache.getName());
 		assertEquals(target.getNativeCache(), cache.getNativeCache());
 
@@ -72,7 +72,7 @@ public class TransactionAwareCacheDecoratorTests {
 	@Test
 	public void putNonTransactional() {
 		Cache target = new ConcurrentMapCache("testCache");
-		Cache cache = new TransactionAwareCacheDecorator(target);
+		Cache cache = new TransactionAwareCache(target);
 
 		Object key = new Object();
 		cache.put(key, "123");
@@ -82,7 +82,7 @@ public class TransactionAwareCacheDecoratorTests {
 	@Test
 	public void putTransactional() {
 		Cache target = new ConcurrentMapCache("testCache");
-		Cache cache = new TransactionAwareCacheDecorator(target);
+		Cache cache = new TransactionAwareCache(target);
 
 		TransactionStatus status = this.txManager.getTransaction(
 				new DefaultTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED));
@@ -98,7 +98,7 @@ public class TransactionAwareCacheDecoratorTests {
 	@Test
 	public void putIfAbsent() { // no transactional support for putIfAbsent
 		Cache target = new ConcurrentMapCache("testCache");
-		Cache cache = new TransactionAwareCacheDecorator(target);
+		Cache cache = new TransactionAwareCache(target);
 
 		Object key = new Object();
 		assertNull(cache.putIfAbsent(key, "123"));
@@ -110,7 +110,7 @@ public class TransactionAwareCacheDecoratorTests {
 	@Test
 	public void evictNonTransactional() {
 		Cache target = new ConcurrentMapCache("testCache");
-		Cache cache = new TransactionAwareCacheDecorator(target);
+		Cache cache = new TransactionAwareCache(target);
 		Object key = new Object();
 		cache.put(key, "123");
 
@@ -121,7 +121,7 @@ public class TransactionAwareCacheDecoratorTests {
 	@Test
 	public void evictTransactional() {
 		Cache target = new ConcurrentMapCache("testCache");
-		Cache cache = new TransactionAwareCacheDecorator(target);
+		Cache cache = new TransactionAwareCache(target);
 		Object key = new Object();
 		cache.put(key, "123");
 
@@ -138,7 +138,7 @@ public class TransactionAwareCacheDecoratorTests {
 	@Test
 	public void clearNonTransactional() {
 		Cache target = new ConcurrentMapCache("testCache");
-		Cache cache = new TransactionAwareCacheDecorator(target);
+		Cache cache = new TransactionAwareCache(target);
 		Object key = new Object();
 		cache.put(key, "123");
 
@@ -149,7 +149,7 @@ public class TransactionAwareCacheDecoratorTests {
 	@Test
 	public void clearTransactional() {
 		Cache target = new ConcurrentMapCache("testCache");
-		Cache cache = new TransactionAwareCacheDecorator(target);
+		Cache cache = new TransactionAwareCache(target);
 		Object key = new Object();
 		cache.put(key, "123");
 

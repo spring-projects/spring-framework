@@ -37,10 +37,10 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @author Stas Volsky
- * @since 3.2
+ * @since 5.1
  * @see TransactionAwareCacheManagerProxy
  */
-public class TransactionAwareCacheDecorator implements Cache {
+public class TransactionAwareCache implements Cache {
 
 	private final Cache targetCache;
 
@@ -49,7 +49,7 @@ public class TransactionAwareCacheDecorator implements Cache {
 	 * Create a new TransactionAwareCache for the given target Cache.
 	 * @param targetCache the target Cache to decorate
 	 */
-	public TransactionAwareCacheDecorator(Cache targetCache) {
+	public TransactionAwareCache(Cache targetCache) {
 		Assert.notNull(targetCache, "Target Cache must not be null");
 		this.targetCache = targetCache;
 	}
@@ -94,7 +94,7 @@ public class TransactionAwareCacheDecorator implements Cache {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 				@Override
 				public void afterCommit() {
-					TransactionAwareCacheDecorator.this.targetCache.put(key, value);
+					TransactionAwareCache.this.targetCache.put(key, value);
 				}
 			});
 		}
@@ -115,7 +115,7 @@ public class TransactionAwareCacheDecorator implements Cache {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 				@Override
 				public void afterCommit() {
-					TransactionAwareCacheDecorator.this.targetCache.evict(key);
+					TransactionAwareCache.this.targetCache.evict(key);
 				}
 			});
 		}

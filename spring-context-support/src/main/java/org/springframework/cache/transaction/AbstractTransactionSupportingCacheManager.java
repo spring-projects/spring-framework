@@ -27,7 +27,7 @@ import org.springframework.cache.support.AbstractCacheManager;
  * @author Juergen Hoeller
  * @since 3.2
  * @see #setTransactionAware
- * @see TransactionAwareCacheDecorator
+ * @see TransactionAwareCache
  * @see TransactionAwareCacheManagerProxy
  */
 public abstract class AbstractTransactionSupportingCacheManager extends AbstractCacheManager {
@@ -54,8 +54,9 @@ public abstract class AbstractTransactionSupportingCacheManager extends Abstract
 
 
 	@Override
-	protected Cache decorateCache(Cache cache) {
-		return (isTransactionAware() ? new TransactionAwareCacheDecorator(cache) : cache);
+	public void afterPropertiesSet() {
+		super.addCacheDecorator(cache -> isTransactionAware() ? new org.springframework.cache.transaction.TransactionAwareCache(cache) : cache);
+		super.afterPropertiesSet();
 	}
 
 }

@@ -96,7 +96,7 @@ public abstract class AbstractTransactionSupportingCacheManagerTests<T extends C
 	@Test
 	public void getTransactionalOnExistingCache() {
 		assertThat(getCacheManager(true).getCache(CACHE_NAME),
-				is(instanceOf(TransactionAwareCacheDecorator.class)));
+				is(instanceOf(TransactionAwareCache.class)));
 	}
 
 	@Test
@@ -107,7 +107,7 @@ public abstract class AbstractTransactionSupportingCacheManagerTests<T extends C
 		addNativeCache(cacheName);
 		try {
 			assertThat(cacheManager.getCache(cacheName),
-					is(instanceOf(TransactionAwareCacheDecorator.class)));
+					is(instanceOf(TransactionAwareCache.class)));
 			assertTrue(cacheManager.getCacheNames().contains(cacheName));
 		}
 		finally {
