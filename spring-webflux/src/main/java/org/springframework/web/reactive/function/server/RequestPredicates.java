@@ -362,10 +362,7 @@ public abstract class RequestPredicates {
 		@Override
 		public Optional<ServerRequest> nest(ServerRequest request) {
 			return Optional.ofNullable(this.pattern.matchStartOfPath(request.pathContainer()))
-					.map(info -> {
-						mergeTemplateVariables(request, info.getUriVariables());
-						return new SubPathServerRequestWrapper(request, info);
-					});
+					.map(info -> new SubPathServerRequestWrapper(request, info));
 		}
 
 		private void mergeTemplateVariables(ServerRequest request, Map<String, String> variables) {
@@ -475,10 +472,21 @@ public abstract class RequestPredicates {
 
 		private final PathContainer subPathContainer;
 
+		private final Map<String, String> pathVariables;
 
 		public SubPathServerRequestWrapper(ServerRequest request, PathPattern.PathRemainingMatchInfo info) {
 			this.request = request;
 			this.subPathContainer = new SubPathContainer(info.getPathRemaining());
+
+			this.pathVariables = mergePathVariables(request, info.getUriVariables());
+		}
+
+		private static Map<String, String> mergePathVariables(ServerRequest request,
+				Map<String, String> pathVariables) {
+
+			Map<String, String> result = new LinkedHashMap<>(request.pathVariables());
+			result.putAll(pathVariables);
+			return Collections.unmodifiableMap(result);
 		}
 
 		@Override
@@ -582,13 +590,8 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
-		public String pathVariable(String name) {
-			return this.request.pathVariable(name);
-		}
-
-		@Override
 		public Map<String, String> pathVariables() {
-			return this.request.pathVariables();
+			return this.pathVariables;
 		}
 
 		@Override
