@@ -123,14 +123,35 @@ public abstract class RouterFunctions {
 	 * For instance
 	 * <pre class="code">
 	 * Resource location = new FileSystemResource("public-resources/");
-	 * RoutingFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources("/resources/**", location);
+	 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources("/resources/**", location);
      * </pre>
 	 * @param pattern the pattern to match
 	 * @param location the location directory relative to which resources should be resolved
 	 * @return a router function that routes to resources
+	 * @see #resourceLookupFunction(String, Resource)
 	 */
 	public static RouterFunction<ServerResponse> resources(String pattern, Resource location) {
-		return resources(new PathResourceLookupFunction(pattern, location));
+		return resources(resourceLookupFunction(pattern, location));
+	}
+
+	/**
+	 * Returns the resource lookup function used by {@link #resources(String, Resource)}.
+	 * The returned function can be {@linkplain Function#andThen(Function) composed} on, for
+	 * instance to return a default resource when the lookup function does not match:
+	 * <pre class="code">
+	 * Mono&lt;Resource&gt; defaultResource = Mono.just(new ClassPathResource("index.html"));
+	 * Function&lt;ServerRequest, Mono&lt;Resource&gt;&gt; lookupFunction =
+	 *   RouterFunctions.resourceLookupFunction("/resources/**", new FileSystemResource("public-resources/"))
+	 *     .andThen(resourceMono -&gt; resourceMono.switchIfEmpty(defaultResource));
+	 *
+	 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources(lookupFunction);
+     * </pre>
+	 * @param pattern the pattern to match
+	 * @param location the location directory relative to which resources should be resolved
+	 * @return the default resource lookup function for the given parameters.
+	 */
+	public static Function<ServerRequest, Mono<Resource>> resourceLookupFunction(String pattern, Resource location) {
+		return new PathResourceLookupFunction(pattern, location);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.reactive.function.server;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.function.Function;
 
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -94,5 +95,38 @@ public class PathResourceLookupFunctionTests {
 				.expectComplete()
 				.verify();
 	}
+
+	@Test
+	public void composeResourceLookupFunction() throws Exception {
+
+		Function<ServerRequest, Mono<Resource>> lookupFunction =
+				new PathResourceLookupFunction("/resources/**",
+						new ClassPathResource("org/springframework/web/reactive/function/server/"));
+
+		ClassPathResource defaultResource = new ClassPathResource("response.txt", getClass());
+
+		Function<ServerRequest, Mono<Resource>> customLookupFunction =
+				lookupFunction.andThen(resourceMono -> resourceMono
+								.switchIfEmpty(Mono.just(defaultResource)));
+
+		MockServerRequest request = MockServerRequest.builder()
+				.uri(new URI("http://localhost/resources/foo"))
+				.build();
+
+		Mono<Resource> result = customLookupFunction.apply(request);
+		StepVerifier.create(result)
+				.expectNextMatches(resource -> {
+					try {
+						return defaultResource.getFile().equals(resource.getFile());
+					}
+					catch (IOException ex) {
+						return false;
+					}
+				})
+				.expectComplete()
+				.verify();
+
+	}
+
 
 }
