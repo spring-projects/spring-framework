@@ -164,8 +164,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 
 	@Override
 	@Nullable
-	protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response,
-			@Nullable Object handler, Exception ex) {
+	protected ModelAndView doResolveException(
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
 
 		try {
 			if (ex instanceof HttpRequestMethodNotSupportedException) {
@@ -546,7 +546,6 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 		}
 		return new ModelAndView();
 	}
-
 
 	/**
 	 * Invoked to send a server error. Sets the status to 500 and also sets the
