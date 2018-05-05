@@ -43,7 +43,6 @@ import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
@@ -125,6 +124,7 @@ public interface ServerRequest {
 
 	/**
 	 * Return the readers used to convert the body of this request.
+	 * @since 5.1
 	 */
 	List<HttpMessageReader<?>> messageReaders();
 
@@ -262,7 +262,6 @@ public interface ServerRequest {
 	/**
 	 * Return the form data from the body of the request if the Content-Type is
 	 * {@code "application/x-www-form-urlencoded"} or an empty map otherwise.
-	 *
 	 * <p><strong>Note:</strong> calling this method causes the request body to
 	 * be read and parsed in full and the resulting {@code MultiValueMap} is
 	 * cached so that this method is safe to call more than once.
@@ -272,7 +271,6 @@ public interface ServerRequest {
 	/**
 	 * Return the parts of a multipart request if the Content-Type is
 	 * {@code "multipart/form-data"} or an empty map otherwise.
-	 *
 	 * <p><strong>Note:</strong> calling this method causes the request body to
 	 * be read and parsed in full and the resulting {@code MultiValueMap} is
 	 * cached so that this method is safe to call more than once.
@@ -280,13 +278,13 @@ public interface ServerRequest {
 	Mono<MultiValueMap<String, Part>> multipartData();
 
 	/**
-	 * Returns the web exchange that this request is based on. Manipulating the exchange directly,
-	 * instead of using the methods provided on {@code ServerRequest} and {@code ServerResponse},
-	 * can lead to irregular results.
-	 *
-	 * @return the web exchange
+	 * Return the web exchange that this request is based on.
+	 * <p>Note: Manipulating the exchange directly (instead of using the methods provided on
+	 * {@code ServerRequest} and {@code ServerResponse}) can lead to irregular results.
+	 * @since 5.1
 	 */
 	ServerWebExchange exchange();
+
 
 	// Static methods
 
@@ -305,11 +303,12 @@ public interface ServerRequest {
 	 * Create a builder with the status, headers, and cookies of the given request.
 	 * @param other the response to copy the status, headers, and cookies from
 	 * @return the created builder
+	 * @since 5.1
 	 */
 	static Builder from(ServerRequest other) {
-		Assert.notNull(other, "'other' must not be null");
 		return new DefaultServerRequestBuilder(other);
 	}
+
 
 	/**
 	 * Represents the headers of the HTTP request.
@@ -378,6 +377,7 @@ public interface ServerRequest {
 
 	/**
 	 * Defines a builder for a request.
+	 * @since 5.1
 	 */
 	interface Builder {
 

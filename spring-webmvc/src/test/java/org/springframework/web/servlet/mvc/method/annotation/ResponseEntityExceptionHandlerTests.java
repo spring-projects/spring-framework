@@ -328,6 +328,8 @@ public class ResponseEntityExceptionHandlerTests {
 		}
 	}
 
+
+	@SuppressWarnings("unused")
 	void handle(String arg) {
 	}
 

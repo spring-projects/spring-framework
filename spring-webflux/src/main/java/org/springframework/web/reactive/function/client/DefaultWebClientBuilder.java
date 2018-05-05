@@ -208,9 +208,7 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 
 	private static @Nullable HttpHeaders unmodifiableCopy(@Nullable HttpHeaders original) {
 		if (original != null) {
-			HttpHeaders copy = new HttpHeaders();
-			copy.putAll(original);
-			return HttpHeaders.readOnlyHttpHeaders(copy);
+			return HttpHeaders.readOnlyHttpHeaders(original);
 		}
 		else {
 			return null;

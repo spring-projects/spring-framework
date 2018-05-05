@@ -99,7 +99,6 @@ final class DefaultRenderingResponseBuilder implements RenderingResponse.Builder
 
 	@Override
 	public RenderingResponse.Builder cookies(Consumer<MultiValueMap<String, ResponseCookie>> cookiesConsumer) {
-		Assert.notNull(cookiesConsumer, "Consumer must not be null");
 		cookiesConsumer.accept(this.cookies);
 		return this;
 	}

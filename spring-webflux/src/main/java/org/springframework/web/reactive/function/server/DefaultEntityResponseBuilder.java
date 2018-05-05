@@ -96,7 +96,6 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 
 	@Override
 	public EntityResponse.Builder<T> cookies(Consumer<MultiValueMap<String, ResponseCookie>> cookiesConsumer) {
-		Assert.notNull(cookiesConsumer, "Consumer must not be null");
 		cookiesConsumer.accept(this.cookies);
 		return this;
 	}

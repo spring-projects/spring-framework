@@ -265,7 +265,7 @@ class Tokenizer {
 						raiseParseException(this.pos, SpelMessage.UNEXPECTED_ESCAPE_CHAR);
 						break;
 					default:
-						throw new IllegalStateException("Cannot handle ('" + ch + "')");
+						throw new IllegalStateException("Cannot handle (" + (int) ch + ") '" + ch + "'");
 				}
 			}
 		}

@@ -67,37 +67,39 @@ import org.springframework.web.util.UriUtils;
  */
 class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
+	private final List<HttpMessageReader<?>> messageReaders;
+
+	private ServerWebExchange exchange;
+
+	private String methodName;
+
+	private URI uri;
+
 	private final HttpHeaders headers = new HttpHeaders();
 
 	private final MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
 
 	private final Map<String, Object> attributes = new LinkedHashMap<>();
 
-	private final List<HttpMessageReader<?>> messageReaders;
-
-	private ServerWebExchange exchange;
-
-	private HttpMethod method = HttpMethod.GET;
-
-	@Nullable
-	private URI uri;
-
 	private Flux<DataBuffer> body = Flux.empty();
+
 
 	public DefaultServerRequestBuilder(ServerRequest other) {
 		Assert.notNull(other, "ServerRequest must not be null");
 		this.messageReaders = other.messageReaders();
 		this.exchange = other.exchange();
-		method(other.method());
-		uri(other.uri());
+		this.methodName = other.methodName();
+		this.uri = other.uri();
 		headers(headers -> headers.addAll(other.headers().asHttpHeaders()));
 		cookies(cookies -> cookies.addAll(other.cookies()));
+		attributes(attributes -> attributes.putAll(other.attributes()));
 	}
+
 
 	@Override
 	public ServerRequest.Builder method(HttpMethod method) {
 		Assert.notNull(method, "'method' must not be null");
-		this.method = method;
+		this.methodName = method.name();
 		return this;
 	}
 
@@ -118,7 +120,6 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest.Builder headers(Consumer<HttpHeaders> headersConsumer) {
-		Assert.notNull(headersConsumer, "'headersConsumer' must not be null");
 		headersConsumer.accept(this.headers);
 		return this;
 	}
@@ -132,10 +133,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 	}
 
 	@Override
-	public ServerRequest.Builder cookies(
-			Consumer<MultiValueMap<String, HttpCookie>> cookiesConsumer) {
-
-		Assert.notNull(cookiesConsumer, "'cookiesConsumer' must not be null");
+	public ServerRequest.Builder cookies(Consumer<MultiValueMap<String, HttpCookie>> cookiesConsumer) {
 		cookiesConsumer.accept(this.cookies);
 		return this;
 	}
@@ -174,26 +172,25 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest.Builder attributes(Consumer<Map<String, Object>> attributesConsumer) {
-		Assert.notNull(attributesConsumer, "'attributesConsumer' must not be null");
 		attributesConsumer.accept(this.attributes);
 		return this;
 	}
 
 	@Override
 	public ServerRequest build() {
-		ServerHttpRequest serverHttpRequest = new BuiltServerHttpRequest(this.method, this.uri,
-				this.headers, this.cookies, this.body);
-		ServerWebExchange exchange = new DelegatingServerWebExchange(serverHttpRequest,
-				this.exchange, this.messageReaders);
+		ServerHttpRequest serverHttpRequest = new BuiltServerHttpRequest(
+				this.methodName, this.uri, this.headers, this.cookies, this.body);
+		ServerWebExchange exchange = new DelegatingServerWebExchange(
+				serverHttpRequest, this.exchange, this.messageReaders);
 		return new DefaultServerRequest(exchange, this.messageReaders);
 	}
+
 
 	private static class BuiltServerHttpRequest implements ServerHttpRequest {
 
 		private static final Pattern QUERY_PATTERN = Pattern.compile("([^&=]+)(=?)([^&]+)?");
 
-
-		private final HttpMethod method;
+		private final String method;
 
 		private final URI uri;
 
@@ -207,10 +204,9 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		private final Flux<DataBuffer> body;
 
-		public BuiltServerHttpRequest(HttpMethod method, URI uri,
-				HttpHeaders headers,
-				MultiValueMap<String, HttpCookie> cookies,
-				Flux<DataBuffer> body) {
+		public BuiltServerHttpRequest(String method, URI uri, HttpHeaders headers,
+				MultiValueMap<String, HttpCookie> cookies, Flux<DataBuffer> body) {
+
 			this.method = method;
 			this.uri = uri;
 			this.path = RequestPath.parse(uri, null);
@@ -245,15 +241,9 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 			return queryParams;
 		}
 
-		@Nullable
-		@Override
-		public HttpMethod getMethod() {
-			return this.method;
-		}
-
 		@Override
 		public String getMethodValue() {
-			return this.method.name();
+			return this.method;
 		}
 
 		@Override
@@ -287,6 +277,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		}
 	}
 
+
 	private static class DelegatingServerWebExchange implements ServerWebExchange {
 
 		private static final ResolvableType FORM_DATA_TYPE =
@@ -296,12 +287,10 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 				MultiValueMap.class, String.class, Part.class);
 
 		private static final Mono<MultiValueMap<String, String>> EMPTY_FORM_DATA =
-				Mono.just(CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<String, String>(0)))
-						.cache();
+				Mono.just(CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<String, String>(0))).cache();
 
 		private static final Mono<MultiValueMap<String, Part>> EMPTY_MULTIPART_DATA =
-				Mono.just(CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<String, Part>(0)))
-						.cache();
+				Mono.just(CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<String, Part>(0))).cache();
 
 		private final ServerHttpRequest request;
 
@@ -311,8 +300,9 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		private final Mono<MultiValueMap<String, Part>> multipartDataMono;
 
-		public DelegatingServerWebExchange(ServerHttpRequest request, ServerWebExchange delegate,
-				List<HttpMessageReader<?>> messageReaders) {
+		public DelegatingServerWebExchange(
+				ServerHttpRequest request, ServerWebExchange delegate, List<HttpMessageReader<?>> messageReaders) {
+
 			this.request = request;
 			this.delegate = delegate;
 			this.formDataMono = initFormData(request, messageReaders);
@@ -398,7 +388,6 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		public <T extends Principal> Mono<T> getPrincipal() {
 			return this.delegate.getPrincipal();
 		}
-
 
 		@Override
 		public LocaleContext getLocaleContext() {
