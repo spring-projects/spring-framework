@@ -70,13 +70,13 @@ public class HotSwappableTargetSourceTests {
 	@Test
 	public void testBasicFunctionality() {
 		SideEffectBean proxied = (SideEffectBean) beanFactory.getBean("swappable");
-		assertEquals(INITIAL_COUNT, proxied.getCount() );
+		assertEquals(INITIAL_COUNT, proxied.getCount());
 		proxied.doWork();
-		assertEquals(INITIAL_COUNT + 1, proxied.getCount() );
+		assertEquals(INITIAL_COUNT + 1, proxied.getCount());
 
 		proxied = (SideEffectBean) beanFactory.getBean("swappable");
 		proxied.doWork();
-		assertEquals(INITIAL_COUNT + 2, proxied.getCount() );
+		assertEquals(INITIAL_COUNT + 2, proxied.getCount());
 	}
 
 	@Test
@@ -85,9 +85,9 @@ public class HotSwappableTargetSourceTests {
 		SideEffectBean target2 = (SideEffectBean) beanFactory.getBean("target2");
 
 		SideEffectBean proxied = (SideEffectBean) beanFactory.getBean("swappable");
-		assertEquals(target1.getCount(), proxied.getCount() );
+		assertEquals(target1.getCount(), proxied.getCount());
 		proxied.doWork();
-		assertEquals(INITIAL_COUNT + 1, proxied.getCount() );
+		assertEquals(INITIAL_COUNT + 1, proxied.getCount());
 
 		HotSwappableTargetSource swapper = (HotSwappableTargetSource) beanFactory.getBean("swapper");
 		Object old = swapper.swap(target2);
