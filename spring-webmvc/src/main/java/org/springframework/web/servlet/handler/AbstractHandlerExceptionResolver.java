@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.handler;
 
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -241,10 +240,11 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * @param handler the executed handler, or {@code null} if none chosen at the time
 	 * of the exception (for example, if multipart resolution failed)
 	 * @param ex the exception that got thrown during handler execution
-	 * @return a corresponding {@code ModelAndView} to forward to, or {@code null} for default processing
+	 * @return a corresponding {@code ModelAndView} to forward to,
+	 * or {@code null} for default processing in the resolution chain
 	 */
 	@Nullable
-	protected abstract ModelAndView doResolveException(HttpServletRequest request,
-			HttpServletResponse response, @Nullable Object handler, Exception ex);
+	protected abstract ModelAndView doResolveException(
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex);
 
 }
