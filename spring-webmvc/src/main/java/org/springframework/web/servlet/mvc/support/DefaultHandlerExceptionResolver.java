@@ -53,9 +53,9 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 
 /**
- * Default implementation of the {@link org.springframework.web.servlet.HandlerExceptionResolver
- * HandlerExceptionResolver} interface that resolves standard Spring exceptions and translates
- * them to corresponding HTTP status codes.
+ * The default implementation of the {@link org.springframework.web.servlet.HandlerExceptionResolver}
+ * interface, resolving standard Spring MVC exceptions and translating them to corresponding
+ * HTTP status codes.
  *
  * <p>This exception resolver is enabled by default in the common Spring
  * {@link org.springframework.web.servlet.DispatcherServlet}.
@@ -169,54 +169,59 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 
 		try {
 			if (ex instanceof HttpRequestMethodNotSupportedException) {
-				return handleHttpRequestMethodNotSupported((HttpRequestMethodNotSupportedException) ex, request,
-						response, handler);
+				return handleHttpRequestMethodNotSupported(
+						(HttpRequestMethodNotSupportedException) ex, request, response, handler);
 			}
 			else if (ex instanceof HttpMediaTypeNotSupportedException) {
-				return handleHttpMediaTypeNotSupported((HttpMediaTypeNotSupportedException) ex, request, response,
-						handler);
+				return handleHttpMediaTypeNotSupported(
+						(HttpMediaTypeNotSupportedException) ex, request, response, handler);
 			}
 			else if (ex instanceof HttpMediaTypeNotAcceptableException) {
-				return handleHttpMediaTypeNotAcceptable((HttpMediaTypeNotAcceptableException) ex, request, response,
-						handler);
+				return handleHttpMediaTypeNotAcceptable(
+						(HttpMediaTypeNotAcceptableException) ex, request, response, handler);
 			}
 			else if (ex instanceof MissingPathVariableException) {
-				return handleMissingPathVariable((MissingPathVariableException) ex, request,
-						response, handler);
+				return handleMissingPathVariable(
+						(MissingPathVariableException) ex, request, response, handler);
 			}
 			else if (ex instanceof MissingServletRequestParameterException) {
-				return handleMissingServletRequestParameter((MissingServletRequestParameterException) ex, request,
-						response, handler);
+				return handleMissingServletRequestParameter(
+						(MissingServletRequestParameterException) ex, request, response, handler);
 			}
 			else if (ex instanceof ServletRequestBindingException) {
-				return handleServletRequestBindingException((ServletRequestBindingException) ex, request, response,
-						handler);
+				return handleServletRequestBindingException(
+						(ServletRequestBindingException) ex, request, response, handler);
 			}
 			else if (ex instanceof ConversionNotSupportedException) {
-				return handleConversionNotSupported((ConversionNotSupportedException) ex, request, response, handler);
+				return handleConversionNotSupported(
+						(ConversionNotSupportedException) ex, request, response, handler);
 			}
 			else if (ex instanceof TypeMismatchException) {
-				return handleTypeMismatch((TypeMismatchException) ex, request, response, handler);
+				return handleTypeMismatch(
+						(TypeMismatchException) ex, request, response, handler);
 			}
 			else if (ex instanceof HttpMessageNotReadableException) {
-				return handleHttpMessageNotReadable((HttpMessageNotReadableException) ex, request, response, handler);
+				return handleHttpMessageNotReadable(
+						(HttpMessageNotReadableException) ex, request, response, handler);
 			}
 			else if (ex instanceof HttpMessageNotWritableException) {
-				return handleHttpMessageNotWritable((HttpMessageNotWritableException) ex, request, response, handler);
+				return handleHttpMessageNotWritable(
+						(HttpMessageNotWritableException) ex, request, response, handler);
 			}
 			else if (ex instanceof MethodArgumentNotValidException) {
-				return handleMethodArgumentNotValidException((MethodArgumentNotValidException) ex, request, response,
-						handler);
+				return handleMethodArgumentNotValidException(
+						(MethodArgumentNotValidException) ex, request, response, handler);
 			}
 			else if (ex instanceof MissingServletRequestPartException) {
-				return handleMissingServletRequestPartException((MissingServletRequestPartException) ex, request,
-						response, handler);
+				return handleMissingServletRequestPartException(
+						(MissingServletRequestPartException) ex, request, response, handler);
 			}
 			else if (ex instanceof BindException) {
 				return handleBindException((BindException) ex, request, response, handler);
 			}
 			else if (ex instanceof NoHandlerFoundException) {
-				return handleNoHandlerFoundException((NoHandlerFoundException) ex, request, response, handler);
+				return handleNoHandlerFoundException(
+						(NoHandlerFoundException) ex, request, response, handler);
 			}
 			else if (ex instanceof AsyncRequestTimeoutException) {
 				return handleAsyncRequestTimeoutException(
@@ -225,7 +230,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 		}
 		catch (Exception handlerException) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Handling of [" + ex.getClass().getName() + "] resulted in Exception", handlerException);
+				logger.warn("Handling of [" + ex.getClass().getName() + "] resulted in exception", handlerException);
 			}
 		}
 		return null;
@@ -549,7 +554,6 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 */
 	protected void sendServerError(Exception ex, HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
-
 
 		request.setAttribute("javax.servlet.error.exception", ex);
 		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

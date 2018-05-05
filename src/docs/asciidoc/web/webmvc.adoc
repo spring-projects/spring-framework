@@ -2977,7 +2977,7 @@ Applications that implement global exception handling with error details in the 
 body should consider extending
 {api-spring-framework}/web/servlet/mvc/method/annotation/ResponseEntityExceptionHandler.html[ResponseEntityExceptionHandler]
 which provides handling for exceptions that Spring MVC raises along with hooks to
-customize the response body. To make use of this, create a sub-class of
+customize the response body. To make use of this, create a subclass of
 `ResponseEntityExceptionHandler`, annotate with `@ControllerAdvice`, override the
 necessary methods, and declare it as a Spring bean.
 
