@@ -114,7 +114,7 @@ public interface ClientRequest {
 	/**
 	 * Create a builder with the given method and url.
 	 * @param method the HTTP method (GET, POST, etc)
-	 * @param url the URL
+	 * @param url the url (as a URI instance)
 	 * @return the created builder
 	 * @deprecated in favor of {@link #create(HttpMethod, URI)}
 	 */
@@ -126,7 +126,7 @@ public interface ClientRequest {
 	/**
 	 * Create a request builder with the given method and url.
 	 * @param method the HTTP method (GET, POST, etc)
-	 * @param url the URL
+	 * @param url the url (as a URI instance)
 	 * @return the created builder
 	 */
 	static Builder create(HttpMethod method, URI url) {

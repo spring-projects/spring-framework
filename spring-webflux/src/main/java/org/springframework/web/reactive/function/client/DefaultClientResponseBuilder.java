@@ -42,15 +42,15 @@ import org.springframework.util.MultiValueMap;
  */
 final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
+	private ExchangeStrategies strategies;
+
+	private HttpStatus statusCode = HttpStatus.OK;
+
 	private final HttpHeaders headers = new HttpHeaders();
 
 	private final MultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
 
-	private HttpStatus statusCode = HttpStatus.OK;
-
 	private Flux<DataBuffer> body = Flux.empty();
-
-	private ExchangeStrategies strategies;
 
 
 	public DefaultClientResponseBuilder(ExchangeStrategies strategies) {
@@ -84,7 +84,6 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 	@Override
 	public ClientResponse.Builder headers(Consumer<HttpHeaders> headersConsumer) {
-		Assert.notNull(headersConsumer, "Consumer must not be null");
 		headersConsumer.accept(this.headers);
 		return this;
 	}
@@ -99,7 +98,6 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 	@Override
 	public ClientResponse.Builder cookies(Consumer<MultiValueMap<String, ResponseCookie>> cookiesConsumer) {
-		Assert.notNull(cookiesConsumer, "Consumer must not be null");
 		cookiesConsumer.accept(this.cookies);
 		return this;
 	}

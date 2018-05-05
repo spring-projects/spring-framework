@@ -76,12 +76,8 @@ class DefaultServerRequest implements ServerRequest {
 
 	DefaultServerRequest(ServerWebExchange exchange, List<HttpMessageReader<?>> messageReaders) {
 		this.exchange = exchange;
-		this.messageReaders = unmodifiableCopy(messageReaders);
+		this.messageReaders = Collections.unmodifiableList(new ArrayList<>(messageReaders));
 		this.headers = new DefaultHeaders();
-	}
-
-	private static <T> List<T> unmodifiableCopy(List<? extends T> list) {
-		return Collections.unmodifiableList(new ArrayList<>(list));
 	}
 
 

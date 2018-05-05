@@ -414,7 +414,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Private constructor that can create read-only {@code HttpHeader} instances.
 	 */
 	private HttpHeaders(Map<String, List<String>> headers, boolean readOnly) {
-		Assert.notNull(headers, "'headers' must not be null");
 		if (readOnly) {
 			Map<String, List<String>> map = new LinkedCaseInsensitiveMap<>(headers.size(), Locale.ENGLISH);
 			headers.forEach((key, valueList) -> map.put(key, Collections.unmodifiableList(valueList)));
@@ -1556,6 +1555,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Return a {@code HttpHeaders} object that can only be read, not written to.
 	 */
 	public static HttpHeaders readOnlyHttpHeaders(HttpHeaders headers) {
+		Assert.notNull(headers, "HttpHeaders must not be null");
 		return (headers.readOnly ? headers : new HttpHeaders(headers, true));
 	}
 
