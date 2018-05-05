@@ -132,7 +132,7 @@ public abstract class AbstractCacheTests<T extends Cache> {
 		String key = createRandomKey();
 
 		assertNull(cache.get(key));
-		Object value = cache.get(key, () -> returnValue );
+		Object value = cache.get(key, () -> returnValue);
 		assertEquals(returnValue, value);
 		assertEquals(value, cache.get(key).get());
 	}

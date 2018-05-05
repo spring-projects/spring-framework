@@ -354,7 +354,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		urlPathHelper.setUrlDecode(false);
 		urlPathHelper.setRemoveSemicolonContent(false);
 
-		this.handlerMapping.setUrlPathHelper(urlPathHelper );
+		this.handlerMapping.setUrlPathHelper(urlPathHelper);
 
 		request = new MockHttpServletRequest();
 		handleMatch(request, "/path{filter}", "/path;mvar=a%2fb");

@@ -260,7 +260,7 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 		}
 		if (jsonpFunction != null) {
 			generator.writeRaw("/**/");
-			generator.writeRaw(jsonpFunction + "(" );
+			generator.writeRaw(jsonpFunction + "(");
 		}
 	}
 
