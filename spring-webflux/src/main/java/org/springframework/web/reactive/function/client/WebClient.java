@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -286,15 +286,6 @@ public interface WebClient {
 		Builder filters(Consumer<List<ExchangeFilterFunction>> filtersConsumer);
 
 		/**
-		 * Configure the {@link ExchangeStrategies} to use.
-		 * <p>By default {@link ExchangeStrategies#withDefaults()} is used.
-		 * @param strategies the strategies to use
-		 * @see #clientConnector(ClientHttpConnector)
-		 * @see #exchangeFunction(ExchangeFunction)
-		 */
-		Builder exchangeStrategies(ExchangeStrategies strategies);
-
-		/**
 		 * Provide a pre-configured {@link ExchangeFunction} instance. This is
 		 * an alternative to and effectively overrides the following:
 		 * <ul>
@@ -306,6 +297,15 @@ public interface WebClient {
 		 * @see #exchangeStrategies(ExchangeStrategies)
 		 */
 		Builder exchangeFunction(ExchangeFunction exchangeFunction);
+
+		/**
+		 * Configure the {@link ExchangeStrategies} to use.
+		 * <p>By default {@link ExchangeStrategies#withDefaults()} is used.
+		 * @param strategies the strategies to use
+		 * @see #clientConnector(ClientHttpConnector)
+		 * @see #exchangeFunction(ExchangeFunction)
+		 */
+		Builder exchangeStrategies(ExchangeStrategies strategies);
 
 		/**
 		 * Clone this {@code WebClient.Builder}

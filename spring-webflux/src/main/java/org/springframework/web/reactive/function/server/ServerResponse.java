@@ -56,8 +56,6 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public interface ServerResponse {
 
-	// Instance methods
-
 	/**
 	 * Return the status code of this response.
 	 */
@@ -82,7 +80,7 @@ public interface ServerResponse {
 	Mono<Void> writeTo(ServerWebExchange exchange, Context context);
 
 
-	// Static builder methods
+	// Static methods
 
 	/**
 	 * Create a builder with the status code and headers of the given response.
@@ -190,7 +188,6 @@ public interface ServerResponse {
 
 	/**
 	 * Create a builder with a {@linkplain HttpStatus#NOT_FOUND 404 Not Found} status.
-	 *
 	 * @return the created builder
 	 */
 	static HeadersBuilder<?> notFound() {

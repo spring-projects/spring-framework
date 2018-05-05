@@ -63,10 +63,10 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	@Nullable
 	private ClientHttpConnector connector;
 
-	private ExchangeStrategies exchangeStrategies;
-
 	@Nullable
 	private ExchangeFunction exchangeFunction;
+
+	private ExchangeStrategies exchangeStrategies;
 
 
 	public DefaultWebClientBuilder() {
@@ -91,8 +91,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 				new LinkedMultiValueMap<>(other.defaultCookies) : null);
 		this.filters = (other.filters != null ? new ArrayList<>(other.filters) : null);
 		this.connector = other.connector;
-		this.exchangeStrategies = other.exchangeStrategies;
 		this.exchangeFunction = other.exchangeFunction;
+		this.exchangeStrategies = other.exchangeStrategies;
 	}
 
 
@@ -182,15 +182,15 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	@Override
-	public WebClient.Builder exchangeStrategies(ExchangeStrategies strategies) {
-		Assert.notNull(strategies, "ExchangeStrategies must not be null");
-		this.exchangeStrategies = strategies;
+	public WebClient.Builder exchangeFunction(ExchangeFunction exchangeFunction) {
+		this.exchangeFunction = exchangeFunction;
 		return this;
 	}
 
 	@Override
-	public WebClient.Builder exchangeFunction(ExchangeFunction exchangeFunction) {
-		this.exchangeFunction = exchangeFunction;
+	public WebClient.Builder exchangeStrategies(ExchangeStrategies strategies) {
+		Assert.notNull(strategies, "ExchangeStrategies must not be null");
+		this.exchangeStrategies = strategies;
 		return this;
 	}
 
@@ -242,7 +242,6 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		else if (this.connector != null) {
 			return ExchangeFunctions.create(this.connector, this.exchangeStrategies);
 		}
-
 		else {
 			return ExchangeFunctions.create(new ReactorClientHttpConnector(), this.exchangeStrategies);
 		}
