@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,16 +59,16 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 
 
 	@Override
-	protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response,
-			Object handler, Exception ex) {
+	protected ModelAndView doResolveException(
+			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
 
-		ResponseStatus responseStatus = AnnotatedElementUtils.findMergedAnnotation(ex.getClass(), ResponseStatus.class);
-		if (responseStatus != null) {
+		ResponseStatus status = AnnotatedElementUtils.findMergedAnnotation(ex.getClass(), ResponseStatus.class);
+		if (status != null) {
 			try {
-				return resolveResponseStatus(responseStatus, request, response, handler, ex);
+				return resolveResponseStatus(status, request, response, handler, ex);
 			}
 			catch (Exception resolveEx) {
-				logger.warn("Handling of @ResponseStatus resulted in Exception", resolveEx);
+				logger.warn("ResponseStatus handling resulted in exception", resolveEx);
 			}
 		}
 		else if (ex.getCause() instanceof Exception) {
@@ -79,7 +79,7 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 	}
 
 	/**
-	 * Template method that handles {@link ResponseStatus @ResponseStatus} annotation.
+	 * Template method that handles the {@link ResponseStatus @ResponseStatus} annotation.
 	 * <p>The default implementation sends a response error using
 	 * {@link HttpServletResponse#sendError(int)} or
 	 * {@link HttpServletResponse#sendError(int, String)} if the annotation has a
@@ -88,11 +88,9 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler the executed handler, or {@code null} if none chosen at the
-	 * time of the exception (for example, if multipart resolution failed)
-	 * @param ex the exception that got thrown during handler execution or the
-	 * exception that has the ResponseStatus annotation if found on the cause.
-	 * @return a corresponding ModelAndView to forward to, or {@code null}
-	 * for default processing
+	 * time of the exception, e.g. if multipart resolution failed
+	 * @param ex the exception
+	 * @return an empty ModelAndView, i.e. exception resolved
 	 */
 	protected ModelAndView resolveResponseStatus(ResponseStatus responseStatus, HttpServletRequest request,
 			HttpServletResponse response, Object handler, Exception ex) throws Exception {
