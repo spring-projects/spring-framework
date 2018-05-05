@@ -73,7 +73,7 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 				logger.warn("Message headers contain two values for the same header '" + name + "', " +
 						"one in the top level header map and a second in the nested map with native headers. " +
 						"Using the value from top level map. " +
-						"Use 'nativeHeader.myHeader' to resolve to the value from the nested native header map." );
+						"Use 'nativeHeader.myHeader' to resolve to the value from the nested native header map.");
 			}
 		}
 

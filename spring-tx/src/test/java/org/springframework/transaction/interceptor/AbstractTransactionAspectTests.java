@@ -406,7 +406,7 @@ public abstract class AbstractTransactionAspectTests {
 		}
 		catch (Throwable t) {
 			if (rollbackException) {
-				assertEquals("Caught wrong exception", tex, t );
+				assertEquals("Caught wrong exception", tex, t);
 			}
 			else {
 				assertEquals("Caught wrong exception", ex, t);

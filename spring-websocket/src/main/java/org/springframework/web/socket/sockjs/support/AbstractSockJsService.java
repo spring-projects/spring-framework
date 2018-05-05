@@ -89,7 +89,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 	private long heartbeatTime = TimeUnit.SECONDS.toMillis(25);
 
-	private long disconnectDelay = TimeUnit.SECONDS.toMillis(5 );
+	private long disconnectDelay = TimeUnit.SECONDS.toMillis(5);
 
 	private int httpMessageCacheSize = 100;
 
