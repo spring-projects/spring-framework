@@ -2448,8 +2448,8 @@ in `@ControllerAdvice` classes to apply them globally.
 ====
 Note that Spring WebFlux does not have an equivalent for the Spring MVC
 `ResponseEntityExceptionHandler` because WebFlux only raises `ResponseStatusException`
-(or sub-classes of), which and those do not need to be translated translation to an HTTP
-status code.
+(or subclasses thereof), which and those do not need to be translated translation to
+an HTTP status code.
 ====
 
 
