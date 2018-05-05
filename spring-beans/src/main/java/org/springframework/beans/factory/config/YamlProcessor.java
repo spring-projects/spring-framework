@@ -30,6 +30,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.MappingNode;
@@ -44,6 +45,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * Base class for YAML factories.
+ *
+ * <p>Requires SnakeYAML 1.18 or higher, as of Spring Framework 5.0.6.
  *
  * @author Dave Syer
  * @author Juergen Hoeller
@@ -144,9 +147,14 @@ public abstract class YamlProcessor {
 
 	/**
 	 * Create the {@link Yaml} instance to use.
+	 * <p>The default implementation sets the "allowDuplicateKeys" flag to {@code false},
+	 * enabling built-in duplicate key handling in SnakeYAML 1.18+.
+	 * @see LoaderOptions#setAllowDuplicateKeys(boolean)
 	 */
 	protected Yaml createYaml() {
-		return new Yaml(new StrictMapAppenderConstructor());
+		LoaderOptions options = new LoaderOptions();
+		options.setAllowDuplicateKeys(false);
+		return new Yaml(options);
 	}
 
 	private boolean process(MatchCallback callback, Yaml yaml, Resource resource) {
@@ -393,7 +401,10 @@ public abstract class YamlProcessor {
 
 	/**
 	 * A specialized {@link Constructor} that checks for duplicate keys.
+	 * @deprecated as of Spring Framework 5.0.6 (not used anymore here),
+	 * superseded by SnakeYAML's own duplicate key handling
 	 */
+	@Deprecated
 	protected static class StrictMapAppenderConstructor extends Constructor {
 
 		// Declared as public for use in subclasses
