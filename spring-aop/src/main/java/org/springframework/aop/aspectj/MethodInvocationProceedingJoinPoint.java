@@ -62,7 +62,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 
 	/** Lazily initialized signature object */
 	@Nullable
-	private Signature signature;
+	private MethodSignature signature;
 
 	/** Lazily initialized source location object */
 	@Nullable
@@ -129,7 +129,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	}
 
 	@Override
-	public Signature getSignature() {
+	public MethodSignature getSignature() {
 		if (this.signature == null) {
 			this.signature = new MethodSignatureImpl();
 		}
