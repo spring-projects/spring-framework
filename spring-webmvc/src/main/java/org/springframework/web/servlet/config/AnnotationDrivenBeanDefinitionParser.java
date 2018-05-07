@@ -63,8 +63,6 @@ import org.springframework.util.xml.DomUtils;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
@@ -115,10 +113,10 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  *
  * <p>This class registers the following {@link HandlerExceptionResolver}s:
  * <ul>
- * <li>{@link ExceptionHandlerExceptionResolver} for handling exceptions
- * through @{@link ExceptionHandler} methods.
+ * <li>{@link ExceptionHandlerExceptionResolver} for handling exceptions through
+ * {@link org.springframework.web.bind.annotation.ExceptionHandler} methods.
  * <li>{@link ResponseStatusExceptionResolver} for exceptions annotated
- * with @{@link ResponseStatus}.
+ * with {@link org.springframework.web.bind.annotation.ResponseStatus}.
  * <li>{@link DefaultHandlerExceptionResolver} for resolving known Spring
  * exception types
  * </ul>

@@ -481,7 +481,6 @@ initialization parameters ( `init-param` elements) to the Servlet declaration in
   Note that if <<mvc-default-servlet-handler,default servlet handling>>  is
   also configured, then unresolved requests are always forwarded to the default servlet
   and a 404 would never be raised.
-
 |===
 
 
@@ -2830,22 +2829,75 @@ controller-specific ``Formatter``'s:
 		public ResponseEntity<String> handle(IOException ex) {
 			// ...
 		}
-
 	}
 ----
 
-The annotation can list the exception types to match. Or simply declare the target
-exception as a method argument as shown above. When multiple exception methods match,
-a root exception match is generally preferred to a cause exception match. More formally
-the `ExceptionDepthComparator` is used to sort exceptions based on their depth from the
-thrown exception type.
+The exception may match against a top-level exception being propagated (i.e. a direct
+`IOException` thrown), or against the immediate cause within a top-level wrapper exception
+(e.g. an `IOException` wrapped inside an `IllegalStateException`).
+
+For matching exception types, preferably declare the target exception as a method argument
+as shown above. When multiple exception methods match, a root exception match is generally
+preferred to a cause exception match. More specifically, the `ExceptionDepthComparator` is
+used to sort exceptions based on their depth from the thrown exception type.
+
+Alternatively, the annotation declaration may narrow the exception types to match:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@ExceptionHandler({FileSystemException.class, RemoteException.class})
+	public ResponseEntity<String> handle(IOException ex) {
+		// ...
+	}
+----
+
+Or even a list of specific exception types with a very generic argument signature:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@ExceptionHandler({FileSystemException.class, RemoteException.class})
+	public ResponseEntity<String> handle(Exception ex) {
+		// ...
+	}
+----
+
+[NOTE]
+====
+The distinction between root and cause exception matching can be surprising:
+
+In the `IOException` variant above, the method will typically be called with
+the actual `FileSystemException` or `RemoteException` instance as the argument
+since both of them extend from `IOException`. However, if any such matching
+exception is propagated within a wrapper exception which is an `IOException`
+itself, the passed-in exception instance will be that wrapper exception.
+
+The behavior is even simpler in the `handle(Exception)` variant: This will
+always be invoked with the wrapper exception in a wrapping scenario, with the
+actually matching exception to be found through `ex.getCause()` in that case.
+The passed-in exception will only be the actual `FileSystemException` or
+`RemoteException` instance when these are thrown as top-level exceptions.
+====
+
+We generally recommend to be as specific as possible in the argument signature,
+reducing the potential for mismatches between root and cause exception types.
+Consider breaking a multi-matching method into individual `@ExceptionHandler`
+methods, each matching a single specific exception type through its signature.
 
 In a multi-`@ControllerAdvice` arrangement, please declare your primary root exception
 mappings on a `@ControllerAdvice` prioritized with a corresponding order. While a root
-exception match is preferred to a cause, this is mainly among the methods of a given
-controller or `@ControllerAdvice`. That means a cause match on a higher-priority
-`@ControllerAdvice` is preferred to any match (e.g. root) on a lower-priority
-`@ControllerAdvice`.
+exception match is preferred to a cause, this is defined among the methods of a given
+controller or `@ControllerAdvice` class. This means a cause match on a higher-priority
+`@ControllerAdvice` bean is preferred to any match (e.g. root) on a lower-priority
+`@ControllerAdvice` bean.
+
+Last but not least, an `@ExceptionHandler` method implementation may choose to back
+out of dealing with a given exception instance by rethrowing it in its original form.
+This is useful in scenarios where you are only interested in root-level matches or in
+matches within a specific context that cannot be statically determined. A rethrown
+exception will be propagated through the remaining resolution chain, just like if
+the given `@ExceptionHandler` method would not have matched in the first place.
 
 Support for `@ExceptionHandler` methods in Spring MVC is built on the `DispatcherServlet`
 level, <<mvc-exceptionhandlers,HandlerExceptionResolver>> mechanism.
