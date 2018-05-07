@@ -28,7 +28,7 @@ dependencies {
 	optional("javax.activation:activation:1.1.1")
 	optional("javax.el:javax.el-api:3.0.1-b04")
 	optional("javax.inject:javax.inject:1")
-	optional("javax.servlet:javax.servlet-api:4.0.0")
+	optional("javax.servlet:javax.servlet-api:4.0.1")
 	optional("javax.servlet.jsp:javax.servlet.jsp-api:2.3.2-b02")
 	optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
 	optional("javax.xml.bind:jaxb-api:2.3.0")
