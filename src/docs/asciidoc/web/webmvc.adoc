@@ -469,6 +469,19 @@ initialization parameters ( `init-param` elements) to the Servlet declaration in
 
 | `namespace`
 | Namespace of the `WebApplicationContext`. Defaults to `[servlet-name]-servlet`.
+
+| `throwExceptionIfNoHandlerFound`
+| Whether to throw a `NoHandlerFoundException` when no handler was found for a request.
+  The exception can then be caught with a `HandlerExceptionResolver`, e.g. via an
+  `@ExceptionHandler` controller method, and handled as any others.
+
+  By default this is set to "false", in which case the `DispatcherServlet` sets the
+  response status to 404 (NOT_FOUND) without raising an exception.
+
+  Note that if <<mvc-default-servlet-handler,default servlet handling>>  is
+  also configured, then unresolved requests are always forwarded to the default servlet
+  and a 404 would never be raised.
+
 |===
 
 
