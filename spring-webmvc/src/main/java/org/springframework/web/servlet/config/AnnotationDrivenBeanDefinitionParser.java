@@ -121,7 +121,8 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * <li>the {@link HandlerMapping} for ViewControllers
  * <li>and the {@link HandlerMapping} for serving resources
  * </ul>
- * Note that those beans can be configured by using the {@code path-matching} MVC namespace element.
+ * Note that those beans can be configured by using the {@code path-matching}
+ * MVC namespace element.
  *
  * <p>Both the {@link RequestMappingHandlerAdapter} and the
  * {@link ExceptionHandlerExceptionResolver} are configured with instances of
@@ -131,7 +132,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * <li>A {@link DefaultFormattingConversionService}
  * <li>A {@link org.springframework.validation.beanvalidation.LocalValidatorFactoryBean}
  * if a JSR-303 implementation is available on the classpath
- * <li>A range of {@link HttpMessageConverter}s depending on what 3rd party
+ * <li>A range of {@link HttpMessageConverter}s depending on which third-party
  * libraries are available on the classpath.
  * </ul>
  *
@@ -265,22 +266,23 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		handlerAdapterDef.getPropertyValues().add("deferredResultInterceptors", deferredResultInterceptors);
 		readerContext.getRegistry().registerBeanDefinition(HANDLER_ADAPTER_BEAN_NAME , handlerAdapterDef);
 
-		String uriCompContribName = MvcUriComponentsBuilder.MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME;
-		RootBeanDefinition uriCompContribDef = new RootBeanDefinition(CompositeUriComponentsContributorFactoryBean.class);
-		uriCompContribDef.setSource(source);
-		uriCompContribDef.getPropertyValues().addPropertyValue("handlerAdapter", handlerAdapterDef);
-		uriCompContribDef.getPropertyValues().addPropertyValue("conversionService", conversionService);
-		readerContext.getRegistry().registerBeanDefinition(uriCompContribName, uriCompContribDef);
+		RootBeanDefinition uriContributorDef =
+				new RootBeanDefinition(CompositeUriComponentsContributorFactoryBean.class);
+		uriContributorDef.setSource(source);
+		uriContributorDef.getPropertyValues().addPropertyValue("handlerAdapter", handlerAdapterDef);
+		uriContributorDef.getPropertyValues().addPropertyValue("conversionService", conversionService);
+		String uriContributorName = MvcUriComponentsBuilder.MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME;
+		readerContext.getRegistry().registerBeanDefinition(uriContributorName, uriContributorDef);
 
 		RootBeanDefinition csInterceptorDef = new RootBeanDefinition(ConversionServiceExposingInterceptor.class);
 		csInterceptorDef.setSource(source);
 		csInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0, conversionService);
-		RootBeanDefinition mappedCsInterceptorDef = new RootBeanDefinition(MappedInterceptor.class);
-		mappedCsInterceptorDef.setSource(source);
-		mappedCsInterceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		mappedCsInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0, (Object) null);
-		mappedCsInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(1, csInterceptorDef);
-		String mappedInterceptorName = readerContext.registerWithGeneratedName(mappedCsInterceptorDef);
+		RootBeanDefinition mappedInterceptorDef = new RootBeanDefinition(MappedInterceptor.class);
+		mappedInterceptorDef.setSource(source);
+		mappedInterceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0, (Object) null);
+		mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(1, csInterceptorDef);
+		String mappedInterceptorName = readerContext.registerWithGeneratedName(mappedInterceptorDef);
 
 		RootBeanDefinition methodExceptionResolver = new RootBeanDefinition(ExceptionHandlerExceptionResolver.class);
 		methodExceptionResolver.setSource(source);
@@ -386,7 +388,6 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			factoryBeanDef.setSource(source);
 			factoryBeanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			factoryBeanDef.getPropertyValues().add("mediaTypes", getDefaultMediaTypes());
-
 			String name = CONTENT_NEGOTIATION_MANAGER_BEAN_NAME;
 			parserContext.getReaderContext().getRegistry().registerBeanDefinition(name , factoryBeanDef);
 			parserContext.registerComponent(new BeanComponentDefinition(factoryBeanDef, name));
@@ -401,6 +402,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		Element pathMatchingElement = DomUtils.getChildElementByTagName(element, "path-matching");
 		if (pathMatchingElement != null) {
 			Object source = parserContext.extractSource(element);
+
 			if (pathMatchingElement.hasAttribute("suffix-pattern")) {
 				Boolean useSuffixPatternMatch = Boolean.valueOf(pathMatchingElement.getAttribute("suffix-pattern"));
 				handlerMappingDef.getPropertyValues().add("useSuffixPatternMatch", useSuffixPatternMatch);
@@ -413,6 +415,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 				Boolean useRegisteredSuffixPatternMatch = Boolean.valueOf(pathMatchingElement.getAttribute("registered-suffixes-only"));
 				handlerMappingDef.getPropertyValues().add("useRegisteredSuffixPatternMatch", useRegisteredSuffixPatternMatch);
 			}
+
 			RuntimeBeanReference pathHelperRef = null;
 			if (pathMatchingElement.hasAttribute("path-helper")) {
 				pathHelperRef = new RuntimeBeanReference(pathMatchingElement.getAttribute("path-helper"));
@@ -430,18 +433,18 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	private Properties getDefaultMediaTypes() {
-		Properties props = new Properties();
+		Properties defaultMediaTypes = new Properties();
 		if (romePresent) {
-			props.put("atom", MediaType.APPLICATION_ATOM_XML_VALUE);
-			props.put("rss", MediaType.APPLICATION_RSS_XML_VALUE);
+			defaultMediaTypes.put("atom", MediaType.APPLICATION_ATOM_XML_VALUE);
+			defaultMediaTypes.put("rss", MediaType.APPLICATION_RSS_XML_VALUE);
 		}
 		if (jaxb2Present || jackson2XmlPresent) {
-			props.put("xml", MediaType.APPLICATION_XML_VALUE);
+			defaultMediaTypes.put("xml", MediaType.APPLICATION_XML_VALUE);
 		}
 		if (jackson2Present || gsonPresent) {
-			props.put("json", MediaType.APPLICATION_JSON_VALUE);
+			defaultMediaTypes.put("json", MediaType.APPLICATION_JSON_VALUE);
 		}
-		return props;
+		return defaultMediaTypes;
 	}
 
 	private RuntimeBeanReference getMessageCodesResolver(Element element) {
