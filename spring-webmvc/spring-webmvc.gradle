@@ -13,7 +13,7 @@ dependencyManagement {
 }
 
 dependencies {
-	provided("javax.servlet:javax.servlet-api:4.0.0")
+	provided("javax.servlet:javax.servlet-api:4.0.1")
 	compile(project(":spring-aop"))
 	compile(project(":spring-beans"))
 	compile(project(":spring-context"))
@@ -47,7 +47,7 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	optional("org.reactivestreams:reactive-streams")
-	testCompile("javax.servlet:javax.servlet-api:4.0.0")
+	testCompile("javax.servlet:javax.servlet-api:4.0.1")
 	testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}") {
 		exclude group: "javax.servlet", module: "javax.servlet"
 	}
