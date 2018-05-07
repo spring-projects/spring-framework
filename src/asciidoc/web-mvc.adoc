@@ -3975,11 +3975,11 @@ especially when relying on `@ResponseBody` methods rather than on view resolutio
 may be more convenient to directly set the status of the response and optionally write
 error content to the body of the response.
 
-You can do that with `@ExceptionHandler` methods. When declared within a controller such
-methods apply to exceptions raised by `@RequestMapping` methods of that controller (or
-any of its subclasses). You can also declare an `@ExceptionHandler` method within an
-`@ControllerAdvice` class in which case it handles exceptions from `@RequestMapping`
-methods from many controllers. Below is an example of a controller-local
+You can do that with `@ExceptionHandler` methods. When declared within a controller,
+such methods apply to exceptions raised by `@RequestMapping` methods of that controller
+(or any of its subclasses). You can also declare an `@ExceptionHandler` method within
+an `@ControllerAdvice` class in which case it handles exceptions from `@RequestMapping`
+methods from many controllers. Below is an example for a controller-local
 `@ExceptionHandler` method:
 
 [source,java,indent=0]
@@ -3988,21 +3988,28 @@ methods from many controllers. Below is an example of a controller-local
 	@Controller
 	public class SimpleController {
 
-		// @RequestMapping methods omitted ...
+		// ...
 
-		@ExceptionHandler(IOException.class)
-		public ResponseEntity<String> handleIOException(IOException ex) {
-			// prepare responseEntity
-			return responseEntity;
+		@ExceptionHandler
+		public ResponseEntity<String> handle(IOException ex) {
+			// ...
 		}
-
 	}
 ----
 
-The `@ExceptionHandler` value can be set to an array of Exception types. If an exception
-is thrown that matches one of the types in the list, then the method annotated with the
-matching `@ExceptionHandler` will be invoked. If the annotation value is not set then
-the exception types listed as method arguments are used.
+The exception may match against a top-level exception being propagated (i.e. a direct
+`IOException` thrown), or against the immediate cause within a top-level wrapper exception
+(e.g. an `IOException` wrapped inside an `IllegalStateException`).
+
+For matching exception types, preferably declare the target exception as a method argument
+as shown above. When multiple exception methods match, a root exception match is generally
+preferred to a cause exception match. More specifically, the `ExceptionDepthComparator` is
+used to sort exceptions based on their depth from the thrown exception type.
+
+Alternatively, the `@ExceptionHandler` value can be set to an array of exception types.
+If an exception is thrown that matches one of the types in the list, then the method
+annotated with the matching `@ExceptionHandler` will be invoked. If the annotation value
+is not set, then the declared method parameter type will be used for matching.
 
 [TIP]
 ====
@@ -4014,18 +4021,26 @@ advice bean. As a consequence, when using a multi-advice arrangement, please dec
 primary root exception mappings on a prioritized advice bean with a corresponding order!
 ====
 
-Much like standard controller methods annotated with a `@RequestMapping` annotation, the
-method arguments and return values of `@ExceptionHandler` methods can be flexible. For
-example, the `HttpServletRequest` can be accessed in Servlet environments and the
+Much like standard controller methods annotated with a `@RequestMapping` annotation,
+the method arguments and return values of `@ExceptionHandler` methods can be flexible.
+For example, the `HttpServletRequest` can be accessed in Servlet environments and the
 `PortletRequest` in Portlet environments. The return type can be a `String`, which is
 interpreted as a view name, a `ModelAndView` object, a `ResponseEntity`, or you can also
 add the `@ResponseBody` to have the method return value converted with message
 converters and written to the response stream.
 
+Last but not least, an `@ExceptionHandler` method implementation may choose to back
+out of dealing with a given exception instance by rethrowing it in its original form.
+This is useful in scenarios where you are only interested in root-level matches or in
+matches within a specific context that cannot be statically determined. A rethrown
+exception will be propagated through the remaining resolution chain, just like if
+the given `@ExceptionHandler` method would not have matched in the first place.
+
 
 
 [[mvc-ann-rest-spring-mvc-exceptions]]
 === Handling Standard Spring MVC Exceptions
+
 Spring MVC may raise a number of exceptions while processing a request. The
 `SimpleMappingExceptionResolver` can easily map any exception to a default error view as
 needed. However, when working with clients that interpret responses in an automated way
