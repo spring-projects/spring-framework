@@ -2406,31 +2406,29 @@ controller-specific ``Formatter``'s:
 		public ResponseEntity<String> handle(IOException ex) {
 			// ...
 		}
-
 	}
 ----
 
-The annotation can list the exception types to match. Or simply declare the target
-exception as a method argument as shown above. When multiple exception methods match,
-a root exception match is generally preferred to a cause exception match. More formally
-the `ExceptionDepthComparator` is used to sort exceptions based on their depth from the
-thrown exception type.
+The exception may match against a top-level exception being propagated (i.e. a direct
+`IOException` thrown), or against the immediate cause within a top-level wrapper exception
+(e.g. an `IOException` wrapped inside an `IllegalStateException`).
 
-In a multi-`@ControllerAdvice` arrangement, please declare your primary root exception
-mappings on a `@ControllerAdvice` prioritized with a corresponding order. While a root
-exception match is preferred to a cause, this is mainly among the methods of a given
-controller or `@ControllerAdvice`. That means a cause match on a higher-priority
-`@ControllerAdvice` is preferred to any match (e.g. root) on a lower-priority
-`@ControllerAdvice`.
+For matching exception types, preferably declare the target exception as a method argument
+as shown above. Alternatively, the annotation declaration may narrow the exception types to
+match. We generally recommend to be as specific as possible in the argument signature and to
+declare your primary root exception mappings on a `@ControllerAdvice` prioritized with a
+corresponding order. See <<web.adoc#mvc-ann-exceptionhandler,the MVC section>> for details.
+
+[NOTE]
+====
+An `@ExceptionHandler` method in WebFlux supports the same method arguments and
+return values as an `@RequestMapping` method, with the exception of request body
+and `@ModelAttribute` related method arguments.
+====
 
 Support for `@ExceptionHandler` methods in Spring WebFlux is provided by the
 `HandlerAdapter` for `@RequestMapping` methods. See <<webflux-dispatcher-exceptions>>
 under the `DispatcherHandler` section for more details.
-
-
-An `@ExceptionHandler` method in WebFlux supports the same method arguments and return
-values as an `@RequestMapping` method does with the exception of request body and
-`@ModelAttribute` related method arguments.
 
 
 [[webflux-ann-rest-exceptions]]

@@ -27,7 +27,6 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
@@ -60,13 +59,10 @@ import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
@@ -117,10 +113,10 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  *
  * <p>This class registers the following {@link HandlerExceptionResolver}s:
  * <ul>
- * <li>{@link ExceptionHandlerExceptionResolver} for handling exceptions
- * through @{@link ExceptionHandler} methods.
+ * <li>{@link ExceptionHandlerExceptionResolver} for handling exceptions through
+ * {@link org.springframework.web.bind.annotation.ExceptionHandler} methods.
  * <li>{@link ResponseStatusExceptionResolver} for exceptions annotated
- * with @{@link ResponseStatus}.
+ * with {@link org.springframework.web.bind.annotation.ResponseStatus}.
  * <li>{@link DefaultHandlerExceptionResolver} for resolving known Spring
  * exception types
  * </ul>
@@ -663,27 +659,6 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		}
 		return list;
 	}
-
-    private ManagedList<BeanReference> extractBeanRefSubElements(Element parentElement, ParserContext parserContext){
-        ManagedList<BeanReference> list = new ManagedList<>();
-        list.setSource(parserContext.extractSource(parentElement));
-        for (Element refElement : DomUtils.getChildElementsByTagName(parentElement, "ref")) {
-            BeanReference reference;
-            if (StringUtils.hasText("bean")) {
-                reference = new RuntimeBeanReference(refElement.getAttribute("bean"),false);
-                list.add(reference);
-            }
-			else if (StringUtils.hasText("parent")){
-                reference = new RuntimeBeanReference(refElement.getAttribute("parent"),true);
-                list.add(reference);
-            }
-			else {
-                parserContext.getReaderContext().error("'bean' or 'parent' attribute is required for <ref> element",
-                        parserContext.extractSource(parentElement));
-            }
-        }
-        return list;
-    }
 
 
 	/**

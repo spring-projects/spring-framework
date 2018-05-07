@@ -67,8 +67,6 @@ import org.springframework.validation.Validator;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.cors.CorsConfiguration;
@@ -136,10 +134,10 @@ import org.springframework.web.util.UrlPathHelper;
  * <p>Registers a {@link HandlerExceptionResolverComposite} with this chain of
  * exception resolvers:
  * <ul>
- * <li>{@link ExceptionHandlerExceptionResolver} for handling exceptions
- * through @{@link ExceptionHandler} methods.
- * <li>{@link ResponseStatusExceptionResolver} for exceptions annotated
- * with @{@link ResponseStatus}.
+ * <li>{@link ExceptionHandlerExceptionResolver} for handling exceptions through
+ * {@link org.springframework.web.bind.annotation.ExceptionHandler} methods.
+ * <li>{@link ResponseStatusExceptionResolver} for exceptions annotated with
+ * {@link org.springframework.web.bind.annotation.ResponseStatus}.
  * <li>{@link DefaultHandlerExceptionResolver} for resolving known Spring
  * exception types
  * </ul>
@@ -926,12 +924,11 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * A method available to subclasses for adding default {@link HandlerExceptionResolver}s.
 	 * <p>Adds the following exception resolvers:
 	 * <ul>
-	 * <li>{@link ExceptionHandlerExceptionResolver}
-	 * for handling exceptions through @{@link ExceptionHandler} methods.
-	 * <li>{@link ResponseStatusExceptionResolver}
-	 * for exceptions annotated with @{@link ResponseStatus}.
-	 * <li>{@link DefaultHandlerExceptionResolver}
-	 * for resolving known Spring exception types
+	 * <li>{@link ExceptionHandlerExceptionResolver} for handling exceptions through
+	 * {@link org.springframework.web.bind.annotation.ExceptionHandler} methods.
+	 * <li>{@link ResponseStatusExceptionResolver} for exceptions annotated with
+	 * {@link org.springframework.web.bind.annotation.ResponseStatus}.
+	 * <li>{@link DefaultHandlerExceptionResolver} for resolving known Spring exception types
 	 * </ul>
 	 */
 	protected final void addDefaultHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
