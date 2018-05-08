@@ -28,6 +28,7 @@ import java.net.URLConnection;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.Base64Utils;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
@@ -37,6 +38,7 @@ import org.springframework.util.StringUtils;
  * case of the {@code "file:"} protocol.
  *
  * @author Juergen Hoeller
+ * @author Denis Kostin
  * @since 28.12.2003
  * @see java.net.URL
  */
@@ -167,6 +169,12 @@ public class UrlResource extends AbstractFileResolvingResource {
 	public InputStream getInputStream() throws IOException {
 		URLConnection con = this.url.openConnection();
 		ResourceUtils.useCachesIfNecessary(con);
+
+		if (this.url.getUserInfo() != null) {
+			String basicAuth = "Basic " + new String(Base64Utils.encode(url.getUserInfo().getBytes()));
+			con.setRequestProperty("Authorization", basicAuth);
+		}
+
 		try {
 			return con.getInputStream();
 		}
