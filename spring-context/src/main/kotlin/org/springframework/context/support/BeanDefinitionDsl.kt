@@ -232,6 +232,17 @@ open class BeanDefinitionDsl(private val condition: (ConfigurableEnvironment) ->
 		null -> context.getBean(T::class.java)
 		else -> context.getBean(name, T::class.java)
 	}
+		
+	/**
+	 * Get references to the all available beans for a given type with the syntax
+	 * `refAll<Foo>()`.
+	 * @param T type the beans must match, can be an interface or superclass
+	 * @return a Map with the matching beans, containing the bean names as
+	 * keys and the corresponding bean instances as values
+	 */
+	inline fun <reified T : Any> refAll() : Map<String, T> {
+		return context.getBeansOfType(T::class.java)
+	}
 
 	/**
 	 * Take in account bean definitions enclosed in the provided lambda only when the
