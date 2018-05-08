@@ -31,6 +31,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.Base64Utils;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
@@ -41,6 +42,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Denis Kostin
  * @since 28.12.2003
  * @see java.net.URL
  */
@@ -225,6 +227,11 @@ public class UrlResource extends AbstractFileResolvingResource {
 	public InputStream getInputStream() throws IOException {
 		URLConnection con = this.url.openConnection();
 		customizeConnection(con);
+
+		if (this.url.getUserInfo() != null) {
+			String basicAuth = "Basic " + Base64Utils.encodeToString(url.getUserInfo().getBytes());
+			con.setRequestProperty("Authorization", basicAuth);
+		}
 		try {
 			return con.getInputStream();
 		}
