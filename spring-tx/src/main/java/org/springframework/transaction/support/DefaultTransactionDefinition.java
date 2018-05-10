@@ -119,7 +119,11 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 		if (!constantName.startsWith(PREFIX_PROPAGATION)) {
 			throw new IllegalArgumentException("Only propagation constants allowed");
 		}
-		setPropagationBehavior(constants.asNumber(constantName).intValue());
+		internalSetPropagationBehavior(constants.asNumber(constantName).intValue());
+	}
+	
+	private void internalSetPropagationBehavior(int propagationBehavior) {
+		this.propagationBehavior = propagationBehavior;
 	}
 
 	/**
@@ -162,7 +166,11 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 		if (!constantName.startsWith(PREFIX_ISOLATION)) {
 			throw new IllegalArgumentException("Only isolation constants allowed");
 		}
-		setIsolationLevel(constants.asNumber(constantName).intValue());
+		internalSetIsolationLevel(constants.asNumber(constantName).intValue());
+	}
+	
+	private void internalSetIsolationLevel(int isolationLevel){
+		this.isolationLevel = isolationLevel;
 	}
 
 	/**
