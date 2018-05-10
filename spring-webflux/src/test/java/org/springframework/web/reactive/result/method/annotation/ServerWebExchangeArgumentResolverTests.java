@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ public class ServerWebExchangeArgumentResolverTests {
 
 
 	@Test
-	public void supportsParameter() throws Exception {
+	public void supportsParameter() {
 		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(ServerWebExchange.class)));
 		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(ServerHttpRequest.class)));
 		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(ServerHttpResponse.class)));
@@ -69,6 +69,7 @@ public class ServerWebExchangeArgumentResolverTests {
 		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(UriComponentsBuilder.class)));
 		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(UriBuilder.class)));
 
+		assertFalse(this.resolver.supportsParameter(this.testMethod.arg(WebSession.class)));
 		assertFalse(this.resolver.supportsParameter(this.testMethod.arg(String.class)));
 		try {
 			this.resolver.supportsParameter(this.testMethod.arg(Mono.class, ServerWebExchange.class));
@@ -82,7 +83,7 @@ public class ServerWebExchangeArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveArgument() throws Exception {
+	public void resolveArgument() {
 		testResolveArgument(this.testMethod.arg(ServerWebExchange.class), this.exchange);
 		testResolveArgument(this.testMethod.arg(ServerHttpRequest.class), this.exchange.getRequest());
 		testResolveArgument(this.testMethod.arg(ServerHttpResponse.class), this.exchange.getResponse());
@@ -97,7 +98,7 @@ public class ServerWebExchangeArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveUriComponentsBuilder() throws Exception {
+	public void resolveUriComponentsBuilder() {
 		MethodParameter param = this.testMethod.arg(UriComponentsBuilder.class);
 		Object value = this.resolver.resolveArgument(param, new BindingContext(), this.exchange).block();
 
