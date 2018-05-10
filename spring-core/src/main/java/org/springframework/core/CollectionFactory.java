@@ -16,6 +16,15 @@
 
 package org.springframework.core;
 
+import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableMultiset;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSortedMap;
+import com.google.common.collect.Iterables;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
@@ -36,6 +45,8 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import java.util.function.Consumer;
+import java.util.stream.StreamSupport;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -141,9 +152,12 @@ public abstract class CollectionFactory {
 	 * Create the most appropriate collection for the given collection type.
 	 * <p>Delegates to {@link #createCollection(Class, Class, int)} with a
 	 * {@code null} element type.
+	 * <p><strong>Warning</strong>: This method does not support the Guava {@link ImmutableCollection} types.
+	 * For those collection types see {@link #createCollectionOf(Class, Iterable)}
 	 * @param collectionType the desired type of the target collection; never {@code null}
 	 * @param capacity the initial capacity
 	 * @return a new collection instance
+	 * @see #createCollectionOf(Class, Iterable)
 	 * @throws IllegalArgumentException if the supplied {@code collectionType}
 	 * is {@code null} or of type {@link EnumSet}
 	 */
@@ -153,6 +167,8 @@ public abstract class CollectionFactory {
 
 	/**
 	 * Create the most appropriate collection for the given collection type.
+	 * <p><strong>Warning</strong>: This method does not support the Guava {@link ImmutableCollection} types.
+	 * For those collection types see {@link #createCollectionOf(Class, Iterable, Class)}
 	 * <p><strong>Warning</strong>: Since the parameterized type {@code E} is
 	 * not bound to the supplied {@code elementType}, type safety cannot be
 	 * guaranteed if the desired {@code collectionType} is {@link EnumSet}.
@@ -173,6 +189,7 @@ public abstract class CollectionFactory {
 	 * @throws IllegalArgumentException if the supplied {@code collectionType} is
 	 * {@code null}; or if the desired {@code collectionType} is {@link EnumSet} and
 	 * the supplied {@code elementType} is not a subtype of {@link Enum}
+	 * @see #createCollectionOf(Class, Iterable, Class)
 	 */
 	@SuppressWarnings({ "unchecked", "cast" })
 	public static <E> Collection<E> createCollection(Class<?> collectionType, @Nullable Class<?> elementType, int capacity) {
@@ -207,6 +224,144 @@ public abstract class CollectionFactory {
 				throw new IllegalArgumentException(
 					"Could not instantiate Collection type: " + collectionType.getName(), ex);
 			}
+		}
+	}
+
+	/**
+	 * Create the most appropriate collection for the given collection type and
+	 * populates the {@link Collection} with the provided set of {@code elements}.
+	 * The distinction between this method and {@link #createCollection(Class, int)}
+	 * is that this method support's the Guava {@link ImmutableCollection} types
+	 * since it is capable of populating the created {@link ImmutableCollection}.
+	 * The supported Guava types are {@link ImmutableCollection}, {@link ImmutableList}
+	 * {@link ImmutableSet} and {@link ImmutableMultiset}.
+	 * <p>Delegates to {@link #createCollection(Class, Class, int)} with a
+	 * {@code null} element type.
+	 * @param collectionType the desired type of the target collection; never {@code null}
+	 * @param elements the set of values to include in the created {@link Collection}, or {@code null}
+	 * no elements should be inserted
+	 * @return a new collection instance populated with {@code elements}
+	 * @throws IllegalArgumentException if the supplied {@code collectionType}
+	 * is {@code null} or of type {@link EnumSet}
+	 * @see ImmutableCollection
+	 * @see ImmutableList
+	 * @see ImmutableSet
+	 * @see ImmutableMultiset
+	 * @see #createCollection(Class, int)
+	 */
+	public static <C extends Collection<E>, E> C createCollectionOf(Class<?> collectionType,
+			@Nullable Iterable<? extends E> elements) {
+		return createCollectionOf(collectionType, elements, null);
+	}
+
+	/**
+	 * Create the most appropriate collection for the given collection type and
+	 * populates the {@link Collection} with the provided set of {@code elements}.
+	 * The distinction between this method and {@link #createCollection(Class, Class, int)}
+	 * is that this method support's the Guava {@link ImmutableCollection} types
+	 * since it is capable of populating the created {@link ImmutableCollection}.
+	 * The supported Guava types are {@link ImmutableCollection}, {@link ImmutableList}
+	 * {@link ImmutableSet} and {@link ImmutableMultiset}.
+	 * <p><strong>Warning</strong>: Since the parameterized type {@code E} is
+	 * not bound to the supplied {@code elementType}, type safety cannot be
+	 * guaranteed if the desired {@code collectionType} is {@link EnumSet}.
+	 * In such scenarios, the caller is responsible for ensuring that the
+	 * supplied {@code elementType} is an enum type matching type {@code E}.
+	 * As an alternative, the caller may wish to treat the return value as a
+	 * raw collection or collection of {@link Object}.
+	 * @param collectionType the desired type of the target collection; never {@code null}
+	 * @param elements the set of values to include in the created {@link Collection}, or {@code null}
+	 * no elements should be inserted
+	 * @param elementType the collection's element type, or {@code null} if unknown
+	 * (note: only relevant for {@link EnumSet} creation)
+	 * @return a new collection instance populated with {@code elements}
+	 * @see java.util.LinkedHashSet
+	 * @see java.util.ArrayList
+	 * @see java.util.TreeSet
+	 * @see java.util.EnumSet
+	 * @see ImmutableCollection
+	 * @see ImmutableList
+	 * @see ImmutableSet
+	 * @see ImmutableMultiset
+	 * @see #createCollection(Class, Class, int)
+	 * @throws IllegalArgumentException if the supplied {@code collectionType} is
+	 * {@code null}; or if the desired {@code collectionType} is {@link EnumSet} and
+	 * the supplied {@code elementType} is not a subtype of {@link Enum}
+	 */
+	@SuppressWarnings({"unchecked", "cast"})
+	public static <C extends Collection<E>, E> C createCollectionOf(Class<?> collectionType,
+			@Nullable Iterable<? extends E> elements,
+			@Nullable Class<?> elementType) {
+		int capacity = elements == null ? 0 : Iterables.size(elements);
+		Assert.notNull(collectionType, "Collection type must not be null");
+		if (collectionType.isInterface()) {
+			C resultCollection;
+			if (Set.class == collectionType || Collection.class == collectionType) {
+				resultCollection = (C) new LinkedHashSet<E>(capacity);
+			}
+			else if (List.class == collectionType) {
+				resultCollection = (C) new ArrayList<E>(capacity);
+			}
+			else if (SortedSet.class == collectionType || NavigableSet.class == collectionType) {
+				resultCollection = (C) new TreeSet<E>();
+			}
+			else {
+				throw new IllegalArgumentException(
+						"Unsupported Collection interface: " + collectionType.getName());
+			}
+			return addAllElements(elements, resultCollection);
+		}
+		else if (EnumSet.class == collectionType) {
+			Assert.notNull(elementType, "Cannot create EnumSet for unknown element type");
+			// Cast is necessary for compilation in Eclipse 4.4.1.
+			return addAllElements(elements, (C) EnumSet.noneOf(asEnumType(elementType)));
+		}
+		else if (ImmutableCollection.class.isAssignableFrom(collectionType)) {
+			ImmutableCollection.Builder<E> builder;
+			if (ImmutableCollection.class == collectionType
+					|| ImmutableList.class == collectionType) {
+				builder = ImmutableList.builder();
+			}
+			else if (ImmutableSet.class == collectionType) {
+				builder = ImmutableSet.builder();
+			}
+			else if (ImmutableMultiset.class == collectionType) {
+				builder = ImmutableMultiset.builder();
+			}
+			else {
+				throw new IllegalArgumentException(
+						"Unsupported ImmutableCollection interface: " + collectionType.getName());
+			}
+			nullableForEach(elements, builder::add);
+			return (C) builder.build();
+		}
+		else {
+			if (!Collection.class.isAssignableFrom(collectionType)) {
+				throw new IllegalArgumentException(
+						"Unsupported Collection type: " + collectionType.getName());
+			}
+			try {
+				return addAllElements(elements,
+						(C) ReflectionUtils.accessibleConstructor(collectionType).newInstance());
+			}
+			catch (Throwable ex) {
+				throw new IllegalArgumentException(
+						"Could not instantiate Collection type: " + collectionType.getName(), ex);
+			}
+		}
+	}
+
+	private static <C extends Collection<E>, E> C addAllElements(
+			@Nullable Iterable<? extends E> elements,
+			C collection) {
+		nullableForEach(elements, collection::add);
+		return collection;
+	}
+
+	private static <E> void nullableForEach(@Nullable Iterable<E> elements,
+			Consumer<E> consumer) {
+		if (elements != null) {
+			StreamSupport.stream(elements.spliterator(), false).forEach(consumer);
 		}
 	}
 
@@ -256,9 +411,12 @@ public abstract class CollectionFactory {
 	 * Create the most appropriate map for the given map type.
 	 * <p>Delegates to {@link #createMap(Class, Class, int)} with a
 	 * {@code null} key type.
+	 * <p><strong>Warning</strong>: This method does not support the Guava {@link ImmutableMap} types.
+	 * For those collection types see {@link #createMapOf(Class, Iterable)}
 	 * @param mapType the desired type of the target map
 	 * @param capacity the initial capacity
 	 * @return a new map instance
+	 * @see #createMapOf(Class, Iterable)
 	 * @throws IllegalArgumentException if the supplied {@code mapType} is
 	 * {@code null} or of type {@link EnumMap}
 	 */
@@ -268,6 +426,8 @@ public abstract class CollectionFactory {
 
 	/**
 	 * Create the most appropriate map for the given map type.
+	 * <p><strong>Warning</strong>: This method does not support the Guava {@link ImmutableMap} types.
+	 * For those collection types see {@link #createMapOf(Class, Iterable, Class)}
 	 * <p><strong>Warning</strong>: Since the parameterized type {@code K}
 	 * is not bound to the supplied {@code keyType}, type safety cannot be
 	 * guaranteed if the desired {@code mapType} is {@link EnumMap}. In such
@@ -286,6 +446,7 @@ public abstract class CollectionFactory {
 	 * @see java.util.TreeMap
 	 * @see org.springframework.util.LinkedMultiValueMap
 	 * @see java.util.EnumMap
+	 * @see #createMapOf(Class, Iterable, Class)
 	 * @throws IllegalArgumentException if the supplied {@code mapType} is
 	 * {@code null}; or if the desired {@code mapType} is {@link EnumMap} and
 	 * the supplied {@code keyType} is not a subtype of {@link Enum}
@@ -322,6 +483,132 @@ public abstract class CollectionFactory {
 				throw new IllegalArgumentException("Could not instantiate Map type: " + mapType.getName(), ex);
 			}
 		}
+	}
+
+	/**
+	 * Create the most appropriate map for the given map type and
+	 * populates the {@link Map} with the provided set of {@code elements}.
+	 * The distinction between this method and {@link #createMap(Class, int)}
+	 * is that this method support's the Guava {@link ImmutableMap} types
+	 * since it is capable of populating the created {@link ImmutableMap}.
+	 * The supported Guava types are  {@link ImmutableMap}, {@link ImmutableBiMap}, and
+	 * {@link ImmutableSortedMap}. Although {@link ImmutableSortedMap} is supported note that it is created with
+	 * natural order which may not be desired ordering.
+	 * <p>Delegates to {@link #createMapOf(Class, Iterable, Class)} with a
+	 * {@code null} key type.
+	 * @param mapType the desired type of the target map
+	 * @param elements the set of values to include in the created {@link Map}, or {@code null}
+	 * no elements should be inserted
+	 * @return a new map instance populated with {@code elements}
+	 * @throws IllegalArgumentException if the supplied {@code mapType} is
+	 * {@code null} or of type {@link EnumMap}
+	 * @see #createMap(Class, int)
+	 * @see ImmutableMap
+	 * @see ImmutableBiMap
+	 * @see ImmutableSortedMap
+	 */
+	public static <M extends Map<K, V>, K, V> M createMapOf(Class<?> mapType,
+			@Nullable Iterable<? extends Map.Entry<? extends K, ? extends V>> elements) {
+		return createMapOf(mapType, elements, null);
+	}
+
+	/**
+	 * Create the most appropriate map for the given map type and
+	 * populates the {@link Map} with the provided set of {@code elements}.
+	 * The distinction between this method and {@link #createMap(Class, Class, int)}
+	 * is that this method support's the Guava {@link ImmutableMap} types
+	 * since it is capable of populating the created {@link ImmutableMap}.
+	 * The supported Guava types are  {@link ImmutableMap}, {@link ImmutableBiMap}, and
+	 * {@link ImmutableSortedMap}. Although {@link ImmutableSortedMap} is supported note that it is created with
+	 * natural order which may not be desired ordering.
+	 * <p><strong>Warning</strong>: Since the parameterized type {@code K}
+	 * is not bound to the supplied {@code keyType}, type safety cannot be
+	 * guaranteed if the desired {@code mapType} is {@link EnumMap}. In such
+	 * scenarios, the caller is responsible for ensuring that the {@code keyType}
+	 * is an enum type matching type {@code K}. As an alternative, the caller
+	 * may wish to treat the return value as a raw map or map keyed by
+	 * {@link Object}. Similarly, type safety cannot be enforced if the
+	 * desired {@code mapType} is {@link MultiValueMap}.
+	 * @param mapType the desired type of the target map; never {@code null}
+	 * @param keyType the map's key type, or {@code null} if unknown
+	 * (note: only relevant for {@link EnumMap} creation)
+	 * @return a new map instance
+	 * @since 4.1.3
+	 * @see java.util.LinkedHashMap
+	 * @see java.util.TreeMap
+	 * @see org.springframework.util.LinkedMultiValueMap
+	 * @see java.util.EnumMap
+	 * @see ImmutableMap
+	 * @see ImmutableBiMap
+	 * @see ImmutableSortedMap
+	 * @throws IllegalArgumentException if the supplied {@code mapType} is
+	 * {@code null}; or if the desired {@code mapType} is {@link EnumMap} and
+	 * the supplied {@code keyType} is not a subtype of {@link Enum}
+	 */
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	public static <M extends Map<K, V>, K, V> M createMapOf(Class<?> mapType,
+			@Nullable Iterable<? extends Map.Entry<? extends K, ? extends V>> elements,
+			@Nullable Class<?> keyType) {
+		int capacity = elements == null ? 0 : Iterables.size(elements);
+		Assert.notNull(mapType, "Map type must not be null");
+		if (mapType.isInterface()) {
+			M resultMap;
+			if (Map.class == mapType) {
+				resultMap = (M) new LinkedHashMap<K, V>(capacity);
+			}
+			else if (SortedMap.class == mapType || NavigableMap.class == mapType) {
+				resultMap = (M) new TreeMap<K, V>();
+			}
+			else if (MultiValueMap.class == mapType) {
+				resultMap = (M) new LinkedMultiValueMap<K, V>();
+			}
+			else {
+				throw new IllegalArgumentException(
+						"Unsupported Map interface: " + mapType.getName());
+			}
+			return addAllEntries(elements, resultMap);
+		}
+		else if (EnumMap.class == mapType) {
+			Assert.notNull(keyType, "Cannot create EnumMap for unknown key type");
+			return addAllEntries(elements, (M) new EnumMap(asEnumType(keyType)));
+		}
+		else if (ImmutableMap.class.isAssignableFrom(mapType)) {
+			ImmutableMap.Builder<K, V> builder;
+			if (ImmutableMap.class == mapType) {
+				builder = ImmutableMap.builder();
+			}
+			else if (ImmutableBiMap.class == mapType) {
+				builder = ImmutableBiMap.builder();
+			}
+			else if (ImmutableSortedMap.class == mapType)
+				builder = (ImmutableMap.Builder) ImmutableSortedMap.naturalOrder();
+			else {
+				throw new IllegalArgumentException(
+						"Unsupported ImmutableMap interface: " + mapType.getName());
+			}
+			nullableForEach(elements, builder::put);
+			return (M) builder.build();
+		}
+		else {
+			if (!Map.class.isAssignableFrom(mapType)) {
+				throw new IllegalArgumentException("Unsupported Map type: " + mapType.getName());
+			}
+			try {
+				return addAllEntries(elements,
+						(M) ReflectionUtils.accessibleConstructor(mapType).newInstance());
+			}
+			catch (Throwable ex) {
+				throw new IllegalArgumentException(
+						"Could not instantiate Map type: " + mapType.getName(), ex);
+			}
+		}
+	}
+
+	private static <M extends Map<K, V>, K, V> M addAllEntries(
+			@Nullable Iterable<? extends Map.Entry<? extends K, ? extends V>> elements,
+			M map) {
+		nullableForEach(elements, p -> map.put(p.getKey(), p.getValue()));
+		return map;
 	}
 
 	/**

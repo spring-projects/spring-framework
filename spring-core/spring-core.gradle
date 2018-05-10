@@ -76,6 +76,7 @@ dependencies {
 	compile(files(cglibRepackJar))
 	compile(files(objenesisRepackJar))
 	compile(project(":spring-jcl"))
+	compile("com.google.guava:guava:23.5-jre")
 	optional("net.sf.jopt-simple:jopt-simple:5.0.4")
 	optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")

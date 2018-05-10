@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -34,6 +35,21 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import javax.annotation.Nullable;
+
+import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultiset;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSortedMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
+import org.hamcrest.collection.IsEmptyCollection;
+import org.hamcrest.collection.IsEmptyIterable;
+import org.hamcrest.collection.IsMapContaining;
+import org.hamcrest.core.IsCollectionContaining;
 import org.junit.Test;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -238,6 +254,79 @@ public class CollectionFactoryTests {
 	}
 
 	@Test
+	public void createsCollectionsOfCorrectlyWithNullElements() {
+		createsCollectionsOfCorrectlyWithElements(null);
+	}
+
+	@Test
+	public void createsCollectionsOfCorrectlyWithElements() {
+		createsCollectionsOfCorrectlyWithElements(ImmutableList.of("e1", "e2"));
+	}
+
+	private void createsCollectionsOfCorrectlyWithElements(
+			@Nullable ImmutableList<String> elements) {
+		// interfaces
+		createsCollectionsOfCorrectly(List.class, elements, ArrayList.class);
+		createsCollectionsOfCorrectly(Set.class, elements, LinkedHashSet.class);
+		createsCollectionsOfCorrectly(Collection.class, elements, LinkedHashSet.class);
+		createsCollectionsOfCorrectly(SortedSet.class, elements, TreeSet.class);
+		createsCollectionsOfCorrectly(NavigableSet.class, elements, TreeSet.class);
+
+		createsCollectionsOfWithTypeCorrectly(List.class, elements, ArrayList.class);
+		createsCollectionsOfWithTypeCorrectly(Set.class, elements, LinkedHashSet.class);
+		createsCollectionsOfWithTypeCorrectly(Collection.class, elements, LinkedHashSet.class);
+		createsCollectionsOfWithTypeCorrectly(SortedSet.class, elements, TreeSet.class);
+		createsCollectionsOfWithTypeCorrectly(NavigableSet.class, elements, TreeSet.class);
+
+		// concrete types
+		createsCollectionsOfCorrectly(HashSet.class, elements, HashSet.class);
+		createsCollectionsOfWithTypeCorrectly(HashSet.class, elements, HashSet.class);
+
+		// guava immutable types
+		createsCollectionsOfCorrectly(ImmutableCollection.class, elements, ImmutableList.class);
+		createsCollectionsOfCorrectly(ImmutableList.class, elements, ImmutableList.class);
+		createsCollectionsOfCorrectly(ImmutableSet.class, elements, ImmutableSet.class);
+		createsCollectionsOfCorrectly(ImmutableMultiset.class, elements, ImmutableMultiset.class);
+
+		createsCollectionsOfWithTypeCorrectly(ImmutableCollection.class, elements,
+				ImmutableList.class);
+		createsCollectionsOfWithTypeCorrectly(ImmutableList.class, elements, ImmutableList.class);
+		createsCollectionsOfWithTypeCorrectly(ImmutableSet.class, elements, ImmutableSet.class);
+		createsCollectionsOfWithTypeCorrectly(ImmutableMultiset.class, elements,
+				ImmutableMultiset.class);
+	}
+
+	private void createsCollectionsOfCorrectly(
+			Class<?> inputType,
+			@Nullable Iterable<String> elements,
+			Class<?> expectedType) {
+		Collection<String> result = createCollectionOf(inputType, elements);
+		assertThat(result, is(instanceOf(expectedType)));
+		if (elements == null) {
+			assertThat(result, IsEmptyCollection.empty());
+		}
+		else {
+			assertThat(result,
+					IsCollectionContaining.hasItems(Iterables.toArray(elements, String.class)));
+		}
+	}
+
+	private void createsCollectionsOfWithTypeCorrectly(
+			Class<?> inputType,
+			@Nullable Iterable<String> elements,
+			Class<?> expectedType) {
+		Collection<String> result = createCollectionOf(inputType, elements, String.class);
+		assertThat(result, is(instanceOf(expectedType)));
+		if (elements == null) {
+			assertThat(result, IsEmptyCollection.empty());
+		}
+		else {
+			assertThat(result,
+					IsCollectionContaining.hasItems(Iterables.toArray(elements, String.class)));
+		}
+	}
+
+	@Test
 	public void createsEnumSet() {
 		assertThat(createCollection(EnumSet.class, Color.class, 0), is(instanceOf(EnumSet.class)));
 	}
@@ -274,6 +363,91 @@ public class CollectionFactoryTests {
 		assertThat(createMap(HashMap.class, 0), is(instanceOf(HashMap.class)));
 
 		assertThat(createMap(HashMap.class, String.class, 0), is(instanceOf(HashMap.class)));
+	}
+
+	@Test
+	public void createsMapsCorrectlyOfWithNullElements() {
+		createsMapsCorrectlyOfWithNullElements(null);
+		createsMapsCorrectlyOfCorrectly(MultiValueMap.class, null, LinkedMultiValueMap.class);
+		createsMapsCorrectlyOfWithTypeCorrectly(MultiValueMap.class, null,
+				LinkedMultiValueMap.class);
+	}
+
+	@Test
+	public void createsMapsCorrectlyOfWithElements() {
+		Iterable<Map.Entry<String, ?>> elements = ImmutableList.of(
+				Maps.immutableEntry("k1", "v1"),
+				Maps.immutableEntry("k2", "v2")
+		);
+		createsMapsCorrectlyOfWithNullElements(elements);
+		createsMapsCorrectlyOfCorrectly(MultiValueMap.class,
+				ImmutableList.of(
+						Maps.immutableEntry("k1", ImmutableList.of("1", "2")),
+						Maps.immutableEntry("k2", ImmutableList.of("3", "4"))
+				),
+				LinkedMultiValueMap.class);
+	}
+
+	private void createsMapsCorrectlyOfWithNullElements(
+			@Nullable Iterable<Map.Entry<String, ?>> elements) {
+		// interfaces
+		createsMapsCorrectlyOfCorrectly(Map.class, elements, LinkedHashMap.class);
+		createsMapsCorrectlyOfCorrectly(SortedMap.class, elements, TreeMap.class);
+		createsMapsCorrectlyOfCorrectly(NavigableMap.class, elements, TreeMap.class);
+
+		createsMapsCorrectlyOfWithTypeCorrectly(Map.class, elements, LinkedHashMap.class);
+		createsMapsCorrectlyOfWithTypeCorrectly(SortedMap.class, elements, TreeMap.class);
+		createsMapsCorrectlyOfWithTypeCorrectly(NavigableMap.class, elements, TreeMap.class);
+
+		// concrete types
+		assertThat(createMap(HashMap.class, 0), is(instanceOf(HashMap.class)));
+		assertThat(createMap(HashMap.class, String.class, 0), is(instanceOf(HashMap.class)));
+
+		// Guava Immutable types
+		createsMapsCorrectlyOfCorrectly(ImmutableMap.class, elements, ImmutableMap.class);
+		createsMapsCorrectlyOfCorrectly(ImmutableBiMap.class, elements, ImmutableBiMap.class);
+		createsMapsCorrectlyOfCorrectly(ImmutableSortedMap.class, elements,
+				ImmutableSortedMap.class);
+
+		createsMapsCorrectlyOfWithTypeCorrectly(ImmutableMap.class, elements, ImmutableMap.class);
+		createsMapsCorrectlyOfWithTypeCorrectly(ImmutableBiMap.class, elements,
+				ImmutableBiMap.class);
+		createsMapsCorrectlyOfWithTypeCorrectly(ImmutableSortedMap.class, elements,
+				ImmutableSortedMap.class);
+	}
+
+	private void createsMapsCorrectlyOfCorrectly(
+			Class<?> inputType,
+			@Nullable Iterable<Map.Entry<String, ?>> elements,
+			Class<?> expectedType) {
+		Map<String, ?> result = createMapOf(inputType, elements);
+		assertThat(result, is(instanceOf(expectedType)));
+		if (elements == null) {
+			assertThat(result.size(), is(0));
+		}
+		else {
+			assertThat(result.size(), is(Iterables.size(elements)));
+			for (Entry<String, ?> element : elements) {
+				assertThat(result, IsMapContaining.hasEntry(element.getKey(), element.getValue()));
+			}
+		}
+	}
+
+	private void createsMapsCorrectlyOfWithTypeCorrectly(
+			Class<?> inputType,
+			@Nullable Iterable<Map.Entry<String, ?>> elements,
+			Class<?> expectedType) {
+		Map<String, ?> result = createMapOf(inputType, elements, String.class);
+		assertThat(result, is(instanceOf(expectedType)));
+		if (elements == null) {
+			assertThat(result.size(), is(0));
+		}
+		else {
+			assertThat(result.size(), is(Iterables.size(elements)));
+			for (Entry<String, ?> element : elements) {
+				assertThat(result, IsMapContaining.hasEntry(element.getKey(), element.getValue()));
+			}
+		}
 	}
 
 	@Test
