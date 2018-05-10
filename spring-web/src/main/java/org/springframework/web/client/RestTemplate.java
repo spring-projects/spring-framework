@@ -673,6 +673,17 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 	// general execution
 
+	/**
+	 * {@inheritDoc}
+	 * <p>To provide a {@code RequestCallback} or {@code ResponseExtractor} only,
+	 * but not both, consider using:
+	 * <ul>
+	 * <li>{@link #acceptHeaderRequestCallback(Class)}
+	 * <li>{@link #httpEntityCallback(Object)}
+	 * <li>{@link #httpEntityCallback(Object, Type)}
+	 * <li>{@link #responseEntityExtractor(Type)}
+	 * </ul>
+	 */
 	@Override
 	@Nullable
 	public <T> T execute(String url, HttpMethod method, @Nullable RequestCallback requestCallback,
@@ -682,6 +693,17 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		return doExecute(expanded, method, requestCallback, responseExtractor);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>To provide a {@code RequestCallback} or {@code ResponseExtractor} only,
+	 * but not both, consider using:
+	 * <ul>
+	 * <li>{@link #acceptHeaderRequestCallback(Class)}
+	 * <li>{@link #httpEntityCallback(Object)}
+	 * <li>{@link #httpEntityCallback(Object, Type)}
+	 * <li>{@link #responseEntityExtractor(Type)}
+	 * </ul>
+	 */
 	@Override
 	@Nullable
 	public <T> T execute(String url, HttpMethod method, @Nullable RequestCallback requestCallback,
@@ -692,6 +714,17 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		return doExecute(expanded, method, requestCallback, responseExtractor);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>To provide a {@code RequestCallback} or {@code ResponseExtractor} only,
+	 * but not both, consider using:
+	 * <ul>
+	 * <li>{@link #acceptHeaderRequestCallback(Class)}
+	 * <li>{@link #httpEntityCallback(Object)}
+	 * <li>{@link #httpEntityCallback(Object, Type)}
+	 * <li>{@link #responseEntityExtractor(Type)}
+	 * </ul>
+	 */
 	@Override
 	@Nullable
 	public <T> T execute(URI url, HttpMethod method, @Nullable RequestCallback requestCallback,
@@ -770,34 +803,38 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	}
 
 	/**
-	 * Returns a request callback implementation that prepares the request {@code Accept}
-	 * headers based on the given response type and configured
-	 * {@linkplain #getMessageConverters() message converters}.
+	 * Return a {@code RequestCallback} that sets the request {@code Accept}
+	 * header based on the given response type, cross-checked against the
+	 * configured message converters.
 	 */
-	protected <T> RequestCallback acceptHeaderRequestCallback(Class<T> responseType) {
+	public <T> RequestCallback acceptHeaderRequestCallback(Class<T> responseType) {
 		return new AcceptHeaderRequestCallback(responseType);
 	}
 
 	/**
-	 * Returns a request callback implementation that writes the given object to the
-	 * request stream.
+	 * Return a {@code RequestCallback} implementation that writes the given
+	 * object to the request stream.
 	 */
-	protected <T> RequestCallback httpEntityCallback(@Nullable Object requestBody) {
+	public <T> RequestCallback httpEntityCallback(@Nullable Object requestBody) {
 		return new HttpEntityRequestCallback(requestBody);
 	}
 
 	/**
-	 * Returns a request callback implementation that writes the given object to the
-	 * request stream.
+	 * Return a {@code RequestCallback} implementation that:
+	 * <ol>
+	 * <li>Sets the request {@code Accept} header based on the given response
+	 * type, cross-checked against the configured message converters.
+	 * <li>Writes the given object to the request stream.
+	 * </ol>
 	 */
-	protected <T> RequestCallback httpEntityCallback(@Nullable Object requestBody, Type responseType) {
+	public <T> RequestCallback httpEntityCallback(@Nullable Object requestBody, Type responseType) {
 		return new HttpEntityRequestCallback(requestBody, responseType);
 	}
 
 	/**
-	 * Returns a response extractor for {@link ResponseEntity}.
+	 * Return a {@code ResponseExtractor} that prepares a {@link ResponseEntity}.
 	 */
-	protected <T> ResponseExtractor<ResponseEntity<T>> responseEntityExtractor(Type responseType) {
+	public <T> ResponseExtractor<ResponseEntity<T>> responseEntityExtractor(Type responseType) {
 		return new ResponseEntityResponseExtractor<>(responseType);
 	}
 
