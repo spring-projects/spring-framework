@@ -171,7 +171,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 		ResourceUtils.useCachesIfNecessary(con);
 
 		if (this.url.getUserInfo() != null) {
-			String basicAuth = "Basic " + new String(Base64Utils.encode(url.getUserInfo().getBytes()));
+			String basicAuth = "Basic " + Base64Utils.encodeToString(url.getUserInfo().getBytes());
 			con.setRequestProperty("Authorization", basicAuth);
 		}
 
