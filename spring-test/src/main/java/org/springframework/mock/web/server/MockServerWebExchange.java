@@ -109,8 +109,10 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 
 		/**
 		 * Set the session to use for the exchange.
-		 * <p>This is mutually exclusive with {@link #sessionManager(WebSessionManager)}.
+		 * <p>This method is mutually exclusive with
+		 * {@link #sessionManager(WebSessionManager)}.
 		 * @param session the session to use
+		 * @see MockWebSession
 		 */
 		public Builder session(WebSession session) {
 			this.sessionManager = exchange -> Mono.just(session);
