@@ -109,7 +109,7 @@ public class ServerWebExchangeArgumentResolver extends HandlerMethodArgumentReso
 			return timeZone != null ? timeZone.toZoneId() : ZoneId.systemDefault();
 		}
 		else if (UriBuilder.class == paramType || UriComponentsBuilder.class == paramType) {
-			return UriComponentsBuilder.fromHttpRequest(exchange.getRequest());
+			return UriComponentsBuilder.fromUri(exchange.getRequest().getURI());
 		}
 		else {
 			// should never happen...

@@ -23,6 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Arrays;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 
 import org.hamcrest.Matchers;
 import org.joda.time.DateTime;
@@ -36,7 +37,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.test.MockFilterChain;
 import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
@@ -49,6 +52,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.filter.ForwardedHeaderFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -136,27 +140,38 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void usesForwardedHostAsHostIfHeaderIsSet() {
+	public void usesForwardedHostAsHostIfHeaderIsSet() throws Exception {
 		this.request.addHeader("X-Forwarded-Host", "somethingDifferent");
+		adaptRequestFromForwardedHeaders();
 		UriComponents uriComponents = fromController(PersonControllerImpl.class).build();
 
 		assertThat(uriComponents.toUriString(), startsWith("http://somethingDifferent"));
 	}
 
 	@Test
-	public void usesForwardedHostAndPortFromHeader() {
+	public void usesForwardedHostAndPortFromHeader() throws Exception {
 		request.addHeader("X-Forwarded-Host", "foobar:8088");
+		adaptRequestFromForwardedHeaders();
 		UriComponents uriComponents = fromController(PersonControllerImpl.class).build();
 
 		assertThat(uriComponents.toUriString(), startsWith("http://foobar:8088"));
 	}
 
 	@Test
-	public void usesFirstHostOfXForwardedHost() {
-		request.addHeader("X-Forwarded-Host", "barfoo:8888, localhost:8088");
+	public void usesFirstHostOfXForwardedHost() throws Exception {
+		this.request.addHeader("X-Forwarded-Host", "barfoo:8888, localhost:8088");
+		adaptRequestFromForwardedHeaders();
 		UriComponents uriComponents = fromController(PersonControllerImpl.class).build();
 
 		assertThat(uriComponents.toUriString(), startsWith("http://barfoo:8888"));
+	}
+
+	// SPR-16668
+	private void adaptRequestFromForwardedHeaders() throws Exception {
+		MockFilterChain chain = new MockFilterChain();
+		new ForwardedHeaderFilter().doFilter(this.request, new MockHttpServletResponse(), chain);
+		HttpServletRequest adaptedRequest = (HttpServletRequest) chain.getRequest();
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(adaptedRequest));
 	}
 
 	@Test

@@ -38,7 +38,6 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.multipart.Part;
@@ -141,7 +140,7 @@ public class MockServerRequest implements ServerRequest {
 
 	@Override
 	public UriBuilder uriBuilder() {
-		return UriComponentsBuilder.fromHttpRequest(new ServerRequestAdapter());
+		return UriComponentsBuilder.fromUri(this.uri);
 	}
 
 	@Override
@@ -569,24 +568,6 @@ public class MockServerRequest implements ServerRequest {
 			return value != -1 ? OptionalLong.of(value) : OptionalLong.empty();
 		}
 
-	}
-
-	private final class ServerRequestAdapter implements HttpRequest {
-
-		@Override
-		public String getMethodValue() {
-			return methodName();
-		}
-
-		@Override
-		public URI getURI() {
-			return MockServerRequest.this.uri;
-		}
-
-		@Override
-		public HttpHeaders getHeaders() {
-			return MockServerRequest.this.headers.headers;
-		}
 	}
 
 }

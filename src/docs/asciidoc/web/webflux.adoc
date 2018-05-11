@@ -1417,10 +1417,8 @@ etc, and is equivalent to `required=false`.
   See <<webflux-ann-sessionattributes>> for more details.
 
 | `UriComponentsBuilder`
-| For preparing a URL relative to the current request's host, port, scheme, context path, and
-  the literal  part of the servlet mapping also taking into account `Forwarded` and
-  `X-Forwarded-*` headers.
-  // TODO: See <<webflux-uri-building>>.
+| For preparing a URL relative to the current request's host, port, scheme, and path.
+  See <<webflux-uri-building>>.
 
 | `@SessionAttribute`
 | For access to any session attribute; in contrast to model attributes stored in the session
@@ -2499,7 +2497,7 @@ Javadoc for more details.
 
 
 
-[[mvc-uri-building]]
+[[webflux-uri-building]]
 == URI Links
 [.small]#<<web.adoc#mvc-uri-building,Same in Spring MVC>>#
 

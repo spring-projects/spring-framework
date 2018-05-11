@@ -36,7 +36,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRange;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.multipart.Part;
@@ -93,7 +92,7 @@ class DefaultServerRequest implements ServerRequest {
 
 	@Override
 	public UriBuilder uriBuilder() {
-		return UriComponentsBuilder.fromHttpRequest(new ServerRequestAdapter());
+		return UriComponentsBuilder.fromUri(uri());
 	}
 
 	@Override
@@ -276,25 +275,6 @@ class DefaultServerRequest implements ServerRequest {
 		@Override
 		public String toString() {
 			return delegate().toString();
-		}
-	}
-
-
-	private final class ServerRequestAdapter implements HttpRequest {
-
-		@Override
-		public String getMethodValue() {
-			return methodName();
-		}
-
-		@Override
-		public URI getURI() {
-			return uri();
-		}
-
-		@Override
-		public HttpHeaders getHeaders() {
-			return request().getHeaders();
 		}
 	}
 

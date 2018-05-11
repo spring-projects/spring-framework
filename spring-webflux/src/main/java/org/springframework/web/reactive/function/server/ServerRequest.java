@@ -84,10 +84,13 @@ public interface ServerRequest {
 
 	/**
 	 * Return a {@code UriBuilderComponents}  from the URI associated with this
-	 * {@code ServerRequest}, while also overlaying with values from the headers
-	 * "Forwarded" (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>),
-	 * or "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" if
-	 * "Forwarded" is not found.
+	 * {@code ServerRequest}.
+	 *
+	 * <p><strong>Note:</strong> as of 5.1 this method ignores
+	 * {@code "Forwarded"} and {@code "X-Forwarded-*"} headers that specify the
+	 * client-originated address. Consider using the {@code ForwardedHeaderFilter}
+	 * to extract and use, or to discard such headers.
+	 *
 	 * @return a URI builder
 	 */
 	UriBuilder uriBuilder();

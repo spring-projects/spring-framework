@@ -1689,8 +1689,7 @@ etc, and is equivalent to `required=false`.
 
 | `UriComponentsBuilder`
 | For preparing a URL relative to the current request's host, port, scheme, context path, and
-  the literal  part of the servlet mapping also taking into account `Forwarded` and
- `X-Forwarded-*` headers. See <<mvc-uri-building>>.
+  the literal  part of the servlet mapping. See <<mvc-uri-building>>.
 
 | `@SessionAttribute`
 | For access to any session attribute; in contrast to model attributes stored in the session
@@ -3098,7 +3097,7 @@ Javadoc for more details.
 
 [[mvc-uri-building]]
 == URI Links
-[.small]#<<web-reactive.adoc#mvc-uri-building,Same in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-uri-building,Same in Spring WebFlux>>#
 
 This section describes various options available in the Spring Framework to prepare URIs.
 
@@ -3148,14 +3147,12 @@ You can create URIs relative to a Servlet (e.g. `/main/{asterisk}`):
 			.path("/accounts").build()
 ----
 
-[CAUTION]
+[NOTE]
 ====
-`ServletUriComponentsBuilder` detects and uses information from the "Forwarded",
-"X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers, so the resulting
-links reflect the original request. You need to ensure that your application is behind
-a trusted proxy which filters out such headers coming from outside. Also consider using
-the <<filters-forwarded-headers,ForwardedHeaderFilter>> which processes such headers once
-per request, and also provides an option to remove and ignore such headers.
+As of 5.1 `ServletUriComponentsBuilder` ignores information from the "Forwarded",
+"X-Forwarded-*" headers, that specify the client-originated address. Consider using the
+<<filters-forwarded-headers,ForwardedHeaderFilter>> to extract and use, or to discard
+such headers.
 ====
 
 
@@ -3243,14 +3240,12 @@ with a base URL and then use the instance-based "withXxx" methods. For example:
 	URI uri = uriComponents.encode().toUri();
 ----
 
-[CAUTION]
+[NOTE]
 ====
-`MvcUriComponentsBuilder` detects and uses information from the "Forwarded",
-"X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers, so the resulting
-links reflect the original request. You need to ensure that your application is behind
-a trusted proxy which filters out such headers coming from outside. Also consider using
-the <<filters-forwarded-headers,ForwardedHeaderFilter>> which processes such headers once
-per request, and also provides an option to remove and ignore such headers.
+As of 5.1 `MvcUriComponentsBuilder` ignores information from the "Forwarded",
+"X-Forwarded-*" headers, that specify the client-originated address. Consider using the
+<<filters-forwarded-headers,ForwardedHeaderFilter>> to extract and use, or to discard
+such headers.
 ====
 
 
