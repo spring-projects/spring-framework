@@ -606,6 +606,32 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
+	public void shouldSupportUnknownStatusCodeOnExchange() throws Exception {
+		prepareResponse(response -> response.setResponseCode(999)
+				.setHeader("Content-Type", "text/plain")
+				.setBody("Hello Spring!"));
+
+		Mono<String> result = this.webClient.get()
+				.uri("/unknownStatusCode")
+				.exchange()
+				.flatMap(r -> {
+					assertEquals(999, r.rawStatusCode());
+					return r.bodyToMono(String.class);
+				});
+
+		StepVerifier.create(result)
+				.expectNext("Hello Spring!")
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
+			assertEquals("/unknownStatusCode", request.getPath());
+		});
+	}
+
+	@Test
 	public void shouldReceiveEmptyResponse() throws Exception {
 		prepareResponse(response -> response.setHeader("Content-Length", "0").setBody(""));
 

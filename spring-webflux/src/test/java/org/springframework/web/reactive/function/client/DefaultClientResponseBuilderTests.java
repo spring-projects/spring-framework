@@ -34,6 +34,7 @@ import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
+ * @author Denys Ivano
  */
 public class DefaultClientResponseBuilderTests {
 
@@ -57,10 +58,52 @@ public class DefaultClientResponseBuilderTests {
 				.build();
 
 		assertEquals(HttpStatus.BAD_GATEWAY, response.statusCode());
+		assertEquals(HttpStatus.BAD_GATEWAY.value(), response.rawStatusCode());
 		HttpHeaders responseHeaders = response.headers().asHttpHeaders();
 		assertEquals("bar", responseHeaders.getFirst("foo"));
 		assertNotNull("qux", response.cookies().getFirst("baz"));
 		assertEquals("qux", response.cookies().getFirst("baz").getValue());
+
+		StepVerifier.create(response.bodyToFlux(String.class))
+				.expectNext("baz")
+				.verifyComplete();
+	}
+
+	@Test
+	public void withRawStatusCode() {
+		Flux<DataBuffer> body = Flux.just("baz")
+				.map(s -> s.getBytes(StandardCharsets.UTF_8))
+				.map(dataBufferFactory::wrap);
+
+		ClientResponse response = ClientResponse.create(HttpStatus.BAD_GATEWAY.value(), ExchangeStrategies.withDefaults())
+				.body(body)
+				.build();
+
+		assertEquals(HttpStatus.BAD_GATEWAY, response.statusCode());
+		assertEquals(HttpStatus.BAD_GATEWAY.value(), response.rawStatusCode());
+
+		StepVerifier.create(response.bodyToFlux(String.class))
+				.expectNext("baz")
+				.verifyComplete();
+	}
+
+	@Test
+	public void withUnknownStatusCode() {
+		Flux<DataBuffer> body = Flux.just("baz")
+				.map(s -> s.getBytes(StandardCharsets.UTF_8))
+				.map(dataBufferFactory::wrap);
+
+		ClientResponse response = ClientResponse.create(999, ExchangeStrategies.withDefaults())
+				.body(body)
+				.build();
+
+		try {
+			response.statusCode();
+			fail("Expected IllegalArgumentException");
+		} catch (IllegalArgumentException ex) {
+			// do nothing
+		}
+		assertEquals(999, response.rawStatusCode());
 
 		StepVerifier.create(response.bodyToFlux(String.class))
 				.expectNext("baz")
@@ -90,10 +133,42 @@ public class DefaultClientResponseBuilderTests {
 				.build();
 
 		assertEquals(HttpStatus.BAD_REQUEST, result.statusCode());
+		assertEquals(HttpStatus.BAD_REQUEST.value(), result.rawStatusCode());
 		assertEquals(1, result.headers().asHttpHeaders().size());
 		assertEquals("baar", result.headers().asHttpHeaders().getFirst("foo"));
 		assertEquals(1, result.cookies().size());
 		assertEquals("quux", result.cookies().getFirst("baz").getValue());
+
+		StepVerifier.create(result.bodyToFlux(String.class))
+				.expectNext("baz")
+				.verifyComplete();
+	}
+
+	@Test
+	public void fromWithUnknownStatusCode() throws Exception {
+		Flux<DataBuffer> otherBody = Flux.just("foo", "bar")
+				.map(s -> s.getBytes(StandardCharsets.UTF_8))
+				.map(dataBufferFactory::wrap);
+
+		ClientResponse other = ClientResponse.create(999, ExchangeStrategies.withDefaults())
+				.body(otherBody)
+				.build();
+
+		Flux<DataBuffer> body = Flux.just("baz")
+				.map(s -> s.getBytes(StandardCharsets.UTF_8))
+				.map(dataBufferFactory::wrap);
+
+		ClientResponse result = ClientResponse.from(other)
+				.body(body)
+				.build();
+
+		try {
+			result.statusCode();
+			fail("Expected IllegalArgumentException");
+		} catch (IllegalArgumentException ex) {
+			// do nothing
+		}
+		assertEquals(999, result.rawStatusCode());
 
 		StepVerifier.create(result.bodyToFlux(String.class))
 				.expectNext("baz")
