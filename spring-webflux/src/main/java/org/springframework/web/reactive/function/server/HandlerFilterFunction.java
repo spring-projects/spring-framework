@@ -74,7 +74,7 @@ public interface HandlerFilterFunction<T extends ServerResponse, R extends Serve
 
 	/**
 	 * Adapt the given request processor function to a filter function that only operates
-	 * on the {@code ClientRequest}.
+	 * on the {@code ServerRequest}.
 	 * @param requestProcessor the request processor
 	 * @return the filter adaptation of the request processor
 	 */
@@ -87,8 +87,10 @@ public interface HandlerFilterFunction<T extends ServerResponse, R extends Serve
 
 	/**
 	 * Adapt the given response processor function to a filter function that only operates
-	 * on the {@code ClientResponse}.
+	 * on the {@code ServerResponse}.
 	 * @param responseProcessor the response processor
+	 * @param <T> the type of the {@linkplain HandlerFunction handler function} to filter
+	 * @param <R> the type of the response of the function
 	 * @return the filter adaptation of the request processor
 	 */
 	static <T extends ServerResponse, R extends ServerResponse> HandlerFilterFunction<T, R> ofResponseProcessor(
