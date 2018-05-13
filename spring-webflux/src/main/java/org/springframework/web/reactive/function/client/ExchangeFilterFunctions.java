@@ -37,6 +37,7 @@ import org.springframework.util.Assert;
  *
  * @author Rob Winch
  * @author Arjen Poutsma
+ * @author Denys Ivano
  * @since 5.0
  */
 public abstract class ExchangeFilterFunctions {
@@ -124,8 +125,10 @@ public abstract class ExchangeFilterFunctions {
 	/**
 	 * Return a filter that returns a given {@link Throwable} as response if the given
 	 * {@link HttpStatus} predicate matches.
-	 * @param statusPredicate the predicate that should match the
-	 * {@linkplain ClientResponse#statusCode() response status}
+	 * <p><b>Note:</b> when the response contains status code that can't be
+	 * resolved through {@link HttpStatus} enum, the specified predicate and
+	 * exception function will not be applied.
+	 * @param statusPredicate the predicate that should match the response status
 	 * @param exceptionFunction the function that returns the exception
 	 * @return the {@link ExchangeFilterFunction} that returns the given exception if the predicate
 	 * matches
@@ -138,7 +141,38 @@ public abstract class ExchangeFilterFunctions {
 
 		return ExchangeFilterFunction.ofResponseProcessor(
 				clientResponse -> {
-					if (statusPredicate.test(clientResponse.statusCode())) {
+					int status = clientResponse.rawStatusCode();
+					HttpStatus resolvedStatus = HttpStatus.resolve(status);
+					if (resolvedStatus != null && statusPredicate.test(resolvedStatus)) {
+						return Mono.error(exceptionFunction.apply(clientResponse));
+					}
+					else {
+						return Mono.just(clientResponse);
+					}
+				}
+		);
+	}
+
+	/**
+	 * Return a filter that returns a given {@link Throwable} as response if the given
+	 * response status predicate matches.
+	 * @param statusCodePredicate the predicate that should match the
+	 * {@linkplain ClientResponse#rawStatusCode() response status}
+	 * @param exceptionFunction the function that returns the exception
+	 * @return the {@link ExchangeFilterFunction} that returns the given exception if the predicate
+	 * matches
+	 * @since 5.0.7
+	 * @see StatusCodePredicates
+	 */
+	public static ExchangeFilterFunction statusCodeError(Predicate<Integer> statusCodePredicate,
+			Function<ClientResponse, ? extends Throwable> exceptionFunction) {
+
+		Assert.notNull(statusCodePredicate, "Predicate must not be null");
+		Assert.notNull(exceptionFunction, "Function must not be null");
+
+		return ExchangeFilterFunction.ofResponseProcessor(
+				clientResponse -> {
+					if (statusCodePredicate.test(clientResponse.rawStatusCode())) {
 						return Mono.error(exceptionFunction.apply(clientResponse));
 					}
 					else {

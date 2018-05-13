@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ public class WebClientResponseException extends WebClientException {
 
 	private final int statusCode;
 
+	@Nullable
 	private final String statusText;
 
 	private final byte[] responseBody;
@@ -47,13 +48,14 @@ public class WebClientResponseException extends WebClientException {
 
 	/**
 	 * Construct a new instance of with the given response data.
+	 * @param message the exception message
 	 * @param statusCode the raw status code value
-	 * @param statusText the status text
+	 * @param statusText the status text (may be {@code null})
 	 * @param headers the response headers (may be {@code null})
 	 * @param responseBody the response body content (may be {@code null})
 	 * @param responseCharset the response body charset (may be {@code null})
 	 */
-	public WebClientResponseException(String message, int statusCode, String statusText,
+	public WebClientResponseException(String message, int statusCode, @Nullable String statusText,
 			@Nullable HttpHeaders headers, @Nullable byte[] responseBody,
 			@Nullable Charset responseCharset) {
 
@@ -84,6 +86,7 @@ public class WebClientResponseException extends WebClientException {
 	/**
 	 * Return the HTTP status text.
 	 */
+	@Nullable
 	public String getStatusText() {
 		return this.statusText;
 	}
