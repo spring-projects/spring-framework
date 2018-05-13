@@ -61,8 +61,7 @@ public interface ClientResponse {
 	/**
 	 * Return the status code of this response.
 	 * @return the status as an HttpStatus enum value
-	 * @throws IllegalArgumentException in case of an unknown HTTP status
-	 * code
+	 * @throws IllegalArgumentException in case of an unknown HTTP status code
 	 * @see HttpStatus#valueOf(int)
 	 */
 	HttpStatus statusCode();

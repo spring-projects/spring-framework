@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.function.client;
 
 import java.util.function.Predicate;
+
 import org.springframework.util.Assert;
 
 /**
@@ -121,7 +122,7 @@ public abstract class StatusCodePredicates {
 	 * @return the status code predicate
 	 */
 	public static Predicate<Integer> anyOf(int ... statusCodes) {
-		Assert.notNull(statusCodes, "statuses must not be null");
+		Assert.notNull(statusCodes, "Status codes must not be null");
 		return status -> {
 			for (int s : statusCodes) {
 				if (s == status) {
