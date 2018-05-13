@@ -51,6 +51,7 @@ import static org.mockito.BDDMockito.*;
  * @author Dave Syer
  * @author Mark Fisher
  * @author Sam Brannen
+ * @author ScienJus
  * @since 20.02.2004
  */
 public class QuartzSupportTests {
@@ -403,6 +404,46 @@ public class QuartzSupportTests {
 			ctx.close();
 		}
 		*/
+	}
+
+	/**
+	 * SPR-16816: Process cannot exit when the SchedulerFactoryBean fails to initialize
+	 */
+	@Test
+	public void schedulerAfterPropertiesSetFailed() throws Exception {
+		JobDetailImpl jobDetail = new JobDetailImpl();
+		jobDetail.setDurability(true);
+		jobDetail.setJobClass(DummyJobBean.class);
+		jobDetail.setName("myJob");
+		jobDetail.getJobDataMap().put("param", "10");
+
+		SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
+		trigger.setName("myTrigger");
+		trigger.setJobDetail(jobDetail);
+		trigger.setStartDelay(1);
+		trigger.setRepeatInterval(500);
+		trigger.setRepeatCount(1);
+		trigger.afterPropertiesSet();
+
+		SchedulerFactoryBean bean = new SchedulerFactoryBean() {
+
+			@Override
+			public void registerJobsAndTriggers() {
+				// try to mock quartz fails to initialize
+				throw new IllegalStateException();
+			}
+		};
+		bean.setJobFactory(new SpringBeanJobFactory());
+		bean.setTriggers(trigger.getObject());
+		bean.setJobDetails(jobDetail);
+		try {
+			bean.afterPropertiesSet();
+			bean.start();
+		} catch (Exception e) {
+			// ignore
+		}
+
+		assertTrue(bean.getScheduler().isShutdown());
 	}
 
 	private ClassPathXmlApplicationContext context(String path) {
