@@ -327,7 +327,7 @@ public abstract class BodyInserters {
 								.flatMap(reader -> reader.getWritableMediaTypes().stream())
 								.collect(Collectors.toList());
 						UnsupportedMediaTypeException error =
-								new UnsupportedMediaTypeException(contentType, supportedMediaTypes);
+								new UnsupportedMediaTypeException(contentType, supportedMediaTypes, bodyType);
 						return Mono.error(error);
 					});
 		};

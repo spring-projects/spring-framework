@@ -252,7 +252,7 @@ public abstract class BodyExtractors {
 							.flatMap(reader -> reader.getReadableMediaTypes().stream())
 							.collect(Collectors.toList());
 					UnsupportedMediaTypeException error =
-							new UnsupportedMediaTypeException(contentType, supportedMediaTypes);
+							new UnsupportedMediaTypeException(contentType, supportedMediaTypes, elementType);
 					return unsupportedError.apply(error);
 				});
 	}

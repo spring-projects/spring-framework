@@ -191,7 +191,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		if (contentType == null && method != null && SUPPORTED_METHODS.contains(method)) {
 			Flux<DataBuffer> body = request.getBody().doOnNext(o -> {
 				// Body not empty, back to 415..
-				throw new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes);
+				throw new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes, elementType);
 			});
 			if (isBodyRequired) {
 				body = body.switchIfEmpty(Mono.error(() -> handleMissingBody(bodyParam)));
@@ -199,7 +199,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 			return (adapter != null ? Mono.just(adapter.fromPublisher(body)) : Mono.from(body));
 		}
 
-		return Mono.error(new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes));
+		return Mono.error(new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes, elementType));
 	}
 
 	private Throwable handleReadError(MethodParameter parameter, Throwable ex) {
