@@ -24,6 +24,7 @@ import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
+import org.springframework.http.codec.FormHttpMessageReader;
 import org.springframework.http.codec.FormHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
@@ -68,6 +69,16 @@ public class DefaultClientCodecConfigurer extends AbstractCodecConfigurer implem
 		@Override
 		public void serverSentEventDecoder(Decoder<?> decoder) {
 			this.sseDecoder = decoder;
+		}
+
+		@Override
+		List<HttpMessageReader<?>> getTypedReaders() {
+			if (!shouldRegisterDefaults()) {
+				return Collections.emptyList();
+			}
+			List<HttpMessageReader<?>> result = super.getTypedReaders();
+			result.add(new FormHttpMessageReader());
+			return result;
 		}
 
 		@Override
