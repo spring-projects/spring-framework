@@ -16,10 +16,13 @@
 
 package org.springframework.web.multipart.support;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
@@ -27,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -90,11 +94,20 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 
 	@Override
 	public String[] getParameterValues(String name) {
-		String[] values = getMultipartParameters().get(name);
-		if (values != null) {
-			return values;
+		String[] parameterValues = super.getParameterValues(name);
+		String[] mpValues = getMultipartParameters().get(name);
+		if (mpValues == null) {
+			return parameterValues;
 		}
-		return super.getParameterValues(name);
+		if (parameterValues == null || getQueryString() == null) {
+			return mpValues;
+		}
+		else {
+			String[] result = new String[mpValues.length + parameterValues.length];
+			System.arraycopy(mpValues, 0, result, 0, mpValues.length);
+			System.arraycopy(parameterValues, 0, result, mpValues.length, parameterValues.length);
+			return result;
+		}
 	}
 
 	@Override
@@ -105,25 +118,20 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 		}
 
 		Set<String> paramNames = new LinkedHashSet<>();
-		Enumeration<String> paramEnum = super.getParameterNames();
-		while (paramEnum.hasMoreElements()) {
-			paramNames.add(paramEnum.nextElement());
-		}
+		paramNames.addAll(Collections.list(super.getParameterNames()));
 		paramNames.addAll(multipartParameters.keySet());
 		return Collections.enumeration(paramNames);
 	}
 
 	@Override
 	public Map<String, String[]> getParameterMap() {
-		Map<String, String[]> multipartParameters = getMultipartParameters();
-		if (multipartParameters.isEmpty()) {
-			return super.getParameterMap();
+		Map<String, String[]> result = new LinkedHashMap<>();
+		Enumeration<String> names = getParameterNames();
+		while (names.hasMoreElements()) {
+			String name = names.nextElement();
+			result.put(name, getParameterValues(name));
 		}
-
-		Map<String, String[]> paramMap = new LinkedHashMap<>();
-		paramMap.putAll(super.getParameterMap());
-		paramMap.putAll(multipartParameters);
-		return paramMap;
+		return result;
 	}
 
 	@Override
