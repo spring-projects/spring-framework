@@ -27,6 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -50,6 +51,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.ServerWebInputException;
 
 import static org.junit.Assert.*;
 import static org.springframework.core.ResolvableType.*;
@@ -84,29 +86,32 @@ public class RequestPartMethodArgumentResolverTests {
 
 		MethodParameter param;
 
-		param = this.testMethod.annot(requestPart().name("name")).arg(Person.class);
+		param = this.testMethod.annot(requestPart()).arg(Person.class);
 		assertTrue(this.resolver.supportsParameter(param));
 
-		param = this.testMethod.annot(requestPart().name("name")).arg(Mono.class, Person.class);
+		param = this.testMethod.annot(requestPart()).arg(Mono.class, Person.class);
 		assertTrue(this.resolver.supportsParameter(param));
 
-		param = this.testMethod.annot(requestPart().name("name")).arg(Flux.class, Person.class);
+		param = this.testMethod.annot(requestPart()).arg(Flux.class, Person.class);
 		assertTrue(this.resolver.supportsParameter(param));
 
-		param = this.testMethod.annot(requestPart().name("name")).arg(Part.class);
+		param = this.testMethod.annot(requestPart()).arg(Part.class);
 		assertTrue(this.resolver.supportsParameter(param));
 
-		param = this.testMethod.annot(requestPart().name("name")).arg(Mono.class, Part.class);
+		param = this.testMethod.annot(requestPart()).arg(Mono.class, Part.class);
 		assertTrue(this.resolver.supportsParameter(param));
 
-		param = this.testMethod.annot(requestPart().name("name")).arg(Flux.class, Part.class);
+		param = this.testMethod.annot(requestPart()).arg(Flux.class, Part.class);
 		assertTrue(this.resolver.supportsParameter(param));
+
+		param = this.testMethod.annotNotPresent(RequestPart.class).arg(Person.class);
+		assertFalse(this.resolver.supportsParameter(param));
 	}
 
 
 	@Test
 	public void person() {
-		MethodParameter param = this.testMethod.annot(requestPart().name("name")).arg(Person.class);
+		MethodParameter param = this.testMethod.annot(requestPart()).arg(Person.class);
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
 		bodyBuilder.part("name", new Person("Jones"));
 		Person actual = resolveArgument(param, bodyBuilder);
@@ -116,7 +121,7 @@ public class RequestPartMethodArgumentResolverTests {
 
 	@Test
 	public void listPerson() {
-		MethodParameter param = this.testMethod.annot(requestPart().name("name")).arg(List.class, Person.class);
+		MethodParameter param = this.testMethod.annot(requestPart()).arg(List.class, Person.class);
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
 		bodyBuilder.part("name", new Person("Jones"));
 		bodyBuilder.part("name", new Person("James"));
@@ -128,7 +133,7 @@ public class RequestPartMethodArgumentResolverTests {
 
 	@Test
 	public void monoPerson() {
-		MethodParameter param = this.testMethod.annot(requestPart().name("name")).arg(Mono.class, Person.class);
+		MethodParameter param = this.testMethod.annot(requestPart()).arg(Mono.class, Person.class);
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
 		bodyBuilder.part("name", new Person("Jones"));
 		Mono<Person> actual = resolveArgument(param, bodyBuilder);
@@ -138,7 +143,7 @@ public class RequestPartMethodArgumentResolverTests {
 
 	@Test
 	public void fluxPerson() {
-		MethodParameter param = this.testMethod.annot(requestPart().name("name")).arg(Flux.class, Person.class);
+		MethodParameter param = this.testMethod.annot(requestPart()).arg(Flux.class, Person.class);
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
 		bodyBuilder.part("name", new Person("Jones"));
 		bodyBuilder.part("name", new Person("James"));
@@ -151,7 +156,7 @@ public class RequestPartMethodArgumentResolverTests {
 
 	@Test
 	public void part() {
-		MethodParameter param = this.testMethod.annot(requestPart().name("name")).arg(Part.class);
+		MethodParameter param = this.testMethod.annot(requestPart()).arg(Part.class);
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
 		bodyBuilder.part("name", new Person("Jones"));
 		Part actual = resolveArgument(param, bodyBuilder);
@@ -162,7 +167,7 @@ public class RequestPartMethodArgumentResolverTests {
 
 	@Test
 	public void listPart() {
-		MethodParameter param = this.testMethod.annot(requestPart().name("name")).arg(List.class, Part.class);
+		MethodParameter param = this.testMethod.annot(requestPart()).arg(List.class, Part.class);
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
 		bodyBuilder.part("name", new Person("Jones"));
 		bodyBuilder.part("name", new Person("James"));
@@ -174,7 +179,7 @@ public class RequestPartMethodArgumentResolverTests {
 
 	@Test
 	public void monoPart() {
-		MethodParameter param = this.testMethod.annot(requestPart().name("name")).arg(Mono.class, Part.class);
+		MethodParameter param = this.testMethod.annot(requestPart()).arg(Mono.class, Part.class);
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
 		bodyBuilder.part("name", new Person("Jones"));
 		Mono<Part> actual = resolveArgument(param, bodyBuilder);
@@ -185,7 +190,7 @@ public class RequestPartMethodArgumentResolverTests {
 
 	@Test
 	public void fluxPart() {
-		MethodParameter param = this.testMethod.annot(requestPart().name("name")).arg(Flux.class, Part.class);
+		MethodParameter param = this.testMethod.annot(requestPart()).arg(Flux.class, Part.class);
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
 		bodyBuilder.part("name", new Person("Jones"));
 		bodyBuilder.part("name", new Person("James"));
@@ -195,6 +200,43 @@ public class RequestPartMethodArgumentResolverTests {
 		assertEquals("{\"name\":\"Jones\"}", partToUtf8String(parts.get(0)));
 		assertEquals("{\"name\":\"James\"}", partToUtf8String(parts.get(1)));
 	}
+
+	@Test
+	public void personRequired() {
+		MethodParameter param = this.testMethod.annot(requestPart()).arg(Person.class);
+		ServerWebExchange exchange = createExchange(new MultipartBodyBuilder());
+		Mono<Object> result = this.resolver.resolveArgument(param, new BindingContext(), exchange);
+
+		StepVerifier.create(result).expectError(ServerWebInputException.class).verify();
+	}
+
+	@Test
+	public void personNotRequired() {
+		MethodParameter param = this.testMethod.annot(requestPart().notRequired()).arg(Person.class);
+		ServerWebExchange exchange = createExchange(new MultipartBodyBuilder());
+		Mono<Object> result = this.resolver.resolveArgument(param, new BindingContext(), exchange);
+
+		StepVerifier.create(result).verifyComplete();
+	}
+
+	@Test
+	public void partRequired() {
+		MethodParameter param = this.testMethod.annot(requestPart()).arg(Part.class);
+		ServerWebExchange exchange = createExchange(new MultipartBodyBuilder());
+		Mono<Object> result = this.resolver.resolveArgument(param, new BindingContext(), exchange);
+
+		StepVerifier.create(result).expectError(ServerWebInputException.class).verify();
+	}
+
+	@Test
+	public void partNotRequired() {
+		MethodParameter param = this.testMethod.annot(requestPart().notRequired()).arg(Part.class);
+		ServerWebExchange exchange = createExchange(new MultipartBodyBuilder());
+		Mono<Object> result = this.resolver.resolveArgument(param, new BindingContext(), exchange);
+
+		StepVerifier.create(result).verifyComplete();
+	}
+
 
 	@SuppressWarnings("unchecked")
 	private <T> T resolveArgument(MethodParameter param, MultipartBodyBuilder builder) {
@@ -237,7 +279,9 @@ public class RequestPartMethodArgumentResolverTests {
 			@RequestPart("name") Mono<Part> partMono,
 			@RequestPart("name") Flux<Part> partFlux,
 			@RequestPart("name") List<Part> partList,
-			String notAnnotated) {}
+			@RequestPart(name = "anotherPart", required = false) Person anotherPerson,
+			@RequestPart(name = "anotherPart", required = false) Part anotherPart,
+			Person notAnnotated) {}
 
 
 	private static class Person {
