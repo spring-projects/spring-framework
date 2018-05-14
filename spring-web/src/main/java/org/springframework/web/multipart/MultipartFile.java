@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.springframework.core.io.InputStreamSource;
+import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 
 /**
@@ -92,6 +93,17 @@ public interface MultipartFile extends InputStreamSource {
 	 */
 	@Override
 	InputStream getInputStream() throws IOException;
+
+	/**
+	 * Return a Resource representation of this MultipartFile. This can be used
+	 * as input to the {@code RestTemplate} or the {@code WebClient} to expose
+	 * content length and the filename along with the InputStream.
+	 * @return this MultipartFile adapted to the Resource contract
+	 * @since 5.1
+	 */
+	default Resource getResource() {
+		return new MultipartFileResource(this);
+	}
 
 	/**
 	 * Transfer the received file to the given destination file.
