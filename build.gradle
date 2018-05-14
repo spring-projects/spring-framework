@@ -43,7 +43,7 @@ configure(allprojects) { project ->
 
 	ext.aspectjVersion       = "1.9.1"
 	ext.freemarkerVersion    = "2.3.28"
-	ext.groovyVersion        = "2.4.15"
+	ext.groovyVersion        = "2.5.0-rc-2"
 	ext.hsqldbVersion        = "2.4.0"
 	ext.jackson2Version      = "2.9.5"
 	ext.jettyVersion         = "9.4.10.v20180503"
@@ -52,7 +52,7 @@ configure(allprojects) { project ->
 	ext.junitVintageVersion  = "5.2.0"
 	ext.kotlinVersion        = "1.2.41"
 	ext.log4jVersion         = "2.11.0"
-	ext.nettyVersion         = "4.1.24.Final"
+	ext.nettyVersion         = "4.1.25.Final"
 	ext.reactorVersion       = "Californium-BUILD-SNAPSHOT"
 	ext.rxjavaVersion        = "1.3.8"
 	ext.rxjavaAdapterVersion = "1.2.1"
@@ -60,7 +60,7 @@ configure(allprojects) { project ->
 	ext.slf4jVersion         = "1.7.25"	  // spring-jcl + consistent 3rd party deps
 	ext.tiles3Version        = "3.0.8"
 	ext.tomcatVersion        = "9.0.8"
-	ext.undertowVersion      = "2.0.6.Final"
+	ext.undertowVersion      = "2.0.7.Final"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
@@ -272,7 +272,7 @@ configure(rootProject) {
 		testCompile("javax.servlet:javax.servlet-api:3.1.0")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-		testCompile("org.hibernate:hibernate-core:5.1.13.Final")
+		testCompile("org.hibernate:hibernate-core:5.1.14.Final")
 	}
 
 	artifacts {
