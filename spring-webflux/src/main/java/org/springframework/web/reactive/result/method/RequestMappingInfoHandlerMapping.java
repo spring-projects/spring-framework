@@ -365,6 +365,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 				if (result.contains(HttpMethod.GET)) {
 					result.add(HttpMethod.HEAD);
 				}
+				result.add(HttpMethod.OPTIONS);
 				return result;
 			}
 		}

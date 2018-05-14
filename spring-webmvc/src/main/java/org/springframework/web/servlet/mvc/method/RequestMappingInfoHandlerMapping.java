@@ -443,6 +443,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 						result.add(HttpMethod.HEAD);
 					}
 				}
+				result.add(HttpMethod.OPTIONS);
 			}
 			return result;
 		}

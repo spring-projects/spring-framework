@@ -1776,7 +1776,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		getServlet().service(request, response);
 
 		assertEquals(200, response.getStatus());
-		assertEquals("GET,HEAD", response.getHeader("Allow"));
+		assertEquals("GET,HEAD,OPTIONS", response.getHeader("Allow"));
 		assertTrue(response.getContentAsByteArray().length == 0);
 	}
 

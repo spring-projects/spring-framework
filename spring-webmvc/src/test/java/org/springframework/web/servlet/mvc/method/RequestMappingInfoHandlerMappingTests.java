@@ -172,8 +172,8 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test
 	public void getHandlerHttpOptions() throws Exception {
-		testHttpOptions("/foo", "GET,HEAD");
-		testHttpOptions("/person/1", "PUT");
+		testHttpOptions("/foo", "GET,HEAD,OPTIONS");
+		testHttpOptions("/person/1", "PUT,OPTIONS");
 		testHttpOptions("/persons", "GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS");
 		testHttpOptions("/something", "PUT,POST");
 	}
