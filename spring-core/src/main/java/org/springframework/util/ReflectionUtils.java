@@ -862,10 +862,10 @@ public abstract class ReflectionUtils {
 
 
 	/**
-	 * Pre-built MethodFilter that matches all non-bridge methods
+	 * Pre-built MethodFilter that matches all non-bridge non-synthetic methods
 	 * which are not declared on {@code java.lang.Object}.
 	 */
 	public static final MethodFilter USER_DECLARED_METHODS =
-			(method -> (!method.isBridge() && method.getDeclaringClass() != Object.class));
+			(method -> (!method.isBridge() && !method.isSynthetic() && method.getDeclaringClass() != Object.class));
 
 }
