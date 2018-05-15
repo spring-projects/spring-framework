@@ -169,7 +169,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 		}
 
 		this.methodResolver = new ControllerMethodResolver(this.argumentResolverConfigurer,
-				this.messageReaders, this.reactiveAdapterRegistry, this.applicationContext);
+				this.reactiveAdapterRegistry, this.applicationContext, this.messageReaders);
 
 		this.modelInitializer = new ModelInitializer(this.methodResolver, this.reactiveAdapterRegistry);
 	}
