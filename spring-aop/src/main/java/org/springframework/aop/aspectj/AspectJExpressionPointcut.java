@@ -19,6 +19,7 @@ package org.springframework.aop.aspectj;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -428,6 +429,9 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	private ShadowMatch getTargetShadowMatch(Method method, @Nullable Class<?> targetClass) {
 		Method targetMethod = AopUtils.getMostSpecificMethod(method, targetClass);
 		if (targetClass != null && targetMethod.getDeclaringClass().isInterface()) {
+			// Try to build the most specific interface possible for inherited methods to be
+			// considered for sub-interface matches as well, in particular for proxy classes.
+			// Note: AspectJ is only going to take Method.getDeclaringClass() into account.
 			Set<Class<?>> ifcs = ClassUtils.getAllInterfacesForClassAsSet(targetClass);
 			if (ifcs.size() > 1) {
 				Class<?> compositeInterface = ClassUtils.createCompositeInterface(
@@ -465,7 +469,11 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 								fallbackExpression = null;
 							}
 						}
-						if (shadowMatch == null && targetMethod != originalMethod) {
+						if (targetMethod != originalMethod && (shadowMatch == null ||
+								(shadowMatch.neverMatches() && Proxy.isProxyClass(targetMethod.getDeclaringClass())))) {
+							// Fall back to the plain original method in case of no resolvable match or a
+							// negative match on a proxy class (which doesn't carry any annotations on its
+							// redeclared methods).
 							methodToMatch = originalMethod;
 							try {
 								shadowMatch = obtainPointcutExpression().matchesMethodExecution(methodToMatch);
