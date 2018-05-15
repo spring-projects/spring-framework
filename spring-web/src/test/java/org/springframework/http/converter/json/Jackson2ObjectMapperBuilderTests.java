@@ -32,8 +32,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -87,6 +90,7 @@ import static org.junit.Assert.assertTrue;
  * Test class for {@link Jackson2ObjectMapperBuilder}.
  *
  * @author Sebastien Deleuze
+ * @author Eddú Meléndez
  */
 @SuppressWarnings("deprecation")
 public class Jackson2ObjectMapperBuilderTests {
@@ -499,6 +503,19 @@ public class Jackson2ObjectMapperBuilderTests {
 	}
 
 
+	@Test
+	public void visibility() throws JsonProcessingException {
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
+				.registerVisibility(PropertyAccessor.GETTER, Visibility.NONE)
+				.registerVisibility(PropertyAccessor.FIELD, Visibility.ANY)
+				.build();
+
+		String json = objectMapper.writeValueAsString(new JacksonVisibilityBean());
+		assertThat(json, containsString("property1"));
+		assertThat(json, containsString("property2"));
+		assertThat(json, not(containsString("property3")));
+	}
+
 	public static class CustomIntegerModule extends Module {
 
 		@Override
@@ -583,6 +600,18 @@ public class Jackson2ObjectMapperBuilderTests {
 		public void setList(List<T> list) {
 			this.list = list;
 		}
+	}
+
+	public static class JacksonVisibilityBean {
+
+		private String property1;
+
+		public String property2;
+
+		public String getProperty3() {
+			return null;
+		}
+
 	}
 
 }

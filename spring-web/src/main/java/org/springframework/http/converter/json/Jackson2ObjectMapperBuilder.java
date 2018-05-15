@@ -27,8 +27,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -91,6 +93,7 @@ import org.springframework.util.xml.StaxUtils;
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
  * @author Tadaya Tsuyukubo
+ * @authos Eddú Meléndez
  * @since 4.1.1
  * @see #build()
  * @see #configure(ObjectMapper)
@@ -109,6 +112,8 @@ public class Jackson2ObjectMapperBuilder {
 	private final Map<Class<?>, JsonDeserializer<?>> deserializers = new LinkedHashMap<>();
 
 	private final Map<Object, Boolean> features = new HashMap<>();
+
+	private final Map<PropertyAccessor, JsonAutoDetect.Visibility> visibilities = new HashMap<>();
 
 	private boolean createXmlMapper = false;
 
@@ -544,6 +549,17 @@ public class Jackson2ObjectMapperBuilder {
 	}
 
 	/**
+	 * Specify visibilities.
+	 * @see com.fasterxml.jackson.annotation.PropertyAccessor
+	 * @see com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility
+	 */
+	public Jackson2ObjectMapperBuilder registerVisibility(PropertyAccessor accessor,
+			JsonAutoDetect.Visibility visibility) {
+		this.visibilities.put(accessor, visibility);
+		return this;
+	}
+
+	/**
 	 * Set whether to let Jackson find available modules via the JDK ServiceLoader,
 	 * based on META-INF metadata in the classpath.
 	 * <p>If this mode is not set, Spring's Jackson2ObjectMapperBuilder itself
@@ -671,6 +687,10 @@ public class Jackson2ObjectMapperBuilder {
 
 		customizeDefaultFeatures(objectMapper);
 		this.features.forEach((feature, enabled) -> configureFeature(objectMapper, feature, enabled));
+
+		for (PropertyAccessor propertyAccessor : this.visibilities.keySet()) {
+			objectMapper.setVisibility(propertyAccessor, this.visibilities.get(propertyAccessor));
+		}
 
 		if (this.handlerInstantiator != null) {
 			objectMapper.setHandlerInstantiator(this.handlerInstantiator);
