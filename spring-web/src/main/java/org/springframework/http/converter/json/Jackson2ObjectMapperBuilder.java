@@ -677,7 +677,7 @@ public class Jackson2ObjectMapperBuilder {
 			objectMapper.setFilterProvider(this.filters);
 		}
 
-		this.mixIns.forEach((target, mixinSource) -> objectMapper.addMixIn(target, mixinSource));
+		this.mixIns.forEach(objectMapper::addMixIn);
 
 		if (!this.serializers.isEmpty() || !this.deserializers.isEmpty()) {
 			SimpleModule module = new SimpleModule();
