@@ -540,7 +540,14 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 		}
 
 		registerListeners();
-		registerJobsAndTriggers();
+		try {
+			// Catching quartz fails to initialize, shutdown scheduler and rethrows
+			registerJobsAndTriggers();
+		} catch (Exception e) {
+			waitForJobsToCompleteOnShutdown = true;
+			destroy();
+			throw e;
+		}
 	}
 
 
