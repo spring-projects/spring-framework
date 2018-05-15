@@ -2982,7 +2982,6 @@ in the primitive wrapper classes explicitly or using auto-boxing.
 [subs="verbatim,quotes"]
 ----
 	import javax.sql.DataSource;
-
 	import org.springframework.jdbc.core.JdbcTemplate;
 
 	public class ExecuteAnUpdate {
@@ -4023,7 +4022,7 @@ data from the `t_actor` relation to an instance of the `Actor` class.
 
 		public ActorMappingQuery(DataSource ds) {
 			super(ds, "select id, first_name, last_name from t_actor where id = ?");
-			super.declareParameter(new SqlParameter("id", Types.INTEGER));
+			declareParameter(new SqlParameter("id", Types.INTEGER));
 			compile();
 		}
 
@@ -4044,7 +4043,7 @@ for this customer query takes the `DataSource` as the only parameter. In this
 constructor you call the constructor on the superclass with the `DataSource` and the SQL
 that should be executed to retrieve the rows for this query. This SQL will be used to
 create a `PreparedStatement` so it may contain place holders for any parameters to be
-passed in during execution.You must declare each parameter using the `declareParameter`
+passed in during execution. You must declare each parameter using the `declareParameter`
 method passing in an `SqlParameter`. The `SqlParameter` takes a name and the JDBC type
 as defined in `java.sql.Types`. After you define all parameters, you call the
 `compile()` method so the statement can be prepared and later executed. This class is
@@ -4097,9 +4096,7 @@ class since it can easily be parameterized by setting SQL and declaring paramete
 [subs="verbatim"]
 ----
 	import java.sql.Types;
-
 	import javax.sql.DataSource;
-
 	import org.springframework.jdbc.core.SqlParameter;
 	import org.springframework.jdbc.object.SqlUpdate;
 
@@ -4178,9 +4175,7 @@ output parameter, in this case only one, using the parameter name as the key.
 	import java.util.Date;
 	import java.util.HashMap;
 	import java.util.Map;
-
 	import javax.sql.DataSource;
-
 	import org.springframework.beans.factory.annotation.Autowired;
 	import org.springframework.jdbc.core.SqlOutParameter;
 	import org.springframework.jdbc.object.StoredProcedure;
@@ -4227,13 +4222,12 @@ Oracle REF cursors).
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
+	import java.util.HashMap;
+	import java.util.Map;
+	import javax.sql.DataSource;
 	import oracle.jdbc.OracleTypes;
 	import org.springframework.jdbc.core.SqlOutParameter;
 	import org.springframework.jdbc.object.StoredProcedure;
-
-	import javax.sql.DataSource;
-	import java.util.HashMap;
-	import java.util.Map;
 
 	public class TitlesAndGenresStoredProcedure extends StoredProcedure {
 
@@ -4264,12 +4258,10 @@ the supplied `ResultSet`:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	import org.springframework.jdbc.core.RowMapper;
-
 	import java.sql.ResultSet;
 	import java.sql.SQLException;
-
 	import com.foo.domain.Title;
+	import org.springframework.jdbc.core.RowMapper;
 
 	public final class TitleMapper implements RowMapper<Title> {
 
@@ -4288,12 +4280,10 @@ the supplied `ResultSet`.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	import org.springframework.jdbc.core.RowMapper;
-
 	import java.sql.ResultSet;
 	import java.sql.SQLException;
-
 	import com.foo.domain.Genre;
+	import org.springframework.jdbc.core.RowMapper;
 
 	public final class GenreMapper implements RowMapper<Genre> {
 
@@ -4311,17 +4301,15 @@ delegate to the superclass' untyped `execute(Map parameters)` method (which has
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	import oracle.jdbc.OracleTypes;
-	import org.springframework.jdbc.core.SqlOutParameter;
-	import org.springframework.jdbc.core.SqlParameter;
-	import org.springframework.jdbc.object.StoredProcedure;
-
-	import javax.sql.DataSource;
-
 	import java.sql.Types;
 	import java.util.Date;
 	import java.util.HashMap;
 	import java.util.Map;
+	import javax.sql.DataSource;
+	import oracle.jdbc.OracleTypes;
+	import org.springframework.jdbc.core.SqlOutParameter;
+	import org.springframework.jdbc.core.SqlParameter;
+	import org.springframework.jdbc.object.StoredProcedure;
 
 	public class TitlesAfterDateStoredProcedure extends StoredProcedure {
 
@@ -4416,6 +4404,7 @@ dependency injection.
 	final File clobIn = new File("large.txt");
 	final InputStream clobIs = new FileInputStream(clobIn);
 	final InputStreamReader clobReader = new InputStreamReader(clobIs);
+
 	jdbcTemplate.execute(
 		"INSERT INTO lob_table (id, a_clob, a_blob) VALUES (?, ?, ?)",
 		new AbstractLobCreatingPreparedStatementCallback(lobHandler) { # <1>
@@ -4426,6 +4415,7 @@ dependency injection.
 			}
 		}
 	);
+
 	blobIs.close();
 	clobReader.close();
 ----
@@ -4512,21 +4502,24 @@ declaration of an `SqlOutParameter`.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	final TestItem = new TestItem(123L, "A test item",
-			new SimpleDateFormat("yyyy-M-d").parse("2010-12-31"));
+	public class TestItemStoredProcedure extends StoredProcedure {
 
-	declareParameter(new SqlOutParameter("item", OracleTypes.STRUCT, "ITEM_TYPE",
-		new SqlReturnType() {
-			public Object getTypeValue(CallableStatement cs, int colIndx, int sqlType, String typeName) throws SQLException {
-				STRUCT struct = (STRUCT) cs.getObject(colIndx);
-				Object[] attr = struct.getAttributes();
-				TestItem item = new TestItem();
-				item.setId(((Number) attr[0]).longValue());
-				item.setDescription((String) attr[1]);
-				item.setExpirationDate((java.util.Date) attr[2]);
-				return item;
-			}
-		}));
+		public TestItemStoredProcedure(DataSource dataSource) {
+			...
+			declareParameter(new SqlOutParameter("item", OracleTypes.STRUCT, "ITEM_TYPE",
+				new SqlReturnType() {
+					public Object getTypeValue(CallableStatement cs, int colIndx, int sqlType, String typeName) throws SQLException {
+						STRUCT struct = (STRUCT) cs.getObject(colIndx);
+						Object[] attr = struct.getAttributes();
+						TestItem item = new TestItem();
+						item.setId(((Number) attr[0]).longValue());
+						item.setDescription((String) attr[1]);
+						item.setExpirationDate((java.util.Date) attr[2]);
+						return item;
+					}
+				}));
+			...
+		}
 ----
 
 You use the `SqlTypeValue` to pass in the value of a Java object like `TestItem` into a
@@ -4538,7 +4531,7 @@ the following example, or ``ArrayDescriptor``s.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	final TestItem = new TestItem(123L, "A test item",
+	final TestItem testItem = new TestItem(123L, "A test item",
 			new SimpleDateFormat("yyyy-M-d").parse("2010-12-31"));
 
 	SqlTypeValue value = new AbstractSqlTypeValue() {
@@ -6257,7 +6250,6 @@ constructs a Spring application context, and calls these two methods.
 	import java.io.IOException;
 	import javax.xml.transform.stream.StreamResult;
 	import javax.xml.transform.stream.StreamSource;
-
 	import org.springframework.context.ApplicationContext;
 	import org.springframework.context.support.ClassPathXmlApplicationContext;
 	import org.springframework.oxm.Marshaller;
