@@ -486,61 +486,21 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 			this.resourceLoader = this.applicationContext;
 		}
 
-		// Initialize the SchedulerFactory instance...
-		SchedulerFactory schedulerFactory = prepareSchedulerFactory();
-
-		if (this.resourceLoader != null) {
-			// Make given ResourceLoader available for SchedulerFactory configuration.
-			configTimeResourceLoaderHolder.set(this.resourceLoader);
-		}
-		if (this.taskExecutor != null) {
-			// Make given TaskExecutor available for SchedulerFactory configuration.
-			configTimeTaskExecutorHolder.set(this.taskExecutor);
-		}
-		if (this.dataSource != null) {
-			// Make given DataSource available for SchedulerFactory configuration.
-			configTimeDataSourceHolder.set(this.dataSource);
-		}
-		if (this.nonTransactionalDataSource != null) {
-			// Make given non-transactional DataSource available for SchedulerFactory configuration.
-			configTimeNonTransactionalDataSourceHolder.set(this.nonTransactionalDataSource);
-		}
-
-		// Get Scheduler instance from SchedulerFactory.
+		// Initialize the Scheduler instance...
+		this.scheduler = prepareScheduler(prepareSchedulerFactory());
 		try {
-			this.scheduler = createScheduler(schedulerFactory, this.schedulerName);
-			populateSchedulerContext();
-
-			if (!this.jobFactorySet && !(this.scheduler instanceof RemoteScheduler)) {
-				// Use AdaptableJobFactory as default for a local Scheduler, unless when
-				// explicitly given a null value through the "jobFactory" bean property.
-				this.jobFactory = new AdaptableJobFactory();
-			}
-			if (this.jobFactory != null) {
-				if (this.jobFactory instanceof SchedulerContextAware) {
-					((SchedulerContextAware) this.jobFactory).setSchedulerContext(this.scheduler.getContext());
-				}
-				this.scheduler.setJobFactory(this.jobFactory);
-			}
+			registerListeners();
+			registerJobsAndTriggers();
 		}
-
-		finally {
-			if (this.resourceLoader != null) {
-				configTimeResourceLoaderHolder.remove();
+		catch (Exception ex) {
+			try {
+				this.scheduler.shutdown(true);
 			}
-			if (this.taskExecutor != null) {
-				configTimeTaskExecutorHolder.remove();
+			catch (Exception ex2) {
+				logger.debug("Scheduler shutdown exception after registration failure", ex2);
 			}
-			if (this.dataSource != null) {
-				configTimeDataSourceHolder.remove();
-			}
-			if (this.nonTransactionalDataSource != null) {
-				configTimeNonTransactionalDataSourceHolder.remove();
-			}
+			throw ex;
 		}
-
-		registerListeners();
-		registerJobsAndTriggers();
 	}
 
 
@@ -607,6 +567,59 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 		schedulerFactory.initialize(mergedProps);
 	}
 
+	private Scheduler prepareScheduler(SchedulerFactory schedulerFactory) throws SchedulerException {
+		if (this.resourceLoader != null) {
+			// Make given ResourceLoader available for SchedulerFactory configuration.
+			configTimeResourceLoaderHolder.set(this.resourceLoader);
+		}
+		if (this.taskExecutor != null) {
+			// Make given TaskExecutor available for SchedulerFactory configuration.
+			configTimeTaskExecutorHolder.set(this.taskExecutor);
+		}
+		if (this.dataSource != null) {
+			// Make given DataSource available for SchedulerFactory configuration.
+			configTimeDataSourceHolder.set(this.dataSource);
+		}
+		if (this.nonTransactionalDataSource != null) {
+			// Make given non-transactional DataSource available for SchedulerFactory configuration.
+			configTimeNonTransactionalDataSourceHolder.set(this.nonTransactionalDataSource);
+		}
+
+		// Get Scheduler instance from SchedulerFactory.
+		try {
+			Scheduler scheduler = createScheduler(schedulerFactory, this.schedulerName);
+			populateSchedulerContext(scheduler);
+
+			if (!this.jobFactorySet && !(scheduler instanceof RemoteScheduler)) {
+				// Use AdaptableJobFactory as default for a local Scheduler, unless when
+				// explicitly given a null value through the "jobFactory" bean property.
+				this.jobFactory = new AdaptableJobFactory();
+			}
+			if (this.jobFactory != null) {
+				if (this.jobFactory instanceof SchedulerContextAware) {
+					((SchedulerContextAware) this.jobFactory).setSchedulerContext(scheduler.getContext());
+				}
+				scheduler.setJobFactory(this.jobFactory);
+			}
+			return scheduler;
+		}
+
+		finally {
+			if (this.resourceLoader != null) {
+				configTimeResourceLoaderHolder.remove();
+			}
+			if (this.taskExecutor != null) {
+				configTimeTaskExecutorHolder.remove();
+			}
+			if (this.dataSource != null) {
+				configTimeDataSourceHolder.remove();
+			}
+			if (this.nonTransactionalDataSource != null) {
+				configTimeNonTransactionalDataSourceHolder.remove();
+			}
+		}
+	}
+
 	/**
 	 * Create the Scheduler instance for the given factory and scheduler name.
 	 * Called by {@link #afterPropertiesSet}.
@@ -658,10 +671,10 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * Expose the specified context attributes and/or the current
 	 * ApplicationContext in the Quartz SchedulerContext.
 	 */
-	private void populateSchedulerContext() throws SchedulerException {
+	private void populateSchedulerContext(Scheduler scheduler) throws SchedulerException {
 		// Put specified objects into Scheduler context.
 		if (this.schedulerContextMap != null) {
-			getScheduler().getContext().putAll(this.schedulerContextMap);
+			scheduler.getContext().putAll(this.schedulerContextMap);
 		}
 
 		// Register ApplicationContext in Scheduler context.
@@ -671,7 +684,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 					"SchedulerFactoryBean needs to be set up in an ApplicationContext " +
 					"to be able to handle an 'applicationContextSchedulerContextKey'");
 			}
-			getScheduler().getContext().put(this.applicationContextSchedulerContextKey, this.applicationContext);
+			scheduler.getContext().put(this.applicationContextSchedulerContextKey, this.applicationContext);
 		}
 	}
 
