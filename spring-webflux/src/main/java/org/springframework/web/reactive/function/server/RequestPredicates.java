@@ -266,10 +266,17 @@ public abstract class RequestPredicates {
 	 */
 	public static RequestPredicate pathExtension(String extension) {
 		Assert.notNull(extension, "'extension' must not be null");
-		return pathExtension(pathExtension -> {
-			boolean match = extension.equalsIgnoreCase(pathExtension);
-			traceMatch("Extension", extension, pathExtension, match);
-			return match;
+		return pathExtension(new Predicate<String>() {
+			@Override
+			public boolean test(String pathExtension) {
+				boolean match = extension.equalsIgnoreCase(pathExtension);
+				traceMatch("Extension", extension, pathExtension, match);
+				return match;
+			}
+
+			public String toString() {
+				return String.format("*.%s", extension);
+			}
 		});
 	}
 
@@ -281,11 +288,30 @@ public abstract class RequestPredicates {
 	 * file extension
 	 */
 	public static RequestPredicate pathExtension(Predicate<String> extensionPredicate) {
-		Assert.notNull(extensionPredicate, "'extensionPredicate' must not be null");
-		return request -> {
-			String pathExtension = UriUtils.extractFileExtension(request.path());
-			return extensionPredicate.test(pathExtension);
-		};
+		return new PathExtensionPredicate(extensionPredicate);
+	}
+
+	/**
+	 * Return a {@code RequestPredicate} that matches if the request's query parameter of the given name
+	 * has the given value
+	 * @param name the name of the query parameter to test against
+	 * @param value the value of the query parameter to test against
+	 * @return a predicate that matches if the query parameter has the given value
+	 * @see ServerRequest#queryParam(String)
+	 * @since 5.0.7
+	 */
+	public static RequestPredicate queryParam(String name, String value) {
+		return queryParam(name, new Predicate<String>() {
+			@Override
+			public boolean test(String s) {
+				return s.equals(value);
+			}
+
+			@Override
+			public String toString() {
+				return String.format("== %s", value);
+			}
+		});
 	}
 
 	/**
@@ -297,10 +323,7 @@ public abstract class RequestPredicates {
 	 * @see ServerRequest#queryParam(String)
 	 */
 	public static RequestPredicate queryParam(String name, Predicate<String> predicate) {
-		return request -> {
-			Optional<String> s = request.queryParam(name);
-			return s.filter(predicate).isPresent();
-		};
+		return new QueryParamPredicate(name, predicate);
 	}
 
 
@@ -402,6 +425,56 @@ public abstract class RequestPredicates {
 		}
 	}
 
+
+	private static class PathExtensionPredicate implements RequestPredicate {
+
+		private final Predicate<String> extensionPredicate;
+
+		public PathExtensionPredicate(Predicate<String> extensionPredicate) {
+			Assert.notNull(extensionPredicate, "Predicate must not be null");
+			this.extensionPredicate = extensionPredicate;
+		}
+
+		@Override
+		public boolean test(ServerRequest request) {
+			String pathExtension = UriUtils.extractFileExtension(request.path());
+			return this.extensionPredicate.test(pathExtension);
+		}
+
+		@Override
+		public String toString() {
+			return this.extensionPredicate.toString();
+		}
+
+	}
+
+
+	private static class QueryParamPredicate implements RequestPredicate {
+
+		private final String name;
+
+		private final Predicate<String> predicate;
+
+		public QueryParamPredicate(String name, Predicate<String> predicate) {
+			Assert.notNull(name, "Name must not be null");
+			Assert.notNull(predicate, "Predicate must not be null");
+			this.name = name;
+			this.predicate = predicate;
+		}
+
+		@Override
+		public boolean test(ServerRequest request) {
+			Optional<String> s = request.queryParam(this.name);
+			return s.filter(this.predicate).isPresent();
+		}
+
+		@Override
+		public String toString() {
+			return String.format("?%s %s", this.name, this.predicate);
+		}
+	}
+
+
 	static class AndRequestPredicate implements RequestPredicate {
 
 		private final RequestPredicate left;
@@ -430,6 +503,7 @@ public abstract class RequestPredicates {
 			return String.format("(%s && %s)", this.left, this.right);
 		}
 	}
+
 
 	static class OrRequestPredicate implements RequestPredicate {
 
@@ -465,6 +539,7 @@ public abstract class RequestPredicates {
 			return String.format("(%s || %s)", this.left, this.right);
 		}
 	}
+
 
 	private static class SubPathServerRequestWrapper implements ServerRequest {
 
