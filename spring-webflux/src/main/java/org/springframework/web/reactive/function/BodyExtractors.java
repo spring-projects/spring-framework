@@ -165,19 +165,22 @@ public abstract class BodyExtractors {
 
 	/**
 	 * Return a {@code BodyExtractor} that reads form data into a {@link MultiValueMap}.
+	 * <p>As of 5.1 this method can also be used on the client side to read form
+	 * data from a server response (e.g. OAuth).
 	 * @return a {@code BodyExtractor} that reads form data
 	 */
-	// Note that the returned BodyExtractor is parameterized to ServerHttpRequest, not
-	// ReactiveHttpInputMessage like other methods, since reading form data only typically happens on
-	// the server-side
-	public static BodyExtractor<Mono<MultiValueMap<String, String>>, ServerHttpRequest> toFormData() {
-		return (request, context) -> {
+	public static BodyExtractor<Mono<MultiValueMap<String, String>>, ReactiveHttpInputMessage> toFormData() {
+		return (message, context) -> {
 			ResolvableType type = FORM_MAP_TYPE;
 			HttpMessageReader<MultiValueMap<String, String>> reader =
 					messageReader(type, MediaType.APPLICATION_FORM_URLENCODED, context);
-			return context.serverResponse()
-					.map(response -> reader.readMono(type, type, request, response, context.hints()))
-					.orElseGet(() -> reader.readMono(type, request, context.hints()));
+			Optional<ServerHttpResponse> response = context.serverResponse();
+			if (response.isPresent() && message instanceof ServerHttpRequest) {
+				return reader.readMono(type, type, (ServerHttpRequest) message, response.get(), context.hints());
+			}
+			else {
+				return reader.readMono(type, message, context.hints());
+			}
 		};
 	}
 

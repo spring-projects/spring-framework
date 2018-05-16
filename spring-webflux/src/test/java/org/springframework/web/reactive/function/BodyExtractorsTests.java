@@ -107,7 +107,7 @@ public class BodyExtractorsTests {
 
 
 	@Test
-	public void toMono() throws Exception {
+	public void toMono() {
 		BodyExtractor<Mono<String>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(String.class);
 
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
@@ -125,7 +125,7 @@ public class BodyExtractorsTests {
 	}
 
 	@Test
-	public void toMonoParameterizedTypeReference() throws Exception {
+	public void toMonoParameterizedTypeReference() {
 		BodyExtractor<Mono<Map<String, String>>, ReactiveHttpInputMessage> extractor =
 				BodyExtractors.toMono(new ParameterizedTypeReference<Map<String, String>>() {});
 
@@ -147,7 +147,7 @@ public class BodyExtractorsTests {
 	}
 
 	@Test
-	public void toMonoWithHints() throws Exception {
+	public void toMonoWithHints() {
 		BodyExtractor<Mono<User>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(User.class);
 		this.hints.put(JSON_VIEW_HINT, SafeToDeserialize.class);
 
@@ -172,7 +172,7 @@ public class BodyExtractorsTests {
 	}
 
 	@Test // SPR-15758
-	public void toMonoWithEmptyBodyAndNoContentType() throws Exception {
+	public void toMonoWithEmptyBodyAndNoContentType() {
 		BodyExtractor<Mono<Map<String, String>>, ReactiveHttpInputMessage> extractor =
 				BodyExtractors.toMono(new ParameterizedTypeReference<Map<String, String>>() {});
 
@@ -183,7 +183,7 @@ public class BodyExtractorsTests {
 	}
 
 	@Test
-	public void toFlux() throws Exception {
+	public void toFlux() {
 		BodyExtractor<Flux<String>, ReactiveHttpInputMessage> extractor = BodyExtractors.toFlux(String.class);
 
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
@@ -201,7 +201,7 @@ public class BodyExtractorsTests {
 	}
 
 	@Test
-	public void toFluxWithHints() throws Exception {
+	public void toFluxWithHints() {
 		BodyExtractor<Flux<User>, ReactiveHttpInputMessage> extractor = BodyExtractors.toFlux(User.class);
 		this.hints.put(JSON_VIEW_HINT, SafeToDeserialize.class);
 
@@ -230,7 +230,7 @@ public class BodyExtractorsTests {
 	}
 
 	@Test
-	public void toFluxUnacceptable() throws Exception {
+	public void toFluxUnacceptable() {
 		BodyExtractor<Flux<String>, ReactiveHttpInputMessage> extractor = BodyExtractors.toFlux(String.class);
 
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
@@ -266,9 +266,7 @@ public class BodyExtractorsTests {
 	}
 
 	@Test
-	public void toFormData() throws Exception {
-		BodyExtractor<Mono<MultiValueMap<String, String>>, ServerHttpRequest> extractor = BodyExtractors.toFormData();
-
+	public void toFormData() {
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
 		String text = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
 		DefaultDataBuffer dataBuffer = factory.wrap(ByteBuffer.wrap(text.getBytes(StandardCharsets.UTF_8)));
@@ -278,7 +276,7 @@ public class BodyExtractorsTests {
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
 				.body(body);
 
-		Mono<MultiValueMap<String, String>> result = extractor.extract(request, this.context);
+		Mono<MultiValueMap<String, String>> result = BodyExtractors.toFormData().extract(request, this.context);
 
 		StepVerifier.create(result)
 				.consumeNextWith(form -> {
@@ -295,7 +293,7 @@ public class BodyExtractorsTests {
 	}
 
 	@Test
-	public void toParts() throws Exception {
+	public void toParts() {
 		BodyExtractor<Flux<Part>, ServerHttpRequest> extractor = BodyExtractors.toParts();
 
 		String bodyContents = "-----------------------------9051914041544843365972754266\r\n" +
@@ -353,7 +351,7 @@ public class BodyExtractorsTests {
 	}
 
 	@Test
-	public void toDataBuffers() throws Exception {
+	public void toDataBuffers() {
 		BodyExtractor<Flux<DataBuffer>, ReactiveHttpInputMessage> extractor = BodyExtractors.toDataBuffers();
 
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
