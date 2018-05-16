@@ -686,6 +686,22 @@
                                 ]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>
+						<xsd:attribute name="time-to-first-message" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	 Set the maximum time allowed in milliseconds after the WebSocket
+	 connection is established and before the first sub-protocol message is
+	 received.
+
+	 This handler is for WebSocket connections that use a sub-protocol.
+	 Therefore, we expect the client to send at least one sub-protocol message
+	 in the beginning, or else we assume the connection isn't doing well, e.g.
+	 proxy issue, slow network, and can be closed.
+
+	 By default this is set to 60,000 (1 minute).
+                                ]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
 					</xsd:complexType>
 				</xsd:element>
 				<xsd:element name="stomp-endpoint" minOccurs="1" maxOccurs="unbounded">

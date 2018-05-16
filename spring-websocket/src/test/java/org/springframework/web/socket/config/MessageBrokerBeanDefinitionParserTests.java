@@ -94,8 +94,8 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Test fixture for MessageBrokerBeanDefinitionParser.
- * See test configuration files websocket-config-broker-*.xml.
+ * Test fixture for {@link MessageBrokerBeanDefinitionParser}.
+ * Also see test configuration files websocket-config-broker-*.xml.
  *
  * @author Brian Clozel
  * @author Artem Bilan
@@ -147,6 +147,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertEquals(Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp"), subProtocolWsHandler.getSubProtocols());
 		assertEquals(25 * 1000, subProtocolWsHandler.getSendTimeLimit());
 		assertEquals(1024 * 1024, subProtocolWsHandler.getSendBufferSizeLimit());
+		assertEquals(30 * 1000, subProtocolWsHandler.getTimeToFirstMessage());
 
 		Map<String, SubProtocolHandler> handlerMap = subProtocolWsHandler.getProtocolHandlerMap();
 		StompSubProtocolHandler stompHandler = (StompSubProtocolHandler) handlerMap.get("v12.stomp");
