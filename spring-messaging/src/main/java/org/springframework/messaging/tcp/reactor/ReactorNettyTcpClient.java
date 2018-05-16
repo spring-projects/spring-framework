@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.util.concurrent.ImmediateEventExecutor;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.DirectProcessor;
 import reactor.core.publisher.Flux;
@@ -64,6 +66,8 @@ import org.springframework.util.concurrent.SettableListenableFuture;
  * @since 5.0
  */
 public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
+
+	private static Log logger = LogFactory.getLog(ReactorNettyTcpClient.class);
 
 	private static final int PUBLISH_ON_BUFFER_SIZE = 16;
 
@@ -201,7 +205,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 				.doOnNext(updateConnectMono(connectMono))
 				.doOnError(updateConnectMono(connectMono))
 				.doOnError(handler::afterConnectFailure)    // report all connect failures to the handler
-				.flatMap(NettyContext::onClose)                // post-connect issues
+				.flatMap(NettyContext::onClose)             // post-connect issues
 				.retryWhen(reconnectFunction(strategy))
 				.repeatWhen(reconnectFunction(strategy))
 				.subscribe();
@@ -281,6 +285,11 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 		});
 	}
 
+	@Override
+	public String toString() {
+		return "ReactorNettyTcpClient[" + this.tcpClient + "]";
+	}
+
 
 	private class ReactorNettyHandler implements BiFunction<NettyInbound, NettyOutbound, Publisher<Void>> {
 
@@ -293,6 +302,9 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 		@Override
 		@SuppressWarnings("unchecked")
 		public Publisher<Void> apply(NettyInbound inbound, NettyOutbound outbound) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Connected to " + inbound.remoteAddress());
+			}
 			DirectProcessor<Void> completion = DirectProcessor.create();
 			TcpConnection<P> connection = new ReactorNettyTcpConnection<>(inbound, outbound,  codec, completion);
 			scheduler.schedule(() -> connectionHandler.afterConnected(connection));
@@ -321,7 +333,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 		}
 
 		@Override
-		protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+		protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
 			Collection<Message<P>> messages = codec.decode(in);
 			out.addAll(messages);
 		}

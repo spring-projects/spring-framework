@@ -279,9 +279,9 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertEquals(5000, messageBroker.getSystemHeartbeatSendInterval());
 		assertThat(messageBroker.getDestinationPrefixes(), Matchers.containsInAnyOrder("/topic","/queue"));
 
-		List<Class<? extends MessageHandler>> subscriberTypes =
-				Arrays.<Class<? extends MessageHandler>>asList(SimpAnnotationMethodMessageHandler.class,
-						UserDestinationMessageHandler.class, StompBrokerRelayMessageHandler.class);
+		List<Class<? extends MessageHandler>> subscriberTypes = Arrays.asList(
+				SimpAnnotationMethodMessageHandler.class, UserDestinationMessageHandler.class,
+				StompBrokerRelayMessageHandler.class);
 		testChannel("clientInboundChannel", subscriberTypes, 2);
 		testExecutor("clientInboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
@@ -289,8 +289,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		testChannel("clientOutboundChannel", subscriberTypes, 1);
 		testExecutor("clientOutboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
-		subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(
-				StompBrokerRelayMessageHandler.class, UserDestinationMessageHandler.class);
+		subscriberTypes = Arrays.asList(StompBrokerRelayMessageHandler.class, UserDestinationMessageHandler.class);
 		testChannel("brokerChannel", subscriberTypes, 1);
 		try {
 			this.appContext.getBean("brokerChannelExecutor", ThreadPoolTaskExecutor.class);
