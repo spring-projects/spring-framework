@@ -526,14 +526,14 @@
 			<xsd:attribute name="allowed-origins" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-		Configure allowed {@code Origin} header values. Multiple origins may be specified
+		Configure allowed Origin header values. Multiple origins may be specified
 		as a comma-separated list.
 
 		This check is mostly designed for browser clients. There is noting preventing other
 		types of client to modify the Origin header value.
 
 		When SockJS is enabled and allowed origins are restricted, transport types that do not
-		use {@code Origin} headers for cross origin requests (jsonp-polling, iframe-xhr-polling,
+		use Origin headers for cross origin requests (jsonp-polling, iframe-xhr-polling,
 		iframe-eventsource and iframe-htmlfile) are disabled. As a consequence, IE6/IE7 won't be
 		supported anymore and IE8/IE9 will only be supported without cookies.
 
@@ -628,10 +628,10 @@
 
 	In general WebSocket servers expect that messages to a single WebSocket
 	session are sent from a single thread at a time. This is automatically
-	guaranteed when using {@code @EnableWebSocketMessageBroker} configuration.
+	guaranteed when using @EnableWebSocketMessageBroker configuration.
 	If message sending is slow, or at least slower than rate of messages sending,
-	subsequent messages are buffered until either the {@code sendTimeLimit}
-	or the {@code sendBufferSizeLimit} are reached at which point the session
+	subsequent messages are buffered until either the sendTimeLimit
+	or the sendBufferSizeLimit are reached at which point the session
 	state is cleared and an attempt is made to close the session.
 
 	NOTE that the session time limit is checked only
@@ -648,7 +648,7 @@
 	the server is using non-blocking IO such as Tomcat's NIO connector that
 	is used by default on Tomcat 8. If you must use blocking IO consider
 	customizing OS-level TCP settings, for example
-	{@code /proc/sys/net/ipv4/tcp_retries2} on Linux.
+	/proc/sys/net/ipv4/tcp_retries2 on Linux.
 
 	The default value is 10 seconds (i.e. 10 * 10000).
                                 ]]></xsd:documentation>
@@ -663,10 +663,10 @@
 
 	In general WebSocket servers expect that messages to a single WebSocket
 	session are sent from a single thread at a time. This is automatically
-	guaranteed when using {@code @EnableWebSocketMessageBroker} configuration.
+	guaranteed when using @EnableWebSocketMessageBroker configuration.
 	If message sending is slow, or at least slower than rate of messages sending,
-	subsequent messages are buffered until either the {@code sendTimeLimit}
-	or the {@code sendBufferSizeLimit} are reached at which point the session
+	subsequent messages are buffered until either the sendTimeLimit
+	or the sendBufferSizeLimit are reached at which point the session
 	state is cleared and an attempt is made to close the session.
 
 	NOTE that closing the session may not succeed in
@@ -675,14 +675,11 @@
 	configured by default on Tomcat 7. Therefore it is recommended to ensure
 	the server is using non-blocking IO such as Tomcat's NIO connector used
 	by default on Tomcat 8. If you must use blocking IO consider customizing
-	OS-level TCP settings, for example {@code /proc/sys/net/ipv4/tcp_retries2}
+	OS-level TCP settings, for example /proc/sys/net/ipv4/tcp_retries2
 	on Linux.
 
-	The default value is 512K (i.e. 512 * 1024).
-
-	@param sendBufferSizeLimit the maximum number of bytes to buffer when
-	sending messages; if the value is less than or equal to 0 then buffering
-	is effectively disabled.
+	The default value is 512K (i.e. 512 * 1024). If the value is set to less
+	than or equal to 0 then buffering is effectively disabled.
                                 ]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>
@@ -727,14 +724,14 @@
 						<xsd:attribute name="allowed-origins" type="xsd:string">
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
-		Configure allowed {@code Origin} header values. Multiple origins may be specified
+		Configure allowed Origin header values. Multiple origins may be specified
 		as a comma-separated list.
 
 		This check is mostly designed for browser clients. There is noting preventing other
 		types of client to modify the Origin header value.
 
 		When SockJS is enabled and allowed origins are restricted, transport types that do not
-		use {@code Origin} headers for cross origin requests (jsonp-polling, iframe-xhr-polling,
+		use Origin headers for cross origin requests (jsonp-polling, iframe-xhr-polling,
 		iframe-eventsource and iframe-htmlfile) are disabled. As a consequence, IE6/IE7 won't be
 		supported anymore and IE8/IE9 will only be supported without cookies.
 
