@@ -17,17 +17,18 @@
 package org.springframework.http.client.reactive;
 
 import java.net.URI;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
+import reactor.ipc.netty.NettyInbound;
+import reactor.ipc.netty.NettyOutbound;
 import reactor.ipc.netty.http.client.HttpClient;
-import reactor.ipc.netty.http.client.HttpClientOptions;
 import reactor.ipc.netty.http.client.HttpClientRequest;
 import reactor.ipc.netty.http.client.HttpClientResponse;
-import reactor.ipc.netty.options.ClientOptions;
 
 import org.springframework.http.HttpMethod;
+
+import io.netty.buffer.ByteBufAllocator;
 
 /**
  * Reactor-Netty implementation of {@link ClientHttpConnector}.
@@ -43,20 +44,19 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 
 	/**
 	 * Create a Reactor Netty {@link ClientHttpConnector}
-	 * with default {@link ClientOptions} and HTTP compression support enabled.
+	 * with a default configuration and HTTP compression support enabled.
 	 */
 	public ReactorClientHttpConnector() {
-		this.httpClient = HttpClient.builder()
-				.options(options -> options.compression(true))
-				.build();
+		this.httpClient = HttpClient.prepare()
+									.compress();
 	}
 
 	/**
 	 * Create a Reactor Netty {@link ClientHttpConnector} with the given
-	 * {@link HttpClientOptions.Builder}
+	 * {@link HttpClient}
 	 */
-	public ReactorClientHttpConnector(Consumer<? super HttpClientOptions.Builder> clientOptions) {
-		this.httpClient = HttpClient.create(clientOptions);
+	public ReactorClientHttpConnector(HttpClient httpClient) {
+		this.httpClient = httpClient;
 	}
 
 
@@ -69,22 +69,24 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 		}
 
 		return this.httpClient
-				.request(adaptHttpMethod(method),
-						uri.toString(),
-						request -> requestCallback.apply(adaptRequest(method, uri, request)))
-				.map(this::adaptResponse);
+				.request(adaptHttpMethod(method))
+				.uri(uri.toString())
+				.send((req, out) -> requestCallback.apply(adaptRequest(method, uri, req, out)))
+				.responseConnection((res, con) -> Mono.just(adaptResponse(res, con.inbound(), con.outbound().alloc())))
+				.next();
 	}
 
 	private io.netty.handler.codec.http.HttpMethod adaptHttpMethod(HttpMethod method) {
 		return io.netty.handler.codec.http.HttpMethod.valueOf(method.name());
 	}
 
-	private ReactorClientHttpRequest adaptRequest(HttpMethod method, URI uri, HttpClientRequest request) {
-		return new ReactorClientHttpRequest(method, uri, request);
+	private ReactorClientHttpRequest adaptRequest(HttpMethod method, URI uri, HttpClientRequest request, NettyOutbound out) {
+		return new ReactorClientHttpRequest(method, uri, request, out);
 	}
 
-	private ClientHttpResponse adaptResponse(HttpClientResponse response) {
-		return new ReactorClientHttpResponse(response);
+	private ClientHttpResponse adaptResponse(HttpClientResponse response, NettyInbound nettyInbound,
+			ByteBufAllocator alloc) {
+		return new ReactorClientHttpResponse(response, nettyInbound, alloc);
 	}
 
 }
