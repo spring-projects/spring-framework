@@ -25,7 +25,8 @@ import io.netty.handler.codec.http.cookie.DefaultCookie;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.http.client.HttpClientRequest;
+import reactor.netty.NettyOutbound;
+import reactor.netty.http.client.HttpClientRequest;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -38,7 +39,7 @@ import org.springframework.http.ZeroCopyHttpOutputMessage;
  *
  * @author Brian Clozel
  * @since 5.0
- * @see reactor.ipc.netty.http.client.HttpClient
+ * @see reactor.netty.http.client.HttpClient
  */
 class ReactorClientHttpRequest extends AbstractClientHttpRequest implements ZeroCopyHttpOutputMessage {
 
@@ -48,15 +49,18 @@ class ReactorClientHttpRequest extends AbstractClientHttpRequest implements Zero
 
 	private final HttpClientRequest httpRequest;
 
+	private final NettyOutbound out;
+
 	private final NettyDataBufferFactory bufferFactory;
 
 
 	public ReactorClientHttpRequest(HttpMethod httpMethod, URI uri,
-			HttpClientRequest httpRequest) {
+			HttpClientRequest httpRequest, NettyOutbound out) {
 		this.httpMethod = httpMethod;
 		this.uri = uri;
-		this.httpRequest = httpRequest.failOnClientError(false).failOnServerError(false);
-		this.bufferFactory = new NettyDataBufferFactory(httpRequest.alloc());
+		this.httpRequest = httpRequest;
+		this.out = out;
+		this.bufferFactory = new NettyDataBufferFactory(out.alloc());
 	}
 
 
@@ -77,14 +81,14 @@ class ReactorClientHttpRequest extends AbstractClientHttpRequest implements Zero
 
 	@Override
 	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
-		return doCommit(() -> this.httpRequest
+		return doCommit(() -> this.out
 				.send(Flux.from(body).map(NettyDataBufferFactory::toByteBuf)).then());
 	}
 
 	@Override
 	public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
 		Publisher<Publisher<ByteBuf>> byteBufs = Flux.from(body).map(ReactorClientHttpRequest::toByteBufs);
-		return doCommit(() -> this.httpRequest.sendGroups(byteBufs).then());
+		return doCommit(() -> this.out.sendGroups(byteBufs).then());
 	}
 
 	private static Publisher<ByteBuf> toByteBufs(Publisher<? extends DataBuffer> dataBuffers) {
@@ -93,12 +97,12 @@ class ReactorClientHttpRequest extends AbstractClientHttpRequest implements Zero
 
 	@Override
 	public Mono<Void> writeWith(File file, long position, long count) {
-		return doCommit(() -> this.httpRequest.sendFile(file.toPath(), position, count).then());
+		return doCommit(() -> this.out.sendFile(file.toPath(), position, count).then());
 	}
 
 	@Override
 	public Mono<Void> setComplete() {
-		return doCommit(() -> httpRequest.sendHeaders().then());
+		return doCommit(() -> out.then());
 	}
 
 	@Override

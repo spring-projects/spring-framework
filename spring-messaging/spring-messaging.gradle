@@ -18,7 +18,7 @@ dependencies {
 	compile(project(":spring-core"))
 	optional(project(":spring-context"))
 	optional(project(":spring-oxm"))
-	optional("io.projectreactor.ipc:reactor-netty")
+	optional("io.projectreactor.netty:reactor-netty:0.8.0.BUILD-SNAPSHOT")
 	optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
 		exclude group: "javax.servlet", module: "javax.servlet-api"
 	}
