@@ -20,10 +20,10 @@ server side applications that handle WebSocket messages.
 
 
 [[webflux-websocket-server-handler]]
-=== WebSocketHandler
+=== Server
 [.small]#<<web.adoc#websocket-server-handler,Same in Servlet stack>>#
 
-Creating a WebSocket server is as simple as implementing `WebSocketHandler`:
+To create a WebSocket server, first create a `WebSocketHandler`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -40,10 +40,7 @@ Creating a WebSocket server is as simple as implementing `WebSocketHandler`:
 	}
 ----
 
-Spring WebFlux provides a `WebSocketHandlerAdapter` that can adapt WebSocket
-requests and use the above handler to handle the resulting WebSocket session. After the
-adapter is registered as a bean, you can map requests to your handler, for example using
-`SimpleUrlHandlerMapping`. This is shown below:
+Then map it to a URL and add a `WebSocketHandlerAdapter`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -71,17 +68,109 @@ adapter is registered as a bean, you can map requests to your handler, for examp
 
 
 
+[[webflux-websockethandler]]
+=== WebSocketHandler
+
+The most basic implementation of a handler is one that handles inbound messages:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+class ExampleHandler implements WebSocketHandler {
+
+	@Override
+	public Mono<Void> handle(WebSocketSession session) {
+		return session.receive()			<1>
+				.doOnNext(message -> {
+					// ...					<2>
+				})
+				.concatMap(message -> {
+					// ...					<3>
+				})
+				.then();					<4>
+	}
+}
+----
+<1> Access stream of inbound messages.
+<2> Do something with each message.
+<3> Perform nested async operation using message content.
+<4> Return `Mono<Void>` that doesn't complete while we continue to receive.
+
+[NOTE]
+====
+If performing a nested, asynchronous operation, you'll need to call
+`message.retain()` if the underlying server uses pooled data buffers (e.g. Netty), or
+otherwise the data buffer may be released before you've had a chance to read the data.
+For more on this see <<core.adoc#databuffers,Data Buffers and Codecs>>.
+====
+
+A handler can work with inbound and outbound messages as independent streams:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+class ExampleHandler implements WebSocketHandler {
+
+	@Override
+	public Mono<Void> handle(WebSocketSession session) {
+
+		Mono<Void> input = session.receive()								<1>
+				.doOnNext(message -> {
+					// ...
+				})
+				.concatMap(message -> {
+					// ...
+				})
+				.then();
+
+		Flux<String> source = ... ;
+		Mono<Void> output = session.send(source.map(session::textMessage));	<2>
+
+		return Mono.zip(input, output).then();								<3>
+	}
+}
+----
+<1> Handle inbound message stream.
+<2> Send outgoing messages.
+<3> Join the streams and return `Mono<Void>` that completes when _either_ stream ends.
+
+A handler can compose a connected flow of inbound and outbound messages:
+4
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+class ExampleHandler implements WebSocketHandler {
+
+	@Override
+	public Mono<Void> handle(WebSocketSession session) {
+
+		Flux<WebSocketMessage> output = session.receive()				<1>
+				.doOnNext(message -> {
+					// ...
+				})
+				.concatMap(message -> {
+					// ...
+				})
+				.map(value -> session.textMessage("Echo " + value));	<2>
+
+		return session.send(output);									<3>
+	}
+}
+----
+<1> Handle inbound message stream.
+<2> Create outbound message, producing a combined flow.
+<3> Return `Mono<Void>` that doesn't complete while we continue to receive.
+
+
+
 [[webflux-websocket-server-handshake]]
-=== WebSocket Handshake
+=== Handshake
 [.small]#<<web.adoc#websocket-server-handshake,Same in Servlet stack>>#
 
-`WebSocketHandlerAdapter` does not perform WebSocket handshakes itself. Instead it
-delegates to an instance of `WebSocketService`. The default `WebSocketService`
-implementation is `HandshakeWebSocketService`.
-
-The `HandshakeWebSocketService` performs basic checks on the WebSocket request and
-delegates to a server-specific `RequestUpgradeStrategy`. At present upgrade strategies
-exist for Reactor Netty, Tomcat, Jetty, and Undertow.
+`WebSocketHandlerAdapter` delegates to a `WebSocketService`. By default that's an instance
+of `HandshakeWebSocketService`, which performs basic checks on the WebSocket request and
+then uses `RequestUpgradeStrategy` for the server in use. Currently there is built-in
+support for Reactor Netty, Tomcat, Jetty, and Undertow.
 
 
 
@@ -132,7 +221,7 @@ specify CORS settings by URL pattern. If both are specified they're combined via
 
 
 [[webflux-websocket-client]]
-== WebSocketClient
+=== Client
 
 Spring WebFlux provides a `WebSocketClient` abstraction with implementations for
 Reactor Netty, Tomcat, Jetty, Undertow, and standard Java (i.e. JSR-356).
