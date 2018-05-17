@@ -44,5 +44,5 @@ dependencies {
 	optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
-	testCompile("io.projectreactor.ipc:reactor-netty")
+	testCompile("io.projectreactor.netty:reactor-netty:0.8.0.BUILD-SNAPSHOT")
 }

@@ -19,7 +19,7 @@ package org.springframework.web.reactive.socket.server.upgrade;
 import java.util.function.Supplier;
 
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.http.server.HttpServerResponse;
+import reactor.netty.http.server.HttpServerResponse;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.server.reactive.AbstractServerHttpResponse;
