@@ -375,6 +375,10 @@ public abstract class RouterFunctions {
 			this.routerFunction.accept(visitor);
 		}
 
+		@Override
+		public String toString() {
+			return this.routerFunction.toString();
+		}
 	}
 
 	private static final class DefaultRouterFunction<T extends ServerResponse>
