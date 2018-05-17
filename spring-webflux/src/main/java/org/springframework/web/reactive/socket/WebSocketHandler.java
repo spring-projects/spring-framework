@@ -25,12 +25,41 @@ import reactor.core.publisher.Mono;
 /**
  * Handler for a WebSocket session.
  *
- * <p>Use {@link WebSocketSession#receive()} to compose on the stream of
- * inbound messages and {@link WebSocketSession#send(Publisher)} to write the
- * stream of outbound messages.
+ * <p>A server {@code WebSocketHandler} is mapped to requests with
+ * {@link org.springframework.web.reactive.handler.SimpleUrlHandlerMapping
+ * SimpleUrlHandlerMapping} and
+ * {@link org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter
+ * WebSocketHandlerAdapter}. A client {@code WebSocketHandler} is passed to the
+ * {@link org.springframework.web.reactive.socket.client.WebSocketClient
+ * WebSocketClient} execute method.
  *
- * <p>You can handle inbound and outbound messages as independent streams, and
- * then join them:
+ * <p>Use {@link WebSocketSession#receive() session.receive()} to compose on
+ * the inbound message stream, and {@link WebSocketSession#send(Publisher)
+ * session.send(publisher)} for the outbound message stream. Below is an
+ * example, combined flow to process inbound and to send outbound messages:
+ *
+ * <pre class="code">
+ * class ExampleHandler implements WebSocketHandler {
+
+ * 	&#064;Override
+ * 	public Mono&lt;Void&gt; handle(WebSocketSession session) {
+ *
+ * 		Flux&lt;WebSocketMessage&gt; input = session.receive()
+ *			.doOnNext(message -> {
+ * 				// ...
+ * 			})
+ * 			.concatMap(message -> {
+ * 				// ...
+ * 			})
+ * 			.map(value -> session.textMessage("Echo " + value));
+ *
+ * 		return session.send(output);
+ * 	}
+ * }
+ * </pre>
+ *
+ * <p>If processing inbound and sending outbound messages are independent
+ * streams, they can be joined together with the "zip" operator:
  *
  * <pre class="code">
  * class ExampleHandler implements WebSocketHandler {
@@ -55,32 +84,12 @@ import reactor.core.publisher.Mono;
  * }
  * </pre>
  *
- * <p>You can also create a single flow including inbound and outbound messages:
- * <pre class="code">
- * class ExampleHandler implements WebSocketHandler {
-
- * 	&#064;Override
- * 	public Mono&lt;Void&gt; handle(WebSocketSession session) {
- *
- * 		Flux&lt;WebSocketMessage&gt; input = session.receive()
- *			.doOnNext(message -> {
- * 				// ...
- * 			})
- * 			.concatMap(message -> {
- * 				// ...
- * 			})
- * 			.map(value -> session.textMessage("Echo " + value));
- *
- * 		return session.send(output);
- * 	}
- * }
- * </pre>
- *
- * <p>When the connection is closed, the inbound stream will receive a
- * completion/error signal, while the outbound stream will get a cancellation
- * signal. The above flows are composed in such a way that the
- * {@code Mono<Void>} returned from the {@code WebSocketHandler} won't complete
- * until the connection is closed.
+ * <p>A {@code WebSocketHandler} must compose the inbound and outbound streams
+ * into a unified flow and return a {@code Mono<Void>} that reflects the
+ * completion of that flow. That means there is no need to check if the
+ * connection is open, since Reactive Streams signals will terminate activity.
+ * The inbound stream receives a completion/error signal, and the outbound
+ * stream receives receives a cancellation signal.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -96,13 +105,17 @@ public interface WebSocketHandler {
 	}
 
 	/**
-	 * Handle the WebSocket session.
+	 * Invoked when a new WebSocket connection is established, and allows
+	 * handling of the session.
 	 *
-	 *
+	 * <p>See the class-level doc and the reference for more details and
+	 * examples of how to handle the session.
 	 *
 	 * @param session the session to handle
-	 * @return completion {@code Mono<Void>} to indicate the outcome of the
-	 * WebSocket session handling.
+	 * @return indicates when appilcation handling of the session is complete,
+	 * which should reflect the completion of the inbound message stream
+	 * (i.e. connection closing) and possibly the completion of the outbound
+	 * message stream and the writing of messages.
 	 */
 	Mono<Void> handle(WebSocketSession session);
 
