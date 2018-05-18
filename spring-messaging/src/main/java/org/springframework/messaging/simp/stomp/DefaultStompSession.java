@@ -379,7 +379,9 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		}
 		StompHeaderAccessor accessor = createHeaderAccessor(StompCommand.CONNECT);
 		accessor.addNativeHeaders(this.connectHeaders);
-		accessor.setAcceptVersion("1.1,1.2");
+		if (this.connectHeaders.getAcceptVersion() == null) {
+			accessor.setAcceptVersion("1.1,1.2");
+		}
 		Message<byte[]> message = createMessage(accessor, EMPTY_PAYLOAD);
 		execute(message);
 	}
