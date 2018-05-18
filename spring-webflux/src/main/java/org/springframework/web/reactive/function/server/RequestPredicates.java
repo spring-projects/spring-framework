@@ -297,8 +297,8 @@ public abstract class RequestPredicates {
 	 * @param name the name of the query parameter to test against
 	 * @param value the value of the query parameter to test against
 	 * @return a predicate that matches if the query parameter has the given value
-	 * @see ServerRequest#queryParam(String)
 	 * @since 5.0.7
+	 * @see ServerRequest#queryParam(String)
 	 */
 	public static RequestPredicate queryParam(String name, String value) {
 		return queryParam(name, new Predicate<String>() {
@@ -306,7 +306,6 @@ public abstract class RequestPredicates {
 			public boolean test(String s) {
 				return s.equals(value);
 			}
-
 			@Override
 			public String toString() {
 				return String.format("== %s", value);
