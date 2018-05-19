@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.web.reactive.socket;
 
 import java.net.URI;
 import java.security.Principal;
+import java.util.Collections;
+import java.util.Map;
 
 import reactor.core.publisher.Mono;
 
@@ -44,6 +46,8 @@ public class HandshakeInfo {
 	@Nullable
 	private final String protocol;
 
+	private final Map<String, Object> attributes;
+
 
 	/**
 	 * Constructor with information about the handshake.
@@ -53,13 +57,30 @@ public class HandshakeInfo {
 	 * @param protocol the negotiated sub-protocol (may be {@code null})
 	 */
 	public HandshakeInfo(URI uri, HttpHeaders headers, Mono<Principal> principal, @Nullable String protocol) {
+		this(uri, headers, principal, protocol, Collections.emptyMap());
+	}
+
+	/**
+	 * Constructor with information about the handshake.
+	 * @param uri the endpoint URL
+	 * @param headers request headers for server or response headers or client
+	 * @param principal the principal for the session
+	 * @param protocol the negotiated sub-protocol (may be {@code null})
+	 * @since 5.1
+	 */
+	public HandshakeInfo(URI uri, HttpHeaders headers, Mono<Principal> principal,
+			@Nullable String protocol, Map<String, Object> attributes) {
+
 		Assert.notNull(uri, "URI is required");
 		Assert.notNull(headers, "HttpHeaders are required");
 		Assert.notNull(principal, "Principal is required");
+		Assert.notNull(principal, "'attributes' is required");
+
 		this.uri = uri;
 		this.headers = headers;
 		this.principalMono = principal;
 		this.protocol = protocol;
+		this.attributes = attributes;
 	}
 
 
@@ -93,6 +114,15 @@ public class HandshakeInfo {
 	@Nullable
 	public String getSubProtocol() {
 		return this.protocol;
+	}
+
+	/**
+	 * Attributes extracted from the handshake request to be added to the
+	 * WebSocket session.
+	 * @since 5.1
+	 */
+	public Map<String, Object> getAttributes() {
+		return this.attributes;
 	}
 
 

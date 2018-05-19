@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.web.reactive.socket.server.upgrade;
 
 import java.io.IOException;
-import java.security.Principal;
+import java.util.function.Supplier;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -140,7 +140,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 	@Override
 	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler,
-			@Nullable String subProtocol) {
+			@Nullable String subProtocol, Supplier<HandshakeInfo> handshakeInfoFactory) {
 
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
@@ -148,12 +148,11 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		HttpServletRequest servletRequest = getHttpServletRequest(request);
 		HttpServletResponse servletResponse = getHttpServletResponse(response);
 
-		JettyWebSocketHandlerAdapter adapter = new JettyWebSocketHandlerAdapter(handler,
-				session -> {
-					HandshakeInfo info = getHandshakeInfo(exchange, subProtocol);
-					DataBufferFactory factory = response.bufferFactory();
-					return new JettyWebSocketSession(session, info, factory);
-				});
+		HandshakeInfo handshakeInfo = handshakeInfoFactory.get();
+		DataBufferFactory factory = response.bufferFactory();
+
+		JettyWebSocketHandlerAdapter adapter = new JettyWebSocketHandlerAdapter(
+				handler, session -> new JettyWebSocketSession(session, handshakeInfo, factory));
 
 		startLazily(servletRequest);
 
@@ -183,12 +182,6 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	private HttpServletResponse getHttpServletResponse(ServerHttpResponse response) {
 		Assert.isInstanceOf(AbstractServerHttpResponse.class, response);
 		return ((AbstractServerHttpResponse) response).getNativeResponse();
-	}
-
-	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, @Nullable String protocol) {
-		ServerHttpRequest request = exchange.getRequest();
-		Mono<Principal> principal = exchange.getPrincipal();
-		return new HandshakeInfo(request.getURI(), request.getHeaders(), principal, protocol);
 	}
 
 	private void startLazily(HttpServletRequest request) {

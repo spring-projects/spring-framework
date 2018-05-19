@@ -54,7 +54,7 @@ public abstract class AbstractWebSocketSession<T> implements WebSocketSession {
 
 
 	/**
-	 * Create a new instance and associate the given attributes with it.
+	 * Create a new WebSocket session.
 	 */
 	protected AbstractWebSocketSession(T delegate, String id, HandshakeInfo handshakeInfo,
 			DataBufferFactory bufferFactory) {
@@ -68,6 +68,7 @@ public abstract class AbstractWebSocketSession<T> implements WebSocketSession {
 		this.id = id;
 		this.handshakeInfo = handshakeInfo;
 		this.bufferFactory = bufferFactory;
+		this.attributes.putAll(handshakeInfo.getAttributes());
 	}
 
 

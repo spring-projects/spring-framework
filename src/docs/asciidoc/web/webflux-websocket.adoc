@@ -202,7 +202,10 @@ of `HandshakeWebSocketService`, which performs basic checks on the WebSocket req
 then uses `RequestUpgradeStrategy` for the server in use. Currently there is built-in
 support for Reactor Netty, Tomcat, Jetty, and Undertow.
 
-The above are just 3 examples to serve as a starting point.
+`HandshakeWebSocketService` exposes a `sessionAttributePredicate` property that allows
+setting a `Predicate<String>` to extract attributes from the `WebSession` and insert them
+into the attributes of the `WebSocketSession`.
+
 
 
 
@@ -210,7 +213,7 @@ The above are just 3 examples to serve as a starting point.
 === Server config
 [.small]#<<web.adoc#websocket-server-runtime-configuration,Same in Servlet stack>>#
 
-The `RequestUpgradeStrategy` for each server exposes the WebSocket-related configuration
+The `RequestUpgradeStrategy` for each server exposes WebSocket-related configuration
 options available for the underlying WebSocket engine. Below is an example of setting
 WebSocket options when running on Tomcat:
 

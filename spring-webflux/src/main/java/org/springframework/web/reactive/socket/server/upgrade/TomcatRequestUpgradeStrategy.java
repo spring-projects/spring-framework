@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package org.springframework.web.reactive.socket.server.upgrade;
 
 import java.io.IOException;
-import java.security.Principal;
 import java.util.Collections;
+import java.util.function.Supplier;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,6 +46,7 @@ import org.springframework.web.server.ServerWebExchange;
  * A {@link RequestUpgradeStrategy} for use with Tomcat.
  *
  * @author Violeta Georgieva
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
@@ -124,7 +125,7 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	@Override
 	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler,
-			@Nullable String subProtocol){
+			@Nullable String subProtocol, Supplier<HandshakeInfo> handshakeInfoFactory){
 
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
@@ -132,12 +133,11 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		HttpServletRequest servletRequest = getHttpServletRequest(request);
 		HttpServletResponse servletResponse = getHttpServletResponse(response);
 
-		Endpoint endpoint = new StandardWebSocketHandlerAdapter(handler,
-				session -> {
-					HandshakeInfo info = getHandshakeInfo(exchange, subProtocol);
-					DataBufferFactory factory = response.bufferFactory();
-					return new TomcatWebSocketSession(session, info, factory);
-				});
+		HandshakeInfo handshakeInfo = handshakeInfoFactory.get();
+		DataBufferFactory bufferFactory = response.bufferFactory();
+
+		Endpoint endpoint = new StandardWebSocketHandlerAdapter(
+				handler, session -> new TomcatWebSocketSession(session, handshakeInfo, bufferFactory));
 
 		String requestURI = servletRequest.getRequestURI();
 		DefaultServerEndpointConfig config = new DefaultServerEndpointConfig(requestURI, endpoint);
@@ -163,12 +163,6 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 	private HttpServletResponse getHttpServletResponse(ServerHttpResponse response) {
 		Assert.isInstanceOf(AbstractServerHttpResponse.class, response, "ServletServerHttpResponse required");
 		return ((AbstractServerHttpResponse) response).getNativeResponse();
-	}
-
-	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, @Nullable String protocol) {
-		ServerHttpRequest request = exchange.getRequest();
-		Mono<Principal> principal = exchange.getPrincipal();
-		return new HandshakeInfo(request.getURI(), request.getHeaders(), principal, protocol);
 	}
 
 	private WsServerContainer getContainer(HttpServletRequest request) {

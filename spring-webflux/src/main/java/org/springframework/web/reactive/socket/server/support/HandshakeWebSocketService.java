@@ -16,8 +16,12 @@
 
 package org.springframework.web.reactive.socket.server.support;
 
+import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,6 +36,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.WebSocketService;
@@ -53,6 +58,8 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 	private static final String SEC_WEBSOCKET_KEY = "Sec-WebSocket-Key";
 
 	private static final String SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
+
+	private static final Mono<Map<String, Object>> EMPTY_ATTRIBUTES = Mono.just(Collections.emptyMap());
 
 
 	private static final boolean tomcatPresent = ClassUtils.isPresent(
@@ -76,6 +83,9 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
 
 	private final RequestUpgradeStrategy upgradeStrategy;
+
+	@Nullable
+	private Predicate<String> sessionAttributePredicate;
 
 	private volatile boolean running = false;
 
@@ -133,6 +143,28 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 	 */
 	public RequestUpgradeStrategy getUpgradeStrategy() {
 		return this.upgradeStrategy;
+	}
+
+	/**
+	 * Configure a predicate to use to extract
+	 * {@link org.springframework.web.server.WebSession WebSession} attributes
+	 * and use them to initialize the WebSocket session with.
+	 * <p>By default this is not set in which case no attributes are passed.
+	 * @param predicate the predicate
+	 * @since 5.1
+	 */
+	public void setSessionAttributePredicate(@Nullable Predicate<String> predicate) {
+		this.sessionAttributePredicate = predicate;
+	}
+
+	/**
+	 * Return the configured predicate for initialization WebSocket session
+	 * attributes from {@code WebSession} attributes.
+	 * @since 5.1
+	 */
+	@Nullable
+	public Predicate<String> getSessionAttributePredicate() {
+		return this.sessionAttributePredicate;
 	}
 
 
@@ -200,7 +232,11 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		}
 
 		String protocol = selectProtocol(headers, handler);
-		return this.upgradeStrategy.upgrade(exchange, handler, protocol);
+
+		return initAttributes(exchange).flatMap(attributes ->
+				this.upgradeStrategy.upgrade(exchange, handler, protocol,
+						() -> createHandshakeInfo(exchange, request, protocol, attributes))
+		);
 	}
 
 	private Mono<Void> handleBadRequest(String reason) {
@@ -222,6 +258,23 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 			}
 		}
 		return null;
+	}
+
+	private Mono<Map<String, Object>> initAttributes(ServerWebExchange exchange) {
+		if (this.sessionAttributePredicate == null) {
+			return EMPTY_ATTRIBUTES;
+		}
+		return exchange.getSession().map(session ->
+				session.getAttributes().entrySet().stream()
+						.filter(entry -> this.sessionAttributePredicate.test(entry.getKey()))
+						.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+	}
+
+	private HandshakeInfo createHandshakeInfo(ServerWebExchange exchange, ServerHttpRequest request,
+			@Nullable String protocol, Map<String, Object> attributes) {
+
+		Mono<Principal> principal = exchange.getPrincipal();
+		return new HandshakeInfo(request.getURI(), request.getHeaders(), principal, protocol, attributes);
 	}
 
 }
