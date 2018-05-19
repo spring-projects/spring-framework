@@ -40,7 +40,9 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @deprecated as of 5.1 in favor of using {@link EncodedResourceResolver}.
  */
+@Deprecated
 public class GzipResourceResolver extends AbstractResourceResolver {
 
 	@Override

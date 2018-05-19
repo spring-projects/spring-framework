@@ -144,7 +144,8 @@ public class CssLinkResourceTransformerTests {
 		this.request = new MockHttpServletRequest("GET", "/static/main.css");
 		Resource original = new ClassPathResource("test/main.css", getClass());
 		createTempCopy("main.css", "main.css.gz");
-		GzipResourceResolver.GzippedResource expected = new GzipResourceResolver.GzippedResource(original);
+		EncodedResourceResolver.EncodedResource expected =
+				new EncodedResourceResolver.EncodedResource(original, "gzip", ".gz");
 		Resource actual = this.transformerChain.transform(this.request, expected);
 		assertSame(expected, actual);
 	}

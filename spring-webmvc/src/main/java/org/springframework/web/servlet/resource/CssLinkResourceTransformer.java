@@ -62,6 +62,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 	}
 
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public Resource transform(HttpServletRequest request, Resource resource, ResourceTransformerChain transformerChain)
 			throws IOException {
@@ -70,6 +71,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 		String filename = resource.getFilename();
 		if (!"css".equals(StringUtils.getFilenameExtension(filename)) ||
+				resource instanceof EncodedResourceResolver.EncodedResource ||
 				resource instanceof GzipResourceResolver.GzippedResource) {
 			return resource;
 		}

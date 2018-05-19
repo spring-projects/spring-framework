@@ -2914,6 +2914,10 @@ of resolvers and transformers (e.g. resources on Amazon S3). When serving only l
 resources the workaround is to use `ResourceUrlProvider` directly (e.g. through a custom
 tag) and block for 0 seconds.
 
+Note that when using both `EncodedResourceResolver` (e.g. for serving gzipped or brotli
+encoded resources) and `VersionedResourceResolver`, they must be registered in this order.
+That ensures content based versions are always computed reliably based on the unencoded file.
+
 http://www.webjars.org/documentation[WebJars] is also supported via `WebJarsResourceResolver`
 and automatically registered when `"org.webjars:webjars-locator"` is present on the
 classpath. The resolver can re-write URLs to include the version of the jar and can also

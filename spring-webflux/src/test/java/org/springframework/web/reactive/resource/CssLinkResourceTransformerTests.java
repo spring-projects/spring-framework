@@ -145,7 +145,8 @@ public class CssLinkResourceTransformerTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/static/main.css"));
 		Resource original = new ClassPathResource("test/main.css", getClass());
 		createTempCopy("main.css", "main.css.gz");
-		GzipResourceResolver.GzippedResource expected = new GzipResourceResolver.GzippedResource(original);
+		EncodedResourceResolver.EncodedResource expected =
+				new EncodedResourceResolver.EncodedResource(original, "gzip", ".gz");
 		StepVerifier.create(this.transformerChain.transform(exchange, expected))
 				.expectNext(expected)
 				.expectComplete().verify();

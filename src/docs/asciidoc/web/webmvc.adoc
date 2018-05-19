@@ -4549,11 +4549,15 @@ In XML, the same:
 </mvc:resources>
 ----
 
-You can use `ResourceUrlProvider` to rewrite URLs and apply the full chain of resolvers and
+You can then use `ResourceUrlProvider` to rewrite URLs and apply the full chain of resolvers and
 transformers -- e.g. to insert versions. The MVC config provides a `ResourceUrlProvider`
 bean so it can be injected into others. You can also make the rewrite transparent with the
 `ResourceUrlEncodingFilter` for Thymeleaf, JSPs, FreeMarker, and others with URL tags that
 rely on `HttpServletResponse#encodeURL`.
+
+Note that when using both `EncodedResourceResolver` (e.g. for serving gzipped or brotli
+encoded resources) and `VersionedResourceResolver`, they must be registered in this order.
+That ensures content based versions are always computed reliably based on the unencoded file.
 
 http://www.webjars.org/documentation[WebJars] is also supported via `WebJarsResourceResolver`
 and automatically registered when `"org.webjars:webjars-locator"` is present on the
