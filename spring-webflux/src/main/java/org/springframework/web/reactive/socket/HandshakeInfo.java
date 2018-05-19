@@ -66,6 +66,7 @@ public class HandshakeInfo {
 	 * @param headers request headers for server or response headers or client
 	 * @param principal the principal for the session
 	 * @param protocol the negotiated sub-protocol (may be {@code null})
+	 * @param attributes initial attributes to use for the WebSocket session
 	 * @since 5.1
 	 */
 	public HandshakeInfo(URI uri, HttpHeaders headers, Mono<Principal> principal,
