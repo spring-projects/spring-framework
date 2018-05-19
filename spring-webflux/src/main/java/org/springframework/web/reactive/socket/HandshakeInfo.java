@@ -74,7 +74,7 @@ public class HandshakeInfo {
 		Assert.notNull(uri, "URI is required");
 		Assert.notNull(headers, "HttpHeaders are required");
 		Assert.notNull(principal, "Principal is required");
-		Assert.notNull(principal, "'attributes' is required");
+		Assert.notNull(attributes, "'attributes' is required");
 
 		this.uri = uri;
 		this.headers = headers;
