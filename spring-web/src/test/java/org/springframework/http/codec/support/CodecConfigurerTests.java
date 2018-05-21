@@ -37,6 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.CodecConfigurer;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
+import org.springframework.http.codec.FormHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
@@ -53,7 +54,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.core.ResolvableType.forClass;
 
 /**
- * Unit tests for {@link AbstractCodecConfigurer.AbstractDefaultCodecs}.
+ * Unit tests for {@link BaseCodecConfigurer}.
  * @author Rossen Stoyanchev
  */
 public class CodecConfigurerTests {
@@ -66,12 +67,13 @@ public class CodecConfigurerTests {
 	@Test
 	public void defaultReaders() {
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
-		assertEquals(9, readers.size());
+		assertEquals(10, readers.size());
 		assertEquals(ByteArrayDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ByteBufferDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(DataBufferDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ResourceDecoder.class, getNextDecoder(readers).getClass());
 		assertStringDecoder(getNextDecoder(readers), true);
+		assertEquals(FormHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
 		assertEquals(Jackson2JsonDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(Jackson2SmileDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(Jaxb2XmlDecoder.class, getNextDecoder(readers).getClass());
@@ -115,12 +117,13 @@ public class CodecConfigurerTests {
 
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
 
-		assertEquals(13, readers.size());
+		assertEquals(14, readers.size());
 		assertEquals(ByteArrayDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ByteBufferDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(DataBufferDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ResourceDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(StringDecoder.class, getNextDecoder(readers).getClass());
+		assertEquals(FormHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
 		assertSame(customDecoder1, getNextDecoder(readers));
 		assertSame(customReader1, readers.get(this.index.getAndIncrement()));
 		assertEquals(Jackson2JsonDecoder.class, getNextDecoder(readers).getClass());
@@ -284,13 +287,13 @@ public class CodecConfigurerTests {
 
 
 
-	private static class TestCodecConfigurer extends AbstractCodecConfigurer {
+	private static class TestCodecConfigurer extends BaseCodecConfigurer {
 
 		TestCodecConfigurer() {
 			super(new TestDefaultCodecs());
 		}
 
-		private static class TestDefaultCodecs extends AbstractDefaultCodecs {
+		private static class TestDefaultCodecs extends BaseDefaultCodecs {
 
 		}
 	}
