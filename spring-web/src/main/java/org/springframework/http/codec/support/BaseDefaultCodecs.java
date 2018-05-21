@@ -95,8 +95,9 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 	}
 
 
-	// Package private access to the configured readers...
-
+	/**
+	 * Return readers that support specific types.
+	 */
 	final List<HttpMessageReader<?>> getTypedReaders() {
 		if (!this.registerDefaults) {
 			return Collections.emptyList();
@@ -112,9 +113,15 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 		return readers;
 	}
 
+	/**
+	 * Hook for client or server specific typed readers.
+	 */
 	protected void extendTypedReaders(List<HttpMessageReader<?>> typedReaders) {
 	}
 
+	/**
+	 * Return Object readers (JSON, XML, SSE).
+	 */
 	final List<HttpMessageReader<?>> getObjectReaders() {
 		if (!this.registerDefaults) {
 			return Collections.emptyList();
@@ -133,9 +140,15 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 		return readers;
 	}
 
+	/**
+	 * Hook for client or server specific Object readers.
+	 */
 	protected void extendObjectReaders(List<HttpMessageReader<?>> objectReaders) {
 	}
 
+	/**
+	 * Return readers that need to be at the end, after all others.
+	 */
 	final List<HttpMessageReader<?>> getCatchAllReaders() {
 		if (!this.registerDefaults) {
 			return Collections.emptyList();
@@ -145,10 +158,13 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 		return result;
 	}
 
-
-	// Package private access to the configured writers...
-
-	final List<HttpMessageWriter<?>> getTypedWriters() {
+	/**
+	 * Return writers that support specific types.
+	 * @param forMultipart whether to returns writers for general use ("false"),
+	 * or for multipart requests only ("true"). Generally the two sets are the
+	 * same except for the multipart writer itself.
+	 */
+	final List<HttpMessageWriter<?>> getTypedWriters(boolean forMultipart) {
 		if (!this.registerDefaults) {
 			return Collections.emptyList();
 		}
@@ -158,14 +174,26 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 		writers.add(new EncoderHttpMessageWriter<>(new DataBufferEncoder()));
 		writers.add(new ResourceHttpMessageWriter());
 		writers.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()));
-		extendTypedWriters(writers);
+		// No client or server specific multipart writers currently..
+		if (!forMultipart) {
+			extendTypedWriters(writers);
+		}
 		return writers;
 	}
 
+	/**
+	 * Hook for client or server specific typed writers.
+	 */
 	protected void extendTypedWriters(List<HttpMessageWriter<?>> typedWriters) {
 	}
 
-	final List<HttpMessageWriter<?>> getObjectWriters() {
+	/**
+	 * Return Object writers (JSON, XML, SSE).
+	 * @param forMultipart whether to returns writers for general use ("false"),
+	 * or for multipart requests only ("true"). Generally the two sets are the
+	 * same except for the multipart writer itself.
+	 */
+	final List<HttpMessageWriter<?>> getObjectWriters(boolean forMultipart) {
 		if (!this.registerDefaults) {
 			return Collections.emptyList();
 		}
@@ -179,13 +207,22 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 		if (jaxb2Present) {
 			writers.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
 		}
-		extendObjectWriters(writers);
+		// No client or server specific multipart writers currently..
+		if (!forMultipart) {
+			extendObjectWriters(writers);
+		}
 		return writers;
 	}
 
+	/**
+	 * Hook for client or server specific Object writers.
+	 */
 	protected void extendObjectWriters(List<HttpMessageWriter<?>> objectWriters) {
 	}
 
+	/**
+	 * Return writers that need to be at the end, after all others.
+	 */
 	List<HttpMessageWriter<?>> getCatchAllWriters() {
 		if (!this.registerDefaults) {
 			return Collections.emptyList();
