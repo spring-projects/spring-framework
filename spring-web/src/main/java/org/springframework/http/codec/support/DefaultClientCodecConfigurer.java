@@ -29,8 +29,7 @@ public class DefaultClientCodecConfigurer extends BaseCodecConfigurer implements
 
 	public DefaultClientCodecConfigurer() {
 		super(new ClientDefaultCodecsImpl());
-		((ClientDefaultCodecsImpl) defaultCodecs()).initCustomTypedWriters(getCustomTypedWriters());
-		((ClientDefaultCodecsImpl) defaultCodecs()).initCustomObjectWriters(getCustomObjectWriters());
+		((ClientDefaultCodecsImpl) defaultCodecs()).setPartWritersSupplier(() -> getWritersInternal(true));
 	}
 
 

@@ -29,7 +29,6 @@ import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerSentEventHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * Default implementation of {@link ClientCodecConfigurer.ClientDefaultCodecs}.
@@ -45,18 +44,17 @@ class ClientDefaultCodecsImpl extends BaseDefaultCodecs implements ClientCodecCo
 	private Decoder<?> sseDecoder;
 
 	@Nullable
-	private Supplier<List<HttpMessageWriter<?>>> customTypedWriters;
-
-	@Nullable
-	private Supplier<List<HttpMessageWriter<?>>> customObjectWriters;
+	private Supplier<List<HttpMessageWriter<?>>> partWritersSupplier;
 
 
-	void initCustomTypedWriters(Supplier<List<HttpMessageWriter<?>>> supplier) {
-		this.customTypedWriters = supplier;
-	}
-
-	void initCustomObjectWriters(Supplier<List<HttpMessageWriter<?>>> supplier) {
-		this.customObjectWriters = supplier;
+	/**
+	 * Set a supplier for part writers to use when
+	 * {@link #multipartCodecs()} are not explicitly configured.
+	 * That's the same set of writers as for general except for the multipart
+	 * writer itself.
+	 */
+	void setPartWritersSupplier(Supplier<List<HttpMessageWriter<?>>> supplier) {
+		this.partWritersSupplier = supplier;
 	}
 
 
@@ -86,36 +84,19 @@ class ClientDefaultCodecsImpl extends BaseDefaultCodecs implements ClientCodecCo
 
 	@Override
 	protected void extendTypedWriters(List<HttpMessageWriter<?>> typedWriters) {
-
-		MultipartHttpMessageWriter multipartWriter = new MultipartHttpMessageWriter(
-				resolvePartWriters(typedWriters, getObjectWriters()), new FormHttpMessageWriter());
-
-		typedWriters.add(multipartWriter);
+		typedWriters.add(new MultipartHttpMessageWriter(getPartWriters(), new FormHttpMessageWriter()));
 	}
 
-	private List<HttpMessageWriter<?>> resolvePartWriters(List<HttpMessageWriter<?>> typedWriters,
-			List<HttpMessageWriter<?>> objectWriters) {
-
-		List<HttpMessageWriter<?>> partWriters;
-		if (this.multipartCodecs != null) {
-			partWriters = this.multipartCodecs.getWriters();
-		}
-		else {
-			Assert.notNull(this.customTypedWriters, "Expected custom typed writers supplier.");
-			Assert.notNull(this.customObjectWriters, "Expected custom object writers supplier.");
-
-			partWriters = new ArrayList<>(typedWriters);
-			partWriters.addAll(this.customTypedWriters.get());
-
-			partWriters.addAll(objectWriters);
-			partWriters.addAll(this.customObjectWriters.get());
-
-			partWriters.addAll(super.getCatchAllWriters());
-		}
-		return partWriters;
+	@SuppressWarnings("ConstantConditions")
+	private List<HttpMessageWriter<?>> getPartWriters() {
+		return this.multipartCodecs != null ?
+				this.multipartCodecs.getWriters() : this.partWritersSupplier.get();
 	}
 
 
+	/**
+	 * Default implementation of {@link ClientCodecConfigurer.MultipartCodecs}.
+	 */
 	private static class DefaultMultipartCodecs implements ClientCodecConfigurer.MultipartCodecs {
 
 		private final List<HttpMessageWriter<?>> writers = new ArrayList<>();
@@ -137,4 +118,5 @@ class ClientDefaultCodecsImpl extends BaseDefaultCodecs implements ClientCodecCo
 			return this.writers;
 		}
 	}
+
 }

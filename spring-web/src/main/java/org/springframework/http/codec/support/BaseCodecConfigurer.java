@@ -18,7 +18,6 @@ package org.springframework.http.codec.support;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Decoder;
@@ -28,6 +27,7 @@ import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
 import org.springframework.util.Assert;
 
 /**
@@ -85,27 +85,26 @@ class BaseCodecConfigurer implements CodecConfigurer {
 
 	@Override
 	public List<HttpMessageWriter<?>> getWriters() {
+		return getWritersInternal(false);
+	}
+
+	/**
+	 * Internal method that returns the configured writers.
+	 * @param forMultipart whether to returns writers for general use ("false"),
+	 * or for multipart requests only ("true"). Generally the two sets are the
+	 * same except for the multipart writer itself.
+	 */
+	protected List<HttpMessageWriter<?>> getWritersInternal(boolean forMultipart) {
 		List<HttpMessageWriter<?>> result = new ArrayList<>();
 
-		result.addAll(this.defaultCodecs.getTypedWriters());
+		result.addAll(this.defaultCodecs.getTypedWriters(forMultipart));
 		result.addAll(this.customCodecs.getTypedWriters());
 
-		result.addAll(this.defaultCodecs.getObjectWriters());
+		result.addAll(this.defaultCodecs.getObjectWriters(forMultipart));
 		result.addAll(this.customCodecs.getObjectWriters());
 
 		result.addAll(this.defaultCodecs.getCatchAllWriters());
 		return result;
-	}
-
-
-	// Accessors for use in sub-classes...
-
-	protected Supplier<List<HttpMessageWriter<?>>> getCustomTypedWriters() {
-		return () -> this.customCodecs.typedWriters;
-	}
-
-	protected Supplier<List<HttpMessageWriter<?>>> getCustomObjectWriters() {
-		return () -> this.customCodecs.objectWriters;
 	}
 
 
