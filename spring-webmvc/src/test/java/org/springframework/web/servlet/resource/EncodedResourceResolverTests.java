@@ -58,11 +58,11 @@ public class EncodedResourceResolverTests {
 
 	@BeforeClass
 	public static void createGzippedResources() throws IOException {
-		createGzipFile("/js/foo.js");
-		createGzipFile("foo.css");
+		createGzippedFile("/js/foo.js");
+		createGzippedFile("foo.css");
 	}
 
-	private static void createGzipFile(String filePath) throws IOException {
+	static void createGzippedFile(String filePath) throws IOException {
 		Resource location = new ClassPathResource("test/", EncodedResourceResolverTests.class);
 		Resource resource = new FileSystemResource(location.createRelative(filePath).getFile());
 

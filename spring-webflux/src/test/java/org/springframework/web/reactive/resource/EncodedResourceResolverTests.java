@@ -25,14 +25,11 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.cache.Cache;
@@ -63,11 +60,11 @@ public class EncodedResourceResolverTests {
 
 	@BeforeClass
 	public static void createGzippedResources() throws IOException {
-		createGzFile("/js/foo.js");
-		createGzFile("foo.css");
+		createGzippedFile("/js/foo.js");
+		createGzippedFile("foo.css");
 	}
 
-	private static void createGzFile(String filePath) throws IOException {
+	static void createGzippedFile(String filePath) throws IOException {
 		Resource location = new ClassPathResource("test/", EncodedResourceResolverTests.class);
 		Resource resource = new FileSystemResource(location.createRelative(filePath).getFile());
 

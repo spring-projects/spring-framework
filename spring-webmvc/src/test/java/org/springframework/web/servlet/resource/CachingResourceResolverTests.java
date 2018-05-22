@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,21 +63,18 @@ public class CachingResourceResolverTests {
 
 	@Test
 	public void resolveResourceInternal() {
-		String file = "bar.css";
-		Resource expected = new ClassPathResource("test/" + file, getClass());
-		Resource actual = this.chain.resolveResource(null, file, this.locations);
+		Resource expected = new ClassPathResource("test/bar.css", getClass());
+		Resource actual = this.chain.resolveResource(null, "bar.css", this.locations);
 
+		assertNotSame(expected, actual);
 		assertEquals(expected, actual);
 	}
 
 	@Test
 	public void resolveResourceInternalFromCache() {
-
 		Resource expected = Mockito.mock(Resource.class);
 		this.cache.put(CachingResourceResolver.RESOLVED_RESOURCE_CACHE_KEY_PREFIX + "bar.css", expected);
-
-		String file = "bar.css";
-		Resource actual = this.chain.resolveResource(null, file, this.locations);
+		Resource actual = this.chain.resolveResource(null, "bar.css", this.locations);
 
 		assertSame(expected, actual);
 	}
@@ -112,39 +109,41 @@ public class CachingResourceResolverTests {
 	@Test
 	public void resolveResourceAcceptEncodingInCacheKey() {
 		String file = "bar.css";
-
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", file);
 		request.addHeader("Accept-Encoding", "gzip");
 		Resource expected = this.chain.resolveResource(request, file, this.locations);
-		String cacheKey = CachingResourceResolver.RESOLVED_RESOURCE_CACHE_KEY_PREFIX + file + "+encoding=gzip";
 
-		assertEquals(expected, this.cache.get(cacheKey).get());
+		String cacheKey = CachingResourceResolver.RESOLVED_RESOURCE_CACHE_KEY_PREFIX + file + "+encoding=gzip";
+		Object actual = this.cache.get(cacheKey).get();
+
+		assertSame(expected, actual);
 	}
 
 	@Test
-	public void resolveResourceNoAcceptEncodingInCacheKey() {
+	public void resolveResourceNoAcceptEncoding() {
 		String file = "bar.css";
-
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", file);
 		Resource expected = this.chain.resolveResource(request, file, this.locations);
-		String cacheKey = CachingResourceResolver.RESOLVED_RESOURCE_CACHE_KEY_PREFIX + file;
 
-		assertEquals(expected, this.cache.get(cacheKey).get());
+		String cacheKey = CachingResourceResolver.RESOLVED_RESOURCE_CACHE_KEY_PREFIX + file;
+		Object actual = this.cache.get(cacheKey).get();
+
+		assertEquals(expected, actual);
 	}
 
 	@Test
 	public void resolveResourceMatchingEncoding() {
 		Resource resource = Mockito.mock(Resource.class);
-		Resource gzResource = Mockito.mock(Resource.class);
+		Resource gzipped = Mockito.mock(Resource.class);
 		this.cache.put(CachingResourceResolver.RESOLVED_RESOURCE_CACHE_KEY_PREFIX + "bar.css", resource);
-		this.cache.put(CachingResourceResolver.RESOLVED_RESOURCE_CACHE_KEY_PREFIX + "bar.css+encoding=gzip", gzResource);
+		this.cache.put(CachingResourceResolver.RESOLVED_RESOURCE_CACHE_KEY_PREFIX + "bar.css+encoding=gzip", gzipped);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "bar.css");
 		assertSame(resource, this.chain.resolveResource(request,"bar.css", this.locations));
 
 		request = new MockHttpServletRequest("GET", "bar.css");
 		request.addHeader("Accept-Encoding", "gzip");
-		assertSame(gzResource, this.chain.resolveResource(request, "bar.css", this.locations));
+		assertSame(gzipped, this.chain.resolveResource(request, "bar.css", this.locations));
 	}
 
 }
