@@ -116,7 +116,6 @@ public class EncodedResourceResolverTests {
 	}
 
 	@Test
-	@Ignore // SPR-16862
 	public void resolveGzippedWithVersion() {
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(

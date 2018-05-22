@@ -112,6 +112,12 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	private final List<ResourceTransformer> resourceTransformers = new ArrayList<>(4);
 
 	@Nullable
+	private ResourceResolverChain resolverChain;
+
+	@Nullable
+	private ResourceTransformerChain transformerChain;
+
+	@Nullable
 	private ResourceHttpMessageConverter resourceHttpMessageConverter;
 
 	@Nullable
@@ -324,6 +330,10 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 		initAllowedLocations();
 
+		// Initialize immutable resolver and transformer chains
+		this.resolverChain = new DefaultResourceResolverChain(this.resourceResolvers);
+		this.transformerChain = new DefaultResourceTransformerChain(this.resolverChain, this.resourceTransformers);
+
 		if (this.resourceHttpMessageConverter == null) {
 			this.resourceHttpMessageConverter = new ResourceHttpMessageConverter();
 		}
@@ -525,15 +535,13 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			return null;
 		}
 
-		ResourceResolverChain resolveChain = new DefaultResourceResolverChain(getResourceResolvers());
-		Resource resource = resolveChain.resolveResource(request, path, getLocations());
-		if (resource == null || getResourceTransformers().isEmpty()) {
-			return resource;
-		}
+		Assert.notNull(this.resolverChain, "ResourceResolverChain not initialized.");
+		Assert.notNull(this.transformerChain, "ResourceTransformerChain not initialized.");
 
-		ResourceTransformerChain transformChain =
-				new DefaultResourceTransformerChain(resolveChain, getResourceTransformers());
-		resource = transformChain.transform(request, resource);
+		Resource resource = this.resolverChain.resolveResource(request, path, getLocations());
+		if (resource != null) {
+			resource = this.transformerChain.transform(request, resource);
+		}
 		return resource;
 	}
 
