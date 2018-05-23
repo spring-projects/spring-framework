@@ -37,6 +37,7 @@ import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.FileCopyUtils;
@@ -109,7 +110,11 @@ public class EncodedResourceResolverTests {
 
 		assertEquals(getResource(file + ".gz").getDescription(), actual.getDescription());
 		assertEquals(getResource(file).getFilename(), actual.getFilename());
+
 		assertTrue(actual instanceof HttpResource);
+		HttpHeaders headers = ((HttpResource) actual).getResponseHeaders();
+		assertEquals("gzip", headers.getFirst(HttpHeaders.CONTENT_ENCODING));
+		assertEquals("Accept-Encoding", headers.getFirst(HttpHeaders.VARY));
 	}
 
 	@Test

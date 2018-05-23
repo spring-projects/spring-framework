@@ -166,6 +166,7 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 				headers = new HttpHeaders();
 			}
 			headers.add(HttpHeaders.CONTENT_ENCODING, "gzip");
+			headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT_ENCODING);
 			return headers;
 		}
 	}
