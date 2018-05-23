@@ -43,7 +43,7 @@ configure(allprojects) { project ->
 
 	ext.aspectjVersion       = "1.9.1"
 	ext.freemarkerVersion    = "2.3.28"
-	ext.groovyVersion        = "2.5.0-rc-2"
+	ext.groovyVersion        = "2.5.0-rc-3"
 	ext.hsqldbVersion        = "2.4.0"
 	ext.jackson2Version      = "2.9.5"
 	ext.jettyVersion         = "9.4.10.v20180503"
@@ -56,7 +56,7 @@ configure(allprojects) { project ->
 	ext.reactorVersion       = "Californium-BUILD-SNAPSHOT"
 	ext.rxjavaVersion        = "1.3.8"
 	ext.rxjavaAdapterVersion = "1.2.1"
-	ext.rxjava2Version       = "2.1.13"
+	ext.rxjava2Version       = "2.1.14"
 	ext.slf4jVersion         = "1.7.25"	  // spring-jcl + consistent 3rd party deps
 	ext.tiles3Version        = "3.0.8"
 	ext.tomcatVersion        = "9.0.8"
