@@ -103,6 +103,9 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 			if (codingKey != null) {
 				key.append("+encoding=").append(codingKey);
 			}
+			if (encoding != null && encoding.contains("br")) {
+				key.append("+encoding=brotli");
+			}
 		}
 		return key.toString();
 	}
