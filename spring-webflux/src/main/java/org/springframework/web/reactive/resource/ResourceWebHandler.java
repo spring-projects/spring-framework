@@ -98,6 +98,12 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	private final List<ResourceTransformer> resourceTransformers = new ArrayList<>(4);
 
 	@Nullable
+	private ResourceResolverChain resolverChain;
+
+	@Nullable
+	private ResourceTransformerChain transformerChain;
+
+	@Nullable
 	private CacheControl cacheControl;
 
 	@Nullable
@@ -199,10 +205,17 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 		if (this.resourceResolvers.isEmpty()) {
 			this.resourceResolvers.add(new PathResourceResolver());
 		}
+
 		initAllowedLocations();
+
 		if (getResourceHttpMessageWriter() == null) {
 			this.resourceHttpMessageWriter = new ResourceHttpMessageWriter();
 		}
+
+
+		// Initialize immutable resolver and transformer chains
+		this.resolverChain = new DefaultResourceResolverChain(this.resourceResolvers);
+		this.transformerChain = new DefaultResourceTransformerChain(this.resolverChain, this.resourceTransformers);
 	}
 
 	/**
@@ -330,12 +343,11 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 			return Mono.empty();
 		}
 
-		ResourceResolverChain resolveChain = createResolverChain();
-		return resolveChain.resolveResource(exchange, path, getLocations())
-				.flatMap(resource -> {
-					ResourceTransformerChain transformerChain = createTransformerChain(resolveChain);
-					return transformerChain.transform(exchange, resource);
-				});
+		Assert.notNull(this.resolverChain, "ResourceResolverChain not initialized.");
+		Assert.notNull(this.transformerChain, "ResourceTransformerChain not initialized.");
+
+		return this.resolverChain.resolveResource(exchange, path, getLocations())
+				.flatMap(resource -> this.transformerChain.transform(exchange, resource));
 	}
 
 	/**
@@ -468,14 +480,6 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 			}
 		}
 		return false;
-	}
-
-	private ResourceResolverChain createResolverChain() {
-		return new DefaultResourceResolverChain(getResourceResolvers());
-	}
-
-	private ResourceTransformerChain createTransformerChain(ResourceResolverChain resolverChain) {
-		return new DefaultResourceTransformerChain(resolverChain, getResourceTransformers());
 	}
 
 	/**
