@@ -87,6 +87,40 @@ public class HttpMessageConverterExtractorTests {
 	}
 
 	@Test
+	public void incorrectContentType() throws IOException {
+		HttpMessageConverter<String> converter = mock(HttpMessageConverter.class);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		MediaType contentType = MediaType.APPLICATION_JSON_UTF8;
+		responseHeaders.setContentType(contentType);
+		String expected = "Foo";
+		extractor = new HttpMessageConverterExtractor<>(String.class, MediaType.TEXT_PLAIN, createConverterList(converter));
+		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
+		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getBody()).willReturn(new ByteArrayInputStream(expected.getBytes()));
+		given(converter.canRead(String.class, contentType)).willReturn(false);
+		given(converter.canRead(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+		given(converter.read(eq(String.class), any(HttpInputMessage.class))).willReturn(expected);
+		Object result = extractor.extractData(response);
+		assertEquals(expected, result);
+	}
+
+	@Test
+	public void noContentType() throws IOException {
+		HttpMessageConverter<String> converter = mock(HttpMessageConverter.class);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		String expected = "Foo";
+		extractor = new HttpMessageConverterExtractor<>(String.class, MediaType.TEXT_PLAIN, createConverterList(converter));
+		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
+		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getBody()).willReturn(new ByteArrayInputStream(expected.getBytes()));
+		given(converter.canRead(String.class, MediaType.APPLICATION_OCTET_STREAM)).willReturn(false);
+		given(converter.canRead(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+		given(converter.read(eq(String.class), any(HttpInputMessage.class))).willReturn(expected);
+		Object result = extractor.extractData(response);
+		assertEquals(expected, result);
+	}
+
+	@Test
 	public void zeroContentLength() throws IOException {
 		HttpMessageConverter<?> converter = mock(HttpMessageConverter.class);
 		HttpHeaders responseHeaders = new HttpHeaders();

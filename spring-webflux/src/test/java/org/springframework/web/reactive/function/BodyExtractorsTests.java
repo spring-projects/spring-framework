@@ -183,6 +183,43 @@ public class BodyExtractorsTests {
 	}
 
 	@Test
+	public void toMonoWithBodyAndNoContentType() {
+		BodyExtractor<Mono<User>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(User.class, MediaType.APPLICATION_JSON);
+		String text = "{\"username\":\"foo\",\"password\":\"bar\"}";
+		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+		DefaultDataBuffer dataBuffer = factory.wrap(ByteBuffer.wrap(text.getBytes(StandardCharsets.UTF_8)));
+		Flux<DataBuffer> body = Flux.just(dataBuffer);
+		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(body);
+		Mono<User> result = extractor.extract(request, this.context);
+		StepVerifier.create(result).consumeNextWith(user -> {
+			assertEquals("foo", user.getUsername());
+			assertEquals("bar", user.getPassword());
+		}).expectComplete().verify();
+	}
+
+	@Test
+	public void toFluxWithBodyAndNoContentType() {
+		BodyExtractor<Flux<User>, ReactiveHttpInputMessage> extractor = BodyExtractors.toFlux(User.class, MediaType.APPLICATION_JSON);
+		String text = "[{\"username\":\"foo\",\"password\":\"bar\"},{\"username\":\"bar\",\"password\":\"baz\"}]";
+		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+		DefaultDataBuffer dataBuffer = factory.wrap(ByteBuffer.wrap(text.getBytes(StandardCharsets.UTF_8)));
+		Flux<DataBuffer> body = Flux.just(dataBuffer);
+		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(body);
+		Flux<User> result = extractor.extract(request, this.context);
+		StepVerifier.create(result)
+				.consumeNextWith(user -> {
+					assertEquals("foo", user.getUsername());
+					assertEquals("bar", user.getPassword());
+				})
+				.consumeNextWith(user -> {
+					assertEquals("bar", user.getUsername());
+					assertEquals("baz", user.getPassword());
+				})
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
 	public void toFlux() {
 		BodyExtractor<Flux<String>, ReactiveHttpInputMessage> extractor = BodyExtractors.toFlux(String.class);
 

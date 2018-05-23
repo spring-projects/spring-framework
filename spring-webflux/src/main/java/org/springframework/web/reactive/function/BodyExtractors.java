@@ -64,7 +64,7 @@ public abstract class BodyExtractors {
 	 * @return a {@code BodyExtractor} that reads a mono
 	 */
 	public static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(Class<? extends T> elementClass) {
-		return toMono(ResolvableType.forClass(elementClass));
+		return toMono(ResolvableType.forClass(elementClass), null);
 	}
 
 	/**
@@ -85,10 +85,43 @@ public abstract class BodyExtractors {
 	public static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(
 			ParameterizedTypeReference<T> typeReference) {
 
-		return toMono(ResolvableType.forType(typeReference.getType()));
+		return toMono(ResolvableType.forType(typeReference.getType()), null);
 	}
 
-	static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(ResolvableType elementType) {
+	/**
+	 * Return a {@code BodyExtractor} that reads into a Reactor {@link Mono}.
+	 * @param elementClass the class of element in the {@code Mono}
+	 * @param <T> the element type
+	 * @param mediaType the media type
+	 * @return a {@code BodyExtractor} that reads a mono
+	 */
+	public static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(Class<? extends T> elementClass, MediaType mediaType) {
+		return toMono(ResolvableType.forClass(elementClass), mediaType);
+	}
+
+	/**
+	 * Return a {@code BodyExtractor} that reads into a Reactor {@link Mono}.
+	 * The given {@link ParameterizedTypeReference} is used to pass generic type information, for
+	 * instance when using the {@link org.springframework.web.reactive.function.client.WebClient WebClient}
+	 * <pre class="code">
+	 * Mono&lt;Map&lt;String, String&gt;&gt; body = this.webClient
+	 *  .get()
+	 *  .uri("http://example.com")
+	 *  .exchange()
+	 *  .flatMap(r -> r.body(toMono(new ParameterizedTypeReference&lt;Map&lt;String,String&gt;&gt;() {})));
+	 * </pre>
+	 * @param typeReference a reference to the type of element in the {@code Mono}
+	 * @param <T> the element type
+	 * @param mediaType the media type
+	 * @return a {@code BodyExtractor} that reads a mono
+	 */
+	public static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(
+			ParameterizedTypeReference<T> typeReference, MediaType mediaType) {
+
+		return toMono(ResolvableType.forType(typeReference.getType()), mediaType);
+	}
+
+	static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(ResolvableType elementType, MediaType mediaType) {
 		return (inputMessage, context) -> readWithMessageReaders(inputMessage, context,
 				elementType,
 				(HttpMessageReader<T> reader) -> {
@@ -103,7 +136,7 @@ public abstract class BodyExtractors {
 				},
 				ex -> (inputMessage.getHeaders().getContentType() == null) ?
 						Mono.from(permitEmptyOrFail(inputMessage, ex)) : Mono.error(ex),
-				Mono::empty);
+				Mono::empty, mediaType);
 	}
 
 	/**
@@ -113,7 +146,7 @@ public abstract class BodyExtractors {
 	 * @return a {@code BodyExtractor} that reads a flux
 	 */
 	public static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(Class<? extends T> elementClass) {
-		return toFlux(ResolvableType.forClass(elementClass));
+		return toFlux(ResolvableType.forClass(elementClass), null);
 	}
 
 	/**
@@ -134,11 +167,44 @@ public abstract class BodyExtractors {
 	public static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(
 			ParameterizedTypeReference<T> typeReference) {
 
-		return toFlux(ResolvableType.forType(typeReference.getType()));
+		return toFlux(ResolvableType.forType(typeReference.getType()), null);
+	}
+
+	/**
+	 * Return a {@code BodyExtractor} that reads into a Reactor {@link Flux}.
+	 * @param elementClass the class of element in the {@code Flux}
+	 * @param <T> the element type
+	 * @param mediaType the media type
+	 * @return a {@code BodyExtractor} that reads a flux
+	 */
+	public static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(Class<? extends T> elementClass, MediaType mediaType) {
+		return toFlux(ResolvableType.forClass(elementClass), mediaType);
+	}
+
+	/**
+	 * Return a {@code BodyExtractor} that reads into a Reactor {@link Flux}.
+	 * The given {@link ParameterizedTypeReference} is used to pass generic type information, for
+	 * instance when using the {@link org.springframework.web.reactive.function.client.WebClient WebClient}
+	 * <pre class="code">
+	 * Flux&lt;ServerSentEvent&lt;String&gt;&gt; body = this.webClient
+	 *  .get()
+	 *  .uri("http://example.com")
+	 *  .exchange()
+	 *  .flatMap(r -> r.body(toFlux(new ParameterizedTypeReference&lt;ServerSentEvent&lt;String&gt;&gt;() {})));
+	 * </pre>
+	 * @param typeReference a reference to the type of element in the {@code Flux}
+	 * @param <T> the element type
+	 * @param mediaType the media type
+	 * @return a {@code BodyExtractor} that reads a flux
+	 */
+	public static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(
+			ParameterizedTypeReference<T> typeReference, MediaType mediaType) {
+
+		return toFlux(ResolvableType.forType(typeReference.getType()), mediaType);
 	}
 
 	@SuppressWarnings("unchecked")
-	static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(ResolvableType elementType) {
+	static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(ResolvableType elementType, MediaType mediaType) {
 		return (inputMessage, context) -> readWithMessageReaders(inputMessage, context,
 				elementType,
 				(HttpMessageReader<T> reader) -> {
@@ -153,7 +219,7 @@ public abstract class BodyExtractors {
 				},
 				ex -> (inputMessage.getHeaders().getContentType() == null) ?
 						permitEmptyOrFail(inputMessage, ex) : Flux.error(ex),
-				Flux::empty);
+				Flux::empty, mediaType);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -238,12 +304,17 @@ public abstract class BodyExtractors {
 			ReactiveHttpInputMessage inputMessage, BodyExtractor.Context context, ResolvableType elementType,
 			Function<HttpMessageReader<T>, S> readerFunction,
 			Function<UnsupportedMediaTypeException, S> unsupportedError,
-			Supplier<S> empty) {
+			Supplier<S> empty, MediaType mediaType) {
 
 		if (VOID_TYPE.equals(elementType)) {
 			return empty.get();
 		}
-		MediaType contentType = contentType(inputMessage);
+		final MediaType contentType;
+		if (mediaType == null) {
+			contentType = contentType(inputMessage);
+		} else {
+			contentType = mediaType;
+		}
 		List<HttpMessageReader<?>> messageReaders = context.messageReaders();
 		return messageReaders.stream()
 				.filter(r -> r.canRead(elementType, contentType))
