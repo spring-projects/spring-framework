@@ -46,6 +46,9 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 	@Nullable
 	private final Class<T> responseClass;
 
+	@Nullable
+	private final MediaType mediaType;
+
 	private final List<HttpMessageConverter<?>> messageConverters;
 
 	private final Log logger;
@@ -64,19 +67,36 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 	 * type and message converters. The given converters must support the response type.
 	 */
 	public HttpMessageConverterExtractor(Type responseType, List<HttpMessageConverter<?>> messageConverters) {
-		this(responseType, messageConverters, LogFactory.getLog(HttpMessageConverterExtractor.class));
+		this(responseType,null , messageConverters);
+	}
+
+	/**
+	 * Creates a new instance of the {@code HttpMessageConverterExtractor} with the given response
+	 * type and message converters. The given converters must support the response type.
+	 *
+	 */
+	public HttpMessageConverterExtractor(Type responseType, @Nullable MediaType mediaType, List<HttpMessageConverter<?>> messageConverters) {
+		this(responseType, messageConverters, mediaType, LogFactory.getLog(HttpMessageConverterExtractor.class));
+	}
+
+	/**
+	 * Creates a new instance of the {@code HttpMessageConverterExtractor} with the given response
+	 * type and message converters. The given converters must support the response type.
+	 */
+	HttpMessageConverterExtractor(Type responseType, List<HttpMessageConverter<?>> messageConverters, Log logger) {
+		this(responseType, messageConverters, null, logger);
 	}
 
 	@SuppressWarnings("unchecked")
-	HttpMessageConverterExtractor(Type responseType, List<HttpMessageConverter<?>> messageConverters, Log logger) {
+	HttpMessageConverterExtractor(Type responseType, List<HttpMessageConverter<?>> messageConverters, @Nullable MediaType mediaType, Log logger) {
 		Assert.notNull(responseType, "'responseType' must not be null");
 		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
 		this.responseType = responseType;
 		this.responseClass = (responseType instanceof Class ? (Class<T>) responseType : null);
+		this.mediaType = mediaType;
 		this.messageConverters = messageConverters;
 		this.logger = logger;
 	}
-
 
 	@Override
 	@SuppressWarnings({"unchecked", "rawtypes", "resource"})
@@ -85,8 +105,12 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 		if (!responseWrapper.hasMessageBody() || responseWrapper.hasEmptyMessageBody()) {
 			return null;
 		}
-		MediaType contentType = getContentType(responseWrapper);
-
+		MediaType contentType;
+		if (this.mediaType == null) {
+			contentType = getContentType(responseWrapper);
+		} else {
+			contentType = mediaType;
+		}
 		try {
 			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
 				if (messageConverter instanceof GenericHttpMessageConverter) {
