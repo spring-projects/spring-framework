@@ -33,6 +33,7 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link ForwardedHeaderFilter}.
@@ -458,7 +459,7 @@ public class ForwardedHeaderFilterTests {
 		};
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		FilterChain filterChain = new MockFilterChain(new HttpServlet() {}, this.filter, filter);
+		FilterChain filterChain = new MockFilterChain(mock(HttpServlet.class), this.filter, filter);
 		filterChain.doFilter(request, response);
 
 		return response.getRedirectedUrl();
