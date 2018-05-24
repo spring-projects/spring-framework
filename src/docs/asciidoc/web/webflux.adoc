@@ -2866,7 +2866,7 @@ evaluated and if present a `304` status code is returned.
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
 			registry.addResourceHandler("/resources/**")
 				.addResourceLocations("/public", "classpath:/static/")
-				.setCachePeriod(31556926);
+				.setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS));
 		}
 
 	}
@@ -2910,13 +2910,12 @@ so it can be injected into others.
 
 Unlike Spring MVC at present in WebFlux there is no way to transparently rewrite static
 resource URLs since there are no view technologies that can make use of a non-blocking chain
-of resolvers and transformers (e.g. resources on Amazon S3). When serving only local
-resources the workaround is to use `ResourceUrlProvider` directly (e.g. through a custom
-tag) and block for 0 seconds.
+of resolvers and transformers. When serving only local resources the workaround is to use
+`ResourceUrlProvider` directly (e.g. through a custom tag) and block.
 
-Note that when using both `EncodedResourceResolver` (e.g. for serving gzipped or brotli
-encoded resources) and `VersionedResourceResolver`, they must be registered in this order.
-That ensures content based versions are always computed reliably based on the unencoded file.
+Note that when using both `EncodedResourceResolver` (e.g. Gzip, Brotli encoded) and
+`VersionedResourceResolver`, they must be registered in that order to ensure content
+based versions are always computed reliably based on the unencoded file.
 
 http://www.webjars.org/documentation[WebJars] is also supported via `WebJarsResourceResolver`
 and automatically registered when `"org.webjars:webjars-locator"` is present on the
