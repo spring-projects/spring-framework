@@ -52,7 +52,7 @@ dependencies {
 		exclude group: "commons-logging", module: "commons-logging"
 		exclude group: "io.netty", module: "netty"
 	}
-	optional("org.xmlunit:xmlunit-matchers:2.5.1")
+	optional("org.xmlunit:xmlunit-matchers:2.6.0")
 	optional("org.skyscreamer:jsonassert:1.5.0")
 	optional("com.jayway.jsonpath:json-path:2.4.0")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
