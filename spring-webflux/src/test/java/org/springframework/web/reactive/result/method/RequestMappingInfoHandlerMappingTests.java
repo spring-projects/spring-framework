@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,14 +91,14 @@ public class RequestMappingInfoHandlerMappingTests {
 
 
 	@Before
-	public void setup() throws Exception {
+	public void setup() {
 		this.handlerMapping = new TestRequestMappingInfoHandlerMapping();
 		this.handlerMapping.registerHandler(new TestController());
 	}
 
 
 	@Test
-	public void getHandlerDirectMatch() throws Exception {
+	public void getHandlerDirectMatch() {
 		Method expected = on(TestController.class).annot(getMapping("/foo").params()).resolveMethod();
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/foo"));
 		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
@@ -107,7 +107,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	public void getHandlerGlobMatch() throws Exception {
+	public void getHandlerGlobMatch() {
 		Method expected = on(TestController.class).annot(requestMapping("/ba*").method(GET, HEAD)).resolveMethod();
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/bar"));
 		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
@@ -116,7 +116,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	public void getHandlerEmptyPathMatch() throws Exception {
+	public void getHandlerEmptyPathMatch() {
 		Method expected = on(TestController.class).annot(requestMapping("")).resolveMethod();
 		ServerWebExchange exchange = MockServerWebExchange.from(get(""));
 		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
@@ -128,7 +128,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	public void getHandlerBestMatch() throws Exception {
+	public void getHandlerBestMatch() {
 		Method expected = on(TestController.class).annot(getMapping("/foo").params("p")).resolveMethod();
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/foo?p=anything"));
 		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
@@ -137,7 +137,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	public void getHandlerRequestMethodNotAllowed() throws Exception {
+	public void getHandlerRequestMethodNotAllowed() {
 		ServerWebExchange exchange = MockServerWebExchange.from(post("/bar"));
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
@@ -146,7 +146,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test  // SPR-9603
-	public void getHandlerRequestMethodMatchFalsePositive() throws Exception {
+	public void getHandlerRequestMethodMatchFalsePositive() {
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/users").accept(MediaType.APPLICATION_XML));
 		this.handlerMapping.registerHandler(new UserController());
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
@@ -157,14 +157,14 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test  // SPR-8462
-	public void getHandlerMediaTypeNotSupported() throws Exception {
+	public void getHandlerMediaTypeNotSupported() {
 		testHttpMediaTypeNotSupportedException("/person/1");
 		testHttpMediaTypeNotSupportedException("/person/1/");
 		testHttpMediaTypeNotSupportedException("/person/1.json");
 	}
 
 	@Test
-	public void getHandlerTestInvalidContentType() throws Exception {
+	public void getHandlerTestInvalidContentType() {
 		MockServerHttpRequest request = put("/person/1").header("content-type", "bogus").build();
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
@@ -175,13 +175,13 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test  // SPR-8462
-	public void getHandlerTestMediaTypeNotAcceptable() throws Exception {
+	public void getHandlerTestMediaTypeNotAcceptable() {
 		testMediaTypeNotAcceptable("/persons");
 		testMediaTypeNotAcceptable("/persons/");
 	}
 
 	@Test  // SPR-12854
-	public void getHandlerTestRequestParamMismatch() throws Exception {
+	public void getHandlerTestRequestParamMismatch() {
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/params"));
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 		assertError(mono, ServerWebInputException.class, ex -> {
@@ -191,7 +191,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	public void getHandlerHttpOptions() throws Exception {
+	public void getHandlerHttpOptions() {
 		List<HttpMethod> allMethodExceptTrace = new ArrayList<>(Arrays.asList(HttpMethod.values()));
 		allMethodExceptTrace.remove(HttpMethod.TRACE);
 
@@ -202,7 +202,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	public void getHandlerProducibleMediaTypesAttribute() throws Exception {
+	public void getHandlerProducibleMediaTypesAttribute() {
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/content").accept(MediaType.APPLICATION_XML));
 		this.handlerMapping.getHandler(exchange).block();
 
@@ -218,7 +218,7 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void handleMatchUriTemplateVariables() throws Exception {
+	public void handleMatchUriTemplateVariables() {
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/1/2"));
 
 		RequestMappingInfo key = paths("/{path1}/{path2}").build();
@@ -233,7 +233,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test  // SPR-9098
-	public void handleMatchUriTemplateVariablesDecode() throws Exception {
+	public void handleMatchUriTemplateVariablesDecode() {
 		RequestMappingInfo key = paths("/{group}/{identifier}").build();
 		URI url = URI.create("/group/a%2Fb");
 		ServerWebExchange exchange = MockServerWebExchange.from(method(HttpMethod.GET, url));
@@ -250,7 +250,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	public void handleMatchBestMatchingPatternAttribute() throws Exception {
+	public void handleMatchBestMatchingPatternAttribute() {
 		RequestMappingInfo key = paths("/{path1}/2", "/**").build();
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/1/2"));
 		this.handlerMapping.handleMatch(key, handlerMethod, exchange);
@@ -263,7 +263,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	public void handleMatchBestMatchingPatternAttributeNoPatternsDefined() throws Exception {
+	public void handleMatchBestMatchingPatternAttributeNoPatternsDefined() {
 		RequestMappingInfo key = paths().build();
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/1/2"));
 		this.handlerMapping.handleMatch(key, handlerMethod, exchange);
@@ -273,7 +273,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	public void handleMatchMatrixVariables() throws Exception {
+	public void handleMatchMatrixVariables() {
 		MultiValueMap<String, String> matrixVariables;
 		Map<String, String> uriVariables;
 
@@ -290,17 +290,17 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	public void handleMatchMatrixVariablesDecoding() throws Exception {
-		MockServerHttpRequest request = method(HttpMethod.GET, URI.create("/path;mvar=a%2fb")).build();
+	public void handleMatchMatrixVariablesDecoding() {
+		MockServerHttpRequest request = method(HttpMethod.GET, URI.create("/cars;mvar=a%2Fb")).build();
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
-		handleMatch(exchange, "/{filter}");
+		handleMatch(exchange, "/{cars}");
 
-		MultiValueMap<String, String> matrixVariables = getMatrixVariables(exchange, "filter");
+		MultiValueMap<String, String> matrixVariables = getMatrixVariables(exchange, "cars");
 		Map<String, String> uriVariables = getUriTemplateVariables(exchange);
 
 		assertNotNull(matrixVariables);
 		assertEquals(Collections.singletonList("a/b"), matrixVariables.get("mvar"));
-		assertEquals("path", uriVariables.get("filter"));
+		assertEquals("cars", uriVariables.get("cars"));
 	}
 
 
@@ -314,7 +314,7 @@ public class RequestMappingInfoHandlerMappingTests {
 				.verify();
 	}
 
-	private void testHttpMediaTypeNotSupportedException(String url) throws Exception {
+	private void testHttpMediaTypeNotSupportedException(String url) {
 		MockServerHttpRequest request = put(url).contentType(MediaType.APPLICATION_JSON).build();
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
@@ -325,7 +325,7 @@ public class RequestMappingInfoHandlerMappingTests {
 						ex.getSupportedMediaTypes()));
 	}
 
-	private void testHttpOptions(String requestURI, Set<HttpMethod> allowedMethods) throws Exception {
+	private void testHttpOptions(String requestURI, Set<HttpMethod> allowedMethods) {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.options(requestURI));
 		HandlerMethod handlerMethod = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
 
@@ -342,7 +342,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertEquals(allowedMethods, ((HttpHeaders) value).getAllow());
 	}
 
-	private void testMediaTypeNotAcceptable(String url) throws Exception {
+	private void testMediaTypeNotAcceptable(String url) {
 		ServerWebExchange exchange = MockServerWebExchange.from(get(url).accept(MediaType.APPLICATION_JSON));
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
