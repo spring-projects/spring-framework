@@ -116,7 +116,8 @@ public interface WebClient {
 
 
 	/**
-	 * Return a builder to mutate properties of this web client.
+	 * Return a builder for a new {@code WebClient} with properties replicated
+	 * from the current {@code WebClient} instance, but without affecting it.
 	 */
 	Builder mutate();
 
@@ -136,6 +137,7 @@ public interface WebClient {
 	 * A variant of {@link #create()} that accepts a default base URL. For more
 	 * details see {@link Builder#baseUrl(String) Builder.baseUrl(String)}.
 	 * @param baseUrl the base URI for all requests
+	 * @see #builder()
 	 */
 	static WebClient create(String baseUrl) {
 		return new DefaultWebClientBuilder().baseUrl(baseUrl).build();
