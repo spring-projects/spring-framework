@@ -31,7 +31,8 @@ import org.springframework.core.annotation.AliasFor;
  * SQL {@link #scripts} and {@link #statements} to be executed against a given
  * database during integration tests.
  *
- * <p>Method-level declarations override class-level declarations.
+ * <p>Method-level declarations override class-level declarations by default.
+ * This behaviour can be adjusted via {@link MergeMode}
  *
  * <p>Script execution is performed by the {@link SqlScriptsTestExecutionListener},
  * which is enabled by default.
@@ -146,6 +147,13 @@ public @interface Sql {
 	 */
 	SqlConfig config() default @SqlConfig;
 
+	/**
+	 * Indicates whether this annotation should be merged with upper-level annotations
+	 * or override them.
+	 * <p>Defaults to {@link MergeMode#OVERRIDE}.
+	 */
+	MergeMode mergeMode() default MergeMode.OVERRIDE;
+
 
 	/**
 	 * Enumeration of <em>phases</em> that dictate when SQL scripts are executed.
@@ -165,4 +173,23 @@ public @interface Sql {
 		AFTER_TEST_METHOD
 	}
 
+	/**
+	 * Enumeration of <em>modes</em> that dictate whether or not
+	 * declared SQL {@link #scripts} and {@link #statements} are merged
+	 * with the upper-level annotations.
+	 */
+	enum MergeMode {
+
+		/**
+		 * Indicates that locally declared SQL {@link #scripts} and {@link #statements}
+		 * should override the upper-level (e.g. Class-level) annotations.
+		 */
+		OVERRIDE,
+
+		/**
+		 * Indicates that locally declared SQL {@link #scripts} and {@link #statements}
+		 * should be merged the upper-level (e.g. Class-level) annotations.
+		 */
+		MERGE
+	}
 }

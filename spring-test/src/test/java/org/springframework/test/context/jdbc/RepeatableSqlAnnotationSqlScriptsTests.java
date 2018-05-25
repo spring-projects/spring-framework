@@ -25,6 +25,7 @@ import org.junit.runners.MethodSorters;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
+import org.springframework.test.jdbc.JdbcTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -56,6 +57,10 @@ public class RepeatableSqlAnnotationSqlScriptsTests extends AbstractTransactiona
 	// test##_ prefix is required for @FixMethodOrder.
 	public void test02_methodLevelScripts() {
 		assertNumUsers(2);
+	}
+
+	protected int countRowsInTable(String tableName) {
+		return JdbcTestUtils.countRowsInTable(this.jdbcTemplate, tableName);
 	}
 
 	protected void assertNumUsers(int expected) {

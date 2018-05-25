@@ -16,14 +16,17 @@
 
 package org.springframework.test.context.jdbc;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.io.ByteArrayResource;
@@ -126,19 +129,35 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	 * {@link TestContext} and {@link ExecutionPhase}.
 	 */
 	private void executeSqlScripts(TestContext testContext, ExecutionPhase executionPhase) throws Exception {
-		boolean classLevel = false;
-
-		Set<Sql> sqlAnnotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(
-				testContext.getTestMethod(), Sql.class, SqlGroup.class);
-		if (sqlAnnotations.isEmpty()) {
-			sqlAnnotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(
-					testContext.getTestClass(), Sql.class, SqlGroup.class);
-			if (!sqlAnnotations.isEmpty()) {
-				classLevel = true;
-			}
+		Set<Sql> methodLevelSqls = getScriptsFromElement(testContext.getTestMethod());
+		List<Sql> methodLevelOverrides = methodLevelSqls.stream()
+							.filter(s -> s.executionPhase() == executionPhase)
+							.filter(s -> s.mergeMode() == Sql.MergeMode.OVERRIDE)
+							.collect(Collectors.toList());
+		if (methodLevelOverrides.isEmpty()) {
+			executeScripts(getScriptsFromElement(testContext.getTestClass()), testContext, executionPhase, true);
+			executeScripts(methodLevelSqls, testContext, executionPhase, false);
+		} else {
+			executeScripts(methodLevelOverrides, testContext, executionPhase, false);
 		}
+	}
 
-		for (Sql sql : sqlAnnotations) {
+	/**
+	 * Get SQL scripts configured via {@link Sql @Sql} for the supplied
+	 * {@link AnnotatedElement}.
+	 */
+	private Set<Sql> getScriptsFromElement(AnnotatedElement annotatedElement) throws Exception {
+		return AnnotatedElementUtils.getMergedRepeatableAnnotations(annotatedElement, Sql.class, SqlGroup.class);
+	}
+
+	/**
+	 * Execute given {@link Sql @Sql} scripts.
+	 * {@link AnnotatedElement}.
+	 */
+	private void executeScripts(Iterable<Sql> scripts, TestContext testContext, ExecutionPhase executionPhase,
+								boolean classLevel)
+			throws Exception {
+		for (Sql sql : scripts) {
 			executeSqlScripts(sql, executionPhase, testContext, classLevel);
 		}
 	}
@@ -166,14 +185,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 					mergedSqlConfig, executionPhase, testContext));
 		}
 
-		final ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
-		populator.setSqlScriptEncoding(mergedSqlConfig.getEncoding());
-		populator.setSeparator(mergedSqlConfig.getSeparator());
-		populator.setCommentPrefix(mergedSqlConfig.getCommentPrefix());
-		populator.setBlockCommentStartDelimiter(mergedSqlConfig.getBlockCommentStartDelimiter());
-		populator.setBlockCommentEndDelimiter(mergedSqlConfig.getBlockCommentEndDelimiter());
-		populator.setContinueOnError(mergedSqlConfig.getErrorMode() == ErrorMode.CONTINUE_ON_ERROR);
-		populator.setIgnoreFailedDrops(mergedSqlConfig.getErrorMode() == ErrorMode.IGNORE_FAILED_DROPS);
+		final ResourceDatabasePopulator populator = configurePopulator(mergedSqlConfig);
 
 		String[] scripts = getScripts(sql, testContext, classLevel);
 		scripts = TestContextResourceUtils.convertToClasspathResourcePaths(testContext.getTestClass(), scripts);
@@ -230,6 +242,19 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 				return null;
 			});
 		}
+	}
+
+	@NotNull
+	private ResourceDatabasePopulator configurePopulator(MergedSqlConfig mergedSqlConfig) {
+		final ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
+		populator.setSqlScriptEncoding(mergedSqlConfig.getEncoding());
+		populator.setSeparator(mergedSqlConfig.getSeparator());
+		populator.setCommentPrefix(mergedSqlConfig.getCommentPrefix());
+		populator.setBlockCommentStartDelimiter(mergedSqlConfig.getBlockCommentStartDelimiter());
+		populator.setBlockCommentEndDelimiter(mergedSqlConfig.getBlockCommentEndDelimiter());
+		populator.setContinueOnError(mergedSqlConfig.getErrorMode() == ErrorMode.CONTINUE_ON_ERROR);
+		populator.setIgnoreFailedDrops(mergedSqlConfig.getErrorMode() == ErrorMode.IGNORE_FAILED_DROPS);
+		return populator;
 	}
 
 	@Nullable
