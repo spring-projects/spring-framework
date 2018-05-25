@@ -51,7 +51,8 @@ public class ForwardedHeaderFilterTests {
 				.header("X-Forwarded-Host", "example.com")
 				.header("X-Forwarded-Port", "8080")
 				.header("X-Forwarded-Proto", "http")
-				.header("X-Forwarded-Prefix", "prefix"));
+				.header("X-Forwarded-Prefix", "prefix")
+				.header("X-Forwarded-Ssl", "on"));
 
 		this.filter.setRemoveOnly(true);
 		this.filter.filter(exchange, this.filterChain).block(Duration.ZERO);
@@ -63,6 +64,7 @@ public class ForwardedHeaderFilterTests {
 		assertFalse(result.containsKey("X-Forwarded-Port"));
 		assertFalse(result.containsKey("X-Forwarded-Proto"));
 		assertFalse(result.containsKey("X-Forwarded-Prefix"));
+		assertFalse(result.containsKey("X-Forwarded-Ssl"));
 	}
 
 	@Test

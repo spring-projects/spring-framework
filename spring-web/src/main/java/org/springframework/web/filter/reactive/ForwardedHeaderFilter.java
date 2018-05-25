@@ -52,6 +52,7 @@ public class ForwardedHeaderFilter implements WebFilter {
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Port");
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Proto");
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Prefix");
+		FORWARDED_HEADER_NAMES.add("X-Forwarded-Ssl");
 	}
 
 
