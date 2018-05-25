@@ -42,7 +42,7 @@ import static org.junit.Assert.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @ContextConfiguration(classes = EmptyDatabaseConfig.class)
-@Sql({ "schema.sql", "data.sql" })
+@Sql({"drop-schema.sql", "schema.sql", "data.sql" })
 @DirtiesContext
 public class NonTransactionalSqlScriptsTests {
 

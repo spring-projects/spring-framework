@@ -46,7 +46,7 @@ import static org.springframework.test.transaction.TransactionTestUtils.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @ContextConfiguration
-@Sql({ "schema.sql", "data.sql" })
+@Sql({"drop-schema.sql", "schema.sql", "data.sql" })
 @DirtiesContext
 public class DataSourceOnlySqlScriptsTests {
 
@@ -66,7 +66,7 @@ public class DataSourceOnlySqlScriptsTests {
 	}
 
 	@Test
-	@Sql({ "drop-schema.sql", "schema.sql", "data.sql", "data-add-dogbert.sql" })
+	@Sql({"data-add-dogbert.sql" })
 	// test##_ prefix is required for @FixMethodOrder.
 	public void test02_methodLevelScripts() {
 		assertInTransaction(false);

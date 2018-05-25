@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.jdbc;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
@@ -126,20 +127,19 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	 * {@link TestContext} and {@link ExecutionPhase}.
 	 */
 	private void executeSqlScripts(TestContext testContext, ExecutionPhase executionPhase) throws Exception {
-		boolean classLevel = false;
+		executeSqlScriptsByElement(testContext, executionPhase, testContext.getTestClass());
+		executeSqlScriptsByElement(testContext, executionPhase, testContext.getTestMethod());
+	}
 
+	/**
+	 * Execute SQL scripts configured via {@link Sql @Sql} for the supplied
+	 * {@link TestContext}, {@link ExecutionPhase} and {@link AnnotatedElement}.
+	 */
+	private void executeSqlScriptsByElement(TestContext testContext, ExecutionPhase executionPhase, AnnotatedElement annotatedElement) throws Exception {
 		Set<Sql> sqlAnnotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(
-				testContext.getTestMethod(), Sql.class, SqlGroup.class);
-		if (sqlAnnotations.isEmpty()) {
-			sqlAnnotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(
-					testContext.getTestClass(), Sql.class, SqlGroup.class);
-			if (!sqlAnnotations.isEmpty()) {
-				classLevel = true;
-			}
-		}
-
+				annotatedElement, Sql.class, SqlGroup.class);
 		for (Sql sql : sqlAnnotations) {
-			executeSqlScripts(sql, executionPhase, testContext, classLevel);
+			executeSqlScripts(sql, executionPhase, testContext, annotatedElement instanceof Class);
 		}
 	}
 

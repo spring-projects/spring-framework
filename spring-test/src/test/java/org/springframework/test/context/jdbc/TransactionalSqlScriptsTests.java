@@ -43,7 +43,7 @@ import static org.junit.Assert.*;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @ContextConfiguration(classes = EmptyDatabaseConfig.class)
 @Transactional
-@Sql({ "schema.sql", "data.sql" })
+@Sql({ "drop-schema.sql", "schema.sql", "data.sql" })
 @DirtiesContext
 public class TransactionalSqlScriptsTests {
 
@@ -62,7 +62,7 @@ public class TransactionalSqlScriptsTests {
 	}
 
 	@Test
-	@Sql({ "drop-schema.sql", "schema.sql", "data.sql", "data-add-dogbert.sql" })
+	@Sql({ "data-add-dogbert.sql" })
 	// test##_ prefix is required for @FixMethodOrder.
 	public void test02_methodLevelScripts() {
 		assertNumUsers(2);
