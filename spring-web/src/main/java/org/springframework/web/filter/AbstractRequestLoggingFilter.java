@@ -137,7 +137,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 * Return whether the request headers should be included in the log message.
 	 * @since 4.3
 	 */
-	public boolean isIncludeHeaders() {
+	protected boolean isIncludeHeaders() {
 		return this.includeHeaders;
 	}
 
