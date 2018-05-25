@@ -61,6 +61,7 @@ public class BeanDefinitionReaderUtils {
 		bd.setParentName(parentName);
 		if (className != null) {
 			if (classLoader != null) {
+				//如果classLoader不为空，则使用以传入的classLoader同一虚拟机加载类对象，否则只是记录className
 				bd.setBeanClass(ClassUtils.forName(className, classLoader));
 			}
 			else {
@@ -90,12 +91,14 @@ public class BeanDefinitionReaderUtils {
 	/**
 	 * Generate a bean name for the given bean definition, unique within the
 	 * given bean factory.
+	 * 为给定的bean定义生成一个bean名称，这在给定的bean工厂内是唯一的。
 	 * @param definition the bean definition to generate a bean name for
 	 * @param registry the bean factory that the definition is going to be
 	 * registered with (to check for existing bean names)
 	 * @param isInnerBean whether the given bean definition will be registered
 	 * as inner bean or as top-level bean (allowing for special name generation
 	 * for inner beans versus top-level beans)
+	 * 是否将给定的bean定义注册为内部bean或顶级bean（允许为内部bean与顶级bean生成特殊名称）
 	 * @return the generated bean name
 	 * @throws BeanDefinitionStoreException if no unique name can be generated
 	 * for the given bean definition
@@ -137,6 +140,7 @@ public class BeanDefinitionReaderUtils {
 
 	/**
 	 * Register the given bean definition with the given bean factory.
+	 * 给定的bean工厂注册给定的bean定义
 	 * @param definitionHolder the bean definition including name and aliases
 	 * @param registry the bean factory to register with
 	 * @throws BeanDefinitionStoreException if registration failed
@@ -146,13 +150,17 @@ public class BeanDefinitionReaderUtils {
 			throws BeanDefinitionStoreException {
 
 		// Register bean definition under primary name.
+		// 使用beanName做唯一标示注册
 		String beanName = definitionHolder.getBeanName();
+		//------------------------------关键方法--------------------------------------
 		registry.registerBeanDefinition(beanName, definitionHolder.getBeanDefinition());
 
 		// Register aliases for bean name, if any.
+		// 注册所有的别名
 		String[] aliases = definitionHolder.getAliases();
 		if (aliases != null) {
 			for (String alias : aliases) {
+				//------------------------------关键方法--------------------------------------
 				registry.registerAlias(beanName, alias);
 			}
 		}

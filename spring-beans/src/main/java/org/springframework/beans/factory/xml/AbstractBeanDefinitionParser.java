@@ -60,9 +60,11 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	@Override
 	@Nullable
 	public final BeanDefinition parse(Element element, ParserContext parserContext) {
+		//---------------------关键方法-----------------
 		AbstractBeanDefinition definition = parseInternal(element, parserContext);
 		if (definition != null && !parserContext.isNested()) {
 			try {
+				//映射id
 				String id = resolveId(element, definition, parserContext);
 				if (!StringUtils.hasText(id)) {
 					parserContext.getReaderContext().error(
@@ -70,14 +72,18 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 									+ "' when used as a top-level tag", element);
 				}
 				String[] aliases = null;
+				//是否解析别名
 				if (shouldParseNameAsAliases()) {
 					String name = element.getAttribute(NAME_ATTRIBUTE);
 					if (StringUtils.hasLength(name)) {
 						aliases = StringUtils.trimArrayElements(StringUtils.commaDelimitedListToStringArray(name));
 					}
 				}
+				//将BeanDefinition封装成BeanDefinitionHolder
 				BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id, aliases);
+				//并进行注册
 				registerBeanDefinition(holder, parserContext.getRegistry());
+				//需要通知监听器则进行处理，postProcessComponentDefinition需要自己实现
 				if (shouldFireEvents()) {
 					BeanComponentDefinition componentDefinition = new BeanComponentDefinition(holder);
 					postProcessComponentDefinition(componentDefinition);
@@ -98,6 +104,8 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	 * <p>When using {@link #shouldGenerateId generation}, a name is generated automatically.
 	 * Otherwise, the ID is extracted from the "id" attribute, potentially with a
 	 * {@link #shouldGenerateIdAsFallback() fallback} to a generated id.
+	 * 解析所提供的{@link BeanDefinition}的ID。 <p>使用{@link #shouldGenerateId generation}时，会自动生成一个名称。
+	 * 否则，ID将从“id”属性提取，可能会使用{@link #shouldGenerateIdAsFallback（）后备}生成一个生成的ID。
 	 * @param element the element that the bean definition has been built from
 	 * @param definition the bean definition to be registered
 	 * @param parserContext the object encapsulating the current state of the parsing process;

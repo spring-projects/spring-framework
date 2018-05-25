@@ -75,6 +75,8 @@ public abstract class DomUtils {
 	/**
 	 * Retrieves all child elements of the given DOM element that match the given element name.
 	 * Only look at the direct child level of the given element; do not go into further depth
+	 * 检索给定DOM元素中与给定元素名称匹配的所有子元素。
+	 * 只查看给定元素的直接子级; 不要进一步深入
 	 * (in contrast to the DOM API's {@code getElementsByTagName} method).
 	 * @param ele the DOM element to analyze
 	 * @param childEleName the child element name to look for

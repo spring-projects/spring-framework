@@ -343,6 +343,13 @@ class ConstructorResolver {
 	 * to match with the parameters. We don't have the types attached to constructor args,
 	 * so trial and error is the only way to go here. The explicitArgs array may contain
 	 * argument values passed in programmatically via the corresponding getBean method.
+	 * 使用命名工厂方法实例化bean。 该方法可能是静态的，如果是
+	 * bean定义参数指定一个类，而不是“工厂bean”，或者
+	 * 使用依赖注入配置的工厂对象本身的实例变量。
+	 * <p>实现需要使用.txt迭代静态或实例方法
+	 * 名称在RootBeanDefinition中指定（该方法可能被重载）并尝试与参数匹配。
+	 * 我们没有附加到构造器参数的类型，所以反复试验是唯一的方法。 explicitArgs数组可能包含
+	 * 参数值通过相应的getBean方法以编程方式传递。
 	 * @param beanName the name of the bean
 	 * @param mbd the merged bean definition for the bean
 	 * @param explicitArgs argument values passed in programmatically via the getBean

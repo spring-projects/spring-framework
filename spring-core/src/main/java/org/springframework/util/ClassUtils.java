@@ -182,12 +182,15 @@ public abstract class ClassUtils {
 		}
 		catch (Throwable ex) {
 			// Cannot access thread context ClassLoader - falling back...
+			// 无法访问线程上下文ClassLoader - 回退...
 		}
 		if (cl == null) {
 			// No thread context class loader -> use class loader of this class.
+			// 没有线程上下文类加载器 - >使用这个类的类加载器。
 			cl = ClassUtils.class.getClassLoader();
 			if (cl == null) {
 				// getClassLoader() returning null indicates the bootstrap ClassLoader
+				// getClassLoader（）返回null表示引导类加载器
 				try {
 					cl = ClassLoader.getSystemClassLoader();
 				}
