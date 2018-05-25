@@ -2677,7 +2677,7 @@ the time to live, you can configure the `JmsListenerContainerFactory` accordingl
 		public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
 			DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
 			factory.setConnectionFactory(connectionFactory());
-			QosSettings replyQosSettings = new ReplyQosSettings();
+			QosSettings replyQosSettings = new QosSettings();
 			replyQosSettings.setPriority(2);
 			replyQosSettings.setTimeToLive(10000);
 			factory.setReplyQosSettings(replyQosSettings);
