@@ -347,6 +347,11 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	}
 
 	@Override
+	public void removeAliasByName(String beanName) {
+		this.beanFactory.removeAliasByName(beanName);
+	}
+
+	@Override
 	public boolean isAlias(String beanName) {
 		return this.beanFactory.isAlias(beanName);
 	}

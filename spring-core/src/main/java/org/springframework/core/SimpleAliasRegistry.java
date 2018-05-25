@@ -103,6 +103,17 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	}
 
 	@Override
+	public void removeAliasByName(String beanName) {
+		List<String> result = new ArrayList<>();
+		synchronized (this.aliasMap) {
+			retrieveAliases(beanName, result);
+			for (String alias : result) {
+				this.aliasMap.remove(alias);
+			}
+		}
+	}
+
+	@Override
 	public boolean isAlias(String name) {
 		return this.aliasMap.containsKey(name);
 	}

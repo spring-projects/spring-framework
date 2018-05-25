@@ -42,6 +42,12 @@ public interface AliasRegistry {
 	void removeAlias(String alias);
 
 	/**
+	 * Remove the specified beanName from this registry
+	 * @param beanName bean name
+	 */
+	void removeAliasByName(String beanName);
+
+	/**
 	 * Determine whether this given name is defines as an alias
 	 * (as opposed to the name of an actually registered component).
 	 * @param name the name to check
