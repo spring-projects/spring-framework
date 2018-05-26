@@ -16,18 +16,19 @@
 
 package org.springframework.web.reactive.function.client;
 
+import java.net.URI;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.util.Assert;
 
 /**
- * Exposes request-response exchange functionality, such as to
- * {@linkplain #create(ClientHttpConnector) create} an {@code ExchangeFunction} given a
- * {@code ClientHttpConnector}.
+ * Static factory methods to create an {@link ExchangeFunction}.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -39,24 +40,25 @@ public abstract class ExchangeFunctions {
 
 
 	/**
-	 * Create a new {@link ExchangeFunction} with the given connector. This method uses
-	 * {@linkplain ExchangeStrategies#withDefaults() default strategies}.
-	 * @param connector the connector to create connections
-	 * @return the created function
+	 * Create an {@code ExchangeFunction} with the given {@code ClientHttpConnector}.
+	 * This is the same as calling
+	 * {@link #create(ClientHttpConnector, ExchangeStrategies)} and passing
+	 * {@link ExchangeStrategies#withDefaults()}.
+	 * @param connector the connector to use for connecting to servers
+	 * @return the created {@code ExchangeFunction}
 	 */
 	public static ExchangeFunction create(ClientHttpConnector connector) {
 		return create(connector, ExchangeStrategies.withDefaults());
 	}
 
 	/**
-	 * Create a new {@link ExchangeFunction} with the given connector and strategies.
-	 * @param connector the connector to create connections
-	 * @param strategies the strategies to use
-	 * @return the created function
+	 * Create an {@code ExchangeFunction} with the given
+	 * {@code ClientHttpConnector} and {@code ExchangeStrategies}.
+	 * @param connector the connector to use for connecting to servers
+	 * @param strategies the {@code ExchangeStrategies} to use
+	 * @return the created {@code ExchangeFunction}
 	 */
 	public static ExchangeFunction create(ClientHttpConnector connector, ExchangeStrategies strategies) {
-		Assert.notNull(connector, "ClientHttpConnector must not be null");
-		Assert.notNull(strategies, "ExchangeStrategies must not be null");
 		return new DefaultExchangeFunction(connector, strategies);
 	}
 
@@ -67,26 +69,33 @@ public abstract class ExchangeFunctions {
 
 		private final ExchangeStrategies strategies;
 
+
 		public DefaultExchangeFunction(ClientHttpConnector connector, ExchangeStrategies strategies) {
+			Assert.notNull(connector, "ClientHttpConnector must not be null");
+			Assert.notNull(strategies, "ExchangeStrategies must not be null");
 			this.connector = connector;
 			this.strategies = strategies;
 		}
 
+
 		@Override
 		public Mono<ClientResponse> exchange(ClientRequest request) {
 			Assert.notNull(request, "ClientRequest must not be null");
+
+			HttpMethod httpMethod = request.method();
+			URI url = request.url();
+
 			return this.connector
-					.connect(request.method(), request.url(),
-							clientHttpRequest -> request.writeTo(clientHttpRequest, this.strategies))
+					.connect(httpMethod, url, httpRequest -> request.writeTo(httpRequest, this.strategies))
 					.doOnSubscribe(subscription -> logger.debug("Subscriber present"))
 					.doOnRequest(n -> logger.debug("Demand signaled"))
 					.doOnCancel(() -> logger.debug("Cancelling request"))
 					.map(response -> {
 						if (logger.isDebugEnabled()) {
-							int status = response.getRawStatusCode();
-							HttpStatus resolvedStatus = HttpStatus.resolve(status);
-							logger.debug("Response received, status: " + status +
-									(resolvedStatus != null ? " " + resolvedStatus.getReasonPhrase() : ""));
+							int code = response.getRawStatusCode();
+							HttpStatus status = HttpStatus.resolve(code);
+							String reason = status != null ? " " + status.getReasonPhrase() : "";
+							logger.debug("Response received, status: " + code + reason);
 						}
 						return new DefaultClientResponse(response, this.strategies);
 					});

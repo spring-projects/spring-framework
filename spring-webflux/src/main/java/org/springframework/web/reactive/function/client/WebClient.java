@@ -52,13 +52,17 @@ import org.springframework.web.util.UriBuilderFactory;
  * {@link #create(String)} or obtain a {@link WebClient#builder()} to create an
  * instance.
  *
- * <p>For examples with a response body see
- * {@link RequestHeadersSpec#retrieve() retrieve()} and
- * {@link RequestHeadersSpec#exchange() exchange()}.
- * For examples with a request body see
- * {@link RequestBodySpec#body(Publisher, Class) body(Publisher,Class)},
- * {@link RequestBodySpec#syncBody(Object) syncBody(Object)}, and
- * {@link RequestBodySpec#body(BodyInserter) body(BodyInserter)}.
+ * <p>For examples with a response body, see the Javadoc for:
+ * <ul>
+ * <li>{@link RequestHeadersSpec#retrieve() retrieve()}
+ * <li>{@link RequestHeadersSpec#exchange() exchange()}
+ * </ul>
+ * For examples with a request body see:
+ * <ul>
+ * <li>{@link RequestBodySpec#body(Publisher, Class) body(Publisher,Class)}
+ * <li>{@link RequestBodySpec#syncBody(Object) syncBody(Object)}
+ * <li>{@link RequestBodySpec#body(BodyInserter) body(BodyInserter)}
+ * </ul>
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
@@ -67,57 +71,57 @@ import org.springframework.web.util.UriBuilderFactory;
 public interface WebClient {
 
 	/**
-	 * Prepare an HTTP GET request.
+	 * Start building an HTTP GET request.
 	 * @return a spec for specifying the target URL
 	 */
 	RequestHeadersUriSpec<?> get();
 
 	/**
-	 * Prepare an HTTP HEAD request.
+	 * Start building an HTTP HEAD request.
 	 * @return a spec for specifying the target URL
 	 */
 	RequestHeadersUriSpec<?> head();
 
 	/**
-	 * Prepare an HTTP POST request.
+	 * Start building an HTTP POST request.
 	 * @return a spec for specifying the target URL
 	 */
 	RequestBodyUriSpec post();
 
 	/**
-	 * Prepare an HTTP PUT request.
+	 * Start building an HTTP PUT request.
 	 * @return a spec for specifying the target URL
 	 */
 	RequestBodyUriSpec put();
 
 	/**
-	 * Prepare an HTTP PATCH request.
+	 * Start building an HTTP PATCH request.
 	 * @return a spec for specifying the target URL
 	 */
 	RequestBodyUriSpec patch();
 
 	/**
-	 * Prepare an HTTP DELETE request.
+	 * Start building an HTTP DELETE request.
 	 * @return a spec for specifying the target URL
 	 */
 	RequestHeadersUriSpec<?> delete();
 
 	/**
-	 * Prepare an HTTP OPTIONS request.
+	 * Start building an HTTP OPTIONS request.
 	 * @return a spec for specifying the target URL
 	 */
 	RequestHeadersUriSpec<?> options();
 
 	/**
-	 * Prepare a request for the specified {@code HttpMethod}.
+	 * Start building a request for the given {@code HttpMethod}.
 	 * @return a spec for specifying the target URL
 	 */
 	RequestBodyUriSpec method(HttpMethod method);
 
 
 	/**
-	 * Return a builder for a new {@code WebClient} with properties replicated
-	 * from the current {@code WebClient} instance, but without affecting it.
+	 * Return a builder to create a new {@code WebClient} whose settings are
+	 * replicated from the current {@code WebClient}.
 	 */
 	Builder mutate();
 
@@ -125,7 +129,7 @@ public interface WebClient {
 	// Static, factory methods
 
 	/**
-	 * Create a new {@code WebClient} with a Reactor Netty connector.
+	 * Create a new {@code WebClient} with Reactor Netty by default.
 	 * @see #create(String)
 	 * @see #builder()
 	 */
@@ -134,7 +138,7 @@ public interface WebClient {
 	}
 
 	/**
-	 * A variant of {@link #create()} that accepts a default base URL. For more
+	 * Variant of {@link #create()} that accepts a default base URL. For more
 	 * details see {@link Builder#baseUrl(String) Builder.baseUrl(String)}.
 	 * @param baseUrl the base URI for all requests
 	 * @see #builder()
@@ -161,27 +165,25 @@ public interface WebClient {
 		 *
 		 * <p>For example given base URL "http://abc.com/v1":
 		 * <p><pre class="code">
-		 * Mono&#060;Account&#062; result = client.get()
-		 *         .uri("/accounts/{id}", 43)
-		 *         .exchange()
-		 *         .then(response -> response.bodyToMono(Account.class));
+		 * Mono&#060;Account&#062; result = client.get().uri("/accounts/{id}", 43)
+		 *         .retrieve()
+		 *         .bodyToMono(Account.class);
 		 *
 		 * // Result: http://abc.com/v1/accounts/43
 		 *
 		 * Flux&#060;Account&#062; result = client.get()
 		 *         .uri(builder -> builder.path("/accounts").queryParam("q", "12").build())
-		 *         .exchange()
-		 *         .then(response -> response.bodyToFlux(Account.class));
+		 *         .retrieve()
+		 *         .bodyToFlux(Account.class);
 		 *
 		 * // Result: http://abc.com/v1/accounts?q=12
 		 * </pre>
 		 *
 		 * <p>The base URL can be overridden with an absolute URI:
 		 * <pre class="code">
-		 * Mono&#060;Account&#062; result = client.get()
-		 *         .uri("http://xyz.com/path")
-		 *         .exchange()
-		 *         .then(response -> response.bodyToMono(Account.class));
+		 * Mono&#060;Account&#062; result = client.get().uri("http://xyz.com/path")
+		 *         .retrieve()
+		 *         .bodyToMono(Account.class);
 		 *
 		 * // Result: http://xyz.com/path
 		 * </pre>
@@ -190,8 +192,8 @@ public interface WebClient {
 		 * <pre class="code">
 		 * Flux&#060;Account&#062; result = client.get()
 		 *         .uri(builder -> builder.replacePath("/v2/accounts").queryParam("q", "12").build())
-		 *         .exchange()
-		 *         .then(response -> response.bodyToFlux(Account.class));
+		 *         .retrieve()
+		 *         .bodyToFlux(Account.class);
 		 *
 		 * // Result: http://abc.com/v2/accounts?q=12
 		 * </pre>
@@ -232,12 +234,9 @@ public interface WebClient {
 
 		/**
 		 * Manipulate the default headers with the given consumer. The
-		 * headers provided to the consumer are "live", so that the consumer can be used to
-		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
-		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
-		 * {@link HttpHeaders} methods.
-		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
-		 * @return this builder
+		 * headers provided to the consumer are "live", so that the consumer
+		 * can be used to overwrite or remove existing values.
+		 * @param headersConsumer the headers consumer
 		 */
 		Builder defaultHeaders(Consumer<HttpHeaders> headersConsumer);
 
@@ -250,27 +249,11 @@ public interface WebClient {
 
 		/**
 		 * Manipulate the default cookies with the given consumer. The
-		 * map provided to the consumer is "live", so that the consumer can be used to
-		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing header values,
-		 * {@linkplain MultiValueMap#remove(Object) remove} values, or use any of the other
-		 * {@link MultiValueMap} methods.
+		 * cookies provided to the consumer are "live", so that the consumer
+		 * can be used to overwrite or remove existing values.
 		 * @param cookiesConsumer a function that consumes the cookies map
-		 * @return this builder
 		 */
 		Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
-
-		/**
-		 * Configure the {@link ClientHttpConnector} to use.
-		 * <p>By default an instance of
-		 * {@link org.springframework.http.client.reactive.ReactorClientHttpConnector
-		 * ReactorClientHttpConnector} is created if this is not set. However a
-		 * shared instance may be passed instead, e.g. for use with multiple
-		 * {@code WebClient}'s targeting different base URIs.
-		 * @param connector the connector to use
-		 * @see #exchangeStrategies(ExchangeStrategies)
-		 * @see #exchangeFunction(ExchangeFunction)
-		 */
-		Builder clientConnector(ClientHttpConnector connector);
 
 		/**
 		 * Add the given filter to the filter chain.
@@ -279,8 +262,8 @@ public interface WebClient {
 		Builder filter(ExchangeFilterFunction filter);
 
 		/**
-		 * Manipulate the filters with the given consumer. The
-		 * list provided to the consumer is "live", so that the consumer can be used to remove
+		 * Manipulate the filters with the given consumer. The list provided to
+		 * the consumer is "live", so that the consumer can be used to remove
 		 * filters, change ordering, etc.
 		 * @param filtersConsumer a function that consumes the filter list
 		 * @return this builder
@@ -288,26 +271,31 @@ public interface WebClient {
 		Builder filters(Consumer<List<ExchangeFilterFunction>> filtersConsumer);
 
 		/**
-		 * Provide a pre-configured {@link ExchangeFunction} instance. This is
-		 * an alternative to and effectively overrides the following:
-		 * <ul>
-		 * <li>{@link #clientConnector(ClientHttpConnector)}
-		 * <li>{@link #exchangeStrategies(ExchangeStrategies)}.
-		 * </ul>
-		 * @param exchangeFunction the exchange function to use
-		 * @see #clientConnector(ClientHttpConnector)
-		 * @see #exchangeStrategies(ExchangeStrategies)
+		 * Configure the {@link ClientHttpConnector} to use. This is useful for
+		 * plugging in and/or customizing options of the underlying HTTP client
+		 * library (e.g. SSL).
+		 * <p>By default this is set to
+		 * {@link org.springframework.http.client.reactive.ReactorClientHttpConnector
+		 * ReactorClientHttpConnector}.
+		 * @param connector the connector to use
 		 */
-		Builder exchangeFunction(ExchangeFunction exchangeFunction);
+		Builder clientConnector(ClientHttpConnector connector);
 
 		/**
 		 * Configure the {@link ExchangeStrategies} to use.
-		 * <p>By default {@link ExchangeStrategies#withDefaults()} is used.
+		 * <p>By default this is obtained from {@link ExchangeStrategies#withDefaults()}.
 		 * @param strategies the strategies to use
-		 * @see #clientConnector(ClientHttpConnector)
-		 * @see #exchangeFunction(ExchangeFunction)
 		 */
 		Builder exchangeStrategies(ExchangeStrategies strategies);
+
+		/**
+		 * Provide an {@link ExchangeFunction} pre-configured with
+		 * {@link ClientHttpConnector} and {@link ExchangeStrategies}.
+		 * <p>This is an alternative to, and effectively overrides
+		 * {@link #clientConnector}, and {@link #exchangeStrategies}.
+		 * @param exchangeFunction the exchange function to use
+		 */
+		Builder exchangeFunction(ExchangeFunction exchangeFunction);
 
 		/**
 		 * Clone this {@code WebClient.Builder}
@@ -315,7 +303,8 @@ public interface WebClient {
 		Builder clone();
 
 		/**
-		 * Shortcut for pre-packaged customizations to WebTest builder.
+		 * Apply the given {@code Consumer} to this builder instance.
+		 * <p>This can be useful for applying pre-packaged customizations.
 		 * @param builderConsumer the consumer to apply
 		 */
 		Builder apply(Consumer<Builder> builderConsumer);
@@ -390,11 +379,9 @@ public interface WebClient {
 		S cookie(String name, String value);
 
 		/**
-		 * Manipulate the request's cookies with the given consumer. The
-		 * map provided to the consumer is "live", so that the consumer can be used to
-		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing header values,
-		 * {@linkplain MultiValueMap#remove(Object) remove} values, or use any of the other
-		 * {@link MultiValueMap} methods.
+		 * Manipulate the default cookies with the given consumer. The
+		 * cookies provided to the consumer are "live", so that the consumer
+		 * can be used to overwrite or remove existing values.
 		 * @param cookiesConsumer a function that consumes the cookies map
 		 * @return this builder
 		 */
@@ -425,11 +412,9 @@ public interface WebClient {
 		S header(String headerName, String... headerValues);
 
 		/**
-		 * Manipulate the request's headers with the given consumer. The
-		 * headers provided to the consumer are "live", so that the consumer can be used to
-		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
-		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
-		 * {@link HttpHeaders} methods.
+		 * Manipulate the default headers with the given consumer. The
+		 * headers provided to the consumer are "live", so that the consumer
+		 * can be used to overwrite or remove existing values.
 		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
 		 * @return this builder
 		 */

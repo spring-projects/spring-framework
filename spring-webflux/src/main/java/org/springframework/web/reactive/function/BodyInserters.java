@@ -40,8 +40,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Implementations of {@link BodyInserter} that write various bodies, such a reactive streams,
- * server-sent events, resources, etc.
+ * Static factory methods for {@link BodyInserter} implementations.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
