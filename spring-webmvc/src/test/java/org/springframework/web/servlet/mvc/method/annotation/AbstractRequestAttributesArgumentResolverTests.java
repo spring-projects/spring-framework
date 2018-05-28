@@ -79,6 +79,8 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 
 	protected abstract int getScope();
 
+	protected abstract Class<? extends ServletRequestBindingException> getMissingArgumentExceptionType();
+
 
 	@Test
 	public void supportsParameter() throws Exception {
@@ -95,6 +97,7 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 		}
 		catch (ServletRequestBindingException ex) {
 			assertTrue(ex.getMessage().startsWith("Missing "));
+			assertEquals(getMissingArgumentExceptionType(), ex.getClass());
 		}
 
 		Foo foo = new Foo();

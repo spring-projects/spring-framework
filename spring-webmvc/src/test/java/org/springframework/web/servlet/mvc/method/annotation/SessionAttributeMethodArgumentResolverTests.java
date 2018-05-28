@@ -16,6 +16,8 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import org.springframework.web.bind.MissingSessionAttributeException;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
@@ -40,6 +42,11 @@ public class SessionAttributeMethodArgumentResolverTests extends AbstractRequest
 	@Override
 	protected int getScope() {
 		return RequestAttributes.SCOPE_SESSION;
+	}
+
+	@Override
+	protected Class<? extends ServletRequestBindingException> getMissingArgumentExceptionType() {
+		return MissingSessionAttributeException.class;
 	}
 
 }
