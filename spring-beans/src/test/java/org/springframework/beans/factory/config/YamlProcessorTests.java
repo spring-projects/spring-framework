@@ -124,4 +124,16 @@ public class YamlProcessorTests {
 		});
 	}
 
+	@Test
+	public void nullValue() {
+		this.processor.setResources(new ByteArrayResource("foo: bar\n  bar: ~".getBytes()));
+		this.processor.process(new MatchCallback() {
+			@Override
+			public void process(Properties properties, Map<String, Object> map) {
+				assertEquals(null, properties.get("bar"));
+				assertEquals(1, properties.size());
+			}
+		});
+	}
+
 }
