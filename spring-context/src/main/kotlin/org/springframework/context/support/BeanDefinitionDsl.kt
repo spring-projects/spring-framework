@@ -61,11 +61,7 @@ import java.util.function.Supplier
  * @see BeanDefinitionDsl
  * @since 5.0
  */
-fun beans(init: BeanDefinitionDsl.() -> Unit): BeanDefinitionDsl {
-	val beans = BeanDefinitionDsl()
-	beans.init = init
-	return beans
-}
+fun beans(init: BeanDefinitionDsl.() -> Unit) = BeanDefinitionDsl(init)
 
 /**
  * Class implementing functional bean definition Kotlin DSL.
@@ -76,13 +72,12 @@ fun beans(init: BeanDefinitionDsl.() -> Unit): BeanDefinitionDsl {
  * @author Sebastien Deleuze
  * @since 5.0
  */
-open class BeanDefinitionDsl(private val condition: (ConfigurableEnvironment) -> Boolean = { true })
+open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
+							 private val condition: (ConfigurableEnvironment) -> Boolean = { true })
 	: ApplicationContextInitializer<GenericApplicationContext> {
 
 	@PublishedApi
 	internal val children = arrayListOf<BeanDefinitionDsl>()
-
-	internal lateinit var init: BeanDefinitionDsl.() -> Unit
 
 	/**
 	 * Access to the context for advanced use-cases.
@@ -238,8 +233,7 @@ open class BeanDefinitionDsl(private val condition: (ConfigurableEnvironment) ->
 	 * specified profile is active.
 	 */
 	fun profile(profile: String, init: BeanDefinitionDsl.() -> Unit) {
-		val beans = BeanDefinitionDsl({ it.activeProfiles.contains(profile) })
-		beans.init = init
+		val beans = BeanDefinitionDsl(init, { it.activeProfiles.contains(profile) })
 		children.add(beans)
 	}
 
@@ -251,8 +245,7 @@ open class BeanDefinitionDsl(private val condition: (ConfigurableEnvironment) ->
 	 */
 	fun environment(condition: ConfigurableEnvironment.() -> Boolean,
 					init: BeanDefinitionDsl.() -> Unit) {
-		val beans = BeanDefinitionDsl(condition::invoke)
-		beans.init = init
+		val beans = BeanDefinitionDsl(init, condition::invoke)
 		children.add(beans)
 	}
 
