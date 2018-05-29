@@ -45,13 +45,12 @@ class DefaultResourceTransformerChain implements ResourceTransformerChain {
 	private final ResourceTransformerChain nextChain;
 
 
-	public DefaultResourceTransformerChain(ResourceResolverChain resolverChain,
-			@Nullable List<ResourceTransformer> transformers) {
+	public DefaultResourceTransformerChain(
+			ResourceResolverChain resolverChain, @Nullable List<ResourceTransformer> transformers) {
 
 		Assert.notNull(resolverChain, "ResourceResolverChain is required");
 		this.resolverChain = resolverChain;
-
-		transformers = transformers != null ? transformers : Collections.emptyList();
+		transformers = (transformers != null ? transformers : Collections.emptyList());
 		DefaultResourceTransformerChain chain = initTransformerChain(resolverChain, new ArrayList<>(transformers));
 		this.transformer = chain.transformer;
 		this.nextChain = chain.nextChain;
@@ -61,9 +60,9 @@ class DefaultResourceTransformerChain implements ResourceTransformerChain {
 			ArrayList<ResourceTransformer> transformers) {
 
 		DefaultResourceTransformerChain chain = new DefaultResourceTransformerChain(resolverChain, null, null);
-		ListIterator<? extends ResourceTransformer> itr = transformers.listIterator(transformers.size());
-		while (itr.hasPrevious()) {
-			chain = new DefaultResourceTransformerChain(resolverChain, itr.previous(), chain);
+		ListIterator<? extends ResourceTransformer> it = transformers.listIterator(transformers.size());
+		while (it.hasPrevious()) {
+			chain = new DefaultResourceTransformerChain(resolverChain, it.previous(), chain);
 		}
 		return chain;
 	}
@@ -73,23 +72,22 @@ class DefaultResourceTransformerChain implements ResourceTransformerChain {
 
 		Assert.isTrue((transformer == null && chain == null) || (transformer != null && chain != null),
 				"Both transformer and transformer chain must be null, or neither is");
-
 		this.resolverChain = resolverChain;
 		this.transformer = transformer;
 		this.nextChain = chain;
 	}
 
+
+	@Override
 	public ResourceResolverChain getResolverChain() {
 		return this.resolverChain;
 	}
 
-
 	@Override
-	@SuppressWarnings("ConstantConditions")
 	public Mono<Resource> transform(ServerWebExchange exchange, Resource resource) {
-		return this.transformer != null ?
+		return (this.transformer != null && this.nextChain != null ?
 				this.transformer.transform(exchange, resource, this.nextChain) :
-				Mono.just(resource);
+				Mono.just(resource));
 	}
 
 }
