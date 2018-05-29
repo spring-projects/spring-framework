@@ -426,10 +426,11 @@ public class ResourceWebHandlerTests {
 	public void directoryInJarFile() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "underscorejs/");
-		this.handler.handle(exchange).block(TIMEOUT);
-
-		assertNull(exchange.getResponse().getStatusCode());
-		assertEquals(0, exchange.getResponse().getHeaders().getContentLength());
+		StepVerifier.create(this.handler.handle(exchange))
+				.expectErrorSatisfies(err -> {
+					assertThat(err, instanceOf(ResponseStatusException.class));
+					assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) err).getStatus());
+				}).verify(TIMEOUT);
 	}
 
 	@Test
