@@ -60,7 +60,7 @@ public interface Resource extends InputStreamSource {
 	boolean exists();
 
 	/**
-	 * Indicate whether the contents of this resource can be read via
+	 * Indicate whether non-empty contents of this resource can be read via
 	 * {@link #getInputStream()}.
 	 * <p>Will be {@code true} for typical resource descriptors that exist
 	 * since it strictly implies {@link #exists()} semantics as of 5.1.
