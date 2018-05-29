@@ -94,7 +94,6 @@ public class ExceptionHandlerExceptionResolverTests {
 
 
 	@Test
-	@SuppressWarnings("ConstantConditions")
 	public void nullHandler() {
 		Object handler = null;
 		this.resolver.afterPropertiesSet();
@@ -103,7 +102,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void setCustomArgumentResolvers() throws Exception {
+	public void setCustomArgumentResolvers() {
 		HandlerMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
 		this.resolver.setCustomArgumentResolvers(Collections.singletonList(resolver));
 		this.resolver.afterPropertiesSet();
@@ -113,7 +112,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void setArgumentResolvers() throws Exception {
+	public void setArgumentResolvers() {
 		HandlerMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
 		this.resolver.setArgumentResolvers(Collections.singletonList(resolver));
 		this.resolver.afterPropertiesSet();

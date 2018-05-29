@@ -26,7 +26,6 @@ import org.springframework.http.codec.ServerCodecConfigurer;
  */
 public class DefaultServerCodecConfigurer extends BaseCodecConfigurer implements ServerCodecConfigurer {
 
-
 	public DefaultServerCodecConfigurer() {
 		super(new ServerDefaultCodecsImpl());
 	}

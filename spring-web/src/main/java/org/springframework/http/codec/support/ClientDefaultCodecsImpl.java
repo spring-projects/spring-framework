@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.codec.support;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -79,7 +81,7 @@ class ClientDefaultCodecsImpl extends BaseDefaultCodecs implements ClientCodecCo
 
 	@Nullable
 	private Decoder<?> getSseDecoder() {
-		return this.sseDecoder != null ? this.sseDecoder : jackson2Present ? getJackson2JsonDecoder() : null;
+		return (this.sseDecoder != null ? this.sseDecoder : jackson2Present ? getJackson2JsonDecoder() : null);
 	}
 
 	@Override
@@ -87,10 +89,16 @@ class ClientDefaultCodecsImpl extends BaseDefaultCodecs implements ClientCodecCo
 		typedWriters.add(new MultipartHttpMessageWriter(getPartWriters(), new FormHttpMessageWriter()));
 	}
 
-	@SuppressWarnings("ConstantConditions")
 	private List<HttpMessageWriter<?>> getPartWriters() {
-		return this.multipartCodecs != null ?
-				this.multipartCodecs.getWriters() : this.partWritersSupplier.get();
+		if (this.multipartCodecs != null) {
+			return this.multipartCodecs.getWriters();
+		}
+		else if (this.partWritersSupplier != null) {
+			return this.partWritersSupplier.get();
+		}
+		else {
+			return Collections.emptyList();
+		}
 	}
 
 
@@ -100,7 +108,6 @@ class ClientDefaultCodecsImpl extends BaseDefaultCodecs implements ClientCodecCo
 	private static class DefaultMultipartCodecs implements ClientCodecConfigurer.MultipartCodecs {
 
 		private final List<HttpMessageWriter<?>> writers = new ArrayList<>();
-
 
 		@Override
 		public ClientCodecConfigurer.MultipartCodecs encoder(Encoder<?> encoder) {

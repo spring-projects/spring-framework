@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,13 +44,12 @@ class DefaultResourceTransformerChain implements ResourceTransformerChain {
 	private final ResourceTransformerChain nextChain;
 
 
-	public DefaultResourceTransformerChain(ResourceResolverChain resolverChain,
-			@Nullable List<ResourceTransformer> transformers) {
+	public DefaultResourceTransformerChain(
+			ResourceResolverChain resolverChain, @Nullable List<ResourceTransformer> transformers) {
 
 		Assert.notNull(resolverChain, "ResourceResolverChain is required");
 		this.resolverChain = resolverChain;
-
-		transformers = transformers != null ? transformers : Collections.emptyList();
+		transformers = (transformers != null ? transformers : Collections.emptyList());
 		DefaultResourceTransformerChain chain = initTransformerChain(resolverChain, new ArrayList<>(transformers));
 		this.transformer = chain.transformer;
 		this.nextChain = chain.nextChain;
@@ -60,9 +59,9 @@ class DefaultResourceTransformerChain implements ResourceTransformerChain {
 			ArrayList<ResourceTransformer> transformers) {
 
 		DefaultResourceTransformerChain chain = new DefaultResourceTransformerChain(resolverChain, null, null);
-		ListIterator<? extends ResourceTransformer> itr = transformers.listIterator(transformers.size());
-		while (itr.hasPrevious()) {
-			chain = new DefaultResourceTransformerChain(resolverChain, itr.previous(), chain);
+		ListIterator<? extends ResourceTransformer> it = transformers.listIterator(transformers.size());
+		while (it.hasPrevious()) {
+			chain = new DefaultResourceTransformerChain(resolverChain, it.previous(), chain);
 		}
 		return chain;
 	}
@@ -83,12 +82,10 @@ class DefaultResourceTransformerChain implements ResourceTransformerChain {
 		return this.resolverChain;
 	}
 
-
 	@Override
-	@SuppressWarnings("ConstantConditions")
 	public Resource transform(HttpServletRequest request, Resource resource) throws IOException {
-		return transformer != null ?
-				this.transformer.transform(request, resource, this.nextChain) : resource;
+		return (this.transformer != null && this.nextChain != null ?
+				this.transformer.transform(request, resource, this.nextChain) : resource);
 	}
 
 }

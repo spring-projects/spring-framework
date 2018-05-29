@@ -249,9 +249,7 @@ public class RequestPartMethodArgumentResolverTests {
 		return (T) value;
 	}
 
-	@SuppressWarnings("ConstantConditions")
 	private ServerWebExchange createExchange(MultipartBodyBuilder builder) {
-
 		MockClientHttpRequest clientRequest = new MockClientHttpRequest(HttpMethod.POST, "/");
 		this.writer.write(Mono.just(builder.build()), forClass(MultiValueMap.class),
 				MediaType.MULTIPART_FORM_DATA, clientRequest, Collections.emptyMap()).block();

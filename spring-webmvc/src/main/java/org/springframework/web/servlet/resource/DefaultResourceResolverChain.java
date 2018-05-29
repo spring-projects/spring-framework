@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 
 
 	public DefaultResourceResolverChain(@Nullable List<? extends ResourceResolver> resolvers) {
-		resolvers = resolvers != null ? resolvers : Collections.emptyList();
+		resolvers = (resolvers != null ? resolvers : Collections.emptyList());
 		DefaultResourceResolverChain chain = initChain(new ArrayList<>(resolvers));
 		this.resolver = chain.resolver;
 		this.nextChain = chain.nextChain;
@@ -50,19 +50,16 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 
 	private static DefaultResourceResolverChain initChain(ArrayList<? extends ResourceResolver> resolvers) {
 		DefaultResourceResolverChain chain = new DefaultResourceResolverChain(null, null);
-		ListIterator<? extends ResourceResolver> itr = resolvers.listIterator(resolvers.size());
-		while (itr.hasPrevious()) {
-			chain = new DefaultResourceResolverChain(itr.previous(), chain);
+		ListIterator<? extends ResourceResolver> it = resolvers.listIterator(resolvers.size());
+		while (it.hasPrevious()) {
+			chain = new DefaultResourceResolverChain(it.previous(), chain);
 		}
 		return chain;
 	}
 
-	private DefaultResourceResolverChain(@Nullable ResourceResolver resolver,
-			@Nullable ResourceResolverChain chain) {
-
+	private DefaultResourceResolverChain(@Nullable ResourceResolver resolver, @Nullable ResourceResolverChain chain) {
 		Assert.isTrue((resolver == null && chain == null) || (resolver != null && chain != null),
 				"Both resolver and resolver chain must be null, or neither is");
-
 		this.resolver = resolver;
 		this.nextChain = chain;
 	}
@@ -70,20 +67,18 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 
 	@Override
 	@Nullable
-	@SuppressWarnings("ConstantConditions")
-	public Resource resolveResource(@Nullable HttpServletRequest request, String requestPath,
-			List<? extends Resource> locations) {
+	public Resource resolveResource(
+			@Nullable HttpServletRequest request, String requestPath, List<? extends Resource> locations) {
 
-		return this.resolver != null ?
-				this.resolver.resolveResource(request, requestPath, locations, this.nextChain) : null;
+		return (this.resolver != null && this.nextChain != null ?
+				this.resolver.resolveResource(request, requestPath, locations, this.nextChain) : null);
 	}
 
 	@Override
 	@Nullable
-	@SuppressWarnings("ConstantConditions")
 	public String resolveUrlPath(String resourcePath, List<? extends Resource> locations) {
-		return this.resolver != null ?
-				this.resolver.resolveUrlPath(resourcePath, locations, this.nextChain) : null;
+		return (this.resolver != null && this.nextChain != null ?
+				this.resolver.resolveUrlPath(resourcePath, locations, this.nextChain) : null);
 	}
 
 }
