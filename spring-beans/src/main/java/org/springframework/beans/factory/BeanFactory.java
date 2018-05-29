@@ -22,10 +22,16 @@ import org.springframework.lang.Nullable;
 
 /**
  * The root interface for accessing a Spring bean container.
+ * 访问springIOC容器的根接口
+ *
  * This is the basic client view of a bean container;
+ * 这是bean容器的基础客户视图
+ *
  * further interfaces such as {@link ListableBeanFactory} and
  * {@link org.springframework.beans.factory.config.ConfigurableBeanFactory}
  * are available for specific purposes.
+ *
+ * 未来将会有 ListableBeanFactory 和 ConfigurableBeanFactory 类将作为特定的目的有新的特征
  *
  * <p>This interface is implemented by objects that hold a number of bean definitions,
  * each uniquely identified by a String name. Depending on the bean definition,
@@ -119,7 +125,9 @@ public interface BeanFactory {
 	 * Used to dereference a {@link FactoryBean} instance and distinguish it from
 	 * beans <i>created</i> by the FactoryBean. For example, if the bean named
 	 * {@code myJndiObject} is a FactoryBean, getting {@code &myJndiObject}
-	 * will return the factory, not the instance returned by the factory.
+	 *
+	 * 获取FactoryBean 的时候必须加上这个前缀作为区分
+	 *
 	 */
 	String FACTORY_BEAN_PREFIX = "&";
 
