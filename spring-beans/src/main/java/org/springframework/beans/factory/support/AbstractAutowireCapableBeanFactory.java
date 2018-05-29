@@ -39,6 +39,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
 
+import org.apache.commons.logging.Log;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -1868,6 +1870,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			super.clearSingletonCache();
 			this.factoryBeanInstanceCache.clear();
 		}
+	}
+
+	/**
+	 * Expose the logger to collaborating delegates.
+	 * @since 5.0.7
+	 */
+	Log getLogger() {
+		return logger;
 	}
 
 
