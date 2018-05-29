@@ -19,7 +19,6 @@ package org.springframework.core.io;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
@@ -70,19 +69,18 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 					return true;
 				}
 				if (httpCon != null) {
-					// no HTTP OK status, and no content-length header: give up
+					// No HTTP OK status, and no content-length header: give up
 					httpCon.disconnect();
 					return false;
 				}
 				else {
 					// Fall back to stream existence: can we open the stream?
-					InputStream is = getInputStream();
-					is.close();
+					getInputStream().close();
 					return true;
 				}
 			}
 		}
-		catch (IOException ex) {
+		catch (Exception ex) {
 			return false;
 		}
 	}
@@ -97,10 +95,33 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 				return (file.canRead() && !file.isDirectory());
 			}
 			else {
+				// Try InputStream resolution for jar resources
+				URLConnection con = url.openConnection();
+				customizeConnection(con);
+				if (con instanceof HttpURLConnection) {
+					HttpURLConnection httpCon = (HttpURLConnection) con;
+					int code = httpCon.getResponseCode();
+					if (code != HttpURLConnection.HTTP_OK) {
+						httpCon.disconnect();
+						return false;
+					}
+				}
+				int contentLength = con.getContentLength();
+				if (contentLength > 0) {
+					return true;
+				}
+				else if (contentLength < 0) {
+					return false;
+				}
+				// 0 length: either an empty file or a directory...
+				// On current JDKs, this will trigger an NPE from within the close() call
+				// for directories, only returning true for actual files with 0 length.
+				getInputStream().close();
 				return true;
 			}
 		}
-		catch (IOException ex) {
+		catch (Exception ex) {
+			// Usually an IOException but potentially a NullPointerException (see above)
 			return false;
 		}
 	}
@@ -114,7 +135,7 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 			}
 			return ResourceUtils.URL_PROTOCOL_FILE.equals(url.getProtocol());
 		}
-		catch (IOException ex) {
+		catch (Exception ex) {
 			return false;
 		}
 	}
@@ -165,7 +186,7 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 			}
 			return ResourceUtils.URL_PROTOCOL_FILE.equals(uri.getScheme());
 		}
-		catch (IOException ex) {
+		catch (Exception ex) {
 			return false;
 		}
 	}

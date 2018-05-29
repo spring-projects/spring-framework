@@ -109,7 +109,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	protected Mono<Resource> getResource(String resourcePath, Resource location) {
 		try {
 			Resource resource = location.createRelative(resourcePath);
-			if (resource.exists() && resource.isReadable()) {
+			if (resource.isReadable()) {
 				if (checkResource(resource, location)) {
 					if (logger.isTraceEnabled()) {
 						logger.trace("Found match: " + resource);

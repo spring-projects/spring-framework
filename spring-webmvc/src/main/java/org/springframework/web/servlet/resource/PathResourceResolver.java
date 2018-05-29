@@ -183,7 +183,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	@Nullable
 	protected Resource getResource(String resourcePath, Resource location) throws IOException {
 		Resource resource = location.createRelative(resourcePath);
-		if (resource.exists() && resource.isReadable()) {
+		if (resource.isReadable()) {
 			if (checkResource(resource, location)) {
 				return resource;
 			}
