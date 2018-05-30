@@ -2214,7 +2214,7 @@ configure the application context to take advantage of these annotations.
 
 
 [[jdbc-introduction]]
-=== Introduction to Spring Framework JDBC
+=== Introduction to Spring Framework's JDBC support
 
 The value-add provided by the Spring Framework JDBC abstraction is perhaps best shown by
 the sequence of actions outlined in the table below. The table shows what actions Spring
@@ -4295,8 +4295,7 @@ the supplied `ResultSet`.
 
 To pass parameters to a stored procedure that has one or more input parameters in its
 definition in the RDBMS, you can code a strongly typed `execute(..)` method that would
-delegate to the superclass' untyped `execute(Map parameters)` method (which has
-`protected` access); for example:
+delegate to the untyped `execute(Map)` method in the superclass; for example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4337,7 +4336,7 @@ delegate to the superclass' untyped `execute(Map parameters)` method (which has
 === Common problems with parameter and data value handling
 
 Common problems with parameters and data values exist in the different approaches
-provided by the Spring Framework JDBC.
+provided by Spring Framework's JDBC support.
 
 
 [[jdbc-type-information]]
@@ -4407,11 +4406,11 @@ dependency injection.
 
 	jdbcTemplate.execute(
 		"INSERT INTO lob_table (id, a_clob, a_blob) VALUES (?, ?, ?)",
-		new AbstractLobCreatingPreparedStatementCallback(lobHandler) { # <1>
+		new AbstractLobCreatingPreparedStatementCallback(lobHandler) {  # <1>
 			protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
 				ps.setLong(1, 1L);
-				lobCreator.setClobAsCharacterStream(ps, 2, clobReader, (int)clobIn.length()); # <2>
-				lobCreator.setBlobAsBinaryStream(ps, 3, blobIs, (int)blobIn.length()); # <3>
+				lobCreator.setClobAsCharacterStream(ps, 2, clobReader, (int)clobIn.length());  # <2>
+				lobCreator.setBlobAsBinaryStream(ps, 3, blobIs, (int)blobIn.length());  # <3>
 			}
 		}
 	);
@@ -4449,9 +4448,13 @@ with the same instance variable `lobHandler` and a reference to a `DefaultLobHan
 		new RowMapper<Map<String, Object>>() {
 			public Map<String, Object> mapRow(ResultSet rs, int i) throws SQLException {
 				Map<String, Object> results = new HashMap<String, Object>();
-				String clobText = lobHandler.getClobAsString(rs, "a_clob"); # <1>
-	results.put("CLOB", clobText); byte[] blobBytes = lobHandler.getBlobAsBytes(rs, "a_blob"); # <2>
-	results.put("BLOB", blobBytes); return results; } });
+				String clobText = lobHandler.getClobAsString(rs, "a_clob");  # <1>
+				results.put("CLOB", clobText);
+				byte[] blobBytes = lobHandler.getBlobAsBytes(rs, "a_blob");  # <2>
+				results.put("BLOB", blobBytes);
+				return results;
+			}
+		});
 ----
 
 <1> Using the method `getClobAsString`, retrieve the contents of the CLOB.
