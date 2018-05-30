@@ -4296,7 +4296,7 @@ the supplied `ResultSet`.
 To pass parameters to a stored procedure that has one or more input parameters in its
 definition in the RDBMS, you can code a strongly typed `execute(..)` method that would
 delegate to the superclass' untyped `execute(Map parameters)` method (which has
-`protected` access); for example:
+`public` access); for example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
