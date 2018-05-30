@@ -1,3 +1,0 @@
-dependencies {
-    compile '{@= groupId @}:spring-context:{@= version @}'
-} 
