@@ -16,7 +16,7 @@ dependencies {
 	optional("org.freemarker:freemarker:${freemarkerVersion}")
 	testCompile(project(":spring-context"))
 	testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-	testCompile("org.hibernate:hibernate-validator:6.0.9.Final")
+	testCompile("org.hibernate:hibernate-validator:6.0.10.Final")
 	testCompile("javax.annotation:javax.annotation-api:1.3.2")
 	testRuntime("org.ehcache:jcache:1.0.1")
 	testRuntime("org.ehcache:ehcache:3.4.0")
