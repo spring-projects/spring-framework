@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@ package org.springframework.web.reactive.socket.client;
 
 import java.net.URI;
 import java.util.List;
-import java.util.function.Consumer;
 
 import io.netty.buffer.ByteBufAllocator;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
+import reactor.netty.http.websocket.WebsocketInbound;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
@@ -51,6 +51,7 @@ public class ReactorNettyWebSocketClient extends WebSocketClientSupport implemen
 
 	/**
 	 * Constructor that accepts an existing {@link HttpClient} builder.
+	 * @since 5.1
 	 */
 	public ReactorNettyWebSocketClient(HttpClient httpClient) {
 		this.httpClient = httpClient;
@@ -71,32 +72,32 @@ public class ReactorNettyWebSocketClient extends WebSocketClientSupport implemen
 	}
 
 	@Override
-	public Mono<Void> execute(URI url, HttpHeaders headers, WebSocketHandler handler) {
-		List<String> protocols = beforeHandshake(url, headers, handler);
+	public Mono<Void> execute(URI url, HttpHeaders httpHeaders, WebSocketHandler handler) {
+		List<String> protocols = beforeHandshake(url, httpHeaders, handler);
 
 		return getHttpClient()
-				.headers(nettyHeaders -> setNettyHeaders(headers, nettyHeaders))
+				.headers(nettyHeaders -> setNettyHeaders(httpHeaders, nettyHeaders))
 				.websocket(StringUtils.collectionToCommaDelimitedString(protocols))
 				.uri(url.toString())
-				.handle((in, out) -> {
-					HandshakeInfo info = afterHandshake(url, toHttpHeaders(in.headers()));
-					ByteBufAllocator allocator = out.alloc();
-					NettyDataBufferFactory factory = new NettyDataBufferFactory(allocator);
-					WebSocketSession session = new ReactorNettyWebSocketSession(in, out, info, factory);
+				.handle((inbound, outbound) -> {
+					HandshakeInfo info = afterHandshake(url, toHttpHeaders(inbound));
+					NettyDataBufferFactory factory = new NettyDataBufferFactory(outbound.alloc());
+					WebSocketSession session = new ReactorNettyWebSocketSession(inbound, outbound, info, factory);
 					return handler.handle(session);
 				})
 				.next();
 	}
 
-	private void setNettyHeaders(HttpHeaders headers, io.netty.handler.codec.http.HttpHeaders nettyHeaders) {
-		headers.forEach(nettyHeaders::set);
+	private void setNettyHeaders(HttpHeaders httpHeaders, io.netty.handler.codec.http.HttpHeaders nettyHeaders) {
+		httpHeaders.forEach(nettyHeaders::set);
 	}
 
-	private HttpHeaders toHttpHeaders(io.netty.handler.codec.http.HttpHeaders responseHeaders) {
+	private HttpHeaders toHttpHeaders(WebsocketInbound inbound) {
 		HttpHeaders headers = new HttpHeaders();
-		responseHeaders.forEach(entry -> {
+		io.netty.handler.codec.http.HttpHeaders nettyHeaders = inbound.headers();
+		nettyHeaders.forEach(entry -> {
 			String name = entry.getKey();
-			headers.put(name, responseHeaders.getAll(name));
+			headers.put(name, nettyHeaders.getAll(name));
 		});
 		return headers;
 	}

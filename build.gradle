@@ -247,6 +247,9 @@ configure(rootProject) {
 		imports {
 			mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
 		}
+		dependencies {
+			dependency "io.projectreactor.netty:reactor-netty:0.8.0.BUILD-SNAPSHOT"
+		}
 		resolutionStrategy {
 			cacheChangingModulesFor 0, 'seconds'
 		}

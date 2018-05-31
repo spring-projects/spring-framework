@@ -8,6 +8,9 @@ dependencyManagement {
 		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
 		mavenBom "io.netty:netty-bom:${nettyVersion}"
 	}
+	dependencies {
+		dependency "io.projectreactor.netty:reactor-netty:0.8.0.BUILD-SNAPSHOT"
+	}
 	resolutionStrategy {
 		cacheChangingModulesFor 0, 'seconds'
 	}
@@ -34,7 +37,7 @@ dependencies {
 	optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
 	optional("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
 	optional("io.netty:netty-all")
-	optional("io.projectreactor.netty:reactor-netty:0.8.0.BUILD-SNAPSHOT")
+	optional("io.projectreactor.netty:reactor-netty")
 	optional("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 	optional("org.eclipse.jetty:jetty-server:${jettyVersion}") {
 		exclude group: "javax.servlet", module: "javax.servlet-api"

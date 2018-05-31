@@ -42,28 +42,26 @@ import io.netty.buffer.ByteBufAllocator;
  */
 class ReactorClientHttpResponse implements ClientHttpResponse {
 
-	private final NettyDataBufferFactory dataBufferFactory;
+	private final NettyDataBufferFactory bufferFactory;
 
 	private final HttpClientResponse response;
 
-	private final NettyInbound nettyInbound;
+	private final NettyInbound inbound;
 
 
-	public ReactorClientHttpResponse(HttpClientResponse response, NettyInbound nettyInbound,
-			ByteBufAllocator alloc) {
+	public ReactorClientHttpResponse(HttpClientResponse response, NettyInbound inbound, ByteBufAllocator alloc) {
 		this.response = response;
-		this.nettyInbound = nettyInbound;
-		this.dataBufferFactory = new NettyDataBufferFactory(alloc);
+		this.inbound = inbound;
+		this.bufferFactory = new NettyDataBufferFactory(alloc);
 	}
 
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return nettyInbound
-				.receive()
-				.map(buf -> {
-					buf.retain();
-					return dataBufferFactory.wrap(buf);
+		return this.inbound.receive()
+				.map(byteBuf -> {
+					byteBuf.retain();
+					return this.bufferFactory.wrap(byteBuf);
 				});
 	}
 

@@ -90,25 +90,30 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 
 
 	/**
-	 * Simple constructor with a host and a port.
+	 * Simple constructor with the host and port to use to connect to.
+	 * <p>This constructor manages the lifecycle of the {@link TcpClient} and
+	 * underlying resources such as {@link ConnectionProvider},
+	 * {@link LoopResources}, and {@link ChannelGroup}.
+	 * <p>For full control over the initialization and lifecycle of the
+	 * TcpClient, use {@link #ReactorNettyTcpClient(TcpClient, ReactorNettyCodec)}.
 	 * @param host the host to connect to
 	 * @param port the port to connect to
-	 * @param codec the code to use
+	 * @param codec for encoding and decoding the input/output byte streams
 	 * @see org.springframework.messaging.simp.stomp.StompReactorNettyCodec
 	 */
 	public ReactorNettyTcpClient(String host, int port, ReactorNettyCodec<P> codec) {
 		Assert.notNull(host, "host is required");
-		Assert.notNull(port, "port is required");
 		Assert.notNull(codec, "ReactorNettyCodec is required");
 
 		this.channelGroup = new DefaultChannelGroup(ImmediateEventExecutor.INSTANCE);
 		this.loopResources = LoopResources.create("tcp-client-loop");
 		this.poolResources = ConnectionProvider.elastic("tcp-client-pool");
-		this.tcpClient = TcpClient.create(poolResources)
-								.host(host)
-								.port(port)
-								.runOn(loopResources, false)
-								.doOnConnected(c -> channelGroup.add(c.channel()));
+
+		this.tcpClient = TcpClient.create(this.poolResources)
+				.host(host).port(port)
+				.runOn(this.loopResources, false)
+				.doOnConnected(conn -> this.channelGroup.add(conn.channel()));
+
 		this.codec = codec;
 	}
 
@@ -117,7 +122,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	 * lifecycle is expected to be managed externally.
 	 *
 	 * @param tcpClient the TcpClient instance to use
-	 * @param codec the code to use
+	 * @param codec for encoding and decoding the input/output byte streams
 	 * @see org.springframework.messaging.simp.stomp.StompReactorNettyCodec
 	 */
 	public ReactorNettyTcpClient(TcpClient tcpClient, ReactorNettyCodec<P> codec) {
@@ -264,16 +269,16 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 		@Override
 		@SuppressWarnings("unchecked")
 		public Publisher<Void> apply(NettyInbound inbound, NettyOutbound outbound) {
-			inbound.withConnection(c -> {
+			inbound.withConnection(conn -> {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Connected to " + c.address());
+					logger.debug("Connected to " + conn.address());
 				}
 			});
 			DirectProcessor<Void> completion = DirectProcessor.create();
 			TcpConnection<P> connection = new ReactorNettyTcpConnection<>(inbound, outbound,  codec, completion);
 			scheduler.schedule(() -> connectionHandler.afterConnected(connection));
 
-			inbound.withConnection(c -> c.addHandler(new StompMessageDecoder<>(codec)));
+			inbound.withConnection(conn -> conn.addHandler(new StompMessageDecoder<>(codec)));
 
 			inbound.receiveObject()
 					.cast(Message.class)

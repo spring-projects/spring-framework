@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,15 +31,14 @@ public class ReactorHttpsServer extends AbstractHttpServer {
 
 	private reactor.netty.http.server.HttpServer reactorServer;
 
-	private AtomicReference<DisposableServer> disposableServer = new AtomicReference<>();
+	private AtomicReference<DisposableServer> serverRef = new AtomicReference<>();
 
 
 	@Override
-	protected void initServer() throws Exception {
+	protected void initServer() {
 		this.reactorHandler = createHttpHandlerAdapter();
 		this.reactorServer = reactor.netty.http.server.HttpServer.create()
-			.tcpConfiguration(tcpServer -> tcpServer.host(getHost())
-													.secure())
+			.tcpConfiguration(server -> server.host(getHost()).secure())
 			.port(getPort());
 	}
 
@@ -49,21 +48,21 @@ public class ReactorHttpsServer extends AbstractHttpServer {
 
 	@Override
 	protected void startInternal() {
-		DisposableServer disposableServer = this.reactorServer.handle(this.reactorHandler).bind().block();
-		setPort(disposableServer.address().getPort());
-		this.disposableServer.set(disposableServer);
+		DisposableServer server = this.reactorServer.handle(this.reactorHandler).bind().block();
+		setPort(server.address().getPort());
+		this.serverRef.set(server);
 	}
 
 	@Override
 	protected void stopInternal() {
-		this.disposableServer.get().dispose();
+		this.serverRef.get().dispose();
 	}
 
 	@Override
 	protected void resetInternal() {
 		this.reactorServer = null;
 		this.reactorHandler = null;
-		this.disposableServer.set(null);
+		this.serverRef.set(null);
 	}
 
 }

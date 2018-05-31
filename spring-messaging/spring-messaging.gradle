@@ -7,6 +7,9 @@ dependencyManagement {
 		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
 		mavenBom "io.netty:netty-bom:${nettyVersion}"
 	}
+	dependencies {
+		dependency "io.projectreactor.netty:reactor-netty:0.8.0.BUILD-SNAPSHOT"
+	}
 	resolutionStrategy {
 		cacheChangingModulesFor 0, 'seconds'
 	}
@@ -18,7 +21,7 @@ dependencies {
 	compile(project(":spring-core"))
 	optional(project(":spring-context"))
 	optional(project(":spring-oxm"))
-	optional("io.projectreactor.netty:reactor-netty:0.8.0.BUILD-SNAPSHOT")
+	optional("io.projectreactor.netty:reactor-netty")
 	optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
 		exclude group: "javax.servlet", module: "javax.servlet-api"
 	}

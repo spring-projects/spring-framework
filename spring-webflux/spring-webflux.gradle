@@ -7,6 +7,9 @@ dependencyManagement {
 		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
 		mavenBom "io.netty:netty-bom:${nettyVersion}"
 	}
+	dependencies {
+		dependency "io.projectreactor.netty:reactor-netty:0.8.0.BUILD-SNAPSHOT"
+	}
 	resolutionStrategy {
 		cacheChangingModulesFor 0, 'seconds'
 	}
@@ -28,7 +31,7 @@ dependencies {
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jackson2Version}")
 	optional("io.reactivex:rxjava:${rxjavaVersion}")
 	optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
-	optional("io.projectreactor.netty:reactor-netty:0.8.0.BUILD-SNAPSHOT")
+	optional("io.projectreactor.netty:reactor-netty")
 	optional("org.apache.tomcat:tomcat-websocket:${tomcatVersion}") {
 		exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
 		exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"

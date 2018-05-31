@@ -7,6 +7,9 @@ dependencyManagement {
 		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
 		mavenBom "io.netty:netty-bom:${nettyVersion}"
 	}
+	dependencies {
+		dependency "io.projectreactor.netty:reactor-netty:0.8.0.BUILD-SNAPSHOT"
+	}
 	resolutionStrategy {
 		cacheChangingModulesFor 0, 'seconds'
 	}
@@ -80,7 +83,7 @@ dependencies {
 	testCompile("org.apache.httpcomponents:httpclient:4.5.5") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-	testCompile('io.projectreactor.netty:reactor-netty:0.8.0.BUILD-SNAPSHOT')
+	testCompile('io.projectreactor.netty:reactor-netty')
 	testCompile('de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1')
 	// Pull in the latest JUnit 5 Launcher API and the Vintage engine as well
 	// so that we can run JUnit 4 tests in IntelliJ IDEA.

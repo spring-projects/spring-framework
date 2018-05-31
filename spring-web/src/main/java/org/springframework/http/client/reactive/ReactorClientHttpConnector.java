@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,16 +44,17 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 
 	/**
 	 * Create a Reactor Netty {@link ClientHttpConnector}
-	 * with a default configuration and HTTP compression support enabled.
+	 * with default configuration and HTTP compression support enabled.
 	 */
 	public ReactorClientHttpConnector() {
-		this.httpClient = HttpClient.create()
-									.compress();
+		this.httpClient = HttpClient.create().compress();
 	}
 
 	/**
-	 * Create a Reactor Netty {@link ClientHttpConnector} with the given
-	 * {@link HttpClient}
+	 * Create a Reactor Netty {@link ClientHttpConnector} with a fully
+	 * configured {@code HttpClient}.
+	 * @param httpClient the client instance to use
+	 * @since 5.1
 	 */
 	public ReactorClientHttpConnector(HttpClient httpClient) {
 		this.httpClient = httpClient;
@@ -69,24 +70,23 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 		}
 
 		return this.httpClient
-				.request(adaptHttpMethod(method))
+				.request(io.netty.handler.codec.http.HttpMethod.valueOf(method.name()))
 				.uri(uri.toString())
-				.send((req, out) -> requestCallback.apply(adaptRequest(method, uri, req, out)))
+				.send((request, outbound) -> requestCallback.apply(adaptRequest(method, uri, request, outbound)))
 				.responseConnection((res, con) -> Mono.just(adaptResponse(res, con.inbound(), con.outbound().alloc())))
 				.next();
 	}
 
-	private io.netty.handler.codec.http.HttpMethod adaptHttpMethod(HttpMethod method) {
-		return io.netty.handler.codec.http.HttpMethod.valueOf(method.name());
-	}
+	private ReactorClientHttpRequest adaptRequest(HttpMethod method, URI uri, HttpClientRequest request,
+			NettyOutbound nettyOutbound) {
 
-	private ReactorClientHttpRequest adaptRequest(HttpMethod method, URI uri, HttpClientRequest request, NettyOutbound out) {
-		return new ReactorClientHttpRequest(method, uri, request, out);
+		return new ReactorClientHttpRequest(method, uri, request, nettyOutbound);
 	}
 
 	private ClientHttpResponse adaptResponse(HttpClientResponse response, NettyInbound nettyInbound,
-			ByteBufAllocator alloc) {
-		return new ReactorClientHttpResponse(response, nettyInbound, alloc);
+			ByteBufAllocator allocator) {
+
+		return new ReactorClientHttpResponse(response, nettyInbound, allocator);
 	}
 
 }
