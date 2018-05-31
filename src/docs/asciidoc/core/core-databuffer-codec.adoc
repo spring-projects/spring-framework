@@ -44,7 +44,7 @@ writing, and a separate `flip()` operation to switch between the two  I/O operat
 In general, the following invariant holds for the read position, write position, and the capacity:
 
 --
-	`0` <= _read position_ <= _write position_ <= _capacity_
+	0 <= read position <= write position <= capacity
 --
 
 When reading bytes from the `DataBuffer`, the read position is automatically updated in accordance with
