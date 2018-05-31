@@ -366,7 +366,7 @@ and code snippets for each server:
 |Server name|Group id|Artifact name
 
 |Reactor Netty
-|io.projectreactor.ipc
+|io.projectreactor.netty
 |reactor-netty
 
 |Undertow

@@ -75,7 +75,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 			HandshakeWebSocketService.class.getClassLoader());
 
 	private static final boolean reactorNettyPresent = ClassUtils.isPresent(
-			"reactor.ipc.netty.http.server.HttpServerResponse",
+			"reactor.netty.http.server.HttpServerResponse",
 			HandshakeWebSocketService.class.getClassLoader());
 
 
