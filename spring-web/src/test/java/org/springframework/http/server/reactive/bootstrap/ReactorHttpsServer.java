@@ -18,7 +18,7 @@ package org.springframework.http.server.reactive.bootstrap;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import reactor.ipc.netty.NettyContext;
+import reactor.ipc.netty.DisposableServer;
 
 import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
 
@@ -31,15 +31,16 @@ public class ReactorHttpsServer extends AbstractHttpServer {
 
 	private reactor.ipc.netty.http.server.HttpServer reactorServer;
 
-	private AtomicReference<NettyContext> nettyContext = new AtomicReference<>();
+	private AtomicReference<DisposableServer> disposableServer = new AtomicReference<>();
 
 
 	@Override
 	protected void initServer() throws Exception {
 		this.reactorHandler = createHttpHandlerAdapter();
-		this.reactorServer = reactor.ipc.netty.http.server.HttpServer.create(builder -> {
-			builder.host(getHost()).port(getPort()).sslSelfSigned();
-		});
+		this.reactorServer = reactor.ipc.netty.http.server.HttpServer.create()
+			.tcpConfiguration(tcpServer -> tcpServer.host(getHost())
+													.secure())
+			.port(getPort());
 	}
 
 	private ReactorHttpHandlerAdapter createHttpHandlerAdapter() {
@@ -48,21 +49,21 @@ public class ReactorHttpsServer extends AbstractHttpServer {
 
 	@Override
 	protected void startInternal() {
-		NettyContext nettyContext = this.reactorServer.newHandler(this.reactorHandler).block();
-		setPort(nettyContext.address().getPort());
-		this.nettyContext.set(nettyContext);
+		DisposableServer disposableServer = this.reactorServer.handle(this.reactorHandler).bind().block();
+		setPort(disposableServer.address().getPort());
+		this.disposableServer.set(disposableServer);
 	}
 
 	@Override
 	protected void stopInternal() {
-		this.nettyContext.get().dispose();
+		this.disposableServer.get().dispose();
 	}
 
 	@Override
 	protected void resetInternal() {
 		this.reactorServer = null;
 		this.reactorHandler = null;
-		this.nettyContext.set(null);
+		this.disposableServer.set(null);
 	}
 
 }
