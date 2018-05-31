@@ -31,6 +31,7 @@ For example:
 ----
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.server.RequestPredicates.*;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 PersonRepository repository = ...
 PersonHandler handler = new PersonHandler(repository);
@@ -130,7 +131,7 @@ headers, or to provide a body. Below is an example with a 200 (OK) response with
 content:
 
  Mono<Person> person = ...
- ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person);
+ ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person, Person.class);
 
 This is how to build a 201 (CREATED) response with `"Location"` header, and no body:
 
