@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 
 package org.springframework.core.env
 
+import com.nhaarman.mockito_kotlin.any
+import com.nhaarman.mockito_kotlin.whenever
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Answers
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.junit.MockitoJUnitRunner
@@ -29,16 +32,30 @@ import org.mockito.junit.MockitoJUnitRunner
  * @author Sebastien Deleuze
  */
 @RunWith(MockitoJUnitRunner::class)
+@Suppress("UNUSED_VARIABLE")
 class PropertyResolverExtensionsTests {
 
 	@Mock(answer = Answers.RETURNS_MOCKS)
 	lateinit var propertyResolver: PropertyResolver
 
-	@Suppress("UNUSED_VARIABLE")
 	@Test
 	fun `get operator`() {
-		val name = propertyResolver["name"]
-		Mockito.verify(propertyResolver, Mockito.times(1)).getRequiredProperty("name")
+		val name = propertyResolver["name"] ?: "foo"
+		Mockito.verify(propertyResolver, Mockito.times(1)).getProperty("name")
+	}
+
+	@Test
+	fun `getProperty extension`() {
+		whenever(propertyResolver.getProperty(any(), eq(String::class.java))).thenReturn("foo")
+		val name = propertyResolver.getProperty<String>("name") ?: "foo"
+		Mockito.verify(propertyResolver, Mockito.times(1)).getProperty("name", String::class.java)
+	}
+
+	@Test
+	fun `getRequiredProperty extension`() {
+		whenever(propertyResolver.getRequiredProperty(any(), eq(String::class.java))).thenReturn("foo")
+		val name = propertyResolver.getRequiredProperty<String>("name")
+		Mockito.verify(propertyResolver, Mockito.times(1)).getRequiredProperty("name", String::class.java)
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,40 @@
  * limitations under the License.
  */
 
+@file:Suppress("EXTENSION_SHADOWED_BY_MEMBER")
+
 package org.springframework.core.env
 
 /**
- * Extension for [PropertyResolver.getRequiredProperty] providing Array like getter.
+ * Extension for [PropertyResolver.getProperty] providing Array like getter returning a
+ * nullable [String].
  *
  * ```kotlin
- * env["name"] = "Seb"
+ * val name = env["name"] ?: "Seb"
  * ```
  *
  * @author Sebastien Deleuze
  * @since 5.0
  */
-operator fun PropertyResolver.get(key: String) : String = getRequiredProperty(key)
+operator fun PropertyResolver.get(key: String) : String? = getProperty(key)
+
+
+/**
+ * Extension for [PropertyResolver.getProperty] providing a `getProperty<Foo>(...)`
+ * variant returning a nullable [String].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.1
+ */
+inline fun <reified T: Any?> PropertyResolver.getProperty(key: String) : T? =
+		getProperty(key, T::class.java)
+
+/**
+ * Extension for [PropertyResolver.getRequiredProperty] providing a
+ * `getRequiredProperty<Foo>(...)` variant.
+ *
+ * @author Sebastien Deleuze
+ * @since 5.1
+ */
+inline fun <reified T: Any> PropertyResolver.getRequiredProperty(key: String) : T =
+		getRequiredProperty(key, T::class.java)

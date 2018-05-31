@@ -82,7 +82,7 @@ class BeanDefinitionDslTests {
 		val beans = beans {
 			bean<Foo>()
 			bean<Bar>("bar")
-			bean { FooFoo(env["name"]) }
+			bean { FooFoo(env["name"]!!) }
 			environment( { activeProfiles.contains("baz") } ) {
 				bean { Baz(ref()) }
 				bean { Baz(ref("bar")) }
@@ -109,7 +109,7 @@ class BeanDefinitionDslTests {
 	@Test  // SPR-16412
 	fun `Declare beans depending on environment properties`() {
 		val beans = beans {
-			val n = env["number-of-beans"].toInt()
+			val n = env["number-of-beans"]!!.toInt()
 			for (i in 1..n) {
 				bean("string$i") { Foo() }
 			}
