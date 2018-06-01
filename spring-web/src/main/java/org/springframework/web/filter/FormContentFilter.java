@@ -45,24 +45,17 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link javax.servlet.Filter} that makes form encoded data available through
- * the {@code ServletRequest.getParameter*()} family of methods during HTTP PUT
- * or PATCH requests.
- *
- * <p>The Servlet spec requires form data to be available for HTTP POST but
- * not for HTTP PUT or PATCH requests. This filter intercepts HTTP PUT and PATCH
- * requests where content type is {@code 'application/x-www-form-urlencoded'},
- * reads form encoded content from the body of the request, and wraps the ServletRequest
- * in order to make the form data available as request parameters just like
- * it is for HTTP POST requests.
+ * {@code Filter} that parses form data for HTTP PUT, PATCH, and DELETE requests
+ * and exposes it as Servlet request parameters. By default the Servlet spec
+ * only requires this for HTTP POST.
  *
  * @author Rossen Stoyanchev
- * @since 3.1
- * @deprecated as of 5.1 in favor of {@link FormContentFilter} which is the same
- * but also handles DELETE.
+ * @since 5.1
  */
-@Deprecated
-public class HttpPutFormContentFilter extends OncePerRequestFilter {
+public class FormContentFilter extends OncePerRequestFilter {
+
+	private static final List<String> HTTP_METHODS = Arrays.asList("PUT", "PATCH", "DELETE");
+
 
 	private FormHttpMessageConverter formConverter = new AllEncompassingFormHttpMessageConverter();
 
@@ -94,55 +87,62 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(final HttpServletRequest request, HttpServletResponse response,
 			FilterChain filterChain) throws ServletException, IOException {
 
-		if (("PUT".equals(request.getMethod()) || "PATCH".equals(request.getMethod())) && isFormContentType(request)) {
-			HttpInputMessage inputMessage = new ServletServerHttpRequest(request) {
-				@Override
-				public InputStream getBody() throws IOException {
-					return request.getInputStream();
-				}
-			};
-			MultiValueMap<String, String> formParameters = this.formConverter.read(null, inputMessage);
-			if (!formParameters.isEmpty()) {
-				HttpServletRequest wrapper = new HttpPutFormContentRequestWrapper(request, formParameters);
-				filterChain.doFilter(wrapper, response);
-				return;
-			}
-		}
+		MultiValueMap<String, String> params = parseIfNecessary(request);
 
-		filterChain.doFilter(request, response);
-	}
-
-	private boolean isFormContentType(HttpServletRequest request) {
-		String contentType = request.getContentType();
-		if (contentType != null) {
-			try {
-				MediaType mediaType = MediaType.parseMediaType(contentType);
-				return (MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType));
-			}
-			catch (IllegalArgumentException ex) {
-				return false;
-			}
+		if (params != null && !params.isEmpty()) {
+			filterChain.doFilter(new FormContentRequestWrapper(request, params), response);
 		}
 		else {
+			filterChain.doFilter(request, response);
+		}
+	}
+
+	@Nullable
+	private MultiValueMap<String, String> parseIfNecessary(HttpServletRequest request) throws IOException {
+
+		if (!shouldParse(request)) {
+			return null;
+		}
+
+		HttpInputMessage inputMessage = new ServletServerHttpRequest(request) {
+
+			@Override
+			public InputStream getBody() throws IOException {
+				return request.getInputStream();
+			}
+		};
+
+		return this.formConverter.read(null, inputMessage);
+	}
+
+	private boolean shouldParse(HttpServletRequest request) {
+		if (!HTTP_METHODS.contains(request.getMethod())) {
+			return false;
+		}
+		try {
+			MediaType mediaType = MediaType.parseMediaType(request.getContentType());
+			return MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType);
+		}
+		catch (IllegalArgumentException ex) {
 			return false;
 		}
 	}
 
 
-	private static class HttpPutFormContentRequestWrapper extends HttpServletRequestWrapper {
+	private static class FormContentRequestWrapper extends HttpServletRequestWrapper {
 
-		private MultiValueMap<String, String> formParameters;
+		private MultiValueMap<String, String> formParams;
 
-		public HttpPutFormContentRequestWrapper(HttpServletRequest request, MultiValueMap<String, String> parameters) {
+		public FormContentRequestWrapper(HttpServletRequest request, MultiValueMap<String, String> params) {
 			super(request);
-			this.formParameters = parameters;
+			this.formParams = params;
 		}
 
 		@Override
 		@Nullable
 		public String getParameter(String name) {
 			String queryStringValue = super.getParameter(name);
-			String formValue = this.formParameters.getFirst(name);
+			String formValue = this.formParams.getFirst(name);
 			return (queryStringValue != null ? queryStringValue : formValue);
 		}
 
@@ -161,7 +161,7 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 		public Enumeration<String> getParameterNames() {
 			Set<String> names = new LinkedHashSet<>();
 			names.addAll(Collections.list(super.getParameterNames()));
-			names.addAll(this.formParameters.keySet());
+			names.addAll(this.formParams.keySet());
 			return Collections.enumeration(names);
 		}
 
@@ -169,7 +169,7 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 		@Nullable
 		public String[] getParameterValues(String name) {
 			String[] parameterValues = super.getParameterValues(name);
-			List<String> formParam = this.formParameters.get(name);
+			List<String> formParam = this.formParams.get(name);
 			if (formParam == null) {
 				return parameterValues;
 			}

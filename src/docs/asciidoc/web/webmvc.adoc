@@ -1046,14 +1046,14 @@ The `spring-web` module provides some useful filters.
 
 
 [[filters-http-put]]
-=== HTTP PUT Form
+=== Form Data
 
 Browsers can only submit form data via HTTP GET or HTTP POST but non-browser clients can also
-use HTTP PUT and PATCH. The Servlet API requires `ServletRequest.getParameter{asterisk}()`
+use HTTP PUT, PATCH, and DELETE. The Servlet API requires `ServletRequest.getParameter{asterisk}()`
 methods to support form field access only for HTTP POST.
 
-The `spring-web` module provides `HttpPutFormContentFilter` that intercepts HTTP PUT and
-PATCH requests with content type `application/x-www-form-urlencoded`, reads the form data from
+The `spring-web` module provides `FormContentFilter` that intercepts HTTP PUT, PATCH, and DELETE
+requests with content type `application/x-www-form-urlencoded`, reads the form data from
 the body of the request, and wraps the `ServletRequest` in order to make the form data
 available through the `ServletRequest.getParameter{asterisk}()` family of methods.
 
