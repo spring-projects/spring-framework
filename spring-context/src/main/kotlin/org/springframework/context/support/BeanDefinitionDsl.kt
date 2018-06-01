@@ -195,7 +195,7 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 									  autowireMode: Autowire = Autowire.NO,
 									  isAutowireCandidate: Boolean? = null,
 									  crossinline function: () -> T) {
-		
+
 		val customizer = BeanDefinitionCustomizer { bd ->
 			scope?.let { bd.scope = scope.name.toLowerCase() }
 			isLazyInit?.let { bd.isLazyInit = isLazyInit }
@@ -255,9 +255,11 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 	 */
 	override fun initialize(context: GenericApplicationContext) {
 		this.context = context
-		for (child in children) {
-			child.initialize(context)
-		}
 		init()
+		for (child in children) {
+			if (child.condition.invoke(context.environment)) {
+				child.initialize(context)
+			}
+		}
 	}
 }

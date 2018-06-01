@@ -52,18 +52,21 @@ class BeanDefinitionDslTests {
 	@Test
 	fun `Declare beans using profile condition with the functional Kotlin DSL`() {
 		val beans = beans {
-			bean<Foo>()
-			bean<Bar>("bar")
-			profile("baz") {
-				profile("pp") {
-					bean<Foo>()
+			profile("foo") {
+				bean<Foo>()
+				profile("bar") {
+					bean<Bar>("bar")
 				}
+			}
+			profile("baz") {
 				bean { Baz(ref()) }
 				bean { Baz(ref("bar")) }
 			}
 		}
 
 		val context = GenericApplicationContext().apply {
+			environment.addActiveProfile("foo")
+			environment.addActiveProfile("bar")
 			beans.initialize(this)
 			refresh()
 		}
@@ -82,7 +85,9 @@ class BeanDefinitionDslTests {
 		val beans = beans {
 			bean<Foo>()
 			bean<Bar>("bar")
-			bean { FooFoo(env["name"]!!) }
+			environment( { env["name"].equals("foofoo") } ) {
+				bean { FooFoo(env["name"]!!) }
+			}
 			environment( { activeProfiles.contains("baz") } ) {
 				bean { Baz(ref()) }
 				bean { Baz(ref("bar")) }
@@ -97,13 +102,12 @@ class BeanDefinitionDslTests {
 
 		assertNotNull(context.getBean<Foo>())
 		assertNotNull(context.getBean<Bar>("bar"))
+		assertEquals("foofoo", context.getBean<FooFoo>().name)
 		try {
 			context.getBean<Baz>()
 			fail("Expect NoSuchBeanDefinitionException to be thrown")
 		}
 		catch(ex: NoSuchBeanDefinitionException) { null }
-		val foofoo = context.getBean<FooFoo>()
-		assertEquals("foofoo", foofoo.name)
 	}
 
 	@Test  // SPR-16412
