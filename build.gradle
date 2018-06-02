@@ -284,7 +284,7 @@ configure(rootProject) {
 		archives distZip
 	}
 
-	task wrapper(type: Wrapper) {
+	wrapper {
 		description = "Generates gradlew[.bat] scripts"
 		gradleVersion = '4.6'
 
