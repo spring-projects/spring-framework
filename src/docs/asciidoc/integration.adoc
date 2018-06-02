@@ -6288,6 +6288,30 @@ container and once through the `@Configurable` aspect, with the consequence of e
 `@Scheduled` method being invoked twice.
 ====
 
+For your tasks, marked with `@Scheduled` annotation it is possible to implement a
+manual configuration step to decide should this schedule be executed at all or not.
+By returning `true` or `false` from your method with `@BeforeSchedule` annotation you
+can switch off the job entirely or continue the initialization process. Moreover, a
+method with `@BeforeSchedule` is executed before any schedule configuration validation,
+so, for example, it's possible to have an invalid cron expression 'never' in the
+following example:
+
+[source,java,indent=0]
+[subs="verbatim"]
+----
+    @Value("${cron}")
+    private String cronExpression;
+
+	@Scheduled(cron = "${cron}")
+	public void doSomething() {
+		// your job here, no need to check 'cron' property
+	}
+
+	@BeforeSchedule
+	public boolean beforeStart() {
+	    return !"never".equals(cronExpression);
+	}
+----
 
 [[scheduling-annotation-support-async]]
 ==== The @Async annotation

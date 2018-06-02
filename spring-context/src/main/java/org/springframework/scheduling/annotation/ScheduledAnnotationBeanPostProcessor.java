@@ -55,6 +55,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.MethodIntrospector;
+import org.springframework.core.MethodIntrospector.MetadataLookup;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
@@ -70,6 +71,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
@@ -316,7 +318,7 @@ public class ScheduledAnnotationBeanPostProcessor
 		Class<?> targetClass = AopProxyUtils.ultimateTargetClass(bean);
 		if (!this.nonAnnotatedClasses.contains(targetClass)) {
 			Map<Method, Set<Scheduled>> annotatedMethods = MethodIntrospector.selectMethods(targetClass,
-					(MethodIntrospector.MetadataLookup<Set<Scheduled>>) method -> {
+					(MetadataLookup<Set<Scheduled>>) method -> {
 						Set<Scheduled> scheduledMethods = AnnotatedElementUtils.getMergedRepeatableAnnotations(
 								method, Scheduled.class, Schedules.class);
 						return (!scheduledMethods.isEmpty() ? scheduledMethods : null);
@@ -328,6 +330,12 @@ public class ScheduledAnnotationBeanPostProcessor
 				}
 			}
 			else {
+				if (!checkBeforeScheduleAnnotation(bean, targetClass)) {
+					if (logger.isInfoEnabled()) {
+						logger.info("Schedule execution is disabled manually by @BeforeSchedule annotation in " + targetClass.getCanonicalName());
+					}
+					return bean;
+				}
 				// Non-empty set of methods
 				annotatedMethods.forEach((method, scheduledMethods) ->
 						scheduledMethods.forEach(scheduled -> processScheduled(scheduled, method, bean)));
@@ -338,6 +346,44 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 		}
 		return bean;
+	}
+
+	/**
+	 * Check whatever we should continue with processing @Scheduled annotation or stop doing this
+	 * because of manual disabling.
+	 *
+	 * @param bean bean to check
+	 * @param targetClass class to check
+	 * @return true - if there is no any manual instruction or the @BeforeSchedule returned true,
+	 *         false - otherwise.
+	 */
+	private boolean checkBeforeScheduleAnnotation(Object bean, Class<?> targetClass) {
+		Map<Method, BeforeSchedule> methods = MethodIntrospector.selectMethods(
+				targetClass,
+				(MetadataLookup<BeforeSchedule>) method ->
+						AnnotatedElementUtils.getMergedAnnotation(
+								method,
+								BeforeSchedule.class));
+		if (methods.isEmpty()) {
+			return true;
+		}
+		if (methods.size() > 1) {
+			throw new IllegalStateException("Expected only 1 method with @BeforeSchedule annotation, but found several in " + targetClass.getCanonicalName());
+		}
+		Method method = methods.keySet().iterator().next();
+		ReflectionUtils.makeAccessible(method);
+		if (method.getParameterCount() > 0) {
+			throw new IllegalStateException("Method '" + method.getName() + "' of bean '" + targetClass.getCanonicalName() + "' shouldn't have any parameters.");
+		}
+
+		if (!method.getReturnType().equals(Boolean.class) &&
+				!method.getReturnType().equals(boolean.class)) {
+			throw new IllegalStateException("Expect boolean as a return type of method '" + method.getName() +
+					"'. Found " + method.getReturnType().getCanonicalName());
+		}
+		Object res = ReflectionUtils.invokeMethod(method, bean);
+
+		return (Boolean) res;
 	}
 
 	protected void processScheduled(Scheduled scheduled, Method method, Object bean) {
