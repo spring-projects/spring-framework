@@ -218,6 +218,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 
 		if (resourceLoader instanceof ResourcePatternResolver) {
 			// Resource pattern matching available.
+			// 资源模式匹配可用。
 			try {
 				Resource[] resources = ((ResourcePatternResolver) resourceLoader).getResources(location);
 				int loadCount = loadBeanDefinitions(resources);

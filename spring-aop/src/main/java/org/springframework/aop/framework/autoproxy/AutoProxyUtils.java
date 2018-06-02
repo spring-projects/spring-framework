@@ -56,7 +56,9 @@ public abstract class AutoProxyUtils {
 
 	/**
 	 * Determine whether the given bean should be proxied with its target
-	 * class rather than its interfaces. Checks the
+	 * class rather than its interfaces.
+	 * 确定给定的bean是否应该用其目标类而不是其接口进行代理
+	 * Checks the
 	 * {@link #PRESERVE_TARGET_CLASS_ATTRIBUTE "preserveTargetClass" attribute}
 	 * of the corresponding bean definition.
 	 * @param beanFactory the containing ConfigurableListableBeanFactory
@@ -97,6 +99,7 @@ public abstract class AutoProxyUtils {
 
 	/**
 	 * Expose the given target class for the specified bean, if possible.
+	 * 如果可能的话，公开给定的bean的给定目标类。
 	 * @param beanFactory the containing ConfigurableListableBeanFactory
 	 * @param beanName the name of the bean
 	 * @param targetClass the corresponding target class
@@ -106,6 +109,7 @@ public abstract class AutoProxyUtils {
 			Class<?> targetClass) {
 
 		if (beanName != null && beanFactory.containsBeanDefinition(beanName)) {
+			//设置AutoProxyUtils.class + “.” + originalTargetClass为key，targetClass为value的属性
 			beanFactory.getMergedBeanDefinition(beanName).setAttribute(ORIGINAL_TARGET_CLASS_ATTRIBUTE, targetClass);
 		}
 	}

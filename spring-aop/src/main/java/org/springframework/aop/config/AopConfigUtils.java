@@ -54,6 +54,7 @@ public abstract class AopConfigUtils {
 
 	/**
 	 * Stores the auto proxy creator classes in escalation order.
+	 * 按升级顺序存储自动代理创建者类。
 	 */
 	private static final List<Class<?>> APC_PRIORITY_LIST = new ArrayList<>();
 
@@ -105,6 +106,7 @@ public abstract class AopConfigUtils {
 
 	public static void forceAutoProxyCreatorToUseClassProxying(BeanDefinitionRegistry registry) {
 		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
+			// 注册表中包含名为org.springframework.aop.config.internalAutoProxyCreator的beanDefinition
 			BeanDefinition definition = registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
 			definition.getPropertyValues().add("proxyTargetClass", Boolean.TRUE);
 		}
@@ -123,22 +125,33 @@ public abstract class AopConfigUtils {
 
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 
+		//如果已经存在了自动代理创建器并且在的自动代理创建器与现在的不一致那么需要根据优先级来判断到底需要使用哪一个
 		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
+			// beanDefinition 包含org.springframework.aop.config.internalAutoProxyCreator
 			BeanDefinition apcDefinition = registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
 			if (!cls.getName().equals(apcDefinition.getBeanClassName())) {
+				//AnnotationAwareAspectJAutoProxyCreator.class
+				// 不等于在beanDefinition中注册的org.springframework.aop.config.internalAutoProxyCreator
+
+				//根据优先级找到org.springframework.aop.config.internalAutoProxyCreator
+				//currentPriority为beanDefinition中注册的优先级，
+				// requiredPriority为AnnotationAwareAspectJAutoProxyCreator.class的优先级
 				int currentPriority = findPriorityForClass(apcDefinition.getBeanClassName());
 				int requiredPriority = findPriorityForClass(cls);
 				if (currentPriority < requiredPriority) {
+					// 改变bean最重要的就是改变bean所对应的className属性
 					apcDefinition.setBeanClassName(cls.getName());
 				}
 			}
 			return null;
 		}
 
+		// 系统中没有org.springframework.aop.config.internalAutoProxyCreator，走以下流程
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(cls);
 		beanDefinition.setSource(source);
 		beanDefinition.getPropertyValues().add("order", Ordered.HIGHEST_PRECEDENCE);
 		beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		//注册org.springframework.aop.config.internalAutoProxyCreator
 		registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, beanDefinition);
 		return beanDefinition;
 	}

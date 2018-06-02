@@ -31,6 +31,12 @@ import org.springframework.util.ObjectUtils;
  * parameters). Explore the {@code PropertySource} type hierarchy to see provided
  * implementations.
  *
+ * 表示名称/值属性对源的抽象基类。
+ * 底层的{@linkplain #getSource（）源对象}可以是封装属性的任何类型{@code T}。
+ * 示例包括{@link java.util.Properties}对象，{@link java.util.Map}对象，
+ * {@code ServletContext}和{@code ServletConfig}对象（用于访问init参数）。
+ * 浏览{PropertyCource}类型层次结构以查看提供的实现。
+ *
  * <p>{@code PropertySource} objects are not typically used in isolation, but rather
  * through a {@link PropertySources} object, which aggregates property sources and in
  * conjunction with a {@link PropertyResolver} implementation that can perform

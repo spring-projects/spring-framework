@@ -999,6 +999,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Set the role hint for this {@code BeanDefinition}.
+	 *
+	 * 为此{@code BeanDefinition}设置角色提示。
+	 * 
 	 */
 	public void setRole(int role) {
 		this.role = role;

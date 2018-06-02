@@ -64,6 +64,11 @@ class ConditionEvaluator {
 	 * Determine if an item should be skipped based on {@code @Conditional} annotations.
 	 * The {@link ConfigurationPhase} will be deduced from the type of item (i.e. a
 	 * {@code @Configuration} class will be {@link ConfigurationPhase#PARSE_CONFIGURATION})
+	 *
+	 * 根据{@code @Conditional}注释确定是否应该跳过一个注解。
+	 *{@link ConfigurationPhase}将从注解类型（即a
+	 *{@code @Configuration}类将是{@link ConfigurationPhase＃PARSE_CONFIGURATION}）
+	 *
 	 * @param metadata the meta data
 	 * @return if the item should be skipped
 	 */
@@ -73,12 +78,16 @@ class ConditionEvaluator {
 
 	/**
 	 * Determine if an item should be skipped based on {@code @Conditional} annotations.
+	 *
+	 * 根据{@code @Conditional}注释确定是否应该跳过一个注解。
+	 *
 	 * @param metadata the meta data
 	 * @param phase the phase of the call
 	 * @return if the item should be skipped
 	 */
 	public boolean shouldSkip(@Nullable AnnotatedTypeMetadata metadata, @Nullable ConfigurationPhase phase) {
 		if (metadata == null || !metadata.isAnnotated(Conditional.class.getName())) {
+			//元数据为空，或者没有@Conditional注解，返回fasle
 			return false;
 		}
 

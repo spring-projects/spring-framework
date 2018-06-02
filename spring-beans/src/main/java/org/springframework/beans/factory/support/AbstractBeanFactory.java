@@ -353,7 +353,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					//----------------------------关键方法--------------------------
 					sharedInstance = getSingleton(beanName, () -> {
 						try {
-							//----------------------------关键方法--------------------------
+							//----------------------------关键方法--------------------------创建bean
 							return createBean(beanName, mbd, args);
 						}
 						catch (BeansException ex) {
@@ -1189,6 +1189,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * Initialize the given BeanWrapper with the custom editors registered
 	 * with this factory. To be called for BeanWrappers that will create
 	 * and populate bean instances.
+	 * 使用在此工厂注册的自定义编辑器初始化给定的BeanWrapper。
+	 * 被调用将创建和填充bean实例的BeanWrappers。
 	 * <p>The default implementation delegates to {@link #registerCustomEditors}.
 	 * Can be overridden in subclasses.
 	 * @param bw the BeanWrapper to initialize
@@ -1216,6 +1218,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		if (!this.propertyEditorRegistrars.isEmpty()) {
 			for (PropertyEditorRegistrar registrar : this.propertyEditorRegistrars) {
 				try {
+					//-------------------关键方法-------------------------
+					// 调用客户自定义的PropertyEditorRegistrar实现类的registerCustomEditors方法
+					// registerCustomEditors方法中会调用实现PropertyEditorRegistry的registerCustomEditor方法
 					registrar.registerCustomEditors(registry);
 				}
 				catch (BeanCreationException ex) {
@@ -1469,6 +1474,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 		String className = mbd.getBeanClassName();
 		if (className != null) {
+			//--------------------关键方法--------------------
+			// 弯沉spel表达式解析
 			Object evaluated = evaluateBeanDefinitionString(className, mbd);
 			if (!className.equals(evaluated)) {
 				// A dynamically resolved expression, supported as of 4.2...

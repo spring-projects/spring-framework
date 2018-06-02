@@ -41,6 +41,9 @@ public abstract class ScopedProxyUtils {
 	/**
 	 * Generate a scoped proxy for the supplied target bean, registering the target
 	 * bean with an internal name and setting 'targetBeanName' on the scoped proxy.
+	 *
+	 * 为提供的目标bean生成一个作用域代理，用一个内部名称注册目标bean，并在作用域代理上设置'targetBeanName'。
+	 *
 	 * @param definition the original bean definition
 	 * @param registry the bean definition registry
 	 * @param proxyTargetClass whether to create a target class proxy
@@ -49,18 +52,29 @@ public abstract class ScopedProxyUtils {
 	public static BeanDefinitionHolder createScopedProxy(BeanDefinitionHolder definition,
 			BeanDefinitionRegistry registry, boolean proxyTargetClass) {
 
+		//获得beanName
 		String originalBeanName = definition.getBeanName();
+		//从BeanDefinitionHolder对象中获得BeanDefinition
 		BeanDefinition targetDefinition = definition.getBeanDefinition();
+		//targetBeanName = “scopedTarget.”+ beanName
 		String targetBeanName = getTargetBeanName(originalBeanName);
 
 		// Create a scoped proxy definition for the original bean name,
 		// "hiding" the target bean in an internal target definition.
+
+		//为原始bean名称创建一个范围代理定义，
+		//将目标bean隐藏在内部目标定义中。
+		//最终都使用RootBeanDefinition对象
 		RootBeanDefinition proxyDefinition = new RootBeanDefinition(ScopedProxyFactoryBean.class);
 		proxyDefinition.setDecoratedDefinition(new BeanDefinitionHolder(targetDefinition, targetBeanName));
+		//设置proxyDefinition的代理对象
 		proxyDefinition.setOriginatingBeanDefinition(targetDefinition);
+		//设置proxyDefinition的原对象
 		proxyDefinition.setSource(definition.getSource());
+		//设置proxyDefinition的
 		proxyDefinition.setRole(targetDefinition.getRole());
 
+		//设置proxyDefinition的键值对中设置，"targetBeanName" : targetBeanName
 		proxyDefinition.getPropertyValues().add("targetBeanName", targetBeanName);
 		if (proxyTargetClass) {
 			targetDefinition.setAttribute(AutoProxyUtils.PRESERVE_TARGET_CLASS_ATTRIBUTE, Boolean.TRUE);
@@ -91,6 +105,9 @@ public abstract class ScopedProxyUtils {
 
 	/**
 	 * Generate the bean name that is used within the scoped proxy to reference the target bean.
+	 *
+	 * 生成在作用域代理中使用的bean名称以引用目标bean。
+	 *
 	 * @param originalBeanName the original name of bean
 	 * @return the generated bean to be used to reference the target bean
 	 */

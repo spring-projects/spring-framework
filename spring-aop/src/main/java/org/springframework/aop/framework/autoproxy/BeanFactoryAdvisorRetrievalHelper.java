@@ -61,17 +61,23 @@ public class BeanFactoryAdvisorRetrievalHelper {
 	/**
 	 * Find all eligible Advisor beans in the current bean factory,
 	 * ignoring FactoryBeans and excluding beans that are currently in creation.
+	 * 在当前bean工厂中查找所有合格的Advisor bean，忽略FactoryBeans并排除当前正在创建的Bean。
 	 * @return the list of {@link org.springframework.aop.Advisor} beans
 	 * @see #isEligibleBean
 	 */
 	public List<Advisor> findAdvisorBeans() {
 		// Determine list of advisor bean names, if not cached already.
+		// 确定顾问bean名称列表，如果尚未被高速缓存。
 		String[] advisorNames = null;
 		synchronized (this) {
 			advisorNames = this.cachedAdvisorBeanNames;
 			if (advisorNames == null) {
 				// Do not initialize FactoryBeans here: We need to leave all regular beans
 				// uninitialized to let the auto-proxy creator apply to them!
+				//不要在这里初始化FactoryBeans：我们需要离开所有普通的bean
+				//未初始化以让自动代理创建器应用于它们！
+				//----------------------关键方法---------------------
+				//返回beanFactory和parentBeanFactory中所有为Advisor.class类型的bean
 				advisorNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 						this.beanFactory, Advisor.class, true, false);
 				this.cachedAdvisorBeanNames = advisorNames;
@@ -83,7 +89,9 @@ public class BeanFactoryAdvisorRetrievalHelper {
 
 		List<Advisor> advisors = new LinkedList<>();
 		for (String name : advisorNames) {
+			// 确定具有给定名称的方面bean是否合格。
 			if (isEligibleBean(name)) {
+				//确定指定的bean当前是否正在创建。
 				if (this.beanFactory.isCurrentlyInCreation(name)) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Skipping currently created advisor '" + name + "'");
@@ -91,6 +99,7 @@ public class BeanFactoryAdvisorRetrievalHelper {
 				}
 				else {
 					try {
+						//所有已经创建完的Advisor.class类型，都加入到advisors
 						advisors.add(this.beanFactory.getBean(name, Advisor.class));
 					}
 					catch (BeanCreationException ex) {
@@ -118,6 +127,7 @@ public class BeanFactoryAdvisorRetrievalHelper {
 
 	/**
 	 * Determine whether the aspect bean with the given name is eligible.
+	 * 确定具有给定名称的方面bean是否合格。
 	 * <p>The default implementation always returns {@code true}.
 	 * @param beanName the name of the aspect bean
 	 * @return whether the bean is eligible

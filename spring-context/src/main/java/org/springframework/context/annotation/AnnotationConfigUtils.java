@@ -238,20 +238,24 @@ public class AnnotationConfigUtils {
 	}
 
 	static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd, AnnotatedTypeMetadata metadata) {
+		//获取Lazy.class类型的
 		AnnotationAttributes lazy = attributesFor(metadata, Lazy.class);
 		if (lazy != null) {
 			abd.setLazyInit(lazy.getBoolean("value"));
 		}
 		else if (abd.getMetadata() != metadata) {
+			//在启动过程中，从AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);调用的均是相同的
 			lazy = attributesFor(abd.getMetadata(), Lazy.class);
 			if (lazy != null) {
 				abd.setLazyInit(lazy.getBoolean("value"));
 			}
 		}
 
+		//获取Primary.class类型的
 		if (metadata.isAnnotated(Primary.class.getName())) {
 			abd.setPrimary(true);
 		}
+		//获取DependsOn.class类型的
 		AnnotationAttributes dependsOn = attributesFor(metadata, DependsOn.class);
 		if (dependsOn != null) {
 			abd.setDependsOn(dependsOn.getStringArray("value"));
@@ -259,10 +263,12 @@ public class AnnotationConfigUtils {
 
 		if (abd instanceof AbstractBeanDefinition) {
 			AbstractBeanDefinition absBd = (AbstractBeanDefinition) abd;
+			//获取Role.class类型的
 			AnnotationAttributes role = attributesFor(metadata, Role.class);
 			if (role != null) {
 				absBd.setRole(role.getNumber("value").intValue());
 			}
+			//获取Description.class类型的
 			AnnotationAttributes description = attributesFor(metadata, Description.class);
 			if (description != null) {
 				absBd.setDescription(description.getString("value"));
@@ -273,10 +279,12 @@ public class AnnotationConfigUtils {
 	static BeanDefinitionHolder applyScopedProxyMode(
 			ScopeMetadata metadata, BeanDefinitionHolder definition, BeanDefinitionRegistry registry) {
 
+		//获得之前元数据中的是否使用代理模式
 		ScopedProxyMode scopedProxyMode = metadata.getScopedProxyMode();
 		if (scopedProxyMode.equals(ScopedProxyMode.NO)) {
 			return definition;
 		}
+		//如果是cglib模式的代理
 		boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);
 		return ScopedProxyCreator.createScopedProxy(definition, registry, proxyTargetClass);
 	}

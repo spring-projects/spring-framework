@@ -123,6 +123,7 @@ abstract class AnnotationReadingVisitorUtils {
 			Map<String, Set<String>> metaAnnotationMap, String annotationName) {
 
 		// Get the unmerged list of attributes for the target annotation.
+		//获取目标注释的未合并属性列表。
 		List<AnnotationAttributes> attributesList = attributesMap.get(annotationName);
 		if (attributesList == null || attributesList.isEmpty()) {
 			return null;
@@ -131,6 +132,10 @@ abstract class AnnotationReadingVisitorUtils {
 		// To start with, we populate the result with a copy of all attribute values
 		// from the target annotation. A copy is necessary so that we do not
 		// inadvertently mutate the state of the metadata passed to this method.
+
+		//首先，我们用所有属性值的副本填充结果
+		//来自目标注释。 一个副本是必要的，所以我们不需要
+		//无意中改变传递给此方法的元数据的状态。
 		AnnotationAttributes result = new AnnotationAttributes(attributesList.get(0));
 
 		Set<String> overridableAttributeNames = new HashSet<>(result.keySet());
@@ -139,10 +144,15 @@ abstract class AnnotationReadingVisitorUtils {
 		// Since the map is a LinkedMultiValueMap, we depend on the ordering of
 		// elements in the map and reverse the order of the keys in order to traverse
 		// "down" the annotation hierarchy.
+
+		//由于该映射是一个LinkedMultiValueMap，我们依赖于的排序
+		//地图中的元素，并反转键的顺序以遍历
+		//“注销”注释层次结构。
 		List<String> annotationTypes = new ArrayList<>(attributesMap.keySet());
 		Collections.reverse(annotationTypes);
 
 		// No need to revisit the target annotation type:
+		//不需要重新访问目标注释类型：
 		annotationTypes.remove(annotationName);
 
 		for (String currentAnnotationType : annotationTypes) {
@@ -156,6 +166,8 @@ abstract class AnnotationReadingVisitorUtils {
 						if (value != null) {
 							// Store the value, potentially overriding a value from an attribute
 							// of the same name found higher in the annotation hierarchy.
+							//存储值，可能会覆盖属性的值
+							//注释层次结构中名称相同的同名名称。
 							result.put(overridableAttributeName, value);
 						}
 					}

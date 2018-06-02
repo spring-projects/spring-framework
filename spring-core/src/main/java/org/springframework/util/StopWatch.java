@@ -26,6 +26,8 @@ import org.springframework.lang.Nullable;
  * Simple stop watch, allowing for timing of a number of tasks,
  * exposing total running time and running time for each named task.
  *
+ * 简单的秒表，允许多项任务的计时，为每个指定任务提供总运行时间和运行时间。
+ *
  * <p>Conceals use of {@code System.currentTimeMillis()}, improving the
  * readability of application code and reducing the likelihood of calculation errors.
  *
@@ -46,6 +48,8 @@ public class StopWatch {
 	 * Identifier of this stop watch.
 	 * Handy when we have output from multiple stop watches
 	 * and need to distinguish between them in log or console output.
+	 *
+	 * 此秒表的标识符。 当我们有多个停止监视器的输出并需要在日志或控制台输出中区分它们时，方便使用。
 	 */
 	private final String id;
 

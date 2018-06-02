@@ -112,6 +112,9 @@ public abstract class PropertiesLoaderUtils {
 
 	/**
 	 * Load properties from the given resource (in ISO-8859-1 encoding).
+	 *
+	 * 从给定资源中加载属性（在ISO-859-1编码中）。
+	 *
 	 * @param resource the resource to load from
 	 * @return the populated Properties instance
 	 * @throws IOException if loading failed
@@ -119,12 +122,17 @@ public abstract class PropertiesLoaderUtils {
 	 */
 	public static Properties loadProperties(Resource resource) throws IOException {
 		Properties props = new Properties();
+		//----------------关键方法------------------
+		// 从给定的资源中填充给定的属性（在ISO-859-1编码中）。
 		fillProperties(props, resource);
 		return props;
 	}
 
 	/**
 	 * Fill the given properties from the given resource (in ISO-8859-1 encoding).
+	 *
+	 * 从给定的资源中填充给定的属性（在ISO-859-1编码中）。
+	 *
 	 * @param props the Properties instance to fill
 	 * @param resource the resource to load from
 	 * @throws IOException if loading failed

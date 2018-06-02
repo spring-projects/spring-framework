@@ -127,6 +127,9 @@ public class AnnotatedBeanDefinitionReader {
 	 * Register one or more annotated classes to be processed.
 	 * <p>Calls to {@code register} are idempotent; adding the same
 	 * annotated class more than once has no additional effect.
+	 *
+	 * 注册一个或多个带注释的类以进行处理。 呼叫{@code register}是幂等的; 不止一次添加相同的带注释的类没有附加效果。
+	 *
 	 * @param annotatedClasses one or more annotated classes,
 	 * e.g. {@link Configuration @Configuration} classes
 	 */
@@ -139,6 +142,9 @@ public class AnnotatedBeanDefinitionReader {
 	/**
 	 * Register a bean from the given bean class, deriving its metadata from
 	 * class-declared annotations.
+	 *
+	 * 从给定的bean类注册一个bean，从类声明的注释中派生它的元数据。
+	 *
 	 * @param annotatedClass the class of the bean
 	 */
 	public void registerBean(Class<?> annotatedClass) {
@@ -200,6 +206,9 @@ public class AnnotatedBeanDefinitionReader {
 	/**
 	 * Register a bean from the given bean class, deriving its metadata from
 	 * class-declared annotations.
+	 *
+	 * 从给定的bean类注册一个bean，从类声明的注释中派生它的元数据。
+	 *
 	 * @param annotatedClass the class of the bean
 	 * @param instanceSupplier a callback for creating an instance of the bean
 	 * (may be {@code null})
@@ -215,15 +224,22 @@ public class AnnotatedBeanDefinitionReader {
 
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
 		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
+			//springApplication.run 没有@Conditional
 			return;
 		}
 
 		abd.setInstanceSupplier(instanceSupplier);
+		//-------------------------关键方法-------------------
+		//获得scope的元数据，比如是单例模式，原型模式啊啊，是否代理啊
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);
 		abd.setScope(scopeMetadata.getScopeName());
+		//因为有名字，beanName就为启动类的名字
 		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
 
+		//-------------------------关键方法-------------------
+		//执行公共的注解
 		AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);
+		//在run的启动过程中，qualifiers为空
 		if (qualifiers != null) {
 			for (Class<? extends Annotation> qualifier : qualifiers) {
 				if (Primary.class == qualifier) {
@@ -237,11 +253,15 @@ public class AnnotatedBeanDefinitionReader {
 				}
 			}
 		}
+		//在run的启动过程中，qualifiers为空
+		//执行传入的实现BeanDefinitionCustomizer的customize方法
 		for (BeanDefinitionCustomizer customizer : definitionCustomizers) {
 			customizer.customize(abd);
 		}
 
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);
+		//-------------------------关键方法-------------------
+		//是否应用代理
 		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
 		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);
 	}

@@ -191,6 +191,10 @@ public abstract class BeanFactoryUtils {
 	 * will be matched against the type. If "allowEagerInit" is not set,
 	 * only raw FactoryBeans will be checked (which doesn't require initialization
 	 * of each FactoryBean).
+	 * 获取给定类型的所有bean名称，包括在祖先工厂中定义的那些名称。 如果重写了bean定义，
+	 * 将返回唯一名称。如果设置了“allowEagerInit”标志，那么会考虑由FactoryBeans创建的对象，
+	 * 这意味着FactoryBeans将被初始化。 如果FactoryBean创建的对象不匹配，则原始FactoryBean本身将与该类型匹配。
+	 * 如果未设置“allowEagerInit”，则只会检查原始FactoryBeans（不需要初始化每个FactoryBean）。
 	 * @param lbf the bean factory
 	 * @param includeNonSingletons whether to include prototype or scoped beans too
 	 * or just singletons (also applies to FactoryBeans)
@@ -206,12 +210,16 @@ public abstract class BeanFactoryUtils {
 			ListableBeanFactory lbf, Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
 
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
+		//获得所有Advisor.class类型的beanName
 		String[] result = lbf.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
 		if (lbf instanceof HierarchicalBeanFactory) {
+			//如果为HierarchicalBeanFactory类型
 			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
+				//如果父beanFactory为ListableBeanFactory类型，获得父beanFactory中所有Advisor.class类型的beanName
 				String[] parentResult = beanNamesForTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includeNonSingletons, allowEagerInit);
+				//beanFactory和parentBeanFactory中为Advisor.class类型的bean，进行合并
 				result = mergeNamesWithParent(result, parentResult, hbf);
 			}
 		}
@@ -454,6 +462,7 @@ public abstract class BeanFactoryUtils {
 
 	/**
 	 * Merge the given bean names result with the given parent result.
+	 * 将给定的bean名称结果与给定的父结果合并。
 	 * @param result the local bean name result
 	 * @param parentResult the parent bean name result (possibly empty)
 	 * @param hbf the local bean factory

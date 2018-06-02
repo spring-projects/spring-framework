@@ -231,14 +231,22 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * {@link #setActiveProfiles} or if the current set of active profiles
 	 * is empty, check for the presence of the {@value #ACTIVE_PROFILES_PROPERTY_NAME}
 	 * property and assign its value to the set of active profiles.
+	 *
+	 * 通过{@link #setActiveProfiles}显式设置返回一组活动配置文件，
+	 * 或者如果当前一组活动配置文件为空，
+	 * 请检查是否存在{@value #ACTIVE_PROFILES_PROPERTY_NAME}属性并将其值分配给一组活动配置文件。
+	 *
 	 * @see #getActiveProfiles()
 	 * @see #ACTIVE_PROFILES_PROPERTY_NAME
 	 */
 	protected Set<String> doGetActiveProfiles() {
 		synchronized (this.activeProfiles) {
 			if (this.activeProfiles.isEmpty()) {
+				//Profiles 集合为空，获得“spring.profiles.active”的值
 				String profiles = getProperty(ACTIVE_PROFILES_PROPERTY_NAME);
 				if (StringUtils.hasText(profiles)) {
+					//-------------------关键方法-------------------
+					//设置Profiles
 					setActiveProfiles(StringUtils.commaDelimitedListToStringArray(
 							StringUtils.trimAllWhitespace(profiles)));
 				}
@@ -253,6 +261,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		synchronized (this.activeProfiles) {
 			this.activeProfiles.clear();
 			for (String profile : profiles) {
+				//---------------关键方法------------------
+				//profile不为空，并且不能以"!"开头
 				validateProfile(profile);
 				this.activeProfiles.add(profile);
 			}

@@ -478,6 +478,11 @@ public abstract class ReflectionUtils {
 	 * if necessary. The {@code setAccessible(true)} method is only called
 	 * when actually necessary, to avoid unnecessary conflicts with a JVM
 	 * SecurityManager (if active).
+	 *
+	 * 使给定的构造函数可访问，必要时明确设置它是可访问的。
+	 * 只有在实际需要时才调用setAccessible（true）}方法，
+	 * 以避免与JVM SecurityManager（如果处于活动状态）发生不必要的冲突。
+	 *
 	 * @param ctor the constructor to make accessible
 	 * @see java.lang.reflect.Constructor#setAccessible
 	 */
@@ -578,6 +583,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Get all declared methods on the leaf class and all superclasses.
 	 * Leaf class methods are included first.
+	 * 获取子类和所有超类的所有声明方法。 首先包括子类方法。
 	 * @param leafClass the class to introspect
 	 * @throws IllegalStateException if introspection fails
 	 */

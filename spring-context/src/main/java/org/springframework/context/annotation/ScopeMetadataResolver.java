@@ -37,6 +37,12 @@ public interface ScopeMetadataResolver {
 	 * present on {@link BeanDefinition#getBeanClassName() the class} of the
 	 * supplied {@code definition}, or to use metadata present in the
 	 * {@link BeanDefinition#attributeNames()} of the supplied {@code definition}.
+	 *
+	 * 适用于所提供的bean定义的解决方案</ p>
+	 * <p>实现当然可以使用他们喜欢的任何策略来确定范围元数据，
+	 * 但是一些立即想到的实现可能是使用源代码级别 所提供的{@code定义}的{}连接BeanDefinition＃getBeanClassName（）类中的注释，
+	 * 或者使用提供的{@code definition}的{@link BeanDefinition＃attributeNames（）}中存在的元数据。
+	 *
 	 * @param definition the target bean definition
 	 * @return the relevant scope metadata; never {@code null}
 	 */
