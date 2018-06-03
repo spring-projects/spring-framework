@@ -46,7 +46,7 @@ import static org.junit.Assert.*;
 @ContextConfiguration(classes = EmptyDatabaseConfig.class)
 @Transactional
 @Sql(
-	scripts    = {"drop-schema.sql", "schema.sql"},
+	scripts    = "schema.sql",
 	statements = "INSERT INTO user VALUES('Dilbert')"
 )
 @DirtiesContext
@@ -67,7 +67,9 @@ public class TransactionalInlinedStatementsSqlScriptsTests {
 	}
 
 	@Test
-	@Sql(statements = "INSERT INTO user VALUES ('Dogbert'), ('Catbert')")
+	@Sql(statements = "DROP TABLE user IF EXISTS")
+	@Sql("schema.sql")
+	@Sql(statements = "INSERT INTO user VALUES ('Dilbert'), ('Dogbert'), ('Catbert')")
 	// test##_ prefix is required for @FixMethodOrder.
 	public void test02_methodLevelScripts() {
 		assertNumUsers(3);

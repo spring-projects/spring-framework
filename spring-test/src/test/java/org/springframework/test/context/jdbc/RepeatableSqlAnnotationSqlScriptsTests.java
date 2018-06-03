@@ -37,7 +37,6 @@ import static org.junit.Assert.*;
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @ContextConfiguration(classes = EmptyDatabaseConfig.class)
-@Sql("drop-schema.sql")
 @Sql("schema.sql")
 @Sql("data.sql")
 @DirtiesContext
@@ -50,6 +49,9 @@ public class RepeatableSqlAnnotationSqlScriptsTests extends AbstractTransactiona
 	}
 
 	@Test
+	@Sql("drop-schema.sql")
+	@Sql("schema.sql")
+	@Sql("data.sql")
 	@Sql("data-add-dogbert.sql")
 	// test##_ prefix is required for @FixMethodOrder.
 	public void test02_methodLevelScripts() {

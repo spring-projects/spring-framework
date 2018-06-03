@@ -42,7 +42,7 @@ import org.springframework.test.context.jdbc.TransactionalSqlScriptsTests;
 // Note: @FixMethodOrder is NOT @Inherited.
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 // Overriding @Sql declaration to reference scripts using relative path.
-@Sql({ "../../jdbc/drop-schema.sql", "../../jdbc/schema.sql", "../../jdbc/data.sql" })
+@Sql({ "../../jdbc/schema.sql", "../../jdbc/data.sql" })
 public class TransactionalSqlScriptsSpringRuleTests extends TransactionalSqlScriptsTests {
 
 	@ClassRule
@@ -69,7 +69,7 @@ public class TransactionalSqlScriptsSpringRuleTests extends TransactionalSqlScri
 	 * Overriding {@code @Sql} declaration to reference scripts using relative path.
 	 */
 	@Test
-	@Sql({ "../../jdbc/data-add-dogbert.sql" })
+	@Sql({ "../../jdbc/drop-schema.sql", "../../jdbc/schema.sql", "../../jdbc/data.sql", "../../jdbc/data-add-dogbert.sql" })
 	@Override
 	// test##_ prefix is required for @FixMethodOrder.
 	public void test02_methodLevelScripts() {
