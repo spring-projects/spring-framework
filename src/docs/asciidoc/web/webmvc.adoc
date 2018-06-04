@@ -1789,7 +1789,7 @@ supported for all return values, see below for more details.
   `ResponseEntity`. See <<mvc-ann-async>> and <<mvc-ann-async-http-streaming>>.
 
 | Reactive types -- Reactor, RxJava, or others via `ReactiveAdapterRegistry`
-| Alternative to ``DeferredResult` with multi-value streams (e.g. `Flux`, `Observable`)
+| Alternative to `DeferredResult` with multi-value streams (e.g. `Flux`, `Observable`)
   collected to a `List`.
 
   For streaming scenarios -- e.g. `text/event-stream`, `application/json+stream` --
