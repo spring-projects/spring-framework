@@ -3679,6 +3679,17 @@ JUnit rules>>.
 ====
 
 
+[[testcontext-junit-jupiter-extension]]
+===== JUnit 5 Support
+
+Spring Framework 5.0 offers full integration with the _JUnit Jupiter_ testing framework
+introduced in JUnit 5. Developers are therefore encouraged to upgrade to Spring 5.x to
+benefit fully from Spring's support for JUnit 5. However, if your project for some reason
+cannot yet upgrade to Spring 5.x, you may be interested in using the
+https://github.com/sbrannen/spring-test-junit5[spring-test-junit5] project as a temporary
+solution to assist you in upgrading to JUnit 5 while still using Spring Framework 4.3.x.
+
+
 [[testcontext-support-classes-testng]]
 ===== TestNG support classes
 
