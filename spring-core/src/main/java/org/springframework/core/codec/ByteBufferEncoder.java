@@ -56,8 +56,4 @@ public class ByteBufferEncoder extends AbstractEncoder<ByteBuffer> {
 		return Flux.from(inputStream).map(bufferFactory::wrap);
 	}
 
-	@Override
-	public Long getContentLength(ByteBuffer byteBuffer, @Nullable MimeType mimeType) {
-		return (long) byteBuffer.array().length;
-	}
 }

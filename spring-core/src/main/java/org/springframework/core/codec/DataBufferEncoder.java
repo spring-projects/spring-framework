@@ -55,9 +55,4 @@ public class DataBufferEncoder extends AbstractEncoder<DataBuffer> {
 		return Flux.from(inputStream);
 	}
 
-	@Override
-	public Long getContentLength(DataBuffer dataBuffer, @Nullable MimeType mimeType) {
-		return (long) dataBuffer.readableByteCount();
-	}
-
 }

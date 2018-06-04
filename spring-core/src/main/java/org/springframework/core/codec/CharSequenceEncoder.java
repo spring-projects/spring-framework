@@ -82,11 +82,6 @@ public class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 		return charset;
 	}
 
-	@Override
-	public Long getContentLength(CharSequence data, @Nullable MimeType mimeType) {
-		return (long) data.toString().getBytes(getCharset(mimeType)).length;
-	}
-
 	/**
 	 * Create a {@code CharSequenceEncoder} that supports only "text/plain".
 	 */
