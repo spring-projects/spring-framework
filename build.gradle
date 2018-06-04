@@ -286,7 +286,7 @@ configure(rootProject) {
 
 	wrapper {
 		description = "Generates gradlew[.bat] scripts"
-		gradleVersion = '4.7'
+		gradleVersion = '4.8'
 
 		doLast() {
 			def gradleOpts = "-XX:MaxMetaspaceSize=1024m -Xmx1024m"
