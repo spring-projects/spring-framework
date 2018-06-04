@@ -31,6 +31,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.ResourceEncoder;
 import org.springframework.core.codec.ResourceRegionEncoder;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -119,9 +120,9 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 		headers.setContentType(resourceMediaType);
 
 		if (headers.getContentLength() < 0) {
-			Long contentLength = this.encoder.getContentLength(resource, mediaType);
-			if (contentLength != null) {
-				headers.setContentLength(contentLength);
+			long length = lengthOf(resource);
+			if (length != -1) {
+				headers.setContentLength(length);
 			}
 		}
 
@@ -139,6 +140,18 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 			return mediaType;
 		}
 		return MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
+	}
+
+	private static long lengthOf(Resource resource) {
+		// Don't consume InputStream...
+		if (InputStreamResource.class != resource.getClass()) {
+			try {
+				return resource.contentLength();
+			}
+			catch (IOException ignored) {
+			}
+		}
+		return -1;
 	}
 
 	private static Optional<Mono<Void>> zeroCopy(Resource resource, @Nullable ResourceRegion region,
@@ -192,8 +205,8 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 			if (regions.size() == 1){
 				ResourceRegion region = regions.get(0);
 				headers.setContentType(resourceMediaType);
-				Long contentLength = this.encoder.getContentLength(resource, mediaType);
-				if (contentLength != null) {
+				long contentLength = lengthOf(resource);
+				if (contentLength != -1) {
 					long start = region.getPosition();
 					long end = start + region.getCount() - 1;
 					end = Math.min(end, contentLength - 1);
