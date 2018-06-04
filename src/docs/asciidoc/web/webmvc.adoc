@@ -1899,7 +1899,7 @@ To get all matrix variables, use a `MultiValueMap`:
 	@GetMapping("/owners/{ownerId}/pets/{petId}")
 	public void findPet(
 			@MatrixVariable MultiValueMap<String, String> matrixVars,
-			@MatrixVariable(pathVar="petId"") MultiValueMap<String, String> petMatrixVars) {
+			@MatrixVariable(pathVar="petId") MultiValueMap<String, String> petMatrixVars) {
 
 		// matrixVars: ["q" : [11,22], "r" : 12, "s" : 23]
 		// petMatrixVars: ["q" : 22, "s" : 23]
