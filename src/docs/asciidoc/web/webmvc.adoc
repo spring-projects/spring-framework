@@ -1789,7 +1789,7 @@ supported for all return values, see below for more details.
   `ResponseEntity`. See <<mvc-ann-async>> and <<mvc-ann-async-http-streaming>>.
 
 | Reactive types -- Reactor, RxJava, or others via `ReactiveAdapterRegistry`
-| Alternative to ``DeferredResult` with multi-value streams (e.g. `Flux`, `Observable`)
+| Alternative to `DeferredResult` with multi-value streams (e.g. `Flux`, `Observable`)
   collected to a `List`.
 
   For streaming scenarios -- e.g. `text/event-stream`, `application/json+stream` --
@@ -1899,7 +1899,7 @@ To get all matrix variables, use a `MultiValueMap`:
 	@GetMapping("/owners/{ownerId}/pets/{petId}")
 	public void findPet(
 			@MatrixVariable MultiValueMap<String, String> matrixVars,
-			@MatrixVariable(pathVar="petId"") MultiValueMap<String, String> petMatrixVars) {
+			@MatrixVariable(pathVar="petId") MultiValueMap<String, String> petMatrixVars) {
 
 		// matrixVars: ["q" : [11,22], "r" : 12, "s" : 23]
 		// petMatrixVars: ["q" : 22, "s" : 23]
