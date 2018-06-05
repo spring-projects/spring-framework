@@ -53,7 +53,10 @@ import org.springframework.util.Assert;
  */
 public class EncodedResourceResolver extends AbstractResourceResolver {
 
-	private final List<String> contentCodings = new ArrayList<>(Arrays.asList("br", "gzip"));
+	public static final List<String> DEFAULT_CODINGS = Arrays.asList("br", "gzip");
+
+
+	private final List<String> contentCodings = new ArrayList<>(DEFAULT_CODINGS);
 
 	private final Map<String, String> extensions = new LinkedHashMap<>();
 
@@ -71,11 +74,15 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 	 * is used.
 	 *
 	 * <p><strong>Note:</strong> Each coding must be associated with a file
-	 * extension via {@link #registerExtension} or {@link #setExtensions}.
+	 * extension via {@link #registerExtension} or {@link #setExtensions}. Also
+	 * customizations to the list of codings here should be matched by
+	 * customizations to the same list in {@link CachingResourceResolver} to
+	 * ensure encoded variants of a resource are cached under separate keys.
 	 *
 	 * <p>By default this property is set to {@literal ["br", "gzip"]}.
 	 *
 	 * @param codings one or more supported content codings
+	 * @since 5.1
 	 */
 	public void setContentCodings(List<String> codings) {
 		Assert.notEmpty(codings, "At least one content coding expected.");
@@ -85,6 +92,7 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 
 	/**
 	 * Return a read-only list with the supported content codings.
+	 * @since 5.1
 	 */
 	public List<String> getContentCodings() {
 		return Collections.unmodifiableList(this.contentCodings);
@@ -97,6 +105,7 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 	 * {@literal ["gzip" -> ".gz"]}.
 	 * @param extensions the extensions to use.
 	 * @see #registerExtension(String, String)
+	 * @since 5.1
 	 */
 	public void setExtensions(Map<String, String> extensions) {
 		extensions.forEach(this::registerExtension);
@@ -106,6 +115,7 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 	 * Java config friendly alternative to {@link #setExtensions(Map)}.
 	 * @param coding the content coding
 	 * @param extension the associated file extension
+	 * @since 5.1
 	 */
 	public void registerExtension(String coding, String extension) {
 		this.extensions.put(coding, extension.startsWith(".") ? extension : "." + extension);
@@ -113,6 +123,7 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 
 	/**
 	 * Return a read-only map with coding-to-extension mappings.
+	 * @since 5.1
 	 */
 	public Map<String, String> getExtensions() {
 		return Collections.unmodifiableMap(this.extensions);

@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.resource;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,7 +79,7 @@ public class CachingResourceResolverTests {
 	@Test
 	public void resolveResourceInternalFromCache() {
 		Resource expected = Mockito.mock(Resource.class);
-		this.cache.put(getCacheKey("bar.css"), expected);
+		this.cache.put(resourceKey("bar.css"), expected);
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(get(""));
 		Resource actual = this.chain.resolveResource(exchange, "bar.css", this.locations).block(TIMEOUT);
@@ -115,16 +116,36 @@ public class CachingResourceResolverTests {
 	}
 
 	@Test
-	public void resolveResourceAcceptEncodingInCacheKey() {
+	public void resolveResourceAcceptEncodingInCacheKey() throws IOException {
+
 		String file = "bar.css";
-		MockServerWebExchange exchange = MockServerWebExchange.from(get(file)
-				.header("Accept-Encoding", "gzip ; a=b  , deflate ,  brotli  ; c=d "));
+		EncodedResourceResolverTests.createGzippedFile(file);
+
+		// 1. Resolve plain resource
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(get(file));
 		Resource expected = this.chain.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 
-		String cacheKey = getCacheKey(file + "+encoding=brotli,deflate,gzip");
-		Object actual = this.cache.get(cacheKey).get();
+		String cacheKey = resourceKey(file);
+		assertSame(expected, this.cache.get(cacheKey).get());
 
-		assertSame(expected, actual);
+
+		// 2. Resolve with Accept-Encoding
+
+		exchange = MockServerWebExchange.from(get(file)
+				.header("Accept-Encoding", "gzip ; a=b  , deflate ,  br  ; c=d "));
+		expected = this.chain.resolveResource(exchange, file, this.locations).block(TIMEOUT);
+
+		cacheKey = resourceKey(file + "+encoding=br,gzip");
+		assertSame(expected, this.cache.get(cacheKey).get());
+
+		// 3. Resolve with Accept-Encoding but no matching codings
+
+		exchange = MockServerWebExchange.from(get(file).header("Accept-Encoding", "deflate"));
+		expected = this.chain.resolveResource(exchange, file, this.locations).block(TIMEOUT);
+
+		cacheKey = resourceKey(file);
+		assertSame(expected, this.cache.get(cacheKey).get());
 	}
 
 	@Test
@@ -133,7 +154,7 @@ public class CachingResourceResolverTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get(file));
 		Resource expected = this.chain.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 
-		String cacheKey = getCacheKey(file);
+		String cacheKey = resourceKey(file);
 		Object actual = this.cache.get(cacheKey).get();
 
 		assertEquals(expected, actual);
@@ -143,8 +164,8 @@ public class CachingResourceResolverTests {
 	public void resolveResourceMatchingEncoding() {
 		Resource resource = Mockito.mock(Resource.class);
 		Resource gzipped = Mockito.mock(Resource.class);
-		this.cache.put(getCacheKey("bar.css"), resource);
-		this.cache.put(getCacheKey("bar.css+encoding=gzip"), gzipped);
+		this.cache.put(resourceKey("bar.css"), resource);
+		this.cache.put(resourceKey("bar.css+encoding=gzip"), gzipped);
 
 		String file = "bar.css";
 		MockServerWebExchange exchange = MockServerWebExchange.from(get(file));
@@ -154,7 +175,7 @@ public class CachingResourceResolverTests {
 		assertSame(gzipped, this.chain.resolveResource(exchange, file, this.locations).block(TIMEOUT));
 	}
 
-	private static String getCacheKey(String key) {
+	private static String resourceKey(String key) {
 		return CachingResourceResolver.RESOLVED_RESOURCE_CACHE_KEY_PREFIX + key;
 	}
 

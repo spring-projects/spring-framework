@@ -16,7 +16,9 @@
 
 package org.springframework.web.reactive.resource;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,6 +49,8 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 
 	private final Cache cache;
 
+	private final List<String> contentCodings = new ArrayList<>(EncodedResourceResolver.DEFAULT_CODINGS);
+
 
 	public CachingResourceResolver(Cache cache) {
 		Assert.notNull(cache, "Cache is required");
@@ -67,6 +71,33 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 	 */
 	public Cache getCache() {
 		return this.cache;
+	}
+
+	/**
+	 * Configure the supported content codings from the
+	 * {@literal "Accept-Encoding"} header for which to cache resource variations.
+	 *
+	 * <p>The codings configured here are generally expected to match those
+	 * configured on {@link EncodedResourceResolver#setContentCodings(List)}.
+	 *
+	 * <p>By default this property is set to {@literal ["br", "gzip"]} based on
+	 * the value of {@link EncodedResourceResolver#DEFAULT_CODINGS}.
+	 *
+	 * @param codings one or more supported content codings
+	 * @since 5.1
+	 */
+	public void setContentCodings(List<String> codings) {
+		Assert.notEmpty(codings, "At least one content coding expected.");
+		this.contentCodings.clear();
+		this.contentCodings.addAll(codings);
+	}
+
+	/**
+	 * Return a read-only list with the supported content codings.
+	 * @since 5.1
+	 */
+	public List<String> getContentCodings() {
+		return Collections.unmodifiableList(this.contentCodings);
 	}
 
 
@@ -98,7 +129,7 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 		key.append(requestPath);
 		if (exchange != null) {
 			String codingKey = getContentCodingKey(exchange);
-			if (codingKey != null) {
+			if (StringUtils.hasText(codingKey)) {
 				key.append("+encoding=").append(codingKey);
 			}
 		}
@@ -106,7 +137,7 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 	}
 
 	@Nullable
-	private static String getContentCodingKey(ServerWebExchange exchange) {
+	private String getContentCodingKey(ServerWebExchange exchange) {
 		String header = exchange.getRequest().getHeaders().getFirst("Accept-Encoding");
 		if (!StringUtils.hasText(header)) {
 			return null;
@@ -116,8 +147,7 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 					int index = token.indexOf(';');
 					return (index >= 0 ? token.substring(0, index) : token).trim().toLowerCase();
 				})
-				.filter(coding -> !coding.equals("*"))
-				.filter(coding -> !coding.equals("identity"))
+				.filter(this.contentCodings::contains)
 				.sorted()
 				.collect(Collectors.joining(","));
 	}
