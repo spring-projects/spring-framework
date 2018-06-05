@@ -1397,6 +1397,37 @@ Applications can also use dot-separated destinations (vs slash).
 See <<websocket-stomp-destination-separator>>.
 ====
 
+If configured with a task scheduler, the simple broker supports
+https://stomp.github.io/stomp-specification-1.2.html#Heart-beating[STOMP heartbeats].
+For that you can declare your own scheduler, or use the one that's automatically
+declared and used internally:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Configuration
+@EnableWebSocketMessageBroker
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+	private TaskScheduler messageBrokerTaskScheduler;
+
+	@Autowired
+	public void setMessageBrokerTaskScheduler(TaskScheduler taskScheduler) {
+		this.messageBrokerTaskScheduler = taskScheduler;
+	}
+
+	@Override
+	public void configureMessageBroker(MessageBrokerRegistry registry) {
+
+		registry.enableSimpleBroker("/queue/", "/topic/")
+				.setHeartbeatValue(new long[] {10000, 20000})
+				.setTaskScheduler(this.messageBrokerTaskScheduler);
+
+		// ...
+	}
+}
+----
+
 
 
 [[websocket-stomp-handle-broker-relay]]
