@@ -3,25 +3,17 @@ buildscript {
 		maven { url "https://repo.spring.io/plugins-release" }
 	}
 	dependencies {
-		classpath("io.spring.gradle:propdeps-plugin:0.0.8")
-		classpath("io.spring.gradle:docbook-reference-plugin:0.3.1")
+		classpath("io.spring.gradle:propdeps-plugin:0.0.9.RELEASE")
 		classpath("org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.16")
-		classpath("org.asciidoctor:asciidoctorj-epub3:1.5.0-alpha.7")
 	}
 }
 
 // 3rd party plugin repositories can be configured in settings.gradle
 plugins {
-	id "com.gradle.build-scan" version "1.8"
-	id "io.spring.dependency-management" version "1.0.3.RELEASE" apply false
+	id "io.spring.dependency-management" version "1.0.5.RELEASE" apply false
 	id "org.jetbrains.kotlin.jvm" version "1.2.41" apply false
 	id "org.jetbrains.dokka" version "0.9.17"
-	id "org.asciidoctor.convert" version "1.5.6"
-}
-
-buildScan {
-	licenseAgreementUrl = 'https://gradle.com/terms-of-service'
-	licenseAgree = 'yes'
+	id "org.asciidoctor.convert" version "1.5.7"
 }
 
 ext {
