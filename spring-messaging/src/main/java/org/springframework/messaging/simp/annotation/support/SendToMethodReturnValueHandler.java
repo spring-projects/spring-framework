@@ -17,8 +17,11 @@
 package org.springframework.messaging.simp.annotation.support;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -154,67 +157,101 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		MessageHeaders headers = message.getHeaders();
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		PlaceholderResolver varResolver = initVarResolver(headers);
-		Object annotation = findAnnotation(returnType);
+		Set<Annotation> annotations = findAnnotation(returnType);
+		Set<String> destinationsSentTo = new HashSet<String>();
 
-		if (annotation instanceof SendToUser) {
-			SendToUser sendToUser = (SendToUser) annotation;
-			boolean broadcast = sendToUser.broadcast();
-			String user = getUserName(message, headers);
-			if (user == null) {
-				if (sessionId == null) {
-					throw new MissingSessionUserException(message);
+		for(Annotation annotation: annotations) {
+			if (annotation instanceof SendToUser) {
+				SendToUser sendToUser = (SendToUser) annotation;
+				boolean broadcast = sendToUser.broadcast();
+				String user = getUserName(message, headers);
+				if (user == null) {
+					if (sessionId == null) {
+						throw new MissingSessionUserException(message);
+					}
+					user = sessionId;
+					broadcast = false;
 				}
-				user = sessionId;
-				broadcast = false;
+				String[] destinations = getTargetDestinations(sendToUser, message, this.defaultUserDestinationPrefix);
+				for (String destination : destinations) {
+					destination = this.placeholderHelper.replacePlaceholders(destination, varResolver);
+					if(!destinationsSentTo.contains(destination)) {
+						if (broadcast) {
+							this.messagingTemplate.convertAndSendToUser(
+									user, destination, returnValue, createHeaders(null, returnType));
+						}
+						else {
+							this.messagingTemplate.convertAndSendToUser(
+									user, destination, returnValue, createHeaders(sessionId, returnType));
+						}
+						destinationsSentTo.add(destination);
+					}
+				}
 			}
-			String[] destinations = getTargetDestinations(sendToUser, message, this.defaultUserDestinationPrefix);
-			for (String destination : destinations) {
-				destination = this.placeholderHelper.replacePlaceholders(destination, varResolver);
-				if (broadcast) {
-					this.messagingTemplate.convertAndSendToUser(
-							user, destination, returnValue, createHeaders(null, returnType));
+			else {
+				SendTo sendTo = (SendTo) annotation;  // possibly null
+				String[] destinations = getTargetDestinations(sendTo, message, this.defaultDestinationPrefix);
+				for (String destination : destinations) {
+					destination = this.placeholderHelper.replacePlaceholders(destination, varResolver);
+					if(!destinationsSentTo.contains(destination)) {
+						this.messagingTemplate.convertAndSend(destination, returnValue, createHeaders(sessionId, returnType));
+						destinationsSentTo.add(destination);
+					}
 				}
-				else {
-					this.messagingTemplate.convertAndSendToUser(
-							user, destination, returnValue, createHeaders(sessionId, returnType));
-				}
-			}
-		}
-		else {
-			SendTo sendTo = (SendTo) annotation;  // possibly null
-			String[] destinations = getTargetDestinations(sendTo, message, this.defaultDestinationPrefix);
-			for (String destination : destinations) {
-				destination = this.placeholderHelper.replacePlaceholders(destination, varResolver);
-				this.messagingTemplate.convertAndSend(destination, returnValue, createHeaders(sessionId, returnType));
 			}
 		}
 	}
 
-	@Nullable
-	private Object findAnnotation(MethodParameter returnType) {
-		Annotation[] anns = new Annotation[4];
-		anns[0] = AnnotatedElementUtils.findMergedAnnotation(returnType.getExecutable(), SendToUser.class);
-		anns[1] = AnnotatedElementUtils.findMergedAnnotation(returnType.getExecutable(), SendTo.class);
-		anns[2] = AnnotatedElementUtils.findMergedAnnotation(returnType.getDeclaringClass(), SendToUser.class);
-		anns[3] = AnnotatedElementUtils.findMergedAnnotation(returnType.getDeclaringClass(), SendTo.class);
+	private Set<Annotation> findAnnotation(MethodParameter returnType) {
+		Set<Annotation> annotations = new HashSet<Annotation>();
 
-		if (anns[0] != null && !ObjectUtils.isEmpty(((SendToUser) anns[0]).value())) {
-			return anns[0];
-		}
-		if (anns[1] != null && !ObjectUtils.isEmpty(((SendTo) anns[1]).value())) {
-			return anns[1];
-		}
-		if (anns[2] != null && !ObjectUtils.isEmpty(((SendToUser) anns[2]).value())) {
-			return anns[2];
-		}
-		if (anns[3] != null && !ObjectUtils.isEmpty(((SendTo) anns[3]).value())) {
-			return anns[3];
+		Annotation ann1 = AnnotatedElementUtils.findMergedAnnotation(returnType.getExecutable(), SendToUser.class);
+		Annotation ann2 = AnnotatedElementUtils.findMergedAnnotation(returnType.getExecutable(), SendTo.class);
+		Annotation ann3 = AnnotatedElementUtils.findMergedAnnotation(returnType.getDeclaringClass(), SendToUser.class);
+		Annotation ann4 = AnnotatedElementUtils.findMergedAnnotation(returnType.getDeclaringClass(), SendTo.class);
+
+		Annotation sendToUser = getAnnotationIfExists(ann1, ann3);
+		Annotation sendTo = getAnnotationIfExists(ann2, ann4);
+
+		if(sendToUser != null) {
+			annotations.add(sendToUser);
 		}
 
-		for (int i=0; i < 4; i++) {
-			if (anns[i] != null) {
-				return anns[i];
+		if(sendTo != null || annotations.size() == 0) {
+			annotations.add(sendTo);
+		}
+
+		return annotations;
+	}
+
+	private Annotation getAnnotationIfExists(Annotation executable, Annotation declaringClass) {
+		Object executableValue = null;
+		Object declaringClassValue = null;
+
+		try {
+			if(executable != null) {
+				executableValue = executable.getClass().getMethod("value").invoke(executable);
 			}
+		} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) { }
+
+		try {
+			if(declaringClass != null) {
+				declaringClassValue = declaringClass.getClass().getMethod("value").invoke(declaringClass);
+			}
+		} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) { }
+
+		if (executable != null && !ObjectUtils.isEmpty(executableValue)) {
+			return executable;
+		}
+		else if (declaringClass != null && !ObjectUtils.isEmpty(declaringClassValue)) {
+			return declaringClass;
+		}
+
+		if (executable != null) {
+			return executable;
+		}
+		else if (declaringClass != null) {
+			return declaringClass;
 		}
 
 		return null;
