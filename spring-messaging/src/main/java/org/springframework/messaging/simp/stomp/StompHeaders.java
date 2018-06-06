@@ -203,7 +203,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Applies to the CONNECT frame.
 	 * @since 5.0.7
 	 */
-	public void setAcceptVersion(@Nullable String[] acceptVersions) {
+	public void setAcceptVersion(@Nullable String... acceptVersions) {
 		if (ObjectUtils.isEmpty(acceptVersions)) {
 			set(ACCEPT_VERSION, null);
 			return;
