@@ -76,15 +76,16 @@ public abstract class YamlProcessor {
 	 * name: My Cool App
 	 * </pre>
 	 * when mapped with
-	 * <code>documentMatchers = YamlProcessor.mapMatcher({"environment": "prod"})</code>
+	 * <pre class="code">
+	 * setDocumentMatchers(properties ->
+	 *     ("prod".equals(properties.getProperty("environment")) ? MatchStatus.FOUND : MatchStatus.NOT_FOUND));
+	 * </pre>
 	 * would end up as
 	 * <pre class="code">
 	 * environment=prod
 	 * url=http://foo.bar.com
 	 * name=My Cool App
-	 * url=http://dev.bar.com
 	 * </pre>
-	 * @param matchers a map of keys to value patterns (regular expressions)
 	 */
 	public void setDocumentMatchers(DocumentMatcher... matchers) {
 		this.documentMatchers = Arrays.asList(matchers);
@@ -93,8 +94,7 @@ public abstract class YamlProcessor {
 	/**
 	 * Flag indicating that a document for which all the
 	 * {@link #setDocumentMatchers(DocumentMatcher...) document matchers} abstain will
-	 * nevertheless match.
-	 * @param matchDefault the flag to set (default true)
+	 * nevertheless match. Default is {@code true}.
 	 */
 	public void setMatchDefault(boolean matchDefault) {
 		this.matchDefault = matchDefault;
@@ -103,9 +103,7 @@ public abstract class YamlProcessor {
 	/**
 	 * Method to use for resolving resources. Each resource will be converted to a Map,
 	 * so this property is used to decide which map entries to keep in the final output
-	 * from this factory.
-	 * @param resolutionMethod the resolution method to set (defaults to
-	 * {@link ResolutionMethod#OVERRIDE}).
+	 * from this factory. Default is {@link ResolutionMethod#OVERRIDE}.
 	 */
 	public void setResolutionMethod(ResolutionMethod resolutionMethod) {
 		Assert.notNull(resolutionMethod, "ResolutionMethod must not be null");
