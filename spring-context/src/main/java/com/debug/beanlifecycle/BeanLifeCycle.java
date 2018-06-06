@@ -98,6 +98,10 @@ public class BeanLifeCycle implements InitializingBean, DisposableBean, Applicat
     }
 
 
+    /**
+     * 这里继承了EnvironmentAware类，具体可参看AbstractApplicationContext的prepareBeanFactory方法里面有具体注册
+     * @param environment
+     */
     @Override
     public void setEnvironment(Environment environment)
     {
