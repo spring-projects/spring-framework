@@ -147,6 +147,9 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 
 	/**
 	 * Invoke the given listener with the given event.
+	 *
+	 * 用给定的事件调用给定的监听器。
+	 *
 	 * @param listener the ApplicationListener to invoke
 	 * @param event the current event to propagate
 	 * @since 4.1
@@ -176,6 +179,9 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 			if (msg == null || matchesClassCastMessage(msg, event.getClass().getName())) {
 				// Possibly a lambda-defined listener which we could not resolve the generic event type for
 				// -> let's suppress the exception and just log a debug message.
+
+				//可能是一个lambda定义的侦听器，我们无法解析泛型事件类型
+				// - >让我们来抑制异常并只记录一条调试消息。
 				Log logger = LogFactory.getLog(getClass());
 				if (logger.isDebugEnabled()) {
 					logger.debug("Non-matching event type for listener: " + listener, ex);

@@ -81,24 +81,32 @@ public class AnnotationConfigUtils {
 
 	/**
 	 * The bean name of the internally managed Autowired annotation processor.
+	 *
+	 * 他是内部管理的Autowired注释处理器的bean名称。
 	 */
 	public static final String AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME =
 			"org.springframework.context.annotation.internalAutowiredAnnotationProcessor";
 
 	/**
 	 * The bean name of the internally managed Required annotation processor.
+	 *
+	 * 内部管理的必需注释处理器的bean名称。
 	 */
 	public static final String REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME =
 			"org.springframework.context.annotation.internalRequiredAnnotationProcessor";
 
 	/**
 	 * The bean name of the internally managed JSR-250 annotation processor.
+	 *
+	 * 内部管理的JSR-250注释处理器的bean名称。
 	 */
 	public static final String COMMON_ANNOTATION_PROCESSOR_BEAN_NAME =
 			"org.springframework.context.annotation.internalCommonAnnotationProcessor";
 
 	/**
 	 * The bean name of the internally managed JPA annotation processor.
+	 *
+	 * 内部管理的JPA注释处理器的bean名称。
 	 */
 	public static final String PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME =
 			"org.springframework.context.annotation.internalPersistenceAnnotationProcessor";
@@ -109,12 +117,17 @@ public class AnnotationConfigUtils {
 
 	/**
 	 * The bean name of the internally managed @EventListener annotation processor.
+	 *
+	 * 内部管理的@EventListener注释处理器的bean名称。
+	 *
 	 */
 	public static final String EVENT_LISTENER_PROCESSOR_BEAN_NAME =
 			"org.springframework.context.event.internalEventListenerProcessor";
 
 	/**
 	 * The bean name of the internally managed EventListenerFactory.
+	 *
+	 * 内部管理的EventListenerFactory的bean名称。
 	 */
 	public static final String EVENT_LISTENER_FACTORY_BEAN_NAME =
 			"org.springframework.context.event.internalEventListenerFactory";
@@ -129,6 +142,9 @@ public class AnnotationConfigUtils {
 
 	/**
 	 * Register all relevant annotation post processors in the given registry.
+	 *
+	 * 在给定的注册表中注册所有相关的注释后处理器。
+	 *
 	 * @param registry the registry to operate on
 	 */
 	public static void registerAnnotationConfigProcessors(BeanDefinitionRegistry registry) {
@@ -137,6 +153,9 @@ public class AnnotationConfigUtils {
 
 	/**
 	 * Register all relevant annotation post processors in the given registry.
+	 *
+	 * 在给定的注册表中注册所有相关的注释后处理器。
+	 *
 	 * @param registry the registry to operate on
 	 * @param source the configuration source element (already extracted)
 	 * that this registration was triggered from. May be {@code null}.
@@ -146,6 +165,8 @@ public class AnnotationConfigUtils {
 	public static Set<BeanDefinitionHolder> registerAnnotationConfigProcessors(
 			BeanDefinitionRegistry registry, @Nullable Object source) {
 
+		//----------------------关键方法-----------------------
+		//根据类型获得beanFactory
 		DefaultListableBeanFactory beanFactory = unwrapDefaultListableBeanFactory(registry);
 		if (beanFactory != null) {
 			if (!(beanFactory.getDependencyComparator() instanceof AnnotationAwareOrderComparator)) {
@@ -158,33 +179,47 @@ public class AnnotationConfigUtils {
 
 		Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<>(4);
 
+		//容器中不包含“org.springframework.context.annotation.internalConfigurationAnnotationProcessor”的BeanDefinition
+		//该类实现了 BeanDefinitionRegistryPostProcessor,
+		//		PriorityOrdered, ResourceLoaderAware, BeanClassLoaderAware, EnvironmentAware
 		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+			//加入默认的
 			RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
+		//容器中不包含“org.springframework.context.annotation.internalAutowiredAnnotationProcessor”
 		if (!registry.containsBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+			//加入默认的
 			RootBeanDefinition def = new RootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class);
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
+		//容器中不包含“org.springframework.context.annotation.internalRequiredAnnotationProcessor"
 		if (!registry.containsBeanDefinition(REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+			//加入默认的
 			RootBeanDefinition def = new RootBeanDefinition(RequiredAnnotationBeanPostProcessor.class);
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
 		// Check for JSR-250 support, and if present add the CommonAnnotationBeanPostProcessor.
+		//检查JSR-250支持，如果存在，添加CommonAnnotationBeanPostProcessor。
+		// 并且容器中不包含“org.springframework.context.annotation.internalCommonAnnotationProcessor”
 		if (jsr250Present && !registry.containsBeanDefinition(COMMON_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+			//加入默认的
 			RootBeanDefinition def = new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class);
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
 		// Check for JPA support, and if present add the PersistenceAnnotationBeanPostProcessor.
+		//检查JPA支持，如果存在，添加PersistenceAnnotationBeanPostProcessor。
+		// 并且容器中不包含“org.springframework.context.annotation.internalPersistenceAnnotationProcessor“
 		if (jpaPresent && !registry.containsBeanDefinition(PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+			//加入默认的
 			RootBeanDefinition def = new RootBeanDefinition();
 			try {
 				def.setBeanClass(ClassUtils.forName(PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME,
@@ -197,13 +232,16 @@ public class AnnotationConfigUtils {
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
-
+		// 容器中不包含“org.springframework.context.event.internalEventListenerProcessor
 		if (!registry.containsBeanDefinition(EVENT_LISTENER_PROCESSOR_BEAN_NAME)) {
+			//加入默认的
 			RootBeanDefinition def = new RootBeanDefinition(EventListenerMethodProcessor.class);
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, EVENT_LISTENER_PROCESSOR_BEAN_NAME));
 		}
+		// 容器中不包含“org.springframework.context.event.internalEventListenerFactory“
 		if (!registry.containsBeanDefinition(EVENT_LISTENER_FACTORY_BEAN_NAME)) {
+			//加入默认的
 			RootBeanDefinition def = new RootBeanDefinition(DefaultEventListenerFactory.class);
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, EVENT_LISTENER_FACTORY_BEAN_NAME));
@@ -223,9 +261,11 @@ public class AnnotationConfigUtils {
 	@Nullable
 	private static DefaultListableBeanFactory unwrapDefaultListableBeanFactory(BeanDefinitionRegistry registry) {
 		if (registry instanceof DefaultListableBeanFactory) {
+			//xml的时候走这个分支
 			return (DefaultListableBeanFactory) registry;
 		}
 		else if (registry instanceof GenericApplicationContext) {
+			//springboot即是注解的时候走这个分支
 			return ((GenericApplicationContext) registry).getDefaultListableBeanFactory();
 		}
 		else {
@@ -312,20 +352,28 @@ public class AnnotationConfigUtils {
 		Set<AnnotationAttributes> result = new LinkedHashSet<>();
 
 		// Direct annotation present?
+		// 直接注释存在？
+		//将map转化为注解，然后放入set中
 		addAttributesIfNotNull(result, metadata.getAnnotationAttributes(annotationClassName, false));
 
 		// Container annotation present?
+		// 容器注解存在？
 		Map<String, Object> container = metadata.getAnnotationAttributes(containerClassName, false);
+		// 例如找的是@PropertySources ：获得@PropertySources 注解
 		if (container != null && container.containsKey("value")) {
+			// 例如找的是@PropertySources ：如果@PropertySources 不为空，同时有“value”的值
 			for (Map<String, Object> containedAttributes : (Map<String, Object>[]) container.get("value")) {
+				// 例如找的是@PropertySources ：获得每个@PropertySource，放入set中
 				addAttributesIfNotNull(result, containedAttributes);
 			}
 		}
 
 		// Return merged result
+		// 返回合并结果
 		return Collections.unmodifiableSet(result);
 	}
 
+	//将map转化为注解，然后放入set中
 	private static void addAttributesIfNotNull(
 			Set<AnnotationAttributes> result, @Nullable Map<String, Object> attributes) {
 

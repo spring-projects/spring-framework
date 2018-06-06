@@ -139,7 +139,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	@Nullable
 	private String serializationId;
 
-	/** Whether to allow re-registration of a different definition with the same name */
+	/** Whether to allow re-registration of a different definition with the same name
+	 * 是否允许重新注册具有相同名称的不同定义 */
 	private boolean allowBeanDefinitionOverriding = true;
 
 	/** Whether to allow eager class loading even for lazy-init beans */
@@ -235,6 +236,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/**
 	 * Return whether it should be allowed to override bean definitions by registering
 	 * a different definition with the same name, automatically replacing the former.
+	 *
+	 * 返回是否应该允许通过注册具有相同名称的不同定义来覆盖bean定义，并自动替换前者。
+	 *
 	 * @since 4.1.2
 	 */
 	public boolean isAllowBeanDefinitionOverriding() {
@@ -276,6 +280,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/**
 	 * Return the dependency comparator for this BeanFactory (may be {@code null}.
+	 *
+	 * 返回此BeanFactory的依赖比较器（可能为null）。
+	 *
 	 * @since 4.0
 	 */
 	@Nullable
@@ -306,6 +313,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/**
 	 * Return the autowire candidate resolver for this BeanFactory (never {@code null}).
+	 *
+	 * 返回此BeanFactory的自动装配候选解析器（从不{code null}）。
+	 *
 	 */
 	public AutowireCandidateResolver getAutowireCandidateResolver() {
 		return this.autowireCandidateResolver;
@@ -820,6 +830,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (oldBeanDefinition != null) {
 			//beanDefinition已经存在
 			if (!isAllowBeanDefinitionOverriding()) {
+				//是否允许重新定义，不允许抛出异常，bean已经存在
 				throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
 						"Cannot register bean definition [" + beanDefinition + "] for bean '" + beanName +
 						"': There is already [" + oldBeanDefinition + "] bound.");
@@ -828,12 +839,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				// e.g. was ROLE_APPLICATION, now overriding with ROLE_SUPPORT or ROLE_INFRASTRUCTURE
 				// 例如 是ROLE_APPLICATION，现在用ROLE_SUPPORT或ROLE_INFRASTRUCTURE覆盖
 				if (this.logger.isWarnEnabled()) {
+					//如果允许打印覆盖bean，使用框架生成的bean定义：替换。。。。
 					this.logger.warn("Overriding user-defined bean definition for bean '" + beanName +
 							"' with a framework-generated bean definition: replacing [" +
 							oldBeanDefinition + "] with [" + beanDefinition + "]");
 				}
 			}
 			else if (!beanDefinition.equals(oldBeanDefinition)) {
+				//如果新的beanDefinition和老的beanDefinition不相同，打印用不同的定义：替换
 				if (this.logger.isInfoEnabled()) {
 					this.logger.info("Overriding bean definition for bean '" + beanName +
 							"' with a different definition: replacing [" + oldBeanDefinition +
@@ -841,6 +854,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 			else {
+				//下面就是新的beanDefinition和老的beanDefinition相同，打印具有相同的定义：替换
 				if (this.logger.isDebugEnabled()) {
 					this.logger.debug("Overriding bean definition for bean '" + beanName +
 							"' with an equivalent definition: replacing [" + oldBeanDefinition +
@@ -878,6 +892,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		if (oldBeanDefinition != null || containsSingleton(beanName)) {
+			//oldBeanDefinition不为空，同时bean是单例模式
 			//重置所有bean对应的缓存
 			resetBeanDefinition(beanName);
 		}
@@ -915,6 +930,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/**
 	 * Reset all bean definition caches for the given bean,
 	 * including the caches of beans that are derived from it.
+	 *
+	 * 重置给定bean的所有bean定义缓存，包括从它派生的bean的缓存。
+	 *
 	 * @param beanName the name of the bean to reset
 	 */
 	protected void resetBeanDefinition(String beanName) {

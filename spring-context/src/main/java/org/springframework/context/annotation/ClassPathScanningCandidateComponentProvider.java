@@ -195,6 +195,8 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	/**
 	 * Register the default filter for {@link Component @Component}.
 	 * <p>This will implicitly register all annotations that have the
+	 * 注册{@link Component @Component}的默认过滤器。 <p>这将隐式注册所有具有注释的注释
+	 *
 	 * {@link Component @Component} meta-annotation including the
 	 * {@link Repository @Repository}, {@link Service @Service}, and
 	 * {@link Controller @Controller} stereotype annotations.
@@ -213,6 +215,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		}
 		catch (ClassNotFoundException ex) {
 			// JSR-250 1.1 API (as included in Java EE 6) not available - simply skip.
+			// JSR-250 1.1 API（包含在Java EE 6中）不可用 - 只需跳过。
 		}
 		try {
 			this.includeFilters.add(new AnnotationTypeFilter(
@@ -305,20 +308,29 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 	/**
 	 * Scan the class path for candidate components.
+	 *
+	 * 扫描候选组件的类路径。
+	 *
 	 * @param basePackage the package to check for annotated classes
 	 * @return a corresponding Set of autodetected bean definitions
 	 */
 	public Set<BeanDefinition> findCandidateComponents(String basePackage) {
 		if (this.componentsIndex != null && indexSupportsIncludeFilters()) {
+			//不是Indexed注解 && componentsIndex 不为空    为什么？？？？？？？？？
 			return addCandidateComponentsFromIndex(this.componentsIndex, basePackage);
 		}
 		else {
+			//---------------------关键方法----------------
+			//为什么？？？？？？？？？
 			return scanCandidateComponents(basePackage);
 		}
 	}
 
 	/**
 	 * Determine if the index can be used by this instance.
+	 *
+	 * 确定该实例是否可以使用索引。
+	 *
 	 * @return {@code true} if the index is available and the configuration of this
 	 * instance is supported by it, {@code false} otherwise
 	 * @since 5.0
@@ -334,6 +346,9 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 	/**
 	 * Determine if the specified include {@link TypeFilter} is supported by the index.
+	 *
+	 * 确定索引是否支持指定的包含{@link TypeFilter}。
+	 *
 	 * @param filter the filter to check
 	 * @return whether the index supports this include filter
 	 * @since 5.0
@@ -342,11 +357,13 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	private boolean indexSupportsIncludeFilter(TypeFilter filter) {
 		if (filter instanceof AnnotationTypeFilter) {
 			Class<? extends Annotation> annotation = ((AnnotationTypeFilter) filter).getAnnotationType();
+			//是否是声明的注解 || 注解是以javax.开头
 			return (AnnotationUtils.isAnnotationDeclaredLocally(Indexed.class, annotation) ||
 					annotation.getName().startsWith("javax."));
 		}
 		if (filter instanceof AssignableTypeFilter) {
 			Class<?> target = ((AssignableTypeFilter) filter).getTargetType();
+			//是否是声明的注解
 			return AnnotationUtils.isAnnotationDeclaredLocally(Indexed.class, target);
 		}
 		return false;

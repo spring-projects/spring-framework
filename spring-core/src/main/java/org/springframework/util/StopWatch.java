@@ -115,6 +115,9 @@ public class StopWatch {
 	/**
 	 * Start an unnamed task. The results are undefined if {@link #stop()}
 	 * or timing methods are called without invoking this method.
+	 *
+	 * 开始一个未命名的任务。 如果在不调用此方法的情况下调用{@link #stop（）}或计时方法，则结果未定义。
+	 *
 	 * @see #stop()
 	 */
 	public void start() throws IllegalStateException {
@@ -124,6 +127,9 @@ public class StopWatch {
 	/**
 	 * Start a named task. The results are undefined if {@link #stop()}
 	 * or timing methods are called without invoking this method.
+	 *
+	 * 开始一个命名的任务。 如果在不调用此方法的情况下调用{@link #stop（）}或计时方法，则结果未定义。
+	 *
 	 * @param taskName the name of the task to start
 	 * @see #stop()
 	 */
@@ -138,6 +144,9 @@ public class StopWatch {
 	/**
 	 * Stop the current task. The results are undefined if timing
 	 * methods are called without invoking at least one pair
+	 *
+	 * 停止当前的任务。 如果调用时序方法而不调用至少一对，结果是不确定的
+	 *
 	 * {@code start()} / {@code stop()} methods.
 	 * @see #start()
 	 */

@@ -70,6 +70,8 @@ class PostProcessorRegistrationDelegate {
 					// 类型为BeanDefinitionRegistryPostProcessor
 					BeanDefinitionRegistryPostProcessor registryProcessor =
 							(BeanDefinitionRegistryPostProcessor) postProcessor;
+					//----------------------关键方法--------------------
+					//通过注册表加载beanDefinition，注解就是从这里加载的
 					registryProcessor.postProcessBeanDefinitionRegistry(registry);
 					registryProcessors.add(registryProcessor);
 				}

@@ -38,6 +38,9 @@ import org.springframework.util.Assert;
  * This is an alternative to {@link ClassPathBeanDefinitionScanner}, applying
  * the same resolution of annotations but for explicitly registered classes only.
  *
+ * 方便的注释bean类的程序注册适配器。
+ * 这是{@link ClassPathBeanDefinitionScanner}的替代方法，应用注解的相同分辨率，但仅适用于显式注册的类。
+ *
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Sam Brannen
@@ -61,6 +64,10 @@ public class AnnotatedBeanDefinitionReader {
 	 * If the registry is {@link EnvironmentCapable}, e.g. is an {@code ApplicationContext},
 	 * the {@link Environment} will be inherited, otherwise a new
 	 * {@link StandardEnvironment} will be created and used.
+	 *
+	 * 为给定的注册表创建一个新的AnnotatedBeanDefinitionReader。 如果注册表是{@link EnvironmentCapable}，
+	 * 例如 是一个ApplicationContext，则将继承{@link Environment}，否则将创建并使用新的{@link StandardEnvironment}。
+	 *
 	 * @param registry the {@code BeanFactory} to load bean definitions into,
 	 * in the form of a {@code BeanDefinitionRegistry}
 	 * @see #AnnotatedBeanDefinitionReader(BeanDefinitionRegistry, Environment)
@@ -83,7 +90,10 @@ public class AnnotatedBeanDefinitionReader {
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		Assert.notNull(environment, "Environment must not be null");
 		this.registry = registry;
+		//Conditional注解评估器
 		this.conditionEvaluator = new ConditionEvaluator(registry, environment, null);
+		//---------------------关键方法----------------------
+		// 在给定的注册表中注册所有相关的注释后处理器。
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 	}
 
@@ -261,8 +271,10 @@ public class AnnotatedBeanDefinitionReader {
 
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);
 		//-------------------------关键方法-------------------
-		//是否应用代理
+		//是否应用代理，如果使用代理，返回是代理对象
 		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+		//-------------------------关键方法-------------------
+		//给定的bean工厂注册给定的bean定义
 		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);
 	}
 
@@ -270,6 +282,9 @@ public class AnnotatedBeanDefinitionReader {
 	/**
 	 * Get the Environment from the given registry if possible, otherwise return a new
 	 * StandardEnvironment.
+	 *
+	 * 如果可能，从给定的注册表中获取环境，否则返回一个新的标准环境。
+	 *
 	 */
 	private static Environment getOrCreateEnvironment(BeanDefinitionRegistry registry) {
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");

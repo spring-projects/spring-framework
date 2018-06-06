@@ -30,6 +30,11 @@ import java.lang.annotation.Target;
  * where {@link PropertySource} can simply be declared several times on the same
  * {@linkplain ElementType#TYPE type}, implicitly generating this container annotation.
  *
+ * 集合了多个{@link PropertySource}注释的容器注解。
+ * 可以原生使用，声明多个嵌套的{@link PropertySource}注解。
+ * 也可以与Java 8支持<em>repeatable annotations</ em>结合使用，
+ * 其中{@link PropertySource}可以在相同的{@linkplain ElementType＃TYPE类型}上多次声明，隐式生成此容器注释。
+ *
  * @author Phillip Webb
  * @since 4.0
  * @see PropertySource

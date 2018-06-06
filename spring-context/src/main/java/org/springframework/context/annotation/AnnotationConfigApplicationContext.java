@@ -39,6 +39,15 @@ import org.springframework.util.Assert;
  * deliberately override certain bean definitions via an extra {@code @Configuration}
  * class.
  *
+ * 独立的应用程序上下文，接受注释的类作为输入 - 特别是
+ *  {@link Configuration @Configuration} -annotated类，但也很简单
+ *  {@link org.springframework.stereotype.Component @Component}类型和JSR-330兼容
+ *	类使用{@code javax.inject}注释。 允许通过一个类来注册
+ *  一个使用{@link #register（Class ...）}以及使用类路径扫描
+ *  {@link #scan（String ...）}。
+ *  <p>在多个@Configuration类的情况下，后面的类中定义的@
+ * {@ link Bean}方法将覆盖在以前的类中定义的方法。 这可以用来通过一个额外的@Configuration}类有意地重写某些bean定义。
+ *
  * <p>See @{@link Configuration}'s javadoc for usage examples.
  *
  * @author Juergen Hoeller
@@ -52,22 +61,32 @@ import org.springframework.util.Assert;
  */
 public class AnnotationConfigApplicationContext extends GenericApplicationContext implements AnnotationConfigRegistry {
 
+	//解析器用来解析带注解的bean
 	private final AnnotatedBeanDefinitionReader reader;
 
+	//用来扫描类
 	private final ClassPathBeanDefinitionScanner scanner;
 
 
 	/**
 	 * Create a new AnnotationConfigApplicationContext that needs to be populated
 	 * through {@link #register} calls and then manually {@linkplain #refresh refreshed}.
+	 *
+	 * 创建一个需要填充的新AnnotationConfigApplicationContext
+	 * 通过{@link #register}调用，然后手动{@linkplain #refresh刷新}。
 	 */
 	public AnnotationConfigApplicationContext() {
+		//里面有注解的BeanDefinitionreader
 		this.reader = new AnnotatedBeanDefinitionReader(this);
+		//bean扫描器
 		this.scanner = new ClassPathBeanDefinitionScanner(this);
 	}
 
 	/**
 	 * Create a new AnnotationConfigApplicationContext with the given DefaultListableBeanFactory.
+	 *
+	 * 用给定的DefaultListableBeanFactory创建一个新的AnnotationConfigApplicationContext。
+	 *
 	 * @param beanFactory the DefaultListableBeanFactory instance to use for this context
 	 */
 	public AnnotationConfigApplicationContext(DefaultListableBeanFactory beanFactory) {
@@ -79,11 +98,16 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	/**
 	 * Create a new AnnotationConfigApplicationContext, deriving bean definitions
 	 * from the given annotated classes and automatically refreshing the context.
+	 *
+	 * 创建一个新的AnnotationConfigApplicationContext，从给定的注释类派生bean定义并自动刷新上下文。
+	 *
 	 * @param annotatedClasses one or more annotated classes,
 	 * e.g. {@link Configuration @Configuration} classes
 	 */
 	public AnnotationConfigApplicationContext(Class<?>... annotatedClasses) {
 		this();
+		//关键代码   注册配置的类对象
+		// （当配置类上有@Conditional注解且为matches方法返回false的时候  这个类就不注册了）
 		register(annotatedClasses);
 		refresh();
 	}
@@ -91,6 +115,9 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	/**
 	 * Create a new AnnotationConfigApplicationContext, scanning for bean definitions
 	 * in the given packages and automatically refreshing the context.
+	 *
+	 * 创建一个新的AnnotationConfigApplicationContext，扫描给定包中的bean定义并自动刷新上下文。
+	 *
 	 * @param basePackages the packages to check for annotated classes
 	 */
 	public AnnotationConfigApplicationContext(String... basePackages) {

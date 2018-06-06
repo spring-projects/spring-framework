@@ -242,6 +242,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Create a new AbstractBeanDefinition with default settings.
+	 *
+	 * 用默认设置创建一个新的AbstractBeanDefinition。
+	 *
 	 */
 	protected AbstractBeanDefinition() {
 		this(null, null);
@@ -674,6 +677,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Set whether this bean is a primary autowire candidate.
 	 * <p>If this value is {@code true} for exactly one bean among multiple
 	 * matching candidates, it will serve as a tie-breaker.
+	 *
+	 * 设置这个bean是否是主要的autowire候选者。
+	 * <p>如果多个匹配候选者中只有一个bean的值为{true}，那么它将作为决胜者。
 	 */
 	@Override
 	public void setPrimary(boolean primary) {
@@ -722,6 +728,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Copy the qualifiers from the supplied AbstractBeanDefinition to this bean definition.
+	 *
+	 * 将提供的AbstractBeanDefinition中的限定符复制到此bean定义中。
+	 *
 	 * @param source the AbstractBeanDefinition to copy from
 	 */
 	public void copyQualifiersFrom(AbstractBeanDefinition source) {
@@ -1001,7 +1010,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Set the role hint for this {@code BeanDefinition}.
 	 *
 	 * 为此{@code BeanDefinition}设置角色提示。
-	 * 
+	 *
 	 */
 	public void setRole(int role) {
 		this.role = role;
@@ -1077,6 +1086,10 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Allows for retrieving the decorated bean definition, if any.
 	 * <p>Note that this method returns the immediate originator. Iterate through the
 	 * originator chain to find the original BeanDefinition as defined by the user.
+	 *
+	 * 返回原始BeanDefinition，否则返回{null}。
+	 * 允许检索装饰的bean定义（如果有的话）。
+	 * 请注意，此方法返回直接发件人。 遍历发起者链来查找用户定义的原始BeanDefinition。
 	 */
 	@Override
 	@Nullable

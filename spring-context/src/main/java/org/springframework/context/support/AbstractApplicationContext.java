@@ -138,6 +138,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Name of the LifecycleProcessor bean in the factory.
 	 * If none is supplied, a DefaultLifecycleProcessor is used.
 	 *
+	 * 工厂中LifecycleProcessor bean的名称。如果没有提供，则使用DefaultLifecycleProcessor。
+	 *
 	 * @see org.springframework.context.LifecycleProcessor
 	 * @see org.springframework.context.support.DefaultLifecycleProcessor
 	 */
@@ -615,7 +617,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
-				// ------------------关键方法-------------------初始化剩下的单实例
+				// ------------------关键方法-------------------初始化剩下的单实例，初始化了实现LoadTimeWeaverAware接口的类型
 				finishBeanFactoryInitialization(beanFactory);
 
 				// Last step: publish corresponding event.
@@ -697,6 +699,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected ConfigurableListableBeanFactory obtainFreshBeanFactory() {
 		//----------------------关键方法------------------初始化beanFactory
+		//在springboot中，就是使用注解的时候，容器类型是AnnotationConfigApplicationContext，
+		// 既是调用的GenericApplicationContext的refreshBeanFactory方法
 		refreshBeanFactory();
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 		if (logger.isDebugEnabled()) {
@@ -1013,7 +1017,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Finish the refresh of this context, invoking the LifecycleProcessor's
 	 * onRefresh() method and publishing the
+	 *
 	 * 完成此上下文的刷新，调用LifecycleProcessor的onRefresh（）方法并发布
+	 *
 	 * {@link org.springframework.context.event.ContextRefreshedEvent}.
 	 */
 	protected void finishRefresh() {

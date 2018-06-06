@@ -146,6 +146,11 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * using the given {@link Environment} when evaluating bean definition profile metadata.
 	 * @param registry the {@code BeanFactory} to load bean definitions into, in the form
 	 * of a {@code BeanDefinitionRegistry}
+	 *
+	 *  为给定的bean工厂创建一个新的{@code ClassPathBeanDefinitionScanner}，
+	 *  并在评估bean定义概要文件元数据时使用给定的{@link Environment}。
+	 *  @param注册表{@code BeanFactory}将Bean定义加载到{@code BeanDefinitionRegistry}
+	 *
 	 * @param useDefaultFilters whether to include the default filters for the
 	 * {@link org.springframework.stereotype.Component @Component},
 	 * {@link org.springframework.stereotype.Repository @Repository},
@@ -163,6 +168,8 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		this.registry = registry;
 
 		if (useDefaultFilters) {
+			//---------------------关键方法-----------------------
+			//includeFilters中加入Component.class过滤器
 			registerDefaultFilters();
 		}
 		setEnvironment(environment);
@@ -206,6 +213,8 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	/**
 	 * Set the BeanNameGenerator to use for detected bean classes.
 	 * <p>Default is a {@link AnnotationBeanNameGenerator}.
+	 *
+	 * 将BeanNameGenerator设置为用于检测到的bean类。 <p>默认是一个{@link AnnotationBeanNameGenerator}。
 	 */
 	public void setBeanNameGenerator(@Nullable BeanNameGenerator beanNameGenerator) {
 		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : new AnnotationBeanNameGenerator());
@@ -265,6 +274,9 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * returning the registered bean definitions.
 	 * <p>This method does <i>not</i> register an annotation config processor
 	 * but rather leaves this up to the caller.
+	 *
+	 * 在指定的基础包中执行扫描，返回注册的bean定义。 <p>这个方法不注册注释配置处理器，而是将其留给调用者。
+	 *
 	 * @param basePackages the packages to check for annotated classes
 	 * @return set of beans registered if any for tooling registration purposes (never {@code null})
 	 */
@@ -272,22 +284,33 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
 		Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
 		for (String basePackage : basePackages) {
+			//---------------------关键方法-----------------------
+			//扫描软件包中的所有的BeanDefinition
 			Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
 			for (BeanDefinition candidate : candidates) {
 				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 				candidate.setScope(scopeMetadata.getScopeName());
 				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
 				if (candidate instanceof AbstractBeanDefinition) {
+					//--------------------关键方法-----------------------
+					//除了从扫描组件类中检索到的内容以外，对给定的bean定义应用更多设置。合并AbstractBeanDefinition的属性
 					postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
 				}
 				if (candidate instanceof AnnotatedBeanDefinition) {
+					//--------------------关键方法-----------------------
+					//注解走这里，通过注解，配置AnnotatedBeanDefinition
 					AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
 				}
 				if (checkCandidate(beanName, candidate)) {
+					//如果beanName在注册表中不存在未true，如果存在，但是类型配比返回false，
+					// 如果存在但是类型不匹配抛出异常
+					//实例化BeanDefinitionHolder
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
+					// 设置代理模式
 					definitionHolder =
 							AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
 					beanDefinitions.add(definitionHolder);
+					//注册definitionHolder
 					registerBeanDefinition(definitionHolder, this.registry);
 				}
 			}
@@ -298,6 +321,9 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	/**
 	 * Apply further settings to the given bean definition,
 	 * beyond the contents retrieved from scanning the component class.
+	 *
+	 * 除了从扫描组件类中检索到的内容以外，对给定的bean定义应用更多设置。
+	 *
 	 * @param beanDefinition the scanned bean definition
 	 * @param beanName the generated bean name for the given bean
 	 */
@@ -312,6 +338,9 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * Register the specified bean with the given registry.
 	 * <p>Can be overridden in subclasses, e.g. to adapt the registration
 	 * process or to register further bean definitions for each scanned bean.
+	 *
+	 * 用给定的注册表注册指定的bean。 <p>可以在子类中重写，例如 以适应注册过程或为每个扫描的bean注册更多的bean定义。
+	 *
 	 * @param definitionHolder the bean definition plus bean name for the bean
 	 * @param registry the BeanDefinitionRegistry to register the bean with
 	 */
@@ -323,6 +352,9 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	/**
 	 * Check the given candidate's bean name, determining whether the corresponding
 	 * bean definition needs to be registered or conflicts with an existing definition.
+	 *
+	 * 检查给定候选者的bean名称，确定相应的bean定义是否需要注册或与现有定义冲突。
+	 *
 	 * @param beanName the suggested name for the bean
 	 * @param beanDefinition the corresponding bean definition
 	 * @return {@code true} if the bean can be registered as-is;
@@ -333,16 +365,23 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 */
 	protected boolean checkCandidate(String beanName, BeanDefinition beanDefinition) throws IllegalStateException {
 		if (!this.registry.containsBeanDefinition(beanName)) {
+			//如果注册表中没有当前的beanName，返回true
 			return true;
 		}
+		//根据beanName获得BeanDefinition
 		BeanDefinition existingDef = this.registry.getBeanDefinition(beanName);
 		BeanDefinition originatingDef = existingDef.getOriginatingBeanDefinition();
+		//获取原始的BeanDefinition
 		if (originatingDef != null) {
+			//原始的BeanDefinition存在
 			existingDef = originatingDef;
 		}
 		if (isCompatible(beanDefinition, existingDef)) {
+			//判断存在的BeanDefinition的类型是否是继承自GenericBeanDefinition，实现了AnnotatedBeanDefinition
+			// 	||  新的SourceClass和以存在的SourceClass是否一样 || 新的BeanDefinition老的BeanDefinition是否一样
 			return false;
 		}
+		//抛出不兼容异常
 		throw new ConflictingBeanDefinitionException("Annotation-specified bean name '" + beanName +
 				"' for bean class [" + beanDefinition.getBeanClassName() + "] conflicts with existing, " +
 				"non-compatible bean definition of same name and class [" + existingDef.getBeanClassName() + "]");
@@ -353,6 +392,10 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * the given existing bean definition.
 	 * <p>The default implementation considers them as compatible when the existing
 	 * bean definition comes from the same source or from a non-scanning source.
+	 *
+	 * 确定给定的新bean定义是否与给定的现有bean定义兼容。
+	 * <p>当现有bean定义来自同一个源或来自非扫描源时，默认实现将它们视为兼容。
+	 *
 	 * @param newDefinition the new bean definition, originated from scanning
 	 * @param existingDefinition the existing bean definition, potentially an
 	 * explicitly defined one or a previously generated one from scanning
@@ -360,9 +403,9 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * new definition to be skipped in favor of the existing definition
 	 */
 	protected boolean isCompatible(BeanDefinition newDefinition, BeanDefinition existingDefinition) {
-		return (!(existingDefinition instanceof ScannedGenericBeanDefinition) ||  // explicitly registered overriding bean
-				(newDefinition.getSource() != null && newDefinition.getSource().equals(existingDefinition.getSource())) ||  // scanned same file twice
-				newDefinition.equals(existingDefinition));  // scanned equivalent class twice
+		return (!(existingDefinition instanceof ScannedGenericBeanDefinition) ||  // explicitly registered overriding bean//显式注册重写的bean
+				(newDefinition.getSource() != null && newDefinition.getSource().equals(existingDefinition.getSource())) ||  // scanned same file twice//扫描相同的文件两次
+				newDefinition.equals(existingDefinition));  // scanned equivalent class twice//扫描相应的类两次
 	}
 
 

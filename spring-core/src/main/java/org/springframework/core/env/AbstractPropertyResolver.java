@@ -208,6 +208,8 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 		if (this.strictHelper == null) {
 			this.strictHelper = createPlaceholderHelper(false);
 		}
+		//------------------------关键方法---------------------------
+		//根据text映射资源 ，this.strictHelper = PropertyPlaceholderHelper 类型的 ，没有读完
 		return doResolvePlaceholders(text, this.strictHelper);
 	}
 
@@ -267,6 +269,8 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	/**
 	 * Retrieve the specified property as a raw String,
 	 * i.e. without resolution of nested placeholders.
+	 * 检索指定的属性作为一个原始字符串，即没有解析嵌套的占位符。
+	 *
 	 * @param key the property name to resolve
 	 * @return the property value or {@code null} if none found
 	 */

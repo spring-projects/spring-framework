@@ -161,6 +161,9 @@ final class ConfigurationClass {
 	/**
 	 * Return whether this configuration class was registered via @{@link Import} or
 	 * automatically registered due to being nested within another configuration class.
+	 *
+	 * 返回此配置类是通过@{@link Import} 注册 还是由于嵌套在另一个配置类中而自动注册。
+	 *
 	 * @since 3.1.1
 	 * @see #getImportedBy()
 	 */
@@ -170,6 +173,9 @@ final class ConfigurationClass {
 
 	/**
 	 * Merge the imported-by declarations from the given configuration class into this one.
+	 *
+	 * 将导入的声明从给定的配置类合并到这个中。
+	 *
 	 * @since 4.0.5
 	 */
 	public void mergeImportedBy(ConfigurationClass otherConfigClass) {
@@ -212,13 +218,17 @@ final class ConfigurationClass {
 
 	public void validate(ProblemReporter problemReporter) {
 		// A configuration class may not be final (CGLIB limitation)
+		//配置类可能不是最终的（CGLIB限制）
 		if (getMetadata().isAnnotated(Configuration.class.getName())) {
+			//是Configuration类型
 			if (getMetadata().isFinal()) {
 				problemReporter.error(new FinalConfigurationProblem());
 			}
 		}
 
 		for (BeanMethod beanMethod : this.beanMethods) {
+			//-------------------关键方法-----------------------
+			//beanMethod进行验证
 			beanMethod.validate(problemReporter);
 		}
 	}

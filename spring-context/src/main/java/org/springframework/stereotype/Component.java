@@ -49,6 +49,9 @@ public @interface Component {
 	 * The value may indicate a suggestion for a logical component name,
 	 * to be turned into a Spring bean in case of an autodetected component.
 	 * @return the suggested component name, if any (or empty String otherwise)
+	 *
+	 * 该值可能指示逻辑组件名称的建议，如果是自动检测组件，则该建议将变成Spring bean。
+	 * @返回建议的组件名称（如果有的话）（否则返回空字符串）
 	 */
 	String value() default "";
 

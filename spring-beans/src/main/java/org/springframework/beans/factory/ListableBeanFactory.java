@@ -169,6 +169,14 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * "factory-bean" reference) for the type check. Note that FactoryBeans need to be
 	 * eagerly initialized to determine their type: So be aware that passing in "true"
 	 * for this flag will initialize FactoryBeans and "factory-bean" references.
+	 *
+	 * @param allowEagerInit
+	 * 是否要初始化由FactoryBeans </ i>创建的<i> lazy-init单例</ i>和<i>对象
+	 *  （或者带有“工厂bean”引用的工厂方法）以进行类型检查。 请注意，
+	 * 需要对FactoryBeans进行急切的初始化以确定它们的类型：因此，请注意，
+	 *  为此标志传入“true”将初始化FactoryBeans和“工厂bean”引用。
+	 *
+	 *
 	 * @return the names of beans (or objects created by FactoryBeans) matching
 	 * the given object type (including subclasses), or an empty array if none
 	 * @see FactoryBean#getObjectType

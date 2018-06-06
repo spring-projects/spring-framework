@@ -63,6 +63,7 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 
 
 	static void registerApplicationContext(ConfigurableApplicationContext applicationContext) {
+		//获得系统参数spring.liveBeansView.mbeanDomain
 		String mbeanDomain = applicationContext.getEnvironment().getProperty(MBEAN_DOMAIN_PROPERTY_NAME);
 		if (mbeanDomain != null) {
 			synchronized (applicationContexts) {

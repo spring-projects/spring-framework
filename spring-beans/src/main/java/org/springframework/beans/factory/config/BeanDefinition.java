@@ -121,6 +121,12 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * even be empty in case of a factory bean reference that a method is called on.
 	 * Hence, do <i>not</i> consider this to be the definitive bean type at runtime but
 	 * rather only use it for parsing purposes at the individual bean definition level.
+	 *
+	 * 返回此bean定义的当前bean类名称。
+	 * <p>请注意，这不一定是运行时使用的实际类名，以防子定义覆盖/继承父类的类名。
+	 * 另外，这可能只是调用工厂方法的类，或者在调用方法的工厂bean引用的情况下它甚至可能是空的。
+	 * 因此，<i>不要</ i>考虑这个 在运行时是最终的bean类型，而只能在单个bean定义级别将其用于解析目的。
+	 *
 	 * @see #getParentName()
 	 * @see #getFactoryBeanName()
 	 * @see #getFactoryMethodName()
@@ -178,6 +184,8 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 	/**
 	 * Return whether this bean is a candidate for getting autowired into some other bean.
+	 *
+	 * 返回这个bean是否是一个获得自动装入其他bean的候选者。
 	 */
 	boolean isAutowireCandidate();
 
@@ -303,6 +311,10 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * Allows for retrieving the decorated bean definition, if any.
 	 * <p>Note that this method returns the immediate originator. Iterate through the
 	 * originator chain to find the original BeanDefinition as defined by the user.
+	 *
+	 * 返回原始BeanDefinition，否则返回{null}。
+	 * 允许检索装饰的bean定义（如果有的话）。
+	 * 请注意，此方法返回直接发件人。 遍历发起者链来查找用户定义的原始BeanDefinition。
 	 */
 	@Nullable
 	BeanDefinition getOriginatingBeanDefinition();

@@ -216,20 +216,31 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	/**
 	 * Derive further bean definitions from the configuration classes in the registry.
+	 *
+	 * 从注册表中的配置类派生更多的bean定义。
+	 *
+	 * ConfigurationClassPostProcessor实现了BeanDefinitionRegistryPostProcessor接口,该接口在
+	 * AbstractApplicationContext的refresh()方法中会被invokeBeanFactoryPostProcessors(beanFactory)方法调用,
+	 * 就是在容器激活的时候被调用
+	 *
 	 */
 	@Override
 	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
 		int registryId = System.identityHashCode(registry);
 		if (this.registriesPostProcessed.contains(registryId)) {
 			throw new IllegalStateException(
+					//postProcessBeanDefinitionRegistry已经在这个后处理器上调用过
 					"postProcessBeanDefinitionRegistry already called on this post-processor against " + registry);
 		}
 		if (this.factoriesPostProcessed.contains(registryId)) {
 			throw new IllegalStateException(
+					//postProcessBeanFactory已经调用这个后处理器
 					"postProcessBeanFactory already called on this post-processor against " + registry);
 		}
 		this.registriesPostProcessed.add(registryId);
 
+		//------------------------关键方法-----------------------
+		//处理@Configuration的bean
 		processConfigBeanDefinitions(registry);
 	}
 
@@ -257,31 +268,45 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	/**
 	 * Build and validate a configuration model based on the registry of
+	 *
+	 * 基于注册表构建和验证配置模型
+	 *
 	 * {@link Configuration} classes.
 	 */
 	public void processConfigBeanDefinitions(BeanDefinitionRegistry registry) {
 		List<BeanDefinitionHolder> configCandidates = new ArrayList<>();
+		//返回此注册表中所有的BeanDefinitionName
 		String[] candidateNames = registry.getBeanDefinitionNames();
 
 		for (String beanName : candidateNames) {
+			//根据beanName获得beanDefinition对象
 			BeanDefinition beanDef = registry.getBeanDefinition(beanName);
+			//-------------------------关键方法--------------------------------
 			if (ConfigurationClassUtils.isFullConfigurationClass(beanDef) ||
 					ConfigurationClassUtils.isLiteConfigurationClass(beanDef)) {
+				// 这里就是说注解已经处理完了，在beanDef的Attribute中，设置full，life属性
 				if (logger.isDebugEnabled()) {
 					logger.debug("Bean definition has already been processed as a configuration class: " + beanDef);
 				}
 			}
+			//-------------------------关键方法--------------------------------
+			//检查给定的bean定义是否是配置类的候选对象（或者是在配置/组件类中声明的嵌套组件类，以便自动注册），并相应地标记它。
 			else if (ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef, this.metadataReaderFactory)) {
+				//（beanClassName不为空 && FactoryMethodName为空）&&  （是Configuration.class类型的
+				// ||有Component.，ComponentScan，Import，ImportResource，bean 5中注解）
+				//加入BeanDefinitionHolder
 				configCandidates.add(new BeanDefinitionHolder(beanDef, beanName));
 			}
 		}
 
 		// Return immediately if no @Configuration classes were found
+		// 如果没有找到@Configuration类，立即返回
 		if (configCandidates.isEmpty()) {
 			return;
 		}
 
 		// Sort by previously determined @Order value, if applicable
+		// 按照以前确定的@Order值进行排序（如果适用）
 		configCandidates.sort((bd1, bd2) -> {
 			int i1 = ConfigurationClassUtils.getOrder(bd1.getBeanDefinition());
 			int i2 = ConfigurationClassUtils.getOrder(bd2.getBeanDefinition());
@@ -289,6 +314,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		});
 
 		// Detect any custom bean name generation strategy supplied through the enclosing application context
+		// 检测通过封闭应用程序上下文提供的任何自定义bean名称生成策略
 		SingletonBeanRegistry sbr = null;
 		if (registry instanceof SingletonBeanRegistry) {
 			sbr = (SingletonBeanRegistry) registry;
@@ -306,6 +332,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		// Parse each @Configuration class
+		// 解析每个@Configuration类
 		ConfigurationClassParser parser = new ConfigurationClassParser(
 				this.metadataReaderFactory, this.problemReporter, this.environment,
 				this.resourceLoader, this.componentScanBeanNameGenerator, registry);
@@ -313,18 +340,25 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		Set<BeanDefinitionHolder> candidates = new LinkedHashSet<>(configCandidates);
 		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size());
 		do {
+			//-------------------------关键方法--------------------------------
+			//参数是所有符合6种注解的类
 			parser.parse(candidates);
+			//-------------------关键方法-----------------------
+			//方法不能是final的，方法需要能被重写
 			parser.validate();
 
 			Set<ConfigurationClass> configClasses = new LinkedHashSet<>(parser.getConfigurationClasses());
 			configClasses.removeAll(alreadyParsed);
 
 			// Read the model and create bean definitions based on its content
+			// 读取模型并根据其内容创建bean定义
 			if (this.reader == null) {
 				this.reader = new ConfigurationClassBeanDefinitionReader(
 						registry, this.sourceExtractor, this.resourceLoader, this.environment,
 						this.importBeanNameGenerator, parser.getImportRegistry());
 			}
+			//-----------------------关键方法--------------------------
+			//根据ConfigurationClass的类，加载bean
 			this.reader.loadBeanDefinitions(configClasses);
 			alreadyParsed.addAll(configClasses);
 
@@ -351,6 +385,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		while (!candidates.isEmpty());
 
 		// Register the ImportRegistry as a bean in order to support ImportAware @Configuration classes
+		// 将ImportRegistry注册为一个bean，以支持ImportAware @Configuration类
 		if (sbr != null && !sbr.containsSingleton(IMPORT_REGISTRY_BEAN_NAME)) {
 			sbr.registerSingleton(IMPORT_REGISTRY_BEAN_NAME, parser.getImportRegistry());
 		}
@@ -358,6 +393,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		if (this.metadataReaderFactory instanceof CachingMetadataReaderFactory) {
 			// Clear cache in externally provided MetadataReaderFactory; this is a no-op
 			// for a shared cache since it'll be cleared by the ApplicationContext.
+			//清除外部提供的MetadataReaderFactory中的缓存; 这是一个没有操作
+			//用于共享缓存，因为它将被ApplicationContext清除。
 			((CachingMetadataReaderFactory) this.metadataReaderFactory).clearCache();
 		}
 	}

@@ -55,7 +55,7 @@ import org.springframework.core.type.filter.TypeFilter;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Repeatable(ComponentScans.class)
+@Repeatable(ComponentScans.class)//等同于ComponentScans.class
 public @interface ComponentScan {
 
 	/**
@@ -63,6 +63,9 @@ public @interface ComponentScan {
 	 * <p>Allows for more concise annotation declarations if no other attributes
 	 * are needed &mdash; for example, {@code @ComponentScan("org.my.pkg")}
 	 * instead of {@code @ComponentScan(basePackages = "org.my.pkg")}.
+	 *
+	 * {@link #basePackages}的别名。 <p>如果不需要其他属性，则允许更简洁的注释声明＆mdash;
+	 * 例如，{@code @ComponentScan（“org.my.pkg”）}，而不是{@code @ComponentScan（basePackages =“org.my.pkg”）}。
 	 */
 	@AliasFor("basePackages")
 	String[] value() default {};
@@ -73,6 +76,10 @@ public @interface ComponentScan {
 	 * attribute.
 	 * <p>Use {@link #basePackageClasses} for a type-safe alternative to
 	 * String-based package names.
+	 *
+	 * 用于扫描注释组件的基本软件包。
+	 * {@link #value}是此属性的别名（并且与之互斥）。
+	 * <p>使用{@link #basePackageClasses}为基于字符串的包名称提供类型安全的替代方案。
 	 */
 	@AliasFor("value")
 	String[] basePackages() default {};
@@ -82,6 +89,9 @@ public @interface ComponentScan {
 	 * to scan for annotated components. The package of each class specified will be scanned.
 	 * <p>Consider creating a special no-op marker class or interface in each package
 	 * that serves no purpose other than being referenced by this attribute.
+	 *
+	 * {@link #basePackages}的类型安全替代方法，用于指定扫描注释组件的软件包。
+	 * 将扫描指定的每个类的包。<p>考虑在每个包中创建一个特殊的无操作标记类或接口，除了被此属性引用外，其他任何用途都无用。
 	 */
 	Class<?>[] basePackageClasses() default {};
 
@@ -94,11 +104,17 @@ public @interface ComponentScan {
 	 * {@link AnnotationBeanNameGenerator} or any custom instance supplied to the
 	 * application context at bootstrap time.
 	 * @see AnnotationConfigApplicationContext#setBeanNameGenerator(BeanNameGenerator)
+	 *
+	 * 用于命名Spring容器中检测到的组件的{@link BeanNameGenerator}类。
+	 * <p> BeanNameGenerator接口本身的默认值表示用于处理这个{@code @ComponentScan}注释的扫描器应该
+	 * 使用它的继承bean名称生成器，例如 在引导时提供给应用程序上下文的默认{@link AnnotationBeanNameGenerator}或任何自定义实例。
+	 * @see AnnotationConfigApplicationContext＃setBeanNameGenerator（BeanNameGenerator）
 	 */
 	Class<? extends BeanNameGenerator> nameGenerator() default BeanNameGenerator.class;
 
 	/**
 	 * The {@link ScopeMetadataResolver} to be used for resolving the scope of detected components.
+	 * 用于解析检测到的组件范围的{@link ScopeMetadataResolver}。
 	 */
 	Class<? extends ScopeMetadataResolver> scopeResolver() default AnnotationScopeMetadataResolver.class;
 
@@ -116,12 +132,19 @@ public @interface ComponentScan {
 	 * Controls the class files eligible for component detection.
 	 * <p>Consider use of {@link #includeFilters} and {@link #excludeFilters}
 	 * for a more flexible approach.
+	 *
+	 * 控制可用于组件检测的类文件。 考虑使用{@link #includeFilters}和{@link #excludeFilters}来获得更灵活的方法。
+	 *
 	 */
 	String resourcePattern() default ClassPathScanningCandidateComponentProvider.DEFAULT_RESOURCE_PATTERN;
 
 	/**
 	 * Indicates whether automatic detection of classes annotated with {@code @Component}
 	 * {@code @Repository}, {@code @Service}, or {@code @Controller} should be enabled.
+	 *
+	 * 指示是否应启用自动检测使用{@code @Component} {@code @Repository}，
+	 * {@code @Service}或{@code @Controller}注解的类。
+	 *
 	 */
 	boolean useDefaultFilters() default true;
 
@@ -132,6 +155,12 @@ public @interface ComponentScan {
 	 * <p>Note that these filters will be applied in addition to the default filters, if specified.
 	 * Any type under the specified base packages which matches a given filter will be included,
 	 * even if it does not match the default filters (i.e. is not annotated with {@code @Component}).
+	 *
+	 * 指定哪些类型有资格进行组件扫描。
+	 * <p>从{@link #basePackages}中的所有内容进一步缩小候选组件的集合
+	 * 与基本包中与给定过滤器匹配的所有内容。
+	 * <p>请注意，如果指定，除默认过滤器外，还会应用这些过滤器。
+	 * 即使与默认过滤器不匹配（即未用@Component}进行注释），也会包含指定基本包中与指定过滤器匹配的任何类型。
 	 * @see #resourcePattern()
 	 * @see #useDefaultFilters()
 	 */
@@ -139,6 +168,7 @@ public @interface ComponentScan {
 
 	/**
 	 * Specifies which types are not eligible for component scanning.
+	 * 指定哪些类型不符合组件扫描条件。
 	 * @see #resourcePattern
 	 */
 	Filter[] excludeFilters() default {};
@@ -146,6 +176,7 @@ public @interface ComponentScan {
 	/**
 	 * Specify whether scanned beans should be registered for lazy initialization.
 	 * <p>Default is {@code false}; switch this to {@code true} when desired.
+	 * 指定扫描的bean是否应注册以进行延迟初始化。 <p>默认是{@code false}; 在需要时将其切换为{@code true}。
 	 * @since 4.1
 	 */
 	boolean lazyInit() default false;
@@ -154,6 +185,12 @@ public @interface ComponentScan {
 	/**
 	 * Declares the type filter to be used as an {@linkplain ComponentScan#includeFilters
 	 * include filter} or {@linkplain ComponentScan#excludeFilters exclude filter}.
+	 *
+	 * 声明类型过滤器用作{@linkplain ComponentScan＃includeFilters include过滤器}
+	 * 或{@linkplain ComponentScan＃excludeFilters exclude filter}。
+	 *
+	 * {@linkplain ComponentScan＃includeFilters include过滤器}
+	 * 或{@linkplain ComponentScan＃excludeFilters exclude filter}。
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({})

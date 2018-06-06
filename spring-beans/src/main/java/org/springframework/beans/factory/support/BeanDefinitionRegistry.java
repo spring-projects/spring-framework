@@ -52,6 +52,9 @@ public interface BeanDefinitionRegistry extends AliasRegistry {
 	/**
 	 * Register a new bean definition with this registry.
 	 * Must support RootBeanDefinition and ChildBeanDefinition.
+	 *
+	 * 用这个注册表注册一个新的bean定义。必须支持RootBeanDefinition和ChildBeanDefinition。
+	 *
 	 * @param beanName the name of the bean instance to register
 	 * @param beanDefinition definition of the bean instance to register
 	 * @throws BeanDefinitionStoreException if the BeanDefinition is invalid
@@ -88,6 +91,9 @@ public interface BeanDefinitionRegistry extends AliasRegistry {
 
 	/**
 	 * Return the names of all beans defined in this registry.
+	 *
+	 * 返回在此注册表中定义的所有Bean的名称。
+	 *
 	 * @return the names of all beans defined in this registry,
 	 * or an empty array if none defined
 	 */

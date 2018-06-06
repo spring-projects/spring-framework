@@ -48,6 +48,8 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 
 	/**
 	 * Shared default instance of {@code AnnotationAwareOrderComparator}.
+	 *
+	 * {@Catch AnnotationAwareOrderComparator}的共享默认实例。
 	 */
 	public static final AnnotationAwareOrderComparator INSTANCE = new AnnotationAwareOrderComparator();
 
@@ -117,6 +119,10 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 	 * Sort the given List with a default AnnotationAwareOrderComparator.
 	 * <p>Optimized to skip sorting for lists with size 0 or 1,
 	 * in order to avoid unnecessary array extraction.
+	 *
+	 * 使用默认的AnnotationAwareOrderComparator对给定的列表进行排序。
+	 * <p>经过优化可跳过大小为0或1的列表的排序，以避免不必要的数组提取
+	 *
 	 * @param list the List to sort
 	 * @see java.util.List#sort(java.util.Comparator)
 	 */

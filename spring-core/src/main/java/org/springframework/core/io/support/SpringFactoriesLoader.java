@@ -109,7 +109,7 @@ public abstract class SpringFactoriesLoader {
 	 * given type from {@value #FACTORIES_RESOURCE_LOCATION}, using the given
 	 * class loader.
 	 *
-	 * 使用给定的类加载器从给定的类型的工厂实现中加载完全限定的类名。
+	 * 使用给定的类加载器从{@value #FACTORIES_RESOURCE_LOCATION}加载给定类型的工厂实现的完全限定类名称。
 	 *
 	 * @param factoryClass the interface or abstract class representing the factory
 	 * @param classLoader the ClassLoader to use for loading resources; can be
@@ -140,6 +140,7 @@ public abstract class SpringFactoriesLoader {
 			while (urls.hasMoreElements()) {
 				URL url = urls.nextElement();
 				UrlResource resource = new UrlResource(url);
+				//----------------关键方法-----------------
 				//从给定资源中加载属性（在ISO-859-1编码中）。
 				Properties properties = PropertiesLoaderUtils.loadProperties(resource);
 				for (Map.Entry<?, ?> entry : properties.entrySet()) {

@@ -75,41 +75,52 @@ class ComponentScanAnnotationParser {
 
 	public Set<BeanDefinitionHolder> parse(AnnotationAttributes componentScan, final String declaringClass) {
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(this.registry,
+				//指示是否应启用自动检测使用{@code @Component} {@code @Repository}，
+				//	 * {@code @Service}或{@code @Controller}注解的类。
 				componentScan.getBoolean("useDefaultFilters"), this.environment, this.resourceLoader);
 
+		//设置beanName生成器
 		Class<? extends BeanNameGenerator> generatorClass = componentScan.getClass("nameGenerator");
 		boolean useInheritedGenerator = (BeanNameGenerator.class == generatorClass);
 		scanner.setBeanNameGenerator(useInheritedGenerator ? this.beanNameGenerator :
 				BeanUtils.instantiateClass(generatorClass));
 
+		//获得代理模式
 		ScopedProxyMode scopedProxyMode = componentScan.getEnum("scopedProxy");
 		if (scopedProxyMode != ScopedProxyMode.DEFAULT) {
 			scanner.setScopedProxyMode(scopedProxyMode);
 		}
 		else {
+			//为代理的 DEFAULT，获得组件范围解析器
 			Class<? extends ScopeMetadataResolver> resolverClass = componentScan.getClass("scopeResolver");
+			//设置组件范围解析器
 			scanner.setScopeMetadataResolver(BeanUtils.instantiateClass(resolverClass));
 		}
 
+		//设置类文件匹配规则 “**/*.class”
 		scanner.setResourcePattern(componentScan.getString("resourcePattern"));
 
+		//设置includeFilters
 		for (AnnotationAttributes filter : componentScan.getAnnotationArray("includeFilters")) {
 			for (TypeFilter typeFilter : typeFiltersFor(filter)) {
 				scanner.addIncludeFilter(typeFilter);
 			}
 		}
+		//设置excludeFilters
 		for (AnnotationAttributes filter : componentScan.getAnnotationArray("excludeFilters")) {
 			for (TypeFilter typeFilter : typeFiltersFor(filter)) {
 				scanner.addExcludeFilter(typeFilter);
 			}
 		}
 
+		//设置是否是延迟加载
 		boolean lazyInit = componentScan.getBoolean("lazyInit");
 		if (lazyInit) {
 			scanner.getBeanDefinitionDefaults().setLazyInit(true);
 		}
 
 		Set<String> basePackages = new LinkedHashSet<>();
+		//获得扫描的软件包路径
 		String[] basePackagesArray = componentScan.getStringArray("basePackages");
 		for (String pkg : basePackagesArray) {
 			String[] tokenized = StringUtils.tokenizeToStringArray(this.environment.resolvePlaceholders(pkg),
@@ -125,6 +136,8 @@ class ComponentScanAnnotationParser {
 
 		scanner.addExcludeFilter(new AbstractTypeHierarchyTraversingFilter(false, false) {
 			@Override
+			//--------------------------关键方法----------------------
+			//判断className类型是否匹配
 			protected boolean matchClassName(String className) {
 				return declaringClass.equals(className);
 			}

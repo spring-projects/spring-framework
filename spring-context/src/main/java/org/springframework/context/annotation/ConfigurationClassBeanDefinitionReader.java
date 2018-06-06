@@ -110,10 +110,14 @@ class ConfigurationClassBeanDefinitionReader {
 	/**
 	 * Read {@code configurationModel}, registering bean definitions
 	 * with the registry based on its contents.
+	 *
+	 * 阅读{@code configurationModel}，根据注册表的内容向注册表注册bean定义。
 	 */
 	public void loadBeanDefinitions(Set<ConfigurationClass> configurationModel) {
 		TrackedConditionEvaluator trackedConditionEvaluator = new TrackedConditionEvaluator();
 		for (ConfigurationClass configClass : configurationModel) {
+			//---------------------关键方法-----------------------
+			//根据ConfigurationClass，加载beanDefinition，
 			loadBeanDefinitionsForConfigurationClass(configClass, trackedConditionEvaluator);
 		}
 	}
@@ -121,20 +125,28 @@ class ConfigurationClassBeanDefinitionReader {
 	/**
 	 * Read a particular {@link ConfigurationClass}, registering bean definitions
 	 * for the class itself and all of its {@link Bean} methods.
+	 *
+	 * 读入一个特定的ConfigurationClass，为该类本身及其所有{@link Bean}方法注册bean定义。
 	 */
 	private void loadBeanDefinitionsForConfigurationClass(
 			ConfigurationClass configClass, TrackedConditionEvaluator trackedConditionEvaluator) {
 
+		//----------------------------关键方法-----------------------
 		if (trackedConditionEvaluator.shouldSkip(configClass)) {
+			//需要跳过
 			String beanName = configClass.getBeanName();
 			if (StringUtils.hasLength(beanName) && this.registry.containsBeanDefinition(beanName)) {
+				//这个bean已经注册了，就从注册表里移除
 				this.registry.removeBeanDefinition(beanName);
 			}
+			// 再从import注册表中移除这个类
 			this.importRegistry.removeImportingClass(configClass.getMetadata().getClassName());
 			return;
 		}
 
 		if (configClass.isImported()) {
+			//----------------关键方法------------------
+			//configClass是通过@Import导入的
 			registerBeanDefinitionForImportedConfigurationClass(configClass);
 		}
 		for (BeanMethod beanMethod : configClass.getBeanMethods()) {
@@ -147,6 +159,9 @@ class ConfigurationClassBeanDefinitionReader {
 
 	/**
 	 * Register the {@link Configuration} class itself as a bean definition.
+	 *
+	 * 将{@link Configuration}类自身注册为一个bean定义。
+	 *
 	 */
 	private void registerBeanDefinitionForImportedConfigurationClass(ConfigurationClass configClass) {
 		AnnotationMetadata metadata = configClass.getMetadata();
@@ -416,6 +431,9 @@ class ConfigurationClassBeanDefinitionReader {
 	/**
 	 * Evaluate {@code @Conditional} annotations, tracking results and taking into
 	 * account 'imported by'.
+	 *
+	 * 计算{@code @Conditional}注释，跟踪结果并考虑'导入'。
+	 *
 	 */
 	private class TrackedConditionEvaluator {
 
@@ -424,22 +442,29 @@ class ConfigurationClassBeanDefinitionReader {
 		public boolean shouldSkip(ConfigurationClass configClass) {
 			Boolean skip = this.skipped.get(configClass);
 			if (skip == null) {
+				//如果没有处理过，就进入处理
 				if (configClass.isImported()) {
+					//是通过@Import导入的
 					boolean allSkipped = true;
 					for (ConfigurationClass importedBy : configClass.getImportedBy()) {
 						if (!shouldSkip(importedBy)) {
+							//是通过其他类导入的
 							allSkipped = false;
 							break;
 						}
 					}
 					if (allSkipped) {
 						// The config classes that imported this one were all skipped, therefore we are skipped...
+						// 导入这一个的配置类全部被跳过，因此我们被跳过...
+						//  只要有一个类是通过其他类导入的，就不走这里
 						skip = true;
 					}
 				}
 				if (skip == null) {
+					// 不是全部都需要跳过
 					skip = conditionEvaluator.shouldSkip(configClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN);
 				}
+				//说明没有被处理过，放入map
 				this.skipped.put(configClass, skip);
 			}
 			return skip;
