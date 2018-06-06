@@ -8,9 +8,6 @@ dependencyManagement {
 		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
 		mavenBom "io.netty:netty-bom:${nettyVersion}"
 	}
-	dependencies {
-		dependency "io.projectreactor.netty:reactor-netty:0.8.0.BUILD-SNAPSHOT"
-	}
 	resolutionStrategy {
 		cacheChangingModulesFor 0, 'seconds'
 	}
