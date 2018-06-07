@@ -62,7 +62,8 @@ class DefaultServerRequest implements ServerRequest {
 
 	private static final Function<UnsupportedMediaTypeException, UnsupportedMediaTypeStatusException> ERROR_MAPPER =
 			ex -> (ex.getContentType() != null ?
-					new UnsupportedMediaTypeStatusException(ex.getContentType(), ex.getSupportedMediaTypes()) :
+					new UnsupportedMediaTypeStatusException(
+							ex.getContentType(), ex.getSupportedMediaTypes(), ex.getBodyType()) :
 					new UnsupportedMediaTypeStatusException(ex.getMessage()));
 
 

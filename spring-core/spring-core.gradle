@@ -87,9 +87,9 @@ dependencies {
 	optional("io.netty:netty-buffer")
 	testCompile("io.projectreactor:reactor-test")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
-	testCompile("org.xmlunit:xmlunit-matchers:2.5.1")
+	testCompile("org.xmlunit:xmlunit-matchers:2.6.0")
 	testCompile("javax.xml.bind:jaxb-api:2.3.0")
-	testCompile("com.fasterxml.woodstox:woodstox-core:5.0.3") {
+	testCompile("com.fasterxml.woodstox:woodstox-core:5.1.0") {
 		exclude group: "stax", module: "stax-api"
 	}
 }

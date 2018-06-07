@@ -215,7 +215,7 @@ public abstract class WebApplicationContextUtils {
 	 * with the given BeanFactory, as used by the WebApplicationContext.
 	 * @param bf the BeanFactory to configure
 	 * @param servletContext the ServletContext that we're running within
-	 * @param servletConfig the ServletConfig of the containing Portlet
+	 * @param servletConfig the ServletConfig
 	 */
 	public static void registerEnvironmentBeans(ConfigurableListableBeanFactory bf,
 			@Nullable ServletContext servletContext, @Nullable ServletConfig servletConfig) {

@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
@@ -37,6 +40,9 @@ import org.springframework.util.StringValueResolver;
  */
 public class SimpleAliasRegistry implements AliasRegistry {
 
+	/** Logger available to subclasses */
+	protected final Log logger = LogFactory.getLog(getClass());
+
 	/** Map from alias to canonical name */
 	private final Map<String, String> aliasMap = new ConcurrentHashMap<>(16);
 
@@ -49,6 +55,9 @@ public class SimpleAliasRegistry implements AliasRegistry {
 			if (alias.equals(name)) {
 				// 如果beanName与alias相同的话不记录alias，并删除对应的alias
 				this.aliasMap.remove(alias);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Alias definition '" + alias + "' ignored since it points to same name");
+				}
 			}
 			else {
 				String registeredName = this.aliasMap.get(alias);
@@ -61,14 +70,21 @@ public class SimpleAliasRegistry implements AliasRegistry {
 					// 返回是否允许覆盖别名,如果不允许则抛出异常
 					if (!allowAliasOverriding()) {
 						//如果不允许别名覆盖，抛出别名以注册异常
-						throw new IllegalStateException("Cannot register alias '" + alias + "' for name '" +
+						throw new IllegalStateException("Cannot define alias '" + alias + "' for name '" +
 								name + "': It is already registered for name '" + registeredName + "'.");
+					}
+					if (this.logger.isInfoEnabled()) {
+						logger.info("Overriding alias '" + alias + "' definition for registered name '" +
+								registeredName + "' with new target name '" + name + "'");
 					}
 				}
 				//-----------------------------关键方法--------------------------
 				//如果A指向B，如果C也指向B，抛出异常
 				checkForAliasCircle(name, alias);
 				this.aliasMap.put(alias, name);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Alias definition '" + alias + "' registered for name '" + name + "'");
+				}
 			}
 		}
 	}

@@ -20,10 +20,10 @@ server side applications that handle WebSocket messages.
 
 
 [[webflux-websocket-server-handler]]
-=== WebSocketHandler
+=== Server
 [.small]#<<web.adoc#websocket-server-handler,Same in Servlet stack>>#
 
-Creating a WebSocket server is as simple as implementing `WebSocketHandler`:
+To create a WebSocket server, first create a `WebSocketHandler`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -40,10 +40,7 @@ Creating a WebSocket server is as simple as implementing `WebSocketHandler`:
 	}
 ----
 
-Spring WebFlux provides a `WebSocketHandlerAdapter` that can adapt WebSocket
-requests and use the above handler to handle the resulting WebSocket session. After the
-adapter is registered as a bean, you can map requests to your handler, for example using
-`SimpleUrlHandlerMapping`. This is shown below:
+Then map it to a URL and add a `WebSocketHandlerAdapter`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -71,17 +68,144 @@ adapter is registered as a bean, you can map requests to your handler, for examp
 
 
 
+[[webflux-websockethandler]]
+=== WebSocketHandler
+
+The `handle` method of `WebSocketHandler` takes `WebSocketSession` and returns `Mono<Void>`
+to indicate when application handling of the session is complete. The session is handled
+through two streams, one for inbound and one for outbound messages:
+
+[options="header"]
+|===
+| WebSocketSession method | Description
+
+| `Flux<WebSocketMessage> receive()`
+| Provides access to the inbound message stream, and completes when the connection is closed.
+
+| `Mono<Void> send(Publisher<WebSocketMessage>)`
+| Takes a source for outgoing messages, writes the messages, and returns a `Mono<Void>` that
+  completes when the source completes and writing is done.
+
+|===
+
+A `WebSocketHandler` must compose the inbound and outbound streams into a unified flow, and
+return a `Mono<Void>` that reflects the completion of that flow. Depending on application
+requirements, the unified flow completes when:
+
+* Either inbound or outbound message streams complete.
+* Inbound stream completes (i.e. connection closed), while outbound is infinite.
+* At a chosen point through the `close` method of `WebSocketSession`.
+
+When inbound and outbound message streams are composed together, there is no need to
+check if the connection is open, since Reactive Streams signals will terminate activity.
+The inbound stream receives a completion/error signal, and the outbound stream receives
+receives a cancellation signal.
+
+The most basic implementation of a handler is one that handles the inbound stream:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+class ExampleHandler implements WebSocketHandler {
+
+	@Override
+	public Mono<Void> handle(WebSocketSession session) {
+		return session.receive()			<1>
+				.doOnNext(message -> {
+					// ...					<2>
+				})
+				.concatMap(message -> {
+					// ...					<3>
+				})
+				.then();					<4>
+	}
+}
+----
+<1> Access stream of inbound messages.
+<2> Do something with each message.
+<3> Perform nested async operation using message content.
+<4> Return `Mono<Void>` that completes when receiving completes.
+
+[TIP]
+====
+For nested, asynchronous operations, you may need to call `message.retain()` on underlying
+servers that use pooled data buffers (e.g. Netty), or otherwise the data buffer may be
+released before you've had a chance to read the data. For more background see
+<<core.adoc#databuffers,Data Buffers and Codecs>>.
+====
+
+The below implementation combines the inbound with the outbound streams:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+class ExampleHandler implements WebSocketHandler {
+
+	@Override
+	public Mono<Void> handle(WebSocketSession session) {
+
+		Flux<WebSocketMessage> output = session.receive()				<1>
+				.doOnNext(message -> {
+					// ...
+				})
+				.concatMap(message -> {
+					// ...
+				})
+				.map(value -> session.textMessage("Echo " + value));	<2>
+
+		return session.send(output);									<3>
+	}
+}
+----
+<1> Handle inbound message stream.
+<2> Create outbound message, producing a combined flow.
+<3> Return `Mono<Void>` that doesn't complete while we continue to receive.
+
+Inbound and outbound streams can be independent, and joined only for completion:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+class ExampleHandler implements WebSocketHandler {
+
+	@Override
+	public Mono<Void> handle(WebSocketSession session) {
+
+		Mono<Void> input = session.receive()								<1>
+				.doOnNext(message -> {
+					// ...
+				})
+				.concatMap(message -> {
+					// ...
+				})
+				.then();
+
+		Flux<String> source = ... ;
+		Mono<Void> output = session.send(source.map(session::textMessage));	<2>
+
+		return Mono.zip(input, output).then();								<3>
+	}
+}
+----
+<1> Handle inbound message stream.
+<2> Send outgoing messages.
+<3> Join the streams and return `Mono<Void>` that completes when _either_ stream ends.
+
+
+
 [[webflux-websocket-server-handshake]]
-=== WebSocket Handshake
+=== Handshake
 [.small]#<<web.adoc#websocket-server-handshake,Same in Servlet stack>>#
 
-`WebSocketHandlerAdapter` does not perform WebSocket handshakes itself. Instead it
-delegates to an instance of `WebSocketService`. The default `WebSocketService`
-implementation is `HandshakeWebSocketService`.
+`WebSocketHandlerAdapter` delegates to a `WebSocketService`. By default that's an instance
+of `HandshakeWebSocketService`, which performs basic checks on the WebSocket request and
+then uses `RequestUpgradeStrategy` for the server in use. Currently there is built-in
+support for Reactor Netty, Tomcat, Jetty, and Undertow.
 
-The `HandshakeWebSocketService` performs basic checks on the WebSocket request and
-delegates to a server-specific `RequestUpgradeStrategy`. At present upgrade strategies
-exist for Reactor Netty, Tomcat, Jetty, and Undertow.
+`HandshakeWebSocketService` exposes a `sessionAttributePredicate` property that allows
+setting a `Predicate<String>` to extract attributes from the `WebSession` and insert them
+into the attributes of the `WebSocketSession`.
+
 
 
 
@@ -89,7 +213,7 @@ exist for Reactor Netty, Tomcat, Jetty, and Undertow.
 === Server config
 [.small]#<<web.adoc#websocket-server-runtime-configuration,Same in Servlet stack>>#
 
-The `RequestUpgradeStrategy` for each server exposes the WebSocket-related configuration
+The `RequestUpgradeStrategy` for each server exposes WebSocket-related configuration
 options available for the underlying WebSocket engine. Below is an example of setting
 WebSocket options when running on Tomcat:
 
@@ -132,7 +256,7 @@ specify CORS settings by URL pattern. If both are specified they're combined via
 
 
 [[webflux-websocket-client]]
-== WebSocketClient
+=== Client
 
 Spring WebFlux provides a `WebSocketClient` abstraction with implementations for
 Reactor Netty, Tomcat, Jetty, Undertow, and standard Java (i.e. JSR-356).

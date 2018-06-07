@@ -426,6 +426,21 @@ public class UriComponentsBuilderTests {
 		assertEquals(-1, result.getPort());
 	}
 
+	@Test  // SPR-16863
+	public void fromHttpRequestWithForwardedSsl() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setScheme("http");
+		request.setServerName("example.org");
+		request.setServerPort(10080);
+		request.addHeader("X-Forwarded-Ssl", "on");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
+
+		assertEquals("https", result.getScheme());
+		assertEquals("example.org", result.getHost());
+		assertEquals(-1, result.getPort());
+	}
 
 	@Test
 	public void fromHttpRequestWithForwardedHostWithForwardedScheme() {

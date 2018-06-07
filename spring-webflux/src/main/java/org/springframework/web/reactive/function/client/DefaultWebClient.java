@@ -288,8 +288,8 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public <T, P extends Publisher<T>> RequestHeadersSpec<?> body(P publisher,
-				ParameterizedTypeReference<T> typeReference) {
+		public <T, P extends Publisher<T>> RequestHeadersSpec<?> body(
+				P publisher, ParameterizedTypeReference<T> typeReference) {
 
 			this.inserter = BodyInserters.fromPublisher(publisher, typeReference);
 			return this;
@@ -443,7 +443,6 @@ class DefaultWebClient implements WebClient {
 		}
 
 		private static Mono<WebClientResponseException> createResponseException(ClientResponse response) {
-
 			return DataBufferUtils.join(response.body(BodyExtractors.toDataBuffers()))
 					.map(dataBuffer -> {
 						byte[] bytes = new byte[dataBuffer.readableByteCount()];

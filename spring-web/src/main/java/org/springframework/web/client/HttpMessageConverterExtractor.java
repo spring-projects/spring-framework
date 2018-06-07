@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,7 +120,14 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 				"for response type [" + this.responseType + "] and content type [" + contentType + "]");
 	}
 
-	private MediaType getContentType(ClientHttpResponse response) {
+	/**
+	 * Determine the Content-Type of the response based on the "Content-Type"
+	 * header or otherwise default to {@link MediaType#APPLICATION_OCTET_STREAM}.
+	 * @param response the response
+	 * @return the MediaType, possibly {@code null}.
+	 */
+	@Nullable
+	protected MediaType getContentType(ClientHttpResponse response) {
 		MediaType contentType = response.getHeaders().getContentType();
 		if (contentType == null) {
 			if (logger.isTraceEnabled()) {

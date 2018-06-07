@@ -55,8 +55,4 @@ public class ByteArrayEncoder extends AbstractEncoder<byte[]> {
 		return Flux.from(inputStream).map(bufferFactory::wrap);
 	}
 
-	@Override
-	public Long getContentLength(byte[] bytes, @Nullable MimeType mimeType) {
-		return (long) bytes.length;
-	}
 }

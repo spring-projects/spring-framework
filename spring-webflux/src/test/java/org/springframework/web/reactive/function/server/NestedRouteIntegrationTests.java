@@ -41,11 +41,12 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 	protected RouterFunction<?> routerFunction() {
 		NestedHandler nestedHandler = new NestedHandler();
 		return nest(path("/foo/"),
-				route(GET("/bar"), nestedHandler::bar)
-						.andRoute(GET("/baz"), nestedHandler::baz))
-				.andNest(GET("/{foo}"),
-						nest(GET("/{bar}"),
-								route(GET("/{baz}"), nestedHandler::variables)))
+					route(GET("/bar"), nestedHandler::bar)
+					.andRoute(GET("/baz"), nestedHandler::baz))
+			   .andNest(GET("/{foo}"),
+					route(GET("/bar"), nestedHandler::variables).and(
+					nest(GET("/{bar}"),
+								route(GET("/{baz}"), nestedHandler::variables))))
 				.andRoute(GET("/{qux}/quux"), nestedHandler::variables);
 	}
 
@@ -75,6 +76,17 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 
 		assertEquals(HttpStatus.OK, result.getStatusCode());
 		assertEquals("{foo=1, bar=2, baz=3}", result.getBody());
+	}
+
+	// SPR-16868
+	@Test
+	public void parentVariables() throws Exception {
+		ResponseEntity<String> result =
+				restTemplate.getForEntity("http://localhost:" + port + "/1/bar", String.class);
+
+		assertEquals(HttpStatus.OK, result.getStatusCode());
+		assertEquals("{foo=1}", result.getBody());
+
 	}
 
 	// SPR 16692

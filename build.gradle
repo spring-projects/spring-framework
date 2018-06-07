@@ -3,25 +3,17 @@ buildscript {
 		maven { url "https://repo.spring.io/plugins-release" }
 	}
 	dependencies {
-		classpath("io.spring.gradle:propdeps-plugin:0.0.8")
-		classpath("io.spring.gradle:docbook-reference-plugin:0.3.1")
+		classpath("io.spring.gradle:propdeps-plugin:0.0.9.RELEASE")
 		classpath("org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.16")
-		classpath("org.asciidoctor:asciidoctorj-epub3:1.5.0-alpha.7")
 	}
 }
 
 // 3rd party plugin repositories can be configured in settings.gradle
 plugins {
-	id "com.gradle.build-scan" version "1.8"
-	id "io.spring.dependency-management" version "1.0.3.RELEASE" apply false
+	id "io.spring.dependency-management" version "1.0.5.RELEASE" apply false
 	id "org.jetbrains.kotlin.jvm" version "1.2.41" apply false
-	id "org.jetbrains.dokka" version "0.9.16"
-	id "org.asciidoctor.convert" version "1.5.6"
-}
-
-buildScan {
-	licenseAgreementUrl = 'https://gradle.com/terms-of-service'
-	licenseAgree = 'yes'
+	id "org.jetbrains.dokka" version "0.9.17"
+	id "org.asciidoctor.convert" version "1.5.7"
 }
 
 ext {
@@ -43,8 +35,8 @@ configure(allprojects) { project ->
 
 	ext.aspectjVersion       = "1.9.1"
 	ext.freemarkerVersion    = "2.3.28"
-	ext.groovyVersion        = "2.5.0-rc-2"
-	ext.hsqldbVersion        = "2.4.0"
+	ext.groovyVersion        = "2.5.0"
+	ext.hsqldbVersion        = "2.4.1"
 	ext.jackson2Version      = "2.9.5"
 	ext.jettyVersion         = "9.4.10.v20180503"
 	ext.junitPlatformVersion = "1.2.0"
@@ -56,11 +48,11 @@ configure(allprojects) { project ->
 	ext.reactorVersion       = "Californium-BUILD-SNAPSHOT"
 	ext.rxjavaVersion        = "1.3.8"
 	ext.rxjavaAdapterVersion = "1.2.1"
-	ext.rxjava2Version       = "2.1.13"
+	ext.rxjava2Version       = "2.1.14"
 	ext.slf4jVersion         = "1.7.25"	  // spring-jcl + consistent 3rd party deps
 	ext.tiles3Version        = "3.0.8"
 	ext.tomcatVersion        = "9.0.8"
-	ext.undertowVersion      = "2.0.7.Final"
+	ext.undertowVersion      = "2.0.9.Final"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
@@ -282,9 +274,9 @@ configure(rootProject) {
 		archives distZip
 	}
 
-	task wrapper(type: Wrapper) {
+	wrapper {
 		description = "Generates gradlew[.bat] scripts"
-		gradleVersion = '4.6'
+		gradleVersion = '4.8'
 
 		doLast() {
 			def gradleOpts = "-XX:MaxMetaspaceSize=1024m -Xmx1024m"

@@ -70,6 +70,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 	}
 
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public Mono<Resource> transform(ServerWebExchange exchange, Resource inputResource,
 			ResourceTransformerChain transformerChain) {
@@ -78,6 +79,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 				.flatMap(ouptputResource -> {
 					String filename = ouptputResource.getFilename();
 					if (!"css".equals(StringUtils.getFilenameExtension(filename)) ||
+							inputResource instanceof EncodedResourceResolver.EncodedResource ||
 							inputResource instanceof GzipResourceResolver.GzippedResource) {
 						return Mono.just(ouptputResource);
 					}

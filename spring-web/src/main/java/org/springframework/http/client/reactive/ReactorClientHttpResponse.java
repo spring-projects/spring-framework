@@ -19,7 +19,8 @@ package org.springframework.http.client.reactive;
 import java.util.Collection;
 
 import reactor.core.publisher.Flux;
-import reactor.ipc.netty.http.client.HttpClientResponse;
+import reactor.netty.NettyInbound;
+import reactor.netty.http.client.HttpClientResponse;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
@@ -30,32 +31,37 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import io.netty.buffer.ByteBufAllocator;
+
 /**
  * {@link ClientHttpResponse} implementation for the Reactor-Netty HTTP client.
  *
  * @author Brian Clozel
  * @since 5.0
- * @see reactor.ipc.netty.http.client.HttpClient
+ * @see reactor.netty.http.client.HttpClient
  */
 class ReactorClientHttpResponse implements ClientHttpResponse {
 
-	private final NettyDataBufferFactory dataBufferFactory;
+	private final NettyDataBufferFactory bufferFactory;
 
 	private final HttpClientResponse response;
 
+	private final NettyInbound inbound;
 
-	public ReactorClientHttpResponse(HttpClientResponse response) {
+
+	public ReactorClientHttpResponse(HttpClientResponse response, NettyInbound inbound, ByteBufAllocator alloc) {
 		this.response = response;
-		this.dataBufferFactory = new NettyDataBufferFactory(response.channel().alloc());
+		this.inbound = inbound;
+		this.bufferFactory = new NettyDataBufferFactory(alloc);
 	}
 
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return response.receive()
-				.map(buf -> {
-					buf.retain();
-					return dataBufferFactory.wrap(buf);
+		return this.inbound.receive()
+				.map(byteBuf -> {
+					byteBuf.retain();
+					return this.bufferFactory.wrap(byteBuf);
 				});
 	}
 

@@ -1397,6 +1397,37 @@ Applications can also use dot-separated destinations (vs slash).
 See <<websocket-stomp-destination-separator>>.
 ====
 
+If configured with a task scheduler, the simple broker supports
+https://stomp.github.io/stomp-specification-1.2.html#Heart-beating[STOMP heartbeats].
+For that you can declare your own scheduler, or use the one that's automatically
+declared and used internally:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Configuration
+@EnableWebSocketMessageBroker
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+	private TaskScheduler messageBrokerTaskScheduler;
+
+	@Autowired
+	public void setMessageBrokerTaskScheduler(TaskScheduler taskScheduler) {
+		this.messageBrokerTaskScheduler = taskScheduler;
+	}
+
+	@Override
+	public void configureMessageBroker(MessageBrokerRegistry registry) {
+
+		registry.enableSimpleBroker("/queue/", "/topic/")
+				.setHeartbeatValue(new long[] {10000, 20000})
+				.setTaskScheduler(this.messageBrokerTaskScheduler);
+
+		// ...
+	}
+}
+----
+
 
 
 [[websocket-stomp-handle-broker-relay]]
@@ -1929,9 +1960,10 @@ will typically notice the broker is not responding within 10 seconds. Clients ne
 implement their own reconnect logic.
 ====
 
-Furthermore, an application can directly intercept every incoming and outgoing message by
-registering a `ChannelInterceptor` on the respective message channel. For example
-to intercept inbound messages:
+The above events reflect points in the lifecycle of a STOMP connection. They're not meant
+to provide notification for every message sent from the client. Instead an application
+can register a `ChannelInterceptor` to intercept every incoming and outgoing STOMP message.
+For example to intercept inbound messages:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1947,8 +1979,7 @@ to intercept inbound messages:
 	}
 ----
 
-A custom `ChannelInterceptor` can extend the empty method base class
-`ChannelInterceptorAdapter` and use `StompHeaderAccessor` or `SimpMessageHeaderAccessor`
+A custom `ChannelInterceptor` can use `StompHeaderAccessor` or `SimpMessageHeaderAccessor`
 to access information about the message.
 
 [source,java,indent=0]
@@ -1965,6 +1996,12 @@ to access information about the message.
 		}
 	}
 ----
+
+Note that just like with the `SesionDisconnectEvent` above, a DISCONNECT message
+may have been sent from the client, or it may also be automatically generated when
+the WebSocket session is closed. In some cases an interceptor may intercept this
+message more than once per session. Components should be idempotent with regard to
+multiple disconnect events.
 
 
 

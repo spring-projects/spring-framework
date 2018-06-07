@@ -56,16 +56,13 @@ import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.ResponseEntity.notFound;
-import static org.springframework.http.ResponseEntity.ok;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
-import static org.springframework.web.method.ResolvableMethod.on;
-import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
+import static org.junit.Assert.*;
+import static org.springframework.core.ResolvableType.*;
+import static org.springframework.http.MediaType.*;
+import static org.springframework.http.ResponseEntity.*;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.*;
+import static org.springframework.web.method.ResolvableMethod.*;
+import static org.springframework.web.reactive.HandlerMapping.*;
 
 /**
  * Unit tests for {@link ResponseEntityResultHandler}. When adding a test also
@@ -106,9 +103,7 @@ public class ResponseEntityResultHandlerTests {
 
 
 	@Test
-	@SuppressWarnings("ConstantConditions")
-	public void supports() throws NoSuchMethodException {
-
+	public void supports() throws Exception {
 		Object value = null;
 
 		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(String.class));
@@ -133,9 +128,7 @@ public class ResponseEntityResultHandlerTests {
 	}
 
 	@Test
-	@SuppressWarnings("ConstantConditions")
-	public void doesNotSupport() throws NoSuchMethodException {
-
+	public void doesNotSupport() throws Exception {
 		Object value = null;
 
 		MethodParameter returnType = on(TestController.class).resolveReturnType(String.class);
@@ -417,7 +410,6 @@ public class ResponseEntityResultHandlerTests {
 		Flux<?> fluxWildcard() { return null; }
 
 		Object object() { return null; }
-
 	}
 
 }

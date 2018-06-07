@@ -34,7 +34,6 @@ import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.ChannelInterceptor;
-import org.springframework.messaging.support.ChannelInterceptorAdapter;
 import org.springframework.messaging.support.InterceptableChannel;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -274,7 +273,7 @@ public abstract class AbstractBrokerMessageHandler
 	/**
 	 * Detect unsent DISCONNECT messages and process them anyway.
 	 */
-	private class UnsentDisconnectChannelInterceptor extends ChannelInterceptorAdapter {
+	private class UnsentDisconnectChannelInterceptor implements ChannelInterceptor {
 
 		@Override
 		public void afterSendCompletion(

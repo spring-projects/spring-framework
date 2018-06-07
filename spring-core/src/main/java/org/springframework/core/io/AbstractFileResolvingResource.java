@@ -19,7 +19,6 @@ package org.springframework.core.io;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
@@ -70,14 +69,13 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 					return true;
 				}
 				if (httpCon != null) {
-					// no HTTP OK status, and no content-length header: give up
+					// No HTTP OK status, and no content-length header: give up
 					httpCon.disconnect();
 					return false;
 				}
 				else {
 					// Fall back to stream existence: can we open the stream?
-					InputStream is = getInputStream();
-					is.close();
+					getInputStream().close();
 					return true;
 				}
 			}
@@ -97,7 +95,30 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 				return (file.canRead() && !file.isDirectory());
 			}
 			else {
-				return true;
+				// Try InputStream resolution for jar resources
+				URLConnection con = url.openConnection();
+				customizeConnection(con);
+				if (con instanceof HttpURLConnection) {
+					HttpURLConnection httpCon = (HttpURLConnection) con;
+					int code = httpCon.getResponseCode();
+					if (code != HttpURLConnection.HTTP_OK) {
+						httpCon.disconnect();
+						return false;
+					}
+				}
+				int contentLength = con.getContentLength();
+				if (contentLength > 0) {
+					return true;
+				}
+				else if (contentLength == 0) {
+					// Empty file or directory -> not considered readable...
+					return false;
+				}
+				else {
+					// Fall back to stream existence: can we open the stream?
+					getInputStream().close();
+					return true;
+				}
 			}
 		}
 		catch (IOException ex) {

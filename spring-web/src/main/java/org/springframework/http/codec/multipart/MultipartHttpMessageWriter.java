@@ -135,6 +135,14 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 
 
 	/**
+	 * Return the configured part writers.
+	 * @since 5.0.7
+	 */
+	public List<HttpMessageWriter<?>> getPartWriters() {
+		return Collections.unmodifiableList(partWriters);
+	}
+
+	/**
 	 * Set the character set to use for part headers such as
 	 * "Content-Disposition" (and its filename parameter).
 	 * <p>By default this is set to "UTF-8".

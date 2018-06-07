@@ -1046,14 +1046,14 @@ The `spring-web` module provides some useful filters.
 
 
 [[filters-http-put]]
-=== HTTP PUT Form
+=== Form Data
 
 Browsers can only submit form data via HTTP GET or HTTP POST but non-browser clients can also
-use HTTP PUT and PATCH. The Servlet API requires `ServletRequest.getParameter{asterisk}()`
+use HTTP PUT, PATCH, and DELETE. The Servlet API requires `ServletRequest.getParameter{asterisk}()`
 methods to support form field access only for HTTP POST.
 
-The `spring-web` module provides `HttpPutFormContentFilter` that intercepts HTTP PUT and
-PATCH requests with content type `application/x-www-form-urlencoded`, reads the form data from
+The `spring-web` module provides `FormContentFilter` that intercepts HTTP PUT, PATCH, and DELETE
+requests with content type `application/x-www-form-urlencoded`, reads the form data from
 the body of the request, and wraps the `ServletRequest` in order to make the form data
 available through the `ServletRequest.getParameter{asterisk}()` family of methods.
 
@@ -1789,7 +1789,7 @@ supported for all return values, see below for more details.
   `ResponseEntity`. See <<mvc-ann-async>> and <<mvc-ann-async-http-streaming>>.
 
 | Reactive types -- Reactor, RxJava, or others via `ReactiveAdapterRegistry`
-| Alternative to ``DeferredResult` with multi-value streams (e.g. `Flux`, `Observable`)
+| Alternative to `DeferredResult` with multi-value streams (e.g. `Flux`, `Observable`)
   collected to a `List`.
 
   For streaming scenarios -- e.g. `text/event-stream`, `application/json+stream` --
@@ -1899,7 +1899,7 @@ To get all matrix variables, use a `MultiValueMap`:
 	@GetMapping("/owners/{ownerId}/pets/{petId}")
 	public void findPet(
 			@MatrixVariable MultiValueMap<String, String> matrixVars,
-			@MatrixVariable(pathVar="petId"") MultiValueMap<String, String> petMatrixVars) {
+			@MatrixVariable(pathVar="petId") MultiValueMap<String, String> petMatrixVars) {
 
 		// matrixVars: ["q" : [11,22], "r" : 12, "s" : 23]
 		// petMatrixVars: ["q" : 22, "s" : 23]
@@ -4549,11 +4549,15 @@ In XML, the same:
 </mvc:resources>
 ----
 
-You can use `ResourceUrlProvider` to rewrite URLs and apply the full chain of resolvers and
+You can then use `ResourceUrlProvider` to rewrite URLs and apply the full chain of resolvers and
 transformers -- e.g. to insert versions. The MVC config provides a `ResourceUrlProvider`
 bean so it can be injected into others. You can also make the rewrite transparent with the
 `ResourceUrlEncodingFilter` for Thymeleaf, JSPs, FreeMarker, and others with URL tags that
 rely on `HttpServletResponse#encodeURL`.
+
+Note that when using both `EncodedResourceResolver` (e.g. for serving gzipped or brotli
+encoded resources) and `VersionedResourceResolver`, they must be registered in this order.
+That ensures content based versions are always computed reliably based on the unencoded file.
 
 http://www.webjars.org/documentation[WebJars] is also supported via `WebJarsResourceResolver`
 and automatically registered when `"org.webjars:webjars-locator"` is present on the

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,16 +60,18 @@ public interface Resource extends InputStreamSource {
 	boolean exists();
 
 	/**
-	 * Indicate whether the contents of this resource can be read via
+	 * Indicate whether non-empty contents of this resource can be read via
 	 * {@link #getInputStream()}.
-	 * <p>Will be {@code true} for typical resource descriptors;
-	 * note that actual content reading may still fail when attempted.
+	 * <p>Will be {@code true} for typical resource descriptors that exist
+	 * since it strictly implies {@link #exists()} semantics as of 5.1.
+	 * Note that actual content reading may still fail when attempted.
 	 * However, a value of {@code false} is a definitive indication
 	 * that the resource content cannot be read.
 	 * @see #getInputStream()
+	 * @see #exists()
 	 */
 	default boolean isReadable() {
-		return true;
+		return exists();
 	}
 
 	/**
