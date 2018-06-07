@@ -4644,9 +4644,9 @@ Or in XML:
 === Path Matching
 [.small]#<<web-reactive.adoc#webflux-config-path-matching,Same in Spring WebFlux>>#
 
-This allows customizing options related to URL matching and treatment of the URL.
-For details on the individual options check out the
-{api-spring-framework}/web/servlet/config/annotation/PathMatchConfigurer.html[PathMatchConfigurer] API.
+Customize options related to path matching, and treatment of the URL.
+For details on the individual options, see the
+{api-spring-framework}/web/servlet/config/annotation/PathMatchConfigurer.html[PathMatchConfigurer] Javadoc.
 
 Example in Java config:
 
@@ -4664,7 +4664,9 @@ Example in Java config:
 				.setUseTrailingSlashMatch(false)
 				.setUseRegisteredSuffixPatternMatch(true)
 				.setPathMatcher(antPathMatcher())
-				.setUrlPathHelper(urlPathHelper());
+				.setUrlPathHelper(urlPathHelper())
+				.addPathPrefix("/api",
+						HandlerTypePredicate.forAnnotation(RestController.class));
 		}
 
 		@Bean

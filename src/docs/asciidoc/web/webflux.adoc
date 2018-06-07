@@ -2929,16 +2929,8 @@ match to incoming URLs without versions -- e.g. `"/jquery/jquery.min.js"` to
 === Path Matching
 [.small]#<<web.adoc#mvc-config-path-matching,Same in Spring MVC>>#
 
-Spring WebFlux uses parsed representation of path patterns -- i.e. `PathPattern`, and also
-the incoming  request path -- i.e. `RequestPath`, which eliminates the need to indicate
-whether to decode the request path, or remove semicolon content, since `PathPattern`
-can now access decoded path segment values and match safely.
-
-Spring WebFlux also does not support suffix pattern matching so effectively there are only two
-minor options to customize related to path matching -- whether to match trailing slashes
-(`true` by default) and whether the match is case-sensitive (`false`).
-
-To customize those options:
+Customize options related to path matching. For details on the individual options, see the
+{api-spring-framework}/web/reactive/config/PathMatchConfigurer.html[PathMatchConfigurer] Javadoc.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -2949,11 +2941,28 @@ To customize those options:
 
 		@Override
 		public void configurePathMatch(PathMatchConfigurer configurer) {
-			// ...
+			configurer
+				.setUseCaseSensitiveMatch(true)
+				.setUseTrailingSlashMatch(false)
+				.addPathPrefix("/api",
+						HandlerTypePredicate.forAnnotation(RestController.class));
 		}
 
 	}
 ----
+
+[TIP]
+====
+Spring WebFlux relies on a parsed representation of the request path called
+`RequestPath` for access to decoded path segment values, with semicolon content removed
+(i.e. path/matrix variables). That means, unlike Spring MVC, there is no need to indicate
+neither whether to decode the request path, nor whether to remove semicolon content for
+path matching purposes.
+
+Spring WebFlux also does not support suffix pattern matching, unlike Spring MVC, where we
+also <<web.adoc#mvc-ann-requestmapping-suffix-pattern-match,recommend>> moving away from
+reliance on it.
+====
 
 
 
