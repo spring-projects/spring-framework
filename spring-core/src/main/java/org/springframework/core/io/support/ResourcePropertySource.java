@@ -62,6 +62,9 @@ public class ResourcePropertySource extends PropertiesPropertySource {
 	 * Create a PropertySource based on Properties loaded from the given resource.
 	 * The name of the PropertySource will be generated based on the
 	 * {@link Resource#getDescription() description} of the given resource.
+	 *
+	 * 根据从给定资源加载的属性创建一个PropertySource。
+	 * PropertySource的名称将根据给定资源的{@link Resource＃getDescription（）描述}生成。
 	 */
 	public ResourcePropertySource(EncodedResource resource) throws IOException {
 		super(getNameForResource(resource.getResource()), PropertiesLoaderUtils.loadProperties(resource));
@@ -173,6 +176,9 @@ public class ResourcePropertySource extends PropertiesPropertySource {
 	/**
 	 * Return the description for the given Resource; if the description is
 	 * empty, return the class name of the resource plus its identity hash code.
+	 *
+	 * 返回给定资源的描述; 如果描述为空，则返回资源的类名称加上其身份哈希码。
+	 *
 	 * @see org.springframework.core.io.Resource#getDescription()
 	 */
 	private static String getNameForResource(Resource resource) {

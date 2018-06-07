@@ -38,6 +38,9 @@ import org.springframework.util.Assert;
  * This is an alternative to {@link ClassPathBeanDefinitionScanner}, applying
  * the same resolution of annotations but for explicitly registered classes only.
  *
+ * 方便的注释bean类的程序注册适配器。
+ * 这是{@link ClassPathBeanDefinitionScanner}的替代方法，应用注解的相同分辨率，但仅适用于显式注册的类。
+ *
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Sam Brannen
@@ -61,6 +64,10 @@ public class AnnotatedBeanDefinitionReader {
 	 * If the registry is {@link EnvironmentCapable}, e.g. is an {@code ApplicationContext},
 	 * the {@link Environment} will be inherited, otherwise a new
 	 * {@link StandardEnvironment} will be created and used.
+	 *
+	 * 为给定的注册表创建一个新的AnnotatedBeanDefinitionReader。 如果注册表是{@link EnvironmentCapable}，
+	 * 例如 是一个ApplicationContext，则将继承{@link Environment}，否则将创建并使用新的{@link StandardEnvironment}。
+	 *
 	 * @param registry the {@code BeanFactory} to load bean definitions into,
 	 * in the form of a {@code BeanDefinitionRegistry}
 	 * @see #AnnotatedBeanDefinitionReader(BeanDefinitionRegistry, Environment)
@@ -83,7 +90,10 @@ public class AnnotatedBeanDefinitionReader {
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		Assert.notNull(environment, "Environment must not be null");
 		this.registry = registry;
+		//Conditional注解评估器
 		this.conditionEvaluator = new ConditionEvaluator(registry, environment, null);
+		//---------------------关键方法----------------------
+		// 在给定的注册表中注册所有相关的注释后处理器。
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 	}
 
@@ -127,6 +137,9 @@ public class AnnotatedBeanDefinitionReader {
 	 * Register one or more annotated classes to be processed.
 	 * <p>Calls to {@code register} are idempotent; adding the same
 	 * annotated class more than once has no additional effect.
+	 *
+	 * 注册一个或多个带注释的类以进行处理。 呼叫{@code register}是幂等的; 不止一次添加相同的带注释的类没有附加效果。
+	 *
 	 * @param annotatedClasses one or more annotated classes,
 	 * e.g. {@link Configuration @Configuration} classes
 	 */
@@ -139,6 +152,9 @@ public class AnnotatedBeanDefinitionReader {
 	/**
 	 * Register a bean from the given bean class, deriving its metadata from
 	 * class-declared annotations.
+	 *
+	 * 从给定的bean类注册一个bean，从类声明的注释中派生它的元数据。
+	 *
 	 * @param annotatedClass the class of the bean
 	 */
 	public void registerBean(Class<?> annotatedClass) {
@@ -200,6 +216,9 @@ public class AnnotatedBeanDefinitionReader {
 	/**
 	 * Register a bean from the given bean class, deriving its metadata from
 	 * class-declared annotations.
+	 *
+	 * 从给定的bean类注册一个bean，从类声明的注释中派生它的元数据。
+	 *
 	 * @param annotatedClass the class of the bean
 	 * @param instanceSupplier a callback for creating an instance of the bean
 	 * (may be {@code null})
@@ -215,15 +234,22 @@ public class AnnotatedBeanDefinitionReader {
 
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
 		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
+			//springApplication.run 没有@Conditional
 			return;
 		}
 
 		abd.setInstanceSupplier(instanceSupplier);
+		//-------------------------关键方法-------------------
+		//获得scope的元数据，比如是单例模式，原型模式啊啊，是否代理啊
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);
 		abd.setScope(scopeMetadata.getScopeName());
+		//因为有名字，beanName就为启动类的名字
 		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
 
+		//-------------------------关键方法-------------------
+		//执行公共的注解
 		AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);
+		//在run的启动过程中，qualifiers为空
 		if (qualifiers != null) {
 			for (Class<? extends Annotation> qualifier : qualifiers) {
 				if (Primary.class == qualifier) {
@@ -237,12 +263,18 @@ public class AnnotatedBeanDefinitionReader {
 				}
 			}
 		}
+		//在run的启动过程中，qualifiers为空
+		//执行传入的实现BeanDefinitionCustomizer的customize方法
 		for (BeanDefinitionCustomizer customizer : definitionCustomizers) {
 			customizer.customize(abd);
 		}
 
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);
+		//-------------------------关键方法-------------------
+		//是否应用代理，如果使用代理，返回是代理对象
 		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+		//-------------------------关键方法-------------------
+		//给定的bean工厂注册给定的bean定义
 		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);
 	}
 
@@ -250,6 +282,9 @@ public class AnnotatedBeanDefinitionReader {
 	/**
 	 * Get the Environment from the given registry if possible, otherwise return a new
 	 * StandardEnvironment.
+	 *
+	 * 如果可能，从给定的注册表中获取环境，否则返回一个新的标准环境。
+	 *
 	 */
 	private static Environment getOrCreateEnvironment(BeanDefinitionRegistry registry) {
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");

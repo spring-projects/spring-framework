@@ -31,6 +31,10 @@ import org.springframework.util.StringUtils;
  * {@link PropertySource} instances. Necessary in cases where multiple property sources
  * share the same name, e.g. when multiple values are supplied to {@code @PropertySource}.
  *
+ * 综合{@link PropertySource}实现遍历一组
+ * {@link PropertySource}实例。 在多个资源来源共用相同名称的情况下是必要的，
+ * 例如， 当多个值提供给{@code @PropertySource}时。
+ *
  * <p>As of Spring 4.1.2, this class extends {@link EnumerablePropertySource} instead
  * of plain {@link PropertySource}, exposing {@link #getPropertyNames()} based on the
  * accumulated property names from all contained sources (as far as possible).

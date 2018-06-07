@@ -831,6 +831,13 @@ public abstract class AnnotationUtils {
 	 * is {@linkplain java.lang.annotation.Inherited inherited}. For greater
 	 * clarity regarding inherited annotations, consider using
 	 * {@link #isAnnotationInherited(Class, Class)} instead.
+	 *
+	 * 确定是否在提供的clazz上本地声明了指定的{annotationType}的注释（即，<em>directly present</ em>）。
+	 * 提供的{@link Class}可以表示任何类型。
+	 * 元注释将<em>not</ em>搜索。
+	 * <p>注意：此方法确定<strong>not</ strong>确定注释是否为{@linkplain java.lang.annotation.Inherited inherited}。
+	 * 为了更清楚地了解继承的注释，请考虑使用{@link #isAnnotationInherited（Class，Class）}。
+	 *
 	 * @param annotationType the annotation type to look for
 	 * @param clazz the class to check for the annotation on
 	 * @return {@code true} if an annotation of the specified {@code annotationType}

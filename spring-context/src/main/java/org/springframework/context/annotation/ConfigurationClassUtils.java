@@ -74,6 +74,9 @@ abstract class ConfigurationClassUtils {
 	 * Check whether the given bean definition is a candidate for a configuration class
 	 * (or a nested component class declared within a configuration/component class,
 	 * to be auto-registered as well), and mark it accordingly.
+	 *
+	 * 检查给定的bean定义是否是配置类的候选对象（或者是在配置/组件类中声明的嵌套组件类，以便自动注册），并相应地标记它。
+	 *
 	 * @param beanDef the bean definition to check
 	 * @param metadataReaderFactory the current factory in use by the caller
 	 * @return whether the candidate qualifies as (any kind of) configuration class
@@ -89,16 +92,24 @@ abstract class ConfigurationClassUtils {
 		AnnotationMetadata metadata;
 		if (beanDef instanceof AnnotatedBeanDefinition &&
 				className.equals(((AnnotatedBeanDefinition) beanDef).getMetadata().getClassName())) {
+			//注解就走这里了
+
 			// Can reuse the pre-parsed metadata from the given BeanDefinition...
+			//可以重复给定BeanDefinition中的预解析注解...
 			metadata = ((AnnotatedBeanDefinition) beanDef).getMetadata();
 		}
 		else if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) beanDef).hasBeanClass()) {
+			//xml的就走这里了
+
 			// Check already loaded Class if present...
 			// since we possibly can't even load the class file for this Class.
+			//检查已加载的类是否存在...
+			//因为我们可能甚至无法加载该类的类文件。
 			Class<?> beanClass = ((AbstractBeanDefinition) beanDef).getBeanClass();
 			metadata = new StandardAnnotationMetadata(beanClass, true);
 		}
 		else {
+			//自定义的走这里？？待确定
 			try {
 				MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(className);
 				metadata = metadataReader.getAnnotationMetadata();
@@ -113,9 +124,13 @@ abstract class ConfigurationClassUtils {
 		}
 
 		if (isFullConfigurationCandidate(metadata)) {
+			// 是Configuration.class类型的，
+			// 设置"ConfigurationClassPostProcessor.configurationClass":"full"
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
 		}
 		else if (isLiteConfigurationCandidate(metadata)) {
+			// 如果有Component.，ComponentScan，Import，ImportResource，bean 5中注解
+			// 设置"ConfigurationClassPostProcessor.configurationClass":"lite"
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 		}
 		else {
@@ -123,6 +138,7 @@ abstract class ConfigurationClassUtils {
 		}
 
 		// It's a full or lite configuration candidate... Let's determine the order value, if any.
+		// 它是一个完整的或精简的配置候选者...让我们确定订单值，如果有的话。
 		Integer order = getOrder(metadata);
 		if (order != null) {
 			beanDef.setAttribute(ORDER_ATTRIBUTE, order);
@@ -168,11 +184,15 @@ abstract class ConfigurationClassUtils {
 	/**
 	 * Check the given metadata for a configuration class candidate
 	 * (or nested component class declared within a configuration/component class).
+	 *
+	 * 检查给定的元数据以获取配置类候选者（或在配置/组件类中声明的嵌套组件类）。
+	 *
 	 * @param metadata the metadata of the annotated class
 	 * @return {@code true} if the given class is to be registered as a
 	 * reflection-detected bean definition; {@code false} otherwise
 	 */
 	public static boolean isConfigurationCandidate(AnnotationMetadata metadata) {
+		//是@Configuration(等价于beans)或者@Component，@ComponentScan，@Import，@ImportResource，@Bean这5种注解
 		return (isFullConfigurationCandidate(metadata) || isLiteConfigurationCandidate(metadata));
 	}
 
@@ -191,17 +211,24 @@ abstract class ConfigurationClassUtils {
 	 * Check the given metadata for a lite configuration class candidate
 	 * (e.g. a class annotated with {@code @Component} or just having
 	 * {@code @Import} declarations or {@code @Bean methods}).
+	 *
+	 * 检查给定的元数据是否为精简配置类候选者（例如，使用@Component}注解的类或仅具有@Import声明或@Bean方法}）。
+	 *
 	 * @param metadata the metadata of the annotated class
 	 * @return {@code true} if the given class is to be processed as a lite
 	 * configuration class, just registering it and scanning it for {@code @Bean} methods
 	 */
 	public static boolean isLiteConfigurationCandidate(AnnotationMetadata metadata) {
 		// Do not consider an interface or an annotation...
+		// 不要考虑接口或注释...
 		if (metadata.isInterface()) {
 			return false;
 		}
 
 		// Any of the typical annotations found?
+		// 找到下面4种的任何注解
+		// candidateIndicators包含 ：Component.class.getName()，ComponentScan.class.getName()，Import.class.getName()，
+		//		ImportResource.class.getName()
 		for (String indicator : candidateIndicators) {
 			if (metadata.isAnnotated(indicator)) {
 				return true;
@@ -209,6 +236,7 @@ abstract class ConfigurationClassUtils {
 		}
 
 		// Finally, let's look for @Bean methods...
+		// 最后，我们来看看@Bean方法...
 		try {
 			return metadata.hasAnnotatedMethods(Bean.class.getName());
 		}
@@ -223,16 +251,23 @@ abstract class ConfigurationClassUtils {
 	/**
 	 * Determine whether the given bean definition indicates a full {@code @Configuration}
 	 * class, through checking {@link #checkConfigurationClassCandidate}'s metadata marker.
+	 *
+	 * 通过检查{@link #checkConfigurationClassCandidate}
+	 * 的注解标记来确定给定的bean定义是否指示完整的{Configuration @ Configuration}类。
 	 */
 	public static boolean isFullConfigurationClass(BeanDefinition beanDef) {
+		//beanDef.getAttribute("ConfigurationClassPostProcessor.configurationClass")是否为full
 		return CONFIGURATION_CLASS_FULL.equals(beanDef.getAttribute(CONFIGURATION_CLASS_ATTRIBUTE));
 	}
 
 	/**
 	 * Determine whether the given bean definition indicates a lite {@code @Configuration}
 	 * class, through checking {@link #checkConfigurationClassCandidate}'s metadata marker.
+	 *
+	 * 通过检查{@link #checkConfigurationClassCandidate}的元数据标记来确定给定的bean定义是否指示lite类配置。
 	 */
 	public static boolean isLiteConfigurationClass(BeanDefinition beanDef) {
+		//beanDef.getAttribute("ConfigurationClassPostProcessor.configurationClass")是否为lite
 		return CONFIGURATION_CLASS_LITE.equals(beanDef.getAttribute(CONFIGURATION_CLASS_ATTRIBUTE));
 	}
 

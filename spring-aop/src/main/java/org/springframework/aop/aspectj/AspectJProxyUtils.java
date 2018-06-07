@@ -36,20 +36,29 @@ public abstract class AspectJProxyUtils {
 	 * This will expose the current Spring AOP invocation (necessary for some AspectJ pointcut matching)
 	 * and make available the current AspectJ JoinPoint. The call will have no effect if there are no
 	 * AspectJ advisors in the advisor chain.
+	 * 如果需要，添加特殊增强以处理包含AspectJ顾问的代理链。
+	 * 这将公开当前的Spring AOP调用（对于某些AspectJ切入点匹配必需）
+	 * 并提供当前的AspectJ JoinPoint。 如果增强链中没有AspectJ顾问，该调用将不起作用。
 	 * @param advisors Advisors available
 	 * @return {@code true} if any special {@link Advisor Advisors} were added, otherwise {@code false}.
 	 */
 	public static boolean makeAdvisorChainAspectJCapableIfNecessary(List<Advisor> advisors) {
 		// Don't add advisors to an empty list; may indicate that proxying is just not required
+		//不要将增强添加到空列表中; 可能表示代理是不需要的
 		if (!advisors.isEmpty()) {
 			boolean foundAspectJAdvice = false;
 			for (Advisor advisor : advisors) {
 				// Be careful not to get the Advice without a guard, as
 				// this might eagerly instantiate a non-singleton AspectJ aspect
+				//注意不要没有增强的建议，如
+				//这可能会急切地实例化一个非单例的AspectJ方面
+
+				//判断是否是增强类
 				if (isAspectJAdvice(advisor)) {
 					foundAspectJAdvice = true;
 				}
 			}
+			//foundAspectJAdvice 为true，同时满足没有公开暴露的拦截器，加入一个默认的拦截器
 			if (foundAspectJAdvice && !advisors.contains(ExposeInvocationInterceptor.ADVISOR)) {
 				advisors.add(0, ExposeInvocationInterceptor.ADVISOR);
 				return true;
@@ -60,6 +69,7 @@ public abstract class AspectJProxyUtils {
 
 	/**
 	 * Determine whether the given Advisor contains an AspectJ advice.
+	 * 确定给定增强是否包含AspectJ建议。
 	 * @param advisor the Advisor to check
 	 */
 	private static boolean isAspectJAdvice(Advisor advisor) {

@@ -196,12 +196,15 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 	/**
 	 * Actually register the default editors for this registry instance.
+	 * 实际上注册这个注册表实例的默认编辑器。
 	 */
 	private void createDefaultEditors() {
 		this.defaultEditors = new HashMap<>(64);
 
 		// Simple editors, without parameterization capabilities.
 		// The JDK does not contain a default editor for any of these target types.
+		//简单的编辑器，没有参数化功能。
+		// JDK不包含任何这些目标类型的默认编辑器。
 		this.defaultEditors.put(Charset.class, new CharsetEditor());
 		this.defaultEditors.put(Class.class, new ClassEditor());
 		this.defaultEditors.put(Class[].class, new ClassArrayEditor());
@@ -223,6 +226,8 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 		// Default instances of collection editors.
 		// Can be overridden by registering custom instances of those as custom editors.
+		//收藏编辑器的默认实例。
+		//可以通过将自定义实例注册为自定义编辑器来覆盖它们。
 		this.defaultEditors.put(Collection.class, new CustomCollectionEditor(Collection.class));
 		this.defaultEditors.put(Set.class, new CustomCollectionEditor(Set.class));
 		this.defaultEditors.put(SortedSet.class, new CustomCollectionEditor(SortedSet.class));
@@ -259,6 +264,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(BigInteger.class, new CustomNumberEditor(BigInteger.class, true));
 
 		// Only register config value editors if explicitly requested.
+		// 如果明确要求，只注册配置值编辑器。
 		if (this.configValueEditorsActive) {
 			StringArrayPropertyEditor sae = new StringArrayPropertyEditor();
 			this.defaultEditors.put(String[].class, sae);

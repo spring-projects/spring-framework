@@ -22,6 +22,8 @@ import java.util.Set;
  * Interface that defines abstract access to the annotations of a specific
  * class, in a form that does not require that class to be loaded yet.
  *
+ * 以不需要加载类的形式定义对特定类的注释的抽象访问的接口。
+ *
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @author Phillip Webb
@@ -70,6 +72,9 @@ public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata
 	/**
 	 * Determine whether the underlying class has any methods that are
 	 * annotated (or meta-annotated) with the given annotation type.
+	 *
+	 * 确定底层类是否有任何用给定注释类型注释（或元注释）的方法。
+	 *
 	 * @param annotationName the fully qualified class name of the annotation
 	 * type to look for
 	 */

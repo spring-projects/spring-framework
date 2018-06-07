@@ -53,6 +53,9 @@ public abstract class PropertiesLoaderUtils {
 	 * Load properties from the given EncodedResource,
 	 * potentially defining a specific encoding for the properties file.
 	 * @see #fillProperties(java.util.Properties, EncodedResource)
+	 *
+	 * 从给定的EncodedResource加载属性，可能会为属性文件定义特定的编码。
+	 * @see #fillProperties（java.util.Properties，EncodedResource）
 	 */
 	public static Properties loadProperties(EncodedResource resource) throws IOException {
 		Properties props = new Properties();
@@ -63,6 +66,9 @@ public abstract class PropertiesLoaderUtils {
 	/**
 	 * Fill the given properties from the given EncodedResource,
 	 * potentially defining a specific encoding for the properties file.
+	 *
+	 * 从给定的EncodedResource中填充给定的属性，可能为属性文件定义一个特定的编码。
+	 *
 	 * @param props the Properties instance to load into
 	 * @param resource the resource to load from
 	 * @throws IOException in case of I/O errors
@@ -88,10 +94,12 @@ public abstract class PropertiesLoaderUtils {
 		try {
 			String filename = resource.getResource().getFilename();
 			if (filename != null && filename.endsWith(XML_FILE_EXTENSION)) {
+				//文件是以xml结尾
 				stream = resource.getInputStream();
 				persister.loadFromXml(props, stream);
 			}
 			else if (resource.requiresReader()) {
+				//(this.encoding != null || this.charset != null);
 				reader = resource.getReader();
 				persister.load(props, reader);
 			}
@@ -112,6 +120,9 @@ public abstract class PropertiesLoaderUtils {
 
 	/**
 	 * Load properties from the given resource (in ISO-8859-1 encoding).
+	 *
+	 * 从给定资源中加载属性（在ISO-859-1编码中）。
+	 *
 	 * @param resource the resource to load from
 	 * @return the populated Properties instance
 	 * @throws IOException if loading failed
@@ -119,12 +130,17 @@ public abstract class PropertiesLoaderUtils {
 	 */
 	public static Properties loadProperties(Resource resource) throws IOException {
 		Properties props = new Properties();
+		//----------------关键方法------------------
+		// 从给定的资源中填充给定的属性（在ISO-859-1编码中）。
 		fillProperties(props, resource);
 		return props;
 	}
 
 	/**
 	 * Fill the given properties from the given resource (in ISO-8859-1 encoding).
+	 *
+	 * 从给定的资源中填充给定的属性（在ISO-859-1编码中）。
+	 *
 	 * @param props the Properties instance to fill
 	 * @param resource the resource to load from
 	 * @throws IOException if loading failed
@@ -134,9 +150,12 @@ public abstract class PropertiesLoaderUtils {
 		try {
 			String filename = resource.getFilename();
 			if (filename != null && filename.endsWith(XML_FILE_EXTENSION)) {
+				//xml走这里
 				props.loadFromXML(is);
 			}
 			else {
+				//----------------关键方法-----------------
+				//spring.factories走这里
 				props.load(is);
 			}
 		}

@@ -1085,6 +1085,12 @@ public abstract class StringUtils {
 	 * delimiter characters. Each of those characters can be used to separate
 	 * tokens. A delimiter is always a single character; for multi-character
 	 * delimiters, consider using {@link #delimitedListToStringArray}.
+	 *
+	 * 通过{@link StringTokenizer}将给定的{@code String}标记为一个{@code String}数组。
+	 * 修剪令牌并省略空的令牌。 给定的{@code delimiters}字符串可以由任意数量的分隔字符组成。
+	 * 每个字符都可以用来分隔令牌。 分隔符总是单个字符; 对于多字符分隔符，
+	 * 请考虑使用{@link #delimitedListToStringArray}。
+	 *
 	 * @param str the {@code String} to tokenize
 	 * @param delimiters the delimiter characters, assembled as a {@code String}
 	 * (each of the characters is individually considered as a delimiter)

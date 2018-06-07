@@ -38,6 +38,11 @@ public abstract class AutoProxyUtils {
 	 * <p>Proxy factories can set this attribute if they built a target class proxy
 	 * for a specific bean, and want to enforce that bean can always be cast
 	 * to its target class (even if AOP advices get applied through auto-proxying).
+	 *
+	 * Bean定义属性，可以指示给定的bean是否应该使用其目标类进行代理（如果它首先进行代理）。
+	 * 该值是{@code Boolean.TRUE}或{@code Boolean.FALSE}。 如果代理工厂为特定的bean构建目标类代理，
+	 * 并且要强制该bean始终可以转换为其目标类（即使通过自动代理应用AOP建议），代理工厂也可以设置此属性。
+	 *
 	 * @see #shouldProxyTargetClass
 	 */
 	public static final String PRESERVE_TARGET_CLASS_ATTRIBUTE =
@@ -56,7 +61,9 @@ public abstract class AutoProxyUtils {
 
 	/**
 	 * Determine whether the given bean should be proxied with its target
-	 * class rather than its interfaces. Checks the
+	 * class rather than its interfaces.
+	 * 确定给定的bean是否应该用其目标类而不是其接口进行代理
+	 * Checks the
 	 * {@link #PRESERVE_TARGET_CLASS_ATTRIBUTE "preserveTargetClass" attribute}
 	 * of the corresponding bean definition.
 	 * @param beanFactory the containing ConfigurableListableBeanFactory
@@ -97,6 +104,7 @@ public abstract class AutoProxyUtils {
 
 	/**
 	 * Expose the given target class for the specified bean, if possible.
+	 * 如果可能的话，公开给定的bean的给定目标类。
 	 * @param beanFactory the containing ConfigurableListableBeanFactory
 	 * @param beanName the name of the bean
 	 * @param targetClass the corresponding target class
@@ -106,6 +114,7 @@ public abstract class AutoProxyUtils {
 			Class<?> targetClass) {
 
 		if (beanName != null && beanFactory.containsBeanDefinition(beanName)) {
+			//设置AutoProxyUtils.class + “.” + originalTargetClass为key，targetClass为value的属性
 			beanFactory.getMergedBeanDefinition(beanName).setAttribute(ORIGINAL_TARGET_CLASS_ATTRIBUTE, targetClass);
 		}
 	}

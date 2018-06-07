@@ -29,6 +29,9 @@ import org.springframework.util.Assert;
  * based on an {@link AdviceMode} value from an annotation (such as the {@code @Enable*}
  * annotations).
  *
+ * 用于选择导入的{@link ImportSelector}实现的便捷基类
+ * 基于注释中的{@link AdviceMode}值（例如{@code @ Enable *}注释）。
+ *
  * @author Chris Beams
  * @since 3.1
  * @param <A> annotation containing {@linkplain #getAdviceModeAttributeName() AdviceMode attribute}

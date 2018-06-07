@@ -214,6 +214,7 @@ public abstract class AopUtils {
 	 * Can the given pointcut apply at all on the given class?
 	 * <p>This is an important test as it can be used to optimize
 	 * out a pointcut for a class.
+	 * 给定的切入点可以适用于给定的类吗？ 这是一个重要的测试，因为它可以用来优化一个类的切入点。
 	 * @param pc the static or dynamic pointcut to check
 	 * @param targetClass the class to test
 	 * @param hasIntroductions whether or not the advisor chain
@@ -223,12 +224,15 @@ public abstract class AopUtils {
 	public static boolean canApply(Pointcut pc, Class<?> targetClass, boolean hasIntroductions) {
 		Assert.notNull(pc, "Pointcut must not be null");
 		if (!pc.getClassFilter().matches(targetClass)) {
+			//targetClass类型不匹配
 			return false;
 		}
 
+		//获得切入点的方法匹配
 		MethodMatcher methodMatcher = pc.getMethodMatcher();
 		if (methodMatcher == MethodMatcher.TRUE) {
 			// No need to iterate the methods if we're matching any method anyway...
+			//如果我们匹配任何方法，则无需迭代方法...
 			return true;
 		}
 
@@ -239,11 +243,15 @@ public abstract class AopUtils {
 
 		Set<Class<?>> classes = new LinkedHashSet<>();
 		if (!Proxy.isProxyClass(targetClass)) {
+			//不为Proxy类型，同时Proxy缓存中不存在，加入class的set中
 			classes.add(ClassUtils.getUserClass(targetClass));
 		}
+		//------------------------关键方法-------------------------
+		//返回给定类实现为Set的所有接口，包括由超类实现的接口。如果类本身是接口，它将作为唯一接口返回。
 		classes.addAll(ClassUtils.getAllInterfacesForClassAsSet(targetClass));
 
 		for (Class<?> clazz : classes) {
+			//获取类和超类所有的方法
 			Method[] methods = ReflectionUtils.getAllDeclaredMethods(clazz);
 			for (Method method : methods) {
 				if (introductionAwareMethodMatcher != null ?
@@ -261,6 +269,7 @@ public abstract class AopUtils {
 	 * Can the given advisor apply at all on the given class?
 	 * This is an important test as it can be used to optimize
 	 * out a advisor for a class.
+	 * 给定的增强能否适用于给定的类？ 这是一个重要的测试，因为它可以用来优化类的增强。
 	 * @param advisor the advisor to check
 	 * @param targetClass class we're testing
 	 * @return whether the pointcut can apply on any method
@@ -273,6 +282,9 @@ public abstract class AopUtils {
 	 * Can the given advisor apply at all on the given class?
 	 * <p>This is an important test as it can be used to optimize out a advisor for a class.
 	 * This version also takes into account introductions (for IntroductionAwareMethodMatchers).
+	 * 给定的增强能否适用于给定的类？
+	 * 这是一个重要的测试，因为它可以用来优化类的增强。
+	 * 此版本也考虑到介绍（对于IntroductionAwareMethodMatchers）。
 	 * @param advisor the advisor to check
 	 * @param targetClass class we're testing
 	 * @param hasIntroductions whether or not the advisor chain for this bean includes
@@ -281,14 +293,20 @@ public abstract class AopUtils {
 	 */
 	public static boolean canApply(Advisor advisor, Class<?> targetClass, boolean hasIntroductions) {
 		if (advisor instanceof IntroductionAdvisor) {
+			//IntroductionAdvisor只能应用于类级别的拦截
+			//如果为IntroductionAdvisor类型
 			return ((IntroductionAdvisor) advisor).getClassFilter().matches(targetClass);
 		}
 		else if (advisor instanceof PointcutAdvisor) {
+			//可以使用任何类型的Pointcut
+			//如果为PointcutAdvisor类型
 			PointcutAdvisor pca = (PointcutAdvisor) advisor;
+			//-------------------------关键方法---------------------------
 			return canApply(pca.getPointcut(), targetClass, hasIntroductions);
 		}
 		else {
 			// It doesn't have a pointcut so we assume it applies.
+			// 它没有切入点，所以我们假设它适用。
 			return true;
 		}
 	}
@@ -296,6 +314,7 @@ public abstract class AopUtils {
 	/**
 	 * Determine the sublist of the {@code candidateAdvisors} list
 	 * that is applicable to the given class.
+	 * 确定适用于给定类的{candidate}候选人列表的子列表。
 	 * @param candidateAdvisors the Advisors to evaluate
 	 * @param clazz the target class
 	 * @return sublist of Advisors that can apply to an object of the given class
@@ -305,9 +324,12 @@ public abstract class AopUtils {
 		if (candidateAdvisors.isEmpty()) {
 			return candidateAdvisors;
 		}
+		//如果增强集合不为空
 		List<Advisor> eligibleAdvisors = new LinkedList<>();
 		for (Advisor candidate : candidateAdvisors) {
+			//------------------------关键方法----------------------处理引介增强
 			if (candidate instanceof IntroductionAdvisor && canApply(candidate, clazz)) {
+				//增强为IntroductionAdvisor类型，同时判断给定的类是否适用于增强
 				eligibleAdvisors.add(candidate);
 			}
 		}
@@ -315,6 +337,7 @@ public abstract class AopUtils {
 		for (Advisor candidate : candidateAdvisors) {
 			if (candidate instanceof IntroductionAdvisor) {
 				// already processed
+				// 已经执行
 				continue;
 			}
 			if (canApply(candidate, clazz, hasIntroductions)) {

@@ -49,6 +49,7 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, PriorityO
 	/**
 	 * Singleton advisor for this class. Use in preference to INSTANCE when using
 	 * Spring AOP, as it prevents the need to create a new Advisor to wrap the instance.
+	 * 这个bean的单例增强。 当使用Spring AOP时，优先使用INSTANCE，因为它可以防止创建新Advisor来包装实例。
 	 */
 	public static final Advisor ADVISOR = new DefaultPointcutAdvisor(INSTANCE) {
 		@Override

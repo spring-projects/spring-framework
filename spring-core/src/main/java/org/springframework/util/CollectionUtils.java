@@ -97,6 +97,7 @@ public abstract class CollectionUtils {
 	/**
 	 * Merge the given Properties instance into the given Map,
 	 * copying all properties (key-value pairs) over.
+	 * 将给定的Properties实例合并到给定的Map中，复制所有属性（键值对）。
 	 * <p>Uses {@code Properties.propertyNames()} to even catch
 	 * default properties linked into the original Properties instance.
 	 * @param props the Properties instance to merge (may be {@code null})

@@ -48,12 +48,17 @@ public interface ClassMetadata {
 
 	/**
 	 * Return whether the underlying class is marked as abstract.
+	 *
+	 * 返回基础类是否被标记为抽象。
 	 */
 	boolean isAbstract();
 
 	/**
 	 * Return whether the underlying class represents a concrete class,
 	 * i.e. neither an interface nor an abstract class.
+	 *
+	 * 返回底层类是否代表具体类，
+	 * 即既不是接口也不是抽象类。
 	 */
 	boolean isConcrete();
 
@@ -66,6 +71,8 @@ public interface ClassMetadata {
 	 * Determine whether the underlying class is independent, i.e. whether
 	 * it is a top-level class or a nested class (static inner class) that
 	 * can be constructed independently from an enclosing class.
+	 *
+	 * 确定底层类是否是独立的，即它是顶级类还是可以独立于封闭类构建的嵌套类（静态内部类）。
 	 */
 	boolean isIndependent();
 
@@ -100,6 +107,8 @@ public interface ClassMetadata {
 	/**
 	 * Return the names of all interfaces that the underlying class
 	 * implements, or an empty array if there are none.
+	 *
+	 * 返回底层类实现的所有接口的名称，如果没有，则返回一个空数组。
 	 */
 	String[] getInterfaceNames();
 

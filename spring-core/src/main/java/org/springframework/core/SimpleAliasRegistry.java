@@ -53,6 +53,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 		Assert.hasText(alias, "'alias' must not be empty");
 		synchronized (this.aliasMap) {
 			if (alias.equals(name)) {
+				// 如果beanName与alias相同的话不记录alias，并删除对应的alias
 				this.aliasMap.remove(alias);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Alias definition '" + alias + "' ignored since it points to same name");
@@ -63,9 +64,12 @@ public class SimpleAliasRegistry implements AliasRegistry {
 				if (registeredName != null) {
 					if (registeredName.equals(name)) {
 						// An existing alias - no need to re-register
+						// 现有的别名 - 无需重新注册
 						return;
 					}
+					// 返回是否允许覆盖别名,如果不允许则抛出异常
 					if (!allowAliasOverriding()) {
+						//如果不允许别名覆盖，抛出别名以注册异常
 						throw new IllegalStateException("Cannot define alias '" + alias + "' for name '" +
 								name + "': It is already registered for name '" + registeredName + "'.");
 					}
@@ -74,6 +78,8 @@ public class SimpleAliasRegistry implements AliasRegistry {
 								registeredName + "' with new target name '" + name + "'");
 					}
 				}
+				//-----------------------------关键方法--------------------------
+				//如果A指向B，如果C也指向B，抛出异常
 				checkForAliasCircle(name, alias);
 				this.aliasMap.put(alias, name);
 				if (logger.isDebugEnabled()) {
@@ -191,6 +197,10 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	 * Check whether the given name points back to the given alias as an alias
 	 * in the other direction already, catching a circular reference upfront
 	 * and throwing a corresponding IllegalStateException.
+	 *
+	 * 检查给定的名称是否指向给定的别名作为另一个方向的别名，
+	 * 并向前捕获循环引用并抛出相应的IllegalStateException。
+	 *
 	 * @param name the candidate name
 	 * @param alias the candidate alias
 	 * @see #registerAlias

@@ -98,6 +98,9 @@ public abstract class GenericTypeResolver {
 	 * Resolve the single type argument of the given generic interface against
 	 * the given target class which is assumed to implement the generic interface
 	 * and possibly declare a concrete type for its type variable.
+	 *
+	 * 根据给定的目标类来解析给定通用接口的单一类型参数，假定该类实现泛型接口，并可能为其类型变量声明具体类型。
+	 *
 	 * @param clazz the target class to check against
 	 * @param genericIfc the generic interface or superclass to resolve the type argument from
 	 * @return the resolved type of the argument, or {@code null} if not resolvable

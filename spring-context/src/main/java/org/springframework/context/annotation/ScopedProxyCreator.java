@@ -33,6 +33,8 @@ class ScopedProxyCreator {
 	public static BeanDefinitionHolder createScopedProxy(
 			BeanDefinitionHolder definitionHolder, BeanDefinitionRegistry registry, boolean proxyTargetClass) {
 
+		//----------------------------关键方法-------------------------
+		//为提供的目标bean生成一个作用域代理，用一个内部名称注册目标bean，并在作用域代理上设置'targetBeanName'。
 		return ScopedProxyUtils.createScopedProxy(definitionHolder, registry, proxyTargetClass);
 	}
 

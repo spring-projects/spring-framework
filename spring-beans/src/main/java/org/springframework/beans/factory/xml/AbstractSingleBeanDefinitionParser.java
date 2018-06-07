@@ -51,6 +51,8 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 	 * Creates a {@link BeanDefinitionBuilder} instance for the
 	 * {@link #getBeanClass bean Class} and passes it to the
 	 * {@link #doParse} strategy method.
+	 * 为{@link #getBeanClass bean Class}创建一个{@link BeanDefinitionBuilder}
+	 * 实例并将其传递给{@link #doParse}策略方法。
 	 * @param element the element that is to be parsed into a single BeanDefinition
 	 * @param parserContext the object encapsulating the current state of the parsing process
 	 * @return the BeanDefinition resulting from the parsing of the supplied {@link Element}
@@ -65,10 +67,12 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 		if (parentName != null) {
 			builder.getRawBeanDefinition().setParentName(parentName);
 		}
+		//获取自定义标签中的class，此时会调用自定义解析器中的getBeanClass方法
 		Class<?> beanClass = getBeanClass(element);
 		if (beanClass != null) {
 			builder.getRawBeanDefinition().setBeanClass(beanClass);
 		}
+		//如果子类没有重写getBeanClass方法则尝试检查子类是否重写getBeanClassName方法
 		else {
 			String beanClassName = getBeanClassName(element);
 			if (beanClassName != null) {
@@ -79,12 +83,15 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 		BeanDefinition containingBd = parserContext.getContainingBeanDefinition();
 		if (containingBd != null) {
 			// Inner bean definition must receive same scope as containing bean.
+			// 内部bean定义必须与包含bean相同的范围。内部bean定义必须与包含bean相同的范围。
 			builder.setScope(containingBd.getScope());
 		}
 		if (parserContext.isDefaultLazyInit()) {
 			// Default-lazy-init applies to custom bean definitions as well.
+			// Default-lazy-init也适用于自定义bean定义。
 			builder.setLazyInit(true);
 		}
+		//调用实现类的doParse方法
 		doParse(element, parserContext, builder);
 		return builder.getBeanDefinition();
 	}

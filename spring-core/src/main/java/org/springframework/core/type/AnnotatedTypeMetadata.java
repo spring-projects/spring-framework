@@ -43,6 +43,10 @@ public interface AnnotatedTypeMetadata {
 	 * of the given type defined.
 	 * <p>If this method returns {@code true}, then
 	 * {@link #getAnnotationAttributes} will return a non-null Map.
+	 *
+	 * 确定底层元素是否具有定义的给定类型的注释或元注释。
+	 * <p>如果此方法返回{true}，则{@link #getAnnotationAttributes}将返回一个非空Map。
+	 *
 	 * @param annotationName the fully qualified class name of the annotation
 	 * type to look for
 	 * @return whether a matching annotation is defined
@@ -66,6 +70,9 @@ public interface AnnotatedTypeMetadata {
 	 * Retrieve the attributes of the annotation of the given type, if any (i.e. if
 	 * defined on the underlying element, as direct annotation or meta-annotation),
 	 * also taking attribute overrides on composed annotations into account.
+	 *
+	 * 检索给定类型的注释的属性（即，如果在底层元素上定义为直接注释或元注释），也考虑组合注释的属性覆盖。
+	 *
 	 * @param annotationName the fully qualified class name of the annotation
 	 * type to look for
 	 * @param classValuesAsString whether to convert class references to String

@@ -108,6 +108,9 @@ public abstract class SpringFactoriesLoader {
 	 * Load the fully qualified class names of factory implementations of the
 	 * given type from {@value #FACTORIES_RESOURCE_LOCATION}, using the given
 	 * class loader.
+	 *
+	 * 使用给定的类加载器从{@value #FACTORIES_RESOURCE_LOCATION}加载给定类型的工厂实现的完全限定类名称。
+	 *
 	 * @param factoryClass the interface or abstract class representing the factory
 	 * @param classLoader the ClassLoader to use for loading resources; can be
 	 * {@code null} to use the default
@@ -116,6 +119,8 @@ public abstract class SpringFactoriesLoader {
 	 */
 	public static List<String> loadFactoryNames(Class<?> factoryClass, @Nullable ClassLoader classLoader) {
 		String factoryClassName = factoryClass.getName();
+		//----------------关键方法-----------------
+		//加载spring SPI
 		return loadSpringFactories(classLoader).getOrDefault(factoryClassName, Collections.emptyList());
 	}
 
@@ -126,6 +131,8 @@ public abstract class SpringFactoriesLoader {
 		}
 
 		try {
+			// classLoader 不为空，加载resource下"META-INF/spring.factories"，
+			// 如果为空，加载系统下的"META-INF/spring.factories"
 			Enumeration<URL> urls = (classLoader != null ?
 					classLoader.getResources(FACTORIES_RESOURCE_LOCATION) :
 					ClassLoader.getSystemResources(FACTORIES_RESOURCE_LOCATION));
@@ -133,6 +140,8 @@ public abstract class SpringFactoriesLoader {
 			while (urls.hasMoreElements()) {
 				URL url = urls.nextElement();
 				UrlResource resource = new UrlResource(url);
+				//----------------关键方法-----------------
+				//从给定资源中加载属性（在ISO-859-1编码中）。
 				Properties properties = PropertiesLoaderUtils.loadProperties(resource);
 				for (Map.Entry<?, ?> entry : properties.entrySet()) {
 					List<String> factoryClassNames = Arrays.asList(
@@ -140,6 +149,7 @@ public abstract class SpringFactoriesLoader {
 					result.addAll((String) entry.getKey(), factoryClassNames);
 				}
 			}
+			//放入Map<ClassLoader, MultiValueMap<String, String>> cache 中
 			cache.put(classLoader, result);
 			return result;
 		}

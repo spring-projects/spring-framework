@@ -182,12 +182,15 @@ public abstract class ClassUtils {
 		}
 		catch (Throwable ex) {
 			// Cannot access thread context ClassLoader - falling back...
+			// 无法访问线程上下文ClassLoader - 回退...
 		}
 		if (cl == null) {
 			// No thread context class loader -> use class loader of this class.
+			// 没有线程上下文类加载器 - >使用这个类的类加载器。
 			cl = ClassUtils.class.getClassLoader();
 			if (cl == null) {
 				// getClassLoader() returning null indicates the bootstrap ClassLoader
+				// getClassLoader（）返回null表示引导类加载器
 				try {
 					cl = ClassLoader.getSystemClassLoader();
 				}
@@ -224,6 +227,12 @@ public abstract class ClassUtils {
 	 * for primitives (e.g. "int") and array class names (e.g. "String[]").
 	 * Furthermore, it is also capable of resolving inner class names in Java source
 	 * style (e.g. "java.lang.Thread.State" instead of "java.lang.Thread$State").
+	 *
+	 * 替换{@Class Class.forName（）}，该类还为基元（例如“int”）和数组类名称
+	 * （例如“String []”）返回Class实例。
+	 * 此外，它还能够以Java源代码样式解析内部类名
+	 * （例如“java.lang.Thread.State”而不是“java.lang.Thread $ State”）。
+	 *
 	 * @param name the name of the Class
 	 * @param classLoader the class loader to use
 	 * (may be {@code null}, which indicates the default class loader)
@@ -237,6 +246,7 @@ public abstract class ClassUtils {
 
 		Assert.notNull(name, "Name must not be null");
 
+		//-----------------关键方法-------------------
 		Class<?> clazz = resolvePrimitiveClassName(name);
 		if (clazz == null) {
 			clazz = commonClassCache.get(name);
@@ -321,6 +331,8 @@ public abstract class ClassUtils {
 	 * Determine whether the {@link Class} identified by the supplied name is present
 	 * and can be loaded. Will return {@code false} if either the class or
 	 * one of its dependencies is not present or cannot be loaded.
+	 * 确定提供的名称标识的{@link Class}是否存在并且可以加载。
+	 * 如果该类或其某个依赖项不存在或无法加载，将返回{false}。
 	 * @param className the name of the class to check
 	 * @param classLoader the class loader to use
 	 * (may be {@code null} which indicates the default class loader)
@@ -339,6 +351,7 @@ public abstract class ClassUtils {
 
 	/**
 	 * Check whether the given class is visible in the given ClassLoader.
+	 * 检查给定的类是否在给定的ClassLoader中可见。
 	 * @param clazz the class to check (typically an interface)
 	 * @param classLoader the ClassLoader to check against
 	 * (may be {@code null} in which case this method will always return {@code true})
@@ -357,6 +370,7 @@ public abstract class ClassUtils {
 		}
 
 		// Visible if same Class can be loaded from given ClassLoader
+		// 如果相同的Class可以从给定的ClassLoader加载，则可见
 		return isLoadable(clazz, classLoader);
 	}
 
@@ -413,9 +427,11 @@ public abstract class ClassUtils {
 		try {
 			return (clazz == classLoader.loadClass(clazz.getName()));
 			// Else: different class with same name found
+			// 否则：找到具有相同名称的不同类
 		}
 		catch (ClassNotFoundException ex) {
 			// No corresponding class found at all
+			// 根本找不到相应的类
 			return false;
 		}
 	}
@@ -426,6 +442,10 @@ public abstract class ClassUtils {
 	 * <p>Also supports the JVM's internal class names for primitive arrays.
 	 * Does <i>not</i> support the "[]" suffix notation for primitive arrays;
 	 * this is only supported by {@link #forName(String, ClassLoader)}.
+	 *
+	 * 根据JVM的原始类的命名规则，将给定的类名称解析为原始类（如果适用）。 <p>还支持原始数组的JVM的内部类名称。
+	 * <i>不支持原始数组的“[]”后缀表示法; 这仅受{@link #forName（String，ClassLoader）}支持。
+	 *
 	 * @param name the name of the potentially primitive class
 	 * @return the primitive class, or {@code null} if the name does not denote
 	 * a primitive class or primitive array class
@@ -435,8 +455,12 @@ public abstract class ClassUtils {
 		Class<?> result = null;
 		// Most class names will be quite long, considering that they
 		// SHOULD sit in a package, so a length check is worthwhile.
+
+		//考虑到他们，大多数类名称会很长
+		//应该坐在一个包里，所以长度检查是值得的。
 		if (name != null && name.length() <= 8) {
 			// Could be a primitive - likely.
+			//可能是原始的 - 可能。
 			result = primitiveTypeNameMap.get(name);
 		}
 		return result;
@@ -712,6 +736,7 @@ public abstract class ClassUtils {
 	 * Return all interfaces that the given class implements as a Set,
 	 * including ones implemented by superclasses.
 	 * <p>If the class itself is an interface, it gets returned as sole interface.
+	 * 返回给定类实现为Set的所有接口，包括由超类实现的接口。如果类本身是接口，它将作为唯一接口返回。
 	 * @param clazz the class to analyze for interfaces
 	 * @return all interfaces that the given object implements as a Set
 	 */
@@ -730,18 +755,23 @@ public abstract class ClassUtils {
 	 */
 	public static Set<Class<?>> getAllInterfacesForClassAsSet(Class<?> clazz, @Nullable ClassLoader classLoader) {
 		Assert.notNull(clazz, "Class must not be null");
+		//判断是接口，同时满足给定的ClassLoader是否可以加载给定的clazz
 		if (clazz.isInterface() && isVisible(clazz, classLoader)) {
 			return Collections.singleton(clazz);
 		}
 		Set<Class<?>> interfaces = new LinkedHashSet<>();
 		Class<?> current = clazz;
 		while (current != null) {
+			//获得所有实现的接口
 			Class<?>[] ifcs = current.getInterfaces();
 			for (Class<?> ifc : ifcs) {
+				//判断给定的ClassLoader是否可以加载给定的clazz
 				if (isVisible(ifc, classLoader)) {
+					//加入set
 					interfaces.add(ifc);
 				}
 			}
+			//返回clazz的超类
 			current = current.getSuperclass();
 		}
 		return interfaces;

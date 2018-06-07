@@ -171,7 +171,11 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * <p>If the value stored under the specified {@code attributeName} is
 	 * a string, it will be wrapped in a single-element array before
 	 * returning it.
+	 *
+	 * 将指定的{@code attributeName}下存储的值作为字符串数组获取。
+	 * <p>如果存储在指定的{@code attributeName}下的值是一个字符串，它将在返回之前将其封装在一个单元素数组中。
 	 * @param attributeName the name of the attribute to get;
+	 *
 	 * never {@code null} or empty
 	 * @return the value
 	 * @throws IllegalArgumentException if the attribute does not exist or
@@ -221,6 +225,8 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 
 	/**
 	 * Get the value stored under the specified {@code attributeName} as a class.
+	 * 获取存储在指定的{@code attributeName}下的值作为类。
+	 *
 	 * @param attributeName the name of the attribute to get;
 	 * never {@code null} or empty
 	 * @return the value
@@ -323,6 +329,13 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * component type of the expected array type, the single element will be
 	 * wrapped in a single-element array of the appropriate type before
 	 * returning it.
+	 *
+	 * 获取存储在指定的{@code attributeName}下的值，
+	 * 确保该值是{expected code}的值。
+	 * <p>如果{@code expectedType}是一个数组，
+	 * 并且存储在指定的{@code attributeName }是预期数组类型的单个元素，
+	 * 在返回之前，单个元素将被封装在相应类型的单个元素数组中。
+	 *
 	 * @param attributeName the name of the attribute to get;
 	 * never {@code null} or empty
 	 * @param expectedType the expected type; never {@code null}
@@ -421,6 +434,9 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * will be cast and returned immediately without creating a new instance.
 	 * Otherwise a new instance will be created by passing the supplied map
 	 * to the {@link #AnnotationAttributes(Map)} constructor.
+	 *
+	 * 根据给定的map返回一个AnnotationAttributes实例。 如果地图已经是AnnotationAttributes实例，则它将被立即转换并返回，
+	 * 而不会创建新的实例。 否则，将通过将提供的映射传递给{@link #AnnotationAttributes（Map）}构造函数来创建新实例。
 	 * @param map original source of annotation attribute <em>key-value</em> pairs
 	 */
 	@Nullable

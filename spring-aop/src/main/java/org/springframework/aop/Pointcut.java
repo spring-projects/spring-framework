@@ -40,6 +40,7 @@ public interface Pointcut {
 
 	/**
 	 * Return the MethodMatcher for this pointcut.
+	 * 返回此切入点的MethodMatcher。
 	 * @return the MethodMatcher (never {@code null})
 	 */
 	MethodMatcher getMethodMatcher();
@@ -47,6 +48,7 @@ public interface Pointcut {
 
 	/**
 	 * Canonical Pointcut instance that always matches.
+	 * 总是匹配的规范切入点实例。
 	 */
 	Pointcut TRUE = TruePointcut.INSTANCE;
 
