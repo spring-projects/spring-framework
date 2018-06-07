@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,10 +39,6 @@ public enum TransportType {
 	XHR("xhr", HttpMethod.POST, "cors", "jsessionid", "no_cache"),
 
 	XHR_SEND("xhr_send", HttpMethod.POST, "cors", "jsessionid", "no_cache"),
-
-	JSONP("jsonp", HttpMethod.GET, "jsessionid", "no_cache"),
-
-	JSONP_SEND("jsonp_send", HttpMethod.POST, "jsessionid", "no_cache"),
 
 	XHR_STREAMING("xhr_streaming", HttpMethod.POST, "cors", "jsessionid", "no_cache"),
 

@@ -2030,11 +2030,6 @@ annotations. When further control is needed, a custom `ObjectMapper` can be inje
 through the `ObjectMapper` property for cases where custom JSON
 serializers/deserializers need to be provided for specific types.
 
-http://en.wikipedia.org/wiki/JSONP[JSONP] is supported and automatically enabled when
-the request has a query parameter named `jsonp` or `callback`. The JSONP query parameter
-name(s) could be customized through the `jsonpParameterNames` property.
-
-
 
 [[mvc-view-xml-mapping]]
 === XML

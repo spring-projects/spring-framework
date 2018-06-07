@@ -401,8 +401,8 @@ The 3 possible behaviors are:
    transport is disabled since it does not allow to check the origin of a request.
    As a consequence, IE6 and IE7 are not supported when this mode is enabled.
  * Allow a specified list of origins: each provided _allowed origin_ must start with `http://`
-   or `https://`. In this mode, when SockJS is enabled, both IFrame and JSONP based
-   transports are disabled. As a consequence, IE6 through IE9 are not supported when this
+   or `https://`. In this mode, when SockJS is enabled, IFrame transport is disabled.
+   As a consequence, IE6 through IE9 are not supported when this
    mode is enabled.
  * Allow all origins: to enable this mode, you should provide `{asterisk}` as the allowed origin
    value. In this mode, all transports are available.

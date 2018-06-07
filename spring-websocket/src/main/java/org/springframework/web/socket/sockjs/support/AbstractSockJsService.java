@@ -298,9 +298,9 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	 * designed for browsers. There is nothing preventing other types of client
 	 * to modify the {@code Origin} header value.
 	 * <p>When SockJS is enabled and origins are restricted, transport types
-	 * that do not allow to check request origin (JSONP and Iframe based
-	 * transports) are disabled. As a consequence, IE 6 to 9 are not supported
-	 * when origins are restricted.
+	 * that do not allow to check request origin (Iframe based transports)
+	 * are disabled. As a consequence, IE 6 to 9 are not supported when origins
+	 * are restricted.
 	 * <p>Each provided allowed origin must have a scheme, and optionally a port
 	 * (e.g. "http://example.org", "http://example.org:9090"). An allowed origin
 	 * string may also be "*" in which case all origins are allowed.

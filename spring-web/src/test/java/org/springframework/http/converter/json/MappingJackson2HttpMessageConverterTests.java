@@ -394,39 +394,6 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertThat(result, not(containsString("\"property2\":\"value\"")));
 	}
 
-	@Test
-	public void jsonp() throws Exception {
-		MappingJacksonValue jacksonValue = new MappingJacksonValue("foo");
-		jacksonValue.setSerializationView(MyJacksonView1.class);
-		jacksonValue.setJsonpFunction("callback");
-
-		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		this.converter.writeInternal(jacksonValue, null, outputMessage);
-
-		assertEquals("/**/callback(\"foo\");", outputMessage.getBodyAsString(StandardCharsets.UTF_8));
-	}
-
-	@Test
-	public void jsonpAndJsonView() throws Exception {
-		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		JacksonViewBean bean = new JacksonViewBean();
-		bean.setWithView1("with");
-		bean.setWithView2("with");
-		bean.setWithoutView("without");
-
-		MappingJacksonValue jacksonValue = new MappingJacksonValue(bean);
-		jacksonValue.setSerializationView(MyJacksonView1.class);
-		jacksonValue.setJsonpFunction("callback");
-		this.converter.writeInternal(jacksonValue, null, outputMessage);
-
-		String result = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
-		assertThat(result, startsWith("/**/callback("));
-		assertThat(result, endsWith(");"));
-		assertThat(result, containsString("\"withView1\":\"with\""));
-		assertThat(result, not(containsString("\"withView2\":\"with\"")));
-		assertThat(result, not(containsString("\"withoutView\":\"without\"")));
-	}
-
 	@Test  // SPR-13318
 	public void writeSubType() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();

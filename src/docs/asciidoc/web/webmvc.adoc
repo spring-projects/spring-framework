@@ -2645,30 +2645,6 @@ to the model:
 	}
 ----
 
-[[mvc-ann-jsonp]]
-===== Jackson JSONP
-
-In order to enable http://en.wikipedia.org/wiki/JSONP[JSONP] support for `@ResponseBody`
-and `ResponseEntity` methods, declare an `@ControllerAdvice` bean that extends
-`AbstractJsonpResponseBodyAdvice` as shown below where the constructor argument indicates
-the JSONP query parameter name(s):
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	@ControllerAdvice
-	public class JsonpAdvice extends AbstractJsonpResponseBodyAdvice {
-
-		public JsonpAdvice() {
-			super("callback");
-		}
-	}
-----
-
-For controllers relying on view resolution, JSONP is automatically enabled when the
-request has a query parameter named `jsonp` or `callback`. Those names can be
-customized through `jsonpParameterNames` property.
-
 
 
 [[mvc-ann-modelattrib-methods]]
