@@ -67,13 +67,16 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 		}
 		ClassMetadata metadata = metadataReader.getClassMetadata();
 		if (matchClassName(metadata.getClassName())) {
+			//return false，不进入
 			return true;
 		}
 
 		if (this.considerInherited) {
+			//是否考虑继承
 			String superClassName = metadata.getSuperClassName();
 			if (superClassName != null) {
 				// Optimization to avoid creating ClassReader for super class.
+				// 优化避免为超类创建ClassReader。
 				Boolean superClassMatch = matchSuperClass(superClassName);
 				if (superClassMatch != null) {
 					if (superClassMatch.booleanValue()) {
@@ -82,6 +85,7 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 				}
 				else {
 					// Need to read super class to determine a match...
+					// 需要阅读超级类以确定匹配...
 					try {
 						if (match(metadata.getSuperClassName(), metadataReaderFactory)) {
 							return true;
@@ -98,6 +102,7 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 		if (this.considerInterfaces) {
 			for (String ifc : metadata.getInterfaceNames()) {
 				// Optimization to avoid creating ClassReader for super class
+				// 优化避免为超类创建ClassReader
 				Boolean interfaceMatch = matchInterface(ifc);
 				if (interfaceMatch != null) {
 					if (interfaceMatch.booleanValue()) {
@@ -106,6 +111,7 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 				}
 				else {
 					// Need to read interface to determine a match...
+					// 需要阅读接口以确定匹配...
 					try {
 						if (match(ifc, metadataReaderFactory)) {
 							return true;

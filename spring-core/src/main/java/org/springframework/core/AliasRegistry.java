@@ -27,6 +27,7 @@ public interface AliasRegistry {
 
 	/**
 	 * Given a name, register an alias for it.
+	 * 给定一个名字，为它注册一个别名。
 	 * @param name the canonical name
 	 * @param alias the alias to be registered
 	 * @throws IllegalStateException if the alias is already in use

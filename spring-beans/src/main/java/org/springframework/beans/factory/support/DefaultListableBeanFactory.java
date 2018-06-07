@@ -953,6 +953,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (!beanName.equals(bdName)) {
 				BeanDefinition bd = this.beanDefinitionMap.get(bdName);
 				if (beanName.equals(bd.getParentName())) {
+					//-----------------------关键方法---------------------
+					//递归调用
 					resetBeanDefinition(bdName);
 				}
 			}

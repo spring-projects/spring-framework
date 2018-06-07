@@ -171,6 +171,8 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 	/**
 	 * Add an exclude type filter to the <i>front</i> of the exclusion list.
+	 *
+	 * 将排除类型过滤器添加到排除列表的<i>前端</ i>。
 	 */
 	public void addExcludeFilter(TypeFilter excludeFilter) {
 		this.excludeFilters.add(0, excludeFilter);
@@ -321,7 +323,6 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		}
 		else {
 			//---------------------关键方法----------------
-			//为什么？？？？？？？？？
 			return scanCandidateComponents(basePackage);
 		}
 	}
@@ -433,6 +434,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
 		Set<BeanDefinition> candidates = new LinkedHashSet<>();
 		try {
+			//获得classpath路径
 			String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 					resolveBasePackage(basePackage) + '/' + this.resourcePattern;
 			Resource[] resources = getResourcePatternResolver().getResources(packageSearchPath);
@@ -445,10 +447,14 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 				if (resource.isReadable()) {
 					try {
 						MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(resource);
+						//---------------------关键方法------------------
+						//判断是否符合
 						if (isCandidateComponent(metadataReader)) {
 							ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
 							sbd.setResource(resource);
 							sbd.setSource(resource);
+							//---------------------关键方法------------------
+							//判断是否符合
 							if (isCandidateComponent(sbd)) {
 								if (debugEnabled) {
 									logger.debug("Identified candidate component class: " + resource);
@@ -501,6 +507,9 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	/**
 	 * Determine whether the given class does not match any exclude filter
 	 * and does match at least one include filter.
+	 *
+	 * 确定给定的类是否与任何排除过滤器不匹配，并且是否至少匹配一个包含过滤器。
+	 *
 	 * @param metadataReader the ASM ClassReader for the class
 	 * @return whether the class qualifies as a candidate component
 	 */
@@ -537,6 +546,11 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * <p>The default implementation checks whether the class is not an interface
 	 * and not dependent on an enclosing class.
 	 * <p>Can be overridden in subclasses.
+	 *
+	 *  确定给定的bean定义是否有资格成为候选人。
+	 *  <p>默认实现检查类是否不是接口
+	 * 而不依赖于封闭类。
+	 * <p>可以在子类中重写。
 	 * @param beanDefinition the bean definition to check
 	 * @return whether the bean definition qualifies as a candidate component
 	 */

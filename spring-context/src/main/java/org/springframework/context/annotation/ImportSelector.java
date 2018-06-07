@@ -40,6 +40,9 @@ import org.springframework.core.type.AnnotationMetadata;
  * {@code @Configuration} classes have been processed (see {@link DeferredImportSelector}
  * for details).
  *
+ * 通常，ImportSelectors的处理方式与常规的{@link Import}注释相同，
+ * 但也可以推迟选择导入，直到处理完所有的{@code Configuration}类为止（请参阅 {@link DeferredImportSelector }了解详情）。
+ *
  * @author Chris Beams
  * @since 3.1
  * @see DeferredImportSelector

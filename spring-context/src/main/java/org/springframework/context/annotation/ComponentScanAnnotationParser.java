@@ -142,6 +142,8 @@ class ComponentScanAnnotationParser {
 				return declaringClass.equals(className);
 			}
 		});
+		//--------------------------关键方法----------------------
+		//注册beanDefinition
 		return scanner.doScan(StringUtils.toStringArray(basePackages));
 	}
 

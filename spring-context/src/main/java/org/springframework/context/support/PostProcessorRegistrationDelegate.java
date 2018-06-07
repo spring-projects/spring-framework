@@ -85,6 +85,11 @@ class PostProcessorRegistrationDelegate {
 			// uninitialized to let the bean factory post-processors apply to them!
 			// Separate between BeanDefinitionRegistryPostProcessors that implement
 			// PriorityOrdered, Ordered, and the rest.
+
+			//不要在这里初始化FactoryBeans：我们需要离开所有普通的bean
+			//未初始化，让豆厂后处理器适用于他们！
+			//分开执行的BeanDefinitionRegistryPostProcessor
+			// PriorityOrdered，Ordered和其他。
 			List<BeanDefinitionRegistryPostProcessor> currentRegistryProcessors = new ArrayList<>();
 
 			// First, invoke the BeanDefinitionRegistryPostProcessors that implement PriorityOrdered.
@@ -305,6 +310,8 @@ class PostProcessorRegistrationDelegate {
 
 	/**
 	 * Invoke the given BeanDefinitionRegistryPostProcessor beans.
+	 *
+	 * 调用给定的BeanDefinitionRegistryPostProcessor bean。
 	 */
 	private static void invokeBeanDefinitionRegistryPostProcessors(
 			Collection<? extends BeanDefinitionRegistryPostProcessor> postProcessors, BeanDefinitionRegistry registry) {

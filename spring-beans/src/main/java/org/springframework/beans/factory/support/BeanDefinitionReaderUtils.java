@@ -161,6 +161,7 @@ public class BeanDefinitionReaderUtils {
 		if (aliases != null) {
 			for (String alias : aliases) {
 				//------------------------------关键方法--------------------------------------
+				//使用key：alias  value：beanName的方式注册
 				registry.registerAlias(beanName, alias);
 			}
 		}

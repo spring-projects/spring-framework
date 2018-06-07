@@ -171,7 +171,11 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * <p>If the value stored under the specified {@code attributeName} is
 	 * a string, it will be wrapped in a single-element array before
 	 * returning it.
+	 *
+	 * 将指定的{@code attributeName}下存储的值作为字符串数组获取。
+	 * <p>如果存储在指定的{@code attributeName}下的值是一个字符串，它将在返回之前将其封装在一个单元素数组中。
 	 * @param attributeName the name of the attribute to get;
+	 *
 	 * never {@code null} or empty
 	 * @return the value
 	 * @throws IllegalArgumentException if the attribute does not exist or

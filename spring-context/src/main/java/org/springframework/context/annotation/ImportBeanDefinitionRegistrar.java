@@ -29,6 +29,9 @@ import org.springframework.core.type.AnnotationMetadata;
  * may be provided to the @{@link Import} annotation (or may also be returned from an
  * {@code ImportSelector}).
  *
+ * 接口由处理@ {@link Configuration}类时注册附加bean定义的类型实现。 在bean定义级别（相对于@ Bean方法/实例级别）操作时，这是有用或必要的。
+ * <p> @code @Configuration}和{@link ImportSelector}，可以将这种类型的类提供给@ {@link Import}注解（或者也可以从ImportSelector中返回）。
+ *
  * <p>An {@link ImportBeanDefinitionRegistrar} may implement any of the following
  * {@link org.springframework.beans.factory.Aware Aware} interfaces, and their respective
  * methods will be called prior to {@link #registerBeanDefinitions}:
@@ -55,6 +58,11 @@ public interface ImportBeanDefinitionRegistrar {
 	 * <p>Note that {@link BeanDefinitionRegistryPostProcessor} types may <em>not</em> be
 	 * registered here, due to lifecycle constraints related to {@code @Configuration}
 	 * class processing.
+	 *
+	 * 根据导入{@Code @Configuration}类的给定注释元数据，根据需要注册bean definitions。
+	 * <p>请注意，{@link BeanDefinitionRegistryPostProcessor}类型可能在此处未注册，
+	 * 因为与类配置处理相关的生命周期约束。
+	 *
 	 * @param importingClassMetadata annotation metadata of the importing class
 	 * @param registry current bean definition registry
 	 */

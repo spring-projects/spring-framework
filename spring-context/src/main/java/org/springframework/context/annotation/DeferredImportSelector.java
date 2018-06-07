@@ -41,6 +41,9 @@ public interface DeferredImportSelector extends ImportSelector {
 
 	/**
 	 * Return a specific import group or {@code null} if no grouping is required.
+	 *
+	 * 如果不需要分组，则返回特定的导入组或{@code null}。
+	 *
 	 * @return the import group class or {@code null}
 	 */
 	@Nullable
@@ -51,6 +54,8 @@ public interface DeferredImportSelector extends ImportSelector {
 
 	/**
 	 * Interface used to group results from different import selectors.
+	 *
+	 * 用于分组来自不同导入选择器的结果的接口。
 	 */
 	interface Group {
 
