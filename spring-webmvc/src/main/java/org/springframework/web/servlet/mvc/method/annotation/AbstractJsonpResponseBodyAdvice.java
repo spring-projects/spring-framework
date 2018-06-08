@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,10 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Rossen Stoyanchev
  * @since 4.1
+ * @deprecated Will be removed as of Spring Framework 5.1, use
+ * <a href="https://docs.spring.io/spring/docs/5.0.x/spring-framework-reference/web.html#mvc-cors">CORS</a> instead.
  */
+@Deprecated
 public abstract class AbstractJsonpResponseBodyAdvice extends AbstractMappingJacksonResponseBodyAdvice {
 
 	/**

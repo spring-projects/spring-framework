@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ import org.springframework.web.servlet.View;
  * @author Sebastien Deleuze
  * @since 3.1.2
  */
+@SuppressWarnings("deprecation")
 public class MappingJackson2JsonView extends AbstractJackson2View {
 
 	/**
@@ -69,7 +70,10 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 
 	/**
 	 * Default content type for JSONP: "application/javascript".
+	 * @deprecated Will be removed as of Spring Framework 5.1, use
+	 * <a href="https://docs.spring.io/spring/docs/5.0.x/spring-framework-reference/web.html#mvc-cors">CORS</a> instead.
 	 */
+	@Deprecated
 	public static final String DEFAULT_JSONP_CONTENT_TYPE = "application/javascript";
 
 	/**
@@ -87,7 +91,7 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	private boolean extractValueFromSingleKeyModel = false;
 
 	@Nullable
-	private Set<String> jsonpParameterNames = new LinkedHashSet<>(Arrays.asList("jsonp", "callback"));
+	private Set<String> jsonpParameterNames = new LinkedHashSet<>();
 
 
 	/**
@@ -170,10 +174,14 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	 * Set JSONP request parameter names. Each time a request has one of those
 	 * parameters, the resulting JSON will be wrapped into a function named as
 	 * specified by the JSONP request parameter value.
-	 * <p>The parameter names configured by default are "jsonp" and "callback".
+	 * <p>As of Spring Framework 5.0.7, there is no parameter name configured
+	 * by default.
 	 * @since 4.1
 	 * @see <a href="http://en.wikipedia.org/wiki/JSONP">JSONP Wikipedia article</a>
+	 * @deprecated Will be removed as of Spring Framework 5.1, use
+	 * <a href="https://docs.spring.io/spring/docs/5.0.x/spring-framework-reference/web.html#mvc-cors">CORS</a> instead.
 	 */
+	@Deprecated
 	public void setJsonpParameterNames(Set<String> jsonpParameterNames) {
 		this.jsonpParameterNames = jsonpParameterNames;
 	}
@@ -204,7 +212,10 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	 * Invalid parameter values are ignored.
 	 * @param value the query param value, never {@code null}
 	 * @since 4.1.8
+	 * @deprecated Will be removed as of Spring Framework 5.1, use
+	 * <a href="https://docs.spring.io/spring/docs/5.0.x/spring-framework-reference/web.html#mvc-cors">CORS</a> instead.
 	 */
+	@Deprecated
 	protected boolean isValidJsonpQueryParam(String value) {
 		return CALLBACK_PARAM_PATTERN.matcher(value).matches();
 	}

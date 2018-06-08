@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 package org.springframework.web.servlet.view.json;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -324,11 +326,19 @@ public class MappingJackson2JsonViewTests {
 
 	@Test
 	public void renderWithJsonp() throws Exception {
+		testJsonp("jsonp", "callback", false);
+		testJsonp("jsonp", "_callback", false);
+		testJsonp("jsonp", "_Call.bAcK", false);
+		testJsonp("jsonp", "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_.", false);
+		testJsonp("jsonp", "<script>", false);
+		testJsonp("jsonp", "!foo!bar", false);
+
+		this.view.setJsonpParameterNames(new LinkedHashSet<>(Arrays.asList("jsonp")));
+
 		testJsonp("jsonp", "callback", true);
 		testJsonp("jsonp", "_callback", true);
 		testJsonp("jsonp", "_Call.bAcK", true);
 		testJsonp("jsonp", "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_.", true);
-
 		testJsonp("jsonp", "<script>", false);
 		testJsonp("jsonp", "!foo!bar", false);
 	}
