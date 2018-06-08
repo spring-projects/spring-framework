@@ -18,10 +18,10 @@ package org.springframework.web.servlet.config.annotation;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
-import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -58,7 +58,7 @@ public class PathMatchConfigurer {
 	private PathMatcher pathMatcher;
 
 	@Nullable
-	private Map<String, HandlerTypePredicate> pathPrefixes;
+	private Map<String, Predicate<Class<?>>> pathPrefixes;
 
 
 	/**
@@ -121,13 +121,14 @@ public class PathMatchConfigurer {
 	 * Configure a path prefix to apply to matching controller methods.
 	 * <p>Prefixes are used to enrich the mappings of every {@code @RequestMapping}
 	 * method whose controller type is matched by the corresponding
-	 * {@link HandlerTypePredicate}. The prefix for the first matching predicate
-	 * is used.
+	 * {@code Predicate}. The prefix for the first matching predicate is used.
+	 * <p>Consider using {@link org.springframework.web.method.HandlerTypePredicate
+	 * HandlerTypePredicate} to group controllers.
 	 * @param prefix the prefix to apply
 	 * @param predicate a predicate for matching controller types
 	 * @since 5.1
 	 */
-	public PathMatchConfigurer addPathPrefix(String prefix, HandlerTypePredicate predicate) {
+	public PathMatchConfigurer addPathPrefix(String prefix, Predicate<Class<?>> predicate) {
 		this.pathPrefixes = this.pathPrefixes == null ? new LinkedHashMap<>() : this.pathPrefixes;
 		this.pathPrefixes.put(prefix, predicate);
 		return this;
@@ -160,7 +161,7 @@ public class PathMatchConfigurer {
 	}
 
 	@Nullable
-	protected Map<String, HandlerTypePredicate> getPathPrefixes() {
+	protected Map<String, Predicate<Class<?>>> getPathPrefixes() {
 		return this.pathPrefixes;
 	}
 }

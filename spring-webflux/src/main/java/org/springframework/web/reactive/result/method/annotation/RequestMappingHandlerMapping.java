@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -34,7 +35,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
@@ -53,7 +53,7 @@ import org.springframework.web.reactive.result.method.RequestMappingInfoHandlerM
 public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMapping
 		implements EmbeddedValueResolverAware {
 
-	private final Map<String, HandlerTypePredicate> pathPrefixes = new LinkedHashMap<>();
+	private final Map<String, Predicate<Class<?>>> pathPrefixes = new LinkedHashMap<>();
 
 	private RequestedContentTypeResolver contentTypeResolver = new RequestedContentTypeResolverBuilder().build();
 
@@ -66,13 +66,16 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	/**
 	 * Configure path prefixes to apply to controller methods.
 	 * <p>Prefixes are used to enrich the mappings of every {@code @RequestMapping}
-	 * method whose controller type is matched by the corresponding
-	 * {@link HandlerTypePredicate} in the map. The prefix for the first matching
-	 * predicate is used, assuming the input map has predictable order.
+	 * method whose controller type is matched by a corresponding
+	 * {@code Predicate} in the map. The prefix for the first matching predicate
+	 * is used, assuming the input map has predictable order.
+	 * <p>Consider using {@link org.springframework.web.method.HandlerTypePredicate
+	 * HandlerTypePredicate} to group controllers.
 	 * @param prefixes a map with path prefixes as key
 	 * @since 5.1
+	 * @see org.springframework.web.method.HandlerTypePredicate
 	 */
-	public void setPathPrefixes(Map<String, HandlerTypePredicate> prefixes) {
+	public void setPathPrefixes(Map<String, Predicate<Class<?>>> prefixes) {
 		this.pathPrefixes.clear();
 		prefixes.entrySet().stream()
 				.filter(entry -> StringUtils.hasText(entry.getKey()))
@@ -80,8 +83,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
-	 * Set the {@link RequestedContentTypeResolver} to use to determine requested media types.
-	 * If not set, the default constructor is used.
+	 * Set the {@link RequestedContentTypeResolver} to use to determine requested
+	 * media types. If not set, the default constructor is used.
 	 */
 	public void setContentTypeResolver(RequestedContentTypeResolver contentTypeResolver) {
 		Assert.notNull(contentTypeResolver, "'contentTypeResolver' must not be null");
@@ -107,7 +110,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * The configured path prefixes as a read-only, possibly empty map.
 	 * @since 5.1
 	 */
-	public Map<String, HandlerTypePredicate> getPathPrefixes() {
+	public Map<String, Predicate<Class<?>>> getPathPrefixes() {
 		return Collections.unmodifiableMap(this.pathPrefixes);
 	}
 
@@ -144,7 +147,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			if (typeInfo != null) {
 				info = typeInfo.combine(info);
 			}
-			for (Map.Entry<String, HandlerTypePredicate> entry : this.pathPrefixes.entrySet()) {
+			for (Map.Entry<String, Predicate<Class<?>>> entry : this.pathPrefixes.entrySet()) {
 				if (entry.getValue().test(handlerType)) {
 					String prefix = entry.getKey();
 					if (this.embeddedValueResolver != null) {

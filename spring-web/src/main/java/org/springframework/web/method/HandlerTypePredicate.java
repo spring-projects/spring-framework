@@ -29,19 +29,24 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * A {@code Predicate} to match request handling component types based on the
- * following selectors:
+ * A {@code Predicate} to match request handling component types if
+ * <strong>any</strong> of the following selectors match:
  * <ul>
  * <li>Base packages -- for selecting handlers by their package.
  * <li>Assignable types -- for selecting handlers by super type.
  * <li>Annotations -- for selecting handlers annotated in a specific way.
  * </ul>
- * <p>Use static factory methods in this class to create a Predicate.
+ * <p>Composability methods on {@link Predicate} can be used :
+ * <pre class="code">
+ * Predicate&lt;Class&lt;?&gt;&gt; predicate =
+ * 		HandlerTypePredicate.forAnnotation(RestController)
+ * 				.and(HandlerTypePredicate.forBasePackage("org.example"));
+ * </pre>
  *
  * @author Rossen Stoyanchev
  * @since 5.1
  */
-public class HandlerTypePredicate implements Predicate<Class<?>> {
+public class  HandlerTypePredicate implements Predicate<Class<?>> {
 
 	private final Set<String> basePackages;
 

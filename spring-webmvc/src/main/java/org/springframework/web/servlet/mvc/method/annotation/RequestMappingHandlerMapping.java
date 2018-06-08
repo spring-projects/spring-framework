@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.context.EmbeddedValueResolverAware;
@@ -38,7 +39,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.MatchableHandlerMapping;
 import org.springframework.web.servlet.handler.RequestMatchResult;
@@ -67,7 +67,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	private boolean useTrailingSlashMatch = true;
 
-	private final Map<String, HandlerTypePredicate> pathPrefixes = new LinkedHashMap<>();
+	private final Map<String, Predicate<Class<?>>> pathPrefixes = new LinkedHashMap<>();
 
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
@@ -113,12 +113,13 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * Configure path prefixes to apply to controller methods.
 	 * <p>Prefixes are used to enrich the mappings of every {@code @RequestMapping}
 	 * method whose controller type is matched by the corresponding
-	 * {@link HandlerTypePredicate} in the map. The prefix for the first matching
-	 * predicate is used, assuming the input map has predictable order.
+	 * {@code Predicate}. The prefix for the first matching predicate is used.
+	 * <p>Consider using {@link org.springframework.web.method.HandlerTypePredicate
+	 * HandlerTypePredicate} to group controllers.
 	 * @param prefixes a map with path prefixes as key
 	 * @since 5.1
 	 */
-	public void setPathPrefixes(Map<String, HandlerTypePredicate> prefixes) {
+	public void setPathPrefixes(Map<String, Predicate<Class<?>>> prefixes) {
 		this.pathPrefixes.clear();
 		prefixes.entrySet().stream()
 				.filter(entry -> StringUtils.hasText(entry.getKey()))
@@ -178,7 +179,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * The configured path prefixes as a read-only, possibly empty map.
 	 * @since 5.1
 	 */
-	public Map<String, HandlerTypePredicate> getPathPrefixes() {
+	public Map<String, Predicate<Class<?>>> getPathPrefixes() {
 		return Collections.unmodifiableMap(this.pathPrefixes);
 	}
 
@@ -226,7 +227,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			if (typeInfo != null) {
 				info = typeInfo.combine(info);
 			}
-			for (Map.Entry<String, HandlerTypePredicate> entry : this.pathPrefixes.entrySet()) {
+			for (Map.Entry<String, Predicate<Class<?>>> entry : this.pathPrefixes.entrySet()) {
 				if (entry.getValue().test(handlerType)) {
 					String prefix = entry.getKey();
 					if (this.embeddedValueResolver != null) {

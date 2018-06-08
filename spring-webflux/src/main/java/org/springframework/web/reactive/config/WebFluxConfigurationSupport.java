@@ -18,6 +18,7 @@ package org.springframework.web.reactive.config;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import reactor.core.publisher.Mono;
 
@@ -44,7 +45,6 @@ import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
@@ -131,7 +131,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 			mapping.setUseCaseSensitiveMatch(useCaseSensitiveMatch);
 		}
 
-		Map<String, HandlerTypePredicate> pathPrefixes = configurer.getPathPrefixes();
+		Map<String, Predicate<Class<?>>> pathPrefixes = configurer.getPathPrefixes();
 		if (pathPrefixes != null) {
 			mapping.setPathPrefixes(pathPrefixes);
 		}
