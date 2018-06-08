@@ -25,10 +25,16 @@ import org.springframework.lang.Nullable;
 
 /**
  * Central interface to provide configuration for an application.
+ *
+ * 为application提供一个配置的中心接口 ，核心接口
+ *
+ *
  * This is read-only while the application is running, but may be
  * reloaded if the implementation supports this.
+ * 仅仅在运行的时候读取。但是它可以重新加载，如果它的实现类支持
+
  *
- * <p>An ApplicationContext provides:
+ * <p>An ApplicationContext provides: 提供下面的功能：
  * <ul>
  * <li>Bean factory methods for accessing application components.
  * Inherited from {@link org.springframework.beans.factory.ListableBeanFactory}.

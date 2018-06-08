@@ -50,6 +50,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	@Nullable
 	private ClassLoader classLoader;
 
+    /***协议解析器集合 Set 初始化的空间为4 ，资源解析支持4种协议？？？*/
 	private final Set<ProtocolResolver> protocolResolvers = new LinkedHashSet<>(4);
 
 	private final Map<Class<?>, Map<Resource, ?>> resourceCaches = new ConcurrentHashMap<>(4);
@@ -143,7 +144,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	@Override
 	public Resource getResource(String location) {
 		Assert.notNull(location, "Location must not be null");
-
+        /**几种协议都去尝试去解析，解析成功后就返回，阻断式的解析*/
 		for (ProtocolResolver protocolResolver : this.protocolResolvers) {
 			Resource resource = protocolResolver.resolve(location, this);
 			if (resource != null) {
@@ -169,6 +170,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 			catch (MalformedURLException ex) {
 				// No URL -> resolve as resource path.
 				// 没有URL - >解析为资源路径。
+				// 最好还是用 以 / 开头的资源解析方法
 				return getResourceByPath(location);
 			}
 		}

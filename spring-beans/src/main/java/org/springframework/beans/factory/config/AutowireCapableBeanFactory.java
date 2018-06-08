@@ -115,7 +115,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	@Deprecated
 	int AUTOWIRE_AUTODETECT = 4;
 
-
+	
 	//-------------------------------------------------------------------------
 	// Typical methods for creating and populating external bean instances
 	//-------------------------------------------------------------------------
