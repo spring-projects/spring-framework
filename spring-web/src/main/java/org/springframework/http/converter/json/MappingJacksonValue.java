@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,14 +108,20 @@ public class MappingJacksonValue {
 
 	/**
 	 * Set the name of the JSONP function name.
+	 * @deprecated Will be removed as of Spring Framework 5.1, use
+	 * <a href="https://docs.spring.io/spring/docs/4.3.x/spring-framework-reference/html/cors.html">CORS</a> instead.
 	 */
+	@Deprecated
 	public void setJsonpFunction(String functionName) {
 		this.jsonpFunction = functionName;
 	}
 
 	/**
 	 * Return the configured JSONP function name.
+	 * @deprecated Will be removed as of Spring Framework 5.1, use
+	 * <a href="https://docs.spring.io/spring/docs/4.3.x/spring-framework-reference/html/cors.html">CORS</a> instead.
 	 */
+	@Deprecated
 	public String getJsonpFunction() {
 		return this.jsonpFunction;
 	}

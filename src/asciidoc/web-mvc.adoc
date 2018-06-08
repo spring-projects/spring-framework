@@ -2291,6 +2291,12 @@ For controllers relying on view resolution, JSONP is automatically enabled when 
 request has a query parameter named `jsonp` or `callback`. Those names can be
 customized through `jsonpParameterNames` property.
 
+[NOTE]
+====
+As of Spring Framework 4.3.18, JSONP support is deprecated and will be removed as of
+Spring Framework 5.1, <<cors,CORS>> should be used instead.
+====
+
 
 [[mvc-ann-async]]
 === Asynchronous Request Processing
