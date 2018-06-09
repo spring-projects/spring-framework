@@ -87,6 +87,7 @@ public class SendToMethodReturnValueHandlerTests {
 	private MethodParameter sendToWithPlaceholdersReturnType = param("handleAndSendToWithPlaceholders");
 	private MethodParameter sendToUserReturnType = param("handleAndSendToUser");
 	private MethodParameter sendToUserInSessionReturnType = param("handleAndSendToUserInSession");
+	private MethodParameter sendToSendToUserReturnType = param("handleAndSendToAndSendToUser");
 	private MethodParameter sendToUserDefaultDestReturnType = param("handleAndSendToUserDefaultDest");
 	private MethodParameter sendToUserInSessionDefaultDestReturnType = param("handleAndSendToUserDefaultDestInSession");
 	private MethodParameter jsonViewReturnType = param("handleAndSendToJsonView");
@@ -355,6 +356,38 @@ public class SendToMethodReturnValueHandlerTests {
 		assertEquals("/user/" + user.getName() + "/dest2", accessor.getDestination());
 	}
 
+	@Test
+	public void sendToAndSendToUser() throws Exception {
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
+
+		String sessionId = "sess1";
+		TestUser user = new TestUser();
+		Message<?> inputMessage = createMessage(sessionId, "sub1", null, null, user);
+		this.handler.handleReturnValue(PAYLOAD, this.sendToSendToUserReturnType, inputMessage);
+
+		verify(this.messageChannel, times(4)).send(this.messageCaptor.capture());
+
+		SimpMessageHeaderAccessor accessor = getCapturedAccessor(0);
+		assertNull(accessor.getSessionId());
+		assertNull(accessor.getSubscriptionId());
+		assertEquals("/user/" + user.getName() + "/dest1", accessor.getDestination());
+
+		accessor = getCapturedAccessor(1);
+		assertNull(accessor.getSessionId());
+		assertNull(accessor.getSubscriptionId());
+		assertEquals("/user/" + user.getName() + "/dest2", accessor.getDestination());
+
+		accessor = getCapturedAccessor(2);
+		assertEquals("sess1", accessor.getSessionId());
+		assertNull(accessor.getSubscriptionId());
+		assertEquals("/dest1", accessor.getDestination());
+
+		accessor = getCapturedAccessor(3);
+		assertEquals("sess1", accessor.getSessionId());
+		assertNull(accessor.getSubscriptionId());
+		assertEquals("/dest2", accessor.getDestination());
+	}
+
 	@Test  // SPR-12170
 	public void sendToWithDestinationPlaceholders() throws Exception {
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
@@ -574,6 +607,13 @@ public class SendToMethodReturnValueHandlerTests {
 	@SendToUser(destinations = { "/dest1", "/dest2" }, broadcast = false)
 	@SuppressWarnings("unused")
 	String handleAndSendToUserInSession() {
+		return PAYLOAD;
+	}
+
+	@SendTo({"/dest1", "/dest2"})
+	@SendToUser({"/dest1", "/dest2"})
+	@SuppressWarnings("unused")
+	String handleAndSendToAndSendToUser() {
 		return PAYLOAD;
 	}
 
