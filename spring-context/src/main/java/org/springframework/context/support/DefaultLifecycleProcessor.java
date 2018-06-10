@@ -354,7 +354,9 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			}
 			Collections.sort(this.members);
 			for (LifecycleGroupMember member : this.members) {
-				doStart(this.lifecycleBeans, member.name, this.autoStartupOnly);
+				if (this.lifecycleBeans.containsKey(member.name)) {
+					doStart(this.lifecycleBeans, member.name, this.autoStartupOnly);
+				}
 			}
 		}
 
@@ -369,7 +371,13 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			CountDownLatch latch = new CountDownLatch(this.smartMemberCount);
 			Set<String> countDownBeanNames = Collections.synchronizedSet(new LinkedHashSet<>());
 			for (LifecycleGroupMember member : this.members) {
-				doStop(this.lifecycleBeans, member.name, latch, countDownBeanNames);
+				if (this.lifecycleBeans.containsKey(member.name)) {
+					doStop(this.lifecycleBeans, member.name, latch, countDownBeanNames);
+				}
+				else if (member.bean instanceof SmartLifecycle) {
+					// Already removed: must have been a dependent bean from another phase
+					latch.countDown();
+				}
 			}
 			try {
 				latch.await(this.timeout, TimeUnit.MILLISECONDS);
