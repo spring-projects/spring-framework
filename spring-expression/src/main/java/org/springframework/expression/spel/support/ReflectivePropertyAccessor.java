@@ -436,13 +436,11 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 * Return class methods ordered with non-bridge methods appearing higher.
 	 */
 	private Method[] getSortedMethods(Class<?> clazz) {
-		Method[] methods = this.sortedMethodsCache.get(clazz);
-		if (methods == null) {
-			methods = clazz.getMethods();
+		return this.sortedMethodsCache.computeIfAbsent(clazz, key -> {
+			Method[] methods = key.getMethods();
 			Arrays.sort(methods, (o1, o2) -> (o1.isBridge() == o2.isBridge() ? 0 : (o1.isBridge() ? 1 : -1)));
-			this.sortedMethodsCache.put(clazz, methods);
-		}
-		return methods;
+			return methods;
+		});
 	}
 
 	/**
