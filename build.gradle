@@ -38,7 +38,7 @@ configure(allprojects) { project ->
 	ext.groovyVersion        = "2.5.0"
 	ext.hsqldbVersion        = "2.4.1"
 	ext.jackson2Version      = "2.9.5"
-	ext.jettyVersion         = "9.4.10.v20180503"
+	ext.jettyVersion         = "9.4.11.v20180605"
 	ext.junitPlatformVersion = "1.2.0"
 	ext.junitJupiterVersion  = "5.2.0"
 	ext.junitVintageVersion  = "5.2.0"
