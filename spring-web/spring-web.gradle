@@ -48,7 +48,7 @@ dependencies {
 	optional("com.fasterxml.woodstox:woodstox-core:5.1.0") {  // woodstox before aalto
 		exclude group: "stax", module: "stax-api"
 	}
-	optional("com.fasterxml:aalto-xml:1.0.0")
+	optional("com.fasterxml:aalto-xml:1.1.0")
 	optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jackson2Version}")
@@ -56,7 +56,7 @@ dependencies {
 	optional("com.google.code.gson:gson:2.8.5")
 	optional("com.google.protobuf:protobuf-java-util:3.5.1")
 	optional("com.googlecode.protobuf-java-format:protobuf-java-format:1.4")
-	optional("com.rometools:rome:1.9.0")
+	optional("com.rometools:rome:1.10.0")
 	optional("com.caucho:hessian:4.0.51")
 	optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
@@ -77,8 +77,8 @@ dependencies {
 	testCompile("org.skyscreamer:jsonassert:1.5.0")
 	testCompile("org.xmlunit:xmlunit-matchers:2.6.0")
 	testRuntime("com.sun.mail:javax.mail:1.6.1")
-	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0")
-	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0")
+	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0.1")
+	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0.1")
 	testRuntime("javax.json:javax.json-api:1.1.2")
 	testRuntime("org.apache.johnzon:johnzon-jsonb:1.1.7")
 }

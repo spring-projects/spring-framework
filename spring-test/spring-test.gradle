@@ -66,7 +66,7 @@ dependencies {
 	testCompile("org.junit.jupiter:junit-jupiter-params:${junitJupiterVersion}")
 	testCompile("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 	testCompile("com.thoughtworks.xstream:xstream:1.4.10")
-	testCompile("com.rometools:rome:1.9.0")
+	testCompile("com.rometools:rome:1.10.0")
 	testCompile("org.apache.tiles:tiles-api:${tiles3Version}")
 	testCompile("org.apache.tiles:tiles-core:${tiles3Version}", withoutJclOverSlf4J)
 	testCompile("org.apache.tiles:tiles-servlet:${tiles3Version}", withoutJclOverSlf4J)
@@ -82,8 +82,8 @@ dependencies {
 	testRuntime("org.junit.platform:junit-platform-launcher:${junitPlatformVersion}")
 	testRuntime("org.junit.vintage:junit-vintage-engine:${junitVintageVersion}")
 	testRuntime("org.glassfish:javax.el:3.0.1-b08")
-	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0")
-	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0")
+	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0.1")
+	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0.1")
 }
 
 task testNG(type: Test) {
