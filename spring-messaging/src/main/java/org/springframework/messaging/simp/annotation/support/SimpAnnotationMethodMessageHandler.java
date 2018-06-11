@@ -330,15 +330,14 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>();
 
 		// Single-purpose return value types
+
 		handlers.add(new ListenableFutureReturnValueHandler());
 		handlers.add(new CompletableFutureReturnValueHandler());
 
 		// Annotation-based return value types
-		SendToMethodReturnValueHandler sendToHandler =
-				new SendToMethodReturnValueHandler(this.brokerTemplate, true);
-		if (this.headerInitializer != null) {
-			sendToHandler.setHeaderInitializer(this.headerInitializer);
-		}
+
+		SendToMethodReturnValueHandler sendToHandler = new SendToMethodReturnValueHandler(this.brokerTemplate, true);
+		sendToHandler.setHeaderInitializer(this.headerInitializer);
 		handlers.add(sendToHandler);
 
 		SubscriptionMethodReturnValueHandler subscriptionHandler =
@@ -350,6 +349,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		handlers.addAll(getCustomReturnValueHandlers());
 
 		// catch-all
+
 		sendToHandler = new SendToMethodReturnValueHandler(this.brokerTemplate, false);
 		sendToHandler.setHeaderInitializer(this.headerInitializer);
 		handlers.add(sendToHandler);
