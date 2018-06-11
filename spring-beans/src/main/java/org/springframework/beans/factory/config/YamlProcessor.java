@@ -296,7 +296,8 @@ public abstract class YamlProcessor {
 				Collection<Object> collection = (Collection<Object>) value;
 				if (collection.isEmpty()) {
 					result.put(key, "");
-				} else {
+				}
+				else {
 					int count = 0;
 					for (Object object : collection) {
 						buildFlattenedMap(result, Collections.singletonMap(
