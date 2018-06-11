@@ -44,15 +44,15 @@ configure(allprojects) { project ->
 	ext.aspectjVersion       = "1.8.13"
 	ext.freemarkerVersion    = "2.3.27-incubating"
 	ext.groovyVersion        = "2.4.15"
-	ext.hsqldbVersion        = "2.4.0"
+	ext.hsqldbVersion        = "2.4.1"
 	ext.jackson2Version      = "2.9.5"
-	ext.jettyVersion         = "9.4.10.v20180503"
+	ext.jettyVersion         = "9.4.11.v20180605"
 	ext.junitJupiterVersion  = "5.0.3"
 	ext.junitPlatformVersion = "1.0.3"
 	ext.junitVintageVersion  = "4.12.3"
 	ext.kotlinVersion        = "1.2.41"
 	ext.log4jVersion         = "2.11.0"
-	ext.nettyVersion         = "4.1.24.Final"
+	ext.nettyVersion         = "4.1.25.Final"
 	ext.reactorVersion       = "Bismuth-SR9"
 	ext.rxjavaVersion        = "1.3.8"
 	ext.rxjavaAdapterVersion = "1.2.1"
@@ -271,7 +271,7 @@ configure(rootProject) {
 		testCompile("javax.servlet:javax.servlet-api:3.1.0")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-		testCompile("org.hibernate:hibernate-core:5.1.13.Final")
+		testCompile("org.hibernate:hibernate-core:5.1.14.Final")
 	}
 
 	artifacts {
