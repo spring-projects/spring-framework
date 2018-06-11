@@ -294,11 +294,12 @@ public class SendToMethodReturnValueHandlerTests {
 		MethodParameter parameter = new SynthesizingMethodParameter(method, -1);
 
 		String sessionId = "sess1";
-		Message<?> inputMessage = createMessage(sessionId, "sub1", null, null, null);
+		Message<?> inputMessage = createMessage(sessionId, "sub1", "/topic", "/sample-destination", null);
 		this.handler.handleReturnValue(PAYLOAD, parameter, inputMessage);
 
-		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
-		assertResponse(parameter, sessionId, 0, "/user/sess1/dest-default");
+		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
+		assertResponse(parameter, sessionId, 0, "/topic/sample-destination");
+		assertResponse(parameter, sessionId, 1, "/user/sess1/dest-default");
 	}
 
 	@Test // SPR-14238
@@ -313,7 +314,7 @@ public class SendToMethodReturnValueHandlerTests {
 		Message<?> inputMessage = createMessage(sessionId, "sub1", null, null, null);
 		this.handler.handleReturnValue(PAYLOAD, parameter, inputMessage);
 
-		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
+		verify(this.messageChannel, times(3)).send(this.messageCaptor.capture());
 		assertResponse(parameter, sessionId, 0, "/dest3");
 		assertResponse(parameter, sessionId, 1, "/dest4");
 	}
