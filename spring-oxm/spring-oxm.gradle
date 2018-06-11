@@ -13,7 +13,7 @@ dependencies {
 	xjc 'javax.xml.bind:jaxb-api:2.3.0'
 	xjc 'com.sun.xml.bind:jaxb-core:2.3.0.1'
 	xjc 'com.sun.xml.bind:jaxb-impl:2.3.0.1'
-	xjc 'com.sun.xml.bind:jaxb-xjc:2.3.0.1'
+	xjc 'com.sun.xml.bind:jaxb-xjc:2.2.11'  // 2.3.0 breaks with "xjc failed"
 	xjc 'com.sun.activation:javax.activation:1.2.0'
 }
 
