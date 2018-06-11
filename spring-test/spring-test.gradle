@@ -1,16 +1,10 @@
 description = "Spring TestContext Framework"
 
-apply plugin: "io.spring.dependency-management"
-
 dependencyManagement {
 	imports {
 		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
 		mavenBom "io.netty:netty-bom:${nettyVersion}"
 	}
-	resolutionStrategy {
-		cacheChangingModulesFor 0, 'seconds'
-	}
-	applyMavenExclusions = false
 }
 
 dependencies {
@@ -74,8 +68,8 @@ dependencies {
 	testCompile("com.thoughtworks.xstream:xstream:1.4.10")
 	testCompile("com.rometools:rome:1.9.0")
 	testCompile("org.apache.tiles:tiles-api:${tiles3Version}")
-	testCompile("org.apache.tiles:tiles-core:${tiles3Version}")
-	testCompile("org.apache.tiles:tiles-servlet:${tiles3Version}")
+	testCompile("org.apache.tiles:tiles-core:${tiles3Version}", withoutJclOverSlf4J)
+	testCompile("org.apache.tiles:tiles-servlet:${tiles3Version}", withoutJclOverSlf4J)
 	testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 	testCompile("org.apache.httpcomponents:httpclient:4.5.5") {
 		exclude group: "commons-logging", module: "commons-logging"
