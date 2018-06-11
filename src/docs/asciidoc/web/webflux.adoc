@@ -2540,6 +2540,124 @@ include::webflux-view.adoc[leveloffset=+1]
 
 
 
+[[webflux-caching]]
+== HTTP Caching
+[.small]#<<web.adoc#mvc-caching,Same in Spring MVC>>#
+
+HTTP caching can significantly improve the performance of a web application. HTTP caching
+revolves around the "Cache-Control" response header and subsequently conditional request
+headers such as "Last-Modified" and "ETag". "Cache-Control" advises private (e.g. browser)
+and public (e.g. proxy) caches how to cache and re-use responses. An "ETag" header is used
+to make a conditional request that may result in a 304 (NOT_MODIFIED) without a body,
+if the content has not changed. "ETag" can be seen as a more sophisticated successor to
+the `Last-Modified` header.
+
+This section describes HTTP caching related options available in Spring Web MVC.
+
+
+
+[[webflux-caching-cachecontrol]]
+=== `CacheControl`
+[.small]#<<web.adoc#mvc-caching-cachecontrol,Same in Spring MVC>>#
+
+{api-spring-framework}/http/CacheControl.html[`CacheControl`] provides support for
+configuring settings related to the "Cache-Control" header and is accepted as an argument
+in a number of places:
+
+* <<webflux-caching-etag-lastmodified>>
+* <<webflux-caching-static-resources>>
+
+While https://tools.ietf.org/html/rfc7234#section-5.2.2[RFC 7234] describes all possible
+directives for the "Cache-Control" response header, the `CacheControl` type takes a
+use case oriented approach focusing on the common scenarios:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	// Cache for an hour - "Cache-Control: max-age=3600"
+	CacheControl ccCacheOneHour = CacheControl.maxAge(1, TimeUnit.HOURS);
+
+	// Prevent caching - "Cache-Control: no-store"
+	CacheControl ccNoStore = CacheControl.noStore();
+
+	// Cache for ten days in public and private caches,
+	// public caches should not transform the response
+	// "Cache-Control: max-age=864000, public, no-transform"
+	CacheControl ccCustom = CacheControl.maxAge(10, TimeUnit.DAYS).noTransform().cachePublic();
+----
+
+
+
+[[webflux-caching-etag-lastmodified]]
+=== Controllers
+[.small]#<<web.adoc#mvc-caching-etag-lastmodified,Same in Spring MVC>>#
+
+Controllers can add explicit support for HTTP caching. This is recommended since the
+lastModified or ETag value for a resource needs to be calculated before it can be compared
+against conditional request headers. A controller can add an ETag and "Cache-Control"
+settings to a `ResponseEntity`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@GetMapping("/book/{id}")
+	public ResponseEntity<Book> showBook(@PathVariable Long id) {
+
+		Book book = findBook(id);
+		String version = book.getVersion();
+
+		return ResponseEntity
+				.ok()
+				.cacheControl(CacheControl.maxAge(30, TimeUnit.DAYS))
+				.eTag(version) // lastModified is also available
+				.body(book);
+	}
+----
+
+This will send an 304 (NOT_MODIFIED) response with an empty body, if the comparison
+to the conditional request headers indicates the content has not changed. Otherwise the
+"ETag" and "Cache-Control" headers will be added to the response.
+
+The check against conditional request headers can also be made in the controller:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RequestMapping
+	public String myHandleMethod(ServerWebExchange exchange, Model model) {
+
+		long eTag = ... <1>
+
+		if (exchange.checkNotModified(eTag)) {
+			return null; <2>
+		}
+
+		model.addAttribute(...); <3>
+		return "myViewName";
+	}
+----
+
+<1> Application-specific calculation.
+<2> Response has been set to 304 (NOT_MODIFIED), no further processing.
+<3> Continue with request processing.
+
+There are 3 variants for checking conditional requests against eTag values, lastModified
+values, or both. For conditional "GET" and "HEAD" requests, the response may be set to
+304 (NOT_MODIFIED). For conditional "POST", "PUT", and "DELETE", the response would be set
+to 409 (PRECONDITION_FAILED) instead to prevent concurrent modification.
+
+
+
+[[webflux-caching-static-resources]]
+=== Static resources
+[.small]#<<web.adoc#mvc-caching-static-resources,Same in Spring MVC>>#
+
+Static resources should be served with a "Cache-Control" and conditional response headers
+for optimal performance. See section on configuring <<webflux-config-static-resources>>.
+
+
+
+
 [[webflux-config]]
 == WebFlux Config
 [.small]#<<web.adoc#mvc-config,Same in Spring MVC>>#

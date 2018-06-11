@@ -3708,6 +3708,7 @@ http://hdiv.org/[HDIV] is another web security framework that integrates with Sp
 
 [[mvc-caching]]
 == HTTP Caching
+[.small]#<<web-reactive.adoc#webflux-caching,Same in Spring WebFlux>>#
 
 HTTP caching can significantly improve the performance of a web application. HTTP caching
 revolves around the "Cache-Control" response header and subsequently conditional request
@@ -3723,6 +3724,7 @@ This section describes HTTP caching related options available in Spring Web MVC.
 
 [[mvc-caching-cachecontrol]]
 === `CacheControl`
+[.small]#<<web-reactive.adoc#webflux-caching-cachecontrol,Same in Spring WebFlux>>#
 
 {api-spring-framework}/http/CacheControl.html[`CacheControl`] provides support for
 configuring settings related to the "Cache-Control" header and is accepted as an argument
@@ -3764,6 +3766,7 @@ works as follows:
 
 [[mvc-caching-etag-lastmodified]]
 === Controllers
+[.small]#<<web-reactive.adoc#webflux-caching-etag-lastmodified,Same in Spring WebFlux>>#
 
 Controllers can add explicit support for HTTP caching. This is recommended since the
 lastModified or ETag value for a resource needs to be calculated before it can be compared
@@ -3823,6 +3826,7 @@ to 409 (PRECONDITION_FAILED) instead to prevent concurrent modification.
 
 [[mvc-caching-static-resources]]
 === Static resources
+[.small]#<<web-reactive.adoc#webflux-caching-static-resources,Same in Spring WebFlux>>#
 
 Static resources should be served with a "Cache-Control" and conditional response headers
 for optimal performance. See section on configuring <<mvc-config-static-resources>>.
