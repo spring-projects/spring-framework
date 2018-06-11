@@ -38,6 +38,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.lang.UsesJava7;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.NumberUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Generic utility methods for working with JDBC. Mainly for internal use
@@ -335,7 +336,7 @@ public abstract class JdbcUtils {
 			return action.processMetaData(metaData);
 		}
 		catch (CannotGetJdbcConnectionException ex) {
-			throw new MetaDataAccessException("Could not get Connection for extracting meta data", ex);
+			throw new MetaDataAccessException("Could not get Connection for extracting meta-data", ex);
 		}
 		catch (SQLException ex) {
 			throw new MetaDataAccessException("Error while extracting DatabaseMetaData", ex);
@@ -458,13 +459,13 @@ public abstract class JdbcUtils {
 	 * <p><i>columnLabel - the label for the column specified with the SQL AS clause.
 	 * If the SQL AS clause was not specified, then the label is the name of the column</i>.
 	 * @return the column name to use
-	 * @param resultSetMetaData the current meta data to use
+	 * @param resultSetMetaData the current meta-data to use
 	 * @param columnIndex the index of the column for the look up
 	 * @throws SQLException in case of lookup failure
 	 */
 	public static String lookupColumnName(ResultSetMetaData resultSetMetaData, int columnIndex) throws SQLException {
 		String name = resultSetMetaData.getColumnLabel(columnIndex);
-		if (name == null || name.length() < 1) {
+		if (!StringUtils.hasLength(name)) {
 			name = resultSetMetaData.getColumnName(columnIndex);
 		}
 		return name;
