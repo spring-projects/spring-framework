@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ public interface MessageHandler {
 	/**
 	 * Handle the given message.
 	 * @param message the message to be handled
+	 * @throws MessagingException if the handler failed to process the message
 	 */
 	void handleMessage(Message<?> message) throws MessagingException;
 
