@@ -22,12 +22,14 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -704,10 +706,10 @@ public class JdbcTemplateTests {
 	@Test
 	public void testBatchUpdateWithListOfObjectArrays() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
-		final List<Object[]> ids = new ArrayList<>();
+		final List<Object[]> ids = new ArrayList<>(2);
 		ids.add(new Object[] {100});
 		ids.add(new Object[] {200});
-		final int[] rowsAffected = new int[] { 1, 2 };
+		final int[] rowsAffected = new int[] {1, 2};
 
 		given(this.preparedStatement.executeBatch()).willReturn(rowsAffected);
 		mockDatabaseMetaData(true);
@@ -730,11 +732,11 @@ public class JdbcTemplateTests {
 	@Test
 	public void testBatchUpdateWithListOfObjectArraysPlusTypeInfo() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
-		final List<Object[]> ids = new ArrayList<>();
+		final List<Object[]> ids = new ArrayList<>(2);
 		ids.add(new Object[] {100});
 		ids.add(new Object[] {200});
 		final int[] sqlTypes = new int[] {Types.NUMERIC};
-		final int[] rowsAffected = new int[] { 1, 2 };
+		final int[] rowsAffected = new int[] {1, 2};
 
 		given(this.preparedStatement.executeBatch()).willReturn(rowsAffected);
 		mockDatabaseMetaData(true);
@@ -1070,14 +1072,13 @@ public class JdbcTemplateTests {
 		given(this.callableStatement.execute()).willReturn(true);
 		given(this.callableStatement.getUpdateCount()).willReturn(-1);
 
-		List<SqlParameter> params = new ArrayList<>();
-		params.add(new SqlReturnResultSet("", (RowCallbackHandler) rs -> {
+		SqlParameter param = new SqlReturnResultSet("", (RowCallbackHandler) rs -> {
 			throw new InvalidDataAccessApiUsageException("");
-		}));
+		});
 
 		this.thrown.expect(InvalidDataAccessApiUsageException.class);
 		try {
-			this.template.call(conn -> conn.prepareCall("my query"), params);
+			this.template.call(conn -> conn.prepareCall("my query"), Collections.singletonList(param));
 		}
 		finally {
 			verify(this.resultSet).close();
@@ -1099,16 +1100,33 @@ public class JdbcTemplateTests {
 		assertTrue("now it should have been set to case insensitive",
 				this.template.isResultsMapCaseInsensitive());
 
-		List<SqlParameter> params = new ArrayList<>();
-		params.add(new SqlOutParameter("a", 12));
-
-		Map<String, Object> out = this.template.call(conn -> conn.prepareCall("my query"), params);
+		Map<String, Object> out = this.template.call(
+				conn -> conn.prepareCall("my query"), Collections.singletonList(new SqlOutParameter("a", 12)));
 
 		assertThat(out, instanceOf(LinkedCaseInsensitiveMap.class));
 		assertNotNull("we should have gotten the result with upper case", out.get("A"));
 		assertNotNull("we should have gotten the result with lower case", out.get("a"));
 		verify(this.callableStatement).close();
 		verify(this.connection).close();
+	}
+
+	@Test  // SPR-16578
+	public void testEquallyNamedColumn() throws SQLException {
+		given(this.connection.createStatement()).willReturn(this.statement);
+
+		ResultSetMetaData metaData = mock(ResultSetMetaData.class);
+		given(metaData.getColumnCount()).willReturn(2);
+		given(metaData.getColumnLabel(1)).willReturn("x");
+		given(metaData.getColumnLabel(2)).willReturn("X");
+		given(this.resultSet.getMetaData()).willReturn(metaData);
+
+		given(this.resultSet.next()).willReturn(true, false);
+		given(this.resultSet.getObject(1)).willReturn("first value");
+		given(this.resultSet.getObject(2)).willReturn("second value");
+
+		Map<String, Object> map = this.template.queryForMap("my query");
+		assertEquals(1, map.size());
+		assertEquals("first value", map.get("x"));
 	}
 
 
