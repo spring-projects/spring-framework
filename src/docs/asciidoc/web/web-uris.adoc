@@ -104,29 +104,24 @@ An example of using the `DefaultUriBuilderFactory`:
 = URI Encoding
 [.small]#Spring MVC and Spring WebFlux#
 
-The default way of encoding URIs in `UriComponents` works as follows:
+By default `UriComponents` encodes only characters that are illegal within a given URI
+component, but not all characters with reserved meaning. More specifically `UriComponents`
+does the following:
 
-. URI variables are expanded.
-. Each URI component (path, query, etc) is encoded individually.
+. Expand URI variables.
+. Encode each URI component (path, query, etc) individually, by applying percent encoding
+to illegal characters such as non-US-ASCII characters as well as any characters that are
+illegal within the URI component, as per RFC 3986.
 
-The rules for encoding are as follows: within a URI component, apply percent encoding to
-all illegal characters, including non-US-ASCII characters, and all other characters that
-are illegal within the URI component, as defined in RFC 3986.
+This is comparable to the way the `java.net.URI` multi-argument constructor works and is
+described in the "Escaped octets, quotation, encoding, and decoding" section of its Javadoc.
 
-[TIP]
-====
-The encoding in `UriComponents` is comparable to the multi-argument constructor of
-`java.net.URI`, as described in the "Escaped octets, quotation, encoding, and decoding"
-section of its class-level Javadoc.
-====
+In some cases, you may want to ensure that expanded URI variables do not impact the
+structure and meaning of the URI. That means encoding not only illegal characters but also
+all characters with reserved meaning in a URI.
 
-The above default encoding strategy *does not* encode all characters with reserved
-meaning, but only the ones that are illegal within a given URI component. If this is not
-what you expect, you can use the alternative strategy described next.
-
-When using <<web-uribuilder,DefaultUriBuilderFactory>> -- plugged into the `WebClient`,
-`RestTemplate`, or used directly, you can switch to an alternative encoding strategy as
-shown below:
+The `WebClient` and the `RestTemplate` can be switched to a different encoding mode
+through the <<web-uribuilder,UriBuilderFactory>> strategy:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -135,11 +130,13 @@ shown below:
 	DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl)
 	factory.setEncodingMode(EncodingMode.VALUES_ONLY);
 
-	// ...
+	WebClient client = WebClient.builder().uriBuilderFactory(factory).build();
+
+	RestTemplate restTemplate = new RestTemplate();
+	restTemplate.setUriTemplateHandler(factory);
 ----
 
-This alternative encoding strategy applies `UriUtils.encode(String, Charset)` to each URI
-variable value prior to expanding it, effectively encoding all non-US-ASCII characters,
-and *all* characters with reserved meaning in a URI, which ensures that the expanded URI
-variables do not have any impact on the structure or meaning of the URI.
+Internally `DefaultUriBuilderFactory` delegates to `UriUtils.encode(String, Charset)` to
+encode each URI variable value prior to expanding it, effectively encoding both all
+non-US-ASCII characters, and characters with reserved meaning in a URI.
 
