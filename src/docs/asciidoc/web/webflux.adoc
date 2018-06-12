@@ -1306,6 +1306,41 @@ logic. This is a more advanced option that requires sub-classing
 you can check the custom attribute and return your own `RequestCondition`.
 
 
+[[webflux-ann-requestmapping-registration]]
+==== Explicit Registrations
+[.small]#<<web.adoc#mvc-ann-requestmapping-registration,Same in Spring MVC>>#
+
+Handler methods can be registered programmatically which can be used for dynamic
+registrations, or for advanced cases such as different instances of the same handler
+under different URLs. Below is an example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Configuration
+public class MyConfig {
+
+	@Autowired
+	public void setHandlerMapping(RequestMappingHandlerMapping mapping, UserHandler handler) <1>
+			throws NoSuchMethodException {
+
+		RequestMappingInfo info = RequestMappingInfo
+				.paths("/user/{id}").methods(RequestMethod.GET).build(); <2>
+
+		Method method = UserHandler.class.getMethod("getUser", Long.class); <3>
+
+		mapping.registerMapping(info, handler, method); <4>
+	}
+
+}
+----
+
+<1> Inject target handler(s) and the handler mapping for controllers.
+<2> Prepare the request mapping meta data.
+<3> Get the handler method.
+<4> Add the registration.
+
+
 
 [[webflux-ann-methods]]
 === Handler methods
