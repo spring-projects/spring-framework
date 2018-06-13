@@ -16,30 +16,32 @@
 
 package org.springframework.core.env;
 
+import java.util.function.Predicate;
+
 /**
- * A set of profiles that may be {@link Environment#acceptsProfiles(Profiles) accepted} by
+ * Profile predicate that may be {@link Environment#acceptsProfiles(Profiles) accepted} by
  * an {@link Environment}.
  * <p>
  * May be implemented directly or, more usually, created using the {@link #of(String...)
  * of(...)} factory method.
  *
  * @author Phillip Webb
- * @since 5.0
- * @see #of(String...)
+ * @since 5.1
  */
 @FunctionalInterface
 public interface Profiles {
 
 	/**
-	 * Test if this profile set matches against given active profiles.
+	 * Test if this profile predicate matches against given active profiles.
+	 * @param activeProfiles test whether a given profile is currently active
 	 */
-	boolean matches(ActiveProfiles activeProfiles);
+	boolean matches(Predicate<String> activeProfiles);
 
 	/**
 	 * Return a new {@link Profiles} instance that checks for matches against the given
 	 * profile strings. The returned instance will
-	 * {@link Profiles#matches(ActiveProfiles) matches} if any one of the given profile
-	 * strings match.
+	 * {@link Profiles#matches(Predicate)} match} if any one of the given profile strings
+	 * match.
 	 * <p>
 	 * A profile string may contains a simple profile name (for example
 	 * {@code "production"}) or a profile expression. A profile expression allows for more
@@ -59,18 +61,8 @@ public interface Profiles {
 	 * @param profiles the profiles to include
 	 * @return a new {@link Profiles} instance
 	 */
-	public static Profiles of(String... profiles) {
+	static Profiles of(String... profiles) {
 		return ProfilesParser.parse(profiles);
 	}
 
-	/**
-	 * The current set of active profiles.
-	 */
-	interface ActiveProfiles {
-
-		/**
-		 * Tests if given profile is currently active.
-		 */
-		boolean contains(String profile);
-	}
 }

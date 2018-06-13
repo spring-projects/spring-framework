@@ -19,10 +19,10 @@ package org.springframework.core.env;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.function.Predicate;
 
-import org.springframework.core.env.Profiles.ActiveProfiles;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -30,7 +30,6 @@ import org.springframework.util.StringUtils;
  * Internal parser used by {@link Profiles#of}.
  *
  * @author Phillip Webb
- * @since 5.0
  */
 class ProfilesParser {
 
@@ -55,7 +54,7 @@ class ProfilesParser {
 		Operator operator = null;
 		while (tokens.hasMoreTokens()) {
 			String token = tokens.nextToken().trim();
-			if(token.isEmpty()) {
+			if (token.isEmpty()) {
 				continue;
 			}
 			switch (token) {
@@ -86,7 +85,8 @@ class ProfilesParser {
 		return merge(expression, elements, operator);
 	}
 
-	private static Profiles merge(String expression, List<Profiles> elements, Operator operator) {
+	private static Profiles merge(String expression, List<Profiles> elements,
+			Operator operator) {
 		assertWellFormed(expression, !elements.isEmpty());
 		if (elements.size() == 1) {
 			return elements.get(0);
@@ -115,16 +115,17 @@ class ProfilesParser {
 	}
 
 	private static Profiles equals(String profile) {
-		return (activeProfile) -> activeProfile.contains(profile);
+		return (activeProfile) -> activeProfile.test(profile);
 	}
 
-	private static Predicate<Profiles> isMatch(ActiveProfiles activeProfile) {
+	private static Predicate<Profiles> isMatch(Predicate<String> activeProfile) {
 		return (profiles) -> profiles.matches(activeProfile);
 	}
 
 	enum Operator {
-		AND, OR
-	};
+		AND,
+		OR
+	}
 
 	private static class ParsedProfiles implements Profiles {
 
@@ -138,7 +139,7 @@ class ProfilesParser {
 		}
 
 		@Override
-		public boolean matches(ActiveProfiles activeProfiles) {
+		public boolean matches(Predicate<String> activeProfiles) {
 			for (Profiles candidate : this.parsed) {
 				if (candidate.matches(activeProfiles)) {
 					return true;
@@ -149,7 +150,9 @@ class ProfilesParser {
 
 		@Override
 		public String toString() {
-			return StringUtils.arrayToCommaDelimitedString(this.expressions);
+			return StringUtils.arrayToDelimitedString(this.expressions, " or ");
 		}
+
 	}
+
 }

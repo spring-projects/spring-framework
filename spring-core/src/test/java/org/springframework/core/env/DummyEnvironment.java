@@ -74,7 +74,13 @@ public class DummyEnvironment implements Environment {
 	}
 
 	@Override
+	public boolean acceptsProfiles(String... profiles) {
+		return false;
+	}
+
+	@Override
 	public boolean acceptsProfiles(Profiles profiles) {
 		return false;
 	}
+
 }

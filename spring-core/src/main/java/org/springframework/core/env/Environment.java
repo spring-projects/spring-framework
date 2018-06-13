@@ -97,18 +97,22 @@ public interface Environment extends PropertyResolver {
 	/**
 	 * Return whether one or more of the given profiles is active or, in the case of no
 	 * explicit active profiles, whether one or more of the given profiles is included in
-	 * the set of default profiles. Profiles can simple indicators ('{@code p1}',
-	 * {@code !p1}) or more complex boolean expressions. See {@link Profiles#of(String...)}
-	 * for syntax details.
+	 * the set of default profiles. If a profile begins with '!' the logic is inverted,
+	 * i.e. the method will return true if the given profile is <em>not</em> active.
+	 * For example, <pre class="code">env.acceptsProfiles("p1", "!p2")</pre> will
+	 * return {@code true} if profile 'p1' is active or 'p2' is not active.
+	 * @throws IllegalArgumentException if called with zero arguments
+	 * or if any profile is {@code null}, empty or whitespace-only
 	 * @see #getActiveProfiles
 	 * @see #getDefaultProfiles
+	 * @see #acceptsProfiles(Profiles)
+	 * @deprecated as of 5.1 in favor of {@link #acceptsProfiles(Profiles)}
 	 */
-	default boolean acceptsProfiles(String... profiles) {
-		return acceptsProfiles(Profiles.of(profiles));
-	}
+	@Deprecated
+	boolean acceptsProfiles(String... profiles);
 
 	/**
-	 * Returns whether the active profiles match the given {@link Profiles} set.
+	 * Return whether the active profiles match the given {@link Profiles} predicate.
 	 */
 	boolean acceptsProfiles(Profiles profiles);
 

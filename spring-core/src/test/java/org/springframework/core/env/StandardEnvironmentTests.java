@@ -326,12 +326,12 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test
-	public void acceptsProfiles_withProfileExpression() throws Exception {
-		assertThat(environment.acceptsProfiles("p1 & p2"), is(false));
+	public void acceptsProfiles_withProfileExpression() {
+		assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2")), is(false));
 		environment.addActiveProfile("p1");
-		assertThat(environment.acceptsProfiles("p1 & p2"), is(false));
+		assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2")), is(false));
 		environment.addActiveProfile("p2");
-		assertThat(environment.acceptsProfiles("p1 & p2"), is(true));
+		assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2")), is(true));
 	}
 
 	@Test
