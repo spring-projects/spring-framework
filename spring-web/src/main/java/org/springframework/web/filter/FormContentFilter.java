@@ -41,6 +41,7 @@ import org.springframework.http.converter.support.AllEncompassingFormHttpMessage
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
@@ -56,7 +57,6 @@ public class FormContentFilter extends OncePerRequestFilter {
 
 	private static final List<String> HTTP_METHODS = Arrays.asList("PUT", "PATCH", "DELETE");
 
-
 	private FormHttpMessageConverter formConverter = new AllEncompassingFormHttpMessageConverter();
 
 
@@ -65,7 +65,7 @@ public class FormContentFilter extends OncePerRequestFilter {
 	 * <p>By default this is an instance of {@link AllEncompassingFormHttpMessageConverter}.
 	 */
 	public void setFormConverter(FormHttpMessageConverter converter) {
-		Assert.notNull(converter, "FormHttpMessageConverter is required.");
+		Assert.notNull(converter, "FormHttpMessageConverter is required");
 		this.formConverter = converter;
 	}
 
@@ -84,12 +84,12 @@ public class FormContentFilter extends OncePerRequestFilter {
 
 
 	@Override
-	protected void doFilterInternal(final HttpServletRequest request, HttpServletResponse response,
-			FilterChain filterChain) throws ServletException, IOException {
+	protected void doFilterInternal(
+			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
 
 		MultiValueMap<String, String> params = parseIfNecessary(request);
-
-		if (params != null && !params.isEmpty()) {
+		if (!CollectionUtils.isEmpty(params)) {
 			filterChain.doFilter(new FormContentRequestWrapper(request, params), response);
 		}
 		else {
@@ -99,19 +99,16 @@ public class FormContentFilter extends OncePerRequestFilter {
 
 	@Nullable
 	private MultiValueMap<String, String> parseIfNecessary(HttpServletRequest request) throws IOException {
-
 		if (!shouldParse(request)) {
 			return null;
 		}
 
 		HttpInputMessage inputMessage = new ServletServerHttpRequest(request) {
-
 			@Override
 			public InputStream getBody() throws IOException {
 				return request.getInputStream();
 			}
 		};
-
 		return this.formConverter.read(null, inputMessage);
 	}
 
