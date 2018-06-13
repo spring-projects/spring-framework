@@ -113,6 +113,34 @@ public class MockHttpServletRequestTests {
 	}
 
 	@Test
+	public void getReaderAfterGettingInputStream() throws IOException {
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage("Cannot call getReader() after" + 
+				" getInputStream() has already been called for the current request");
+		try {
+			request.getInputStream();
+		}
+		catch (IllegalStateException e) {
+			fail("Call to getInputStream() failed unexpectedly.");
+		}
+		request.getReader();
+	}
+
+	@Test
+	public void getInputStreamAfterGettingReader() throws IOException {
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage("Cannot call getInputStream() after" + 
+				" getReader() has already been called for the current request");
+		try {
+			request.getReader();
+		}
+		catch (IllegalStateException e) {
+			fail("Call to getReader() failed unexpectedly.");
+		}
+		request.getInputStream();
+	}
+
+	@Test
 	public void setContentType() {
 		String contentType = "test/plain";
 		request.setContentType(contentType);
