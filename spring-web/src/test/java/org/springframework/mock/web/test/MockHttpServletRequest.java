@@ -174,6 +174,10 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private String contentType;
 
+	private ServletInputStream inputStream;
+
+	private BufferedReader reader;
+
 	private final Map<String, String[]> parameters = new LinkedHashMap<>(16);
 
 	private String protocol = DEFAULT_PROTOCOL;
@@ -473,12 +477,18 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public ServletInputStream getInputStream() {
-		if (this.content != null) {
-			return new DelegatingServletInputStream(new ByteArrayInputStream(this.content));
+		if (this.inputStream != null) {
+			return this.inputStream;
 		}
-		else {
-			return EMPTY_SERVLET_INPUT_STREAM;
+		else if (this.reader != null) {
+			throw new IllegalStateException(
+					"Cannot call getInputStream() after getReader() has already been called for the current request")			;
 		}
+
+		this.inputStream = (this.content != null ?
+				new DelegatingServletInputStream(new ByteArrayInputStream(this.content)) :
+				EMPTY_SERVLET_INPUT_STREAM);
+		return this.inputStream;
 	}
 
 	/**
@@ -507,8 +517,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 */
 	public void setParameters(Map<String, ?> params) {
 		Assert.notNull(params, "Parameter map must not be null");
-		for (String key : params.keySet()) {
-			Object value = params.get(key);
+		params.forEach((key, value) -> {
 			if (value instanceof String) {
 				setParameter(key, (String) value);
 			}
@@ -519,7 +528,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 				throw new IllegalArgumentException(
 						"Parameter map value must be single value " + " or array of type [" + String.class.getName() + "]");
 			}
-		}
+		});
 	}
 
 	/**
@@ -557,8 +566,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 */
 	public void addParameters(Map<String, ?> params) {
 		Assert.notNull(params, "Parameter map must not be null");
-		for (String key : params.keySet()) {
-			Object value = params.get(key);
+		params.forEach((key, value) -> {
 			if (value instanceof String) {
 				addParameter(key, (String) value);
 			}
@@ -569,7 +577,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 				throw new IllegalArgumentException("Parameter map value must be single value " +
 						" or array of type [" + String.class.getName() + "]");
 			}
-		}
+		});
 	}
 
 	/**
@@ -677,16 +685,25 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public BufferedReader getReader() throws UnsupportedEncodingException {
+		if (this.reader != null) {
+			return this.reader;
+		}
+		else if (this.inputStream != null) {
+			throw new IllegalStateException(
+					"Cannot call getReader() after getInputStream() has already been called for the current request")			;
+		}
+
 		if (this.content != null) {
 			InputStream sourceStream = new ByteArrayInputStream(this.content);
 			Reader sourceReader = (this.characterEncoding != null) ?
 					new InputStreamReader(sourceStream, this.characterEncoding) :
 					new InputStreamReader(sourceStream);
-			return new BufferedReader(sourceReader);
+			this.reader = new BufferedReader(sourceReader);
 		}
 		else {
-			return EMPTY_BUFFERED_READER;
+			this.reader = EMPTY_BUFFERED_READER;
 		}
+		return this.reader;
 	}
 
 	public void setRemoteAddr(String remoteAddr) {
