@@ -143,7 +143,7 @@ public final class ResponseCookie extends HttpCookie {
 			sb.append("; Expires=");
 			HttpHeaders headers = new HttpHeaders();
 			long seconds = this.maxAge.getSeconds();
-			headers.setExpires(seconds > 0 ? System.currentTimeMillis() + seconds : 0);
+			headers.setExpires(seconds > 0 ? System.currentTimeMillis() + (1000 * seconds) : 0);
 			sb.append(headers.getFirst(HttpHeaders.EXPIRES));
 		}
 
