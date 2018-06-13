@@ -32,8 +32,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 
 /**
- * Implementations of {@link ExchangeFilterFunction} that provide various useful request filter
- * operations, such as basic authentication, error handling, etc.
+ * Static factory methods providing access to built-in implementations of
+ * {@link ExchangeFilterFunction} for basic authentication, error handling, etc.
  *
  * @author Rob Winch
  * @author Arjen Poutsma
@@ -42,93 +42,84 @@ import org.springframework.util.Assert;
 public abstract class ExchangeFilterFunctions {
 
 	/**
-	 * Name of the {@link ClientRequest} attribute that contains the
-	 * {@link Credentials}, as used by {@link #basicAuthentication()}.
+	 * Name of the {@linkplain ClientRequest#attributes() request attribute} that
+	 * contains the {@link Credentials} used by {@link #basicAuthentication()}.
 	 */
 	public static final String BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE =
 			ExchangeFilterFunctions.class.getName() + ".basicAuthenticationCredentials";
 
 
 	/**
-	 * Return a filter that adds an Authorization header for HTTP Basic Authentication, based on
-	 * the given username and password.
+	 * Return a filter for HTTP Basic Authentication that adds an authorization
+	 * header, based on the given user and password.
 	 * <p>Note that Basic Authentication only supports characters in the
 	 * {@link StandardCharsets#ISO_8859_1 ISO-8859-1} character set.
-	 * @param username the username to use
-	 * @param password the password to use
-	 * @return the {@link ExchangeFilterFunction} that adds the Authorization header
-	 * @throws IllegalArgumentException if either {@code username} or {@code password} contain
-	 * characters that cannot be encoded to ISO-8859-1
+	 * @param user the user
+	 * @param password the password
+	 * @return the filter for basic authentication
+	 * @throws IllegalArgumentException if either {@code user} or
+	 * {@code password} contain characters that cannot be encoded to ISO-8859-1.
 	 */
-	public static ExchangeFilterFunction basicAuthentication(String username, String password) {
-		Assert.notNull(username, "'username' must not be null");
+	public static ExchangeFilterFunction basicAuthentication(String user, String password) {
+		Assert.notNull(user, "'user' must not be null");
 		Assert.notNull(password, "'password' must not be null");
-		checkIllegalCharacters(username, password);
-		return basicAuthenticationInternal(r -> Optional.of(new Credentials(username, password)));
+		checkIllegalCharacters(user, password);
+		return basicAuthenticationInternal(request -> Optional.of(new Credentials(user, password)));
 	}
 
 	/**
-	 * Return a filter that adds an Authorization header for HTTP Basic Authentication, based on
-	 * the {@link Credentials} provided in the
-	 * {@linkplain ClientRequest#attributes() request attributes}. If the attribute is not found,
-	 * no authorization header is added.
-	 * <p>Note that Basic Authentication only supports characters in the
-	 * {@link StandardCharsets#ISO_8859_1 ISO-8859-1} character set.
-	 * @return the {@link ExchangeFilterFunction} that adds the Authorization header
+	 * Variant of {@link #basicAuthentication(String, String)} that looks up
+	 * the {@link Credentials Credentials} provided in a
+	 * {@linkplain ClientRequest#attributes() request attribute}, or if the
+	 * attribute is not found, the authorization header is not added.
+	 * @return the filter for basic authentication
 	 * @see #BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE
 	 * @see Credentials#basicAuthenticationCredentials(String, String)
 	 */
 	public static ExchangeFilterFunction basicAuthentication() {
-		return basicAuthenticationInternal(
-				request -> request.attribute(BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE).map(o -> (Credentials)o));
+		return basicAuthenticationInternal(request ->
+				request.attribute(BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE)
+						.map(credentials -> (Credentials) credentials));
 	}
 
 	private static ExchangeFilterFunction basicAuthenticationInternal(
 			Function<ClientRequest, Optional<Credentials>> credentialsFunction) {
 
-		return ExchangeFilterFunction.ofRequestProcessor(
-				clientRequest -> credentialsFunction.apply(clientRequest).map(
-						credentials -> {
-							ClientRequest authorizedRequest = ClientRequest.from(clientRequest)
-									.headers(headers -> headers.set(HttpHeaders.AUTHORIZATION,
-                                            authorization(credentials)))
-									.build();
-							return Mono.just(authorizedRequest);
-						})
-						.orElse(Mono.just(clientRequest)));
+		return ExchangeFilterFunction.ofRequestProcessor(request ->
+				credentialsFunction.apply(request)
+						.map(credentials -> Mono.just(insertAuthorizationHeader(request, credentials)))
+						.orElse(Mono.just(request)));
 	}
 
-	private static String authorization(Credentials credentials) {
-		String credentialsString = credentials.username + ":" + credentials.password;
-		byte[] credentialBytes = credentialsString.getBytes(StandardCharsets.ISO_8859_1);
-		byte[] encodedBytes = Base64.getEncoder().encode(credentialBytes);
-		String encodedCredentials = new String(encodedBytes, StandardCharsets.ISO_8859_1);
-		return "Basic " + encodedCredentials;
-	}
-
-	/*
-	 * Basic authentication only supports ISO 8859-1, see
-	 * https://stackoverflow.com/questions/702629/utf-8-characters-mangled-in-http-basic-auth-username#703341
-	 */
 	private static void checkIllegalCharacters(String username, String password) {
+
+		// Basic authentication only supports ISO 8859-1, see
+		// https://stackoverflow.com/questions/702629/utf-8-characters-mangled-in-http-basic-auth-username#703341
+
 		CharsetEncoder encoder = StandardCharsets.ISO_8859_1.newEncoder();
 		if (!encoder.canEncode(username) || !encoder.canEncode(password)) {
 			throw new IllegalArgumentException(
 					"Username or password contains characters that cannot be encoded to ISO-8859-1");
 		}
+	}
 
+	private static ClientRequest insertAuthorizationHeader(ClientRequest request, Credentials credentials) {
+		return ClientRequest.from(request).headers(headers -> {
+			String credentialsString = credentials.username + ":" + credentials.password;
+			byte[] credentialBytes = credentialsString.getBytes(StandardCharsets.ISO_8859_1);
+			byte[] encodedBytes = Base64.getEncoder().encode(credentialBytes);
+			String encodedCredentials = new String(encodedBytes, StandardCharsets.ISO_8859_1);
+			headers.set(HttpHeaders.AUTHORIZATION, "Basic " + encodedCredentials);
+		}).build();
 	}
 
 
-
 	/**
-	 * Return a filter that returns a given {@link Throwable} as response if the given
+	 * Return a filter that generates an error signal when the given
 	 * {@link HttpStatus} predicate matches.
-	 * @param statusPredicate the predicate that should match the
-	 * {@linkplain ClientResponse#statusCode() response status}
-	 * @param exceptionFunction the function that returns the exception
-	 * @return the {@link ExchangeFilterFunction} that returns the given exception if the predicate
-	 * matches
+	 * @param statusPredicate the predicate to check the HTTP status with
+	 * @param exceptionFunction the function that to create the exception
+	 * @return the filter to generate an error signal
 	 */
 	public static ExchangeFilterFunction statusError(Predicate<HttpStatus> statusPredicate,
 			Function<ClientResponse, ? extends Throwable> exceptionFunction) {
@@ -137,20 +128,16 @@ public abstract class ExchangeFilterFunctions {
 		Assert.notNull(exceptionFunction, "Function must not be null");
 
 		return ExchangeFilterFunction.ofResponseProcessor(
-				clientResponse -> {
-					if (statusPredicate.test(clientResponse.statusCode())) {
-						return Mono.error(exceptionFunction.apply(clientResponse));
-					}
-					else {
-						return Mono.just(clientResponse);
-					}
-				}
+				response -> statusPredicate.test(response.statusCode()) ?
+						Mono.error(exceptionFunction.apply(response)) :
+						Mono.just(response)
 		);
 	}
 
 
 	/**
-	 * Represents a combination of username and password, as used by {@link #basicAuthentication()}.
+	 * Stores user and password for HTTP basic authentication.
+	 * @see #basicAuthentication()
 	 * @see #basicAuthenticationCredentials(String, String)
 	 */
 	public static final class Credentials {
@@ -158,6 +145,7 @@ public abstract class ExchangeFilterFunctions {
 		private final String username;
 
 		private final String password;
+
 
 		/**
 		 * Create a new {@code Credentials} instance with the given username and password.
@@ -171,22 +159,24 @@ public abstract class ExchangeFilterFunctions {
 			this.password = password;
 		}
 
+
 		/**
-		 * Return a consumer that stores the given username and password in the
-		 * {@linkplain ClientRequest.Builder#attributes(java.util.function.Consumer) request
-		 * attributes} as a {@code Credentials} object.
-		 * @param username the username
+		 * Return a {@literal Consumer} that stores the given user and password
+		 * as a request attribute of type {@code Credentials} that is in turn
+		 * used by {@link ExchangeFilterFunctions#basicAuthentication()}.
+		 * @param user the user
 		 * @param password the password
-		 * @return a consumer that adds the given credentials to the attribute map
+		 * @return a consumer that can be passed into
+		 * {@linkplain ClientRequest.Builder#attributes(java.util.function.Consumer)}
 		 * @see ClientRequest.Builder#attributes(java.util.function.Consumer)
 		 * @see #BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE
 		 */
-		public static Consumer<Map<String, Object>> basicAuthenticationCredentials(String username, String password) {
-			Credentials credentials = new Credentials(username, password);
-			checkIllegalCharacters(username, password);
-
-			return attributes -> attributes.put(BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE, credentials);
+		public static Consumer<Map<String, Object>> basicAuthenticationCredentials(String user, String password) {
+			Credentials credentials = new Credentials(user, password);
+			checkIllegalCharacters(user, password);
+			return map -> map.put(BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE, credentials);
 		}
+
 
 		@Override
 		public boolean equals(Object o) {
@@ -197,7 +187,6 @@ public abstract class ExchangeFilterFunctions {
 				Credentials other = (Credentials) o;
 				return this.username.equals(other.username) &&
 						this.password.equals(other.password);
-
 			}
 			return false;
 		}
@@ -206,7 +195,6 @@ public abstract class ExchangeFilterFunctions {
 		public int hashCode() {
 			return 31 * this.username.hashCode() + this.password.hashCode();
 		}
-
 	}
 
 }
