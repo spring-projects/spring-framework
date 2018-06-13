@@ -298,25 +298,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		Charset charset = contentType.getCharset();
 		Assert.notNull(charset, "No charset"); // should never occur
 
-		StringBuilder builder = new StringBuilder();
-		formData.forEach((name, values) ->
-				values.forEach(value -> {
-					try {
-						if (builder.length() != 0) {
-							builder.append('&');
-						}
-						builder.append(URLEncoder.encode(name, charset.name()));
-						if (value != null) {
-							builder.append('=');
-							builder.append(URLEncoder.encode(value, charset.name()));
-						}
-					}
-					catch (UnsupportedEncodingException ex) {
-						throw new IllegalStateException(ex);
-					}
-				}));
-
-		final byte[] bytes = builder.toString().getBytes(charset);
+		final byte[] bytes = serializeForm(formData, charset).getBytes(charset);
 		outputMessage.getHeaders().setContentLength(bytes.length);
 
 		if (outputMessage instanceof StreamingHttpOutputMessage) {
@@ -338,6 +320,28 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		else {
 			return mediaType;
 		}
+	}
+
+	protected String serializeForm(MultiValueMap<String, String> formData, Charset charset) {
+		StringBuilder builder = new StringBuilder();
+		formData.forEach((name, values) ->
+				values.forEach(value -> {
+					try {
+						if (builder.length() != 0) {
+							builder.append('&');
+						}
+						builder.append(URLEncoder.encode(name, charset.name()));
+						if (value != null) {
+							builder.append('=');
+							builder.append(URLEncoder.encode(value, charset.name()));
+						}
+					}
+					catch (UnsupportedEncodingException ex) {
+						throw new IllegalStateException(ex);
+					}
+				}));
+
+		return builder.toString();
 	}
 
 	private void writeMultipart(final MultiValueMap<String, Object> parts,

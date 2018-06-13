@@ -147,7 +147,7 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 		}
 	}
 
-	private String serializeForm(MultiValueMap<String, String> formData, Charset charset) {
+	protected String serializeForm(MultiValueMap<String, String> formData, Charset charset) {
 		StringBuilder builder = new StringBuilder();
 		formData.forEach((name, values) ->
 				values.forEach(value -> {
