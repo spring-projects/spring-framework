@@ -579,21 +579,44 @@ public interface WebClient {
 		/**
 		 * Register a custom error function that gets invoked when the given {@link HttpStatus}
 		 * predicate applies. The exception returned from the function will be returned from
-		 * {@link #bodyToMono(Class)} and {@link #bodyToFlux(Class)}.
-		 * <p>By default, an error handler is register that throws a
+		 * {@link #bodyToMono(Class)}, {@link #bodyToMono(ParameterizedTypeReference)},
+		 * {@link #bodyToFlux(Class)} and {@link #bodyToFlux(ParameterizedTypeReference)}.
+		 * <p>By default, an error handler is registered that throws a
 		 * {@link WebClientResponseException} when the response status code is 4xx or 5xx.
+		 * <p><b>Note:</b> when the response contains status code that can't be resolved through
+		 * {@link HttpStatus} enum, the specified predicate and exception function will not be
+		 * applied.
 		 * @param statusPredicate a predicate that indicates whether {@code exceptionFunction}
 		 * applies
 		 * @param exceptionFunction the function that returns the exception
 		 * @return this builder
+		 * @see #onStatusCode(Predicate, Function)
 		 */
 		ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,
 				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction);
 
 		/**
+		 * Register a custom error function that gets invoked when the given status code
+		 * predicate applies. The exception returned from the function will be returned from
+		 * {@link #bodyToMono(Class)}, {@link #bodyToMono(ParameterizedTypeReference)},
+		 * {@link #bodyToFlux(Class)} and {@link #bodyToFlux(ParameterizedTypeReference)}.
+		 * <p>By default, an error handler is registered that throws a
+		 * {@link WebClientResponseException} when the response status code is 4xx or 5xx.
+		 * @param statusCodePredicate a predicate that indicates whether {@code exceptionFunction}
+		 * applies
+		 * @param exceptionFunction the function that returns the exception
+		 * @return this builder
+		 * @since 5.0.7
+		 * @see StatusCodePredicates
+		 */
+		ResponseSpec onStatusCode(Predicate<Integer> statusCodePredicate,
+				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction);
+
+		/**
 		 * Extract the body to a {@code Mono}. By default, if the response has status code 4xx or
-		 * 5xx, the {@code Mono} will contain a {@link WebClientException}. This can be overridden
-		 * with {@link #onStatus(Predicate, Function)}.
+		 * 5xx, the {@code Mono} will contain a {@link WebClientResponseException}. This can be
+		 * overridden with {@link #onStatus(Predicate, Function)} and
+		 * {@link #onStatusCode(Predicate, Function)}.
 		 * @param bodyType the expected response body type
 		 * @param <T> response body type
 		 * @return a mono containing the body, or a {@link WebClientResponseException} if the
@@ -603,8 +626,9 @@ public interface WebClient {
 
 		/**
 		 * Extract the body to a {@code Mono}. By default, if the response has status code 4xx or
-		 * 5xx, the {@code Mono} will contain a {@link WebClientException}. This can be overridden
-		 * with {@link #onStatus(Predicate, Function)}.
+		 * 5xx, the {@code Mono} will contain a {@link WebClientResponseException}. This can be
+		 * overridden with {@link #onStatus(Predicate, Function)} and
+		 * {@link #onStatusCode(Predicate, Function)}
 		 * @param typeReference a type reference describing the expected response body type
 		 * @param <T> response body type
 		 * @return a mono containing the body, or a {@link WebClientResponseException} if the
@@ -614,9 +638,10 @@ public interface WebClient {
 
 		/**
 		 * Extract the body to a {@code Flux}. By default, if the response has status code 4xx or
-		 * 5xx, the {@code Flux} will contain a {@link WebClientException}. This can be overridden
-         * with {@link #onStatus(Predicate, Function)}.
-		 * @param elementType the type of element in the response
+		 * 5xx, the {@code Flux} will contain a {@link WebClientResponseException}. This can be
+		 * overridden with {@link #onStatus(Predicate, Function)} and
+		 * {@link #onStatusCode(Predicate, Function)}
+		 * @param elementType the type of elements in the response
 		 * @param <T> the type of elements in the response
 		 * @return a flux containing the body, or a {@link WebClientResponseException} if the
 		 * status code is 4xx or 5xx
@@ -625,9 +650,10 @@ public interface WebClient {
 
 		/**
 		 * Extract the body to a {@code Flux}. By default, if the response has status code 4xx or
-		 * 5xx, the {@code Flux} will contain a {@link WebClientException}. This can be overridden
-         * with {@link #onStatus(Predicate, Function)}.
-		 * @param typeReference a type reference describing the expected response body type
+		 * 5xx, the {@code Flux} will contain a {@link WebClientResponseException}. This can be
+		 * overridden with {@link #onStatus(Predicate, Function)} and
+		 * {@link #onStatusCode(Predicate, Function)}
+		 * @param typeReference a type reference describing the type of elements in the response
 		 * @param <T> the type of elements in the response
 		 * @return a flux containing the body, or a {@link WebClientResponseException} if the
 		 * status code is 4xx or 5xx

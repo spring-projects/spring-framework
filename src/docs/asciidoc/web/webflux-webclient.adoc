@@ -66,8 +66,8 @@ By default, responses with 4xx or 5xx status codes result in an error of type
 	Mono<Person> result = client.get()
 			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
 			.retrieve()
-			.onStatus(HttpStatus::is4xxServerError, response -> ...)
-			.onStatus(HttpStatus::is5xxServerError, response -> ...)
+			.onStatus(HttpStatus::is4xxClientError, response -> ...)
+			.onStatusCode(StatusCodePredicates.is(500), response -> ...)
 			.bodyToMono(Person.class);
 ----
 

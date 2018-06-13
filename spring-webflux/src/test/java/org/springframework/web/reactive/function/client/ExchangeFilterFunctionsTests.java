@@ -32,6 +32,7 @@ import static org.springframework.web.reactive.function.client.ExchangeFilterFun
 
 /**
  * @author Arjen Poutsma
+ * @author Denys Ivano
  */
 public class ExchangeFilterFunctionsTests {
 
@@ -147,6 +148,7 @@ public class ExchangeFilterFunctionsTests {
 		ClientRequest request = ClientRequest.create(GET, URI.create("http://example.com")).build();
 		ClientResponse response = mock(ClientResponse.class);
 		when(response.statusCode()).thenReturn(HttpStatus.NOT_FOUND);
+		when(response.rawStatusCode()).thenReturn(HttpStatus.NOT_FOUND.value());
 
 		ExchangeFunction exchange = r -> Mono.just(response);
 
@@ -165,11 +167,91 @@ public class ExchangeFilterFunctionsTests {
 		ClientRequest request = ClientRequest.create(GET, URI.create("http://example.com")).build();
 		ClientResponse response = mock(ClientResponse.class);
 		when(response.statusCode()).thenReturn(HttpStatus.NOT_FOUND);
+		when(response.rawStatusCode()).thenReturn(HttpStatus.NOT_FOUND.value());
 
 		ExchangeFunction exchange = r -> Mono.just(response);
 
 		ExchangeFilterFunction errorHandler = ExchangeFilterFunctions.statusError(
 				HttpStatus::is5xxServerError, r -> new MyException());
+
+		Mono<ClientResponse> result = errorHandler.filter(request, exchange);
+
+		StepVerifier.create(result)
+				.expectNext(response)
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void statusHandlerUnknownStatusCode() {
+		ClientRequest request = ClientRequest.create(GET, URI.create("http://example.com")).build();
+		ClientResponse response = mock(ClientResponse.class);
+		when(response.statusCode()).thenThrow(new IllegalArgumentException("999"));
+		when(response.rawStatusCode()).thenReturn(999);
+
+		ExchangeFunction exchange = r -> Mono.just(response);
+
+		ExchangeFilterFunction errorHandler = ExchangeFilterFunctions.statusError(
+				HttpStatus::is5xxServerError, r -> new MyException());
+
+		Mono<ClientResponse> result = errorHandler.filter(request, exchange);
+
+		StepVerifier.create(result)
+				.expectNext(response)
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void statusCodeHandlerMatch() {
+		ClientRequest request = ClientRequest.create(GET, URI.create("http://example.com")).build();
+		ClientResponse response = mock(ClientResponse.class);
+		when(response.statusCode()).thenReturn(HttpStatus.NOT_FOUND);
+		when(response.rawStatusCode()).thenReturn(HttpStatus.NOT_FOUND.value());
+
+		ExchangeFunction exchange = r -> Mono.just(response);
+
+		ExchangeFilterFunction errorHandler = ExchangeFilterFunctions.statusCodeError(
+				StatusCodePredicates.is4xxClientError(), r -> new MyException());
+
+		Mono<ClientResponse> result = errorHandler.filter(request, exchange);
+
+		StepVerifier.create(result)
+				.expectError(MyException.class)
+				.verify();
+	}
+
+	@Test
+	public void statusCodeHandlerNoMatch() {
+		ClientRequest request = ClientRequest.create(GET, URI.create("http://example.com")).build();
+		ClientResponse response = mock(ClientResponse.class);
+		when(response.statusCode()).thenReturn(HttpStatus.NOT_FOUND);
+		when(response.rawStatusCode()).thenReturn(HttpStatus.NOT_FOUND.value());
+
+		ExchangeFunction exchange = r -> Mono.just(response);
+
+		ExchangeFilterFunction errorHandler = ExchangeFilterFunctions.statusCodeError(
+				StatusCodePredicates.is5xxServerError(), r -> new MyException());
+
+		Mono<ClientResponse> result = errorHandler.filter(request, exchange);
+
+		StepVerifier.create(result)
+				.expectNext(response)
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void statusCodeHandlerUnknownStatusCode() {
+		ClientRequest request = ClientRequest.create(GET, URI.create("http://example.com")).build();
+		ClientResponse response = mock(ClientResponse.class);
+		when(response.statusCode()).thenThrow(new IllegalArgumentException("999"));
+		when(response.rawStatusCode()).thenReturn(999);
+
+		ExchangeFunction exchange = r -> Mono.just(response);
+
+		ExchangeFilterFunction errorHandler = ExchangeFilterFunctions.statusCodeError(
+				StatusCodePredicates.is5xxServerError(), r -> new MyException());
 
 		Mono<ClientResponse> result = errorHandler.filter(request, exchange);
 

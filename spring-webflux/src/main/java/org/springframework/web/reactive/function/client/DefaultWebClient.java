@@ -59,6 +59,7 @@ import org.springframework.web.util.UriBuilderFactory;
  * Default implementation of {@link WebClient}.
  *
  * @author Rossen Stoyanchev
+ * @author Denys Ivano
  * @since 5.0
  */
 class DefaultWebClient implements WebClient {
@@ -369,11 +370,12 @@ class DefaultWebClient implements WebClient {
 	private static class DefaultResponseSpec implements ResponseSpec {
 
 		private static final StatusHandler DEFAULT_STATUS_HANDLER =
-				new StatusHandler(HttpStatus::isError, DefaultResponseSpec::createResponseException);
+				new StatusHandler(StatusCodePredicates.isError(),
+						DefaultResponseSpec::createResponseException);
 
 		private final Mono<ClientResponse> responseMono;
 
-		private List<StatusHandler> statusHandlers = new ArrayList<>(1);
+		private final List<StatusHandler> statusHandlers = new ArrayList<>(1);
 
 		DefaultResponseSpec(Mono<ClientResponse> responseMono) {
 			this.responseMono = responseMono;
@@ -384,12 +386,26 @@ class DefaultWebClient implements WebClient {
 		public ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,
 				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
 
+			removeDefaultStatusHandler();
+			this.statusHandlers.add(new HttpStatusHandler(statusPredicate, exceptionFunction));
+
+			return this;
+		}
+
+		@Override
+		public ResponseSpec onStatusCode(Predicate<Integer> statusCodePredicate,
+				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
+
+			removeDefaultStatusHandler();
+			this.statusHandlers.add(new StatusHandler(statusCodePredicate, exceptionFunction));
+
+			return this;
+		}
+
+		private void removeDefaultStatusHandler() {
 			if (this.statusHandlers.size() == 1 && this.statusHandlers.get(0) == DEFAULT_STATUS_HANDLER) {
 				this.statusHandlers.clear();
 			}
-			this.statusHandlers.add(new StatusHandler(statusPredicate, exceptionFunction));
-
-			return this;
 		}
 
 		@Override
@@ -435,7 +451,7 @@ class DefaultWebClient implements WebClient {
 				T bodyPublisher, Function<Mono<? extends Throwable>, T> errorFunction) {
 
 			return this.statusHandlers.stream()
-					.filter(statusHandler -> statusHandler.test(response.statusCode()))
+					.filter(statusHandler -> statusHandler.test(response.rawStatusCode()))
 					.findFirst()
 					.map(statusHandler -> statusHandler.apply(response))
 					.map(errorFunction::apply)
@@ -452,14 +468,16 @@ class DefaultWebClient implements WebClient {
 					})
 					.defaultIfEmpty(new byte[0])
 					.map(bodyBytes -> {
-						String msg = String.format("ClientResponse has erroneous status code: %d %s", response.statusCode().value(),
-								response.statusCode().getReasonPhrase());
+						int status = response.rawStatusCode();
+						HttpStatus resolvedStatus = HttpStatus.resolve(status);
+						String msg = "ClientResponse has erroneous status code: " + status +
+								(resolvedStatus != null ? " " + resolvedStatus.getReasonPhrase() : "");
 						Charset charset = response.headers().contentType()
 								.map(MimeType::getCharset)
 								.orElse(StandardCharsets.ISO_8859_1);
 						return new WebClientResponseException(msg,
-								response.statusCode().value(),
-								response.statusCode().getReasonPhrase(),
+								status,
+								resolvedStatus != null ? resolvedStatus.getReasonPhrase() : null,
 								response.headers().asHttpHeaders(),
 								bodyBytes,
 								charset
@@ -470,11 +488,11 @@ class DefaultWebClient implements WebClient {
 
 		private static class StatusHandler {
 
-			private final Predicate<HttpStatus> predicate;
+			private final Predicate<Integer> predicate;
 
 			private final Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction;
 
-			public StatusHandler(Predicate<HttpStatus> predicate,
+			public StatusHandler(Predicate<Integer> predicate,
 					Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
 
 				Assert.notNull(predicate, "Predicate must not be null");
@@ -483,12 +501,28 @@ class DefaultWebClient implements WebClient {
 				this.exceptionFunction = exceptionFunction;
 			}
 
-			public boolean test(HttpStatus status) {
+			public boolean test(int status) {
 				return this.predicate.test(status);
 			}
 
 			public Mono<? extends Throwable> apply(ClientResponse response) {
 				return this.exceptionFunction.apply(response);
+			}
+		}
+
+		private static class HttpStatusHandler extends StatusHandler {
+
+			public HttpStatusHandler(Predicate<HttpStatus> predicate,
+					Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
+
+				super(statusCodePredicate(predicate), exceptionFunction);
+			}
+
+			private static Predicate<Integer> statusCodePredicate(Predicate<HttpStatus> predicate) {
+				return status -> {
+					HttpStatus resolvedStatus = HttpStatus.resolve(status);
+					return resolvedStatus != null && predicate.test(resolvedStatus);
+				};
 			}
 		}
 	}

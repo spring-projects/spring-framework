@@ -23,6 +23,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.zip.CRC32;
 
 import okhttp3.mockwebserver.MockResponse;
@@ -55,6 +56,7 @@ import static org.junit.Assert.*;
  *
  * @author Brian Clozel
  * @author Rossen Stoyanchev
+ * @author Denys Ivano
  */
 public class WebClientIntegrationTests {
 
@@ -411,7 +413,7 @@ public class WebClientIntegrationTests {
 				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
-				.expectError(WebClientException.class)
+				.expectError(WebClientResponseException.class)
 				.verify(Duration.ofSeconds(3));
 
 		expectRequestCount(1);
@@ -431,7 +433,7 @@ public class WebClientIntegrationTests {
 				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
-				.expectError(WebClientException.class)
+				.expectError(WebClientResponseException.class)
 				.verify(Duration.ofSeconds(3));
 
 		expectRequestCount(1);
@@ -457,6 +459,9 @@ public class WebClientIntegrationTests {
 					assertTrue(throwable instanceof WebClientResponseException);
 					WebClientResponseException ex = (WebClientResponseException) throwable;
 					assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatusCode());
+					assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getRawStatusCode());
+					assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
+							ex.getStatusText());
 					assertEquals(MediaType.TEXT_PLAIN, ex.getHeaders().getContentType());
 					assertEquals(errorMessage, ex.getResponseBodyAsString());
 				})
@@ -466,6 +471,38 @@ public class WebClientIntegrationTests {
 		expectRequest(request -> {
 			assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
 			assertEquals("/greeting?name=Spring", request.getPath());
+		});
+	}
+
+	@Test
+	public void shouldGetErrorSignalOnUnknownErrorStatusCode() throws Exception {
+		int errorStatus = 555; // 4xx or 5xx
+		assertNull(HttpStatus.resolve(errorStatus));
+
+		String errorMessage = "Something went wrong";
+		prepareResponse(response -> response.setResponseCode(errorStatus)
+				.setHeader("Content-Type", "text/plain").setBody(errorMessage));
+
+		Mono<String> result = this.webClient.get()
+				.uri("/unknownPage")
+				.retrieve()
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectErrorSatisfies(throwable -> {
+					assertTrue(throwable instanceof WebClientResponseException);
+					WebClientResponseException ex = (WebClientResponseException) throwable;
+					assertEquals(errorStatus, ex.getRawStatusCode());
+					assertNull(ex.getStatusText());
+					assertEquals(MediaType.TEXT_PLAIN, ex.getHeaders().getContentType());
+					assertEquals(errorMessage, ex.getResponseBodyAsString());
+				})
+				.verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
+			assertEquals("/unknownPage", request.getPath());
 		});
 	}
 
@@ -511,6 +548,100 @@ public class WebClientIntegrationTests {
 			assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
 			assertEquals("/greeting?name=Spring", request.getPath());
 		});
+	}
+
+	@Test
+	public void shouldApplyCustomStatusCodeHandler() throws Exception {
+		int status = 999;
+
+		prepareResponse(response -> response.setResponseCode(status)
+				.setHeader("Content-Type", "text/plain").setBody("Something went wrong"));
+
+		Mono<String> result = this.webClient.get()
+				.uri("/unknownServerPage")
+				.retrieve()
+				.onStatusCode(StatusCodePredicates.between(600, 999), response -> Mono.just(new MyException("Error!")))
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectError(MyException.class)
+				.verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
+			assertEquals("/unknownServerPage", request.getPath());
+		});
+	}
+
+	@Test
+	public void shouldApplyCustomStatusAndStatusCodeHandlers() throws Exception {
+		Supplier<WebClient.ResponseSpec> responseSpec = () -> {
+			return this.webClient.get()
+					.uri("/greeting?name=Spring")
+					.retrieve()
+					.onStatus(HttpStatus::is4xxClientError, response -> Mono.just(new MyException("HttpStatus 4xx")))
+					.onStatusCode(StatusCodePredicates.is5xxServerError(), response -> Mono.just(new MyException("Status code 5xx")))
+					// this handler shouldn't be called
+					.onStatus(HttpStatus::is5xxServerError, response -> Mono.just(new MyException("HttpStatus 5xx")))
+					.onStatusCode(StatusCodePredicates.between(600, 999), response -> Mono.just(new MyException("Status code >= 600")));
+		};
+
+		// 400 -> "HttpStatus 4xx"
+		prepareResponse(response -> response.setResponseCode(400)
+				.setHeader("Content-Type", "text/plain").setBody("Something went wrong"));
+
+		Mono<String> result = responseSpec.get().bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectErrorSatisfies(throwable -> {
+					assertTrue(throwable instanceof MyException);
+					assertEquals("HttpStatus 4xx", throwable.getMessage());
+				})
+				.verify(Duration.ofSeconds(3));
+
+		expectRequest(request -> {
+			assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
+			assertEquals("/greeting?name=Spring", request.getPath());
+		});
+
+		// 500 -> "Status code 5xx"
+		prepareResponse(response -> response.setResponseCode(500)
+				.setHeader("Content-Type", "text/plain").setBody("Something went wrong"));
+
+		result = responseSpec.get().bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectErrorSatisfies(throwable -> {
+					assertTrue(throwable instanceof MyException);
+					assertEquals("Status code 5xx", throwable.getMessage());
+				})
+				.verify(Duration.ofSeconds(3));
+
+		expectRequest(request -> {
+			assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
+			assertEquals("/greeting?name=Spring", request.getPath());
+		});
+
+		// 999 -> "Status code >= 600"
+		prepareResponse(response -> response.setResponseCode(999)
+				.setHeader("Content-Type", "text/plain").setBody("Something went wrong"));
+
+		result = responseSpec.get().bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectErrorSatisfies(throwable -> {
+					assertTrue(throwable instanceof MyException);
+					assertEquals("Status code >= 600", throwable.getMessage());
+				})
+				.verify(Duration.ofSeconds(3));
+
+		expectRequest(request -> {
+			assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
+			assertEquals("/greeting?name=Spring", request.getPath());
+		});
+
+		expectRequestCount(3);
 	}
 
 	@Test
@@ -603,6 +734,61 @@ public class WebClientIntegrationTests {
 				.expectComplete().verify(Duration.ofSeconds(3));
 
 		expectRequestCount(2);
+	}
+
+	@Test
+	public void shouldSupportUnknownStatusCodeOnExchange() throws Exception {
+		int status = 999;
+		assertNull(HttpStatus.resolve(status));
+
+		prepareResponse(response -> response.setResponseCode(status)
+				.setHeader("Content-Type", "text/plain")
+				.setBody("Hello Spring!"));
+
+		Mono<String> result = this.webClient.get()
+				.uri("/unknownStatusCode")
+				.exchange()
+				.flatMap(r -> {
+					assertEquals(status, r.rawStatusCode());
+					return r.bodyToMono(String.class);
+				});
+
+		StepVerifier.create(result)
+				.expectNext("Hello Spring!")
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
+			assertEquals("/unknownStatusCode", request.getPath());
+		});
+	}
+
+	@Test
+	public void shouldSupportUnknownStatusCodeOnRetrieve() throws Exception {
+		int status = 999;
+		assertNull(HttpStatus.resolve(status));
+
+		prepareResponse(response -> response.setResponseCode(status)
+				.setHeader("Content-Type", "text/plain")
+				.setBody("Hello Spring!"));
+
+		Mono<String> result = this.webClient.get()
+				.uri("/unknownStatusCode")
+				.retrieve()
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectNext("Hello Spring!")
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
+			assertEquals("/unknownStatusCode", request.getPath());
+		});
 	}
 
 	@Test

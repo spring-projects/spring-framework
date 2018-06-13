@@ -60,8 +60,21 @@ public interface ClientResponse {
 
 	/**
 	 * Return the status code of this response.
+	 * @return the status as an HttpStatus enum value
+	 * @throws IllegalArgumentException in case of an unknown HTTP status code
+	 * @see HttpStatus#valueOf(int)
 	 */
 	HttpStatus statusCode();
+
+	/**
+	 * Return the status code (potentially non-standard and not resolvable
+	 * through the {@link HttpStatus} enum) as an integer.
+	 * @return the status as an integer
+	 * @since 5.0.7
+	 * @see #statusCode()
+	 * @see HttpStatus#resolve(int)
+	 */
+	int rawStatusCode();
 
 	/**
 	 * Return the headers of this response.
@@ -173,6 +186,17 @@ public interface ClientResponse {
 	}
 
 	/**
+	 * Create a response builder with the given status code and using default strategies for
+	 * reading the body.
+	 * @param statusCode the status code
+	 * @return the created builder
+	 * @since 5.0.7
+	 */
+	static Builder create(int statusCode) {
+		return create(statusCode, ExchangeStrategies.withDefaults());
+	}
+
+	/**
 	 * Create a response builder with the given status code and strategies for reading the body.
 	 * @param statusCode the status code
 	 * @param strategies the strategies
@@ -183,12 +207,44 @@ public interface ClientResponse {
 	}
 
 	/**
+	 * Create a response builder with the given status code and strategies for reading the body.
+	 * @param statusCode the status code
+	 * @param strategies the strategies
+	 * @return the created builder
+	 * @since 5.0.7
+	 */
+	static Builder create(int statusCode, ExchangeStrategies strategies) {
+		return new DefaultClientResponseBuilder(strategies).statusCode(statusCode);
+	}
+
+	/**
 	 * Create a response builder with the given status code and message body readers.
 	 * @param statusCode the status code
 	 * @param messageReaders the message readers
 	 * @return the created builder
 	 */
 	static Builder create(HttpStatus statusCode, List<HttpMessageReader<?>> messageReaders) {
+		return create(statusCode, new ExchangeStrategies() {
+			@Override
+			public List<HttpMessageReader<?>> messageReaders() {
+				return messageReaders;
+			}
+			@Override
+			public List<HttpMessageWriter<?>> messageWriters() {
+				// not used in the response
+				return Collections.emptyList();
+			}
+		});
+	}
+
+	/**
+	 * Create a response builder with the given status code and message body readers.
+	 * @param statusCode the status code
+	 * @param messageReaders the message readers
+	 * @return the created builder
+	 * @since 5.0.7
+	 */
+	static Builder create(int statusCode, List<HttpMessageReader<?>> messageReaders) {
 		return create(statusCode, new ExchangeStrategies() {
 			@Override
 			public List<HttpMessageReader<?>> messageReaders() {
@@ -246,6 +302,14 @@ public interface ClientResponse {
 		 * @return this builder
 		 */
 		Builder statusCode(HttpStatus statusCode);
+
+		/**
+		 * Set the status code of the response.
+		 * @param statusCode the new status code.
+		 * @return this builder
+		 * @since 5.0.7
+		 */
+		Builder statusCode(int statusCode);
 
 		/**
 		 * Add the given header value(s) under the given name.

@@ -44,7 +44,7 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 	private ExchangeStrategies strategies;
 
-	private HttpStatus statusCode = HttpStatus.OK;
+	private int statusCode = HttpStatus.OK.value();
 
 	private final HttpHeaders headers = new HttpHeaders();
 
@@ -61,7 +61,7 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 	public DefaultClientResponseBuilder(ClientResponse other) {
 		Assert.notNull(other, "ClientResponse must not be null");
 		this.strategies = other.strategies();
-		statusCode(other.statusCode());
+		statusCode(other.rawStatusCode());
 		headers(headers -> headers.addAll(other.headers().asHttpHeaders()));
 		cookies(cookies -> cookies.addAll(other.cookies()));
 	}
@@ -70,6 +70,12 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 	@Override
 	public DefaultClientResponseBuilder statusCode(HttpStatus statusCode) {
 		Assert.notNull(statusCode, "HttpStatus must not be null");
+		this.statusCode = statusCode.value();
+		return this;
+	}
+
+	@Override
+	public DefaultClientResponseBuilder statusCode(int statusCode) {
 		this.statusCode = statusCode;
 		return this;
 	}
@@ -137,7 +143,7 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 	private static class BuiltClientHttpResponse implements ClientHttpResponse {
 
-		private final HttpStatus statusCode;
+		private final int statusCode;
 
 		private final HttpHeaders headers;
 
@@ -145,7 +151,7 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 		private final Flux<DataBuffer> body;
 
-		public BuiltClientHttpResponse(HttpStatus statusCode, HttpHeaders headers,
+		public BuiltClientHttpResponse(int statusCode, HttpHeaders headers,
 				MultiValueMap<String, ResponseCookie> cookies, Flux<DataBuffer> body) {
 
 			this.statusCode = statusCode;
@@ -156,12 +162,12 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 		@Override
 		public HttpStatus getStatusCode() {
-			return this.statusCode;
+			return HttpStatus.valueOf(this.statusCode);
 		}
 
 		@Override
 		public int getRawStatusCode() {
-			return this.statusCode.value();
+			return this.statusCode;
 		}
 
 		@Override
