@@ -120,16 +120,11 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 			ResolvableType elementType, @Nullable MediaType mediaType, ReactiveHttpOutputMessage message,
 			Map<String, Object> hints) {
 
-		mediaType = (mediaType != null ? mediaType : DEFAULT_FORM_DATA_MEDIA_TYPE);
-		Charset charset;
-		if (mediaType.getCharset() == null) {
-			charset = getDefaultCharset();
-			mediaType = new MediaType(mediaType, charset);
-		}
-		else {
-			charset = mediaType.getCharset();
-		}
+		mediaType = getMediaType(mediaType);
 		message.getHeaders().setContentType(mediaType);
+
+		Charset charset = mediaType.getCharset();
+		Assert.notNull(charset, "No charset"); // should never occur
 
 		return Mono.from(inputStream).flatMap(form -> {
 					String value = serializeForm(form, charset);
@@ -138,45 +133,38 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 					message.getHeaders().setContentLength(byteBuffer.remaining());
 					return message.writeWith(Mono.just(buffer));
 				});
-
 	}
 
-	private Charset getMediaTypeCharset(@Nullable MediaType mediaType) {
-		if (mediaType != null && mediaType.getCharset() != null) {
-			return mediaType.getCharset();
+	private MediaType getMediaType(@Nullable MediaType mediaType) {
+		if (mediaType == null) {
+			return DEFAULT_FORM_DATA_MEDIA_TYPE;
+		}
+		else if (mediaType.getCharset() == null) {
+			return new MediaType(mediaType, getDefaultCharset());
 		}
 		else {
-			return getDefaultCharset();
+			return mediaType;
 		}
 	}
 
-	private String serializeForm(MultiValueMap<String, String> form, Charset charset) {
+	private String serializeForm(MultiValueMap<String, String> formData, Charset charset) {
 		StringBuilder builder = new StringBuilder();
-		try {
-			for (Iterator<String> names = form.keySet().iterator(); names.hasNext();) {
-				String name = names.next();
-				for (Iterator<?> values = form.get(name).iterator(); values.hasNext();) {
-					Object rawValue = values.next();
-					builder.append(URLEncoder.encode(name, charset.name()));
-					if (rawValue != null) {
-						builder.append('=');
-						Assert.isInstanceOf(String.class, rawValue,
-								"FormHttpMessageWriter supports String values only. " +
-										"Use MultipartHttpMessageWriter for multipart requests.");
-						builder.append(URLEncoder.encode((String) rawValue, charset.name()));
-						if (values.hasNext()) {
+		formData.forEach((name, values) ->
+				values.forEach(value -> {
+					try {
+						if (builder.length() != 0) {
 							builder.append('&');
 						}
+						builder.append(URLEncoder.encode(name, charset.name()));
+						if (value != null) {
+							builder.append('=');
+							builder.append(URLEncoder.encode(value, charset.name()));
+						}
 					}
-				}
-				if (names.hasNext()) {
-					builder.append('&');
-				}
-			}
-		}
-		catch (UnsupportedEncodingException ex) {
-			throw new IllegalStateException(ex);
-		}
+					catch (UnsupportedEncodingException ex) {
+						throw new IllegalStateException(ex);
+					}
+				}));
 		return builder.toString();
 	}
 
