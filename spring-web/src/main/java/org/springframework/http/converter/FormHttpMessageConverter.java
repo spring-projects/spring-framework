@@ -26,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.mail.internet.MimeUtility;
@@ -290,35 +289,33 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		return false;
 	}
 
-	private void writeForm(MultiValueMap<String, String> form, @Nullable MediaType contentType,
+	private void writeForm(MultiValueMap<String, String> formData, @Nullable MediaType contentType,
 			HttpOutputMessage outputMessage) throws IOException {
 
-		contentType = (contentType != null ? contentType : DEFAULT_FORM_DATA_MEDIA_TYPE);
-		Charset charset = contentType.getCharset();
-		if (charset == null) {
-			charset = this.charset;
-			contentType = new MediaType(contentType, charset);
-		}
+		contentType = getMediaType(contentType);
 		outputMessage.getHeaders().setContentType(contentType);
 
+		Charset charset = contentType.getCharset();
+		Assert.notNull(charset, "No charset"); // should never occur
+
 		StringBuilder builder = new StringBuilder();
-		for (Iterator<String> nameIterator = form.keySet().iterator(); nameIterator.hasNext();) {
-			String name = nameIterator.next();
-			for (Iterator<String> valueIterator = form.get(name).iterator(); valueIterator.hasNext();) {
-				String value = valueIterator.next();
-				builder.append(URLEncoder.encode(name, charset.name()));
-				if (value != null) {
-					builder.append('=');
-					builder.append(URLEncoder.encode(value, charset.name()));
-					if (valueIterator.hasNext()) {
-						builder.append('&');
+		formData.forEach((name, values) ->
+				values.forEach(value -> {
+					try {
+						if (builder.length() != 0) {
+							builder.append('&');
+						}
+						builder.append(URLEncoder.encode(name, charset.name()));
+						if (value != null) {
+							builder.append('=');
+							builder.append(URLEncoder.encode(value, charset.name()));
+						}
 					}
-				}
-			}
-			if (nameIterator.hasNext()) {
-				builder.append('&');
-			}
-		}
+					catch (UnsupportedEncodingException ex) {
+						throw new IllegalStateException(ex);
+					}
+				}));
+
 		final byte[] bytes = builder.toString().getBytes(charset);
 		outputMessage.getHeaders().setContentLength(bytes.length);
 
@@ -328,6 +325,18 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		}
 		else {
 			StreamUtils.copy(bytes, outputMessage.getBody());
+		}
+	}
+
+	private MediaType getMediaType(@Nullable MediaType mediaType) {
+		if (mediaType == null) {
+			return DEFAULT_FORM_DATA_MEDIA_TYPE;
+		}
+		else if (mediaType.getCharset() == null) {
+			return new MediaType(mediaType, this.charset);
+		}
+		else {
+			return mediaType;
 		}
 	}
 
