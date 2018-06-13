@@ -64,6 +64,7 @@ configure(allprojects) { project ->
 	apply plugin: "test-source-set-dependencies"
 	apply plugin: "io.spring.dependency-management"
 	apply from: "${gradleScriptDir}/ide.gradle"
+	apply plugin: "checkstyle"
 
 	dependencyManagement {
 		resolutionStrategy {
@@ -73,6 +74,11 @@ configure(allprojects) { project ->
 		generatedPomCustomization {
 			enabled = false
 		}
+	}
+
+	checkstyle {
+		toolVersion = "8.10.1"
+		configDir = rootProject.file("src/checkstyle")
 	}
 
 	apply plugin: "kotlin"
@@ -163,9 +169,10 @@ configure(allprojects) { project ->
 		testRuntime("org.apache.logging.log4j:log4j-core:${log4jVersion}")
 		testRuntime("org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}")
 		testRuntime("org.apache.logging.log4j:log4j-jul:${log4jVersion}")
-        // JSR-305 only used for non-required meta-annotations
+		// JSR-305 only used for non-required meta-annotations
 		compileOnly("com.google.code.findbugs:jsr305:3.0.2")
 		testCompileOnly("com.google.code.findbugs:jsr305:3.0.2")
+		checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.5")
 	}
 
 	ext.javadocLinks = [
