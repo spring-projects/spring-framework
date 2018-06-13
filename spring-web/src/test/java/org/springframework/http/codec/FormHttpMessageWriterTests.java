@@ -16,6 +16,7 @@
 
 package org.springframework.http.codec;
 
+import java.nio.charset.Charset;
 import java.util.Map;
 
 import org.junit.Test;
@@ -85,4 +86,28 @@ public class FormHttpMessageWriterTests {
 		assertEquals(responseBody.getBytes().length, headers.getContentLength());
 	}
 
+	@Test
+	public void writeExtendForm() {
+		MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+		body.set("name 1", "value 1");
+		body.add("name 2", "value 2+1");
+		body.add("name 2", "value 2+2");
+		body.add("name 3", null);
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		FormHttpMessageWriter writer = new SignFormHttpMessageWriter();
+		writer.write(Mono.just(body), null, MediaType.APPLICATION_FORM_URLENCODED, response, null).block();
+
+		String responseBody = response.getBodyAsString().block();
+		assertEquals("name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3&sign=mysign", responseBody);
+		HttpHeaders headers = response.getHeaders();
+		assertEquals("application/x-www-form-urlencoded;charset=UTF-8", headers.getContentType().toString());
+		assertEquals(responseBody.getBytes().length, headers.getContentLength());
+	}
+
+	public class SignFormHttpMessageWriter extends FormHttpMessageWriter {
+		@Override
+		protected StringBuilder serializeForm(MultiValueMap<String, String> form, Charset charset) {
+			return super.serializeForm(form, charset).append("&sign=mysign");
+		}
+	}
 }

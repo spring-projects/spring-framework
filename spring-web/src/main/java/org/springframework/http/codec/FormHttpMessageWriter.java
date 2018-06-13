@@ -132,7 +132,7 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 		message.getHeaders().setContentType(mediaType);
 
 		return Mono.from(inputStream).flatMap(form -> {
-					String value = serializeForm(form, charset);
+					String value = serializeForm(form, charset).toString();
 					ByteBuffer byteBuffer = charset.encode(value);
 					DataBuffer buffer = message.bufferFactory().wrap(byteBuffer);
 					message.getHeaders().setContentLength(byteBuffer.remaining());
@@ -150,7 +150,7 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 		}
 	}
 
-	private String serializeForm(MultiValueMap<String, String> form, Charset charset) {
+	protected StringBuilder serializeForm(MultiValueMap<String, String> form, Charset charset) {
 		StringBuilder builder = new StringBuilder();
 		try {
 			for (Iterator<String> names = form.keySet().iterator(); names.hasNext();) {
@@ -177,7 +177,7 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 		catch (UnsupportedEncodingException ex) {
 			throw new IllegalStateException(ex);
 		}
-		return builder.toString();
+		return builder;
 	}
 
 }
