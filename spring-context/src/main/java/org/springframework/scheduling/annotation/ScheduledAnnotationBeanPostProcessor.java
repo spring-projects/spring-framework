@@ -340,13 +340,17 @@ public class ScheduledAnnotationBeanPostProcessor
 		return bean;
 	}
 
+	protected Runnable createRunnable(Method method, Object bean) {
+		Assert.isTrue(method.getParameterCount() == 0,
+				"Only no-arg methods may be annotated with @Scheduled");
+
+		Method invocableMethod = AopUtils.selectInvocableMethod(method, bean.getClass());
+		return new ScheduledMethodRunnable(bean, invocableMethod);
+	}
+
 	protected void processScheduled(Scheduled scheduled, Method method, Object bean) {
 		try {
-			Assert.isTrue(method.getParameterCount() == 0,
-					"Only no-arg methods may be annotated with @Scheduled");
-
-			Method invocableMethod = AopUtils.selectInvocableMethod(method, bean.getClass());
-			Runnable runnable = new ScheduledMethodRunnable(bean, invocableMethod);
+			Runnable runnable = createRunnable(method, bean);
 			boolean processedSchedule = false;
 			String errorMessage =
 					"Exactly one of the 'cron', 'fixedDelay(String)', or 'fixedRate(String)' attributes is required";
