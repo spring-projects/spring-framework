@@ -35,7 +35,7 @@ public class CookieWebSessionIdResolverTests {
 
 
 	@Test
-	public void setSessionId() throws Exception {
+	public void setSessionId() {
 		MockServerHttpRequest request = MockServerHttpRequest.get("https://example.org/path").build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		this.resolver.setSessionId(exchange, "123");

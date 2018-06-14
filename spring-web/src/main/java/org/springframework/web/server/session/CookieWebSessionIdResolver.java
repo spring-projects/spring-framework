@@ -92,7 +92,7 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 	 * Return the configured "SameSite" attribute value for the session cookie.
 	 */
 	public String getSameSite() {
-		return sameSite;
+		return this.sameSite;
 	}
 
 	@Override
