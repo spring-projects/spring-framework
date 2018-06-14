@@ -25,10 +25,23 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link AbstractRefreshableApplicationContext} subclass that adds common handling
- * of specified config locations. Serves as base class for XML-based application
+ * of specified config locations.
+ *
+ * 它的子类 AbstractRefreshableApplicationContext  提供一系列的公共操作，针对特定的 配置位置
+ *
+ *
+ *
+ * Serves as base class for XML-based application
+ *
  * context implementations such as {@link ClassPathXmlApplicationContext} and
  * {@link FileSystemXmlApplicationContext}, as well as
  * {@link org.springframework.web.context.support.XmlWebApplicationContext}.
+ *
+ * 作为基于xml模式applicationContext  的基础类
+ * 该类的实现有 ClassPathXmlApplicationContext 或者  FileSystemXmlApplicationContext 以及 XmlWebApplicationContext
+ *
+ * 也就是上面这三个ApplicationContext 都要实现它
+ *
  *
  * @author Juergen Hoeller
  * @since 2.5.2
@@ -42,10 +55,11 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	@Nullable
 	private String[] configLocations;
 
-	private boolean setIdCalled = false;
+	private boolean setIdCalled = false;//////?????????
 
 
 	/**
+	 *
 	 * Create a new AbstractRefreshableConfigApplicationContext with no parent.
 	 */
 	public AbstractRefreshableConfigApplicationContext() {
@@ -62,8 +76,14 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 
 	/**
 	 * Set the config locations for this application context in init-param style,
-	 * i.e. with distinct locations separated by commas, semicolons or whitespace.
+	 *
+	 * 通过 init-param style 这种方式设置定位，就是在xml文件中对一个Bean的定义中可以通过init-param 来设置值
+	 *
+	 * i.e. with distinct locations separated by commas 逗号, semicolons 分号  or whitespace 空白.
+	 * 不同的位置描述可以通过 逗号，分号，空白来区分
+	 *
 	 * <p>If not set, the implementation may use a default as appropriate.
+	 *    如果不是设置就用默认的方式
 	 */
 	public void setConfigLocation(String location) {
 		setConfigLocations(StringUtils.tokenizeToStringArray(location, CONFIG_LOCATION_DELIMITERS));
@@ -78,9 +98,9 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	public void setConfigLocations(@Nullable String... locations) {
 		if (locations != null) {
 			Assert.noNullElements(locations, "Config locations must not be null");
-			this.configLocations = new String[locations.length];
+			this.configLocations = new String[locations.length];//初始化一个字符串的数组，表示这个位置描述的集合
 			for (int i = 0; i < locations.length; i++) {
-				this.configLocations[i] = resolvePath(locations[i]).trim();
+				this.configLocations[i] = resolvePath(locations[i]).trim();//再每个做处理
 			}
 		}
 		else {

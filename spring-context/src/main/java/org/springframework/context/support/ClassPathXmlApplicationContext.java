@@ -222,6 +222,9 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 	 * Create a new ClassPathXmlApplicationContext, loading the definitions
 	 * from the given XML files and automatically refreshing the context.
 	 *
+	 * 创建一个ClassPathXmlApplicationContext 从xml文件中加载definitions
+	 * 然后自动从context中刷新
+	 *
 	 *
 	 * @param paths array of relative (or absolute) paths within the class path //路径数组，
 	 * @param clazz the class to load resources with (basis for the given paths)
@@ -238,6 +241,12 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 	 * Create a new ClassPathXmlApplicationContext with the given parent,
 	 * loading the definitions from the given XML files and automatically
 	 * refreshing the context.
+	 *
+	 *
+	 *  ClassPathXmlApplicationContext 通过给定的父类创建它
+	 *  从xml文件中加载definitions，然后自动从context中刷新
+	 *
+	 *
 	 * @param paths array of relative (or absolute) paths within the class path
 	 * @param clazz the class to load resources with (basis for the given paths)
 	 * @param parent the parent context

@@ -54,7 +54,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * @see org.springframework.web.context.ContextLoader#CONFIG_LOCATION_PARAM
 	 * @see org.springframework.web.servlet.FrameworkServlet#setContextConfigLocation
 	 */
-	String CONFIG_LOCATION_DELIMITERS = ",; \t\n";
+	String CONFIG_LOCATION_DELIMITERS = ",; \t\n";//逗号，分号，空白的常量
 
 	/**
 	 * Name of the ConversionService bean in the factory.

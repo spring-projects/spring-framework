@@ -196,6 +196,9 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 
 	/**
 	 * Load bean definitions from the specified resource location.
+	 *
+	 * 通过特定的资源的坐标位置加载 Bean 的 definitions
+	 *
 	 * <p>The location can also be a location pattern, provided that the
 	 * ResourceLoader of this bean definition reader is a ResourcePatternResolver.
 	 * @param location the resource location, to be loaded with the ResourceLoader

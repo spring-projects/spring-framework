@@ -34,20 +34,38 @@ import org.springframework.lang.Nullable;
  * 未来将会有 ListableBeanFactory 和 ConfigurableBeanFactory 类将作为特定的目的有新的特征
  *
  * <p>This interface is implemented by objects that hold a number of bean definitions,
- * each uniquely identified by a String name. Depending on the bean definition,
+ * each uniquely identified by a String name.
+ * 这个接口被对象实现，这些对象拥有一些列的Bean定义，每个唯一的定义是通过一个字符串名称表示
+ *
+ *
+ * Depending on the bean definition,
  * the factory will return either an independent instance of a contained object
  * (the Prototype design pattern), or a single shared instance (a superior
  * alternative to the Singleton design pattern, in which the instance is a
- * singleton in the scope of the factory). Which type of instance will be returned
+ * singleton in the scope of the factory).
+ * 通过这个bean定义，这个工厂将会要么返回一个独立的类实例，这个实例可能是原型模式，或者单例的共享模式
+ * 单例模式的对象时在这个工厂范围内是单例的
+ *
+ *
+ *
+ * Which type of instance will be returned
  * depends on the bean factory configuration: the API is the same. Since Spring
  * 2.0, further scopes are available depending on the concrete application
  * context (e.g. "request" and "session" scopes in a web environment).
+ * 返回什么类型的实例这个可以依据工厂的配置，API是相同的。
+ * 比如：request，session，域在a web environment中的描述
+ *
+ *
+ *
  *
  * <p>The point of this approach is that the BeanFactory is a central registry
  * of application components, and centralizes configuration of application
  * components (no more do individual objects need to read properties files,
  * for example). See chapters 4 and 11 of "Expert One-on-One J2EE Design and
  * Development" for a discussion of the benefits of this approach.
+ *
+ *
+ *
  *
  * <p>Note that it is generally better to rely on Dependency Injection
  * ("push" configuration) to configure application objects through setters
