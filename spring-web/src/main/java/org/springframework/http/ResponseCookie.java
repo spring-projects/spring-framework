@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.util.StringUtils;
  * static method.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  * @see <a href="https://tools.ietf.org/html/rfc6265">RFC 6265</a>
  */
@@ -46,12 +47,15 @@ public final class ResponseCookie extends HttpCookie {
 
 	private final boolean httpOnly;
 
+	@Nullable
+	private final String sameSite;
+
 
 	/**
 	 * Private constructor. See {@link #from(String, String)}.
 	 */
 	private ResponseCookie(String name, String value, Duration maxAge, @Nullable String domain,
-			@Nullable String path, boolean secure, boolean httpOnly) {
+			@Nullable String path, boolean secure, boolean httpOnly, @Nullable String sameSite) {
 
 		super(name, value);
 		Assert.notNull(maxAge, "Max age must not be null");
@@ -60,6 +64,7 @@ public final class ResponseCookie extends HttpCookie {
 		this.path = path;
 		this.secure = secure;
 		this.httpOnly = httpOnly;
+		this.sameSite = sameSite;
 	}
 
 
@@ -105,6 +110,16 @@ public final class ResponseCookie extends HttpCookie {
 		return this.httpOnly;
 	}
 
+	/**
+	 * Return the cookie "SameSite" attribute, or {@code null} if not set.
+	 * <p>This limits the scope of the cookie such that it will only be attached to
+	 * same site requests if {@code "Strict"} or cross-site requests if {@code "Lax"}.
+	 * @see <a href="https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis#section-4.1.2.7">RFC6265 bis</a>
+	 */
+	@Nullable
+	public String getSameSite() {
+		return this.sameSite;
+	}
 
 	@Override
 	public boolean equals(Object other) {
@@ -146,12 +161,14 @@ public final class ResponseCookie extends HttpCookie {
 			headers.setExpires(seconds > 0 ? System.currentTimeMillis() + seconds : 0);
 			sb.append(headers.getFirst(HttpHeaders.EXPIRES));
 		}
-
 		if (this.secure) {
 			sb.append("; Secure");
 		}
 		if (this.httpOnly) {
 			sb.append("; HttpOnly");
+		}
+		if (StringUtils.hasText(this.sameSite)) {
+			sb.append("; SameSite=").append(this.sameSite);
 		}
 		return sb.toString();
 	}
@@ -179,6 +196,9 @@ public final class ResponseCookie extends HttpCookie {
 			private boolean secure;
 
 			private boolean httpOnly;
+
+			@Nullable
+			private String sameSite;
 
 			@Override
 			public ResponseCookieBuilder maxAge(Duration maxAge) {
@@ -217,9 +237,15 @@ public final class ResponseCookie extends HttpCookie {
 			}
 
 			@Override
+			public ResponseCookieBuilder sameSite(String sameSite) {
+				this.sameSite = sameSite;
+				return this;
+			}
+
+			@Override
 			public ResponseCookie build() {
 				return new ResponseCookie(name, value, this.maxAge, this.domain, this.path,
-						this.secure, this.httpOnly);
+						this.secure, this.httpOnly, this.sameSite);
 			}
 		};
 	}
@@ -265,6 +291,12 @@ public final class ResponseCookie extends HttpCookie {
 		 * @see <a href="http://www.owasp.org/index.php/HTTPOnly">http://www.owasp.org/index.php/HTTPOnly</a>
 		 */
 		ResponseCookieBuilder httpOnly(boolean httpOnly);
+
+		/**
+		 * Add the "SameSite" attribute to the cookie.
+		 * @see <a href="https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis#section-4.1.2.7">RFC6265 bis</a>
+		 */
+		ResponseCookieBuilder sameSite(String sameSite);
 
 		/**
 		 * Create the HttpCookie.
