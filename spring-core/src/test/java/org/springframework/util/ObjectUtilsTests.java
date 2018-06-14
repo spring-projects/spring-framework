@@ -271,7 +271,7 @@ public class ObjectUtilsTests {
 	@Test
 	@Deprecated
 	public void hashCodeWithLong() {
-		long lng = 883l;
+		long lng = 883L;
 		int expected = (new Long(lng)).hashCode();
 		assertEquals(expected, ObjectUtils.hashCode(lng));
 	}
@@ -489,12 +489,12 @@ public class ObjectUtilsTests {
 
 	@Test
 	public void nullSafeHashCodeWithLongArray() {
-		long lng = 7993l;
+		long lng = 7993L;
 		int expected = 31 * 7 + (int) (lng ^ (lng >>> 32));
-		lng = 84320l;
+		lng = 84320L;
 		expected = 31 * expected + (int) (lng ^ (lng >>> 32));
 
-		long[] array = {7993l, 84320l};
+		long[] array = {7993L, 84320L};
 		int actual = ObjectUtils.nullSafeHashCode(array);
 
 		assertEquals(expected, actual);
@@ -715,7 +715,7 @@ public class ObjectUtilsTests {
 
 	@Test
 	public void nullSafeToStringWithLongArray() {
-		long[] array = {434l, 23423l};
+		long[] array = {434L, 23423L};
 		assertEquals("{434, 23423}", ObjectUtils.nullSafeToString(array));
 	}
 

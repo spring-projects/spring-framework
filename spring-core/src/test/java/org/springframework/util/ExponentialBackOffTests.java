@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,30 +38,30 @@ public class ExponentialBackOffTests {
 	public void defaultInstance() {
 		ExponentialBackOff backOff = new ExponentialBackOff();
 		BackOffExecution execution = backOff.start();
-		assertEquals(2000l, execution.nextBackOff());
-		assertEquals(3000l, execution.nextBackOff());
-		assertEquals(4500l, execution.nextBackOff());
+		assertEquals(2000L, execution.nextBackOff());
+		assertEquals(3000L, execution.nextBackOff());
+		assertEquals(4500L, execution.nextBackOff());
 	}
 
 	@Test
 	public void simpleIncrease() {
 		ExponentialBackOff backOff = new ExponentialBackOff(100L, 2.0);
 		BackOffExecution execution = backOff.start();
-		assertEquals(100l, execution.nextBackOff());
-		assertEquals(200l, execution.nextBackOff());
-		assertEquals(400l, execution.nextBackOff());
-		assertEquals(800l, execution.nextBackOff());
+		assertEquals(100L, execution.nextBackOff());
+		assertEquals(200L, execution.nextBackOff());
+		assertEquals(400L, execution.nextBackOff());
+		assertEquals(800L, execution.nextBackOff());
 	}
 
 	@Test
 	public void fixedIncrease() {
 		ExponentialBackOff backOff = new ExponentialBackOff(100L, 1.0);
-		backOff.setMaxElapsedTime(300l);
+		backOff.setMaxElapsedTime(300L);
 
 		BackOffExecution execution = backOff.start();
-		assertEquals(100l, execution.nextBackOff());
-		assertEquals(100l, execution.nextBackOff());
-		assertEquals(100l, execution.nextBackOff());
+		assertEquals(100L, execution.nextBackOff());
+		assertEquals(100L, execution.nextBackOff());
+		assertEquals(100L, execution.nextBackOff());
 		assertEquals(BackOffExecution.STOP, execution.nextBackOff());
 	}
 
@@ -71,10 +71,10 @@ public class ExponentialBackOffTests {
 		backOff.setMaxInterval(4000L);
 
 		BackOffExecution execution = backOff.start();
-		assertEquals(2000l, execution.nextBackOff());
-		assertEquals(4000l, execution.nextBackOff());
-		assertEquals(4000l, execution.nextBackOff()); // max reached
-		assertEquals(4000l, execution.nextBackOff());
+		assertEquals(2000L, execution.nextBackOff());
+		assertEquals(4000L, execution.nextBackOff());
+		assertEquals(4000L, execution.nextBackOff()); // max reached
+		assertEquals(4000L, execution.nextBackOff());
 	}
 
 	@Test
@@ -83,8 +83,8 @@ public class ExponentialBackOffTests {
 		backOff.setMaxElapsedTime(4000L);
 
 		BackOffExecution execution = backOff.start();
-		assertEquals(2000l, execution.nextBackOff());
-		assertEquals(4000l, execution.nextBackOff());
+		assertEquals(2000L, execution.nextBackOff());
+		assertEquals(4000L, execution.nextBackOff());
 		assertEquals(BackOffExecution.STOP, execution.nextBackOff()); // > 4 sec wait in total
 	}
 
@@ -98,10 +98,10 @@ public class ExponentialBackOffTests {
 		BackOffExecution execution = backOff.start();
 		BackOffExecution execution2 = backOff.start();
 
-		assertEquals(2000l, execution.nextBackOff());
-		assertEquals(2000l, execution2.nextBackOff());
-		assertEquals(4000l, execution.nextBackOff());
-		assertEquals(4000l, execution2.nextBackOff());
+		assertEquals(2000L, execution.nextBackOff());
+		assertEquals(2000L, execution2.nextBackOff());
+		assertEquals(4000L, execution.nextBackOff());
+		assertEquals(4000L, execution2.nextBackOff());
 		assertEquals(BackOffExecution.STOP, execution.nextBackOff());
 		assertEquals(BackOffExecution.STOP, execution2.nextBackOff());
 	}

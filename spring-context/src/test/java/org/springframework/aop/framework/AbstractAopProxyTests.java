@@ -175,7 +175,7 @@ public abstract class AbstractAopProxyTests {
 		ProxyFactory pf1 = new ProxyFactory(target1);
 		pf1.addAdvice(new NopInterceptor());
 		pf1.addAdvice(new NopInterceptor());
-		ITestBean proxies[] = new ITestBean[howMany];
+		ITestBean[] proxies = new ITestBean[howMany];
 		for (int i = 0; i < howMany; i++) {
 			proxies[i] = (ITestBean) createAopProxy(pf1).getProxy();
 			assertEquals(age1, proxies[i].getAge());
@@ -1356,7 +1356,7 @@ public abstract class AbstractAopProxyTests {
 				rmi.getUserAttributes().putAll(valuesToAdd);
 				return invocation.proceed();
 			}
-		};
+		}
 		AdvisedSupport pc = new AdvisedSupport(ITestBean.class);
 		MapAwareMethodInterceptor mami1 = new MapAwareMethodInterceptor(new HashMap<>(), new HashMap<String, String>());
 		Map<String, String> firstValuesToAdd = new HashMap<>();
