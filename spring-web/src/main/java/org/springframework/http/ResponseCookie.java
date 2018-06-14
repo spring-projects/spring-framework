@@ -139,12 +139,10 @@ public final class ResponseCookie extends HttpCookie {
 			sb.append("; Domain=").append(this.domain);
 		}
 		if (!this.maxAge.isNegative()) {
-			sb.append("; Max-Age=").append(this.maxAge);
+			sb.append("; Max-Age=").append(this.maxAge.getSeconds());
 			sb.append("; Expires=");
-			HttpHeaders headers = new HttpHeaders();
-			long seconds = this.maxAge.getSeconds();
-			headers.setExpires(seconds > 0 ? System.currentTimeMillis() + seconds : 0);
-			sb.append(headers.getFirst(HttpHeaders.EXPIRES));
+			long millis = this.maxAge.getSeconds() > 0 ? System.currentTimeMillis() + this.maxAge.toMillis() : 0;
+			sb.append(HttpHeaders.formatDate(millis));
 		}
 
 		if (this.secure) {
@@ -241,7 +239,7 @@ public final class ResponseCookie extends HttpCookie {
 		ResponseCookieBuilder maxAge(Duration maxAge);
 
 		/**
-		 * Set the cookie "Max-Age" attribute in seconds.
+		 * Variant of {@link #maxAge(Duration)} accepting a value in seconds.
 		 */
 		ResponseCookieBuilder maxAge(long maxAgeSeconds);
 
