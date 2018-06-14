@@ -444,9 +444,15 @@ public class MvcUriComponentsBuilder {
 	 */
 	public static MethodArgumentBuilder fromMappingName(@Nullable UriComponentsBuilder builder, String name) {
 		WebApplicationContext wac = getWebApplicationContext();
-		Assert.notNull(wac, "Cannot lookup handler method mappings without WebApplicationContext");
-		RequestMappingInfoHandlerMapping mapping = wac.getBean(RequestMappingInfoHandlerMapping.class);
-		List<HandlerMethod> handlerMethods = mapping.getHandlerMethodsForMappingName(name);
+		Assert.notNull(wac, "No WebApplicationContext. ");
+		Map<String, RequestMappingInfoHandlerMapping> map = wac.getBeansOfType(RequestMappingInfoHandlerMapping.class);
+		List<HandlerMethod> handlerMethods = null;
+		for (RequestMappingInfoHandlerMapping mapping : map.values()) {
+			handlerMethods = mapping.getHandlerMethodsForMappingName(name);
+			if (handlerMethods != null) {
+				break;
+			}
+		}
 		if (handlerMethods == null) {
 			throw new IllegalArgumentException("Mapping not found: " + name);
 		}
