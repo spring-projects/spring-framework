@@ -37,7 +37,6 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.NumberUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Generic utility methods for working with JDBC. Mainly for internal use
@@ -453,7 +452,7 @@ public abstract class JdbcUtils {
 	 */
 	public static String lookupColumnName(ResultSetMetaData resultSetMetaData, int columnIndex) throws SQLException {
 		String name = resultSetMetaData.getColumnLabel(columnIndex);
-		if (!StringUtils.hasLength(name)) {
+		if (name == null || name.length() < 1) {
 			name = resultSetMetaData.getColumnName(columnIndex);
 		}
 		return name;

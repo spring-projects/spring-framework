@@ -4,15 +4,9 @@
     xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="otherSchedulerWithDefaultShutdownOrder" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
-		<property name="autoStartup" value="false"/>
-	</bean>
+	<bean id="lazyInitSchedulerWithDefaultShutdownOrder" class="org.springframework.scheduling.quartz.SchedulerFactoryBean" lazy-init="true"/>
 
-	<bean id="lazyInitSchedulerWithDefaultShutdownOrder" class="org.springframework.scheduling.quartz.SchedulerFactoryBean"
-		  lazy-init="true" depends-on="otherSchedulerWithDefaultShutdownOrder"/>
-
-	<bean id="lazyInitSchedulerWithCustomShutdownOrder" class="org.springframework.scheduling.quartz.SchedulerFactoryBean"
-		  lazy-init="true">
+	<bean id="lazyInitSchedulerWithCustomShutdownOrder" class="org.springframework.scheduling.quartz.SchedulerFactoryBean" lazy-init="true">
 		<property name="phase" value="99"/>
 	</bean>
 

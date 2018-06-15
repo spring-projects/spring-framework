@@ -94,7 +94,7 @@ import org.springframework.util.MultiValueMap;
  * @see AnnotationUtils
  * @see BridgeMethodResolver
  */
-public abstract class AnnotatedElementUtils {
+public class AnnotatedElementUtils {
 
 	/**
 	 * {@code null} constant used to denote that the search algorithm should continue.

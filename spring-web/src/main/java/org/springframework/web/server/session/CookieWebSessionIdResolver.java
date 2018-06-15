@@ -31,7 +31,6 @@ import org.springframework.web.server.ServerWebExchange;
  * Cookie-based {@link WebSessionIdResolver}.
  *
  * @author Rossen Stoyanchev
- * @author Brian Clozel
  * @since 5.0
  */
 public class CookieWebSessionIdResolver implements WebSessionIdResolver {
@@ -39,8 +38,6 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 	private String cookieName = "SESSION";
 
 	private Duration cookieMaxAge = Duration.ofSeconds(-1);
-
-	private String sameSite = "Strict";
 
 
 	/**
@@ -77,23 +74,6 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 		return this.cookieMaxAge;
 	}
 
-	/**
-	 * Set the value for the "SameSite" attribute of the cookie that holds the
-	 * session id. For its meaning and possible values, see
-	 * {@link ResponseCookie#getSameSite()}.
-	 * <p>By default set to {@code "Strict"}
-	 * @param sameSite the SameSite value
-	 */
-	public void setSameSite(String sameSite) {
-		this.sameSite = sameSite;
-	}
-
-	/**
-	 * Return the configured "SameSite" attribute value for the session cookie.
-	 */
-	public String getSameSite() {
-		return this.sameSite;
-	}
 
 	@Override
 	public List<String> resolveSessionIds(ServerWebExchange exchange) {
@@ -108,21 +88,21 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 	@Override
 	public void setSessionId(ServerWebExchange exchange, String id) {
 		Assert.notNull(id, "'id' is required");
-		setSessionCookie(exchange, id, getCookieMaxAge(), getSameSite());
+		setSessionCookie(exchange, id, getCookieMaxAge());
 	}
 
 	@Override
 	public void expireSession(ServerWebExchange exchange) {
-		setSessionCookie(exchange, "", Duration.ofSeconds(0), "");
+		setSessionCookie(exchange, "", Duration.ofSeconds(0));
 	}
 
-	private void setSessionCookie(ServerWebExchange exchange, String id, Duration maxAge, String sameSite) {
+	private void setSessionCookie(ServerWebExchange exchange, String id, Duration maxAge) {
 		String name = getCookieName();
 		boolean secure = "https".equalsIgnoreCase(exchange.getRequest().getURI().getScheme());
 		String path = exchange.getRequest().getPath().contextPath().value() + "/";
 		exchange.getResponse().getCookies().set(name,
 				ResponseCookie.from(name, id).path(path)
-						.maxAge(maxAge).httpOnly(true).secure(secure).sameSite(sameSite).build());
+						.maxAge(maxAge).httpOnly(true).secure(secure).build());
 	}
 
 }

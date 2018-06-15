@@ -1,5 +1,11 @@
 description = "Spring Framework (Bill of Materials)"
 
+dependencyManagement {
+	generatedPomCustomization {
+		enabled = false
+	}
+}
+
 configurations.archives.artifacts.clear()
 artifacts {
 	// work around GRADLE-2406 by attaching text artifact

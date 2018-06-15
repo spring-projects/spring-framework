@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,8 +91,9 @@ import java.lang.annotation.Target;
  * (not declaring a response argument in the handler method signature).
  * </ul>
  *
- * <p>You may combine the {@code ExceptionHandler} annotation with
- * {@link ResponseStatus @ResponseStatus} for a specific HTTP error status.
+ * <p>In Servlet environments, you can combine the {@code ExceptionHandler} annotation
+ * with {@link ResponseStatus @ResponseStatus}, to define the response status
+ * for the HTTP response.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,6 +75,7 @@ import static org.mockito.BDDMockito.*;
  * @author Brian Clozel
  * @author Sebastien Deleuze
  */
+@SuppressWarnings("unused")
 public class SimpAnnotationMethodMessageHandlerTests {
 
 	private static final String TEST_INVALID_VALUE = "invalidValue";
@@ -198,30 +199,6 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		HandlerMethod handlerMethod = (HandlerMethod) this.testController.arguments.get("handlerMethod");
 		assertNotNull(handlerMethod);
 		assertEquals("illegalState", handlerMethod.getMethod().getName());
-	}
-
-	@Test
-	public void exceptionAsCause() {
-		Message<?> message = createMessage("/pre/illegalStateCause");
-		this.messageHandler.registerHandler(this.testController);
-		this.messageHandler.handleMessage(message);
-
-		assertEquals("handleExceptionWithHandlerMethodArg", this.testController.method);
-		HandlerMethod handlerMethod = (HandlerMethod) this.testController.arguments.get("handlerMethod");
-		assertNotNull(handlerMethod);
-		assertEquals("illegalStateCause", handlerMethod.getMethod().getName());
-	}
-
-	@Test
-	public void errorAsMessageHandlingException() {
-		Message<?> message = createMessage("/pre/error");
-		this.messageHandler.registerHandler(this.testController);
-		this.messageHandler.handleMessage(message);
-
-		assertEquals("handleErrorWithHandlerMethodArg", this.testController.method);
-		HandlerMethod handlerMethod = (HandlerMethod) this.testController.arguments.get("handlerMethod");
-		assertNotNull(handlerMethod);
-		assertEquals("errorAsThrowable", handlerMethod.getMethod().getName());
 	}
 
 	@Test
@@ -435,17 +412,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 		@MessageMapping("/illegalState")
 		public void illegalState() {
-			throw new IllegalStateException("my cause");
-		}
-
-		@MessageMapping("/illegalStateCause")
-		public void illegalStateCause() {
-			throw new RuntimeException(new IllegalStateException("my cause"));
-		}
-
-		@MessageMapping("/error")
-		public void errorAsThrowable() {
-			throw new Error("my cause");
+			throw new IllegalStateException();
 		}
 
 		@MessageExceptionHandler(MethodArgumentNotValidException.class)
@@ -453,18 +420,10 @@ public class SimpAnnotationMethodMessageHandlerTests {
 			this.method = "handleValidationException";
 		}
 
-		@MessageExceptionHandler
-		public void handleExceptionWithHandlerMethodArg(IllegalStateException ex, HandlerMethod handlerMethod) {
+		@MessageExceptionHandler(IllegalStateException.class)
+		public void handleExceptionWithHandlerMethodArg(HandlerMethod handlerMethod) {
 			this.method = "handleExceptionWithHandlerMethodArg";
 			this.arguments.put("handlerMethod", handlerMethod);
-			assertEquals("my cause", ex.getMessage());
-		}
-
-		@MessageExceptionHandler
-		public void handleErrorWithHandlerMethodArg(Error ex, HandlerMethod handlerMethod) {
-			this.method = "handleErrorWithHandlerMethodArg";
-			this.arguments.put("handlerMethod", handlerMethod);
-			assertEquals("my cause", ex.getMessage());
 		}
 
 		@MessageMapping("/scope")
@@ -486,6 +445,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	private static class DotPathSeparatorController {
 
 		private String method;
+
 
 		@MessageMapping("foo")
 		public void handleFoo() {

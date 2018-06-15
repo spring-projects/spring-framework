@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.http.converter.HttpMessageConverter;
  * method argument depending on the content type of the request. Optionally, automatic
  * validation can be applied by annotating the argument with {@code @Valid}.
  *
- * <p>Supported for annotated handler methods.
+ * <p>Supported for annotated handler methods in Servlet environments.
  *
  * @author Arjen Poutsma
  * @since 3.0

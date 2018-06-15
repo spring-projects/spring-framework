@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,11 @@ import org.springframework.core.annotation.AliasFor;
 
 /**
  * Annotation which indicates that a method parameter should be bound to a URI template
- * variable. Supported for {@link RequestMapping} annotated handler methods.
+ * variable. Supported for {@link RequestMapping} annotated handler methods in Servlet
+ * environments.
  *
- * <p>If the method parameter is {@link java.util.Map Map&lt;String, String&gt;}
+ * <p>If the method parameter is {@link java.util.Map Map&lt;String, String&gt;} or
+ * {@link org.springframework.util.MultiValueMap MultiValueMap&lt;String, String&gt;}
  * then the map is populated with all path variable names and values.
  *
  * @author Arjen Poutsma
