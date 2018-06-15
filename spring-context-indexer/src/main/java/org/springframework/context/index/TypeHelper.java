@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,9 +62,9 @@ class TypeHelper {
 			DeclaredType declaredType = (DeclaredType) type;
 			Element enclosingElement = declaredType.asElement().getEnclosingElement();
 			if (enclosingElement != null && enclosingElement instanceof TypeElement) {
-				return getQualifiedName(enclosingElement) + "$"
-						+ declaredType.asElement().getSimpleName().toString();
-			} else {
+				return getQualifiedName(enclosingElement) + "$" + declaredType.asElement().getSimpleName().toString();
+			}
+			else {
 				return getQualifiedName(declaredType.asElement());
 			}
 		}
@@ -85,7 +85,7 @@ class TypeHelper {
 	public Element getSuperClass(Element element) {
 		List<? extends TypeMirror> superTypes = this.types.directSupertypes(element.asType());
 		if (superTypes.isEmpty()) {
-			return null; // reached java.lang.Object
+			return null;  // reached java.lang.Object
 		}
 		return this.types.asElement(superTypes.get(0));
 	}

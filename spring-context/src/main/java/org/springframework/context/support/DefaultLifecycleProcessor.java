@@ -252,7 +252,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 					}
 				}
 				else if (bean instanceof SmartLifecycle) {
-					// don't wait for beans that aren't running
+					// Don't wait for beans that aren't running...
 					latch.countDown();
 				}
 			}
@@ -317,8 +317,6 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 */
 	private class LifecycleGroup {
 
-		private final List<LifecycleGroupMember> members = new ArrayList<>();
-
 		private final int phase;
 
 		private final long timeout;
@@ -327,9 +325,13 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 		private final boolean autoStartupOnly;
 
-		private volatile int smartMemberCount;
+		private final List<LifecycleGroupMember> members = new ArrayList<>();
 
-		public LifecycleGroup(int phase, long timeout, Map<String, ? extends Lifecycle> lifecycleBeans, boolean autoStartupOnly) {
+		private int smartMemberCount;
+
+		public LifecycleGroup(
+				int phase, long timeout, Map<String, ? extends Lifecycle> lifecycleBeans, boolean autoStartupOnly) {
+
 			this.phase = phase;
 			this.timeout = timeout;
 			this.lifecycleBeans = lifecycleBeans;
@@ -337,10 +339,10 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		}
 
 		public void add(String name, Lifecycle bean) {
+			this.members.add(new LifecycleGroupMember(name, bean));
 			if (bean instanceof SmartLifecycle) {
 				this.smartMemberCount++;
 			}
-			this.members.add(new LifecycleGroupMember(name, bean));
 		}
 
 		public void start() {
@@ -373,7 +375,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 					doStop(this.lifecycleBeans, member.name, latch, countDownBeanNames);
 				}
 				else if (member.bean instanceof SmartLifecycle) {
-					// already removed, must have been a dependent
+					// Already removed: must have been a dependent bean from another phase
 					latch.countDown();
 				}
 			}

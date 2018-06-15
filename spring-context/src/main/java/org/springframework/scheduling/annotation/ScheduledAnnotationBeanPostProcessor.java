@@ -115,6 +115,8 @@ public class ScheduledAnnotationBeanPostProcessor
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	private final ScheduledTaskRegistrar registrar;
+
 	@Nullable
 	private Object scheduler;
 
@@ -130,11 +132,28 @@ public class ScheduledAnnotationBeanPostProcessor
 	@Nullable
 	private ApplicationContext applicationContext;
 
-	private final ScheduledTaskRegistrar registrar = new ScheduledTaskRegistrar();
-
 	private final Set<Class<?>> nonAnnotatedClasses = Collections.newSetFromMap(new ConcurrentHashMap<>(64));
 
 	private final Map<Object, Set<ScheduledTask>> scheduledTasks = new IdentityHashMap<>(16);
+
+
+	/**
+	 * Create a default {@code ScheduledAnnotationBeanPostProcessor}.
+	 */
+	public ScheduledAnnotationBeanPostProcessor() {
+		this.registrar = new ScheduledTaskRegistrar();
+	}
+
+	/**
+	 * Create a {@code ScheduledAnnotationBeanPostProcessor} delegating to the
+	 * specified {@link ScheduledTaskRegistrar}.
+	 * @param registrar the ScheduledTaskRegistrar to register @Scheduled tasks on
+	 * @since 5.1
+	 */
+	public ScheduledAnnotationBeanPostProcessor(ScheduledTaskRegistrar registrar) {
+		Assert.notNull(registrar, "ScheduledTaskRegistrar is required");
+		this.registrar = registrar;
+	}
 
 
 	@Override
@@ -340,13 +359,16 @@ public class ScheduledAnnotationBeanPostProcessor
 		return bean;
 	}
 
+	/**
+	 * Process the given {@code @Scheduled} method declaration on the given bean.
+	 * @param scheduled the @Scheduled annotation
+	 * @param method the method that the annotation has been declared on
+	 * @param bean the target bean instance
+	 * @see #createRunnable(Object, Method)
+	 */
 	protected void processScheduled(Scheduled scheduled, Method method, Object bean) {
 		try {
-			Assert.isTrue(method.getParameterCount() == 0,
-					"Only no-arg methods may be annotated with @Scheduled");
-
-			Method invocableMethod = AopUtils.selectInvocableMethod(method, bean.getClass());
-			Runnable runnable = new ScheduledMethodRunnable(bean, invocableMethod);
+			Runnable runnable = createRunnable(bean, method);
 			boolean processedSchedule = false;
 			String errorMessage =
 					"Exactly one of the 'cron', 'fixedDelay(String)', or 'fixedRate(String)' attributes is required";
@@ -468,6 +490,23 @@ public class ScheduledAnnotationBeanPostProcessor
 			throw new IllegalStateException(
 					"Encountered invalid @Scheduled method '" + method.getName() + "': " + ex.getMessage());
 		}
+	}
+
+	/**
+	 * Create a {@link Runnable} for the given bean instance,
+	 * calling the specified scheduled method.
+	 * <p>The default implementation creates a {@link ScheduledMethodRunnable}.
+	 * @param target the target bean instance
+	 * @param method the scheduled method to call
+	 * @since 5.1
+	 * @see ScheduledMethodRunnable#ScheduledMethodRunnable(Object, Method)
+	 */
+	protected Runnable createRunnable(Object target, Method method) {
+		Assert.isTrue(method.getParameterCount() == 0,
+				"Only no-arg methods may be annotated with @Scheduled");
+
+		Method invocableMethod = AopUtils.selectInvocableMethod(method, target.getClass());
+		return new ScheduledMethodRunnable(target, invocableMethod);
 	}
 
 	private static long parseDelayAsLong(String value) throws RuntimeException {

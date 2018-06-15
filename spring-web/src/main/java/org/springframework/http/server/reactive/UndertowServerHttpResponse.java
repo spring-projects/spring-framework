@@ -16,10 +16,10 @@
 
 package org.springframework.http.server.reactive;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 import io.undertow.server.HttpServerExchange;
@@ -106,10 +106,10 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 	}
 
 	@Override
-	public Mono<Void> writeWith(File file, long position, long count) {
+	public Mono<Void> writeWith(Path file, long position, long count) {
 		return doCommit(() ->
 				Mono.defer(() -> {
-					try (FileChannel source = FileChannel.open(file.toPath(), StandardOpenOption.READ)) {
+					try (FileChannel source = FileChannel.open(file, StandardOpenOption.READ)) {
 						StreamSinkChannel destination = this.exchange.getResponseChannel();
 						Channels.transferBlocking(destination, source, position, count);
 						return Mono.empty();

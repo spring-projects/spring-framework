@@ -16,7 +16,7 @@
 
 package org.springframework.http.server.reactive;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -112,8 +112,8 @@ class ReactorServerHttpResponse extends AbstractServerHttpResponse implements Ze
 	}
 
 	@Override
-	public Mono<Void> writeWith(File file, long position, long count) {
-		return doCommit(() -> this.response.sendFile(file.toPath(), position, count).then());
+	public Mono<Void> writeWith(Path file, long position, long count) {
+		return doCommit(() -> this.response.sendFile(file, position, count).then());
 	}
 
 	private static Publisher<ByteBuf> toByteBufs(Publisher<? extends DataBuffer> dataBuffers) {

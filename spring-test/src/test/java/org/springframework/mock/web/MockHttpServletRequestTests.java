@@ -47,6 +47,7 @@ import static org.junit.Assert.*;
  * @author Sam Brannen
  * @author Brian Clozel
  * @author Jakub Narloch
+ * @author Av Pinzur
  */
 public class MockHttpServletRequestTests {
 
@@ -110,6 +111,38 @@ public class MockHttpServletRequestTests {
 		assertNotNull(request.getInputStream());
 		assertEquals(-1, request.getInputStream().read());
 		assertNull(request.getContentAsByteArray());
+	}
+
+	@Test  // SPR-16505
+	public void getReaderTwice() throws IOException {
+		byte[] bytes = "body".getBytes(Charset.defaultCharset());
+		request.setContent(bytes);
+		assertSame(request.getReader(), request.getReader());
+	}
+
+	@Test  // SPR-16505
+	public void getInputStreamTwice() throws IOException {
+		byte[] bytes = "body".getBytes(Charset.defaultCharset());
+		request.setContent(bytes);
+		assertSame(request.getInputStream(), request.getInputStream());
+	}
+
+	@Test  // SPR-16499
+	public void getReaderAfterGettingInputStream() throws IOException {
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(
+				"Cannot call getReader() after getInputStream() has already been called for the current request");
+		request.getInputStream();
+		request.getReader();
+	}
+
+	@Test  // SPR-16499
+	public void getInputStreamAfterGettingReader() throws IOException {
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(
+				"Cannot call getInputStream() after getReader() has already been called for the current request");
+		request.getReader();
+		request.getInputStream();
 	}
 
 	@Test

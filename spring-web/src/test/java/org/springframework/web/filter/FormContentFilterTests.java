@@ -50,7 +50,6 @@ public class FormContentFilterTests {
 	@Before
 	public void setup() {
 		this.request = new MockHttpServletRequest("PUT", "/");
-		this.request.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=ISO-8859-1");
 		this.request.setContentType("application/x-www-form-urlencoded; charset=ISO-8859-1");
 		this.response = new MockHttpServletResponse();
 		this.filterChain = new MockFilterChain();
@@ -59,29 +58,31 @@ public class FormContentFilterTests {
 
 	@Test
 	public void wrapPutPatchAndDeleteOnly() throws Exception {
-		this.request.setContent("foo=bar".getBytes("ISO-8859-1"));
 		for (HttpMethod method : HttpMethod.values()) {
-			this.request.setMethod(method.name());
+			MockHttpServletRequest request = new MockHttpServletRequest(method.name(), "/");
+			request.setContent("foo=bar".getBytes("ISO-8859-1"));
+			request.setContentType("application/x-www-form-urlencoded; charset=ISO-8859-1");
 			this.filterChain = new MockFilterChain();
-			this.filter.doFilter(this.request, this.response, this.filterChain);
+			this.filter.doFilter(request, this.response, this.filterChain);
 			if (method == HttpMethod.PUT || method == HttpMethod.PATCH || method == HttpMethod.DELETE) {
-				assertNotSame(this.request, this.filterChain.getRequest());
+				assertNotSame(request, this.filterChain.getRequest());
 			}
 			else {
-				assertSame(this.request, this.filterChain.getRequest());
+				assertSame(request, this.filterChain.getRequest());
 			}
 		}
 	}
 
 	@Test
 	public void wrapFormEncodedOnly() throws Exception {
-		this.request.setContent("".getBytes("ISO-8859-1"));
 		String[] contentTypes = new String[] {"text/plain", "multipart/form-data"};
 		for (String contentType : contentTypes) {
-			this.request.setContentType(contentType);
+			MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/");
+			request.setContent("".getBytes("ISO-8859-1"));
+			request.setContentType(contentType);
 			this.filterChain = new MockFilterChain();
-			this.filter.doFilter(this.request, this.response, this.filterChain);
-			assertSame(this.request, this.filterChain.getRequest());
+			this.filter.doFilter(request, this.response, this.filterChain);
+			assertSame(request, this.filterChain.getRequest());
 		}
 	}
 
@@ -146,7 +147,7 @@ public class FormContentFilterTests {
 		String[] values = this.filterChain.getRequest().getParameterValues("name");
 
 		assertNotSame("Request not wrapped", this.request, filterChain.getRequest());
-		assertArrayEquals(new String[]{"value1", "value2", "value3", "value4"}, values);
+		assertArrayEquals(new String[] {"value1", "value2", "value3", "value4"}, values);
 	}
 
 	@Test
@@ -160,7 +161,7 @@ public class FormContentFilterTests {
 		String[] values = this.filterChain.getRequest().getParameterValues("name");
 
 		assertNotSame("Request not wrapped", this.request, this.filterChain.getRequest());
-		assertArrayEquals(new String[]{"value1", "value2"}, values);
+		assertArrayEquals(new String[] {"value1", "value2"}, values);
 	}
 
 	@Test
@@ -173,7 +174,7 @@ public class FormContentFilterTests {
 		String[] values = this.filterChain.getRequest().getParameterValues("anotherName");
 
 		assertNotSame("Request not wrapped", this.request, this.filterChain.getRequest());
-		assertArrayEquals(new String[]{"anotherValue"}, values);
+		assertArrayEquals(new String[] {"anotherValue"}, values);
 	}
 
 	@Test
@@ -211,7 +212,7 @@ public class FormContentFilterTests {
 		this.request.addParameter("hiddenField", "testHidden");
 		this.filter.doFilter(this.request, this.response, this.filterChain);
 
-		assertArrayEquals(new String[]{"testHidden"},
+		assertArrayEquals(new String[] {"testHidden"},
 				this.filterChain.getRequest().getParameterValues("hiddenField"));
 	}
 

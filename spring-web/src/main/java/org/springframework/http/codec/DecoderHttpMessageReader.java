@@ -93,7 +93,15 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 		return this.decoder.decodeToMono(message.getBody(), elementType, contentType, hints);
 	}
 
-	private MediaType getContentType(HttpMessage inputMessage) {
+	/**
+	 * Determine the Content-Type of the HTTP message based on the
+	 * "Content-Type" header or otherwise default to
+	 * {@link MediaType#APPLICATION_OCTET_STREAM}.
+	 * @param inputMessage the HTTP message
+	 * @return the MediaType, possibly {@code null}.
+	 */
+	@Nullable
+	protected MediaType getContentType(HttpMessage inputMessage) {
 		MediaType contentType = inputMessage.getHeaders().getContentType();
 		return (contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM);
 	}

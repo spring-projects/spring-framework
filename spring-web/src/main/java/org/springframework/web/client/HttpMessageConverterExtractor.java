@@ -120,6 +120,13 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 				"for response type [" + this.responseType + "] and content type [" + contentType + "]");
 	}
 
+	/**
+	 * Determine the Content-Type of the response based on the "Content-Type"
+	 * header or otherwise default to {@link MediaType#APPLICATION_OCTET_STREAM}.
+	 * @param response the response
+	 * @return the MediaType, possibly {@code null}.
+	 */
+	@Nullable
 	protected MediaType getContentType(ClientHttpResponse response) {
 		MediaType contentType = response.getHeaders().getContentType();
 		if (contentType == null) {

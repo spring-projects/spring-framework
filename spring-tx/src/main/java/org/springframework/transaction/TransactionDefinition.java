@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,8 +122,8 @@ public interface TransactionDefinition {
 
 	/**
 	 * Execute within a nested transaction if a current transaction exists,
-	 * behave like {@link #PROPAGATION_REQUIRED} else. There is no analogous
-	 * feature in EJB.
+	 * behave like {@link #PROPAGATION_REQUIRED} otherwise. There is no
+	 * analogous feature in EJB.
 	 * <p><b>NOTE:</b> Actual creation of a nested transaction will only work on
 	 * specific transaction managers. Out of the box, this only applies to the JDBC
 	 * {@link org.springframework.jdbc.datasource.DataSourceTransactionManager}

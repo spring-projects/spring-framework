@@ -16,8 +16,8 @@
 
 package org.springframework.http.client.reactive;
 
-import java.io.File;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.Collection;
 
 import io.netty.buffer.ByteBuf;
@@ -97,8 +97,8 @@ class ReactorClientHttpRequest extends AbstractClientHttpRequest implements Zero
 	}
 
 	@Override
-	public Mono<Void> writeWith(File file, long position, long count) {
-		return doCommit(() -> this.outbound.sendFile(file.toPath(), position, count).then());
+	public Mono<Void> writeWith(Path file, long position, long count) {
+		return doCommit(() -> this.outbound.sendFile(file, position, count).then());
 	}
 
 	@Override
