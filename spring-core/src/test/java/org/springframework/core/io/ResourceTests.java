@@ -23,6 +23,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
 
 import org.junit.Ignore;
@@ -124,6 +126,16 @@ public class ResourceTests {
 		Resource resource = new FileSystemResource(getClass().getResource("Resource.class").getFile());
 		doTestResource(resource);
 		assertEquals(new FileSystemResource(getClass().getResource("Resource.class").getFile()), resource);
+		Resource resource2 = new FileSystemResource("core/io/Resource.class");
+		assertEquals(resource2, new FileSystemResource("core/../core/io/./Resource.class"));
+	}
+
+	@Test
+	public void testFileSystemResourceWithFilePath() throws Exception {
+		Path filePath = Paths.get(getClass().getResource("Resource.class").toURI());
+		Resource resource = new FileSystemResource(filePath);
+		doTestResource(resource);
+		assertEquals(new FileSystemResource(filePath), resource);
 		Resource resource2 = new FileSystemResource("core/io/Resource.class");
 		assertEquals(resource2, new FileSystemResource("core/../core/io/./Resource.class"));
 	}
