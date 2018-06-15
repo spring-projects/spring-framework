@@ -174,8 +174,15 @@ public class MvcUriComponentsBuilder {
 			Class<?> controllerType) {
 
 		builder = getBaseUrlToUse(builder);
+
+		// Externally configured prefix via PathConfigurer..
+		String prefix = getPathPrefix(controllerType);
+		builder.path(prefix);
+
 		String mapping = getClassMapping(controllerType);
-		return builder.path(mapping);
+		builder.path(mapping);
+
+		return builder;
 	}
 
 	/**
@@ -526,15 +533,21 @@ public class MvcUriComponentsBuilder {
 	}
 
 
-	private static UriComponentsBuilder fromMethodInternal(@Nullable UriComponentsBuilder baseUrl,
+	private static UriComponentsBuilder fromMethodInternal(@Nullable UriComponentsBuilder builder,
 			Class<?> controllerType, Method method, Object... args) {
 
-		baseUrl = getBaseUrlToUse(baseUrl);
+		builder = getBaseUrlToUse(builder);
+
+		// Externally configured prefix via PathConfigurer..
+		String prefix = getPathPrefix(controllerType);
+		builder.path(prefix);
+
 		String typePath = getClassMapping(controllerType);
 		String methodPath = getMethodMapping(method);
 		String path = pathMatcher.combine(typePath, methodPath);
-		baseUrl.path(path);
-		UriComponents uriComponents = applyContributors(baseUrl, method, args);
+		builder.path(path);
+
+		UriComponents uriComponents = applyContributors(builder, method, args);
 		return UriComponentsBuilder.newInstance().uriComponents(uriComponents);
 	}
 
@@ -542,6 +555,22 @@ public class MvcUriComponentsBuilder {
 		return baseUrl == null ?
 				ServletUriComponentsBuilder.fromCurrentServletMapping() :
 				baseUrl.cloneBuilder();
+	}
+
+	private static String getPathPrefix(Class<?> controllerType) {
+		WebApplicationContext wac = getWebApplicationContext();
+		if (wac != null) {
+			Map<String, RequestMappingHandlerMapping> map = wac.getBeansOfType(RequestMappingHandlerMapping.class);
+			for (RequestMappingHandlerMapping mapping : map.values()) {
+				if (mapping.isHandler(controllerType)) {
+					String prefix = mapping.getPathPrefix(controllerType);
+					if (prefix != null) {
+						return prefix;
+					}
+				}
+			}
+		}
+		return "";
 	}
 
 	private static String getClassMapping(Class<?> controllerType) {

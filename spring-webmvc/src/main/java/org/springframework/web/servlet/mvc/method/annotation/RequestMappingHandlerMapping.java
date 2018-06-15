@@ -32,7 +32,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -67,7 +66,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	private boolean useTrailingSlashMatch = true;
 
-	private final Map<String, Predicate<Class<?>>> pathPrefixes = new LinkedHashMap<>();
+	private Map<String, Predicate<Class<?>>> pathPrefixes = new LinkedHashMap<>();
 
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
@@ -120,10 +119,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @since 5.1
 	 */
 	public void setPathPrefixes(Map<String, Predicate<Class<?>>> prefixes) {
-		this.pathPrefixes.clear();
-		prefixes.entrySet().stream()
-				.filter(entry -> StringUtils.hasText(entry.getKey()))
-				.forEach(entry -> this.pathPrefixes.put(entry.getKey(), entry.getValue()));
+		this.pathPrefixes = Collections.unmodifiableMap(new LinkedHashMap<>(prefixes));
 	}
 
 	/**
@@ -180,7 +176,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @since 5.1
 	 */
 	public Map<String, Predicate<Class<?>>> getPathPrefixes() {
-		return Collections.unmodifiableMap(this.pathPrefixes);
+		return this.pathPrefixes;
 	}
 
 	/**
@@ -227,18 +223,26 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			if (typeInfo != null) {
 				info = typeInfo.combine(info);
 			}
-			for (Map.Entry<String, Predicate<Class<?>>> entry : this.pathPrefixes.entrySet()) {
-				if (entry.getValue().test(handlerType)) {
-					String prefix = entry.getKey();
-					if (this.embeddedValueResolver != null) {
-						prefix = this.embeddedValueResolver.resolveStringValue(prefix);
-					}
-					info = RequestMappingInfo.paths(prefix).build().combine(info);
-					break;
-				}
+			String prefix = getPathPrefix(handlerType);
+			if (prefix != null) {
+				info = RequestMappingInfo.paths(prefix).build().combine(info);
 			}
 		}
 		return info;
+	}
+
+	@Nullable
+	String getPathPrefix(Class<?> handlerType) {
+		for (Map.Entry<String, Predicate<Class<?>>> entry : this.pathPrefixes.entrySet()) {
+			if (entry.getValue().test(handlerType)) {
+				String prefix = entry.getKey();
+				if (this.embeddedValueResolver != null) {
+					prefix = this.embeddedValueResolver.resolveStringValue(prefix);
+				}
+				return prefix;
+			}
+		}
+		return null;
 	}
 
 	/**
