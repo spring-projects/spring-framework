@@ -28,6 +28,7 @@ import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -783,15 +784,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			logger.debug("Searching directory [" + dir.getAbsolutePath() +
 					"] for files matching pattern [" + fullPattern + "]");
 		}
-		File[] dirContents = dir.listFiles();
-		if (dirContents == null) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Could not retrieve contents of directory [" + dir.getAbsolutePath() + "]");
-			}
-			return;
-		}
-		Arrays.sort(dirContents);
-		for (File content : dirContents) {
+		for (File content : listDirectory(dir)) {
 			String currPath = StringUtils.replace(content.getAbsolutePath(), File.separator, "/");
 			if (content.isDirectory() && getPathMatcher().matchStart(fullPattern, currPath + "/")) {
 				if (!content.canRead()) {
@@ -808,6 +801,25 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				result.add(content);
 			}
 		}
+	}
+
+	/**
+	 * Determine a sorted list of files in the given directory.
+	 * @param dir the directory to introspect
+	 * @return the sorted list of files (by default in alphabetical order)
+	 * @since 5.1
+	 * @see File#listFiles()
+	 */
+	protected File[] listDirectory(File dir) {
+		File[] files = dir.listFiles();
+		if (files == null) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Could not retrieve contents of directory [" + dir.getAbsolutePath() + "]");
+			}
+			return new File[0];
+		}
+		Arrays.sort(files, Comparator.comparing(File::getName));
+		return files;
 	}
 
 
