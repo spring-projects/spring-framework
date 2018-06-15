@@ -16,15 +16,18 @@
 
 package org.springframework.core.io.support;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
-
+import org.junit.rules.TemporaryFolder;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
@@ -56,6 +59,8 @@ public class PathMatchingResourcePatternResolverTests {
 
 	private PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
+	@Rule
+	public TemporaryFolder folder = new TemporaryFolder();
 
 	@Test(expected = FileNotFoundException.class)
 	public void invalidPrefixWithPatternElementInIt() throws IOException {
@@ -116,6 +121,27 @@ public class PathMatchingResourcePatternResolverTests {
 			}
 		}
 		assertTrue("Could not find aspectj_1_5_0.dtd in the root of the aspectjweaver jar", found);
+	}
+	
+	
+	@Test
+	public void testConsistentFileOrder() throws IOException {
+		
+		List<String> expectedFileNames = new ArrayList<>();
+		
+		expectedFileNames.add(folder.newFile("A.txt").getName());
+		expectedFileNames.add(folder.newFile("B.txt").getName());
+		expectedFileNames.add(folder.newFile("P.txt").getName());
+		File newFolder = folder.newFolder("message");
+		expectedFileNames.add(File.createTempFile("Message", ".txt", newFolder).getName());
+		
+		Set<File> matchingFiles = resolver.retrieveMatchingFiles(folder.getRoot(), "**/*.txt");
+		assertEquals(expectedFileNames.size(), matchingFiles.size());
+		int i = 0;
+		for (File file : matchingFiles) {
+			assertEquals(expectedFileNames.get(i), file.getName());
+			i++;
+		}
 	}
 
 

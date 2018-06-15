@@ -790,7 +790,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			}
 			return;
 		}
-		Arrays.sort(dirContents);
+		
+		// enforce consistent alphabetical sorting to avoid different order between OS
+		Arrays.sort(dirContents, (f1, f2) -> f1.getName().compareTo(f2.getName()));
+		
 		for (File content : dirContents) {
 			String currPath = StringUtils.replace(content.getAbsolutePath(), File.separator, "/");
 			if (content.isDirectory() && getPathMatcher().matchStart(fullPattern, currPath + "/")) {
