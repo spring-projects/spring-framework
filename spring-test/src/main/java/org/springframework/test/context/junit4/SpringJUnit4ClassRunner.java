@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -365,9 +365,6 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * @see #getJUnitTimeout(FrameworkMethod)
 	 */
 	@Override
-	// Retain the following warning suppression for deprecation (even if Eclipse
-	// states it is unnecessary) since withPotentialTimeout(FrameworkMethod,Object,Statement)
-	// in BlockJUnit4ClassRunner has been deprecated.
 	@SuppressWarnings("deprecation")
 	protected Statement withPotentialTimeout(FrameworkMethod frameworkMethod, Object testInstance, Statement next) {
 		Statement statement = null;

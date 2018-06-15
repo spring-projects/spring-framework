@@ -227,9 +227,6 @@ public class MethodParameter {
 	 * @since 5.0
 	 */
 	public Parameter getParameter() {
-		if (this.parameterIndex < 0) {
-			throw new IllegalStateException("Cannot retrieve Parameter descriptor for method return type");
-		}
 		Parameter parameter = this.parameter;
 		if (parameter == null) {
 			parameter = getExecutable().getParameters()[this.parameterIndex];
@@ -600,9 +597,6 @@ public class MethodParameter {
 	 */
 	@Nullable
 	public String getParameterName() {
-		if (this.parameterIndex < 0) {
-			return null;
-		}
 		ParameterNameDiscoverer discoverer = this.parameterNameDiscoverer;
 		if (discoverer != null) {
 			String[] parameterNames = null;
@@ -741,8 +735,7 @@ public class MethodParameter {
 
 	private static int validateIndex(Executable executable, int parameterIndex) {
 		int count = executable.getParameterCount();
-		Assert.isTrue(parameterIndex >= -1 && parameterIndex < count,
-				() -> "Parameter index needs to be between -1 and " + (count - 1));
+		Assert.isTrue(parameterIndex < count, () -> "Parameter index needs to be between -1 and " + (count - 1));
 		return parameterIndex;
 	}
 

@@ -18,7 +18,6 @@ package org.springframework.web.reactive.config;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 
 import reactor.core.publisher.Mono;
 
@@ -120,22 +119,14 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		mapping.setCorsConfigurations(getCorsConfigurations());
 
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
-
 		Boolean useTrailingSlashMatch = configurer.isUseTrailingSlashMatch();
+		Boolean useCaseSensitiveMatch = configurer.isUseCaseSensitiveMatch();
 		if (useTrailingSlashMatch != null) {
 			mapping.setUseTrailingSlashMatch(useTrailingSlashMatch);
 		}
-
-		Boolean useCaseSensitiveMatch = configurer.isUseCaseSensitiveMatch();
 		if (useCaseSensitiveMatch != null) {
 			mapping.setUseCaseSensitiveMatch(useCaseSensitiveMatch);
 		}
-
-		Map<String, Predicate<Class<?>>> pathPrefixes = configurer.getPathPrefixes();
-		if (pathPrefixes != null) {
-			mapping.setPathPrefixes(pathPrefixes);
-		}
-
 		return mapping;
 	}
 

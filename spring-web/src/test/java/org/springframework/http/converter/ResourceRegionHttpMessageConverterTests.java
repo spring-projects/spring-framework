@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,6 @@ public class ResourceRegionHttpMessageConverterTests {
 	public void canWriteResource() {
 		assertTrue(converter.canWrite(ResourceRegion.class, null, MediaType.APPLICATION_OCTET_STREAM));
 		assertTrue(converter.canWrite(ResourceRegion.class, null, MediaType.ALL));
-		assertFalse(converter.canWrite(Object.class, null, MediaType.ALL));
 	}
 
 	@Test
@@ -75,8 +74,6 @@ public class ResourceRegionHttpMessageConverterTests {
 
 		assertFalse(converter.canWrite(List.class, MediaType.APPLICATION_OCTET_STREAM));
 		assertFalse(converter.canWrite(List.class, MediaType.ALL));
-		Type resourceObjectList = new ParameterizedTypeReference<List<Object>>() {}.getType();
-		assertFalse(converter.canWrite(resourceObjectList, null, MediaType.ALL));
 	}
 
 	@Test

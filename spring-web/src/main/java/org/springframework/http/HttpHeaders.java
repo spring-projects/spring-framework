@@ -1218,14 +1218,9 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @see #setZonedDateTime(String, ZonedDateTime)
 	 */
 	public void setDate(String headerName, long date) {
-		set(headerName, formatDate(date));
-	}
-
-	// Package private: also used in ResponseCookie..
-	static String formatDate(long date) {
 		Instant instant = Instant.ofEpochMilli(date);
-		ZonedDateTime time = ZonedDateTime.ofInstant(instant, GMT);
-		return DATE_FORMATTERS[0].format(time);
+		ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, GMT);
+		set(headerName, DATE_FORMATTERS[0].format(zonedDateTime));
 	}
 
 	/**

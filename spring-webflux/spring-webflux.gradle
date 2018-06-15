@@ -1,10 +1,19 @@
 description = "Spring WebFlux"
 
+apply plugin: "io.spring.dependency-management"
+
 dependencyManagement {
 	imports {
 		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
 		mavenBom "io.netty:netty-bom:${nettyVersion}"
 	}
+	dependencies {
+		dependency "io.projectreactor.netty:reactor-netty:0.8.0.BUILD-SNAPSHOT"
+	}
+	resolutionStrategy {
+		cacheChangingModulesFor 0, 'seconds'
+	}
+	applyMavenExclusions = false
 }
 
 dependencies {
@@ -47,7 +56,7 @@ dependencies {
 	testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
 	testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
 	testCompile("io.undertow:undertow-core:${undertowVersion}")
-	testCompile("com.fasterxml:aalto-xml:1.1.0")
+	testCompile("com.fasterxml:aalto-xml:1.0.0")
 	testCompile("com.squareup.okhttp3:mockwebserver:3.10.0")
 	testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
 	testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}")
@@ -57,7 +66,7 @@ dependencies {
 	testRuntime("org.synchronoss.cloud:nio-multipart-parser:1.1.0")
 	testRuntime("org.webjars:underscorejs:1.8.3")
 	testRuntime("org.glassfish:javax.el:3.0.1-b08")
-	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0.1")
-	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0.1")
+	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0")
+	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0")
 	testRuntime("com.sun.activation:javax.activation:1.2.0")
 }

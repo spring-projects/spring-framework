@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.web.multipart;
 
 import java.io.IOException;
@@ -36,7 +35,7 @@ class MultipartFileResource extends AbstractResource {
 
 
 	public MultipartFileResource(MultipartFile multipartFile) {
-		Assert.notNull(multipartFile, "MultipartFile must not be null");
+		Assert.notNull(multipartFile, "MultipartFile must not be null.");
 		this.multipartFile = multipartFile;
 	}
 
@@ -87,8 +86,9 @@ class MultipartFileResource extends AbstractResource {
 
 	@Override
 	public boolean equals(Object obj) {
-		return (obj == this || (obj instanceof MultipartFileResource &&
-				((MultipartFileResource) obj).multipartFile.equals(this.multipartFile)));
+		return (obj == this ||
+				(obj instanceof MultipartFileResource &&
+						((MultipartFileResource) obj).multipartFile.equals(this.multipartFile)));
 	}
 
 	@Override

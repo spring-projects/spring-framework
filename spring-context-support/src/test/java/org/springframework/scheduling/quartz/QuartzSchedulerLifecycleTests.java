@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.scheduling.quartz;
 
 import org.junit.Test;
 
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.util.StopWatch;
 
@@ -32,8 +32,7 @@ public class QuartzSchedulerLifecycleTests {
 
 	@Test  // SPR-6354
 	public void destroyLazyInitSchedulerWithDefaultShutdownOrderDoesNotHang() {
-		ConfigurableApplicationContext context =
-				new ClassPathXmlApplicationContext("quartzSchedulerLifecycleTests.xml", getClass());
+		AbstractApplicationContext context = new ClassPathXmlApplicationContext("quartzSchedulerLifecycleTests.xml", this.getClass());
 		assertNotNull(context.getBean("lazyInitSchedulerWithDefaultShutdownOrder"));
 		StopWatch sw = new StopWatch();
 		sw.start("lazyScheduler");
@@ -45,8 +44,7 @@ public class QuartzSchedulerLifecycleTests {
 
 	@Test  // SPR-6354
 	public void destroyLazyInitSchedulerWithCustomShutdownOrderDoesNotHang() {
-		ConfigurableApplicationContext context =
-				new ClassPathXmlApplicationContext("quartzSchedulerLifecycleTests.xml", getClass());
+		AbstractApplicationContext context = new ClassPathXmlApplicationContext("quartzSchedulerLifecycleTests.xml", this.getClass());
 		assertNotNull(context.getBean("lazyInitSchedulerWithCustomShutdownOrder"));
 		StopWatch sw = new StopWatch();
 		sw.start("lazyScheduler");

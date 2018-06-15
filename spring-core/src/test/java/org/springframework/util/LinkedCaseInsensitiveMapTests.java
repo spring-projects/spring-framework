@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,9 @@ public class LinkedCaseInsensitiveMapTests {
 
 	@Test
 	public void putAndGet() {
-		assertNull(map.put("key", "value1"));
-		assertEquals("value1", map.put("key", "value2"));
-		assertEquals("value2", map.put("key", "value3"));
+		map.put("key", "value1");
+		map.put("key", "value2");
+		map.put("key", "value3");
 		assertEquals(1, map.size());
 		assertEquals("value3", map.get("key"));
 		assertEquals("value3", map.get("KEY"));
@@ -47,9 +47,9 @@ public class LinkedCaseInsensitiveMapTests {
 
 	@Test
 	public void putWithOverlappingKeys() {
-		assertNull(map.put("key", "value1"));
-		assertEquals("value1", map.put("KEY", "value2"));
-		assertEquals("value2", map.put("Key", "value3"));
+		map.put("key", "value1");
+		map.put("KEY", "value2");
+		map.put("Key", "value3");
 		assertEquals(1, map.size());
 		assertEquals("value3", map.get("key"));
 		assertEquals("value3", map.get("KEY"));
@@ -64,9 +64,9 @@ public class LinkedCaseInsensitiveMapTests {
 
 	@Test
 	public void getOrDefault() {
-		assertNull(map.put("key", "value1"));
-		assertEquals("value1", map.put("KEY", "value2"));
-		assertEquals("value2", map.put("Key", "value3"));
+		map.put("key", "value1");
+		map.put("KEY", "value2");
+		map.put("Key", "value3");
 		assertEquals("value3", map.getOrDefault("key", "N"));
 		assertEquals("value3", map.getOrDefault("KEY", "N"));
 		assertEquals("value3", map.getOrDefault("Key", "N"));
@@ -76,9 +76,9 @@ public class LinkedCaseInsensitiveMapTests {
 
 	@Test
 	public void getOrDefaultWithNullValue() {
-		assertNull(map.put("key", null));
-		assertNull(map.put("KEY", null));
-		assertNull(map.put("Key", null));
+		map.put("key", null);
+		map.put("KEY", null);
+		map.put("Key", null);
 		assertNull(map.getOrDefault("key", "N"));
 		assertNull(map.getOrDefault("KEY", "N"));
 		assertNull(map.getOrDefault("Key", "N"));
@@ -88,9 +88,9 @@ public class LinkedCaseInsensitiveMapTests {
 
 	@Test
 	public void computeIfAbsentWithExistingValue() {
-		assertNull(map.putIfAbsent("key", "value1"));
-		assertEquals("value1", map.putIfAbsent("KEY", "value2"));
-		assertEquals("value1", map.put("Key", "value3"));
+		map.put("key", "value1");
+		map.put("KEY", "value2");
+		map.put("Key", "value3");
 		assertEquals("value3", map.computeIfAbsent("key", key -> "value1"));
 		assertEquals("value3", map.computeIfAbsent("KEY", key -> "value2"));
 		assertEquals("value3", map.computeIfAbsent("Key", key -> "value3"));
@@ -105,7 +105,7 @@ public class LinkedCaseInsensitiveMapTests {
 
 	@Test
 	public void mapClone() {
-		assertNull(map.put("key", "value1"));
+		map.put("key", "value1");
 		LinkedCaseInsensitiveMap<String> copy = map.clone();
 
 		assertEquals(map.getLocale(), copy.getLocale());
