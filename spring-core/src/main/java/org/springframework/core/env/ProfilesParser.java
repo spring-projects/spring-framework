@@ -33,7 +33,7 @@ import org.springframework.util.StringUtils;
  */
 class ProfilesParser {
 
-	public static Profiles parse(String... expressions) {
+	static Profiles parse(String... expressions) {
 		Assert.notEmpty(expressions, "Must specify at least one profile");
 		Profiles[] parsed = new Profiles[expressions.length];
 		for (int i = 0; i < expressions.length; i++) {
@@ -92,7 +92,7 @@ class ProfilesParser {
 			return elements.get(0);
 		}
 		Profiles[] profiles = elements.toArray(new Profiles[0]);
-		return (operator != Operator.AND ? or(profiles) : and(profiles));
+		return (operator == Operator.AND ? and(profiles) : or(profiles));
 	}
 
 	private static void assertWellFormed(String expression, boolean wellFormed) {
@@ -111,7 +111,7 @@ class ProfilesParser {
 	}
 
 	private static Profiles not(Profiles profiles) {
-		return (activeProfiles) -> !profiles.matches(activeProfiles);
+		return (activeProfile) -> !profiles.matches(activeProfile);
 	}
 
 	private static Profiles equals(String profile) {
@@ -133,7 +133,7 @@ class ProfilesParser {
 
 		private final Profiles[] parsed;
 
-		public ParsedProfiles(String[] expressions, Profiles[] parsed) {
+		ParsedProfiles(String[] expressions, Profiles[] parsed) {
 			this.expressions = expressions;
 			this.parsed = parsed;
 		}
