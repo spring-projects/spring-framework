@@ -37,6 +37,7 @@ import static org.junit.Assert.*;
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @since 5.1
  */
 public class ProfilesTests {
 

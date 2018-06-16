@@ -19,7 +19,6 @@ package org.springframework.core.env;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.function.Predicate;
 
@@ -30,6 +29,7 @@ import org.springframework.util.StringUtils;
  * Internal parser used by {@link Profiles#of}.
  *
  * @author Phillip Webb
+ * @since 5.1
  */
 class ProfilesParser {
 
@@ -43,7 +43,7 @@ class ProfilesParser {
 	}
 
 	private static Profiles parseExpression(String expression) {
-		Assert.hasText(expression,
+		Assert.hasText(expression, () ->
 				"Invalid profile expression [" + expression + "]: must contain text");
 		StringTokenizer tokens = new StringTokenizer(expression, "()&|!", true);
 		return parseTokens(expression, tokens);
@@ -97,7 +97,7 @@ class ProfilesParser {
 
 	private static void assertWellFormed(String expression, boolean wellFormed) {
 		Assert.isTrue(wellFormed,
-				() -> "Malformed profile expression '" + expression + "'");
+				() -> "Malformed profile expression [" + expression + "]");
 	}
 
 	private static Profiles or(Profiles... profiles) {
@@ -122,7 +122,7 @@ class ProfilesParser {
 		return (profiles) -> profiles.matches(activeProfile);
 	}
 
-	enum Operator {
+	private enum Operator {
 		AND,
 		OR
 	}

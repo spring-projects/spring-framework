@@ -49,7 +49,7 @@ import org.springframework.core.env.Profiles;
  * <p>If a {@code @Configuration} class is marked with {@code @Profile}, all of the
  * {@code @Bean} methods and {@link Import @Import} annotations associated with that class
  * will be bypassed unless one or more of the specified profiles are active. A profile
- * string may contains a simple profile name (for example {@code "p1"}) or a profile
+ * string may contain a simple profile name (for example {@code "p1"}) or a profile
  * expression. A profile expression allows for more complicated profile logic to be
  * expressed, for example {@code "p1 & p2"}. See {@link Profiles#of(String...)} for more
  * details about supported formats.

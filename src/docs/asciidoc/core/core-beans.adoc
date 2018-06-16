@@ -7664,19 +7664,19 @@ straight JNDI `InitialContext` usage shown above, but not the `JndiObjectFactory
 variant which would force you to declare the return type as the `FactoryBean` type.
 ====
 
-The profile string may contains a simple profile name (for example `production`) or a
+The profile string may contain a simple profile name (for example `production`) or a
 profile expression. A profile expression allows for more complicated profile logic to be
 expressed, for example `production & us-east`. The following operators are supported in
 profile expressions:
 
-* `!` - A logical not of the profile
-* `&` - A logical and of the profiles
-* `|` - A logical or of the profiles
+* `!` - A logical _not_ of the profile
+* `&` - A logical _and_ of the profiles
+* `|` - A logical _or_ of the profiles
 
 [NOTE]
 ====
 The `&` and `|` operators may not be mixed without using parentheses. For example
-`production & us-east | eu-central` is not a valid expression, it must be expressed as
+`production & us-east | eu-central` is not a valid expression; it must be expressed as
 `production & (us-east | eu-central)`.
 ====
 
