@@ -190,7 +190,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		}
 
 		boolean debugLevel = (cause instanceof JsonMappingException &&
-				cause.getMessage().startsWith("Can not find"));
+				(cause.getMessage().startsWith("Can not find") || cause.getMessage().startsWith("Cannot find")));
 
 		if (debugLevel ? logger.isDebugEnabled() : logger.isWarnEnabled()) {
 			String msg = "Failed to evaluate Jackson " + (type instanceof JavaType ? "de" : "") +
