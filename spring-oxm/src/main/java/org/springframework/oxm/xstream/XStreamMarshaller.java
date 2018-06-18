@@ -767,7 +767,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 		else {
 			throw new IllegalArgumentException("DOMSource contains neither Document nor Element");
 		}
-        return doUnmarshal(streamReader, null);
+		return doUnmarshal(streamReader, null);
 	}
 
 	@Override
@@ -783,7 +783,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 
 	@Override
 	protected Object unmarshalXmlStreamReader(XMLStreamReader streamReader) throws XmlMappingException {
-        return doUnmarshal(new StaxReader(new QNameMap(), streamReader, this.nameCoder), null);
+		return doUnmarshal(new StaxReader(new QNameMap(), streamReader, this.nameCoder), null);
 	}
 
 	@Override
@@ -800,12 +800,12 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	}
 
 	public Object unmarshalInputStream(InputStream inputStream, @Nullable DataHolder dataHolder) throws XmlMappingException, IOException {
-        if (this.streamDriver != null) {
-            return doUnmarshal(this.streamDriver.createReader(inputStream), dataHolder);
-        }
-        else {
-		    return unmarshalReader(new InputStreamReader(inputStream, this.encoding), dataHolder);
-        }
+		if (this.streamDriver != null) {
+			return doUnmarshal(this.streamDriver.createReader(inputStream), dataHolder);
+		}
+		else {
+			return unmarshalReader(new InputStreamReader(inputStream, this.encoding), dataHolder);
+		}
 	}
 
 	@Override

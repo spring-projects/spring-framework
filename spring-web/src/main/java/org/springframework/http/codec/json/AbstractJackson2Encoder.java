@@ -176,7 +176,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 
 		return buffer;
 	}
-	
+
 	protected ObjectWriter customizeWriter(ObjectWriter writer, @Nullable MimeType mimeType,
 			ResolvableType elementType, @Nullable Map<String, Object> hints) {
 
@@ -227,5 +227,5 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	protected <A extends Annotation> A getAnnotation(MethodParameter parameter, Class<A> annotType) {
 		return parameter.getMethodAnnotation(annotType);
 	}
-	
+
 }

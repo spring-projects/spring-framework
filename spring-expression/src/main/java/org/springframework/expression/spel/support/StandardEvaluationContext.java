@@ -203,7 +203,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 	@Override
 	public TypeConverter getTypeConverter() {
 		if (this.typeConverter == null) {
-			 this.typeConverter = new StandardTypeConverter();
+			this.typeConverter = new StandardTypeConverter();
 		}
 		return this.typeConverter;
 	}

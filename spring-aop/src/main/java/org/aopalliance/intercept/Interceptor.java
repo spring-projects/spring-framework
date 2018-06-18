@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.aopalliance.aop.Advice;
  * <p>A generic interceptor can intercept runtime events that occur
  * within a base program. Those events are materialized by (reified
  * in) joinpoints. Runtime joinpoints can be invocations, field
- * access, exceptions... 
+ * access, exceptions...
  *
  * <p>This interface is not used directly. Use the sub-interfaces
  * to intercept specific events. For instance, the following class
@@ -32,7 +32,7 @@ import org.aopalliance.aop.Advice;
  * debugger:
  *
  * <pre class=code>
- * class DebuggingInterceptor implements MethodInterceptor, 
+ * class DebuggingInterceptor implements MethodInterceptor,
  *     ConstructorInterceptor, FieldInterceptor {
  *
  *   Object invoke(MethodInvocation i) throws Throwable {
@@ -44,7 +44,7 @@ import org.aopalliance.aop.Advice;
  *     debug(i.getConstructor(), i.getThis(), i.getArgs());
  *     return i.proceed();
  *   }
- * 
+ *
  *   Object get(FieldAccess fa) throws Throwable {
  *     debug(fa.getField(), fa.getThis(), null);
  *     return fa.proceed();

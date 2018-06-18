@@ -228,7 +228,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
 		Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, getDeclaredParameters());
 		RowMapper<T> rowMapper = newRowMapper(params, context);
- 		return getJdbcTemplate().query(newPreparedStatementCreator(sqlToUse, params), rowMapper);
+		return getJdbcTemplate().query(newPreparedStatementCreator(sqlToUse, params), rowMapper);
 	}
 
 	/**

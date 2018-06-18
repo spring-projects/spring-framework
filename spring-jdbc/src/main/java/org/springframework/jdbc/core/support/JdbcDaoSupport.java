@@ -96,7 +96,7 @@ public abstract class JdbcDaoSupport extends DaoSupport {
 	 */
 	@Nullable
 	public final JdbcTemplate getJdbcTemplate() {
-	  return this.jdbcTemplate;
+		return this.jdbcTemplate;
 	}
 
 	/**

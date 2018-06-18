@@ -465,7 +465,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	protected ModelAndView handleMethodArgumentNotValidException(MethodArgumentNotValidException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
- 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		return new ModelAndView();
 	}
 

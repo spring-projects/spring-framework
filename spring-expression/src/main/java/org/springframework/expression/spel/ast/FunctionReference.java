@@ -163,7 +163,7 @@ public class FunctionReference extends SpelNodeImpl {
 		}
 		return arguments;
 	}
-	
+
 	@Override
 	public boolean isCompilable() {
 		Method method = this.method;
@@ -182,8 +182,8 @@ public class FunctionReference extends SpelNodeImpl {
 		}
 		return true;
 	}
-	
-	@Override 
+
+	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		Method method = this.method;
 		Assert.state(method != null, "No method handle");

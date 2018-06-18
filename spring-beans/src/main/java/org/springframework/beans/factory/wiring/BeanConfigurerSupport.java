@@ -78,7 +78,7 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
 			throw new IllegalArgumentException(
-				 "Bean configurer aspect needs to run in a ConfigurableListableBeanFactory: " + beanFactory);
+				"Bean configurer aspect needs to run in a ConfigurableListableBeanFactory: " + beanFactory);
 		}
 		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
 		if (this.beanWiringInfoResolver == null) {

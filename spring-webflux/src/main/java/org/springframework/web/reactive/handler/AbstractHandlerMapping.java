@@ -64,8 +64,8 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 
 
 	public AbstractHandlerMapping() {
-		  this.patternParser = new PathPatternParser();
-		  this.globalCorsConfigSource = new UrlBasedCorsConfigurationSource(this.patternParser);
+		this.patternParser = new PathPatternParser();
+		this.globalCorsConfigSource = new UrlBasedCorsConfigurationSource(this.patternParser);
 	}
 
 

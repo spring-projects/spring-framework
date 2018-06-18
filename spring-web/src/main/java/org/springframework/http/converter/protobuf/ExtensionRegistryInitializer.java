@@ -35,6 +35,6 @@ public interface ExtensionRegistryInitializer {
 	 * Initializes the {@code ExtensionRegistry} with Protocol Message extensions.
 	 * @param registry the registry to populate
 	 */
-    void initializeExtensionRegistry(ExtensionRegistry registry);
+	void initializeExtensionRegistry(ExtensionRegistry registry);
 
 }

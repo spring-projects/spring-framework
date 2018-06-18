@@ -28,7 +28,7 @@ import reactor.core.publisher.MonoProcessor;
 
 /**
  * {@link WebSocketClient} implementation for use with the Java WebSocket API.
- * 
+ *
  * @author Violeta Georgieva
  * @since 5.0
  */

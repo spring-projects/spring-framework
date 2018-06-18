@@ -71,7 +71,7 @@ public interface MvcResult {
 	 * @return an exception, or {@code null} if none
 	 */
 	@Nullable
- 	Exception getResolvedException();
+	Exception getResolvedException();
 
 	/**
 	 * Return the "output" flash attributes saved during request processing.

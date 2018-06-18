@@ -190,7 +190,7 @@ public class Indexer extends SpelNodeImpl {
 		throw new SpelEvaluationException(
 				getStartPosition(), SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, targetDescriptor);
 	}
-	
+
 	@Override
 	public boolean isCompilable() {
 		if (this.indexedType == IndexedType.ARRAY) {
@@ -210,7 +210,7 @@ public class Indexer extends SpelNodeImpl {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		String descriptor = cf.lastDescriptor();
@@ -249,7 +249,7 @@ public class Indexer extends SpelNodeImpl {
 				mv.visitTypeInsn(CHECKCAST, "[C");
 				insn = CALOAD;
 			}
-			else { 
+			else {
 				mv.visitTypeInsn(CHECKCAST, "["+ this.exitTypeDescriptor +
 						(CodeFlow.isPrimitiveArray(this.exitTypeDescriptor) ? "" : ";"));
 						//depthPlusOne(exitTypeDescriptor)+"Ljava/lang/Object;");
@@ -286,7 +286,7 @@ public class Indexer extends SpelNodeImpl {
 			}
 			mv.visitMethodInsn(
 					INVOKEINTERFACE, "java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;", true);
-		} 
+		}
 
 		else if (this.indexedType == IndexedType.OBJECT) {
 			ReflectivePropertyAccessor.OptimalPropertyAccessor accessor =
@@ -313,7 +313,7 @@ public class Indexer extends SpelNodeImpl {
 				mv.visitFieldInsn((isStatic ? GETSTATIC : GETFIELD), classDesc, member.getName(),
 						CodeFlow.toJvmDescriptor(((Field) member).getType()));
 			}
-		} 
+		}
 
 		cf.pushDescriptor(this.exitTypeDescriptor);
 	}

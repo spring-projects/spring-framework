@@ -301,7 +301,7 @@ public class MethodReference extends SpelNodeImpl {
 
 		return true;
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		CachedMethodExecutor executorToCheck = this.cachedExecutor;
@@ -332,7 +332,7 @@ public class MethodReference extends SpelNodeImpl {
 			// Something on the stack when nothing is needed
 			mv.visitInsn(POP);
 		}
-		
+
 		if (CodeFlow.isPrimitive(descriptor)) {
 			CodeFlow.insertBoxIfNecessary(mv, descriptor.charAt(0));
 		}

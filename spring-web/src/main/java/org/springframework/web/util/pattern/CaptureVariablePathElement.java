@@ -107,8 +107,8 @@ class CaptureVariablePathElement extends PathElement {
 				match = (pathIndex == matchingContext.pathLength);
 				if (!match && matchingContext.isMatchOptionalTrailingSeparator()) {
 					match = //(nextPos > candidateIndex) &&
-						    (pathIndex + 1) == matchingContext.pathLength &&
-						    matchingContext.isSeparator(pathIndex);
+							(pathIndex + 1) == matchingContext.pathLength &&
+							matchingContext.isSeparator(pathIndex);
 				}
 			}
 		}

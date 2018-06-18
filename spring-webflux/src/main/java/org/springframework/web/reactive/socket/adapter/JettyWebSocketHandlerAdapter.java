@@ -42,7 +42,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 /**
  * Jetty {@link WebSocket @WebSocket} handler that delegates events to a
  * reactive {@link WebSocketHandler} and its session.
- * 
+ *
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
  * @since 5.0

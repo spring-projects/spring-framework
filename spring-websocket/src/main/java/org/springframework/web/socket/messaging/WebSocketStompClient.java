@@ -422,17 +422,17 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 			Assert.state(getTaskScheduler() != null, "No TaskScheduler configured");
 			this.lastWriteTime = System.currentTimeMillis();
 			this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(() -> {
-                if (System.currentTimeMillis() - this.lastWriteTime > duration) {
-                    try {
-                        runnable.run();
-                    }
-                    catch (Throwable ex) {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("WriteInactivityTask failure", ex);
-                        }
-                    }
-                }
-            }, duration / 2));
+				if (System.currentTimeMillis() - this.lastWriteTime > duration) {
+					try {
+						runnable.run();
+					}
+					catch (Throwable ex) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("WriteInactivityTask failure", ex);
+						}
+					}
+				}
+			}, duration / 2));
 		}
 
 		@Override

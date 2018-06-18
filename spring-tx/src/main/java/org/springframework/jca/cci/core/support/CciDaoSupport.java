@@ -56,7 +56,7 @@ public abstract class CciDaoSupport extends DaoSupport {
 	 */
 	public final void setConnectionFactory(ConnectionFactory connectionFactory) {
 		if (this.cciTemplate == null || connectionFactory != this.cciTemplate.getConnectionFactory()) {
-		  this.cciTemplate = createCciTemplate(connectionFactory);
+			this.cciTemplate = createCciTemplate(connectionFactory);
 		}
 	}
 
@@ -95,7 +95,7 @@ public abstract class CciDaoSupport extends DaoSupport {
 	 */
 	@Nullable
 	public final CciTemplate getCciTemplate() {
-	  return this.cciTemplate;
+		return this.cciTemplate;
 	}
 
 	@Override

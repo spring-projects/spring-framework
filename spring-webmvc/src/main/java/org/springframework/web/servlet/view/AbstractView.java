@@ -83,7 +83,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 	@Nullable
 	private Set<String> exposedContextBeanNames;
-	
+
 	@Nullable
 	private String beanName;
 

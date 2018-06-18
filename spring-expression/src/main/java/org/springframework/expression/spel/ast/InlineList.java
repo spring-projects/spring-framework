@@ -128,12 +128,12 @@ public class InlineList extends SpelNodeImpl {
 		Assert.state(this.constant != null, "No constant");
 		return (List<Object>) this.constant.getValue();
 	}
-	
+
 	@Override
 	public boolean isCompilable() {
 		return isConstant();
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
 		final String constantFieldName = "inlineList$" + codeflow.nextFieldId();
@@ -144,11 +144,11 @@ public class InlineList extends SpelNodeImpl {
 
 		codeflow.registerNewClinit((mVisitor, cflow) ->
 				generateClinitCode(className, constantFieldName, mVisitor, cflow, false));
-		
+
 		mv.visitFieldInsn(GETSTATIC, className, constantFieldName, "Ljava/util/List;");
 		codeflow.pushDescriptor("Ljava/util/List");
 	}
-	
+
 	void generateClinitCode(String clazzname, String constantFieldName, MethodVisitor mv, CodeFlow codeflow, boolean nested) {
 		mv.visitTypeInsn(NEW, "java/util/ArrayList");
 		mv.visitInsn(DUP);

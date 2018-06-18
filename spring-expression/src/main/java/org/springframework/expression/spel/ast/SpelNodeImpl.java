@@ -194,7 +194,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
 	public abstract TypedValue getValueInternal(ExpressionState expressionState) throws EvaluationException;
 
-	
+
 	/**
 	 * Generate code that handles building the argument values for the specified method.
 	 * This method will take account of whether the invoked method is a varargs method
@@ -222,12 +222,12 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 			// have been passed to satisfy the varargs and so something needs to be built.
 			int p = 0; // Current supplied argument being processed
 			int childCount = arguments.length;
-						
+
 			// Fulfill all the parameter requirements except the last one
 			for (p = 0; p < paramDescriptors.length - 1; p++) {
 				generateCodeForArgument(mv, cf, arguments[p], paramDescriptors[p]);
 			}
-			
+
 			SpelNodeImpl lastChild = (childCount == 0 ? null : arguments[childCount - 1]);
 			String arrayType = paramDescriptors[paramDescriptors.length - 1];
 			// Determine if the final passed argument is already suitably packaged in array

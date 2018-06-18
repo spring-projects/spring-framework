@@ -73,7 +73,7 @@ class SingleCharWildcardedPathElement extends PathElement {
 			// Not enough data to match this path element
 			return false;
 		}
-		
+
 		char[] data = ((PathSegment)element).valueToMatchAsChars();
 		if (this.caseSensitive) {
 			for (int i = 0; i < this.len; i++) {
@@ -92,7 +92,7 @@ class SingleCharWildcardedPathElement extends PathElement {
 				}
 			}
 		}
-		
+
 		pathIndex++;
 		if (isNoMorePattern()) {
 			if (matchingContext.determineRemainingPath) {
@@ -129,7 +129,7 @@ class SingleCharWildcardedPathElement extends PathElement {
 	public String toString() {
 		return "SingleCharWildcarded(" + String.valueOf(this.text) + ")";
 	}
-	
+
 	@Override
 	public char[] getChars() {
 		return this.text;

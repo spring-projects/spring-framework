@@ -72,7 +72,7 @@ public @interface SendToUser {
 	 * or only to the session of the input message being handled.
 	 * <p>By default, this is set to {@code true} in which case messages are
 	 * broadcast to all sessions.
-     */
-    boolean broadcast() default true;
+	 */
+	boolean broadcast() default true;
 
 }

@@ -108,10 +108,10 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	private static HttpHeaders initHeaders(HttpServletRequest request) {
 		HttpHeaders headers = new HttpHeaders();
 		for (Enumeration<?> names = request.getHeaderNames();
-			 names.hasMoreElements(); ) {
+			names.hasMoreElements(); ) {
 			String name = (String) names.nextElement();
 			for (Enumeration<?> values = request.getHeaders(name);
-				 values.hasMoreElements(); ) {
+				values.hasMoreElements(); ) {
 				headers.add(name, (String) values.nextElement());
 			}
 		}

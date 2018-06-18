@@ -78,7 +78,7 @@ import org.springframework.web.servlet.support.BindStatus;
  * </tr>
  * </tbody>
  * </table>
- * 
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #setPath
@@ -131,14 +131,14 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 	 * Default is to not ignore.
 	 */
 	public void setIgnoreNestedPath(boolean ignoreNestedPath) {
-	  this.ignoreNestedPath = ignoreNestedPath;
+		this.ignoreNestedPath = ignoreNestedPath;
 	}
 
 	/**
 	 * Return whether to ignore a nested path, if any.
 	 */
 	public boolean isIgnoreNestedPath() {
-	  return this.ignoreNestedPath;
+		return this.ignoreNestedPath;
 	}
 
 

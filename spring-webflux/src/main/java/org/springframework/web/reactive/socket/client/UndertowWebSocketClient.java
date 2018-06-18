@@ -92,7 +92,7 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 	 * @since 5.0.8
 	 */
 	public UndertowWebSocketClient(XnioWorker worker, ByteBufferPool byteBufferPool,
-								   Consumer<ConnectionBuilder> builderConsumer) {
+			Consumer<ConnectionBuilder> builderConsumer) {
 
 		Assert.notNull(worker, "XnioWorker must not be null");
 		Assert.notNull(byteBufferPool, "ByteBufferPool must not be null");
