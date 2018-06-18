@@ -467,8 +467,8 @@ public class MessageHeaderAccessor {
 
 	@Nullable
 	public Object getReplyChannel() {
-        return getHeader(MessageHeaders.REPLY_CHANNEL);
-    }
+		return getHeader(MessageHeaders.REPLY_CHANNEL);
+	}
 
 	public void setErrorChannelName(String errorChannelName) {
 		setHeader(MessageHeaders.ERROR_CHANNEL, errorChannelName);
@@ -480,8 +480,8 @@ public class MessageHeaderAccessor {
 
 	@Nullable
 	public Object getErrorChannel() {
-        return getHeader(MessageHeaders.ERROR_CHANNEL);
-    }
+		return getHeader(MessageHeaders.ERROR_CHANNEL);
+	}
 
 
 	// Log message stuff

@@ -118,12 +118,12 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Serv
 					this.factory = new WebSocketServerFactory(this.servletContext, this.policy);
 				}
 				this.factory.setCreator((request, response) -> {
-                    WebSocketHandlerContainer container = containerHolder.get();
-                    Assert.state(container != null, "Expected WebSocketHandlerContainer");
-                    response.setAcceptedSubProtocol(container.getSelectedProtocol());
-                    response.setExtensions(container.getExtensionConfigs());
-                    return container.getHandler();
-                });
+					WebSocketHandlerContainer container = containerHolder.get();
+					Assert.state(container != null, "Expected WebSocketHandlerContainer");
+					response.setAcceptedSubProtocol(container.getSelectedProtocol());
+					response.setExtensions(container.getExtensionConfigs());
+					return container.getHandler();
+				});
 				this.factory.start();
 			}
 			catch (Throwable ex) {

@@ -38,7 +38,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 /**
  * Spring {@link WebSocketSession} adapter for a standard Java (JSR 356)
  * {@link javax.websocket.Session}.
- * 
+ *
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
  * @since 5.0

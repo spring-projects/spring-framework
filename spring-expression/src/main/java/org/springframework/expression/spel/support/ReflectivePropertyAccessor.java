@@ -385,10 +385,10 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	@Nullable
 	protected Method findGetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
 		Method method = findMethodForProperty(getPropertyMethodSuffixes(propertyName),
-				 "get", clazz, mustBeStatic, 0, ANY_TYPES);
+				"get", clazz, mustBeStatic, 0, ANY_TYPES);
 		if (method == null) {
 			method = findMethodForProperty(getPropertyMethodSuffixes(propertyName),
-					 "is", clazz, mustBeStatic, 0, BOOLEAN_TYPES);
+					"is", clazz, mustBeStatic, 0, BOOLEAN_TYPES);
 		}
 		return method;
 	}

@@ -81,17 +81,17 @@ public class ModelResultMatchers {
 		};
 	}
 
-    /**
-     * Assert the given model attributes do not exist.
-     */
-    public ResultMatcher attributeDoesNotExist(final String... names) {
-        return result -> {
+	/**
+	 * Assert the given model attributes do not exist.
+	 */
+	public ResultMatcher attributeDoesNotExist(final String... names) {
+		return result -> {
 			ModelAndView mav = getModelAndView(result);
 			for (String name : names) {
 				assertTrue("Model attribute '" + name + "' exists", mav.getModel().get(name) == null);
 			}
 		};
-    }
+	}
 
 	/**
 	 * Assert the given model attribute(s) have errors.

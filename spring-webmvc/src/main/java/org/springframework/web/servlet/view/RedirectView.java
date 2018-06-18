@@ -346,7 +346,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			targetUrl = replaceUriTemplateVariables(targetUrl.toString(), model, variables, enc);
 		}
 		if (isPropagateQueryProperties()) {
-		 	appendCurrentQueryParams(targetUrl, request);
+			appendCurrentQueryParams(targetUrl, request);
 		}
 		if (this.exposeModelAttributes) {
 			appendQueryProperties(targetUrl, model, enc);

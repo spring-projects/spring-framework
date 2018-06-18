@@ -66,7 +66,7 @@ public abstract class AspectJProxyUtils {
 		return (advisor instanceof InstantiationModelAwarePointcutAdvisor ||
 				advisor.getAdvice() instanceof AbstractAspectJAdvice ||
 				(advisor instanceof PointcutAdvisor &&
-						 ((PointcutAdvisor) advisor).getPointcut() instanceof AspectJExpressionPointcut));
+						((PointcutAdvisor) advisor).getPointcut() instanceof AspectJExpressionPointcut));
 	}
 
 }

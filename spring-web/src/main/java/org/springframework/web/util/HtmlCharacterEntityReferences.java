@@ -124,7 +124,7 @@ class HtmlCharacterEntityReferences {
 	 */
 	@Nullable
 	public String convertToReference(char character) {
-	   return convertToReference(character, WebUtils.DEFAULT_CHARACTER_ENCODING);
+		return convertToReference(character, WebUtils.DEFAULT_CHARACTER_ENCODING);
 	}
 
 	/**

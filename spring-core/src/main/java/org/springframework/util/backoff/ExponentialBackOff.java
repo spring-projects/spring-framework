@@ -199,7 +199,7 @@ public class ExponentialBackOff implements BackOff {
 				return maxInterval;
 			}
 			else if (this.currentInterval < 0) {
-			 	long initialInterval = getInitialInterval();
+				long initialInterval = getInitialInterval();
 				this.currentInterval = (initialInterval < maxInterval
 						? initialInterval : maxInterval);
 			}
