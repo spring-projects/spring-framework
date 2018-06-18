@@ -132,12 +132,14 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
 
 		if (shouldApplyTo(request, handler)) {
-			if (this.logger.isDebugEnabled()) {
-				this.logger.debug("Resolving exception from handler [" + handler + "]: " + ex);
-			}
 			prepareResponse(ex, response);
 			ModelAndView result = doResolveException(request, response, handler, ex);
 			if (result != null) {
+				// One-liner at debug level..
+				if (logger.isDebugEnabled()) {
+					logger.debug("Resolved [" + ex + "]" + (result.isEmpty() ? "" : " to " + result));
+				}
+				// warnLogger with full stack trace (requires explicit config)..
 				logException(ex, request);
 			}
 			return result;

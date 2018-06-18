@@ -146,8 +146,8 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	 */
 	@Override
 	public final void init() throws ServletException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Initializing servlet '" + getServletName() + "'");
+		if (logger.isTraceEnabled()) {
+			logger.trace("Initializing servlet '" + getServletName() + "'");
 		}
 
 		// Set bean properties from init parameters.
@@ -171,8 +171,8 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 		// Let subclasses do whatever initialization they like.
 		initServletBean();
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Servlet '" + getServletName() + "' configured successfully");
+		if (logger.isTraceEnabled()) {
+			logger.trace("Servlet '" + getServletName() + "' configured successfully");
 		}
 	}
 

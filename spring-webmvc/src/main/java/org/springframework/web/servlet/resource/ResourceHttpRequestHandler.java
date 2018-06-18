@@ -21,9 +21,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -448,7 +450,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		// For very general mappings (e.g. "/") we need to check 404 first
 		Resource resource = getResource(request);
 		if (resource == null) {
-			logger.trace("No matching resource found - returning 404");
+			logger.trace("Resource not found");
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
@@ -463,7 +465,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 		// Header phase
 		if (new ServletWebRequest(request, response).checkNotModified(resource.lastModified())) {
-			logger.trace("Resource not modified - returning 304");
+			logger.trace("Resource not modified");
 			return;
 		}
 
@@ -472,21 +474,10 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 		// Check the media type for the resource
 		MediaType mediaType = getMediaType(request, resource);
-		if (mediaType != null) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Determined media type '" + mediaType + "' for " + resource);
-			}
-		}
-		else {
-			if (logger.isTraceEnabled()) {
-				logger.trace("No media type found for " + resource + " - not sending a content-type header");
-			}
-		}
 
 		// Content phase
 		if (METHOD_HEAD.equals(request.getMethod())) {
 			setHeaders(response, resource, mediaType);
-			logger.trace("HEAD request - skipping content");
 			return;
 		}
 
@@ -597,9 +588,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 					return path;
 				}
 				path = (slash ? "/" + path.substring(i) : path.substring(i));
-				if (logger.isTraceEnabled()) {
-					logger.trace("Path after trimming leading '/' and control characters: [" + path + "]");
-				}
 				return path;
 			}
 		}
@@ -649,20 +637,20 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 */
 	protected boolean isInvalidPath(String path) {
 		if (path.contains("WEB-INF") || path.contains("META-INF")) {
-			logger.trace("Path contains \"WEB-INF\" or \"META-INF\".");
+			logger.warn("Path contains \"WEB-INF\" or \"META-INF\".");
 			return true;
 		}
 		if (path.contains(":/")) {
 			String relativePath = (path.charAt(0) == '/' ? path.substring(1) : path);
 			if (ResourceUtils.isUrl(relativePath) || relativePath.startsWith("url:")) {
-				logger.trace("Path represents URL or has \"url:\" prefix.");
+				logger.warn("Path represents URL or has \"url:\" prefix.");
 				return true;
 			}
 		}
 		if (path.contains("..")) {
 			path = StringUtils.cleanPath(path);
 			if (path.contains("../")) {
-				logger.trace("Path contains \"../\" after call to StringUtils#cleanPath.");
+				logger.warn("Path contains \"../\" after call to StringUtils#cleanPath.");
 				return true;
 			}
 		}
@@ -727,7 +715,17 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	@Override
 	public String toString() {
-		return "ResourceHttpRequestHandler [locations=" + getLocations() + ", resolvers=" + getResourceResolvers() + "]";
+		return "ResourceHttpRequestHandler " + formatLocations();
+	}
+
+	private Object formatLocations() {
+		if (!this.locationValues.isEmpty()) {
+			return this.locationValues.stream().collect(Collectors.joining("\", \"", "[\"", "\"]"));
+		}
+		else if (!this.locations.isEmpty()) {
+			return this.locations;
+		}
+		return Collections.emptyList();
 	}
 
 }

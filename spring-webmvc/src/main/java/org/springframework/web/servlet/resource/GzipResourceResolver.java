@@ -61,7 +61,7 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 			}
 		}
 		catch (IOException ex) {
-			logger.trace("No gzipped resource for [" + resource.getFilename() + "]", ex);
+			logger.trace("No gzip resource for [" + resource.getFilename() + "]", ex);
 		}
 
 		return resource;

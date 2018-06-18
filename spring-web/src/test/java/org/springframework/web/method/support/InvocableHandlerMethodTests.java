@@ -93,7 +93,7 @@ public class InvocableHandlerMethodTests {
 			fail("Expected exception");
 		}
 		catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().contains("No suitable resolver for argument 0 of type 'java.lang.Integer'"));
+			assertTrue(ex.getMessage().contains("Could not resolve parameter [0]"));
 		}
 	}
 

@@ -227,13 +227,15 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 				return handleAsyncRequestTimeoutException(
 						(AsyncRequestTimeoutException) ex, request, response, handler);
 			}
-		}
-		catch (Exception handlerException) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Handling of [" + ex.getClass().getName() + "] resulted in exception", handlerException);
+			else {
+				return null;
 			}
+
 		}
-		return null;
+		catch (Exception handlerEx) {
+			logger.warn("Failure while trying to resolve exception [" + ex.getClass().getName() + "]", handlerEx);
+			return null;
+		}
 	}
 
 	/**
@@ -541,8 +543,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 		if (!response.isCommitted()) {
 			response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
 		}
-		else if (logger.isDebugEnabled()) {
-			logger.debug("Async timeout for " + request.getMethod() + " [" + request.getRequestURI() + "]");
+		else if (logger.isWarnEnabled()) {
+			logger.warn("Async request timed out");
 		}
 		return new ModelAndView();
 	}

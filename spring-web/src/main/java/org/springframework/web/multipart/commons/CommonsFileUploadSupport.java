@@ -281,10 +281,15 @@ public abstract class CommonsFileUploadSupport {
 				// multipart file field
 				CommonsMultipartFile file = createMultipartFile(fileItem);
 				multipartFiles.add(file.getName(), file);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Found multipart file [" + file.getName() + "] of size " + file.getSize() +
-							" bytes with original filename [" + file.getOriginalFilename() + "], stored " +
-							file.getStorageDescription());
+				if (logger.isDebugEnabled() || logger.isTraceEnabled()) {
+					String message = "Part '" + file.getName() + "', " +
+							"size " + file.getSize() + " bytes, filename='" + file.getOriginalFilename() + "'";
+					if (logger.isTraceEnabled()) {
+						logger.trace(message + ", storage=" + file.getStorageDescription());
+					}
+					else {
+						logger.debug(message);
+					}
 				}
 			}
 		}
@@ -318,9 +323,15 @@ public abstract class CommonsFileUploadSupport {
 				if (file instanceof CommonsMultipartFile) {
 					CommonsMultipartFile cmf = (CommonsMultipartFile) file;
 					cmf.getFileItem().delete();
-					if (logger.isDebugEnabled()) {
-						logger.debug("Cleaning up multipart file [" + cmf.getName() + "] with original filename [" +
-								cmf.getOriginalFilename() + "], stored " + cmf.getStorageDescription());
+					if (logger.isDebugEnabled() || logger.isTraceEnabled()) {
+						String filename = cmf.getOriginalFilename();
+						String message = "Cleaning up part '" + cmf.getName() + "', filename '" + filename + "'";
+						if (logger.isTraceEnabled()) {
+							logger.trace(message + ", stored " + cmf.getStorageDescription());
+						}
+						else {
+							logger.debug(message);
+						}
 					}
 				}
 			}

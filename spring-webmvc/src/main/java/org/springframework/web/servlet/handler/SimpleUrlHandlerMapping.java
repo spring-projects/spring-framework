@@ -16,9 +16,12 @@
 
 package org.springframework.web.servlet.handler;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.springframework.beans.BeansException;
 import org.springframework.util.CollectionUtils;
@@ -111,7 +114,7 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	 */
 	protected void registerHandlers(Map<String, Object> urlMap) throws BeansException {
 		if (urlMap.isEmpty()) {
-			logger.warn("Neither 'urlMap' nor 'mappings' set on SimpleUrlHandlerMapping");
+			logger.warn("Neither 'urlMap' nor 'mappings' set, " + formatMappingName());
 		}
 		else {
 			urlMap.forEach((url, handler) -> {
@@ -125,6 +128,17 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 				}
 				registerHandler(url, handler);
 			});
+			if (logger.isDebugEnabled()) {
+				List<String> patterns = new ArrayList<>();
+				if (getRootHandler() != null) {
+					patterns.add("/");
+				}
+				if (getDefaultHandler() != null) {
+					patterns.add("/**");
+				}
+				patterns.addAll(getHandlerMap().keySet());
+				logger.debug("Patterns " + patterns + " in " + formatMappingName());
+			}
 		}
 	}
 

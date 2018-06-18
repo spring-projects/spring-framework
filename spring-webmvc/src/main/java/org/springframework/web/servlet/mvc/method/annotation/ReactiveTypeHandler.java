@@ -211,12 +211,12 @@ class ReactiveTypeHandler {
 		@Override
 		public final void onSubscribe(Subscription subscription) {
 			this.subscription = subscription;
-			if (logger.isDebugEnabled()) {
-				logger.debug("Subscribed to Publisher for " + this.emitter);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Subscribed to Publisher for " + this.emitter);
 			}
 			this.emitter.onTimeout(() -> {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Connection timed out for " + this.emitter);
+					logger.debug("Connection timeout for " + this.emitter);
 				}
 				terminate();
 				this.emitter.complete();
@@ -304,7 +304,7 @@ class ReactiveTypeHandler {
 				}
 				else {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Publishing completed for " + this.emitter);
+						logger.debug("Publisher completed for " + this.emitter);
 					}
 					this.emitter.complete();
 				}

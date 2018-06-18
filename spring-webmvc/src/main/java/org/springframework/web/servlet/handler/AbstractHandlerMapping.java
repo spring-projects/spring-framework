@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
@@ -65,7 +66,8 @@ import org.springframework.web.util.UrlPathHelper;
  * @see #setInterceptors
  * @see org.springframework.web.servlet.HandlerInterceptor
  */
-public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport implements HandlerMapping, Ordered {
+public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
+		implements HandlerMapping, Ordered, BeanNameAware {
 
 	@Nullable
 	private Object defaultHandler;
@@ -83,6 +85,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	private CorsProcessor corsProcessor = new DefaultCorsProcessor();
 
 	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
+
+	@Nullable
+	private String beanName;
 
 
 	/**
@@ -231,6 +236,15 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		return this.order;
 	}
 
+	@Override
+	public void setBeanName(String name) {
+		this.beanName = name;
+	}
+
+	protected String formatMappingName() {
+		return this.beanName != null ? "'" + this.beanName + "'" : "<unknown>";
+	}
+
 
 	/**
 	 * Initializes the interceptors.
@@ -361,12 +375,21 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		}
 
 		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
+
+		if (logger.isTraceEnabled()) {
+			logger.trace("Mapped to " + handler);
+		}
+		else if (logger.isDebugEnabled()) {
+			logger.debug("Mapped to " + executionChain.getHandler());
+		}
+
 		if (CorsUtils.isCorsRequest(request)) {
 			CorsConfiguration globalConfig = this.globalCorsConfigSource.getCorsConfiguration(request);
 			CorsConfiguration handlerConfig = getCorsConfiguration(handler, request);
 			CorsConfiguration config = (globalConfig != null ? globalConfig.combine(handlerConfig) : handlerConfig);
 			executionChain = getCorsHandlerExecutionChain(request, executionChain, config);
 		}
+
 		return executionChain;
 	}
 

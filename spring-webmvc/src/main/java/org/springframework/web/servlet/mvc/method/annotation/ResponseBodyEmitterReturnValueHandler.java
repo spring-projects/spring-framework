@@ -193,7 +193,9 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		@SuppressWarnings("unchecked")
 		private <T> void sendInternal(T data, @Nullable MediaType mediaType) throws IOException {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Writing [" + data + "]");
+				String format = mediaType != null ? "\"" + mediaType + "\" from " : "";
+				logger.trace("Writing " + format + "[" +
+						(data instanceof CharSequence ? "\"" + data + "\"" : data) + "]");
 			}
 			for (HttpMessageConverter<?> converter : ResponseBodyEmitterReturnValueHandler.this.messageConverters) {
 				if (converter.canWrite(data.getClass(), mediaType)) {

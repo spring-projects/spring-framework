@@ -68,13 +68,13 @@ public class DefaultCorsProcessor implements CorsProcessor {
 
 		ServletServerHttpResponse serverResponse = new ServletServerHttpResponse(response);
 		if (responseHasCors(serverResponse)) {
-			logger.debug("Skip CORS processing: response already contains \"Access-Control-Allow-Origin\" header");
+			logger.trace("Skip CORS processing: response already contains \"Access-Control-Allow-Origin\" header");
 			return true;
 		}
 
 		ServletServerHttpRequest serverRequest = new ServletServerHttpRequest(request);
 		if (WebUtils.isSameOrigin(serverRequest)) {
-			logger.debug("Skip CORS processing: request is from same origin");
+			logger.trace("Skip CORS processing: request is from same origin");
 			return true;
 		}
 

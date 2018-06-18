@@ -205,20 +205,20 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 						}
 					}
 					catch (IllegalArgumentException ex) {
+						String reason = "Ignoring invalid locale cookie '" +
+								cookieName + ":" + value + "' due to: " + ex.getMessage();
 						if (request.getAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE) != null) {
 							// Error dispatch: ignore locale/timezone parse exceptions
 							if (logger.isDebugEnabled()) {
-								logger.debug("Ignoring invalid locale cookie '" + cookieName +
-										"' with value [" + value + "] due to error dispatch: " + ex.getMessage());
+								logger.debug(reason);
 							}
 						}
 						else {
-							throw new IllegalStateException("Invalid locale cookie '" + cookieName +
-									"' with value [" + value + "]: " + ex.getMessage());
+							throw new IllegalStateException(reason);
 						}
 					}
-					if (logger.isDebugEnabled()) {
-						logger.debug("Parsed cookie value [" + cookie.getValue() + "] into locale '" + locale +
+					if (logger.isTraceEnabled()) {
+						logger.trace("Parsed cookie value [" + cookie.getValue() + "] into locale '" + locale +
 								"'" + (timeZone != null ? " and time zone '" + timeZone.getID() + "'" : ""));
 					}
 				}

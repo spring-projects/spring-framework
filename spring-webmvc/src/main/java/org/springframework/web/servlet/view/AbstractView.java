@@ -138,7 +138,8 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 				String tok = st.nextToken();
 				int eqIdx = tok.indexOf('=');
 				if (eqIdx == -1) {
-					throw new IllegalArgumentException("Expected = in attributes CSV string '" + propString + "'");
+					throw new IllegalArgumentException(
+							"Expected '=' in attributes CSV string '" + propString + "'");
 				}
 				if (eqIdx >= tok.length() - 2) {
 					throw new IllegalArgumentException(
@@ -304,9 +305,10 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	public void render(@Nullable Map<String, ?> model, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 
-		if (logger.isTraceEnabled()) {
-			logger.trace("Rendering view with name '" + this.beanName + "' with model " + model +
-				" and static attributes " + this.staticAttributes);
+		if (logger.isDebugEnabled()) {
+			logger.debug("View " + formatViewName() +
+					", model " + (model != null ? model : Collections.emptyMap()) +
+					(this.staticAttributes.isEmpty() ? "" : ", static attributes " + this.staticAttributes));
 		}
 
 		Map<String, Object> mergedModel = createMergedOutputModel(model, request, response);
@@ -437,20 +439,12 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	protected void exposeModelAsRequestAttributes(Map<String, Object> model,
 			HttpServletRequest request) throws Exception {
 
-		model.forEach((modelName, modelValue) -> {
-			if (modelValue != null) {
-				request.setAttribute(modelName, modelValue);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Added model object '" + modelName + "' of type [" + modelValue.getClass().getName() +
-							"] to request in view with name '" + getBeanName() + "'");
-				}
+		model.forEach((name, value) -> {
+			if (value != null) {
+				request.setAttribute(name, value);
 			}
 			else {
-				request.removeAttribute(modelName);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Removed model object '" + modelName +
-							"' from request in view with name '" + getBeanName() + "'");
-				}
+				request.removeAttribute(name);
 			}
 		});
 	}
@@ -499,14 +493,11 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder(getClass().getName());
-		if (getBeanName() != null) {
-			sb.append(": name '").append(getBeanName()).append("'");
-		}
-		else {
-			sb.append(": unnamed");
-		}
-		return sb.toString();
+		return getClass().getName() + ": " + formatViewName();
+	}
+
+	protected String formatViewName() {
+		return (getBeanName() != null ? "name '" + getBeanName() + "'" : "[unnamed]");
 	}
 
 }

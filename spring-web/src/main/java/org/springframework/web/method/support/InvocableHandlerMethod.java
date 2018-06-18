@@ -26,6 +26,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -163,24 +164,26 @@ public class InvocableHandlerMethod extends HandlerMethod {
 					continue;
 				}
 				catch (Exception ex) {
-					if (logger.isDebugEnabled()) {
-						logger.debug(getArgumentResolutionErrorMessage("Failed to resolve", i), ex);
+					// Leave stack trace for later, e.g. AbstractHandlerExceptionResolver
+					String message = ex.getMessage();
+					if (!message.contains(parameter.getExecutable().toGenericString())) {
+						if (logger.isDebugEnabled()) {
+							logger.debug(formatArgumentError(parameter, message));
+						}
 					}
 					throw ex;
 				}
 			}
 			if (args[i] == null) {
-				throw new IllegalStateException("Could not resolve method parameter at index " +
-						parameter.getParameterIndex() + " in " + parameter.getExecutable().toGenericString() +
-						": " + getArgumentResolutionErrorMessage("No suitable resolver for", i));
+				throw new IllegalStateException(formatArgumentError(parameter, "No suitable resolver"));
 			}
 		}
 		return args;
 	}
 
-	private String getArgumentResolutionErrorMessage(String text, int index) {
-		Class<?> paramType = getMethodParameters()[index].getParameterType();
-		return text + " argument " + index + " of type '" + paramType.getName() + "'";
+	private static String formatArgumentError(MethodParameter param, String message) {
+		return "Could not resolve parameter [" + param.getParameterIndex() + "] in " +
+				param.getExecutable().toGenericString() + (StringUtils.hasText(message) ? ": " + message : "");
 	}
 
 	/**

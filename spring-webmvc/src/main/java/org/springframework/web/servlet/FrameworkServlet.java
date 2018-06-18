@@ -43,6 +43,7 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -565,9 +566,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			// Publish the context as a servlet context attribute.
 			String attrName = getServletContextAttributeName();
 			getServletContext().setAttribute(attrName, wac);
-			if (this.logger.isDebugEnabled()) {
-				this.logger.debug("Published WebApplicationContext of servlet '" + getServletName() +
-						"' as ServletContext attribute with name [" + attrName + "]");
+			if (this.logger.isTraceEnabled()) {
+				this.logger.trace("Published WebApplicationContext of servlet '" + getServletName() +
+						"' as ServletContext attribute [" + attrName + "]");
 			}
 		}
 
@@ -615,10 +616,10 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 */
 	protected WebApplicationContext createWebApplicationContext(@Nullable ApplicationContext parent) {
 		Class<?> contextClass = getContextClass();
-		if (this.logger.isDebugEnabled()) {
-			this.logger.debug("Servlet with name '" + getServletName() +
-					"' will try to create custom WebApplicationContext context of class '" +
-					contextClass.getName() + "'" + ", using parent context [" + parent + "]");
+		if (this.logger.isTraceEnabled()) {
+			this.logger.trace("Servlet '" + getServletName() +
+					"' will create custom WebApplicationContext context of class '" +
+					contextClass.getName() + "'" + ", parent context [" + parent + "]");
 		}
 		if (!ConfigurableWebApplicationContext.class.isAssignableFrom(contextClass)) {
 			throw new ApplicationContextException(
@@ -990,14 +991,15 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 			if (logger.isDebugEnabled()) {
 				if (failureCause != null) {
-					this.logger.debug("Could not complete request", failureCause);
+					this.logger.debug("Failed to complete request: ", failureCause);
 				}
 				else {
 					if (asyncManager.isConcurrentHandlingStarted()) {
-						logger.debug("Leaving response open for concurrent processing");
+						logger.debug("Exiting, but response remains open for further handling");
 					}
 					else {
-						this.logger.debug("Successfully completed request");
+						HttpStatus status = HttpStatus.resolve(response.getStatus());
+						this.logger.debug("Completed " + (status != null ? status : response.getStatus()));
 					}
 				}
 			}

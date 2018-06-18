@@ -290,7 +290,7 @@ public final class WebAsyncManager {
 		final CallableInterceptorChain interceptorChain = new CallableInterceptorChain(interceptors);
 
 		this.asyncWebRequest.addTimeoutHandler(() -> {
-			logger.debug("Processing timeout");
+			logger.debug("Async request timeout for " + formatRequestUri());
 			Object result = interceptorChain.triggerAfterTimeout(this.asyncWebRequest, callable);
 			if (result != CallableProcessingInterceptor.RESULT_NONE) {
 				setConcurrentResultAndDispatch(result);
@@ -298,7 +298,7 @@ public final class WebAsyncManager {
 		});
 
 		this.asyncWebRequest.addErrorHandler(ex -> {
-			logger.debug("Processing error");
+			logger.debug("Async request error for " + formatRequestUri() + ": " + ex);
 			Object result = interceptorChain.triggerAfterError(this.asyncWebRequest, callable, ex);
 			result = (result != CallableProcessingInterceptor.RESULT_NONE ? result : ex);
 			setConcurrentResultAndDispatch(result);
@@ -333,6 +333,11 @@ public final class WebAsyncManager {
 		}
 	}
 
+	private String formatRequestUri() {
+		HttpServletRequest request = this.asyncWebRequest.getNativeRequest(HttpServletRequest.class);
+		return request != null ? urlPathHelper.getRequestUri(request) : "servlet container";
+	}
+
 	private void setConcurrentResultAndDispatch(Object result) {
 		synchronized (WebAsyncManager.this) {
 			if (this.concurrentResult != RESULT_NONE) {
@@ -347,8 +352,7 @@ public final class WebAsyncManager {
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Concurrent result value [" + this.concurrentResult +
-					"] - dispatching request to resume processing");
+			logger.debug("Async result ready, dispatch to " + formatRequestUri());
 		}
 		this.asyncWebRequest.dispatch();
 	}
@@ -432,11 +436,7 @@ public final class WebAsyncManager {
 		this.asyncWebRequest.startAsync();
 
 		if (logger.isDebugEnabled()) {
-			HttpServletRequest request = this.asyncWebRequest.getNativeRequest(HttpServletRequest.class);
-			if (request != null) {
-				String requestUri = urlPathHelper.getRequestUri(request);
-				logger.debug("Concurrent handling starting for " + request.getMethod() + " [" + requestUri + "]");
-			}
+			logger.debug("Started async request");
 		}
 	}
 

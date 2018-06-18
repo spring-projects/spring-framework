@@ -65,8 +65,8 @@ class DeferredResultInterceptorChain {
 				this.interceptors.get(i).postProcess(request, deferredResult, concurrentResult);
 			}
 		}
-		catch (Throwable t) {
-			return t;
+		catch (Throwable ex) {
+			return ex;
 		}
 		return concurrentResult;
 	}
@@ -105,8 +105,8 @@ class DeferredResultInterceptorChain {
 			try {
 				this.interceptors.get(i).afterCompletion(request, deferredResult);
 			}
-			catch (Throwable t) {
-				logger.error("afterCompletion error", t);
+			catch (Throwable ex) {
+				logger.error("Unhandled error from interceptor afterCompletion method", ex);
 			}
 		}
 	}

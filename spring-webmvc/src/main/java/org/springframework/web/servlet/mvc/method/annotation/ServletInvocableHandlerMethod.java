@@ -121,7 +121,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		}
 		catch (Exception ex) {
 			if (logger.isTraceEnabled()) {
-				logger.trace(getReturnValueHandlingErrorMessage("Error handling return value", returnValue), ex);
+				logger.trace(formatErrorForReturnValue("Error handling return value", returnValue), ex);
 			}
 			throw ex;
 		}
@@ -160,7 +160,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		return webRequest.isNotModified();
 	}
 
-	private String getReturnValueHandlingErrorMessage(String message, @Nullable Object returnValue) {
+	private String formatErrorForReturnValue(String message, @Nullable Object returnValue) {
 		StringBuilder sb = new StringBuilder(message);
 		if (returnValue != null) {
 			sb.append(" [type=").append(returnValue.getClass().getName()).append("]");

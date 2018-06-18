@@ -583,8 +583,8 @@ public class MvcUriComponentsBuilder {
 		if (ObjectUtils.isEmpty(paths) || StringUtils.isEmpty(paths[0])) {
 			return "/";
 		}
-		if (paths.length > 1 && logger.isWarnEnabled()) {
-			logger.warn("Multiple paths on controller " + controllerType.getName() + ", using first one");
+		if (paths.length > 1 && logger.isTraceEnabled()) {
+			logger.trace("Using first of multiple paths on " + controllerType.getName());
 		}
 		return paths[0];
 	}
@@ -599,8 +599,8 @@ public class MvcUriComponentsBuilder {
 		if (ObjectUtils.isEmpty(paths) || StringUtils.isEmpty(paths[0])) {
 			return "/";
 		}
-		if (paths.length > 1 && logger.isWarnEnabled()) {
-			logger.warn("Multiple paths on method " + method.toGenericString() + ", using first one");
+		if (paths.length > 1 && logger.isTraceEnabled()) {
+			logger.trace("Using first of multiple paths on " + method.toGenericString());
 		}
 		return paths[0];
 	}
@@ -628,10 +628,6 @@ public class MvcUriComponentsBuilder {
 
 	private static UriComponents applyContributors(UriComponentsBuilder builder, Method method, Object... args) {
 		CompositeUriComponentsContributor contributor = getUriComponentsContributor();
-		if (contributor == null) {
-			logger.trace("Using default CompositeUriComponentsContributor");
-			contributor = defaultUriComponentsContributor;
-		}
 
 		int paramCount = method.getParameterCount();
 		int argCount = args.length;
@@ -652,35 +648,29 @@ public class MvcUriComponentsBuilder {
 				uriVars.getOrDefault(name, UriComponents.UriTemplateVariables.SKIP_VALUE));
 	}
 
-	@Nullable
 	private static CompositeUriComponentsContributor getUriComponentsContributor() {
 		WebApplicationContext wac = getWebApplicationContext();
-		if (wac == null) {
-			return null;
-		}
-		try {
-			return wac.getBean(MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME, CompositeUriComponentsContributor.class);
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("No CompositeUriComponentsContributor");
+		if (wac != null) {
+			try {
+				return wac.getBean(MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME, CompositeUriComponentsContributor.class);
 			}
-			return null;
+			catch (NoSuchBeanDefinitionException ex) {
+				// Ignore
+			}
 		}
+		return defaultUriComponentsContributor;
 	}
 
 	@Nullable
 	private static WebApplicationContext getWebApplicationContext() {
 		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 		if (requestAttributes == null) {
-			logger.trace("No request bound to the current thread: not in a DispatcherServlet request?");
 			return null;
 		}
 		HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
 		String attributeName = DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE;
 		WebApplicationContext wac = (WebApplicationContext) request.getAttribute(attributeName);
 		if (wac == null) {
-			logger.trace("No WebApplicationContext found: not in a DispatcherServlet request?");
 			return null;
 		}
 		return wac;
@@ -800,8 +790,7 @@ public class MvcUriComponentsBuilder {
 						proxy = objenesis.newInstance(proxyClass, enhancer.getUseCache());
 					}
 					catch (ObjenesisException ex) {
-						logger.debug("Unable to instantiate controller proxy using Objenesis, " +
-								"falling back to regular construction", ex);
+						logger.debug("Failed to create controller proxy, falling back on default constructor", ex);
 					}
 				}
 
@@ -810,8 +799,8 @@ public class MvcUriComponentsBuilder {
 						proxy = ReflectionUtils.accessibleConstructor(proxyClass).newInstance();
 					}
 					catch (Throwable ex) {
-						throw new IllegalStateException("Unable to instantiate controller proxy using Objenesis, " +
-								"and regular controller instantiation via default constructor fails as well", ex);
+						throw new IllegalStateException(
+								"Failed to create controller proxy or use default constructor", ex);
 					}
 				}
 
