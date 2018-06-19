@@ -1296,18 +1296,14 @@ See <<websocket-stomp-handle-send>>.
 [[websocket-stomp-subscribe-mapping]]
 ==== `@SubscribeMapping`
 
-`@SubscribeMapping` is used together with `@MessageMapping` to narrow the mapping to
-subscription messages. In this scenario `@MessageMapping` expresses message destination
-mappings for routing purposes, which can be done at the class or at the method level,
-while `@SubscribeMapping` narrows the mapping to subscription messages only.
-
-Methods with `@MessageMapping` and `@SubscribeMapping` support the same
-<<websocket-stomp-message-mapping,method arguments>> as methods annotated only with
-`@MessageMapping` do. However for the return value, in the absence of `@SendTo` and
+`@SubscribeMapping` is similar to `@MessageMapping` but also narrows the mapping to
+subscription messages only. Methods with `@SubscribeMapping` support the same
+<<websocket-stomp-message-mapping,method arguments>> as `@MessageMapping` methods do.
+The main difference is that for the return value, in the absence of `@SendTo` and
 `@SendToUser`, a message is sent directly as a reply to the subscription, via the
-"clientOutboundChannel" channel. Effectively the subscription is used as a one-time,
-request-reply message exchange with the subscription never stored. This is useful for
-loading data on startup and for initializing a front-end UI.
+"clientOutboundChannel" channel. Effectively in this case the subscription is used as
+a one-time, request-reply message exchange with the subscription never stored.
+This is useful for loading data on startup and for initializing a front-end UI.
 
 If an `@SubscribeMapping` method is annotated with `@SendTo` and `@SendToUser` the return
 value is sent to the `"brokerChannel"` as usual, sending a message subscribers of the
