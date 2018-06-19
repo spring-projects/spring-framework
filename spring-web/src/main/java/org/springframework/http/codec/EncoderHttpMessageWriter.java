@@ -103,11 +103,14 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 		Flux<DataBuffer> body = this.encoder.encode(
 				inputStream, message.bufferFactory(), elementType, contentType, hints);
 
-		// Response is not committed until the first signal...
 		if (inputStream instanceof Mono) {
 			HttpHeaders headers = message.getHeaders();
 			if (headers.getContentLength() < 0 && !headers.containsKey(HttpHeaders.TRANSFER_ENCODING)) {
-				body = body.doOnNext(data -> headers.setContentLength(data.readableByteCount()));
+				return Mono.from(body)
+						.flatMap(dataBuffer -> {
+							headers.setContentLength(dataBuffer.readableByteCount());
+							return message.writeWith(Mono.just(dataBuffer));
+						});
 			}
 		}
 
