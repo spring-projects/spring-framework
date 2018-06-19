@@ -18,8 +18,10 @@ package org.springframework.test.context.junit4.orm;
 
 import javax.persistence.PersistenceException;
 
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.exception.ConstraintViolationException;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -29,9 +31,12 @@ import org.springframework.test.context.junit4.AbstractTransactionalJUnit4Spring
 import org.springframework.test.context.junit4.orm.domain.DriversLicense;
 import org.springframework.test.context.junit4.orm.domain.Person;
 import org.springframework.test.context.junit4.orm.service.PersonService;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
-import static org.junit.Assert.*;
-import static org.springframework.test.transaction.TransactionTestUtils.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 
 /**
  * Transactional integration tests regarding <i>manual</i> session flushing with
@@ -51,7 +56,6 @@ public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4Sp
 
 	@Autowired
 	private SessionFactory sessionFactory;
-
 
 	protected int countRowsInPersonTable() {
 		return countRowsInTable("person");
@@ -75,6 +79,18 @@ public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4Sp
 		DriversLicense driversLicense = sam.getDriversLicense();
 		assertNotNull("Sam's driver's license should not be null", driversLicense);
 		assertEquals("Verifying Sam's driver's license number", Long.valueOf(1234), driversLicense.getNumber());
+	}
+
+	@Test
+	@Transactional(readOnly = true)
+	public void readOnlySession() {
+		Session session = sessionFactory.getCurrentSession();
+		Person sam = personService.findByName(SAM);
+		sam.setName("Vlad");
+		//By setting setDefaultReadOnly(true), the user can no longer modify any entity.
+		session.flush();
+		session.refresh(sam);
+		assertEquals("Sam", sam.getName());
 	}
 
 	@Test

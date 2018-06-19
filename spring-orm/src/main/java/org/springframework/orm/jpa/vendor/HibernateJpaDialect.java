@@ -165,7 +165,8 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 		// Adapt flush mode and store previous isolation level, if any.
 		FlushMode previousFlushMode = prepareFlushMode(session, definition.isReadOnly());
-		return new SessionTransactionData(session, previousFlushMode, preparedCon, previousIsolationLevel);
+		boolean previousReadOnly = prepareReadOnly(session, definition.isReadOnly());
+		return new SessionTransactionData(session, previousFlushMode, preparedCon, previousIsolationLevel, previousReadOnly);
 	}
 
 	@Override
@@ -174,7 +175,8 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 		Session session = getSession(entityManager);
 		FlushMode previousFlushMode = prepareFlushMode(session, readOnly);
-		return new SessionTransactionData(session, previousFlushMode, null, null);
+		boolean previousReadOnly = prepareReadOnly(session, readOnly);
+		return new SessionTransactionData(session, previousFlushMode, null, null, previousReadOnly);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -198,6 +200,12 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		}
 		// No FlushMode change needed...
 		return null;
+	}
+
+	protected boolean prepareReadOnly(Session session, boolean readOnly) {
+		boolean previousReadOnly = session.isDefaultReadOnly();
+		session.setDefaultReadOnly(readOnly);
+		return previousReadOnly;
 	}
 
 	@Override
@@ -332,13 +340,16 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		@Nullable
 		private final Integer previousIsolationLevel;
 
+		private final boolean previousReadOnly;
+
 		public SessionTransactionData(Session session, @Nullable FlushMode previousFlushMode,
-				@Nullable Connection preparedCon, @Nullable Integer previousIsolationLevel) {
+				@Nullable Connection preparedCon, @Nullable Integer previousIsolationLevel, boolean previousReadOnly) {
 
 			this.session = session;
 			this.previousFlushMode = previousFlushMode;
 			this.preparedCon = preparedCon;
 			this.previousIsolationLevel = previousIsolationLevel;
+			this.previousReadOnly = previousReadOnly;
 		}
 
 		@SuppressWarnings("deprecation")
@@ -346,6 +357,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			if (this.previousFlushMode != null) {
 				this.session.setFlushMode(this.previousFlushMode);
 			}
+			session.setDefaultReadOnly(previousReadOnly);
 			if (this.preparedCon != null && this.session.isConnected()) {
 				Connection conToReset = HibernateConnectionHandle.doGetConnection(this.session);
 				if (conToReset != this.preparedCon) {

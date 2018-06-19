@@ -6,4 +6,6 @@
 
 	<bean class="org.springframework.test.context.transaction.ejb.dao.RequiredEjbTxTestEntityDao" />
 
+	<bean class="org.springframework.test.context.transaction.ejb.dao.TestEntityServiceImpl" />
+
 </beans>
