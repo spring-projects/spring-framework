@@ -318,7 +318,7 @@ public class WebClientIntegrationTests {
 		expectRequest(request -> {
 			assertEquals("/pojo/capitalize", request.getPath());
 			assertEquals("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}", request.getBody().readUtf8());
-			assertEquals("chunked", request.getHeader(HttpHeaders.TRANSFER_ENCODING));
+			assertEquals("31", request.getHeader(HttpHeaders.CONTENT_LENGTH));
 			assertEquals("application/json", request.getHeader(HttpHeaders.ACCEPT));
 			assertEquals("application/json", request.getHeader(HttpHeaders.CONTENT_TYPE));
 		});

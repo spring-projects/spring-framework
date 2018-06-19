@@ -340,10 +340,12 @@ public class BodyInsertersTests {
 					String content = new String(resultBytes, StandardCharsets.UTF_8);
 					assertThat(content, containsString("Content-Disposition: form-data; name=\"name\"\r\n" +
 							"Content-Type: text/plain;charset=UTF-8\r\n" +
+							"Content-Length: 6\r\n" +
 							"\r\n" +
 							"value1"));
 					assertThat(content, containsString("Content-Disposition: form-data; name=\"name\"\r\n" +
 							"Content-Type: text/plain;charset=UTF-8\r\n" +
+							"Content-Length: 6\r\n" +
 							"\r\n" +
 							"value2"));
 				})
