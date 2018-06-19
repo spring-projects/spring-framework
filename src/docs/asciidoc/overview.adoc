@@ -133,7 +133,7 @@ that, for all but the most trivial issues, we expect a ticket to be filed in the
 tracker, where discussions take place and leave a record for future reference.
 
 For more details see the guidelines at the
-https://github.com/spring-projects/spring-framework/blob/master/CONTRIBUTING.adoc[CONTRIBUTING],
+https://github.com/spring-projects/spring-framework/blob/master/CONTRIBUTING.md[CONTRIBUTING],
 top-level project page.
 
 
