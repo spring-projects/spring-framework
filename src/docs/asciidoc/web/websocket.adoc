@@ -1292,26 +1292,18 @@ handled under the covers. See <<websocket-stomp-handle-send>>.
 [[websocket-stomp-subscribe-mapping]]
 ==== `@SubscribeMapping`
 
-The `@SubscribeMapping` annotation is used in combination with `@MessageMapping` in order
-to narrow the mapping to subscription messages. In such scenarios, the `@MessageMapping`
-annotation specifies the destination while `@SubscribeMapping` indicates interest in
-subscription messages only.
+`@SubscribeMapping` is similar to `@MessageMapping` but also narrows the mapping to
+subscription messages only. Methods with `@SubscribeMapping` support the same
+<<websocket-stomp-message-mapping,method arguments>> as `@MessageMapping` methods do.
+The main difference is that for the return value, in the absence of `@SendTo` and
+`@SendToUser`, a message is sent directly as a reply to the subscription, via the
+"clientOutboundChannel" channel. Effectively in this case the subscription is used as
+a one-time, request-reply message exchange with the subscription never stored.
+This is useful for loading data on startup and for initializing a front-end UI.
 
-An `@SubscribeMapping` method is generally no different from any `@MessageMapping`
-method with respect to mapping and input arguments. For example you can combine it with a
-type-level `@MessageMapping` to express a shared destination prefix, and you can use the
-same <<websocket-stomp-message-mapping,method arguments>> as any @MessageMapping` method.
-
-The key difference with `@SubscribeMapping` is that the return value of the method is
-serialized as a payload and sent, not to the "brokerChannel" but to the
-"clientOutboundChannel", effectively replying directly to the client rather than
-broadcasting through the broker. This is useful for implementing one-off, request-reply
-message exchanges, and never holding on to the subscription. A common scenario for this
-pattern is application initialization when data must be loaded and presented.
-
-A `@SubscribeMapping` method can also be annotated with `@SendTo` in which case the
-return value is sent to the `"brokerChannel"` with the explicitly specified target
-destination.
+If an `@SubscribeMapping` method is annotated with `@SendTo` or `@SendToUser` the return
+value is sent to the `"brokerChannel"` as usual, i.e. sending a message to subscribers
+of the specified destination(s).
 
 
 [[websocket-stomp-exception-handler]]
