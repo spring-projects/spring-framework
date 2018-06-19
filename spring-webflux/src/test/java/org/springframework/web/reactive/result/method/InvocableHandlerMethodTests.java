@@ -176,7 +176,7 @@ public class InvocableHandlerMethodTests {
 			fail("Expected UnsupportedMediaTypeStatusException");
 		}
 		catch (UnsupportedMediaTypeStatusException ex) {
-			assertThat(ex.getMessage(), is("Response status 415 with reason \"boo\""));
+			assertThat(ex.getMessage(), is("Response status 415 UNSUPPORTED_MEDIA_TYPE with reason \"boo\""));
 		}
 	}
 
