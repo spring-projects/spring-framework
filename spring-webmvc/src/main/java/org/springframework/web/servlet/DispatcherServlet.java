@@ -309,6 +309,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	/** Perform cleanup of request attributes after include request? */
 	private boolean cleanupAfterInclude = true;
 
+	/** Do not log potentially sensitive information (params at DEBUG and headers at TRACE). */
+	private boolean disableLoggingRequestDetails = false;
+
 	/** MultipartResolver used by this servlet */
 	@Nullable
 	private MultipartResolver multipartResolver;
@@ -484,6 +487,25 @@ public class DispatcherServlet extends FrameworkServlet {
 		this.cleanupAfterInclude = cleanupAfterInclude;
 	}
 
+	/**
+	 * Set whether the {@code DispatcherServlet} should not log request
+	 * parameters and headers. By default request parameters are logged at DEBUG
+	 * while headers are logged at TRACE under the log category
+	 * {@code "org.springframework.web.servlet.DispatcherServlet"}. Those may
+	 * contain sensitive information, however this is typically not a problem
+	 * since DEBUG and TRACE are only expected to be enabled in development.
+	 * This property may be used to explicitly disable logging of such
+	 * information regardless of the log level.
+	 * <p>By default this is set to {@code false} in which case request details
+	 * are logged. If set to {@code true} request details will not be logged at
+	 * any log level.
+	 * @param disableLoggingRequestDetails whether to disable or not
+	 * @since 5.1
+	 */
+	public void setDisableLoggingRequestDetails(boolean disableLoggingRequestDetails) {
+		this.disableLoggingRequestDetails = disableLoggingRequestDetails;
+	}
+
 
 	/**
 	 * This implementation calls {@link #initStrategies}.
@@ -507,6 +529,20 @@ public class DispatcherServlet extends FrameworkServlet {
 		initRequestToViewNameTranslator(context);
 		initViewResolvers(context);
 		initFlashMapManager(context);
+
+		if (logger.isDebugEnabled() || logger.isTraceEnabled()) {
+			if (this.disableLoggingRequestDetails) {
+				logger.debug("Logging request parameters and headers is OFF.");
+			}
+			else {
+				logger.warn("\n\n" +
+						"!!!!!!!!!!!!!!!!!!!\n" +
+						"Logging of request parameters (DEBUG level) and headers (TRACE level) may log sensitive data.\n" +
+						"If not in development, lower the log level for \"org.springframework.web.servlet.DispatcherServlet\", or\n" +
+						"set the DispatcherServlet property \"disableLoggingRequestDetails\" to 'true'.\n" +
+						"!!!!!!!!!!!!!!!!!!!\n");
+			}
+		}
 	}
 
 	/**
@@ -954,9 +990,12 @@ public class DispatcherServlet extends FrameworkServlet {
 	private void logRequest(HttpServletRequest request) {
 		if (logger.isDebugEnabled() || logger.isTraceEnabled()) {
 
-			String params = request.getParameterMap().entrySet().stream()
-					.map(entry -> entry.getKey() + ":" + Arrays.toString(entry.getValue()))
-					.collect(Collectors.joining(", ", ", parameters={", "}"));
+			String params = "";
+			if (!this.disableLoggingRequestDetails) {
+				params = request.getParameterMap().entrySet().stream()
+						.map(entry -> entry.getKey() + ":" + Arrays.toString(entry.getValue()))
+						.collect(Collectors.joining(", ", ", parameters={", "}"));
+			}
 
 			String dispatchType = !request.getDispatcherType().equals(DispatcherType.REQUEST) ?
 					" [" + request.getDispatcherType().name() + "]" : "";
@@ -964,10 +1003,12 @@ public class DispatcherServlet extends FrameworkServlet {
 			String message = request.getMethod() + " " + getRequestUri(request) + dispatchType + params;
 
 			if (logger.isTraceEnabled()) {
-				String headers = Collections.list(request.getHeaderNames()).stream()
-						.map(name -> name + ":" + Collections.list(request.getHeaders(name)))
-						.collect(Collectors.joining(", ", ", headers={", "}"));
-
+				String headers = "";
+				if (!this.disableLoggingRequestDetails) {
+					headers = Collections.list(request.getHeaderNames()).stream()
+							.map(name -> name + ":" + Collections.list(request.getHeaders(name)))
+							.collect(Collectors.joining(", ", ", headers={", "}"));
+				}
 				logger.trace(message + headers + " in DispatcherServlet '" + getServletName() + "'");
 			}
 			else {
