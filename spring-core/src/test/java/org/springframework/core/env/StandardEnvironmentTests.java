@@ -38,6 +38,7 @@ import static org.springframework.core.env.AbstractEnvironment.*;
  * @author Chris Beams
  * @author Juergen Hoeller
  */
+@SuppressWarnings("deprecation")
 public class StandardEnvironmentTests {
 
 	private static final String ALLOWED_PROPERTY_NAME = "theanswer";
