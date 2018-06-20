@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import io.undertow.connector.ByteBufferPool;
 import io.undertow.server.DefaultByteBufferPool;
 import io.undertow.websockets.client.WebSocketClient.ConnectionBuilder;
 import io.undertow.websockets.client.WebSocketClientNegotiation;
@@ -56,9 +57,9 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 
 	private final XnioWorker worker;
 
-	private final Consumer<ConnectionBuilder> builderConsumer;
+	private ByteBufferPool byteBufferPool;
 
-	private int poolBufferSize = DEFAULT_POOL_BUFFER_SIZE;
+	private final Consumer<ConnectionBuilder> builderConsumer;
 
 	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
@@ -79,8 +80,24 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 	 * @param builderConsumer a consumer to configure {@code ConnectionBuilder}'s
 	 */
 	public UndertowWebSocketClient(XnioWorker worker, Consumer<ConnectionBuilder> builderConsumer) {
-		Assert.notNull(worker, "XnioWorker is required");
+		this(worker, new DefaultByteBufferPool(false, DEFAULT_POOL_BUFFER_SIZE), builderConsumer);
+	}
+
+	/**
+	 * Alternate constructor providing additional control over the
+	 * {@link ConnectionBuilder} for each WebSocket connection.
+	 * @param worker the Xnio worker to use to create {@code ConnectionBuilder}'s
+	 * @param byteBufferPool the ByteBufferPool to use to create {@code ConnectionBuilder}'s
+	 * @param builderConsumer a consumer to configure {@code ConnectionBuilder}'s
+	 * @since 5.0.8
+	 */
+	public UndertowWebSocketClient(XnioWorker worker, ByteBufferPool byteBufferPool,
+			Consumer<ConnectionBuilder> builderConsumer) {
+
+		Assert.notNull(worker, "XnioWorker must not be null");
+		Assert.notNull(byteBufferPool, "ByteBufferPool must not be null");
 		this.worker = worker;
+		this.byteBufferPool = byteBufferPool;
 		this.builderConsumer = builderConsumer;
 	}
 
@@ -90,6 +107,27 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 	 */
 	public XnioWorker getXnioWorker() {
 		return this.worker;
+	}
+
+	/**
+	 * Set the {@link io.undertow.connector.ByteBufferPool ByteBufferPool} to pass to
+	 * {@link io.undertow.websockets.client.WebSocketClient#connectionBuilder}.
+	 * <p>By default an indirect {@link io.undertow.server.DefaultByteBufferPool} with a buffer size
+	 * of {@value #DEFAULT_POOL_BUFFER_SIZE} is used.
+	 * @since 5.0.8
+	 */
+	public void setByteBufferPool(ByteBufferPool byteBufferPool) {
+		Assert.notNull(byteBufferPool, "ByteBufferPool must not be null");
+		this.byteBufferPool = byteBufferPool;
+	}
+
+	/**
+	 * @return the {@link io.undertow.connector.ByteBufferPool} currently used
+	 * for newly created WebSocket sessions by this client
+	 * @since 5.0.8
+	 */
+	public ByteBufferPool getByteBufferPool() {
+		return this.byteBufferPool;
 	}
 
 	/**
@@ -103,17 +141,23 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 	 * Configure the size of the {@link io.undertow.connector.ByteBufferPool
 	 * ByteBufferPool} to pass to
 	 * {@link io.undertow.websockets.client.WebSocketClient#connectionBuilder}.
-	 * <p>By default the buffer size is set to 8192.
+	 * <p>By default the buffer size is set to {@value #DEFAULT_POOL_BUFFER_SIZE}.
+	 * @deprecated as of 5.0.8 this method is deprecated in favor
+	 * of {@link #setByteBufferPool(io.undertow.connector.ByteBufferPool)}
 	 */
+	@Deprecated
 	public void setPoolBufferSize(int poolBufferSize) {
-		this.poolBufferSize = poolBufferSize;
+		this.byteBufferPool = new DefaultByteBufferPool(false, poolBufferSize);
 	}
 
 	/**
 	 * Return the size for Undertow's WebSocketClient {@code ByteBufferPool}.
+	 * @deprecated as of 5.0.8 this method is deprecated in favor
+	 * of using {@link #getByteBufferPool()}
 	 */
+	@Deprecated
 	public int getPoolBufferSize() {
-		return this.poolBufferSize;
+		return getByteBufferPool().getBufferSize();
 	}
 
 
@@ -153,14 +197,13 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 	/**
 	 * Create a {@link ConnectionBuilder} for the given URI.
 	 * <p>The default implementation creates a builder with the configured
-	 * {@link #getXnioWorker() XnioWorker} and {@link #getPoolBufferSize()} and
+	 * {@link #getXnioWorker() XnioWorker} and {@link #getByteBufferPool() ByteBufferPool} and
 	 * then passes it to the {@link #getConnectionBuilderConsumer() consumer}
 	 * provided at construction time.
 	 */
 	protected ConnectionBuilder createConnectionBuilder(URI url) {
 		ConnectionBuilder builder = io.undertow.websockets.client.WebSocketClient
-				.connectionBuilder(getXnioWorker(),
-						new DefaultByteBufferPool(false, getPoolBufferSize()), url);
+				.connectionBuilder(getXnioWorker(), getByteBufferPool(), url);
 		this.builderConsumer.accept(builder);
 		return builder;
 	}
