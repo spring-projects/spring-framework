@@ -137,23 +137,6 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 		return this.builderConsumer;
 	}
 
-	/**
-	 * Configure the size of the {@link io.undertow.connector.ByteBufferPool
-	 * ByteBufferPool} to pass to
-	 * {@link io.undertow.websockets.client.WebSocketClient#connectionBuilder}.
-	 * <p>By default the buffer size is set to {@value #DEFAULT_POOL_BUFFER_SIZE}.
-	 * @deprecated as of 5.0.8, in favor of {@link #setByteBufferPool(io.undertow.connector.ByteBufferPool)}
-	 */
-	@Deprecated
-	public void setPoolBufferSize(int poolBufferSize) {}
-
-	/**
-	 * Return the size for Undertow's WebSocketClient {@code ByteBufferPool}.
-	 */
-	public int getPoolBufferSize() {
-		return getByteBufferPool().getBufferSize();
-	}
-
 
 	@Override
 	public Mono<Void> execute(URI url, WebSocketHandler handler) {
