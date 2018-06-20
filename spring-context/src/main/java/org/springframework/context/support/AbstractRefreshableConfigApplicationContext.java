@@ -27,7 +27,7 @@ import org.springframework.util.StringUtils;
  * {@link AbstractRefreshableApplicationContext} subclass that adds common handling
  * of specified config locations.
  *
- * 它的子类 AbstractRefreshableApplicationContext  提供一系列的公共操作，针对特定的 配置位置
+ * 它的子类 AbstractRefreshableApplicationContext  提供一系列的公共操作，针对特定的配置位置
  *
  *
  *
@@ -48,6 +48,10 @@ import org.springframework.util.StringUtils;
  * @see #setConfigLocation
  * @see #setConfigLocations
  * @see #getDefaultConfigLocations
+ *
+ *
+ * 个人理解：Refreshable 通过字面意思解释是可以刷新的配置，为什么要刷新配置？？？？
+ *
  */
 public abstract class AbstractRefreshableConfigApplicationContext extends AbstractRefreshableApplicationContext
 		implements BeanNameAware, InitializingBean {

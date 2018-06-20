@@ -21,15 +21,24 @@ import java.util.Locale;
 import org.springframework.lang.Nullable;
 
 /**
+ *   顶级接口
+ *
  * Strategy interface for resolving messages, with support for the parameterization
  * and internationalization of such messages.
  *
- * <p>Spring provides two out-of-the-box implementations for production:
+ *  解析消息的策略接口，可以支持参数化和国际化
+ *
+ *
+ *
+ *
+ * <p>Spring provides two out-of-the-box implementations for production: Spring为生产提供了两个开箱即用的实现：
  * <ul>
  * <li>{@link org.springframework.context.support.ResourceBundleMessageSource},
- * built on top of the standard {@link java.util.ResourceBundle}
+ * built on top of the standard {@link java.util.ResourceBundle} 建立在标准之上
+ *
+ *
  * <li>{@link org.springframework.context.support.ReloadableResourceBundleMessageSource},
- * being able to reload message definitions without restarting the VM
+ * being able to reload message definitions without restarting the VM  能够在不重启VM的情况下重新加载消息定义
  * </ul>
  *
  * @author Rod Johnson

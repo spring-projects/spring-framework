@@ -27,7 +27,18 @@ import org.springframework.core.io.ProtocolResolver;
 import org.springframework.lang.Nullable;
 
 /**
+ * ConfigurableApplicationContext 是ApplicationContext接口的扩展接口
+ * 扩展了：生命周期，关闭的一些功能
+ *
+ *  Lifecycle,生命周期的接口
+ *
+ *  Closeable，表示资源可释放，实现了这个接口后
+ *
+ *
+ *
  * SPI interface to be implemented by most if not all application contexts.
+ * 不是所有的上下文context都实现这些接口
+ *
  * Provides facilities to configure an application context in addition
  * to the application context client methods in the
  * {@link org.springframework.context.ApplicationContext} interface.
@@ -94,6 +105,8 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 
 	/**
 	 * Set the unique id of this application context.
+	 * 设置application context 的唯一id ，这个id干嘛的？？？？？？？？？？？？？？
+	 *
 	 * @since 3.0
 	 */
 	void setId(String id);

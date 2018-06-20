@@ -22,14 +22,25 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
 /**
+ *
+ * -----------------位置模式的策略接口--------------
+ *
  * Strategy interface for resolving a location pattern (for example,
  * an Ant-style path pattern) into Resource objects.
  *
+ * 用于解决位置模式的策略接口（例如，
+ * 一个ant样式的路径模式）到资源对象
+ *
+ *
  * <p>This is an extension to the {@link org.springframework.core.io.ResourceLoader}
+ * 这是对@link org.springframework.core.io.ResourceLoader的扩展。
+ *
  * interface. A passed-in ResourceLoader (for example, an
  * {@link org.springframework.context.ApplicationContext} passed in via
  * {@link org.springframework.context.ResourceLoaderAware} when running in a context)
- * can be checked whether it implements this extended interface too.
+ * can be checked whether it implements this extended interface too. 也可以检查它是否实现了这个扩展接口。
+ *
+ *
  *
  * <p>{@link PathMatchingResourcePatternResolver} is a standalone implementation
  * that is usable outside an ApplicationContext, also used by
@@ -39,10 +50,22 @@ import org.springframework.core.io.ResourceLoader;
  * Input patterns have to match the strategy implementation. This interface just
  * specifies the conversion method rather than a specific pattern format.
  *
+ * 可以用于任何类型的位置模式：e.g. "/WEB-INF/*-context.xml"
+ * 输入模式必须与策略实现相匹配
+ * 这个接口只是指定了转换方法而不是特定的模式格式
+ *
  * <p>This interface also suggests a new resource prefix "classpath*:" for all
  * matching resources from the class path. Note that the resource location is
  * expected to be a path without placeholders in this case (e.g. "/beans.xml");
  * JAR files or classes directories can contain multiple files of the same name.
+ *
+ * 这个接口支持带有占位符的资源定位描述方式，比如classpath* 这样
+ * 注意，资源位置是
+ * 在这种情况下，期望是一条没有占位符的路径（例如“/它指明”);
+ * JAR文件或类目录可以包含同一个名称的多个文件。
+ *
+ * 也就是资源文件的描述期望是不带占位符号的，
+ *
  *
  * @author Juergen Hoeller
  * @since 1.0.2

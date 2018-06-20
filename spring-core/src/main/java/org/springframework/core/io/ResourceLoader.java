@@ -22,7 +22,11 @@ import org.springframework.util.ResourceUtils;
 /**
  * Strategy interface for loading resources (e.. class path or file system
  * resources).
- * 从文件系统或则从类路径加载资源的策略接口
+ *
+ *                        ***********从文件系统或则从类路径加载资源的策略接口**********
+ *
+ *                        ********************顶级接口****************
+ *
  *
  * An {@link org.springframework.context.ApplicationContext}
  * is required to provide this functionality, plus extended
@@ -39,6 +43,10 @@ import org.springframework.util.ResourceUtils;
  * <p>Bean properties of type Resource and Resource array can be populated
  * from Strings when running in an ApplicationContext, using the particular
  * context's resource loading strategy.
+ *
+ * Bean属性或者资源类型可以发布成字符串
+ *
+ *
  *
  * @author Juergen Hoeller
  * @since 10.03.2004
@@ -72,6 +80,10 @@ public interface ResourceLoader {
 	 * </ul>
 	 * <p>Note that a Resource handle does not imply an existing resource;
 	 * you need to invoke {@link Resource#exists} to check for existence.
+	 *
+	 * 一个资源解析器并不意味着资源的已经存在，你需要通过检查来判断资源解析器的存在
+	 *
+	 *
 	 * @param location the resource location
 	 * @return a corresponding Resource handle (never {@code null})
 	 * @see #CLASSPATH_URL_PREFIX
@@ -82,9 +94,16 @@ public interface ResourceLoader {
 
 	/**
 	 * Expose the ClassLoader used by this ResourceLoader.
+	 *
+	 * 暴露这个资源解析器的类加载器
+	 *
 	 * <p>Clients which need to access the ClassLoader directly can do so
 	 * in a uniform manner with the ResourceLoader, rather than relying
 	 * on the thread context ClassLoader.
+	 *
+	 * 客户端可以直接获取资源解析器的类加载器，而不是依赖线程来获取类加载器，？？？？这样做有什么好处？？？
+	 *
+	 *
 	 * @return the ClassLoader
 	 * (only {@code null} if even the system ClassLoader isn't accessible)
 	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()

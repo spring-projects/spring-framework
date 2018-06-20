@@ -26,7 +26,7 @@ import org.springframework.lang.Nullable;
 /**
  * Central interface to provide configuration for an application.
  *
- * 为application提供一个配置的中心接口 ，核心接口
+ * ------------------为application提供一个配置的中心接口 ，核心接口---------------
  *
  *
  * This is read-only while the application is running, but may be
@@ -36,22 +36,40 @@ import org.springframework.lang.Nullable;
  *
  * <p>An ApplicationContext provides: 提供下面的功能：
  * <ul>
- * <li>Bean factory methods for accessing application components.
+ * <li>Bean factory methods for accessing application components. Bean工厂用于访问应用程序组件的方法。
  * Inherited from {@link org.springframework.beans.factory.ListableBeanFactory}.
- * <li>The ability to load file resources in a generic fashion.
+ *
+ *
+ *
+ * <li>The ability to load file resources in a generic fashion.以通用的方式加载文件资源的能力
  * Inherited from the {@link org.springframework.core.io.ResourceLoader} interface.
- * <li>The ability to publish events to registered listeners.
+ *
+ *
+ *
+ * <li>The ability to publish events to registered listeners. 向已注册的监听器发布事件的能力
  * Inherited from the {@link ApplicationEventPublisher} interface.
- * <li>The ability to resolve messages, supporting internationalization.
+ *
+ *
+ * <li>The ability to resolve messages, supporting internationalization.  解决消息、支持国际化的能力
  * Inherited from the {@link MessageSource} interface.
+ *
+ *
  * <li>Inheritance from a parent context. Definitions in a descendant context
  * will always take priority. This means, for example, that a single parent
  * context can be used by an entire web application, while each servlet has
  * its own child context that is independent of that of any other servlet.
  * </ul>
+ * 例如，单亲父母
+ * 上下文可以被整个web应用程序使用，而每个servlet都有
+ * 它自己的子上下文独立于任何其他servlet
+ *
  *
  * <p>In addition to standard {@link org.springframework.beans.factory.BeanFactory}
  * lifecycle capabilities, ApplicationContext implementations detect and invoke
+ *
+ *  除了支持标准的BeanFactory的生命周期能力， ApplicationContext还有检车和调用Bean的能力
+ *  比如：ApplicationContextAware、ApplicationEventPublisherAware
+ *
  * {@link ApplicationContextAware} beans as well as {@link ResourceLoaderAware},
  * {@link ApplicationEventPublisherAware} and {@link MessageSourceAware} beans.
  *

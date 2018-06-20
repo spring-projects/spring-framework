@@ -22,9 +22,13 @@ import org.springframework.lang.Nullable;
  * Sub-interface implemented by bean factories that can be part
  * of a hierarchy.
  *
+ *  由bean工厂实现的子接口，它可以是层次结构的一部分
+ *
  * <p>The corresponding {@code setParentBeanFactory} method for bean
  * factories that allow setting the parent in a configurable
  * fashion can be found in the ConfigurableBeanFactory interface.
+ *
+ *  字面意思是可以分层的Bean工厂，我的理解是Bean工厂也是有层级关系，或者父子关系的
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
