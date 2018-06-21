@@ -225,7 +225,7 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 	/**
 	 * Invocation handler that suppresses close calls on CCI Connections.
 	 */
-	private static class CloseSuppressingInvocationHandler implements InvocationHandler {
+	private static final class CloseSuppressingInvocationHandler implements InvocationHandler {
 
 		private final Connection target;
 

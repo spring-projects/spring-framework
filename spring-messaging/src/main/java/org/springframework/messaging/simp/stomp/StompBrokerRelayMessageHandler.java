@@ -577,7 +577,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		private volatile boolean isStompConnected;
 
 
-		private StompConnectionHandler(String sessionId, StompHeaderAccessor connectHeaders) {
+		protected StompConnectionHandler(String sessionId, StompHeaderAccessor connectHeaders) {
 			this(sessionId, connectHeaders, true);
 		}
 

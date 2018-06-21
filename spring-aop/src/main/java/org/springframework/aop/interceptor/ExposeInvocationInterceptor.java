@@ -41,7 +41,7 @@ import org.springframework.core.PriorityOrdered;
  * @author Juergen Hoeller
  */
 @SuppressWarnings("serial")
-public class ExposeInvocationInterceptor implements MethodInterceptor, PriorityOrdered, Serializable {
+public final class ExposeInvocationInterceptor implements MethodInterceptor, PriorityOrdered, Serializable {
 
 	/** Singleton instance of this class. */
 	public static final ExposeInvocationInterceptor INSTANCE = new ExposeInvocationInterceptor();

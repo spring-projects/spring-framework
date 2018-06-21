@@ -745,7 +745,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * Holder for suspended resources.
 	 * Used internally by {@code doSuspend} and {@code doResume}.
 	 */
-	private static class SuspendedResourcesHolder {
+	private static final class SuspendedResourcesHolder {
 
 		private final EntityManagerHolder entityManagerHolder;
 

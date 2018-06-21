@@ -27,11 +27,15 @@ import org.springframework.lang.Nullable;
  * @author Ramnivas Laddad
  * @since 2.5
  */
-public class ProxyCreationContext {
+public final class ProxyCreationContext {
 
 	/** ThreadLocal holding the current proxied bean name during Advisor matching. */
 	private static final ThreadLocal<String> currentProxiedBeanName =
 			new NamedThreadLocal<>("Name of currently proxied bean");
+
+
+	private ProxyCreationContext() {
+	}
 
 
 	/**

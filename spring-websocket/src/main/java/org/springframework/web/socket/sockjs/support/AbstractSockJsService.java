@@ -74,7 +74,6 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 	private static final String XFRAME_OPTIONS_HEADER = "X-Frame-Options";
 
-
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final TaskScheduler taskScheduler;
@@ -98,6 +97,10 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	private boolean suppressCors = false;
 
 	protected final Set<String> allowedOrigins = new LinkedHashSet<>();
+
+	private final SockJsRequestHandler infoHandler = new InfoHandler();
+
+	private final SockJsRequestHandler iframeHandler = new IframeHandler();
 
 
 	public AbstractSockJsService(TaskScheduler scheduler) {
@@ -539,7 +542,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	}
 
 
-	private final SockJsRequestHandler infoHandler = new SockJsRequestHandler() {
+	private class InfoHandler implements SockJsRequestHandler {
 
 		private static final String INFO_CONTENT =
 				"{\"entropy\":%s,\"origins\":[\"*:*\"],\"cookie_needed\":%s,\"websocket\":%s}";
@@ -569,7 +572,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	};
 
 
-	private final SockJsRequestHandler iframeHandler = new SockJsRequestHandler() {
+	private class IframeHandler implements SockJsRequestHandler {
 
 		private static final String IFRAME_CONTENT =
 				"<!DOCTYPE html>\n" +

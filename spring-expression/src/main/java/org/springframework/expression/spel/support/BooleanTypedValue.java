@@ -24,7 +24,7 @@ import org.springframework.expression.TypedValue;
  * @author Andy Clement
  * @since 3.0
  */
-public class BooleanTypedValue extends TypedValue {
+public final class BooleanTypedValue extends TypedValue {
 
 	/**
 	 * True.

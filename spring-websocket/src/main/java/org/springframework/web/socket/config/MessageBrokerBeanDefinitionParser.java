@@ -663,7 +663,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		context.registerComponent(new BeanComponentDefinition(beanDef, name));
 	}
 
-	private static class DecoratingFactoryBean implements FactoryBean<WebSocketHandler> {
+	private static final class DecoratingFactoryBean implements FactoryBean<WebSocketHandler> {
 
 		private final WebSocketHandler handler;
 

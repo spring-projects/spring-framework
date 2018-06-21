@@ -890,7 +890,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * Holder for suspended resources.
 	 * Used internally by {@code doSuspend} and {@code doResume}.
 	 */
-	private static class SuspendedResourcesHolder {
+	private static final class SuspendedResourcesHolder {
 
 		private final SessionHolder sessionHolder;
 

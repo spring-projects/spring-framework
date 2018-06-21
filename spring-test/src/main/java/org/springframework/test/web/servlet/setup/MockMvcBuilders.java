@@ -33,7 +33,12 @@ import org.springframework.web.context.WebApplicationContext;
  * @see #webAppContextSetup(WebApplicationContext)
  * @see #standaloneSetup(Object...)
  */
-public class MockMvcBuilders {
+public final class MockMvcBuilders {
+
+
+	private MockMvcBuilders() {
+	}
+
 
 	/**
 	 * Build a {@link MockMvc} instance using the given, fully initialized

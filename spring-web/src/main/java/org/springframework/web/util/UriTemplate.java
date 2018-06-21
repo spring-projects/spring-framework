@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,7 +170,7 @@ public class UriTemplate implements Serializable {
 	/**
 	 * Helper to extract variable names and regex for matching to actual URLs.
 	 */
-	private static class TemplateInfo {
+	private static final class TemplateInfo {
 
 		private final List<String> variableNames;
 

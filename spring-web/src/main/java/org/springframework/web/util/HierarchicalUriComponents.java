@@ -53,6 +53,50 @@ final class HierarchicalUriComponents extends UriComponents {
 
 	private static final String PATH_DELIMITER_STRING = "/";
 
+	/**
+	 * Represents an empty path.
+	 */
+	static final PathComponent NULL_PATH_COMPONENT = new PathComponent() {
+
+		@Override
+		public String getPath() {
+			return "";
+		}
+
+		@Override
+		public List<String> getPathSegments() {
+			return Collections.emptyList();
+		}
+
+		@Override
+		public PathComponent encode(Charset charset) {
+			return this;
+		}
+
+		@Override
+		public void verify() {
+		}
+
+		@Override
+		public PathComponent expand(UriTemplateVariables uriVariables) {
+			return this;
+		}
+
+		@Override
+		public void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			return (this == obj);
+		}
+
+		@Override
+		public int hashCode() {
+			return getClass().hashCode();
+		}
+	};
+
 
 	@Nullable
 	private final String userInfo;
@@ -860,43 +904,6 @@ final class HierarchicalUriComponents extends UriComponents {
 			}
 		}
 	}
-
-
-	/**
-	 * Represents an empty path.
-	 */
-	static final PathComponent NULL_PATH_COMPONENT = new PathComponent() {
-		@Override
-		public String getPath() {
-			return "";
-		}
-		@Override
-		public List<String> getPathSegments() {
-			return Collections.emptyList();
-		}
-		@Override
-		public PathComponent encode(Charset charset) {
-			return this;
-		}
-		@Override
-		public void verify() {
-		}
-		@Override
-		public PathComponent expand(UriTemplateVariables uriVariables) {
-			return this;
-		}
-		@Override
-		public void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
-		}
-		@Override
-		public boolean equals(Object obj) {
-			return (this == obj);
-		}
-		@Override
-		public int hashCode() {
-			return getClass().hashCode();
-		}
-	};
 
 
 	private static class QueryUriTemplateVariables implements UriTemplateVariables {

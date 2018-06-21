@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class ModelAndViewDefiningException extends ServletException {
 
-	private ModelAndView modelAndView;
+	private final ModelAndView modelAndView;
 
 
 	/**

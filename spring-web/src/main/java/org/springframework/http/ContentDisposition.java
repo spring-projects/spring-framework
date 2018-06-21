@@ -39,7 +39,7 @@ import static java.time.format.DateTimeFormatter.*;
  * @since 5.0
  * @see <a href="https://tools.ietf.org/html/rfc2183">RFC 2183</a>
  */
-public class ContentDisposition {
+public final class ContentDisposition {
 
 	@Nullable
 	private final String type;

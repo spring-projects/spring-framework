@@ -37,7 +37,7 @@ public class MailSendException extends MailException {
 	private final transient Map<Object, Exception> failedMessages;
 
 	@Nullable
-	private Exception[] messageExceptions;
+	private final Exception[] messageExceptions;
 
 
 	/**
@@ -56,6 +56,7 @@ public class MailSendException extends MailException {
 	public MailSendException(String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 		this.failedMessages = new LinkedHashMap<>();
+		this.messageExceptions = null;
 	}
 
 	/**

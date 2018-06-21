@@ -62,7 +62,7 @@ import org.springframework.web.server.session.WebSessionManager;
  * @since 5.0
  * @see HttpWebHandlerAdapter
  */
-public class WebHttpHandlerBuilder {
+public final class WebHttpHandlerBuilder {
 
 	/** Well-known name for the target WebHandler in the bean factory. */
 	public static final String WEB_HANDLER_BEAN_NAME = "webHandler";

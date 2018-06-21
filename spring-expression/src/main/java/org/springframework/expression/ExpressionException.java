@@ -29,7 +29,7 @@ import org.springframework.lang.Nullable;
 public class ExpressionException extends RuntimeException {
 
 	@Nullable
-	protected String expressionString;
+	protected final String expressionString;
 
 	protected int position;  // -1 if not known; should be known in all reasonable cases
 
@@ -40,6 +40,8 @@ public class ExpressionException extends RuntimeException {
 	 */
 	public ExpressionException(String message) {
 		super(message);
+		this.expressionString = null;
+		this.position = 0;
 	}
 
 	/**
@@ -49,6 +51,8 @@ public class ExpressionException extends RuntimeException {
 	 */
 	public ExpressionException(String message, Throwable cause) {
 		super(message, cause);
+		this.expressionString = null;
+		this.position = 0;
 	}
 
 	/**
@@ -81,6 +85,7 @@ public class ExpressionException extends RuntimeException {
 	 */
 	public ExpressionException(int position, String message) {
 		super(message);
+		this.expressionString = null;
 		this.position = position;
 	}
 
@@ -92,6 +97,7 @@ public class ExpressionException extends RuntimeException {
 	 */
 	public ExpressionException(int position, String message, Throwable cause) {
 		super(message, cause);
+		this.expressionString = null;
 		this.position = position;
 	}
 

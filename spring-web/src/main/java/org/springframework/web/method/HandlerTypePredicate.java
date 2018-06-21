@@ -46,7 +46,7 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @since 5.1
  */
-public class  HandlerTypePredicate implements Predicate<Class<?>> {
+public final class HandlerTypePredicate implements Predicate<Class<?>> {
 
 	private final Set<String> basePackages;
 

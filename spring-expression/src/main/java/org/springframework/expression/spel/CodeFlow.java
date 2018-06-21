@@ -1009,6 +1009,21 @@ public class CodeFlow implements Opcodes {
 		}
 	}
 
+	public static final String toBoxedDescriptor(String primitiveDescriptor) {
+		switch (primitiveDescriptor.charAt(0)) {
+			case 'I': return "Ljava/lang/Integer";
+			case 'J': return "Ljava/lang/Long";
+			case 'F': return "Ljava/lang/Float";
+			case 'D': return "Ljava/lang/Double";
+			case 'B': return "Ljava/lang/Byte";
+			case 'C': return "Ljava/lang/Character";
+			case 'S': return "Ljava/lang/Short";
+			case 'Z': return "Ljava/lang/Boolean";
+			default:
+				throw new IllegalArgumentException("Unexpected non primitive descriptor "+primitiveDescriptor);
+		}
+	}
+
 
 	/**
 	 * Interface used to generate fields.
@@ -1029,19 +1044,5 @@ public class CodeFlow implements Opcodes {
 		void generateCode(MethodVisitor mv, CodeFlow codeflow);
 	}
 
-	public static String toBoxedDescriptor(String primitiveDescriptor) {
-		switch (primitiveDescriptor.charAt(0)) {
-			case 'I': return "Ljava/lang/Integer";
-			case 'J': return "Ljava/lang/Long";
-			case 'F': return "Ljava/lang/Float";
-			case 'D': return "Ljava/lang/Double";
-			case 'B': return "Ljava/lang/Byte";
-			case 'C': return "Ljava/lang/Character";
-			case 'S': return "Ljava/lang/Short";
-			case 'Z': return "Ljava/lang/Boolean";
-			default:
-				throw new IllegalArgumentException("Unexpected non primitive descriptor "+primitiveDescriptor);
-		}	
-	}
 
 }

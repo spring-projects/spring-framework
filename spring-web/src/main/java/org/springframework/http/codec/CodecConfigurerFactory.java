@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.util.ClassUtils;
  * @see ClientCodecConfigurer#create()
  * @see ServerCodecConfigurer#create()
  */
-class CodecConfigurerFactory {
+final class CodecConfigurerFactory {
 
 	private static final String DEFAULT_CONFIGURERS_PATH = "CodecConfigurer.properties";
 
@@ -56,6 +56,10 @@ class CodecConfigurerFactory {
 		catch (IOException | ClassNotFoundException ex) {
 			throw new IllegalStateException(ex);
 		}
+	}
+
+
+	private CodecConfigurerFactory() {
 	}
 
 

@@ -127,6 +127,9 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 
 	private static final String CID = "cid:";
 
+	private static final EntityResolver NO_OP_ENTITY_RESOLVER =
+			(publicId, systemId) -> new InputSource(new StringReader(""));
+
 
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -1078,9 +1081,5 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 			return "ByteArrayDataSource";
 		}
 	}
-
-
-	private static final EntityResolver NO_OP_ENTITY_RESOLVER =
-			(publicId, systemId) -> new InputSource(new StringReader(""));
 
 }

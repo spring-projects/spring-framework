@@ -31,7 +31,10 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @since 5.1
  */
-class ProfilesParser {
+final class ProfilesParser {
+
+	private ProfilesParser() {
+	}
 
 	static Profiles parse(String... expressions) {
 		Assert.notEmpty(expressions, "Must specify at least one profile");

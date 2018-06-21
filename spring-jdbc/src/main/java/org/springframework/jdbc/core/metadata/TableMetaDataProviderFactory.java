@@ -32,9 +32,13 @@ import org.springframework.jdbc.support.MetaDataAccessException;
  * @author Thomas Risberg
  * @since 2.5
  */
-public class TableMetaDataProviderFactory {
+public final class TableMetaDataProviderFactory {
 
 	private static final Log logger = LogFactory.getLog(TableMetaDataProviderFactory.class);
+
+
+	private TableMetaDataProviderFactory() {
+	}
 
 
 	/**
