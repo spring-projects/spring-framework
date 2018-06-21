@@ -951,7 +951,9 @@ public class CodeFlow implements Opcodes {
 		int length = arraytype.length();
 		for (int i = 0; i < length; i++) {
 			char ch = arraytype.charAt(i);
-			if (ch == '[') continue;
+			if (ch == '[') {
+				continue;
+			}
 			return ch=='L';
 		}
 		return false;
