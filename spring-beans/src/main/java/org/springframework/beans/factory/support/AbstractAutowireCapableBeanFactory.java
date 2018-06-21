@@ -875,7 +875,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		/**
 		 * Holder used to keep a reference to a {@code Class} value.
 		 */
-		class Holder { @Nullable Class<?> value = null; }
+		class Holder {
+
+			@Nullable
+			Class<?> value = null;
+		}
 
 		final Holder objectType = new Holder();
 
