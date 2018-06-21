@@ -12,5 +12,7 @@ dependencies {
 	optional("javax.resource:javax.resource-api")
 	optional("javax.transaction:javax.transaction-api")
 	optional("com.fasterxml.jackson.core:jackson-databind")
+	optional("com.google.code.gson:gson")
+
 	testImplementation("javax.jms:javax.jms-api")
 }

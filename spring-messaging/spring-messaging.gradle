@@ -12,6 +12,7 @@ dependencies {
 	optional("io.rsocket:rsocket-core")
 	optional("io.rsocket:rsocket-transport-netty")
 	optional("com.fasterxml.jackson.core:jackson-databind")
+	optional("com.google.code.gson:gson")
 	optional("javax.xml.bind:jaxb-api")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
