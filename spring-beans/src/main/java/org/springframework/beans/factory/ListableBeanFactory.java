@@ -26,28 +26,56 @@ import org.springframework.lang.Nullable;
 /**
  * Extension of the {@link BeanFactory} interface to be implemented by bean factories
  * that can enumerate all their bean instances, rather than attempting bean lookup
- * by name one by one as requested by clients. BeanFactory implementations that
+ * by name one by one as requested by clients.
+ *
+ * ****************ListableBeanFactory是一个BeanFactory的扩展接口********************
+ * ****************                                            *********************
+ *
+ * 它可以列举所有实现它的bean工厂的实例，而不是通过Bean的name一个一个的循环，当客户端请求的时候
+ *
+ *
+ * BeanFactory implementations that
  * preload all their bean definitions (such as XML-based factories) may implement
  * this interface.
+ * Bean工厂实例需要预加载所有Bean定义的时候，比如基于XML的Bean工厂，可能会实现这个接口
+ *
  *
  * <p>If this is a {@link HierarchicalBeanFactory}, the return values will <i>not</i>
  * take any BeanFactory hierarchy into account, but will relate only to the beans
  * defined in the current factory. Use the {@link BeanFactoryUtils} helper class
  * to consider beans in ancestor factories too.
  *
+ * 如果这是一个层次继承的接口，则只会考虑当前层次这个工厂内的bean定义，而不会考虑其他任何层次。
+ * 也可以使用BeanFactoryUtils这个帮助类来针对其祖先工厂也考虑的情况。
+ *
  * <p>The methods in this interface will just respect bean definitions of this factory.
+ *      这个接口中的方法只会尊重当前这个工厂的bean定义
  * They will ignore any singleton beans that have been registered by other means like
  * {@link org.springframework.beans.factory.config.ConfigurableBeanFactory}'s
- * {@code registerSingleton} method, with the exception of
+ * {@code registerSingleton} method,
+ * 它们会忽略任何被像ConfigurableBeanFactory的registerSingleton方法已注册的单例的bean，
+ *
+ * with the exception of
  * {@code getBeanNamesOfType} and {@code getBeansOfType} which will check
- * such manually registered singletons too. Of course, BeanFactory's {@code getBean}
+ * such manually registered singletons too.
+ *  getBeanNamesOfType和getBeansOfType 调用的时候，也会手动的检查已被注册的单例bean。
+ *
+ * Of course, BeanFactory's {@code getBean}
  * does allow transparent access to such special beans as well. However, in typical
  * scenarios, all beans will be defined by external bean definitions anyway, so most
  * applications don't need to worry about this differentiation.
  *
+ *  * 当然，BeanFactory的getBean方法也可以透明的访问这些特殊的bean（已被注册的单例bean）。
+ *  * 然而，在经典的场合，无论如何，所有bean都会被处部定义 定义，所以许多程序不需要这方面不同
+ *
+ *
+ *
  * <p><b>NOTE:</b> With the exception of {@code getBeanDefinitionCount}
  * and {@code containsBeanDefinition}, the methods in this interface
  * are not designed for frequent invocation. Implementations may be slow.
+ *
+ *    注意：除了getBeanDefinitionCount和containsBeanDefinition，这个接口中的方法没有被当作
+ *  * 频烦调用的方法设计，实现可以会慢
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
