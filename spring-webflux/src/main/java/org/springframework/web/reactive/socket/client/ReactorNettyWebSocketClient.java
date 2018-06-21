@@ -18,7 +18,6 @@ package org.springframework.web.reactive.socket.client;
 import java.net.URI;
 import java.util.List;
 
-import io.netty.buffer.ByteBufAllocator;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.websocket.WebsocketInbound;
