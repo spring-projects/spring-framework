@@ -160,7 +160,7 @@ class DefaultMvcResult implements MvcResult {
 		try {
 			return this.asyncDispatchLatch.await(timeout, TimeUnit.MILLISECONDS);
 		}
-		catch (InterruptedException e) {
+		catch (InterruptedException ex) {
 			return false;
 		}
 	}
