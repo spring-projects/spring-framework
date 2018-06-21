@@ -69,11 +69,12 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, PriorityO
 	 */
 	public static MethodInvocation currentInvocation() throws IllegalStateException {
 		MethodInvocation mi = invocation.get();
-		if (mi == null)
+		if (mi == null) {
 			throw new IllegalStateException(
 					"No MethodInvocation found: Check that an AOP invocation is in progress, and that the " +
 					"ExposeInvocationInterceptor is upfront in the interceptor chain. Specifically, note that " +
 					"advices with order HIGHEST_PRECEDENCE will execute before ExposeInvocationInterceptor!");
+		}
 		return mi;
 	}
 
