@@ -32,7 +32,7 @@ import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.ExceptionTypeFilter;
 
-import static java.util.Arrays.*;
+import static java.util.Arrays.asList;
 
 /**
  * A base {@link JCacheOperation} implementation.
