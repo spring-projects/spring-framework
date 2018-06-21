@@ -403,8 +403,8 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 			try {
 				return this.delegate.call();
 			}
-			catch (Throwable t) {
-				this.errorHandler.handleError(t);
+			catch (Throwable ex) {
+				this.errorHandler.handleError(ex);
 				return null;
 			}
 		}

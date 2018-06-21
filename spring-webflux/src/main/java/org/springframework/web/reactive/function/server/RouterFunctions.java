@@ -250,8 +250,8 @@ public abstract class RouterFunctions {
 		try {
 			return supplier.get();
 		}
-		catch (Throwable t) {
-			return Mono.error(t);
+		catch (Throwable ex) {
+			return Mono.error(ex);
 		}
 	}
 
