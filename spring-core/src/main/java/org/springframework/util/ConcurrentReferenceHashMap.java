@@ -433,10 +433,10 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	 */
 	public enum ReferenceType {
 
-		/** Use {@link SoftReference}s */
+		/** Use {@link SoftReference SoftReferences}. */
 		SOFT,
 
-		/** Use {@link WeakReference}s */
+		/** Use {@link WeakReference WeakReferences}. */
 		WEAK
 	}
 
@@ -667,6 +667,9 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	/**
 	 * A reference to an {@link Entry} contained in the map. Implementations are usually
 	 * wrappers around specific Java reference implementations (e.g., {@link SoftReference}).
+	 *
+	 * @param <K> the key type
+	 * @param <V> the value type
 	 */
 	protected interface Reference<K, V> {
 
@@ -697,6 +700,9 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 	/**
 	 * A single map entry.
+	 *
+	 * @param <K> the key type
+	 * @param <V> the value type
 	 */
 	protected static final class Entry<K, V> implements Map.Entry<K, V> {
 
@@ -960,7 +966,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 
 	/**
-	 * Strategy class used to manage {@link Reference}s. This class can be overridden if
+	 * Strategy class used to manage {@link Reference References}. This class can be overridden if
 	 * alternative reference types need to be supported.
 	 */
 	protected class ReferenceManager {
@@ -997,7 +1003,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 
 	/**
-	 * Internal {@link Reference} implementation for {@link SoftReference}s.
+	 * Internal {@link Reference} implementation for {@link SoftReference Reference} implementation for {@link SoftReferences}.
 	 */
 	private static final class SoftEntryReference<K, V> extends SoftReference<Entry<K, V>> implements Reference<K, V> {
 
@@ -1034,7 +1040,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 
 	/**
-	 * Internal {@link Reference} implementation for {@link WeakReference}s.
+	 * Internal {@link Reference} implementation for {@link WeakReference Reference} implementation for {@link WeakReferences}.
 	 */
 	private static final class WeakEntryReference<K, V> extends WeakReference<Entry<K, V>> implements Reference<K, V> {
 

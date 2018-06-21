@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,9 @@ import org.springframework.web.servlet.view.json.AbstractJackson2View;
  */
 public class MappingJackson2XmlView extends AbstractJackson2View {
 
+	/**
+	 * The default content type for the view.
+	 */
 	public static final String DEFAULT_CONTENT_TYPE = "application/xml";
 
 

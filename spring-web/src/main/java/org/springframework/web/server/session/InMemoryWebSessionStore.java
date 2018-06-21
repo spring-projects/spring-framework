@@ -43,7 +43,7 @@ import org.springframework.web.server.WebSession;
  */
 public class InMemoryWebSessionStore implements WebSessionStore {
 
-	/** Minimum period between expiration checks */
+	/** Minimum period between expiration checks. */
 	private static final Duration EXPIRATION_CHECK_PERIOD = Duration.ofSeconds(60);
 
 	private static final IdGenerator idGenerator = new JdkIdGenerator();

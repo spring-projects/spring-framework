@@ -33,13 +33,16 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
 /**
- * Encoder for {@link Resource}s.
+ * Encoder for {@link Resource Resources}.
  *
  * @author Arjen Poutsma
  * @since 5.0
  */
 public class ResourceEncoder extends AbstractSingleValueEncoder<Resource> {
 
+	/**
+	 * The default buffer size used by the encoder.
+	 */
 	public static final int DEFAULT_BUFFER_SIZE = StreamUtils.BUFFER_SIZE;
 
 	private final int bufferSize;

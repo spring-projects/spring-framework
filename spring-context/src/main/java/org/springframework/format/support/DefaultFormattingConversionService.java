@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 	 * Create a new {@code DefaultFormattingConversionService} with the set of
 	 * {@linkplain DefaultConversionService#addDefaultConverters default converters} and,
 	 * based on the value of {@code registerDefaultFormatters}, the set of
-	 * {@linkplain #addDefaultFormatters default formatters}
+	 * {@linkplain #addDefaultFormatters default formatters}.
 	 * @param embeddedValueResolver delegated to {@link #setEmbeddedValueResolver(StringValueResolver)}
 	 * prior to calling {@link #addDefaultFormatters}.
 	 * @param registerDefaultFormatters whether to register default formatters

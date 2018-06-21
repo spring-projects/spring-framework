@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ public abstract class AbstractSqlTypeValue implements SqlTypeValue {
 	/**
 	 * Create the type value to be passed into {@code PreparedStatement.setObject}.
 	 * @param con the JDBC Connection, if needed to create any database-specific objects
-	 * @param sqlType SQL type of the parameter we are setting
+	 * @param sqlType the SQL type of the parameter we are setting
 	 * @param typeName the type name of the parameter
 	 * @return the type value
 	 * @throws SQLException if a SQLException is encountered setting

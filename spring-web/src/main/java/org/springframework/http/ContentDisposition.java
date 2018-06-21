@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -441,12 +441,12 @@ public class ContentDisposition {
 	public interface Builder {
 
 		/**
-		 * Set the value of the {@literal name} parameter
+		 * Set the value of the {@literal name} parameter.
 		 */
 		Builder name(String name);
 
 		/**
-		 * Set the value of the {@literal filename} parameter
+		 * Set the value of the {@literal filename} parameter.
 		 */
 		Builder filename(String filename);
 
@@ -463,7 +463,7 @@ public class ContentDisposition {
 		Builder filename(String filename, Charset charset);
 
 		/**
-		 * Set the value of the {@literal size} parameter
+		 * Set the value of the {@literal size} parameter.
 		 */
 		Builder size(Long size);
 
@@ -483,7 +483,7 @@ public class ContentDisposition {
 		Builder readDate(ZonedDateTime readDate);
 
 		/**
-		 * Build the content disposition
+		 * Build the content disposition.
 		 */
 		ContentDisposition build();
 	}

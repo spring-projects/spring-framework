@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,19 +30,19 @@ import javax.servlet.jsp.JspException;
  * <caption>Attribute Summary</caption>
  * <thead>
  * <tr>
- * <th class="colFirst">Attribute</th>
- * <th class="colOne">Required?</th>
- * <th class="colOne">Runtime Expression?</th>
- * <th class="colLast">Description</th>
+ * <th>Attribute</th>
+ * <th>Required?</th>
+ * <th>Runtime Expression?</th>
+ * <th>Description</th>
  * </tr>
  * </thead>
  * <tbody>
- * <tr class="altColor">
- * <td>defaultHtmlEscape</p></td>
- * <td>true</p></td>
- * <td>true</p></td>
+ * <tr>
+ * <td>defaultHtmlEscape</td>
+ * <td>true</td>
+ * <td>true</td>
  * <td>Set the default value for HTML escaping, to be put into the current
- * PageContext.</p></td>
+ * PageContext.</td>
  * </tr>
  * </tbody>
  * </table>

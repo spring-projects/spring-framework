@@ -42,6 +42,9 @@ import org.springframework.util.StringUtils;
 public class DestinationPatternsMessageCondition
 		extends AbstractMessageCondition<DestinationPatternsMessageCondition> {
 
+	/**
+	 * The name of the "lookup destination" header.
+	 */
 	public static final String LOOKUP_DESTINATION_HEADER = "lookupDestination";
 
 

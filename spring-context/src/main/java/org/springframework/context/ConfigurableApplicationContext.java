@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,8 +54,8 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	/**
 	 * Name of the ConversionService bean in the factory.
 	 * If none is supplied, default conversion rules apply.
-	 * @see org.springframework.core.convert.ConversionService
 	 * @since 3.0
+	 * @see org.springframework.core.convert.ConversionService
 	 */
 	String CONVERSION_SERVICE_BEAN_NAME = "conversionService";
 

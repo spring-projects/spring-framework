@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Implementation of {@link ResponseErrorHandler} that uses {@link HttpMessageConverter}s to
+ * Implementation of {@link ResponseErrorHandler} that uses {@link HttpMessageConverter ResponseErrorHandler} that uses {@link HttpMessageConverters} to
  * convert HTTP error responses to {@link RestClientException}.
  *
  * <p>To use this error handler, you must specify a

@@ -55,28 +55,28 @@ import org.springframework.lang.Nullable;
  */
 public abstract class ClassUtils {
 
-	/** Suffix for array class names: "[]" */
+	/** Suffix for array class names: {@code "[]"}. */
 	public static final String ARRAY_SUFFIX = "[]";
 
-	/** Prefix for internal array class names: "[" */
+	/** Prefix for internal array class names: {@code "["}. */
 	private static final String INTERNAL_ARRAY_PREFIX = "[";
 
-	/** Prefix for internal non-primitive array class names: "[L" */
+	/** Prefix for internal non-primitive array class names: {@code "[L"}. */
 	private static final String NON_PRIMITIVE_ARRAY_PREFIX = "[L";
 
-	/** The package separator character: '.' */
+	/** The package separator character: {@code '.'}. */
 	private static final char PACKAGE_SEPARATOR = '.';
 
-	/** The path separator character: '/' */
+	/** The path separator character: {@code '/'}. */
 	private static final char PATH_SEPARATOR = '/';
 
-	/** The inner class separator character: '$' */
+	/** The inner class separator character: {@code '$'}. */
 	private static final char INNER_CLASS_SEPARATOR = '$';
 
-	/** The CGLIB class separator: "$$" */
+	/** The CGLIB class separator: {@code "$$"}. */
 	public static final String CGLIB_CLASS_SEPARATOR = "$$";
 
-	/** The ".class" file suffix */
+	/** The ".class" file suffix. */
 	public static final String CLASS_FILE_SUFFIX = ".class";
 
 
@@ -227,7 +227,7 @@ public abstract class ClassUtils {
 	 * @param name the name of the Class
 	 * @param classLoader the class loader to use
 	 * (may be {@code null}, which indicates the default class loader)
-	 * @return Class instance for the supplied name
+	 * @return a class instance for the supplied name
 	 * @throws ClassNotFoundException if the class was not found
 	 * @throws LinkageError if the class file could not be loaded
 	 * @see Class#forName(String, boolean, ClassLoader)
@@ -298,7 +298,7 @@ public abstract class ClassUtils {
 	 * @param className the name of the Class
 	 * @param classLoader the class loader to use
 	 * (may be {@code null}, which indicates the default class loader)
-	 * @return Class instance for the supplied name
+	 * @return a class instance for the supplied name
 	 * @throws IllegalArgumentException if the class name was not resolvable
 	 * (that is, the class could not be found or the class file could not be loaded)
 	 * @see #forName(String, ClassLoader)

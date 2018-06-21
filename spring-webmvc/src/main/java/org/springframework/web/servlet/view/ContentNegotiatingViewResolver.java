@@ -55,7 +55,7 @@ import org.springframework.web.servlet.ViewResolver;
  * or {@code Accept} header.
  *
  * <p>The {@code ContentNegotiatingViewResolver} does not resolve views itself, but delegates to
- * other {@link ViewResolver}s. By default, these other view resolvers are picked up automatically
+ * other {@link ViewResolver ViewResolvers}. By default, these other view resolvers are picked up automatically
  * from the application context, though they can also be set explicitly by using the
  * {@link #setViewResolvers viewResolvers} property. <strong>Note</strong> that in order for this
  * view resolver to work properly, the {@link #setOrder order} property needs to be set to a higher

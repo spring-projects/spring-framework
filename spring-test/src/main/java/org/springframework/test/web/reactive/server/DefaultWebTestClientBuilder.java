@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,22 +52,22 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	private Duration responseTimeout;
 
 
-	/** Connect to server via Reactor Netty */
+	/** Connect to server via Reactor Netty. */
 	DefaultWebTestClientBuilder() {
 		this(new ReactorClientHttpConnector());
 	}
 
-	/** Connect to server through the given connector */
+	/** Connect to server through the given connector. */
 	DefaultWebTestClientBuilder(ClientHttpConnector connector) {
 		this(null, null, connector, null);
 	}
 
-	/** Connect to given mock server with mock request and response */
+	/** Connect to given mock server with mock request and response. */
 	DefaultWebTestClientBuilder(WebHttpHandlerBuilder httpHandlerBuilder) {
 		this(null, httpHandlerBuilder, null, null);
 	}
 
-	/** Copy constructor */
+	/** Copy constructor. */
 	DefaultWebTestClientBuilder(DefaultWebTestClientBuilder other) {
 		this(other.webClientBuilder.clone(), other.httpHandlerBuilder, other.connector,
 				other.responseTimeout);

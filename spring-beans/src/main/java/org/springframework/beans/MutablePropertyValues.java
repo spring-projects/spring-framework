@@ -80,7 +80,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	/**
 	 * Construct a new MutablePropertyValues object from a Map.
-	 * @param original Map with property values keyed by property name Strings
+	 * @param original a Map with property values keyed by property name Strings
 	 * @see #addPropertyValues(Map)
 	 */
 	public MutablePropertyValues(@Nullable Map<?, ?> original) {
@@ -101,7 +101,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 * PropertyValue objects as-is.
 	 * <p>This is a constructor for advanced usage scenarios.
 	 * It is not intended for typical programmatic use.
-	 * @param propertyValueList List of PropertyValue objects
+	 * @param propertyValueList a List of PropertyValue objects
 	 */
 	public MutablePropertyValues(@Nullable List<PropertyValue> propertyValueList) {
 		this.propertyValueList =
@@ -145,7 +145,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	/**
 	 * Add all property values from the given Map.
-	 * @param other Map with property values keyed by property name,
+	 * @param other a Map with property values keyed by property name,
 	 * which must be a String
 	 * @return this in order to allow for adding multiple property values in a chain
 	 */
@@ -160,7 +160,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	/**
 	 * Add a PropertyValue object, replacing any existing one for the
 	 * corresponding property or getting merged with it (if applicable).
-	 * @param pv PropertyValue object to add
+	 * @param pv the PropertyValue object to add
 	 * @return this in order to allow for adding multiple property values in a chain
 	 */
 	public MutablePropertyValues addPropertyValue(PropertyValue pv) {

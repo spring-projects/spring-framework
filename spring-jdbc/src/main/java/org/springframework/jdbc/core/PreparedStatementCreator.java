@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public interface PreparedStatementCreator {
 	/**
 	 * Create a statement in this connection. Allows implementations to use
 	 * PreparedStatements. The JdbcTemplate will close the created statement.
-	 * @param con Connection to use to create statement
+	 * @param con the connection used to create statement
 	 * @return a prepared statement
 	 * @throws SQLException there is no need to catch SQLExceptions
 	 * that may be thrown in the implementation of this method.

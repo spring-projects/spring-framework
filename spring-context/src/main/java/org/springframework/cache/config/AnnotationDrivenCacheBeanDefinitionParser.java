@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,12 +175,12 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 		}
 
 		/**
-		 * Registers a
+		 * Registers a cache aspect.
 		 * <pre class="code">
-		 * <bean id="cacheAspect" class="org.springframework.cache.aspectj.AnnotationCacheAspect" factory-method="aspectOf">
-		 *   <property name="cacheManager" ref="cacheManager"/>
-		 *   <property name="keyGenerator" ref="keyGenerator"/>
-		 * </bean>
+		 * &lt;bean id="cacheAspect" class="org.springframework.cache.aspectj.AnnotationCacheAspect" factory-method="aspectOf"&gt;
+		 *   &lt;property name="cacheManager" ref="cacheManager"/&gt;
+		 *   &lt;property name="keyGenerator" ref="keyGenerator"/&gt;
+		 * &lt;/bean&gt;
 		 * </pre>
 		 */
 		private static void registerCacheAspect(Element element, ParserContext parserContext) {

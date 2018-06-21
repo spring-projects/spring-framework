@@ -41,15 +41,21 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
 /**
- * Encoder for {@link ResourceRegion}s.
+ * Encoder for {@link ResourceRegion ResourceRegions}.
  *
  * @author Brian Clozel
  * @since 5.0
  */
 public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 
+	/**
+	 * The default buffer size used by the encoder.
+	 */
 	public static final int DEFAULT_BUFFER_SIZE = StreamUtils.BUFFER_SIZE;
 
+	/**
+	 * The hint key that contains the boundary string.
+	 */
 	public static final String BOUNDARY_STRING_HINT = ResourceRegionEncoder.class.getName() + ".boundaryString";
 
 	private final int bufferSize;

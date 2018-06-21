@@ -60,7 +60,7 @@ import org.springframework.web.servlet.resource.WebJarsResourceResolver;
  * {@code resources} element to register a {@link ResourceHttpRequestHandler} and
  * register a {@link SimpleUrlHandlerMapping} for mapping resource requests,
  * and a {@link HttpRequestHandlerAdapter}. Will also create a resource handling
- * chain with {@link ResourceResolver}s and {@link ResourceTransformer}s.
+ * chain with {@link ResourceResolver}s and {@link ResourceTransformer ResourceResolver}s and {@link ResourceTransformers}.
  *
  * @author Keith Donald
  * @author Jeremy Grelle

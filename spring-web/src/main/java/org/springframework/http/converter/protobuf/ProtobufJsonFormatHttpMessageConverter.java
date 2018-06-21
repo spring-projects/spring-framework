@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class ProtobufJsonFormatHttpMessageConverter extends ProtobufHttpMessageC
 	/**
 	 * Construct a new {@code ProtobufJsonFormatHttpMessageConverter} with the given
 	 * {@link JsonFormat.Parser} and {@link JsonFormat.Printer} configuration, also
-	 * accepting an initializer that allows the registration of message extensions
+	 * accepting an initializer that allows the registration of message extensions.
 	 * @param parser the JSON parser configuration
 	 * @param printer the JSON printer configuration
 	 * @param registryInitializer an initializer for message extensions

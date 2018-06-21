@@ -530,24 +530,27 @@ public class CodeFlow implements Opcodes {
 	}
 
 	/**
+	 * Returns if the descriptor is for a boolean primitive or boolean reference type.
 	 * @param descriptor type descriptor
-	 * @return {@code true} if the descriptor is for a boolean primitive or boolean reference type
+	 * @return {@code true} if the descriptor is boolean compatible
 	 */
 	public static boolean isBooleanCompatible(@Nullable String descriptor) {
 		return (descriptor != null && (descriptor.equals("Z") || descriptor.equals("Ljava/lang/Boolean")));
 	}
 
 	/**
+	 * Returns if the descriptor is for a primitive type.
 	 * @param descriptor type descriptor
-	 * @return {@code true} if the descriptor is for a primitive type
+	 * @return {@code true} if a primitive type
 	 */
 	public static boolean isPrimitive(@Nullable String descriptor) {
 		return (descriptor != null && descriptor.length() == 1);
 	}
 
 	/**
+	 * Returns if the descriptor is for a primitive array (e.g. "[[I").
 	 * @param descriptor the descriptor for a possible primitive array
-	 * @return {@code true} if the descriptor is for a primitive array (e.g. "[[I")
+	 * @return {@code true} if the descriptor a primitive array
 	 */
 	public static boolean isPrimitiveArray(@Nullable String descriptor) {
 		if (descriptor == null) {
@@ -662,6 +665,7 @@ public class CodeFlow implements Opcodes {
 	}
 
 	/**
+	 * Convert a type descriptor to the single character primitive descriptor.
 	 * @param descriptor a descriptor for a type that should have a primitive representation
 	 * @return the single character descriptor for a primitive input descriptor
 	 */
@@ -941,7 +945,7 @@ public class CodeFlow implements Opcodes {
 	}
 
 	/**
-	 * @return true if the supplied array type has a core component reference type
+	 * Returns if the supplied array type has a core component reference type.
 	 */
 	public static boolean isReferenceTypeArray(String arraytype) {
 		int length = arraytype.length();
@@ -1004,6 +1008,9 @@ public class CodeFlow implements Opcodes {
 	}
 
 
+	/**
+	 * Interface used to generate fields.
+	 */
 	@FunctionalInterface
 	public interface FieldAdder {
 
@@ -1011,6 +1018,9 @@ public class CodeFlow implements Opcodes {
 	}
 
 
+	/**
+	 * Interface used to generate {@code clinit} static initializer blocks.
+	 */
 	@FunctionalInterface
 	public interface ClinitAdder {
 

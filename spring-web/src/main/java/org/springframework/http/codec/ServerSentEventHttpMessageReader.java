@@ -37,8 +37,8 @@ import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.lang.Nullable;
 
 /**
- * Reader that supports a stream of {@link ServerSentEvent}s and also plain
- * {@link Object}s which is the same as an {@link ServerSentEvent} with data only.
+ * Reader that supports a stream of {@link ServerSentEvent ServerSentEvents} and also plain
+ * {@link Object Objects} which is the same as an {@link ServerSentEvent} with data only.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev

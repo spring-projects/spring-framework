@@ -545,8 +545,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	/**
-	 * Checks whether there are any {@link RuntimeBeanReference}s inside the {@link Map}
-	 * and converts it to a {@link ManagedMap} if necessary.
+	 * Checks whether there are any {@link RuntimeBeanReference RuntimeBeanReferences}
+	 * inside the {@link Map} and converts it to a {@link ManagedMap} if necessary.
 	 * @param map the original Map
 	 * @return either the original map or a managed copy of it
 	 */
@@ -567,8 +567,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	/**
-	 * Checks whether there are any {@link RuntimeBeanReference}s inside the {@link List}
-	 * and converts it to a {@link ManagedList} if necessary.
+	 * Checks whether there are any {@link RuntimeBeanReference RuntimeBeanReferences}
+	 * inside the {@link List} and converts it to a {@link ManagedList} if necessary.
 	 * @param list the original List
 	 * @return either the original list or a managed copy of it
 	 */
@@ -630,7 +630,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 
 	/**
 	 * This method overrides property retrieval in the scope of the
-	 * {@code GroovyBeanDefinitionReader} to either:
+	 * {@code GroovyBeanDefinitionReader}. A property retrieval will either:
 	 * <ul>
 	 * <li>Retrieve a variable from the bean builder's binding if it exists
 	 * <li>Retrieve a RuntimeBeanReference for a specific bean if it exists

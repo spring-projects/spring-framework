@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,16 +44,16 @@ import org.springframework.util.Assert;
  */
 public abstract class TagUtils {
 
-	/** Constant identifying the page scope */
+	/** Constant identifying the page scope. */
 	public static final String SCOPE_PAGE = "page";
 
-	/** Constant identifying the request scope */
+	/** Constant identifying the request scope. */
 	public static final String SCOPE_REQUEST = "request";
 
-	/** Constant identifying the session scope */
+	/** Constant identifying the session scope. */
 	public static final String SCOPE_SESSION = "session";
 
-	/** Constant identifying the application scope */
+	/** Constant identifying the application scope. */
 	public static final String SCOPE_APPLICATION = "application";
 
 

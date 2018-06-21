@@ -384,6 +384,7 @@ public class DefaultDataBuffer implements DataBuffer {
 	}
 
 	/**
+	 * Calculate the capacity of the buffer.
 	 * @see io.netty.buffer.AbstractByteBufAllocator#calculateNewCapacity(int, int)
 	 */
 	private int calculateCapacity(int neededCapacity) {

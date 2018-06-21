@@ -77,7 +77,7 @@ public class ResourceHandlerRegistry {
 	 * <p>Patterns like {@code "/static/**"} or {@code "/css/{filename:\\w+\\.css}"}
 	 * are allowed. See {@link org.springframework.web.util.pattern.PathPattern}
 	 * for more details on the syntax.
-	 * @return A {@link ResourceHandlerRegistration} to use to further
+	 * @return a {@link ResourceHandlerRegistration} to use to further
 	 * configure the registered resource handler
 	 */
 	public ResourceHandlerRegistration addResourceHandler(String... patterns) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ class CaptureTheRestPathElement extends PathElement {
 
 
 	/**
+	 * Create a new {@link CaptureTheRestPathElement} instance.
 	 * @param pos position of the path element within the path pattern text
 	 * @param captureDescriptor a character array containing contents like '{' '*' 'a' 'b' '}'
 	 * @param separator the separator used in the path pattern
@@ -80,7 +81,7 @@ class CaptureTheRestPathElement extends PathElement {
 		}
 		return true;
 	}
-	
+
 	private String pathToString(int fromSegment, List<Element> pathElements) {
 		StringBuilder buf = new StringBuilder();
 		for (int i = fromSegment, max = pathElements.size(); i < max; i++) {

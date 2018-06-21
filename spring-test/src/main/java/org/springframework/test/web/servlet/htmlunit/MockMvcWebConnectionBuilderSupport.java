@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Rob Winch
  * @author Sam Brannen
  * @since 4.2
+ * @param <T> a self reference to the builder type
  */
 public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebConnectionBuilderSupport<T>> {
 
@@ -144,10 +145,10 @@ public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebCon
 	 * {@code WebRequestMatcher} instances matches (never {@code null})
 	 * @return a new {@code WebConnection} that will use a {@code MockMvc}
 	 * instance if one of the specified {@code WebRequestMatcher} matches
+	 * @since 4.3
 	 * @see #alwaysUseMockMvc()
 	 * @see #useMockMvc(WebRequestMatcher...)
 	 * @see #useMockMvcForHosts(String...)
-	 * @since 4.3
 	 */
 	protected final WebConnection createConnection(WebClient webClient) {
 		Assert.notNull(webClient, "WebClient must not be null");

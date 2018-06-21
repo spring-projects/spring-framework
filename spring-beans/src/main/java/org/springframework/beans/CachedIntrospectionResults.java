@@ -96,7 +96,7 @@ public class CachedIntrospectionResults {
 	private static final boolean shouldIntrospectorIgnoreBeaninfoClasses =
 			SpringProperties.getFlag(IGNORE_BEANINFO_PROPERTY_NAME);
 
-	/** Stores the BeanInfoFactory instances */
+	/** Stores the BeanInfoFactory instances. */
 	private static List<BeanInfoFactory> beanInfoFactories = SpringFactoriesLoader.loadFactories(
 			BeanInfoFactory.class, CachedIntrospectionResults.class.getClassLoader());
 
@@ -250,13 +250,13 @@ public class CachedIntrospectionResults {
 	}
 
 
-	/** The BeanInfo object for the introspected bean class */
+	/** The BeanInfo object for the introspected bean class. */
 	private final BeanInfo beanInfo;
 
-	/** PropertyDescriptor objects keyed by property name String */
+	/** PropertyDescriptor objects keyed by property name String. */
 	private final Map<String, PropertyDescriptor> propertyDescriptorCache;
 
-	/** TypeDescriptor objects keyed by PropertyDescriptor */
+	/** TypeDescriptor objects keyed by PropertyDescriptor. */
 	private final ConcurrentMap<PropertyDescriptor, TypeDescriptor> typeDescriptorCache;
 
 

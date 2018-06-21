@@ -222,7 +222,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 	/**
 	 * We cannot combine ERROR_LISTENER and HandlerResultSubscriber due to:
-	 * https://issues.jboss.org/browse/WFLY-8515
+	 * https://issues.jboss.org/browse/WFLY-8515.
 	 */
 	private static void runIfAsyncNotComplete(AsyncContext asyncContext, AtomicBoolean isCompleted, Runnable task) {
 		try {

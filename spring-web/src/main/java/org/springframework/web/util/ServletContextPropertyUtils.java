@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,10 +51,10 @@ public abstract class ServletContextPropertyUtils {
      * @param text the String to resolve
      * @param servletContext the servletContext to use for lookups.
 	 * @return the resolved String
+	 * @throws IllegalArgumentException if there is an unresolvable placeholder
 	 * @see SystemPropertyUtils#PLACEHOLDER_PREFIX
 	 * @see SystemPropertyUtils#PLACEHOLDER_SUFFIX
      * @see SystemPropertyUtils#resolvePlaceholders(String, boolean)
-	 * @throws IllegalArgumentException if there is an unresolvable placeholder
 	 */
 	public static String resolvePlaceholders(String text, ServletContext servletContext) {
 		return resolvePlaceholders(text, servletContext, false);
@@ -68,10 +68,10 @@ public abstract class ServletContextPropertyUtils {
      * @param servletContext the servletContext to use for lookups.
 	 * @param ignoreUnresolvablePlaceholders flag to determine is unresolved placeholders are ignored
 	 * @return the resolved String
+	 * @throws IllegalArgumentException if there is an unresolvable placeholder and the flag is false
 	 * @see SystemPropertyUtils#PLACEHOLDER_PREFIX
 	 * @see SystemPropertyUtils#PLACEHOLDER_SUFFIX
      * @see SystemPropertyUtils#resolvePlaceholders(String, boolean)
-	 * @throws IllegalArgumentException if there is an unresolvable placeholder and the flag is false
 	 */
 	public static String resolvePlaceholders(String text, ServletContext servletContext,
 			boolean ignoreUnresolvablePlaceholders) {

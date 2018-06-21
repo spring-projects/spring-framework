@@ -34,7 +34,7 @@ import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * {@code HandlerResultHandler} implementation that supports {@link ServerResponse}s.
+ * {@code HandlerResultHandler} implementation that supports {@link ServerResponse ServerResponses}.
  *
  * @author Arjen Poutsma
  * @since 5.0

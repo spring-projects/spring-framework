@@ -327,6 +327,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	}
 
 	/**
+	 * Get the last read invoker pair.
 	 * @deprecated as of 4.3.15 since it is not used within the framework anymore
 	 */
 	@Deprecated
@@ -639,6 +640,9 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 */
 	public static class OptimalPropertyAccessor implements CompilablePropertyAccessor {
 
+		/**
+		 * The member being accessed.
+		 */
 		public final Member member;
 
 		private final TypeDescriptor typeDescriptor;

@@ -55,7 +55,8 @@ import static org.springframework.core.MethodIntrospector.*;
 /**
  * Package-private class to assist {@link RequestMappingHandlerAdapter} with
  * resolving, initializing, and caching annotated methods declared in
- * {@code @Controller} and {@code @ControllerAdvice} components:
+ * {@code @Controller} and {@code @ControllerAdvice} components. Assists with
+ * the following annotations:
  * <ul>
  * <li>{@code @InitBinder}
  * <li>{@code @ModelAttribute}

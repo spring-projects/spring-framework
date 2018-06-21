@@ -61,6 +61,9 @@ import org.springframework.util.MultiValueMap;
 public class FormHttpMessageWriter extends LoggingCodecSupport
 		implements HttpMessageWriter<MultiValueMap<String, String>> {
 
+	/**
+	 * The default charset used by the writer.
+	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private static final MediaType DEFAULT_FORM_DATA_MEDIA_TYPE =

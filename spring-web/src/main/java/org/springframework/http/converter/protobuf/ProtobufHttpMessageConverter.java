@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import org.springframework.util.ClassUtils;
 import static org.springframework.http.MediaType.*;
 
 /**
- * An {@code HttpMessageConverter} that reads and writes {@link com.google.protobuf.Message}s
+ * An {@code HttpMessageConverter} that reads and writes {@link com.google.protobuf.Message com.google.protobuf.Messages}
  * using <a href="https://developers.google.com/protocol-buffers/">Google Protocol Buffers</a>.
  *
  * <p>To generate {@code Message} Java classes, you need to install the {@code protoc} binary.
@@ -78,12 +78,24 @@ import static org.springframework.http.MediaType.*;
  */
 public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<Message> {
 
+	/**
+	 * The default charset used by the converter.
+	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
+	/**
+	 * The media-type for protobuf {@code application/x-protobuf}.
+	 */
 	public static final MediaType PROTOBUF = new MediaType("application", "x-protobuf", DEFAULT_CHARSET);
 
+	/**
+	 * The HTTP header containing the protobuf schema.
+	 */
 	public static final String X_PROTOBUF_SCHEMA_HEADER = "X-Protobuf-Schema";
 
+	/**
+	 * The HTTP header containing the protobuf message.
+	 */
 	public static final String X_PROTOBUF_MESSAGE_HEADER = "X-Protobuf-Message";
 
 
@@ -243,6 +255,9 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	}
 
 
+	/**
+	 * Protobuf format support.
+	 */
 	interface ProtobufFormatSupport {
 
 		MediaType[] supportedMediaTypes();
@@ -256,7 +271,10 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 				throws IOException;
 	}
 
-
+	/**
+	 * {@link ProtobufFormatSupport} implementation used when
+	 * {@code com.googlecode.protobuf.format.FormatFactory} is available.
+	 */
 	static class ProtobufJavaFormatSupport implements ProtobufFormatSupport {
 
 		private final ProtobufFormatter jsonFormatter;
@@ -317,6 +335,10 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	}
 
 
+	/**
+	 * {@link ProtobufFormatSupport} implementation used when
+	 * {@code com.google.protobuf.util.JsonFormat} is available.
+	 */
 	static class ProtobufJavaUtilSupport implements ProtobufFormatSupport {
 
 		private final JsonFormat.Parser parser;

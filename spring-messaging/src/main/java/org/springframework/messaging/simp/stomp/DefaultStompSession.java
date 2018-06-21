@@ -62,6 +62,9 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	private static final IdGenerator idGenerator = new AlternativeJdkIdGenerator();
 
+	/**
+	 * An empty payload.
+	 */
 	public static final byte[] EMPTY_PAYLOAD = new byte[0];
 
 	/* STOMP spec: receiver SHOULD take into account an error margin */

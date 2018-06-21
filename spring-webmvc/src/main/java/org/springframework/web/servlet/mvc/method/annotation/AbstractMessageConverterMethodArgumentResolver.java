@@ -59,7 +59,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
 /**
  * A base class for resolving method argument values by reading from the body of
- * a request with {@link HttpMessageConverter}s.
+ * a request with {@link HttpMessageConverter HttpMessageConverters}.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev

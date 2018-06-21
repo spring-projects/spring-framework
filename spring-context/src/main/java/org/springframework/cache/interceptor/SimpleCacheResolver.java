@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.cache.CacheManager;
 /**
  * A simple {@link CacheResolver} that resolves the {@link Cache} instance(s)
  * based on a configurable {@link CacheManager} and the name of the
- * cache(s) as provided by {@link BasicOperation#getCacheNames() getCacheNames()}
+ * cache(s) as provided by {@link BasicOperation#getCacheNames() getCacheNames()}.
  *
  * @author Stephane Nicoll
  * @since 4.1

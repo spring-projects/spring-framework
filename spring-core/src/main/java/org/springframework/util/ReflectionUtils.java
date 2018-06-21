@@ -511,8 +511,8 @@ public abstract class ReflectionUtils {
 	 * on Java 8 based interfaces that the given class implements).
 	 * @param clazz the class to introspect
 	 * @param mc the callback to invoke for each method
-	 * @since 4.2
 	 * @throws IllegalStateException if introspection fails
+	 * @since 4.2
 	 * @see #doWithMethods
 	 */
 	public static void doWithLocalMethods(Class<?> clazz, MethodCallback mc) {
@@ -682,8 +682,8 @@ public abstract class ReflectionUtils {
 	 * Invoke the given callback on all locally declared fields in the given class.
 	 * @param clazz the target class to analyze
 	 * @param fc the callback to invoke for each field
-	 * @since 4.2
 	 * @throws IllegalStateException if introspection fails
+	 * @since 4.2
 	 * @see #doWithFields
 	 */
 	public static void doWithLocalFields(Class<?> clazz, FieldCallback fc) {

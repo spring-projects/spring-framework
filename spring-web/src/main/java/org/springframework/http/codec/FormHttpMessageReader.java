@@ -51,6 +51,9 @@ import org.springframework.util.StringUtils;
 public class FormHttpMessageReader extends LoggingCodecSupport
 		implements HttpMessageReader<MultiValueMap<String, String>> {
 
+	/**
+	 * The default charset used by the reader.
+	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private static final ResolvableType MULTIVALUE_TYPE =

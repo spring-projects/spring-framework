@@ -100,9 +100,9 @@ public class DefaultTestContext implements TestContext {
 	 * test context.
 	 * <p>The default implementation delegates to the {@link CacheAwareContextLoaderDelegate}
 	 * that was supplied when this {@code TestContext} was constructed.
-	 * @see CacheAwareContextLoaderDelegate#loadContext
 	 * @throws IllegalStateException if the context returned by the context
 	 * loader delegate is not <em>active</em> (i.e., has been closed).
+	 * @see CacheAwareContextLoaderDelegate#loadContext
 	 */
 	public ApplicationContext getApplicationContext() {
 		ApplicationContext context = this.cacheAwareContextLoaderDelegate.loadContext(this.mergedContextConfiguration);

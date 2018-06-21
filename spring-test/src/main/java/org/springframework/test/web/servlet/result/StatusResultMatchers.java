@@ -613,7 +613,7 @@ public class StatusResultMatchers {
 	}
 
 	/**
-	 * Match the expected response status to that of the HttpServletResponse
+	 * Match the expected response status to that of the HttpServletResponse.
 	 */
 	private ResultMatcher matcher(final HttpStatus status) {
 		return result -> assertEquals("Status", status.value(), result.getResponse().getStatus());

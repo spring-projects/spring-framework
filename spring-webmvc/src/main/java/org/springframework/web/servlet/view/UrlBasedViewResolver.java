@@ -122,7 +122,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	@Nullable
 	private String requestContextAttribute;
 
-	/** Map of static attributes, keyed by attribute name (String) */
+	/** Map of static attributes, keyed by attribute name (String). */
 	private final Map<String, Object> staticAttributes = new HashMap<>();
 
 	@Nullable
@@ -325,7 +325,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * Set static attributes from a Map, for all views returned by this resolver.
 	 * This allows to set any kind of attribute values, for example bean references.
 	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
-	 * @param attributes Map with name Strings as keys and attribute objects as values
+	 * @param attributes a Map with name Strings as keys and attribute objects as values
 	 * @see AbstractView#setAttributesMap
 	 */
 	public void setAttributesMap(@Nullable Map<String, ?> attributes) {
@@ -354,7 +354,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * <li>{@code true} - all Views resolved by this resolver will expose path variables
 	 * <li>{@code false} - no Views resolved by this resolver will expose path variables
 	 * <li>{@code null} - individual Views can decide for themselves (this is used by the default)
-	 * <ul>
+	 * </ul>
 	 * @see AbstractView#setExposePathVariables
 	 */
 	public void setExposePathVariables(@Nullable Boolean exposePathVariables) {
@@ -505,7 +505,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 
 	/**
 	 * Delegates to {@code buildView} for creating a new instance of the
-	 * specified view class, and applies the following Spring lifecycle methods
+	 * specified view class. Applies the following Spring lifecycle methods
 	 * (as supported by the generic Spring bean factory):
 	 * <ul>
 	 * <li>ApplicationContextAware's {@code setApplicationContext}

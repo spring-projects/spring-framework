@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,18 +31,18 @@ import org.springframework.lang.Nullable;
  * <caption>Attribute Summary</caption>
  * <thead>
  * <tr>
- * <th class="colFirst">Attribute</th>
- * <th class="colOne">Required?</th>
- * <th class="colOne">Runtime Expression?</th>
- * <th class="colLast">Description</th>
+ * <th>Attribute</th>
+ * <th>Required?</th>
+ * <th>Runtime Expression?</th>
+ * <th>Description</th>
  * </tr>
  * </thead>
  * <tbody>
- * <tr class="altColor">
- * <td>value</p></td>
- * <td>false</p></td>
- * <td>true</p></td>
- * <td>The value of the argument.</p></td>
+ * <tr>
+ * <td>value</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>The value of the argument.</td>
  * </tr>
  * </tbody>
  * </table>
@@ -63,7 +63,7 @@ public class ArgumentTag extends BodyTagSupport {
 
 	/**
 	 * Set the value of the argument (optional).
-	 * <pIf not set, the tag's body content will get evaluated.
+	 * If not set, the tag's body content will get evaluated.
 	 * @param value the parameter value
 	 */
 	public void setValue(Object value) {

@@ -69,7 +69,7 @@ public class MethodParameter {
 
 	private int nestingLevel = 1;
 
-	/** Map from Integer level to Integer type index */
+	/** Map from Integer level to Integer type index. */
 	@Nullable
 	Map<Integer, Integer> typeIndexesPerLevel;
 

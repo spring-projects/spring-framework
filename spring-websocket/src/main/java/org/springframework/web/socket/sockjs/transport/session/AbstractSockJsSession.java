@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	/**
 	 * Create a new instance.
 	 * @param id the session ID
-	 * @param config SockJS service configuration options
+	 * @param config the SockJS service configuration options
 	 * @param handler the recipient of SockJS messages
 	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket
 	 * session; the provided attributes are copied, the original map is not used.

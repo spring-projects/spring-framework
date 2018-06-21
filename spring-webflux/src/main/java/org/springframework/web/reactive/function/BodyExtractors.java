@@ -161,7 +161,7 @@ public abstract class BodyExtractors {
 	}
 
 	/**
-	 * Extractor that returns the raw {@link DataBuffer}s.
+	 * Extractor that returns the raw {@link DataBuffer DataBuffers}.
 	 * <p><strong>Note:</strong> the data buffers should be
 	 * {@link org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer)
 	 * released} after being used.

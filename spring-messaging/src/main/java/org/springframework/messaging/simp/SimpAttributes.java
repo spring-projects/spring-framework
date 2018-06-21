@@ -36,10 +36,10 @@ import org.springframework.util.StringUtils;
  */
 public class SimpAttributes {
 
-	/** Key for the mutex session attribute */
+	/** Key for the mutex session attribute. */
 	public static final String SESSION_MUTEX_NAME = SimpAttributes.class.getName() + ".MUTEX";
 
-	/** Key set after the session is completed */
+	/** Key set after the session is completed. */
 	public static final String SESSION_COMPLETED_NAME = SimpAttributes.class.getName() + ".COMPLETED";
 
 	/** Prefix for the name of session attributes used to store destruction callbacks. */
@@ -89,7 +89,7 @@ public class SimpAttributes {
 	/**
 	 * Remove the attribute of the given name, if it exists.
 	 * <p>Also removes the registered destruction callback for the specified
-	 * attribute, if any. However it <i>does not</i> execute</i> the callback.
+	 * attribute, if any. However it <i>does not</i> execute the callback.
 	 * It is assumed the removed object will continue to be used and destroyed
 	 * independently at the appropriate time.
 	 * @param name the name of the attribute

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,14 @@ import org.springframework.util.Assert;
 public class GenericMessagingTemplate extends AbstractDestinationResolvingMessagingTemplate<MessageChannel>
 		implements BeanFactoryAware {
 
+	/**
+	 * The default header key used for a send timeout.
+	 */
 	public static final String DEFAULT_SEND_TIMEOUT_HEADER = "sendTimeout";
 
+	/**
+	 * The default header key used for a receive timeout.
+	 */
 	public static final String DEFAULT_RECEIVE_TIMEOUT_HEADER = "receiveTimeout";
 
 	private volatile long sendTimeout = -1;

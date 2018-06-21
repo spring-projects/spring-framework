@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +34,12 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 
 /**
  * Base class for Netty-based {@link WebSocketSession} adapters that provides
- * convenience methods to convert Netty {@link WebSocketFrame}s to and from
- * {@link WebSocketMessage}s.
+ * convenience methods to convert Netty {@link WebSocketFrame WebSocketFrames} to and from
+ * {@link WebSocketMessage WebSocketMessages}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @param <T> the native delegate type
  */
 public abstract class NettyWebSocketSessionSupport<T> extends AbstractWebSocketSession<T> {
 

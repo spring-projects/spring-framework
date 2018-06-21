@@ -131,8 +131,8 @@ public class HeaderResultMatchers {
 	 * <p>The {@link ResultMatcher} returned by this method throws an
 	 * {@link AssertionError} if the response does not contain the specified
 	 * header, or if the supplied {@code value} does not match the primary value.
-	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
 	 * @since 4.2
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
 	 */
 	public ResultMatcher dateValue(final String name, final long value) {
 		return result -> {

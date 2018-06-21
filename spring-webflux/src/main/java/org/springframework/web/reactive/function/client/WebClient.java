@@ -298,7 +298,7 @@ public interface WebClient {
 		Builder exchangeFunction(ExchangeFunction exchangeFunction);
 
 		/**
-		 * Clone this {@code WebClient.Builder}
+		 * Clone this {@code WebClient.Builder}.
 		 */
 		Builder clone();
 
@@ -319,6 +319,8 @@ public interface WebClient {
 
 	/**
 	 * Contract for specifying the URI for a request.
+	 *
+	 * @param <S> a self reference to the spec type
 	 */
 	interface UriSpec<S extends RequestHeadersSpec<?>> {
 
@@ -351,6 +353,8 @@ public interface WebClient {
 
 	/**
 	 * Contract for specifying request headers leading up to the exchange.
+	 *
+	 * @param <S> a self reference to the spec type
 	 */
 	interface RequestHeadersSpec<S extends RequestHeadersSpec<S>> {
 
@@ -462,13 +466,13 @@ public interface WebClient {
 		 *     .uri("/persons/1")
 		 *     .accept(MediaType.APPLICATION_JSON)
 		 *     .exchange()
-		 *     .flatMap(response -> response.bodyToMono(Person.class));
+		 *     .flatMap(response -&gt; response.bodyToMono(Person.class));
 		 *
 		 * Flux&lt;Person&gt; flux = client.get()
 		 *     .uri("/persons")
 		 *     .accept(MediaType.APPLICATION_STREAM_JSON)
 		 *     .exchange()
-		 *     .flatMapMany(response -> response.bodyToFlux(Person.class));
+		 *     .flatMapMany(response -&gt; response.bodyToFlux(Person.class));
 		 * </pre>
 		 * <p><strong>NOTE:</strong> You must always use one of the body or
 		 * entity methods of the response to ensure resources are released.
@@ -480,6 +484,9 @@ public interface WebClient {
 	}
 
 
+	/**
+	 * Contract for specifying request headers and body leading up to the exchange.
+	 */
 	interface RequestBodySpec extends RequestHeadersSpec<RequestBodySpec> {
 
 		/**
@@ -552,7 +559,7 @@ public interface WebClient {
 		 * <p><pre class="code">
 		 * Person person = ... ;
 		 *
-		 * Mono<Void> result = client.post()
+		 * Mono&lt;Void&gt; result = client.post()
 		 *     .uri("/persons/{id}", id)
 		 *     .contentType(MediaType.APPLICATION_JSON)
 		 *     .syncBody(person)
@@ -573,7 +580,9 @@ public interface WebClient {
 		RequestHeadersSpec<?> syncBody(Object body);
 	}
 
-
+	/**
+	 * Contract for specifying response operations following the exchange.
+	 */
 	interface ResponseSpec {
 
 		/**
@@ -637,11 +646,18 @@ public interface WebClient {
 	}
 
 
+	/**
+	 * Contract for specifying request headers and URI for a request.
+	 *
+	 * @param <S> a self reference to the spec type
+	 */
 	interface RequestHeadersUriSpec<S extends RequestHeadersSpec<S>>
 			extends UriSpec<S>, RequestHeadersSpec<S> {
 	}
 
-
+	/**
+	 * Contract for specifying request headers, body and URI for a request.
+	 */
 	interface RequestBodyUriSpec extends RequestBodySpec, RequestHeadersUriSpec<RequestBodySpec> {
 	}
 

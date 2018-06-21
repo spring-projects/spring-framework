@@ -38,6 +38,7 @@ import org.springframework.util.Assert;
  *
  * @author Arjen Poutsma
  * @since 3.0
+ * @param <T> the data type
  * @see RestTemplate
  */
 public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {

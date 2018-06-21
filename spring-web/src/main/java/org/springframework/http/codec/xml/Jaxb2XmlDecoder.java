@@ -179,7 +179,7 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	}
 
 	/**
-	 * Split a flux of {@link XMLEvent}s into a flux of XMLEvent lists, one list
+	 * Split a flux of {@link XMLEvent XMLEvents} into a flux of XMLEvent lists, one list
 	 * for each branch of the tree that starts with the given qualified name.
 	 * That is, given the XMLEvents shown {@linkplain XmlEventDecoder here},
 	 * and the {@code desiredName} "{@code child}", this method returns a flux

@@ -324,6 +324,13 @@ public abstract class RouterFunctions {
 		}
 	}
 
+	/**
+	 * A composed routing function that first invokes one function, and then invokes the
+	 * another function (of the same response type {@code T}) if this route had
+	 * {@linkplain Mono#empty() no result}.
+	 *
+	 * @param <T> the server response type
+	 */
 	static final class SameComposedRouterFunction<T extends ServerResponse> extends AbstractRouterFunction<T> {
 
 		private final RouterFunction<T> first;
@@ -348,6 +355,11 @@ public abstract class RouterFunctions {
 		}
 	}
 
+	/**
+	 * A composed routing function that first invokes one function, and then invokes
+	 * another function (of a different response type) if this route had
+	 * {@linkplain Mono#empty() no result}.
+	 */
 	static final class DifferentComposedRouterFunction extends AbstractRouterFunction<ServerResponse> {
 
 		private final RouterFunction<?> first;
@@ -374,6 +386,13 @@ public abstract class RouterFunctions {
 
 	}
 
+	/**
+	 * Filter the specified {@linkplain HandlerFunction handler functions} with the given
+	 * {@linkplain HandlerFilterFunction filter function}.
+	 *
+	 * @param <T> the type of the {@linkplain HandlerFunction handler function} to filter
+	 * @param <S> the type of the response of the function
+	 */
 	static final class FilteredRouterFunction<T extends ServerResponse, S extends ServerResponse>
 			implements RouterFunction<S> {
 

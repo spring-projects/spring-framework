@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class XmlExpectationsHelper {
 	 * two are "similar" -- i.e. they contain the same elements and attributes
 	 * regardless of order.
 	 * <p>Use of this method assumes the
-	 * <a href="https://github.com/xmlunit/xmlunit">XMLUnit<a/> library is available.
+	 * <a href="https://github.com/xmlunit/xmlunit">XMLUnit</a> library is available.
 	 * @param expected the expected XML content
 	 * @param actual the actual XML content
 	 * @see org.springframework.test.web.servlet.result.MockMvcResultMatchers#xpath(String, Object...)

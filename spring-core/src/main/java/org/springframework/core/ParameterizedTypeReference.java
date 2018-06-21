@@ -37,6 +37,7 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 3.2
+ * @param <T> the referenced type
  * @see <a href="http://gafter.blogspot.nl/2006/12/super-type-tokens.html">Neal Gafter on Super Type Tokens</a>
  */
 public abstract class ParameterizedTypeReference<T> {

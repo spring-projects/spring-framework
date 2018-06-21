@@ -63,10 +63,10 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 	/** JNDI names of resources that are known to be shareable, i.e. can be cached */
 	private final Set<String> shareableResources = new HashSet<>();
 
-	/** Cache of shareable singleton objects: bean name --> bean instance */
+	/** Cache of shareable singleton objects: bean name to bean instance. */
 	private final Map<String, Object> singletonObjects = new HashMap<>();
 
-	/** Cache of the types of nonshareable resources: bean name --> bean type */
+	/** Cache of the types of nonshareable resources: bean name to bean type. */
 	private final Map<String, Class<?>> resourceTypes = new HashMap<>();
 
 

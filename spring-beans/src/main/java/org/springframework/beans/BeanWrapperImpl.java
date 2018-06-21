@@ -70,7 +70,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	private CachedIntrospectionResults cachedIntrospectionResults;
 
 	/**
-	 * The security context used for invoking the property methods
+	 * The security context used for invoking the property methods.
 	 */
 	@Nullable
 	private AccessControlContext acc;

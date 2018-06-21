@@ -38,6 +38,9 @@ import org.springframework.web.util.WebUtils;
  */
 public abstract class MultipartResolutionDelegate {
 
+	/**
+	 * Indicates an unresolvable value.
+	 */
 	public static final Object UNRESOLVABLE = new Object();
 
 

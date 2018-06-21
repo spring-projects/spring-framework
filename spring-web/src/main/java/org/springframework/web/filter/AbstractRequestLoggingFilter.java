@@ -60,12 +60,28 @@ import org.springframework.web.util.WebUtils;
  */
 public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter {
 
+	/**
+	 * The default value prepended to the log message written <i>before</i> a request is
+	 * processed.
+	 */
 	public static final String DEFAULT_BEFORE_MESSAGE_PREFIX = "Before request [";
 
+	/**
+	 * The default value appended to the log message written <i>before</i> a request is
+	 * processed.
+	 */
 	public static final String DEFAULT_BEFORE_MESSAGE_SUFFIX = "]";
 
+	/**
+	 * The default value prepended to the log message written <i>after</i> a request is
+	 * processed.
+	 */
 	public static final String DEFAULT_AFTER_MESSAGE_PREFIX = "After request [";
 
+	/**
+	 * The default value appended to the log message written <i>after</i> a request is
+	 * processed.
+	 */
 	public static final String DEFAULT_AFTER_MESSAGE_SUFFIX = "]";
 
 	private static final int DEFAULT_MAX_PAYLOAD_LENGTH = 50;

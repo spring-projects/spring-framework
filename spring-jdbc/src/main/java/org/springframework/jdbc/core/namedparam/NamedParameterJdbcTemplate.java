@@ -64,16 +64,16 @@ import org.springframework.util.Assert;
  */
 public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations {
 
-	/** Default maximum number of entries for this template's SQL cache: 256 */
+	/** Default maximum number of entries for this template's SQL cache: 256. */
 	public static final int DEFAULT_CACHE_LIMIT = 256;
 
 
-	/** The JdbcTemplate we are wrapping */
+	/** The JdbcTemplate we are wrapping. */
 	private final JdbcOperations classicJdbcTemplate;
 
 	private volatile int cacheLimit = DEFAULT_CACHE_LIMIT;
 
-	/** Cache of original SQL String to ParsedSql representation */
+	/** Cache of original SQL String to ParsedSql representation. */
 	@SuppressWarnings("serial")
 	private final Map<String, ParsedSql> parsedSqlCache =
 			new LinkedHashMap<String, ParsedSql>(DEFAULT_CACHE_LIMIT, 0.75f, true) {

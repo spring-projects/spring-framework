@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public interface PropertyValues {
 	 * Return the changes since the previous PropertyValues.
 	 * Subclasses should also override {@code equals}.
 	 * @param old old property values
-	 * @return PropertyValues updated or new properties.
+	 * @return the updated or new properties.
 	 * Return empty PropertyValues if there are no changes.
 	 * @see Object#equals
 	 */

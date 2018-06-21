@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator
  * <p>In a Servlet 3+ container, {@link org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler}
  * can be used to invoke this service. The processing servlet, as well as all filters involved,
  * must have asynchronous support enabled through the ServletContext API or by adding an
- * {@code <async-support>true</async-support>} element to servlet and filter declarations
+ * <code>&lt;async-support&gt;true&lt;/async-support&gt;</code> element to servlet and filter declarations
  * in web.xml.
  *
  * @author Rossen Stoyanchev

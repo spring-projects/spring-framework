@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
  * A helper class for assertions on JSON content.
  *
  * <p>Use of this class requires the <a
- * href="http://jsonassert.skyscreamer.org/">JSONassert<a/> library.
+ * href="http://jsonassert.skyscreamer.org/">JSONassert</a> library.
  *
  * @author Sebastien Deleuze
  * @since 4.1

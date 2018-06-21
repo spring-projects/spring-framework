@@ -58,11 +58,11 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	@Nullable
 	private Object[] args;
 
-	/** Lazily initialized signature object */
+	/** Lazily initialized signature object. */
 	@Nullable
 	private Signature signature;
 
-	/** Lazily initialized source location object */
+	/** Lazily initialized source location object. */
 	@Nullable
 	private SourceLocation sourceLocation;
 
