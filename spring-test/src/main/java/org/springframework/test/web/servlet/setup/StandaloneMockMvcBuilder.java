@@ -268,7 +268,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	}
 
 	/**
-	 * Set up view resolution with the given {@link ViewResolver}s.
+	 * Set up view resolution with the given {@link ViewResolver ViewResolvers}.
 	 * If not set, an {@link InternalResourceViewResolver} is used by default.
 	 */
 	public StandaloneMockMvcBuilder setViewResolvers(ViewResolver...resolvers) {
@@ -413,7 +413,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	}
 
 
-	/** Using the MVC Java configuration as the starting point for the "standalone" setup */
+	/** Using the MVC Java configuration as the starting point for the "standalone" setup. */
 	private class StandaloneConfiguration extends WebMvcConfigurationSupport {
 
 		public RequestMappingHandlerMapping getHandlerMapping() {

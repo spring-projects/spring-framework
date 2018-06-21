@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,12 +58,11 @@ import org.springframework.util.ReflectionUtils;
  * {@code web.xml} as follows:
  *
  * <pre class="code">
- * {@code
- * <absolute-ordering>
- *   <name>some_web_fragment</name>
- *   <name>spring_web</name>
- * </absolute-ordering>
- * }</pre>
+ * &lt;absolute-ordering&gt;
+ *   &lt;name>some_web_fragment&lt;/name&gt;
+ *   &lt;name>spring_web&lt;/name&gt;
+ * &lt;/absolute-ordering&gt;
+ * </pre>
  *
  * <h2>Relationship to Spring's {@code WebApplicationInitializer}</h2>
  * Spring's {@code WebApplicationInitializer} SPI consists of just one method:

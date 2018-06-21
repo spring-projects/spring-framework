@@ -28,7 +28,7 @@ import org.springframework.lang.Nullable;
  *
  * <p>Implementations can also extend the {@link org.springframework.core.Ordered}
  * interface or use the {@link org.springframework.core.annotation.Order} annotation to
- * indicate a precedence against other {@link DeferredImportSelector}s.
+ * indicate a precedence against other {@link DeferredImportSelector DeferredImportSelectors}.
  *
  * <p>Implementations may also provide an {@link #getImportGroup() import group} which
  * can provide additional sorting and filtering logic across different selectors.

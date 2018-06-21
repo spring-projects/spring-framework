@@ -89,7 +89,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * A {@link BeanDefinitionParser} that provides the configuration for the
  * {@code <annotation-driven/>} MVC namespace element.
  *
- * <p>This class registers the following {@link HandlerMapping}s:</p>
+ * <p>This class registers the following {@link HandlerMapping HandlerMappings}:</p>
  * <ul>
  * <li>{@link RequestMappingHandlerMapping}
  * ordered at 0 for mapping requests to annotated controller methods.
@@ -101,17 +101,17 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * as a result of using the {@code <view-controller>} or the
  * {@code <resources>} MVC namespace elements.
  *
- * <p>This class registers the following {@link HandlerAdapter}s:
+ * <p>This class registers the following {@link HandlerAdapter HandlerAdapters}:
  * <ul>
  * <li>{@link RequestMappingHandlerAdapter}
  * for processing requests with annotated controller methods.
  * <li>{@link HttpRequestHandlerAdapter}
- * for processing requests with {@link HttpRequestHandler}s.
+ * for processing requests with {@link HttpRequestHandler HttpRequestHandlers}.
  * <li>{@link SimpleControllerHandlerAdapter}
- * for processing requests with interface-based {@link Controller}s.
+ * for processing requests with interface-based {@link Controller Controllers}.
  * </ul>
  *
- * <p>This class registers the following {@link HandlerExceptionResolver}s:
+ * <p>This class registers the following {@link HandlerExceptionResolver HandlerExceptionResolvers}:
  * <ul>
  * <li>{@link ExceptionHandlerExceptionResolver} for handling exceptions through
  * {@link org.springframework.web.bind.annotation.ExceptionHandler} methods.
@@ -139,7 +139,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * <li>A {@link DefaultFormattingConversionService}
  * <li>A {@link org.springframework.validation.beanvalidation.LocalValidatorFactoryBean}
  * if a JSR-303 implementation is available on the classpath
- * <li>A range of {@link HttpMessageConverter}s depending on which third-party
+ * <li>A range of {@link HttpMessageConverter HttpMessageConverters} depending on which third-party
  * libraries are available on the classpath.
  * </ul>
  *

@@ -63,6 +63,7 @@ import org.springframework.util.concurrent.SettableListenableFuture;
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
  * @since 5.0
+ * @param <P> the type of payload for in and outbound messages
  */
 public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 

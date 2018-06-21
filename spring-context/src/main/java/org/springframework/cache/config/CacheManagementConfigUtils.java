@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,15 +24,27 @@ package org.springframework.cache.config;
  */
 public class CacheManagementConfigUtils {
 
+	/**
+	 * The name of the cache advisor bean.
+	 */
 	public static final String CACHE_ADVISOR_BEAN_NAME =
 			"org.springframework.cache.config.internalCacheAdvisor";
 
+	/**
+	 * The name of the cache aspect bean.
+	 */
 	public static final String CACHE_ASPECT_BEAN_NAME =
 			"org.springframework.cache.config.internalCacheAspect";
 
+	/**
+	 * The name of the JCache advisor bean.
+	 */
 	public static final String JCACHE_ADVISOR_BEAN_NAME =
 			"org.springframework.cache.config.internalJCacheAdvisor";
 
+	/**
+	 * The name of the JCache advisor bean.
+	 */
 	public static final String JCACHE_ASPECT_BEAN_NAME =
 			"org.springframework.cache.config.internalJCacheAspect";
 

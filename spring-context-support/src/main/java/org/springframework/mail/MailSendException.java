@@ -65,7 +65,7 @@ public class MailSendException extends MailException {
 	 * to the invoked send method.
 	 * @param msg the detail message
 	 * @param cause the root cause from the mail API in use
-	 * @param failedMessages Map of failed messages as keys and thrown
+	 * @param failedMessages a Map of failed messages as keys and thrown
 	 * exceptions as values
 	 */
 	public MailSendException(@Nullable String msg, @Nullable Throwable cause, Map<Object, Exception> failedMessages) {
@@ -79,7 +79,7 @@ public class MailSendException extends MailException {
 	 * messages that failed as keys, and the thrown exceptions as values.
 	 * <p>The messages should be the same that were originally passed
 	 * to the invoked send method.
-	 * @param failedMessages Map of failed messages as keys and thrown
+	 * @param failedMessages a Map of failed messages as keys and thrown
 	 * exceptions as values
 	 */
 	public MailSendException(Map<Object, Exception> failedMessages) {

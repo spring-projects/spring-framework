@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,51 +47,52 @@ import org.springframework.web.util.TagUtils;
  * <caption>Attribute Summary</caption>
  * <thead>
  * <tr>
- * <th class="colFirst">Attribute</th>
- * <th class="colOne">Required?</th>
- * <th class="colOne">Runtime Expression?</th>
- * <th class="colLast">Description</th>
+ * <th>Attribute</th>
+ * <th>Required?</th>
+ * <th>Runtime Expression?</th>
+ * <th>Description</th>
  * </tr>
+ * </thead>
  * <tbody>
- * <tr class="altColor">
- * <td>expression</p></td>
- * <td>true</p></td>
- * <td>true</p></td>
- * <td>The expression to evaluate.</p></td>
+ * <tr>
+ * <td>expression</td>
+ * <td>true</td>
+ * <td>true</td>
+ * <td>The expression to evaluate.</td>
  * </tr>
- * <tr class="rowColor">
- * <td>htmlEscape</p></td>
- * <td>false</p></td>
- * <td>true</p></td>
+ * <tr>
+ * <td>htmlEscape</td>
+ * <td>false</td>
+ * <td>true</td>
  * <td>Set HTML escaping for this tag, as a boolean value.
- * Overrides the default HTML escaping setting for the current page.</p></td>
+ * Overrides the default HTML escaping setting for the current page.</td>
  * </tr>
- * <tr class="altColor">
- * <td>javaScriptEscape</p></td>
- * <td>false</p></td>
- * <td>true</p></td>
+ * <tr>
+ * <td>javaScriptEscape</td>
+ * <td>false</td>
+ * <td>true</td>
  * <td>Set JavaScript escaping for this tag, as a boolean value.
- * Default is false.</p></td>
+ * Default is false.</td>
  * </tr>
- * <tr class="rowColor">
- * <td>scope</p></td>
- * <td>false</p></td>
- * <td>true</p></td>
+ * <tr>
+ * <td>scope</td>
+ * <td>false</td>
+ * <td>true</td>
  * <td>The scope for the var. 'application', 'session', 'request' and 'page'
  * scopes are supported. Defaults to page scope. This attribute has no effect
- * unless the var attribute is also defined.</p></td>
+ * unless the var attribute is also defined.</td>
  * </tr>
- * <tr class="altColor">
- * <td>var</p></td>
- * <td>false</p></td>
- * <td>true</p></td>
+ * <tr>
+ * <td>var</td>
+ * <td>false</td>
+ * <td>true</td>
  * <td>The name of the variable to export the evaluation result to.
  * If not specified the evaluation result is converted to a String and written
- * as output.</p></td>
+ * as output.</td>
  * </tr>
  * </tbody>
  * </table>
- * 
+ *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @since 3.0.1

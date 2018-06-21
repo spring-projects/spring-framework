@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.lang.Nullable;
 
 /**
- * Represents a DOT separated expression sequence, such as 'property1.property2.methodOne()'
+ * Represents a DOT separated expression sequence, such as
+ * {@code 'property1.property2.methodOne()'}.
  *
  * @author Andy Clement
  * @since 3.0
@@ -112,7 +113,7 @@ public class CompoundExpression extends SpelNodeImpl {
 		}
 		return sb.toString();
 	}
-	
+
 	@Override
 	public boolean isCompilable() {
 		for (SpelNodeImpl child: this.children) {
@@ -122,7 +123,7 @@ public class CompoundExpression extends SpelNodeImpl {
 		}
 		return true;
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		for (int i = 0; i < this.children.length;i++) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class XpathResultMatchers {
 	 * {@link MockMvcResultMatchers#xpath(String, Object...)} or
 	 * {@link MockMvcResultMatchers#xpath(String, Map, Object...)}.
 	 * @param expression the XPath expression
-	 * @param namespaces XML namespaces referenced in the XPath expression, or {@code null}
+	 * @param namespaces the XML namespaces referenced in the XPath expression, or {@code null}
 	 * @param args arguments to parameterize the XPath expression with using the
 	 * formatting specifiers defined in {@link String#format(String, Object...)}
 	 */

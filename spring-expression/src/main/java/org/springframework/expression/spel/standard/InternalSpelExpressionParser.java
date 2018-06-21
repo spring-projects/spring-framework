@@ -456,7 +456,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	}
 
 	/**
-	 * Used for consuming arguments for either a method or a constructor call
+	 * Used for consuming arguments for either a method or a constructor call.
 	 */
 	private void consumeArguments(List<SpelNodeImpl> accumulatedArguments) {
 		Token t = peekToken();

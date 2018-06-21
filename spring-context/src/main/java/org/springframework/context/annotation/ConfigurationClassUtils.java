@@ -39,7 +39,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 /**
- * Utilities for identifying @{@link Configuration} classes.
+ * Utilities for identifying {@link Configuration} classes.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -239,8 +239,8 @@ abstract class ConfigurationClassUtils {
 	/**
 	 * Determine the order for the given configuration class metadata.
 	 * @param metadata the metadata of the annotated class
-	 * @return the {@link @Order} annotation value on the configuration class,
-	 * or {@link Ordered#LOWEST_PRECEDENCE} if none declared
+	 * @return the {@code @Order} annotation value on the configuration class,
+	 * or {@code Ordered.LOWEST_PRECEDENCE} if none declared
 	 * @since 5.0
 	 */
 	@Nullable
@@ -253,7 +253,7 @@ abstract class ConfigurationClassUtils {
 	 * Determine the order for the given configuration class bean definition,
 	 * as set by {@link #checkConfigurationClassCandidate}.
 	 * @param beanDef the bean definition to check
-	 * @return the {@link @Order} annotation value on the configuration class,
+	 * @return the {@link Order @Order} annotation value on the configuration class,
 	 * or {@link Ordered#LOWEST_PRECEDENCE} if none declared
 	 * @since 4.2
 	 */

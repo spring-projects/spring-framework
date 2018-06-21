@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,14 +46,21 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 19.05.2003
+ * @param <E> the element type
  * @see #getPageList()
  * @see org.springframework.beans.support.MutableSortDefinition
  */
 @SuppressWarnings("serial")
 public class PagedListHolder<E> implements Serializable {
 
+	/**
+	 * The default page size.
+	 */
 	public static final int DEFAULT_PAGE_SIZE = 10;
 
+	/**
+	 * The default maximum number of page links.
+	 */
 	public static final int DEFAULT_MAX_LINKED_PAGES = 10;
 
 

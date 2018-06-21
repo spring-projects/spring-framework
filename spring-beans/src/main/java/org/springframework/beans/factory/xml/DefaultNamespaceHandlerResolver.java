@@ -55,17 +55,17 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	public static final String DEFAULT_HANDLER_MAPPINGS_LOCATION = "META-INF/spring.handlers";
 
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** ClassLoader to use for NamespaceHandler classes */
+	/** ClassLoader to use for NamespaceHandler classes. */
 	@Nullable
 	private final ClassLoader classLoader;
 
-	/** Resource location to search for */
+	/** Resource location to search for. */
 	private final String handlerMappingsLocation;
 
-	/** Stores the mappings from namespace URI to NamespaceHandler class name / instance */
+	/** Stores the mappings from namespace URI to NamespaceHandler class name / instance. */
 	@Nullable
 	private volatile Map<String, Object> handlerMappings;
 

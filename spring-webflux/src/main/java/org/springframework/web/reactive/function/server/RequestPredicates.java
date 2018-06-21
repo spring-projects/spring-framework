@@ -293,7 +293,7 @@ public abstract class RequestPredicates {
 
 	/**
 	 * Return a {@code RequestPredicate} that matches if the request's query parameter of the given name
-	 * has the given value
+	 * has the given value.
 	 * @param name the name of the query parameter to test against
 	 * @param value the value of the query parameter to test against
 	 * @return a predicate that matches if the query parameter has the given value
@@ -473,6 +473,10 @@ public abstract class RequestPredicates {
 	}
 
 
+	/**
+	 * {@link RequestPredicate} for where both {@code left} and {@code right} predicates
+	 * must match.
+	 */
 	static class AndRequestPredicate implements RequestPredicate {
 
 		private final RequestPredicate left;
@@ -503,6 +507,10 @@ public abstract class RequestPredicates {
 	}
 
 
+	/**
+	 * {@link RequestPredicate} for where either {@code left} or {@code right} predicates
+	 * may match.
+	 */
 	static class OrRequestPredicate implements RequestPredicate {
 
 		private final RequestPredicate left;

@@ -81,9 +81,12 @@ import org.springframework.util.MultiValueMap;
 public class MultipartHttpMessageWriter extends LoggingCodecSupport
 		implements HttpMessageWriter<MultiValueMap<String, ?>> {
 
+	/**
+	 * THe default charset used by the writer.
+	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-	/** Suppress logging from individual part writers (full map logged at this level) */
+	/** Suppress logging from individual part writers (full map logged at this level). */
 	private static final Map<String, Object> DEFAULT_HINTS =
 			Collections.singletonMap(Log.class.getName(), new NoOpLog());
 

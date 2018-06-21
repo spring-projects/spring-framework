@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -243,7 +243,7 @@ public abstract class StaxUtils {
 
 	/**
 	 * Create a {@link XMLEventReader} from the given list of {@link XMLEvent}.
-	 * @param events the list of {@link XMLEvent}s.
+	 * @param events the list of {@link XMLEvent XMLEvents}.
 	 * @return an {@code XMLEventReader} that reads from the given events
 	 * @since 5.0
 	 */

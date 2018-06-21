@@ -130,58 +130,58 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 */
 	private static final String WILDCARD = "*";
 
-	/** Constant for the JMX {@code mr_type} "ObjectReference" */
+	/** Constant for the JMX {@code mr_type} "ObjectReference". */
 	private static final String MR_TYPE_OBJECT_REFERENCE = "ObjectReference";
 
-	/** Prefix for the autodetect constants defined in this class */
+	/** Prefix for the autodetect constants defined in this class. */
 	private static final String CONSTANT_PREFIX_AUTODETECT = "AUTODETECT_";
 
 
-	/** Constants instance for this class */
+	/** Constants instance for this class. */
 	private static final Constants constants = new Constants(MBeanExporter.class);
 
-	/** The beans to be exposed as JMX managed resources, with JMX names as keys */
+	/** The beans to be exposed as JMX managed resources, with JMX names as keys. */
 	@Nullable
 	private Map<String, Object> beans;
 
-	/** The autodetect mode to use for this MBeanExporter */
+	/** The autodetect mode to use for this MBeanExporter. */
 	@Nullable
 	private Integer autodetectMode;
 
-	/** Whether to eagerly initialize candidate beans when autodetecting MBeans */
+	/** Whether to eagerly initialize candidate beans when autodetecting MBeans. */
 	private boolean allowEagerInit = false;
 
-	/** Stores the MBeanInfoAssembler to use for this exporter */
+	/** Stores the MBeanInfoAssembler to use for this exporter. */
 	private MBeanInfoAssembler assembler = new SimpleReflectiveMBeanInfoAssembler();
 
-	/** The strategy to use for creating ObjectNames for an object */
+	/** The strategy to use for creating ObjectNames for an object. */
 	private ObjectNamingStrategy namingStrategy = new KeyNamingStrategy();
 
-	/** Indicates whether Spring should modify generated ObjectNames */
+	/** Indicates whether Spring should modify generated ObjectNames. */
 	private boolean ensureUniqueRuntimeObjectNames = true;
 
-	/** Indicates whether Spring should expose the managed resource ClassLoader in the MBean */
+	/** Indicates whether Spring should expose the managed resource ClassLoader in the MBean. */
 	private boolean exposeManagedResourceClassLoader = true;
 
-	/** A set of bean names that should be excluded from autodetection */
+	/** A set of bean names that should be excluded from autodetection. */
 	private Set<String> excludedBeans = new HashSet<>();
 
 	/** The MBeanExporterListeners registered with this exporter. */
 	@Nullable
 	private MBeanExporterListener[] listeners;
 
-	/** The NotificationListeners to register for the MBeans registered by this exporter */
+	/** The NotificationListeners to register for the MBeans registered by this exporter. */
 	@Nullable
 	private NotificationListenerBean[] notificationListeners;
 
-	/** Map of actually registered NotificationListeners */
+	/** Map of actually registered NotificationListeners. */
 	private final Map<NotificationListenerBean, ObjectName[]> registeredNotificationListeners = new LinkedHashMap<>();
 
-	/** Stores the ClassLoader to use for generating lazy-init proxies */
+	/** Stores the ClassLoader to use for generating lazy-init proxies. */
 	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
-	/** Stores the BeanFactory for use in autodetection process */
+	/** Stores the BeanFactory for use in autodetection process. */
 	@Nullable
 	private ListableBeanFactory beanFactory;
 
@@ -197,7 +197,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * Bean instances are typically linked in through bean references.
 	 * Bean names will be resolved as beans in the current factory, respecting
 	 * lazy-init markers (that is, not triggering initialization of such beans).
-	 * @param beans Map with JMX names as keys and bean instances or bean names
+	 * @param beans a Map with JMX names as keys and bean instances or bean names
 	 * as values
 	 * @see #setNamingStrategy
 	 * @see org.springframework.jmx.export.naming.KeyNamingStrategy
@@ -1029,7 +1029,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	}
 
 
-    /**
+	/**
 	 * Notifies all registered {@link MBeanExporterListener MBeanExporterListeners} of the
 	 * registration of the MBean identified by the supplied {@link ObjectName}.
 	 */

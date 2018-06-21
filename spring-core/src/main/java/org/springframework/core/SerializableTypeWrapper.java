@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Internal utility class that can be used to obtain wrapped {@link Serializable}
- * variants of {@link java.lang.reflect.Type}s.
+ * variants of {@link java.lang.reflect.Type java.lang.reflect.Types}.
  *
  * <p>{@link #forField(Field) Fields} or {@link #forMethodParameter(MethodParameter)
  * MethodParameters} can be used as the root source for a serializable type.
@@ -49,7 +49,7 @@ import org.springframework.util.ReflectionUtils;
  * <p>The returned type will either be a {@link Class} or a serializable proxy of
  * {@link GenericArrayType}, {@link ParameterizedType}, {@link TypeVariable} or
  * {@link WildcardType}. With the exception of {@link Class} (which is final) calls
- * to methods that return further {@link Type}s (for example
+ * to methods that return further {@link Type Types} (for example
  * {@link GenericArrayType#getGenericComponentType()}) will be automatically wrapped.
  *
  * @author Phillip Webb
@@ -251,7 +251,7 @@ abstract class SerializableTypeWrapper {
 
 
 	/**
-	 * {@link TypeProvider} for {@link Type}s obtained from a {@link Field}.
+	 * {@link TypeProvider} for {@link Type Types} obtained from a {@link Field}.
 	 */
 	@SuppressWarnings("serial")
 	static class FieldTypeProvider implements TypeProvider {
@@ -291,7 +291,7 @@ abstract class SerializableTypeWrapper {
 
 
 	/**
-	 * {@link TypeProvider} for {@link Type}s obtained from a {@link MethodParameter}.
+	 * {@link TypeProvider} for {@link Type Types} obtained from a {@link MethodParameter}.
 	 */
 	@SuppressWarnings("serial")
 	static class MethodParameterTypeProvider implements TypeProvider {
@@ -345,7 +345,7 @@ abstract class SerializableTypeWrapper {
 
 
 	/**
-	 * {@link TypeProvider} for {@link Type}s obtained by invoking a no-arg method.
+	 * {@link TypeProvider} for {@link Type Types} obtained by invoking a no-arg method.
 	 */
 	@SuppressWarnings("serial")
 	static class MethodInvokeTypeProvider implements TypeProvider {

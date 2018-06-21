@@ -38,6 +38,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Juergen Hoeller
  * @since 3.0
+ * @param <V> the value type
  */
 @SuppressWarnings("serial")
 public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable, Cloneable {

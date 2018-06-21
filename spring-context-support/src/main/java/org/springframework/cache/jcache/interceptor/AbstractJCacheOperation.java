@@ -39,6 +39,7 @@ import static java.util.Arrays.*;
  *
  * @author Stephane Nicoll
  * @since 4.1
+ * @param <A> the annotation type
  */
 abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOperation<A> {
 
@@ -147,6 +148,9 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 	}
 
 
+	/**
+	 * Details for a single cache parameter.
+	 */
 	protected static class CacheParameterDetail {
 
 		private final Class<?> rawType;
@@ -196,6 +200,9 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 	}
 
 
+	/**
+	 * A single cache invocation parameter.
+	 */
 	protected static class CacheInvocationParameterImpl implements CacheInvocationParameter {
 
 		private final CacheParameterDetail detail;

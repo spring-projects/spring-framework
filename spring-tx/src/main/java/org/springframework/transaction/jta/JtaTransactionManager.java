@@ -864,7 +864,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * <p>Calls {@code applyIsolationLevel} and {@code applyTimeout}
 	 * before invoking the UserTransaction's {@code begin} method.
 	 * @param txObject the JtaTransactionObject containing the UserTransaction
-	 * @param definition TransactionDefinition instance, describing propagation
+	 * @param definition the TransactionDefinition instance, describing propagation
 	 * behavior, isolation level, read-only flag, timeout, and transaction name
 	 * @throws NotSupportedException if thrown by JTA methods
 	 * @throws SystemException if thrown by JTA methods
@@ -1139,7 +1139,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * If none of the two is available, a warning will be logged.
 	 * <p>Can be overridden in subclasses, for specific JTA implementations.
 	 * @param txObject the current transaction object
-	 * @param synchronizations List of TransactionSynchronization objects
+	 * @param synchronizations a List of TransactionSynchronization objects
 	 * @throws RollbackException if thrown by JTA methods
 	 * @throws SystemException if thrown by JTA methods
 	 * @see #getTransactionManager()

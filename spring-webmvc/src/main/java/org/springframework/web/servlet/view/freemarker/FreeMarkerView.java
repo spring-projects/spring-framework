@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -258,7 +258,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * different rendering operations can't overwrite each other's formats etc.
 	 * <p>Called by {@code renderMergedTemplateModel}. The default implementation
 	 * is empty. This method can be overridden to add custom helpers to the model.
-	 * @param model The model that will be passed to the template at merge time
+	 * @param model the model that will be passed to the template at merge time
 	 * @param request current HTTP request
 	 * @throws Exception if there's a fatal error while we're adding information to the context
 	 * @see #renderMergedTemplateModel

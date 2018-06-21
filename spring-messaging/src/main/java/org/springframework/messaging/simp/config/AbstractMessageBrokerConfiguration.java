@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -424,7 +424,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	protected abstract SimpUserRegistry createLocalUserRegistry();
 
 	/**
-	 * Return a {@link org.springframework.validation.Validator}s instance for validating
+	 * Return a {@link org.springframework.validation.Validator org.springframework.validation.Validators} instance for validating
 	 * {@code @Payload} method arguments.
 	 * <p>In order, this method tries to get a Validator instance:
 	 * <ul>

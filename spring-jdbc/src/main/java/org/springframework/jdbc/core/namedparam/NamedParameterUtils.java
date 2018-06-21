@@ -202,7 +202,7 @@ public abstract class NamedParameterUtils {
 	}
 
 	/**
-	 * Skip over comments and quoted names present in an SQL statement
+	 * Skip over comments and quoted names present in an SQL statement.
 	 * @param statement character array containing SQL statement
 	 * @param position current position of statement
 	 * @return next position to process after any comments or quotes are skipped

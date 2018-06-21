@@ -161,7 +161,7 @@ public class ContentRequestMatchers {
 	 * two are "similar" - i.e. they contain the same elements and attributes
 	 * regardless of order.
 	 * <p>Use of this matcher assumes the
-	 * <a href="http://xmlunit.sourceforge.net/">XMLUnit<a/> library is available.
+	 * <a href="http://xmlunit.sourceforge.net/">XMLUnit</a> library is available.
 	 * @param expectedXmlContent the expected XML content
 	 */
 	public RequestMatcher xml(final String expectedXmlContent) {
@@ -204,7 +204,7 @@ public class ContentRequestMatchers {
 	 * regardless of formatting with a lenient checking (extensible, and non-strict array
 	 * ordering).
 	 * <p>Use of this matcher requires the <a
-	 * href="http://jsonassert.skyscreamer.org/">JSONassert<a/> library.
+	 * href="http://jsonassert.skyscreamer.org/">JSONassert</a> library.
 	 * @param expectedJsonContent the expected JSON content
 	 * @since 5.0.5
 	 */
@@ -222,7 +222,7 @@ public class ContentRequestMatchers {
 	 * <li>{@code false}: lenient checking. Extensible, and non-strict array ordering.</li>
 	 * </ul>
 	 * <p>Use of this matcher requires the <a
-	 * href="http://jsonassert.skyscreamer.org/">JSONassert<a/> library.
+	 * href="http://jsonassert.skyscreamer.org/">JSONassert</a> library.
 	 * @param expectedJsonContent the expected JSON content
 	 * @param strict enables strict checking
 	 * @since 5.0.5

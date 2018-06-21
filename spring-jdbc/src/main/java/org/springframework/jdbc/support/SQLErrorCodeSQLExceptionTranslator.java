@@ -73,7 +73,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	private static final int MESSAGE_SQL_SQLEX_CONSTRUCTOR = 5;
 
 
-	/** Error codes used by this translator */
+	/** Error codes used by this translator. */
 	@Nullable
 	private SQLErrorCodes sqlErrorCodes;
 
@@ -90,7 +90,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 * Create a SQL error code translator for the given DataSource.
 	 * Invoking this constructor will cause a Connection to be obtained
 	 * from the DataSource to get the meta-data.
-	 * @param dataSource DataSource to use to find meta-data and establish
+	 * @param dataSource the DataSource to use to find meta-data and establish
 	 * which error codes are usable
 	 * @see SQLErrorCodesFactory
 	 */
@@ -127,7 +127,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 * Set the DataSource for this translator.
 	 * <p>Setting this property will cause a Connection to be obtained from
 	 * the DataSource to get the meta-data.
-	 * @param dataSource DataSource to use to find meta-data and establish
+	 * @param dataSource the DataSource to use to find meta-data and establish
 	 * which error codes are usable
 	 * @see SQLErrorCodesFactory#getErrorCodes(javax.sql.DataSource)
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
@@ -291,7 +291,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 * Subclasses can override this method to attempt a custom mapping from SQLException
 	 * to DataAccessException.
 	 * @param task readable text describing the task being attempted
-	 * @param sql SQL query or update that caused the problem. May be {@code null}.
+	 * @param sql the SQL query or update that caused the problem. May be {@code null}.
 	 * @param sqlEx the offending SQLException
 	 * @return null if no custom translation was possible, otherwise a DataAccessException
 	 * resulting from custom translation. This exception should include the sqlEx parameter
@@ -307,7 +307,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 * Create a custom DataAccessException, based on a given exception
 	 * class from a CustomSQLErrorCodesTranslation definition.
 	 * @param task readable text describing the task being attempted
-	 * @param sql SQL query or update that caused the problem. May be {@code null}.
+	 * @param sql the SQL query or update that caused the problem. May be {@code null}.
 	 * @param sqlEx the offending SQLException
 	 * @param exceptionClass the exception class to use, as defined in the
 	 * CustomSQLErrorCodesTranslation definition

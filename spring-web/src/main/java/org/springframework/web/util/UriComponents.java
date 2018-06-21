@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import org.springframework.util.MultiValueMap;
 @SuppressWarnings("serial")
 public abstract class UriComponents implements Serializable {
 
-	/** Captures URI template variable names */
+	/** Captures URI template variable names. */
 	private static final Pattern NAMES_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
 
 
@@ -182,8 +182,8 @@ public abstract class UriComponents implements Serializable {
 
 	/**
 	 * Replace all URI template variables with the values from the given {@link
-	 * UriTemplateVariables}
-	 * @param uriVariables URI template values
+	 * UriTemplateVariables}.
+	 * @param uriVariables the URI template values
 	 * @return the expanded URI components
 	 */
 	abstract UriComponents expandInternal(UriTemplateVariables uriVariables);
@@ -293,11 +293,14 @@ public abstract class UriComponents implements Serializable {
 
 
 	/**
-	 * Defines the contract for URI Template variables
+	 * Defines the contract for URI Template variables.
 	 * @see HierarchicalUriComponents#expand
 	 */
 	public interface UriTemplateVariables {
 
+		/**
+		 * Indicates a skipped value.
+		 */
 		Object SKIP_VALUE = UriTemplateVariables.class;
 
 		/**

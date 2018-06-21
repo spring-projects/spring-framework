@@ -39,6 +39,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @param <T> the native delegate type
  */
 public abstract class AbstractWebSocketSession<T> implements WebSocketSession {
 

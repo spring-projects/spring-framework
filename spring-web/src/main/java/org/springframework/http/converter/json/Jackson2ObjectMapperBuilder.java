@@ -310,7 +310,7 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Add mix-in annotations to use for augmenting specified class or interface.
-	 * @param mixIns Map of entries with target classes (or interface) whose annotations
+	 * @param mixIns a Map of entries with target classes (or interface) whose annotations
 	 * to effectively override as key and mix-in classes (or interface) whose
 	 * annotations are to be "added" to target's annotations as value.
 	 * @since 4.1.2
@@ -339,8 +339,8 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Configure a custom serializer for the given type.
-	 * @see #serializers(JsonSerializer...)
 	 * @since 4.1.2
+	 * @see #serializers(JsonSerializer...)
 	 */
 	public Jackson2ObjectMapperBuilder serializerByType(Class<?> type, JsonSerializer<?> serializer) {
 		this.serializers.put(type, serializer);

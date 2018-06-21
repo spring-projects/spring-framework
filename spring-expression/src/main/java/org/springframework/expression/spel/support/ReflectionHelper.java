@@ -373,15 +373,18 @@ public abstract class ReflectionHelper {
 	}
 
 
+	/**
+	 * Arguments match kinds.
+	 */
 	enum ArgumentsMatchKind {
 
-		/** An exact match is where the parameter types exactly match what the method/constructor is expecting */
+		/** An exact match is where the parameter types exactly match what the method/constructor is expecting. */
 		EXACT,
 
-		/** A close match is where the parameter types either exactly match or are assignment-compatible */
+		/** A close match is where the parameter types either exactly match or are assignment-compatible. */
 		CLOSE,
 
-		/** A conversion match is where the type converter must be used to transform some of the parameter types */
+		/** A conversion match is where the type converter must be used to transform some of the parameter types. */
 		REQUIRES_CONVERSION
 	}
 

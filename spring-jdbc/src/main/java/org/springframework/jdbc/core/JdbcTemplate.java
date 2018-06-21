@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	private static final String RETURN_UPDATE_COUNT_PREFIX = "#update-count-";
 
 
-	/** If this variable is false, we will throw exceptions on SQL warnings */
+	/** If this variable is false, we will throw exceptions on SQL warnings. */
 	private boolean ignoreWarnings = true;
 
 	/**
@@ -399,6 +399,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			logger.debug("Executing SQL statement [" + sql + "]");
 		}
 
+		/**
+		 * Callback to execute the statement.
+		 */
 		class ExecuteStatementCallback implements StatementCallback<Object>, SqlProvider {
 			@Override
 			@Nullable
@@ -424,6 +427,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			logger.debug("Executing SQL query [" + sql + "]");
 		}
 
+		/**
+		 * Callback to execute the query.
+		 */
 		class QueryStatementCallback implements StatementCallback<T>, SqlProvider {
 			@Override
 			@Nullable
@@ -496,6 +502,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			logger.debug("Executing SQL update [" + sql + "]");
 		}
 
+		/**
+		 * Callback to execute the update statement.
+		 */
 		class UpdateStatementCallback implements StatementCallback<Integer>, SqlProvider {
 			@Override
 			public Integer doInStatement(Statement stmt) throws SQLException {
@@ -521,6 +530,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			logger.debug("Executing SQL batch update of " + sql.length + " statements");
 		}
 
+		/**
+		 * Callback to execute the batch update.
+		 */
 		class BatchUpdateStatementCallback implements StatementCallback<int[]>, SqlProvider {
 
 			@Nullable
@@ -638,7 +650,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * Query using a prepared statement, allowing for a PreparedStatementCreator
 	 * and a PreparedStatementSetter. Most other query methods use this method,
 	 * but application code will always work with either a creator or a setter.
-	 * @param psc Callback handler that can create a PreparedStatement given a
+	 * @param psc the Callback handler that can create a PreparedStatement given a
 	 * Connection
 	 * @param pss object that knows how to set values on the prepared statement.
 	 * If this is null, the SQL will be assumed to contain no bind parameters.
@@ -1122,10 +1134,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	/**
 	 * Extract returned ResultSets from the completed stored procedure.
-	 * @param cs JDBC wrapper for the stored procedure
-	 * @param updateCountParameters Parameter list of declared update count parameters for the stored procedure
-	 * @param resultSetParameters Parameter list of declared resultSet parameters for the stored procedure
-	 * @return Map that contains returned results
+	 * @param cs a JDBC wrapper for the stored procedure
+	 * @param updateCountParameters the parameter list of declared update count parameters for the stored procedure
+	 * @param resultSetParameters the parameter list of declared resultSet parameters for the stored procedure
+	 * @return a Map that contains returned results
 	 */
 	protected Map<String, Object> extractReturnedResults(CallableStatement cs,
 			@Nullable List<SqlParameter> updateCountParameters, @Nullable List<SqlParameter> resultSetParameters,
@@ -1186,9 +1198,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	/**
 	 * Extract output parameters from the completed stored procedure.
-	 * @param cs JDBC wrapper for the stored procedure
+	 * @param cs the JDBC wrapper for the stored procedure
 	 * @param parameters parameter list for the stored procedure
-	 * @return Map that contains returned results
+	 * @return a Map that contains returned results
 	 */
 	protected Map<String, Object> extractOutputParameters(CallableStatement cs, List<SqlParameter> parameters)
 			throws SQLException {
@@ -1235,7 +1247,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * Process the given ResultSet from a stored procedure.
 	 * @param rs the ResultSet to process
 	 * @param param the corresponding stored procedure parameter
-	 * @return Map that contains returned results
+	 * @return a Map that contains returned results
 	 */
 	protected Map<String, Object> processResultSet(
 			@Nullable ResultSet rs, ResultSetSupportingSqlParameter param) throws SQLException {
@@ -1392,7 +1404,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	/**
 	 * Translate the given {@link SQLException} into a generic {@link DataAccessException}.
 	 * @param task readable text describing the task being attempted
-	 * @param sql SQL query or update that caused the problem (may be {@code null})
+	 * @param sql the SQL query or update that caused the problem (may be {@code null})
 	 * @param ex the offending {@code SQLException}
 	 * @return a DataAccessException wrapping the {@code SQLException} (never {@code null})
 	 * @since 5.0

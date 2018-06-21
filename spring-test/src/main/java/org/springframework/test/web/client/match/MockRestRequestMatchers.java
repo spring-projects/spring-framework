@@ -68,7 +68,7 @@ public abstract class MockRestRequestMatchers {
 
 	/**
 	 * Assert the request URI string with the given Hamcrest matcher.
-	 * @param matcher String matcher for the expected URI
+	 * @param matcher the String matcher for the expected URI
 	 * @return the request matcher
 	 */
 	public static RequestMatcher requestTo(final Matcher<String> matcher) {

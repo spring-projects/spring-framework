@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,10 +41,10 @@ public interface Model {
 	/**
 	 * Add the supplied attribute to this {@code Map} using a
 	 * {@link org.springframework.core.Conventions#getVariableName generated name}.
-	 * <p><emphasis>Note: Empty {@link java.util.Collection Collections} are not added to
+	 * <p><i>Note: Empty {@link java.util.Collection Collections} are not added to
 	 * the model when using this method because we cannot correctly determine
 	 * the true convention name. View code should check for {@code null} rather
-	 * than for empty collections as is already done by JSTL tags.</emphasis>
+	 * than for empty collections as is already done by JSTL tags.</i>
 	 * @param attributeValue the model attribute value (never {@code null})
 	 */
 	Model addAttribute(Object attributeValue);

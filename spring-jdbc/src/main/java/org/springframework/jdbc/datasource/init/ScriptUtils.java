@@ -339,7 +339,7 @@ public abstract class ScriptUtils {
 	/**
 	 * Does the provided SQL script contain the specified delimiter?
 	 * @param script the SQL script
-	 * @param delim String delimiting each statement - typically a ';' character
+	 * @param delim the string delimiting each statement - typically a ';' character
 	 */
 	public static boolean containsSqlScriptDelimiters(String script, String delim) {
 		boolean inLiteral = false;

@@ -66,7 +66,7 @@ public class HandlerMethodReturnValueHandlerComposite implements AsyncHandlerMet
 	}
 
 	/**
-	 * Add the given {@link HandlerMethodReturnValueHandler}s.
+	 * Add the given {@link HandlerMethodReturnValueHandler HandlerMethodReturnValueHandlers}.
 	 */
 	public HandlerMethodReturnValueHandlerComposite addHandlers(
 			@Nullable List<? extends HandlerMethodReturnValueHandler> handlers) {

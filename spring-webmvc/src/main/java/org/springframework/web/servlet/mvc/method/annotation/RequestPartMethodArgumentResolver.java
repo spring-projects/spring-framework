@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,11 +87,13 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 
 
 	/**
-	 * Supports the following:
+	 * Whether the given {@linkplain MethodParameter method parameter} is a multi-part
+	 * supported. Supports the following:
 	 * <ul>
 	 * <li>annotated with {@code @RequestPart}
 	 * <li>of type {@link MultipartFile} unless annotated with {@code @RequestParam}
-	 * <li>of type {@code javax.servlet.http.Part} unless annotated with {@code @RequestParam}
+	 * <li>of type {@code javax.servlet.http.Part} unless annotated with
+	 * {@code @RequestParam}
 	 * </ul>
 	 */
 	@Override

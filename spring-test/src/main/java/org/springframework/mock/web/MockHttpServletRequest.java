@@ -102,7 +102,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			new BufferedReader(new StringReader(""));
 
 	/**
-	 * Date formats as specified in the HTTP RFC
+	 * Date formats as specified in the HTTP RFC.
 	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
 	 */
 	private static final String[] DATE_FORMATS = new String[] {
@@ -198,7 +198,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private String remoteHost = DEFAULT_REMOTE_HOST;
 
-	/** List of locales in descending order */
+	/** List of locales in descending order. */
 	private final List<Locale> locales = new LinkedList<>();
 
 	private boolean secure = false;
@@ -785,8 +785,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	/**
 	 * Set the list of preferred locales, in descending order, effectively replacing
 	 * any existing locales.
-	 * @see #addPreferredLocale
 	 * @since 3.2
+	 * @see #addPreferredLocale
 	 */
 	public void setPreferredLocales(List<Locale> locales) {
 		Assert.notEmpty(locales, "Locale list must not be empty");

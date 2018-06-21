@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
  * Parses the configuration for the {@code <websocket:handlers/>} namespace
  * element. Registers a Spring MVC {@code SimpleUrlHandlerMapping} to map HTTP
  * WebSocket handshake (or SockJS) requests to
- * {@link org.springframework.web.socket.WebSocketHandler WebSocketHandler}s.
+ * {@link org.springframework.web.socket.WebSocketHandler WebSocketHandler org.springframework.web.socket.WebSocketHandler WebSocketHandlers}.
  *
  * @author Brian Clozel
  * @author Rossen Stoyanchev

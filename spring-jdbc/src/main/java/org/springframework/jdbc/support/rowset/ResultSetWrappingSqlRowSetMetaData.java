@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * The default implementation of Spring's {@link SqlRowSetMetaData} interface, wrapping
- * a {@link java.sql.ResultSetMetaData} instance, catching any {@link SQLException}s
+ * a {@link java.sql.ResultSetMetaData} instance, catching any {@link SQLException java.sql.ResultSetMetaData} instance, catching any {@link SQLExceptions}
  * and translating them to a corresponding Spring {@link InvalidResultSetAccessException}.
  *
  * <p>Used by {@link ResultSetWrappingSqlRowSet}.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class CustomDateEditor extends PropertyEditorSupport {
 	 * <p>The "allowEmpty" parameter states if an empty String should
 	 * be allowed for parsing, i.e. get interpreted as null value.
 	 * Otherwise, an IllegalArgumentException gets thrown in that case.
-	 * @param dateFormat DateFormat to use for parsing and rendering
+	 * @param dateFormat the DateFormat to use for parsing and rendering
 	 * @param allowEmpty if empty strings should be allowed
 	 */
 	public CustomDateEditor(DateFormat dateFormat, boolean allowEmpty) {
@@ -80,7 +80,7 @@ public class CustomDateEditor extends PropertyEditorSupport {
 	 * with an "exactDateLength" specified, prepended zeros in the day or month
 	 * part may still allow for a shorter year part, so consider this as just
 	 * one more assertion that gets you closer to the intended date format.
-	 * @param dateFormat DateFormat to use for parsing and rendering
+	 * @param dateFormat the DateFormat to use for parsing and rendering
 	 * @param allowEmpty if empty strings should be allowed
 	 * @param exactDateLength the exact expected length of the date String
 	 */

@@ -60,7 +60,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 
 	private ConfigurableBeanFactory beanFactory;
 
-	/** Internally used DefaultListableBeanFactory instances, keyed by bean name */
+	/** Internally used DefaultListableBeanFactory instances, keyed by bean name. */
 	private final Map<String, DefaultListableBeanFactory> internalBeanFactories =
 			new HashMap<>();
 

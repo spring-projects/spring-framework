@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public class ModelAndViewDefiningException extends ServletException {
 	/**
 	 * Create new ModelAndViewDefiningException with the given ModelAndView,
 	 * typically representing a specific error page.
-	 * @param modelAndView ModelAndView with view to forward to and model to expose
+	 * @param modelAndView the ModelAndView with view to forward to and model to expose
 	 */
 	public ModelAndViewDefiningException(ModelAndView modelAndView) {
 		Assert.notNull(modelAndView, "ModelAndView must not be null in ModelAndViewDefiningException");

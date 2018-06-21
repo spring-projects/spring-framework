@@ -265,7 +265,7 @@ public class TableMetaDataContext {
 
 
 	/**
-	 * Build the insert string based on configuration and meta-data information
+	 * Build the insert string based on configuration and meta-data information.
 	 * @return the insert string to be used
 	 */
 	public String createInsertString(String... generatedKeyNames) {
@@ -361,6 +361,9 @@ public class TableMetaDataContext {
 	}
 
 	/**
+	 * Does this database support a simple query to retrieve generated keys
+	 * when the JDBC 3.0 feature is not supported:
+	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
 	 * @deprecated as of 4.3.15, in favor of {@link #getSimpleQueryForGetGeneratedKey}
 	 */
 	@Deprecated

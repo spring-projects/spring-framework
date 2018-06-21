@@ -43,6 +43,7 @@ import org.springframework.util.Assert;
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @param <T> the type of element signaled
  */
 public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 

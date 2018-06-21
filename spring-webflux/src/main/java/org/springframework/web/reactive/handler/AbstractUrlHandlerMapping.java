@@ -100,7 +100,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
 	 * and various path pattern matches, e.g. a registered "/t*" matches
 	 * both "/test" and "/team". For details, see the PathPattern class.
-	 * @param lookupPath URL the handler is mapped to
+	 * @param lookupPath the URL the handler is mapped to
 	 * @param exchange the current exchange
 	 * @return the associated handler instance, or {@code null} if not found
 	 * @see org.springframework.web.util.pattern.PathPattern

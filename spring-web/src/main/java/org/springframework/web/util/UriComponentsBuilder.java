@@ -361,7 +361,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * Build a {@code UriComponents} instance and replaces URI template variables
 	 * with the values from an array. This is a shortcut method which combines
 	 * calls to {@link #build()} and then {@link UriComponents#expand(Object...)}.
-	 * @param uriVariableValues URI variable values
+	 * @param uriVariableValues the URI variable values
 	 * @return the URI components with expanded values
 	 */
 	public UriComponents buildAndExpand(Object... uriVariableValues) {

@@ -94,22 +94,22 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 
 	private boolean reconnectOnException = false;
 
-	/** The target Connection */
+	/** The target Connection. */
 	@Nullable
 	private Connection connection;
 
-	/** A hint whether to create a queue or topic connection */
+	/** A hint whether to create a queue or topic connection. */
 	@Nullable
 	private Boolean pubSubMode;
 
-	/** An internal aggregator allowing for per-connection ExceptionListeners */
+	/** An internal aggregator allowing for per-connection ExceptionListeners. */
 	@Nullable
 	private AggregatedExceptionListener aggregatedExceptionListener;
 
-	/** Whether the shared Connection has been started */
+	/** Whether the shared Connection has been started. */
 	private int startedCount = 0;
 
-	/** Synchronization monitor for the shared Connection */
+	/** Synchronization monitor for the shared Connection. */
 	private final Object connectionMonitor = new Object();
 
 

@@ -47,11 +47,11 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public abstract class AbstractView implements View, BeanNameAware, ApplicationContextAware {
 
-	/** Well-known name for the RequestDataValueProcessor in the bean factory */
+	/** Well-known name for the RequestDataValueProcessor in the bean factory. */
 	public static final String REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME = "requestDataValueProcessor";
 
 
-	/** Logger that is available to subclasses */
+	/** Logger that is available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private static final Object NO_VALUE = new Object();
@@ -177,7 +177,7 @@ public abstract class AbstractView implements View, BeanNameAware, ApplicationCo
 
 	/**
 	 * Prepare the model to render.
-	 * @param model Map with name Strings as keys and corresponding model
+	 * @param model a Map with name Strings as keys and corresponding model
 	 * objects as values (Map can also be {@code null} in case of empty model)
 	 * @param contentType the content type selected to render with which should
 	 * match one of the {@link #getSupportedMediaTypes() supported media types}.

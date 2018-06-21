@@ -21,7 +21,7 @@ import org.springframework.test.web.servlet.MockMvcBuilder;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * The main class to import in order to access all available {@link MockMvcBuilder}s.
+ * The main class to import in order to access all available {@link MockMvcBuilder MockMvcBuilders}.
  *
  * <h3>Eclipse Users</h3>
  * <p>Consider adding this class as a Java editor favorite. To navigate to

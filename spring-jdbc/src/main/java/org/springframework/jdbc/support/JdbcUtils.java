@@ -446,9 +446,9 @@ public abstract class JdbcUtils {
 	 * expressed in the JDBC 4.0 specification:
 	 * <p><i>columnLabel - the label for the column specified with the SQL AS clause.
 	 * If the SQL AS clause was not specified, then the label is the name of the column</i>.
-	 * @return the column name to use
 	 * @param resultSetMetaData the current meta-data to use
 	 * @param columnIndex the index of the column for the look up
+	 * @return the column name to use
 	 * @throws SQLException in case of lookup failure
 	 */
 	public static String lookupColumnName(ResultSetMetaData resultSetMetaData, int columnIndex) throws SQLException {

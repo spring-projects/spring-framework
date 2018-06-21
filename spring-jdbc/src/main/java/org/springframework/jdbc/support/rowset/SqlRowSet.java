@@ -219,8 +219,8 @@ public interface SqlRowSet extends Serializable {
 	 * (for NCHAR, NVARCHAR, LONGNVARCHAR columns).
 	 * @param columnIndex the column index
 	 * @return a String representing the column value
-	 * @see java.sql.ResultSet#getNString(int)
 	 * @since 4.1.3
+	 * @see java.sql.ResultSet#getNString(int)
 	 */
 	String getNString(int columnIndex) throws InvalidResultSetAccessException;
 
@@ -229,8 +229,8 @@ public interface SqlRowSet extends Serializable {
 	 * (for NCHAR, NVARCHAR, LONGNVARCHAR columns).
 	 * @param columnLabel the column label
 	 * @return a String representing the column value
-	 * @see java.sql.ResultSet#getNString(String)
 	 * @since 4.1.3
+	 * @see java.sql.ResultSet#getNString(String)
 	 */
 	String getNString(String columnLabel) throws InvalidResultSetAccessException;
 

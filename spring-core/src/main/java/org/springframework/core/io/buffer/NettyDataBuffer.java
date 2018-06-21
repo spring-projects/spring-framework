@@ -215,7 +215,7 @@ public class NettyDataBuffer implements PooledDataBuffer {
 	}
 
 	/**
-	 * Writes one or more Netty {@link ByteBuf}s to this buffer, starting at the current
+	 * Writes one or more Netty {@link ByteBuf ByteBufs} to this buffer, starting at the current
 	 * writing position.
 	 * @param byteBufs the buffers to write into this buffer
 	 * @return this buffer

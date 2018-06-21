@@ -46,7 +46,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Utility class for working with {@link DataBuffer}s.
+ * Utility class for working with {@link DataBuffer DataBuffers}.
  *
  * @author Arjen Poutsma
  * @author Brian Clozel
@@ -289,7 +289,7 @@ public abstract class DataBufferUtils {
 	//---------------------------------------------------------------------
 
 	/**
-	 * Write the given stream of {@link DataBuffer}s to the given {@code OutputStream}. Does
+	 * Write the given stream of {@link DataBuffer DataBuffers} to the given {@code OutputStream}. Does
 	 * <strong>not</strong> close the output stream when the flux is terminated, and does
 	 * <strong>not</strong> {@linkplain #release(DataBuffer) release} the data buffers in the
 	 * source. If releasing is required, then subscribe to the returned {@code Flux} with a
@@ -309,7 +309,7 @@ public abstract class DataBufferUtils {
 	}
 
 	/**
-	 * Write the given stream of {@link DataBuffer}s to the given {@code WritableByteChannel}. Does
+	 * Write the given stream of {@link DataBuffer DataBuffers} to the given {@code WritableByteChannel}. Does
 	 * <strong>not</strong> close the channel when the flux is terminated, and does
 	 * <strong>not</strong> {@linkplain #release(DataBuffer) release} the data buffers in the
 	 * source. If releasing is required, then subscribe to the returned {@code Flux} with a
@@ -344,7 +344,7 @@ public abstract class DataBufferUtils {
 	}
 
 	/**
-	 * Write the given stream of {@link DataBuffer}s to the given {@code AsynchronousFileChannel}.
+	 * Write the given stream of {@link DataBuffer DataBuffers} to the given {@code AsynchronousFileChannel}.
 	 * Does <strong>not</strong> close the channel when the flux is terminated, and does
 	 * <strong>not</strong> {@linkplain #release(DataBuffer) release} the data buffers in the
 	 * source. If releasing is required, then subscribe to the returned {@code Flux} with a

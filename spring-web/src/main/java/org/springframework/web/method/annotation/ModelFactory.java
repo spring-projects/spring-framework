@@ -250,7 +250,8 @@ public final class ModelFactory {
 	}
 
 	/**
-	 * Derive the model attribute name for the given return value based on:
+	 * Derive the model attribute name for the given return value. Results will be
+	 * based on:
 	 * <ol>
 	 * <li>the method {@code ModelAttribute} annotation value
 	 * <li>the declared return type if it is more specific than {@code Object}

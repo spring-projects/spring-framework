@@ -211,7 +211,7 @@ public final class WebAsyncManager {
 	}
 
 	/**
-	 * Register one or more {@link DeferredResultProcessingInterceptor}s without a specified key.
+	 * Register one or more {@link DeferredResultProcessingInterceptor DeferredResultProcessingInterceptors} without a specified key.
 	 * The default key is derived from the interceptor class name and hash code.
 	 * @param interceptors one or more interceptors to register
 	 */

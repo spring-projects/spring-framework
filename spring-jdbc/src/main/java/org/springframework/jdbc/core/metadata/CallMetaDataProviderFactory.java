@@ -37,7 +37,7 @@ import org.springframework.jdbc.support.MetaDataAccessException;
  */
 public class CallMetaDataProviderFactory {
 
-	/** List of supported database products for procedure calls */
+	/** List of supported database products for procedure calls. */
 	public static final List<String> supportedDatabaseProductsForProcedures = Arrays.asList(
 			"Apache Derby",
 			"DB2",
@@ -48,7 +48,7 @@ public class CallMetaDataProviderFactory {
 			"Sybase"
 		);
 
-	/** List of supported database products for function calls */
+	/** List of supported database products for function calls. */
 	public static final List<String> supportedDatabaseProductsForFunctions = Arrays.asList(
 			"MySQL",
 			"Microsoft SQL Server",

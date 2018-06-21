@@ -46,10 +46,11 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
  * @since 3.0
+ * @param <T> the converted object type
  */
 public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConverter<T> {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private List<MediaType> supportedMediaTypes = Collections.emptyList();

@@ -35,6 +35,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 19.05.2003
+ * @param <T> the type of objects that may be compared by this comparator
  * @see org.springframework.beans.BeanWrapper
  */
 public class PropertyComparator<T> implements Comparator<T> {

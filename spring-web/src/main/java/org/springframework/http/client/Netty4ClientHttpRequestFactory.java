@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,8 +115,8 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	/**
 	 * Set the default maximum response size.
 	 * <p>By default this is set to {@link #DEFAULT_MAX_RESPONSE_SIZE}.
-	 * @see HttpObjectAggregator#HttpObjectAggregator(int)
 	 * @since 4.1.5
+	 * @see HttpObjectAggregator#HttpObjectAggregator(int)
 	 */
 	public void setMaxResponseSize(int maxResponseSize) {
 		this.maxResponseSize = maxResponseSize;

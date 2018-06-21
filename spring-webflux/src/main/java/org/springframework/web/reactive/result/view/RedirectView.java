@@ -283,7 +283,7 @@ public class RedirectView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Send a redirect back to the HTTP client
+	 * Send a redirect back to the HTTP client.
 	 * @param targetUrl the target URL to redirect to
 	 * @param exchange current exchange
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag 
 	 * If {@link #shouldRender rendering}, flush any buffered
 	 * {@link BodyContent} or, if no {@link BodyContent} is supplied,
 	 * {@link #renderDefaultContent render the default content}.
-	 * @return Tag#EVAL_PAGE
+	 * @return a {@link Tag#EVAL_PAGE} result
 	 */
 	@Override
 	public int doEndTag() throws JspException {

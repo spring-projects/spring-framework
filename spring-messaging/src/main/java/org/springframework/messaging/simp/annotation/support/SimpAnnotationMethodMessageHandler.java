@@ -231,7 +231,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	/**
-	 * Set the Validator instance used for validating @Payload arguments
+	 * Set the Validator instance used for validating {@code @Payload} arguments.
 	 * @see org.springframework.validation.annotation.Validated
 	 * @see PayloadArgumentResolver
 	 */
@@ -246,7 +246,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	/**
 	 * Configure a {@link MessageHeaderInitializer} to pass on to
-	 * {@link org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler}s
+	 * {@link org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandlers}
 	 * that send messages from controller return values.
 	 * <p>By default, this property is not set.
 	 */

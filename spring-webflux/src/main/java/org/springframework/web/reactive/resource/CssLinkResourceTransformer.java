@@ -162,6 +162,9 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 	}
 
 
+	/**
+	 * Abstract base class for {@link LinkParser} implementations.
+	 */
 	protected abstract static class AbstractLinkParser implements LinkParser {
 
 		/** Return the keyword to use to search for links, e.g. "@import", "url(" */

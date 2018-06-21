@@ -60,7 +60,7 @@ import org.springframework.util.StringUtils;
  */
 public class StaticListableBeanFactory implements ListableBeanFactory {
 
-	/** Map from bean name to bean instance */
+	/** Map from bean name to bean instance. */
 	private final Map<String, Object> beans;
 
 

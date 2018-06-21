@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,9 @@ import org.springframework.web.multipart.MultipartResolver;
  */
 public class MultipartFilter extends OncePerRequestFilter {
 
+	/**
+	 * The default name for the multipart resolver bean.
+	 */
 	public static final String DEFAULT_MULTIPART_RESOLVER_BEAN_NAME = "filterMultipartResolver";
 
 	private final MultipartResolver defaultMultipartResolver = new StandardServletMultipartResolver();

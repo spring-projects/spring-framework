@@ -401,7 +401,8 @@ public abstract class BeanUtils {
 
 
 	/**
-	 * Retrieve the JavaBeans {@code PropertyDescriptor}s of a given class.
+	 * Retrieve the JavaBeans {@code PropertyDescriptor}s of a given
+	 * class.
 	 * @param clazz the Class to retrieve the PropertyDescriptors for
 	 * @return an array of {@code PropertyDescriptors} for the given class
 	 * @throws BeansException if PropertyDescriptor look fails

@@ -1833,8 +1833,8 @@ public abstract class AnnotationUtils {
 	/**
 	 * Determine if the supplied method is an "annotationType" method.
 	 * @return {@code true} if the method is an "annotationType" method
-	 * @see Annotation#annotationType()
 	 * @since 4.2
+	 * @see Annotation#annotationType()
 	 */
 	static boolean isAnnotationTypeMethod(@Nullable Method method) {
 		return (method != null && method.getName().equals("annotationType") && method.getParameterCount() == 0);

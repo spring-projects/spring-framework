@@ -42,8 +42,14 @@ import org.springframework.util.StringUtils;
  */
 public class CachingResourceResolver extends AbstractResourceResolver {
 
+	/**
+	 * The prefix used for resolved resource cache keys.
+	 */
 	public static final String RESOLVED_RESOURCE_CACHE_KEY_PREFIX = "resolvedResource:";
 
+	/**
+	 * The prefix used for resolved URL path cache keys.
+	 */
 	public static final String RESOLVED_URL_PATH_CACHE_KEY_PREFIX = "resolvedUrlPath:";
 
 

@@ -333,7 +333,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 	/**
-	 * Override to add custom {@link Converter}s and {@link Formatter}s.
+	 * Override to add custom {@link Converter}s and {@link Formatter Converter}s and {@link Formatters}.
 	 */
 	protected void addFormatters(FormatterRegistry registry) {
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,7 +149,7 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	 * Returns {@code null} if it's not transactional.
 	 * <p>Can be overridden to support custom annotations that carry transaction metadata.
 	 * @param ae the annotated method or class
-	 * @return TransactionAttribute the configured transaction attribute,
+	 * @return the configured transaction attribute,
 	 * or {@code null} if none was found
 	 */
 	@Nullable

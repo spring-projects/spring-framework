@@ -20,7 +20,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
- * A factory for {@link DataBuffer}s, allowing for allocation and wrapping of
+ * A factory for {@link DataBuffer DataBuffers}, allowing for allocation and wrapping of
  * data buffers.
  *
  * @author Arjen Poutsma

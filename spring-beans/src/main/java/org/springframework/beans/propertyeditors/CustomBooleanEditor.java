@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,16 +38,44 @@ import org.springframework.util.StringUtils;
  */
 public class CustomBooleanEditor extends PropertyEditorSupport {
 
+	/**
+	 * Value of {@code "true"}.
+	 */
 	public static final String VALUE_TRUE = "true";
+
+	/**
+	 * Value of {@code "false"}.
+	 */
 	public static final String VALUE_FALSE = "false";
 
+	/**
+	 * Value of {@code "on"}.
+	 */
 	public static final String VALUE_ON = "on";
+
+	/**
+	 * Value of {@code "off"}.
+	 */
 	public static final String VALUE_OFF = "off";
 
+	/**
+	 * Value of {@code "yes"}.
+	 */
 	public static final String VALUE_YES = "yes";
+
+	/**
+	 * Value of {@code "no"}.
+	 */
 	public static final String VALUE_NO = "no";
 
+	/**
+	 * Value of {@code "1"}.
+	 */
 	public static final String VALUE_1 = "1";
+
+	/**
+	 * Value of {@code "0"}.
+	 */
 	public static final String VALUE_0 = "0";
 
 

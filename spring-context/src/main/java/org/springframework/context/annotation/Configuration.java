@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,11 +69,11 @@ import org.springframework.stereotype.Component;
  * {@code AnnotationConfigApplicationContext}, {@code @Configuration} classes may be
  * declared as normal {@code <bean>} definitions within Spring XML files:
  * <pre class="code">
- * {@code
- * <beans>
- *    <context:annotation-config/>
- *    <bean class="com.acme.AppConfig"/>
- * </beans>}</pre>
+ * &lt;beans&gt;
+ *    &lt;context:annotation-config/&gt;
+ *    &lt;bean class="com.acme.AppConfig"/&gt;
+ * &lt;/beans&gt;
+ * </pre>
  *
  * In the example above, {@code <context:annotation-config/>} is required in order to
  * enable {@link ConfigurationClassPostProcessor} and other annotation-related

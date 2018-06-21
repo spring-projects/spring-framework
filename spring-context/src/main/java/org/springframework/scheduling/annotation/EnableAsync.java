@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,19 +112,18 @@ import org.springframework.core.Ordered;
  * configuration:
  *
  * <pre class="code">
- * {@code
- * <beans>
+ * &lt;beans&gt;
  *
- *     <task:annotation-driven executor="myExecutor" exception-handler="exceptionHandler"/>
+ *     &lt;task:annotation-driven executor="myExecutor" exception-handler="exceptionHandler"/&gt;
  *
- *     <task:executor id="myExecutor" pool-size="7-42" queue-capacity="11"/>
+ *     &lt;task:executor id="myExecutor" pool-size="7-42" queue-capacity="11"/&gt;
  *
- *     <bean id="asyncBean" class="com.foo.MyAsyncBean"/>
+ *     &lt;bean id="asyncBean" class="com.foo.MyAsyncBean"/&gt;
  *
- *     <bean id="exceptionHandler" class="com.foo.MyAsyncUncaughtExceptionHandler"/>
+ *     &lt;bean id="exceptionHandler" class="com.foo.MyAsyncUncaughtExceptionHandler"/&gt;
  *
- * </beans>
- * }</pre>
+ * &lt;/beans&gt;
+ * </pre>
  *
  * The above XML-based and JavaConfig-based examples are equivalent except for the
  * setting of the <em>thread name prefix</em> of the {@code Executor}; this is because

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,14 +83,14 @@ public interface SimpleJdbcInsertOperations {
 
 	/**
 	 * Execute the insert using the values passed in.
-	 * @param args Map containing column names and corresponding value
+	 * @param args a Map containing column names and corresponding value
 	 * @return the number of rows affected as returned by the JDBC driver
 	 */
 	int execute(Map<String, ?> args);
 
 	/**
 	 * Execute the insert using the values passed in.
-	 * @param parameterSource SqlParameterSource containing values to use for insert
+	 * @param parameterSource the SqlParameterSource containing values to use for insert
 	 * @return the number of rows affected as returned by the JDBC driver
 	 */
 	int execute(SqlParameterSource parameterSource);
@@ -100,7 +100,7 @@ public interface SimpleJdbcInsertOperations {
 	 * <p>This requires that the name of the columns with auto generated keys have been specified.
 	 * This method will always return a KeyHolder but the caller must verify that it actually
 	 * contains the generated keys.
-	 * @param args Map containing column names and corresponding value
+	 * @param args a Map containing column names and corresponding value
 	 * @return the generated key value
 	 */
 	Number executeAndReturnKey(Map<String, ?> args);
@@ -110,7 +110,7 @@ public interface SimpleJdbcInsertOperations {
 	 * <p>This requires that the name of the columns with auto generated keys have been specified.
 	 * This method will always return a KeyHolder but the caller must verify that it actually
 	 * contains the generated keys.
-	 * @param parameterSource SqlParameterSource containing values to use for insert
+	 * @param parameterSource the SqlParameterSource containing values to use for insert
 	 * @return the generated key value.
 	 */
 	Number executeAndReturnKey(SqlParameterSource parameterSource);
@@ -120,7 +120,7 @@ public interface SimpleJdbcInsertOperations {
 	 * <p>This requires that the name of the columns with auto generated keys have been specified.
 	 * This method will always return a KeyHolder but the caller must verify that it actually
 	 * contains the generated keys.
-	 * @param args Map containing column names and corresponding value
+	 * @param args a Map containing column names and corresponding value
 	 * @return the KeyHolder containing all generated keys
 	 */
 	KeyHolder executeAndReturnKeyHolder(Map<String, ?> args);
@@ -130,7 +130,7 @@ public interface SimpleJdbcInsertOperations {
 	 * <p>This requires that the name of the columns with auto generated keys have been specified.
 	 * This method will always return a KeyHolder but the caller must verify that it actually
 	 * contains the generated keys.
-	 * @param parameterSource SqlParameterSource containing values to use for insert
+	 * @param parameterSource the SqlParameterSource containing values to use for insert
 	 * @return the KeyHolder containing all generated keys
 	 */
 	KeyHolder executeAndReturnKeyHolder(SqlParameterSource parameterSource);

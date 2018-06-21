@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.web.socket.server.support.WebSocketHandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * A {@link WebSocketHandlerRegistry} that maps {@link WebSocketHandler}s to URLs for use
+ * A {@link WebSocketHandlerRegistry} that maps {@link WebSocketHandler WebSocketHandlerRegistry} that maps {@link WebSocketHandlers} to URLs for use
  * in a Servlet container.
  *
  * @author Rossen Stoyanchev

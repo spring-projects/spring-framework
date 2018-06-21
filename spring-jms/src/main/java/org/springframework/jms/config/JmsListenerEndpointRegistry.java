@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import org.springframework.util.Assert;
  * lifecycle of the listener containers, in particular within the lifecycle
  * of the application context.
  *
- * <p>Contrary to {@link MessageListenerContainer}s created manually, listener
+ * <p>Contrary to {@link MessageListenerContainer MessageListenerContainers} created manually, listener
  * containers managed by registry are not beans in the application context and
  * are not candidates for autowiring. Use {@link #getListenerContainers()} if
  * you need to access this registry's listener containers for management purposes.
@@ -103,8 +103,8 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 
 	/**
 	 * Return the ids of the managed {@link MessageListenerContainer} instance(s).
-	 * @see #getListenerContainer(String)
 	 * @since 4.2.3
+	 * @see #getListenerContainer(String)
 	 */
 	public Set<String> getListenerContainerIds() {
 		return Collections.unmodifiableSet(this.listenerContainers.keySet());

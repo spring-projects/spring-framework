@@ -66,7 +66,7 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 
 	/**
 	 * Constructor with the {@link XnioWorker} to pass to
-	 * {@link io.undertow.websockets.client.WebSocketClient#connectionBuilder}
+	 * {@link io.undertow.websockets.client.WebSocketClient#connectionBuilder}.
 	 * @param worker the Xnio worker
 	 */
 	public UndertowWebSocketClient(XnioWorker worker) {
@@ -122,8 +122,9 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 	}
 
 	/**
-	 * @return the {@link io.undertow.connector.ByteBufferPool} currently used
-	 * for newly created WebSocket sessions by this client
+	 * Return the {@link io.undertow.connector.ByteBufferPool} currently used
+	 * for newly created WebSocket sessions by this client.
+	 * @return the byte buffer pool
 	 * @since 5.0.8
 	 */
 	public ByteBufferPool getByteBufferPool() {
@@ -131,7 +132,7 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 	}
 
 	/**
-	 * Return the configured {@code Consumer<ConnectionBuilder}.
+	 * Return the configured <code>Consumer&lt;ConnectionBuilder&gt;</code>.
 	 */
 	public Consumer<ConnectionBuilder> getConnectionBuilderConsumer() {
 		return this.builderConsumer;

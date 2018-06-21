@@ -34,7 +34,7 @@ import org.springframework.web.reactive.handler.AbstractHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * {@code HandlerMapping} implementation that supports {@link RouterFunction}s.
+ * {@code HandlerMapping} implementation that supports {@link RouterFunction RouterFunctions}.
  * <p>If no {@link RouterFunction} is provided at
  * {@linkplain #RouterFunctionMapping(RouterFunction) construction time}, this mapping will detect
  * all router functions in the application context, and consult them in

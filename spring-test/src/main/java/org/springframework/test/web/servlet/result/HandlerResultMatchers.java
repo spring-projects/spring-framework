@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ public class HandlerResultMatchers {
 	 * public class SimpleController {
 	 *
 	 *     &#064;RequestMapping("/")
-	 *     public ResponseEntity<Void> handle() {
+	 *     public ResponseEntity&lt;Void&gt; handle() {
 	 *         return ResponseEntity.ok().build();
 	 *     }
 	 * }

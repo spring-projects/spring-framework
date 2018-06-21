@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @param <T> the native delegate type
  */
 public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSocketSession<T>
 		implements Subscriber<Void> {
@@ -162,12 +163,12 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 	// WebSocketHandler adapter delegate methods
 
-	/** Handle a message callback from the WebSocketHandler adapter */
+	/** Handle a message callback from the WebSocketHandler adapter. */
 	void handleMessage(Type type, WebSocketMessage message) {
 		this.receivePublisher.handleMessage(message);
 	}
 
-	/** Handle an error callback from the WebSocketHandler adapter */
+	/** Handle an error callback from the WebSocketHandler adapter. */
 	void handleError(Throwable ex) {
 		this.receivePublisher.onError(ex);
 		WebSocketSendProcessor sendProcessor = this.sendProcessor;
@@ -177,7 +178,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		}
 	}
 
-	/** Handle a close callback from the WebSocketHandler adapter */
+	/** Handle a close callback from the WebSocketHandler adapter. */
 	void handleClose(CloseStatus reason) {
 		this.receivePublisher.onAllDataRead();
 		WebSocketSendProcessor sendProcessor = this.sendProcessor;
@@ -259,6 +260,9 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	}
 
 
+	/**
+	 * Processor to send web socket messages.
+	 */
 	protected final class WebSocketSendProcessor extends AbstractListenerWriteProcessor<WebSocketMessage> {
 
 		private volatile boolean isReady = true;

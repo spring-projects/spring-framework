@@ -48,6 +48,7 @@ import org.springframework.util.Assert;
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @param <T> the type of objects in the input stream
  */
 public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
