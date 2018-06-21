@@ -2047,7 +2047,7 @@ public abstract class AnnotationUtils {
 	 * @see #getAttributeAliasNames
 	 * @see #getAttributeOverrideName
 	 */
-	private static class AliasDescriptor {
+	private static final class AliasDescriptor {
 
 		private final Method sourceAttribute;
 

@@ -150,7 +150,7 @@ public class MockFilterChain implements FilterChain {
 	/**
 	 * A filter that simply delegates to a Servlet.
 	 */
-	private static class ServletFilterProxy implements Filter {
+	private static final class ServletFilterProxy implements Filter {
 
 		private final Servlet delegateServlet;
 

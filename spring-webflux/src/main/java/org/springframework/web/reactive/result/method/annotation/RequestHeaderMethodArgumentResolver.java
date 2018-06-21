@@ -95,7 +95,7 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueSyncA
 	}
 
 
-	private static class RequestHeaderNamedValueInfo extends NamedValueInfo {
+	private static final class RequestHeaderNamedValueInfo extends NamedValueInfo {
 
 		private RequestHeaderNamedValueInfo(RequestHeader annotation) {
 			super(annotation.name(), annotation.required(), annotation.defaultValue());

@@ -71,7 +71,7 @@ import org.springframework.util.StringUtils;
  * @see #clearClassLoader(ClassLoader)
  * @see #forClass(Class)
  */
-public class CachedIntrospectionResults {
+public final class CachedIntrospectionResults {
 
 	/**
 	 * System property that instructs Spring to use the {@link Introspector#IGNORE_ALL_BEANINFO}

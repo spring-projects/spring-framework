@@ -77,7 +77,7 @@ public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueMet
 	}
 
 
-	private static class ExpressionValueNamedValueInfo extends NamedValueInfo {
+	private static final class ExpressionValueNamedValueInfo extends NamedValueInfo {
 
 		private ExpressionValueNamedValueInfo(Value annotation) {
 			super("@Value", false, annotation.value());

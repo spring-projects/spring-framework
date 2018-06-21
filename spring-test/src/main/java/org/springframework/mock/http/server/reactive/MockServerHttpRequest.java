@@ -52,7 +52,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class MockServerHttpRequest extends AbstractServerHttpRequest {
+public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpMethod httpMethod;
 

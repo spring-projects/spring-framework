@@ -29,13 +29,13 @@ import org.springframework.util.ClassUtils;
 public class BeanNotOfRequiredTypeException extends BeansException {
 
 	/** The name of the instance that was of the wrong type. */
-	private String beanName;
+	private final String beanName;
 
 	/** The required type. */
-	private Class<?> requiredType;
+	private final Class<?> requiredType;
 
 	/** The offending type. */
-	private Class<?> actualType;
+	private final Class<?> actualType;
 
 
 	/**

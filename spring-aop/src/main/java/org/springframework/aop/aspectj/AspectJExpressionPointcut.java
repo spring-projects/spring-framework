@@ -561,6 +561,19 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		return sb.toString();
 	}
 
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+
+	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+		// Rely on default serialization, just initialize state after deserialization.
+		ois.defaultReadObject();
+
+		// Initialize transient fields.
+		// pointcutExpression will be initialized lazily by checkReadyToMatch()
+		this.shadowMatchCache = new ConcurrentHashMap<>(32);
+	}
+
 
 	/**
 	 * Handler for the Spring-specific {@code bean()} pointcut designator
@@ -654,20 +667,6 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			return BeanFactoryAnnotationUtils.isQualifierMatch(
 					this.expressionPattern::matches, advisedBeanName, beanFactory);
 		}
-	}
-
-
-	//---------------------------------------------------------------------
-	// Serialization support
-	//---------------------------------------------------------------------
-
-	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-		// Rely on default serialization, just initialize state after deserialization.
-		ois.defaultReadObject();
-
-		// Initialize transient fields.
-		// pointcutExpression will be initialized lazily by checkReadyToMatch()
-		this.shadowMatchCache = new ConcurrentHashMap<>(32);
 	}
 
 

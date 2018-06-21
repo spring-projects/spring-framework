@@ -71,7 +71,7 @@ public abstract class AbstractCookieValueMethodArgumentResolver extends Abstract
 	}
 
 
-	private static class CookieValueNamedValueInfo extends NamedValueInfo {
+	private static final class CookieValueNamedValueInfo extends NamedValueInfo {
 
 		private CookieValueNamedValueInfo(CookieValue annotation) {
 			super(annotation.name(), annotation.required(), annotation.defaultValue());

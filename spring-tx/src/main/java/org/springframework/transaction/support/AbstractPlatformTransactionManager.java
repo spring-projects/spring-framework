@@ -1273,7 +1273,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * Holder for suspended resources.
 	 * Used internally by {@code suspend} and {@code resume}.
 	 */
-	protected static class SuspendedResourcesHolder {
+	protected static final class SuspendedResourcesHolder {
 
 		@Nullable
 		private final Object suspendedResources;

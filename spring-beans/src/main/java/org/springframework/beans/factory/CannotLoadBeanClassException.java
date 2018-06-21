@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,13 @@ import org.springframework.lang.Nullable;
 public class CannotLoadBeanClassException extends FatalBeanException {
 
 	@Nullable
-	private String resourceDescription;
+	private final String resourceDescription;
 
 	@Nullable
-	private String beanName;
+	private final String beanName;
 
 	@Nullable
-	private String beanClassName;
+	private final String beanClassName;
 
 
 	/**

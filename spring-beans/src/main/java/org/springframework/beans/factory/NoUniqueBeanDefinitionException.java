@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,10 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public class NoUniqueBeanDefinitionException extends NoSuchBeanDefinitionException {
 
-	private int numberOfBeansFound;
+	private final int numberOfBeansFound;
 
 	@Nullable
-	private Collection<String> beanNamesFound;
+	private final Collection<String> beanNamesFound;
 
 
 	/**
@@ -48,6 +48,7 @@ public class NoUniqueBeanDefinitionException extends NoSuchBeanDefinitionExcepti
 	public NoUniqueBeanDefinitionException(Class<?> type, int numberOfBeansFound, String message) {
 		super(type, message);
 		this.numberOfBeansFound = numberOfBeansFound;
+		this.beanNamesFound = null;
 	}
 
 	/**
@@ -56,8 +57,9 @@ public class NoUniqueBeanDefinitionException extends NoSuchBeanDefinitionExcepti
 	 * @param beanNamesFound the names of all matching beans (as a Collection)
 	 */
 	public NoUniqueBeanDefinitionException(Class<?> type, Collection<String> beanNamesFound) {
-		this(type, beanNamesFound.size(), "expected single matching bean but found " + beanNamesFound.size() + ": " +
+		super(type, "expected single matching bean but found " + beanNamesFound.size() + ": " +
 				StringUtils.collectionToCommaDelimitedString(beanNamesFound));
+		this.numberOfBeansFound =  beanNamesFound.size();
 		this.beanNamesFound = beanNamesFound;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,10 @@ import org.springframework.lang.Nullable;
 public class NoSuchBeanDefinitionException extends BeansException {
 
 	@Nullable
-	private String beanName;
+	private final String beanName;
 
 	@Nullable
-	private ResolvableType resolvableType;
+	private final ResolvableType resolvableType;
 
 
 	/**
@@ -49,6 +49,7 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	public NoSuchBeanDefinitionException(String name) {
 		super("No bean named '" + name + "' available");
 		this.beanName = name;
+		this.resolvableType = null;
 	}
 
 	/**
@@ -59,6 +60,7 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	public NoSuchBeanDefinitionException(String name, String message) {
 		super("No bean named '" + name + "' available: " + message);
 		this.beanName = name;
+		this.resolvableType = null;
 	}
 
 	/**
@@ -85,6 +87,7 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	 */
 	public NoSuchBeanDefinitionException(ResolvableType type) {
 		super("No qualifying bean of type '" + type + "' available");
+		this.beanName = null;
 		this.resolvableType = type;
 	}
 
@@ -96,6 +99,7 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	 */
 	public NoSuchBeanDefinitionException(ResolvableType type, String message) {
 		super("No qualifying bean of type '" + type + "' available: " + message);
+		this.beanName = null;
 		this.resolvableType = type;
 	}
 

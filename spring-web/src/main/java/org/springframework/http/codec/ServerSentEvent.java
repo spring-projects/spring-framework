@@ -32,7 +32,7 @@ import org.springframework.lang.Nullable;
  * @see ServerSentEventHttpMessageWriter
  * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
  */
-public class ServerSentEvent<T> {
+public final class ServerSentEvent<T> {
 
 	@Nullable
     private final String id;

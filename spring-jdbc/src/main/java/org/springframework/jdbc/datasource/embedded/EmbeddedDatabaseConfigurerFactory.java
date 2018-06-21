@@ -29,6 +29,11 @@ import org.springframework.util.Assert;
  */
 final class EmbeddedDatabaseConfigurerFactory {
 
+
+	private EmbeddedDatabaseConfigurerFactory() {
+	}
+
+
 	/**
 	 * Return a configurer instance for the given embedded database type.
 	 * @param type the embedded database type (HSQL, H2 or Derby)

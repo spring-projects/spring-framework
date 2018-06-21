@@ -78,7 +78,7 @@ public class DestinationVariableMethodArgumentResolver extends AbstractNamedValu
 	}
 
 
-	private static class DestinationVariableNamedValueInfo extends NamedValueInfo {
+	private static final class DestinationVariableNamedValueInfo extends NamedValueInfo {
 
 		private DestinationVariableNamedValueInfo(DestinationVariable annotation) {
 			super(annotation.value(), true, ValueConstants.DEFAULT_NONE);

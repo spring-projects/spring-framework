@@ -63,7 +63,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Arjen Poutsma
  * @since 5.0
  */
-public class MockServerRequest implements ServerRequest {
+public final class MockServerRequest implements ServerRequest {
 
 	private final HttpMethod method;
 

@@ -125,7 +125,7 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueSync
 	}
 
 
-	private static class MatrixVariableNamedValueInfo extends NamedValueInfo {
+	private static final class MatrixVariableNamedValueInfo extends NamedValueInfo {
 
 		private MatrixVariableNamedValueInfo(MatrixVariable annotation) {
 			super(annotation.name(), annotation.required(), annotation.defaultValue());

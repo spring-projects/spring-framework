@@ -517,7 +517,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * Holder for a registered custom editor with property name.
 	 * Keeps the PropertyEditor itself plus the type it was registered for.
 	 */
-	private static class CustomEditorHolder {
+	private static final class CustomEditorHolder {
 
 		private final PropertyEditor propertyEditor;
 

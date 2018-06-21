@@ -53,7 +53,7 @@ import org.springframework.util.MimeTypeUtils;
  * @since 5.0
  * @see CharSequenceEncoder
  */
-public class StringDecoder extends AbstractDataBufferDecoder<String> {
+public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 	private static final DataBuffer END_FRAME = new DefaultDataBufferFactory().wrap(new byte[0]);
 

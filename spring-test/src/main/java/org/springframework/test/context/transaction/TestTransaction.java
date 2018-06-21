@@ -38,7 +38,12 @@ import org.springframework.util.Assert;
  * @since 4.1
  * @see TransactionalTestExecutionListener
  */
-public class TestTransaction {
+public final class TestTransaction {
+
+
+	private TestTransaction() {
+	}
+
 
 	/**
 	 * Determine whether a test-managed transaction is currently <em>active</em>.
