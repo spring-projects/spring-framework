@@ -174,7 +174,7 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 				int read = this.channel.read(byteBuffer);
 				if (logger.isTraceEnabled()) {
-					logger.trace("Channel read returned " + read + (read != -1 ? " bytes" : ""));
+					logger.trace("Channel.read returned " + read + (read != -1 ? " bytes" : ""));
 				}
 
 				if (read > 0) {

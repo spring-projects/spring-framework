@@ -170,7 +170,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
 		assertError(mono, UnsupportedMediaTypeStatusException.class,
-				ex -> assertEquals("Response status 415 UNSUPPORTED_MEDIA_TYPE with reason " +
+				ex -> assertEquals("415 UNSUPPORTED_MEDIA_TYPE " +
 						"\"Invalid mime type \"bogus\": does not contain '/'\"", ex.getMessage()));
 	}
 

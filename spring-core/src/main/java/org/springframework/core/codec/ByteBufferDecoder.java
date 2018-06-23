@@ -52,10 +52,14 @@ public class ByteBufferDecoder extends AbstractDataBufferDecoder<ByteBuffer> {
 	protected ByteBuffer decodeDataBuffer(DataBuffer dataBuffer, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		ByteBuffer copy = ByteBuffer.allocate(dataBuffer.readableByteCount());
+		int byteCount = dataBuffer.readableByteCount();
+		ByteBuffer copy = ByteBuffer.allocate(byteCount);
 		copy.put(dataBuffer.asByteBuffer());
 		copy.flip();
 		DataBufferUtils.release(dataBuffer);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Read " + byteCount + " bytes");
+		}
 		return copy;
 	}
 

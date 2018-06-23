@@ -157,7 +157,15 @@ public class PathResourceResolver extends AbstractResourceResolver {
 				}
 			}
 			catch (IOException ex) {
-				logger.trace("Failed to get resource, skipping location: " + location, ex);
+				if (logger.isDebugEnabled() || logger.isTraceEnabled()) {
+					String error = "Skip location [" + location + "] due to error";
+					if (logger.isTraceEnabled()) {
+						logger.trace(error, ex);
+					}
+					else {
+						logger.debug(error + ": " + ex.getMessage());
+					}
+				}
 			}
 		}
 		return null;
@@ -276,9 +284,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 			try {
 				String decodedPath = URLDecoder.decode(resourcePath, "UTF-8");
 				if (decodedPath.contains("../") || decodedPath.contains("..\\")) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Resolved resource path contains encoded \"../\" or \"..\\\": " + resourcePath);
-					}
+					logger.warn("Resolved resource path contains encoded \"../\" or \"..\\\": " + resourcePath);
 					return true;
 				}
 			}

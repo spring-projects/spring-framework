@@ -141,7 +141,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 			if (mapping.endsWith("/*")) {
 				String path = mapping.substring(0, mapping.length() - 2);
 				if (!path.isEmpty()) {
-					logger.info("Found Servlet mapping '" + path + "' for Servlet '" + name + "'");
+					logger.info("Found servlet mapping prefix '" + path + "' for '" + name + "'");
 				}
 				return path;
 			}
@@ -159,7 +159,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		if (DispatcherType.ASYNC.equals(request.getDispatcherType())) {
 			Throwable ex = (Throwable) request.getAttribute(WRITE_ERROR_ATTRIBUTE_NAME);
-			throw new ServletException("Write publisher error", ex);
+			throw new ServletException("Failed to create response content", ex);
 		}
 
 		// Start async before Read/WriteListener registration
@@ -171,8 +171,8 @@ public class ServletHttpHandlerAdapter implements Servlet {
 			httpRequest = createRequest(((HttpServletRequest) request), asyncContext);
 		}
 		catch (URISyntaxException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Invalid URL for incoming request: " + ex.getMessage());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Failed to get request  URL: " + ex.getMessage());
 			}
 			((HttpServletResponse) response).setStatus(400);
 			asyncContext.complete();
@@ -247,14 +247,15 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		@Override
 		public void onTimeout(AsyncEvent event) {
-			logger.debug("Timeout notification from Servlet container");
+			logger.debug("Timeout notification");
 			AsyncContext context = event.getAsyncContext();
 			runIfAsyncNotComplete(context, this.isCompleted, context::complete);
 		}
 
 		@Override
 		public void onError(AsyncEvent event) {
-			logger.debug("Error notification from Servlet container");
+			Throwable ex = event.getThrowable();
+			logger.debug("Error notification: " + (ex != null ? ex : "<no Throwable>"));
 			AsyncContext context = event.getAsyncContext();
 			runIfAsyncNotComplete(context, this.isCompleted, context::complete);
 		}
@@ -294,16 +295,16 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		@Override
 		public void onError(Throwable ex) {
-			logger.warn("Handling completed with error: " + ex.getMessage());
+			logger.trace("Failed to complete: " + ex.getMessage());
 			runIfAsyncNotComplete(this.asyncContext, this.isCompleted, () -> {
 				if (this.asyncContext.getResponse().isCommitted()) {
-					logger.debug("Dispatching into container to raise error");
+					logger.trace("Dispatch to container, to raise the error on servlet thread");
 					this.asyncContext.getRequest().setAttribute(WRITE_ERROR_ATTRIBUTE_NAME, ex);
 					this.asyncContext.dispatch();
 				}
 				else {
 					try {
-						logger.debug("Setting response status code to 500");
+						logger.trace("Setting ServletResponse status to 500 Server Error");
 						this.asyncContext.getResponse().resetBuffer();
 						((HttpServletResponse) this.asyncContext.getResponse()).setStatus(500);
 					}
@@ -316,7 +317,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		@Override
 		public void onComplete() {
-			logger.debug("Handling completed with success");
+			logger.trace("Handling completed");
 			runIfAsyncNotComplete(this.asyncContext, this.isCompleted, this.asyncContext::complete);
 		}
 	}

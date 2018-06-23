@@ -141,6 +141,9 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 		ServerHttpResponse response = exchange.getResponse();
 		MediaType bestMediaType = selectMediaType(exchange, () -> getMediaTypesFor(elementType));
 		if (bestMediaType != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug((publisher instanceof Mono ? "0..1" : "0..N") + " [" + elementType + "]");
+			}
 			for (HttpMessageWriter<?> writer : getMessageWriters()) {
 				if (writer.canWrite(elementType, bestMediaType)) {
 					return writer.write((Publisher) publisher, actualType, elementType,

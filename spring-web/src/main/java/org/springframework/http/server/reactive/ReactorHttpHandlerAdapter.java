@@ -61,8 +61,8 @@ public class ReactorHttpHandlerAdapter implements BiFunction<HttpServerRequest, 
 			adaptedResponse = new ReactorServerHttpResponse(response, bufferFactory);
 		}
 		catch (URISyntaxException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Invalid URL for incoming request: " + ex.getMessage());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Failed to get request URI: " + ex.getMessage());
 			}
 			response.status(HttpResponseStatus.BAD_REQUEST);
 			return Mono.empty();
@@ -73,8 +73,8 @@ public class ReactorHttpHandlerAdapter implements BiFunction<HttpServerRequest, 
 		}
 
 		return this.httpHandler.handle(adaptedRequest, adaptedResponse)
-				.doOnError(ex -> logger.warn("Handling completed with error: " + ex.getMessage()))
-				.doOnSuccess(aVoid -> logger.debug("Handling completed with success"));
+				.doOnError(ex -> logger.trace("Failed to complete: " + ex.getMessage()))
+				.doOnSuccess(aVoid -> logger.trace("Handling completed"));
 	}
 
 }

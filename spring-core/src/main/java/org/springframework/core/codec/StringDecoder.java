@@ -205,7 +205,11 @@ public class StringDecoder extends AbstractDataBufferDecoder<String> {
 		Charset charset = getCharset(mimeType);
 		CharBuffer charBuffer = charset.decode(dataBuffer.asByteBuffer());
 		DataBufferUtils.release(dataBuffer);
-		return charBuffer.toString();
+		String value = charBuffer.toString();
+		if (logger.isDebugEnabled()) {
+			logger.debug("Decoded '" + "'");
+		}
+		return value;
 	}
 
 	private static Charset getCharset(@Nullable MimeType mimeType) {

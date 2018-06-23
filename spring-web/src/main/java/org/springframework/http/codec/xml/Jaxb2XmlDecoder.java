@@ -104,7 +104,13 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 		QName typeName = toQName(outputClass);
 		Flux<List<XMLEvent>> splitEvents = split(xmlEventFlux, typeName);
 
-		return splitEvents.map(events -> unmarshal(events, outputClass));
+		return splitEvents.map(events -> {
+			Object value = unmarshal(events, outputClass);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Decoded [" + value + "]");
+			}
+			return value;
+		});
 	}
 
 	@Override

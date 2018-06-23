@@ -537,9 +537,9 @@ public class DispatcherServlet extends FrameworkServlet {
 			else {
 				logger.warn("\n\n" +
 						"!!!!!!!!!!!!!!!!!!!\n" +
-						"Logging of request parameters (DEBUG level) and headers (TRACE level) may log sensitive data.\n" +
-						"If not in development, lower the log level for \"org.springframework.web.servlet.DispatcherServlet\", or\n" +
-						"set the DispatcherServlet property \"disableLoggingRequestDetails\" to 'true'.\n" +
+						"Logging request parameters (DEBUG) and headers (TRACE) may show sensitive data.\n" +
+						"If not in development, use the DispatcherServlet property \"disableLoggingRequestDetails=true\",\n" +
+						"or lower the log level.\n" +
 						"!!!!!!!!!!!!!!!!!!!\n");
 			}
 		}
@@ -1278,8 +1278,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	protected void noHandlerFound(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (pageNotFoundLogger.isWarnEnabled()) {
-			pageNotFoundLogger.warn("No mapping for " + request.getMethod() + " " +
-					getRequestUri(request) + " in DispatcherServlet '" + getServletName() + "'");
+			pageNotFoundLogger.warn("No mapping for " + request.getMethod() + " " + getRequestUri(request));
 		}
 		if (this.throwExceptionIfNoHandlerFound) {
 			throw new NoHandlerFoundException(request.getMethod(), getRequestUri(request),

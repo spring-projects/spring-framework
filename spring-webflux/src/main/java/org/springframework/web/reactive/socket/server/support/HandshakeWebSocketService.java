@@ -208,10 +208,6 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		HttpMethod method = request.getMethod();
 		HttpHeaders headers = request.getHeaders();
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Handling " + request.getURI() + " with headers: " + headers);
-		}
-
 		if (HttpMethod.GET != method) {
 			return Mono.error(new MethodNotAllowedException(
 					request.getMethodValue(), Collections.singleton(HttpMethod.GET)));

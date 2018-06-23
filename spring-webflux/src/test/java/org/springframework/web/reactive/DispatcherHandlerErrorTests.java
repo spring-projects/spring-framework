@@ -89,7 +89,7 @@ public class DispatcherHandlerErrorTests {
 				.consumeErrorWith(error -> {
 					assertThat(error, instanceOf(ResponseStatusException.class));
 					assertThat(error.getMessage(),
-							is("Response status 404 NOT_FOUND with reason \"No matching handler\""));
+							is("404 NOT_FOUND \"No matching handler\""));
 				})
 				.verify();
 	}

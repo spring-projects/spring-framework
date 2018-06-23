@@ -75,7 +75,9 @@ class CallableInterceptorChain {
 			catch (Throwable ex) {
 				// Save the first exception but invoke all interceptors
 				if (exceptionResult != null) {
-					logger.warn("Unhandled error from interceptor postProcess method", ex);
+					if (logger.isTraceEnabled()) {
+						logger.trace("Ignoring failure in postProcess method", ex);
+					}
 				}
 				else {
 					exceptionResult = ex;
@@ -141,7 +143,9 @@ class CallableInterceptorChain {
 				this.interceptors.get(i).afterCompletion(request, task);
 			}
 			catch (Throwable ex) {
-				logger.error("Unhandled error from interceptor afterCompletion method", ex);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Ignoring failure in afterCompletion method", ex);
+				}
 			}
 		}
 	}

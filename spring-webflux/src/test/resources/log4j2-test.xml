@@ -6,8 +6,9 @@
 		</Console>
 	</Appenders>
 	<Loggers>
+		<Logger name="org.springframework.core.codec" level="debug" />
 		<Logger name="org.springframework.http" level="debug" />
-		<!--<Logger name="org.springframework.web" level="debug" />-->
+		<Logger name="org.springframework.web" level="debug" />
 
 		<!-- temporarily while we resolve random failures -->
 		<Logger name="org.springframework.web.reactive.socket.WebSocketIntegrationTests" level="debug" />

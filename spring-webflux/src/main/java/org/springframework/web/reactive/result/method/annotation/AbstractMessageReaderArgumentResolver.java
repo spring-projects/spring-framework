@@ -152,10 +152,18 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		MediaType contentType = request.getHeaders().getContentType();
 		MediaType mediaType = (contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM);
 
+		if (logger.isDebugEnabled()) {
+			logger.debug(contentType != null ? "Content-Type:" + contentType :
+					"No Content-Type, using " + MediaType.APPLICATION_OCTET_STREAM);
+		}
+
 		for (HttpMessageReader<?> reader : getMessageReaders()) {
 			if (reader.canRead(elementType, mediaType)) {
 				Map<String, Object> readHints = Collections.emptyMap();
 				if (adapter != null && adapter.isMultiValue()) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("0..N [" + elementType + "]");
+					}
 					Flux<?> flux = reader.read(actualType, elementType, request, response, readHints);
 					flux = flux.onErrorResume(ex -> Flux.error(handleReadError(bodyParam, ex)));
 					if (isBodyRequired) {
@@ -170,6 +178,9 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 				}
 				else {
 					// Single-value (with or without reactive type wrapper)
+					if (logger.isDebugEnabled()) {
+						logger.debug("0..1 [" + elementType + "]");
+					}
 					Mono<?> mono = reader.readMono(actualType, elementType, request, response, readHints);
 					mono = mono.onErrorResume(ex -> Mono.error(handleReadError(bodyParam, ex)));
 					if (isBodyRequired) {

@@ -32,6 +32,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.synchronoss.cloud.nio.multipart.DefaultPartBodyStreamStorageFactory;
 import org.synchronoss.cloud.nio.multipart.Multipart;
 import org.synchronoss.cloud.nio.multipart.MultipartContext;
@@ -53,6 +55,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.LoggingCodecSupport;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -70,7 +73,7 @@ import org.springframework.util.Assert;
  * @see <a href="https://github.com/synchronoss/nio-multipart">Synchronoss NIO Multipart</a>
  * @see MultipartHttpMessageReader
  */
-public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part> {
+public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implements HttpMessageReader<Part> {
 
 	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
@@ -91,7 +94,12 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 
 	@Override
 	public Flux<Part> read(ResolvableType elementType, ReactiveHttpInputMessage message, Map<String, Object> hints) {
-		return Flux.create(new SynchronossPartGenerator(message, this.bufferFactory, this.streamStorageFactory));
+		return Flux.create(new SynchronossPartGenerator(message, this.bufferFactory, this.streamStorageFactory))
+				.doOnNext(part -> {
+					if (shouldLogRequestDetails()) {
+						logger.debug("Decoded [" + part + "]");
+					}
+				});
 	}
 
 
@@ -263,6 +271,11 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 		DataBufferFactory getBufferFactory() {
 			return this.bufferFactory;
 		}
+
+		@Override
+		public String toString() {
+			return "Part '" + this.name + "', headers=" + this.headers;
+		}
 	}
 
 
@@ -342,6 +355,11 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 			}
 			return Mono.empty();
 		}
+
+		@Override
+		public String toString() {
+			return "Part '" + name() + "', filename='" + this.filename + "'";
+		}
 	}
 
 
@@ -370,6 +388,11 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 		private Charset getCharset() {
 			String name = MultipartUtils.getCharEncoding(headers());
 			return (name != null ? Charset.forName(name) : StandardCharsets.UTF_8);
+		}
+
+		@Override
+		public String toString() {
+			return "Part '" + name() + "=" + this.content + "'";
 		}
 	}
 

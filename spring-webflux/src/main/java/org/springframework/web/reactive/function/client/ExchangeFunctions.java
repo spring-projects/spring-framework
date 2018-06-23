@@ -25,6 +25,8 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.client.reactive.ClientHttpResponse;
+import org.springframework.http.codec.LoggingCodecSupport;
 import org.springframework.util.Assert;
 
 /**
@@ -69,12 +71,22 @@ public abstract class ExchangeFunctions {
 
 		private final ExchangeStrategies strategies;
 
+		private boolean disableLoggingRequestDetails;
+
 
 		public DefaultExchangeFunction(ClientHttpConnector connector, ExchangeStrategies strategies) {
 			Assert.notNull(connector, "ClientHttpConnector must not be null");
 			Assert.notNull(strategies, "ExchangeStrategies must not be null");
 			this.connector = connector;
 			this.strategies = strategies;
+
+			strategies.messageWriters().stream()
+					.filter(LoggingCodecSupport.class::isInstance)
+					.forEach(reader -> {
+						if (((LoggingCodecSupport) reader).isDisableLoggingRequestDetails()) {
+							this.disableLoggingRequestDetails = true;
+						}
+					});
 		}
 
 
@@ -87,18 +99,38 @@ public abstract class ExchangeFunctions {
 
 			return this.connector
 					.connect(httpMethod, url, httpRequest -> request.writeTo(httpRequest, this.strategies))
-					.doOnSubscribe(subscription -> logger.debug("Subscriber present"))
-					.doOnRequest(n -> logger.debug("Demand signaled"))
-					.doOnCancel(() -> logger.debug("Cancelling request"))
+					.doOnRequest(n -> logRequest(request))
+					.doOnCancel(() -> logger.debug("Cancel signal (to close connection)"))
 					.map(response -> {
-						if (logger.isDebugEnabled()) {
-							int code = response.getRawStatusCode();
-							HttpStatus status = HttpStatus.resolve(code);
-							String reason = status != null ? " " + status.getReasonPhrase() : "";
-							logger.debug("Response received, status: " + code + reason);
-						}
+						logResponse(response);
 						return new DefaultClientResponse(response, this.strategies);
 					});
+		}
+
+		private void logRequest(ClientRequest request) {
+			if (logger.isDebugEnabled()) {
+				String formatted = request.url().toString();
+				if (this.disableLoggingRequestDetails) {
+					int index = formatted.indexOf("?");
+					formatted = index != -1 ? formatted.substring(0, index) : formatted;
+				}
+				logger.debug("HTTP " + request.method() + " " + formatted);
+			}
+		}
+
+		private void logResponse(ClientHttpResponse response) {
+			if (logger.isDebugEnabled() || logger.isTraceEnabled()) {
+				int code = response.getRawStatusCode();
+				HttpStatus status = HttpStatus.resolve(code);
+				String message = "Response " + (status != null ? status : code);
+				if (logger.isTraceEnabled()) {
+					String headers = this.disableLoggingRequestDetails ? "" : ", headers=" + response.getHeaders();
+					logger.trace(message + headers);
+				}
+				else {
+					logger.debug(message);
+				}
+			}
 		}
 	}
 

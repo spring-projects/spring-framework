@@ -215,6 +215,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 		MediaType contentType = outputMessage.getHeaders().getContentType();
 		if (contentType != null && contentType.isConcrete()) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Found 'Content-Type:" + contentType + "' in response");
+			}
 			mediaTypesToUse = Collections.singletonList(contentType);
 		}
 		else {
@@ -233,6 +236,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 						mediaTypesToUse.add(getMostSpecificMediaType(requestedType, producibleType));
 					}
 				}
+			}
+			if (logger.isDebugEnabled()) {
+				logger.debug("No match for " + requestedMediaTypes + ", supported: " + producibleMediaTypes);
 			}
 			if (mediaTypesToUse.isEmpty()) {
 				if (body != null) {
@@ -255,6 +261,10 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			}
 		}
 
+		if (logger.isDebugEnabled()) {
+			logger.debug("Using '" + selectedMediaType + "' given " + mediaTypesToUse);
+		}
+
 		if (selectedMediaType != null) {
 			selectedMediaType = selectedMediaType.removeQualityValue();
 			for (HttpMessageConverter<?> converter : this.messageConverters) {
@@ -267,6 +277,10 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 							(Class<? extends HttpMessageConverter<?>>) converter.getClass(),
 							inputMessage, outputMessage);
 					if (body != null) {
+						if (logger.isDebugEnabled()) {
+							Object formatted = body instanceof CharSequence ? "\"" + body + "\"" : body;
+							logger.debug("Writing [" + formatted + "]");
+						}
 						addContentDispositionHeader(inputMessage, outputMessage);
 						if (genericConverter != null) {
 							genericConverter.write(body, declaredType, selectedMediaType, outputMessage);
@@ -274,9 +288,10 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 						else {
 							((HttpMessageConverter) converter).write(body, selectedMediaType, outputMessage);
 						}
+					}
+					else {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Written \"" + selectedMediaType + "\" from " +
-									"[" + (body instanceof CharSequence ? "\"" + body + "\"" : body) + "]");
+							logger.debug("Nothing to write: null body");
 						}
 					}
 					return;

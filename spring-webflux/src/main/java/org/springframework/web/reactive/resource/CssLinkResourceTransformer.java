@@ -84,10 +84,6 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 						return Mono.just(ouptputResource);
 					}
 
-					if (logger.isTraceEnabled()) {
-						logger.trace("Transforming resource: " + ouptputResource);
-					}
-
 					DataBufferFactory bufferFactory = exchange.getResponse().bufferFactory();
 					Flux<DataBuffer> flux = DataBufferUtils
 							.read(ouptputResource, bufferFactory, StreamUtils.BUFFER_SIZE);
@@ -106,9 +102,6 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 		List<ContentChunkInfo> contentChunkInfos = parseContent(cssContent);
 		if (contentChunkInfos.isEmpty()) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("No links found.");
-			}
 			return Mono.just(resource);
 		}
 
@@ -228,8 +221,8 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 			if (content.substring(position, position + 4).equals("url(")) {
 				// Ignore, UrlFunctionContentParser will take care
 			}
-			else if (logger.isErrorEnabled()) {
-				logger.error("Unexpected syntax for @import link at index " + position);
+			else if (logger.isTraceEnabled()) {
+				logger.trace("Unexpected syntax for @import link at index " + position);
 			}
 			return position;
 		}

@@ -22,10 +22,11 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -57,7 +58,8 @@ import org.springframework.util.MultiValueMap;
  * @since 5.0
  * @see org.springframework.http.codec.multipart.MultipartHttpMessageWriter
  */
-public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<String, String>> {
+public class FormHttpMessageWriter extends LoggingCodecSupport
+		implements HttpMessageWriter<MultiValueMap<String, String>> {
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
@@ -127,12 +129,15 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 		Assert.notNull(charset, "No charset"); // should never occur
 
 		return Mono.from(inputStream).flatMap(form -> {
-					String value = serializeForm(form, charset);
-					ByteBuffer byteBuffer = charset.encode(value);
-					DataBuffer buffer = message.bufferFactory().wrap(byteBuffer);
-					message.getHeaders().setContentLength(byteBuffer.remaining());
-					return message.writeWith(Mono.just(buffer));
-				});
+			if (shouldLogRequestDetails()) {
+				logger.debug("Encoding " + form);
+			}
+			String value = serializeForm(form, charset);
+			ByteBuffer byteBuffer = charset.encode(value);
+			DataBuffer buffer = message.bufferFactory().wrap(byteBuffer);
+			message.getHeaders().setContentLength(byteBuffer.remaining());
+			return message.writeWith(Mono.just(buffer));
+		});
 	}
 
 	private MediaType getMediaType(@Nullable MediaType mediaType) {

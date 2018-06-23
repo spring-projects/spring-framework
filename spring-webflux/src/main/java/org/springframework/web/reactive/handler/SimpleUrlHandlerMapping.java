@@ -16,7 +16,9 @@
 
 package org.springframework.web.reactive.handler;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -110,7 +112,7 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	 */
 	protected void registerHandlers(Map<String, Object> urlMap) throws BeansException {
 		if (urlMap.isEmpty()) {
-			logger.warn("Neither 'urlMap' nor 'mappings' set on SimpleUrlHandlerMapping");
+			logger.trace("No patterns in " + formatMappingName());
 		}
 		else {
 			for (Map.Entry<String, Object> entry : urlMap.entrySet()) {
@@ -125,6 +127,9 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 					handler = ((String) handler).trim();
 				}
 				registerHandler(url, handler);
+			}
+			if (logger.isDebugEnabled()) {
+				logger.debug("Patterns " + getHandlerMap().keySet() + " in " + formatMappingName());
 			}
 		}
 	}

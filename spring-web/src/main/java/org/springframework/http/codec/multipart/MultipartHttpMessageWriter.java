@@ -29,6 +29,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.impl.NoOpLog;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -48,6 +50,7 @@ import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.FormHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.LoggingCodecSupport;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -75,9 +78,14 @@ import org.springframework.util.MultiValueMap;
  * @since 5.0
  * @see FormHttpMessageWriter
  */
-public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueMap<String, ?>> {
+public class MultipartHttpMessageWriter extends LoggingCodecSupport
+		implements HttpMessageWriter<MultiValueMap<String, ?>> {
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+
+	/** Suppress logging from individual part writers (full map logged at this level) */
+	private static final Map<String, Object> DEFAULT_HINTS =
+			Collections.singletonMap(Log.class.getName(), new NoOpLog());
 
 
 	private final List<HttpMessageWriter<?>> partWriters;
@@ -214,6 +222,10 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 
 		outputMessage.getHeaders().setContentType(new MediaType(MediaType.MULTIPART_FORM_DATA, params));
 
+		if (shouldLogRequestDetails()) {
+			logger.debug("Encoding " + map);
+		}
+
 		Flux<DataBuffer> body = Flux.fromIterable(map.entrySet())
 				.concatMap(entry -> encodePartValues(boundary, entry.getKey(), entry.getValue()))
 				.concatWith(Mono.just(generateLastLine(boundary)));
@@ -291,7 +303,7 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 		// but only stores the body Flux and returns Mono.empty().
 
 		Mono<Void> partContentReady = ((HttpMessageWriter<T>) writer.get())
-				.write(bodyPublisher, resolvableType, contentType, outputMessage, Collections.emptyMap());
+				.write(bodyPublisher, resolvableType, contentType, outputMessage, DEFAULT_HINTS);
 
 		// After partContentReady, we can access the part content from MultipartHttpOutputMessage
 		// and use it for writing to the actual request body

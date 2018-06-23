@@ -197,10 +197,11 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		initHandlerMethods();
 
-		if (logger.isDebugEnabled()) {
-			// Total includes detected mappings + explicit registrations via registerMapping..
-			int total = this.getHandlerMethods().size();
-			logger.debug("Detected " + total + " mappings in " + formatMappingName());
+		// Total includes detected mappings + explicit registrations via registerMapping..
+		int total = this.getHandlerMethods().size();
+
+		if ((logger.isTraceEnabled() && total == 0) || (logger.isDebugEnabled() && total > 0) ) {
+			logger.debug(total + " mappings in " + formatMappingName());
 		}
 	}
 
@@ -359,7 +360,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			Match bestMatch = matches.get(0);
 			if (matches.size() > 1) {
 				if (logger.isTraceEnabled()) {
-					logger.trace(matches.size() + " matching mapppings: " + matches);
+					logger.trace(matches.size() + " matching mappings: " + matches);
 				}
 				if (CorsUtils.isPreFlightRequest(request)) {
 					return PREFLIGHT_AMBIGUOUS_MATCH;

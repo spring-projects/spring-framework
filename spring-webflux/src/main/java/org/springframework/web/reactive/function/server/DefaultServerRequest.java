@@ -216,7 +216,7 @@ class DefaultServerRequest implements ServerRequest {
 
 	@Override
 	public String toString() {
-		return String.format("%s %s", method(), path());
+		return String.format("HTTP %s %s", method(), path());
 	}
 
 

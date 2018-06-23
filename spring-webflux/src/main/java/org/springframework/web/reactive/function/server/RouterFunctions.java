@@ -421,8 +421,8 @@ public abstract class RouterFunctions {
 		@Override
 		public Mono<HandlerFunction<T>> route(ServerRequest request) {
 			if (this.predicate.test(request)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("Predicate \"%s\" matches against \"%s\"", this.predicate, request));
+				if (logger.isTraceEnabled()) {
+					logger.trace(String.format("Matched %s", this.predicate));
 				}
 				return Mono.just(this.handlerFunction);
 			}
@@ -456,19 +456,15 @@ public abstract class RouterFunctions {
 		public Mono<HandlerFunction<T>> route(ServerRequest serverRequest) {
 			return this.predicate.nest(serverRequest)
 					.map(nestedRequest -> {
-								if (logger.isDebugEnabled()) {
-									logger.debug(
-											String.format(
-													"Nested predicate \"%s\" matches against \"%s\"",
-													this.predicate, serverRequest));
+								if (logger.isTraceEnabled()) {
+									logger.trace(String.format("Matched nested %s", this.predicate));
 								}
 								return this.routerFunction.route(nestedRequest)
 										.doOnNext(match -> {
 											mergeTemplateVariables(serverRequest, nestedRequest.pathVariables());
 										});
 							}
-					)
-					.orElseGet(Mono::empty);
+					).orElseGet(Mono::empty);
 		}
 
 		@SuppressWarnings("unchecked")

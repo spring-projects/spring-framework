@@ -274,11 +274,11 @@ public class WebHttpHandlerBuilder {
 	public HttpHandler build() {
 
 		WebHandler decorated;
-
 		decorated = new FilteringWebHandler(this.webHandler, this.filters);
 		decorated = new ExceptionHandlingWebHandler(decorated,  this.exceptionHandlers);
 
 		HttpWebHandlerAdapter adapted = new HttpWebHandlerAdapter(decorated);
+
 		if (this.sessionManager != null) {
 			adapted.setSessionManager(this.sessionManager);
 		}
@@ -291,6 +291,8 @@ public class WebHttpHandlerBuilder {
 		if (this.applicationContext != null) {
 			adapted.setApplicationContext(this.applicationContext);
 		}
+
+		adapted.afterPropertiesSet();
 
 		return adapted;
 	}

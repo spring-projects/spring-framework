@@ -34,7 +34,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.async.DeferredResult.DeferredResultHandler;
-import org.springframework.web.util.UrlPathHelper;
 
 /**
  * The central class for managing asynchronous request processing, mainly intended
@@ -63,8 +62,6 @@ public final class WebAsyncManager {
 	private static final Object RESULT_NONE = new Object();
 
 	private static final Log logger = LogFactory.getLog(WebAsyncManager.class);
-
-	private static final UrlPathHelper urlPathHelper = new UrlPathHelper();
 
 	private static final CallableProcessingInterceptor timeoutCallableInterceptor =
 			new TimeoutCallableProcessingInterceptor();
@@ -335,7 +332,7 @@ public final class WebAsyncManager {
 
 	private String formatRequestUri() {
 		HttpServletRequest request = this.asyncWebRequest.getNativeRequest(HttpServletRequest.class);
-		return request != null ? urlPathHelper.getRequestUri(request) : "servlet container";
+		return request != null ? request.getRequestURI() : "servlet container";
 	}
 
 	private void setConcurrentResultAndDispatch(Object result) {
@@ -347,7 +344,9 @@ public final class WebAsyncManager {
 		}
 
 		if (this.asyncWebRequest.isAsyncComplete()) {
-			logger.error("Could not complete async processing due to timeout or network error");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Async request already complete for " + formatRequestUri());
+			}
 			return;
 		}
 

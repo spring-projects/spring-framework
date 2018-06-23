@@ -32,6 +32,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -789,9 +790,9 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		boolean hasError = errorHandler.hasError(response);
 		if (logger.isDebugEnabled()) {
 			try {
-				logger.debug(method.name() + " request for \"" + url + "\" resulted in " +
-						response.getRawStatusCode() + " (" + response.getStatusText() + ")" +
-						(hasError ? "; invoking error handler" : ""));
+				int code = response.getRawStatusCode();
+				HttpStatus status = HttpStatus.resolve(code);
+				logger.debug("Response " + (status != null ? status : code));
 			}
 			catch (IOException ex) {
 				// ignore
@@ -873,7 +874,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 						.sorted(MediaType.SPECIFICITY_COMPARATOR)
 						.collect(Collectors.toList());
 				if (logger.isDebugEnabled()) {
-					logger.debug("Setting request Accept header to " + allSupportedMediaTypes);
+					logger.debug("Accept=" + allSupportedMediaTypes);
 				}
 				request.getHeaders().setAccept(allSupportedMediaTypes);
 			}
@@ -958,16 +959,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 							if (!requestHeaders.isEmpty()) {
 								requestHeaders.forEach((key, values) -> httpHeaders.put(key, new LinkedList<>(values)));
 							}
-							if (logger.isDebugEnabled()) {
-								if (requestContentType != null) {
-									logger.debug("Writing [" + requestBody + "] as \"" + requestContentType +
-											"\" using [" + messageConverter + "]");
-								}
-								else {
-									logger.debug("Writing [" + requestBody + "] using [" + messageConverter + "]");
-								}
-
-							}
+							logBody(requestBody, requestContentType, genericConverter);
 							genericConverter.write(requestBody, requestBodyType, requestContentType, httpRequest);
 							return;
 						}
@@ -976,27 +968,29 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 						if (!requestHeaders.isEmpty()) {
 							requestHeaders.forEach((key, values) -> httpHeaders.put(key, new LinkedList<>(values)));
 						}
-						if (logger.isDebugEnabled()) {
-							if (requestContentType != null) {
-								logger.debug("Writing [" + requestBody + "] as \"" + requestContentType +
-										"\" using [" + messageConverter + "]");
-							}
-							else {
-								logger.debug("Writing [" + requestBody + "] using [" + messageConverter + "]");
-							}
-
-						}
+						logBody(requestBody, requestContentType, messageConverter);
 						((HttpMessageConverter<Object>) messageConverter).write(
 								requestBody, requestContentType, httpRequest);
 						return;
 					}
 				}
-				String message = "Could not write request: no suitable HttpMessageConverter found for request type [" +
-						requestBodyClass.getName() + "]";
+				String message = "No HttpMessageConverter for [" + requestBodyClass.getName() + "]";
 				if (requestContentType != null) {
 					message += " and content type [" + requestContentType + "]";
 				}
 				throw new RestClientException(message);
+			}
+		}
+
+		private void logBody(Object body, @Nullable MediaType mediaType, HttpMessageConverter<?> converter) {
+			if (logger.isDebugEnabled()) {
+				if (mediaType != null) {
+					logger.debug("Writing [" + body + "] as \"" + mediaType + "\"");
+				}
+				else {
+					String classname = converter.getClass().getName();
+					logger.debug("Writing [" + body + "] with " + classname);
+				}
 			}
 		}
 	}

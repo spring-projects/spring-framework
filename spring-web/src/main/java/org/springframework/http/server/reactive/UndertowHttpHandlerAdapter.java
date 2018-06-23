@@ -72,7 +72,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 		}
 		catch (URISyntaxException ex) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Invalid URL for incoming request: " + ex.getMessage());
+				logger.debug("Failed to get request URI: " + ex.getMessage());
 			}
 			exchange.setStatusCode(400);
 			return;
@@ -108,7 +108,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 		@Override
 		public void onError(Throwable ex) {
-			logger.warn("Handling completed with error: " + ex.getMessage());
+			logger.trace("Failed to complete: " + ex.getMessage());
 			if (this.exchange.isResponseStarted()) {
 				try {
 					logger.debug("Closing connection");
@@ -119,7 +119,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 				}
 			}
 			else {
-				logger.debug("Setting response status code to 500");
+				logger.debug("Setting HttpServerExchange status to 500 Server Error");
 				this.exchange.setStatusCode(500);
 				this.exchange.endExchange();
 			}
@@ -127,7 +127,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 		@Override
 		public void onComplete() {
-			logger.debug("Handling completed with success");
+			logger.trace("Handling completed");
 			this.exchange.endExchange();
 		}
 	}

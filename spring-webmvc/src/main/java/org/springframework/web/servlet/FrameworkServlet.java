@@ -997,9 +997,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 					if (asyncManager.isConcurrentHandlingStarted()) {
 						logger.debug("Exiting, but response remains open for further handling");
 					}
-					else {
+					else if (logger.isDebugEnabled()) {
 						HttpStatus status = HttpStatus.resolve(response.getStatus());
-						this.logger.debug("Completed " + (status != null ? status : response.getStatus()));
+						logger.debug("Completed " + (status != null ? status : response.getStatus()));
 					}
 				}
 			}

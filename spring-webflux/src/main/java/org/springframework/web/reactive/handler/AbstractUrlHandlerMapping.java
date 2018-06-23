@@ -18,7 +18,9 @@ package org.springframework.web.reactive.handler;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import reactor.core.publisher.Mono;
 
@@ -90,14 +92,6 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		catch (Exception ex) {
 			return Mono.error(ex);
 		}
-
-		if (handler != null && logger.isDebugEnabled()) {
-			logger.debug("Mapping [" + lookupPath + "] to " + handler);
-		}
-		else if (handler == null && logger.isTraceEnabled()) {
-			logger.trace("No handler mapping found for [" + lookupPath + "]");
-		}
-
 		return Mono.justOrEmpty(handler);
 	}
 
@@ -113,20 +107,25 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 */
 	@Nullable
 	protected Object lookupHandler(PathContainer lookupPath, ServerWebExchange exchange) throws Exception {
-		return this.handlerMap.entrySet().stream()
-				.filter(entry -> entry.getKey().matches(lookupPath))
-				.sorted((entry1, entry2) ->
-						PathPattern.SPECIFICITY_COMPARATOR.compare(entry1.getKey(), entry2.getKey()))
-				.findFirst()
-				.map(entry -> {
-					PathPattern pattern = entry.getKey();
-					if (logger.isDebugEnabled()) {
-						logger.debug("Matching pattern for request [" + lookupPath + "] is " + pattern);
-					}
-					PathContainer pathWithinMapping = pattern.extractPathWithinPattern(lookupPath);
-					return handleMatch(entry.getValue(), pattern, pathWithinMapping, exchange);
-				})
-				.orElse(null);
+
+		List<PathPattern> matches = this.handlerMap.keySet().stream()
+				.filter(key -> key.matches(lookupPath))
+				.collect(Collectors.toList());
+
+		if (matches.isEmpty()) {
+			return null;
+		}
+
+		if (matches.size() > 1) {
+			matches.sort(PathPattern.SPECIFICITY_COMPARATOR);
+			if (logger.isTraceEnabled()) {
+				logger.debug("Matching patterns " + matches);
+			}
+		}
+
+		PathPattern pattern = matches.get(0);
+		PathContainer pathWithinMapping = pattern.extractPathWithinPattern(lookupPath);
+		return handleMatch(this.handlerMap.get(pattern), pattern, pathWithinMapping, exchange);
 	}
 
 	private Object handleMatch(Object handler, PathPattern bestMatch, PathContainer pathWithinMapping,
@@ -207,14 +206,13 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 		// Register resolved handler
 		this.handlerMap.put(pattern, resolvedHandler);
-		if (logger.isInfoEnabled()) {
-			logger.info("Mapped URL path [" + urlPath + "] onto " + getHandlerDescription(handler));
+		if (logger.isTraceEnabled()) {
+			logger.trace("Mapped [" + urlPath + "] onto " + getHandlerDescription(handler));
 		}
 	}
 
 	private String getHandlerDescription(Object handler) {
-		return "handler " + (handler instanceof String ?
-				"'" + handler + "'" : "of type [" + handler.getClass() + "]");
+		return (handler instanceof String ? "'" + handler + "'" : handler.toString());
 	}
 
 

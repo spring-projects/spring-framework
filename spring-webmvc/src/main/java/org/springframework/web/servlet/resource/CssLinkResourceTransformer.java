@@ -182,8 +182,8 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 			if (content.substring(index, index + 4).equals("url(")) {
 				// Ignore, UrlLinkParser will take care
 			}
-			else if (logger.isWarnEnabled()) {
-				logger.warn("Unexpected syntax for @import link at index " + index);
+			else if (logger.isTraceEnabled()) {
+				logger.trace("Unexpected syntax for @import link at index " + index);
 			}
 			return index;
 		}

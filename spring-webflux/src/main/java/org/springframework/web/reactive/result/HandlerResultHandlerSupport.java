@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.Ordered;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -46,6 +49,8 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 
 	private static final MediaType MEDIA_TYPE_APPLICATION_ALL = new MediaType("application");
 
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final RequestedContentTypeResolver contentTypeResolver;
 
@@ -117,6 +122,9 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 
 		MediaType contentType = exchange.getResponse().getHeaders().getContentType();
 		if (contentType != null && contentType.isConcrete()) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Found 'Content-Type:" + contentType + "' in response");
+			}
 			return contentType;
 		}
 
@@ -137,11 +145,22 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 
 		for (MediaType mediaType : result) {
 			if (mediaType.isConcrete()) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Using '" + mediaType + "' given " + acceptableTypes);
+				}
 				return mediaType;
 			}
 			else if (mediaType.equals(MediaType.ALL) || mediaType.equals(MEDIA_TYPE_APPLICATION_ALL)) {
-				return MediaType.APPLICATION_OCTET_STREAM;
+				mediaType = MediaType.APPLICATION_OCTET_STREAM;
+				if (logger.isDebugEnabled()) {
+					logger.debug("Using '" + mediaType + "' given " + acceptableTypes);
+				}
+				return mediaType;
 			}
+		}
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("No match for " + acceptableTypes + ", supported: " + producibleTypes);
 		}
 
 		return null;

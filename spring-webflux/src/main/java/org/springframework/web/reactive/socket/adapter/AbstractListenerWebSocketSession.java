@@ -227,11 +227,11 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		protected void checkOnDataAvailable() {
 			resumeReceiving();
 			if (!this.pendingMessages.isEmpty()) {
-				logger.trace("checkOnDataAvailable, processing pending messages");
+				logger.trace("checkOnDataAvailable, " + this.pendingMessages.size() + " pending messages");
 				onDataAvailable();
 			}
 			else {
-				logger.trace("checkOnDataAvailable, no pending messages");
+				logger.trace("checkOnDataAvailable, 0 pending messages");
 			}
 		}
 
@@ -248,11 +248,11 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 		void handleMessage(WebSocketMessage message) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Received message: " + message);
+				logger.trace("Received " + message);
 			}
 			if (!this.pendingMessages.offer(message)) {
-				throw new IllegalStateException("Too many messages received. " +
-						"Please ensure WebSocketSession.receive() is subscribed to.");
+				throw new IllegalStateException(
+						"Too many messages. Please ensure WebSocketSession.receive() is subscribed to.");
 			}
 			onDataAvailable();
 		}
@@ -266,7 +266,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		@Override
 		protected boolean write(WebSocketMessage message) throws IOException {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Sending message " + message);
+				logger.trace("Sending " + message);
 			}
 			return sendMessage(message);
 		}
@@ -288,7 +288,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		 */
 		public void setReadyToSend(boolean ready) {
 			if (ready) {
-				logger.trace("Send succeeded, ready to send again");
+				logger.trace("Ready to send again");
 			}
 			this.isReady = ready;
 		}

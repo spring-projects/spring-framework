@@ -209,7 +209,7 @@ public class DeferredResult<T> {
 			resultHandler.handleResult(resultToHandle);
 		}
 		catch (Throwable ex) {
-			logger.debug("Failed to handle existing result", ex);
+			logger.debug("Failed to process async result", ex);
 		}
 	}
 

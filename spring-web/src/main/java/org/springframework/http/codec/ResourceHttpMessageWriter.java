@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -71,6 +73,8 @@ import static java.util.Collections.*;
 public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 
 	private static final ResolvableType REGION_TYPE = ResolvableType.forClass(ResourceRegion.class);
+
+	private static final Log logger = LogFactory.getLog(ResourceHttpMessageWriter.class);
 
 
 	private final ResourceEncoder encoder;
@@ -139,7 +143,11 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 		if (mediaType != null && mediaType.isConcrete() && !mediaType.equals(MediaType.APPLICATION_OCTET_STREAM)) {
 			return mediaType;
 		}
-		return MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
+		mediaType = MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Resource associated with '" + mediaType + "'");
+		}
+		return mediaType;
 	}
 
 	private static long lengthOf(Resource resource) {
@@ -162,6 +170,10 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 				File file = resource.getFile();
 				long pos = region != null ? region.getPosition() : 0;
 				long count = region != null ? region.getCount() : file.length();
+				if (logger.isDebugEnabled()) {
+					String formatted = region != null ? "region " + pos + "-" + (count) + " of " : "";
+					logger.debug("Zero-copy " + formatted + "[" + resource + "]");
+				}
 				return Optional.of(((ZeroCopyHttpOutputMessage) message).writeWith(file, pos, count));
 			}
 			catch (IOException ex) {

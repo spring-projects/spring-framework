@@ -450,7 +450,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		// For very general mappings (e.g. "/") we need to check 404 first
 		Resource resource = getResource(request);
 		if (resource == null) {
-			logger.trace("Resource not found");
+			logger.debug("Resource not found");
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
@@ -514,15 +514,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 		path = processPath(path);
 		if (!StringUtils.hasText(path) || isInvalidPath(path)) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Ignoring invalid resource path [" + path + "]");
-			}
 			return null;
 		}
 		if (isInvalidEncodedPath(path)) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Ignoring invalid resource path with escape sequences [" + path + "]");
-			}
 			return null;
 		}
 
@@ -587,8 +581,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 				if (i == 0 || (i == 1 && slash)) {
 					return path;
 				}
-				path = (slash ? "/" + path.substring(i) : path.substring(i));
-				return path;
+				return (slash ? "/" + path.substring(i) : path.substring(i));
 			}
 		}
 		return (slash ? "/" : "");
@@ -637,20 +630,20 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 */
 	protected boolean isInvalidPath(String path) {
 		if (path.contains("WEB-INF") || path.contains("META-INF")) {
-			logger.warn("Path contains \"WEB-INF\" or \"META-INF\".");
+			logger.warn("Path with \"WEB-INF\" or \"META-INF\": [" + path + "]");
 			return true;
 		}
 		if (path.contains(":/")) {
 			String relativePath = (path.charAt(0) == '/' ? path.substring(1) : path);
 			if (ResourceUtils.isUrl(relativePath) || relativePath.startsWith("url:")) {
-				logger.warn("Path represents URL or has \"url:\" prefix.");
+				logger.warn("Path represents URL or has \"url:\" prefix: [" + path + "]");
 				return true;
 			}
 		}
 		if (path.contains("..")) {
 			path = StringUtils.cleanPath(path);
 			if (path.contains("../")) {
-				logger.warn("Path contains \"../\" after call to StringUtils#cleanPath.");
+				logger.warn("Invalid Path contains \"../\" after call to StringUtils#cleanPath.");
 				return true;
 			}
 		}

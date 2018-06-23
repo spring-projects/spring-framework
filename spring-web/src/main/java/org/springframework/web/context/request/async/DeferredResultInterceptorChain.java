@@ -106,7 +106,7 @@ class DeferredResultInterceptorChain {
 				this.interceptors.get(i).afterCompletion(request, deferredResult);
 			}
 			catch (Throwable ex) {
-				logger.error("Unhandled error from interceptor afterCompletion method", ex);
+				logger.trace("Ignoring failure in afterCompletion method", ex);
 			}
 		}
 	}

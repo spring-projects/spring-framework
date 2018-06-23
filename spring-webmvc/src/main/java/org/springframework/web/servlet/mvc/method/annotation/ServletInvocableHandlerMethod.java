@@ -121,7 +121,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		}
 		catch (Exception ex) {
 			if (logger.isTraceEnabled()) {
-				logger.trace(formatErrorForReturnValue("Error handling return value", returnValue), ex);
+				logger.trace(formatErrorForReturnValue(returnValue), ex);
 			}
 			throw ex;
 		}
@@ -160,13 +160,10 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		return webRequest.isNotModified();
 	}
 
-	private String formatErrorForReturnValue(String message, @Nullable Object returnValue) {
-		StringBuilder sb = new StringBuilder(message);
-		if (returnValue != null) {
-			sb.append(" [type=").append(returnValue.getClass().getName()).append("]");
-		}
-		sb.append(" [value=").append(returnValue).append("]");
-		return getDetailedErrorMessage(sb.toString());
+	private String formatErrorForReturnValue(@Nullable Object returnValue) {
+		return "Error handling return value=[" + returnValue + "]" +
+				(returnValue != null ? ", type=" + returnValue.getClass().getName() : "") +
+				" in " + toString();
 	}
 
 	/**

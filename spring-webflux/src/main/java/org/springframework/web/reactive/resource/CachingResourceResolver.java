@@ -109,19 +109,12 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 		Resource cachedResource = this.cache.get(key, Resource.class);
 
 		if (cachedResource != null) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Found match: " + cachedResource);
-			}
+			logger.trace("Resource resolved from cache");
 			return Mono.just(cachedResource);
 		}
 
 		return chain.resolveResource(exchange, requestPath, locations)
-				.doOnNext(resource -> {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Putting resolved resource in cache: " + resource);
-					}
-					this.cache.put(key, resource);
-				});
+				.doOnNext(resource -> this.cache.put(key, resource));
 	}
 
 	protected String computeKey(@Nullable ServerWebExchange exchange, String requestPath) {
@@ -160,19 +153,12 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 		String cachedUrlPath = this.cache.get(key, String.class);
 
 		if (cachedUrlPath != null) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Found match: \"" + cachedUrlPath + "\"");
-			}
+			logger.trace("Path resolved from cache");
 			return Mono.just(cachedUrlPath);
 		}
 
 		return chain.resolveUrlPath(resourceUrlPath, locations)
-				.doOnNext(resolvedPath -> {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Putting resolved resource URL path in cache: \"" + resolvedPath + "\"");
-					}
-					this.cache.put(key, resolvedPath);
-				});
+				.doOnNext(resolvedPath -> this.cache.put(key, resolvedPath));
 	}
 
 }

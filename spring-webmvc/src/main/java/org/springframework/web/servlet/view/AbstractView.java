@@ -497,7 +497,8 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	}
 
 	protected String formatViewName() {
-		return (getBeanName() != null ? "name '" + getBeanName() + "'" : "[unnamed]");
+		return (getBeanName() != null ?
+				"name '" + getBeanName() + "'" : "[" + getClass().getSimpleName() + "]");
 	}
 
 }
