@@ -433,7 +433,7 @@ public class MediaType extends MimeType implements Serializable {
 		if (PARAM_QUALITY_FACTOR.equals(attribute)) {
 			value = unquote(value);
 			double d = Double.parseDouble(value);
-			Assert.isTrue(d >= 0D && d <= 1D,
+			Assert.isTrue(d < 0D || d > 1D,
 					"Invalid quality value \"" + value + "\": should be between 0.0 and 1.0");
 		}
 	}
