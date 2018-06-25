@@ -90,10 +90,23 @@ import org.springframework.util.StringUtils;
  * Implements the {@link org.springframework.beans.factory.config.AutowireCapableBeanFactory}
  * interface in addition to AbstractBeanFactory's {@link #createBean} method.
  *
+ * 抽象bean工厂的超类，该类实现了默认bean的创建功能，
+ * 具有@link RootBeanDefinition类指定的全部功能。
+ * 实现了{ @link org.springframework.beans.factory.config.AutowireCapableBeanFactory }接口中
+ * 除了AbstractBeanFactory的@link createbean（）方法之外的所有接口
+ *
+ *
  * <p>Provides bean creation (with constructor resolution), property population,
  * wiring (including autowiring), and initialization. Handles runtime bean
  * references, resolves managed collections, calls initialization methods, etc.
  * Supports autowiring constructors, properties by name, and properties by type.
+ *
+ * 提供bean创建（使用构造函数解析方案），属性填充，
+ * 连接（包括自动装配）和初始化。处理运行时bean
+ * 引用，解析托管集合，调用初始化方法等等。
+ * 支持自动装配构造器、名称属性和类型属性
+ *
+ *
  *
  * <p>The main template method to be implemented by subclasses is
  * {@link #resolveDependency(DependencyDescriptor, String, Set, TypeConverter)},
@@ -101,11 +114,23 @@ import org.springframework.util.StringUtils;
  * its bean definitions, matching beans will typically be implemented through such
  * a search. For other factory styles, simplified matching algorithms can be implemented.
  *
+ * 由子类实现的主要模板方法是
+ * @link resolveDependency(DependencyDescriptor, String, Set, TypeConverter)
+ *                           （依赖性描述符、字符串、集合、类型），
+ * 用于按类型自动装配。如果一个工厂有能力进行搜索
+ * 它的bean定义，匹配bean通常会通过这样的方式实现
+ * 搜索。对于其他工厂样式，可以实现简化匹配算法
+ *
+ *
+ *
  * <p>Note that this class does <i>not</i> assume or implement bean definition
  * registry capabilities. See {@link DefaultListableBeanFactory} for an implementation
  * of the {@link org.springframework.beans.factory.ListableBeanFactory} and
  * {@link BeanDefinitionRegistry} interfaces, which represent the API and SPI
  * view of such a factory, respectively.
+ *
+ * 请注意，该类不会假设或实现bean定义登记处的功能
+ *
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -122,25 +147,47 @@ import org.springframework.util.StringUtils;
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory
 		implements AutowireCapableBeanFactory {
 
-	/** Strategy for creating bean instances */
+	/** Strategy for creating bean instances
+	 *
+	 * 创建Bean实例的策略
+	 *
+	 * */
 	private InstantiationStrategy instantiationStrategy = new CglibSubclassingInstantiationStrategy();
 
-	/** Resolver strategy for method parameter names */
+	/** Resolver strategy for method parameter names
+	 *
+	 *  针对方法参数名称的解析策略
+	 *
+	 * */
 	@Nullable
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
-	/** Whether to automatically try to resolve circular references between beans */
+	/** Whether to automatically try to resolve circular references between beans
+	 *  是否自动尝试解决bean之间的循环引用
+	 *
+	 *  自动解决循环依赖是怎么处理的？？？
+	 *  非自动解析循环依赖是怎么实现的 ？？？？？？？？？
+	 *
+	 * */
 	private boolean allowCircularReferences = true;
 
 	/**
 	 * Whether to resort to injecting a raw bean instance in case of circular reference,
 	 * even if the injected bean eventually got wrapped.
+	 *
+	 * 在循环引用的情况下，是否采用注入原始bean实例的方法，
+	 * 即使被注入的Bean最终被包裹
+	 *
 	 */
 	private boolean allowRawInjectionDespiteWrapping = false;
 
 	/**
 	 * Dependency types to ignore on dependency check and autowire, as Set of
 	 * Class objects: for example, String. Default is none.
+	 *
+	 * 依赖类型忽略依赖性检查和自动连接，如
+	 * 类对象：例如，String。默认是没有
+	 *
 	 */
 	private final Set<Class<?>> ignoredDependencyTypes = new HashSet<>();
 

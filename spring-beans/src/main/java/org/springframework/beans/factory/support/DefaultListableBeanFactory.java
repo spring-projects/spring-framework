@@ -79,19 +79,40 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
+ *
+ *
+ * **************** ListableBeanFactory工厂接口的默认实现******************
+ *  是一个成熟的以bean definition 对象为基础的Bean 工厂
+ *
  * Default implementation of the
  * {@link org.springframework.beans.factory.ListableBeanFactory} and
  * {@link BeanDefinitionRegistry} interfaces: a full-fledged bean factory
  * based on bean definition objects.
+ *
+ *
+ *
  *
  * <p>Typical usage is registering all bean definitions first (possibly read
  * from a bean definition file), before accessing beans. Bean definition lookup
  * is therefore an inexpensive operation in a local bean definition table,
  * operating on pre-built bean definition metadata objects.
  *
+ * 典型的用法是首先注册所有bean定义（可能是读取从bean定义文件中），在访问bean之前。
+ * Bean定义查找，因此在本地bean定义表中是一种廉价的操作，
+ * 在预构建的bean定义元数据对象上操作
+ *
+ *
+ *
+ *
  * <p>Can be used as a standalone bean factory, or as a superclass for custom
- * bean factories. Note that readers for specific bean definition formats are
+ * bean factories.
+ * 可以被使用作为一个独立的Bean工厂，或者一个自定义Bean工厂的超类
+ *
+ * Note that readers for specific bean definition formats are
  * typically implemented separately rather than as bean factory subclasses:
+ * 注意，特定bean定义格式的解析器是通常单独实现的，而不是作为bean工厂的子类
+ *
+ * 参考类：
  * see for example {@link PropertiesBeanDefinitionReader} and
  * {@link org.springframework.beans.factory.xml.XmlBeanDefinitionReader}.
  *
@@ -99,6 +120,11 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.beans.factory.ListableBeanFactory} interface,
  * have a look at {@link StaticListableBeanFactory}, which manages existing
  * bean instances rather than creating new ones based on bean definitions.
+ *
+ * 对于接口的另一种实现，
+ * 看一下@link StaticListableBeanFactory，它管理现有的
+ * bean实例，而不是基于bean定义创建新的实例
+ *
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -131,22 +157,37 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 
-	/** Map from serialized id to factory instance */
+	/** Map from serialized id to factory instance
+	 * 从序列化的id映射到工厂实例
+	 * */
 	private static final Map<String, Reference<DefaultListableBeanFactory>> serializableFactories =
 			new ConcurrentHashMap<>(8);
 
-	/** Optional id for this factory, for serialization purposes */
+	/** Optional id for this factory, for serialization purposes
+	 * 这个工厂的可选id，用于序列化目的
+	 *
+	 * */
 	@Nullable
 	private String serializationId;
 
 	/** Whether to allow re-registration of a different definition with the same name
-	 * 是否允许重新注册具有相同名称的不同定义 */
+	 * 是否允许重新注册具有相同名称的不同定义
+	 *
+	 * 理解为Bean定义的重载
+	 * */
 	private boolean allowBeanDefinitionOverriding = true;
 
-	/** Whether to allow eager class loading even for lazy-init beans */
+	/** Whether to allow eager class loading even for lazy-init beans
+	 *
+	 * 是否允许急切的类加载（饥汉模式的加载），即使是对于延迟的init bean
+	 *
+	 * */
 	private boolean allowEagerClassLoading = true;
 
-	/** Optional OrderComparator for dependency Lists and arrays */
+	/** Optional OrderComparator for dependency Lists and arrays
+	 *
+	 * 对于依赖列表和数组的，可操作的顺序比较   ？？？？ 没理解到
+	 * */
 	@Nullable
 	private Comparator<Object> dependencyComparator;
 
