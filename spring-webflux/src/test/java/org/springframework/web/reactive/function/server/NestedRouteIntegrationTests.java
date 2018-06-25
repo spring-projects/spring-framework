@@ -43,7 +43,7 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 		return nest(path("/foo/"),
 					route(GET("/bar"), nestedHandler::bar)
 					.andRoute(GET("/baz"), nestedHandler::baz))
-			   .andNest(GET("/{foo}"),
+				.andNest(GET("/{foo}"),
 					route(GET("/bar"), nestedHandler::variables).and(
 					nest(GET("/{bar}"),
 								route(GET("/{baz}"), nestedHandler::variables))))

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public class NashornScriptTemplateTests {
 
 	private MockServerHttpResponse render(String viewUrl, Map<String, Object> model,
 			Class<?> configuration) throws Exception {
-		
+
 		ScriptTemplateView view = createViewWithUrl(viewUrl, configuration);
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		view.renderInternal(model, MediaType.TEXT_HTML, exchange).block();

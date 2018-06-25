@@ -325,9 +325,9 @@ public class ForwardedHeaderFilterTests {
 		HttpServletRequest actual = filterAndGetWrappedRequest();
 		assertEquals("http://localhost/prefix/mvc-showcase", actual.getRequestURL().toString());
 	}
-	
+
 	@Test
-	public void requestURLNewStringBuffer() throws Exception { 
+	public void requestURLNewStringBuffer() throws Exception {
 		this.request.addHeader(X_FORWARDED_PREFIX, "/prefix/");
 		this.request.setRequestURI("/mvc-showcase");
 

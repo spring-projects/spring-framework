@@ -394,7 +394,7 @@ public class ImportSelectorTests {
 		public Iterable<Entry> selectImports() {
 			LinkedList<Entry> content = new LinkedList<>();
 			TestImportGroup.imports.forEach((metadata, values) ->
-				    values.forEach(value ->  content.add(new Entry(metadata, value))));
+					values.forEach(value ->  content.add(new Entry(metadata, value))));
 			Collections.reverse(content);
 			return content;
 		}

@@ -46,7 +46,7 @@ public class HeadersRequestConditionTests {
 	public void headerPresent() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept", ""));
 		HeadersRequestCondition condition = new HeadersRequestCondition("accept");
-	
+
 		assertNotNull(condition.getMatchingCondition(exchange));
 	}
 

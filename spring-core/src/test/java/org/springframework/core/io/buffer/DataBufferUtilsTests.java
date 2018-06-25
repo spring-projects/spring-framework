@@ -283,7 +283,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		assertReleased(bar);
 		assertReleased(baz);
 	}
-	
+
 	private static void assertReleased(DataBuffer dataBuffer) {
 		if (dataBuffer instanceof NettyDataBuffer) {
 			ByteBuf byteBuf = ((NettyDataBuffer) dataBuffer).getNativeBuffer();

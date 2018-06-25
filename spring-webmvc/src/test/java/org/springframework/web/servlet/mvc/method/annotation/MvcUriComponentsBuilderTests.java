@@ -277,7 +277,7 @@ public class MvcUriComponentsBuilderTests {
 		assertThat(uriComponents.toUriString(), endsWith("/something/else"));
 	}
 
- 	@Test
+	@Test
 	public void fromMethodCallOnSubclass() {
 		UriComponents uriComponents = fromMethodCall(on(ExtendedController.class).myMethod(null)).build();
 

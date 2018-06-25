@@ -43,7 +43,7 @@ public class CachingResourceResolverTests {
 
 	private static final Duration TIMEOUT = Duration.ofSeconds(5);
 
-			
+
 	private Cache cache;
 
 	private ResourceResolverChain chain;
