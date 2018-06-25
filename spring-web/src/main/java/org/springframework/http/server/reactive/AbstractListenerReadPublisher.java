@@ -82,7 +82,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	 * container.
 	 */
 	public final void onDataAvailable() {
-		this.logger.trace("I/O event onDataAvailable");
+		logger.trace("I/O event onDataAvailable");
 		this.state.get().onDataAvailable(this);
 	}
 
@@ -91,7 +91,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	 * all data has been read.
 	 */
 	public void onAllDataRead() {
-		this.logger.trace("I/O event onAllDataRead");
+		logger.trace("I/O event onAllDataRead");
 		this.state.get().onAllDataRead(this);
 	}
 
@@ -99,8 +99,8 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	 * Sub-classes can call this to delegate container error notifications.
 	 */
 	public final void onError(Throwable ex) {
-		if (this.logger.isTraceEnabled()) {
-			this.logger.trace("I/O event onError: " + ex);
+		if (logger.isTraceEnabled()) {
+			logger.trace("I/O event onError: " + ex);
 		}
 		this.state.get().onError(this, ex);
 	}

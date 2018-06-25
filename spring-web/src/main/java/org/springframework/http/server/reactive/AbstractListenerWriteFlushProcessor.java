@@ -103,7 +103,7 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 	 * container to cancel the upstream subscription.
 	 */
 	protected void cancel() {
-		this.logger.trace("Received request to cancel");
+		logger.trace("Received request to cancel");
 		if (this.subscription != null) {
 			this.subscription.cancel();
 		}
