@@ -306,12 +306,12 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 
 		@Override
 		public String getDescription() {
-			return original.getDescription();
+			return this.original.getDescription();
 		}
 
 		@Override
 		public InputStream getInputStream() throws IOException {
-			return original.getInputStream();
+			return this.original.getInputStream();
 		}
 
 		@Override

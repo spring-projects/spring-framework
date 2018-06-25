@@ -135,7 +135,7 @@ class InternalPathPatternParser {
 					// throw new PatternParseException(pos, pathPatternData,
 					// PatternMessage.CANNOT_HAVE_ADJACENT_CAPTURES);
 					this.insideVariableCapture = true;
-					this.variableCaptureStart = pos;
+					this.variableCaptureStart = this.pos;
 				}
 				else if (ch == '}') {
 					if (!this.insideVariableCapture) {
@@ -202,7 +202,7 @@ class InternalPathPatternParser {
 		boolean previousBackslash = false;
 
 		while (this.pos < this.pathPatternLength) {
-			char ch = this.pathPatternData[pos];
+			char ch = this.pathPatternData[this.pos];
 			if (ch == '\\' && !previousBackslash) {
 				this.pos++;
 				previousBackslash = true;

@@ -120,7 +120,7 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 	public Mono<String> getBodyAsString() {
 		Charset charset = getCharset();
 		return Flux.from(getBody())
-				.reduce(bufferFactory.allocateBuffer(), (previous, current) -> {
+				.reduce(this.bufferFactory.allocateBuffer(), (previous, current) -> {
 					previous.write(current);
 					DataBufferUtils.release(current);
 					return previous;

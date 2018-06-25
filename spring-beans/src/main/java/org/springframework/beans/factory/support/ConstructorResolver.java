@@ -261,15 +261,15 @@ class ConstructorResolver {
 		}
 
 		try {
-			final InstantiationStrategy strategy = beanFactory.getInstantiationStrategy();
+			final InstantiationStrategy strategy = this.beanFactory.getInstantiationStrategy();
 			Object beanInstance;
 
 			if (System.getSecurityManager() != null) {
 				final Constructor<?> ctorToUse = constructorToUse;
 				final Object[] argumentsToUse = argsToUse;
 				beanInstance = AccessController.doPrivileged((PrivilegedAction<Object>) () ->
-						strategy.instantiate(mbd, beanName, beanFactory, ctorToUse, argumentsToUse),
-						beanFactory.getAccessControlContext());
+						strategy.instantiate(mbd, beanName, this.beanFactory, ctorToUse, argumentsToUse),
+						this.beanFactory.getAccessControlContext());
 			}
 			else {
 				beanInstance = strategy.instantiate(mbd, beanName, this.beanFactory, constructorToUse, argsToUse);
@@ -575,8 +575,8 @@ class ConstructorResolver {
 				final Method factoryMethod = factoryMethodToUse;
 				final Object[] args = argsToUse;
 				beanInstance = AccessController.doPrivileged((PrivilegedAction<Object>) () ->
-						beanFactory.getInstantiationStrategy().instantiate(mbd, beanName, beanFactory, fb, factoryMethod, args),
-						beanFactory.getAccessControlContext());
+						this.beanFactory.getInstantiationStrategy().instantiate(mbd, beanName, this.beanFactory, fb, factoryMethod, args),
+						this.beanFactory.getAccessControlContext());
 			}
 			else {
 				beanInstance = this.beanFactory.getInstantiationStrategy().instantiate(

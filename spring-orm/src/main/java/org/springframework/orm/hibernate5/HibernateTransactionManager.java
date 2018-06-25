@@ -336,7 +336,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	@Nullable
 	public Interceptor getEntityInterceptor() throws IllegalStateException, BeansException {
 		if (this.entityInterceptor instanceof Interceptor) {
-			return (Interceptor) entityInterceptor;
+			return (Interceptor) this.entityInterceptor;
 		}
 		else if (this.entityInterceptor instanceof String) {
 			if (this.beanFactory == null) {

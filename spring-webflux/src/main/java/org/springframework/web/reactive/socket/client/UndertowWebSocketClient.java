@@ -190,7 +190,7 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 			DefaultNegotiation negotiation, WebSocketChannel channel) {
 
 		HandshakeInfo info = afterHandshake(url, negotiation.getResponseHeaders());
-		UndertowWebSocketSession session = new UndertowWebSocketSession(channel, info, bufferFactory, completion);
+		UndertowWebSocketSession session = new UndertowWebSocketSession(channel, info, this.bufferFactory, completion);
 		UndertowWebSocketHandlerAdapter adapter = new UndertowWebSocketHandlerAdapter(session);
 
 		channel.getReceiveSetter().set(adapter);

@@ -404,7 +404,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 			Assert.state(getTaskScheduler() != null, "No TaskScheduler configured");
 			this.lastReadTime = System.currentTimeMillis();
 			this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(() -> {
-				if (System.currentTimeMillis() - lastReadTime > duration) {
+				if (System.currentTimeMillis() - this.lastReadTime > duration) {
 					try {
 						runnable.run();
 					}
@@ -422,7 +422,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 			Assert.state(getTaskScheduler() != null, "No TaskScheduler configured");
 			this.lastWriteTime = System.currentTimeMillis();
 			this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(() -> {
-                if (System.currentTimeMillis() - lastWriteTime > duration) {
+                if (System.currentTimeMillis() - this.lastWriteTime > duration) {
                     try {
                         runnable.run();
                     }

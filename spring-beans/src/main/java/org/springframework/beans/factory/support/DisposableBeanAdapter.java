@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -248,12 +248,12 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			try {
 				if (System.getSecurityManager() != null) {
 					AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () -> {
-						((DisposableBean) bean).destroy();
+						((DisposableBean) this.bean).destroy();
 						return null;
-					}, acc);
+					}, this.acc);
 				}
 				else {
-					((DisposableBean) bean).destroy();
+					((DisposableBean) this.bean).destroy();
 				}
 			}
 			catch (Throwable ex) {
@@ -326,7 +326,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 				});
 				try {
 					AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () ->
-						destroyMethod.invoke(bean, args), acc);
+						destroyMethod.invoke(this.bean, args), this.acc);
 				}
 				catch (PrivilegedActionException pax) {
 					throw (InvocationTargetException) pax.getException();
@@ -334,7 +334,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			}
 			else {
 				ReflectionUtils.makeAccessible(destroyMethod);
-				destroyMethod.invoke(bean, args);
+				destroyMethod.invoke(this.bean, args);
 			}
 		}
 		catch (InvocationTargetException ex) {

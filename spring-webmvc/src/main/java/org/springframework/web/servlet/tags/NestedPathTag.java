@@ -106,10 +106,10 @@ public class NestedPathTag extends TagSupport implements TryCatchFinally {
 		// Save previous nestedPath value, build and expose current nestedPath value.
 		// Use request scope to expose nestedPath to included pages too.
 		this.previousNestedPath =
-				(String) pageContext.getAttribute(NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
+				(String) this.pageContext.getAttribute(NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		String nestedPath =
 				(this.previousNestedPath != null ? this.previousNestedPath + getPath() : getPath());
-		pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME, nestedPath, PageContext.REQUEST_SCOPE);
+		this.pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME, nestedPath, PageContext.REQUEST_SCOPE);
 
 		return EVAL_BODY_INCLUDE;
 	}
@@ -121,11 +121,11 @@ public class NestedPathTag extends TagSupport implements TryCatchFinally {
 	public int doEndTag() {
 		if (this.previousNestedPath != null) {
 			// Expose previous nestedPath value.
-			pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME, this.previousNestedPath, PageContext.REQUEST_SCOPE);
+			this.pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME, this.previousNestedPath, PageContext.REQUEST_SCOPE);
 		}
 		else {
 			// Remove exposed nestedPath value.
-			pageContext.removeAttribute(NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
+			this.pageContext.removeAttribute(NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		}
 
 		return EVAL_PAGE;

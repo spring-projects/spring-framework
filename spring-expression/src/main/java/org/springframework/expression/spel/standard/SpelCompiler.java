@@ -256,12 +256,12 @@ public final class SpelCompiler implements Opcodes {
 		}
 
 		int getClassesDefinedCount() {
-			return classesDefinedCount;
+			return this.classesDefinedCount;
 		}
 
 		public Class<?> defineClass(String name, byte[] bytes) {
 			Class<?> clazz = super.defineClass(name, bytes, 0, bytes.length);
-			classesDefinedCount++;
+			this.classesDefinedCount++;
 			return clazz;
 		}
 	}

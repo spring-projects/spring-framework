@@ -142,7 +142,7 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 			NioMultipartParserListener listener = new FluxSinkAdapterListener(emitter, this.bufferFactory, context);
 			NioMultipartParser parser = Multipart
 					.multipart(context)
-					.usePartBodyStreamStorageFactory(streamStorageFactory)
+					.usePartBodyStreamStorageFactory(this.streamStorageFactory)
 					.forNIO(listener);
 
 			this.inputMessage.getBody().subscribe(buffer -> {

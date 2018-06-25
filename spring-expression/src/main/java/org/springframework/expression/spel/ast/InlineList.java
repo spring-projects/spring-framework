@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,11 +167,11 @@ public class InlineList extends SpelNodeImpl {
 			// The children might be further lists if they are not constants. In this
 			// situation do not call back into generateCode() because it will register another clinit adder.
 			// Instead, directly build the list here:
-			if (children[c] instanceof InlineList) {
-				((InlineList)children[c]).generateClinitCode(clazzname, constantFieldName, mv, codeflow, true);
+			if (this.children[c] instanceof InlineList) {
+				((InlineList)this.children[c]).generateClinitCode(clazzname, constantFieldName, mv, codeflow, true);
 			}
 			else {
-				children[c].generateCode(mv, codeflow);
+				this.children[c].generateCode(mv, codeflow);
 				String lastDesc = codeflow.lastDescriptor();
 				if (CodeFlow.isPrimitive(lastDesc)) {
 					CodeFlow.insertBoxIfNecessary(mv, lastDesc.charAt(0));

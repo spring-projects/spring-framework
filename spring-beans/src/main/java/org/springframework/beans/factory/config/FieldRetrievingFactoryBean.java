@@ -97,7 +97,7 @@ public class FieldRetrievingFactoryBean
 	 */
 	@Nullable
 	public Class<?> getTargetClass() {
-		return targetClass;
+		return this.targetClass;
 	}
 
 	/**

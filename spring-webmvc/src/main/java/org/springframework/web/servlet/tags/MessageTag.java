@@ -278,7 +278,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 
 			// Expose as variable, if demanded, else write to the page.
 			if (this.var != null) {
-				pageContext.setAttribute(this.var, msg, TagUtils.getScope(this.scope));
+				this.pageContext.setAttribute(this.var, msg, TagUtils.getScope(this.scope));
 			}
 			else {
 				writeMessage(msg);
@@ -394,7 +394,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	 * @throws IOException if writing failed
 	 */
 	protected void writeMessage(String msg) throws IOException {
-		pageContext.getOut().write(String.valueOf(msg));
+		this.pageContext.getOut().write(String.valueOf(msg));
 	}
 
 	/**

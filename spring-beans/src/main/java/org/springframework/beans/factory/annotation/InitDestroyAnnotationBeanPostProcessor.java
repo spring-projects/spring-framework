@@ -205,14 +205,14 @@ public class InitDestroyAnnotationBeanPostProcessor
 			final LinkedList<LifecycleElement> currDestroyMethods = new LinkedList<>();
 
 			ReflectionUtils.doWithLocalMethods(targetClass, method -> {
-				if (initAnnotationType != null && method.isAnnotationPresent(initAnnotationType)) {
+				if (this.initAnnotationType != null && method.isAnnotationPresent(this.initAnnotationType)) {
 					LifecycleElement element = new LifecycleElement(method);
 					currInitMethods.add(element);
 					if (debug) {
 						logger.debug("Found init method on class [" + clazz.getName() + "]: " + method);
 					}
 				}
-				if (destroyAnnotationType != null && method.isAnnotationPresent(destroyAnnotationType)) {
+				if (this.destroyAnnotationType != null && method.isAnnotationPresent(this.destroyAnnotationType)) {
 					currDestroyMethods.add(new LifecycleElement(method));
 					if (debug) {
 						logger.debug("Found destroy method on class [" + clazz.getName() + "]: " + method);

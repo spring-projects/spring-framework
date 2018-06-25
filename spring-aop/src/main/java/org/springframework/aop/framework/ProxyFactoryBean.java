@@ -651,7 +651,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		}
 
 		public String getBeanName() {
-			return beanName;
+			return this.beanName;
 		}
 
 		@Override

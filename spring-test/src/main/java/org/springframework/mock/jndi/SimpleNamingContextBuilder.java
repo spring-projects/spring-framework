@@ -226,7 +226,7 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 		}
 
 		// Default case...
-		return environment1 -> new SimpleNamingContext("", boundObjects, (Hashtable<String, Object>) environment1);
+		return environment1 -> new SimpleNamingContext("", this.boundObjects, (Hashtable<String, Object>) environment1);
 	}
 
 }

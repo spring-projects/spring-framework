@@ -60,14 +60,14 @@ public class InvalidPropertyException extends FatalBeanException {
 	 * Return the offending bean class.
 	 */
 	public Class<?> getBeanClass() {
-		return beanClass;
+		return this.beanClass;
 	}
 
 	/**
 	 * Return the name of the offending property.
 	 */
 	public String getPropertyName() {
-		return propertyName;
+		return this.propertyName;
 	}
 
 }

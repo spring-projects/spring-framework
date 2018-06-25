@@ -103,7 +103,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * Return whether this call is for a function.
 	 */
 	public boolean isFunction() {
-		return function;
+		return this.function;
 	}
 
 	/**
@@ -117,7 +117,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * Return whether the SQL can be used as is.
 	 */
 	public boolean isSqlReadyForUse() {
-		return sqlReadyForUse;
+		return this.sqlReadyForUse;
 	}
 
 

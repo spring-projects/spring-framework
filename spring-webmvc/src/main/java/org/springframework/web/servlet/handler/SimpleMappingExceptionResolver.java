@@ -133,7 +133,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 * Keys are view names; values are status codes.
 	 */
 	public Map<String, Integer> getStatusCodesAsMap() {
-		return Collections.unmodifiableMap(statusCodes);
+		return Collections.unmodifiableMap(this.statusCodes);
 	}
 
 	/**

@@ -103,7 +103,7 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 	@Nullable
 	protected String getDefaultSchema() {
 		if (this.defaultSchema != null) {
-			return defaultSchema;
+			return this.defaultSchema;
 		}
 		return super.getDefaultSchema();
 	}

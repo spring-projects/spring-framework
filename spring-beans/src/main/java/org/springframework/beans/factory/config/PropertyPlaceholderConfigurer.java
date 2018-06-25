@@ -261,7 +261,8 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 		@Override
 		@Nullable
 		public String resolvePlaceholder(String placeholderName) {
-			return PropertyPlaceholderConfigurer.this.resolvePlaceholder(placeholderName, props, systemPropertiesMode);
+			return PropertyPlaceholderConfigurer.this.resolvePlaceholder(placeholderName,
+					this.props, systemPropertiesMode);
 		}
 	}
 
