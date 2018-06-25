@@ -98,7 +98,7 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	@Override
 	@Nullable
 	public ParamsRequestCondition getMatchingCondition(HttpServletRequest request) {
-		for (ParamExpression expression : expressions) {
+		for (ParamExpression expression : this.expressions) {
 			if (!expression.match(request)) {
 				return null;
 			}

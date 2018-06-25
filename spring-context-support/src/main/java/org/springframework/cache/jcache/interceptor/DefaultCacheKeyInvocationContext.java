@@ -48,12 +48,12 @@ class DefaultCacheKeyInvocationContext<A extends Annotation>
 
 	@Override
 	public CacheInvocationParameter[] getKeyParameters() {
-		return keyParameters.clone();
+		return this.keyParameters.clone();
 	}
 
 	@Override
 	public CacheInvocationParameter getValueParameter() {
-		return valueParameter;
+		return this.valueParameter;
 	}
 
 }

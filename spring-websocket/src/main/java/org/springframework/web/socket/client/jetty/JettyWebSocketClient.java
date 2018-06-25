@@ -154,7 +154,7 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 		final JettyWebSocketHandlerAdapter listener = new JettyWebSocketHandlerAdapter(wsHandler, wsSession);
 
 		Callable<WebSocketSession> connectTask = () -> {
-			Future<Session> future = client.connect(listener, uri, request);
+			Future<Session> future = this.client.connect(listener, uri, request);
 			future.get();
 			return wsSession;
 		};

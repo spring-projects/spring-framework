@@ -234,7 +234,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			int port = uriComponents.getPort();
 
 			this.scheme = uriComponents.getScheme();
-			this.secure = "https".equals(scheme);
+			this.secure = "https".equals(this.scheme);
 			this.host = uriComponents.getHost();
 			this.port = (port == -1 ? (this.secure ? 443 : 80) : port);
 

@@ -231,7 +231,7 @@ public class ContentRequestMatchers {
 		return request -> {
 			try {
 				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
-				jsonHelper.assertJsonEqual(expectedJsonContent, mockRequest.getBodyAsString(), strict);
+				this.jsonHelper.assertJsonEqual(expectedJsonContent, mockRequest.getBodyAsString(), strict);
 			}
 			catch (Exception ex) {
 				throw new AssertionError("Failed to parse expected or actual JSON request content", ex);

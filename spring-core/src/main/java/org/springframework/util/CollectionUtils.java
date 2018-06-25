@@ -557,7 +557,7 @@ public abstract class CollectionUtils {
 			if (this == other) {
 				return true;
 			}
-			return map.equals(other);
+			return this.map.equals(other);
 		}
 
 		@Override

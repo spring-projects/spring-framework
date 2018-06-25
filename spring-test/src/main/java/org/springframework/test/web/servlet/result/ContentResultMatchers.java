@@ -156,7 +156,7 @@ public class ContentResultMatchers {
 	public ResultMatcher xml(final String xmlContent) {
 		return result -> {
 			String content = result.getResponse().getContentAsString();
-			xmlHelper.assertXmlEqual(xmlContent, content);
+			this.xmlHelper.assertXmlEqual(xmlContent, content);
 		};
 	}
 
@@ -167,7 +167,7 @@ public class ContentResultMatchers {
 	public ResultMatcher node(final Matcher<? super Node> matcher) {
 		return result -> {
 			String content = result.getResponse().getContentAsString();
-			xmlHelper.assertNode(content, matcher);
+			this.xmlHelper.assertNode(content, matcher);
 		};
 	}
 
@@ -179,7 +179,7 @@ public class ContentResultMatchers {
 	public ResultMatcher source(final Matcher<? super Source> matcher) {
 		return result -> {
 			String content = result.getResponse().getContentAsString();
-			xmlHelper.assertSource(content, matcher);
+			this.xmlHelper.assertSource(content, matcher);
 		};
 	}
 
@@ -212,7 +212,7 @@ public class ContentResultMatchers {
 	public ResultMatcher json(final String jsonContent, final boolean strict) {
 		return result -> {
 			String content = result.getResponse().getContentAsString();
-			jsonHelper.assertJsonEqual(jsonContent, content, strict);
+			this.jsonHelper.assertJsonEqual(jsonContent, content, strict);
 		};
 	}
 

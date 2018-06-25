@@ -84,7 +84,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	 */
 	@Nullable
 	public WebSocketPolicy getWebSocketPolicy() {
-		return webSocketPolicy;
+		return this.webSocketPolicy;
 	}
 
 

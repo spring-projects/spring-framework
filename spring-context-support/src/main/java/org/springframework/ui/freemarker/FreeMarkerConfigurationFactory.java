@@ -113,7 +113,7 @@ public class FreeMarkerConfigurationFactory {
 	 * @see #setTemplateLoaderPath
 	 */
 	public void setConfigLocation(Resource resource) {
-		configLocation = resource;
+		this.configLocation = resource;
 	}
 
 	/**

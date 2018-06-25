@@ -538,7 +538,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				}
 				return;
 			}
-			stats.incrementDisconnectCount();
+			this.stats.incrementDisconnectCount();
 			handler.forward(message, stompAccessor);
 		}
 		else {

@@ -72,7 +72,7 @@ public final class CustomSQLExceptionTranslatorRegistry {
 	 * @param translator the custom translator
 	 */
 	public void registerTranslator(String dbName, SQLExceptionTranslator translator) {
-		SQLExceptionTranslator replaced = translatorMap.put(dbName, translator);
+		SQLExceptionTranslator replaced = this.translatorMap.put(dbName, translator);
 		if (replaced != null) {
 			logger.warn("Replacing custom translator [" + replaced + "] for database '" + dbName +
 					"' with [" + translator + "]");

@@ -97,7 +97,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Flux<DataBuffer> flux = Flux.from(inputStream);
-		if (useAalto) {
+		if (this.useAalto) {
 			AaltoDataBufferToXmlEvent aaltoMapper = new AaltoDataBufferToXmlEvent();
 			return flux.flatMap(aaltoMapper)
 					.doFinally(signalType -> aaltoMapper.endOfInput());
@@ -135,15 +135,15 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 		@Override
 		public Publisher<? extends XMLEvent> apply(DataBuffer dataBuffer) {
 			try {
-				streamReader.getInputFeeder().feedInput(dataBuffer.asByteBuffer());
+				this.streamReader.getInputFeeder().feedInput(dataBuffer.asByteBuffer());
 				List<XMLEvent> events = new ArrayList<>();
 				while (true) {
-					if (streamReader.next() == AsyncXMLStreamReader.EVENT_INCOMPLETE) {
+					if (this.streamReader.next() == AsyncXMLStreamReader.EVENT_INCOMPLETE) {
 						// no more events with what currently has been fed to the reader
 						break;
 					}
 					else {
-						XMLEvent event = eventAllocator.allocate(streamReader);
+						XMLEvent event = this.eventAllocator.allocate(this.streamReader);
 						events.add(event);
 						if (event.isEndDocument()) {
 							break;

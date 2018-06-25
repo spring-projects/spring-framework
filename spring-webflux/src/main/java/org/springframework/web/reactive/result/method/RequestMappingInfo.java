@@ -492,7 +492,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 			PatternsRequestCondition patternsCondition = new PatternsRequestCondition(parse(this.paths, parser));
 
 			return new RequestMappingInfo(this.mappingName, patternsCondition,
-					new RequestMethodsRequestCondition(methods),
+					new RequestMethodsRequestCondition(this.methods),
 					new ParamsRequestCondition(this.params),
 					new HeadersRequestCondition(this.headers),
 					new ConsumesRequestCondition(this.consumes, this.headers),

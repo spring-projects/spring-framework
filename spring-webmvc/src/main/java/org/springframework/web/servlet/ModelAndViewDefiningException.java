@@ -52,7 +52,7 @@ public class ModelAndViewDefiningException extends ServletException {
 	 * Return the ModelAndView that this exception contains for forwarding to.
 	 */
 	public ModelAndView getModelAndView() {
-		return modelAndView;
+		return this.modelAndView;
 	}
 
 }

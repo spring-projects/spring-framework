@@ -38,7 +38,7 @@ public class RootClassFilter implements ClassFilter, Serializable {
 
 	@Override
 	public boolean matches(Class<?> candidate) {
-		return clazz.isAssignableFrom(candidate);
+		return this.clazz.isAssignableFrom(candidate);
 	}
 
 }

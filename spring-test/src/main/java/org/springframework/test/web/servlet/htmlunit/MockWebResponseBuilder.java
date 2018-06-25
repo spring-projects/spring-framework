@@ -63,7 +63,7 @@ final class MockWebResponseBuilder {
 	public WebResponse build() throws IOException {
 		WebResponseData webResponseData = webResponseData();
 		long endTime = System.currentTimeMillis();
-		return new WebResponse(webResponseData, webRequest, endTime - startTime);
+		return new WebResponse(webResponseData, this.webRequest, endTime - this.startTime);
 	}
 
 	private WebResponseData webResponseData() throws IOException {

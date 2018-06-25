@@ -249,7 +249,7 @@ public class MethodReference extends SpelNodeImpl {
 			Method method = ((ReflectiveMethodExecutor) executorToCheck.get()).getMethod();
 			String descriptor = CodeFlow.toDescriptor(method.getReturnType());
 			if (this.nullSafe && CodeFlow.isPrimitive(descriptor)) {
-				originalPrimitiveExitTypeDescriptor = descriptor;
+				this.originalPrimitiveExitTypeDescriptor = descriptor;
 				this.exitTypeDescriptor = CodeFlow.toBoxedDescriptor(descriptor);
 			}
 			else {

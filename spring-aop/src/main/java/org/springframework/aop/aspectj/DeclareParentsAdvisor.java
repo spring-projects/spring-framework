@@ -76,7 +76,7 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 
 		// Excludes methods implemented.
 		ClassFilter typePatternFilter = new TypePatternClassFilter(typePattern);
-		ClassFilter exclusion = (clazz -> !introducedInterface.isAssignableFrom(clazz));
+		ClassFilter exclusion = (clazz -> !this.introducedInterface.isAssignableFrom(clazz));
 		this.typePatternClassFilter = ClassFilters.intersection(typePatternFilter, exclusion);
 	}
 

@@ -154,12 +154,12 @@ public class TransformTag extends HtmlEscapingAwareTag {
 			}
 			result = htmlEscape(result);
 			if (this.var != null) {
-				pageContext.setAttribute(this.var, result, TagUtils.getScope(this.scope));
+				this.pageContext.setAttribute(this.var, result, TagUtils.getScope(this.scope));
 			}
 			else {
 				try {
 					// Else, just print it out.
-					pageContext.getOut().print(result);
+					this.pageContext.getOut().print(result);
 				}
 				catch (IOException ex) {
 					throw new JspException(ex);

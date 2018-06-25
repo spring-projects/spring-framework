@@ -431,7 +431,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	@Override
 	@Nullable
 	public String getFirst(String headerName) {
-		List<String> headerValues = headers.get(headerName);
+		List<String> headerValues = this.headers.get(headerName);
 		return headerValues != null ? headerValues.get(0) : null;
 	}
 
@@ -445,13 +445,13 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 */
 	@Override
 	public void add(String headerName, @Nullable String headerValue) {
-		List<String> headerValues = headers.computeIfAbsent(headerName, k -> new LinkedList<>());
+		List<String> headerValues = this.headers.computeIfAbsent(headerName, k -> new LinkedList<>());
 		headerValues.add(headerValue);
 	}
 
 	@Override
 	public void addAll(String headerName, List<? extends String> headerValues) {
-		List<String> currentValues = headers.computeIfAbsent(headerName, k -> new LinkedList<>());
+		List<String> currentValues = this.headers.computeIfAbsent(headerName, k -> new LinkedList<>());
 		currentValues.addAll(headerValues);
 	}
 
@@ -472,7 +472,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	public void set(String headerName, @Nullable String headerValue) {
 		List<String> headerValues = new LinkedList<>();
 		headerValues.add(headerValue);
-		headers.put(headerName, headerValues);
+		this.headers.put(headerName, headerValues);
 	}
 
 	@Override
@@ -483,7 +483,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	@Override
 	public Map<String, String> toSingleValueMap() {
 		LinkedHashMap<String, String> singleValueMap = new LinkedHashMap<>(this.headers.size());
-		headers.forEach((key, value) -> singleValueMap.put(key, value.get(0)));
+		this.headers.forEach((key, value) -> singleValueMap.put(key, value.get(0)));
 		return singleValueMap;
 	}
 

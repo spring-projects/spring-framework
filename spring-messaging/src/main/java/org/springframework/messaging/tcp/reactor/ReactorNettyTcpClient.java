@@ -277,7 +277,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 			});
 			DirectProcessor<Void> completion = DirectProcessor.create();
 			TcpConnection<P> connection = new ReactorNettyTcpConnection<>(inbound, outbound,  codec, completion);
-			scheduler.schedule(() -> connectionHandler.afterConnected(connection));
+			scheduler.schedule(() -> this.connectionHandler.afterConnected(connection));
 
 			inbound.withConnection(conn -> conn.addHandler(new StompMessageDecoder<>(codec)));
 
@@ -285,9 +285,9 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 					.cast(Message.class)
 					.publishOn(scheduler, PUBLISH_ON_BUFFER_SIZE)
 					.subscribe(
-							connectionHandler::handleMessage,
-							connectionHandler::handleFailure,
-							connectionHandler::afterConnectionClosed);
+							this.connectionHandler::handleMessage,
+							this.connectionHandler::handleFailure,
+							this.connectionHandler::afterConnectionClosed);
 
 			return completion;
 		}
@@ -304,7 +304,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 
 		@Override
 		protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
-			Collection<Message<P>> messages = codec.decode(in);
+			Collection<Message<P>> messages = this.codec.decode(in);
 			out.addAll(messages);
 		}
 	}

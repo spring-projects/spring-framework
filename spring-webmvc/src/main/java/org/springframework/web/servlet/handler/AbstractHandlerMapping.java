@@ -152,7 +152,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * Return the UrlPathHelper implementation to use for resolution of lookup paths.
 	 */
 	public UrlPathHelper getUrlPathHelper() {
-		return urlPathHelper;
+		return this.urlPathHelper;
 	}
 
 	/**

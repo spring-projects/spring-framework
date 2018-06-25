@@ -218,8 +218,8 @@ class WiretapConnector implements ClientHttpConnector {
 		@Override
 		public Flux<DataBuffer> getBody() {
 			return super.getBody()
-					.doOnNext(buffer::write)
-					.doOnError(body::onError)
+					.doOnNext(this.buffer::write)
+					.doOnError(this.body::onError)
 					.doOnCancel(this::handleOnComplete)
 					.doOnComplete(this::handleOnComplete);
 		}

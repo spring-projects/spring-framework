@@ -110,7 +110,7 @@ public class DefaultTestContext implements TestContext {
 			@SuppressWarnings("resource")
 			ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
 			Assert.state(cac.isActive(), () ->
-					"The ApplicationContext loaded for [" + mergedContextConfiguration +
+					"The ApplicationContext loaded for [" + this.mergedContextConfiguration +
 					"] is not active. This may be due to one of the following reasons: " +
 					"1) the context was closed programmatically by user code; " +
 					"2) the context was closed during parallel test execution either " +

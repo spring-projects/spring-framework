@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class AsyncHttpAccessor {
 	 * org.springframework.http.client.ClientHttpRequest HttpRequests}.
 	 */
 	public org.springframework.http.client.AsyncClientHttpRequestFactory getAsyncRequestFactory() {
-		Assert.state(asyncRequestFactory != null, "No AsyncClientHttpRequestFactory set");
+		Assert.state(this.asyncRequestFactory != null, "No AsyncClientHttpRequestFactory set");
 		return this.asyncRequestFactory;
 	}
 

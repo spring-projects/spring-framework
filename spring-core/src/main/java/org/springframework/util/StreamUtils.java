@@ -260,7 +260,7 @@ public abstract class StreamUtils {
 		@Override
 		public void write(byte[] b, int off, int let) throws IOException {
 			// It is critical that we override this method for performance
-			out.write(b, off, let);
+			this.out.write(b, off, let);
 		}
 
 		@Override

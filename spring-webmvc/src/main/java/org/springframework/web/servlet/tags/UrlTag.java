@@ -245,7 +245,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 		if (this.var == null) {
 			// print the url to the writer
 			try {
-				pageContext.getOut().print(url);
+				this.pageContext.getOut().print(url);
 			}
 			catch (IOException ex) {
 				throw new JspException(ex);
@@ -253,7 +253,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 		}
 		else {
 			// store the url as a variable
-			pageContext.setAttribute(var, url, scope);
+			this.pageContext.setAttribute(this.var, url, this.scope);
 		}
 		return EVAL_PAGE;
 	}
@@ -265,8 +265,8 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	 */
 	String createUrl() throws JspException {
 		Assert.state(this.value != null, "No value set");
-		HttpServletRequest request = (HttpServletRequest) pageContext.getRequest();
-		HttpServletResponse response = (HttpServletResponse) pageContext.getResponse();
+		HttpServletRequest request = (HttpServletRequest) this.pageContext.getRequest();
+		HttpServletResponse response = (HttpServletResponse) this.pageContext.getResponse();
 
 		StringBuilder url = new StringBuilder();
 		if (this.type == UrlType.CONTEXT_RELATIVE) {
@@ -317,7 +317,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	protected String createQueryString(List<Param> params, Set<String> usedParams, boolean includeQueryStringDelimiter)
 			throws JspException {
 
-		String encoding = pageContext.getResponse().getCharacterEncoding();
+		String encoding = this.pageContext.getResponse().getCharacterEncoding();
 		StringBuilder qs = new StringBuilder();
 		for (Param param : params) {
 			if (!usedParams.contains(param.getName()) && StringUtils.hasLength(param.getName())) {
@@ -354,7 +354,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	protected String replaceUriTemplateParams(String uri, List<Param> params, Set<String> usedParams)
 			throws JspException {
 
-		String encoding = pageContext.getResponse().getCharacterEncoding();
+		String encoding = this.pageContext.getResponse().getCharacterEncoding();
 		for (Param param : params) {
 			String template = URL_TEMPLATE_DELIMITER_PREFIX + param.getName() + URL_TEMPLATE_DELIMITER_SUFFIX;
 			if (uri.contains(template)) {

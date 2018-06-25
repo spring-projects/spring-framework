@@ -104,12 +104,12 @@ public class XmlExpectationsHelper {
 
 
 		public boolean hasDifferences() {
-			return diff.hasDifferences();
+			return this.diff.hasDifferences();
 		}
 
 		@Override
 		public String toString() {
-			return diff.toString();
+			return this.diff.toString();
 		}
 
 	}

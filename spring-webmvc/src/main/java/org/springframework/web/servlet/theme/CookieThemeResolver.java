@@ -81,7 +81,7 @@ public class CookieThemeResolver extends CookieGenerator implements ThemeResolve
 	 * Return the name of the default theme.
 	 */
 	public String getDefaultThemeName() {
-		return defaultThemeName;
+		return this.defaultThemeName;
 	}
 
 

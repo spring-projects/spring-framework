@@ -283,7 +283,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 		@Override
 		@Nullable
 		public TypeDescriptor nested(int level) {
-			return TypeDescriptor.nested(property(pd), level);
+			return TypeDescriptor.nested(property(this.pd), level);
 		}
 
 		@Override

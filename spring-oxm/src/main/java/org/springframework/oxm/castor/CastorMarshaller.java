@@ -550,7 +550,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 
 	@Override
 	protected void marshalOutputStream(Object graph, OutputStream outputStream) throws XmlMappingException, IOException {
-		marshalWriter(graph, new OutputStreamWriter(outputStream, encoding));
+		marshalWriter(graph, new OutputStreamWriter(outputStream, this.encoding));
 	}
 
 	@Override

@@ -275,7 +275,7 @@ public final class BeanDefinitionBuilder {
 	 * Set the autowire mode for this definition.
 	 */
 	public BeanDefinitionBuilder setAutowireMode(int autowireMode) {
-		beanDefinition.setAutowireMode(autowireMode);
+		this.beanDefinition.setAutowireMode(autowireMode);
 		return this;
 	}
 
@@ -283,7 +283,7 @@ public final class BeanDefinitionBuilder {
 	 * Set the depency check mode for this definition.
 	 */
 	public BeanDefinitionBuilder setDependencyCheck(int dependencyCheck) {
-		beanDefinition.setDependencyCheck(dependencyCheck);
+		this.beanDefinition.setDependencyCheck(dependencyCheck);
 		return this;
 	}
 
@@ -316,7 +316,7 @@ public final class BeanDefinitionBuilder {
 	 */
 	public BeanDefinitionBuilder applyCustomizers(BeanDefinitionCustomizer... customizers) {
 		for (BeanDefinitionCustomizer customizer : customizers) {
-			customizer.customize(beanDefinition);
+			customizer.customize(this.beanDefinition);
 		}
 		return this;
 	}

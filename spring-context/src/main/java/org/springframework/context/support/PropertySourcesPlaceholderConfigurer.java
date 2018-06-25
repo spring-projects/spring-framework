@@ -170,13 +170,13 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 		propertyResolver.setValueSeparator(this.valueSeparator);
 
 		StringValueResolver valueResolver = strVal -> {
-			String resolved = (ignoreUnresolvablePlaceholders ?
+			String resolved = (this.ignoreUnresolvablePlaceholders ?
 					propertyResolver.resolvePlaceholders(strVal) :
 					propertyResolver.resolveRequiredPlaceholders(strVal));
-			if (trimValues) {
+			if (this.trimValues) {
 				resolved = resolved.trim();
 			}
-			return (resolved.equals(nullValue) ? null : resolved);
+			return (resolved.equals(this.nullValue) ? null : resolved);
 		};
 
 		doProcessProperties(beanFactoryToProcess, valueResolver);

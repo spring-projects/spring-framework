@@ -159,10 +159,10 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 		@Override
 		public Object apply(Object o) {
 			try {
-				return toStoreValue(valueLoader.call());
+				return toStoreValue(this.valueLoader.call());
 			}
 			catch (Exception ex) {
-				throw new ValueRetrievalException(o, valueLoader, ex);
+				throw new ValueRetrievalException(o, this.valueLoader, ex);
 			}
 		}
 	}

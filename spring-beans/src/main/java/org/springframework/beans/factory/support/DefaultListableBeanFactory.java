@@ -1656,7 +1656,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return createOptionalDependency(this.descriptor, this.beanName, args);
 			}
 			else {
-				DependencyDescriptor descriptorToUse = new DependencyDescriptor(descriptor) {
+				DependencyDescriptor descriptorToUse = new DependencyDescriptor(this.descriptor) {
 					@Override
 					public Object resolveCandidate(String beanName, Class<?> requiredType, BeanFactory beanFactory) {
 						return beanFactory.getBean(beanName, args);
@@ -1677,7 +1677,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return createOptionalDependency(this.descriptor, this.beanName);
 			}
 			else {
-				DependencyDescriptor descriptorToUse = new DependencyDescriptor(descriptor) {
+				DependencyDescriptor descriptorToUse = new DependencyDescriptor(this.descriptor) {
 					@Override
 					public boolean isRequired() {
 						return false;
@@ -1690,7 +1690,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		@Override
 		@Nullable
 		public Object getIfUnique() throws BeansException {
-			DependencyDescriptor descriptorToUse = new DependencyDescriptor(descriptor) {
+			DependencyDescriptor descriptorToUse = new DependencyDescriptor(this.descriptor) {
 				@Override
 				public boolean isRequired() {
 					return false;

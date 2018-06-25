@@ -44,7 +44,7 @@ public class InvalidTimeoutException extends TransactionUsageException {
 	 * Return the invalid timeout value.
 	 */
 	public int getTimeout() {
-		return timeout;
+		return this.timeout;
 	}
 
 }
