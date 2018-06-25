@@ -1114,91 +1114,39 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	public abstract AbstractBeanDefinition cloneBeanDefinition();
 
 	@Override
-	public boolean equals(Object other) {
-		if (this == other) {
+	public boolean equals(Object obj) {
+		if (this == obj) {
 			return true;
 		}
-		if (!(other instanceof AbstractBeanDefinition)) {
+		if (!(obj instanceof AbstractBeanDefinition)) {
 			return false;
 		}
-
-		AbstractBeanDefinition that = (AbstractBeanDefinition) other;
-
-		if (!ObjectUtils.nullSafeEquals(getBeanClassName(), that.getBeanClassName())) {
-			return false;
-		}
-		if (!ObjectUtils.nullSafeEquals(this.scope, that.scope)) {
-			return false;
-		}
-		if (this.abstractFlag != that.abstractFlag) {
-			return false;
-		}
-		if (this.lazyInit != that.lazyInit) {
-			return false;
-		}
-
-		if (this.autowireMode != that.autowireMode) {
-			return false;
-		}
-		if (this.dependencyCheck != that.dependencyCheck) {
-			return false;
-		}
-		if (!Arrays.equals(this.dependsOn, that.dependsOn)) {
-			return false;
-		}
-		if (this.autowireCandidate != that.autowireCandidate) {
-			return false;
-		}
-		if (!ObjectUtils.nullSafeEquals(this.qualifiers, that.qualifiers)) {
-			return false;
-		}
-		if (this.primary != that.primary) {
-			return false;
-		}
-
-		if (this.nonPublicAccessAllowed != that.nonPublicAccessAllowed) {
-			return false;
-		}
-		if (this.lenientConstructorResolution != that.lenientConstructorResolution) {
-			return false;
-		}
-		if (!ObjectUtils.nullSafeEquals(this.constructorArgumentValues, that.constructorArgumentValues)) {
-			return false;
-		}
-		if (!ObjectUtils.nullSafeEquals(this.propertyValues, that.propertyValues)) {
-			return false;
-		}
-		if (!ObjectUtils.nullSafeEquals(this.methodOverrides, that.methodOverrides)) {
-			return false;
-		}
-
-		if (!ObjectUtils.nullSafeEquals(this.factoryBeanName, that.factoryBeanName)) {
-			return false;
-		}
-		if (!ObjectUtils.nullSafeEquals(this.factoryMethodName, that.factoryMethodName)) {
-			return false;
-		}
-		if (!ObjectUtils.nullSafeEquals(this.initMethodName, that.initMethodName)) {
-			return false;
-		}
-		if (this.enforceInitMethod != that.enforceInitMethod) {
-			return false;
-		}
-		if (!ObjectUtils.nullSafeEquals(this.destroyMethodName, that.destroyMethodName)) {
-			return false;
-		}
-		if (this.enforceDestroyMethod != that.enforceDestroyMethod) {
-			return false;
-		}
-
-		if (this.synthetic != that.synthetic) {
-			return false;
-		}
-		if (this.role != that.role) {
-			return false;
-		}
-
-		return super.equals(other);
+		AbstractBeanDefinition other = (AbstractBeanDefinition) obj;
+		boolean rtn = true;
+		rtn = rtn &= ObjectUtils.nullSafeEquals(getBeanClassName(), other.getBeanClassName());
+		rtn = rtn &= ObjectUtils.nullSafeEquals(this.scope, other.scope);
+		rtn = rtn &= this.abstractFlag == other.abstractFlag;
+		rtn = rtn &= this.lazyInit == other.lazyInit;
+		rtn = rtn &= this.autowireMode == other.autowireMode;
+		rtn = rtn &= this.dependencyCheck == other.dependencyCheck;
+		rtn = rtn &= Arrays.equals(this.dependsOn, other.dependsOn);
+		rtn = rtn &= this.autowireCandidate == other.autowireCandidate;
+		rtn = rtn &= ObjectUtils.nullSafeEquals(this.qualifiers, other.qualifiers);
+		rtn = rtn &= this.primary == other.primary;
+		rtn = rtn &= this.nonPublicAccessAllowed == other.nonPublicAccessAllowed;
+		rtn = rtn &= this.lenientConstructorResolution == other.lenientConstructorResolution;
+		rtn = rtn &= ObjectUtils.nullSafeEquals(this.constructorArgumentValues, other.constructorArgumentValues);
+		rtn = rtn &= ObjectUtils.nullSafeEquals(this.propertyValues, other.propertyValues);
+		rtn = rtn &= ObjectUtils.nullSafeEquals(this.methodOverrides, other.methodOverrides);
+		rtn = rtn &= ObjectUtils.nullSafeEquals(this.factoryBeanName, other.factoryBeanName);
+		rtn = rtn &= ObjectUtils.nullSafeEquals(this.factoryMethodName, other.factoryMethodName);
+		rtn = rtn &= ObjectUtils.nullSafeEquals(this.initMethodName, other.initMethodName);
+		rtn = rtn &= this.enforceInitMethod == other.enforceInitMethod;
+		rtn = rtn &= ObjectUtils.nullSafeEquals(this.destroyMethodName, other.destroyMethodName);
+		rtn = rtn &= this.enforceDestroyMethod == other.enforceDestroyMethod;
+		rtn = rtn &= this.synthetic == other.synthetic;
+		rtn = rtn &= this.role == other.role;
+		return rtn && super.equals(obj);
 	}
 
 	@Override
