@@ -119,7 +119,7 @@ public abstract class ExchangeFunctions {
 		}
 
 		private void logResponse(ClientHttpResponse response) {
-			if (logger.isDebugEnabled() || logger.isTraceEnabled()) {
+			if (logger.isDebugEnabled()) {
 				int code = response.getRawStatusCode();
 				HttpStatus status = HttpStatus.resolve(code);
 				String message = "Response " + (status != null ? status : code);

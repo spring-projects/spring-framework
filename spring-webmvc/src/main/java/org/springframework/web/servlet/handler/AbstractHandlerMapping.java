@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -379,7 +380,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		if (logger.isTraceEnabled()) {
 			logger.trace("Mapped to " + handler);
 		}
-		else if (logger.isDebugEnabled()) {
+		else if (logger.isDebugEnabled() && !request.getDispatcherType().equals(DispatcherType.ASYNC)) {
 			logger.debug("Mapped to " + executionChain.getHandler());
 		}
 

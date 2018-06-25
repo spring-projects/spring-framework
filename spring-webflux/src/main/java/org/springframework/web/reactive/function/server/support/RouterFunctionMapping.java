@@ -118,7 +118,7 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	}
 
 	private void logRouterFunctions(List<RouterFunction<?>> routerFunctions) {
-		if (logger.isDebugEnabled() || logger.isTraceEnabled()) {
+		if (logger.isDebugEnabled()) {
 			int total = routerFunctions.size();
 			String message = total + " RouterFunction(s) in " + formatMappingName();
 			if (logger.isTraceEnabled()) {

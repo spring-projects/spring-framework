@@ -165,7 +165,7 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 
 		try {
 			this.fileItem.write(dest);
-			if (logger.isDebugEnabled() || logger.isTraceEnabled()) {
+			if (logger.isDebugEnabled()) {
 				String action = "transferred";
 				if (!this.fileItem.isInMemory()) {
 					action = (isAvailable() ? "copied" : "moved");

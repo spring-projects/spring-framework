@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.function.Consumer;
-
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -192,11 +191,6 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 
 		@SuppressWarnings("unchecked")
 		private <T> void sendInternal(T data, @Nullable MediaType mediaType) throws IOException {
-			if (logger.isTraceEnabled()) {
-				String format = mediaType != null ? "\"" + mediaType + "\" from " : "";
-				logger.trace("Writing " + format + "[" +
-						(data instanceof CharSequence ? "\"" + data + "\"" : data) + "]");
-			}
 			for (HttpMessageConverter<?> converter : ResponseBodyEmitterReturnValueHandler.this.messageConverters) {
 				if (converter.canWrite(data.getClass(), mediaType)) {
 					((HttpMessageConverter<T>) converter).write(data, mediaType, this.outputMessage);

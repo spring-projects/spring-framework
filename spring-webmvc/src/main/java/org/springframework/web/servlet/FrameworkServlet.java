@@ -21,6 +21,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import javax.servlet.DispatcherType;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -990,16 +991,32 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			}
 
 			if (logger.isDebugEnabled()) {
+				boolean isRequestDispatch = request.getDispatcherType().equals(DispatcherType.REQUEST);
+				String dispatchType = request.getDispatcherType().name();
 				if (failureCause != null) {
-					this.logger.debug("Failed to complete request: ", failureCause);
+					if (!isRequestDispatch) {
+						logger.debug("Unresolved failure from \"" + dispatchType + "\" dispatch: " + failureCause);
+					}
+					else if (logger.isTraceEnabled()) {
+						logger.trace("Failed to complete request", failureCause);
+					}
+					else {
+						logger.debug("Failed to complete request: " + failureCause);
+					}
 				}
 				else {
 					if (asyncManager.isConcurrentHandlingStarted()) {
-						logger.debug("Exiting, but response remains open for further handling");
+						logger.debug("Exiting but response remains open for further handling");
 					}
-					else if (logger.isDebugEnabled()) {
-						HttpStatus status = HttpStatus.resolve(response.getStatus());
-						logger.debug("Completed " + (status != null ? status : response.getStatus()));
+					else {
+						int status = response.getStatus();
+						if (!isRequestDispatch) {
+							logger.debug("Exiting from \"" + dispatchType + "\" dispatch (status " + status + ")");
+						}
+						else {
+							HttpStatus httpStatus = HttpStatus.resolve(status);
+							logger.debug("Completed " + (httpStatus != null ? httpStatus : status));
+						}
 					}
 				}
 			}

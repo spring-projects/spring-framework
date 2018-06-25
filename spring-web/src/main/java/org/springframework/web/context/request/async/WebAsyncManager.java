@@ -345,13 +345,14 @@ public final class WebAsyncManager {
 
 		if (this.asyncWebRequest.isAsyncComplete()) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Async request already complete for " + formatRequestUri());
+				logger.debug("Async result set but request already complete: " + formatRequestUri());
 			}
 			return;
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Async result ready, dispatch to " + formatRequestUri());
+			boolean isError = result instanceof Throwable;
+			logger.debug("Async " + (isError ? "error" : "result set") + ", dispatch to " + formatRequestUri());
 		}
 		this.asyncWebRequest.dispatch();
 	}

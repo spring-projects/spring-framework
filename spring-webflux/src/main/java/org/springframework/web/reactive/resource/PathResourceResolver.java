@@ -124,7 +124,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 			return Mono.empty();
 		}
 		catch (IOException ex) {
-			if (logger.isDebugEnabled() || logger.isTraceEnabled()) {
+			if (logger.isDebugEnabled()) {
 				String error = "Skip location [" + location + "] due to error";
 				if (logger.isTraceEnabled()) {
 					logger.trace(error, ex);

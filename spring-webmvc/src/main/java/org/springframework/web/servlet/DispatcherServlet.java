@@ -530,7 +530,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		initViewResolvers(context);
 		initFlashMapManager(context);
 
-		if (logger.isDebugEnabled() || logger.isTraceEnabled()) {
+		if (logger.isDebugEnabled()) {
 			if (this.disableLoggingRequestDetails) {
 				logger.debug("Logging request parameters and headers is OFF.");
 			}
@@ -988,7 +988,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	private void logRequest(HttpServletRequest request) {
-		if (logger.isDebugEnabled() || logger.isTraceEnabled()) {
+		if (logger.isDebugEnabled()) {
 
 			String params = "";
 			if (!this.disableLoggingRequestDetails) {
@@ -998,9 +998,9 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 
 			String dispatchType = !request.getDispatcherType().equals(DispatcherType.REQUEST) ?
-					" [" + request.getDispatcherType().name() + "]" : "";
+					"\"" + request.getDispatcherType().name() + "\" dispatch for " : "";
 
-			String message = request.getMethod() + " " + getRequestUri(request) + dispatchType + params;
+			String message = dispatchType + request.getMethod() + " \"" + getRequestUri(request) + "\"" + params;
 
 			if (logger.isTraceEnabled()) {
 				String headers = "";

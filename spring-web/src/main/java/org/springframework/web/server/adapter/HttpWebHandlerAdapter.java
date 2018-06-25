@@ -194,7 +194,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	 * complete initialization.
 	 */
 	public void afterPropertiesSet() {
-		if (logger.isDebugEnabled() || logger.isTraceEnabled()) {
+		if (logger.isDebugEnabled()) {
 			if (this.disableLoggingRequestDetails) {
 				logger.debug("Logging query, form data, multipart data, and headers is OFF.");
 			}
@@ -228,7 +228,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	}
 
 	private void logExchange(ServerWebExchange exchange) {
-		if (logger.isDebugEnabled() || logger.isTraceEnabled()) {
+		if (logger.isDebugEnabled()) {
 			ServerHttpRequest request = exchange.getRequest();
 			if (logger.isTraceEnabled()) {
 				String headers = this.disableLoggingRequestDetails ? "" : ", headers=" + request.getHeaders();
@@ -246,11 +246,11 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 			String rawQuery = request.getURI().getRawQuery();
 			query = StringUtils.hasText(rawQuery) ? "?" + rawQuery : "";
 		}
-		return "HTTP " + request.getMethod() + " " + request.getPath() + query;
+		return "HTTP " + request.getMethod() + " \"" + request.getPath() + query + "\"";
 	}
 
 	private void logResponse(ServerHttpResponse response) {
-		if (logger.isDebugEnabled() || logger.isTraceEnabled()) {
+		if (logger.isDebugEnabled()) {
 			HttpStatus status = response.getStatusCode();
 			String message = "Completed " + (status != null ? status : "200 OK");
 

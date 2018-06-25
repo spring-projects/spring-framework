@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.GenericHttpMessageConverter;
@@ -94,7 +95,8 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 							(GenericHttpMessageConverter<?>) messageConverter;
 					if (genericMessageConverter.canRead(this.responseType, null, contentType)) {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Reading [" + this.responseType + "]");
+							ResolvableType resolvableType = ResolvableType.forType(this.responseType);
+							logger.debug("Reading to [" + resolvableType + "]");
 						}
 						return (T) genericMessageConverter.read(this.responseType, null, responseWrapper);
 					}
@@ -103,7 +105,7 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 					if (messageConverter.canRead(this.responseClass, contentType)) {
 						if (logger.isDebugEnabled()) {
 							String className = this.responseClass.getName();
-							logger.debug("Reading [" + className + "] as \"" + contentType + "\"");
+							logger.debug("Reading to [" + className + "] as \"" + contentType + "\"");
 						}
 						return (T) messageConverter.read((Class) this.responseClass, responseWrapper);
 					}
