@@ -32,7 +32,7 @@ import static org.junit.Assert.*;
 
 /**
  * Tests for {@link HiddenHttpMethodFilter}.
- * 
+ *
  * @author Arjen Poutsma
  * @author Brian Clozel
  */

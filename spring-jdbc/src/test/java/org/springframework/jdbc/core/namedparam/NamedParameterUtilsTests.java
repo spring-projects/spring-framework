@@ -257,7 +257,7 @@ public class NamedParameterUtilsTests {
 	public void parseSqlStatementWithSingleLetterInBrackets() {
 		String expectedSql = "select foo from bar where baz = b?z";
 		String sql = "select foo from bar where baz = b:{p}z";
-		
+
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
 		assertEquals(1, parsedSql.getParameterNames().size());
 		assertEquals("p", parsedSql.getParameterNames().get(0));

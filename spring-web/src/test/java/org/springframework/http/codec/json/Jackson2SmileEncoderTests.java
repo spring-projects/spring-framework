@@ -42,14 +42,14 @@ import static org.springframework.http.MediaType.APPLICATION_XML;
 
 /**
  * Unit tests for {@link Jackson2SmileEncoder}.
- * 
+ *
  * @author Sebastien Deleuze
  */
 public class Jackson2SmileEncoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	private final static MimeType SMILE_MIME_TYPE = new MimeType("application", "x-jackson-smile");
 	private final static MimeType STREAM_SMILE_MIME_TYPE = new MimeType("application", "stream+x-jackson-smile");
-	
+
 	private final Jackson2SmileEncoder encoder = new Jackson2SmileEncoder();
 
 
@@ -106,7 +106,7 @@ public class Jackson2SmileEncoderTests extends AbstractDataBufferAllocatingTestC
 				.consumeNextWith(dataBuffer -> readPojo(mapper, Pojo.class, dataBuffer))
 				.verifyComplete();
 	}
-	
+
 	public <T> T readPojo(ObjectMapper mapper, Class<T> valueType, DataBuffer dataBuffer) {
 		try {
 			T value = mapper.reader().forType(valueType).readValue(DataBufferTestUtils.dumpBytes(dataBuffer));

@@ -43,7 +43,7 @@ public class ResourceTransformerSupportTests {
 
 	private static final Duration TIMEOUT = Duration.ofSeconds(5);
 
-	
+
 	private ResourceTransformerChain chain;
 
 	private TestResourceTransformerSupport transformer;
