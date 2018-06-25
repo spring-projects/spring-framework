@@ -440,8 +440,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						throw ex;
 					}
 					// Probably contains a placeholder: let's ignore it for type matching purposes.
-					if (this.logger.isDebugEnabled()) {
-						this.logger.debug("Ignoring bean class loading failure for bean '" + beanName + "'", ex);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Ignoring bean class loading failure for bean '" + beanName + "'", ex);
 					}
 					onSuppressedException(ex);
 				}
@@ -450,8 +450,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						throw ex;
 					}
 					// Probably contains a placeholder: let's ignore it for type matching purposes.
-					if (this.logger.isDebugEnabled()) {
-						this.logger.debug("Ignoring unresolvable metadata in bean definition '" + beanName + "'", ex);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Ignoring unresolvable metadata in bean definition '" + beanName + "'", ex);
 					}
 					onSuppressedException(ex);
 				}
@@ -521,8 +521,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					BeanCreationException bce = (BeanCreationException) rootCause;
 					String exBeanName = bce.getBeanName();
 					if (exBeanName != null && isCurrentlyInCreation(exBeanName)) {
-						if (this.logger.isDebugEnabled()) {
-							this.logger.debug("Ignoring match to currently created bean '" + exBeanName + "': " +
+						if (logger.isDebugEnabled()) {
+							logger.debug("Ignoring match to currently created bean '" + exBeanName + "': " +
 									ex.getMessage());
 						}
 						onSuppressedException(ex);
@@ -680,8 +680,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
 		BeanDefinition bd = this.beanDefinitionMap.get(beanName);
 		if (bd == null) {
-			if (this.logger.isTraceEnabled()) {
-				this.logger.trace("No bean named '" + beanName + "' found in " + this);
+			if (logger.isTraceEnabled()) {
+				logger.trace("No bean named '" + beanName + "' found in " + this);
 			}
 			throw new NoSuchBeanDefinitionException(beanName);
 		}
@@ -725,8 +725,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public void preInstantiateSingletons() throws BeansException {
-		if (this.logger.isDebugEnabled()) {
-			this.logger.debug("Pre-instantiating singletons in " + this);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Pre-instantiating singletons in " + this);
 		}
 
 		// Iterate over a copy to allow for init methods which in turn register new bean definitions.
@@ -813,22 +813,22 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			else if (oldBeanDefinition.getRole() < beanDefinition.getRole()) {
 				// e.g. was ROLE_APPLICATION, now overriding with ROLE_SUPPORT or ROLE_INFRASTRUCTURE
-				if (this.logger.isWarnEnabled()) {
-					this.logger.warn("Overriding user-defined bean definition for bean '" + beanName +
+				if (logger.isWarnEnabled()) {
+					logger.warn("Overriding user-defined bean definition for bean '" + beanName +
 							"' with a framework-generated bean definition: replacing [" +
 							oldBeanDefinition + "] with [" + beanDefinition + "]");
 				}
 			}
 			else if (!beanDefinition.equals(oldBeanDefinition)) {
-				if (this.logger.isInfoEnabled()) {
-					this.logger.info("Overriding bean definition for bean '" + beanName +
+				if (logger.isInfoEnabled()) {
+					logger.info("Overriding bean definition for bean '" + beanName +
 							"' with a different definition: replacing [" + oldBeanDefinition +
 							"] with [" + beanDefinition + "]");
 				}
 			}
 			else {
-				if (this.logger.isDebugEnabled()) {
-					this.logger.debug("Overriding bean definition for bean '" + beanName +
+				if (logger.isDebugEnabled()) {
+					logger.debug("Overriding bean definition for bean '" + beanName +
 							"' with an equivalent definition: replacing [" + oldBeanDefinition +
 							"] with [" + beanDefinition + "]");
 				}
@@ -871,8 +871,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		BeanDefinition bd = this.beanDefinitionMap.remove(beanName);
 		if (bd == null) {
-			if (this.logger.isTraceEnabled()) {
-				this.logger.trace("No bean named '" + beanName + "' found in " + this);
+			if (logger.isTraceEnabled()) {
+				logger.trace("No bean named '" + beanName + "' found in " + this);
 			}
 			throw new NoSuchBeanDefinitionException(beanName);
 		}

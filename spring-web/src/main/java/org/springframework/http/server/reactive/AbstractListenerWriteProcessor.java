@@ -100,7 +100,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * container.
 	 */
 	public final void onWritePossible() {
-		this.logger.trace("Received onWritePossible");
+		logger.trace("Received onWritePossible");
 		this.state.get().onWritePossible(this);
 	}
 
@@ -109,7 +109,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * container to cancel the upstream subscription.
 	 */
 	public void cancel() {
-		this.logger.trace("Received request to cancel");
+		logger.trace("Received request to cancel");
 		if (this.subscription != null) {
 			this.subscription.cancel();
 		}

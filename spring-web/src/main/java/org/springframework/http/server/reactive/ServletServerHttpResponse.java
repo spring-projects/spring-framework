@@ -313,14 +313,14 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 				flush();
 			}
 			boolean ready = ServletServerHttpResponse.this.isWritePossible();
-			if (this.logger.isTraceEnabled()) {
-				this.logger.trace("write: " + dataBuffer + " ready: " + ready);
+			if (logger.isTraceEnabled()) {
+				logger.trace("write: " + dataBuffer + " ready: " + ready);
 			}
 			int remaining = dataBuffer.readableByteCount();
 			if (ready && remaining > 0) {
 				int written = writeToOutputStream(dataBuffer);
-				if (this.logger.isTraceEnabled()) {
-					this.logger.trace("written: " + written + " total: " + remaining);
+				if (logger.isTraceEnabled()) {
+					logger.trace("written: " + written + " total: " + remaining);
 				}
 				if (written == remaining) {
 					if (logger.isTraceEnabled()) {
