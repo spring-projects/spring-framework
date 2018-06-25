@@ -207,9 +207,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 						}
 						return chain.resolveResource(null, baseUrl, locations)
 								.flatMap(resource -> strategy.getResourceVersion(resource)
-										.map(version -> {
-											return strategy.addVersion(baseUrl, version);
-										}));
+										.map(version -> strategy.addVersion(baseUrl, version)));
 					}
 					return Mono.empty();
 				});

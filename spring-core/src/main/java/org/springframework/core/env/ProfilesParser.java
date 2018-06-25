@@ -104,25 +104,25 @@ final class ProfilesParser {
 	}
 
 	private static Profiles or(Profiles... profiles) {
-		return (activeProfile) -> Arrays.stream(profiles).anyMatch(
+		return activeProfile -> Arrays.stream(profiles).anyMatch(
 				isMatch(activeProfile));
 	}
 
 	private static Profiles and(Profiles... profiles) {
-		return (activeProfile) -> Arrays.stream(profiles).allMatch(
+		return activeProfile -> Arrays.stream(profiles).allMatch(
 				isMatch(activeProfile));
 	}
 
 	private static Profiles not(Profiles profiles) {
-		return (activeProfile) -> !profiles.matches(activeProfile);
+		return activeProfile -> !profiles.matches(activeProfile);
 	}
 
 	private static Profiles equals(String profile) {
-		return (activeProfile) -> activeProfile.test(profile);
+		return activeProfile -> activeProfile.test(profile);
 	}
 
 	private static Predicate<Profiles> isMatch(Predicate<String> activeProfile) {
-		return (profiles) -> profiles.matches(activeProfile);
+		return profiles -> profiles.matches(activeProfile);
 	}
 
 	private enum Operator {

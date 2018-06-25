@@ -554,13 +554,13 @@ class ConfigurationClassParser {
 			Class<? extends Group> group = deferredImport.getImportSelector().getImportGroup();
 			DeferredImportSelectorGrouping grouping = groupings.computeIfAbsent(
 					(group == null ? deferredImport : group),
-					(key) -> new DeferredImportSelectorGrouping(createGroup(group)));
+					key -> new DeferredImportSelectorGrouping(createGroup(group)));
 			grouping.add(deferredImport);
 			configurationClasses.put(deferredImport.getConfigurationClass().getMetadata(),
 					deferredImport.getConfigurationClass());
 		}
 		for (DeferredImportSelectorGrouping grouping : groupings.values()) {
-			grouping.getImports().forEach((entry) -> {
+			grouping.getImports().forEach(entry -> {
 				ConfigurationClass configurationClass = configurationClasses.get(
 						entry.getMetadata());
 				try {
