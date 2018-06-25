@@ -154,9 +154,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 					List<ResourceResolver> resolvers = handler.getResourceResolvers();
 					ResourceResolverChain chain = new DefaultResourceResolverChain(resolvers);
 					return chain.resolveUrlPath(path.value(), handler.getLocations())
-							.map(resolvedPath -> {
-								return mapping.value() + resolvedPath;
-							});
+							.map(resolvedPath ->  mapping.value() + resolvedPath);
 
 				})
 				.orElseGet(() ->{
