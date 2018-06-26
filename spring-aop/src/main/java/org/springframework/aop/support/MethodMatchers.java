@@ -193,6 +193,14 @@ public abstract class MethodMatchers {
 		}
 
 		@Override
+		public int hashCode() {
+			int hashCode = 17;
+			hashCode = 37 * hashCode + this.cf1.hashCode();
+			hashCode = 37 * hashCode + this.cf2.hashCode();
+			return hashCode;
+		}
+
+		@Override
 		public boolean equals(Object other) {
 			if (this == other) {
 				return true;
