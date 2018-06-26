@@ -25,7 +25,8 @@ _Within your locally cloned `spring-framework` working directory:_
 4. In the `spring-oxm` project, add the two folders (`castor` and `jaxb`) in
    `build/generated-sources` to the build path (right click on them and select
    `Build Path -> Use as Source Folder`)
-5. Code away!
+5. To apply project specific settings run `./gradlew eclipseBuildship`
+7. Code away
 
 ## Known Issues
 

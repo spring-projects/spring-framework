@@ -91,6 +91,14 @@ task cleanEclipseJdtUi(type: Delete) {
 	delete project.file(".settings/org.eclipse.wst.common.project.facet.core.xml")
 }
 
+task eclipseBuildship(type: Copy) {
+	from rootProject.files(
+		"src/eclipse/org.eclipse.jdt.ui.prefs",
+		"src/eclipse/org.eclipse.jdt.core.prefs")
+	into project.file('.settings/')
+	outputs.upToDateWhen { false }
+}
+
 tasks["eclipseJdt"].dependsOn(eclipseJdtPrepare)
 tasks["cleanEclipse"].dependsOn(cleanEclipseJdtUi)
 tasks["eclipse"].dependsOn(eclipseSettings, eclipseWstComponent)
