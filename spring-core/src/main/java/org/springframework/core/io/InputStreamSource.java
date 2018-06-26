@@ -22,6 +22,11 @@ import java.io.InputStream;
 /**
  * Simple interface for objects that are sources for an {@link InputStream}.
  *
+ * 对于InputStream 输入对象的简单接口
+ * 所有的资源文件解析，首先第一步是通过流的形式读到内存，这个算作是简单的读取流的接口
+ *
+ *
+ *
  * <p>This is the base interface for Spring's more extensive {@link Resource} interface.
  *
  * <p>For single-use streams, {@link InputStreamResource} can be used for any

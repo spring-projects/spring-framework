@@ -52,8 +52,15 @@ import org.springframework.util.xml.XmlValidationModeDetector;
 
 /**
  * Bean definition reader for XML bean definitions.
+ *
+ * **********************基于XML Bean 定义的Bean 定义读取器*******************
+ * **********************读取资源文件，解析，注册
+ *
  * Delegates the actual XML document reading to an implementation
  * of the {@link BeanDefinitionDocumentReader} interface.
+ *
+ * 委将实际的XML文档读取到一个实现
+ * @link beantiondocumentreader接口的实例中。
  *
  * <p>Typically applied to a
  * {@link org.springframework.beans.factory.support.DefaultListableBeanFactory}
@@ -63,6 +70,11 @@ import org.springframework.util.xml.XmlValidationModeDetector;
  * The document reader will register each bean definition with the given bean factory,
  * talking to the latter's implementation of the
  * {@link org.springframework.beans.factory.support.BeanDefinitionRegistry} interface.
+ *
+ * 该类装入一个DOM文档并将 BeanDefinitionDocumentReader 应用到它。
+ * 文档阅读器将用给定的bean工厂注册每个bean定义，
+ * 并与后者实现@link org.springframework.beans.factory.support。BeanDefinitionRegistry }
+ * 的接口进行对话
  *
  * @author Juergen Hoeller
  * @author Rob Harrop

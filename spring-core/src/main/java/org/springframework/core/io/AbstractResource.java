@@ -34,9 +34,18 @@ import org.springframework.util.ResourceUtils;
  * Convenience base class for {@link Resource} implementations,
  * pre-implementing typical behavior.
  *
+ *
+ * @linkResource 类实现的便利基类，预实现典型行为，Spring中很多地方都用到了这样的方式
+ * 先是搞一个接口，然后搞个抽象类实现接口的部分方法，然后再层层实现下去
+ *
+ * 我理解就是为了抽象更充分，解耦，但是实际好在哪儿，，具体点好在哪？？？？ 没有那种豁然开朗的感觉
+ *
  * <p>The "exists" method will check whether a File or InputStream can
  * be opened; "isOpen" will always return false; "getURL" and "getFile"
  * throw an exception; and "toString" will return the description.
+ *
+ *  “存在”方法将检查文件或InputStream是否可以打开;
+ *  “isOpen”总是返回false;“getURL”和“getFile”抛出一个异常;"toString"将返回描述
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
@@ -77,6 +86,8 @@ public abstract class AbstractResource implements Resource {
 
 	/**
 	 * This implementation always returns {@code false}.
+	 *
+	 * 为什么总是返回false了还需要一个方法来做？？？？？？
 	 */
 	@Override
 	public boolean isOpen() {
@@ -94,7 +105,14 @@ public abstract class AbstractResource implements Resource {
 	/**
 	 * This implementation throws a FileNotFoundException, assuming
 	 * that the resource cannot be resolved to a URL.
+	 *
+	 *
+	 * 这个实现抛出一个FileNotFoundException，假设资源不能被解析为URL
+	 *
+	 *
+	 *
 	 */
+	//todo 为啥要假设不能解析为URL？？？这是基于什么样的设计思想还是具体场景？？？
 	@Override
 	public URL getURL() throws IOException {
 		throw new FileNotFoundException(getDescription() + " cannot be resolved to URL");

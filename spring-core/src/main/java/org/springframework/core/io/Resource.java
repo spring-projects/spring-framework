@@ -30,9 +30,21 @@ import org.springframework.lang.Nullable;
  * Interface for a resource descriptor that abstracts from the actual
  * type of underlying resource, such as a file or class path resource.
  *
+ * ***资源描述符的接口，它从底层资源的实际类型中抽象出来，例如文件或类路径资源
+ * ***所有的资源，如文件、类等都可以通过这个接口表示，它是一个接口，然后根据资源的类型不同有很多实现类
+ *
+ * ******个人理解：资源的顶级，最简单，原始的描述接口了
+ *
  * <p>An InputStream can be opened for every resource if it exists in
  * physical form, but a URL or File handle can just be returned for
  * certain resources. The actual behavior is implementation-specific.
+ *
+ * 如果存在于物理表单中，那么就可以为每个资源打开InputStream，
+ * 但是URL或文件句柄只能返回特定的资源。实际的行为是特定于实现的
+ *
+ * 物理表单是什么？？？？
+ *
+ * 资源有不同协议格式的URL，不同位置中的文件
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
@@ -69,6 +81,9 @@ public interface Resource extends InputStreamSource {
 	 * that the resource content cannot be read.
 	 * @see #getInputStream()
 	 * @see #exists()
+	 *
+	 *
+	 * default java 8中的接口默认实现的语法，在Spring中看到了
 	 */
 	default boolean isReadable() {
 		return exists();
