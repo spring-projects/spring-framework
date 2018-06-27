@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,9 @@ import org.springframework.util.Assert;
 
 /**
  * Abstract class to provide base functionality for easy inserts
- * based on configuration options and database metadata.
- * This class provides the base SPI for {@link SimpleJdbcInsert}.
+ * based on configuration options and database meta-data.
+ *
+ * <p>This class provides the base SPI for {@link SimpleJdbcInsert}.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -65,7 +66,7 @@ public abstract class AbstractJdbcInsert {
 	/** Lower-level class used to execute SQL */
 	private final JdbcTemplate jdbcTemplate;
 
-	/** Context used to retrieve and manage database metadata */
+	/** Context used to retrieve and manage database meta-data */
 	private final TableMetaDataContext tableMetaDataContext = new TableMetaDataContext();
 
 	/** List of columns objects to be used in insert statement */
@@ -81,10 +82,10 @@ public abstract class AbstractJdbcInsert {
 	private volatile boolean compiled = false;
 
 	/** The generated string used for insert statement */
-	private String insertString;
+	private String insertString = "";
 
 	/** The SQL type information for the insert columns */
-	private int[] insertTypes;
+	private int[] insertTypes = new int[0];
 
 
 	/**
@@ -119,7 +120,7 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Set the name of the table for this insert.
 	 */
-	public void setTableName(String tableName) {
+	public void setTableName(@Nullable String tableName) {
 		checkIfConfigurationModificationIsAllowed();
 		this.tableMetaDataContext.setTableName(tableName);
 	}
@@ -135,7 +136,7 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Set the name of the schema for this insert.
 	 */
-	public void setSchemaName(String schemaName) {
+	public void setSchemaName(@Nullable String schemaName) {
 		checkIfConfigurationModificationIsAllowed();
 		this.tableMetaDataContext.setSchemaName(schemaName);
 	}
@@ -151,7 +152,7 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Set the name of the catalog for this insert.
 	 */
-	public void setCatalogName(String catalogName) {
+	public void setCatalogName(@Nullable String catalogName) {
 		checkIfConfigurationModificationIsAllowed();
 		this.tableMetaDataContext.setCatalogName(catalogName);
 	}
@@ -204,7 +205,7 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Specify whether the parameter metadata for the call should be used.
+	 * Specify whether the parameter meta-data for the call should be used.
 	 * The default is {@code true}.
 	 */
 	public void setAccessTableColumnMetaData(boolean accessTableColumnMetaData) {
@@ -239,13 +240,13 @@ public abstract class AbstractJdbcInsert {
 	//-------------------------------------------------------------------------
 
 	/**
-	 * Compile this JdbcInsert using provided parameters and meta data plus other settings.
+	 * Compile this JdbcInsert using provided parameters and meta-data plus other settings.
 	 * This finalizes the configuration for this object and subsequent attempts to compile are
 	 * ignored. This will be implicitly called the first time an un-compiled insert is executed.
 	 * @throws InvalidDataAccessApiUsageException if the object hasn't been correctly initialized,
 	 * for example if no DataSource has been provided
 	 */
-	public synchronized final void compile() throws InvalidDataAccessApiUsageException {
+	public final synchronized void compile() throws InvalidDataAccessApiUsageException {
 		if (!isCompiled()) {
 			if (getTableName() == null) {
 				throw new InvalidDataAccessApiUsageException("Table name is required");
@@ -276,7 +277,7 @@ public abstract class AbstractJdbcInsert {
 		this.insertString = this.tableMetaDataContext.createInsertString(getGeneratedKeyNames());
 		this.insertTypes = this.tableMetaDataContext.createInsertTypes();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Compiled insert object: insert string is [" + getInsertString() + "]");
+			logger.debug("Compiled insert object: insert string is [" + this.insertString + "]");
 		}
 		onCompileInternal();
 	}
@@ -315,7 +316,7 @@ public abstract class AbstractJdbcInsert {
 	protected void checkIfConfigurationModificationIsAllowed() {
 		if (isCompiled()) {
 			throw new InvalidDataAccessApiUsageException(
-					"Configuration can't be altered once the class has been compiled or used");
+					"Configuration cannot be altered once the class has been compiled or used");
 		}
 	}
 
@@ -453,17 +454,17 @@ public abstract class AbstractJdbcInsert {
 			}
 
 			Assert.state(getTableName() != null, "No table name set");
-			final String keyQuery = this.tableMetaDataContext.getSimulationQueryForGetGeneratedKey(
+			final String keyQuery = this.tableMetaDataContext.getSimpleQueryForGetGeneratedKey(
 					getTableName(), getGeneratedKeyNames()[0]);
-			Assert.state(keyQuery != null, "Query for simulating get generated keys can't be null");
+			Assert.state(keyQuery != null, "Query for simulating get generated keys must not be null");
 
 			// This is a hack to be able to get the generated key from a database that doesn't support
 			// get generated keys feature. HSQL is one, PostgreSQL is another. Postgres uses a RETURNING
 			// clause while HSQL uses a second query that has to be executed with the same connection.
 
 			if (keyQuery.toUpperCase().startsWith("RETURNING")) {
-				Long key = getJdbcTemplate().queryForObject(getInsertString() + " " + keyQuery,
-						values.toArray(new Object[values.size()]), Long.class);
+				Long key = getJdbcTemplate().queryForObject(
+						getInsertString() + " " + keyQuery, values.toArray(), Long.class);
 				Map<String, Object> keys = new HashMap<>(1);
 				keys.put(getGeneratedKeyNames()[0], key);
 				keyHolder.getKeyList().add(keys);
@@ -602,7 +603,7 @@ public abstract class AbstractJdbcInsert {
 
 	/**
 	 * Match the provided in parameter values with registered parameters and parameters
-	 * defined via metadata processing.
+	 * defined via meta-data processing.
 	 * @param parameterSource the parameter values provided as a {@link SqlParameterSource}
 	 * @return Map with parameter names and values
 	 */
@@ -612,7 +613,7 @@ public abstract class AbstractJdbcInsert {
 
 	/**
 	 * Match the provided in parameter values with registered parameters and parameters
-	 * defined via metadata processing.
+	 * defined via meta-data processing.
 	 * @param args the parameter values provided in a Map
 	 * @return Map with parameter names and values
 	 */

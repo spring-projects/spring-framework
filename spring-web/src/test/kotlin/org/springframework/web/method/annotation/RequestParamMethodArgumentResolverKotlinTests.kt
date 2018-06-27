@@ -16,7 +16,6 @@
 
 package org.springframework.web.method.annotation
 
-
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
@@ -76,7 +75,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		val method = ReflectionUtils.findMethod(javaClass, "handle", String::class.java,
 				String::class.java, String::class.java, String::class.java,
 				MultipartFile::class.java, MultipartFile::class.java,
-				MultipartFile::class.java, MultipartFile::class.java)
+				MultipartFile::class.java, MultipartFile::class.java)!!
 
 		nullableParamRequired = SynthesizingMethodParameter(method, 0)
 		nullableParamNotRequired = SynthesizingMethodParameter(method, 1)

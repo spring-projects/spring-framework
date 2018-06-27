@@ -92,7 +92,7 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 	/**
 	 * Set the {@link Marshaller} to be used by this message converter.
 	 */
-	public void setMarshaller(Marshaller marshaller) {
+	public void setMarshaller(@Nullable Marshaller marshaller) {
 		this.marshaller = marshaller;
 	}
 
@@ -107,7 +107,7 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 	/**
 	 * Set the {@link Unmarshaller} to be used by this message converter.
 	 */
-	public void setUnmarshaller(Unmarshaller unmarshaller) {
+	public void setUnmarshaller(@Nullable Unmarshaller unmarshaller) {
 		this.unmarshaller = unmarshaller;
 	}
 
@@ -166,7 +166,9 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 
 	@Override
 	@Nullable
-	protected Object convertToInternal(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
+	protected Object convertToInternal(Object payload, @Nullable MessageHeaders headers,
+			@Nullable Object conversionHint) {
+
 		Assert.notNull(this.marshaller, "Property 'marshaller' is required");
 		try {
 			if (byte[].class == getSerializedPayloadClass()) {

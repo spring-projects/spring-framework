@@ -58,7 +58,7 @@ public class BeansDtdResolver implements EntityResolver {
 					"] and system ID [" + systemId + "]");
 		}
 		if (systemId != null && systemId.endsWith(DTD_EXTENSION)) {
-			int lastPathSeparator = systemId.lastIndexOf("/");
+			int lastPathSeparator = systemId.lastIndexOf('/');
 			int dtdNameStart = systemId.indexOf(DTD_NAME, lastPathSeparator);
 			if (dtdNameStart != -1) {
 				String dtdFile = DTD_NAME + DTD_EXTENSION;

@@ -84,12 +84,11 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 
 		HttpHeaders headersToUse = new HttpHeaders();
 		if (headers != null) {
-			for (String header : headers.keySet()) {
-				List<String> values = headers.get(header);
+			headers.forEach((header, values) -> {
 				if (values != null && !specialHeaders.contains(header.toLowerCase())) {
 					headersToUse.put(header, values);
 				}
-			}
+			});
 		}
 
 		List<String> subProtocols =

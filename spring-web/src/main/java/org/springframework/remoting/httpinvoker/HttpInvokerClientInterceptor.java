@@ -92,7 +92,7 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 	 * @see org.springframework.remoting.rmi.CodebaseAwareObjectInputStream
 	 * @see java.rmi.server.RMIClassLoader
 	 */
-	public void setCodebaseUrl(String codebaseUrl) {
+	public void setCodebaseUrl(@Nullable String codebaseUrl) {
 		this.codebaseUrl = codebaseUrl;
 	}
 

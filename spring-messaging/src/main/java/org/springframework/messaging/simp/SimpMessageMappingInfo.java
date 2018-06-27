@@ -65,6 +65,7 @@ public class SimpMessageMappingInfo implements MessageCondition<SimpMessageMappi
 	}
 
 	@Override
+	@Nullable
 	public SimpMessageMappingInfo getMatchingCondition(Message<?> message) {
 		SimpMessageTypeMessageCondition typeCond = this.messageTypeMessageCondition.getMatchingCondition(message);
 		if (typeCond == null) {

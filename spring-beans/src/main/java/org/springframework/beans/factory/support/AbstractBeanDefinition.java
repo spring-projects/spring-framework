@@ -173,11 +173,14 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	@Nullable
 	private String factoryMethodName;
 
+	@Nullable
 	private ConstructorArgumentValues constructorArgumentValues;
 
+	@Nullable
 	private MutablePropertyValues propertyValues;
 
-	private MethodOverrides methodOverrides = new MethodOverrides();
+	@Nullable
+	private MethodOverrides methodOverrides;
 
 	@Nullable
 	private String initMethodName;
@@ -212,8 +215,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * constructor argument values and property values.
 	 */
 	protected AbstractBeanDefinition(@Nullable ConstructorArgumentValues cargs, @Nullable MutablePropertyValues pvs) {
-		this.constructorArgumentValues = (cargs != null ? cargs : new ConstructorArgumentValues());
-		this.propertyValues = (pvs != null ? pvs : new MutablePropertyValues());
+		this.constructorArgumentValues = cargs;
+		this.propertyValues = pvs;
 	}
 
 	/**
@@ -229,8 +232,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		setLazyInit(original.isLazyInit());
 		setFactoryBeanName(original.getFactoryBeanName());
 		setFactoryMethodName(original.getFactoryMethodName());
-		this.constructorArgumentValues = new ConstructorArgumentValues(original.getConstructorArgumentValues());
-		this.propertyValues = new MutablePropertyValues(original.getPropertyValues());
 		setRole(original.getRole());
 		setSource(original.getSource());
 		copyAttributesFrom(original);
@@ -239,6 +240,15 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			AbstractBeanDefinition originalAbd = (AbstractBeanDefinition) original;
 			if (originalAbd.hasBeanClass()) {
 				setBeanClass(originalAbd.getBeanClass());
+			}
+			if (originalAbd.hasConstructorArgumentValues()) {
+				setConstructorArgumentValues(new ConstructorArgumentValues(original.getConstructorArgumentValues()));
+			}
+			if (originalAbd.hasPropertyValues()) {
+				setPropertyValues(new MutablePropertyValues(original.getPropertyValues()));
+			}
+			if (originalAbd.hasMethodOverrides()) {
+				setMethodOverrides(new MethodOverrides(originalAbd.getMethodOverrides()));
 			}
 			setAutowireMode(originalAbd.getAutowireMode());
 			setDependencyCheck(originalAbd.getDependencyCheck());
@@ -249,7 +259,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			setInstanceSupplier(originalAbd.getInstanceSupplier());
 			setNonPublicAccessAllowed(originalAbd.isNonPublicAccessAllowed());
 			setLenientConstructorResolution(originalAbd.isLenientConstructorResolution());
-			setMethodOverrides(new MethodOverrides(originalAbd.getMethodOverrides()));
 			setInitMethodName(originalAbd.getInitMethodName());
 			setEnforceInitMethod(originalAbd.isEnforceInitMethod());
 			setDestroyMethodName(originalAbd.getDestroyMethodName());
@@ -258,6 +267,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			setResource(originalAbd.getResource());
 		}
 		else {
+			setConstructorArgumentValues(new ConstructorArgumentValues(original.getConstructorArgumentValues()));
+			setPropertyValues(new MutablePropertyValues(original.getPropertyValues()));
 			setResourceDescription(original.getResourceDescription());
 		}
 	}
@@ -294,8 +305,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		if (StringUtils.hasLength(other.getFactoryMethodName())) {
 			setFactoryMethodName(other.getFactoryMethodName());
 		}
-		getConstructorArgumentValues().addArgumentValues(other.getConstructorArgumentValues());
-		getPropertyValues().addPropertyValues(other.getPropertyValues());
 		setRole(other.getRole());
 		setSource(other.getSource());
 		copyAttributesFrom(other);
@@ -304,6 +313,15 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			AbstractBeanDefinition otherAbd = (AbstractBeanDefinition) other;
 			if (otherAbd.hasBeanClass()) {
 				setBeanClass(otherAbd.getBeanClass());
+			}
+			if (otherAbd.hasConstructorArgumentValues()) {
+				getConstructorArgumentValues().addArgumentValues(other.getConstructorArgumentValues());
+			}
+			if (otherAbd.hasPropertyValues()) {
+				getPropertyValues().addPropertyValues(other.getPropertyValues());
+			}
+			if (otherAbd.hasMethodOverrides()) {
+				getMethodOverrides().addOverrides(otherAbd.getMethodOverrides());
 			}
 			setAutowireMode(otherAbd.getAutowireMode());
 			setDependencyCheck(otherAbd.getDependencyCheck());
@@ -314,8 +332,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			setInstanceSupplier(otherAbd.getInstanceSupplier());
 			setNonPublicAccessAllowed(otherAbd.isNonPublicAccessAllowed());
 			setLenientConstructorResolution(otherAbd.isLenientConstructorResolution());
-			getMethodOverrides().addOverrides(otherAbd.getMethodOverrides());
-			if (StringUtils.hasLength(otherAbd.getInitMethodName())) {
+			if (otherAbd.getInitMethodName() != null) {
 				setInitMethodName(otherAbd.getInitMethodName());
 				setEnforceInitMethod(otherAbd.isEnforceInitMethod());
 			}
@@ -327,6 +344,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			setResource(otherAbd.getResource());
 		}
 		else {
+			getConstructorArgumentValues().addArgumentValues(other.getConstructorArgumentValues());
+			getPropertyValues().addPropertyValues(other.getPropertyValues());
 			setResourceDescription(other.getResourceDescription());
 		}
 	}
@@ -358,6 +377,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Return the current bean class name of this bean definition.
 	 */
 	@Override
+	@Nullable
 	public String getBeanClassName() {
 		Object beanClassObject = this.beanClass;
 		if (beanClassObject instanceof Class) {
@@ -777,9 +797,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Specify constructor argument values for this bean.
 	 */
-	public void setConstructorArgumentValues(@Nullable ConstructorArgumentValues constructorArgumentValues) {
-		this.constructorArgumentValues =
-				(constructorArgumentValues != null ? constructorArgumentValues : new ConstructorArgumentValues());
+	public void setConstructorArgumentValues(ConstructorArgumentValues constructorArgumentValues) {
+		this.constructorArgumentValues = constructorArgumentValues;
 	}
 
 	/**
@@ -787,21 +806,25 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	@Override
 	public ConstructorArgumentValues getConstructorArgumentValues() {
+		if (this.constructorArgumentValues == null) {
+			this.constructorArgumentValues = new ConstructorArgumentValues();
+		}
 		return this.constructorArgumentValues;
 	}
 
 	/**
 	 * Return if there are constructor argument values defined for this bean.
 	 */
+	@Override
 	public boolean hasConstructorArgumentValues() {
-		return !this.constructorArgumentValues.isEmpty();
+		return (this.constructorArgumentValues != null && !this.constructorArgumentValues.isEmpty());
 	}
 
 	/**
 	 * Specify property values for this bean, if any.
 	 */
-	public void setPropertyValues(@Nullable MutablePropertyValues propertyValues) {
-		this.propertyValues = (propertyValues != null ? propertyValues : new MutablePropertyValues());
+	public void setPropertyValues(MutablePropertyValues propertyValues) {
+		this.propertyValues = propertyValues;
 	}
 
 	/**
@@ -809,14 +832,26 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	@Override
 	public MutablePropertyValues getPropertyValues() {
+		if (this.propertyValues == null) {
+			this.propertyValues = new MutablePropertyValues();
+		}
 		return this.propertyValues;
+	}
+
+	/**
+	 * Return if there are property values values defined for this bean.
+	 * @since 5.0.2
+	 */
+	@Override
+	public boolean hasPropertyValues() {
+		return (this.propertyValues != null && !this.propertyValues.isEmpty());
 	}
 
 	/**
 	 * Specify method overrides for the bean, if any.
 	 */
-	public void setMethodOverrides(@Nullable MethodOverrides methodOverrides) {
-		this.methodOverrides = (methodOverrides != null ? methodOverrides : new MethodOverrides());
+	public void setMethodOverrides(MethodOverrides methodOverrides) {
+		this.methodOverrides = methodOverrides;
 	}
 
 	/**
@@ -825,7 +860,18 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * <p>Never returns {@code null}.
 	 */
 	public MethodOverrides getMethodOverrides() {
+		if (this.methodOverrides == null) {
+			this.methodOverrides = new MethodOverrides();
+		}
 		return this.methodOverrides;
+	}
+
+	/**
+	 * Return if there are method overrides defined for this bean.
+	 * @since 5.0.2
+	 */
+	public boolean hasMethodOverrides() {
+		return (this.methodOverrides != null && !this.methodOverrides.isEmpty());
 	}
 
 	/**
@@ -971,6 +1017,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * came from (for the purpose of showing context in case of errors).
 	 */
 	@Override
+	@Nullable
 	public String getResourceDescription() {
 		return (this.resource != null ? this.resource.getDescription() : null);
 	}
@@ -989,6 +1036,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * originator chain to find the original BeanDefinition as defined by the user.
 	 */
 	@Override
+	@Nullable
 	public BeanDefinition getOriginatingBeanDefinition() {
 		return (this.resource instanceof BeanDefinitionResource ?
 				((BeanDefinitionResource) this.resource).getBeanDefinition() : null);
@@ -999,7 +1047,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @throws BeanDefinitionValidationException in case of validation failure
 	 */
 	public void validate() throws BeanDefinitionValidationException {
-		if (!getMethodOverrides().isEmpty() && getFactoryMethodName() != null) {
+		if (hasMethodOverrides() && getFactoryMethodName() != null) {
 			throw new BeanDefinitionValidationException(
 					"Cannot combine static factory method with method overrides: " +
 					"the static factory method must create the instance");
@@ -1017,9 +1065,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	public void prepareMethodOverrides() throws BeanDefinitionValidationException {
 		// Check that lookup methods exists.
-		MethodOverrides methodOverrides = getMethodOverrides();
-		if (!methodOverrides.isEmpty()) {
-			Set<MethodOverride> overrides = methodOverrides.getOverrides();
+		if (hasMethodOverrides()) {
+			Set<MethodOverride> overrides = getMethodOverrides().getOverrides();
 			synchronized (overrides) {
 				for (MethodOverride mo : overrides) {
 					prepareMethodOverride(mo);

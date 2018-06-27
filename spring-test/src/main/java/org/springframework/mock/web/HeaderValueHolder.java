@@ -39,9 +39,11 @@ class HeaderValueHolder {
 	private final List<Object> values = new LinkedList<>();
 
 
-	public void setValue(Object value) {
+	public void setValue(@Nullable Object value) {
 		this.values.clear();
-		this.values.add(value);
+		if (value != null) {
+			this.values.add(value);
+		}
 	}
 
 	public void addValue(Object value) {

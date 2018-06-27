@@ -218,6 +218,7 @@ public class JobDetailFactoryBean
 
 
 	@Override
+	@Nullable
 	public JobDetail getObject() {
 		return this.jobDetail;
 	}

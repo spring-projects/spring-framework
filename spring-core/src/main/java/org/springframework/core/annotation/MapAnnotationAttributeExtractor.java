@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,11 +60,13 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 
 
 	@Override
+	@Nullable
 	protected Object getRawAttributeValue(Method attributeMethod) {
 		return getRawAttributeValue(attributeMethod.getName());
 	}
 
 	@Override
+	@Nullable
 	protected Object getRawAttributeValue(String attributeName) {
 		return getSource().get(attributeName);
 	}
@@ -126,7 +128,7 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 
 			// finally, ensure correct type
 			Class<?> requiredReturnType = attributeMethod.getReturnType();
-			Class<? extends Object> actualReturnType = attributeValue.getClass();
+			Class<?> actualReturnType = attributeValue.getClass();
 
 			if (!ClassUtils.isAssignable(requiredReturnType, actualReturnType)) {
 				boolean converted = false;

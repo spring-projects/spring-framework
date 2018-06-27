@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.http.codec;
 
 import java.time.Duration;
 
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.lang.Nullable;
 
 /**
@@ -167,10 +166,10 @@ public class ServerSentEvent<T> {
         Builder<T> comment(String comment);
 
 		/**
-		 * Set the value of the {@code data} field. If the {@code data} argument is a
-		 * multi-line {@code String}, it will be turned into multiple {@code data} field lines
-		 * as defined in the Server-Sent Events W3C recommendation. If {@code data} is not a
-		 * String, it will be {@linkplain Jackson2JsonEncoder encoded} into JSON.
+		 * Set the value of the {@code data} field. If the {@code data} argument is a multi-line
+		 * {@code String}, it will be turned into multiple {@code data} field lines as defined
+		 * in the Server-Sent Events W3C recommendation. If {@code data} is not a String, it will
+		 * be {@linkplain org.springframework.http.codec.json.Jackson2JsonEncoder encoded} into JSON.
 		 * @param data the value of the data field
 		 * @return {@code this} builder
 		 */
@@ -181,8 +180,8 @@ public class ServerSentEvent<T> {
          * @return the built event
          */
         ServerSentEvent<T> build();
-
     }
+
 
     private static class BuilderImpl<T> implements Builder<T> {
 
@@ -240,7 +239,7 @@ public class ServerSentEvent<T> {
 
         @Override
         public ServerSentEvent<T> build() {
-            return new ServerSentEvent<T>(this.id, this.event, this.retry, this.comment, this.data);
+            return new ServerSentEvent<>(this.id, this.event, this.retry, this.comment, this.data);
         }
     }
 

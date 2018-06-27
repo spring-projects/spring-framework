@@ -139,11 +139,11 @@ public abstract class ObjectUtils {
 		if (obj instanceof Optional) {
 			return !((Optional) obj).isPresent();
 		}
-		if (obj.getClass().isArray()) {
-			return Array.getLength(obj) == 0;
-		}
 		if (obj instanceof CharSequence) {
 			return ((CharSequence) obj).length() == 0;
+		}
+		if (obj.getClass().isArray()) {
+			return Array.getLength(obj) == 0;
 		}
 		if (obj instanceof Collection) {
 			return ((Collection) obj).isEmpty();

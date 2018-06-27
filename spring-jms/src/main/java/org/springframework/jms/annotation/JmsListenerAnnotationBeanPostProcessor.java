@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 package org.springframework.jms.annotation;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,6 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -41,6 +44,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.jms.config.JmsListenerConfigUtils;
 import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerEndpointRegistrar;
@@ -170,9 +174,11 @@ public class JmsListenerAnnotationBeanPostProcessor
 
 		if (this.beanFactory instanceof ListableBeanFactory) {
 			// Apply JmsListenerConfigurer beans from the BeanFactory, if any
-			Map<String, JmsListenerConfigurer> instances =
+			Map<String, JmsListenerConfigurer> beans =
 					((ListableBeanFactory) this.beanFactory).getBeansOfType(JmsListenerConfigurer.class);
-			for (JmsListenerConfigurer configurer : instances.values()) {
+			List<JmsListenerConfigurer> configurers = new ArrayList<>(beans.values());
+			AnnotationAwareOrderComparator.sort(configurers);
+			for (JmsListenerConfigurer configurer : configurers) {
 				configurer.configureJmsListeners(this.registrar);
 			}
 		}
@@ -214,7 +220,7 @@ public class JmsListenerAnnotationBeanPostProcessor
 	@Override
 	public Object postProcessAfterInitialization(final Object bean, String beanName) throws BeansException {
 		if (!this.nonAnnotatedClasses.contains(bean.getClass())) {
-			Class<?> targetClass = AopUtils.getTargetClass(bean);
+			Class<?> targetClass = AopProxyUtils.ultimateTargetClass(bean);
 			Map<Method, Set<JmsListener>> annotatedMethods = MethodIntrospector.selectMethods(targetClass,
 					(MethodIntrospector.MetadataLookup<Set<JmsListener>>) method -> {
 						Set<JmsListener> listenerMethods = AnnotatedElementUtils.getMergedRepeatableAnnotations(
@@ -345,7 +351,9 @@ public class JmsListenerAnnotationBeanPostProcessor
 
 		private MessageHandlerMethodFactory createDefaultJmsHandlerMethodFactory() {
 			DefaultMessageHandlerMethodFactory defaultFactory = new DefaultMessageHandlerMethodFactory();
-			defaultFactory.setBeanFactory(beanFactory);
+			if (beanFactory != null) {
+				defaultFactory.setBeanFactory(beanFactory);
+			}
 			defaultFactory.afterPropertiesSet();
 			return defaultFactory;
 		}

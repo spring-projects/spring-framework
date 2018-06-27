@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,16 +73,15 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 	private static final Log logger = LogFactory.getLog(WebSocketStompClient.class);
 
-
 	private final WebSocketClient webSocketClient;
 
 	private int inboundMessageSizeLimit = 64 * 1024;
 
 	private boolean autoStartup = true;
 
-	private boolean running = false;
-
 	private int phase = Integer.MAX_VALUE;
+
+	private volatile boolean running = false;
 
 
 	/**
@@ -111,7 +110,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * property to "10000,10000" if it is currently set to "0,0".
 	 */
 	@Override
-	public void setTaskScheduler(TaskScheduler taskScheduler) {
+	public void setTaskScheduler(@Nullable TaskScheduler taskScheduler) {
 		if (!isDefaultHeartbeatEnabled()) {
 			setDefaultHeartbeat(new long[] {10000, 10000});
 		}
@@ -296,6 +295,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 		private final StompWebSocketMessageCodec codec = new StompWebSocketMessageCodec(getInboundMessageSizeLimit());
 
+		@Nullable
 		private volatile WebSocketSession session;
 
 		private volatile long lastReadTime = -1;
@@ -312,7 +312,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		// ListenableFutureCallback implementation: handshake outcome
 
 		@Override
-		public void onSuccess(WebSocketSession webSocketSession) {
+		public void onSuccess(@Nullable WebSocketSession webSocketSession) {
 		}
 
 		@Override
@@ -381,7 +381,9 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 			updateLastWriteTime();
 			SettableListenableFuture<Void> future = new SettableListenableFuture<>();
 			try {
-				this.session.sendMessage(this.codec.encode(message, this.session.getClass()));
+				WebSocketSession session = this.session;
+				Assert.state(session != null, "No WebSocketSession available");
+				session.sendMessage(this.codec.encode(message, session.getClass()));
 				future.set(null);
 			}
 			catch (Throwable ex) {
@@ -419,31 +421,31 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		public void onWriteInactivity(final Runnable runnable, final long duration) {
 			Assert.state(getTaskScheduler() != null, "No TaskScheduler configured");
 			this.lastWriteTime = System.currentTimeMillis();
-			this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(new Runnable() {
-				@Override
-				public void run() {
-					if (System.currentTimeMillis() - lastWriteTime > duration) {
-						try {
-							runnable.run();
-						}
-						catch (Throwable ex) {
-							if (logger.isDebugEnabled()) {
-								logger.debug("WriteInactivityTask failure", ex);
-							}
-						}
-					}
-				}
-			}, duration / 2));
+			this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(() -> {
+                if (System.currentTimeMillis() - lastWriteTime > duration) {
+                    try {
+                        runnable.run();
+                    }
+                    catch (Throwable ex) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("WriteInactivityTask failure", ex);
+                        }
+                    }
+                }
+            }, duration / 2));
 		}
 
 		@Override
 		public void close() {
-			try {
-				this.session.close();
-			}
-			catch (IOException ex) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Failed to close session: " + this.session.getId(), ex);
+			WebSocketSession session = this.session;
+			if (session != null) {
+				try {
+					session.close();
+				}
+				catch (IOException ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Failed to close session: " + session.getId(), ex);
+					}
 				}
 			}
 		}

@@ -24,12 +24,12 @@ import org.springframework.lang.Nullable;
 
 /**
  * Base class for monitoring interceptors, such as performance monitors.
- * Provides {@code prefix} and {@code suffix} properties
- * that help to classify/group performance monitoring results.
+ * Provides configurable "prefix and "suffix" properties that help to
+ * classify/group performance monitoring results.
  *
- * <p>Subclasses should call the {@code createInvocationTraceName(MethodInvocation)}
- * method to create a name for the given trace that includes information about the
- * method invocation under trace along with the prefix and suffix added as appropriate.
+ * <p>In their {@link #invokeUnderTrace} implementation, subclasses should call the
+ * {@link #createInvocationTraceName} method to create a name for the given trace,
+ * including information about the method invocation along with a prefix/suffix.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller

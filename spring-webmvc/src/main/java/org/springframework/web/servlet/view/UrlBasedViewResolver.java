@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,7 +137,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	@Nullable
 	private String[] viewNames;
 
-	private int order = Integer.MAX_VALUE;
+	private int order = Ordered.LOWEST_PRECEDENCE;
 
 
 	/**
@@ -146,8 +146,8 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * (by default, AbstractUrlBasedView)
 	 * @see AbstractUrlBasedView
 	 */
-	public void setViewClass(Class<?> viewClass) {
-		if (!requiredViewClass().isAssignableFrom(viewClass)) {
+	public void setViewClass(@Nullable Class<?> viewClass) {
+		if (viewClass != null && !requiredViewClass().isAssignableFrom(viewClass)) {
 			throw new IllegalArgumentException("Given view class [" + viewClass.getName() +
 					"] is not of type [" + requiredViewClass().getName() + "]");
 		}
@@ -204,7 +204,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * <p>May be ignored by view classes if the view itself is assumed
 	 * to set the content type, e.g. in case of JSPs.
 	 */
-	public void setContentType(String contentType) {
+	public void setContentType(@Nullable String contentType) {
 		this.contentType = contentType;
 	}
 
@@ -276,7 +276,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * @param redirectHosts one or more application hosts
 	 * @since 4.3
 	 */
-	public void setRedirectHosts(String... redirectHosts) {
+	public void setRedirectHosts(@Nullable String... redirectHosts) {
 		this.redirectHosts = redirectHosts;
 	}
 
@@ -294,7 +294,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * @param requestContextAttribute name of the RequestContext attribute
 	 * @see AbstractView#setRequestContextAttribute
 	 */
-	public void setRequestContextAttribute(String requestContextAttribute) {
+	public void setRequestContextAttribute(@Nullable String requestContextAttribute) {
 		this.requestContextAttribute = requestContextAttribute;
 	}
 
@@ -393,7 +393,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * attributes.
 	 * @see AbstractView#setExposedContextBeanNames
 	 */
-	public void setExposedContextBeanNames(String... exposedContextBeanNames) {
+	public void setExposedContextBeanNames(@Nullable String... exposedContextBeanNames) {
 		this.exposedContextBeanNames = exposedContextBeanNames;
 	}
 
@@ -409,7 +409,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * view name 'myReport'.
 	 * @see #canHandle
 	 */
-	public void setViewNames(String... viewNames) {
+	public void setViewNames(@Nullable String... viewNames) {
 		this.viewNames = viewNames;
 	}
 
@@ -423,17 +423,14 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	}
 
 	/**
-	 * Set the order in which this {@link org.springframework.web.servlet.ViewResolver}
-	 * is evaluated.
+	 * Specify the order value for this ViewResolver bean.
+	 * <p>The default value is {@code Ordered.LOWEST_PRECEDENCE}, meaning non-ordered.
+	 * @see org.springframework.core.Ordered#getOrder()
 	 */
 	public void setOrder(int order) {
 		this.order = order;
 	}
 
-	/**
-	 * Return the order in which this {@link org.springframework.web.servlet.ViewResolver}
-	 * is evaluated.
-	 */
 	@Override
 	public int getOrder() {
 		return this.order;

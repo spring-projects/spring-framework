@@ -190,7 +190,9 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param cargs the constructor argument values to apply
 	 * @param pvs the property values to apply
 	 */
-	public RootBeanDefinition(@Nullable Class<?> beanClass, ConstructorArgumentValues cargs, @Nullable MutablePropertyValues pvs) {
+	public RootBeanDefinition(@Nullable Class<?> beanClass, @Nullable ConstructorArgumentValues cargs,
+			@Nullable MutablePropertyValues pvs) {
+
 		super(cargs, pvs);
 		setBeanClass(beanClass);
 	}
@@ -257,7 +259,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/**
 	 * Register a target definition that is being decorated by this bean definition.
 	 */
-	public void setDecoratedDefinition(BeanDefinitionHolder decoratedDefinition) {
+	public void setDecoratedDefinition(@Nullable BeanDefinitionHolder decoratedDefinition) {
 		this.decoratedDefinition = decoratedDefinition;
 	}
 
@@ -276,7 +278,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @see #setTargetType(ResolvableType)
 	 * @see #getResolvedFactoryMethod()
 	 */
-	public void setQualifiedElement(AnnotatedElement qualifiedElement) {
+	public void setQualifiedElement(@Nullable AnnotatedElement qualifiedElement) {
 		this.qualifiedElement = qualifiedElement;
 	}
 

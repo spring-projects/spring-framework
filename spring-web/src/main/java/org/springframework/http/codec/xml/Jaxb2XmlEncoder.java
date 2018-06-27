@@ -25,6 +25,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import org.apache.commons.logging.Log;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
@@ -73,6 +74,10 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 	protected Flux<DataBuffer> encode(Object value, DataBufferFactory dataBufferFactory,
 			ResolvableType type, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 		try {
+			Log logger = getLogger(hints);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Encoding [" + value + "]");
+			}
 			DataBuffer buffer = dataBufferFactory.allocateBuffer(1024);
 			OutputStream outputStream = buffer.asOutputStream();
 			Class<?> clazz = ClassUtils.getUserClass(value);

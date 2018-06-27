@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package org.springframework.test.web.reactive.server;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.format.FormatterRegistry;
@@ -56,13 +56,21 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 
 	DefaultControllerSpec(Object... controllers) {
 		Assert.isTrue(!ObjectUtils.isEmpty(controllers), "At least one controller is required");
-		this.controllers = Arrays.asList(controllers);
+		this.controllers = instantiateIfNecessary(controllers);
+	}
+
+	private static List<Object> instantiateIfNecessary(Object[] specified) {
+		List<Object> instances = new ArrayList<>(specified.length);
+		for (Object obj : specified) {
+			instances.add(obj instanceof Class ? BeanUtils.instantiateClass((Class<?>) obj) : obj);
+		}
+		return instances;
 	}
 
 
 	@Override
-	public DefaultControllerSpec controllerAdvice(Object... controllerAdvice) {
-		this.controllerAdvice.addAll(Arrays.asList(controllerAdvice));
+	public DefaultControllerSpec controllerAdvice(Object... controllerAdvices) {
+		this.controllerAdvice.addAll(instantiateIfNecessary(controllerAdvices));
 		return this;
 	}
 

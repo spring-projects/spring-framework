@@ -251,6 +251,7 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 
 
 	@Override
+	@Nullable
 	public SimpleTrigger getObject() {
 		return this.simpleTrigger;
 	}

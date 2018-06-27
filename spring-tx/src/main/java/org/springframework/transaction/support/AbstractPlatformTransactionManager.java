@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -207,7 +207,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * Set whether existing transactions should be validated before participating
 	 * in them.
 	 * <p>When participating in an existing transaction (e.g. with
-	 * PROPAGATION_REQUIRES or PROPAGATION_SUPPORTS encountering an existing
+	 * PROPAGATION_REQUIRED or PROPAGATION_SUPPORTS encountering an existing
 	 * transaction), this outer transaction's characteristics will apply even
 	 * to the inner transaction scope. Validation will detect incompatible
 	 * isolation level and read-only settings on the inner transaction definition
@@ -215,6 +215,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * <p>Default is "false", leniently ignoring inner transaction settings,
 	 * simply overriding them with the outer transaction's characteristics.
 	 * Switch this flag to "true" in order to enforce strict validation.
+	 * @since 2.5.1
 	 */
 	public final void setValidateExistingTransaction(boolean validateExistingTransaction) {
 		this.validateExistingTransaction = validateExistingTransaction;
@@ -223,6 +224,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	/**
 	 * Return whether existing transactions should be validated before participating
 	 * in them.
+	 * @since 2.5.1
 	 */
 	public final boolean isValidateExistingTransaction() {
 		return this.validateExistingTransaction;
@@ -232,7 +234,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * Set whether to globally mark an existing transaction as rollback-only
 	 * after a participating transaction failed.
 	 * <p>Default is "true": If a participating transaction (e.g. with
-	 * PROPAGATION_REQUIRES or PROPAGATION_SUPPORTS encountering an existing
+	 * PROPAGATION_REQUIRED or PROPAGATION_SUPPORTS encountering an existing
 	 * transaction) fails, the transaction will be globally marked as rollback-only.
 	 * The only possible outcome of such a transaction is a rollback: The
 	 * transaction originator <i>cannot</i> make the transaction commit anymore.
@@ -285,6 +287,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * boundary. This allows, for example, to continue unit tests even after an
 	 * operation failed and the transaction will never be completed. All transaction
 	 * managers will only fail earlier if this flag has explicitly been set to "true".
+	 * @since 2.0
 	 * @see org.springframework.transaction.UnexpectedRollbackException
 	 */
 	public final void setFailEarlyOnGlobalRollbackOnly(boolean failEarlyOnGlobalRollbackOnly) {
@@ -294,6 +297,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	/**
 	 * Return whether to fail early in case of the transaction being globally marked
 	 * as rollback-only.
+	 * @since 2.0
 	 */
 	public final boolean isFailEarlyOnGlobalRollbackOnly() {
 		return this.failEarlyOnGlobalRollbackOnly;

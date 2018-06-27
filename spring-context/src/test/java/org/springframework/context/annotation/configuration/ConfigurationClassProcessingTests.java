@@ -154,7 +154,7 @@ public class ConfigurationClassProcessingTests {
 	public void simplestPossibleConfig() {
 		BeanFactory factory = initBeanFactory(SimplestPossibleConfig.class);
 		String stringBean = factory.getBean("stringBean", String.class);
-		assertEquals(stringBean, "foo");
+		assertEquals("foo", stringBean);
 	}
 
 	@Test
@@ -163,7 +163,7 @@ public class ConfigurationClassProcessingTests {
 		assertEquals(Object.class, factory.getType("stringBean"));
 		assertFalse(factory.isTypeMatch("stringBean", String.class));
 		String stringBean = factory.getBean("stringBean", String.class);
-		assertEquals(stringBean, "foo");
+		assertEquals("foo", stringBean);
 	}
 
 	@Test
@@ -203,6 +203,15 @@ public class ConfigurationClassProcessingTests {
 
 		assertSame(foo.getSpouse(), bar);
 		assertNotSame(bar.getSpouse(), baz);
+	}
+
+	@Test
+	public void configurationWithNullReference() {
+		BeanFactory factory = initBeanFactory(ConfigWithNullReference.class);
+
+		TestBean foo = factory.getBean("foo", TestBean.class);
+		assertTrue(factory.getBean("bar").equals(null));
+		assertNull(foo.getSpouse());
 	}
 
 	@Test
@@ -307,7 +316,7 @@ public class ConfigurationClassProcessingTests {
 
 		static TestBean testBean = new TestBean(ConfigWithBeanWithAliases.class.getSimpleName());
 
-		@Bean(name = { "name1", "alias1", "alias2", "alias3" })
+		@Bean(name = {"name1", "alias1", "alias2", "alias3"})
 		public TestBean methodName() {
 			return testBean;
 		}
@@ -319,7 +328,7 @@ public class ConfigurationClassProcessingTests {
 
 		static TestBean testBean = new TestBean(ConfigWithBeanWithAliasesConfiguredViaValueAttribute.class.getSimpleName());
 
-		@Bean({ "enigma", "alias1", "alias2", "alias3" })
+		@Bean({"enigma", "alias1", "alias2", "alias3"})
 		public TestBean methodName() {
 			return testBean;
 		}
@@ -411,6 +420,16 @@ public class ConfigurationClassProcessingTests {
 		@Bean @Scope("prototype")
 		public TestBean adaptive2(DependencyDescriptor dd) {
 			return new TestBean(dd.getMember().getName());
+		}
+	}
+
+
+	@Configuration
+	static class ConfigWithNullReference extends ConfigWithPrototypeBean {
+
+		@Override
+		public TestBean bar() {
+			return null;
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Test;
 
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -176,6 +177,14 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	public void severalFixedRatesOnDefaultMethod() {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(FixedRatesDefaultBean.class);
+		severalFixedRates(context, processorDefinition, targetDefinition);
+	}
+
+	@Test
+	public void severalFixedRatesAgainstNestedCglibProxy() {
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(SeveralFixedRatesWithRepeatedScheduledAnnotationTestBean.class);
+		targetDefinition.setFactoryMethodName("nestedProxy");
 		severalFixedRates(context, processorDefinition, targetDefinition);
 	}
 
@@ -416,12 +425,21 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void propertyPlaceholderWithFixedDelay() {
+	public void propertyPlaceholderWithFixedDelayInMillis() {
+		propertyPlaceholderWithFixedDelay(false);
+	}
+
+	@Test
+	public void propertyPlaceholderWithFixedDelayInDuration() {
+		propertyPlaceholderWithFixedDelay(true);
+	}
+
+	private void propertyPlaceholderWithFixedDelay(boolean durationFormat) {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition placeholderDefinition = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
 		Properties properties = new Properties();
-		properties.setProperty("fixedDelay", "5000");
-		properties.setProperty("initialDelay", "1000");
+		properties.setProperty("fixedDelay", (durationFormat ? "PT5S" : "5000"));
+		properties.setProperty("initialDelay", (durationFormat ? "PT1S" : "1000"));
 		placeholderDefinition.getPropertyValues().addPropertyValue("properties", properties);
 		BeanDefinition targetDefinition = new RootBeanDefinition(PropertyPlaceholderWithFixedDelayTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
@@ -448,12 +466,21 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void propertyPlaceholderWithFixedRate() {
+	public void propertyPlaceholderWithFixedRateInMillis() {
+		propertyPlaceholderWithFixedRate(false);
+	}
+
+	@Test
+	public void propertyPlaceholderWithFixedRateInDuration() {
+		propertyPlaceholderWithFixedRate(true);
+	}
+
+	private void propertyPlaceholderWithFixedRate(boolean durationFormat) {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition placeholderDefinition = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
 		Properties properties = new Properties();
-		properties.setProperty("fixedRate", "3000");
-		properties.setProperty("initialDelay", "1000");
+		properties.setProperty("fixedRate", (durationFormat ? "PT3S" : "3000"));
+		properties.setProperty("initialDelay", (durationFormat ? "PT1S" : "1000"));
 		placeholderDefinition.getPropertyValues().addPropertyValue("properties", properties);
 		BeanDefinition targetDefinition = new RootBeanDefinition(PropertyPlaceholderWithFixedRateTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
@@ -630,6 +657,14 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		@Scheduled(fixedRate = 4000)
 		@Scheduled(fixedRate = 4000, initialDelay = 2000)
 		public void fixedRate() {
+		}
+
+		static SeveralFixedRatesWithRepeatedScheduledAnnotationTestBean nestedProxy() {
+			ProxyFactory pf1 = new ProxyFactory(new SeveralFixedRatesWithRepeatedScheduledAnnotationTestBean());
+			pf1.setProxyTargetClass(true);
+			ProxyFactory pf2 = new ProxyFactory(pf1.getProxy());
+			pf2.setProxyTargetClass(true);
+			return (SeveralFixedRatesWithRepeatedScheduledAnnotationTestBean) pf2.getProxy();
 		}
 	}
 

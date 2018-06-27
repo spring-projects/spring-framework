@@ -148,6 +148,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 
 
 	@Override
+	@Nullable
 	public byte[] getBlobAsBytes(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning BLOB as bytes");
 		if (this.wrapAsLob) {
@@ -160,6 +161,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 	}
 
 	@Override
+	@Nullable
 	public InputStream getBlobAsBinaryStream(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning BLOB as binary stream");
 		if (this.wrapAsLob) {
@@ -172,6 +174,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 	}
 
 	@Override
+	@Nullable
 	public String getClobAsString(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning CLOB as string");
 		if (this.wrapAsLob) {

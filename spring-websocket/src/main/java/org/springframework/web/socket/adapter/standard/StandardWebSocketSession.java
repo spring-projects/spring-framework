@@ -117,6 +117,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	}
 
 	@Override
+	@Nullable
 	public URI getUri() {
 		checkNativeSessionInitialized();
 		return this.uri;
@@ -144,11 +145,13 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	}
 
 	@Override
+	@Nullable
 	public InetSocketAddress getLocalAddress() {
 		return this.localAddress;
 	}
 
 	@Override
+	@Nullable
 	public InetSocketAddress getRemoteAddress() {
 		return this.remoteAddress;
 	}

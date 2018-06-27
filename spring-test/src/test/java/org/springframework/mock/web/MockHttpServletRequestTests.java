@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,14 +47,11 @@ import static org.junit.Assert.*;
  * @author Sam Brannen
  * @author Brian Clozel
  * @author Jakub Narloch
+ * @author Av Pinzur
  */
 public class MockHttpServletRequestTests {
 
 	private static final String HOST = "Host";
-
-	private static final String CONTENT_TYPE = "Content-Type";
-
-	private static final String IF_MODIFIED_SINCE = "If-Modified-Since";
 
 	private final MockHttpServletRequest request = new MockHttpServletRequest();
 
@@ -82,7 +79,7 @@ public class MockHttpServletRequestTests {
 	}
 
 	@Test
-	public void setContentAndGetContentAsByteArray() throws IOException {
+	public void setContentAndGetContentAsByteArray() {
 		byte[] bytes = "request body".getBytes();
 		request.setContent(bytes);
 		assertEquals(bytes.length, request.getContentLength());
@@ -116,12 +113,44 @@ public class MockHttpServletRequestTests {
 		assertNull(request.getContentAsByteArray());
 	}
 
+	@Test  // SPR-16505
+	public void getReaderTwice() throws IOException {
+		byte[] bytes = "body".getBytes(Charset.defaultCharset());
+		request.setContent(bytes);
+		assertSame(request.getReader(), request.getReader());
+	}
+
+	@Test  // SPR-16505
+	public void getInputStreamTwice() throws IOException {
+		byte[] bytes = "body".getBytes(Charset.defaultCharset());
+		request.setContent(bytes);
+		assertSame(request.getInputStream(), request.getInputStream());
+	}
+
+	@Test  // SPR-16499
+	public void getReaderAfterGettingInputStream() throws IOException {
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(
+				"Cannot call getReader() after getInputStream() has already been called for the current request");
+		request.getInputStream();
+		request.getReader();
+	}
+
+	@Test  // SPR-16499
+	public void getInputStreamAfterGettingReader() throws IOException {
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(
+				"Cannot call getInputStream() after getReader() has already been called for the current request");
+		request.getReader();
+		request.getInputStream();
+	}
+
 	@Test
 	public void setContentType() {
 		String contentType = "test/plain";
 		request.setContentType(contentType);
 		assertEquals(contentType, request.getContentType());
-		assertEquals(contentType, request.getHeader(CONTENT_TYPE));
+		assertEquals(contentType, request.getHeader(HttpHeaders.CONTENT_TYPE));
 		assertNull(request.getCharacterEncoding());
 	}
 
@@ -130,36 +159,34 @@ public class MockHttpServletRequestTests {
 		String contentType = "test/plain;charset=UTF-8";
 		request.setContentType(contentType);
 		assertEquals(contentType, request.getContentType());
-		assertEquals(contentType, request.getHeader(CONTENT_TYPE));
+		assertEquals(contentType, request.getHeader(HttpHeaders.CONTENT_TYPE));
 		assertEquals("UTF-8", request.getCharacterEncoding());
 	}
 
 	@Test
 	public void contentTypeHeader() {
 		String contentType = "test/plain";
-		request.addHeader("Content-Type", contentType);
+		request.addHeader(HttpHeaders.CONTENT_TYPE, contentType);
 		assertEquals(contentType, request.getContentType());
-		assertEquals(contentType, request.getHeader(CONTENT_TYPE));
+		assertEquals(contentType, request.getHeader(HttpHeaders.CONTENT_TYPE));
 		assertNull(request.getCharacterEncoding());
 	}
 
 	@Test
 	public void contentTypeHeaderUTF8() {
 		String contentType = "test/plain;charset=UTF-8";
-		request.addHeader("Content-Type", contentType);
+		request.addHeader(HttpHeaders.CONTENT_TYPE, contentType);
 		assertEquals(contentType, request.getContentType());
-		assertEquals(contentType, request.getHeader(CONTENT_TYPE));
+		assertEquals(contentType, request.getHeader(HttpHeaders.CONTENT_TYPE));
 		assertEquals("UTF-8", request.getCharacterEncoding());
 	}
 
-	// SPR-12677
-
-	@Test
+	@Test  // SPR-12677
 	public void setContentTypeHeaderWithMoreComplexCharsetSyntax() {
 		String contentType = "test/plain;charset=\"utf-8\";foo=\"charset=bar\";foocharset=bar;foo=bar";
-		request.addHeader("Content-Type", contentType);
+		request.addHeader(HttpHeaders.CONTENT_TYPE, contentType);
 		assertEquals(contentType, request.getContentType());
-		assertEquals(contentType, request.getHeader(CONTENT_TYPE));
+		assertEquals(contentType, request.getHeader(HttpHeaders.CONTENT_TYPE));
 		assertEquals("UTF-8", request.getCharacterEncoding());
 	}
 
@@ -168,7 +195,7 @@ public class MockHttpServletRequestTests {
 		request.setContentType("test/plain");
 		request.setCharacterEncoding("UTF-8");
 		assertEquals("test/plain", request.getContentType());
-		assertEquals("test/plain;charset=UTF-8", request.getHeader(CONTENT_TYPE));
+		assertEquals("test/plain;charset=UTF-8", request.getHeader(HttpHeaders.CONTENT_TYPE));
 		assertEquals("UTF-8", request.getCharacterEncoding());
 	}
 
@@ -177,12 +204,12 @@ public class MockHttpServletRequestTests {
 		request.setCharacterEncoding("UTF-8");
 		request.setContentType("test/plain");
 		assertEquals("test/plain", request.getContentType());
-		assertEquals("test/plain;charset=UTF-8", request.getHeader(CONTENT_TYPE));
+		assertEquals("test/plain;charset=UTF-8", request.getHeader(HttpHeaders.CONTENT_TYPE));
 		assertEquals("UTF-8", request.getCharacterEncoding());
 	}
 
 	@Test
-	public void httpHeaderNameCasingIsPreserved() throws Exception {
+	public void httpHeaderNameCasingIsPreserved() {
 		String headerName = "Header1";
 		request.addHeader(headerName, "value1");
 		Enumeration<String> requestHeaders = request.getHeaderNames();
@@ -305,6 +332,13 @@ public class MockHttpServletRequestTests {
 	}
 
 	@Test
+	public void invalidAcceptLanguageHeader() {
+		request.addHeader("Accept-Language", "en_US");
+		assertEquals(Locale.ENGLISH, request.getLocale());
+		assertEquals("en_US", request.getHeader("Accept-Language"));
+	}
+
+	@Test
 	public void getServerNameWithDefaultName() {
 		assertEquals("localhost", request.getServerName());
 	}
@@ -402,6 +436,22 @@ public class MockHttpServletRequestTests {
 		assertEquals("http://localhost", requestURL.toString());
 	}
 
+	@Test  // SPR-16138
+	public void getRequestURLWithHostHeader() {
+		String testServer = "test.server";
+		request.addHeader(HOST, testServer);
+		StringBuffer requestURL = request.getRequestURL();
+		assertEquals("http://" + testServer, requestURL.toString());
+	}
+
+	@Test  // SPR-16138
+	public void getRequestURLWithHostHeaderAndPort() {
+		String testServer = "test.server:9999";
+		request.addHeader(HOST, testServer);
+		StringBuffer requestURL = request.getRequestURL();
+		assertEquals("http://" + testServer, requestURL.toString());
+	}
+
 	@Test
 	public void getRequestURLWithNullRequestUri() {
 		request.setRequestURI(null);
@@ -457,42 +507,43 @@ public class MockHttpServletRequestTests {
 	}
 
 	@Test
-	public void httpHeaderDate() throws Exception {
+	public void httpHeaderDate() {
 		Date date = new Date();
-		request.addHeader(IF_MODIFIED_SINCE, date);
-		assertEquals(date.getTime(), request.getDateHeader(IF_MODIFIED_SINCE));
+		request.addHeader(HttpHeaders.IF_MODIFIED_SINCE, date);
+		assertEquals(date.getTime(), request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE));
 	}
 
 	@Test
-	public void httpHeaderTimestamp() throws Exception {
+	public void httpHeaderTimestamp() {
 		long timestamp = new Date().getTime();
-		request.addHeader(IF_MODIFIED_SINCE, timestamp);
-		assertEquals(timestamp, request.getDateHeader(IF_MODIFIED_SINCE));
+		request.addHeader(HttpHeaders.IF_MODIFIED_SINCE, timestamp);
+		assertEquals(timestamp, request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE));
 	}
 
 	@Test
-	public void httpHeaderRfcFormatedDate() throws Exception {
-		request.addHeader(IF_MODIFIED_SINCE, "Tue, 21 Jul 2015 10:00:00 GMT");
-		assertEquals(1437472800000L, request.getDateHeader(IF_MODIFIED_SINCE));
+	public void httpHeaderRfcFormatedDate() {
+		request.addHeader(HttpHeaders.IF_MODIFIED_SINCE, "Tue, 21 Jul 2015 10:00:00 GMT");
+		assertEquals(1437472800000L, request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE));
 	}
 
 	@Test
-	public void httpHeaderFirstVariantFormatedDate() throws Exception {
-		request.addHeader(IF_MODIFIED_SINCE, "Tue, 21-Jul-15 10:00:00 GMT");
-		assertEquals(1437472800000L, request.getDateHeader(IF_MODIFIED_SINCE));
+	public void httpHeaderFirstVariantFormatedDate() {
+		request.addHeader(HttpHeaders.IF_MODIFIED_SINCE, "Tue, 21-Jul-15 10:00:00 GMT");
+		assertEquals(1437472800000L, request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE));
 	}
 
 	@Test
-	public void httpHeaderSecondVariantFormatedDate() throws Exception {
-		request.addHeader(IF_MODIFIED_SINCE, "Tue Jul 21 10:00:00 2015");
-		assertEquals(1437472800000L, request.getDateHeader(IF_MODIFIED_SINCE));
+	public void httpHeaderSecondVariantFormatedDate() {
+		request.addHeader(HttpHeaders.IF_MODIFIED_SINCE, "Tue Jul 21 10:00:00 2015");
+		assertEquals(1437472800000L, request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void httpHeaderFormatedDateError() throws Exception {
-		request.addHeader(IF_MODIFIED_SINCE, "This is not a date");
-		request.getDateHeader(IF_MODIFIED_SINCE);
+	public void httpHeaderFormatedDateError() {
+		request.addHeader(HttpHeaders.IF_MODIFIED_SINCE, "This is not a date");
+		request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
 	}
+
 
 	private void assertEqualEnumerations(Enumeration<?> enum1, Enumeration<?> enum2) {
 		assertNotNull(enum1);

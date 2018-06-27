@@ -53,6 +53,7 @@ public interface MessageSource {
 	 * otherwise the default message passed as a parameter
 	 * @see java.text.MessageFormat
 	 */
+	@Nullable
 	String getMessage(String code, @Nullable Object[] args, @Nullable String defaultMessage, Locale locale);
 
 	/**

@@ -20,6 +20,8 @@
  * <i>Expert One-on-One J2EE</i>.
  */
 @NonNullApi
+@NonNullFields
 package org.springframework.ejb.access;
 
 import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

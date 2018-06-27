@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,10 +35,11 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 /**
- * Utilities for processing @{@link Configuration} classes.
+ * Utilities for identifying @{@link Configuration} classes.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -59,7 +60,7 @@ abstract class ConfigurationClassUtils {
 
 	private static final Log logger = LogFactory.getLog(ConfigurationClassUtils.class);
 
-	private static final Set<String> candidateIndicators = new HashSet<>(4);
+	private static final Set<String> candidateIndicators = new HashSet<>(8);
 
 	static {
 		candidateIndicators.add(Component.class.getName());
@@ -77,9 +78,11 @@ abstract class ConfigurationClassUtils {
 	 * @param metadataReaderFactory the current factory in use by the caller
 	 * @return whether the candidate qualifies as (any kind of) configuration class
 	 */
-	public static boolean checkConfigurationClassCandidate(BeanDefinition beanDef, MetadataReaderFactory metadataReaderFactory) {
+	public static boolean checkConfigurationClassCandidate(
+			BeanDefinition beanDef, MetadataReaderFactory metadataReaderFactory) {
+
 		String className = beanDef.getBeanClassName();
-		if (className == null) {
+		if (className == null || beanDef.getFactoryMethodName() != null) {
 			return false;
 		}
 
@@ -102,7 +105,8 @@ abstract class ConfigurationClassUtils {
 			}
 			catch (IOException ex) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Could not find class file for introspecting configuration annotations: " + className, ex);
+					logger.debug("Could not find class file for introspecting configuration annotations: " +
+							className, ex);
 				}
 				return false;
 			}
@@ -115,7 +119,7 @@ abstract class ConfigurationClassUtils {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 		}
 		else {
-			return false;
+			return hasNestedConfigurationClass(metadata, metadataReaderFactory);
 		}
 
 		// It's a full or lite configuration candidate... Let's determine the order value, if any.
@@ -125,6 +129,40 @@ abstract class ConfigurationClassUtils {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Check whether the specified class declares a nested configuration class.
+	 */
+	private static boolean hasNestedConfigurationClass(
+			AnnotationMetadata metadata, MetadataReaderFactory metadataReaderFactory) {
+
+		// Potentially nested configuration classes...
+		if (metadata instanceof StandardAnnotationMetadata) {
+			Class<?> beanClass = ((StandardAnnotationMetadata) metadata).getIntrospectedClass();
+			for (Class<?> memberClass : beanClass.getDeclaredClasses()) {
+				if (isConfigurationCandidate(new StandardAnnotationMetadata(memberClass))) {
+					return true;
+				}
+			}
+		}
+		else {
+			for (String memberName : metadata.getMemberClassNames()) {
+				try {
+					MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(memberName);
+					if (isConfigurationCandidate(metadataReader.getAnnotationMetadata())) {
+						return true;
+					}
+				}
+				catch (IOException ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Could not find class file for introspecting configuration annotations: " +
+								memberName, ex);
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -205,6 +243,7 @@ abstract class ConfigurationClassUtils {
 	 * or {@link Ordered#LOWEST_PRECEDENCE} if none declared
 	 * @since 5.0
 	 */
+	@Nullable
 	public static Integer getOrder(AnnotationMetadata metadata) {
 		Map<String, Object> orderAttributes = metadata.getAnnotationAttributes(Order.class.getName());
 		return (orderAttributes != null ? ((Integer) orderAttributes.get(AnnotationUtils.VALUE)) : null);

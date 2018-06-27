@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,14 +28,16 @@ import org.springframework.http.client.ClientHttpRequest;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.springframework.http.HttpMethod.*;
-import static org.springframework.test.web.client.ExpectedCount.*;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.test.web.client.ExpectedCount.once;
+import static org.springframework.test.web.client.ExpectedCount.twice;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 /**
  * Unit tests for {@link DefaultRequestExpectation}.
- *
  * @author Rossen Stoyanchev
  */
 public class DefaultRequestExpectationTests {
@@ -60,26 +62,26 @@ public class DefaultRequestExpectationTests {
 	}
 
 	@Test
-	public void hasRemainingCount() throws Exception {
+	public void hasRemainingCount() {
 		RequestExpectation expectation = new DefaultRequestExpectation(twice(), requestTo("/foo"));
 		expectation.andRespond(withSuccess());
 
-		expectation.createResponse(createRequest(GET, "/foo"));
+		expectation.incrementAndValidate();
 		assertTrue(expectation.hasRemainingCount());
 
-		expectation.createResponse(createRequest(GET, "/foo"));
+		expectation.incrementAndValidate();
 		assertFalse(expectation.hasRemainingCount());
 	}
 
 	@Test
-	public void isSatisfied() throws Exception {
+	public void isSatisfied() {
 		RequestExpectation expectation = new DefaultRequestExpectation(twice(), requestTo("/foo"));
 		expectation.andRespond(withSuccess());
 
-		expectation.createResponse(createRequest(GET, "/foo"));
+		expectation.incrementAndValidate();
 		assertFalse(expectation.isSatisfied());
 
-		expectation.createResponse(createRequest(GET, "/foo"));
+		expectation.incrementAndValidate();
 		assertTrue(expectation.isSatisfied());
 	}
 

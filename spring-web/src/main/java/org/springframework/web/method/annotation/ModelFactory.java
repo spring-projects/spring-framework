@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,8 +103,8 @@ public final class ModelFactory {
 	 * @param handlerMethod the method for which the model is initialized
 	 * @throws Exception may arise from {@code @ModelAttribute} methods
 	 */
-	public void initModel(NativeWebRequest request, ModelAndViewContainer container,
-			HandlerMethod handlerMethod) throws Exception {
+	public void initModel(NativeWebRequest request, ModelAndViewContainer container, HandlerMethod handlerMethod)
+			throws Exception {
 
 		Map<String, ?> sessionAttributes = this.sessionAttributesHandler.retrieveAttributes(request);
 		container.mergeAttributes(sessionAttributes);
@@ -155,18 +155,11 @@ public final class ModelFactory {
 	private ModelMethod getNextModelMethod(ModelAndViewContainer container) {
 		for (ModelMethod modelMethod : this.modelMethods) {
 			if (modelMethod.checkDependencies(container)) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Selected @ModelAttribute method " + modelMethod);
-				}
 				this.modelMethods.remove(modelMethod);
 				return modelMethod;
 			}
 		}
 		ModelMethod modelMethod = this.modelMethods.get(0);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Selected @ModelAttribute method (not present: " +
-					modelMethod.getUnresolvedDependencies(container)+ ") " + modelMethod);
-		}
 		this.modelMethods.remove(modelMethod);
 		return modelMethod;
 	}
@@ -215,7 +208,7 @@ public final class ModelFactory {
 		List<String> keyNames = new ArrayList<>(model.keySet());
 		for (String name : keyNames) {
 			Object value = model.get(name);
-			if (isBindingCandidate(name, value)) {
+			if (value != null && isBindingCandidate(name, value)) {
 				String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + name;
 				if (!model.containsAttribute(bindingResultKey)) {
 					WebDataBinder dataBinder = this.dataBinderFactory.createBinder(request, value, name);
@@ -228,29 +221,27 @@ public final class ModelFactory {
 	/**
 	 * Whether the given attribute requires a {@link BindingResult} in the model.
 	 */
-	private boolean isBindingCandidate(String attributeName, @Nullable Object value) {
+	private boolean isBindingCandidate(String attributeName, Object value) {
 		if (attributeName.startsWith(BindingResult.MODEL_KEY_PREFIX)) {
 			return false;
 		}
 
-		Class<?> attrType = (value != null ? value.getClass() : null);
-		if (this.sessionAttributesHandler.isHandlerSessionAttribute(attributeName, attrType)) {
+		if (this.sessionAttributesHandler.isHandlerSessionAttribute(attributeName, value.getClass())) {
 			return true;
 		}
 
-		return (value != null && !value.getClass().isArray() && !(value instanceof Collection) &&
+		return (!value.getClass().isArray() && !(value instanceof Collection) &&
 				!(value instanceof Map) && !BeanUtils.isSimpleValueType(value.getClass()));
 	}
 
 
 	/**
-	 * Derive the model attribute name for a method parameter based on:
-	 * <ol>
-	 * <li>the parameter {@code @ModelAttribute} annotation value
-	 * <li>the parameter type
-	 * </ol>
+	 * Derive the model attribute name for the given method parameter based on
+	 * a {@code @ModelAttribute} parameter annotation (if present) or falling
+	 * back on parameter type based conventions.
 	 * @param parameter a descriptor for the method parameter
-	 * @return the derived name (never {@code null} or empty String)
+	 * @return the derived name
+	 * @see Conventions#getVariableNameForParameter(MethodParameter)
 	 */
 	public static String getNameForParameter(MethodParameter parameter) {
 		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);

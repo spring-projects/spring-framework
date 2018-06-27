@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory
 
-
 /**
  * Extension for [BeanFactory.getBean] providing a `getBean<Foo>()` variant.
  *

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -98,11 +97,10 @@ public class DelegatingWebMvcConfigurationTests {
 	@Test
 	public void requestMappingHandlerAdapter() throws Exception {
 		delegatingConfig.setConfigurers(Collections.singletonList(webMvcConfigurer));
-		RequestMappingHandlerAdapter adapter = delegatingConfig.requestMappingHandlerAdapter();
+		RequestMappingHandlerAdapter adapter = this.delegatingConfig.requestMappingHandlerAdapter();
 
-		ConfigurableWebBindingInitializer initializer = (ConfigurableWebBindingInitializer) adapter.getWebBindingInitializer();
-		ConversionService initializerConversionService = initializer.getConversionService();
-		assertTrue(initializer.getValidator() instanceof LocalValidatorFactoryBean);
+		ConfigurableWebBindingInitializer initializer =
+				(ConfigurableWebBindingInitializer) adapter.getWebBindingInitializer();
 
 		verify(webMvcConfigurer).configureMessageConverters(converters.capture());
 		verify(webMvcConfigurer).configureContentNegotiation(contentNegotiationConfigurer.capture());
@@ -111,7 +109,9 @@ public class DelegatingWebMvcConfigurationTests {
 		verify(webMvcConfigurer).addReturnValueHandlers(handlers.capture());
 		verify(webMvcConfigurer).configureAsyncSupport(asyncConfigurer.capture());
 
-		assertSame(conversionService.getValue(), initializerConversionService);
+		assertNotNull(initializer);
+		assertSame(conversionService.getValue(), initializer.getConversionService());
+		assertTrue(initializer.getValidator() instanceof LocalValidatorFactoryBean);
 		assertEquals(0, resolvers.getValue().size());
 		assertEquals(0, handlers.getValue().size());
 		assertEquals(converters.getValue(), adapter.getMessageConverters());
@@ -120,7 +120,7 @@ public class DelegatingWebMvcConfigurationTests {
 
 	@Test
 	public void configureMessageConverters() {
-		final HttpMessageConverter customConverter = mock(HttpMessageConverter.class);
+		final HttpMessageConverter<?> customConverter = mock(HttpMessageConverter.class);
 		final StringHttpMessageConverter stringConverter = new StringHttpMessageConverter();
 		List<WebMvcConfigurer> configurers = new ArrayList<>();
 		configurers.add(new WebMvcConfigurer() {

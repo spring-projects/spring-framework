@@ -59,7 +59,6 @@ public class PrintingResultHandler implements ResultHandler {
 
 	private static final String MISSING_CHARACTER_ENCODING = "<no character encoding set>";
 
-
 	private final ResultValuePrinter printer;
 
 
@@ -136,21 +135,26 @@ public class PrintingResultHandler implements ResultHandler {
 	protected final MultiValueMap<String, String> getParamsMultiValueMap(MockHttpServletRequest request) {
 		Map<String, String[]> params = request.getParameterMap();
 		MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<>();
-		for (String name : params.keySet()) {
+		params.forEach((name, values) -> {
 			if (params.get(name) != null) {
-				for (String value : params.get(name)) {
+				for (String value : values) {
 					multiValueMap.add(name, value);
 				}
 			}
-		}
+		});
 		return multiValueMap;
 	}
 
 	protected final Map<String, Object> getSessionAttributes(MockHttpServletRequest request) {
 		HttpSession session = request.getSession(false);
-		return session == null ? Collections.emptyMap() :
-				Collections.list(session.getAttributeNames()).stream()
-						.collect(Collectors.toMap(n -> n, session::getAttribute));
+		if (session != null) {
+			Enumeration<String> attrNames = session.getAttributeNames();
+			if (attrNames != null) {
+				return Collections.list(attrNames).stream().
+						collect(Collectors.toMap(n -> n, session::getAttribute));
+			}
+		}
+		return Collections.emptyMap();
 	}
 
 	protected void printAsyncResult(MvcResult result) throws Exception {
@@ -169,7 +173,9 @@ public class PrintingResultHandler implements ResultHandler {
 	/**
 	 * Print the handler.
 	 */
-	protected void printHandler(@Nullable Object handler, @Nullable HandlerInterceptor[] interceptors) throws Exception {
+	protected void printHandler(@Nullable Object handler, @Nullable HandlerInterceptor[] interceptors)
+			throws Exception {
+
 		if (handler == null) {
 			this.printer.printValue("Type", null);
 		}
@@ -229,10 +235,10 @@ public class PrintingResultHandler implements ResultHandler {
 			this.printer.printValue("Attributes", null);
 		}
 		else {
-			for (String name : flashMap.keySet()) {
+			flashMap.forEach((name, value) -> {
 				this.printer.printValue("Attribute", name);
-				this.printer.printValue("value", flashMap.get(name));
-			}
+				this.printer.printValue("value", value);
+			});
 		}
 	}
 

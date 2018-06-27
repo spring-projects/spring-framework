@@ -22,12 +22,13 @@ import org.mockito.Answers
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.junit.MockitoJUnitRunner
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.bodyToFlux
 import org.springframework.web.reactive.function.server.bodyToMono
 
 /**
- * Mock object based tests for [ServerRequest] Kotlin extensions
+ * Mock object based tests for [ServerRequest] Kotlin extensions.
  *
  * @author Sebastien Deleuze
  */
@@ -39,14 +40,14 @@ class ServerRequestExtensionsTests {
 
 	@Test
 	fun `bodyToMono with reified type parameters`() {
-		request.bodyToMono<Foo>()
-		verify(request, times(1)).bodyToMono(Foo::class.java)
+		request.bodyToMono<List<Foo>>()
+		verify(request, times(1)).bodyToMono(object : ParameterizedTypeReference<List<Foo>>() {})
 	}
 
 	@Test
 	fun `bodyToFlux with reified type parameters`() {
-		request.bodyToFlux<Foo>()
-		verify(request, times(1)).bodyToFlux(Foo::class.java)
+		request.bodyToFlux<List<Foo>>()
+		verify(request, times(1)).bodyToFlux(object : ParameterizedTypeReference<List<Foo>>() {})
 	}
 
 	class Foo

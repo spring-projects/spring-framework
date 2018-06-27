@@ -21,6 +21,8 @@ import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
+
 /**
  * {@link ParameterNameDiscoverer} implementation that tries several discoverer
  * delegates in succession. Those added first in the {@code addDiscoverer} method
@@ -47,6 +49,7 @@ public class PrioritizedParameterNameDiscoverer implements ParameterNameDiscover
 
 
 	@Override
+	@Nullable
 	public String[] getParameterNames(Method method) {
 		for (ParameterNameDiscoverer pnd : this.parameterNameDiscoverers) {
 			String[] result = pnd.getParameterNames(method);
@@ -58,6 +61,7 @@ public class PrioritizedParameterNameDiscoverer implements ParameterNameDiscover
 	}
 
 	@Override
+	@Nullable
 	public String[] getParameterNames(Constructor<?> ctor) {
 		for (ParameterNameDiscoverer pnd : this.parameterNameDiscoverers) {
 			String[] result = pnd.getParameterNames(ctor);

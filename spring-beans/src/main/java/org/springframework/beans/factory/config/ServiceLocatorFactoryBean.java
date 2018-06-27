@@ -329,6 +329,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 
 
 	@Override
+	@Nullable
 	public Object getObject() {
 		return this.proxy;
 	}

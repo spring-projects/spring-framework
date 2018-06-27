@@ -60,7 +60,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	@Override
 	public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner) {
 		// Don't override the class with CGLIB if no overrides.
-		if (bd.getMethodOverrides().isEmpty()) {
+		if (!bd.hasMethodOverrides()) {
 			Constructor<?> constructorToUse;
 			synchronized (bd.constructorArgumentLock) {
 				constructorToUse = (Constructor<?>) bd.resolvedConstructorOrFactoryMethod;
@@ -72,8 +72,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 					try {
 						if (System.getSecurityManager() != null) {
 							constructorToUse = AccessController.doPrivileged(
-									(PrivilegedExceptionAction<Constructor<?>>) () ->
-											clazz.getDeclaredConstructor());
+									(PrivilegedExceptionAction<Constructor<?>>) clazz::getDeclaredConstructor);
 						}
 						else {
 							constructorToUse =	clazz.getDeclaredConstructor();
@@ -107,7 +106,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner,
 			final Constructor<?> ctor, @Nullable Object... args) {
 
-		if (bd.getMethodOverrides().isEmpty()) {
+		if (!bd.hasMethodOverrides()) {
 			if (System.getSecurityManager() != null) {
 				// use own privileged to change accessibility (when security is on)
 				AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
@@ -152,7 +151,11 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 			Method priorInvokedFactoryMethod = currentlyInvokedFactoryMethod.get();
 			try {
 				currentlyInvokedFactoryMethod.set(factoryMethod);
-				return factoryMethod.invoke(factoryBean, args);
+				Object result = factoryMethod.invoke(factoryBean, args);
+				if (result == null) {
+					result = new NullBean();
+				}
+				return result;
 			}
 			finally {
 				if (priorInvokedFactoryMethod != null) {

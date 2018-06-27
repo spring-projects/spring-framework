@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.core.JsonEncoding;
@@ -63,6 +65,7 @@ import org.springframework.util.TypeUtils;
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
  * @since 4.1
+ * @see MappingJackson2HttpMessageConverter
  */
 public abstract class AbstractJackson2HttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> {
 
@@ -79,25 +82,21 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 
 	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper) {
-		init(objectMapper);
-	}
-
-	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper, MediaType supportedMediaType) {
-		super(supportedMediaType);
-		init(objectMapper);
-	}
-
-	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper, MediaType... supportedMediaTypes) {
-		super(supportedMediaTypes);
-		init(objectMapper);
-	}
-
-	protected void init(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
 		setDefaultCharset(DEFAULT_CHARSET);
 		DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
 		prettyPrinter.indentObjectsWith(new DefaultIndenter("  ", "\ndata:"));
 		this.ssePrettyPrinter = prettyPrinter;
+	}
+
+	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper, MediaType supportedMediaType) {
+		this(objectMapper);
+		setSupportedMediaTypes(Collections.singletonList(supportedMediaType));
+	}
+
+	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper, MediaType... supportedMediaTypes) {
+		this(objectMapper);
+		setSupportedMediaTypes(Arrays.asList(supportedMediaTypes));
 	}
 
 
@@ -121,7 +120,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	/**
 	 * Return the underlying {@code ObjectMapper} for this view.
 	 */
-	@Nullable
 	public ObjectMapper getObjectMapper() {
 		return this.objectMapper;
 	}
@@ -158,9 +156,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			return false;
 		}
 		JavaType javaType = getJavaType(type, contextClass);
-		if (!logger.isWarnEnabled()) {
-			return this.objectMapper.canDeserialize(javaType);
-		}
 		AtomicReference<Throwable> causeRef = new AtomicReference<>();
 		if (this.objectMapper.canDeserialize(javaType, causeRef)) {
 			return true;
@@ -173,9 +168,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
 		if (!canWrite(mediaType)) {
 			return false;
-		}
-		if (!logger.isWarnEnabled()) {
-			return this.objectMapper.canSerialize(clazz);
 		}
 		AtomicReference<Throwable> causeRef = new AtomicReference<>();
 		if (this.objectMapper.canSerialize(clazz, causeRef)) {
@@ -198,8 +190,8 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			return;
 		}
 
-		boolean debugLevel = (cause instanceof JsonMappingException &&
-				cause.getMessage().startsWith("Can not find"));
+		// Do not log warning for serializer not found (note: different message wording on Jackson 2.9)
+		boolean debugLevel = (cause instanceof JsonMappingException && cause.getMessage().startsWith("Cannot find"));
 
 		if (debugLevel ? logger.isDebugEnabled() : logger.isWarnEnabled()) {
 			String msg = "Failed to evaluate Jackson " + (type instanceof JavaType ? "de" : "") +
@@ -352,6 +344,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 	@Override
+	@Nullable
 	protected MediaType getDefaultContentType(Object object) throws IOException {
 		if (object instanceof MappingJacksonValue) {
 			object = ((MappingJacksonValue) object).getValue();

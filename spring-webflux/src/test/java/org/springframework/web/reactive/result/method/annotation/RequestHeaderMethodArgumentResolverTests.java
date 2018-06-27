@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
@@ -41,7 +41,11 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link RequestHeaderMethodArgumentResolver}.
@@ -66,10 +70,11 @@ public class RequestHeaderMethodArgumentResolverTests {
 
 
 	@Before
+	@SuppressWarnings("resource")
 	public void setup() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.refresh();
-		ReactiveAdapterRegistry adapterRegistry = new ReactiveAdapterRegistry();
+		ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 		this.resolver = new RequestHeaderMethodArgumentResolver(context.getBeanFactory(), adapterRegistry);
 
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
@@ -108,7 +113,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 	@Test
 	public void resolveStringArgument() throws Exception {
 		String expected = "foo";
-		ServerWebExchange exchange = MockServerHttpRequest.get("/").header("name", expected).toExchange();
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").header("name", expected));
 
 		Mono<Object> mono = this.resolver.resolveArgument(
 				this.paramNamedDefaultValueStringHeader, this.bindingContext, exchange);
@@ -120,7 +125,8 @@ public class RequestHeaderMethodArgumentResolverTests {
 
 	@Test
 	public void resolveStringArrayArgument() throws Exception {
-		ServerWebExchange exchange = MockServerHttpRequest.get("/").header("name", "foo", "bar").toExchange();
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").header("name", "foo", "bar").build();
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		Mono<Object> mono = this.resolver.resolveArgument(
 				this.paramNamedValueStringArray, this.bindingContext, exchange);
@@ -132,7 +138,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 
 	@Test
 	public void resolveDefaultValue() throws Exception {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		Mono<Object> mono = this.resolver.resolveArgument(
 				this.paramNamedDefaultValueStringHeader, this.bindingContext, exchange);
 
@@ -147,7 +153,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 		try {
 			Mono<Object> mono = this.resolver.resolveArgument(
 					this.paramSystemProperty, this.bindingContext,
-					MockServerHttpRequest.get("/").toExchange());
+					MockServerWebExchange.from(MockServerHttpRequest.get("/")));
 
 			Object result = mono.block();
 			assertTrue(result instanceof String);
@@ -161,7 +167,8 @@ public class RequestHeaderMethodArgumentResolverTests {
 	@Test
 	public void resolveNameFromSystemPropertyThroughExpression() throws Exception {
 		String expected = "foo";
-		ServerWebExchange exchange = MockServerHttpRequest.get("/").header("bar", expected).toExchange();
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").header("bar", expected).build();
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		System.setProperty("systemProperty", "bar");
 		try {
@@ -180,7 +187,8 @@ public class RequestHeaderMethodArgumentResolverTests {
 	@Test
 	public void resolveNameFromSystemPropertyThroughPlaceholder() throws Exception {
 		String expected = "foo";
-		ServerWebExchange exchange = MockServerHttpRequest.get("/").header("bar", expected).toExchange();
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").header("bar", expected).build();
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		System.setProperty("systemProperty", "bar");
 		try {
@@ -200,7 +208,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 	public void notFound() throws Exception {
 		Mono<Object> mono = resolver.resolveArgument(
 				this.paramNamedValueStringArray, this.bindingContext,
-				MockServerHttpRequest.get("/").toExchange());
+				MockServerWebExchange.from(MockServerHttpRequest.get("/")));
 
 		StepVerifier.create(mono)
 				.expectNextCount(0)
@@ -212,7 +220,8 @@ public class RequestHeaderMethodArgumentResolverTests {
 	@SuppressWarnings("deprecation")
 	public void dateConversion() throws Exception {
 		String rfc1123val = "Thu, 21 Apr 2016 17:11:08 +0100";
-		ServerWebExchange exchange = MockServerHttpRequest.get("/").header("name", rfc1123val).toExchange();
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").header("name", rfc1123val).build();
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramDate, this.bindingContext, exchange);
 		Object result = mono.block();
@@ -224,7 +233,8 @@ public class RequestHeaderMethodArgumentResolverTests {
 	@Test
 	public void instantConversion() throws Exception {
 		String rfc1123val = "Thu, 21 Apr 2016 17:11:08 +0100";
-		ServerWebExchange exchange = MockServerHttpRequest.get("/").header("name", rfc1123val).toExchange();
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").header("name", rfc1123val).build();
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramInstant, this.bindingContext, exchange);
 		Object result = mono.block();
@@ -234,6 +244,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	public void params(
 			@RequestHeader(name = "name", defaultValue = "bar") String param1,
 			@RequestHeader("name") String[] param2,

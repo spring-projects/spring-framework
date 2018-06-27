@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -240,11 +240,18 @@ public abstract class StatementCreatorUtils {
 	private static void setNull(PreparedStatement ps, int paramIndex, int sqlType, @Nullable String typeName)
 			throws SQLException {
 
-		if (sqlType == SqlTypeValue.TYPE_UNKNOWN || sqlType == Types.OTHER) {
+		if (sqlType == SqlTypeValue.TYPE_UNKNOWN || (sqlType == Types.OTHER && typeName == null)) {
 			boolean useSetObject = false;
 			Integer sqlTypeToUse = null;
 			if (!shouldIgnoreGetParameterType) {
-				sqlTypeToUse = ps.getParameterMetaData().getParameterType(paramIndex);
+				try {
+					sqlTypeToUse = ps.getParameterMetaData().getParameterType(paramIndex);
+				}
+				catch (SQLException ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("JDBC getParameterType call failed - using fallback method instead: " + ex);
+					}
+				}
 			}
 			if (sqlTypeToUse == null) {
 				// Proceed with database-specific checks
@@ -288,9 +295,11 @@ public abstract class StatementCreatorUtils {
 		else if (inValue instanceof SqlValue) {
 			((SqlValue) inValue).setValue(ps, paramIndex);
 		}
-		else if (sqlType == Types.VARCHAR || sqlType == Types.NVARCHAR ||
-				sqlType == Types.LONGVARCHAR || sqlType == Types.LONGNVARCHAR) {
+		else if (sqlType == Types.VARCHAR || sqlType == Types.LONGVARCHAR ) {
 			ps.setString(paramIndex, inValue.toString());
+		}
+		else if (sqlType == Types.NVARCHAR || sqlType == Types.LONGNVARCHAR) {
+			ps.setNString(paramIndex, inValue.toString());
 		}
 		else if ((sqlType == Types.CLOB || sqlType == Types.NCLOB) && isStringValue(inValue.getClass())) {
 			String strVal = inValue.toString();
@@ -305,8 +314,15 @@ public abstract class StatementCreatorUtils {
 				}
 				return;
 			}
-			// Fallback: regular setString binding
-			ps.setString(paramIndex, strVal);
+			else {
+				// Fallback: setString or setNString binding
+				if (sqlType == Types.NCLOB) {
+					ps.setNString(paramIndex, strVal);
+				}
+				else {
+					ps.setString(paramIndex, strVal);
+				}
+			}
 		}
 		else if (sqlType == Types.DECIMAL || sqlType == Types.NUMERIC) {
 			if (inValue instanceof BigDecimal) {

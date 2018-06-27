@@ -39,6 +39,7 @@ import org.springframework.lang.Nullable;
  */
 public abstract class DecoratingNavigationHandler extends NavigationHandler {
 
+	@Nullable
 	private NavigationHandler decoratedNavigationHandler;
 
 
@@ -97,8 +98,8 @@ public abstract class DecoratingNavigationHandler extends NavigationHandler {
 	 * or {@code null} if none
 	 * @see #callNextHandlerInChain
 	 */
-	public abstract void handleNavigation(
-			FacesContext facesContext, @Nullable String fromAction, @Nullable String outcome, @Nullable NavigationHandler originalNavigationHandler);
+	public abstract void handleNavigation(FacesContext facesContext, @Nullable String fromAction,
+			@Nullable String outcome, @Nullable NavigationHandler originalNavigationHandler);
 
 
 	/**
@@ -129,8 +130,8 @@ public abstract class DecoratingNavigationHandler extends NavigationHandler {
 	 * @param originalNavigationHandler the original NavigationHandler,
 	 * or {@code null} if none
 	 */
-	protected final void callNextHandlerInChain(
-			FacesContext facesContext, @Nullable String fromAction, @Nullable String outcome, @Nullable NavigationHandler originalNavigationHandler) {
+	protected final void callNextHandlerInChain(FacesContext facesContext, @Nullable String fromAction,
+			@Nullable String outcome, @Nullable NavigationHandler originalNavigationHandler) {
 
 		NavigationHandler decoratedNavigationHandler = getDecoratedNavigationHandler();
 

@@ -80,6 +80,7 @@ public class ContextExposingHttpServletRequest extends HttpServletRequestWrapper
 
 
 	@Override
+	@Nullable
 	public Object getAttribute(String name) {
 		if ((this.explicitAttributes == null || !this.explicitAttributes.contains(name)) &&
 				(this.exposedContextBeanNames == null || this.exposedContextBeanNames.contains(name)) &&

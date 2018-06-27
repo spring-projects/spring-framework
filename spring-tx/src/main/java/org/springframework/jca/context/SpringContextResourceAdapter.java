@@ -122,6 +122,7 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 
 	private String contextConfigLocation = DEFAULT_CONTEXT_CONFIG_LOCATION;
 
+	@Nullable
 	private ConfigurableApplicationContext applicationContext;
 
 
@@ -208,7 +209,9 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	@Override
 	public void stop() {
 		logger.info("Stopping SpringContextResourceAdapter");
-		this.applicationContext.close();
+		if (this.applicationContext != null) {
+			this.applicationContext.close();
+		}
 	}
 
 

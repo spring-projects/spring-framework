@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,14 +39,15 @@ import org.springframework.util.ObjectUtils;
  * format expression.
  *
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
-	private static SpelNodeImpl[] NO_CHILDREN = new SpelNodeImpl[0];
+	private static final SpelNodeImpl[] NO_CHILDREN = new SpelNodeImpl[0];
 
 
-	protected int pos; // start = top 16bits, end = bottom 16bits
+	protected int pos;  // start = top 16bits, end = bottom 16bits
 
 	protected SpelNodeImpl[] children = SpelNodeImpl.NO_CHILDREN;
 
@@ -72,15 +73,16 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 		Assert.isTrue(pos != 0, "Pos must not be 0");
 		if (!ObjectUtils.isEmpty(operands)) {
 			this.children = operands;
-			for (SpelNodeImpl childNode : operands) {
-				childNode.parent = this;
+			for (SpelNodeImpl operand : operands) {
+				Assert.notNull(operand, "Operand must not be null");
+				operand.parent = this;
 			}
 		}
 	}
 
 
 	/**
-     * @return true if the next child is one of the specified classes
+     * Return {@code true} if the next child is one of the specified classes.
      */
 	protected boolean nextChildIs(Class<?>... clazzes) {
 		if (this.parent != null) {
@@ -104,6 +106,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	}
 
 	@Override
+	@Nullable
 	public final Object getValue(ExpressionState expressionState) throws EvaluationException {
 		return getValueInternal(expressionState).getValue();
 	}
@@ -121,8 +124,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
 	@Override
 	public void setValue(ExpressionState expressionState, @Nullable Object newValue) throws EvaluationException {
-		throw new SpelEvaluationException(getStartPosition(),
-				SpelMessage.SETVALUE_NOT_SUPPORTED, getClass());
+		throw new SpelEvaluationException(getStartPosition(), SpelMessage.SETVALUE_NOT_SUPPORTED, getClass());
 	}
 
 	@Override
@@ -136,6 +138,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getObjectClass(@Nullable Object obj) {
 		if (obj == null) {
 			return null;
@@ -193,9 +196,9 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
 	
 	/**
-	 * Generate code that handles building the argument values for the specified method. This method will take account
-	 * of whether the invoked method is a varargs method and if it is then the argument values will be appropriately
-	 * packaged into an array.
+	 * Generate code that handles building the argument values for the specified method.
+	 * This method will take account of whether the invoked method is a varargs method
+	 * and if it is then the argument values will be appropriately packaged into an array.
 	 * @param mv the method visitor where code should be generated
 	 * @param cf the current codeflow
 	 * @param member the method or constructor for which arguments are being setup
@@ -205,7 +208,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 		String[] paramDescriptors = null;
 		boolean isVarargs = false;
 		if (member instanceof Constructor) {
-			Constructor<?> ctor = (Constructor<?>)member;
+			Constructor<?> ctor = (Constructor<?>) member;
 			paramDescriptors = CodeFlow.toDescriptors(ctor.getParameterTypes());
 			isVarargs = ctor.isVarArgs();
 		}
@@ -278,4 +281,5 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 		}
 		cf.exitCompilationScope();
 	}
+
 }

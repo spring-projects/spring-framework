@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.web.bind.support;
 
-import java.util.List;
-import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
@@ -141,17 +139,17 @@ public class WebRequestDataBinder extends WebDataBinder {
 			for (Part part : request.getParts()) {
 				map.add(part.getName(), part);
 			}
-			for (Map.Entry<String, List<Part>> entry: map.entrySet()) {
-				if (entry.getValue().size() == 1) {
-					Part part = entry.getValue().get(0);
+			map.forEach((key, values) -> {
+				if (values.size() == 1) {
+					Part part = values.get(0);
 					if (isBindEmptyMultipartFiles() || part.getSize() > 0) {
-						mpvs.add(entry.getKey(), part);
+						mpvs.add(key, part);
 					}
 				}
 				else {
-					mpvs.add(entry.getKey(), entry.getValue());
+					mpvs.add(key, values);
 				}
-			}
+			});
 		}
 		catch (Exception ex) {
 			throw new MultipartException("Failed to get request parts", ex);

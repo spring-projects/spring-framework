@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,21 @@
 
 package org.springframework.http.codec.json;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import static java.util.Collections.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 import static org.springframework.http.MediaType.*;
 import static org.springframework.http.codec.json.Jackson2JsonEncoder.*;
 import static org.springframework.http.codec.json.JacksonViewBean.*;
+import org.springframework.util.MimeType;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -32,6 +38,7 @@ import reactor.test.StepVerifier;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
 import org.springframework.http.codec.ServerSentEvent;
 
@@ -50,10 +57,31 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 	public void canEncode() {
 		ResolvableType pojoType = ResolvableType.forClass(Pojo.class);
 		assertTrue(this.encoder.canEncode(pojoType, APPLICATION_JSON));
+		assertTrue(this.encoder.canEncode(pojoType, APPLICATION_JSON_UTF8));
+		assertTrue(this.encoder.canEncode(pojoType, APPLICATION_STREAM_JSON));
 		assertTrue(this.encoder.canEncode(pojoType, null));
 
 		// SPR-15464
 		assertTrue(this.encoder.canEncode(ResolvableType.NONE, null));
+
+		// SPR-15910
+		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Object.class), APPLICATION_OCTET_STREAM));
+	}
+
+	@Test // SPR-15866
+	public void canEncodeWithCustomMimeType() {
+		MimeType textJavascript = new MimeType("text", "javascript", StandardCharsets.UTF_8);
+		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder(new ObjectMapper(), textJavascript);
+
+		assertEquals(Collections.singletonList(textJavascript), encoder.getEncodableMimeTypes());
+	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void encodableMimeTypesIsImmutable() {
+		MimeType textJavascript = new MimeType("text", "javascript", StandardCharsets.UTF_8);
+		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder(new ObjectMapper(), textJavascript);
+
+		encoder.getMimeTypes().add(new MimeType("text", "ecmascript"));
 	}
 
 	@Test
@@ -76,7 +104,10 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, null, emptyMap());
 
 		StepVerifier.create(output)
-				.consumeNextWith(stringConsumer("[{\"foo\":\"foo\",\"bar\":\"bar\"},{\"foo\":\"foofoo\",\"bar\":\"barbar\"},{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}]"))
+				.consumeNextWith(stringConsumer("[" +
+						"{\"foo\":\"foo\",\"bar\":\"bar\"}," +
+						"{\"foo\":\"foofoo\",\"bar\":\"barbar\"}," +
+						"{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}]"))
 				.verifyComplete();
 	}
 
@@ -100,6 +131,26 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 		);
 		ResolvableType type = ResolvableType.forClass(Pojo.class);
 		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, APPLICATION_STREAM_JSON, emptyMap());
+
+		StepVerifier.create(output)
+				.consumeNextWith(stringConsumer("{\"foo\":\"foo\",\"bar\":\"bar\"}\n"))
+				.consumeNextWith(stringConsumer("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}\n"))
+				.consumeNextWith(stringConsumer("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}\n"))
+				.verifyComplete();
+	}
+
+	@Test  // SPR-15727
+	public void encodeAsStreamWithCustomStreamingType() throws Exception {
+		MediaType fooMediaType = new MediaType("application", "foo");
+		MediaType barMediaType = new MediaType("application", "bar");
+		this.encoder.setStreamingMediaTypes(Arrays.asList(fooMediaType, barMediaType));
+		Flux<Pojo> source = Flux.just(
+				new Pojo("foo", "bar"),
+				new Pojo("foofoo", "barbar"),
+				new Pojo("foofoofoo", "barbarbar")
+		);
+		ResolvableType type = ResolvableType.forClass(Pojo.class);
+		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, barMediaType, emptyMap());
 
 		StepVerifier.create(output)
 				.consumeNextWith(stringConsumer("{\"foo\":\"foo\",\"bar\":\"bar\"}\n"))

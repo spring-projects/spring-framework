@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.web.util.UriBuilderFactory;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-class DefaultWebClientBuilder implements WebClient.Builder {
+final class DefaultWebClientBuilder implements WebClient.Builder {
 
 	@Nullable
 	private String baseUrl;
@@ -63,17 +63,18 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 	@Nullable
 	private ClientHttpConnector connector;
 
-	private ExchangeStrategies exchangeStrategies = ExchangeStrategies.withDefaults();
-
 	@Nullable
 	private ExchangeFunction exchangeFunction;
 
+	private ExchangeStrategies exchangeStrategies;
+
 
 	public DefaultWebClientBuilder() {
+		this.exchangeStrategies = ExchangeStrategies.withDefaults();
 	}
 
 	public DefaultWebClientBuilder(DefaultWebClientBuilder other) {
-		Assert.notNull(other, "'other' must not be null");
+		Assert.notNull(other, "DefaultWebClientBuilder must not be null");
 
 		this.baseUrl = other.baseUrl;
 		this.defaultUriVariables = (other.defaultUriVariables != null ?
@@ -90,8 +91,8 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 				new LinkedMultiValueMap<>(other.defaultCookies) : null);
 		this.filters = (other.filters != null ? new ArrayList<>(other.filters) : null);
 		this.connector = other.connector;
-		this.exchangeStrategies = other.exchangeStrategies;
 		this.exchangeFunction = other.exchangeFunction;
+		this.exchangeStrategies = other.exchangeStrategies;
 	}
 
 
@@ -124,7 +125,6 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 
 	@Override
 	public WebClient.Builder defaultHeaders(Consumer<HttpHeaders> headersConsumer) {
-		Assert.notNull(headersConsumer, "'headersConsumer' must not be null");
 		headersConsumer.accept(initHeaders());
 		return this;
 	}
@@ -144,7 +144,6 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 
 	@Override
 	public WebClient.Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer) {
-		Assert.notNull(cookiesConsumer, "Cookies consumer must not be null");
 		cookiesConsumer.accept(initCookies());
 		return this;
 	}
@@ -171,7 +170,6 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 
 	@Override
 	public WebClient.Builder filters(Consumer<List<ExchangeFilterFunction>> filtersConsumer) {
-		Assert.notNull(filtersConsumer, "Filters consumer must not be null");
 		filtersConsumer.accept(initFilters());
 		return this;
 	}
@@ -184,15 +182,15 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	@Override
-	public WebClient.Builder exchangeStrategies(ExchangeStrategies strategies) {
-		Assert.notNull(strategies, "ExchangeStrategies must not be null");
-		this.exchangeStrategies = strategies;
+	public WebClient.Builder exchangeFunction(ExchangeFunction exchangeFunction) {
+		this.exchangeFunction = exchangeFunction;
 		return this;
 	}
 
 	@Override
-	public WebClient.Builder exchangeFunction(ExchangeFunction exchangeFunction) {
-		this.exchangeFunction = exchangeFunction;
+	public WebClient.Builder exchangeStrategies(ExchangeStrategies strategies) {
+		Assert.notNull(strategies, "ExchangeStrategies must not be null");
+		this.exchangeStrategies = strategies;
 		return this;
 	}
 
@@ -210,10 +208,9 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 
 	private static @Nullable HttpHeaders unmodifiableCopy(@Nullable HttpHeaders original) {
 		if (original != null) {
-			HttpHeaders copy = new HttpHeaders();
-			copy.putAll(original);
-			return HttpHeaders.readOnlyHttpHeaders(copy);
-		} else {
+			return HttpHeaders.readOnlyHttpHeaders(original);
+		}
+		else {
 			return null;
 		}
 	}
@@ -245,7 +242,6 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 		else if (this.connector != null) {
 			return ExchangeFunctions.create(this.connector, this.exchangeStrategies);
 		}
-
 		else {
 			return ExchangeFunctions.create(new ReactorClientHttpConnector(), this.exchangeStrategies);
 		}
@@ -254,6 +250,12 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 	@Override
 	public WebClient.Builder clone() {
 		return new DefaultWebClientBuilder(this);
+	}
+
+	@Override
+	public WebClient.Builder apply(Consumer<WebClient.Builder> builderConsumer) {
+		builderConsumer.accept(this);
+		return this;
 	}
 
 }

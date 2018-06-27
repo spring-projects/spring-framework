@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Base implementation of the {@link TypeConverter} interface, using a package-private delegate.
@@ -33,15 +34,18 @@ import org.springframework.lang.Nullable;
  */
 public abstract class TypeConverterSupport extends PropertyEditorRegistrySupport implements TypeConverter {
 
+	@Nullable
 	TypeConverterDelegate typeConverterDelegate;
 
 
 	@Override
+	@Nullable
 	public <T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType) throws TypeMismatchException {
 		return doConvert(value, requiredType, null, null);
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType, @Nullable MethodParameter methodParam)
 			throws TypeMismatchException {
 
@@ -49,6 +53,7 @@ public abstract class TypeConverterSupport extends PropertyEditorRegistrySupport
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType, @Nullable Field field)
 			throws TypeMismatchException {
 
@@ -59,6 +64,7 @@ public abstract class TypeConverterSupport extends PropertyEditorRegistrySupport
 	private <T> T doConvert(@Nullable Object value,@Nullable Class<T> requiredType,
 			@Nullable MethodParameter methodParam, @Nullable Field field) throws TypeMismatchException {
 
+		Assert.state(this.typeConverterDelegate != null, "No TypeConverterDelegate");
 		try {
 			if (field != null) {
 				return this.typeConverterDelegate.convertIfNecessary(value, requiredType, field);

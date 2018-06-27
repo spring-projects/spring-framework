@@ -15,6 +15,8 @@
  */
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.io.File;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,85 +27,95 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
+import org.springframework.http.server.reactive.bootstrap.TomcatHttpServer;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.config.EnableWebFlux;
+import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
- * Integration tests that demonstrate running multiple applications under
- * different context paths.
+ * Integration tests related to the use of context paths.
  *
  * @author Rossen Stoyanchev
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class ContextPathIntegrationTests {
 
-	private ReactorHttpServer server;
 
-
-	@Before
-	public void setup() throws Exception {
+	@Test
+	public void multipleWebFluxApps() throws Exception {
 		AnnotationConfigApplicationContext context1 = new AnnotationConfigApplicationContext();
-		context1.register(WebApp1Config.class);
+		context1.register(WebAppConfig.class);
 		context1.refresh();
 
 		AnnotationConfigApplicationContext context2 = new AnnotationConfigApplicationContext();
-		context2.register(WebApp2Config.class);
+		context2.register(WebAppConfig.class);
 		context2.refresh();
 
-		HttpHandler webApp1Handler = DispatcherHandler.toHttpHandler(context1);
-		HttpHandler webApp2Handler = DispatcherHandler.toHttpHandler(context2);
+		HttpHandler webApp1Handler = WebHttpHandlerBuilder.applicationContext(context1).build();
+		HttpHandler webApp2Handler = WebHttpHandlerBuilder.applicationContext(context2).build();
 
-		this.server = new ReactorHttpServer();
+		ReactorHttpServer server = new ReactorHttpServer();
+		server.registerHttpHandler("/webApp1", webApp1Handler);
+		server.registerHttpHandler("/webApp2", webApp2Handler);
+		server.afterPropertiesSet();
+		server.start();
 
-		this.server.registerHttpHandler("/webApp1", webApp1Handler);
-		this.server.registerHttpHandler("/webApp2", webApp2Handler);
+		try {
+			RestTemplate restTemplate = new RestTemplate();
+			String actual;
 
-		this.server.afterPropertiesSet();
-		this.server.start();
+			String url = "http://localhost:" + server.getPort() + "/webApp1/test";
+			actual = restTemplate.getForObject(url, String.class);
+			assertEquals("Tested in /webApp1", actual);
+
+			url = "http://localhost:" + server.getPort() + "/webApp2/test";
+			actual = restTemplate.getForObject(url, String.class);
+			assertEquals("Tested in /webApp2", actual);
+		}
+		finally {
+			server.stop();
+		}
 	}
-
-	@After
-	public void shutdown() throws Exception {
-		this.server.stop();
-	}
-
 
 	@Test
-	public void basic() throws Exception {
-		RestTemplate restTemplate = new RestTemplate();
-		String actual;
+	public void servletPathMapping() throws Exception {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(WebAppConfig.class);
+		context.refresh();
 
-		actual = restTemplate.getForObject(createUrl("/webApp1/test"), String.class);
-		assertEquals("Tested in /webApp1", actual);
+		File base = new File(System.getProperty("java.io.tmpdir"));
+		TomcatHttpServer server = new TomcatHttpServer(base.getAbsolutePath());
+		server.setContextPath("/app");
+		server.setServletMapping("/api/*");
 
-		actual = restTemplate.getForObject(createUrl("/webApp2/test"), String.class);
-		assertEquals("Tested in /webApp2", actual);
-	}
+		HttpHandler httpHandler = WebHttpHandlerBuilder.applicationContext(context).build();
+		server.setHandler(httpHandler);
 
-	private String createUrl(String path) {
-		return "http://localhost:" + this.server.getPort() + path;
-	}
+		server.afterPropertiesSet();
+		server.start();
 
+		try {
+			RestTemplate restTemplate = new RestTemplate();
+			String actual;
 
-	@EnableWebFlux
-	@Configuration
-	static class WebApp1Config {
-
-		@Bean
-		public TestController testController() {
-			return new TestController();
+			String url = "http://localhost:" + server.getPort() + "/app/api/test";
+			actual = restTemplate.getForObject(url, String.class);
+			assertEquals("Tested in /app/api", actual);
+		}
+		finally {
+			server.stop();
 		}
 	}
 
 
+
 	@EnableWebFlux
 	@Configuration
-	static class WebApp2Config {
+	static class WebAppConfig {
 
 		@Bean
 		public TestController testController() {

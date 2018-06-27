@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package org.springframework.web.socket.server.standard;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -28,7 +26,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestWrapper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.websocket.CloseReason;
 
 import org.glassfish.tyrus.core.TyrusUpgradeResponse;
 import org.glassfish.tyrus.core.Utils;
@@ -56,11 +53,7 @@ public class WebLogicRequestUpgradeStrategy extends AbstractTyrusRequestUpgradeS
 
 	private static final WebLogicServletWriterHelper servletWriterHelper = new WebLogicServletWriterHelper();
 
-	private static final Connection.CloseListener noOpCloseListener = new Connection.CloseListener() {
-		@Override
-		public void close(CloseReason reason) {
-		}
-	};
+	private static final Connection.CloseListener noOpCloseListener = (reason -> {});
 
 
 	@Override
@@ -68,9 +61,7 @@ public class WebLogicRequestUpgradeStrategy extends AbstractTyrusRequestUpgradeS
 			UpgradeInfo upgradeInfo, TyrusUpgradeResponse upgradeResponse) throws IOException, ServletException {
 
 		response.setStatus(upgradeResponse.getStatus());
-		for (Map.Entry<String, List<String>> entry : upgradeResponse.getHeaders().entrySet()) {
-			response.addHeader(entry.getKey(), Utils.getHeaderFromList(entry.getValue()));
-		}
+		upgradeResponse.getHeaders().forEach((key, value) -> response.addHeader(key, Utils.getHeaderFromList(value)));
 
 		AsyncContext asyncContext = request.startAsync();
 		asyncContext.setTimeout(-1L);

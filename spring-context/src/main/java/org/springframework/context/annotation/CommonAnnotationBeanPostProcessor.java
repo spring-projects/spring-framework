@@ -188,7 +188,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	@Nullable
 	private transient StringValueResolver embeddedValueResolver;
 
-	private transient final Map<String, InjectionMetadata> injectionMetadataCache = new ConcurrentHashMap<>(256);
+	private final transient Map<String, InjectionMetadata> injectionMetadataCache = new ConcurrentHashMap<>(256);
 
 
 	/**
@@ -597,7 +597,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			else if (embeddedValueResolver != null) {
 				resourceName = embeddedValueResolver.resolveStringValue(resourceName);
 			}
-			if (resourceType != null && Object.class != resourceType) {
+			if (Object.class != resourceType) {
 				checkResourceType(resourceType);
 			}
 			else {
@@ -642,7 +642,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					resourceName = Introspector.decapitalize(resourceName.substring(3));
 				}
 			}
-			if (resourceType != null && Object.class != resourceType) {
+			if (Object.class != resourceType) {
 				checkResourceType(resourceType);
 			}
 			else {
@@ -726,7 +726,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 				}
 			}
 			Class<?> resourceType = resource.beanInterface();
-			if (resourceType != null && Object.class != resourceType) {
+			if (Object.class != resourceType) {
 				checkResourceType(resourceType);
 			}
 			else {

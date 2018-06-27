@@ -395,7 +395,8 @@ public class HandlerMethodAnnotationDetectionTests {
 		public abstract String handleException(Exception exception);
 	}
 
-	static class ParameterizedSubclassOverridesDefaultMappings extends GenericAbstractClassDeclaresDefaultMappings<String, Date, Date> {
+	static class ParameterizedSubclassOverridesDefaultMappings
+			extends GenericAbstractClassDeclaresDefaultMappings<String, Date, Date> {
 
 		@Override
 		public void initBinder(WebDataBinder dataBinder, @RequestParam("datePattern") String thePattern) {

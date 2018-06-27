@@ -16,8 +16,9 @@
 
 package org.springframework.web.util.pattern;
 
-import org.springframework.http.server.reactive.PathContainer.Element;
-import org.springframework.http.server.reactive.PathContainer.Segment;
+import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.PathContainer.Element;
+import org.springframework.http.server.PathContainer.PathSegment;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
@@ -33,6 +34,7 @@ class LiteralPathElement extends PathElement {
 	private int len;
 
 	private boolean caseSensitive;
+
 
 	public LiteralPathElement(int pos, char[] literalText, boolean caseSensitive, char separator) {
 		super(pos, separator);
@@ -50,6 +52,7 @@ class LiteralPathElement extends PathElement {
 		}
 	}
 
+
 	@Override
 	public boolean matches(int pathIndex, MatchingContext matchingContext) {
 		if (pathIndex >= matchingContext.pathLength) {
@@ -57,16 +60,16 @@ class LiteralPathElement extends PathElement {
 			return false;
 		}
 		Element element = matchingContext.pathElements.get(pathIndex);
-		if (!(element instanceof Segment)) {
+		if (!(element instanceof PathContainer.PathSegment)) {
 			return false;
 		}
-		String value = ((Segment)element).valueDecoded();
+		String value = ((PathSegment)element).valueToMatch();
 		if (value.length() != len) {
 			// Not enough data to match this path element
 			return false;
 		}
 
-		char[] data = ((Segment)element).valueDecodedChars();
+		char[] data = ((PathContainer.PathSegment)element).valueToMatchAsChars();
 		if (this.caseSensitive) {
 			for (int i = 0; i < len; i++) {
 				if (data[i] != this.text[i]) {
@@ -94,32 +97,29 @@ class LiteralPathElement extends PathElement {
 					return true;
 				}
 				else {
-					return (matchingContext.isAllowOptionalTrailingSlash() &&
+					return (matchingContext.isMatchOptionalTrailingSeparator() &&
 							(pathIndex + 1) == matchingContext.pathLength &&
 							matchingContext.isSeparator(pathIndex));
 				}
 			}
 		}
 		else {
-			if (matchingContext.isMatchStartMatching && pathIndex == matchingContext.pathLength) {
-				return true;  // no more data but everything matched so far
-			}
-			return this.next.matches(pathIndex, matchingContext);
+			return (this.next != null && this.next.matches(pathIndex, matchingContext));
 		}
 	}
 
 	@Override
 	public int getNormalizedLength() {
-		return len;
+		return this.len;
+	}
+
+	public char[] getChars() {
+		return this.text;
 	}
 
 
 	public String toString() {
 		return "Literal(" + String.valueOf(this.text) + ")";
-	}
-	
-	public char[] getChars() {
-		return this.text;
 	}
 
 }

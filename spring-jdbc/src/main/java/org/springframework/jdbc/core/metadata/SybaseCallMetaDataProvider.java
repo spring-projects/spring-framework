@@ -41,6 +41,7 @@ public class SybaseCallMetaDataProvider extends GenericCallMetaDataProvider {
 
 
 	@Override
+	@Nullable
 	public String parameterNameToUse(@Nullable String parameterName) {
 		if (parameterName == null) {
 			return null;

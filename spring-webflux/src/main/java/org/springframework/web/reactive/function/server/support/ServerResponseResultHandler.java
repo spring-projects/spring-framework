@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Ordered;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -41,20 +41,19 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class ServerResponseResultHandler implements HandlerResultHandler, InitializingBean, Ordered {
 
-	@Nullable
-	private ServerCodecConfigurer messageCodecConfigurer;
+	private List<HttpMessageWriter<?>> messageWriters = Collections.emptyList();
 
 	private List<ViewResolver> viewResolvers = Collections.emptyList();
 
-	private int order = LOWEST_PRECEDENCE;
+	private int order = 0;
 
 
 	/**
-	 * Configure HTTP message readers to de-serialize the request body with.
-	 * <p>By default this is set to {@link ServerCodecConfigurer} with defaults.
+	 * Configure HTTP message writers to serialize the request body with.
+	 * <p>By default this is set to {@link ServerCodecConfigurer}'s default writers.
 	 */
-	public void setMessageCodecConfigurer(ServerCodecConfigurer configurer) {
-		this.messageCodecConfigurer = configurer;
+	public void setMessageWriters(List<HttpMessageWriter<?>> configurer) {
+		this.messageWriters = configurer;
 	}
 
 	public void setViewResolvers(List<ViewResolver> viewResolvers) {
@@ -63,8 +62,8 @@ public class ServerResponseResultHandler implements HandlerResultHandler, Initia
 
 	/**
 	 * Set the order for this result handler relative to others.
-	 * <p>By default set to {@link Ordered#LOWEST_PRECEDENCE}, however see
-	 * Javadoc of sub-classes which may change this default.
+	 * <p>By default set to 0. It is generally safe to place it early in the
+	 * order as it looks for a concrete return type.
 	 * @param order the order
 	 */
 	public void setOrder(int order) {
@@ -79,8 +78,8 @@ public class ServerResponseResultHandler implements HandlerResultHandler, Initia
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		if (this.messageCodecConfigurer == null) {
-			throw new IllegalArgumentException("Property 'messageCodecConfigurer' is required");
+		if (CollectionUtils.isEmpty(this.messageWriters)) {
+			throw new IllegalArgumentException("Property 'messageWriters' is required");
 		}
 	}
 
@@ -96,8 +95,7 @@ public class ServerResponseResultHandler implements HandlerResultHandler, Initia
 		return response.writeTo(exchange, new ServerResponse.Context() {
 			@Override
 			public List<HttpMessageWriter<?>> messageWriters() {
-				return (messageCodecConfigurer != null ?
-						messageCodecConfigurer.getWriters() : Collections.emptyList());
+				return messageWriters;
 			}
 			@Override
 			public List<ViewResolver> viewResolvers() {
@@ -105,4 +103,5 @@ public class ServerResponseResultHandler implements HandlerResultHandler, Initia
 			}
 		});
 	}
+
 }

@@ -23,6 +23,7 @@ import javax.servlet.ServletContext;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -67,13 +68,13 @@ public class ServletContextScope implements Scope, DisposableBean {
 		Object scopedObject = this.servletContext.getAttribute(name);
 		if (scopedObject == null) {
 			scopedObject = objectFactory.getObject();
-			Assert.state(scopedObject != null, "Scoped object resolved to null");
 			this.servletContext.setAttribute(name, scopedObject);
 		}
 		return scopedObject;
 	}
 
 	@Override
+	@Nullable
 	public Object remove(String name) {
 		Object scopedObject = this.servletContext.getAttribute(name);
 		if (scopedObject != null) {
@@ -92,11 +93,13 @@ public class ServletContextScope implements Scope, DisposableBean {
 	}
 
 	@Override
+	@Nullable
 	public Object resolveContextualObject(String key) {
 		return null;
 	}
 
 	@Override
+	@Nullable
 	public String getConversationId() {
 		return null;
 	}

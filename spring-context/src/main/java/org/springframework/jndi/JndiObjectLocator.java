@@ -62,7 +62,7 @@ public abstract class JndiObjectLocator extends JndiLocatorSupport implements In
 	 * @param jndiName the JNDI name to look up
 	 * @see #setResourceRef
 	 */
-	public void setJndiName(String jndiName) {
+	public void setJndiName(@Nullable String jndiName) {
 		this.jndiName = jndiName;
 	}
 

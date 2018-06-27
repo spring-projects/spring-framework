@@ -40,6 +40,7 @@ import org.springframework.util.Assert;
  */
 public class DelegatingDataSource implements DataSource, InitializingBean {
 
+	@Nullable
 	private DataSource targetDataSource;
 
 
@@ -62,8 +63,7 @@ public class DelegatingDataSource implements DataSource, InitializingBean {
 	/**
 	 * Set the target DataSource that this DataSource should delegate to.
 	 */
-	public void setTargetDataSource(DataSource targetDataSource) {
-		Assert.notNull(targetDataSource, "'targetDataSource' must not be null");
+	public void setTargetDataSource(@Nullable DataSource targetDataSource) {
 		this.targetDataSource = targetDataSource;
 	}
 

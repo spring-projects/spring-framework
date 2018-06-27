@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,10 @@
 package org.springframework.web.reactive.result.view.script;
 
 import java.nio.charset.Charset;
-
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
+
+import org.springframework.lang.Nullable;
 
 /**
  * An implementation of the Spring WebFlux {@link ScriptTemplateConfig} for
@@ -48,20 +49,28 @@ import javax.script.ScriptEngine;
  */
 public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 
+	@Nullable
 	private ScriptEngine engine;
 
+	@Nullable
 	private String engineName;
 
+	@Nullable
 	private Boolean sharedEngine;
 
+	@Nullable
 	private String[] scripts;
 
+	@Nullable
 	private String renderObject;
 
+	@Nullable
 	private String renderFunction;
 
+	@Nullable
 	private Charset charset;
 
+	@Nullable
 	private String resourceLoaderPath;
 
 
@@ -88,11 +97,12 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	 * one (since it implies multiple lazy instantiations of the script engine).
 	 * @see #setEngineName(String)
 	 */
-	public void setEngine(ScriptEngine engine) {
+	public void setEngine(@Nullable ScriptEngine engine) {
 		this.engine = engine;
 	}
 
 	@Override
+	@Nullable
 	public ScriptEngine getEngine() {
 		return this.engine;
 	}
@@ -103,11 +113,12 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	 * You must define {@code engine} or {@code engineName}, not both.
 	 * @see #setEngine(ScriptEngine)
 	 */
-	public void setEngineName(String engineName) {
+	public void setEngineName(@Nullable String engineName) {
 		this.engineName = engineName;
 	}
 
 	@Override
+	@Nullable
 	public String getEngineName() {
 		return this.engineName;
 	}
@@ -124,11 +135,12 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	 * each request.
 	 * @see <a href="http://docs.oracle.com/javase/8/docs/api/javax/script/ScriptEngineFactory.html#getParameter-java.lang.String-">THREADING ScriptEngine parameter<a/>
 	 */
-	public void setSharedEngine(Boolean sharedEngine) {
+	public void setSharedEngine(@Nullable Boolean sharedEngine) {
 		this.sharedEngine = sharedEngine;
 	}
 
 	@Override
+	@Nullable
 	public Boolean isSharedEngine() {
 		return this.sharedEngine;
 	}
@@ -144,11 +156,12 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	 * @see #setResourceLoaderPath
 	 * @see <a href="http://www.webjars.org">WebJars</a>
 	 */
-	public void setScripts(String... scriptNames) {
+	public void setScripts(@Nullable String... scriptNames) {
 		this.scripts = scriptNames;
 	}
 
 	@Override
+	@Nullable
 	public String[] getScripts() {
 		return this.scripts;
 	}
@@ -158,11 +171,12 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	 * For example, in order to call {@code Mustache.render()}, {@code renderObject}
 	 * should be set to {@code "Mustache"} and {@code renderFunction} to {@code "render"}.
 	 */
-	public void setRenderObject(String renderObject) {
+	public void setRenderObject(@Nullable String renderObject) {
 		this.renderObject = renderObject;
 	}
 
 	@Override
+	@Nullable
 	public String getRenderObject() {
 		return this.renderObject;
 	}
@@ -174,15 +188,16 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	 * <ol>
 	 * <li>{@code String template}: the template content</li>
 	 * <li>{@code Map model}: the view model</li>
-	 * <li>{@code RenderingContext context}: the rendering context (since 5.0)</li>
+	 * <li>{@code RenderingContext context}: the rendering context</li>
 	 * </ol>
 	 * @see RenderingContext
 	 */
-	public void setRenderFunction(String renderFunction) {
+	public void setRenderFunction(@Nullable String renderFunction) {
 		this.renderFunction = renderFunction;
 	}
 
 	@Override
+	@Nullable
 	public String getRenderFunction() {
 		return this.renderFunction;
 	}
@@ -191,11 +206,12 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	 * Set the charset used to read script and template files.
 	 * ({@code UTF-8} by default).
 	 */
-	public void setCharset(Charset charset) {
+	public void setCharset(@Nullable Charset charset) {
 		this.charset = charset;
 	}
 
 	@Override
+	@Nullable
 	public Charset getCharset() {
 		return this.charset;
 	}
@@ -208,11 +224,12 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	 * Relative paths are allowed when running in an ApplicationContext.
 	 * <p>Default is "classpath:".
 	 */
-	public void setResourceLoaderPath(String resourceLoaderPath) {
+	public void setResourceLoaderPath(@Nullable String resourceLoaderPath) {
 		this.resourceLoaderPath = resourceLoaderPath;
 	}
 
 	@Override
+	@Nullable
 	public String getResourceLoaderPath() {
 		return this.resourceLoaderPath;
 	}

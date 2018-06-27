@@ -22,6 +22,7 @@ import java.util.Collections;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
@@ -60,6 +61,21 @@ public class ByteBufferDecoderTests extends AbstractDataBufferAllocatingTestCase
 
 		StepVerifier.create(output)
 				.expectNext(ByteBuffer.wrap("foo".getBytes()), ByteBuffer.wrap("bar".getBytes()))
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void decodeToMono() {
+		DataBuffer fooBuffer = stringBuffer("foo");
+		DataBuffer barBuffer = stringBuffer("bar");
+		Flux<DataBuffer> source = Flux.just(fooBuffer, barBuffer);
+		Mono<ByteBuffer> output = this.decoder.decodeToMono(source,
+				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class),
+				null, Collections.emptyMap());
+
+		StepVerifier.create(output)
+				.expectNext(ByteBuffer.wrap("foobar".getBytes()))
 				.expectComplete()
 				.verify();
 	}

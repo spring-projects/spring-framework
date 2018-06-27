@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.codec.LoggingCodecSupport;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.handler.WebHandlerDecorator;
@@ -71,7 +74,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	 * <p>TODO:
 	 * This definition is currently duplicated between HttpWebHandlerAdapter
 	 * and AbstractSockJsSession. It is a candidate for a common utility class.
-	 * @see #indicatesDisconnectedClient(Throwable)
+	 * @see #isDisconnectedClientError(Throwable)
 	 */
 	private static final Set<String> DISCONNECTED_CLIENT_EXCEPTIONS =
 			new HashSet<>(Arrays.asList("ClientAbortException", "EOFException", "EofException"));
@@ -79,16 +82,20 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	private static final Log logger = LogFactory.getLog(HttpWebHandlerAdapter.class);
 
-	private static final Log disconnectedClientLogger = LogFactory.getLog(DISCONNECTED_CLIENT_LOG_CATEGORY);
+	private static final Log lostClientLogger = LogFactory.getLog(DISCONNECTED_CLIENT_LOG_CATEGORY);
 
 
 	private WebSessionManager sessionManager = new DefaultWebSessionManager();
 
-	@Nullable
-	private ServerCodecConfigurer codecConfigurer;
+	private ServerCodecConfigurer codecConfigurer = ServerCodecConfigurer.create();
+
+	private LocaleContextResolver localeContextResolver = new AcceptHeaderLocaleContextResolver();
 
 	@Nullable
-	private LocaleContextResolver localeContextResolver;
+	private ApplicationContext applicationContext;
+
+	/** Do not log potentially sensitive data (query/form at DEBUG, headers at TRACE). */
+	private boolean disableLoggingRequestDetails = false;
 
 
 	public HttpWebHandlerAdapter(WebHandler delegate) {
@@ -122,70 +129,170 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	 * @param codecConfigurer the codec configurer to use
 	 */
 	public void setCodecConfigurer(ServerCodecConfigurer codecConfigurer) {
-		Assert.notNull(codecConfigurer, "ServerCodecConfigurer must not be null");
+		Assert.notNull(codecConfigurer, "ServerCodecConfigurer is required");
 		this.codecConfigurer = codecConfigurer;
-	}
 
-	/**
-	 * Configure a custom {@link LocaleContextResolver}. The provided instance is set on
-	 * each created {@link DefaultServerWebExchange}.
-	 * <p>By default this is set to {@link org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver}.
-	 * @param localeContextResolver the locale context resolver to use
-	 */
-	public void setLocaleContextResolver(LocaleContextResolver localeContextResolver) {
-		this.localeContextResolver = localeContextResolver;
+		this.disableLoggingRequestDetails = false;
+		this.codecConfigurer.getReaders().stream()
+				.filter(LoggingCodecSupport.class::isInstance)
+				.forEach(reader -> {
+					if (((LoggingCodecSupport) reader).isDisableLoggingRequestDetails()) {
+						this.disableLoggingRequestDetails = true;
+					}
+				});
 	}
 
 	/**
 	 * Return the configured {@link ServerCodecConfigurer}.
 	 */
 	public ServerCodecConfigurer getCodecConfigurer() {
-		return (this.codecConfigurer != null ? this.codecConfigurer : ServerCodecConfigurer.create());
+		return this.codecConfigurer;
+	}
+
+	/**
+	 * Configure a custom {@link LocaleContextResolver}. The provided instance is set on
+	 * each created {@link DefaultServerWebExchange}.
+	 * <p>By default this is set to
+	 * {@link org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver}.
+	 * @param resolver the locale context resolver to use
+	 */
+	public void setLocaleContextResolver(LocaleContextResolver resolver) {
+		Assert.notNull(resolver, "LocaleContextResolver is required");
+		this.localeContextResolver = resolver;
 	}
 
 	/**
 	 * Return the configured {@link LocaleContextResolver}.
 	 */
 	public LocaleContextResolver getLocaleContextResolver() {
-		return (this.localeContextResolver != null ? this.localeContextResolver : new AcceptHeaderLocaleContextResolver());
+		return this.localeContextResolver;
+	}
+
+	/**
+	 * Configure the {@code ApplicationContext} associated with the web application,
+	 * if it was initialized with one via
+	 * {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext
+	 * WebHttpHandlerBuilder#applicationContext}.
+	 * @param applicationContext the context
+	 * @since 5.0.3
+	 */
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
+
+	/**
+	 * Return the configured {@code ApplicationContext}, if any.
+	 * @since 5.0.3
+	 */
+	@Nullable
+	public ApplicationContext getApplicationContext() {
+		return this.applicationContext;
+	}
+
+	/**
+	 * This method must be invoked after all properties have been set to
+	 * complete initialization.
+	 */
+	public void afterPropertiesSet() {
+		if (logger.isDebugEnabled()) {
+			if (this.disableLoggingRequestDetails) {
+				logger.debug("Logging query, form data, multipart data, and headers is OFF.");
+			}
+			else {
+				logger.warn("\n\n" +
+						"!!!!!!!!!!!!!!!!!!!\n" +
+						"Logging query, form and multipart data (DEBUG), and headers (TRACE) may show sensitive data.\n" +
+						"If not in development, set \"disableLoggingRequestDetails(true)\" on ServerCodecConfigurer,\n" +
+						"or lower the log level.\n" +
+						"!!!!!!!!!!!!!!!!!!!\n");
+			}
+		}
 	}
 
 
 	@Override
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+
 		ServerWebExchange exchange = createExchange(request, response);
+		logExchange(exchange);
+
 		return getDelegate().handle(exchange)
-				.onErrorResume(ex -> {
-					response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-					logHandleFailure(ex);
-					return Mono.empty();
-				})
+				.doOnSuccess(aVoid -> logResponse(response))
+				.onErrorResume(ex -> handleUnresolvedError(request, response, ex))
 				.then(Mono.defer(response::setComplete));
 	}
 
 	protected ServerWebExchange createExchange(ServerHttpRequest request, ServerHttpResponse response) {
-		return new DefaultServerWebExchange(request, response, this.sessionManager, getCodecConfigurer(), getLocaleContextResolver());
+		return new DefaultServerWebExchange(request, response, this.sessionManager,
+				getCodecConfigurer(), getLocaleContextResolver(), this.applicationContext);
 	}
 
-	private void logHandleFailure(Throwable ex) {
-		if (indicatesDisconnectedClient(ex)) {
-			if (disconnectedClientLogger.isTraceEnabled()) {
-				disconnectedClientLogger.trace("Looks like the client has gone away", ex);
+	private void logExchange(ServerWebExchange exchange) {
+		if (logger.isDebugEnabled()) {
+			ServerHttpRequest request = exchange.getRequest();
+			if (logger.isTraceEnabled()) {
+				String headers = this.disableLoggingRequestDetails ? "" : ", headers=" + request.getHeaders();
+				logger.trace(formatRequest(request) + headers);
 			}
-			else if (disconnectedClientLogger.isDebugEnabled()) {
-				disconnectedClientLogger.debug("Looks like the client has gone away: " + ex +
-						" (For a full stack trace, set the log category '" + DISCONNECTED_CLIENT_LOG_CATEGORY +
-						"' to TRACE level.)");
+			else {
+				logger.debug(formatRequest(request));
 			}
+		}
+	}
+
+	private String formatRequest(ServerHttpRequest request) {
+		String query = "";
+		if (!this.disableLoggingRequestDetails) {
+			String rawQuery = request.getURI().getRawQuery();
+			query = StringUtils.hasText(rawQuery) ? "?" + rawQuery : "";
+		}
+		return "HTTP " + request.getMethod() + " \"" + request.getPath() + query + "\"";
+	}
+
+	private void logResponse(ServerHttpResponse response) {
+		if (logger.isDebugEnabled()) {
+			HttpStatus status = response.getStatusCode();
+			String message = "Completed " + (status != null ? status : "200 OK");
+
+			if (logger.isTraceEnabled()) {
+				String headers = this.disableLoggingRequestDetails ? "" : ", headers=" + response.getHeaders();
+				logger.trace(message + headers);
+			}
+			else {
+				logger.debug(message);
+			}
+		}
+	}
+
+	private Mono<Void> handleUnresolvedError(ServerHttpRequest request, ServerHttpResponse response, Throwable ex) {
+
+		if (isDisconnectedClientError(ex)) {
+			if (lostClientLogger.isTraceEnabled()) {
+				lostClientLogger.trace("Client went away", ex);
+			}
+			else if (lostClientLogger.isDebugEnabled()) {
+				lostClientLogger.debug("Client went away: " + ex +
+						" (stacktrace at TRACE level for '" + DISCONNECTED_CLIENT_LOG_CATEGORY + "')");
+			}
+			return Mono.empty();
+		}
+		else if (response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR)) {
+			logger.error("500 Server Error for " + formatRequest(request), ex);
+			return Mono.empty();
 		}
 		else {
-			logger.error("Failed to handle request", ex);
+			// After the response is committed, propagate errors to the server..
+			logger.error("Error [" + ex + "] for " + formatRequest(request) +
+					", but ServerHttpResponse already committed (" + response.getStatusCode() + ")");
+			return Mono.error(ex);
 		}
 	}
 
-	private boolean indicatesDisconnectedClient(Throwable ex)  {
-		return ("Broken pipe".equalsIgnoreCase(NestedExceptionUtils.getMostSpecificCause(ex).getMessage()) ||
-				DISCONNECTED_CLIENT_EXCEPTIONS.contains(ex.getClass().getSimpleName()));
+	private boolean isDisconnectedClientError(Throwable ex)  {
+		String message = NestedExceptionUtils.getMostSpecificCause(ex).getMessage();
+		message = (message != null ? message.toLowerCase() : "");
+		String className = ex.getClass().getSimpleName();
+		return (message.contains("broken pipe") || DISCONNECTED_CLIENT_EXCEPTIONS.contains(className));
 	}
 
 }

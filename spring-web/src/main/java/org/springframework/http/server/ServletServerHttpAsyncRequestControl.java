@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
  */
 public class ServletServerHttpAsyncRequestControl implements ServerHttpAsyncRequestControl, AsyncListener {
 
-	private static long NO_TIMEOUT_VALUE = Long.MIN_VALUE;
+	private static final long NO_TIMEOUT_VALUE = Long.MIN_VALUE;
 
 
 	private final ServletServerHttpRequest request;

@@ -87,7 +87,7 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	 * Sets the (new) value of the {@code Sec-WebSocket-Accept} header.
 	 * @param secWebSocketAccept the value of the header
 	 */
-	public void setSecWebSocketAccept(String secWebSocketAccept) {
+	public void setSecWebSocketAccept(@Nullable String secWebSocketAccept) {
 		set(SEC_WEBSOCKET_ACCEPT, secWebSocketAccept);
 	}
 
@@ -134,7 +134,7 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	 * Sets the (new) value of the {@code Sec-WebSocket-Key} header.
 	 * @param secWebSocketKey the value of the header
 	 */
-	public void setSecWebSocketKey(String secWebSocketKey) {
+	public void setSecWebSocketKey(@Nullable String secWebSocketKey) {
 		set(SEC_WEBSOCKET_KEY, secWebSocketKey);
 	}
 
@@ -184,7 +184,7 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	 * Sets the (new) value of the {@code Sec-WebSocket-Version} header.
 	 * @param secWebSocketVersion the value of the header
 	 */
-	public void setSecWebSocketVersion(String secWebSocketVersion) {
+	public void setSecWebSocketVersion(@Nullable String secWebSocketVersion) {
 		set(SEC_WEBSOCKET_VERSION, secWebSocketVersion);
 	}
 
@@ -206,6 +206,7 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	 * @return the first header value; or {@code null}
 	 */
 	@Override
+	@Nullable
 	public String getFirst(String headerName) {
 		return this.headers.getFirst(headerName);
 	}
@@ -232,7 +233,7 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	 * @see #add(String, String)
 	 */
 	@Override
-	public void set(String headerName, String headerValue) {
+	public void set(String headerName, @Nullable String headerValue) {
 		this.headers.set(headerName, headerValue);
 	}
 

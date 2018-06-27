@@ -233,8 +233,8 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		String xssQueryString = QUERY_STRING + "&stuff=\"><script>alert('XSS!')</script>";
 		request.setQueryString(xssQueryString);
 		tag.doStartTag();
-		assertEquals("<form id=\"command\" action=\"/my/form?foo=bar&amp;stuff=&quot;&gt;&lt;script&gt;alert(&#39;XSS!&#39;)&lt;/script&gt;\" method=\"post\">",
-				getOutput());
+		assertEquals("<form id=\"command\" action=\"/my/form?foo=bar&amp;stuff=&quot;&gt;&lt;" +
+						"script&gt;alert(&#39;XSS!&#39;)&lt;/script&gt;\" method=\"post\">", getOutput());
 	}
 
 	@Test

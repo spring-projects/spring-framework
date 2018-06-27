@@ -104,8 +104,8 @@ public class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappin
 	public void actualRequestWithDefaultAnnotation() throws Exception {
 		ResponseEntity<String> entity = performGet("/default", this.headers, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
-		assertEquals("http://site1.com", entity.getHeaders().getAccessControlAllowOrigin());
-		assertEquals(true, entity.getHeaders().getAccessControlAllowCredentials());
+		assertEquals("*", entity.getHeaders().getAccessControlAllowOrigin());
+		assertEquals(false, entity.getHeaders().getAccessControlAllowCredentials());
 		assertEquals("default", entity.getBody());
 	}
 
@@ -114,9 +114,9 @@ public class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappin
 		this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		ResponseEntity<Void> entity = performOptions("/default", this.headers, Void.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
-		assertEquals("http://site1.com", entity.getHeaders().getAccessControlAllowOrigin());
+		assertEquals("*", entity.getHeaders().getAccessControlAllowOrigin());
 		assertEquals(1800, entity.getHeaders().getAccessControlMaxAge());
-		assertEquals(true, entity.getHeaders().getAccessControlAllowCredentials());
+		assertEquals(false, entity.getHeaders().getAccessControlAllowCredentials());
 	}
 
 	@Test

@@ -266,6 +266,7 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 
 
 	@Override
+	@Nullable
 	public CronTrigger getObject() {
 		return this.cronTrigger;
 	}

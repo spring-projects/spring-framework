@@ -41,7 +41,7 @@ import org.springframework.web.context.WebApplicationContext;
 public abstract class MockMvcBuilderSupport {
 
 	protected final MockMvc createMockMvc(Filter[] filters, MockServletConfig servletConfig,
-			WebApplicationContext webAppContext, RequestBuilder defaultRequestBuilder,
+			WebApplicationContext webAppContext, @Nullable RequestBuilder defaultRequestBuilder,
 			List<ResultMatcher> globalResultMatchers, List<ResultHandler> globalResultHandlers,
 			@Nullable List<DispatcherServletCustomizer> dispatcherServletCustomizers) {
 

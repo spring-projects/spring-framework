@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.web.reactive.result.method;
-
-import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 
@@ -54,7 +52,7 @@ public interface SyncHandlerMethodArgumentResolver extends HandlerMethodArgument
 	 * @return the resolved value, if any
 	 */
 	@Nullable
-	Object resolveArgumentValue(MethodParameter parameter, BindingContext bindingContext,
-			ServerWebExchange exchange);
+	Object resolveArgumentValue(
+			MethodParameter parameter, BindingContext bindingContext, ServerWebExchange exchange);
 
 }

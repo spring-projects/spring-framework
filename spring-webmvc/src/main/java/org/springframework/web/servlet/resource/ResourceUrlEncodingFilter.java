@@ -80,7 +80,8 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 		public String encodeURL(String url) {
 			ResourceUrlProvider resourceUrlProvider = getResourceUrlProvider();
 			if (resourceUrlProvider == null) {
-				logger.debug("Request attribute exposing ResourceUrlProvider not found");
+				logger.trace("ResourceUrlProvider not available via " +
+						"request attribute ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR");
 				return super.encodeURL(url);
 			}
 
@@ -123,7 +124,7 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 		}
 
 		private int getQueryParamsIndex(String url) {
-			int index = url.indexOf("?");
+			int index = url.indexOf('?');
 			return (index > 0 ? index : url.length());
 		}
 	}

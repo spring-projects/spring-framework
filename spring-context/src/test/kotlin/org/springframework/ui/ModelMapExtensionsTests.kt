@@ -20,9 +20,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-
 /**
- * Tests for [ModelMap] Kotlin extensions
+ * Tests for [ModelMap] Kotlin extensions.
  *
  * @author Sebastien Deleuze
  */

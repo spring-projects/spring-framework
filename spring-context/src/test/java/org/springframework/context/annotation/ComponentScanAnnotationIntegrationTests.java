@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ import org.springframework.context.annotation.componentscan.simple.SimpleCompone
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -193,7 +194,7 @@ public class ComponentScanAnnotationIntegrationTests {
 	@Test
 	public void withAwareTypeFilter() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ComponentScanWithAwareTypeFilter.class);
-		assertTrue(ctx.getEnvironment().acceptsProfiles("the-filter-ran"));
+		assertTrue(ctx.getEnvironment().acceptsProfiles(Profiles.of("the-filter-ran")));
 	}
 
 	@Test

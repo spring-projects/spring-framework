@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ package org.springframework.web.socket.sockjs.support;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
@@ -87,9 +87,9 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 	private boolean sessionCookieNeeded = true;
 
-	private long heartbeatTime = 25 * 1000;
+	private long heartbeatTime = TimeUnit.SECONDS.toMillis(25);
 
-	private long disconnectDelay = 5 * 1000;
+	private long disconnectDelay = TimeUnit.SECONDS.toMillis(5);
 
 	private int httpMessageCacheSize = 100;
 
@@ -298,9 +298,9 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	 * designed for browsers. There is nothing preventing other types of client
 	 * to modify the {@code Origin} header value.
 	 * <p>When SockJS is enabled and origins are restricted, transport types
-	 * that do not allow to check request origin (JSONP and Iframe based
-	 * transports) are disabled. As a consequence, IE 6 to 9 are not supported
-	 * when origins are restricted.
+	 * that do not allow to check request origin (Iframe based transports)
+	 * are disabled. As a consequence, IE 6 to 9 are not supported when origins
+	 * are restricted.
 	 * <p>Each provided allowed origin must have a scheme, and optionally a port
 	 * (e.g. "http://example.org", "http://example.org:9090"). An allowed origin
 	 * string may also be "*" in which case all origins are allowed.
@@ -488,10 +488,11 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	}
 
 	@Override
+	@Nullable
 	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 		if (!this.suppressCors && CorsUtils.isCorsRequest(request)) {
 			CorsConfiguration config = new CorsConfiguration();
-			config.addAllowedOrigin("*");
+			config.setAllowedOrigins(new ArrayList<>(this.allowedOrigins));
 			config.addAllowedMethod("*");
 			config.setAllowCredentials(true);
 			config.setMaxAge(ONE_YEAR);
@@ -513,7 +514,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	protected void sendMethodNotAllowed(ServerHttpResponse response, HttpMethod... httpMethods) {
 		logger.warn("Sending Method Not Allowed (405)");
 		response.setStatusCode(HttpStatus.METHOD_NOT_ALLOWED);
-		response.getHeaders().setAllow(new HashSet<>(Arrays.asList(httpMethods)));
+		response.getHeaders().setAllow(new LinkedHashSet<>(Arrays.asList(httpMethods)));
 	}
 
 
@@ -543,7 +544,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 		@Override
 		public void handle(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
-			if (HttpMethod.GET == request.getMethod()) {
+			if (request.getMethod() == HttpMethod.GET) {
 				addNoCacheHeaders(response);
 				if (checkOrigin(request, response)) {
 					response.getHeaders().setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
@@ -553,14 +554,14 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 				}
 
 			}
-			else if (HttpMethod.OPTIONS == request.getMethod()) {
+			else if (request.getMethod() == HttpMethod.OPTIONS) {
 				if (checkOrigin(request, response)) {
 					addCacheHeaders(response);
 					response.setStatusCode(HttpStatus.NO_CONTENT);
 				}
 			}
 			else {
-				sendMethodNotAllowed(response, HttpMethod.OPTIONS, HttpMethod.GET);
+				sendMethodNotAllowed(response, HttpMethod.GET, HttpMethod.OPTIONS);
 			}
 		}
 	};
@@ -588,7 +589,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 		@Override
 		public void handle(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
-			if (!HttpMethod.GET.equals(request.getMethod())) {
+			if (request.getMethod() != HttpMethod.GET) {
 				sendMethodNotAllowed(response, HttpMethod.GET);
 				return;
 			}

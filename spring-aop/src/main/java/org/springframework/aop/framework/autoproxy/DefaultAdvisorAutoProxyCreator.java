@@ -39,7 +39,7 @@ import org.springframework.lang.Nullable;
 public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCreator implements BeanNameAware {
 
 	/** Separator between prefix and remainder of bean name */
-	public final static String SEPARATOR = ".";
+	public static final String SEPARATOR = ".";
 
 
 	private boolean usePrefix = false;
@@ -70,7 +70,7 @@ public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCrea
 	 * references. Default value is the bean name of this object + a dot.
 	 * @param advisorBeanNamePrefix the exclusion prefix
 	 */
-	public void setAdvisorBeanNamePrefix(String advisorBeanNamePrefix) {
+	public void setAdvisorBeanNamePrefix(@Nullable String advisorBeanNamePrefix) {
 		this.advisorBeanNamePrefix = advisorBeanNamePrefix;
 	}
 

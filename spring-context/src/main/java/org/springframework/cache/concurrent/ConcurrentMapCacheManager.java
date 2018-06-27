@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ public class ConcurrentMapCacheManager implements CacheManager, BeanClassLoaderA
 
 	private boolean storeByValue = false;
 
+	@Nullable
 	private SerializationDelegate serialization;
 
 
@@ -161,6 +162,7 @@ public class ConcurrentMapCacheManager implements CacheManager, BeanClassLoaderA
 	}
 
 	@Override
+	@Nullable
 	public Cache getCache(String name) {
 		Cache cache = this.cacheMap.get(name);
 		if (cache == null && this.dynamic) {

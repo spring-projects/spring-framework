@@ -75,7 +75,9 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 	 * values are not expected to contain expressions
 	 * @param registry for checking reactive type wrappers
 	 */
-	public AbstractNamedValueArgumentResolver(@Nullable ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
+	public AbstractNamedValueArgumentResolver(@Nullable ConfigurableBeanFactory factory,
+			ReactiveAdapterRegistry registry) {
+		
 		super(registry);
 		this.configurableBeanFactory = factory;
 		this.expressionContext = (factory != null ? new BeanExpressionContext(factory, null) : null);

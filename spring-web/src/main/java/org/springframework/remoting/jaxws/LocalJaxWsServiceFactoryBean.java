@@ -49,6 +49,7 @@ public class LocalJaxWsServiceFactoryBean extends LocalJaxWsServiceFactory
 	}
 
 	@Override
+	@Nullable
 	public Service getObject() {
 		return this.service;
 	}

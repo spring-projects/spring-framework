@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.orm.jpa;
 
 import java.util.Map;
-
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -107,10 +106,9 @@ public abstract class EntityManagerFactoryUtils {
 					BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, EntityManagerFactory.class);
 			for (String candidateName : candidateNames) {
 				EntityManagerFactory emf = (EntityManagerFactory) beanFactory.getBean(candidateName);
-				if (emf instanceof EntityManagerFactoryInfo) {
-					if (unitName.equals(((EntityManagerFactoryInfo) emf).getPersistenceUnitName())) {
-						return emf;
-					}
+				if (emf instanceof EntityManagerFactoryInfo &&
+						unitName.equals(((EntityManagerFactoryInfo) emf).getPersistenceUnitName())) {
+					return emf;
 				}
 			}
 			// No matching persistence unit found - simply take the EntityManagerFactory
@@ -481,12 +479,14 @@ public abstract class EntityManagerFactoryUtils {
 				em.flush();
 			}
 			catch (RuntimeException ex) {
+				DataAccessException dae;
 				if (this.jpaDialect != null) {
-					throw this.jpaDialect.translateExceptionIfPossible(ex);
+					dae = this.jpaDialect.translateExceptionIfPossible(ex);
 				}
 				else {
-					throw convertJpaAccessExceptionIfPossible(ex);
+					dae = convertJpaAccessExceptionIfPossible(ex);
 				}
+				throw (dae != null ? dae : ex);
 			}
 		}
 

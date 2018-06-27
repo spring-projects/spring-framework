@@ -17,21 +17,21 @@
 package org.springframework.web.client;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 /**
  * Implementation of {@link ResponseErrorHandler} that uses {@link HttpMessageConverter}s to
  * convert HTTP error responses to {@link RestClientException}.
+ *
  * <p>To use this error handler, you must specify a
  * {@linkplain #setStatusMapping(Map) status mapping} and/or a
  * {@linkplain #setSeriesMapping(Map) series mapping}. If either of these mappings has a match
@@ -42,6 +42,7 @@ import org.springframework.util.CollectionUtils;
  * into the mapped subclass of {@link RestClientException}. Note that the
  * {@linkplain #setStatusMapping(Map) status mapping} takes precedence over
  * {@linkplain #setSeriesMapping(Map) series mapping}.
+ *
  * <p>If there is no match, this error handler will default to the behavior of
  * {@link DefaultResponseErrorHandler}. Note that you can override this default behavior by
  * specifying a {@linkplain #setSeriesMapping(Map) series mapping} from
@@ -50,19 +51,17 @@ import org.springframework.util.CollectionUtils;
  *
  * @author Simon Galperin
  * @author Arjen Poutsma
- * @see RestTemplate#setErrorHandler(ResponseErrorHandler)
  * @since 5.0
+ * @see RestTemplate#setErrorHandler(ResponseErrorHandler)
  */
-public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler
-		implements InitializingBean {
+public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler {
 
-	private List<HttpMessageConverter<?>> messageConverters;
+	private List<HttpMessageConverter<?>> messageConverters = Collections.emptyList();
 
-	private final Map<HttpStatus, Class<? extends RestClientException>> statusMapping =
-			new LinkedHashMap<>();
+	private final Map<HttpStatus, Class<? extends RestClientException>> statusMapping = new LinkedHashMap<>();
 
-	private final Map<HttpStatus.Series, Class<? extends RestClientException>> seriesMapping =
-			new LinkedHashMap<>();
+	private final Map<HttpStatus.Series, Class<? extends RestClientException>> seriesMapping = new LinkedHashMap<>();
+
 
 	/**
 	 * Create a new, empty {@code ExtractingResponseErrorHandler}.
@@ -77,11 +76,12 @@ public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler
 	 * @param messageConverters the message converters to use
 	 */
 	public ExtractingResponseErrorHandler(List<HttpMessageConverter<?>> messageConverters) {
-		setMessageConverters(messageConverters);
+		this.messageConverters = messageConverters;
 	}
 
+
 	/**
-	 * Sets the message converters to use by this extractor.
+	 * Set the message converters to use by this extractor.
 	 */
 	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
 		this.messageConverters = messageConverters;
@@ -96,8 +96,7 @@ public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler
 	 * {@linkplain #setMessageConverters(List) configured message converters} to convert the
 	 * response into the mapped subclass of {@link RestClientException}.
 	 */
-	public void setStatusMapping(
-			Map<HttpStatus, Class<? extends RestClientException>> statusMapping) {
+	public void setStatusMapping(Map<HttpStatus, Class<? extends RestClientException>> statusMapping) {
 		if (!CollectionUtils.isEmpty(statusMapping)) {
 			this.statusMapping.putAll(statusMapping);
 		}
@@ -112,17 +111,12 @@ public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler
 	 * {@linkplain #setMessageConverters(List) configured message converters} to convert the
 	 * response into the mapped subclass of {@link RestClientException}.
 	 */
-	public void setSeriesMapping(
-			Map<HttpStatus.Series, Class<? extends RestClientException>> seriesMapping) {
+	public void setSeriesMapping(Map<HttpStatus.Series, Class<? extends RestClientException>> seriesMapping) {
 		if (!CollectionUtils.isEmpty(seriesMapping)) {
 			this.seriesMapping.putAll(seriesMapping);
 		}
 	}
 
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		Assert.notEmpty(this.messageConverters, "'messageConverters' is required");
-	}
 
 	@Override
 	protected boolean hasError(HttpStatus statusCode) {
@@ -138,8 +132,7 @@ public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler
 	}
 
 	@Override
-	public void handleError(ClientHttpResponse response) throws IOException {
-		HttpStatus statusCode = getHttpStatusCode(response);
+	public void handleError(ClientHttpResponse response, HttpStatus statusCode) throws IOException {
 		if (this.statusMapping.containsKey(statusCode)) {
 			extract(this.statusMapping.get(statusCode), response);
 		}
@@ -147,7 +140,7 @@ public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler
 			extract(this.seriesMapping.get(statusCode.series()), response);
 		}
 		else {
-			super.handleError(response);
+			super.handleError(response, statusCode);
 		}
 	}
 
@@ -157,6 +150,7 @@ public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler
 		if (exceptionClass == null) {
 			return;
 		}
+
 		HttpMessageConverterExtractor<? extends RestClientException> extractor =
 				new HttpMessageConverterExtractor<>(exceptionClass, this.messageConverters);
 		RestClientException exception = extractor.extractData(response);
@@ -164,4 +158,5 @@ public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler
 			throw exception;
 		}
 	}
+
 }

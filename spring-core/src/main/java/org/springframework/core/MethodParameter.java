@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import kotlin.Metadata;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
 import kotlin.reflect.jvm.ReflectJvmMapping;
@@ -59,9 +58,7 @@ import org.springframework.util.ClassUtils;
  */
 public class MethodParameter {
 
-	private static final boolean kotlinPresent =
-			ClassUtils.isPresent("kotlin.Unit", MethodParameter.class.getClassLoader());
-
+	private static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
 
 	private final Executable executable;
 
@@ -188,7 +185,7 @@ public class MethodParameter {
 	 */
 	@Nullable
 	public Constructor<?> getConstructor() {
-		return (this.executable instanceof Constructor ? (Constructor) this.executable : null);
+		return (this.executable instanceof Constructor ? (Constructor<?>) this.executable : null);
 	}
 
 	/**
@@ -230,6 +227,9 @@ public class MethodParameter {
 	 * @since 5.0
 	 */
 	public Parameter getParameter() {
+		if (this.parameterIndex < 0) {
+			throw new IllegalStateException("Cannot retrieve Parameter descriptor for method return type");
+		}
 		Parameter parameter = this.parameter;
 		if (parameter == null) {
 			parameter = getExecutable().getParameters()[this.parameterIndex];
@@ -342,7 +342,7 @@ public class MethodParameter {
 	 */
 	public boolean isOptional() {
 		return (getParameterType() == Optional.class || hasNullableAnnotation() ||
-				(kotlinPresent && KotlinDelegate.isNullable(this)));
+				(KotlinDetector.isKotlinType(getContainingClass()) && KotlinDelegate.isOptional(this)));
 	}
 
 	/**
@@ -422,7 +422,18 @@ public class MethodParameter {
 				paramType = (method != null ? method.getGenericReturnType() : void.class);
 			}
 			else {
-				paramType = this.executable.getGenericParameterTypes()[this.parameterIndex];
+				Type[] genericParameterTypes = this.executable.getGenericParameterTypes();
+				int index = this.parameterIndex;
+				if (this.executable instanceof Constructor &&
+						ClassUtils.isInnerClass(this.executable.getDeclaringClass()) &&
+						genericParameterTypes.length == this.executable.getParameterCount() - 1) {
+					// Bug in javac: type array excludes enclosing instance parameter
+					// for inner classes with at least one generic constructor parameter,
+					// so access it with the actual parameter index lowered by 1
+					index = this.parameterIndex - 1;
+				}
+				paramType = (index >= 0 && index < genericParameterTypes.length ?
+						genericParameterTypes[index] : getParameterType());
 			}
 			this.genericParameterType = paramType;
 		}
@@ -520,12 +531,16 @@ public class MethodParameter {
 		Annotation[] paramAnns = this.parameterAnnotations;
 		if (paramAnns == null) {
 			Annotation[][] annotationArray = this.executable.getParameterAnnotations();
-			if (this.parameterIndex >= 0 && this.parameterIndex < annotationArray.length) {
-				paramAnns = adaptAnnotationArray(annotationArray[this.parameterIndex]);
+			int index = this.parameterIndex;
+			if (this.executable instanceof Constructor &&
+					ClassUtils.isInnerClass(this.executable.getDeclaringClass()) &&
+					annotationArray.length == this.executable.getParameterCount() - 1) {
+				// Bug in javac in JDK <9: annotation array excludes enclosing instance parameter
+				// for inner classes, so access it with the actual parameter index lowered by 1
+				index = this.parameterIndex - 1;
 			}
-			else {
-				paramAnns = new Annotation[0];
-			}
+			paramAnns = (index >= 0 && index < annotationArray.length ?
+					adaptAnnotationArray(annotationArray[index]) : EMPTY_ANNOTATION_ARRAY);
 			this.parameterAnnotations = paramAnns;
 		}
 		return paramAnns;
@@ -585,6 +600,9 @@ public class MethodParameter {
 	 */
 	@Nullable
 	public String getParameterName() {
+		if (this.parameterIndex < 0) {
+			return null;
+		}
 		ParameterNameDiscoverer discoverer = this.parameterNameDiscoverer;
 		if (discoverer != null) {
 			String[] parameterNames = null;
@@ -592,7 +610,7 @@ public class MethodParameter {
 				parameterNames = discoverer.getParameterNames((Method) this.executable);
 			}
 			else if (this.executable instanceof Constructor) {
-				parameterNames = discoverer.getParameterNames((Constructor) this.executable);
+				parameterNames = discoverer.getParameterNames((Constructor<?>) this.executable);
 			}
 			if (parameterNames != null) {
 				this.parameterName = parameterNames[this.parameterIndex];
@@ -723,7 +741,8 @@ public class MethodParameter {
 
 	private static int validateIndex(Executable executable, int parameterIndex) {
 		int count = executable.getParameterCount();
-		Assert.isTrue(parameterIndex < count, () -> "Parameter index needs to be between -1 and " + (count - 1));
+		Assert.isTrue(parameterIndex >= -1 && parameterIndex < count,
+				() -> "Parameter index needs to be between -1 and " + (count - 1));
 		return parameterIndex;
 	}
 
@@ -734,35 +753,33 @@ public class MethodParameter {
 	private static class KotlinDelegate {
 
 		/**
-		 * Check whether the specified {@link MethodParameter} represents a nullable Kotlin type or not.
+		 * Check whether the specified {@link MethodParameter} represents a nullable Kotlin type
+		 * or an optional parameter (with a default value in the Kotlin declaration).
 		 */
-		public static boolean isNullable(MethodParameter param) {
-			if (param.getContainingClass().isAnnotationPresent(Metadata.class)) {
-				Method method = param.getMethod();
-				Constructor<?> ctor = param.getConstructor();
-				int index = param.getParameterIndex();
-				if (method != null && index == -1) {
-					KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-					return (function != null && function.getReturnType().isMarkedNullable());
+		public static boolean isOptional(MethodParameter param) {
+			Method method = param.getMethod();
+			Constructor<?> ctor = param.getConstructor();
+			int index = param.getParameterIndex();
+			if (method != null && index == -1) {
+				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
+				return (function != null && function.getReturnType().isMarkedNullable());
+			}
+			else {
+				KFunction<?> function = null;
+				if (method != null) {
+					function = ReflectJvmMapping.getKotlinFunction(method);
 				}
-				else {
-					KFunction<?> function = null;
-					if (method != null) {
-						function = ReflectJvmMapping.getKotlinFunction(method);
-					}
-					else if (ctor != null) {
-						function = ReflectJvmMapping.getKotlinFunction(ctor);
-					}
-					if (function != null) {
-						List<KParameter> parameters = function.getParameters();
-						return parameters
-								.stream()
-								.filter(p -> KParameter.Kind.VALUE.equals(p.getKind()))
-								.collect(Collectors.toList())
-								.get(index)
-								.getType()
-								.isMarkedNullable();
-					}
+				else if (ctor != null) {
+					function = ReflectJvmMapping.getKotlinFunction(ctor);
+				}
+				if (function != null) {
+					List<KParameter> parameters = function.getParameters();
+					KParameter parameter = parameters
+							.stream()
+							.filter(p -> KParameter.Kind.VALUE.equals(p.getKind()))
+							.collect(Collectors.toList())
+							.get(index);
+					return (parameter.getType().isMarkedNullable() || parameter.isOptional());
 				}
 			}
 			return false;

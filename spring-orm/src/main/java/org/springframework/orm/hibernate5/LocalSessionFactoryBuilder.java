@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 			new AnnotationTypeFilter(Embeddable.class, false),
 			new AnnotationTypeFilter(MappedSuperclass.class, false)};
 
-	private final TypeFilter CONVERTER_TYPE_FILTER = new AnnotationTypeFilter(Converter.class, false);
+	private static final TypeFilter CONVERTER_TYPE_FILTER = new AnnotationTypeFilter(Converter.class, false);
 
 
 	private final ResourcePatternResolver resourcePatternResolver;
@@ -421,12 +421,17 @@ public class LocalSessionFactoryBuilder extends Configuration {
 				return this.sessionFactoryFuture.get();
 			}
 			catch (InterruptedException ex) {
-				throw new IllegalStateException("Interrupted during initialization of Hibernate SessionFactory: " +
-						ex.getMessage());
+				Thread.currentThread().interrupt();
+				throw new IllegalStateException("Interrupted during initialization of Hibernate SessionFactory", ex);
 			}
 			catch (ExecutionException ex) {
+				Throwable cause = ex.getCause();
+				if (cause instanceof HibernateException) {
+					// Rethrow a provider configuration exception (possibly with a nested cause) directly
+					throw (HibernateException) cause;
+				}
 				throw new IllegalStateException("Failed to asynchronously initialize Hibernate SessionFactory: " +
-						ex.getMessage(), ex.getCause());
+						ex.getMessage(), cause);
 			}
 		}
 	}

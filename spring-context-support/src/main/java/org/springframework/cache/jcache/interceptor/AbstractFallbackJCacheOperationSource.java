@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.BridgeMethodResolver;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.core.MethodClassKey;
 import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
 
 /**
  * Abstract implementation of {@link JCacheOperationSource} that caches attributes
@@ -47,7 +46,7 @@ public abstract class AbstractFallbackJCacheOperationSource implements JCacheOpe
 	 * Canonical value held in cache to indicate no caching attribute was
 	 * found for this method and we don't need to look again.
 	 */
-	private final static Object NULL_CACHING_ATTRIBUTE = new Object();
+	private static final Object NULL_CACHING_ATTRIBUTE = new Object();
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -87,9 +86,7 @@ public abstract class AbstractFallbackJCacheOperationSource implements JCacheOpe
 
 		// The method may be on an interface, but we need attributes from the target class.
 		// If the target class is null, the method will be unchanged.
-		Method specificMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
-		// If we are dealing with method with generic parameters, find the original method.
-		specificMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
+		Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
 
 		// First try is the method in the target class.
 		JCacheOperation<?> operation = findCacheOperation(specificMethod, targetClass);

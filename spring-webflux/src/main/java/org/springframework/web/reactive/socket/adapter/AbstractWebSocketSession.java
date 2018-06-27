@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.web.reactive.socket.adapter;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
@@ -48,9 +50,11 @@ public abstract class AbstractWebSocketSession<T> implements WebSocketSession {
 
 	private final DataBufferFactory bufferFactory;
 
+	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
+
 
 	/**
-	 * Create a new instance and associate the given attributes with it.
+	 * Create a new WebSocket session.
 	 */
 	protected AbstractWebSocketSession(T delegate, String id, HandshakeInfo handshakeInfo,
 			DataBufferFactory bufferFactory) {
@@ -64,6 +68,7 @@ public abstract class AbstractWebSocketSession<T> implements WebSocketSession {
 		this.id = id;
 		this.handshakeInfo = handshakeInfo;
 		this.bufferFactory = bufferFactory;
+		this.attributes.putAll(handshakeInfo.getAttributes());
 	}
 
 
@@ -84,6 +89,11 @@ public abstract class AbstractWebSocketSession<T> implements WebSocketSession {
 	@Override
 	public DataBufferFactory bufferFactory() {
 		return this.bufferFactory;
+	}
+
+	@Override
+	public Map<String, Object> getAttributes() {
+		return this.attributes;
 	}
 
 	@Override

@@ -146,6 +146,10 @@ public abstract class CommonsFileUploadSupport {
 		this.fileUpload.setHeaderEncoding(defaultEncoding);
 	}
 
+	/**
+	 * Determine the default encoding to use for parsing requests.
+	 * @see #setDefaultEncoding
+	 */
 	protected String getDefaultEncoding() {
 		String encoding = getFileUpload().getHeaderEncoding();
 		if (encoding == null) {
@@ -167,6 +171,10 @@ public abstract class CommonsFileUploadSupport {
 		this.uploadTempDirSpecified = true;
 	}
 
+	/**
+	 * Return the temporary directory where uploaded files get stored.
+	 * @see #setUploadTempDir
+	 */
 	protected boolean isUploadTempDirSpecified() {
 		return this.uploadTempDirSpecified;
 	}
@@ -247,19 +255,14 @@ public abstract class CommonsFileUploadSupport {
 			if (fileItem.isFormField()) {
 				String value;
 				String partEncoding = determineEncoding(fileItem.getContentType(), encoding);
-				if (partEncoding != null) {
-					try {
-						value = fileItem.getString(partEncoding);
-					}
-					catch (UnsupportedEncodingException ex) {
-						if (logger.isWarnEnabled()) {
-							logger.warn("Could not decode multipart item '" + fileItem.getFieldName() +
-									"' with encoding '" + partEncoding + "': using platform default");
-						}
-						value = fileItem.getString();
-					}
+				try {
+					value = fileItem.getString(partEncoding);
 				}
-				else {
+				catch (UnsupportedEncodingException ex) {
+					if (logger.isWarnEnabled()) {
+						logger.warn("Could not decode multipart item '" + fileItem.getFieldName() +
+								"' with encoding '" + partEncoding + "': using platform default");
+					}
 					value = fileItem.getString();
 				}
 				String[] curParam = multipartParameters.get(fileItem.getFieldName());
@@ -279,9 +282,14 @@ public abstract class CommonsFileUploadSupport {
 				CommonsMultipartFile file = createMultipartFile(fileItem);
 				multipartFiles.add(file.getName(), file);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Found multipart file [" + file.getName() + "] of size " + file.getSize() +
-							" bytes with original filename [" + file.getOriginalFilename() + "], stored " +
-							file.getStorageDescription());
+					String message = "Part '" + file.getName() + "', " +
+							"size " + file.getSize() + " bytes, filename='" + file.getOriginalFilename() + "'";
+					if (logger.isTraceEnabled()) {
+						logger.trace(message + ", storage=" + file.getStorageDescription());
+					}
+					else {
+						logger.debug(message);
+					}
 				}
 			}
 		}
@@ -316,15 +324,20 @@ public abstract class CommonsFileUploadSupport {
 					CommonsMultipartFile cmf = (CommonsMultipartFile) file;
 					cmf.getFileItem().delete();
 					if (logger.isDebugEnabled()) {
-						logger.debug("Cleaning up multipart file [" + cmf.getName() + "] with original filename [" +
-								cmf.getOriginalFilename() + "], stored " + cmf.getStorageDescription());
+						String filename = cmf.getOriginalFilename();
+						String message = "Cleaning up part '" + cmf.getName() + "', filename '" + filename + "'";
+						if (logger.isTraceEnabled()) {
+							logger.trace(message + ", stored " + cmf.getStorageDescription());
+						}
+						else {
+							logger.debug(message);
+						}
 					}
 				}
 			}
 		}
 	}
 
-	@Nullable
 	private String determineEncoding(String contentTypeHeader, String defaultEncoding) {
 		if (!StringUtils.hasText(contentTypeHeader)) {
 			return defaultEncoding;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -424,7 +424,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see #setDisallowedFields
 	 * @see #isAllowed(String)
 	 */
-	public void setAllowedFields(String... allowedFields) {
+	public void setAllowedFields(@Nullable String... allowedFields) {
 		this.allowedFields = PropertyAccessorUtils.canonicalPropertyNames(allowedFields);
 	}
 
@@ -448,7 +448,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see #setAllowedFields
 	 * @see #isAllowed(String)
 	 */
-	public void setDisallowedFields(String... disallowedFields) {
+	public void setDisallowedFields(@Nullable String... disallowedFields) {
 		this.disallowedFields = PropertyAccessorUtils.canonicalPropertyNames(disallowedFields);
 	}
 
@@ -471,7 +471,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see #setBindingErrorProcessor
 	 * @see DefaultBindingErrorProcessor#MISSING_FIELD_ERROR_CODE
 	 */
-	public void setRequiredFields(String... requiredFields) {
+	public void setRequiredFields(@Nullable String... requiredFields) {
 		this.requiredFields = PropertyAccessorUtils.canonicalPropertyNames(requiredFields);
 		if (logger.isDebugEnabled()) {
 			logger.debug("DataBinder requires binding of required fields [" +
@@ -526,17 +526,19 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see #addValidators(Validator...)
 	 * @see #replaceValidators(Validator...)
 	 */
-	public void setValidator(Validator validator) {
+	public void setValidator(@Nullable Validator validator) {
 		assertValidators(validator);
 		this.validators.clear();
-		this.validators.add(validator);
+		if (validator != null) {
+			this.validators.add(validator);
+		}
 	}
 
 	private void assertValidators(Validator... validators) {
-		Assert.notNull(validators, "Validators required");
+		Object target = getTarget();
 		for (Validator validator : validators) {
-			if (validator != null && (getTarget() != null && !validator.supports(getTarget().getClass()))) {
-				throw new IllegalStateException("Invalid target for Validator [" + validator + "]: " + getTarget());
+			if (validator != null && (target != null && !validator.supports(target.getClass()))) {
+				throw new IllegalStateException("Invalid target for Validator [" + validator + "]: " + target);
 			}
 		}
 	}
@@ -567,7 +569,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	@Nullable
 	public Validator getValidator() {
-		return (this.validators.size() > 0 ? this.validators.get(0) : null);
+		return (!this.validators.isEmpty() ? this.validators.get(0) : null);
 	}
 
 	/**
@@ -671,16 +673,19 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	@Override
+	@Nullable
 	public PropertyEditor findCustomEditor(@Nullable Class<?> requiredType, @Nullable String propertyPath) {
 		return getPropertyEditorRegistry().findCustomEditor(requiredType, propertyPath);
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType) throws TypeMismatchException {
 		return getTypeConverter().convertIfNecessary(value, requiredType);
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType,
 			@Nullable MethodParameter methodParam) throws TypeMismatchException {
 
@@ -688,6 +693,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType, @Nullable Field field)
 			throws TypeMismatchException {
 

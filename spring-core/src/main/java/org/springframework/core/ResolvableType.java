@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,36 +117,35 @@ public class ResolvableType implements Serializable {
 	@Nullable
 	private final ResolvableType componentType;
 
-	/**
-	 * Copy of the resolved value.
-	 */
-	@Nullable
-	private final Class<?> resolved;
-
 	@Nullable
 	private final Integer hash;
 
 	@Nullable
-	private ResolvableType superType;
+	private Class<?> resolved;
 
 	@Nullable
-	private ResolvableType[] interfaces;
+	private volatile ResolvableType superType;
 
 	@Nullable
-	private ResolvableType[] generics;
+	private volatile ResolvableType[] interfaces;
+
+	@Nullable
+	private volatile ResolvableType[] generics;
 
 
 	/**
 	 * Private constructor used to create a new {@link ResolvableType} for cache key purposes,
 	 * with no upfront resolution.
 	 */
-	private ResolvableType(Type type, @Nullable TypeProvider typeProvider, @Nullable VariableResolver variableResolver) {
+	private ResolvableType(
+			Type type, @Nullable TypeProvider typeProvider, @Nullable VariableResolver variableResolver) {
+
 		this.type = type;
 		this.typeProvider = typeProvider;
 		this.variableResolver = variableResolver;
 		this.componentType = null;
-		this.resolved = null;
 		this.hash = calculateHashCode();
+		this.resolved = null;
 	}
 
 	/**
@@ -161,8 +160,8 @@ public class ResolvableType implements Serializable {
 		this.typeProvider = typeProvider;
 		this.variableResolver = variableResolver;
 		this.componentType = null;
-		this.resolved = resolveClass();
 		this.hash = hash;
+		this.resolved = resolveClass();
 	}
 
 	/**
@@ -176,8 +175,8 @@ public class ResolvableType implements Serializable {
 		this.typeProvider = typeProvider;
 		this.variableResolver = variableResolver;
 		this.componentType = componentType;
-		this.resolved = resolveClass();
 		this.hash = null;
+		this.resolved = resolveClass();
 	}
 
 	/**
@@ -366,7 +365,7 @@ public class ResolvableType implements Serializable {
 		if (this == NONE) {
 			return false;
 		}
-		return (((this.type instanceof Class && ((Class<?>) this.type).isArray())) ||
+		return ((this.type instanceof Class && ((Class<?>) this.type).isArray()) ||
 				this.type instanceof GenericArrayType || resolveType().isArray());
 	}
 
@@ -453,10 +452,12 @@ public class ResolvableType implements Serializable {
 		if (resolved == null || resolved.getGenericSuperclass() == null) {
 			return NONE;
 		}
-		if (this.superType == null) {
-			this.superType = forType(SerializableTypeWrapper.forGenericSuperclass(resolved), asVariableResolver());
+		ResolvableType superType = this.superType;
+		if (superType == null) {
+			superType = forType(SerializableTypeWrapper.forGenericSuperclass(resolved), asVariableResolver());
+			this.superType = superType;
 		}
-		return this.superType;
+		return superType;
 	}
 
 	/**
@@ -470,10 +471,12 @@ public class ResolvableType implements Serializable {
 		if (resolved == null || ObjectUtils.isEmpty(resolved.getGenericInterfaces())) {
 			return EMPTY_TYPES_ARRAY;
 		}
-		if (this.interfaces == null) {
-			this.interfaces = forTypes(SerializableTypeWrapper.forGenericInterfaces(resolved), asVariableResolver());
+		ResolvableType[] interfaces = this.interfaces;
+		if (interfaces == null) {
+			interfaces = forTypes(SerializableTypeWrapper.forGenericInterfaces(resolved), asVariableResolver());
+			this.interfaces = interfaces;
 		}
-		return this.interfaces;
+		return interfaces;
 	}
 
 	/**
@@ -667,24 +670,25 @@ public class ResolvableType implements Serializable {
 		if (this == NONE) {
 			return EMPTY_TYPES_ARRAY;
 		}
-		if (this.generics == null) {
+		ResolvableType[] generics = this.generics;
+		if (generics == null) {
 			if (this.type instanceof Class) {
 				Class<?> typeClass = (Class<?>) this.type;
-				this.generics = forTypes(SerializableTypeWrapper.forTypeParameters(typeClass), this.variableResolver);
+				generics = forTypes(SerializableTypeWrapper.forTypeParameters(typeClass), this.variableResolver);
 			}
 			else if (this.type instanceof ParameterizedType) {
 				Type[] actualTypeArguments = ((ParameterizedType) this.type).getActualTypeArguments();
-				ResolvableType[] generics = new ResolvableType[actualTypeArguments.length];
+				generics = new ResolvableType[actualTypeArguments.length];
 				for (int i = 0; i < actualTypeArguments.length; i++) {
 					generics[i] = forType(actualTypeArguments[i], this.variableResolver);
 				}
-				this.generics = generics;
 			}
 			else {
-				this.generics = resolveType().getGenerics();
+				generics = resolveType().getGenerics();
 			}
+			this.generics = generics;
 		}
-		return this.generics;
+		return generics;
 	}
 
 	/**
@@ -748,7 +752,7 @@ public class ResolvableType implements Serializable {
 	 */
 	@Nullable
 	public Class<?> resolve() {
-		return (this.resolved != null ? this.resolved : null);
+		return this.resolved;
 	}
 
 	/**
@@ -766,6 +770,7 @@ public class ResolvableType implements Serializable {
 		return (this.resolved != null ? this.resolved : fallback);
 	}
 
+	@Nullable
 	private Class<?> resolveClass() {
 		if (this.type == EmptyType.INSTANCE) {
 			return null;
@@ -1042,7 +1047,7 @@ public class ResolvableType implements Serializable {
 		for (int i = 0; i < generics.length; i++) {
 			ResolvableType generic = generics[i];
 			Type argument = (generic != null ? generic.getType() : null);
-			arguments[i] = (argument != null ? argument : variables[i]);
+			arguments[i] = (argument != null && !(argument instanceof TypeVariable) ? argument : variables[i]);
 		}
 
 		ParameterizedType syntheticType = new SyntheticParameterizedType(clazz, arguments);
@@ -1339,6 +1344,19 @@ public class ResolvableType implements Serializable {
 		return forType(type, variableResolver);
 	}
 
+
+	/**
+	 * Return a {@link ResolvableType} for the specified {@link ParameterizedTypeReference}.
+	 * Note: The resulting {@link ResolvableType} may not be {@link Serializable}.
+	 * @param typeReference the reference to obtain the source type from
+	 * @return a {@link ResolvableType} for the specified {@link ParameterizedTypeReference}
+	 * @since 4.3.12
+	 * @see #forType(Type)
+	 */
+	public static ResolvableType forType(ParameterizedTypeReference<?> typeReference) {
+		return forType(typeReference.getType(), null, null);
+	}
+
 	/**
 	 * Return a {@link ResolvableType} for the specified {@link Type} backed by a given
 	 * {@link VariableResolver}.
@@ -1358,7 +1376,9 @@ public class ResolvableType implements Serializable {
 	 * @param variableResolver the variable resolver or {@code null}
 	 * @return a {@link ResolvableType} for the specified {@link Type} and {@link VariableResolver}
 	 */
-	static ResolvableType forType(@Nullable Type type, @Nullable TypeProvider typeProvider, @Nullable VariableResolver variableResolver) {
+	static ResolvableType forType(
+			@Nullable Type type, @Nullable TypeProvider typeProvider, @Nullable VariableResolver variableResolver) {
+
 		if (type == null && typeProvider != null) {
 			type = SerializableTypeWrapper.forTypeProvider(typeProvider);
 		}
@@ -1376,13 +1396,14 @@ public class ResolvableType implements Serializable {
 		cache.purgeUnreferencedEntries();
 
 		// Check the cache - we may have a ResolvableType which has been resolved before...
-		ResolvableType key = new ResolvableType(type, typeProvider, variableResolver);
-		ResolvableType resolvableType = cache.get(key);
-		if (resolvableType == null) {
-			resolvableType = new ResolvableType(type, typeProvider, variableResolver, key.hash);
-			cache.put(resolvableType, resolvableType);
+		ResolvableType resultType = new ResolvableType(type, typeProvider, variableResolver);
+		ResolvableType cachedType = cache.get(resultType);
+		if (cachedType == null) {
+			cachedType = new ResolvableType(type, typeProvider, variableResolver, resultType.hash);
+			cache.put(cachedType, cachedType);
 		}
-		return resolvableType;
+		resultType.resolved = cachedType.resolved;
+		return resultType;
 	}
 
 	/**
@@ -1419,6 +1440,7 @@ public class ResolvableType implements Serializable {
 	private class DefaultVariableResolver implements VariableResolver {
 
 		@Override
+		@Nullable
 		public ResolvableType resolveVariable(TypeVariable<?> variable) {
 			return ResolvableType.this.resolveVariable(variable);
 		}
@@ -1443,10 +1465,12 @@ public class ResolvableType implements Serializable {
 		}
 
 		@Override
+		@Nullable
 		public ResolvableType resolveVariable(TypeVariable<?> variable) {
 			for (int i = 0; i < this.variables.length; i++) {
-				if (ObjectUtils.nullSafeEquals(SerializableTypeWrapper.unwrap(this.variables[i]),
-						SerializableTypeWrapper.unwrap(variable))) {
+				TypeVariable<?> v1 = SerializableTypeWrapper.unwrap(this.variables[i]);
+				TypeVariable<?> v2 = SerializableTypeWrapper.unwrap(variable);
+				if (ObjectUtils.nullSafeEquals(v1, v2)) {
 					return this.generics[i];
 				}
 			}
@@ -1472,6 +1496,23 @@ public class ResolvableType implements Serializable {
 		}
 
 		@Override
+		public String getTypeName() {
+			StringBuilder result = new StringBuilder(this.rawType.getTypeName());
+			if (this.typeArguments.length > 0) {
+				result.append('<');
+				for (int i = 0; i < this.typeArguments.length; i++) {
+					if (i > 0) {
+						result.append(", ");
+					}
+					result.append(this.typeArguments[i].getTypeName());
+				}
+				result.append('>');
+			}
+			return result.toString();
+		}
+
+		@Override
+		@Nullable
 		public Type getOwnerType() {
 			return null;
 		}
@@ -1502,6 +1543,11 @@ public class ResolvableType implements Serializable {
 		@Override
 		public int hashCode() {
 			return (this.rawType.hashCode() * 31 + Arrays.hashCode(this.typeArguments));
+		}
+
+		@Override
+		public String toString() {
+			return getTypeName();
 		}
 	}
 
@@ -1577,7 +1623,7 @@ public class ResolvableType implements Serializable {
 			}
 			WildcardType wildcardType = (WildcardType) resolveToWildcard.type;
 			Kind boundsType = (wildcardType.getLowerBounds().length > 0 ? Kind.LOWER : Kind.UPPER);
-			Type[] bounds = boundsType == Kind.UPPER ? wildcardType.getUpperBounds() : wildcardType.getLowerBounds();
+			Type[] bounds = (boundsType == Kind.UPPER ? wildcardType.getUpperBounds() : wildcardType.getLowerBounds());
 			ResolvableType[] resolvableBounds = new ResolvableType[bounds.length];
 			for (int i = 0; i < bounds.length; i++) {
 				resolvableBounds[i] = ResolvableType.forType(bounds[i], type.variableResolver);

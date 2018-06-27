@@ -20,7 +20,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -70,9 +69,6 @@ public abstract class AbstractDetectingUrlHandlerMapping extends AbstractUrlHand
 	 */
 	protected void detectHandlers() throws BeansException {
 		ApplicationContext applicationContext = obtainApplicationContext();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Looking for URL mappings in application context: " + applicationContext);
-		}
 		String[] beanNames = (this.detectHandlersInAncestorContexts ?
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(applicationContext, Object.class) :
 				applicationContext.getBeanNamesForType(Object.class));
@@ -84,11 +80,10 @@ public abstract class AbstractDetectingUrlHandlerMapping extends AbstractUrlHand
 				// URL paths found: Let's consider it a handler.
 				registerHandler(urls, beanName);
 			}
-			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Rejected bean name '" + beanName + "': no URL paths identified");
-				}
-			}
+		}
+
+		if ((logger.isDebugEnabled() && !getHandlerMap().isEmpty()) || logger.isTraceEnabled()) {
+			logger.debug("Detected " + getHandlerMap().size() + " mappings in " + formatMappingName());
 		}
 	}
 
@@ -96,10 +91,8 @@ public abstract class AbstractDetectingUrlHandlerMapping extends AbstractUrlHand
 	/**
 	 * Determine the URLs for the given handler bean.
 	 * @param beanName the name of the candidate bean
-	 * @return the URLs determined for the bean,
-	 * or {@code null} or an empty array if none
+	 * @return the URLs determined for the bean, or an empty array if none
 	 */
-	@Nullable
 	protected abstract String[] determineUrlsForHandler(String beanName);
 
 }

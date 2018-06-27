@@ -80,8 +80,8 @@ public abstract class AbstractDataBufferAllocatingTestCase {
 		return dataBuffer -> {
 			String value =
 					DataBufferTestUtils.dumpString(dataBuffer, StandardCharsets.UTF_8);
-			assertEquals(expected, value);
 			DataBufferUtils.release(dataBuffer);
+			assertEquals(expected, value);
 		};
 	}
 

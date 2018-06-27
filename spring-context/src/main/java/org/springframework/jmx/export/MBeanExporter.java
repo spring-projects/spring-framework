@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.jmx.export;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -223,7 +223,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 
 	/**
 	 * Set the autodetection mode to use.
-	 * @exception IllegalArgumentException if the supplied value is not
+	 * @throws IllegalArgumentException if the supplied value is not
 	 * one of the {@code AUTODETECT_} constants
 	 * @see #setAutodetectModeName(String)
 	 * @see #AUTODETECT_ALL
@@ -240,7 +240,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 
 	/**
 	 * Set the autodetection mode to use by name.
-	 * @exception IllegalArgumentException if the supplied value is not resolvable
+	 * @throws IllegalArgumentException if the supplied value is not resolvable
 	 * to one of the {@code AUTODETECT_} constants or is {@code null}
 	 * @see #setAutodetectMode(int)
 	 * @see #AUTODETECT_ALL
@@ -321,7 +321,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 */
 	public void setExcludedBeans(String... excludedBeans) {
 		this.excludedBeans.clear();
-		this.excludedBeans.addAll(Arrays.asList(excludedBeans));
+		Collections.addAll(this.excludedBeans, excludedBeans);
 	}
 
 	/**
@@ -383,8 +383,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 			notificationListeners.add(bean);
 		});
 
-		this.notificationListeners =
-				notificationListeners.toArray(new NotificationListenerBean[notificationListeners.size()]);
+		this.notificationListeners = notificationListeners.toArray(new NotificationListenerBean[0]);
 	}
 
 	@Override
@@ -508,7 +507,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	//---------------------------------------------------------------------
 
 	/**
-	 * Registers the defined beans with the {@link MBeanServer}.
+	 * Register the defined beans with the {@link MBeanServer}.
 	 * <p>Each bean is exposed to the {@code MBeanServer} via a
 	 * {@code ModelMBean}. The actual implemetation of the
 	 * {@code ModelMBean} interface used depends on the implementation of
@@ -566,7 +565,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	}
 
 	/**
-	 * Registers an individual bean with the {@link #setServer MBeanServer}.
+	 * Register an individual bean with the {@link #setServer MBeanServer}.
 	 * <p>This method is responsible for deciding <strong>how</strong> a bean
 	 * should be exposed to the {@code MBeanServer}. Specifically, if the
 	 * supplied {@code mapValue} is the name of a bean that is configured
@@ -579,15 +578,13 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @param mapValue the value configured for this bean in the beans map;
 	 * may be either the {@code String} name of a bean, or the bean itself
 	 * @param beanKey the key associated with this bean in the beans map
-	 * @return the {@code ObjectName} under which the resource was registered,
-	 * or {@code null} if the actual resource was {@code null} as well
+	 * @return the {@code ObjectName} under which the resource was registered
 	 * @throws MBeanExportException if the export failed
 	 * @see #setBeans
 	 * @see #registerBeanInstance
 	 * @see #registerLazyInit
 	 */
-	@Nullable
-	protected ObjectName registerBeanNameOrInstance(@Nullable Object mapValue, String beanKey) throws MBeanExportException {
+	protected ObjectName registerBeanNameOrInstance(Object mapValue, String beanKey) throws MBeanExportException {
 		try {
 			if (mapValue instanceof String) {
 				// Bean name pointing to a potentially lazy-init bean in the factory.
@@ -607,7 +604,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 					return objectName;
 				}
 			}
-			else if (mapValue != null) {
+			else {
 				// Plain bean instance -> register it directly.
 				if (this.beanFactory != null) {
 					Map<String, ?> beansOfSameType =
@@ -623,9 +620,6 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 				}
 				return registerBeanInstance(mapValue, beanKey);
 			}
-			else {
-				return null;
-			}
 		}
 		catch (Throwable ex) {
 			throw new UnableToRegisterMBeanException(
@@ -634,14 +628,14 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	}
 
 	/**
-	 * Replaces any bean names used as keys in the {@code NotificationListener}
+	 * Replace any bean names used as keys in the {@code NotificationListener}
 	 * mappings with their corresponding {@code ObjectName} values.
 	 * @param beanName the name of the bean to be registered
 	 * @param objectName the {@code ObjectName} under which the bean will be registered
 	 * with the {@code MBeanServer}
 	 */
-	private void replaceNotificationListenerBeanNameKeysIfNecessary(String beanName, @Nullable ObjectName objectName) {
-		if (objectName != null && this.notificationListeners != null) {
+	private void replaceNotificationListenerBeanNameKeysIfNecessary(String beanName, ObjectName objectName) {
+		if (this.notificationListeners != null) {
 			for (NotificationListenerBean notificationListener : this.notificationListeners) {
 				notificationListener.replaceObjectName(beanName, objectName);
 			}
@@ -656,12 +650,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @return the {@code ObjectName} under which the bean was registered
 	 * with the {@code MBeanServer}
 	 */
-	@Nullable
-	private ObjectName registerBeanInstance(@Nullable Object bean, String beanKey) throws JMException {
-		if (bean == null) {
-			return null;
-		}
-
+	private ObjectName registerBeanInstance(Object bean, String beanKey) throws JMException {
 		ObjectName objectName = getObjectName(bean, beanKey);
 		Object mbeanToExpose = null;
 		if (isMBean(bean.getClass())) {
@@ -695,7 +684,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	}
 
 	/**
-	 * Registers beans that are configured for lazy initialization with the
+	 * Register beans that are configured for lazy initialization with the
 	 * {@code MBeanServer} indirectly through a proxy.
 	 * @param beanName the name of the bean in the {@code BeanFactory}
 	 * @param beanKey the key associated with this bean in the beans map
@@ -879,9 +868,9 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	private void autodetect(Map<String, Object> beans, AutodetectCallback callback) {
 		Assert.state(this.beanFactory != null, "No BeanFactory set");
 		Set<String> beanNames = new LinkedHashSet<>(this.beanFactory.getBeanDefinitionCount());
-		beanNames.addAll(Arrays.asList(this.beanFactory.getBeanDefinitionNames()));
+		Collections.addAll(beanNames, this.beanFactory.getBeanDefinitionNames());
 		if (this.beanFactory instanceof ConfigurableBeanFactory) {
-			beanNames.addAll(Arrays.asList(((ConfigurableBeanFactory) this.beanFactory).getSingletonNames()));
+			Collections.addAll(beanNames, ((ConfigurableBeanFactory) this.beanFactory).getSingletonNames());
 		}
 
 		for (String beanName : beanNames) {
@@ -890,7 +879,13 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 					Class<?> beanClass = this.beanFactory.getType(beanName);
 					if (beanClass != null && callback.include(beanClass, beanName)) {
 						boolean lazyInit = isBeanDefinitionLazyInit(this.beanFactory, beanName);
-						Object beanInstance = (!lazyInit ? this.beanFactory.getBean(beanName) : null);
+						Object beanInstance = null;
+						if (!lazyInit) {
+							beanInstance = this.beanFactory.getBean(beanName);
+							if (!beanClass.isInstance(beanInstance)) {
+								continue;
+							}
+						}
 						if (!ScopedProxyUtils.isScopedTarget(beanName) && !beans.containsValue(beanName) &&
 								(beanInstance == null ||
 										!CollectionUtils.containsInstance(beans.values(), beanInstance))) {
@@ -1102,6 +1097,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 		}
 
 		@Override
+		@Nullable
 		public Object getTarget() {
 			try {
 				return super.getTarget();

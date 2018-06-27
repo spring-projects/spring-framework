@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,6 +157,11 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	 * not both. If you would like to build a custom MessageInterpolator, consider deriving from
 	 * Hibernate Validator's {@link ResourceBundleMessageInterpolator} and passing in a
 	 * Spring-based {@code ResourceBundleLocator} when constructing your interpolator.
+	 * <p>In order for Hibernate's default validation messages to be resolved still, your
+	 * {@link MessageSource} must be configured for optional resolution (usually the default).
+	 * In particular, the {@code MessageSource} instance specified here should not apply
+	 * {@link org.springframework.context.support.AbstractMessageSource#setUseCodeAsDefaultMessage
+	 * "useCodeAsDefaultMessage"} behavior. Please double-check your setup accordingly.
 	 * @see ResourceBundleMessageInterpolator
 	 */
 	public void setValidationMessageSource(MessageSource messageSource) {

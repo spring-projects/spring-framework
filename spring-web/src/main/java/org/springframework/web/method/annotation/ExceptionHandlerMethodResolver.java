@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +51,7 @@ public class ExceptionHandlerMethodResolver {
 			(AnnotationUtils.findAnnotation(method, ExceptionHandler.class) != null);
 
 
-	private final Map<Class<? extends Throwable>, Method> mappedMethods = new ConcurrentReferenceHashMap<>(16);
+	private final Map<Class<? extends Throwable>, Method> mappedMethods = new HashMap<>(16);
 
 	private final Map<Class<? extends Throwable>, Method> exceptionLookupCache = new ConcurrentReferenceHashMap<>(16);
 
@@ -83,7 +84,9 @@ public class ExceptionHandlerMethodResolver {
 				}
 			}
 		}
-		Assert.notEmpty(result, "No exception types mapped to {" + method + "}");
+		if (result.isEmpty()) {
+			throw new IllegalStateException("No exception types mapped to " + method);
+		}
 		return result;
 	}
 
@@ -166,7 +169,7 @@ public class ExceptionHandlerMethodResolver {
 			}
 		}
 		if (!matches.isEmpty()) {
-			Collections.sort(matches, new ExceptionDepthComparator(exceptionType));
+			matches.sort(new ExceptionDepthComparator(exceptionType));
 			return this.mappedMethods.get(matches.get(0));
 		}
 		else {

@@ -121,7 +121,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		}
 		catch (Exception ex) {
 			if (logger.isTraceEnabled()) {
-				logger.trace(getReturnValueHandlingErrorMessage("Error handling return value", returnValue), ex);
+				logger.trace(formatErrorForReturnValue(returnValue), ex);
 			}
 			throw ex;
 		}
@@ -160,13 +160,10 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		return webRequest.isNotModified();
 	}
 
-	private String getReturnValueHandlingErrorMessage(String message, @Nullable Object returnValue) {
-		StringBuilder sb = new StringBuilder(message);
-		if (returnValue != null) {
-			sb.append(" [type=").append(returnValue.getClass().getName()).append("]");
-		}
-		sb.append(" [value=").append(returnValue).append("]");
-		return getDetailedErrorMessage(sb.toString());
+	private String formatErrorForReturnValue(@Nullable Object returnValue) {
+		return "Error handling return value=[" + returnValue + "]" +
+				(returnValue != null ? ", type=" + returnValue.getClass().getName() : "") +
+				" in " + toString();
 	}
 
 	/**
@@ -286,13 +283,11 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 		@Override
 		public <T extends Annotation> boolean hasMethodAnnotation(Class<T> annotationType) {
-
 			// Ensure @ResponseBody-style handling for values collected from a reactive type
 			// even if actual return type is ResponseEntity<Flux<T>>
-
-			return ResponseBody.class.equals(annotationType) &&
-					this.returnValue instanceof ReactiveTypeHandler.CollectedValuesList ||
-					super.hasMethodAnnotation(annotationType);
+			return (super.hasMethodAnnotation(annotationType) ||
+					(annotationType == ResponseBody.class &&
+							this.returnValue instanceof ReactiveTypeHandler.CollectedValuesList));
 		}
 
 		@Override

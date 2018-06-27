@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * No-arg constructor for use as a JavaBean.
 	 */
 	public AdvisedSupport() {
-		initMethodCache();
+		this.methodCache = new ConcurrentHashMap<>(32);
 	}
 
 	/**
@@ -117,13 +117,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	public AdvisedSupport(Class<?>... interfaces) {
 		this();
 		setInterfaces(interfaces);
-	}
-
-	/**
-	 * Initialize the method cache.
-	 */
-	private void initMethodCache() {
-		this.methodCache = new ConcurrentHashMap<>(32);
 	}
 
 
@@ -235,7 +228,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	@Override
 	public Class<?>[] getProxiedInterfaces() {
-		return this.interfaces.toArray(new Class<?>[this.interfaces.size()]);
+		return ClassUtils.toClassArray(this.interfaces);
 	}
 
 	@Override
@@ -379,7 +372,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Bring the array up to date with the list.
 	 */
 	protected final void updateAdvisorArray() {
-		this.advisorArray = this.advisors.toArray(new Advisor[this.advisors.size()]);
+		this.advisorArray = this.advisors.toArray(new Advisor[0]);
 	}
 
 	/**
@@ -558,7 +551,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		ois.defaultReadObject();
 
 		// Initialize transient fields.
-		initMethodCache();
+		this.methodCache = new ConcurrentHashMap<>(32);
 	}
 
 

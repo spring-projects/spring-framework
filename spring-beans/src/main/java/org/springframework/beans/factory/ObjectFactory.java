@@ -17,7 +17,6 @@
 package org.springframework.beans.factory;
 
 import org.springframework.beans.BeansException;
-import org.springframework.lang.Nullable;
 
 /**
  * Defines a factory which can return an Object instance
@@ -45,7 +44,6 @@ public interface ObjectFactory<T> {
 	 * @return the resulting instance
 	 * @throws BeansException in case of creation errors
 	 */
-	@Nullable
 	T getObject() throws BeansException;
 
 }

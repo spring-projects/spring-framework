@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,11 +39,11 @@ public class MappingJacksonValue {
 
 	private Object value;
 
+	@Nullable
 	private Class<?> serializationView;
 
+	@Nullable
 	private FilterProvider filters;
-
-	private String jsonpFunction;
 
 
 	/**
@@ -74,7 +74,7 @@ public class MappingJacksonValue {
 	 * @see com.fasterxml.jackson.databind.ObjectMapper#writerWithView(Class)
 	 * @see com.fasterxml.jackson.annotation.JsonView
 	 */
-	public void setSerializationView(Class<?> serializationView) {
+	public void setSerializationView(@Nullable Class<?> serializationView) {
 		this.serializationView = serializationView;
 	}
 
@@ -95,7 +95,7 @@ public class MappingJacksonValue {
 	 * @see com.fasterxml.jackson.annotation.JsonFilter
 	 * @see Jackson2ObjectMapperBuilder#filters(FilterProvider)
 	 */
-	public void setFilters(FilterProvider filters) {
+	public void setFilters(@Nullable FilterProvider filters) {
 		this.filters = filters;
 	}
 
@@ -108,21 +108,6 @@ public class MappingJacksonValue {
 	@Nullable
 	public FilterProvider getFilters() {
 		return this.filters;
-	}
-
-	/**
-	 * Set the name of the JSONP function name.
-	 */
-	public void setJsonpFunction(String functionName) {
-		this.jsonpFunction = functionName;
-	}
-
-	/**
-	 * Return the configured JSONP function name.
-	 */
-	@Nullable
-	public String getJsonpFunction() {
-		return this.jsonpFunction;
 	}
 
 }

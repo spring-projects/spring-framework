@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ public class MethodMapTransactionAttributeSource
 	 */
 	public void addTransactionalMethod(String name, TransactionAttribute attr) {
 		Assert.notNull(name, "Name must not be null");
-		int lastDotIndex = name.lastIndexOf(".");
+		int lastDotIndex = name.lastIndexOf('.');
 		if (lastDotIndex == -1) {
 			throw new IllegalArgumentException("'" + name + "' is not a valid method name: format is FQN.methodName");
 		}
@@ -156,7 +156,7 @@ public class MethodMapTransactionAttributeSource
 					"Couldn't find method '" + mappedName + "' on class [" + clazz.getName() + "]");
 		}
 
-		// register all matching methods
+		// Register all matching methods
 		for (Method method : matchingMethods) {
 			String regMethodName = this.methodNameMap.get(method);
 			if (regMethodName == null || (!regMethodName.equals(name) && regMethodName.length() <= name.length())) {
@@ -207,6 +207,7 @@ public class MethodMapTransactionAttributeSource
 
 
 	@Override
+	@Nullable
 	public TransactionAttribute getTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
 		if (this.eagerlyInitialized) {
 			return this.transactionAttributeMap.get(method);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	private boolean active = false;
 
-	private boolean running = false;
+	private volatile boolean running = false;
 
 	private final List<Object> pausedTasks = new LinkedList<>();
 
@@ -96,7 +96,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * @see javax.jms.Connection#setClientID
 	 * @see #setConnectionFactory
 	 */
-	public void setClientId(String clientId) {
+	public void setClientId(@Nullable String clientId) {
 		this.clientId = clientId;
 	}
 
@@ -143,7 +143,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	}
 
 	@Override
-	public void setBeanName(String beanName) {
+	public void setBeanName(@Nullable String beanName) {
 		this.beanName = beanName;
 	}
 
@@ -350,9 +350,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 */
 	@Override
 	public final boolean isRunning() {
-		synchronized (this.lifecycleMonitor) {
-			return (this.running && runningAllowed());
-		}
+		return (this.running && runningAllowed());
 	}
 
 	/**

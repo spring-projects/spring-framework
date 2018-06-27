@@ -19,22 +19,17 @@ package org.springframework.web.reactive.result.condition;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.springframework.http.server.reactive.PathContainer;
+import org.springframework.http.server.PathContainer;
 import org.springframework.lang.Nullable;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
-import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * A logical disjunction (' || ') request condition that matches a request
@@ -46,63 +41,32 @@ import org.springframework.web.util.pattern.PathPatternParser;
  */
 public final class PatternsRequestCondition extends AbstractRequestCondition<PatternsRequestCondition> {
 
-	private final Set<PathPattern> patterns;
-
-	private final PathPatternParser parser;
+	private final SortedSet<PathPattern> patterns;
 
 
 	/**
 	 * Creates a new instance with the given URL patterns.
-	 * Each pattern is prepended with "/" if not already.
 	 * @param patterns 0 or more URL patterns; if 0 the condition will match to every request.
 	 */
-	public PatternsRequestCondition(String... patterns) {
-		this(patterns, null);
+	public PatternsRequestCondition(PathPattern... patterns) {
+		this(Arrays.asList(patterns));
 	}
 
 	/**
-	 * Creates a new instance with the given URL patterns.
-	 * Each pattern that is not empty and does not start with "/" is pre-pended with "/".
-	 * @param patterns the URL patterns to use; if 0, the condition will match to every request.
-	 * @param patternParser for parsing string patterns
+	 * Creates a new instance with the given {@code Stream} of URL patterns.
 	 */
-	public PatternsRequestCondition(String[] patterns, PathPatternParser patternParser) {
-		this(Arrays.asList(patterns), patternParser);
+	public PatternsRequestCondition(List<PathPattern> patterns) {
+		this(toSortedSet(patterns));
 	}
 
-	/**
-	 * Private constructor accepting a collection of raw patterns.
-	 */
-	private PatternsRequestCondition(Collection<String> patterns, PathPatternParser parser) {
-		this.parser = (parser != null ? parser : new PathPatternParser());
-		this.patterns = toSortedSet(patterns.stream().map(pattern -> parse(pattern, this.parser)));
+	private static SortedSet<PathPattern> toSortedSet(Collection<PathPattern> patterns) {
+		TreeSet<PathPattern> sorted = new TreeSet<>();
+		sorted.addAll(patterns);
+		return sorted;
 	}
 
-	private static PathPattern parse(String pattern, PathPatternParser parser) {
-		if (StringUtils.hasText(pattern) && !pattern.startsWith("/")) {
-			pattern = "/" + pattern;
-		}
-		return parser.parse(pattern);
-	}
-
-	private static Set<PathPattern> toSortedSet(Stream<PathPattern> stream) {
-		return Collections.unmodifiableSet(stream.sorted()
-				.collect(Collectors.toCollection(() -> new TreeSet<>(getPatternComparator()))));
-	}
-
-	private static Comparator<PathPattern> getPatternComparator() {
-		return (p1, p2) -> {
-			int index = p1.compareTo(p2);
-			return (index != 0 ? index : p1.getPatternString().compareTo(p2.getPatternString()));
-		};
-	}
-
-	/**
-	 * Private constructor accepting a list of path patterns.
-	 */
-	private PatternsRequestCondition(List<PathPattern> patterns, PathPatternParser patternParser) {
-		this.patterns = toSortedSet(patterns.stream());
-		this.parser = patternParser;
+	private PatternsRequestCondition(SortedSet<PathPattern> patterns) {
+		this.patterns = patterns;
 	}
 
 	public Set<PathPattern> getPatterns() {
@@ -145,10 +109,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		else if (!other.patterns.isEmpty()) {
 			combined.addAll(other.patterns);
 		}
-		else {
-			combined.add(this.parser.parse(""));
-		}
-		return new PatternsRequestCondition(combined, this.parser);
+		return new PatternsRequestCondition(combined);
 	}
 
 	/**
@@ -167,7 +128,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		}
 		SortedSet<PathPattern> matches = getMatchingPatterns(exchange);
 		return matches.isEmpty() ? null :
-				new PatternsRequestCondition(new ArrayList<PathPattern>(matches), this.parser);
+				new PatternsRequestCondition(matches);
 	}
 
 	/**
@@ -201,7 +162,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		Iterator<PathPattern> iterator = this.patterns.iterator();
 		Iterator<PathPattern> iteratorOther = other.getPatterns().iterator();
 		while (iterator.hasNext() && iteratorOther.hasNext()) {
-			int result = iterator.next().compareTo(iteratorOther.next());
+			int result = PathPattern.SPECIFICITY_COMPARATOR.compare(iterator.next(), iteratorOther.next());
 			if (result != 0) {
 				return result;
 			}

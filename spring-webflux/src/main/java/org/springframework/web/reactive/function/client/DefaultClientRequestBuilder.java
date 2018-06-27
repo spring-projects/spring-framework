@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,6 +27,7 @@ import java.util.function.Consumer;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -45,24 +47,52 @@ import org.springframework.web.reactive.function.BodyInserters;
  * @author Arjen Poutsma
  * @since 5.0
  */
-class DefaultClientRequestBuilder implements ClientRequest.Builder {
+final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
-	private final HttpMethod method;
+	private HttpMethod method;
 
-	private final URI url;
+	private URI url;
 
 	private final HttpHeaders headers = new HttpHeaders();
 
 	private final MultiValueMap<String, String> cookies = new LinkedMultiValueMap<>();
 
-	private BodyInserter<?, ? super ClientHttpRequest> inserter = BodyInserters.empty();
+	private final Map<String, Object> attributes = new LinkedHashMap<>();
+
+	private BodyInserter<?, ? super ClientHttpRequest> body = BodyInserters.empty();
 
 
 	public DefaultClientRequestBuilder(HttpMethod method, URI url) {
+		Assert.notNull(method, "HttpMethod must not be null");
+		Assert.notNull(url, "URI must not be null");
 		this.method = method;
 		this.url = url;
 	}
 
+	public DefaultClientRequestBuilder(ClientRequest other) {
+		Assert.notNull(other, "ClientRequest must not be null");
+		this.method = other.method();
+		this.url = other.url();
+		headers(headers -> headers.addAll(other.headers()));
+		cookies(cookies -> cookies.addAll(other.cookies()));
+		attributes(attributes -> attributes.putAll(other.attributes()));
+		body(other.body());
+	}
+
+
+	@Override
+	public ClientRequest.Builder method(HttpMethod method) {
+		Assert.notNull(method, "'method' must not be null");
+		this.method = method;
+		return this;
+	}
+
+	@Override
+	public ClientRequest.Builder url(URI url) {
+		Assert.notNull(url, "'url' must not be null");
+		this.url = url;
+		return this;
+	}
 
 	@Override
 	public ClientRequest.Builder header(String headerName, String... headerValues) {
@@ -74,7 +104,6 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 	@Override
 	public ClientRequest.Builder headers(Consumer<HttpHeaders> headersConsumer) {
-		Assert.notNull(headersConsumer, "'headersConsumer' must not be null");
 		headersConsumer.accept(this.headers);
 		return this;
 	}
@@ -89,7 +118,6 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 	@Override
 	public ClientRequest.Builder cookies(Consumer<MultiValueMap<String, String>> cookiesConsumer) {
-		Assert.notNull(cookiesConsumer, "'cookiesConsumer' must not be null");
 		cookiesConsumer.accept(this.cookies);
 		return this;
 	}
@@ -99,20 +127,42 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 		Assert.notNull(publisher, "'publisher' must not be null");
 		Assert.notNull(elementClass, "'elementClass' must not be null");
 
-		this.inserter = BodyInserters.fromPublisher(publisher, elementClass);
+		this.body = BodyInserters.fromPublisher(publisher, elementClass);
+		return this;
+	}
+
+	@Override
+	public <S, P extends Publisher<S>> ClientRequest.Builder body(
+			P publisher, ParameterizedTypeReference<S> typeReference) {
+
+		Assert.notNull(publisher, "'publisher' must not be null");
+		Assert.notNull(typeReference, "'typeReference' must not be null");
+
+		this.body = BodyInserters.fromPublisher(publisher, typeReference);
+		return this;
+	}
+
+	@Override
+	public ClientRequest.Builder attribute(String name, Object value) {
+		this.attributes.put(name, value);
+		return this;
+	}
+
+	@Override
+	public ClientRequest.Builder attributes(Consumer<Map<String, Object>> attributesConsumer) {
+		attributesConsumer.accept(this.attributes);
 		return this;
 	}
 
 	@Override
 	public ClientRequest.Builder body(BodyInserter<?, ? super ClientHttpRequest> inserter) {
-		this.inserter = inserter;
+		this.body = inserter;
 		return this;
 	}
 
 	@Override
 	public ClientRequest build() {
-		return new BodyInserterRequest(this.method, this.url, this.headers, this.cookies,
-				this.inserter);
+		return new BodyInserterRequest(this.method, this.url, this.headers, this.cookies, this.body, this.attributes);
 	}
 
 
@@ -126,16 +176,20 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 		private final MultiValueMap<String, String> cookies;
 
-		private final BodyInserter<?, ? super ClientHttpRequest> inserter;
+		private final BodyInserter<?, ? super ClientHttpRequest> body;
+
+		private final Map<String, Object> attributes;
 
 		public BodyInserterRequest(HttpMethod method, URI url, HttpHeaders headers,
-				MultiValueMap<String, String> cookies, BodyInserter<?, ? super ClientHttpRequest> inserter) {
+				MultiValueMap<String, String> cookies, BodyInserter<?, ? super ClientHttpRequest> body,
+				Map<String, Object> attributes) {
 
 			this.method = method;
 			this.url = url;
 			this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
 			this.cookies = CollectionUtils.unmodifiableMultiValueMap(cookies);
-			this.inserter = inserter;
+			this.body = body;
+			this.attributes = Collections.unmodifiableMap(attributes);
 		}
 
 		@Override
@@ -160,7 +214,12 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 		@Override
 		public BodyInserter<?, ? super ClientHttpRequest> body() {
-			return this.inserter;
+			return this.body;
+		}
+
+		@Override
+		public Map<String, Object> attributes() {
+			return this.attributes;
 		}
 
 		@Override
@@ -181,17 +240,15 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 				}));
 			}
 
-			return this.inserter.insert(request, new BodyInserter.Context() {
+			return this.body.insert(request, new BodyInserter.Context() {
 				@Override
 				public List<HttpMessageWriter<?>> messageWriters() {
 					return strategies.messageWriters();
 				}
-
 				@Override
 				public Optional<ServerHttpRequest> serverRequest() {
 					return Optional.empty();
 				}
-
 				@Override
 				public Map<String, Object> hints() {
 					return Collections.emptyMap();

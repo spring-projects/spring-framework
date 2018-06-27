@@ -72,8 +72,8 @@ public class UrlBasedViewResolverTests {
 				.consumeNextWith(view -> {
 					assertEquals(RedirectView.class, view.getClass());
 					RedirectView redirectView = (RedirectView) view;
-					assertEquals(redirectView.getUrl(), "foo");
-					assertEquals(redirectView.getStatusCode(), HttpStatus.SEE_OTHER);
+					assertEquals("foo", redirectView.getUrl());
+					assertEquals(HttpStatus.SEE_OTHER, redirectView.getStatusCode());
 				})
 				.expectComplete()
 				.verify(Duration.ZERO);
@@ -88,8 +88,8 @@ public class UrlBasedViewResolverTests {
 				.consumeNextWith(view -> {
 					assertEquals(RedirectView.class, view.getClass());
 					RedirectView redirectView = (RedirectView) view;
-					assertEquals(redirectView.getUrl(), "foo");
-					assertEquals(redirectView.getStatusCode(), HttpStatus.FOUND);
+					assertEquals("foo", redirectView.getUrl());
+					assertEquals(HttpStatus.FOUND, redirectView.getStatusCode());
 				})
 				.expectComplete()
 				.verify(Duration.ZERO);

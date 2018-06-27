@@ -69,10 +69,13 @@ public class HandlerMethod {
 
 	private final MethodParameter[] parameters;
 
+	@Nullable
 	private HttpStatus responseStatus;
 
+	@Nullable
 	private String responseStatusReason;
 
+	@Nullable
 	private HandlerMethod resolvedFromHandlerMethod;
 
 

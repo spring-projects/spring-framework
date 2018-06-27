@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 			this.wsDataSourceClass = getClass().getClassLoader().loadClass("com.ibm.websphere.rsadapter.WSDataSource");
 			Class<?> jdbcConnSpecClass = getClass().getClassLoader().loadClass("com.ibm.websphere.rsadapter.JDBCConnectionSpec");
 			Class<?> wsrraFactoryClass = getClass().getClassLoader().loadClass("com.ibm.websphere.rsadapter.WSRRAFactory");
-			this.newJdbcConnSpecMethod = wsrraFactoryClass.getMethod("createJDBCConnectionSpec", (Class<?>[]) null);
+			this.newJdbcConnSpecMethod = wsrraFactoryClass.getMethod("createJDBCConnectionSpec");
 			this.wsDataSourceGetConnectionMethod =
 					this.wsDataSourceClass.getMethod("getConnection", jdbcConnSpecClass);
 			this.setTransactionIsolationMethod =
@@ -132,7 +132,7 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 	 * @see com.ibm.websphere.rsadapter.WSDataSource#getConnection(com.ibm.websphere.rsadapter.JDBCConnectionSpec)
 	 */
 	@Override
-	protected Connection doGetConnection(String username, String password) throws SQLException {
+	protected Connection doGetConnection(@Nullable String username, @Nullable String password) throws SQLException {
 		// Create JDBCConnectionSpec using current isolation level value and read-only flag.
 		Object connSpec = createConnectionSpec(
 				getCurrentIsolationLevel(), getCurrentReadOnlyFlag(), username, password);

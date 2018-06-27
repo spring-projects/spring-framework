@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.net.URI;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Map;
@@ -33,6 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
@@ -154,16 +156,15 @@ public abstract class WebUtils {
 		String root = servletContext.getRealPath("/");
 		if (root == null) {
 			throw new IllegalStateException(
-				"Cannot set web app root system property when WAR file is not expanded");
+					"Cannot set web app root system property when WAR file is not expanded");
 		}
 		String param = servletContext.getInitParameter(WEB_APP_ROOT_KEY_PARAM);
 		String key = (param != null ? param : DEFAULT_WEB_APP_ROOT_KEY);
 		String oldValue = System.getProperty(key);
 		if (oldValue != null && !StringUtils.pathEquals(oldValue, root)) {
-			throw new IllegalStateException(
-				"Web app root system property already set to different value: '" +
-				key + "' = [" + oldValue + "] instead of [" + root + "] - " +
-				"Choose unique values for the 'webAppRootKey' context-param in your web.xml files!");
+			throw new IllegalStateException("Web app root system property already set to different value: '" +
+					key + "' = [" + oldValue + "] instead of [" + root + "] - " +
+					"Choose unique values for the 'webAppRootKey' context-param in your web.xml files!");
 		}
 		System.setProperty(key, root);
 		servletContext.log("Set web app root system property: '" + key + "' = [" + root + "]");
@@ -300,7 +301,6 @@ public abstract class WebUtils {
 	 * @return the value of the session attribute, or {@code null} if not found
 	 * @throws IllegalStateException if the session attribute could not be found
 	 */
-	@Nullable
 	public static Object getRequiredSessionAttribute(HttpServletRequest request, String name)
 			throws IllegalStateException {
 
@@ -437,7 +437,9 @@ public abstract class WebUtils {
 	 * @param ex the exception encountered
 	 * @param servletName the name of the offending servlet
 	 */
-	public static void exposeErrorRequestAttributes(HttpServletRequest request, Throwable ex, @Nullable String servletName) {
+	public static void exposeErrorRequestAttributes(HttpServletRequest request, Throwable ex,
+			@Nullable String servletName) {
+
 		exposeRequestAttributeIfNotPresent(request, ERROR_STATUS_CODE_ATTRIBUTE, HttpServletResponse.SC_OK);
 		exposeRequestAttributeIfNotPresent(request, ERROR_EXCEPTION_TYPE_ATTRIBUTE, ex.getClass());
 		exposeRequestAttributeIfNotPresent(request, ERROR_MESSAGE_ATTRIBUTE, ex.getMessage());
@@ -490,7 +492,7 @@ public abstract class WebUtils {
 	@Nullable
 	public static Cookie getCookie(HttpServletRequest request, String name) {
 		Assert.notNull(request, "Request must not be null");
-		Cookie cookies[] = request.getCookies();
+		Cookie[] cookies = request.getCookies();
 		if (cookies != null) {
 			for (Cookie cookie : cookies) {
 				if (name.equals(cookie.getName())) {
@@ -664,6 +666,12 @@ public abstract class WebUtils {
 	 * Check the given request origin against a list of allowed origins.
 	 * A list containing "*" means that all origins are allowed.
 	 * An empty list means only same origin is allowed.
+	 *
+	 * <p><strong>Note:</strong> as of 5.1 this method ignores
+	 * {@code "Forwarded"} and {@code "X-Forwarded-*"} headers that specify the
+	 * client-originated address. Consider using the {@code ForwardedHeaderFilter}
+	 * to extract and use, or to discard such headers.
+	 *
 	 * @return {@code true} if the request origin is valid, {@code false} otherwise
 	 * @since 4.1.5
 	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
@@ -686,42 +694,53 @@ public abstract class WebUtils {
 
 	/**
 	 * Check if the request is a same-origin one, based on {@code Origin}, {@code Host},
-	 * {@code Forwarded} and {@code X-Forwarded-Host} headers.
+	 * {@code Forwarded}, {@code X-Forwarded-Proto}, {@code X-Forwarded-Host} and
+	 * @code X-Forwarded-Port} headers.
+	 *
+	 * <p><strong>Note:</strong> as of 5.1 this method ignores
+	 * {@code "Forwarded"} and {@code "X-Forwarded-*"} headers that specify the
+	 * client-originated address. Consider using the {@code ForwardedHeaderFilter}
+	 * to extract and use, or to discard such headers.
+
 	 * @return {@code true} if the request is a same-origin one, {@code false} in case
 	 * of cross-origin request
 	 * @since 4.2
 	 */
 	public static boolean isSameOrigin(HttpRequest request) {
-		String origin = request.getHeaders().getOrigin();
+		HttpHeaders headers = request.getHeaders();
+		String origin = headers.getOrigin();
 		if (origin == null) {
 			return true;
 		}
-		UriComponentsBuilder urlBuilder;
+
+		String scheme;
+		String host;
+		int port;
 		if (request instanceof ServletServerHttpRequest) {
 			// Build more efficiently if we can: we only need scheme, host, port for origin comparison
 			HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
-			urlBuilder = new UriComponentsBuilder().
-					scheme(servletRequest.getScheme()).
-					host(servletRequest.getServerName()).
-					port(servletRequest.getServerPort()).
-					adaptFromForwardedHeaders(request.getHeaders());
+			scheme = servletRequest.getScheme();
+			host = servletRequest.getServerName();
+			port = servletRequest.getServerPort();
 		}
 		else {
-			urlBuilder = UriComponentsBuilder.fromHttpRequest(request);
+			URI uri = request.getURI();
+			scheme = uri.getScheme();
+			host = uri.getHost();
+			port = uri.getPort();
 		}
-		UriComponents actualUrl = urlBuilder.build();
+
 		UriComponents originUrl = UriComponentsBuilder.fromOriginHeader(origin).build();
-		return (ObjectUtils.nullSafeEquals(actualUrl.getHost(), originUrl.getHost()) &&
-				getPort(actualUrl) == getPort(originUrl));
+		return (ObjectUtils.nullSafeEquals(host, originUrl.getHost()) &&
+				getPort(scheme, port) == getPort(originUrl.getScheme(), originUrl.getPort()));
 	}
 
-	private static int getPort(UriComponents uri) {
-		int port = uri.getPort();
+	private static int getPort(@Nullable String scheme, int port) {
 		if (port == -1) {
-			if ("http".equals(uri.getScheme()) || "ws".equals(uri.getScheme())) {
+			if ("http".equals(scheme) || "ws".equals(scheme)) {
 				port = 80;
 			}
-			else if ("https".equals(uri.getScheme()) || "wss".equals(uri.getScheme())) {
+			else if ("https".equals(scheme) || "wss".equals(scheme)) {
 				port = 443;
 			}
 		}

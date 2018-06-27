@@ -84,7 +84,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSl
 	 * converted to Spring's generic RemoteAccessException.
 	 * @param businessInterface the business interface of the EJB
 	 */
-	public void setBusinessInterface(Class<?> businessInterface) {
+	public void setBusinessInterface(@Nullable Class<?> businessInterface) {
 		this.businessInterface = businessInterface;
 	}
 
@@ -112,6 +112,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSl
 
 
 	@Override
+	@Nullable
 	public Object getObject() {
 		return this.proxy;
 	}

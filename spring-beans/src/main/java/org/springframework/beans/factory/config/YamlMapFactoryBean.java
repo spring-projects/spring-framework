@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,8 @@ import org.springframework.lang.Nullable;
  * Note that the value of "foo" in the first document is not simply replaced
  * with the value in the second, but its nested values are merged.
  *
+ * <p>Requires SnakeYAML 1.18 or higher, as of Spring Framework 5.0.6.
+ *
  * @author Dave Syer
  * @author Juergen Hoeller
  * @since 4.1
@@ -97,6 +99,7 @@ public class YamlMapFactoryBean extends YamlProcessor implements FactoryBean<Map
 	}
 
 	@Override
+	@Nullable
 	public Map<String, Object> getObject() {
 		return (this.map != null ? this.map : createMap());
 	}

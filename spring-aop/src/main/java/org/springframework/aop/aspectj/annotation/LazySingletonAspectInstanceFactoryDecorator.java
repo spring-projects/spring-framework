@@ -74,6 +74,7 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
 	}
 
 	@Override
+	@Nullable
 	public ClassLoader getAspectClassLoader() {
 		return this.maaif.getAspectClassLoader();
 	}
@@ -84,6 +85,7 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
 	}
 
 	@Override
+	@Nullable
 	public Object getAspectCreationMutex() {
 		return this.maaif.getAspectCreationMutex();
 	}

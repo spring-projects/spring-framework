@@ -16,8 +16,11 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import reactor.core.publisher.Mono;
+
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -42,14 +45,16 @@ public class RequestAttributeMethodArgumentResolver extends AbstractNamedValueSy
 	 * or {@code null} if default values are not expected to have expressions
 	 * @param registry for checking reactive type wrappers
 	 */
-	public RequestAttributeMethodArgumentResolver(@Nullable ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
+	public RequestAttributeMethodArgumentResolver(@Nullable ConfigurableBeanFactory factory,
+			ReactiveAdapterRegistry registry) {
+
 		super(factory, registry);
 	}
 
 
 	@Override
 	public boolean supportsParameter(MethodParameter param) {
-		return checkAnnotatedParamNoReactiveWrapper(param, RequestAttribute.class, (annot, type) -> true);
+		return param.hasParameterAnnotation(RequestAttribute.class);
 	}
 
 
@@ -62,7 +67,25 @@ public class RequestAttributeMethodArgumentResolver extends AbstractNamedValueSy
 
 	@Override
 	protected Object resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
-		return exchange.getAttribute(name);
+		Object value = exchange.getAttribute(name);
+		ReactiveAdapter toAdapter = getAdapterRegistry().getAdapter(parameter.getParameterType());
+		if (toAdapter != null) {
+			if (value == null) {
+				Assert.isTrue(toAdapter.supportsEmpty(),
+						() -> "No request attribute '" + name + "' and target type " +
+								parameter.getGenericParameterType() + " doesn't support empty values.");
+				return toAdapter.fromPublisher(Mono.empty());
+			}
+			if (parameter.getParameterType().isAssignableFrom(value.getClass())) {
+				return value;
+			}
+			ReactiveAdapter fromAdapter = getAdapterRegistry().getAdapter(value.getClass());
+			Assert.isTrue(fromAdapter != null,
+					() -> getClass().getSimpleName() + " doesn't support " +
+							"reactive type wrapper: " + parameter.getGenericParameterType());
+			return toAdapter.fromPublisher(fromAdapter.toPublisher(value));
+		}
+		return value;
 	}
 
 	@Override

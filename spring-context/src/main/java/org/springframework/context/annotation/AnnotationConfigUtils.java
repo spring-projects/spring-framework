@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -298,18 +298,23 @@ public class AnnotationConfigUtils {
 	}
 
 	@SuppressWarnings("unchecked")
-	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata,
-			String containerClassName, String annotationClassName) {
+	static Set<AnnotationAttributes> attributesForRepeatable(
+			AnnotationMetadata metadata, String containerClassName, String annotationClassName) {
 
 		Set<AnnotationAttributes> result = new LinkedHashSet<>();
+
+		// Direct annotation present?
 		addAttributesIfNotNull(result, metadata.getAnnotationAttributes(annotationClassName, false));
 
+		// Container annotation present?
 		Map<String, Object> container = metadata.getAnnotationAttributes(containerClassName, false);
 		if (container != null && container.containsKey("value")) {
 			for (Map<String, Object> containedAttributes : (Map<String, Object>[]) container.get("value")) {
 				addAttributesIfNotNull(result, containedAttributes);
 			}
 		}
+
+		// Return merged result
 		return Collections.unmodifiableSet(result);
 	}
 

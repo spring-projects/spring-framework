@@ -56,6 +56,7 @@ public class DeferredResult<T> {
 	private static final Log logger = LogFactory.getLog(DeferredResult.class);
 
 
+	@Nullable
 	private final Long timeout;
 
 	private final Object timeoutResult;
@@ -138,6 +139,7 @@ public class DeferredResult<T> {
 	/**
 	 * Return the configured timeout value in milliseconds.
 	 */
+	@Nullable
 	final Long getTimeoutValue() {
 		return this.timeout;
 	}
@@ -207,7 +209,7 @@ public class DeferredResult<T> {
 			resultHandler.handleResult(resultToHandle);
 		}
 		catch (Throwable ex) {
-			logger.debug("Failed to handle existing result", ex);
+			logger.debug("Failed to process async result", ex);
 		}
 	}
 

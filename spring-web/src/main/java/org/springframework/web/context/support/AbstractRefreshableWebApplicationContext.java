@@ -104,7 +104,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 
 
 	@Override
-	public void setServletContext(ServletContext servletContext) {
+	public void setServletContext(@Nullable ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
 
@@ -115,9 +115,9 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	}
 
 	@Override
-	public void setServletConfig(ServletConfig servletConfig) {
+	public void setServletConfig(@Nullable ServletConfig servletConfig) {
 		this.servletConfig = servletConfig;
-		if (this.servletContext == null) {
+		if (servletConfig != null && this.servletContext == null) {
 			setServletContext(servletConfig.getServletContext());
 		}
 	}
@@ -129,9 +129,11 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	}
 
 	@Override
-	public void setNamespace(String namespace) {
+	public void setNamespace(@Nullable String namespace) {
 		this.namespace = namespace;
-		setDisplayName("WebApplicationContext for namespace '" + namespace + "'");
+		if (namespace != null) {
+			setDisplayName("WebApplicationContext for namespace '" + namespace + "'");
+		}
 	}
 
 	@Override
@@ -212,6 +214,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	}
 
 	@Override
+	@Nullable
 	public Theme getTheme(String themeName) {
 		Assert.state(this.themeSource != null, "No ThemeSource available");
 		return this.themeSource.getTheme(themeName);

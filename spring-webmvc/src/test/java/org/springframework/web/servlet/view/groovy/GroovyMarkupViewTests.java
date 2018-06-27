@@ -158,7 +158,9 @@ public class GroovyMarkupViewTests {
 	}
 
 
-	private MockHttpServletResponse renderViewWithModel(String viewUrl, Map<String, Object> model, Locale locale) throws Exception {
+	private MockHttpServletResponse renderViewWithModel(String viewUrl, Map<String,
+			Object> model, Locale locale) throws Exception {
+
 		GroovyMarkupView view = createViewWithUrl(viewUrl);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		MockHttpServletRequest request = new MockHttpServletRequest();

@@ -62,6 +62,7 @@ import org.springframework.web.server.ServerWebExchange;
  * <li>{@link View} -- View to render with
  * <li>{@link Model} -- attributes to add to the model
  * <li>{@link Map} -- attributes to add to the model
+ * <li>{@link Rendering} -- use case driven API for view resolution</li>
  * <li>{@link ModelAttribute @ModelAttribute} -- attribute for the model
  * <li>Non-simple value -- attribute for the model
  * </ul>
@@ -101,7 +102,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 	public ViewResolutionResultHandler(List<ViewResolver> viewResolvers,
 			RequestedContentTypeResolver contentTypeResolver) {
 
-		this(viewResolvers, contentTypeResolver, new ReactiveAdapterRegistry());
+		this(viewResolvers, contentTypeResolver, ReactiveAdapterRegistry.getSharedInstance());
 	}
 
 	/**

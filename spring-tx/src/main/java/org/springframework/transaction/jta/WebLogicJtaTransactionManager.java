@@ -113,6 +113,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 	}
 
 	@Override
+	@Nullable
 	protected UserTransaction retrieveUserTransaction() throws TransactionSystemException {
 		Object helper = loadWebLogicTransactionHelper();
 		try {
@@ -131,6 +132,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 	}
 
 	@Override
+	@Nullable
 	protected TransactionManager retrieveTransactionManager() throws TransactionSystemException {
 		Object helper = loadWebLogicTransactionHelper();
 		try {

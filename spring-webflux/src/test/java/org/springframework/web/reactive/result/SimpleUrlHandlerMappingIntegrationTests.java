@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 

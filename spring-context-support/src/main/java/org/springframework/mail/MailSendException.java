@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.util.ObjectUtils;
 @SuppressWarnings("serial")
 public class MailSendException extends MailException {
 
-	private transient final Map<Object, Exception> failedMessages;
+	private final transient Map<Object, Exception> failedMessages;
 
 	@Nullable
 	private Exception[] messageExceptions;
@@ -71,7 +71,7 @@ public class MailSendException extends MailException {
 	public MailSendException(@Nullable String msg, @Nullable Throwable cause, Map<Object, Exception> failedMessages) {
 		super(msg, cause);
 		this.failedMessages = new LinkedHashMap<>(failedMessages);
-		this.messageExceptions = failedMessages.values().toArray(new Exception[failedMessages.size()]);
+		this.messageExceptions = failedMessages.values().toArray(new Exception[0]);
 	}
 
 	/**
@@ -123,6 +123,7 @@ public class MailSendException extends MailException {
 
 
 	@Override
+	@Nullable
 	public String getMessage() {
 		if (ObjectUtils.isEmpty(this.messageExceptions)) {
 			return super.getMessage();

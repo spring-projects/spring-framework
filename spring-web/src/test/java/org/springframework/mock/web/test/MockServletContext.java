@@ -141,6 +141,7 @@ public class MockServletContext implements ServletContext {
 
 	private final Map<String, MediaType> mimeTypes = new LinkedHashMap<>();
 
+
 	/**
 	 * Create a new {@code MockServletContext}, using no base path and a
 	 * {@link DefaultResourceLoader} (i.e. the classpath root as WAR root).
@@ -179,7 +180,7 @@ public class MockServletContext implements ServletContext {
 	 */
 	public MockServletContext(String resourceBasePath, ResourceLoader resourceLoader) {
 		this.resourceLoader = (resourceLoader != null ? resourceLoader : new DefaultResourceLoader());
-		this.resourceBasePath = (resourceBasePath != null ? resourceBasePath : "");
+		this.resourceBasePath = resourceBasePath;
 
 		// Use JVM temp dir as ServletContext temp dir.
 		String tempDir = System.getProperty(TEMP_DIR_SYSTEM_PROPERTY);
@@ -204,7 +205,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public void setContextPath(String contextPath) {
-		this.contextPath = (contextPath != null ? contextPath : "");
+		this.contextPath = contextPath;
 	}
 
 	@Override

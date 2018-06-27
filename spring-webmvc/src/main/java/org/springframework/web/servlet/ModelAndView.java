@@ -264,7 +264,7 @@ public class ModelAndView {
 	 * <p>The response status is set just prior to View rendering.
 	 * @since 4.3
 	 */
-	public void setStatus(HttpStatus status) {
+	public void setStatus(@Nullable HttpStatus status) {
 		this.status = status;
 	}
 
@@ -352,15 +352,11 @@ public class ModelAndView {
 	 */
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder("ModelAndView: ");
-		if (isReference()) {
-			sb.append("reference to view with name '").append(this.view).append("'");
-		}
-		else {
-			sb.append("materialized View is [").append(this.view).append(']');
-		}
-		sb.append("; model is ").append(this.model);
-		return sb.toString();
+		return "ModelAndView [view=" + formatView() + "; model=" + this.model + "]";
+	}
+
+	private String formatView() {
+		return isReference() ? "\"" + this.view + "\"" : "[" + this.view + "]";
 	}
 
 }

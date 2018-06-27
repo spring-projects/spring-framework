@@ -186,8 +186,7 @@ public class ExecutorSubscribableChannelTests {
 	}
 
 
-	private abstract static class AbstractTestInterceptor extends ChannelInterceptorAdapter
-			implements ExecutorChannelInterceptor {
+	private abstract static class AbstractTestInterceptor implements ChannelInterceptor, ExecutorChannelInterceptor {
 
 		private AtomicInteger counter = new AtomicInteger();
 
@@ -209,7 +208,9 @@ public class ExecutorSubscribableChannelTests {
 		}
 
 		@Override
-		public void afterMessageHandled(Message<?> message, MessageChannel channel, MessageHandler handler, Exception ex) {
+		public void afterMessageHandled(Message<?> message, MessageChannel channel, MessageHandler handler,
+				Exception ex) {
+
 			this.afterHandledInvoked = true;
 		}
 	}

@@ -64,7 +64,7 @@ public interface MultiValueMap<K, V> extends Map<K, List<V>> {
 	 * @param key the key
 	 * @param value the value to set
 	 */
-	void set(K key, V value);
+	void set(K key, @Nullable V value);
 
 	/**
 	 * Set the given values under.

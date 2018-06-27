@@ -198,6 +198,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * Get the bound value.
 	 * @see #getBindStatus()
 	 */
+	@Nullable
 	protected final Object getBoundValue() throws JspException {
 		return getBindStatus().getValue();
 	}
@@ -215,6 +216,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * <p>Use {@link #getPropertyEditor()} for internal rendering purposes.
 	 */
 	@Override
+	@Nullable
 	public final PropertyEditor getEditor() throws JspException {
 		return getPropertyEditor();
 	}

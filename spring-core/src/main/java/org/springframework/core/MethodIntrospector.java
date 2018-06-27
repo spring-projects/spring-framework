@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.core;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -58,10 +57,10 @@ public abstract class MethodIntrospector {
 		Class<?> specificHandlerType = null;
 
 		if (!Proxy.isProxyClass(targetType)) {
-			handlerTypes.add(targetType);
-			specificHandlerType = targetType;
+			specificHandlerType = ClassUtils.getUserClass(targetType);
+			handlerTypes.add(specificHandlerType);
 		}
-		handlerTypes.addAll(Arrays.asList(targetType.getInterfaces()));
+		handlerTypes.addAll(ClassUtils.getAllInterfacesForClassAsSet(targetType));
 
 		for (Class<?> currentHandlerType : handlerTypes) {
 			final Class<?> targetClass = (specificHandlerType != null ? specificHandlerType : currentHandlerType);

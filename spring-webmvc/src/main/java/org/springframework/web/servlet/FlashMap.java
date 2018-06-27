@@ -80,11 +80,11 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 	 */
 	public FlashMap addTargetRequestParams(@Nullable MultiValueMap<String, String> params) {
 		if (params != null) {
-			for (String key : params.keySet()) {
-				for (String value : params.get(key)) {
+			params.forEach((key, values) -> {
+				for (String value : values) {
 					addTargetRequestParam(key, value);
 				}
-			}
+			});
 		}
 		return this;
 	}

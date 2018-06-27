@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package org.springframework.web.util;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
@@ -70,22 +70,28 @@ public class UrlPathHelper {
 
 
 	/**
-	 * Set if URL lookup should always use full path within current servlet
-	 * context. Else, the path within the current servlet mapping is used
-	 * if applicable (i.e. in the case of a ".../*" servlet mapping in web.xml).
-	 * Default is "false".
+	 * Whether URL lookups should always use the full path within current
+	 * application context, i.e. within {@link ServletContext#getContextPath()}.
+	 * <p>If set to {@literal false} the path within the current servlet mapping
+	 * is used instead if applicable (i.e. in the case of a prefix based Servlet
+	 * mapping such as "/myServlet/*").
+	 * <p>By default this is set to "false".
 	 */
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
 		this.alwaysUseFullPath = alwaysUseFullPath;
 	}
 
 	/**
-	 * Set if context path and request URI should be URL-decoded.
-	 * Both are returned <i>undecoded</i> by the Servlet API,
-	 * in contrast to the servlet path.
-	 * <p>Uses either the request encoding or the default encoding according
-	 * to the Servlet spec (ISO-8859-1).
-	 * <p>Default is "true", as of Spring 2.5.
+	 * Whether the context path and request URI should be decoded -- both of
+	 * which are returned <i>undecoded</i> by the Servlet API, in contrast to
+	 * the servlet path.
+	 * <p>Either the request encoding or the default Servlet spec encoding
+	 * (ISO-8859-1) is used when set to "true".
+	 * <p>By default this is set to {@literal true}.
+	 * <p><strong>Note:</strong> Be aware the servlet path will not match when
+	 * compared to encoded paths. Therefore use of {@code urlDecode=false} is
+	 * not compatible with a prefix-based Servlet mappping and likewise implies
+	 * also setting {@code alwaysUseFullPath=true}.
 	 * @see #getServletPath
 	 * @see #getContextPath
 	 * @see #getRequestUri
@@ -95,6 +101,14 @@ public class UrlPathHelper {
 	 */
 	public void setUrlDecode(boolean urlDecode) {
 		this.urlDecode = urlDecode;
+	}
+
+	/**
+	 * Whether to decode the request URI when determining the lookup path.
+	 * @since 4.3.13
+	 */
+	public boolean isUrlDecode() {
+		return this.urlDecode;
 	}
 
 	/**
@@ -254,10 +268,7 @@ public class UrlPathHelper {
 				}
 				c1 = requestUri.charAt(index1);
 			}
-			if (c1 == c2) {
-				continue;
-			}
-			else if (ignoreCase && (Character.toLowerCase(c1) == Character.toLowerCase(c2))) {
+			if (c1 == c2 || (ignoreCase && (Character.toLowerCase(c1) == Character.toLowerCase(c2)))) {
 				continue;
 			}
 			return null;
@@ -452,7 +463,7 @@ public class UrlPathHelper {
 		try {
 			return UriUtils.decode(source, enc);
 		}
-		catch (UnsupportedEncodingException ex) {
+		catch (UnsupportedCharsetException ex) {
 			if (logger.isWarnEnabled()) {
 				logger.warn("Could not decode request string [" + source + "] with encoding '" + enc +
 						"': falling back to platform default encoding; exception message: " + ex.getMessage());
@@ -529,9 +540,7 @@ public class UrlPathHelper {
 		}
 		else {
 			Map<String, String> decodedVars = new LinkedHashMap<>(vars.size());
-			for (Entry<String, String> entry : vars.entrySet()) {
-				decodedVars.put(entry.getKey(), decodeInternal(request, entry.getValue()));
-			}
+			vars.forEach((key, value) -> decodedVars.put(key, decodeInternal(request, value)));
 			return decodedVars;
 		}
 	}
@@ -547,17 +556,19 @@ public class UrlPathHelper {
 	 * @param vars URI variables extracted from the URL path
 	 * @return the same Map or a new Map instance
 	 */
-	public MultiValueMap<String, String> decodeMatrixVariables(HttpServletRequest request, MultiValueMap<String, String> vars) {
+	public MultiValueMap<String, String> decodeMatrixVariables(HttpServletRequest request,
+			MultiValueMap<String, String> vars) {
+
 		if (this.urlDecode) {
 			return vars;
 		}
 		else {
 			MultiValueMap<String, String> decodedVars = new LinkedMultiValueMap<>(vars.size());
-			for (String key : vars.keySet()) {
-				for (String value : vars.get(key)) {
+			vars.forEach((key, values) -> {
+				for (String value : values) {
 					decodedVars.add(key, decodeInternal(request, value));
 				}
-			}
+			});
 			return decodedVars;
 		}
 	}

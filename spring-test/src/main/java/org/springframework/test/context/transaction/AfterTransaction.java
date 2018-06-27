@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,14 +28,14 @@ import java.lang.annotation.Target;
  * configured to run within a transaction via Spring's {@code @Transactional}
  * annotation.
  *
- * <p>As of Spring Framework 4.3, {@code @AfterTransaction} may be declared on
- * Java 8 based interface default methods.
- *
  * <p>{@code @AfterTransaction} methods declared in superclasses or as interface
  * default methods will be executed after those of the current test class.
  *
  * <p>As of Spring Framework 4.0, this annotation may be used as a
  * <em>meta-annotation</em> to create custom <em>composed annotations</em>.
+ *
+ * <p>As of Spring Framework 4.3, {@code @AfterTransaction} may also be
+ * declared on Java 8 based interface default methods.
  *
  * @author Sam Brannen
  * @since 2.5

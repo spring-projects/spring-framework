@@ -97,7 +97,7 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	 * as an alternative to specifying a SessionFactory.
 	 * @see #setSessionFactory
 	 */
-	public final void setHibernateTemplate(HibernateTemplate hibernateTemplate) {
+	public final void setHibernateTemplate(@Nullable HibernateTemplate hibernateTemplate) {
 		this.hibernateTemplate = hibernateTemplate;
 	}
 

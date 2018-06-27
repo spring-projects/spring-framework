@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,15 +98,14 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		for (Object c : this.contributors) {
-			if (c instanceof UriComponentsContributor) {
-				UriComponentsContributor contributor = (UriComponentsContributor) c;
-				if (contributor.supportsParameter(parameter)) {
+		for (Object contributor : this.contributors) {
+			if (contributor instanceof UriComponentsContributor) {
+				if (((UriComponentsContributor) contributor).supportsParameter(parameter)) {
 					return true;
 				}
 			}
-			else if (c instanceof HandlerMethodArgumentResolver) {
-				if (((HandlerMethodArgumentResolver) c).supportsParameter(parameter)) {
+			else if (contributor instanceof HandlerMethodArgumentResolver) {
+				if (((HandlerMethodArgumentResolver) contributor).supportsParameter(parameter)) {
 					return false;
 				}
 			}

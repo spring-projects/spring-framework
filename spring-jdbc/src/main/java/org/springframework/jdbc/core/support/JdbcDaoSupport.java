@@ -76,6 +76,7 @@ public abstract class JdbcDaoSupport extends DaoSupport {
 	/**
 	 * Return the JDBC DataSource used by this DAO.
 	 */
+	@Nullable
 	public final DataSource getDataSource() {
 		return (this.jdbcTemplate != null ? this.jdbcTemplate.getDataSource() : null);
 	}
@@ -84,7 +85,7 @@ public abstract class JdbcDaoSupport extends DaoSupport {
 	 * Set the JdbcTemplate for this DAO explicitly,
 	 * as an alternative to specifying a DataSource.
 	 */
-	public final void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+	public final void setJdbcTemplate(@Nullable JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 		initTemplateConfig();
 	}

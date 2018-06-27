@@ -108,14 +108,19 @@ public class MarshallingSource extends SAXSource {
 
 		private final Object content;
 
+		@Nullable
 		private DTDHandler dtdHandler;
 
+		@Nullable
 		private ContentHandler contentHandler;
 
+		@Nullable
 		private EntityResolver entityResolver;
 
+		@Nullable
 		private ErrorHandler errorHandler;
 
+		@Nullable
 		private LexicalHandler lexicalHandler;
 
 		private MarshallingXMLReader(Marshaller marshaller, Object content) {
@@ -126,7 +131,7 @@ public class MarshallingSource extends SAXSource {
 		}
 
 		@Override
-		public void setContentHandler(ContentHandler contentHandler) {
+		public void setContentHandler(@Nullable ContentHandler contentHandler) {
 			this.contentHandler = contentHandler;
 		}
 
@@ -137,7 +142,7 @@ public class MarshallingSource extends SAXSource {
 		}
 
 		@Override
-		public void setDTDHandler(DTDHandler dtdHandler) {
+		public void setDTDHandler(@Nullable DTDHandler dtdHandler) {
 			this.dtdHandler = dtdHandler;
 		}
 
@@ -148,7 +153,7 @@ public class MarshallingSource extends SAXSource {
 		}
 
 		@Override
-		public void setEntityResolver(EntityResolver entityResolver) {
+		public void setEntityResolver(@Nullable EntityResolver entityResolver) {
 			this.entityResolver = entityResolver;
 		}
 
@@ -159,7 +164,7 @@ public class MarshallingSource extends SAXSource {
 		}
 
 		@Override
-		public void setErrorHandler(ErrorHandler errorHandler) {
+		public void setErrorHandler(@Nullable ErrorHandler errorHandler) {
 			this.errorHandler = errorHandler;
 		}
 
@@ -169,6 +174,7 @@ public class MarshallingSource extends SAXSource {
 			return this.errorHandler;
 		}
 
+		@Nullable
 		protected LexicalHandler getLexicalHandler() {
 			return this.lexicalHandler;
 		}
@@ -184,6 +190,7 @@ public class MarshallingSource extends SAXSource {
 		}
 
 		@Override
+		@Nullable
 		public Object getProperty(String name) throws SAXNotRecognizedException {
 			if ("http://xml.org/sax/properties/lexical-handler".equals(name)) {
 				return lexicalHandler;

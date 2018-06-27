@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.result.view;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +47,9 @@ public interface View {
 	/**
 	 * Return the list of media types this View supports, or an empty list.
 	 */
-	List<MediaType> getSupportedMediaTypes();
+	default List<MediaType> getSupportedMediaTypes() {
+		return Collections.emptyList();
+	}
 
 	/**
 	 * Whether this View does rendering by performing a redirect.

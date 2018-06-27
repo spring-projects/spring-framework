@@ -261,6 +261,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	private static class AspectJAnnotationParameterNameDiscoverer implements ParameterNameDiscoverer {
 
 		@Override
+		@Nullable
 		public String[] getParameterNames(Method method) {
 			if (method.getParameterCount() == 0) {
 				return new String[0];
@@ -283,6 +284,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		}
 
 		@Override
+		@Nullable
 		public String[] getParameterNames(Constructor<?> ctor) {
 			throw new UnsupportedOperationException("Spring AOP cannot handle constructor advice");
 		}

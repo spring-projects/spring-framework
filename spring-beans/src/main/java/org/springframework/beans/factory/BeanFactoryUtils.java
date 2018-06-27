@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -148,14 +149,7 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				String[] parentResult = beanNamesForTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type);
-				List<String> resultList = new ArrayList<>();
-				resultList.addAll(Arrays.asList(result));
-				for (String beanName : parentResult) {
-					if (!resultList.contains(beanName) && !hbf.containsLocalBean(beanName)) {
-						resultList.add(beanName);
-					}
-				}
-				result = StringUtils.toStringArray(resultList);
+				result = mergeNamesWithParent(result, parentResult, hbf);
 			}
 		}
 		return result;
@@ -181,14 +175,7 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				String[] parentResult = beanNamesForTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type);
-				List<String> resultList = new ArrayList<>();
-				resultList.addAll(Arrays.asList(result));
-				for (String beanName : parentResult) {
-					if (!resultList.contains(beanName) && !hbf.containsLocalBean(beanName)) {
-						resultList.add(beanName);
-					}
-				}
-				result = StringUtils.toStringArray(resultList);
+				result = mergeNamesWithParent(result, parentResult, hbf);
 			}
 		}
 		return result;
@@ -224,14 +211,7 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				String[] parentResult = beanNamesForTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includeNonSingletons, allowEagerInit);
-				List<String> resultList = new ArrayList<>();
-				resultList.addAll(Arrays.asList(result));
-				for (String beanName : parentResult) {
-					if (!resultList.contains(beanName) && !hbf.containsLocalBean(beanName)) {
-						resultList.add(beanName);
-					}
-				}
-				result = StringUtils.toStringArray(resultList);
+				result = mergeNamesWithParent(result, parentResult, hbf);
 			}
 		}
 		return result;
@@ -354,6 +334,31 @@ public abstract class BeanFactoryUtils {
 	}
 
 	/**
+	 * Get all bean names whose {@code Class} has the supplied {@link Annotation}
+	 * type, including those defined in ancestor factories, without creating any bean
+	 * instances yet. Will return unique names in case of overridden bean definitions.
+	 * @param lbf the bean factory
+	 * @param annotationType the type of annotation to look for
+	 * @return the array of matching bean names, or an empty array if none
+	 * @since 5.0
+	 */
+	public static String[] beanNamesForAnnotationIncludingAncestors(
+			ListableBeanFactory lbf, Class<? extends Annotation> annotationType) {
+
+		Assert.notNull(lbf, "ListableBeanFactory must not be null");
+		String[] result = lbf.getBeanNamesForAnnotation(annotationType);
+		if (lbf instanceof HierarchicalBeanFactory) {
+			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
+			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
+				String[] parentResult = beanNamesForAnnotationIncludingAncestors(
+						(ListableBeanFactory) hbf.getParentBeanFactory(), annotationType);
+				result = mergeNamesWithParent(result, parentResult, hbf);
+			}
+		}
+		return result;
+	}
+
+	/**
 	 * Return a single bean of the given type or subtypes, also picking up beans
 	 * defined in ancestor bean factories if the current bean factory is a
 	 * HierarchicalBeanFactory. Useful convenience method when we expect a
@@ -445,6 +450,29 @@ public abstract class BeanFactoryUtils {
 		return uniqueBean(type, beansOfType);
 	}
 
+
+	/**
+	 * Merge the given bean names result with the given parent result.
+	 * @param result the local bean name result
+	 * @param parentResult the parent bean name result (possibly empty)
+	 * @param hbf the local bean factory
+	 * @return the merged result (possibly the local result as-is)
+	 * @since 4.3.15
+	 */
+	private static String[] mergeNamesWithParent(String[] result, String[] parentResult, HierarchicalBeanFactory hbf) {
+		if (parentResult.length == 0) {
+			return result;
+		}
+		List<String> merged = new ArrayList<>(result.length + parentResult.length);
+		merged.addAll(Arrays.asList(result));
+		for (String beanName : parentResult) {
+			if (!merged.contains(beanName) && !hbf.containsLocalBean(beanName)) {
+				merged.add(beanName);
+			}
+		}
+		return StringUtils.toStringArray(merged);
+	}
+
 	/**
 	 * Extract a unique bean for the given type from the given Map of matching beans.
 	 * @param type type of bean to match
@@ -454,11 +482,11 @@ public abstract class BeanFactoryUtils {
 	 * @throws NoUniqueBeanDefinitionException if more than one bean of the given type was found
 	 */
 	private static <T> T uniqueBean(Class<T> type, Map<String, T> matchingBeans) {
-		int nrFound = matchingBeans.size();
-		if (nrFound == 1) {
+		int count = matchingBeans.size();
+		if (count == 1) {
 			return matchingBeans.values().iterator().next();
 		}
-		else if (nrFound > 1) {
+		else if (count > 1) {
 			throw new NoUniqueBeanDefinitionException(type, matchingBeans.keySet());
 		}
 		else {

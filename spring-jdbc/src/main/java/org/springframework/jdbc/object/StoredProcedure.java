@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,16 +28,14 @@ import org.springframework.jdbc.core.SqlParameter;
 
 /**
  * Superclass for object abstractions of RDBMS stored procedures.
- * This class is abstract and it is intended that subclasses will provide
- * a typed method for invocation that delegates to the supplied
- * {@link #execute} method.
+ * This class is abstract and it is intended that subclasses will provide a typed
+ * method for invocation that delegates to the supplied {@link #execute} method.
  *
- * <p>The inherited {@code sql} property is the name of the stored
- * procedure in the RDBMS.
+ * <p>The inherited {@link #setSql sql} property is the name of the stored procedure
+ * in the RDBMS.
  *
  * @author Rod Johnson
  * @author Thomas Risberg
- * @see #setSql
  */
 public abstract class StoredProcedure extends SqlCall {
 
@@ -113,10 +111,8 @@ public abstract class StoredProcedure extends SqlCall {
 		validateParameters(inParams);
 		int i = 0;
 		for (SqlParameter sqlParameter : getDeclaredParameters()) {
-			if (sqlParameter.isInputValueProvided()) {
-				if (i < inParams.length) {
-					paramsToUse.put(sqlParameter.getName(), inParams[i++]);
-				}
+			if (sqlParameter.isInputValueProvided() && i < inParams.length) {
+				paramsToUse.put(sqlParameter.getName(), inParams[i++]);
 			}
 		}
 		return getJdbcTemplate().call(newCallableStatementCreator(paramsToUse), getDeclaredParameters());

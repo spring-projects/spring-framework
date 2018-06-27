@@ -98,6 +98,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 * request method is OPTIONS.
 	 */
 	@Override
+	@Nullable
 	public RequestMethodsRequestCondition getMatchingCondition(HttpServletRequest request) {
 		if (CorsUtils.isPreFlightRequest(request)) {
 			return matchPreFlight(request);
@@ -129,6 +130,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 		return matchRequestMethod(expectedMethod);
 	}
 
+	@Nullable
 	private RequestMethodsRequestCondition matchRequestMethod(String httpMethodValue) {
 		HttpMethod httpMethod = HttpMethod.resolve(httpMethodValue);
 		if (httpMethod != null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.xml.StaxUtils;
 
 /**
  * Decodes a {@link DataBuffer} stream into a stream of {@link XMLEvent}s.
@@ -77,7 +78,7 @@ import org.springframework.util.MimeTypeUtils;
  */
 public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
-	private static final XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+	private static final XMLInputFactory inputFactory = StaxUtils.createDefensiveInputFactory();
 
 	private static final boolean aaltoPresent = ClassUtils.isPresent(
 			"com.fasterxml.aalto.AsyncXMLStreamReader", XmlEventDecoder.class.getClassLoader());
@@ -102,16 +103,14 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 					.doFinally(signalType -> aaltoMapper.endOfInput());
 		}
 		else {
-			Mono<DataBuffer> singleBuffer = flux.reduce(DataBuffer::write);
+			Mono<DataBuffer> singleBuffer = DataBufferUtils.join(flux);
 			return singleBuffer.
 					flatMapMany(dataBuffer -> {
 						try {
 							InputStream is = dataBuffer.asInputStream();
 							Iterator eventReader = inputFactory.createXMLEventReader(is);
 							return Flux.fromIterable((Iterable<XMLEvent>) () -> eventReader)
-									.doFinally(t -> {
-										DataBufferUtils.release(dataBuffer);
-									});
+									.doFinally(t -> DataBufferUtils.release(dataBuffer));
 						}
 						catch (XMLStreamException ex) {
 							return Mono.error(ex);

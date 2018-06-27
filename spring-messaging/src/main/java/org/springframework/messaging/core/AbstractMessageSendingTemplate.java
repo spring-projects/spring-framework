@@ -63,7 +63,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	 * a destination argument. If a default destination is not configured, send methods
 	 * without a destination argument will raise an exception if invoked.
 	 */
-	public void setDefaultDestination(D defaultDestination) {
+	public void setDefaultDestination(@Nullable D defaultDestination) {
 		this.defaultDestination = defaultDestination;
 	}
 
@@ -81,7 +81,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	 * @param messageConverter the message converter to use
 	 */
 	public void setMessageConverter(MessageConverter messageConverter) {
-		Assert.notNull(messageConverter, "'messageConverter' must not be null");
+		Assert.notNull(messageConverter, "MessageConverter must not be null");
 		this.converter = messageConverter;
 	}
 
@@ -122,12 +122,16 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	}
 
 	@Override
-	public void convertAndSend(D destination, Object payload, @Nullable Map<String, Object> headers) throws MessagingException {
+	public void convertAndSend(D destination, Object payload, @Nullable Map<String, Object> headers)
+			throws MessagingException {
+
 		convertAndSend(destination, payload, headers, null);
 	}
 
 	@Override
-	public void convertAndSend(Object payload, @Nullable MessagePostProcessor postProcessor) throws MessagingException {
+	public void convertAndSend(Object payload, @Nullable MessagePostProcessor postProcessor)
+			throws MessagingException {
+
 		convertAndSend(getRequiredDefaultDestination(), payload, postProcessor);
 	}
 

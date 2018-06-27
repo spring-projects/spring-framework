@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
@@ -48,8 +48,7 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	@Nullable
 	private RouterFunction<?> routerFunction;
 
-	@Nullable
-	private ServerCodecConfigurer messageCodecConfigurer;
+	private List<HttpMessageReader<?>> messageReaders = Collections.emptyList();
 
 
 	/**
@@ -71,19 +70,32 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 
 
 	/**
-	 * Configure HTTP message readers to de-serialize the request body with.
-	 * <p>By default this is set to {@link ServerCodecConfigurer} with defaults.
+	 * Return the configured {@link RouterFunction}.
+	 * <p><strong>Note:</strong> When router functions are detected from the
+	 * ApplicationContext, this method may return {@code null} if invoked
+	 * prior to {@link #afterPropertiesSet()}.
+	 * @return the router function or {@code null}
 	 */
-	public void setMessageCodecConfigurer(ServerCodecConfigurer configurer) {
-		this.messageCodecConfigurer = configurer;
+	@Nullable
+	public RouterFunction<?> getRouterFunction() {
+		return this.routerFunction;
 	}
 
+	/**
+	 * Configure HTTP message readers to de-serialize the request body with.
+	 * <p>By default this is set to the {@link ServerCodecConfigurer}'s defaults.
+	 */
+	public void setMessageReaders(List<HttpMessageReader<?>> messageReaders) {
+		this.messageReaders = messageReaders;
+	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		if (this.messageCodecConfigurer == null) {
-			this.messageCodecConfigurer = ServerCodecConfigurer.create();
+		if (CollectionUtils.isEmpty(this.messageReaders)) {
+			ServerCodecConfigurer codecConfigurer = ServerCodecConfigurer.create();
+			this.messageReaders = codecConfigurer.getReaders();
 		}
+
 		if (this.routerFunction == null) {
 			initRouterFunctions();
 		}
@@ -93,35 +105,41 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	 * Initialized the router functions by detecting them in the application context.
 	 */
 	protected void initRouterFunctions() {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Looking for router functions in application context: " +
-					getApplicationContext());
-		}
-
 		List<RouterFunction<?>> routerFunctions = routerFunctions();
-		if (!CollectionUtils.isEmpty(routerFunctions) && logger.isInfoEnabled()) {
-			routerFunctions.forEach(routerFunction1 -> {
-				logger.info("Mapped " + routerFunction1);
-			});
-		}
-		this.routerFunction = routerFunctions.stream()
-				.reduce(RouterFunction::andOther)
-				.orElse(null);
+		this.routerFunction = routerFunctions.stream().reduce(RouterFunction::andOther).orElse(null);
+		logRouterFunctions(routerFunctions);
 	}
 
 	private List<RouterFunction<?>> routerFunctions() {
 		SortedRouterFunctionsContainer container = new SortedRouterFunctionsContainer();
 		obtainApplicationContext().getAutowireCapableBeanFactory().autowireBean(container);
-
-		return CollectionUtils.isEmpty(container.routerFunctions) ? Collections.emptyList() :
-				container.routerFunctions;
+		List<RouterFunction<?>> functions = container.routerFunctions;
+		return CollectionUtils.isEmpty(functions) ? Collections.emptyList() : functions;
 	}
+
+	private void logRouterFunctions(List<RouterFunction<?>> routerFunctions) {
+		if (logger.isDebugEnabled()) {
+			int total = routerFunctions.size();
+			String message = total + " RouterFunction(s) in " + formatMappingName();
+			if (logger.isTraceEnabled()) {
+				if (total > 0) {
+					routerFunctions.forEach(routerFunction -> logger.trace("Mapped " + routerFunction));
+				}
+				else {
+					logger.trace(message);
+				}
+			}
+			else if (total > 0) {
+				logger.debug(message);
+			}
+		}
+	}
+
 
 	@Override
 	protected Mono<?> getHandlerInternal(ServerWebExchange exchange) {
 		if (this.routerFunction != null) {
-			Assert.state(this.messageCodecConfigurer != null, "No ServerCodecConfigurer set");
-			ServerRequest request = ServerRequest.create(exchange, this.messageCodecConfigurer.getReaders());
+			ServerRequest request = ServerRequest.create(exchange, this.messageReaders);
 			exchange.getAttributes().put(RouterFunctions.REQUEST_ATTRIBUTE, request);
 			return this.routerFunction.route(request);
 		}

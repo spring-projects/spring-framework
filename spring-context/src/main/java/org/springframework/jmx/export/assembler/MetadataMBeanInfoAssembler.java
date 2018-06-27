@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,12 +158,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	@Override
 	protected boolean includeOperation(Method method, String beanKey) {
 		PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
-		if (pd != null) {
-			if (hasManagedAttribute(method)) {
-				return true;
-			}
-		}
-		return hasManagedOperation(method);
+		return (pd != null && hasManagedAttribute(method)) || hasManagedOperation(method);
 	}
 
 	/**
@@ -432,7 +427,8 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * @param setter the Object value associated with the set method
 	 * @return the appropriate Object to use as the value for the descriptor
 	 */
-	private Object resolveObjectDescriptor(@Nullable Object getter, Object setter) {
+	@Nullable
+	private Object resolveObjectDescriptor(@Nullable Object getter, @Nullable Object setter) {
 		return (getter != null ? getter : setter);
 	}
 
@@ -446,7 +442,8 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * @param setter the String value associated with the set method
 	 * @return the appropriate String to use as the value for the descriptor
 	 */
-	private String resolveStringDescriptor(String getter, String setter) {
+	@Nullable
+	private String resolveStringDescriptor(@Nullable String getter, @Nullable String setter) {
 		return (StringUtils.hasLength(getter) ? getter : setter);
 	}
 

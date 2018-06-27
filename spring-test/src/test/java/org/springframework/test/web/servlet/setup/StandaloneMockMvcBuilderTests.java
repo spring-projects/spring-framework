@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import static org.junit.Assert.*;
 /**
  * Tests for {@link StandaloneMockMvcBuilder}
  *
- * @author Rossen
+ * @author Rossen Stoyanchev
  * @author Rob Winch
  * @author Sebastien Deleuze
  */
@@ -87,8 +87,7 @@ public class StandaloneMockMvcBuilderTests {
 		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder(new PlaceholderController());
 		builder.addPlaceholderValue("sys.login.ajax", "/foo");
 		WebApplicationContext  wac = builder.initWebAppContext();
-		assertEquals(wac, WebApplicationContextUtils
-				.getRequiredWebApplicationContext(wac.getServletContext()));
+		assertEquals(wac, WebApplicationContextUtils.getRequiredWebApplicationContext(wac.getServletContext()));
 	}
 
 	@Test(expected = IllegalArgumentException.class)

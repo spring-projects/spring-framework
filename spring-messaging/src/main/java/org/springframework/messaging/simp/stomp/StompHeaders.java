@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -31,6 +32,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -65,6 +67,8 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	// CONNECT
 
 	public static final String HOST = "host";
+
+	public static final String ACCEPT_VERSION = "accept-version";
 
 	public static final String LOGIN = "login";
 
@@ -126,10 +130,15 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the content-type header.
 	 * Applies to the SEND, MESSAGE, and ERROR frames.
 	 */
-	public void setContentType(MimeType mimeType) {
-		Assert.isTrue(!mimeType.isWildcardType(), "'Content-Type' cannot contain wildcard type '*'");
-		Assert.isTrue(!mimeType.isWildcardSubtype(), "'Content-Type' cannot contain wildcard subtype '*'");
-		set(CONTENT_TYPE, mimeType.toString());
+	public void setContentType(@Nullable MimeType mimeType) {
+		if (mimeType != null) {
+			Assert.isTrue(!mimeType.isWildcardType(), "'Content-Type' cannot contain wildcard type '*'");
+			Assert.isTrue(!mimeType.isWildcardSubtype(), "'Content-Type' cannot contain wildcard subtype '*'");
+			set(CONTENT_TYPE, mimeType.toString());
+		}
+		else {
+			set(CONTENT_TYPE, null);
+		}
 	}
 
 	/**
@@ -161,7 +170,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the receipt header.
 	 * Applies to any client frame other than CONNECT.
 	 */
-	public void setReceipt(String receipt) {
+	public void setReceipt(@Nullable String receipt) {
 		set(RECEIPT, receipt);
 	}
 
@@ -177,7 +186,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the host header.
 	 * Applies to the CONNECT frame.
 	 */
-	public void setHost(String host) {
+	public void setHost(@Nullable String host) {
 		set(HOST, host);
 	}
 
@@ -190,10 +199,36 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	}
 
 	/**
+	 * Set the accept-version header. Must be one of "1.1", "1.2", or both.
+	 * Applies to the CONNECT frame.
+	 * @since 5.0.7
+	 */
+	public void setAcceptVersion(@Nullable String... acceptVersions) {
+		if (ObjectUtils.isEmpty(acceptVersions)) {
+			set(ACCEPT_VERSION, null);
+			return;
+		}
+		Arrays.stream(acceptVersions).forEach(version ->
+				Assert.isTrue(version != null && (version.equals("1.1") || version.equals("1.2")),
+						"Invalid version: " + version));
+		set(ACCEPT_VERSION, StringUtils.arrayToCommaDelimitedString(acceptVersions));
+	}
+
+	/**
+	 * Get the accept-version header.
+	 * @since 5.0.7
+	 */
+	@Nullable
+	public String[] getAcceptVersion() {
+		String value = getFirst(ACCEPT_VERSION);
+		return value != null ? StringUtils.commaDelimitedListToStringArray(value) : null;
+	}
+
+	/**
 	 * Set the login header.
 	 * Applies to the CONNECT frame.
 	 */
-	public void setLogin(String login) {
+	public void setLogin(@Nullable String login) {
 		set(LOGIN, login);
 	}
 
@@ -209,7 +244,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the passcode header.
 	 * Applies to the CONNECT frame.
 	 */
-	public void setPasscode(String passcode) {
+	public void setPasscode(@Nullable String passcode) {
 		set(PASSCODE, passcode);
 	}
 
@@ -263,7 +298,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the session header.
 	 * Applies to the CONNECTED frame.
 	 */
-	public void setSession(String session) {
+	public void setSession(@Nullable String session) {
 		set(SESSION, session);
 	}
 
@@ -279,7 +314,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the server header.
 	 * Applies to the CONNECTED frame.
 	 */
-	public void setServer(String server) {
+	public void setServer(@Nullable String server) {
 		set(SERVER, server);
 	}
 
@@ -295,7 +330,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Set the destination header.
 	 */
-	public void setDestination(String destination) {
+	public void setDestination(@Nullable String destination) {
 		set(DESTINATION, destination);
 	}
 
@@ -312,7 +347,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the id header.
 	 * Applies to the SUBSCR0BE, UNSUBSCRIBE, and ACK or NACK frames.
 	 */
-	public void setId(String id) {
+	public void setId(@Nullable String id) {
 		set(ID, id);
 	}
 
@@ -328,7 +363,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the ack header to one of "auto", "client", or "client-individual".
 	 * Applies to the SUBSCRIBE and MESSAGE frames.
 	 */
-	public void setAck(String ack) {
+	public void setAck(@Nullable String ack) {
 		set(ACK, ack);
 	}
 
@@ -344,7 +379,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the login header.
 	 * Applies to the MESSAGE frame.
 	 */
-	public void setSubscription(String subscription) {
+	public void setSubscription(@Nullable String subscription) {
 		set(SUBSCRIPTION, subscription);
 	}
 
@@ -360,7 +395,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the message-id header.
 	 * Applies to the MESSAGE frame.
 	 */
-	public void setMessageId(String messageId) {
+	public void setMessageId(@Nullable String messageId) {
 		set(MESSAGE_ID, messageId);
 	}
 
@@ -376,7 +411,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the receipt-id header.
 	 * Applies to the RECEIPT frame.
 	 */
-	public void setReceiptId(String receiptId) {
+	public void setReceiptId(@Nullable String receiptId) {
 		set(RECEIPT_ID, receiptId);
 	}
 
@@ -394,6 +429,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * @return the first header value, or {@code null} if none
 	 */
 	@Override
+	@Nullable
 	public String getFirst(String headerName) {
 		List<String> headerValues = headers.get(headerName);
 		return headerValues != null ? headerValues.get(0) : null;
@@ -433,7 +469,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * @see #add(String, String)
 	 */
 	@Override
-	public void set(String headerName, String headerValue) {
+	public void set(String headerName, @Nullable String headerValue) {
 		List<String> headerValues = new LinkedList<>();
 		headerValues.add(headerValue);
 		headers.put(headerName, headerValues);

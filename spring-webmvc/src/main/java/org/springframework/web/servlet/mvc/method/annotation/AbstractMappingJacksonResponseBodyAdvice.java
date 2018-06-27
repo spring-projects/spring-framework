@@ -42,6 +42,7 @@ public abstract class AbstractMappingJacksonResponseBodyAdvice implements Respon
 	}
 
 	@Override
+	@Nullable
 	public final Object beforeBodyWrite(@Nullable Object body, MethodParameter returnType,
 			MediaType contentType, Class<? extends HttpMessageConverter<?>> converterType,
 			ServerHttpRequest request, ServerHttpResponse response) {

@@ -41,6 +41,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.SQLWarningException;
+import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.datasource.ConnectionProxy;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcAccessor;
@@ -316,6 +317,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	//-------------------------------------------------------------------------
 
 	@Override
+	@Nullable
 	public <T> T execute(ConnectionCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 
@@ -328,9 +330,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		catch (SQLException ex) {
 			// Release Connection early, to avoid potential connection pool deadlock
 			// in the case when the exception translator hasn't been initialized yet.
+			String sql = getSql(action);
 			DataSourceUtils.releaseConnection(con, getDataSource());
 			con = null;
-			throw getExceptionTranslator().translate("ConnectionCallback", getSql(action), ex);
+			throw translateException("ConnectionCallback", sql, ex);
 		}
 		finally {
 			DataSourceUtils.releaseConnection(con, getDataSource());
@@ -361,6 +364,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	//-------------------------------------------------------------------------
 
 	@Override
+	@Nullable
 	public <T> T execute(StatementCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 
@@ -376,11 +380,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		catch (SQLException ex) {
 			// Release Connection early, to avoid potential connection pool deadlock
 			// in the case when the exception translator hasn't been initialized yet.
+			String sql = getSql(action);
 			JdbcUtils.closeStatement(stmt);
 			stmt = null;
 			DataSourceUtils.releaseConnection(con, getDataSource());
 			con = null;
-			throw getExceptionTranslator().translate("StatementCallback", getSql(action), ex);
+			throw translateException("StatementCallback", sql, ex);
 		}
 		finally {
 			JdbcUtils.closeStatement(stmt);
@@ -393,8 +398,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL statement [" + sql + "]");
 		}
+
 		class ExecuteStatementCallback implements StatementCallback<Object>, SqlProvider {
 			@Override
+			@Nullable
 			public Object doInStatement(Statement stmt) throws SQLException {
 				stmt.execute(sql);
 				return null;
@@ -404,18 +411,22 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				return sql;
 			}
 		}
+
 		execute(new ExecuteStatementCallback());
 	}
 
 	@Override
+	@Nullable
 	public <T> T query(final String sql, final ResultSetExtractor<T> rse) throws DataAccessException {
 		Assert.notNull(sql, "SQL must not be null");
 		Assert.notNull(rse, "ResultSetExtractor must not be null");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL query [" + sql + "]");
 		}
+
 		class QueryStatementCallback implements StatementCallback<T>, SqlProvider {
 			@Override
+			@Nullable
 			public T doInStatement(Statement stmt) throws SQLException {
 				ResultSet rs = null;
 				try {
@@ -431,6 +442,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				return sql;
 			}
 		}
+
 		return execute(new QueryStatementCallback());
 	}
 
@@ -441,23 +453,23 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	@Override
 	public <T> List<T> query(String sql, RowMapper<T> rowMapper) throws DataAccessException {
-		List<T> result = query(sql, new RowMapperResultSetExtractor<>(rowMapper));
-		Assert.state(result != null, "No result list");
-		return result;
+		return result(query(sql, new RowMapperResultSetExtractor<>(rowMapper)));
 	}
 
 	@Override
 	public Map<String, Object> queryForMap(String sql) throws DataAccessException {
-		return queryForObject(sql, getColumnMapRowMapper());
+		return result(queryForObject(sql, getColumnMapRowMapper()));
 	}
 
 	@Override
+	@Nullable
 	public <T> T queryForObject(String sql, RowMapper<T> rowMapper) throws DataAccessException {
 		List<T> results = query(sql, rowMapper);
-		return DataAccessUtils.requiredSingleResult(results);
+		return DataAccessUtils.nullableSingleResult(results);
 	}
 
 	@Override
+	@Nullable
 	public <T> T queryForObject(String sql, Class<T> requiredType) throws DataAccessException {
 		return queryForObject(sql, getSingleColumnRowMapper(requiredType));
 	}
@@ -474,9 +486,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	@Override
 	public SqlRowSet queryForRowSet(String sql) throws DataAccessException {
-		SqlRowSet result = query(sql, new SqlRowSetResultSetExtractor());
-		Assert.state(result != null, "No SqlRowSet");
-		return result;
+		return result(query(sql, new SqlRowSetResultSetExtractor()));
 	}
 
 	@Override
@@ -487,7 +497,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		}
 
 		class UpdateStatementCallback implements StatementCallback<Integer>, SqlProvider {
-
 			@Override
 			public Integer doInStatement(Statement stmt) throws SQLException {
 				int rows = stmt.executeUpdate(sql);
@@ -496,7 +505,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				}
 				return rows;
 			}
-
 			@Override
 			public String getSql() {
 				return sql;
@@ -515,6 +523,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 		class BatchUpdateStatementCallback implements StatementCallback<int[]>, SqlProvider {
 
+			@Nullable
 			private String currSql;
 
 			@Override
@@ -560,6 +569,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			}
 
 			@Override
+			@Nullable
 			public String getSql() {
 				return this.currSql;
 			}
@@ -576,6 +586,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	//-------------------------------------------------------------------------
 
 	@Override
+	@Nullable
 	public <T> T execute(PreparedStatementCreator psc, PreparedStatementCallback<T> action)
 			throws DataAccessException {
 
@@ -606,7 +617,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			ps = null;
 			DataSourceUtils.releaseConnection(con, getDataSource());
 			con = null;
-			throw getExceptionTranslator().translate("PreparedStatementCallback", sql, ex);
+			throw translateException("PreparedStatementCallback", sql, ex);
 		}
 		finally {
 			if (psc instanceof ParameterDisposer) {
@@ -618,6 +629,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
+	@Nullable
 	public <T> T execute(String sql, PreparedStatementCallback<T> action) throws DataAccessException {
 		return execute(new SimplePreparedStatementCreator(sql), action);
 	}
@@ -644,6 +656,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 		return execute(psc, new PreparedStatementCallback<T>() {
 			@Override
+			@Nullable
 			public T doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				ResultSet rs = null;
 				try {
@@ -664,26 +677,31 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
+	@Nullable
 	public <T> T query(PreparedStatementCreator psc, ResultSetExtractor<T> rse) throws DataAccessException {
 		return query(psc, null, rse);
 	}
 
 	@Override
+	@Nullable
 	public <T> T query(String sql, @Nullable PreparedStatementSetter pss, ResultSetExtractor<T> rse) throws DataAccessException {
 		return query(new SimplePreparedStatementCreator(sql), pss, rse);
 	}
 
 	@Override
+	@Nullable
 	public <T> T query(String sql, Object[] args, int[] argTypes, ResultSetExtractor<T> rse) throws DataAccessException {
 		return query(sql, newArgTypePreparedStatementSetter(args, argTypes), rse);
 	}
 
 	@Override
+	@Nullable
 	public <T> T query(String sql, @Nullable Object[] args, ResultSetExtractor<T> rse) throws DataAccessException {
 		return query(sql, newArgPreparedStatementSetter(args), rse);
 	}
 
 	@Override
+	@Nullable
 	public <T> T query(String sql, ResultSetExtractor<T> rse, @Nullable Object... args) throws DataAccessException {
 		return query(sql, newArgPreparedStatementSetter(args), rse);
 	}
@@ -715,50 +733,54 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	@Override
 	public <T> List<T> query(PreparedStatementCreator psc, RowMapper<T> rowMapper) throws DataAccessException {
-		return nonNull(query(psc, new RowMapperResultSetExtractor<>(rowMapper)));
+		return result(query(psc, new RowMapperResultSetExtractor<>(rowMapper)));
 	}
 
 	@Override
 	public <T> List<T> query(String sql, @Nullable PreparedStatementSetter pss, RowMapper<T> rowMapper) throws DataAccessException {
-		return nonNull(query(sql, pss, new RowMapperResultSetExtractor<>(rowMapper)));
+		return result(query(sql, pss, new RowMapperResultSetExtractor<>(rowMapper)));
 	}
 
 	@Override
 	public <T> List<T> query(String sql, Object[] args, int[] argTypes, RowMapper<T> rowMapper) throws DataAccessException {
-		return nonNull(query(sql, args, argTypes, new RowMapperResultSetExtractor<>(rowMapper)));
+		return result(query(sql, args, argTypes, new RowMapperResultSetExtractor<>(rowMapper)));
 	}
 
 	@Override
 	public <T> List<T> query(String sql, @Nullable Object[] args, RowMapper<T> rowMapper) throws DataAccessException {
-		return nonNull(query(sql, args, new RowMapperResultSetExtractor<>(rowMapper)));
+		return result(query(sql, args, new RowMapperResultSetExtractor<>(rowMapper)));
 	}
 
 	@Override
 	public <T> List<T> query(String sql, RowMapper<T> rowMapper, @Nullable Object... args) throws DataAccessException {
-		return nonNull(query(sql, args, new RowMapperResultSetExtractor<>(rowMapper)));
+		return result(query(sql, args, new RowMapperResultSetExtractor<>(rowMapper)));
 	}
 
 	@Override
+	@Nullable
 	public <T> T queryForObject(String sql, Object[] args, int[] argTypes, RowMapper<T> rowMapper)
 			throws DataAccessException {
 
 		List<T> results = query(sql, args, argTypes, new RowMapperResultSetExtractor<>(rowMapper, 1));
-		return DataAccessUtils.requiredSingleResult(results);
+		return DataAccessUtils.nullableSingleResult(results);
 	}
 
 	@Override
+	@Nullable
 	public <T> T queryForObject(String sql, @Nullable Object[] args, RowMapper<T> rowMapper) throws DataAccessException {
 		List<T> results = query(sql, args, new RowMapperResultSetExtractor<>(rowMapper, 1));
-		return DataAccessUtils.requiredSingleResult(results);
+		return DataAccessUtils.nullableSingleResult(results);
 	}
 
 	@Override
+	@Nullable
 	public <T> T queryForObject(String sql, RowMapper<T> rowMapper, @Nullable Object... args) throws DataAccessException {
 		List<T> results = query(sql, args, new RowMapperResultSetExtractor<>(rowMapper, 1));
-		return DataAccessUtils.requiredSingleResult(results);
+		return DataAccessUtils.nullableSingleResult(results);
 	}
 
 	@Override
+	@Nullable
 	public <T> T queryForObject(String sql, Object[] args, int[] argTypes, Class<T> requiredType)
 			throws DataAccessException {
 
@@ -777,12 +799,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	@Override
 	public Map<String, Object> queryForMap(String sql, Object[] args, int[] argTypes) throws DataAccessException {
-		return queryForObject(sql, args, argTypes, getColumnMapRowMapper());
+		return result(queryForObject(sql, args, argTypes, getColumnMapRowMapper()));
 	}
 
 	@Override
 	public Map<String, Object> queryForMap(String sql, @Nullable Object... args) throws DataAccessException {
-		return queryForObject(sql, args, getColumnMapRowMapper());
+		return result(queryForObject(sql, args, getColumnMapRowMapper()));
 	}
 
 	@Override
@@ -812,12 +834,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	@Override
 	public SqlRowSet queryForRowSet(String sql, Object[] args, int[] argTypes) throws DataAccessException {
-		return nonNull(query(sql, args, argTypes, new SqlRowSetResultSetExtractor()));
+		return result(query(sql, args, argTypes, new SqlRowSetResultSetExtractor()));
 	}
 
 	@Override
 	public SqlRowSet queryForRowSet(String sql, @Nullable Object... args) throws DataAccessException {
-		return nonNull(query(sql, args, new SqlRowSetResultSetExtractor()));
+		return result(query(sql, args, new SqlRowSetResultSetExtractor()));
 	}
 
 	protected int update(final PreparedStatementCreator psc, @Nullable final PreparedStatementSetter pss)
@@ -865,7 +887,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				try {
 					RowMapperResultSetExtractor<Map<String, Object>> rse =
 							new RowMapperResultSetExtractor<>(getColumnMapRowMapper(), 1);
-					generatedKeys.addAll(nonNull(rse.extractData(keys)));
+					generatedKeys.addAll(result(rse.extractData(keys)));
 				}
 				finally {
 					JdbcUtils.closeResultSet(keys);
@@ -1009,6 +1031,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	//-------------------------------------------------------------------------
 
 	@Override
+	@Nullable
 	public <T> T execute(CallableStatementCreator csc, CallableStatementCallback<T> action)
 			throws DataAccessException {
 
@@ -1039,7 +1062,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			cs = null;
 			DataSourceUtils.releaseConnection(con, getDataSource());
 			con = null;
-			throw getExceptionTranslator().translate("CallableStatementCallback", sql, ex);
+			throw translateException("CallableStatementCallback", sql, ex);
 		}
 		finally {
 			if (csc instanceof ParameterDisposer) {
@@ -1051,6 +1074,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
+	@Nullable
 	public <T> T execute(String callString, CallableStatementCallback<T> action) throws DataAccessException {
 		return execute(new SimpleCallableStatementCreator(callString), action);
 	}
@@ -1365,6 +1389,20 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		}
 	}
 
+	/**
+	 * Translate the given {@link SQLException} into a generic {@link DataAccessException}.
+	 * @param task readable text describing the task being attempted
+	 * @param sql SQL query or update that caused the problem (may be {@code null})
+	 * @param ex the offending {@code SQLException}
+	 * @return a DataAccessException wrapping the {@code SQLException} (never {@code null})
+	 * @since 5.0
+	 * @see #getExceptionTranslator()
+	 */
+	protected DataAccessException translateException(String task, @Nullable String sql, SQLException ex) {
+		DataAccessException dae = getExceptionTranslator().translate(task, sql, ex);
+		return (dae != null ? dae : new UncategorizedSQLException(task, sql, ex));
+	}
+
 
 	/**
 	 * Determine SQL from potential provider object.
@@ -1382,7 +1420,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		}
 	}
 
-	private static <T> T nonNull(@Nullable T result) {
+	private static <T> T result(@Nullable T result) {
 		Assert.state(result != null, "No result");
 		return result;
 	}
@@ -1522,6 +1560,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		}
 
 		@Override
+		@Nullable
 		public Object extractData(ResultSet rs) throws SQLException {
 			while (rs.next()) {
 				this.rch.processRow(rs);

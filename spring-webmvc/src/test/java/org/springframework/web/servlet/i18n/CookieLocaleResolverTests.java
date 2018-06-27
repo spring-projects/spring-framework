@@ -49,7 +49,7 @@ public class CookieLocaleResolverTests {
 		CookieLocaleResolver resolver = new CookieLocaleResolver();
 		resolver.setCookieName("LanguageKoekje");
 		Locale loc = resolver.resolveLocale(request);
-		assertEquals(loc.getLanguage(), "nl");
+		assertEquals("nl", loc.getLanguage());
 	}
 
 	@Test

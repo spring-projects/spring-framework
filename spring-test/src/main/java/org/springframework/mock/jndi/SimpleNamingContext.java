@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -209,6 +209,7 @@ public class SimpleNamingContext implements Context {
 	}
 
 	@Override
+	@Nullable
 	public Object addToEnvironment(String propName, Object propVal) {
 		return this.environment.put(propName, propVal);
 	}
@@ -296,7 +297,7 @@ public class SimpleNamingContext implements Context {
 	}
 
 
-	private static abstract class AbstractNamingEnumeration<T> implements NamingEnumeration<T> {
+	private abstract static class AbstractNamingEnumeration<T> implements NamingEnumeration<T> {
 
 		private Iterator<T> iterator;
 

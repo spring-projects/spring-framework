@@ -29,6 +29,7 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockPageContext;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.support.JspAwareRequestContext;
 import org.springframework.web.servlet.support.RequestContext;
@@ -68,8 +69,8 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 	protected MockPageContext createAndPopulatePageContext() throws JspException {
 		MockPageContext pageContext = createPageContext();
 		MockHttpServletRequest request = (MockHttpServletRequest) pageContext.getRequest();
-		StaticWebApplicationContext wac = (StaticWebApplicationContext) RequestContextUtils.findWebApplicationContext(request);
-		wac.registerSingleton("requestDataValueProcessor", RequestDataValueProcessorWrapper.class);
+		((StaticWebApplicationContext) RequestContextUtils.findWebApplicationContext(request))
+				.registerSingleton("requestDataValueProcessor", RequestDataValueProcessorWrapper.class);
 		extendRequest(request);
 		extendPageContext(pageContext);
 		RequestContext requestContext = new JspAwareRequestContext(pageContext);
@@ -102,11 +103,10 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 		return (RequestContext) getPageContext().getAttribute(RequestContextAwareTag.REQUEST_CONTEXT_PAGE_ATTRIBUTE);
 	}
 
-	@SuppressWarnings("deprecation")
 	protected RequestDataValueProcessor getMockRequestDataValueProcessor() {
 		RequestDataValueProcessor mockProcessor = mock(RequestDataValueProcessor.class);
 		HttpServletRequest request = (HttpServletRequest) getPageContext().getRequest();
-		StaticWebApplicationContext wac = (StaticWebApplicationContext) RequestContextUtils.findWebApplicationContext(request);
+		WebApplicationContext wac = RequestContextUtils.findWebApplicationContext(request);
 		wac.getBean(RequestDataValueProcessorWrapper.class).setRequestDataValueProcessor(mockProcessor);
 		return mockProcessor;
 	}

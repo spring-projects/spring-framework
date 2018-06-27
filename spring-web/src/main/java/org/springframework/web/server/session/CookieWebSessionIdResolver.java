@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.server.session;
 
 import java.time.Duration;
@@ -24,13 +25,13 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Cookie-based {@link WebSessionIdResolver}.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  */
 public class CookieWebSessionIdResolver implements WebSessionIdResolver {
@@ -39,6 +40,8 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 
 	private Duration cookieMaxAge = Duration.ofSeconds(-1);
 
+	private String sameSite = "Strict";
+
 
 	/**
 	 * Set the name of the cookie to use for the session id.
@@ -46,7 +49,7 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 	 * @param cookieName the cookie name
 	 */
 	public void setCookieName(String cookieName) {
-		Assert.hasText(cookieName, "'cookieName' must not be empty.");
+		Assert.hasText(cookieName, "'cookieName' must not be empty");
 		this.cookieName = cookieName;
 	}
 
@@ -74,6 +77,23 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 		return this.cookieMaxAge;
 	}
 
+	/**
+	 * Set the value for the "SameSite" attribute of the cookie that holds the
+	 * session id. For its meaning and possible values, see
+	 * {@link ResponseCookie#getSameSite()}.
+	 * <p>By default set to {@code "Strict"}
+	 * @param sameSite the SameSite value
+	 */
+	public void setSameSite(String sameSite) {
+		this.sameSite = sameSite;
+	}
+
+	/**
+	 * Return the configured "SameSite" attribute value for the session cookie.
+	 */
+	public String getSameSite() {
+		return this.sameSite;
+	}
 
 	@Override
 	public List<String> resolveSessionIds(ServerWebExchange exchange) {
@@ -87,11 +107,22 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 
 	@Override
 	public void setSessionId(ServerWebExchange exchange, String id) {
+		Assert.notNull(id, "'id' is required");
+		setSessionCookie(exchange, id, getCookieMaxAge(), getSameSite());
+	}
+
+	@Override
+	public void expireSession(ServerWebExchange exchange) {
+		setSessionCookie(exchange, "", Duration.ofSeconds(0), "");
+	}
+
+	private void setSessionCookie(ServerWebExchange exchange, String id, Duration maxAge, String sameSite) {
 		String name = getCookieName();
-		Duration maxAge = (StringUtils.hasText(id) ? getCookieMaxAge() : Duration.ofSeconds(0));
 		boolean secure = "https".equalsIgnoreCase(exchange.getRequest().getURI().getScheme());
-		MultiValueMap<String, ResponseCookie> cookieMap = exchange.getResponse().getCookies();
-		cookieMap.set(name, ResponseCookie.from(name, id).maxAge(maxAge).httpOnly(true).secure(secure).build());
+		String path = exchange.getRequest().getPath().contextPath().value() + "/";
+		exchange.getResponse().getCookies().set(name,
+				ResponseCookie.from(name, id).path(path)
+						.maxAge(maxAge).httpOnly(true).secure(secure).sameSite(sameSite).build());
 	}
 
 }

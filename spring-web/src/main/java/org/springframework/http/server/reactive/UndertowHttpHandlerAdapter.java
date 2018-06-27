@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 
 package org.springframework.http.server.reactive;
 
-import io.undertow.server.HttpServerExchange;
+import java.io.IOException;
+import java.net.URISyntaxException;
 
+import io.undertow.server.HttpServerExchange;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Subscriber;
@@ -25,6 +27,7 @@ import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
 /**
@@ -62,10 +65,23 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 
 	@Override
-	public void handleRequest(HttpServerExchange exchange) throws Exception {
-
-		ServerHttpRequest request = new UndertowServerHttpRequest(exchange, getDataBufferFactory());
+	public void handleRequest(HttpServerExchange exchange) {
+		ServerHttpRequest request = null;
+		try {
+			request = new UndertowServerHttpRequest(exchange, getDataBufferFactory());
+		}
+		catch (URISyntaxException ex) {
+			if (logger.isWarnEnabled()) {
+				logger.debug("Failed to get request URI: " + ex.getMessage());
+			}
+			exchange.setStatusCode(400);
+			return;
+		}
 		ServerHttpResponse response = new UndertowServerHttpResponse(exchange, getDataBufferFactory());
+
+		if (request.getMethod() == HttpMethod.HEAD) {
+			response = new HttpHeadResponseDecorator(response);
+		}
 
 		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber(exchange);
 		this.httpHandler.handle(request, response).subscribe(resultSubscriber);
@@ -75,7 +91,6 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 	private class HandlerResultSubscriber implements Subscriber<Void> {
 
 		private final HttpServerExchange exchange;
-
 
 		public HandlerResultSubscriber(HttpServerExchange exchange) {
 			this.exchange = exchange;
@@ -88,22 +103,33 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 		@Override
 		public void onNext(Void aVoid) {
-			// no op
+			// no-op
 		}
 
 		@Override
 		public void onError(Throwable ex) {
-			logger.error("Could not complete request", ex);
-			if (!this.exchange.isResponseStarted() && this.exchange.getStatusCode() < 500) {
-				this.exchange.setStatusCode(500);
+			logger.trace("Failed to complete: " + ex.getMessage());
+			if (this.exchange.isResponseStarted()) {
+				try {
+					logger.debug("Closing connection");
+					this.exchange.getConnection().close();
+				}
+				catch (IOException ex2) {
+					// ignore
+				}
 			}
-			this.exchange.endExchange();
+			else {
+				logger.debug("Setting HttpServerExchange status to 500 Server Error");
+				this.exchange.setStatusCode(500);
+				this.exchange.endExchange();
+			}
 		}
 
 		@Override
 		public void onComplete() {
-			logger.debug("Successfully completed request");
+			logger.trace("Handling completed");
 			this.exchange.endExchange();
 		}
 	}
+
 }

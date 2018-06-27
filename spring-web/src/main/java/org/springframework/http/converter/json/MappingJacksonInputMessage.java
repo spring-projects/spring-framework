@@ -61,7 +61,7 @@ public class MappingJacksonInputMessage implements HttpInputMessage {
 		return this.headers;
 	}
 
-	public void setDeserializationView(Class<?> deserializationView) {
+	public void setDeserializationView(@Nullable Class<?> deserializationView) {
 		this.deserializationView = deserializationView;
 	}
 

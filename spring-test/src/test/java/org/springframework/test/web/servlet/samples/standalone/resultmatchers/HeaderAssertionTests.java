@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,6 +142,16 @@ public class HeaderAssertionTests {
 			}
 			assertEquals("Response does not contain header 'X-Custom-Header'", err.getMessage());
 		}
+	}
+
+	@Test
+	public void exists() throws Exception {
+		this.mockMvc.perform(get("/persons/1")).andExpect(header().exists(LAST_MODIFIED));
+	}
+
+	@Test(expected = AssertionError.class)
+	public void existsFail() throws Exception {
+		this.mockMvc.perform(get("/persons/1")).andExpect(header().exists("X-Custom-Header"));
 	}
 
 	@Test  // SPR-10771

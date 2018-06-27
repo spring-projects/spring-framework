@@ -47,7 +47,7 @@ public class ExchangeMutatorTests {
 	public void setUp() throws Exception {
 
 		this.webTestClient = WebTestClient.bindToController(new TestController())
-				.apply(globalIdentity("Pablo"))
+				.apply(identity("Pablo"))
 				.build();
 	}
 
@@ -62,7 +62,8 @@ public class ExchangeMutatorTests {
 	@Test
 	public void useLocallyConfiguredIdentity() throws Exception {
 
-		withIdentity(this.webTestClient, "Giovanni")
+		this.webTestClient
+				.mutateWith(identity("Giovanni"))
 				.get().uri("/userIdentity")
 				.exchange()
 				.expectStatus().isOk()
@@ -70,12 +71,8 @@ public class ExchangeMutatorTests {
 	}
 
 
-	private static MockServerConfigurer globalIdentity(String userName) {
+	private static IdentityConfigurer identity(String userName) {
 		return new IdentityConfigurer(userName);
-	}
-
-	private static WebTestClient withIdentity(WebTestClient client, String userName) {
-		return client.mutate().apply(new IdentityConfigurer(userName)).build();
 	}
 
 

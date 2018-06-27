@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class ReactorNettyTcpStompClient extends StompClientSupport {
 	 * @param port the port
 	 */
 	public ReactorNettyTcpStompClient(String host, int port) {
-		this.tcpClient = new ReactorNettyTcpClient<byte[]>(host, port, new StompReactorNettyCodec());
+		this.tcpClient = new ReactorNettyTcpClient<>(host, port, new StompReactorNettyCodec());
 	}
 
 	/**
@@ -89,4 +89,8 @@ public class ReactorNettyTcpStompClient extends StompClientSupport {
 		this.tcpClient.shutdown();
 	}
 
+	@Override
+	public String toString() {
+		return "ReactorNettyTcpStompClient[" + this.tcpClient + "]";
+	}
 }

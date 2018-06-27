@@ -127,7 +127,7 @@ public class AspectMetadata implements Serializable {
 	 */
 	private String findPerClause(Class<?> aspectClass) {
 		String str = aspectClass.getAnnotation(Aspect.class).value();
-		str = str.substring(str.indexOf("(") + 1);
+		str = str.substring(str.indexOf('(') + 1);
 		str = str.substring(0, str.length() - 1);
 		return str;
 	}
@@ -148,7 +148,7 @@ public class AspectMetadata implements Serializable {
 	}
 
 	/**
-	 * Return the aspect class.
+	 * Return the aspect name.
 	 */
 	public String getAspectName() {
 		return this.aspectName;

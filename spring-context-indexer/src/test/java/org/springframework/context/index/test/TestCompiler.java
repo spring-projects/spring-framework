@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,8 +62,7 @@ public class TestCompiler {
 
 
 	public TestCompilationTask getTask(Class<?>... types) {
-		List<String> names = Arrays.stream(types).map(Class::getName)
-				.collect(Collectors.toList());
+		List<String> names = Arrays.stream(types).map(Class::getName).collect(Collectors.toList());
 		return getTask(names.toArray(new String[names.size()]));
 	}
 
@@ -72,10 +71,9 @@ public class TestCompiler {
 		return getTask(javaFileObjects);
 	}
 
-	private TestCompilationTask getTask(
-			Iterable<? extends JavaFileObject> javaFileObjects) {
-		return new TestCompilationTask(this.compiler.getTask(null, this.fileManager, null,
-				null, null, javaFileObjects));
+	private TestCompilationTask getTask(Iterable<? extends JavaFileObject> javaFileObjects) {
+		return new TestCompilationTask(
+				this.compiler.getTask(null, this.fileManager, null, null, null, javaFileObjects));
 	}
 
 	public File getOutputLocation() {
@@ -120,7 +118,6 @@ public class TestCompiler {
 				throw new IllegalStateException("Compilation failed");
 			}
 		}
-
 	}
 
 }

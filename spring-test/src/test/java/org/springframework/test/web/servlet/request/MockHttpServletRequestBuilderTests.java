@@ -164,6 +164,14 @@ public class MockHttpServletRequestBuilderTests {
 		assertNull(request.getPathInfo());
 	}
 
+	@Test // SPR-16453
+	public void pathInfoIsDecoded() {
+		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/travel/hotels 42");
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertEquals("/travel/hotels 42", request.getPathInfo());
+	}
+
 	@Test
 	public void contextPathServletPathInvalid() {
 		testContextPathServletPathInvalid("/Foo", "", "Request URI [/foo/bar] does not start with context path [/Foo]");

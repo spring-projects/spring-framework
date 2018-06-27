@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
 
 import org.junit.Ignore;
@@ -129,6 +131,16 @@ public class ResourceTests {
 	}
 
 	@Test
+	public void testFileSystemResourceWithFilePath() throws Exception {
+		Path filePath = Paths.get(getClass().getResource("Resource.class").toURI());
+		Resource resource = new FileSystemResource(filePath);
+		doTestResource(resource);
+		assertEquals(new FileSystemResource(filePath), resource);
+		Resource resource2 = new FileSystemResource("core/io/Resource.class");
+		assertEquals(resource2, new FileSystemResource("core/../core/io/./Resource.class"));
+	}
+
+	@Test
 	public void testUrlResource() throws IOException {
 		Resource resource = new UrlResource(getClass().getResource("Resource.class"));
 		doTestResource(resource);
@@ -201,8 +213,8 @@ public class ResourceTests {
 				return name;
 			}
 			@Override
-			public InputStream getInputStream() {
-				return null;
+			public InputStream getInputStream() throws IOException {
+				throw new FileNotFoundException();
 			}
 		};
 
@@ -211,21 +223,21 @@ public class ResourceTests {
 			fail("FileNotFoundException should have been thrown");
 		}
 		catch (FileNotFoundException ex) {
-			assertTrue(ex.getMessage().indexOf(name) != -1);
+			assertTrue(ex.getMessage().contains(name));
 		}
 		try {
 			resource.getFile();
 			fail("FileNotFoundException should have been thrown");
 		}
 		catch (FileNotFoundException ex) {
-			assertTrue(ex.getMessage().indexOf(name) != -1);
+			assertTrue(ex.getMessage().contains(name));
 		}
 		try {
 			resource.createRelative("/testing");
 			fail("FileNotFoundException should have been thrown");
 		}
 		catch (FileNotFoundException ex) {
-			assertTrue(ex.getMessage().indexOf(name) != -1);
+			assertTrue(ex.getMessage().contains(name));
 		}
 
 		assertThat(resource.getFilename(), nullValue());
@@ -235,19 +247,19 @@ public class ResourceTests {
 	public void testContentLength() throws IOException {
 		AbstractResource resource = new AbstractResource() {
 			@Override
-			public InputStream getInputStream() throws IOException {
+			public InputStream getInputStream() {
 				return new ByteArrayInputStream(new byte[] { 'a', 'b', 'c' });
 			}
 			@Override
 			public String getDescription() {
-				return null;
+				return "";
 			}
 		};
 		assertThat(resource.contentLength(), is(3L));
 	}
 
 	@Test
-	public void testGetReadableByteChannel() throws IOException {
+	public void testReadableChannel() throws IOException {
 		Resource resource = new FileSystemResource(getClass().getResource("Resource.class").getFile());
 		ReadableByteChannel channel = null;
 		try {
@@ -262,6 +274,26 @@ public class ResourceTests {
 				channel.close();
 			}
 		}
+	}
+
+	@Test(expected = FileNotFoundException.class)
+	public void testInputStreamNotFoundOnFileSystemResource() throws IOException {
+		new FileSystemResource(getClass().getResource("Resource.class").getFile()).createRelative("X").getInputStream();
+	}
+
+	@Test(expected = FileNotFoundException.class)
+	public void testReadableChannelNotFoundOnFileSystemResource() throws IOException {
+		new FileSystemResource(getClass().getResource("Resource.class").getFile()).createRelative("X").readableChannel();
+	}
+
+	@Test(expected = FileNotFoundException.class)
+	public void testInputStreamNotFoundOnClassPathResource() throws IOException {
+		new ClassPathResource("Resource.class", getClass()).createRelative("X").getInputStream();
+	}
+
+	@Test(expected = FileNotFoundException.class)
+	public void testReadableChannelNotFoundOnClassPathResource() throws IOException {
+		new ClassPathResource("Resource.class", getClass()).createRelative("X").readableChannel();
 	}
 
 }

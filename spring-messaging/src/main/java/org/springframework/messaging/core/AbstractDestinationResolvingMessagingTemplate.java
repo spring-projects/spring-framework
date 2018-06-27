@@ -51,8 +51,7 @@ public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends A
 	 * require resolving a destination name will raise an {@link IllegalArgumentException}.
 	 * @param destinationResolver the destination resolver to use
 	 */
-	public void setDestinationResolver(DestinationResolver<D> destinationResolver) {
-		Assert.notNull(destinationResolver, "'destinationResolver' is required");
+	public void setDestinationResolver(@Nullable DestinationResolver<D> destinationResolver) {
 		this.destinationResolver = destinationResolver;
 	}
 
@@ -101,30 +100,35 @@ public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends A
 	}
 
 	@Override
+	@Nullable
 	public Message<?> receive(String destinationName) {
 		D destination = resolveDestination(destinationName);
 		return super.receive(destination);
 	}
 
 	@Override
+	@Nullable
 	public <T> T receiveAndConvert(String destinationName, Class<T> targetClass) {
 		D destination = resolveDestination(destinationName);
 		return super.receiveAndConvert(destination, targetClass);
 	}
 
 	@Override
+	@Nullable
 	public Message<?> sendAndReceive(String destinationName, Message<?> requestMessage) {
 		D destination = resolveDestination(destinationName);
 		return super.sendAndReceive(destination, requestMessage);
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(String destinationName, Object request, Class<T> targetClass) {
 		D destination = resolveDestination(destinationName);
 		return super.convertSendAndReceive(destination, request, targetClass);
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(String destinationName, Object request,
 			@Nullable Map<String, Object> headers, Class<T> targetClass) {
 
@@ -133,6 +137,7 @@ public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends A
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(String destinationName, Object request, Class<T> targetClass,
 			@Nullable MessagePostProcessor postProcessor) {
 
@@ -141,6 +146,7 @@ public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends A
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(String destinationName, Object request,
 			@Nullable Map<String, Object> headers, Class<T> targetClass,
 			@Nullable MessagePostProcessor postProcessor) {

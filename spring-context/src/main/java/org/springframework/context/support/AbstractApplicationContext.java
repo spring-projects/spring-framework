@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.CachedIntrospectionResults;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -67,6 +66,7 @@ import org.springframework.context.expression.StandardBeanExpressionResolver;
 import org.springframework.context.weaving.LoadTimeWeaverAware;
 import org.springframework.context.weaving.LoadTimeWeaverAwareProcessor;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
@@ -124,7 +124,7 @@ import org.springframework.util.ReflectionUtils;
  * @see org.springframework.context.MessageSource
  */
 public abstract class AbstractApplicationContext extends DefaultResourceLoader
-		implements ConfigurableApplicationContext, DisposableBean {
+		implements ConfigurableApplicationContext {
 
 	/**
 	 * Name of the MessageSource bean in the factory.
@@ -388,7 +388,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		else {
 			applicationEvent = new PayloadApplicationEvent<>(this, event);
 			if (eventType == null) {
-				eventType = ((PayloadApplicationEvent)applicationEvent).getResolvableType();
+				eventType = ((PayloadApplicationEvent) applicationEvent).getResolvableType();
 			}
 		}
 
@@ -901,15 +901,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Reset Spring's common core caches, in particular the {@link ReflectionUtils},
-	 * {@link ResolvableType} and {@link CachedIntrospectionResults} caches.
+	 * Reset Spring's common reflection metadata caches, in particular the
+	 * {@link ReflectionUtils}, {@link AnnotationUtils}, {@link ResolvableType}
+	 * and {@link CachedIntrospectionResults} caches.
 	 * @since 4.2
 	 * @see ReflectionUtils#clearCache()
+	 * @see AnnotationUtils#clearCache()
 	 * @see ResolvableType#clearCache()
 	 * @see CachedIntrospectionResults#clearClassLoader(ClassLoader)
 	 */
 	protected void resetCommonCaches() {
 		ReflectionUtils.clearCache();
+		AnnotationUtils.clearCache();
 		ResolvableType.clearCache();
 		CachedIntrospectionResults.clearClassLoader(getClassLoader());
 	}
@@ -940,12 +943,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * DisposableBean callback for destruction of this instance.
+	 * Callback for destruction of this instance, originally attached
+	 * to a {@code DisposableBean} implementation (not anymore in 5.0).
 	 * <p>The {@link #close()} method is the native way to shut down
 	 * an ApplicationContext, which this method simply delegates to.
-	 * @see #close()
+	 * @deprecated as of Spring Framework 5.0, in favor of {@link #close()}
 	 */
-	@Override
+	@Deprecated
 	public void destroy() {
 		close();
 	}
@@ -1000,11 +1004,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 
 			// Stop all Lifecycle beans, to avoid delays during individual destruction.
-			try {
-				getLifecycleProcessor().onClose();
-			}
-			catch (Throwable ex) {
-				logger.warn("Exception thrown from LifecycleProcessor on context close", ex);
+			if (this.lifecycleProcessor != null) {
+				try {
+					this.lifecycleProcessor.onClose();
+				}
+				catch (Throwable ex) {
+					logger.warn("Exception thrown from LifecycleProcessor on context close", ex);
+				}
 			}
 
 			// Destroy all cached singletons in the context's BeanFactory.
@@ -1137,6 +1143,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
 		assertBeanFactoryActive();
 		return getBeanFactory().getType(name);
@@ -1214,6 +1221,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	@Override
+	@Nullable
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
 			throws NoSuchBeanDefinitionException{
 
@@ -1227,6 +1235,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	//---------------------------------------------------------------------
 
 	@Override
+	@Nullable
 	public BeanFactory getParentBeanFactory() {
 		return getParent();
 	}
@@ -1253,12 +1262,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	//---------------------------------------------------------------------
 
 	@Override
-	public String getMessage(String code, @Nullable Object args[], @Nullable String defaultMessage, Locale locale) {
+	public String getMessage(String code, @Nullable Object[] args, @Nullable String defaultMessage, Locale locale) {
 		return getMessageSource().getMessage(code, args, defaultMessage, locale);
 	}
 
 	@Override
-	public String getMessage(String code, @Nullable Object args[], Locale locale) throws NoSuchMessageException {
+	public String getMessage(String code, @Nullable Object[] args, Locale locale) throws NoSuchMessageException {
 		return getMessageSource().getMessage(code, args, locale);
 	}
 

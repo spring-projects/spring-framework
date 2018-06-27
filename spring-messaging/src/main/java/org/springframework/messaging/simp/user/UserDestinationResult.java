@@ -102,4 +102,5 @@ public class UserDestinationResult {
 		return "UserDestinationResult [source=" + this.sourceDestination + ", target=" + this.targetDestinations +
 				", subscribeDestination=" + this.subscribeDestination + ", user=" + this.user + "]";
 	}
+
 }

@@ -76,7 +76,9 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * and {@code #{...}} SpEL expressions in default values, or {@code null} if default
 	 * values are not expected to contain expressions
 	 */
-	protected AbstractNamedValueMethodArgumentResolver(ConversionService cs, @Nullable ConfigurableBeanFactory beanFactory) {
+	protected AbstractNamedValueMethodArgumentResolver(ConversionService cs,
+			@Nullable ConfigurableBeanFactory beanFactory) {
+
 		this.conversionService = (cs != null ? cs : DefaultConversionService.getSharedInstance());
 		this.configurableBeanFactory = beanFactory;
 		this.expressionContext = (beanFactory != null ? new BeanExpressionContext(beanFactory, null) : null);
@@ -84,6 +86,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 
 	@Override
+	@Nullable
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
 		NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);
 		MethodParameter nestedParameter = parameter.nestedIfOptional();

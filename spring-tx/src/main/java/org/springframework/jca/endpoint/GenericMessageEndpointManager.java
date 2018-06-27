@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,17 +148,20 @@ import org.springframework.util.Assert;
  */
 public class GenericMessageEndpointManager implements SmartLifecycle, InitializingBean, DisposableBean {
 
+	@Nullable
 	private ResourceAdapter resourceAdapter;
 
+	@Nullable
 	private MessageEndpointFactory messageEndpointFactory;
 
+	@Nullable
 	private ActivationSpec activationSpec;
 
 	private boolean autoStartup = true;
 
 	private int phase = Integer.MAX_VALUE;
 
-	private boolean running = false;
+	private volatile boolean running = false;
 
 	private final Object lifecycleMonitor = new Object();
 
@@ -166,7 +169,7 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 	/**
 	 * Set the JCA ResourceAdapter to manage endpoints for.
 	 */
-	public void setResourceAdapter(ResourceAdapter resourceAdapter) {
+	public void setResourceAdapter(@Nullable ResourceAdapter resourceAdapter) {
 		this.resourceAdapter = resourceAdapter;
 	}
 
@@ -186,7 +189,7 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 	 * with different {@link #setActivationSpec ActivationSpec} objects applied.
 	 * @see GenericMessageEndpointFactory#setMessageListener
 	 */
-	public void setMessageEndpointFactory(MessageEndpointFactory messageEndpointFactory) {
+	public void setMessageEndpointFactory(@Nullable MessageEndpointFactory messageEndpointFactory) {
 		this.messageEndpointFactory = messageEndpointFactory;
 	}
 
@@ -203,7 +206,7 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 	 * <p>Note that this ActivationSpec instance should not be shared
 	 * across multiple ResourceAdapter instances.
 	 */
-	public void setActivationSpec(ActivationSpec activationSpec) {
+	public void setActivationSpec(@Nullable ActivationSpec activationSpec) {
 		this.activationSpec = activationSpec;
 	}
 
@@ -327,9 +330,7 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 	 */
 	@Override
 	public boolean isRunning() {
-		synchronized (this.lifecycleMonitor) {
-			return this.running;
-		}
+		return this.running;
 	}
 
 	/**

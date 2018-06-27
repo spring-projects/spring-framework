@@ -203,7 +203,7 @@ public class RequestContext {
 	 */
 	public String getContextUrl(String relativeUrl) {
 		String url = StringUtils.applyRelativePath(getContextPath() + "/", relativeUrl);
-		return getExchange().getResponse().encodeUrl(url);
+		return getExchange().transformUrl(url);
 	}
 
 	/**
@@ -220,7 +220,7 @@ public class RequestContext {
 		String url = StringUtils.applyRelativePath(getContextPath() + "/", relativeUrl);
 		UriTemplate template = new UriTemplate(url);
 		url = template.expand(params).toASCIIString();
-		return getExchange().getResponse().encodeUrl(url);
+		return getExchange().transformUrl(url);
 	}
 
 	/**
@@ -282,6 +282,9 @@ public class RequestContext {
 	 */
 	public String getMessage(String code, @Nullable Object[] args, String defaultMessage, boolean htmlEscape) {
 		String msg = this.messageSource.getMessage(code, args, defaultMessage, this.locale);
+		if (msg == null) {
+			return "";
+		}
 		return (htmlEscape ? HtmlUtils.htmlEscape(msg) : msg);
 	}
 

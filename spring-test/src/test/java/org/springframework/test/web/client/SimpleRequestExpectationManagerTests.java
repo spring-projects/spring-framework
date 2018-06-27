@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.client;
 
+import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -168,8 +169,36 @@ public class SimpleRequestExpectationManagerTests {
 		this.manager.validateRequest(createRequest(GET, "/bar"));
 	}
 
+	@Test  // SPR-15719
+	public void repeatedRequestsInSequentialOrder() throws Exception {
+		this.manager.expectRequest(times(2), requestTo("/foo")).andExpect(method(GET)).andRespond(withSuccess());
+		this.manager.expectRequest(times(2), requestTo("/bar")).andExpect(method(GET)).andRespond(withSuccess());
 
-	@SuppressWarnings("deprecation")
+		this.manager.validateRequest(createRequest(GET, "/foo"));
+		this.manager.validateRequest(createRequest(GET, "/foo"));
+		this.manager.validateRequest(createRequest(GET, "/bar"));
+		this.manager.validateRequest(createRequest(GET, "/bar"));
+	}
+
+	@Test  // SPR-16132
+	public void sequentialRequestsWithFirstFailing() throws Exception {
+		this.manager.expectRequest(once(), requestTo("/foo")).
+				andExpect(method(GET)).andRespond(request -> { throw new SocketException("pseudo network error"); });
+		this.manager.expectRequest(once(), requestTo("/handle-error")).
+				andExpect(method(POST)).andRespond(withSuccess());
+
+		try {
+			this.manager.validateRequest(createRequest(GET, "/foo"));
+			fail("Expected SocketException");
+		}
+		catch (SocketException ex) {
+			// expected
+		}
+		this.manager.validateRequest(createRequest(POST, "/handle-error"));
+		this.manager.verify();
+	}
+
+
 	private ClientHttpRequest createRequest(HttpMethod method, String url) {
 		try {
 			return new MockClientHttpRequest(method, new URI(url));

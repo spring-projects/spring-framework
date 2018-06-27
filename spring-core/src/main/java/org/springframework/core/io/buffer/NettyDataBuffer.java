@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,8 @@ import java.util.function.IntPredicate;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
-import io.netty.buffer.CompositeByteBuf;
-import io.netty.buffer.Unpooled;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Implementation of the {@code DataBuffer} interface that wraps a Netty
@@ -42,7 +39,7 @@ public class NettyDataBuffer implements PooledDataBuffer {
 
 	private final NettyDataBufferFactory dataBufferFactory;
 
-	private ByteBuf byteBuf;
+	private final ByteBuf byteBuf;
 
 
 	/**
@@ -100,6 +97,49 @@ public class NettyDataBuffer implements PooledDataBuffer {
 	}
 
 	@Override
+	public int writableByteCount() {
+		return this.byteBuf.writableBytes();
+	}
+
+	@Override
+	public int readPosition() {
+		return this.byteBuf.readerIndex();
+	}
+
+	@Override
+	public NettyDataBuffer readPosition(int readPosition) {
+		this.byteBuf.readerIndex(readPosition);
+		return this;
+	}
+
+	@Override
+	public int writePosition() {
+		return this.byteBuf.writerIndex();
+	}
+
+	@Override
+	public NettyDataBuffer writePosition(int writePosition) {
+		this.byteBuf.writerIndex(writePosition);
+		return this;
+	}
+
+	@Override
+	public byte getByte(int index) {
+		return this.byteBuf.getByte(index);
+	}
+
+	@Override
+	public int capacity() {
+		return this.byteBuf.capacity();
+	}
+
+	@Override
+	public NettyDataBuffer capacity(int capacity) {
+		this.byteBuf.capacity(capacity);
+		return this;
+	}
+
+	@Override
 	public byte read() {
 		return this.byteBuf.readByte();
 	}
@@ -136,8 +176,10 @@ public class NettyDataBuffer implements PooledDataBuffer {
 
 	@Override
 	public NettyDataBuffer write(DataBuffer... buffers) {
-		if (!ObjectUtils.isEmpty(buffers)) {
-			if (buffers[0] instanceof NettyDataBuffer) {
+		Assert.notNull(buffers, "'buffers' must not be null");
+
+		if (buffers.length > 0) {
+			if (hasNettyDataBuffers(buffers)) {
 				ByteBuf[] nativeBuffers = Arrays.stream(buffers)
 						.map(b -> ((NettyDataBuffer) b).getNativeBuffer())
 						.toArray(ByteBuf[]::new);
@@ -153,12 +195,23 @@ public class NettyDataBuffer implements PooledDataBuffer {
 		return this;
 	}
 
+	private static boolean hasNettyDataBuffers(DataBuffer[] dataBuffers) {
+		for (DataBuffer dataBuffer : dataBuffers) {
+			if (!(dataBuffer instanceof NettyDataBuffer)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	@Override
 	public NettyDataBuffer write(ByteBuffer... buffers) {
 		Assert.notNull(buffers, "'buffers' must not be null");
-		ByteBuf[] wrappedBuffers = Arrays.stream(buffers).map(Unpooled::wrappedBuffer)
-				.toArray(ByteBuf[]::new);
-		return write(wrappedBuffers);
+
+		for (ByteBuffer buffer : buffers) {
+			this.byteBuf.writeBytes(buffer);
+		}
+		return this;
 	}
 
 	/**
@@ -170,21 +223,14 @@ public class NettyDataBuffer implements PooledDataBuffer {
 	public NettyDataBuffer write(ByteBuf... byteBufs) {
 		Assert.notNull(byteBufs, "'byteBufs' must not be null");
 
-		CompositeByteBuf composite = new CompositeByteBuf(
-				this.byteBuf.alloc(), this.byteBuf.isDirect(), byteBufs.length + 1);
-		composite.addComponent(this.byteBuf);
-		composite.addComponents(byteBufs);
-
-		int writerIndex = this.byteBuf.readableBytes() +
-				Arrays.stream(byteBufs).mapToInt(ByteBuf::readableBytes).sum();
-		composite.writerIndex(writerIndex);
-
-		this.byteBuf = composite;
+		for (ByteBuf byteBuf : byteBufs) {
+			this.byteBuf.writeBytes(byteBuf);
+		}
 		return this;
 	}
 
 	@Override
-	public DataBuffer slice(int index, int length) {
+	public NettyDataBuffer slice(int index, int length) {
 		ByteBuf slice = this.byteBuf.slice(index, length);
 		return new NettyDataBuffer(slice, this.dataBufferFactory);
 	}
@@ -195,8 +241,18 @@ public class NettyDataBuffer implements PooledDataBuffer {
 	}
 
 	@Override
+	public ByteBuffer asByteBuffer(int index, int length) {
+		return this.byteBuf.nioBuffer(index, length);
+	}
+
+	@Override
 	public InputStream asInputStream() {
 		return new ByteBufInputStream(this.byteBuf);
+	}
+
+	@Override
+	public InputStream asInputStream(boolean releaseOnClose) {
+		return new ByteBufInputStream(this.byteBuf, releaseOnClose);
 	}
 
 	@Override
@@ -206,7 +262,7 @@ public class NettyDataBuffer implements PooledDataBuffer {
 
 	@Override
 	public PooledDataBuffer retain() {
-		return new NettyDataBuffer(this.byteBuf.retain(), dataBufferFactory);
+		return new NettyDataBuffer(this.byteBuf.retain(), this.dataBufferFactory);
 	}
 
 	@Override

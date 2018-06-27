@@ -179,7 +179,9 @@ public abstract class AbstractMessageChannel implements MessageChannel, Intercep
 			}
 		}
 
-		public void triggerAfterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, @Nullable Exception ex) {
+		public void triggerAfterSendCompletion(Message<?> message, MessageChannel channel,
+				boolean sent, @Nullable Exception ex) {
+
 			for (int i = this.sendInterceptorIndex; i >= 0; i--) {
 				ChannelInterceptor interceptor = interceptors.get(i);
 				try {

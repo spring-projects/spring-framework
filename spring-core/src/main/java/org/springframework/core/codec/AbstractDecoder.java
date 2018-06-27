@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -36,6 +38,8 @@ import org.springframework.util.MimeType;
  * @since 5.0
  */
 public abstract class AbstractDecoder<T> implements Decoder<T> {
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final List<MimeType> decodableMimeTypes;
 

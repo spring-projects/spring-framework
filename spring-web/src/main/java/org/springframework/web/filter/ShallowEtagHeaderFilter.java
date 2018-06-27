@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,27 +126,15 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 			String responseETag = generateETagHeaderValue(responseWrapper.getContentInputStream(), this.writeWeakETag);
 			rawResponse.setHeader(HEADER_ETAG, responseETag);
 			String requestETag = request.getHeader(HEADER_IF_NONE_MATCH);
-			if (requestETag != null
-					&& (responseETag.equals(requestETag)
-					|| responseETag.replaceFirst("^W/", "").equals(requestETag.replaceFirst("^W/", ""))
-					|| "*".equals(requestETag))) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("ETag [" + responseETag + "] equal to If-None-Match, sending 304");
-				}
+			if (requestETag != null && ("*".equals(requestETag) || responseETag.equals(requestETag) ||
+					responseETag.replaceFirst("^W/", "").equals(requestETag.replaceFirst("^W/", "")))) {
 				rawResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 			}
 			else {
-				if (logger.isTraceEnabled()) {
-					logger.trace("ETag [" + responseETag + "] not equal to If-None-Match [" + requestETag +
-							"], sending normal response");
-				}
 				responseWrapper.copyBodyToResponse();
 			}
 		}
 		else {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Response with status code [" + statusCode + "] not eligible for ETag");
-			}
 			responseWrapper.copyBodyToResponse();
 		}
 	}
@@ -163,19 +151,15 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	 * @param response the HTTP response
 	 * @param responseStatusCode the HTTP response status code
 	 * @param inputStream the response body
-	 * @return {@code true} if eligible for ETag generation; {@code false} otherwise
+	 * @return {@code true} if eligible for ETag generation, {@code false} otherwise
 	 */
 	protected boolean isEligibleForEtag(HttpServletRequest request, HttpServletResponse response,
 			int responseStatusCode, InputStream inputStream) {
 
 		String method = request.getMethod();
-		if (responseStatusCode >= 200 && responseStatusCode < 300
-				&& HttpMethod.GET.matches(method)) {
-
+		if (responseStatusCode >= 200 && responseStatusCode < 300 && HttpMethod.GET.matches(method)) {
 			String cacheControl = response.getHeader(HEADER_CACHE_CONTROL);
-			if (cacheControl == null || !cacheControl.contains(DIRECTIVE_NO_STORE)) {
-				return true;
-			}
+			return (cacheControl == null || !cacheControl.contains(DIRECTIVE_NO_STORE));
 		}
 		return false;
 	}
@@ -189,7 +173,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	 * @see org.springframework.util.DigestUtils
 	 */
 	protected String generateETagHeaderValue(InputStream inputStream, boolean isWeak) throws IOException {
-		// length of W/ + 0 + " + 32bits md5 hash + "
+		// length of W/ + " + 0 + 32bits md5 hash + "
 		StringBuilder builder = new StringBuilder(37);
 		if (isWeak) {
 			builder.append("W/");

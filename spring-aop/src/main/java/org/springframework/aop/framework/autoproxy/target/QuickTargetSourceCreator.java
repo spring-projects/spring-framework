@@ -20,6 +20,7 @@ import org.springframework.aop.target.AbstractBeanFactoryBasedTargetSource;
 import org.springframework.aop.target.CommonsPool2TargetSource;
 import org.springframework.aop.target.PrototypeTargetSource;
 import org.springframework.aop.target.ThreadLocalTargetSource;
+import org.springframework.lang.Nullable;
 
 /**
  * Convenient TargetSourceCreator using bean name prefixes to create one of three
@@ -41,6 +42,7 @@ public class QuickTargetSourceCreator extends AbstractBeanFactoryBasedTargetSour
 	public static final String PREFIX_PROTOTYPE = "!";
 
 	@Override
+	@Nullable
 	protected final AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
 			Class<?> beanClass, String beanName) {
 

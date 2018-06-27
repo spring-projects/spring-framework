@@ -45,9 +45,9 @@ import org.springframework.lang.Nullable;
  */
 public class WebJarsResourceResolver extends AbstractResourceResolver {
 
-	private final static String WEBJARS_LOCATION = "META-INF/resources/webjars/";
+	private static final String WEBJARS_LOCATION = "META-INF/resources/webjars/";
 
-	private final static int WEBJARS_LOCATION_LENGTH = WEBJARS_LOCATION.length();
+	private static final int WEBJARS_LOCATION_LENGTH = WEBJARS_LOCATION.length();
 
 
 	private final WebJarAssetLocator webJarAssetLocator;
@@ -101,7 +101,7 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 	@Nullable
 	protected String findWebJarResourcePath(String path) {
 		int startOffset = (path.startsWith("/") ? 1 : 0);
-		int endOffset = path.indexOf("/", 1);
+		int endOffset = path.indexOf('/', 1);
 		if (endOffset != -1) {
 			String webjar = path.substring(startOffset, endOffset);
 			String partialPath = path.substring(endOffset + 1);

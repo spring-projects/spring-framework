@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
@@ -62,6 +63,20 @@ public class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 			DataBufferFactory bufferFactory, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
+		Charset charset = getCharset(mimeType);
+
+		return Flux.from(inputStream).map(charSequence -> {
+			Log logger = getLogger(hints);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Writing '" + charSequence + "'");
+			}
+			CharBuffer charBuffer = CharBuffer.wrap(charSequence);
+			ByteBuffer byteBuffer = charset.encode(charBuffer);
+			return bufferFactory.wrap(byteBuffer);
+		});
+	}
+
+	private Charset getCharset(@Nullable MimeType mimeType) {
 		Charset charset;
 		if (mimeType != null && mimeType.getCharset() != null) {
 			charset = mimeType.getCharset();
@@ -69,13 +84,8 @@ public class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 		else {
 			 charset = DEFAULT_CHARSET;
 		}
-		return Flux.from(inputStream).map(charSequence -> {
-			CharBuffer charBuffer = CharBuffer.wrap(charSequence);
-			ByteBuffer byteBuffer = charset.encode(charBuffer);
-			return bufferFactory.wrap(byteBuffer);
-		});
+		return charset;
 	}
-
 
 	/**
 	 * Create a {@code CharSequenceEncoder} that supports only "text/plain".

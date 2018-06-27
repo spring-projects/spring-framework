@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,11 @@ import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
-import org.junit.jupiter.api.extension.ContainerExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolver;
-import org.junit.jupiter.api.extension.TestExtensionContext;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,11 +45,13 @@ import org.springframework.util.Assert;
  * {@code SpringExtension} integrates the <em>Spring TestContext Framework</em>
  * into JUnit 5's <em>Jupiter</em> programming model.
  *
- * <p>To use this class, simply annotate a JUnit Jupiter based test class with
- * {@code @ExtendWith(SpringExtension.class)}.
+ * <p>To use this extension, simply annotate a JUnit Jupiter based test class with
+ * {@code @ExtendWith(SpringExtension.class)}, {@code @SpringJUnitConfig}, or
+ * {@code @SpringJUnitWebConfig}.
  *
  * @author Sam Brannen
  * @since 5.0
+ * @see org.springframework.test.context.junit.jupiter.EnabledIf
  * @see org.springframework.test.context.junit.jupiter.DisabledIf
  * @see org.springframework.test.context.junit.jupiter.SpringJUnitConfig
  * @see org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig
@@ -72,7 +72,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * Delegates to {@link TestContextManager#beforeTestClass}.
 	 */
 	@Override
-	public void beforeAll(ContainerExtensionContext context) throws Exception {
+	public void beforeAll(ExtensionContext context) throws Exception {
 		getTestContextManager(context).beforeTestClass();
 	}
 
@@ -80,12 +80,12 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * Delegates to {@link TestContextManager#afterTestClass}.
 	 */
 	@Override
-	public void afterAll(ContainerExtensionContext context) throws Exception {
+	public void afterAll(ExtensionContext context) throws Exception {
 		try {
 			getTestContextManager(context).afterTestClass();
 		}
 		finally {
-			context.getStore(NAMESPACE).remove(context.getTestClass().get());
+			getStore(context).remove(context.getRequiredTestClass());
 		}
 	}
 
@@ -101,9 +101,9 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * Delegates to {@link TestContextManager#beforeTestMethod}.
 	 */
 	@Override
-	public void beforeEach(TestExtensionContext context) throws Exception {
-		Object testInstance = context.getTestInstance();
-		Method testMethod = context.getTestMethod().get();
+	public void beforeEach(ExtensionContext context) throws Exception {
+		Object testInstance = context.getRequiredTestInstance();
+		Method testMethod = context.getRequiredTestMethod();
 		getTestContextManager(context).beforeTestMethod(testInstance, testMethod);
 	}
 
@@ -111,9 +111,9 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * Delegates to {@link TestContextManager#beforeTestExecution}.
 	 */
 	@Override
-	public void beforeTestExecution(TestExtensionContext context) throws Exception {
-		Object testInstance = context.getTestInstance();
-		Method testMethod = context.getTestMethod().get();
+	public void beforeTestExecution(ExtensionContext context) throws Exception {
+		Object testInstance = context.getRequiredTestInstance();
+		Method testMethod = context.getRequiredTestMethod();
 		getTestContextManager(context).beforeTestExecution(testInstance, testMethod);
 	}
 
@@ -121,10 +121,10 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * Delegates to {@link TestContextManager#afterTestExecution}.
 	 */
 	@Override
-	public void afterTestExecution(TestExtensionContext context) throws Exception {
-		Object testInstance = context.getTestInstance();
-		Method testMethod = context.getTestMethod().get();
-		Throwable testException = context.getTestException().orElse(null);
+	public void afterTestExecution(ExtensionContext context) throws Exception {
+		Object testInstance = context.getRequiredTestInstance();
+		Method testMethod = context.getRequiredTestMethod();
+		Throwable testException = context.getExecutionException().orElse(null);
 		getTestContextManager(context).afterTestExecution(testInstance, testMethod, testException);
 	}
 
@@ -132,10 +132,10 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * Delegates to {@link TestContextManager#afterTestMethod}.
 	 */
 	@Override
-	public void afterEach(TestExtensionContext context) throws Exception {
-		Object testInstance = context.getTestInstance();
-		Method testMethod = context.getTestMethod().get();
-		Throwable testException = context.getTestException().orElse(null);
+	public void afterEach(ExtensionContext context) throws Exception {
+		Object testInstance = context.getRequiredTestInstance();
+		Method testMethod = context.getRequiredTestMethod();
+		Throwable testException = context.getExecutionException().orElse(null);
 		getTestContextManager(context).afterTestMethod(testInstance, testMethod, testException);
 	}
 
@@ -149,32 +149,34 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * that is annotated with {@code @Autowired}, Spring will assume the responsibility
 	 * for resolving all parameters in the constructor. Consequently, no other registered
 	 * {@link ParameterResolver} will be able to resolve parameters.
-	 * @see #resolve
+	 * @see #resolveParameter
 	 * @see ParameterAutowireUtils#isAutowirable
 	 */
 	@Override
-	public boolean supports(ParameterContext parameterContext, ExtensionContext extensionContext) {
+	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
 		Parameter parameter = parameterContext.getParameter();
+		int index = parameterContext.getIndex();
 		Executable executable = parameter.getDeclaringExecutable();
 		return (executable instanceof Constructor &&
 				AnnotatedElementUtils.hasAnnotation(executable, Autowired.class)) ||
-				ParameterAutowireUtils.isAutowirable(parameter);
+				ParameterAutowireUtils.isAutowirable(parameter, index);
 	}
 
 	/**
 	 * Resolve a value for the {@link Parameter} in the supplied {@link ParameterContext} by
 	 * retrieving the corresponding dependency from the test's {@link ApplicationContext}.
 	 * <p>Delegates to {@link ParameterAutowireUtils#resolveDependency}.
-	 * @see #supports
+	 * @see #supportsParameter
 	 * @see ParameterAutowireUtils#resolveDependency
 	 */
 	@Override
 	@Nullable
-	public Object resolve(ParameterContext parameterContext, ExtensionContext extensionContext) {
+	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
 		Parameter parameter = parameterContext.getParameter();
-		Class<?> testClass = extensionContext.getTestClass().get();
+		int index = parameterContext.getIndex();
+		Class<?> testClass = extensionContext.getRequiredTestClass();
 		ApplicationContext applicationContext = getApplicationContext(extensionContext);
-		return ParameterAutowireUtils.resolveDependency(parameter, testClass, applicationContext);
+		return ParameterAutowireUtils.resolveDependency(parameter, index, testClass, applicationContext);
 	}
 
 
@@ -195,9 +197,13 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 */
 	private static TestContextManager getTestContextManager(ExtensionContext context) {
 		Assert.notNull(context, "ExtensionContext must not be null");
-		Class<?> testClass = context.getTestClass().get();
-		Store store = context.getStore(NAMESPACE);
+		Class<?> testClass = context.getRequiredTestClass();
+		Store store = getStore(context);
 		return store.getOrComputeIfAbsent(testClass, TestContextManager::new, TestContextManager.class);
+	}
+
+	private static Store getStore(ExtensionContext context) {
+		return context.getRoot().getStore(NAMESPACE);
 	}
 
 }

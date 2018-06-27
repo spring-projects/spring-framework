@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -88,7 +88,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		super(scheme, fragment);
 
-			this.userInfo = userInfo;
+		this.userInfo = userInfo;
 		this.host = host;
 		this.port = port;
 		this.path = (path != null ? path : NULL_PATH_COMPONENT);
@@ -105,6 +105,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	// Component getters
 
 	@Override
+	@Nullable
 	public String getSchemeSpecificPart() {
 		return null;
 	}
@@ -134,6 +135,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 	@Override
+	@NonNull
 	public String getPath() {
 		return this.path.getPath();
 	}
@@ -144,12 +146,11 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 	@Override
+	@Nullable
 	public String getQuery() {
 		if (!this.queryParams.isEmpty()) {
 			StringBuilder queryBuilder = new StringBuilder();
-			for (Map.Entry<String, List<String>> entry : this.queryParams.entrySet()) {
-				String name = entry.getKey();
-				List<String> values = entry.getValue();
+			this.queryParams.forEach((name, values) -> {
 				if (CollectionUtils.isEmpty(values)) {
 					if (queryBuilder.length() != 0) {
 						queryBuilder.append('&');
@@ -162,14 +163,12 @@ final class HierarchicalUriComponents extends UriComponents {
 							queryBuilder.append('&');
 						}
 						queryBuilder.append(name);
-
 						if (value != null) {
-							queryBuilder.append('=');
-							queryBuilder.append(value.toString());
+							queryBuilder.append('=').append(value.toString());
 						}
 					}
 				}
-			}
+			});
 			return queryBuilder.toString();
 		}
 		else {
@@ -207,21 +206,21 @@ final class HierarchicalUriComponents extends UriComponents {
 		String hostTo = (this.host != null ? encodeUriComponent(this.host, charset, getHostType()) : null);
 		PathComponent pathTo = this.path.encode(charset);
 		MultiValueMap<String, String> paramsTo = encodeQueryParams(charset);
-		return new HierarchicalUriComponents(schemeTo, fragmentTo, userInfoTo, hostTo, this.port,
-				pathTo, paramsTo, true, false);
+		return new HierarchicalUriComponents(
+				schemeTo, fragmentTo, userInfoTo, hostTo, this.port, pathTo, paramsTo, true, false);
 	}
 
 	private MultiValueMap<String, String> encodeQueryParams(Charset charset) {
 		int size = this.queryParams.size();
 		MultiValueMap<String, String> result = new LinkedMultiValueMap<>(size);
-		for (Map.Entry<String, List<String>> entry : this.queryParams.entrySet()) {
-			String name = encodeUriComponent(entry.getKey(), charset, Type.QUERY_PARAM);
-			List<String> values = new ArrayList<>(entry.getValue().size());
-			for (String value : entry.getValue()) {
-				values.add(encodeUriComponent(value, charset, Type.QUERY_PARAM));
+		this.queryParams.forEach((key, values) -> {
+			String name = encodeUriComponent(key, charset, Type.QUERY_PARAM);
+			List<String> encodedValues = new ArrayList<>(values.size());
+			for (String value : values) {
+				encodedValues.add(encodeUriComponent(value, charset, Type.QUERY_PARAM));
 			}
-			result.put(name, values);
-		}
+			result.put(name, encodedValues);
+		});
 		return result;
 	}
 
@@ -296,12 +295,12 @@ final class HierarchicalUriComponents extends UriComponents {
 		verifyUriComponent(this.userInfo, Type.USER_INFO);
 		verifyUriComponent(this.host, getHostType());
 		this.path.verify();
-		for (Map.Entry<String, List<String>> entry : queryParams.entrySet()) {
-			verifyUriComponent(entry.getKey(), Type.QUERY_PARAM);
-			for (String value : entry.getValue()) {
+		this.queryParams.forEach((key, values) -> {
+			verifyUriComponent(key, Type.QUERY_PARAM);
+			for (String value : values) {
 				verifyUriComponent(value, Type.QUERY_PARAM);
 			}
-		}
+		});
 		verifyUriComponent(getFragment(), Type.FRAGMENT);
 	}
 
@@ -351,29 +350,25 @@ final class HierarchicalUriComponents extends UriComponents {
 		PathComponent pathTo = this.path.expand(uriVariables);
 		MultiValueMap<String, String> paramsTo = expandQueryParams(uriVariables);
 
-		return new HierarchicalUriComponents(schemeTo, fragmentTo, userInfoTo, hostTo, portTo,
-				pathTo, paramsTo, false, false);
+		return new HierarchicalUriComponents(
+				schemeTo, fragmentTo, userInfoTo, hostTo, portTo, pathTo, paramsTo, false, false);
 	}
 
 	private MultiValueMap<String, String> expandQueryParams(UriTemplateVariables variables) {
 		int size = this.queryParams.size();
 		MultiValueMap<String, String> result = new LinkedMultiValueMap<>(size);
-		variables = new QueryUriTemplateVariables(variables);
-		for (Map.Entry<String, List<String>> entry : this.queryParams.entrySet()) {
-			String name = expandUriComponent(entry.getKey(), variables);
-			List<String> values = new ArrayList<>(entry.getValue().size());
-			for (String value : entry.getValue()) {
-				values.add(expandUriComponent(value, variables));
+		UriTemplateVariables queryVariables = new QueryUriTemplateVariables(variables);
+		this.queryParams.forEach((key, values) -> {
+			String name = expandUriComponent(key, queryVariables);
+			List<String> expandedValues = new ArrayList<>(values.size());
+			for (String value : values) {
+				expandedValues.add(expandUriComponent(value, queryVariables));
 			}
-			result.put(name, values);
-		}
+			result.put(name, expandedValues);
+		});
 		return result;
 	}
 
-	/**
-	 * Normalize the path removing sequences like "path/..".
-	 * @see StringUtils#cleanPath(String)
-	 */
 	@Override
 	public UriComponents normalize() {
 		String normalizedPath = StringUtils.cleanPath(getPath());
@@ -384,28 +379,22 @@ final class HierarchicalUriComponents extends UriComponents {
 
 	// Other functionality
 
-	/**
-	 * Returns a URI String from this {@code UriComponents} instance.
-	 */
 	@Override
 	public String toUriString() {
 		StringBuilder uriBuilder = new StringBuilder();
 		if (getScheme() != null) {
-			uriBuilder.append(getScheme());
-			uriBuilder.append(':');
+			uriBuilder.append(getScheme()).append(':');
 		}
 		if (this.userInfo != null || this.host != null) {
 			uriBuilder.append("//");
 			if (this.userInfo != null) {
-				uriBuilder.append(this.userInfo);
-				uriBuilder.append('@');
+				uriBuilder.append(this.userInfo).append('@');
 			}
 			if (this.host != null) {
-				uriBuilder.append(host);
+				uriBuilder.append(this.host);
 			}
 			if (getPort() != -1) {
-				uriBuilder.append(':');
-				uriBuilder.append(port);
+				uriBuilder.append(':').append(this.port);
 			}
 		}
 		String path = getPath();
@@ -417,24 +406,19 @@ final class HierarchicalUriComponents extends UriComponents {
 		}
 		String query = getQuery();
 		if (query != null) {
-			uriBuilder.append('?');
-			uriBuilder.append(query);
+			uriBuilder.append('?').append(query);
 		}
 		if (getFragment() != null) {
-			uriBuilder.append('#');
-			uriBuilder.append(getFragment());
+			uriBuilder.append('#').append(getFragment());
 		}
 		return uriBuilder.toString();
 	}
 
-	/**
-	 * Returns a {@code URI} from this {@code UriComponents} instance.
-	 */
 	@Override
 	public URI toUri() {
 		try {
 			if (this.encoded) {
-				return new URI(toString());
+				return new URI(toUriString());
 			}
 			else {
 				String path = getPath();
@@ -444,8 +428,7 @@ final class HierarchicalUriComponents extends UriComponents {
 						path = PATH_DELIMITER + path;
 					}
 				}
-				return new URI(getScheme(), getUserInfo(), getHost(), getPort(), path, getQuery(),
-						getFragment());
+				return new URI(getScheme(), getUserInfo(), getHost(), getPort(), path, getQuery(), getFragment());
 			}
 		}
 		catch (URISyntaxException ex) {
@@ -698,7 +681,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public List<String> getPathSegments() {
-			String[] segments = StringUtils.tokenizeToStringArray(this.path, PATH_DELIMITER_STRING);
+			String[] segments = StringUtils.tokenizeToStringArray(getPath(), PATH_DELIMITER_STRING);
 			return Collections.unmodifiableList(Arrays.asList(segments));
 		}
 
@@ -710,7 +693,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public void verify() {
-			verifyUriComponent(this.path, Type.PATH);
+			verifyUriComponent(getPath(), Type.PATH);
 		}
 
 		@Override
@@ -799,7 +782,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
-			builder.pathSegment(getPathSegments().toArray(new String[getPathSegments().size()]));
+			builder.pathSegment(StringUtils.toStringArray(getPathSegments()));
 		}
 
 		@Override

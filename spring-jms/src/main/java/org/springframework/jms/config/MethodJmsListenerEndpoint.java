@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 	/**
 	 * Set the actual bean instance to invoke this endpoint method on.
 	 */
-	public void setBean(Object bean) {
+	public void setBean(@Nullable Object bean) {
 		this.bean = bean;
 	}
 
@@ -80,7 +80,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 	/**
 	 * Set the method to invoke for processing a message managed by this endpoint.
 	 */
-	public void setMethod(Method method) {
+	public void setMethod(@Nullable Method method) {
 		this.method = method;
 	}
 
@@ -95,7 +95,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 	 * (if annotated itself, that is, if not just annotated in an interface).
 	 * @since 4.2.3
 	 */
-	public void setMostSpecificMethod(Method mostSpecificMethod) {
+	public void setMostSpecificMethod(@Nullable Method mostSpecificMethod) {
 		this.mostSpecificMethod = mostSpecificMethod;
 	}
 
@@ -105,13 +105,14 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 			return this.mostSpecificMethod;
 		}
 		Method method = getMethod();
-		if (method != null && AopUtils.isAopProxy(this.bean)) {
-			Class<?> target = AopProxyUtils.ultimateTargetClass(this.bean);
-			return AopUtils.getMostSpecificMethod(method, target);
+		if (method != null) {
+			Object bean = getBean();
+			if (AopUtils.isAopProxy(bean)) {
+				Class<?> targetClass = AopProxyUtils.ultimateTargetClass(bean);
+				method = AopUtils.getMostSpecificMethod(method, targetClass);
+			}
 		}
-		else {
-			return method;
-		}
+		return method;
 	}
 
 	/**

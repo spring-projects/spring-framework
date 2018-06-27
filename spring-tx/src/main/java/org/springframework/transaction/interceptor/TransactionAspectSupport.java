@@ -148,7 +148,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	/**
 	 * Specify the name of the default transaction manager bean.
 	 */
-	public void setTransactionManagerBeanName(String transactionManagerBeanName) {
+	public void setTransactionManagerBeanName(@Nullable String transactionManagerBeanName) {
 		this.transactionManagerBeanName = transactionManagerBeanName;
 	}
 
@@ -167,7 +167,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * default transaction manager bean has not been specified.
 	 * @see #setTransactionManagerBeanName
 	 */
-	public void setTransactionManager(PlatformTransactionManager transactionManager) {
+	public void setTransactionManager(@Nullable PlatformTransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
 	}
 
@@ -218,7 +218,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * @see NameMatchTransactionAttributeSource
 	 * @see org.springframework.transaction.annotation.AnnotationTransactionAttributeSource
 	 */
-	public void setTransactionAttributeSource(TransactionAttributeSource transactionAttributeSource) {
+	public void setTransactionAttributeSource(@Nullable TransactionAttributeSource transactionAttributeSource) {
 		this.transactionAttributeSource = transactionAttributeSource;
 	}
 
@@ -234,7 +234,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * Set the BeanFactory to use for retrieving PlatformTransactionManager beans.
 	 */
 	@Override
-	public void setBeanFactory(BeanFactory beanFactory) {
+	public void setBeanFactory(@Nullable BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
@@ -306,6 +306,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		}
 
 		else {
+			final ThrowableHolder throwableHolder = new ThrowableHolder();
+
 			// It's a CallbackPreferringPlatformTransactionManager: pass a TransactionCallback in.
 			try {
 				Object result = ((CallbackPreferringPlatformTransactionManager) tm).execute(txAttr, status -> {
@@ -325,7 +327,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 						}
 						else {
 							// A normal return value: will lead to a commit.
-							return new ThrowableHolder(ex);
+							throwableHolder.throwable = ex;
+							return null;
 						}
 					}
 					finally {
@@ -333,16 +336,27 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 					}
 				});
 
-				// Check result: It might indicate a Throwable to rethrow.
-				if (result instanceof ThrowableHolder) {
-					throw ((ThrowableHolder) result).getThrowable();
+				// Check result state: It might indicate a Throwable to rethrow.
+				if (throwableHolder.throwable != null) {
+					throw throwableHolder.throwable;
 				}
-				else {
-					return result;
-				}
+				return result;
 			}
 			catch (ThrowableHolderException ex) {
 				throw ex.getCause();
+			}
+			catch (TransactionSystemException ex2) {
+				if (throwableHolder.throwable != null) {
+					logger.error("Application exception overridden by commit exception", throwableHolder.throwable);
+					ex2.initApplicationException(throwableHolder.throwable);
+				}
+				throw ex2;
+			}
+			catch (Throwable ex2) {
+				if (throwableHolder.throwable != null) {
+					logger.error("Application exception overridden by commit exception", throwableHolder.throwable);
+				}
+				throw ex2;
 			}
 		}
 	}
@@ -540,13 +554,9 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 					ex2.initApplicationException(ex);
 					throw ex2;
 				}
-				catch (RuntimeException ex2) {
+				catch (RuntimeException | Error ex2) {
 					logger.error("Application exception overridden by rollback exception", ex);
 					throw ex2;
-				}
-				catch (Error err) {
-					logger.error("Application exception overridden by rollback error", ex);
-					throw err;
 				}
 			}
 			else {
@@ -560,13 +570,9 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 					ex2.initApplicationException(ex);
 					throw ex2;
 				}
-				catch (RuntimeException ex2) {
+				catch (RuntimeException | Error ex2) {
 					logger.error("Application exception overridden by commit exception", ex);
 					throw ex2;
-				}
-				catch (Error err) {
-					logger.error("Application exception overridden by commit error", ex);
-					throw err;
 				}
 			}
 		}
@@ -679,20 +685,12 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 
 	/**
-	 * Internal holder class for a Throwable, used as a return value
-	 * from a TransactionCallback (to be subsequently unwrapped again).
+	 * Internal holder class for a Throwable in a callback transaction model.
 	 */
 	private static class ThrowableHolder {
 
-		private final Throwable throwable;
-
-		public ThrowableHolder(Throwable throwable) {
-			this.throwable = throwable;
-		}
-
-		public final Throwable getThrowable() {
-			return this.throwable;
-		}
+		@Nullable
+		public Throwable throwable;
 	}
 
 

@@ -17,51 +17,43 @@
 package org.springframework.web.reactive.function.client
 
 import org.reactivestreams.Publisher
-import org.springframework.http.ResponseEntity
+import org.springframework.core.ParameterizedTypeReference
+import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec
+import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
-
 /**
- * Extension for [WebClient.RequestBodySpec.body] providing a variant without explicit class
- * parameter thanks to Kotlin reified type parameters.
+ * Extension for [WebClient.RequestBodySpec.body] providing a `body<Foo>()` variant
+ * leveraging Kotlin reified type parameters. This extension is not subject to type
+ * erasure and retains actual generic type arguments.
  *
  * @author Sebastien Deleuze
  * @since 5.0
  */
 @Suppress("EXTENSION_SHADOWED_BY_MEMBER")
-inline fun <reified T : Any, S : Publisher<T>> WebClient.RequestBodySpec.body(publisher: S): WebClient.RequestHeadersSpec<*>
-        = body(publisher, T::class.java)
+inline fun <reified T : Any, S : Publisher<T>> RequestBodySpec.body(publisher: S): RequestHeadersSpec<*> =
+		body(publisher, object : ParameterizedTypeReference<T>() {})
 
 /**
- * Extension for [WebClient.ResponseSpec.bodyToMono] providing a `bodyToMono<Foo>()` variant.
+ * Extension for [WebClient.ResponseSpec.bodyToMono] providing a `bodyToMono<Foo>()` variant
+ * leveraging Kotlin reified type parameters. This extension is not subject to type
+ * erasure and retains actual generic type arguments.
  *
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Any> WebClient.ResponseSpec.bodyToMono(): Mono<T> = bodyToMono(T::class.java)
+inline fun <reified T : Any> WebClient.ResponseSpec.bodyToMono(): Mono<T> =
+		bodyToMono(object : ParameterizedTypeReference<T>() {})
 
 
 /**
- * Extension for [WebClient.ResponseSpec.bodyToFlux] providing a `bodyToFlux<Foo>()` variant.
+ * Extension for [WebClient.ResponseSpec.bodyToFlux] providing a `bodyToFlux<Foo>()` variant
+ * leveraging Kotlin reified type parameters. This extension is not subject to type
+ * erasure and retains actual generic type arguments.
  *
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Any> WebClient.ResponseSpec.bodyToFlux(): Flux<T> = bodyToFlux(T::class.java)
-
-/**
- * Extension for [WebClient.ResponseSpec.toEntity] providing a `bodyToEntity<Foo>()` variant.
- *
- * @author Sebastien Deleuze
- * @since 5.0
- */
-inline fun <reified T : Any> WebClient.ResponseSpec.toEntity(): Mono<ResponseEntity<T>> = toEntity(T::class.java)
-
-/**
- * Extension for [WebClient.ResponseSpec.toEntityList] providing a `bodyToEntityList<Foo>()` variant.
- *
- * @author Sebastien Deleuze
- * @since 5.0
- */
-inline fun <reified T : Any> WebClient.ResponseSpec.toEntityList(): Mono<ResponseEntity<List<T>>> = toEntityList(T::class.java)
+inline fun <reified T : Any> WebClient.ResponseSpec.bodyToFlux(): Flux<T> =
+		bodyToFlux(object : ParameterizedTypeReference<T>() {})

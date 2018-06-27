@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,15 @@ import org.springframework.util.StreamUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
- * {@link org.springframework.http.client.ClientHttpRequest} implementation that uses
- * standard Java facilities to execute streaming requests. Created via the {@link
- * org.springframework.http.client.SimpleClientHttpRequestFactory}.
+ * {@link org.springframework.http.client.ClientHttpRequest} implementation
+ * that uses standard Java facilities to execute streaming requests. Created
+ * via the {@link org.springframework.http.client.SimpleClientHttpRequestFactory}.
  *
  * @author Arjen Poutsma
  * @since 3.0
  * @see org.springframework.http.client.SimpleClientHttpRequestFactory#createRequest
+ * @see org.springframework.http.client.support.AsyncHttpAccessor
+ * @see org.springframework.web.client.AsyncRestTemplate
  * @deprecated as of Spring 5.0, with no direct replacement
  */
 @Deprecated
@@ -84,7 +86,7 @@ final class SimpleStreamingAsyncClientHttpRequest extends AbstractAsyncClientHtt
 	protected OutputStream getBodyInternal(HttpHeaders headers) throws IOException {
 		if (this.body == null) {
 			if (this.outputStreaming) {
-				int contentLength = (int) headers.getContentLength();
+				long contentLength = headers.getContentLength();
 				if (contentLength >= 0) {
 					this.connection.setFixedLengthStreamingMode(contentLength);
 				}

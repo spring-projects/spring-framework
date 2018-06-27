@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -233,12 +233,14 @@ public interface NamedParameterJdbcOperations {
 	 * @param sql SQL query to execute
 	 * @param paramSource container of arguments to bind to the query
 	 * @param rowMapper object that will map one object per row
-	 * @return the single mapped object
+	 * @return the single mapped object (may be {@code null} if the given
+	 * {@link RowMapper} returned {@code} null)
 	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
 	 * if the query does not return exactly one row, or does not return exactly
 	 * one column in that row
 	 * @throws org.springframework.dao.DataAccessException if the query fails
 	 */
+	@Nullable
 	<T> T queryForObject(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
 			throws DataAccessException;
 
@@ -250,12 +252,14 @@ public interface NamedParameterJdbcOperations {
 	 * @param paramMap map of parameters to bind to the query
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @param rowMapper object that will map one object per row
-	 * @return the single mapped object
+	 * @return the single mapped object (may be {@code null} if the given
+	 * {@link RowMapper} returned {@code} null)
 	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
 	 * if the query does not return exactly one row, or does not return exactly
 	 * one column in that row
 	 * @throws org.springframework.dao.DataAccessException if the query fails
 	 */
+	@Nullable
 	<T> T queryForObject(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper)
 			throws DataAccessException;
 

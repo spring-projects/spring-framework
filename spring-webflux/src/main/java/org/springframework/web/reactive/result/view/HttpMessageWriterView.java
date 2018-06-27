@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -42,6 +44,9 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  */
 public class HttpMessageWriterView implements View {
+
+	private static final Log logger = LogFactory.getLog(HttpMessageWriter.class);
+
 
 	private final HttpMessageWriter<?> writer;
 
@@ -113,11 +118,12 @@ public class HttpMessageWriterView implements View {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Mono<Void> render(@Nullable Map<String, ?> model, @Nullable MediaType contentType, ServerWebExchange exchange) {
+	public Mono<Void> render(@Nullable Map<String, ?> model, @Nullable MediaType contentType,
+			ServerWebExchange exchange) {
+
 		Object value = getObjectToRender(model);
 		return (value != null) ?
-				write(value, contentType, exchange) :
-				exchange.getResponse().setComplete();
+				write(value, contentType, exchange) : exchange.getResponse().setComplete();
 	}
 
 	@Nullable

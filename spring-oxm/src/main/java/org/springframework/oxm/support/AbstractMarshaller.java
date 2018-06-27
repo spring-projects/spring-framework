@@ -70,6 +70,9 @@ import org.springframework.util.xml.StaxUtils;
  */
 public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 
+	private static final EntityResolver NO_OP_ENTITY_RESOLVER =
+			(publicId, systemId) -> new InputSource(new StringReader(""));
+
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -603,13 +606,5 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	 */
 	protected abstract Object unmarshalReader(Reader reader)
 			throws XmlMappingException, IOException;
-
-
-	private static final EntityResolver NO_OP_ENTITY_RESOLVER = new EntityResolver() {
-		@Override
-		public InputSource resolveEntity(String publicId, String systemId) {
-			return new InputSource(new StringReader(""));
-		}
-	};
 
 }

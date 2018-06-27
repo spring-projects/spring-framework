@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -249,7 +249,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * Creates a JndiTemplate with the given environment settings.
 	 * @see #setJndiTemplate
 	 */
-	public void setJndiEnvironment(Properties jndiEnvironment) {
+	public void setJndiEnvironment(@Nullable Properties jndiEnvironment) {
 		this.jndiTemplate = new JndiTemplate(jndiEnvironment);
 	}
 
@@ -269,7 +269,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see #setUserTransactionName
 	 * @see #setAutodetectUserTransaction
 	 */
-	public void setUserTransaction(UserTransaction userTransaction) {
+	public void setUserTransaction(@Nullable UserTransaction userTransaction) {
 		this.userTransaction = userTransaction;
 	}
 
@@ -333,7 +333,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see #setTransactionManagerName
 	 * @see #setAutodetectTransactionManager
 	 */
-	public void setTransactionManager(TransactionManager transactionManager) {
+	public void setTransactionManager(@Nullable TransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
 	}
 
@@ -386,7 +386,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see #setTransactionSynchronizationRegistryName
 	 * @see #setAutodetectTransactionSynchronizationRegistry
 	 */
-	public void setTransactionSynchronizationRegistry(TransactionSynchronizationRegistry transactionSynchronizationRegistry) {
+	public void setTransactionSynchronizationRegistry(@Nullable TransactionSynchronizationRegistry transactionSynchronizationRegistry) {
 		this.transactionSynchronizationRegistry = transactionSynchronizationRegistry;
 	}
 
@@ -847,13 +847,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		try {
 			doJtaBegin(txObject, definition);
 		}
-		catch (NotSupportedException ex) {
-			// assume nested transaction not supported
-			throw new NestedTransactionNotSupportedException(
-					"JTA implementation does not support nested transactions", ex);
-		}
-		catch (UnsupportedOperationException ex) {
-			// assume nested transaction not supported
+		catch (NotSupportedException | UnsupportedOperationException ex) {
 			throw new NestedTransactionNotSupportedException(
 					"JTA implementation does not support nested transactions", ex);
 		}

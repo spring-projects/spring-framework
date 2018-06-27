@@ -104,7 +104,7 @@ public interface MessageSendingOperations<D> {
 	 * @param headers headers for the message to send
 	 * @param postProcessor the post processor to apply to the message
 	 */
-	void convertAndSend(D destination, Object payload, @Nullable Map<String, Object> headers, @Nullable MessagePostProcessor postProcessor)
-			throws MessagingException;
+	void convertAndSend(D destination, Object payload, @Nullable Map<String, Object> headers,
+			@Nullable MessagePostProcessor postProcessor) throws MessagingException;
 
 }

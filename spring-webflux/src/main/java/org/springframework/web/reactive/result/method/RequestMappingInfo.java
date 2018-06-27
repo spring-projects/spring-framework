@@ -16,6 +16,10 @@
 
 package org.springframework.web.reactive.result.method;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -29,6 +33,7 @@ import org.springframework.web.reactive.result.condition.RequestCondition;
 import org.springframework.web.reactive.result.condition.RequestConditionHolder;
 import org.springframework.web.reactive.result.condition.RequestMethodsRequestCondition;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
@@ -66,8 +71,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	private final RequestConditionHolder customConditionHolder;
 
 
-	public RequestMappingInfo(@Nullable String name, @Nullable PatternsRequestCondition patterns, @Nullable RequestMethodsRequestCondition methods,
-			@Nullable ParamsRequestCondition params, @Nullable HeadersRequestCondition headers, @Nullable ConsumesRequestCondition consumes,
+	public RequestMappingInfo(@Nullable String name, @Nullable PatternsRequestCondition patterns,
+			@Nullable RequestMethodsRequestCondition methods, @Nullable ParamsRequestCondition params,
+			@Nullable HeadersRequestCondition headers, @Nullable ConsumesRequestCondition consumes,
 			@Nullable ProducesRequestCondition produces, @Nullable RequestCondition<?> custom) {
 
 		this.name = (StringUtils.hasText(name) ? name : null);
@@ -83,8 +89,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	/**
 	 * Creates a new instance with the given request conditions.
 	 */
-	public RequestMappingInfo(@Nullable PatternsRequestCondition patterns, @Nullable RequestMethodsRequestCondition methods,
-			@Nullable ParamsRequestCondition params, @Nullable HeadersRequestCondition headers, @Nullable ConsumesRequestCondition consumes,
+	public RequestMappingInfo(@Nullable PatternsRequestCondition patterns,
+			@Nullable RequestMethodsRequestCondition methods, @Nullable ParamsRequestCondition params,
+			@Nullable HeadersRequestCondition headers, @Nullable ConsumesRequestCondition consumes,
 			@Nullable ProducesRequestCondition produces, @Nullable RequestCondition<?> custom) {
 
 		this(null, patterns, methods, params, headers, consumes, produces, custom);
@@ -184,6 +191,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 				methods, params, headers, consumes, produces, custom.getCondition());
 	}
 
+	@Nullable
 	private String combineNames(RequestMappingInfo other) {
 		if (this.name != null && other.name != null) {
 			String separator = "#";
@@ -205,6 +213,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * @return a new instance in case all conditions match; or {@code null} otherwise
 	 */
 	@Override
+	@Nullable
 	public RequestMappingInfo getMatchingCondition(ServerWebExchange exchange) {
 		RequestMethodsRequestCondition methods = this.methodsCondition.getMatchingCondition(exchange);
 		ParamsRequestCondition params = this.paramsCondition.getMatchingCondition(exchange);
@@ -478,8 +487,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		public RequestMappingInfo build() {
 			RequestedContentTypeResolver contentTypeResolver = this.options.getContentTypeResolver();
 
-			PatternsRequestCondition patternsCondition = new PatternsRequestCondition(
-					this.paths, this.options.getPatternParser());
+			PathPatternParser parser = this.options.getPatternParser() != null ?
+					this.options.getPatternParser() : new PathPatternParser();
+			PatternsRequestCondition patternsCondition = new PatternsRequestCondition(parse(this.paths, parser));
 
 			return new RequestMappingInfo(this.mappingName, patternsCondition,
 					new RequestMethodsRequestCondition(methods),
@@ -488,6 +498,18 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 					new ConsumesRequestCondition(this.consumes, this.headers),
 					new ProducesRequestCondition(this.produces, this.headers, contentTypeResolver),
 					this.customCondition);
+		}
+
+		private static List<PathPattern> parse(String[] paths, PathPatternParser parser) {
+			return Arrays
+					.stream(paths)
+					.map(path -> {
+						if (StringUtils.hasText(path) && !path.startsWith("/")) {
+							path = "/" + path;
+						}
+						return parser.parse(path);
+					})
+					.collect(Collectors.toList());
 		}
 	}
 

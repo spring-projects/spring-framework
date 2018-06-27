@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,8 @@ class WebSphereClassLoaderAdapter {
 		}
 
 		if (!wsCompoundClassLoaderClass.isInstance(classLoader)) {
-			throw new IllegalArgumentException("ClassLoader must be instance of " + COMPOUND_CLASS_LOADER_NAME);
+			throw new IllegalArgumentException(
+					"ClassLoader must be an instance of [" + COMPOUND_CLASS_LOADER_NAME + "]: " + classLoader);
 		}
 		this.classLoader = classLoader;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import org.springframework.lang.Nullable;
 public interface MessageCodeFormatter {
 
 	/**
-	 * Build and return a message code consisting of the given fields, usually delimited
-	 * by {@link DefaultMessageCodesResolver#CODE_SEPARATOR}.
+	 * Build and return a message code consisting of the given fields,
+	 * usually delimited by {@link DefaultMessageCodesResolver#CODE_SEPARATOR}.
 	 * @param errorCode e.g.: "typeMismatch"
 	 * @param objectName e.g.: "user"
 	 * @param field e.g. "age"
@@ -38,4 +38,5 @@ public interface MessageCodeFormatter {
 	 * @see DefaultMessageCodesResolver.Format
 	 */
 	String format(String errorCode, @Nullable String objectName, @Nullable String field);
+
 }

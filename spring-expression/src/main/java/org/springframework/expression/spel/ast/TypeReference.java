@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -35,15 +36,16 @@ public class TypeReference extends SpelNodeImpl {
 
 	private final int dimensions;
 
+	@Nullable
 	private transient Class<?> type;
 
 
 	public TypeReference(int pos, SpelNodeImpl qualifiedId) {
-		this(pos,qualifiedId,0);
+		this(pos, qualifiedId, 0);
 	}
 
 	public TypeReference(int pos, SpelNodeImpl qualifiedId, int dims) {
-		super(pos,qualifiedId);
+		super(pos, qualifiedId);
 		this.dimensions = dims;
 	}
 
@@ -99,34 +101,32 @@ public class TypeReference extends SpelNodeImpl {
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		// TODO Future optimization - if followed by a static method call, skip generating code here
+		Assert.state(this.type != null, "No type available");
 		if (this.type.isPrimitive()) {
-			if (this.type == Integer.TYPE) {
-				mv.visitFieldInsn(GETSTATIC, "java/lang/Integer", "TYPE", "Ljava/lang/Class;");
-			}
-			else if (this.type == Boolean.TYPE) {
+			if (this.type == Boolean.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Boolean", "TYPE", "Ljava/lang/Class;");
 			}
 			else if (this.type == Byte.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Byte", "TYPE", "Ljava/lang/Class;");
 			}
-			else if (this.type == Short.TYPE) {
-				mv.visitFieldInsn(GETSTATIC, "java/lang/Short", "TYPE", "Ljava/lang/Class;");
+			else if (this.type == Character.TYPE) {
+				mv.visitFieldInsn(GETSTATIC, "java/lang/Character", "TYPE", "Ljava/lang/Class;");
 			}
 			else if (this.type == Double.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Double", "TYPE", "Ljava/lang/Class;");
 			}
-			else if (this.type == Character.TYPE) {
-				mv.visitFieldInsn(GETSTATIC, "java/lang/Character", "TYPE", "Ljava/lang/Class;");
-			}
 			else if (this.type == Float.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Float", "TYPE", "Ljava/lang/Class;");
+			}
+			else if (this.type == Integer.TYPE) {
+				mv.visitFieldInsn(GETSTATIC, "java/lang/Integer", "TYPE", "Ljava/lang/Class;");
 			}
 			else if (this.type == Long.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Long", "TYPE", "Ljava/lang/Class;");
 			}
-			else if (this.type == Boolean.TYPE) {
-				mv.visitFieldInsn(GETSTATIC, "java/lang/Boolean", "TYPE", "Ljava/lang/Class;");
-	        }
+			else if (this.type == Short.TYPE) {
+				mv.visitFieldInsn(GETSTATIC, "java/lang/Short", "TYPE", "Ljava/lang/Class;");
+			}
 		}
 		else {
 			mv.visitLdcInsn(Type.getType(this.type));

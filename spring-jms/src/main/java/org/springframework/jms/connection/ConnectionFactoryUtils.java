@@ -139,10 +139,12 @@ public abstract class ConnectionFactoryUtils {
 
 		return doGetTransactionalSession(cf, new ResourceFactory() {
 			@Override
+			@Nullable
 			public Session getSession(JmsResourceHolder holder) {
 				return holder.getSession(Session.class, existingCon);
 			}
 			@Override
+			@Nullable
 			public Connection getConnection(JmsResourceHolder holder) {
 				return (existingCon != null ? existingCon : holder.getConnection());
 			}
@@ -182,10 +184,12 @@ public abstract class ConnectionFactoryUtils {
 
 		return (QueueSession) doGetTransactionalSession(cf, new ResourceFactory() {
 			@Override
+			@Nullable
 			public Session getSession(JmsResourceHolder holder) {
 				return holder.getSession(QueueSession.class, existingCon);
 			}
 			@Override
+			@Nullable
 			public Connection getConnection(JmsResourceHolder holder) {
 				return (existingCon != null ? existingCon : holder.getConnection(QueueConnection.class));
 			}
@@ -225,10 +229,12 @@ public abstract class ConnectionFactoryUtils {
 
 		return (TopicSession) doGetTransactionalSession(cf, new ResourceFactory() {
 			@Override
+			@Nullable
 			public Session getSession(JmsResourceHolder holder) {
 				return holder.getSession(TopicSession.class, existingCon);
 			}
 			@Override
+			@Nullable
 			public Connection getConnection(JmsResourceHolder holder) {
 				return (existingCon != null ? existingCon : holder.getConnection(TopicConnection.class));
 			}

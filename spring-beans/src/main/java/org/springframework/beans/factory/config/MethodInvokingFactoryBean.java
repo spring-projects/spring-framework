@@ -116,6 +116,7 @@ public class MethodInvokingFactoryBean extends MethodInvokingBean implements Fac
 	 * specified method on the fly.
 	 */
 	@Override
+	@Nullable
 	public Object getObject() throws Exception {
 		if (this.singleton) {
 			if (!this.initialized) {

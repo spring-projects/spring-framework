@@ -31,9 +31,9 @@ import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.CacheControl;
-import org.springframework.http.server.reactive.PathContainer;
+import org.springframework.http.server.PathContainer;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.resource.AppCacheManifestTransformer;
@@ -81,9 +81,9 @@ public class ResourceHandlerRegistryTests {
 
 	@Test
 	public void mapPathToLocation() throws Exception {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		exchange.getAttributes().put(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE,
-				PathContainer.parse("/testStylesheet.css", StandardCharsets.UTF_8));
+				PathContainer.parsePath("/testStylesheet.css"));
 
 		ResourceWebHandler handler = getHandler("/resources/**");
 		handler.handle(exchange).block(Duration.ofSeconds(5));

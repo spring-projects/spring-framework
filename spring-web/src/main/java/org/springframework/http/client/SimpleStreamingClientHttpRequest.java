@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ import org.springframework.util.StreamUtils;
  * @author Arjen Poutsma
  * @since 3.0
  * @see SimpleClientHttpRequestFactory#createRequest(java.net.URI, HttpMethod)
+ * @see org.springframework.http.client.support.HttpAccessor
+ * @see org.springframework.web.client.RestTemplate
  */
 final class SimpleStreamingClientHttpRequest extends AbstractClientHttpRequest {
 
@@ -73,7 +75,7 @@ final class SimpleStreamingClientHttpRequest extends AbstractClientHttpRequest {
 	protected OutputStream getBodyInternal(HttpHeaders headers) throws IOException {
 		if (this.body == null) {
 			if (this.outputStreaming) {
-				int contentLength = (int) headers.getContentLength();
+				long contentLength = headers.getContentLength();
 				if (contentLength >= 0) {
 					this.connection.setFixedLengthStreamingMode(contentLength);
 				}

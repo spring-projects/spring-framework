@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
@@ -65,9 +67,8 @@ import org.springframework.web.util.UrlPathHelper;
  * @see #setInterceptors
  * @see org.springframework.web.servlet.HandlerInterceptor
  */
-public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport implements HandlerMapping, Ordered {
-
-	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
+public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
+		implements HandlerMapping, Ordered, BeanNameAware {
 
 	@Nullable
 	private Object defaultHandler;
@@ -84,27 +85,18 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	private CorsProcessor corsProcessor = new DefaultCorsProcessor();
 
+	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
-	/**
-	 * Specify the order value for this HandlerMapping bean.
-	 * <p>Default value is {@code Integer.MAX_VALUE}, meaning that it's non-ordered.
-	 * @see org.springframework.core.Ordered#getOrder()
-	 */
-	public final void setOrder(int order) {
-	  this.order = order;
-	}
+	@Nullable
+	private String beanName;
 
-	@Override
-	public final int getOrder() {
-	  return this.order;
-	}
 
 	/**
 	 * Set the default handler for this handler mapping.
 	 * This handler will be returned if no specific mapping was found.
 	 * <p>Default is {@code null}, indicating no default handler.
 	 */
-	public void setDefaultHandler(Object defaultHandler) {
+	public void setDefaultHandler(@Nullable Object defaultHandler) {
 		this.defaultHandler = defaultHandler;
 	}
 
@@ -118,11 +110,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
-	 * Set if URL lookup should always use the full path within the current servlet
-	 * context. Else, the path within the current servlet mapping is used if applicable
-	 * (that is, in the case of a ".../*" servlet mapping in web.xml).
-	 * <p>Default is "false".
-	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
+	 * Shortcut to same property on underlying {@link #setUrlPathHelper UrlPathHelper}.
+	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath(boolean)
 	 */
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
 		this.urlPathHelper.setAlwaysUseFullPath(alwaysUseFullPath);
@@ -130,11 +119,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
-	 * Set if context path and request URI should be URL-decoded. Both are returned
-	 * <i>undecoded</i> by the Servlet API, in contrast to the servlet path.
-	 * <p>Uses either the request encoding or the default encoding according
-	 * to the Servlet spec (ISO-8859-1).
-	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode
+	 * Shortcut to same property on underlying {@link #setUrlPathHelper UrlPathHelper}.
+	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode(boolean)
 	 */
 	public void setUrlDecode(boolean urlDecode) {
 		this.urlPathHelper.setUrlDecode(urlDecode);
@@ -142,8 +128,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
-	 * Set if ";" (semicolon) content should be stripped from the request URI.
-	 * <p>The default value is {@code true}.
+	 * Shortcut to same property on underlying {@link #setUrlPathHelper UrlPathHelper}.
 	 * @see org.springframework.web.util.UrlPathHelper#setRemoveSemicolonContent(boolean)
 	 */
 	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
@@ -238,6 +223,29 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		return this.corsProcessor;
 	}
 
+	/**
+	 * Specify the order value for this HandlerMapping bean.
+	 * <p>The default value is {@code Ordered.LOWEST_PRECEDENCE}, meaning non-ordered.
+	 * @see org.springframework.core.Ordered#getOrder()
+	 */
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	@Override
+	public int getOrder() {
+		return this.order;
+	}
+
+	@Override
+	public void setBeanName(String name) {
+		this.beanName = name;
+	}
+
+	protected String formatMappingName() {
+		return this.beanName != null ? "'" + this.beanName + "'" : "<unknown>";
+	}
+
 
 	/**
 	 * Initializes the interceptors.
@@ -324,8 +332,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	@Nullable
 	protected final HandlerInterceptor[] getAdaptedInterceptors() {
-		int count = this.adaptedInterceptors.size();
-		return (count > 0 ? this.adaptedInterceptors.toArray(new HandlerInterceptor[count]) : null);
+		return (!this.adaptedInterceptors.isEmpty() ?
+				this.adaptedInterceptors.toArray(new HandlerInterceptor[0]) : null);
 	}
 
 	/**
@@ -334,14 +342,13 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	@Nullable
 	protected final MappedInterceptor[] getMappedInterceptors() {
-		List<MappedInterceptor> mappedInterceptors = new ArrayList<>();
+		List<MappedInterceptor> mappedInterceptors = new ArrayList<>(this.adaptedInterceptors.size());
 		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
 			if (interceptor instanceof MappedInterceptor) {
 				mappedInterceptors.add((MappedInterceptor) interceptor);
 			}
 		}
-		int count = mappedInterceptors.size();
-		return (count > 0 ? mappedInterceptors.toArray(new MappedInterceptor[count]) : null);
+		return (!mappedInterceptors.isEmpty() ? mappedInterceptors.toArray(new MappedInterceptor[0]) : null);
 	}
 
 
@@ -353,6 +360,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see #getHandlerInternal
 	 */
 	@Override
+	@Nullable
 	public final HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
 		Object handler = getHandlerInternal(request);
 		if (handler == null) {
@@ -368,12 +376,21 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		}
 
 		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
+
+		if (logger.isTraceEnabled()) {
+			logger.trace("Mapped to " + handler);
+		}
+		else if (logger.isDebugEnabled() && !request.getDispatcherType().equals(DispatcherType.ASYNC)) {
+			logger.debug("Mapped to " + executionChain.getHandler());
+		}
+
 		if (CorsUtils.isCorsRequest(request)) {
 			CorsConfiguration globalConfig = this.globalCorsConfigSource.getCorsConfiguration(request);
 			CorsConfiguration handlerConfig = getCorsConfiguration(handler, request);
 			CorsConfiguration config = (globalConfig != null ? globalConfig.combine(handlerConfig) : handlerConfig);
 			executionChain = getCorsHandlerExecutionChain(request, executionChain, config);
 		}
+
 		return executionChain;
 	}
 
@@ -495,6 +512,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		}
 
 		@Override
+		@Nullable
 		public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 			return this.config;
 		}
@@ -518,6 +536,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		}
 
 		@Override
+		@Nullable
 		public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 			return this.config;
 		}

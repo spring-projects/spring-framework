@@ -22,7 +22,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
-import org.springframework.util.Assert;
+import org.springframework.lang.Nullable;
 
 /**
  * A simple transaction-backed {@link Scope} implementation, delegating to
@@ -53,13 +53,13 @@ public class SimpleTransactionScope implements Scope {
 		Object scopedObject = scopedObjects.scopedInstances.get(name);
 		if (scopedObject == null) {
 			scopedObject = objectFactory.getObject();
-			Assert.state(scopedObject != null, "Scoped object resolved to null");
 			scopedObjects.scopedInstances.put(name, scopedObject);
 		}
 		return scopedObject;
 	}
 
 	@Override
+	@Nullable
 	public Object remove(String name) {
 		ScopedObjectsHolder scopedObjects = (ScopedObjectsHolder) TransactionSynchronizationManager.getResource(this);
 		if (scopedObjects != null) {
@@ -80,11 +80,13 @@ public class SimpleTransactionScope implements Scope {
 	}
 
 	@Override
+	@Nullable
 	public Object resolveContextualObject(String key) {
 		return null;
 	}
 
 	@Override
+	@Nullable
 	public String getConversationId() {
 		return TransactionSynchronizationManager.getCurrentTransactionName();
 	}

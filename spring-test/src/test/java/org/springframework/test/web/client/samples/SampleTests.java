@@ -15,18 +15,26 @@
  */
 package org.springframework.test.web.client.samples;
 
+import java.io.IOException;
+import java.util.Collections;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.client.RestTemplate;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.springframework.test.web.client.ExpectedCount.manyTimes;
 import static org.springframework.test.web.client.ExpectedCount.never;
 import static org.springframework.test.web.client.ExpectedCount.once;
@@ -55,7 +63,7 @@ public class SampleTests {
 	}
 
 	@Test
-	public void performGet() throws Exception {
+	public void performGet() {
 
 		String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
 
@@ -73,7 +81,7 @@ public class SampleTests {
 	}
 
 	@Test
-	public void performGetManyTimes() throws Exception {
+	public void performGetManyTimes() {
 
 		String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
 
@@ -95,7 +103,7 @@ public class SampleTests {
 	}
 
 	@Test
-	public void expectNever() throws Exception {
+	public void expectNever() {
 
 		String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
 
@@ -110,7 +118,7 @@ public class SampleTests {
 	}
 
 	@Test(expected = AssertionError.class)
-	public void expectNeverViolated() throws Exception {
+	public void expectNeverViolated() {
 
 		String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
 
@@ -124,7 +132,7 @@ public class SampleTests {
 	}
 
 	@Test
-	public void performGetWithResponseBodyFromFile() throws Exception {
+	public void performGetWithResponseBodyFromFile() {
 
 		Resource responseBody = new ClassPathResource("ludwig.json", this.getClass());
 
@@ -170,4 +178,48 @@ public class SampleTests {
 			assertTrue(error.getMessage(), error.getMessage().contains("2 unsatisfied expectation(s)"));
 		}
 	}
+
+	@Test // SPR-14694
+	public void repeatedAccessToResponseViaResource() {
+
+		Resource resource = new ClassPathResource("ludwig.json", this.getClass());
+
+		RestTemplate restTemplate = new RestTemplate();
+		restTemplate.setInterceptors(Collections.singletonList(new ContentInterceptor(resource)));
+
+		MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate)
+				.ignoreExpectOrder(true)
+				.bufferContent()  // enable repeated reads of response body
+				.build();
+
+		mockServer.expect(requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
+				.andRespond(withSuccess(resource, MediaType.APPLICATION_JSON));
+
+		restTemplate.getForObject("/composers/{id}", Person.class, 42);
+
+		mockServer.verify();
+	}
+
+
+	private static class ContentInterceptor implements ClientHttpRequestInterceptor {
+
+		private final Resource resource;
+
+
+		private ContentInterceptor(Resource resource) {
+			this.resource = resource;
+		}
+
+		@Override
+		public ClientHttpResponse intercept(HttpRequest request, byte[] body,
+				ClientHttpRequestExecution execution) throws IOException {
+
+			ClientHttpResponse response = execution.execute(request, body);
+			byte[] expected = FileCopyUtils.copyToByteArray(this.resource.getInputStream());
+			byte[] actual = FileCopyUtils.copyToByteArray(response.getBody());
+			assertEquals(new String(expected), new String(actual));
+			return response;
+		}
+	}
+
 }

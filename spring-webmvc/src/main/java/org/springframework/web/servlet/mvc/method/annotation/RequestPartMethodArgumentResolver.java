@@ -108,6 +108,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 	}
 
 	@Override
+	@Nullable
 	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
 			NativeWebRequest request, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 

@@ -1,5 +1,6 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+/*
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,9 +72,7 @@ public class HandlerMethodReturnValueHandlerComposite implements AsyncHandlerMet
 			@Nullable List<? extends HandlerMethodReturnValueHandler> handlers) {
 
 		if (handlers != null) {
-			for (HandlerMethodReturnValueHandler handler : handlers) {
-				this.returnValueHandlers.add(handler);
-			}
+			this.returnValueHandlers.addAll(handlers);
 		}
 		return this;
 	}
@@ -83,9 +82,11 @@ public class HandlerMethodReturnValueHandlerComposite implements AsyncHandlerMet
 		return getReturnValueHandler(returnType) != null;
 	}
 
+	@SuppressWarnings("ForLoopReplaceableByForEach")
 	@Nullable
 	private HandlerMethodReturnValueHandler getReturnValueHandler(MethodParameter returnType) {
-		for (HandlerMethodReturnValueHandler handler : this.returnValueHandlers) {
+		for (int i = 0; i < this.returnValueHandlers.size(); i++) {
+			HandlerMethodReturnValueHandler handler = this.returnValueHandlers.get(i);
 			if (handler.supportsReturnType(returnType)) {
 				return handler;
 			}
@@ -115,6 +116,7 @@ public class HandlerMethodReturnValueHandlerComposite implements AsyncHandlerMet
 	}
 
 	@Override
+	@Nullable
 	public ListenableFuture<?> toListenableFuture(Object returnValue, MethodParameter returnType) {
 		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
 		Assert.state(handler instanceof AsyncHandlerMethodReturnValueHandler,

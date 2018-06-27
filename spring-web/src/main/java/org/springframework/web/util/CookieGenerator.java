@@ -50,12 +50,15 @@ public class CookieGenerator {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private String cookieName;
 
+	@Nullable
 	private String cookieDomain;
 
 	private String cookiePath = DEFAULT_COOKIE_PATH;
 
+	@Nullable 
 	private Integer cookieMaxAge;
 
 	private boolean cookieSecure = false;
@@ -67,13 +70,14 @@ public class CookieGenerator {
 	 * Use the given name for cookies created by this generator.
 	 * @see javax.servlet.http.Cookie#getName()
 	 */
-	public void setCookieName(String cookieName) {
+	public void setCookieName(@Nullable String cookieName) {
 		this.cookieName = cookieName;
 	}
 
 	/**
 	 * Return the given name for cookies created by this generator.
 	 */
+	@Nullable
 	public String getCookieName() {
 		return this.cookieName;
 	}
@@ -83,7 +87,7 @@ public class CookieGenerator {
 	 * The cookie is only visible to servers in this domain.
 	 * @see javax.servlet.http.Cookie#setDomain
 	 */
-	public void setCookieDomain(String cookieDomain) {
+	public void setCookieDomain(@Nullable String cookieDomain) {
 		this.cookieDomain = cookieDomain;
 	}
 
@@ -118,7 +122,7 @@ public class CookieGenerator {
 	 * default.
 	 * @see javax.servlet.http.Cookie#setMaxAge
 	 */
-	public void setCookieMaxAge(Integer cookieMaxAge) {
+	public void setCookieMaxAge(@Nullable Integer cookieMaxAge) {
 		this.cookieMaxAge = cookieMaxAge;
 	}
 
@@ -191,8 +195,8 @@ public class CookieGenerator {
 			cookie.setHttpOnly(true);
 		}
 		response.addCookie(cookie);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Added cookie with name [" + getCookieName() + "] and value [" + cookieValue + "]");
+		if (logger.isTraceEnabled()) {
+			logger.trace("Added cookie [" + getCookieName() + "=" + cookieValue + "]");
 		}
 	}
 
@@ -216,8 +220,8 @@ public class CookieGenerator {
 			cookie.setHttpOnly(true);
 		}
 		response.addCookie(cookie);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Removed cookie with name [" + getCookieName() + "]");
+		if (logger.isTraceEnabled()) {
+			logger.trace("Removed cookie '" + getCookieName() + "'");
 		}
 	}
 

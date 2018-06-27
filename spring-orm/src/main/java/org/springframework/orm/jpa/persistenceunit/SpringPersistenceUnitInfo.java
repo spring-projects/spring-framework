@@ -69,6 +69,7 @@ class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 	 * if specified.
 	 */
 	@Override
+	@Nullable
 	public ClassLoader getClassLoader() {
 		return this.classLoader;
 	}

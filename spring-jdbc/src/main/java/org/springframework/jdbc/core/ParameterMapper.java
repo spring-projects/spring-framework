@@ -20,8 +20,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
-
 /**
  * Implement this interface when parameters need to be customized based
  * on the connection. We might need to do this to make use of proprietary
@@ -45,7 +43,6 @@ public interface ParameterMapper {
 	 * parameter values (that is, there's no need to catch SQLException)
 	 * @return Map of input parameters, keyed by name (never {@code null})
 	 */
-	@Nullable
 	Map<String, ?> createMap(Connection con) throws SQLException;
 
 }

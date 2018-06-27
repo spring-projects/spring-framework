@@ -54,7 +54,7 @@ public class RedirectViewControllerRegistration {
 	 * will select {@code HttpStatus.MOVED_TEMPORARILY (302)} by default.
 	 */
 	public RedirectViewControllerRegistration setStatusCode(HttpStatus statusCode) {
-		Assert.isTrue(statusCode.is3xxRedirection(), "Not a redirect status code.");
+		Assert.isTrue(statusCode.is3xxRedirection(), "Not a redirect status code");
 		this.redirectView.setStatusCode(statusCode);
 		return this;
 	}

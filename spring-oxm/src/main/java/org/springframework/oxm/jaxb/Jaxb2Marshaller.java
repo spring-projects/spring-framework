@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -210,8 +210,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 * <p>Setting either this property, {@link #setClassesToBeBound "classesToBeBound"}
 	 * or {@link #setPackagesToScan "packagesToScan"} is required.
 	 */
-	public void setContextPath(String contextPath) {
-		Assert.hasText(contextPath, "'contextPath' must not be null");
+	public void setContextPath(@Nullable String contextPath) {
 		this.contextPath = contextPath;
 	}
 
@@ -228,8 +227,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 * <p>Setting either this property, {@link #setContextPath "contextPath"}
 	 * or {@link #setPackagesToScan "packagesToScan"} is required.
 	 */
-	public void setClassesToBeBound(Class<?>... classesToBeBound) {
-		Assert.notEmpty(classesToBeBound, "'classesToBeBound' must not be empty");
+	public void setClassesToBeBound(@Nullable Class<?>... classesToBeBound) {
 		this.classesToBeBound = classesToBeBound;
 	}
 
@@ -248,7 +246,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 * <p>Setting either this property, {@link #setContextPath "contextPath"}
 	 * or {@link #setClassesToBeBound "classesToBeBound"} is required.
 	 */
-	public void setPackagesToScan(String... packagesToScan) {
+	public void setPackagesToScan(@Nullable String... packagesToScan) {
 		this.packagesToScan = packagesToScan;
 	}
 
@@ -492,7 +490,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 			if (context == null) {
 				try {
 					if (StringUtils.hasLength(this.contextPath)) {
-						context = createJaxbContextFromContextPath();
+						context = createJaxbContextFromContextPath(this.contextPath);
 					}
 					else if (!ObjectUtils.isEmpty(this.classesToBeBound)) {
 						context = createJaxbContextFromClasses(this.classesToBeBound);
@@ -513,26 +511,26 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		}
 	}
 
-	private JAXBContext createJaxbContextFromContextPath() throws JAXBException {
+	private JAXBContext createJaxbContextFromContextPath(String contextPath) throws JAXBException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Creating JAXBContext with context path [" + this.contextPath + "]");
 		}
 		if (this.jaxbContextProperties != null) {
 			if (this.beanClassLoader != null) {
-				return JAXBContext.newInstance(this.contextPath, this.beanClassLoader, this.jaxbContextProperties);
+				return JAXBContext.newInstance(contextPath, this.beanClassLoader, this.jaxbContextProperties);
 			}
 			else {
 				// analogous to the JAXBContext.newInstance(String) implementation
-				return JAXBContext.newInstance(this.contextPath, Thread.currentThread().getContextClassLoader(),
+				return JAXBContext.newInstance(contextPath, Thread.currentThread().getContextClassLoader(),
 						this.jaxbContextProperties);
 			}
 		}
 		else {
 			if (this.beanClassLoader != null) {
-				return JAXBContext.newInstance(this.contextPath, this.beanClassLoader);
+				return JAXBContext.newInstance(contextPath, this.beanClassLoader);
 			}
 			else {
-				return JAXBContext.newInstance(this.contextPath);
+				return JAXBContext.newInstance(contextPath);
 			}
 		}
 	}
@@ -581,9 +579,9 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		XMLReader xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
 		xmlReader.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
 		for (int i = 0; i < resources.length; i++) {
-			Assert.notNull(resources[i], "Resource is null");
-			Assert.isTrue(resources[i].exists(), "Resource " + resources[i] + " does not exist");
-			InputSource inputSource = SaxResourceUtils.createInputSource(resources[i]);
+			Resource resource = resources[i];
+			Assert.isTrue(resource != null && resource.exists(), () -> "Resource does not exist: " + resource);
+			InputSource inputSource = SaxResourceUtils.createInputSource(resource);
 			schemaSources[i] = new SAXSource(xmlReader, inputSource);
 		}
 		SchemaFactory schemaFactory = SchemaFactory.newInstance(schemaLanguage);
@@ -596,8 +594,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 
 	@Override
 	public boolean supports(Class<?> clazz) {
-		return ((this.supportJaxbElementClass && JAXBElement.class.isAssignableFrom(clazz)) ||
-				supportsInternal(clazz, this.checkForXmlRootElement));
+		return (this.supportJaxbElementClass && JAXBElement.class.isAssignableFrom(clazz)) ||
+				supportsInternal(clazz, this.checkForXmlRootElement);
 	}
 
 	@Override
@@ -609,7 +607,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 				Type typeArgument = parameterizedType.getActualTypeArguments()[0];
 				if (typeArgument instanceof Class) {
 					Class<?> classArgument = (Class<?>) typeArgument;
-					return (((classArgument.isArray() && Byte.TYPE == classArgument.getComponentType())) ||
+					return ((classArgument.isArray() && Byte.TYPE == classArgument.getComponentType()) ||
 							isPrimitiveWrapper(classArgument) || isStandardClass(classArgument) ||
 							supportsInternal(classArgument, false));
 				}
@@ -1061,12 +1059,12 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		}
 
 		@Override
-		public InputStream getInputStream() throws IOException {
+		public InputStream getInputStream() {
 			return new ByteArrayInputStream(this.data, this.offset, this.length);
 		}
 
 		@Override
-		public OutputStream getOutputStream() throws IOException {
+		public OutputStream getOutputStream() {
 			throw new UnsupportedOperationException();
 		}
 
@@ -1082,11 +1080,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	}
 
 
-	private static final EntityResolver NO_OP_ENTITY_RESOLVER = new EntityResolver() {
-		@Override
-		public InputSource resolveEntity(String publicId, String systemId) {
-			return new InputSource(new StringReader(""));
-		}
-	};
+	private static final EntityResolver NO_OP_ENTITY_RESOLVER =
+			(publicId, systemId) -> new InputSource(new StringReader(""));
 
 }

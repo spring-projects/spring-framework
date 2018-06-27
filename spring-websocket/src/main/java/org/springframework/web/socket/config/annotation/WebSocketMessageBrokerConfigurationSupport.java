@@ -56,8 +56,8 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 
 	@Override
 	protected SimpAnnotationMethodMessageHandler createAnnotationMethodMessageHandler() {
-		return new WebSocketAnnotationMethodMessageHandler(clientInboundChannel(),
-				clientOutboundChannel(), brokerMessagingTemplate());
+		return new WebSocketAnnotationMethodMessageHandler(
+				clientInboundChannel(), clientOutboundChannel(), brokerMessagingTemplate());
 	}
 
 	@Override
@@ -68,8 +68,8 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	@Bean
 	public HandlerMapping stompWebSocketHandlerMapping() {
 		WebSocketHandler handler = decorateWebSocketHandler(subProtocolWebSocketHandler());
-		WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(handler,
-				getTransportRegistration(), messageBrokerTaskScheduler());
+		WebMvcStompEndpointRegistry registry = new WebMvcStompEndpointRegistry(
+				handler, getTransportRegistration(), messageBrokerTaskScheduler());
 		ApplicationContext applicationContext = getApplicationContext();
 		if (applicationContext != null) {
 			registry.setApplicationContext(applicationContext);

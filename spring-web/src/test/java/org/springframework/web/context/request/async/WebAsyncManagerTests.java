@@ -66,7 +66,7 @@ public class WebAsyncManagerTests {
 			fail("Expected exception");
 		}
 		catch (IllegalStateException ex) {
-			assertEquals(ex.getMessage(), "AsyncWebRequest must not be null");
+			assertEquals("AsyncWebRequest must not be null", ex.getMessage());
 		}
 
 		try {
@@ -74,7 +74,7 @@ public class WebAsyncManagerTests {
 			fail("Expected exception");
 		}
 		catch (IllegalStateException ex) {
-			assertEquals(ex.getMessage(), "AsyncWebRequest must not be null");
+			assertEquals("AsyncWebRequest must not be null", ex.getMessage());
 		}
 	}
 
@@ -256,7 +256,7 @@ public class WebAsyncManagerTests {
 			fail("Expected exception");
 		}
 		catch (IllegalArgumentException ex) {
-			assertEquals(ex.getMessage(), "Callable must not be null");
+			assertEquals("Callable must not be null", ex.getMessage());
 		}
 	}
 
@@ -357,7 +357,7 @@ public class WebAsyncManagerTests {
 			fail("Expected exception");
 		}
 		catch (IllegalArgumentException ex) {
-			assertEquals(ex.getMessage(), "DeferredResult must not be null");
+			assertEquals("DeferredResult must not be null", ex.getMessage());
 		}
 	}
 

@@ -50,6 +50,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	/** Dummy marker object for unresolved views in the cache Maps */
 	private static final View UNRESOLVED_VIEW = new View() {
 		@Override
+		@Nullable
 		public String getContentType() {
 			return null;
 		}
@@ -143,6 +144,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 
 
 	@Override
+	@Nullable
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
 		if (!isCache()) {
 			return createView(viewName, locale);
@@ -162,15 +164,21 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 						if (view != null) {
 							this.viewAccessCache.put(cacheKey, view);
 							this.viewCreationCache.put(cacheKey, view);
-							if (logger.isTraceEnabled()) {
-								logger.trace("Cached view [" + cacheKey + "]");
-							}
 						}
 					}
 				}
 			}
+			else {
+				if (logger.isTraceEnabled()) {
+					logger.trace(formatKey(cacheKey) + "served from cache");
+				}
+			}
 			return (view != UNRESOLVED_VIEW ? view : null);
 		}
+	}
+
+	private static String formatKey(Object cacheKey) {
+		return "View with key [" + cacheKey + "] ";
 	}
 
 	/**
@@ -195,7 +203,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	 */
 	public void removeFromCache(String viewName, Locale locale) {
 		if (!isCache()) {
-			logger.warn("View caching is SWITCHED OFF -- removal not necessary");
+			logger.warn("Caching is OFF (removal not necessary)");
 		}
 		else {
 			Object cacheKey = getCacheKey(viewName, locale);
@@ -206,12 +214,8 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 			}
 			if (logger.isDebugEnabled()) {
 				// Some debug output might be useful...
-				if (cachedView == null) {
-					logger.debug("No cached instance for view '" + cacheKey + "' was found");
-				}
-				else {
-					logger.debug("Cache for view " + cacheKey + " has been cleared");
-				}
+				logger.debug(formatKey(cacheKey) +
+						(cachedView != null ? "cleared from cache" : "not found in the cache"));
 			}
 		}
 	}
@@ -221,7 +225,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	 * Subsequent resolve calls will lead to recreation of demanded view objects.
 	 */
 	public void clearCache() {
-		logger.debug("Clearing entire view cache");
+		logger.debug("Clearing all views from the cache");
 		synchronized (this.viewCreationCache) {
 			this.viewAccessCache.clear();
 			this.viewCreationCache.clear();

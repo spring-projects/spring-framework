@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.BooleanTypedValue;
-
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * The operator 'instanceof' checks if an object is of the class specified in the right
@@ -36,8 +37,10 @@ import org.springframework.expression.spel.support.BooleanTypedValue;
  */
 public class OperatorInstanceof extends Operator {
 
+	@Nullable
 	private Class<?> type;
 	
+
 	public OperatorInstanceof(int pos, SpelNodeImpl... operands) {
 		super("instanceof", pos, operands);
 	}
@@ -47,8 +50,8 @@ public class OperatorInstanceof extends Operator {
 	 * Compare the left operand to see it is an instance of the type specified as the
 	 * right operand. The right operand must be a class.
 	 * @param state the expression state
-	 * @return true if the left operand is an instanceof of the right operand, otherwise
-	 *         false
+	 * @return {@code true} if the left operand is an instanceof of the right operand,
+	 * otherwise {@code false}
 	 * @throws EvaluationException if there is a problem evaluating the expression
 	 */
 	@Override
@@ -58,7 +61,7 @@ public class OperatorInstanceof extends Operator {
 		TypedValue right = rightOperand.getValueInternal(state);
 		Object leftValue = left.getValue();
 		Object rightValue = right.getValue();
-		BooleanTypedValue result = null;
+		BooleanTypedValue result;
 		if (rightValue == null || !(rightValue instanceof Class)) {
 			throw new SpelEvaluationException(getRightOperand().getStartPosition(),
 					SpelMessage.INSTANCEOF_OPERATOR_NEEDS_CLASS_OPERAND,
@@ -89,6 +92,7 @@ public class OperatorInstanceof extends Operator {
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		getLeftOperand().generateCode(mv, cf);
 		CodeFlow.insertBoxIfNecessary(mv, cf.lastDescriptor());
+		Assert.state(this.type != null, "No type available");
 		if (this.type.isPrimitive()) {
 			// always false - but left operand code always driven
 			// in case it had side effects
@@ -96,7 +100,7 @@ public class OperatorInstanceof extends Operator {
 			mv.visitInsn(ICONST_0); // value of false
 		} 
 		else {
-			mv.visitTypeInsn(INSTANCEOF,Type.getInternalName(this.type));
+			mv.visitTypeInsn(INSTANCEOF, Type.getInternalName(this.type));
 		}
 		cf.pushDescriptor(this.exitTypeDescriptor);
 	}

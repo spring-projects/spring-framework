@@ -239,7 +239,7 @@ public class ModelResultMatchers {
 		ModelAndView mav = mvcResult.getModelAndView();
 		if (mav == null) {
 			fail("No ModelAndView found");
-		};
+		}
 		return mav;
 	}
 

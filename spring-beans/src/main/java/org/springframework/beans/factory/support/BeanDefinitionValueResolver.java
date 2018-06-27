@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -205,6 +205,9 @@ class BeanDefinitionValueResolver {
 						"Error converting typed String value for " + argName, ex);
 			}
 		}
+		else if (value instanceof NullBean) {
+			return null;
+		}
 		else {
 			return evaluate(value);
 		}
@@ -309,12 +312,13 @@ class BeanDefinitionValueResolver {
 			Object innerBean = this.beanFactory.createBean(actualInnerBeanName, mbd, null);
 			if (innerBean instanceof FactoryBean) {
 				boolean synthetic = mbd.isSynthetic();
-				return this.beanFactory.getObjectFromFactoryBean(
+				innerBean = this.beanFactory.getObjectFromFactoryBean(
 						(FactoryBean<?>) innerBean, actualInnerBeanName, !synthetic);
 			}
-			else {
-				return innerBean;
+			if (innerBean instanceof NullBean) {
+				innerBean = null;
 			}
+			return innerBean;
 		}
 		catch (BeansException ex) {
 			throw new BeanCreationException(
@@ -344,8 +348,10 @@ class BeanDefinitionValueResolver {
 	/**
 	 * Resolve a reference to another bean in the factory.
 	 */
+	@Nullable
 	private Object resolveReference(Object argName, RuntimeBeanReference ref) {
 		try {
+			Object bean;
 			String refName = ref.getBeanName();
 			refName = String.valueOf(doEvaluate(refName));
 			if (ref.isToParent()) {
@@ -355,13 +361,16 @@ class BeanDefinitionValueResolver {
 							"Can't resolve reference to bean '" + refName +
 							"' in parent factory: no parent factory available");
 				}
-				return this.beanFactory.getParentBeanFactory().getBean(refName);
+				bean = this.beanFactory.getParentBeanFactory().getBean(refName);
 			}
 			else {
-				Object bean = this.beanFactory.getBean(refName);
+				bean = this.beanFactory.getBean(refName);
 				this.beanFactory.registerDependentBean(refName, this.beanName);
-				return bean;
 			}
+			if (bean instanceof NullBean) {
+				bean = null;
+			}
+			return bean;
 		}
 		catch (BeansException ex) {
 			throw new BeanCreationException(
@@ -412,12 +421,11 @@ class BeanDefinitionValueResolver {
 	 */
 	private Map<?, ?> resolveManagedMap(Object argName, Map<?, ?> mm) {
 		Map<Object, Object> resolved = new LinkedHashMap<>(mm.size());
-		for (Map.Entry<?, ?> entry : mm.entrySet()) {
-			Object resolvedKey = resolveValueIfNecessary(argName, entry.getKey());
-			Object resolvedValue = resolveValueIfNecessary(
-					new KeyedArgName(argName, entry.getKey()), entry.getValue());
+		mm.forEach((key, value) -> {
+			Object resolvedKey = resolveValueIfNecessary(argName, key);
+			Object resolvedValue = resolveValueIfNecessary(new KeyedArgName(argName, key), value);
 			resolved.put(resolvedKey, resolvedValue);
-		}
+		});
 		return resolved;
 	}
 

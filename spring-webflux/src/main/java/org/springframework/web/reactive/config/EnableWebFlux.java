@@ -25,8 +25,11 @@ import java.lang.annotation.Target;
 import org.springframework.context.annotation.Import;
 
 /**
- * Adding this annotation to an {@code @Configuration} class imports the Spring Web
- * Reactive configuration from {@link WebFluxConfigurationSupport}, e.g.:
+ * Adding this annotation to an {@code @Configuration} class imports the Spring
+ * WebFlux configuration from {@link WebFluxConfigurationSupport} that enables
+ * use of annotated controllers and functional endpoints.
+ *
+ * <p>For example:
  *
  * <pre class="code">
  * &#064;Configuration
@@ -36,8 +39,8 @@ import org.springframework.context.annotation.Import;
  * }
  * </pre>
  *
- * <p>To customize the imported configuration implement
- * {@link WebFluxConfigurer} and override individual methods as shown below:
+ * <p>To customize the imported configuration, implement
+ * {@link WebFluxConfigurer} and one or more of its methods:
  *
  * <pre class="code">
  * &#064;Configuration
@@ -46,33 +49,32 @@ import org.springframework.context.annotation.Import;
  * public class MyConfiguration implements WebFluxConfigurer {
  *
  * 	   &#064;Override
- * 	   public void addFormatters(FormatterRegistry formatterRegistry) {
- *         formatterRegistry.addConverter(new MyConverter());
- * 	   }
- *
- * 	   &#064;Override
  * 	   public void configureMessageWriters(List&lt;HttpMessageWriter&lt;?&gt&gt messageWriters) {
  *         messageWriters.add(new MyHttpMessageWriter());
  * 	   }
+ *
+ * 	   // ...
  * }
  * </pre>
  *
- * <p><strong>Note:</strong> only one {@code @Configuration} class may have the
- * {@code @EnableWebFlux} annotation to import the Spring WebFlux configuration.
- * There can however be multiple {@code @Configuration} classes implementing
- * {@code WebFluxConfigurer} in order to customize the provided configuration.
+ * <p>Only one {@code @Configuration} class should have the {@code @EnableWebFlux}
+ * annotation in order to import the Spring WebFlux configuration. There can
+ * however be multiple {@code @Configuration} classes that implement
+ * {@code WebFluxConfigurer} that customize the provided configuration.
  *
- * <p>If {@link WebFluxConfigurer} does not expose some more advanced setting
- * that needs to be configured consider removing the {@code @EnableWebFlux}
- * annotation and extending directly from {@link WebFluxConfigurationSupport}
- * or {@link DelegatingWebFluxConfiguration} if you still want to allow
- * {@link WebFluxConfigurer} instances to customize the configuration.
+ * <p>If {@code WebFluxConfigurer} does not expose some setting that needs to be
+ * configured, consider switching to an advanced mode by removing the
+ * {@code @EnableWebFlux} annotation and extending directly from
+ * {@link WebFluxConfigurationSupport} or {@link DelegatingWebFluxConfiguration} --
+ * the latter allows detecting and delegating to one or more
+ * {@code WebFluxConfigurer} configuration classes.
  *
  * @author Brian Clozel
  * @author Rossen Stoyanchev
  * @since 5.0
  * @see WebFluxConfigurer
  * @see WebFluxConfigurationSupport
+ * @see DelegatingWebFluxConfiguration
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

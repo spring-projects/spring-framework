@@ -169,7 +169,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	}
 
 	@Override
-	public Object prepareTransaction(EntityManager entityManager, boolean readOnly, String name)
+	public Object prepareTransaction(EntityManager entityManager, boolean readOnly, @Nullable String name)
 			throws PersistenceException {
 
 		Session session = getSession(entityManager);
@@ -216,6 +216,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	}
 
 	@Override
+	@Nullable
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		if (ex instanceof HibernateException) {
 			return convertHibernateAccessException((HibernateException) ex);

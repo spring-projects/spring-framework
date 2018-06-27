@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,19 +33,29 @@ import java.util.concurrent.ConcurrentHashMap;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.multipart.Part;
+import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
+import org.springframework.web.reactive.function.server.HandlerStrategies;
 import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
+import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Mock implementation of {@link ServerRequest}.
@@ -58,6 +68,8 @@ public class MockServerRequest implements ServerRequest {
 	private final HttpMethod method;
 
 	private final URI uri;
+
+	private final RequestPath pathContainer;
 
 	private final MockHeaders headers;
 
@@ -78,14 +90,25 @@ public class MockServerRequest implements ServerRequest {
 	@Nullable
 	private Principal principal;
 
+	@Nullable
+	private final InetSocketAddress remoteAddress;
 
-	private MockServerRequest(HttpMethod method, URI uri, MockHeaders headers,
+	private final List<HttpMessageReader<?>> messageReaders;
+
+	@Nullable
+	private final ServerWebExchange exchange;
+
+
+	private MockServerRequest(HttpMethod method, URI uri, String contextPath, MockHeaders headers,
 			MultiValueMap<String, HttpCookie> cookies, @Nullable Object body,
 			Map<String, Object> attributes, MultiValueMap<String, String> queryParams,
-			Map<String, String> pathVariables, @Nullable WebSession session, @Nullable Principal principal) {
+			Map<String, String> pathVariables, @Nullable WebSession session, @Nullable Principal principal,
+			@Nullable InetSocketAddress remoteAddress, List<HttpMessageReader<?>> messageReaders,
+			@Nullable ServerWebExchange exchange) {
 
 		this.method = method;
 		this.uri = uri;
+		this.pathContainer = RequestPath.parse(uri, contextPath);
 		this.headers = headers;
 		this.cookies = cookies;
 		this.body = body;
@@ -94,6 +117,9 @@ public class MockServerRequest implements ServerRequest {
 		this.pathVariables = pathVariables;
 		this.session = session;
 		this.principal = principal;
+		this.remoteAddress = remoteAddress;
+		this.messageReaders = messageReaders;
+		this.exchange = exchange;
 	}
 
 
@@ -103,8 +129,23 @@ public class MockServerRequest implements ServerRequest {
 	}
 
 	@Override
+	public String methodName() {
+		return this.method.name();
+	}
+
+	@Override
 	public URI uri() {
 		return this.uri;
+	}
+
+	@Override
+	public UriBuilder uriBuilder() {
+		return UriComponentsBuilder.fromUri(this.uri);
+	}
+
+	@Override
+	public PathContainer pathContainer() {
+		return this.pathContainer;
 	}
 
 	@Override
@@ -115,6 +156,16 @@ public class MockServerRequest implements ServerRequest {
 	@Override
 	public MultiValueMap<String, HttpCookie> cookies() {
 		return this.cookies;
+	}
+
+	@Override
+	public Optional<InetSocketAddress> remoteAddress() {
+		return Optional.ofNullable(this.remoteAddress);
+	}
+
+	@Override
+	public List<HttpMessageReader<?>> messageReaders() {
+		return this.messageReaders;
 	}
 
 	@Override
@@ -140,15 +191,23 @@ public class MockServerRequest implements ServerRequest {
 
 	@Override
 	@SuppressWarnings("unchecked")
+	public <S> Mono<S> bodyToMono(ParameterizedTypeReference<S> typeReference) {
+		Assert.state(this.body != null, "No body");
+		return (Mono<S>) this.body;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
 	public <S> Flux<S> bodyToFlux(Class<? extends S> elementClass) {
 		Assert.state(this.body != null, "No body");
 		return (Flux<S>) this.body;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public <S> Optional<S> attribute(String name) {
-		return Optional.ofNullable((S) this.attributes.get(name));
+	@SuppressWarnings("unchecked")
+	public <S> Flux<S> bodyToFlux(ParameterizedTypeReference<S> typeReference) {
+		Assert.state(this.body != null, "No body");
+		return (Flux<S>) this.body;
 	}
 
 	@Override
@@ -157,8 +216,8 @@ public class MockServerRequest implements ServerRequest {
 	}
 
 	@Override
-	public List<String> queryParams(String name) {
-		return Collections.unmodifiableList(this.queryParams.get(name));
+	public MultiValueMap<String, String> queryParams() {
+		return CollectionUtils.unmodifiableMultiValueMap(this.queryParams);
 	}
 
 	@Override
@@ -176,6 +235,26 @@ public class MockServerRequest implements ServerRequest {
 		return Mono.justOrEmpty(this.principal);
 	}
 
+	@Override
+	@SuppressWarnings("unchecked")
+	public Mono<MultiValueMap<String, String>> formData() {
+		Assert.state(this.body != null, "No body");
+		return (Mono<MultiValueMap<String, String>>) this.body;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Mono<MultiValueMap<String, Part>> multipartData() {
+		Assert.state(this.body != null, "No body");
+		return (Mono<MultiValueMap<String, Part>>) this.body;
+	}
+
+	@Override
+	public ServerWebExchange exchange() {
+		Assert.state(this.exchange != null, "No exchange");
+		return this.exchange;
+	}
+
 	public static Builder builder() {
 		return new BuilderImpl();
 	}
@@ -188,6 +267,8 @@ public class MockServerRequest implements ServerRequest {
 		Builder method(HttpMethod method);
 
 		Builder uri(URI uri);
+
+		Builder contextPath(String contextPath);
 
 		Builder header(String key, String value);
 
@@ -211,7 +292,19 @@ public class MockServerRequest implements ServerRequest {
 
 		Builder session(WebSession session);
 
+		/**
+		 * @deprecated in favor of {@link #principal(Principal)}
+		 */
+		@Deprecated
 		Builder session(Principal principal);
+
+		Builder principal(Principal principal);
+
+		Builder remoteAddress(InetSocketAddress remoteAddress);
+
+		Builder messageReaders(List<HttpMessageReader<?>> messageReaders);
+
+		Builder exchange(ServerWebExchange exchange);
 
 		MockServerRequest body(Object body);
 
@@ -224,6 +317,8 @@ public class MockServerRequest implements ServerRequest {
 		private HttpMethod method = HttpMethod.GET;
 
 		private URI uri = URI.create("http://localhost");
+
+		private String contextPath = "";
 
 		private MockHeaders headers = new MockHeaders(new HttpHeaders());
 
@@ -244,6 +339,14 @@ public class MockServerRequest implements ServerRequest {
 		@Nullable
 		private Principal principal;
 
+		@Nullable
+		private InetSocketAddress remoteAddress;
+
+		private List<HttpMessageReader<?>> messageReaders = HandlerStrategies.withDefaults().messageReaders();
+
+		@Nullable
+		private ServerWebExchange exchange;
+
 		@Override
 		public Builder method(HttpMethod method) {
 			Assert.notNull(method, "'method' must not be null");
@@ -256,6 +359,14 @@ public class MockServerRequest implements ServerRequest {
 			Assert.notNull(uri, "'uri' must not be null");
 			this.uri = uri;
 			return this;
+		}
+
+		@Override
+		public Builder contextPath(String contextPath) {
+			Assert.notNull(contextPath, "'contextPath' must not be null");
+			this.contextPath = contextPath;
+			return this;
+
 		}
 
 		@Override
@@ -339,25 +450,54 @@ public class MockServerRequest implements ServerRequest {
 		}
 
 		@Override
+		@Deprecated
 		public Builder session(Principal principal) {
+			return principal(principal);
+		}
+
+		@Override
+		public Builder principal(Principal principal) {
 			Assert.notNull(principal, "'principal' must not be null");
 			this.principal = principal;
 			return this;
 		}
 
 		@Override
+		public Builder remoteAddress(InetSocketAddress remoteAddress) {
+			Assert.notNull(remoteAddress, "'remoteAddress' must not be null");
+			this.remoteAddress = remoteAddress;
+			return this;
+		}
+
+		@Override
+		public Builder messageReaders(List<HttpMessageReader<?>> messageReaders) {
+			Assert.notNull(messageReaders, "'messageReaders' must not be null");
+			this.messageReaders = messageReaders;
+			return this;
+		}
+
+		@Override
+		public Builder exchange(ServerWebExchange exchange) {
+			Assert.notNull(exchange, "'exchange' must not be null");
+			this.exchange = exchange;
+			return this;
+		}
+
+		@Override
 		public MockServerRequest body(Object body) {
 			this.body = body;
-			return new MockServerRequest(this.method, this.uri, this.headers, this.cookies,
-					this.body, this.attributes, this.queryParams, this.pathVariables, this.session,
-					this.principal);
+			return new MockServerRequest(this.method, this.uri, this.contextPath, this.headers,
+					this.cookies, this.body, this.attributes, this.queryParams, this.pathVariables,
+					this.session, this.principal, this.remoteAddress, this.messageReaders,
+					this.exchange);
 		}
 
 		@Override
 		public MockServerRequest build() {
-			return new MockServerRequest(this.method, this.uri, this.headers, this.cookies, null,
-					this.attributes, this.queryParams, this.pathVariables, this.session,
-					this.principal);
+			return new MockServerRequest(this.method, this.uri, this.contextPath, this.headers,
+					this.cookies, null, this.attributes, this.queryParams, this.pathVariables,
+					this.session, this.principal, this.remoteAddress, this.messageReaders,
+					this.exchange);
 		}
 	}
 

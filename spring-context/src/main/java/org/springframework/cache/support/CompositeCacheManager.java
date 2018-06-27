@@ -27,6 +27,7 @@ import java.util.Set;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.lang.Nullable;
 
 /**
  * Composite {@link CacheManager} implementation that iterates over
@@ -98,6 +99,7 @@ public class CompositeCacheManager implements CacheManager, InitializingBean {
 
 
 	@Override
+	@Nullable
 	public Cache getCache(String name) {
 		for (CacheManager cacheManager : this.cacheManagers) {
 			Cache cache = cacheManager.getCache(name);

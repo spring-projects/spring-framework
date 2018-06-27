@@ -56,6 +56,7 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 
 
 	@Override
+	@Nullable
 	public ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
 		return new ReschedulingTimerListener(errorHandlingTask(task, true), trigger).schedule();
 	}

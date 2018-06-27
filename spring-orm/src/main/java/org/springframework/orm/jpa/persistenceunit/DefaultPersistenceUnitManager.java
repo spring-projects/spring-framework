@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,21 +101,21 @@ public class DefaultPersistenceUnitManager
 	 * Default location of the {@code persistence.xml} file:
 	 * "classpath*:META-INF/persistence.xml".
 	 */
-	public final static String DEFAULT_PERSISTENCE_XML_LOCATION = "classpath*:META-INF/" + PERSISTENCE_XML_FILENAME;
+	public static final String DEFAULT_PERSISTENCE_XML_LOCATION = "classpath*:META-INF/" + PERSISTENCE_XML_FILENAME;
 
 	/**
 	 * Default location for the persistence unit root URL:
 	 * "classpath:", indicating the root of the classpath.
 	 */
-	public final static String ORIGINAL_DEFAULT_PERSISTENCE_UNIT_ROOT_LOCATION = "classpath:";
+	public static final String ORIGINAL_DEFAULT_PERSISTENCE_UNIT_ROOT_LOCATION = "classpath:";
 
-	public final static String ORIGINAL_DEFAULT_PERSISTENCE_UNIT_NAME = "default";
+	public static final String ORIGINAL_DEFAULT_PERSISTENCE_UNIT_NAME = "default";
 
 
 	private static final Set<AnnotationTypeFilter> entityTypeFilters;
 
 	static {
-		entityTypeFilters = new LinkedHashSet<>(4);
+		entityTypeFilters = new LinkedHashSet<>(8);
 		entityTypeFilters.add(new AnnotationTypeFilter(Entity.class, false));
 		entityTypeFilters.add(new AnnotationTypeFilter(Embeddable.class, false));
 		entityTypeFilters.add(new AnnotationTypeFilter(MappedSuperclass.class, false));
@@ -339,7 +339,7 @@ public class DefaultPersistenceUnitManager
 	 * none has been registered before.
 	 * @see javax.persistence.spi.PersistenceUnitInfo#getNonJtaDataSource()
 	 */
-	public void setDefaultDataSource(DataSource defaultDataSource) {
+	public void setDefaultDataSource(@Nullable DataSource defaultDataSource) {
 		this.defaultDataSource = defaultDataSource;
 	}
 
@@ -361,7 +361,7 @@ public class DefaultPersistenceUnitManager
 	 * none has been registered before.
 	 * @see javax.persistence.spi.PersistenceUnitInfo#getJtaDataSource()
 	 */
-	public void setDefaultJtaDataSource(DataSource defaultJtaDataSource) {
+	public void setDefaultJtaDataSource(@Nullable DataSource defaultJtaDataSource) {
 		this.defaultJtaDataSource = defaultJtaDataSource;
 	}
 
@@ -380,7 +380,7 @@ public class DefaultPersistenceUnitManager
 	 * <p>Such post-processors can, for example, register further entity classes and
 	 * jar files, in addition to the metadata read from {@code persistence.xml}.
 	 */
-	public void setPersistenceUnitPostProcessors(PersistenceUnitPostProcessor... postProcessors) {
+	public void setPersistenceUnitPostProcessors(@Nullable PersistenceUnitPostProcessor... postProcessors) {
 		this.persistenceUnitPostProcessors = postProcessors;
 	}
 
@@ -412,7 +412,7 @@ public class DefaultPersistenceUnitManager
 	 * @see org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver
 	 */
 	@Override
-	public void setLoadTimeWeaver(LoadTimeWeaver loadTimeWeaver) {
+	public void setLoadTimeWeaver(@Nullable LoadTimeWeaver loadTimeWeaver) {
 		this.loadTimeWeaver = loadTimeWeaver;
 	}
 

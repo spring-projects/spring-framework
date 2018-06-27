@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,25 +42,34 @@ public class InterceptorRegistration {
 
 	private final List<String> excludePatterns = new ArrayList<>();
 
-	private int order = 0;
-
 	@Nullable
 	private PathMatcher pathMatcher;
 
+	private int order = 0;
+
 
 	/**
-	 * Creates an {@link InterceptorRegistration} instance.
+	 * Create an {@link InterceptorRegistration} instance.
 	 */
 	public InterceptorRegistration(HandlerInterceptor interceptor) {
 		Assert.notNull(interceptor, "Interceptor is required");
 		this.interceptor = interceptor;
 	}
 
+
 	/**
 	 * Add URL patterns to which the registered interceptor should apply to.
 	 */
 	public InterceptorRegistration addPathPatterns(String... patterns) {
-		this.includePatterns.addAll(Arrays.asList(patterns));
+		return addPathPatterns(Arrays.asList(patterns));
+	}
+
+	/**
+	 * List-based variant of {@link #addPathPatterns(String...)}.
+	 * @since 5.0.3
+	 */
+	public InterceptorRegistration addPathPatterns(List<String> patterns) {
+		this.includePatterns.addAll(patterns);
 		return this;
 	}
 
@@ -68,20 +77,16 @@ public class InterceptorRegistration {
 	 * Add URL patterns to which the registered interceptor should not apply to.
 	 */
 	public InterceptorRegistration excludePathPatterns(String... patterns) {
-		this.excludePatterns.addAll(Arrays.asList(patterns));
-		return this;
+		return excludePathPatterns(Arrays.asList(patterns));
 	}
 
 	/**
-	 * An order position to be used, default is 0.
+	 * List-based variant of {@link #excludePathPatterns(String...)}.
+	 * @since 5.0.3
 	 */
-	public InterceptorRegistration order(int order){
-		this.order = order;
+	public InterceptorRegistration excludePathPatterns(List<String> patterns) {
+		this.excludePatterns.addAll(patterns);
 		return this;
-	}
-
-	protected int getOrder() {
-		return this.order;
 	}
 
 	/**
@@ -96,8 +101,26 @@ public class InterceptorRegistration {
 	}
 
 	/**
-	 * Returns the underlying interceptor. If URL patterns are provided the returned type is
-	 * {@link MappedInterceptor}; otherwise {@link HandlerInterceptor}.
+	 * Specify an order position to be used. Default is 0.
+	 * @since 5.0
+	 */
+	public InterceptorRegistration order(int order){
+		this.order = order;
+		return this;
+	}
+
+	/**
+	 * Return the order position to be used.
+	 * @since 5.0
+	 */
+	protected int getOrder() {
+		return this.order;
+	}
+
+
+	/**
+	 * Build the underlying interceptor. If URL patterns are provided, the returned
+	 * type is {@link MappedInterceptor}; otherwise {@link HandlerInterceptor}.
 	 */
 	protected Object getInterceptor() {
 		if (this.includePatterns.isEmpty() && this.excludePatterns.isEmpty()) {
@@ -107,11 +130,9 @@ public class InterceptorRegistration {
 		String[] include = StringUtils.toStringArray(this.includePatterns);
 		String[] exclude = StringUtils.toStringArray(this.excludePatterns);
 		MappedInterceptor mappedInterceptor = new MappedInterceptor(include, exclude, this.interceptor);
-
 		if (this.pathMatcher != null) {
 			mappedInterceptor.setPathMatcher(this.pathMatcher);
 		}
-
 		return mappedInterceptor;
 	}
 

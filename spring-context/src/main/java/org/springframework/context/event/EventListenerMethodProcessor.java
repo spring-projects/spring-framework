@@ -31,7 +31,6 @@ import org.springframework.aop.framework.autoproxy.AutoProxyUtils;
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.ApplicationContext;
@@ -41,6 +40,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -56,6 +56,7 @@ public class EventListenerMethodProcessor implements SmartInitializingSingleton,
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private ConfigurableApplicationContext applicationContext;
 
 	private final EventExpressionEvaluator evaluator = new EventExpressionEvaluator();
@@ -64,21 +65,28 @@ public class EventListenerMethodProcessor implements SmartInitializingSingleton,
 
 
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+	public void setApplicationContext(ApplicationContext applicationContext) {
 		Assert.isTrue(applicationContext instanceof ConfigurableApplicationContext,
 				"ApplicationContext does not implement ConfigurableApplicationContext");
 		this.applicationContext = (ConfigurableApplicationContext) applicationContext;
 	}
 
+	private ConfigurableApplicationContext getApplicationContext() {
+		Assert.state(this.applicationContext != null, "No ApplicationContext set");
+		return this.applicationContext;
+	}
+
+
 	@Override
 	public void afterSingletonsInstantiated() {
 		List<EventListenerFactory> factories = getEventListenerFactories();
-		String[] beanNames = this.applicationContext.getBeanNamesForType(Object.class);
+		ConfigurableApplicationContext context = getApplicationContext();
+		String[] beanNames = context.getBeanNamesForType(Object.class);
 		for (String beanName : beanNames) {
 			if (!ScopedProxyUtils.isScopedTarget(beanName)) {
 				Class<?> type = null;
 				try {
-					type = AutoProxyUtils.determineTargetClass(this.applicationContext.getBeanFactory(), beanName);
+					type = AutoProxyUtils.determineTargetClass(context.getBeanFactory(), beanName);
 				}
 				catch (Throwable ex) {
 					// An unresolvable bean type, probably from a lazy bean - let's ignore it.
@@ -90,8 +98,7 @@ public class EventListenerMethodProcessor implements SmartInitializingSingleton,
 					if (ScopedObject.class.isAssignableFrom(type)) {
 						try {
 							Class<?> targetClass = AutoProxyUtils.determineTargetClass(
-									this.applicationContext.getBeanFactory(),
-									ScopedProxyUtils.getTargetBeanName(beanName));
+									context.getBeanFactory(), ScopedProxyUtils.getTargetBeanName(beanName));
 							if (targetClass != null) {
 								type = targetClass;
 							}
@@ -121,10 +128,10 @@ public class EventListenerMethodProcessor implements SmartInitializingSingleton,
 	 * {@link EventListener} annotated methods.
 	 */
 	protected List<EventListenerFactory> getEventListenerFactories() {
-		Map<String, EventListenerFactory> beans = this.applicationContext.getBeansOfType(EventListenerFactory.class);
-		List<EventListenerFactory> allFactories = new ArrayList<>(beans.values());
-		AnnotationAwareOrderComparator.sort(allFactories);
-		return allFactories;
+		Map<String, EventListenerFactory> beans = getApplicationContext().getBeansOfType(EventListenerFactory.class);
+		List<EventListenerFactory> factories = new ArrayList<>(beans.values());
+		AnnotationAwareOrderComparator.sort(factories);
+		return factories;
 	}
 
 	protected void processBean(
@@ -134,9 +141,8 @@ public class EventListenerMethodProcessor implements SmartInitializingSingleton,
 			Map<Method, EventListener> annotatedMethods = null;
 			try {
 				annotatedMethods = MethodIntrospector.selectMethods(targetType,
-						(MethodIntrospector.MetadataLookup<EventListener>) method -> {
-							return AnnotatedElementUtils.findMergedAnnotation(method, EventListener.class);
-						});
+						(MethodIntrospector.MetadataLookup<EventListener>) method ->
+								AnnotatedElementUtils.findMergedAnnotation(method, EventListener.class));
 			}
 			catch (Throwable ex) {
 				// An unresolvable type in a method signature, probably from a lazy bean - let's ignore it.
@@ -152,18 +158,17 @@ public class EventListenerMethodProcessor implements SmartInitializingSingleton,
 			}
 			else {
 				// Non-empty set of methods
+				ConfigurableApplicationContext context = getApplicationContext();
 				for (Method method : annotatedMethods.keySet()) {
 					for (EventListenerFactory factory : factories) {
 						if (factory.supportsMethod(method)) {
-							Method methodToUse = AopUtils.selectInvocableMethod(
-									method, this.applicationContext.getType(beanName));
+							Method methodToUse = AopUtils.selectInvocableMethod(method, context.getType(beanName));
 							ApplicationListener<?> applicationListener =
 									factory.createApplicationListener(beanName, targetType, methodToUse);
 							if (applicationListener instanceof ApplicationListenerMethodAdapter) {
-								((ApplicationListenerMethodAdapter) applicationListener)
-										.init(this.applicationContext, this.evaluator);
+								((ApplicationListenerMethodAdapter) applicationListener).init(context, this.evaluator);
 							}
-							this.applicationContext.addApplicationListener(applicationListener);
+							context.addApplicationListener(applicationListener);
 							break;
 						}
 					}

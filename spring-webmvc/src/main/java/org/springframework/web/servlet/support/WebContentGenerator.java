@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,7 +151,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * <p>Default is GET, HEAD and POST for simple form controller types;
 	 * unrestricted for general controllers and interceptors.
 	 */
-	public final void setSupportedMethods(String... methods) {
+	public final void setSupportedMethods(@Nullable String... methods) {
 		if (!ObjectUtils.isEmpty(methods)) {
 			this.supportedMethods = new LinkedHashSet<>(Arrays.asList(methods));
 		}
@@ -174,7 +174,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		if (this.supportedMethods == null) {
 			allowedMethods = new ArrayList<>(HttpMethod.values().length - 1);
 			for (HttpMethod method : HttpMethod.values()) {
-				if (!HttpMethod.TRACE.equals(method)) {
+				if (method != HttpMethod.TRACE) {
 					allowedMethods.add(method.name());
 				}
 			}
@@ -191,13 +191,13 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	}
 
 	/**
-	 * Return the "Allow" header value to use in response to an HTTP OPTIONS
-	 * request based on the configured {@link #setSupportedMethods supported
-	 * methods} also automatically adding "OPTIONS" to the list even if not
-	 * present as a supported method. This means sub-classes don't have to
-	 * explicitly list "OPTIONS" as a supported method as long as HTTP OPTIONS
-	 * requests are handled before making a call to
-	 * {@link #checkRequest(HttpServletRequest)}.
+	 * Return the "Allow" header value to use in response to an HTTP OPTIONS request
+	 * based on the configured {@link #setSupportedMethods supported methods} also
+	 * automatically adding "OPTIONS" to the list even if not present as a supported
+	 * method. This means subclasses don't have to explicitly list "OPTIONS" as a
+	 * supported method as long as HTTP OPTIONS requests are handled before making a
+	 * call to {@link #checkRequest(HttpServletRequest)}.
+	 * @since 4.3
 	 */
 	@Nullable
 	protected String getAllowHeader() {
@@ -223,7 +223,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * the Cache-Control HTTP response header.
 	 * @since 4.2
 	 */
-	public final void setCacheControl(CacheControl cacheControl) {
+	public final void setCacheControl(@Nullable CacheControl cacheControl) {
 		this.cacheControl = cacheControl;
 	}
 
@@ -269,7 +269,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * @param varyByRequestHeaders one or more request header names
 	 * @since 4.3
 	 */
-	public final void setVaryByRequestHeaders(String... varyByRequestHeaders) {
+	public final void setVaryByRequestHeaders(@Nullable String... varyByRequestHeaders) {
 		this.varyByRequestHeaders = varyByRequestHeaders;
 	}
 

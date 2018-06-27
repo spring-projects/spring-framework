@@ -232,6 +232,7 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 
 
 	@Override
+	@Nullable
 	public ScheduledExecutorService getObject() {
 		return this.exposedExecutor;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,6 +113,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	 * @return the located {@link NamespaceHandler}, or {@code null} if none found
 	 */
 	@Override
+	@Nullable
 	public NamespaceHandler resolve(String namespaceUri) {
 		Map<String, Object> handlerMappings = getHandlerMappings();
 		Object handlerOrClassName = handlerMappings.get(namespaceUri);
@@ -136,12 +137,12 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 				return namespaceHandler;
 			}
 			catch (ClassNotFoundException ex) {
-				throw new FatalBeanException("NamespaceHandler class [" + className + "] for namespace [" +
-						namespaceUri + "] not found", ex);
+				throw new FatalBeanException("Could not find NamespaceHandler class [" + className +
+						"] for namespace [" + namespaceUri + "]", ex);
 			}
 			catch (LinkageError err) {
-				throw new FatalBeanException("Invalid NamespaceHandler class [" + className + "] for namespace [" +
-						namespaceUri + "]: problem with handler class file or dependent class", err);
+				throw new FatalBeanException("Unresolvable class definition for NamespaceHandler class [" +
+						className + "] for namespace [" + namespaceUri + "]", err);
 			}
 		}
 	}

@@ -16,12 +16,9 @@
 
 package org.springframework.web.util.pattern;
 
-import java.nio.charset.StandardCharsets;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
@@ -37,7 +34,7 @@ abstract class PathElement {
 
 	protected static final int CAPTURE_VARIABLE_WEIGHT = 1;
 
-	protected final static MultiValueMap<String,String> NO_PARAMETERS = new LinkedMultiValueMap<>();
+	protected static final MultiValueMap<String,String> NO_PARAMETERS = new LinkedMultiValueMap<>();
 
 	// Position in the pattern where this path element starts
 	protected final int pos;

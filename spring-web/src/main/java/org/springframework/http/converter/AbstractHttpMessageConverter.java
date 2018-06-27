@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 
 	private List<MediaType> supportedMediaTypes = Collections.emptyList();
 
+	@Nullable
 	private Charset defaultCharset;
 
 
@@ -110,7 +111,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * Set the default character set, if any.
 	 * @since 4.3
 	 */
-	public void setDefaultCharset(Charset defaultCharset) {
+	public void setDefaultCharset(@Nullable Charset defaultCharset) {
 		this.defaultCharset = defaultCharset;
 	}
 
@@ -207,23 +208,17 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 		addDefaultHeaders(headers, t, contentType);
 
 		if (outputMessage instanceof StreamingHttpOutputMessage) {
-			StreamingHttpOutputMessage streamingOutputMessage =
-					(StreamingHttpOutputMessage) outputMessage;
-			streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
+			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
+			streamingOutputMessage.setBody(outputStream -> writeInternal(t, new HttpOutputMessage() {
 				@Override
-				public void writeTo(final OutputStream outputStream) throws IOException {
-					writeInternal(t, new HttpOutputMessage() {
-						@Override
-						public OutputStream getBody() throws IOException {
-							return outputStream;
-						}
-						@Override
-						public HttpHeaders getHeaders() {
-							return headers;
-						}
-					});
+				public OutputStream getBody() {
+					return outputStream;
 				}
-			});
+				@Override
+				public HttpHeaders getHeaders() {
+					return headers;
+				}
+			}));
 		}
 		else {
 			writeInternal(t, outputMessage);

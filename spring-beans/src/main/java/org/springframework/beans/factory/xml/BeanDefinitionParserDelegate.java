@@ -110,12 +110,6 @@ public class BeanDefinitionParserDelegate {
 
 	public static final String AUTOWIRE_AUTODETECT_VALUE = "autodetect";
 
-	public static final String DEPENDENCY_CHECK_ALL_ATTRIBUTE_VALUE = "all";
-
-	public static final String DEPENDENCY_CHECK_SIMPLE_ATTRIBUTE_VALUE = "simple";
-
-	public static final String DEPENDENCY_CHECK_OBJECTS_ATTRIBUTE_VALUE = "objects";
-
 	public static final String NAME_ATTRIBUTE = "name";
 
 	public static final String BEAN_ELEMENT = "bean";
@@ -609,9 +603,7 @@ public class BeanDefinitionParserDelegate {
 
 		if (ele.hasAttribute(INIT_METHOD_ATTRIBUTE)) {
 			String initMethodName = ele.getAttribute(INIT_METHOD_ATTRIBUTE);
-			if (!"".equals(initMethodName)) {
-				bd.setInitMethodName(initMethodName);
-			}
+			bd.setInitMethodName(initMethodName);
 		}
 		else if (this.defaults.getInitMethod() != null) {
 			bd.setInitMethodName(this.defaults.getInitMethod());
@@ -1210,7 +1202,7 @@ public class BeanDefinitionParserDelegate {
 			boolean hasKeyAttribute = entryEle.hasAttribute(KEY_ATTRIBUTE);
 			boolean hasKeyRefAttribute = entryEle.hasAttribute(KEY_REF_ATTRIBUTE);
 			if ((hasKeyAttribute && hasKeyRefAttribute) ||
-					((hasKeyAttribute || hasKeyRefAttribute)) && keyEle != null) {
+					(hasKeyAttribute || hasKeyRefAttribute) && keyEle != null) {
 				error("<entry> element is only allowed to contain either " +
 						"a 'key' attribute OR a 'key-ref' attribute OR a <key> sub-element", entryEle);
 			}
@@ -1239,7 +1231,7 @@ public class BeanDefinitionParserDelegate {
 			boolean hasValueRefAttribute = entryEle.hasAttribute(VALUE_REF_ATTRIBUTE);
 			boolean hasValueTypeAttribute = entryEle.hasAttribute(VALUE_TYPE_ATTRIBUTE);
 			if ((hasValueAttribute && hasValueRefAttribute) ||
-					((hasValueAttribute || hasValueRefAttribute)) && valueEle != null) {
+					(hasValueAttribute || hasValueRefAttribute) && valueEle != null) {
 				error("<entry> element is only allowed to contain either " +
 						"'value' attribute OR 'value-ref' attribute OR <value> sub-element", entryEle);
 			}

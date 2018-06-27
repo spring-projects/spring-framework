@@ -131,11 +131,13 @@ public class StandardScriptEvaluator implements ScriptEvaluator, BeanClassLoader
 
 
 	@Override
+	@Nullable
 	public Object evaluate(ScriptSource script) {
 		return evaluate(script, null);
 	}
 
 	@Override
+	@Nullable
 	public Object evaluate(ScriptSource script, @Nullable Map<String, Object> argumentBindings) {
 		ScriptEngine engine = getScriptEngine(script);
 		try {

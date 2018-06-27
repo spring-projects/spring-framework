@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -27,6 +29,7 @@ import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -101,9 +104,9 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 		}
 
 		// Check for Unix-style path
-		int unixSep = filename.lastIndexOf("/");
+		int unixSep = filename.lastIndexOf('/');
 		// Check for Windows-style path
-		int winSep = filename.lastIndexOf("\\");
+		int winSep = filename.lastIndexOf('\\');
 		// Cut off at latest possible point
 		int pos = (winSep > unixSep ? winSep : unixSep);
 		if (pos != -1)  {
@@ -167,25 +170,36 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 				if (!this.fileItem.isInMemory()) {
 					action = (isAvailable() ? "copied" : "moved");
 				}
-				logger.debug("Multipart file '" + getName() + "' with original filename [" +
-						getOriginalFilename() + "], stored " + getStorageDescription() + ": " +
-						action + " to [" + dest.getAbsolutePath() + "]");
+				String message = "Part '" + getName() + "',  filename '" + getOriginalFilename() + "'";
+				if (logger.isTraceEnabled()) {
+					logger.trace(message + ", stored " + getStorageDescription() + ": " + action +
+							" to [" + dest.getAbsolutePath() + "]");
+				}
+				else {
+					logger.debug(message + ": " + action + " to [" + dest.getAbsolutePath() + "]");
+				}
 			}
 		}
 		catch (FileUploadException ex) {
 			throw new IllegalStateException(ex.getMessage(), ex);
 		}
-		catch (IllegalStateException ex) {
-			// Pass through when coming from FileItem directly
-			throw ex;
-		}
-		catch (IOException ex) {
-			// From I/O operations within FileItem.write
+		catch (IllegalStateException | IOException ex) {
+			// Pass through IllegalStateException when coming from FileItem directly,
+			// or propagate an exception from I/O operations within FileItem.write
 			throw ex;
 		}
 		catch (Exception ex) {
 			throw new IOException("File transfer failed", ex);
 		}
+	}
+
+	@Override
+	public void transferTo(Path dest) throws IOException, IllegalStateException {
+		if (!isAvailable()) {
+			throw new IllegalStateException("File has already been moved - cannot be transferred again");
+		}
+
+		FileCopyUtils.copy(this.fileItem.getInputStream(), Files.newOutputStream(dest));
 	}
 
 	/**

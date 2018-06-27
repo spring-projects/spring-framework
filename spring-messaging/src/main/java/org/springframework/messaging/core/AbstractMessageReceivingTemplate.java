@@ -34,11 +34,13 @@ public abstract class AbstractMessageReceivingTemplate<D> extends AbstractMessag
 		implements MessageReceivingOperations<D> {
 
 	@Override
+	@Nullable
 	public Message<?> receive() {
 		return doReceive(getRequiredDefaultDestination());
 	}
 
 	@Override
+	@Nullable
 	public Message<?> receive(D destination) {
 		return doReceive(destination);
 	}
@@ -54,11 +56,13 @@ public abstract class AbstractMessageReceivingTemplate<D> extends AbstractMessag
 
 
 	@Override
+	@Nullable
 	public <T> T receiveAndConvert(Class<T> targetClass) {
 		return receiveAndConvert(getRequiredDefaultDestination(), targetClass);
 	}
 
 	@Override
+	@Nullable
 	public <T> T receiveAndConvert(D destination, Class<T> targetClass) {
 		Message<?> message = doReceive(destination);
 		if (message != null) {

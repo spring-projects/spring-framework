@@ -22,7 +22,9 @@ import java.util.function.Predicate;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.MatrixVariable;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -61,6 +63,13 @@ public class MvcAnnotationPredicates {
 		return new RequestPartPredicate();
 	}
 
+	public static RequestAttributePredicate requestAttribute() {
+		return new RequestAttributePredicate();
+	}
+
+	public static MatrixVariablePredicate matrixAttribute() {
+		return new MatrixVariablePredicate();
+	}
 
 	// Method predicates
 
@@ -252,6 +261,38 @@ public class MvcAnnotationPredicates {
 		}
 	}
 
+	public static class RequestAttributePredicate implements Predicate<MethodParameter> {
+
+		private String name;
+
+		private boolean required = true;
+
+
+		public RequestAttributePredicate name(String name) {
+			this.name = name;
+			return this;
+		}
+
+		public RequestAttributePredicate noName() {
+			this.name = "";
+			return this;
+		}
+
+		public RequestAttributePredicate notRequired() {
+			this.required = false;
+			return this;
+		}
+
+
+		@Override
+		public boolean test(MethodParameter parameter) {
+			RequestAttribute annotation = parameter.getParameterAnnotation(RequestAttribute.class);
+			return annotation != null &&
+					(this.name == null || annotation.name().equals(this.name)) &&
+					annotation.required() == this.required;
+		}
+	}
+
 	public static class ResponseStatusPredicate implements Predicate<Method> {
 
 		private HttpStatus code = HttpStatus.INTERNAL_SERVER_ERROR;
@@ -302,6 +343,42 @@ public class MvcAnnotationPredicates {
 					Arrays.equals(this.path, annot.path()) &&
 					Arrays.equals(this.method, annot.method()) &&
 					(this.params == null || Arrays.equals(this.params, annot.params()));
+		}
+	}
+
+	public static class MatrixVariablePredicate implements Predicate<MethodParameter> {
+
+		private String name;
+
+		private String pathVar;
+
+
+		public MatrixVariablePredicate name(String name) {
+			this.name = name;
+			return this;
+		}
+
+		public MatrixVariablePredicate noName() {
+			this.name = "";
+			return this;
+		}
+
+		public MatrixVariablePredicate pathVar(String name) {
+			this.pathVar = name;
+			return this;
+		}
+
+		public MatrixVariablePredicate noPathVar() {
+			this.pathVar = ValueConstants.DEFAULT_NONE;
+			return this;
+		}
+
+		@Override
+		public boolean test(MethodParameter parameter) {
+			MatrixVariable annotation = parameter.getParameterAnnotation(MatrixVariable.class);
+			return annotation != null &&
+					(this.name == null || this.name.equalsIgnoreCase(annotation.name())) &&
+					(this.pathVar == null || this.pathVar.equalsIgnoreCase(annotation.pathVar()));
 		}
 	}
 

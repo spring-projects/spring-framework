@@ -157,7 +157,8 @@ public interface Cache {
 		/**
 		 * Return the actual value in the cache.
 		 */
-		@Nullable Object get();
+		@Nullable
+		Object get();
 	}
 
 

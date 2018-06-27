@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.jdbc.core.StatementCreatorUtils;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link SqlParameterSource} implementation that obtains parameter values
@@ -63,6 +64,7 @@ public class BeanPropertySqlParameterSource extends AbstractSqlParameterSource {
 	}
 
 	@Override
+	@Nullable
 	public Object getValue(String paramName) throws IllegalArgumentException {
 		try {
 			return this.beanWrapper.getPropertyValue(paramName);
@@ -70,6 +72,26 @@ public class BeanPropertySqlParameterSource extends AbstractSqlParameterSource {
 		catch (NotReadablePropertyException ex) {
 			throw new IllegalArgumentException(ex.getMessage());
 		}
+	}
+
+	/**
+	 * Derives a default SQL type from the corresponding property type.
+	 * @see org.springframework.jdbc.core.StatementCreatorUtils#javaTypeToSqlParameterType
+	 */
+	@Override
+	public int getSqlType(String paramName) {
+		int sqlType = super.getSqlType(paramName);
+		if (sqlType != TYPE_UNKNOWN) {
+			return sqlType;
+		}
+		Class<?> propType = this.beanWrapper.getPropertyType(paramName);
+		return StatementCreatorUtils.javaTypeToSqlParameterType(propType);
+	}
+
+	@Override
+	@Nullable
+	public String[] getParameterNames() {
+		return getReadablePropertyNames();
 	}
 
 	/**
@@ -86,23 +108,9 @@ public class BeanPropertySqlParameterSource extends AbstractSqlParameterSource {
 					names.add(pd.getName());
 				}
 			}
-			this.propertyNames = names.toArray(new String[names.size()]);
+			this.propertyNames = StringUtils.toStringArray(names);
 		}
 		return this.propertyNames;
-	}
-
-	/**
-	 * Derives a default SQL type from the corresponding property type.
-	 * @see org.springframework.jdbc.core.StatementCreatorUtils#javaTypeToSqlParameterType
-	 */
-	@Override
-	public int getSqlType(String paramName) {
-		int sqlType = super.getSqlType(paramName);
-		if (sqlType != TYPE_UNKNOWN) {
-			return sqlType;
-		}
-		Class<?> propType = this.beanWrapper.getPropertyType(paramName);
-		return StatementCreatorUtils.javaTypeToSqlParameterType(propType);
 	}
 
 }

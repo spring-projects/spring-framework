@@ -85,6 +85,7 @@ public class JCacheManagerFactoryBean
 
 
 	@Override
+	@Nullable
 	public CacheManager getObject() {
 		return this.cacheManager;
 	}

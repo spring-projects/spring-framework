@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,13 @@ package org.springframework.web.accept;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -47,11 +52,46 @@ import org.springframework.web.context.request.NativeWebRequest;
 public abstract class AbstractMappingContentNegotiationStrategy extends MappingMediaTypeFileExtensionResolver
 		implements ContentNegotiationStrategy {
 
+	protected final Log logger = LogFactory.getLog(getClass());
+
+	private boolean useRegisteredExtensionsOnly = false;
+
+	private boolean ignoreUnknownExtensions = false;
+
+
 	/**
 	 * Create an instance with the given map of file extensions and media types.
 	 */
 	public AbstractMappingContentNegotiationStrategy(@Nullable Map<String, MediaType> mediaTypes) {
 		super(mediaTypes);
+	}
+
+
+	/**
+	 * Whether to only use the registered mappings to look up file extensions,
+	 * or also to use dynamic resolution (e.g. via {@link MediaTypeFactory}.
+	 * <p>By default this is set to {@code false}.
+	 */
+	public void setUseRegisteredExtensionsOnly(boolean useRegisteredExtensionsOnly) {
+		this.useRegisteredExtensionsOnly = useRegisteredExtensionsOnly;
+	}
+
+	public boolean isUseRegisteredExtensionsOnly() {
+		return this.useRegisteredExtensionsOnly;
+	}
+
+	/**
+	 * Whether to ignore requests with unknown file extension. Setting this to
+	 * {@code false} results in {@code HttpMediaTypeNotAcceptableException}.
+	 * <p>By default this is set to {@literal false} but is overridden in
+	 * {@link PathExtensionContentNegotiationStrategy} to {@literal true}.
+	 */
+	public void setIgnoreUnknownExtensions(boolean ignoreUnknownExtensions) {
+		this.ignoreUnknownExtensions = ignoreUnknownExtensions;
+	}
+
+	public boolean isIgnoreUnknownExtensions() {
+		return this.ignoreUnknownExtensions;
 	}
 
 
@@ -82,7 +122,7 @@ public abstract class AbstractMappingContentNegotiationStrategy extends MappingM
 				return Collections.singletonList(mediaType);
 			}
 		}
-		return Collections.emptyList();
+		return MEDIA_TYPE_ALL_LIST;
 	}
 
 
@@ -110,7 +150,16 @@ public abstract class AbstractMappingContentNegotiationStrategy extends MappingM
 	protected MediaType handleNoMatch(NativeWebRequest request, String key)
 			throws HttpMediaTypeNotAcceptableException {
 
-		return null;
+		if (!isUseRegisteredExtensionsOnly()) {
+			Optional<MediaType> mediaType = MediaTypeFactory.getMediaType("file." + key);
+			if (mediaType.isPresent()) {
+				return mediaType.get();
+			}
+		}
+		if (isIgnoreUnknownExtensions()) {
+			return null;
+		}
+		throw new HttpMediaTypeNotAcceptableException(getAllMediaTypes());
 	}
 
 }

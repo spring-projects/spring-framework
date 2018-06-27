@@ -240,7 +240,8 @@ public class ResponseEntityTests {
 		assertTrue(responseEntity.getHeaders().containsKey(HttpHeaders.CACHE_CONTROL));
 		assertEquals(entity, responseEntity.getBody());
 		String cacheControlHeader = responseEntity.getHeaders().getCacheControl();
-		assertThat(cacheControlHeader, Matchers.equalTo("max-age=3600, must-revalidate, private, proxy-revalidate, s-maxage=1800"));
+		assertThat(cacheControlHeader,
+				Matchers.equalTo("max-age=3600, must-revalidate, private, proxy-revalidate, s-maxage=1800"));
 	}
 
 	@Test

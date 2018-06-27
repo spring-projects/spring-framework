@@ -173,6 +173,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	/**
 	 * Return the BeanDefinitionRegistry that this scanner operates on.
 	 */
+	@Override
 	public final BeanDefinitionRegistry getRegistry() {
 		return this.registry;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,15 @@
 
 package org.springframework.web.cors.reactive;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.http.server.PathContainer;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.PathMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.util.pattern.ParsingPathMatcher;
+import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Provide a per reactive request {@link CorsConfiguration} instance based on a
@@ -35,24 +34,34 @@ import org.springframework.web.util.pattern.ParsingPathMatcher;
  * as well as Ant-style path patterns (such as {@code "/admin/**"}).
  *
  * @author Sebastien Deleuze
+ * @author Brian Clozel
  * @since 5.0
  */
 public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource {
 
-	private final Map<String, CorsConfiguration> corsConfigurations = new LinkedHashMap<>();
+	private final Map<PathPattern, CorsConfiguration> corsConfigurations;
 
-	private PathMatcher pathMatcher = new ParsingPathMatcher();
+	private final PathPatternParser patternParser;
 
 
 	/**
-	 * Set the PathMatcher implementation to use for matching URL paths
-	 * against registered URL patterns. Default is ParsingPathMatcher.
-	 * @see ParsingPathMatcher
+	 * Construct a new {@code UrlBasedCorsConfigurationSource} instance with default
+	 * {@code PathPatternParser}.
+	 * @since 5.0.6
 	 */
-	public void setPathMatcher(PathMatcher pathMatcher) {
-		Assert.notNull(pathMatcher, "PathMatcher must not be null");
-		this.pathMatcher = pathMatcher;
+	public UrlBasedCorsConfigurationSource() {
+		this(new PathPatternParser());
 	}
+
+	/**
+	 * Construct a new {@code UrlBasedCorsConfigurationSource} instance from the supplied
+	 * {@code PathPatternParser}.
+	 */
+	public UrlBasedCorsConfigurationSource(PathPatternParser patternParser) {
+		this.corsConfigurations = new LinkedHashMap<>();
+		this.patternParser = patternParser;
+	}
+
 
 	/**
 	 * Set CORS configuration based on URL patterns.
@@ -60,33 +69,26 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	public void setCorsConfigurations(@Nullable Map<String, CorsConfiguration> corsConfigurations) {
 		this.corsConfigurations.clear();
 		if (corsConfigurations != null) {
-			this.corsConfigurations.putAll(corsConfigurations);
+			corsConfigurations.forEach(this::registerCorsConfiguration);
 		}
-	}
-
-	/**
-	 * Get the CORS configuration.
-	 */
-	public Map<String, CorsConfiguration> getCorsConfigurations() {
-		return Collections.unmodifiableMap(this.corsConfigurations);
 	}
 
 	/**
 	 * Register a {@link CorsConfiguration} for the specified path pattern.
 	 */
 	public void registerCorsConfiguration(String path, CorsConfiguration config) {
-		this.corsConfigurations.put(path, config);
+		this.corsConfigurations.put(this.patternParser.parse(path), config);
 	}
 
 	@Override
+	@Nullable
 	public CorsConfiguration getCorsConfiguration(ServerWebExchange exchange) {
-		String lookupPath = exchange.getRequest().getPath().pathWithinApplication().value();
-		for (Map.Entry<String, CorsConfiguration> entry : this.corsConfigurations.entrySet()) {
-			if (this.pathMatcher.match(entry.getKey(), lookupPath)) {
-				return entry.getValue();
-			}
-		}
-		return null;
+		PathContainer lookupPath = exchange.getRequest().getPath().pathWithinApplication();
+		return this.corsConfigurations.entrySet().stream()
+				.filter(entry -> entry.getKey().matches(lookupPath))
+				.map(Map.Entry::getValue)
+				.findFirst()
+				.orElse(null);
 	}
 
 }

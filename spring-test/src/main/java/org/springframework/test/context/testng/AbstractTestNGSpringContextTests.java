@@ -115,7 +115,6 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	/**
 	 * Set the {@link ApplicationContext} to be used by this test instance,
 	 * provided via {@link ApplicationContextAware} semantics.
-	 *
 	 * @param applicationContext the ApplicationContext that this test runs in
 	 */
 	@Override
@@ -123,13 +122,11 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 		this.applicationContext = applicationContext;
 	}
 
+
 	/**
 	 * Delegates to the configured {@link TestContextManager} to call
-	 * {@linkplain TestContextManager#beforeTestClass() 'before test class'}
-	 * callbacks.
-	 *
-	 * @throws Exception if a registered TestExecutionListener throws an
-	 * exception
+	 * {@linkplain TestContextManager#beforeTestClass() 'before test class'} callbacks.
+	 * @throws Exception if a registered TestExecutionListener throws an exception
 	 */
 	@BeforeClass(alwaysRun = true)
 	protected void springTestContextBeforeTestClass() throws Exception {
@@ -141,9 +138,7 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	 * {@linkplain TestContextManager#prepareTestInstance(Object) prepare} this test
 	 * instance prior to execution of any individual tests, for example for
 	 * injecting dependencies, etc.
-	 *
-	 * @throws Exception if a registered TestExecutionListener throws an
-	 * exception
+	 * @throws Exception if a registered TestExecutionListener throws an exception
 	 */
 	@BeforeClass(alwaysRun = true, dependsOnMethods = "springTestContextBeforeTestClass")
 	protected void springTestContextPrepareTestInstance() throws Exception {
@@ -154,7 +149,6 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	 * Delegates to the configured {@link TestContextManager} to
 	 * {@linkplain TestContextManager#beforeTestMethod(Object,Method) pre-process}
 	 * the test method before the actual test is executed.
-	 *
 	 * @param testMethod the test method which is about to be executed
 	 * @throws Exception allows all exceptions to propagate
 	 */
@@ -167,7 +161,6 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	 * Delegates to the {@linkplain IHookCallBack#runTestMethod(ITestResult) test
 	 * method} in the supplied {@code callback} to execute the actual test
 	 * and then tracks the exception thrown during test execution, if any.
-	 *
 	 * @see org.testng.IHookable#run(IHookCallBack, ITestResult)
 	 */
 	@Override
@@ -224,14 +217,13 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	/**
 	 * Delegates to the configured {@link TestContextManager} to call
 	 * {@linkplain TestContextManager#afterTestClass() 'after test class'} callbacks.
-	 *
-	 * @throws Exception if a registered TestExecutionListener throws an
-	 * exception
+	 * @throws Exception if a registered TestExecutionListener throws an exception
 	 */
 	@AfterClass(alwaysRun = true)
 	protected void springTestContextAfterTestClass() throws Exception {
 		this.testContextManager.afterTestClass();
 	}
+
 
 	private Throwable getTestResultException(ITestResult testResult) {
 		Throwable testResultException = testResult.getThrowable();
@@ -241,12 +233,10 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 		return testResultException;
 	}
 
-	@Nullable
 	private RuntimeException throwAsUncheckedException(Throwable t) {
 		throwAs(t);
-
 		// Appeasing the compiler: the following line will never be executed.
-		return null;
+		throw new IllegalStateException(t);
 	}
 
 	@SuppressWarnings("unchecked")

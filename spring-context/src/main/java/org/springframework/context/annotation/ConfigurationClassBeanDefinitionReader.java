@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,8 +122,8 @@ class ConfigurationClassBeanDefinitionReader {
 	 * Read a particular {@link ConfigurationClass}, registering bean definitions
 	 * for the class itself and all of its {@link Bean} methods.
 	 */
-	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass,
-			TrackedConditionEvaluator trackedConditionEvaluator) {
+	private void loadBeanDefinitionsForConfigurationClass(
+			ConfigurationClass configClass, TrackedConditionEvaluator trackedConditionEvaluator) {
 
 		if (trackedConditionEvaluator.shouldSkip(configClass)) {
 			String beanName = configClass.getBeanName();
@@ -140,6 +140,7 @@ class ConfigurationClassBeanDefinitionReader {
 		for (BeanMethod beanMethod : configClass.getBeanMethods()) {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}
+
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
 		loadBeanDefinitionsFromRegistrars(configClass.getImportBeanDefinitionRegistrars());
 	}
@@ -198,6 +199,11 @@ class ConfigurationClassBeanDefinitionReader {
 
 		// Has this effectively been overridden before (e.g. via XML)?
 		if (isOverriddenByExistingDefinition(beanMethod, beanName)) {
+			if (beanName.equals(beanMethod.getConfigurationClass().getBeanName())) {
+				throw new BeanDefinitionStoreException(beanMethod.getConfigurationClass().getResource().getDescription(),
+						beanName, "Bean name derived from @Bean method '" + beanMethod.getMetadata().getMethodName() +
+						"' clashes with bean name for containing configuration class; please make those names unique!");
+			}
 			return;
 		}
 
@@ -310,10 +316,7 @@ class ConfigurationClassBeanDefinitionReader {
 
 		Map<Class<?>, BeanDefinitionReader> readerInstanceCache = new HashMap<>();
 
-		for (Map.Entry<String, Class<? extends BeanDefinitionReader>> entry : importedResources.entrySet()) {
-			String resource = entry.getKey();
-			Class<? extends BeanDefinitionReader> readerClass = entry.getValue();
-
+		importedResources.forEach((resource, readerClass) -> {
 			// Default reader selection necessary?
 			if (BeanDefinitionReader.class == readerClass) {
 				if (StringUtils.endsWithIgnoreCase(resource, ".groovy")) {
@@ -347,7 +350,7 @@ class ConfigurationClassBeanDefinitionReader {
 
 			// TODO SPR-6310: qualify relative path locations as done in AbstractContextLoader.modifyLocations
 			reader.loadBeanDefinitions(resource);
-		}
+		});
 	}
 
 	private void loadBeanDefinitionsFromRegistrars(Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> registrars) {

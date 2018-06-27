@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class AutowireCandidateQualifier extends BeanMetadataAttributeAccessor {
 
-	public static String VALUE_KEY = "value";
+	public static final String VALUE_KEY = "value";
 
 	private final String typeName;
 

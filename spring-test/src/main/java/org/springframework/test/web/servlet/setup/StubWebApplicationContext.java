@@ -275,6 +275,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 	}
 
 	@Override
+	@Nullable
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
 			throws NoSuchBeanDefinitionException{
 
@@ -302,12 +303,12 @@ class StubWebApplicationContext implements WebApplicationContext {
 	//---------------------------------------------------------------------
 
 	@Override
-	public String getMessage(String code, @Nullable Object args[], @Nullable String defaultMessage, Locale locale) {
+	public String getMessage(String code, @Nullable Object[] args, @Nullable String defaultMessage, Locale locale) {
 		return this.messageSource.getMessage(code, args, defaultMessage, locale);
 	}
 
 	@Override
-	public String getMessage(String code, @Nullable Object args[], Locale locale) throws NoSuchMessageException {
+	public String getMessage(String code, @Nullable Object[] args, Locale locale) throws NoSuchMessageException {
 		return this.messageSource.getMessage(code, args, locale);
 	}
 
@@ -322,6 +323,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 	//---------------------------------------------------------------------
 
 	@Override
+	@Nullable
 	public ClassLoader getClassLoader() {
 		return ClassUtils.getDefaultClassLoader();
 	}
@@ -399,11 +401,13 @@ class StubWebApplicationContext implements WebApplicationContext {
 		}
 
 		@Override
+		@Nullable
 		public Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName) {
 			throw new UnsupportedOperationException("Dependency resolution not supported");
 		}
 
 		@Override
+		@Nullable
 		public Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName,
 				@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) {
 			throw new UnsupportedOperationException("Dependency resolution not supported");

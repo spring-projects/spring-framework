@@ -40,6 +40,6 @@ public interface NativeWebSocketSession extends WebSocketSession {
 	 * or {@code null} if not available
 	 */
 	@Nullable
-	<T> T getNativeSession(Class<T> requiredType);
+	<T> T getNativeSession(@Nullable Class<T> requiredType);
 
 }

@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 
 import static java.util.Collections.singletonList;
@@ -63,7 +64,7 @@ public class WebJarsResourceResolverTests {
 		this.locations = singletonList(new ClassPathResource("/META-INF/resources/webjars"));
 		this.resolver = new WebJarsResourceResolver();
 		this.chain = mock(ResourceResolverChain.class);
-		this.exchange = MockServerHttpRequest.get("").toExchange();
+		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 	}
 
 

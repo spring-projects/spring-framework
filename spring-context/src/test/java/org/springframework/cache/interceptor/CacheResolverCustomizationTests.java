@@ -58,13 +58,13 @@ public class CacheResolverCustomizationTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		this.cacheManager = context.getBean("cacheManager", CacheManager.class);
 		this.anotherCacheManager = context.getBean("anotherCacheManager", CacheManager.class);
-
 		this.simpleService = context.getBean(SimpleService.class);
 	}
+
 
 	@Test
 	public void noCustomization() {
@@ -160,12 +160,6 @@ public class CacheResolverCustomizationTests {
 		@Bean
 		public CacheManager cacheManager() {
 			return CacheTestUtils.createSimpleCacheManager("default", "primary", "secondary");
-		}
-
-		@Override
-		@Bean
-		public KeyGenerator keyGenerator() {
-			return null;
 		}
 
 		@Bean

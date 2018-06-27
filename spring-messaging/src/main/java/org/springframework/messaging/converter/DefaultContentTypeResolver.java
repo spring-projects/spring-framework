@@ -32,6 +32,7 @@ import org.springframework.util.MimeType;
  */
 public class DefaultContentTypeResolver implements ContentTypeResolver {
 
+	@Nullable
 	private MimeType defaultMimeType;
 
 
@@ -40,7 +41,7 @@ public class DefaultContentTypeResolver implements ContentTypeResolver {
 	 * {@link MessageHeaders#CONTENT_TYPE} header present.
 	 * <p>This property does not have a default value.
 	 */
-	public void setDefaultMimeType(MimeType defaultMimeType) {
+	public void setDefaultMimeType(@Nullable MimeType defaultMimeType) {
 		this.defaultMimeType = defaultMimeType;
 	}
 
@@ -48,12 +49,14 @@ public class DefaultContentTypeResolver implements ContentTypeResolver {
 	 * Return the default MIME type to use if no
 	 * {@link MessageHeaders#CONTENT_TYPE} header is present.
 	 */
+	@Nullable
 	public MimeType getDefaultMimeType() {
 		return this.defaultMimeType;
 	}
 
 
 	@Override
+	@Nullable
 	public MimeType resolve(@Nullable MessageHeaders headers) {
 		if (headers == null || headers.get(MessageHeaders.CONTENT_TYPE) == null) {
 			return this.defaultMimeType;

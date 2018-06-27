@@ -1,36 +1,26 @@
-= Spring Framework Reference Documentation
-The Spring Framework team and contributors https://github.com/spring-projects/spring-framework/graphs/contributors
+= Spring Framework Documentation
 :doc-root: https://docs.spring.io
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 
+Welcome to the Spring Framework reference documentation!
 
-The Spring Framework is a lightweight solution and a potential one-stop-shop for
-building your enterprise-ready applications. However, Spring is modular, allowing you to
-use only those parts that you need, without having to bring in the rest. You can use the
-IoC container, with any web framework on top, but you can also use only the
-<<data-access.adoc#orm-hibernate,Hibernate integration code>> or the
-<<data-access.adoc#jdbc-introduction,JDBC abstraction layer>>. The Spring Framework supports declarative
-transaction management, remote access to your logic through RMI or web services, and various
-options for persisting your data.
-It offers full-featured web frameworks such as <<web.adoc#mvc-introduction,Spring MVC>>
-and <<web.adoc#web-reactive, Spring WebFlux>>; and it enables you to
-integrate <<core.adoc#aop-introduction,AOP>> transparently into your software.
+Please read the <<overview.adoc#overview,*Overview*>> for a quick introduction including brief history,
+design philosophy, where to ask questions, and tips to get started. For information on
+"What's New", or "Migrating from previous versions", check the
+https://github.com/spring-projects/spring-framework/wiki[*Github Wiki*].
 
-This document is a reference guide to Spring Framework features. Questions on the
-Framework itself should be asked on StackOverflow (see https://spring.io/questions[]).
+The reference documentation is divided into several sections:
 
-This reference document provides the following sections:
-
-* <<overview.adoc#spring-introduction,Overview of the Spring Framework>>
-
-* <<core.adoc#spring-core,Core concepts such as IoC and AOP>>
-
-* <<testing.adoc#testing,Testing with Spring>>
-
-* <<data-access.adoc#spring-data-tier,Data access and transaction management>>
-
-* <<web.adoc#spring-web,Web frameworks>>
-
-* <<integration.adoc#spring-integration,Integration with other technologies>>
-
-* <<appendix.adoc#spring-appendices,Appendix>>
+[horizontal]
+<<core.adoc#spring-core,Core>> :: IoC container, Events, Resources, i18n, Validation,
+Data Binding, Type Conversion, SpEL, AOP.
+<<testing.adoc#testing,Testing>> :: Mock objects, TestContext framework,
+Spring MVC Test, WebTestClient.
+<<data-access.adoc#spring-data-tier,Data Access>> :: Transactions, DAO support, JDBC,
+ORM, Marshalling XML.
+<<web.adoc#spring-web,Web Servlet>> :: Spring MVC, WebSocket, SockJS, STOMP messaging.
+<<web-reactive.adoc#spring-webflux,Web Reactive>> :: Spring WebFlux,
+WebClient, WebSocket.
+<<integration.adoc#spring-integration,Integration>> :: Remoting, JMS, JCA, JMX, Email,
+Tasks, Scheduling, Cache.
+<<languages.adoc#languages,Languages>> :: Kotlin, Groovy, Dynamic languages.

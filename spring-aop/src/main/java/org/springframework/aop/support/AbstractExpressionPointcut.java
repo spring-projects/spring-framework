@@ -43,7 +43,7 @@ public abstract class AbstractExpressionPointcut implements ExpressionPointcut, 
 	/**
 	 * Set the location for debugging.
 	 */
-	public void setLocation(String location) {
+	public void setLocation(@Nullable String location) {
 		this.location = location;
 	}
 
@@ -58,7 +58,7 @@ public abstract class AbstractExpressionPointcut implements ExpressionPointcut, 
 		return this.location;
 	}
 
-	public void setExpression(String expression) {
+	public void setExpression(@Nullable String expression) {
 		this.expression = expression;
 		try {
 			onSetExpression(expression);
@@ -82,13 +82,14 @@ public abstract class AbstractExpressionPointcut implements ExpressionPointcut, 
 	 * @throws IllegalArgumentException if the expression is invalid
 	 * @see #setExpression
 	 */
-	protected void onSetExpression(String expression) throws IllegalArgumentException {
+	protected void onSetExpression(@Nullable String expression) throws IllegalArgumentException {
 	}
 
 	/**
 	 * Return this pointcut's expression.
 	 */
 	@Override
+	@Nullable
 	public String getExpression() {
 		return this.expression;
 	}

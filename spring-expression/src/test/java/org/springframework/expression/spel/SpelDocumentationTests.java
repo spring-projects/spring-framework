@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -438,9 +438,7 @@ public class SpelDocumentationTests extends AbstractExpressionTests {
 	public void testFunctions() throws Exception {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-
-		context.registerFunction("reverseString", StringUtils.class.getDeclaredMethod(
-				"reverseString", new Class[] { String.class }));
+		context.registerFunction("reverseString", StringUtils.class.getDeclaredMethod("reverseString", String.class));
 
 		String helloWorldReversed = parser.parseExpression("#reverseString('hello world')").getValue(context, String.class);
 		assertEquals("dlrow olleh",helloWorldReversed);

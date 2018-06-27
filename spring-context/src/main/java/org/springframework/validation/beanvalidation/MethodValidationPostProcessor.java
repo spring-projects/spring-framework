@@ -62,6 +62,7 @@ public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvis
 
 	private Class<? extends Annotation> validatedAnnotationType = Validated.class;
 
+	@Nullable
 	private Validator validator;
 
 

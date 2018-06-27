@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -246,10 +246,11 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	@Override
 	public PropertyValue[] getPropertyValues() {
-		return this.propertyValueList.toArray(new PropertyValue[this.propertyValueList.size()]);
+		return this.propertyValueList.toArray(new PropertyValue[0]);
 	}
 
 	@Override
+	@Nullable
 	public PropertyValue getPropertyValue(String propertyName) {
 		for (PropertyValue pv : this.propertyValueList) {
 			if (pv.getName().equals(propertyName)) {
@@ -284,11 +285,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		for (PropertyValue newPv : this.propertyValueList) {
 			// if there wasn't an old one, add it
 			PropertyValue pvOld = old.getPropertyValue(newPv.getName());
-			if (pvOld == null) {
-				changes.addPropertyValue(newPv);
-			}
-			else if (!pvOld.equals(newPv)) {
-				// it's changed
+			if (pvOld == null || !pvOld.equals(newPv)) {
 				changes.addPropertyValue(newPv);
 			}
 		}
@@ -317,7 +314,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 */
 	public void registerProcessedProperty(String propertyName) {
 		if (this.processedProperties == null) {
-			this.processedProperties = new HashSet<>();
+			this.processedProperties = new HashSet<>(4);
 		}
 		this.processedProperties.add(propertyName);
 	}

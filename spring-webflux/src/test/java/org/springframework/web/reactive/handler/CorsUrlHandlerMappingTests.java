@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.server.ServerWebExchange;
@@ -132,11 +133,10 @@ public class CorsUrlHandlerMappingTests {
 
 	private ServerWebExchange createExchange(HttpMethod method, String path, String origin) {
 
-		return MockServerHttpRequest
+		return MockServerWebExchange.from(MockServerHttpRequest
 				.method(method, "http://localhost" + path)
 				.header("Origin", origin)
-				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET")
-				.toExchange();
+				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET"));
 	}
 
 

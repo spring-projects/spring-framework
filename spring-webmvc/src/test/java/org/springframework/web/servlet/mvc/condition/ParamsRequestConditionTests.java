@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,11 @@ import org.junit.Test;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition.ParamExpression;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link ParamsRequestCondition}.
@@ -44,6 +48,14 @@ public class ParamsRequestConditionTests {
 	public void paramPresent() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("foo", "");
+
+		assertNotNull(new ParamsRequestCondition("foo").getMatchingCondition(request));
+	}
+
+	@Test // SPR-15831
+	public void paramPresentNullValue() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addParameter("foo", (String) null);
 
 		assertNotNull(new ParamsRequestCondition("foo").getMatchingCondition(request));
 	}
@@ -85,13 +97,35 @@ public class ParamsRequestConditionTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 
 		ParamsRequestCondition condition1 = new ParamsRequestCondition("foo", "bar", "baz");
-		ParamsRequestCondition condition2 = new ParamsRequestCondition("foo", "bar");
+		ParamsRequestCondition condition2 = new ParamsRequestCondition("foo=a", "bar");
 
 		int result = condition1.compareTo(condition2, request);
 		assertTrue("Invalid comparison result: " + result, result < 0);
 
 		result = condition2.compareTo(condition1, request);
 		assertTrue("Invalid comparison result: " + result, result > 0);
+	}
+
+	@Test // SPR-16674
+	public void compareToWithMoreSpecificMatchByValue() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+
+		ParamsRequestCondition condition1 = new ParamsRequestCondition("response_type=code");
+		ParamsRequestCondition condition2 = new ParamsRequestCondition("response_type");
+
+		int result = condition1.compareTo(condition2, request);
+		assertTrue("Invalid comparison result: " + result, result < 0);
+	}
+
+	@Test
+	public void compareToWithNegatedMatch() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+
+		ParamsRequestCondition condition1 = new ParamsRequestCondition("response_type!=code");
+		ParamsRequestCondition condition2 = new ParamsRequestCondition("response_type");
+
+		assertEquals("Negated match should not count as more specific",
+				0, condition1.compareTo(condition2, request));
 	}
 
 	@Test

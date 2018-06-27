@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,15 @@ public class HeaderResultMatchers {
 			List<Object> actual = result.getResponse().getHeaderValues(name);
 			assertEquals("Response header '" + name + "'", Arrays.asList(values), actual);
 		};
+	}
+
+	/**
+	 * Assert that the named response header exists.
+	 * @since 5.0.3
+	 */
+	public ResultMatcher exists(final String name) {
+		return result -> assertTrue("Response should contain header '" + name + "'",
+				result.getResponse().containsHeader(name));
 	}
 
 	/**

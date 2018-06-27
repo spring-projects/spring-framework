@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -46,6 +47,7 @@ import org.springframework.messaging.handler.invocation.HandlerMethodArgumentRes
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
+import org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry;
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.messaging.simp.user.DefaultUserDestinationResolver;
@@ -92,8 +94,8 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Test fixture for MessageBrokerBeanDefinitionParser.
- * See test configuration files websocket-config-broker-*.xml.
+ * Test fixture for {@link MessageBrokerBeanDefinitionParser}.
+ * Also see test configuration files websocket-config-broker-*.xml.
  *
  * @author Brian Clozel
  * @author Artem Bilan
@@ -145,6 +147,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertEquals(Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp"), subProtocolWsHandler.getSubProtocols());
 		assertEquals(25 * 1000, subProtocolWsHandler.getSendTimeLimit());
 		assertEquals(1024 * 1024, subProtocolWsHandler.getSendBufferSizeLimit());
+		assertEquals(30 * 1000, subProtocolWsHandler.getTimeToFirstMessage());
 
 		Map<String, SubProtocolHandler> handlerMap = subProtocolWsHandler.getProtocolHandlerMap();
 		StompSubProtocolHandler stompHandler = (StompSubProtocolHandler) handlerMap.get("v12.stomp");
@@ -174,8 +177,9 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertFalse(defaultSockJsService.shouldSuppressCors());
 
 		ThreadPoolTaskScheduler scheduler = (ThreadPoolTaskScheduler) defaultSockJsService.getTaskScheduler();
-		assertEquals(Runtime.getRuntime().availableProcessors(), scheduler.getScheduledThreadPoolExecutor().getCorePoolSize());
-		assertTrue(scheduler.getScheduledThreadPoolExecutor().getRemoveOnCancelPolicy());
+		ScheduledThreadPoolExecutor executor = scheduler.getScheduledThreadPoolExecutor();
+		assertEquals(Runtime.getRuntime().availableProcessors(), executor.getCorePoolSize());
+		assertTrue(executor.getRemoveOnCancelPolicy());
 
 		interceptors = defaultSockJsService.getHandshakeInterceptors();
 		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class),
@@ -200,6 +204,8 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertNotNull(brokerMessageHandler);
 		Collection<String> prefixes = brokerMessageHandler.getDestinationPrefixes();
 		assertEquals(Arrays.asList("/topic", "/queue"), new ArrayList<>(prefixes));
+		DefaultSubscriptionRegistry registry = (DefaultSubscriptionRegistry) brokerMessageHandler.getSubscriptionRegistry();
+		assertEquals("my-selector", registry.getSelectorHeaderName());
 		assertNotNull(brokerMessageHandler.getTaskScheduler());
 		assertArrayEquals(new long[] {15000, 15000}, brokerMessageHandler.getHeartbeatValue());
 
@@ -226,8 +232,9 @@ public class MessageBrokerBeanDefinitionParserTests {
 
 		assertNotNull(this.appContext.getBean("webSocketScopeConfigurer", CustomScopeConfigurer.class));
 
-		DirectFieldAccessor subscriptionRegistryAccessor = new DirectFieldAccessor(brokerMessageHandler.getSubscriptionRegistry());
-		String pathSeparator = (String) new DirectFieldAccessor(subscriptionRegistryAccessor.getPropertyValue("pathMatcher")).getPropertyValue("pathSeparator");
+		DirectFieldAccessor accessor = new DirectFieldAccessor(registry);
+		Object pathMatcher = accessor.getPropertyValue("pathMatcher");
+		String pathSeparator = (String) new DirectFieldAccessor(pathMatcher).getPropertyValue("pathSeparator");
 		assertEquals(".", pathSeparator);
 	}
 
@@ -272,9 +279,9 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertEquals(5000, messageBroker.getSystemHeartbeatSendInterval());
 		assertThat(messageBroker.getDestinationPrefixes(), Matchers.containsInAnyOrder("/topic","/queue"));
 
-		List<Class<? extends MessageHandler>> subscriberTypes =
-				Arrays.<Class<? extends MessageHandler>>asList(SimpAnnotationMethodMessageHandler.class,
-						UserDestinationMessageHandler.class, StompBrokerRelayMessageHandler.class);
+		List<Class<? extends MessageHandler>> subscriberTypes = Arrays.asList(
+				SimpAnnotationMethodMessageHandler.class, UserDestinationMessageHandler.class,
+				StompBrokerRelayMessageHandler.class);
 		testChannel("clientInboundChannel", subscriberTypes, 2);
 		testExecutor("clientInboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
@@ -282,8 +289,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		testChannel("clientOutboundChannel", subscriberTypes, 1);
 		testExecutor("clientOutboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
-		subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(
-				StompBrokerRelayMessageHandler.class, UserDestinationMessageHandler.class);
+		subscriberTypes = Arrays.asList(StompBrokerRelayMessageHandler.class, UserDestinationMessageHandler.class);
 		testChannel("brokerChannel", subscriberTypes, 1);
 		try {
 			this.appContext.getBean("brokerChannelExecutor", ThreadPoolTaskExecutor.class);
@@ -314,10 +320,14 @@ public class MessageBrokerBeanDefinitionParserTests {
 		String expected = "WebSocketSession\\[0 current WS\\(0\\)-HttpStream\\(0\\)-HttpPoll\\(0\\), " +
 				"0 total, 0 closed abnormally \\(0 connect failure, 0 send limit, 0 transport error\\)\\], " +
 				"stompSubProtocol\\[processed CONNECT\\(0\\)-CONNECTED\\(0\\)-DISCONNECT\\(0\\)\\], " +
-				"stompBrokerRelay\\[0 sessions, relayhost:1234 \\(not available\\), processed CONNECT\\(0\\)-CONNECTED\\(0\\)-DISCONNECT\\(0\\)\\], " +
-				"inboundChannel\\[pool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d\\], " +
-				"outboundChannelpool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d\\], " +
-				"sockJsScheduler\\[pool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d\\]";
+				"stompBrokerRelay\\[0 sessions, relayhost:1234 \\(not available\\), " +
+				"processed CONNECT\\(0\\)-CONNECTED\\(0\\)-DISCONNECT\\(0\\)\\], " +
+				"inboundChannel\\[pool size = \\d, active threads = \\d, queued tasks = \\d, " +
+				"completed tasks = \\d\\], " +
+				"outboundChannelpool size = \\d, active threads = \\d, queued tasks = \\d, " +
+				"completed tasks = \\d\\], " +
+				"sockJsScheduler\\[pool size = \\d, active threads = \\d, queued tasks = \\d, " +
+				"completed tasks = \\d\\]";
 
 		assertTrue("\nExpected: " + expected.replace("\\", "") + "\n  Actual: " + actual, actual.matches(expected));
 	}
@@ -353,7 +363,8 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertEquals(MimeTypeUtils.APPLICATION_JSON, ((DefaultContentTypeResolver) resolver).getDefaultMimeType());
 
 		DirectFieldAccessor handlerAccessor = new DirectFieldAccessor(annotationMethodMessageHandler);
-		String pathSeparator = (String) new DirectFieldAccessor(handlerAccessor.getPropertyValue("pathMatcher")).getPropertyValue("pathSeparator");
+		Object pathMatcher = handlerAccessor.getPropertyValue("pathMatcher");
+		String pathSeparator = (String) new DirectFieldAccessor(pathMatcher).getPropertyValue("pathSeparator");
 		assertEquals(".", pathSeparator);
 	}
 

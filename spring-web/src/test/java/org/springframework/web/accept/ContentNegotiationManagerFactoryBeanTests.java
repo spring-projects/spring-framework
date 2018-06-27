@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockServletContext;
@@ -32,7 +33,7 @@ import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for {@link ContentNegotiationManagerFactoryBean} tests.
@@ -74,19 +75,38 @@ public class ContentNegotiationManagerFactoryBeanTests {
 		this.servletRequest.setRequestURI("/flower.foobarbaz");
 
 		assertEquals("Should ignore unknown extensions by default",
-				Collections.<MediaType>emptyList(), manager.resolveMediaTypes(this.webRequest));
+				ContentNegotiationStrategy.MEDIA_TYPE_ALL_LIST, manager.resolveMediaTypes(this.webRequest));
 
 		this.servletRequest.setRequestURI("/flower");
 		this.servletRequest.setParameter("format", "gif");
 
 		assertEquals("Should not resolve request parameters by default",
-				Collections.<MediaType>emptyList(), manager.resolveMediaTypes(this.webRequest));
+				ContentNegotiationStrategy.MEDIA_TYPE_ALL_LIST, manager.resolveMediaTypes(this.webRequest));
 
 		this.servletRequest.setRequestURI("/flower");
 		this.servletRequest.addHeader("Accept", MediaType.IMAGE_GIF_VALUE);
 
 		assertEquals("Should resolve Accept header by default",
 				Collections.singletonList(MediaType.IMAGE_GIF), manager.resolveMediaTypes(this.webRequest));
+	}
+
+	@Test
+	public void explicitStrategies() throws Exception {
+		Map<String, MediaType> mediaTypes = Collections.singletonMap("bar", new MediaType("application", "bar"));
+		ParameterContentNegotiationStrategy strategy1 = new ParameterContentNegotiationStrategy(mediaTypes);
+		HeaderContentNegotiationStrategy strategy2 = new HeaderContentNegotiationStrategy();
+		List<ContentNegotiationStrategy> strategies = Arrays.asList(strategy1, strategy2);
+		this.factoryBean.setStrategies(strategies);
+		this.factoryBean.afterPropertiesSet();
+		ContentNegotiationManager manager = this.factoryBean.getObject();
+
+		assertEquals(strategies, manager.getStrategies());
+
+		this.servletRequest.setRequestURI("/flower");
+		this.servletRequest.addParameter("format", "bar");
+		assertEquals(Collections.singletonList(new MediaType("application", "bar")),
+				manager.resolveMediaTypes(this.webRequest));
+
 	}
 
 	@Test
@@ -146,7 +166,7 @@ public class ContentNegotiationManagerFactoryBeanTests {
 		ContentNegotiationManager manager = this.factoryBean.getObject();
 
 		this.servletRequest.setRequestURI("/flower");
-		this.servletRequest.setParameter("format", "xyz");
+		this.servletRequest.setParameter("format", "invalid");
 
 		manager.resolveMediaTypes(this.webRequest);
 	}
@@ -160,7 +180,7 @@ public class ContentNegotiationManagerFactoryBeanTests {
 		this.servletRequest.setRequestURI("/flower");
 		this.servletRequest.addHeader("Accept", MediaType.IMAGE_GIF_VALUE);
 
-		assertEquals(Collections.<MediaType>emptyList(), manager.resolveMediaTypes(this.webRequest));
+		assertEquals(ContentNegotiationStrategy.MEDIA_TYPE_ALL_LIST, manager.resolveMediaTypes(this.webRequest));
 	}
 
 	@Test

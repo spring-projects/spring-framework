@@ -57,7 +57,7 @@ import org.slf4j.spi.LocationAwareLogger;
  * (or another SLF4J provider) onto your classpath, without any extra bridges,
  * and let the framework auto-adapt to your choice.
  *
- * @author Juergen Hoeller
+ * @author Juergen Hoeller (for the {@code spring-jcl} variant)
  * @since 5.0
  */
 public abstract class LogFactory {
@@ -206,92 +206,108 @@ public abstract class LogFactory {
 
 		@Override
 		public boolean isFatalEnabled() {
-			return logger.isEnabled(Level.FATAL, null, null);
+			return this.logger.isEnabled(Level.FATAL);
 		}
 
 		@Override
 		public boolean isErrorEnabled() {
-			return logger.isEnabled(Level.ERROR, null, null);
+			return this.logger.isEnabled(Level.ERROR);
 		}
 
 		@Override
 		public boolean isWarnEnabled() {
-			return logger.isEnabled(Level.WARN, null, null);
+			return this.logger.isEnabled(Level.WARN);
 		}
 
 		@Override
 		public boolean isInfoEnabled() {
-			return logger.isEnabled(Level.INFO, null, null);
+			return this.logger.isEnabled(Level.INFO);
 		}
 
 		@Override
 		public boolean isDebugEnabled() {
-			return logger.isEnabled(Level.DEBUG, null, null);
+			return this.logger.isEnabled(Level.DEBUG);
 		}
 
 		@Override
 		public boolean isTraceEnabled() {
-			return logger.isEnabled(Level.TRACE, null, null);
+			return this.logger.isEnabled(Level.TRACE);
 		}
 
 		@Override
 		public void fatal(Object message) {
-			logger.logIfEnabled(FQCN, Level.FATAL, null, message, null);
+			log(Level.FATAL, message, null);
 		}
 
 		@Override
 		public void fatal(Object message, Throwable exception) {
-			logger.logIfEnabled(FQCN, Level.FATAL, null, message, exception);
+			log(Level.FATAL, message, exception);
 		}
 
 		@Override
 		public void error(Object message) {
-			logger.logIfEnabled(FQCN, Level.ERROR, null, message, null);
+			log(Level.ERROR, message, null);
 		}
 
 		@Override
 		public void error(Object message, Throwable exception) {
-			logger.logIfEnabled(FQCN, Level.ERROR, null, message, exception);
+			log(Level.ERROR, message, exception);
 		}
 
 		@Override
 		public void warn(Object message) {
-			logger.logIfEnabled(FQCN, Level.WARN, null, message, null);
+			log(Level.WARN, message, null);
 		}
 
 		@Override
 		public void warn(Object message, Throwable exception) {
-			logger.logIfEnabled(FQCN, Level.WARN, null, message, exception);
+			log(Level.WARN, message, exception);
 		}
 
 		@Override
 		public void info(Object message) {
-			logger.logIfEnabled(FQCN, Level.INFO, null, message, null);
+			log(Level.INFO, message, null);
 		}
 
 		@Override
 		public void info(Object message, Throwable exception) {
-			logger.logIfEnabled(FQCN, Level.INFO, null, message, exception);
+			log(Level.INFO, message, exception);
 		}
 
 		@Override
 		public void debug(Object message) {
-			logger.logIfEnabled(FQCN, Level.DEBUG, null, message, null);
+			log(Level.DEBUG, message, null);
 		}
 
 		@Override
 		public void debug(Object message, Throwable exception) {
-			logger.logIfEnabled(FQCN, Level.DEBUG, null, message, exception);
+			log(Level.DEBUG, message, exception);
 		}
 
 		@Override
 		public void trace(Object message) {
-			logger.logIfEnabled(FQCN, Level.TRACE, null, message, null);
+			log(Level.TRACE, message, null);
 		}
 
 		@Override
 		public void trace(Object message, Throwable exception) {
-			logger.logIfEnabled(FQCN, Level.TRACE, null, message, exception);
+			log(Level.TRACE, message, exception);
+		}
+
+		private void log(Level level, Object message, Throwable exception) {
+			if (message instanceof String) {
+				// Explicitly pass a String argument, avoiding Log4j's argument expansion
+				// for message objects in case of "{}" sequences (SPR-16226)
+				if (exception != null) {
+					this.logger.logIfEnabled(FQCN, level, null, (String) message, exception);
+				}
+				else {
+					this.logger.logIfEnabled(FQCN, level, null, (String) message);
+				}
+			}
+			else {
+				this.logger.logIfEnabled(FQCN, level, null, message, exception);
+			}
 		}
 	}
 
@@ -415,74 +431,87 @@ public abstract class LogFactory {
 			super(logger);
 		}
 
+		@Override
 		public void fatal(Object message) {
 			error(message);
 		}
 
+		@Override
 		public void fatal(Object message, Throwable exception) {
 			error(message, exception);
 		}
 
+		@Override
 		public void error(Object message) {
 			if (message instanceof String || this.logger.isErrorEnabled()) {
 				this.logger.log(null, FQCN, LocationAwareLogger.ERROR_INT, String.valueOf(message), null, null);
 			}
 		}
 
+		@Override
 		public void error(Object message, Throwable exception) {
 			if (message instanceof String || this.logger.isErrorEnabled()) {
 				this.logger.log(null, FQCN, LocationAwareLogger.ERROR_INT, String.valueOf(message), null, exception);
 			}
 		}
 
+		@Override
 		public void warn(Object message) {
 			if (message instanceof String || this.logger.isWarnEnabled()) {
 				this.logger.log(null, FQCN, LocationAwareLogger.WARN_INT, String.valueOf(message), null, null);
 			}
 		}
 
+		@Override
 		public void warn(Object message, Throwable exception) {
 			if (message instanceof String || this.logger.isWarnEnabled()) {
 				this.logger.log(null, FQCN, LocationAwareLogger.WARN_INT, String.valueOf(message), null, exception);
 			}
 		}
 
+		@Override
 		public void info(Object message) {
 			if (message instanceof String || this.logger.isInfoEnabled()) {
 				this.logger.log(null, FQCN, LocationAwareLogger.INFO_INT, String.valueOf(message), null, null);
 			}
 		}
 
+		@Override
 		public void info(Object message, Throwable exception) {
 			if (message instanceof String || this.logger.isInfoEnabled()) {
 				this.logger.log(null, FQCN, LocationAwareLogger.INFO_INT, String.valueOf(message), null, exception);
 			}
 		}
 
+		@Override
 		public void debug(Object message) {
 			if (message instanceof String || this.logger.isDebugEnabled()) {
 				this.logger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, String.valueOf(message), null, null);
 			}
 		}
 
+		@Override
 		public void debug(Object message, Throwable exception) {
 			if (message instanceof String || this.logger.isDebugEnabled()) {
 				this.logger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, String.valueOf(message), null, exception);
 			}
 		}
 
+		@Override
 		public void trace(Object message) {
 			if (message instanceof String || this.logger.isTraceEnabled()) {
 				this.logger.log(null, FQCN, LocationAwareLogger.TRACE_INT, String.valueOf(message), null, null);
 			}
 		}
 
+		@Override
 		public void trace(Object message, Throwable exception) {
 			if (message instanceof String || this.logger.isTraceEnabled()) {
 				this.logger.log(null, FQCN, LocationAwareLogger.TRACE_INT, String.valueOf(message), null, exception);
 			}
 		}
 
+		@Override
 		protected Object readResolve() {
 			return Slf4jDelegate.createLocationAwareLog(this.name);
 		}
@@ -607,6 +636,7 @@ public abstract class LogFactory {
 			super(level, msg);
 		}
 
+		@Override
 		public String getSourceClassName() {
 			if (!this.resolved) {
 				resolve();
@@ -614,11 +644,13 @@ public abstract class LogFactory {
 			return super.getSourceClassName();
 		}
 
+		@Override
 		public void setSourceClassName(String sourceClassName) {
 			super.setSourceClassName(sourceClassName);
 			this.resolved = true;
 		}
 
+		@Override
 		public String getSourceMethodName() {
 			if (!this.resolved) {
 				resolve();
@@ -626,6 +658,7 @@ public abstract class LogFactory {
 			return super.getSourceMethodName();
 		}
 
+		@Override
 		public void setSourceMethodName(String sourceMethodName) {
 			super.setSourceMethodName(sourceMethodName);
 			this.resolved = true;

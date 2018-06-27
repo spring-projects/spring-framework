@@ -267,7 +267,7 @@ public class MockPageContext extends PageContext {
 				return this.request.getAttributeNames();
 			case SESSION_SCOPE:
 				HttpSession session = this.request.getSession(false);
-				return (session != null ? session.getAttributeNames() : null);
+				return (session != null ? session.getAttributeNames() : Collections.emptyEnumeration());
 			case APPLICATION_SCOPE:
 				return this.servletContext.getAttributeNames();
 			default:

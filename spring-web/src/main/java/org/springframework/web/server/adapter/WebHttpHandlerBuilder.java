@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,6 +79,9 @@ public class WebHttpHandlerBuilder {
 
 	private final WebHandler webHandler;
 
+	@Nullable
+	private final ApplicationContext applicationContext;
+
 	private final List<WebFilter> filters = new ArrayList<>();
 
 	private final List<WebExceptionHandler> exceptionHandlers = new ArrayList<>();
@@ -94,19 +97,20 @@ public class WebHttpHandlerBuilder {
 
 
 	/**
-	 * Private constructor.
+	 * Private constructor to use when initialized from an ApplicationContext.
 	 */
-	private WebHttpHandlerBuilder(WebHandler webHandler) {
+	private WebHttpHandlerBuilder(WebHandler webHandler, @Nullable ApplicationContext applicationContext) {
 		Assert.notNull(webHandler, "WebHandler must not be null");
 		this.webHandler = webHandler;
+		this.applicationContext = applicationContext;
 	}
 
 	/**
 	 * Copy constructor.
 	 */
 	private WebHttpHandlerBuilder(WebHttpHandlerBuilder other) {
-
 		this.webHandler = other.webHandler;
+		this.applicationContext = other.applicationContext;
 		this.filters.addAll(other.filters);
 		this.exceptionHandlers.addAll(other.exceptionHandlers);
 		this.sessionManager = other.sessionManager;
@@ -121,33 +125,32 @@ public class WebHttpHandlerBuilder {
 	 * @return the prepared builder
 	 */
 	public static WebHttpHandlerBuilder webHandler(WebHandler webHandler) {
-		return new WebHttpHandlerBuilder(webHandler);
+		return new WebHttpHandlerBuilder(webHandler, null);
 	}
 
 	/**
 	 * Static factory method to create a new builder instance by detecting beans
 	 * in an {@link ApplicationContext}. The following are detected:
 	 * <ul>
-	 *	<li>{@link WebHandler} [1] -- looked up by the name
-	 *	{@link #WEB_HANDLER_BEAN_NAME}.
-	 *	<li>{@link WebFilter} [0..N] -- detected by type and ordered,
-	 *	see {@link AnnotationAwareOrderComparator}.
-	 *	<li>{@link WebExceptionHandler} [0..N] -- detected by type and
-	 *	ordered.
-	 *	<li>{@link WebSessionManager} [0..1] -- looked up by the name
-	 *	{@link #WEB_SESSION_MANAGER_BEAN_NAME}.
-	 *  <li>{@link ServerCodecConfigurer} [0..1] -- looked up by the name
-	 *	{@link #SERVER_CODEC_CONFIGURER_BEAN_NAME}.
-	 *<li>{@link LocaleContextResolver} [0..1] -- looked up by the name
-	 *	{@link #LOCALE_CONTEXT_RESOLVER_BEAN_NAME}.
+	 * <li>{@link WebHandler} [1] -- looked up by the name
+	 * {@link #WEB_HANDLER_BEAN_NAME}.
+	 * <li>{@link WebFilter} [0..N] -- detected by type and ordered,
+	 * see {@link AnnotationAwareOrderComparator}.
+	 * <li>{@link WebExceptionHandler} [0..N] -- detected by type and
+	 * ordered.
+	 * <li>{@link WebSessionManager} [0..1] -- looked up by the name
+	 * {@link #WEB_SESSION_MANAGER_BEAN_NAME}.
+	 * <li>{@link ServerCodecConfigurer} [0..1] -- looked up by the name
+	 * {@link #SERVER_CODEC_CONFIGURER_BEAN_NAME}.
+	 * <li>{@link LocaleContextResolver} [0..1] -- looked up by the name
+	 * {@link #LOCALE_CONTEXT_RESOLVER_BEAN_NAME}.
 	 * </ul>
 	 * @param context the application context to use for the lookup
 	 * @return the prepared builder
 	 */
 	public static WebHttpHandlerBuilder applicationContext(ApplicationContext context) {
-
 		WebHttpHandlerBuilder builder = new WebHttpHandlerBuilder(
-				context.getBean(WEB_HANDLER_BEAN_NAME, WebHandler.class));
+				context.getBean(WEB_HANDLER_BEAN_NAME, WebHandler.class), context);
 
 		// Autowire lists for @Bean + @Order
 
@@ -261,10 +264,7 @@ public class WebHttpHandlerBuilder {
 	 * Build the {@link HttpHandler}.
 	 */
 	public HttpHandler build() {
-
-		WebHandler decorated;
-
-		decorated = new FilteringWebHandler(this.webHandler, this.filters);
+		WebHandler decorated = new FilteringWebHandler(this.webHandler, this.filters);
 		decorated = new ExceptionHandlingWebHandler(decorated,  this.exceptionHandlers);
 
 		HttpWebHandlerAdapter adapted = new HttpWebHandlerAdapter(decorated);
@@ -277,6 +277,10 @@ public class WebHttpHandlerBuilder {
 		if (this.localeContextResolver != null) {
 			adapted.setLocaleContextResolver(this.localeContextResolver);
 		}
+		if (this.applicationContext != null) {
+			adapted.setApplicationContext(this.applicationContext);
+		}
+		adapted.afterPropertiesSet();
 
 		return adapted;
 	}
@@ -296,7 +300,6 @@ public class WebHttpHandlerBuilder {
 		private List<WebFilter> filters = Collections.emptyList();
 
 		private List<WebExceptionHandler> exceptionHandlers = Collections.emptyList();
-
 
 		@Autowired(required = false)
 		public void setFilters(List<WebFilter> filters) {

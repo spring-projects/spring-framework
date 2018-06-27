@@ -17,7 +17,7 @@
 package org.springframework.jdbc.core.namedparam
 
 /**
- * Extension for [MapSqlParameterSource.addValue] providing Array like setter
+ * Extension for [MapSqlParameterSource.addValue] providing Array like setter.
  *
  * ```kotlin
  * source["age"] = 3
@@ -31,7 +31,7 @@ operator fun MapSqlParameterSource.set(paramName: String, value: Any) {
 }
 
 /**
- * Extension for [MapSqlParameterSource.addValue] providing Array like setter
+ * Extension for [MapSqlParameterSource.addValue] providing Array like setter.
  *
  * ```kotlin
  * source["age", JDBCType.INTEGER.vendorTypeNumber] = 3

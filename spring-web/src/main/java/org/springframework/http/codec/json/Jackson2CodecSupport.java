@@ -28,6 +28,8 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
@@ -56,10 +58,13 @@ public abstract class Jackson2CodecSupport {
 	private static final String JSON_VIEW_HINT_ERROR =
 			"@JsonView only supported for write hints with exactly 1 class argument: ";
 
-	protected static final List<MimeType> JSON_MIME_TYPES = Arrays.asList(
-				new MimeType("application", "json", StandardCharsets.UTF_8),
-				new MimeType("application", "*+json", StandardCharsets.UTF_8));
+	private static final List<MimeType> DEFAULT_MIME_TYPES = Collections.unmodifiableList(
+			Arrays.asList(
+					new MimeType("application", "json", StandardCharsets.UTF_8),
+					new MimeType("application", "*+json", StandardCharsets.UTF_8)));
 
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final ObjectMapper objectMapper;
 
@@ -72,16 +77,38 @@ public abstract class Jackson2CodecSupport {
 	protected Jackson2CodecSupport(ObjectMapper objectMapper, MimeType... mimeTypes) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 		this.objectMapper = objectMapper;
-		this.mimeTypes = !ObjectUtils.isEmpty(mimeTypes) ? Arrays.asList(mimeTypes) : JSON_MIME_TYPES;
+		this.mimeTypes = !ObjectUtils.isEmpty(mimeTypes) ?
+				Collections.unmodifiableList(Arrays.asList(mimeTypes)) : DEFAULT_MIME_TYPES;
 	}
 
 
-	protected ObjectMapper objectMapper() {
+	public ObjectMapper getObjectMapper() {
 		return this.objectMapper;
 	}
 
+	/**
+	 * Subclasses should expose this as "decodable" or "encodable" mime types.
+	 */
+	protected List<MimeType> getMimeTypes() {
+		return this.mimeTypes;
+	}
+
+
 	protected boolean supportsMimeType(@Nullable MimeType mimeType) {
 		return (mimeType == null || this.mimeTypes.stream().anyMatch(m -> m.isCompatibleWith(mimeType)));
+	}
+
+	/**
+	 * Helper method to obtain the logger to use from the Map of hints, or fall
+	 * back on the default logger. This may be used for example to override
+	 * logging, e.g. for a multipart request where the full map of part values
+	 * has already been logged.
+	 * @param hints the hints passed to the encode method
+	 * @return the logger to use
+	 * @since 5.1
+	 */
+	protected Log getLogger(@Nullable Map<String, Object> hints) {
+		return hints != null ? ((Log) hints.getOrDefault(Log.class.getName(), logger)) : logger;
 	}
 
 	protected JavaType getJavaType(Type type, @Nullable Class<?> contextClass) {

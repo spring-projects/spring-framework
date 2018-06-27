@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 package org.springframework.core.io.buffer;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
 
 import org.springframework.util.Assert;
@@ -78,6 +80,22 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 	public DataBuffer wrap(byte[] bytes) {
 		ByteBuf byteBuf = Unpooled.wrappedBuffer(bytes);
 		return new NettyDataBuffer(byteBuf, this);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>This implementation uses Netty's {@link CompositeByteBuf}.
+	 */
+	@Override
+	public DataBuffer join(List<? extends DataBuffer> dataBuffers) {
+		Assert.notNull(dataBuffers, "'dataBuffers' must not be null");
+		CompositeByteBuf composite = this.byteBufAllocator.compositeBuffer(dataBuffers.size());
+		for (DataBuffer dataBuffer : dataBuffers) {
+			Assert.isInstanceOf(NettyDataBuffer.class, dataBuffer);
+			NettyDataBuffer nettyDataBuffer = (NettyDataBuffer) dataBuffer;
+			composite.addComponent(true, nettyDataBuffer.getNativeBuffer());
+		}
+		return new NettyDataBuffer(composite, this);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,17 +34,15 @@ import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
 
 /**
  * Base class for {@link org.springframework.web.WebApplicationInitializer}
- * implementations that register a {@link DispatcherHandler} in the servlet context, wrapping it in
- * a {@link ServletHttpHandlerAdapter}.
- *
- * <p>Concrete implementations are required to implement
- * {@link #createApplicationContext()}, which gets invoked from
- * {@link #registerDispatcherHandler(ServletContext)}. Further customization can be achieved by
- * overriding {@link #customizeRegistration(ServletRegistration.Dynamic)}.
+ * implementations that register a {@link DispatcherHandler} in the servlet
+ * context, wrapping it in a {@link ServletHttpHandlerAdapter}.
  *
  * @author Arjen Poutsma
  * @since 5.0
+ * @deprecated as of 5.0.2, in favor of
+ * {@link org.springframework.web.server.adapter.AbstractReactiveWebInitializer}
  */
+@Deprecated
 public abstract class AbstractDispatcherHandlerInitializer implements WebApplicationInitializer {
 
 	/**
@@ -77,28 +75,25 @@ public abstract class AbstractDispatcherHandlerInitializer implements WebApplica
 	 */
 	protected void registerDispatcherHandler(ServletContext servletContext) {
 		String servletName = getServletName();
-		Assert.hasLength(servletName, "getServletName() must not return empty or null");
+		Assert.hasLength(servletName, "getServletName() must not return null or empty");
 
 		ApplicationContext applicationContext = createApplicationContext();
-		Assert.notNull(applicationContext,
-				"createApplicationContext() did not return an application " +
-				"context for servlet [" + servletName + "]");
+		Assert.notNull(applicationContext, "createApplicationContext() must not return null");
 
 		refreshApplicationContext(applicationContext);
 		registerCloseListener(servletContext, applicationContext);
 
 		WebHandler dispatcherHandler = createDispatcherHandler(applicationContext);
-		Assert.notNull(dispatcherHandler,
-				"createDispatcherHandler() did not return a WebHandler for servlet [" + servletName + "]");
+		Assert.notNull(dispatcherHandler, "createDispatcherHandler(ApplicationContext) must not return null");
 
 		ServletHttpHandlerAdapter handlerAdapter = createHandlerAdapter(dispatcherHandler);
-		Assert.notNull(handlerAdapter,
-				"createHttpHandler() did not return a ServletHttpHandlerAdapter for servlet [" + servletName + "]");
+		Assert.notNull(handlerAdapter, "createHandlerAdapter(WebHandler) must not return null");
 
 		ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, handlerAdapter);
-		Assert.notNull(registration,
-				"Failed to register servlet with name '" + servletName + "'." +
-				"Check if there is another servlet registered under the same name.");
+		if (registration == null) {
+			throw new IllegalStateException("Failed to register servlet with name '" + servletName + "'. " +
+					"Check if there is another servlet registered under the same name.");
+		}
 
 		registration.setLoadOnStartup(1);
 		registration.addMapping(getServletMapping());

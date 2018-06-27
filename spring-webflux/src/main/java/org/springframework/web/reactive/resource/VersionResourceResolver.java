@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -135,7 +134,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 				prefixedPatterns.add(versionPrefix + pattern);
 			}
 		}
-		return addVersionStrategy(new FixedVersionStrategy(version), prefixedPatterns.toArray(new String[0]));
+		return addVersionStrategy(new FixedVersionStrategy(version), StringUtils.toStringArray(prefixedPatterns));
 	}
 
 	/**
@@ -172,36 +171,27 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 			return Mono.empty();
 		}
 
-		String candidateVersion = versionStrategy.extractVersion(requestPath);
-		if (StringUtils.isEmpty(candidateVersion)) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("No version found in path \"" + requestPath + "\"");
-			}
+		String candidate = versionStrategy.extractVersion(requestPath);
+		if (StringUtils.isEmpty(candidate)) {
 			return Mono.empty();
 		}
 
-		String simplePath = versionStrategy.removeVersion(requestPath, candidateVersion);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Extracted version from path, re-resolving without version: \"" + simplePath + "\"");
-		}
-
+		String simplePath = versionStrategy.removeVersion(requestPath, candidate);
 		return chain.resolveResource(exchange, simplePath, locations)
-				.flatMap(baseResource -> {
-					String actualVersion = versionStrategy.getResourceVersion(baseResource);
-					if (candidateVersion.equals(actualVersion)) {
-						if (logger.isTraceEnabled()) {
-							logger.trace("Resource matches extracted version [" + candidateVersion + "]");
-						}
-						return Mono.just(new FileNameVersionedResource(baseResource, candidateVersion));
-					}
-					else {
-						if (logger.isTraceEnabled()) {
-							logger.trace("Potential resource found for \"" + requestPath + "\", but version [" +
-									candidateVersion + "] does not match");
-						}
-						return Mono.empty();
-					}
-				});
+				.filterWhen(resource -> versionStrategy.getResourceVersion(resource)
+						.map(actual -> {
+							if (candidate.equals(actual)) {
+								return true;
+							}
+							else {
+								if (logger.isTraceEnabled()) {
+									logger.trace("Found resource for \"" + requestPath + "\", but version [" +
+											candidate + "] does not match");
+								}
+								return false;
+							}
+						}))
+				.map(resource -> new FileNameVersionedResource(resource, candidate));
 	}
 
 	@Override
@@ -211,22 +201,15 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		return chain.resolveUrlPath(resourceUrlPath, locations)
 				.flatMap(baseUrl -> {
 					if (StringUtils.hasText(baseUrl)) {
-						VersionStrategy versionStrategy = getStrategyForPath(resourceUrlPath);
-						if (versionStrategy == null) {
+						VersionStrategy strategy = getStrategyForPath(resourceUrlPath);
+						if (strategy == null) {
 							return Mono.just(baseUrl);
 						}
-						if (logger.isTraceEnabled()) {
-							logger.trace("Getting the original resource to determine version " +
-									"for path \"" + resourceUrlPath + "\"");
-						}
 						return chain.resolveResource(null, baseUrl, locations)
-								.map(resource -> {
-									String version = versionStrategy.getResourceVersion(resource);
-									if (logger.isTraceEnabled()) {
-										logger.trace("Determined version [" + version + "] for " + resource);
-									}
-									return versionStrategy.addVersion(baseUrl, version);
-								});
+								.flatMap(resource -> strategy.getResourceVersion(resource)
+										.map(version -> {
+											return strategy.addVersion(baseUrl, version);
+										}));
 					}
 					return Mono.empty();
 				});
@@ -247,7 +230,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		}
 		if (!matchingPatterns.isEmpty()) {
 			Comparator<String> comparator = this.pathMatcher.getPatternComparator(path);
-			Collections.sort(matchingPatterns, comparator);
+			matchingPatterns.sort(comparator);
 			return this.versionStrategyMap.get(matchingPatterns.get(0));
 		}
 		return null;
@@ -301,6 +284,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		}
 
 		@Override
+		@Nullable
 		public String getFilename() {
 			return this.original.getFilename();
 		}

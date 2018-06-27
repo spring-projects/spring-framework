@@ -51,6 +51,7 @@ public class CompositeMessageConverter implements SmartMessageConverter {
 
 
 	@Override
+	@Nullable
 	public Object fromMessage(Message<?> message, Class<?> targetClass) {
 		for (MessageConverter converter : getConverters()) {
 			Object result = converter.fromMessage(message, targetClass);
@@ -62,6 +63,7 @@ public class CompositeMessageConverter implements SmartMessageConverter {
 	}
 
 	@Override
+	@Nullable
 	public Object fromMessage(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
 		for (MessageConverter converter : getConverters()) {
 			Object result = (converter instanceof SmartMessageConverter ?
@@ -75,6 +77,7 @@ public class CompositeMessageConverter implements SmartMessageConverter {
 	}
 
 	@Override
+	@Nullable
 	public Message<?> toMessage(Object payload, @Nullable MessageHeaders headers) {
 		for (MessageConverter converter : getConverters()) {
 			Message<?> result = converter.toMessage(payload, headers);
@@ -86,6 +89,7 @@ public class CompositeMessageConverter implements SmartMessageConverter {
 	}
 
 	@Override
+	@Nullable
 	public Message<?> toMessage(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
 		for (MessageConverter converter : getConverters()) {
 			Message<?> result = (converter instanceof SmartMessageConverter ?

@@ -55,6 +55,7 @@ import org.springframework.util.Assert;
 public class DelegatingConnectionFactory
 		implements SmartConnectionFactory, QueueConnectionFactory, TopicConnectionFactory, InitializingBean {
 
+	@Nullable
 	private ConnectionFactory targetConnectionFactory;
 
 	private boolean shouldStopConnections = false;
@@ -63,8 +64,7 @@ public class DelegatingConnectionFactory
 	/**
 	 * Set the target ConnectionFactory that this ConnectionFactory should delegate to.
 	 */
-	public void setTargetConnectionFactory(ConnectionFactory targetConnectionFactory) {
-		Assert.notNull(targetConnectionFactory, "'targetConnectionFactory' must not be null");
+	public void setTargetConnectionFactory(@Nullable ConnectionFactory targetConnectionFactory) {
 		this.targetConnectionFactory = targetConnectionFactory;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 		for (int i = 0; i < this.allParameterDetails.size(); i++) {
 			result.add(this.allParameterDetails.get(i).toCacheInvocationParameter(values[i]));
 		}
-		return result.toArray(new CacheInvocationParameter[result.size()]);
+		return result.toArray(new CacheInvocationParameter[0]);
 	}
 
 	protected ExceptionTypeFilter createExceptionTypeFilter(

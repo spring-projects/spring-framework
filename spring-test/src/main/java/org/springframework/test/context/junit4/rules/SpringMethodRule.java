@@ -61,7 +61,7 @@ import org.springframework.util.ReflectionUtils;
  * <pre><code> public class ExampleSpringIntegrationTest {
  *
  *    &#064;ClassRule
- *    public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+ *    public static final SpringClassRule springClassRule = new SpringClassRule();
  *
  *    &#064;Rule
  *    public final SpringMethodRule springMethodRule = new SpringMethodRule();

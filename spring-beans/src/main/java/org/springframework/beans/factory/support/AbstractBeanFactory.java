@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -301,7 +300,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 									"Circular depends-on relationship between '" + beanName + "' and '" + dep + "'");
 						}
 						registerDependentBean(dep, beanName);
-						getBean(dep);
+						try {
+							getBean(dep);
+						}
+						catch (NoSuchBeanDefinitionException ex) {
+							throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+									"'" + beanName + "' depends on missing bean '" + dep + "'", ex);
+						}
 					}
 				}
 
@@ -368,21 +373,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 
 		// Check if required type matches the type of the actual bean instance.
-		// Note that the following return declarations are technically violating the
-		// non-null policy for the getBean methods: However, these will only result
-		// in null under very specific circumstances: such as a user-declared factory
-		// method returning null or a user-provided FactoryBean.getObject() returning
-		// null, without any custom post-processing of such null values. We will pass
-		// them on as null to corresponding injection points in that exceptional case
-		// but do not expect user-level getBean callers to deal with such null values.
-		// In the end, regular getBean callers should be able to assign the outcome
-		// to non-null variables/arguments without being compromised by rather esoteric
-		// corner cases, in particular in functional configuration and Kotlin scenarios.
-		// A future Spring generation might eventually forbid null values completely
-		// and throw IllegalStateExceptions instead of leniently passing them through.
-		if (requiredType != null && bean != null && !requiredType.isInstance(bean)) {
+		if (requiredType != null && !requiredType.isInstance(bean)) {
 			try {
-				return getTypeConverter().convertIfNecessary(bean, requiredType);
+				T convertedBean = getTypeConverter().convertIfNecessary(bean, requiredType);
+				if (convertedBean == null) {
+					throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());
+				}
+				return convertedBean;
 			}
 			catch (TypeMismatchException ex) {
 				if (logger.isDebugEnabled()) {
@@ -392,8 +389,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());
 			}
 		}
-		// For the nullability warning, see the elaboration in the comment above;
-		// in short: This is never going to be null unless user-declared code enforces null.
 		return (T) bean;
 	}
 
@@ -420,9 +415,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			else {
 				return !BeanFactoryUtils.isFactoryDereference(name);
 			}
-		}
-		else if (containsSingleton(beanName)) {
-			return true;
 		}
 
 		// No singleton instance found -> check bean definition.
@@ -496,7 +488,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 		// Check manually registered singletons.
 		Object beanInstance = getSingleton(beanName, false);
-		if (beanInstance != null) {
+		if (beanInstance != null && beanInstance.getClass() != NullBean.class) {
 			if (beanInstance instanceof FactoryBean) {
 				if (!BeanFactoryUtils.isFactoryDereference(name)) {
 					Class<?> type = getTypeForFactoryBean((FactoryBean<?>) beanInstance);
@@ -565,7 +557,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 		// Check bean class whether we're dealing with a FactoryBean.
 		if (FactoryBean.class.isAssignableFrom(beanType)) {
-			if (!BeanFactoryUtils.isFactoryDereference(name)) {
+			if (!BeanFactoryUtils.isFactoryDereference(name) && beanInstance == null) {
 				// If it's a FactoryBean, we want to look at what it creates, not the factory class.
 				beanType = getTypeForFactoryBean(beanName, mbd);
 				if (beanType == null) {
@@ -599,22 +591,19 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
 
 		// Check manually registered singletons.
 		Object beanInstance = getSingleton(beanName, false);
-		if (beanInstance != null) {
+		if (beanInstance != null && beanInstance.getClass() != NullBean.class) {
 			if (beanInstance instanceof FactoryBean && !BeanFactoryUtils.isFactoryDereference(name)) {
 				return getTypeForFactoryBean((FactoryBean<?>) beanInstance);
 			}
 			else {
 				return beanInstance.getClass();
 			}
-		}
-		else if (containsSingleton(beanName) && !containsBeanDefinition(beanName)) {
-			// null instance registered
-			return null;
 		}
 
 		// No singleton instance found -> check bean definition.
@@ -840,6 +829,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	@Override
+	@Nullable
 	public String resolveEmbeddedValue(@Nullable String value) {
 		if (value == null) {
 			return null;
@@ -926,6 +916,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	@Override
+	@Nullable
 	public Scope getRegisteredScope(String scopeName) {
 		Assert.notNull(scopeName, "Scope identifier must not be null");
 		return this.scopes.get(scopeName);
@@ -1010,10 +1001,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		Object beanInstance = getSingleton(beanName, false);
 		if (beanInstance != null) {
 			return (beanInstance instanceof FactoryBean);
-		}
-		else if (containsSingleton(beanName)) {
-			// null instance registered
-			return false;
 		}
 
 		// No singleton instance found -> check bean definition.
@@ -1356,12 +1343,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @since 4.2
 	 */
 	public void clearMetadataCache() {
-		Iterator<String> mergedBeans = this.mergedBeanDefinitions.keySet().iterator();
-		while (mergedBeans.hasNext()) {
-			if (!isBeanEligibleForMetadataCaching(mergedBeans.next())) {
-				mergedBeans.remove();
-			}
-		}
+		this.mergedBeanDefinitions.keySet().removeIf(bean -> !isBeanEligibleForMetadataCaching(bean));
 	}
 
 	/**
@@ -1397,8 +1379,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		catch (ClassNotFoundException ex) {
 			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), ex);
 		}
-		catch (LinkageError ex) {
-			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), ex);
+		catch (LinkageError err) {
+			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), err);
 		}
 	}
 
@@ -1519,7 +1501,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * should be used as fallback.
 	 * @param beanName the name of the bean
 	 * @param mbd the merged bean definition for the bean
-	 * @return the type for the bean if determinable, or {@code null} else
+	 * @return the type for the bean if determinable, or {@code null} otherwise
 	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
 	 * @see #getBean(String)
 	 */
@@ -1533,7 +1515,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			return getTypeForFactoryBean(factoryBean);
 		}
 		catch (BeanCreationException ex) {
-			if (ex instanceof BeanCurrentlyInCreationException) {
+			if (ex.contains(BeanCurrentlyInCreationException.class)) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Bean currently in creation on FactoryBean type check: " + ex);
 				}
@@ -1628,17 +1610,17 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param mbd the merged bean definition
 	 * @return the object to expose for the bean
 	 */
-	@Nullable
 	protected Object getObjectForBeanInstance(
-			@Nullable Object beanInstance, String name, String beanName, @Nullable RootBeanDefinition mbd) {
-
-		if (beanInstance == null) {
-			return null;
-		}
+			Object beanInstance, String name, String beanName, @Nullable RootBeanDefinition mbd) {
 
 		// Don't let calling code try to dereference the factory if the bean isn't a factory.
-		if (BeanFactoryUtils.isFactoryDereference(name) && !(beanInstance instanceof FactoryBean)) {
-			throw new BeanIsNotAFactoryException(transformedBeanName(name), beanInstance.getClass());
+		if (BeanFactoryUtils.isFactoryDereference(name)) {
+			if (beanInstance instanceof NullBean) {
+				return beanInstance;
+			}
+			if (!(beanInstance instanceof FactoryBean)) {
+				throw new BeanIsNotAFactoryException(transformedBeanName(name), beanInstance.getClass());
+			}
 		}
 
 		// Now we have the bean instance, which may be a normal bean or a FactoryBean.
@@ -1685,8 +1667,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @see AbstractBeanDefinition#getDestroyMethodName()
 	 * @see org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor
 	 */
-	protected boolean requiresDestruction(@Nullable Object bean, RootBeanDefinition mbd) {
-		return (bean != null &&
+	protected boolean requiresDestruction(Object bean, RootBeanDefinition mbd) {
+		return (bean.getClass() != NullBean.class &&
 				(DisposableBeanAdapter.hasDestroyMethod(bean, mbd) || (hasDestructionAwareBeanPostProcessors() &&
 						DisposableBeanAdapter.hasApplicableProcessors(bean, getBeanPostProcessors()))));
 	}
@@ -1779,7 +1761,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @return a new instance of the bean
 	 * @throws BeanCreationException if the bean could not be created
 	 */
-	@Nullable
 	protected abstract Object createBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
 			throws BeanCreationException;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * A JMS ConnectionFactory adapter that returns the same Connection
@@ -143,7 +144,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 * Set the target ConnectionFactory which will be used to lazily
 	 * create a single Connection.
 	 */
-	public void setTargetConnectionFactory(ConnectionFactory targetConnectionFactory) {
+	public void setTargetConnectionFactory(@Nullable ConnectionFactory targetConnectionFactory) {
 		this.targetConnectionFactory = targetConnectionFactory;
 	}
 
@@ -151,7 +152,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 * Return the target ConnectionFactory which will be used to lazily
 	 * create a single Connection, if any.
 	 */
-	@org.springframework.lang.Nullable
+	@Nullable
 	public ConnectionFactory getTargetConnectionFactory() {
 		return this.targetConnectionFactory;
 	}
@@ -165,7 +166,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 * @see javax.jms.Connection#setClientID
 	 * @see #setTargetConnectionFactory
 	 */
-	public void setClientId(String clientId) {
+	public void setClientId(@Nullable String clientId) {
 		this.clientId = clientId;
 	}
 
@@ -173,7 +174,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 * Return a JMS client ID for the single Connection created and exposed
 	 * by this ConnectionFactory, if any.
 	 */
-	@org.springframework.lang.Nullable
+	@Nullable
 	protected String getClientId() {
 		return this.clientId;
 	}
@@ -183,7 +184,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 * registered with the single Connection created by this factory.
 	 * @see #setReconnectOnException
 	 */
-	public void setExceptionListener(ExceptionListener exceptionListener) {
+	public void setExceptionListener(@Nullable ExceptionListener exceptionListener) {
 		this.exceptionListener = exceptionListener;
 	}
 
@@ -519,10 +520,8 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 		if (target instanceof TopicConnection) {
 			classes.add(TopicConnection.class);
 		}
-		return (Connection) Proxy.newProxyInstance(
-				Connection.class.getClassLoader(),
-				classes.toArray(new Class<?>[classes.size()]),
-				new SharedConnectionInvocationHandler());
+		return (Connection) Proxy.newProxyInstance(Connection.class.getClassLoader(),
+				ClassUtils.toClassArray(classes), new SharedConnectionInvocationHandler());
 	}
 
 
@@ -706,12 +705,14 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 
 		@Override
 		public void onException(JMSException ex) {
+			// Iterate over temporary copy in order to avoid ConcurrentModificationException,
+			// since listener invocations may in turn trigger registration of listeners...
+			Set<ExceptionListener> copy;
 			synchronized (connectionMonitor) {
-				// Iterate over temporary copy in order to avoid ConcurrentModificationException,
-				// since listener invocations may in turn trigger registration of listeners...
-				for (ExceptionListener listener : new LinkedHashSet<>(this.delegates)) {
-					listener.onException(ex);
-				}
+				copy = new LinkedHashSet<>(this.delegates);
+			}
+			for (ExceptionListener listener : copy) {
+				listener.onException(ex);
 			}
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -249,17 +249,13 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 
 		Properties props = new Properties();
 		try {
-			InputStream is = encodedResource.getResource().getInputStream();
-			try {
+			try (InputStream is = encodedResource.getResource().getInputStream()) {
 				if (encodedResource.getEncoding() != null) {
 					getPropertiesPersister().load(props, new InputStreamReader(is, encodedResource.getEncoding()));
 				}
 				else {
 					getPropertiesPersister().load(props, is);
 				}
-			}
-			finally {
-				is.close();
 			}
 			return registerBeanDefinitions(props, prefix, encodedResource.getResource().getDescription());
 		}
